@@ -86,7 +86,7 @@ mesh2d_repeated_texture	can
 mesh2d_vertex_color_texture	can
 move_sprite	can
 multi_window_text	missing	a second window
-pixel_grid_snap	can
+pixel_grid_snap	can	the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types
 rotate_to_cursor	can
 rotation	can
 sprite_animation	can

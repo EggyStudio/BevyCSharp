@@ -35,6 +35,7 @@ internal static class Catalog
         new("mesh2d_repeated_texture", Mesh2dRepeatedTexture.Build),
         new("mesh2d_vertex_color_texture", Mesh2dVertexColorTexture.Build),
         new("move_sprite", MoveSprite.Build),
+        new("pixel_grid_snap", PixelGridSnap.Build),
         new("rotate_to_cursor", RotateToCursor.Build),
         new("rotation", Rotation2d.Build, Rotation2d.Configure),
         new("sprite", SpriteExample.Build),
@@ -118,10 +119,13 @@ internal static class Catalog
         new("audio", AudioExample.Build),
         new("play_sound_effect", PlaySoundEffect.Build),
         new("soundtrack", Soundtrack.Build),
+        new("spatial_audio_2d", SpatialAudio2d.Build, SpatialAudio2d.Configure),
         new("spatial_audio_3d", SpatialAudio3d.Build),
 
         // Camera
         new("2d_on_ui", TwoDOnUi.Build),
+        new("2d_screen_shake", ScreenShake2d.Build),
+        new("2d_top_down_camera", TopDownCamera2d.Build),
         new("camera_orbit", CameraOrbit.Build),
         new("first_person_view_model", FirstPersonViewModel.Build),
         new("projection_zoom", ProjectionZoom.Build),

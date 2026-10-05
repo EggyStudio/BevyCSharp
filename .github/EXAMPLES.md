@@ -4,18 +4,18 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**142 written, 8 written in part, 101 can be written, 113 missing and 57 do not apply.** Of the 364 that apply, 251 can be written with what is bridged, 8 of them leaving something out.
+**146 written, 8 written in part, 97 can be written, 113 missing and 57 do not apply.** Of the 364 that apply, 251 can be written with what is bridged, 8 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 20 | 1 | 1 | 6 | 1 |
+| [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
 | [3D Rendering](#3d-rendering) | 51 | 4 | 2 | 10 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
-| [Audio](#audio) | 4 | 0 | 1 | 3 | 0 |
-| [Camera](#camera) | 4 | 0 | 2 | 3 | 0 |
+| [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
+| [Camera](#camera) | 6 | 0 | 0 | 3 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **142** | **8** | **101** | **113** | **57** |
+| **All** | **146** | **8** | **97** | **113** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -63,7 +63,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-vertex-color-texture/) | Renders a 2d mesh with vertex color attributes | [written](../BevyCSharp.Examples/2d/mesh2d_vertex_color_texture.cs) |
 | [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/move_sprite.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/move-sprite/) | Changes the transform of a sprite | [written](../BevyCSharp.Examples/2d/move_sprite.cs) |
 | [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multi_window_text.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/multi-window-text/) | Renders text to multiple windows with different scale factors using both Text and Text2d | missing, a second window |
-| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/pixel-grid-snap/) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | can be written |
+| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/pixel-grid-snap/) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | [written](../BevyCSharp.Examples/2d/pixel_grid_snap.cs), the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types |
 | [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotate_to_cursor.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/rotate-to-cursor/) | Demonstrates rotating entities in 2D to follow the cursor | [written](../BevyCSharp.Examples/2d/rotate_to_cursor.cs) |
 | [`rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotation.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/rotation/) | Demonstrates rotating entities in 2D with quaternions | [written](../BevyCSharp.Examples/2d/rotation.cs) |
 | [`sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/sprite/) | Renders a sprite | [written](../BevyCSharp.Examples/2d/sprite.cs) |
@@ -234,7 +234,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`pitch`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/pitch.rs), [live in Bevy](https://bevy.org/examples/audio/pitch/) | Shows how to directly play a simple pitch | missing, a generated tone (Pitch) |
 | [`play_sound_effect`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/play_sound_effect.rs), [live in Bevy](https://bevy.org/examples/audio/play-sound-effect/) | Shows how to play a sound effect in response to an event | [written](../BevyCSharp.Examples/audio/play_sound_effect.cs) |
 | [`soundtrack`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/soundtrack.rs), [live in Bevy](https://bevy.org/examples/audio/soundtrack/) | Shows how to play different soundtracks based on game state | [written](../BevyCSharp.Examples/audio/soundtrack.cs) |
-| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-2d/) | Shows how to play spatial audio, and moving the emitter in 2D | can be written |
+| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-2d/) | Shows how to play spatial audio, and moving the emitter in 2D | [written](../BevyCSharp.Examples/audio/spatial_audio_2d.cs) |
 | [`spatial_audio_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_3d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-3d/) | Shows how to play spatial audio, and moving the emitter in 3D | [written](../BevyCSharp.Examples/audio/spatial_audio_3d.cs) |
 
 ## Camera
@@ -242,8 +242,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`2d_on_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_on_ui.rs), [live in Bevy](https://bevy.org/examples/camera/2d-on-ui/) | Shows how to render 2D objects on top of Bevy UI | [written](../BevyCSharp.Examples/camera/2d_on_ui.cs) |
-| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs), [live in Bevy](https://bevy.org/examples/camera/2d-screen-shake/) | A simple 2D screen shake effect | can be written |
-| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs), [live in Bevy](https://bevy.org/examples/camera/2d-top-down-camera/) | A 2D top-down camera smoothly following player movements | can be written, through Bevy's reflected Bloom |
+| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs), [live in Bevy](https://bevy.org/examples/camera/2d-screen-shake/) | A simple 2D screen shake effect | [written](../BevyCSharp.Examples/camera/2d_screen_shake.cs) |
+| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs), [live in Bevy](https://bevy.org/examples/camera/2d-top-down-camera/) | A 2D top-down camera smoothly following player movements | [written](../BevyCSharp.Examples/camera/2d_top_down_camera.cs), through Bevy's reflected Bloom |
 | [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs), [live in Bevy](https://bevy.org/examples/camera/camera-orbit/) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs), [live in Bevy](https://bevy.org/examples/camera/custom-projection/) | Shows how to create custom camera projections. | missing, custom camera projections |
 | [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs), [live in Bevy](https://bevy.org/examples/camera/first-person-view-model/) | A first-person camera that uses a world model and a view model with different field of views (FOV) | [written](../BevyCSharp.Examples/camera/first_person_view_model.cs) |
