@@ -1,0 +1,4 @@
+# N 7.2, a commit with the form COMMITS.md gives. A place is the commit's short hash.
+# A place a line, then a tab and why. A commit of the owner's other than one of build/version.txt
+# alone is put here with that reason, and NormTests fails for a line whose commit keeps the rule.
+

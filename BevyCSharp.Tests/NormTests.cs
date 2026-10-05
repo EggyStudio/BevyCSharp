@@ -255,10 +255,15 @@ public sealed class NormTests
             if (parts.Length < 3) continue;
             var (hash, subject, body) = (parts[0][..7], parts[1], parts[2].Trim());
             var sentence = body.Length > 0 && !body.Contains('\n') && body.EndsWith('.') && !Regex.IsMatch(body[..^1], @"[.!?] [A-Z]");
-            if (subject != "‎ ‎ ‎" || !sentence) found.Add(hash);
+            if (subject == "‎ ‎ ‎" && sentence) continue;
+
+            // The owner's setting of the version, a commit of build/version.txt alone, whatever it
+            // says. Any other commit of the owner's is on the list with that reason.
+            if (Git("show", "--name-only", "--format=", parts[0])?.Trim() == "build/version.txt") continue;
+            found.Add(hash);
         }
 
-        Assert.True(found.Count == 0, $"N 7.2: these commits do not have the form COMMITS.md gives, three marks and one sentence: {string.Join(", ", found)}");
+        Hold("7.2", found, "a commit without the form COMMITS.md gives, three marks and one sentence");
     }
 
     [Fact]

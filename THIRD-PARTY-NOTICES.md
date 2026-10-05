@@ -24,9 +24,9 @@ A restore fetches them with their own license files. A shader written in Slang i
 Every crate `native/Cargo.lock` names, which is every crate a profile of the bridge compiles for any
 system the package is built for, and some that no shipped profile compiles. A crate offered under a
 choice of licenses is offered so here as its authors offer it. The copyright column gives the
-holders its files name, or else the authors its manifest names, and the last column the texts
-below that its files hold, or for a crate whose package holds none, the standard text of each
-license it names.
+holders its files name, or else the authors its manifest names, or else the contributors to the
+repository or the home its manifest names, and the last column the texts below that its files
+hold, or for a crate whose package holds none, the standard text of each license it names.
 
 | Crate | Version | License | Copyright | Texts |
 |---|---|---|---|---|
@@ -44,7 +44,7 @@ license it names.
 | allocator-api2 | 0.2.21 | MIT OR Apache-2.0 | by Zakarum &lt;zaq.dev@icloud.com&gt; | [1](#text-1), [4](#text-4) |
 | alsa | 0.11.0 | Apache-2.0/MIT | Copyright (c) 2015-2021 David Henningsson, and other contributors. | [1](#text-1), [9](#text-9) |
 | alsa-sys | 0.4.0 | MIT | Copyright (c) 2018 diwic | [9](#text-9) |
-| android-activity | 0.6.1 | MIT OR Apache-2.0 | none given | [10](#text-10), [1](#text-1), [9](#text-9) |
+| android-activity | 0.6.1 | MIT OR Apache-2.0 | the contributors to https://github.com/rust-mobile/android-activity | [10](#text-10), [1](#text-1), [9](#text-9) |
 | android-properties | 0.2.2 | MIT | Copyright (c) 2020 Mikhail Lappo | [9](#text-9) |
 | android_log-sys | 0.3.2 | MIT OR Apache-2.0 | Copyright 2016 The android_log_sys Developers<br>Copyright (c) 2016 The android_log_sys Developers | [11](#text-11), [4](#text-4) |
 | android_system_properties | 0.1.6 | MIT OR Apache-2.0 | Copyright 2016 Nicolas Silva<br>Copyright (c) 2013 Nicolas Silva<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [12](#text-12), [13](#text-13) |
@@ -63,75 +63,75 @@ license it names.
 | async-lock | 3.4.2 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | async-task | 4.7.1 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | atomic-waker | 1.1.2 | Apache-2.0 OR MIT | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors<br>Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [5](#text-5), [4](#text-4), [17](#text-17) |
-| atomicow | 1.2.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| atomicow | 1.2.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/atomicow | [1](#text-1), [9](#text-9) |
 | autocfg | 1.5.1 | Apache-2.0 OR MIT | Copyright (c) 2018 Josh Stone | [5](#text-5), [4](#text-4) |
 | base64 | 0.22.1 | MIT OR Apache-2.0 | Copyright (c) 2015 Alice Maz | [5](#text-5), [7](#text-7) |
-| bevy | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_a11y | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_android | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_animation | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_a11y | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_android | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_animation | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_animation_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_anti_alias | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_app | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_asset | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_asset_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_audio | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_camera | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_clipboard | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_color | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_core_pipeline | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_derive | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_diagnostic | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ecs | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_anti_alias | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_app | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_asset | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_asset_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_audio | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_camera | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_clipboard | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_color | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_core_pipeline | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_diagnostic | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ecs | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_ecs_macro_logic | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
 | bevy_ecs_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
 | bevy_embedded_assets | 0.16.0 | MIT OR Apache-2.0 | by François Mockers &lt;mockersf@gmail.com&gt; | [4](#text-4), [5](#text-5) |
-| bevy_encase_derive | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_gilrs | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_gizmos | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_gizmos_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_gizmos_render | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_gltf | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_image | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_input | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_input_focus | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_internal | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_light | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_log | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_macro_utils | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_material | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_material_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_math | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_mesh | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_encase_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gilrs | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gltf | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_image | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_input | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_input_focus | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_internal | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_light | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_log | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_macro_utils | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_material | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_material_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_math | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_mesh | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_mikktspace | 1.0.0 | Zlib AND (MIT OR Apache-2.0) | Copyright (c) 2017 The mikktspace Library Developers | [1](#text-1), [4](#text-4) |
-| bevy_pbr | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_picking | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_platform | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_post_process | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ptr | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_reflect | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_reflect_derive | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_render | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_render_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_scene | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_scene_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [4](#text-4), [5](#text-5) |
-| bevy_shader | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_solari | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_sprite | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_sprite_render | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_state | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_pbr | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_picking | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_platform | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_post_process | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ptr | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_reflect | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_reflect_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_render_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_scene | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_scene_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [4](#text-4), [5](#text-5) |
+| bevy_shader | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_solari | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_sprite | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_sprite_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_state | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_state_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_tasks | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_text | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_time | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_transform | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ui | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ui_render | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ui_widgets | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_utils | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_window | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_winit | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_world_serialization | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_tasks | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_text | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_time | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_transform | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui_widgets | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_utils | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_window | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_winit | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_world_serialization | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bit-set | 0.9.1 | Apache-2.0 OR MIT | Copyright (c) 2026 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bit-vec | 0.9.1 | Apache-2.0 OR MIT | Copyright (c) 2023 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bitflags | 1.3.2 | MIT/Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
@@ -140,7 +140,7 @@ license it names.
 | blake3 | 1.8.7 | CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception | Copyright 2019 Jack O'Connor and Samuel Neves | [18](#text-18), [19](#text-19), [20](#text-20) |
 | block2 | 0.5.1 | MIT | by Steven Sheldon, Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | block2 | 0.6.2 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
-| blocking | 1.7.0 | Apache-2.0 OR MIT | none given | [5](#text-5), [4](#text-4) |
+| blocking | 1.7.0 | Apache-2.0 OR MIT | the contributors to https://github.com/smol-rs/blocking | [5](#text-5), [4](#text-4) |
 | bumpalo | 3.20.3 | MIT OR Apache-2.0 | Copyright (c) 2019 Nick Fitzgerald | [5](#text-5), [4](#text-4) |
 | bytemuck | 1.25.2 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [21](#text-21), [22](#text-22) |
 | bytemuck_derive | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [21](#text-21), [22](#text-22) |
@@ -165,7 +165,7 @@ license it names.
 | const_panic | 0.2.17 | Zlib | Copyright (c) 2021 Matias Rodriguez. | [22](#text-22) |
 | const_soft_float | 0.1.4 | MIT OR Apache-2.0 | Copyright 2023 Kirk Nickish and https://github.com/823984418<br>Copyright (c) 2023 Kirk Nickish and https://github.com/823984418 | [18](#text-18), [4](#text-4) |
 | constant_time_eq | 0.4.2 | CC0-1.0 OR MIT-0 OR Apache-2.0 | by Cesar Eduardo Barros &lt;cesarb@cesarb.eti.br&gt; | [1](#text-1), [20](#text-20), [25](#text-25) |
-| constgebra | 0.1.4 | MIT OR Apache-2.0 | none given | [4](#text-4), [5](#text-5) |
+| constgebra | 0.1.4 | MIT OR Apache-2.0 | the contributors to https://github.com/knickish/constgebra | [4](#text-4), [5](#text-5) |
 | convert_case | 0.10.0 | MIT | Copyright (c) 2025 rutrum | [9](#text-9) |
 | core-foundation | 0.9.4 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
 | core-foundation-sys | 0.8.7 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
@@ -173,7 +173,7 @@ license it names.
 | core-graphics-types | 0.1.3 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
 | core_maths | 0.1.1 | MIT | Copyright (c) 2024 Robert Bastian | [9](#text-9) |
 | coreaudio-rs | 0.14.2 | MIT/Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
-| cpal | 0.17.3 | Apache-2.0 | none given | [5](#text-5) |
+| cpal | 0.17.3 | Apache-2.0 | the contributors to https://github.com/RustAudio/cpal | [5](#text-5) |
 | cpufeatures | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2020-2026 The RustCrypto Project Developers | [5](#text-5), [4](#text-4) |
 | crc32fast | 1.5.1 | MIT OR Apache-2.0 | Copyright (c) 2018 Sam Rijs, Alex Crichton and contributors | [27](#text-27), [9](#text-9) |
 | critical-section | 1.2.0 | MIT OR Apache-2.0 | Copyright (c) 2022 The critical-section authors | [5](#text-5), [4](#text-4) |
@@ -190,16 +190,16 @@ license it names.
 | dispatch | 0.2.0 | MIT | by Steven Sheldon | [4](#text-4) |
 | dispatch2 | 0.3.1 | Zlib OR Apache-2.0 OR MIT | by Mads Marquart &lt;mads@marquart.dk&gt;, Mary &lt;mary@mary.zone&gt; | [22](#text-22), [5](#text-5), [4](#text-4) |
 | displaydoc | 0.2.7 | MIT OR Apache-2.0 | by Jane Lusby &lt;jlusby@yaah.dev&gt; | [5](#text-5), [4](#text-4) |
-| disqualified | 1.0.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| disqualified | 1.0.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/disqualified | [1](#text-1), [9](#text-9) |
 | dlib | 0.5.3 | MIT | Copyright (c) 2015 Victor Berger | [4](#text-4) |
 | document-features | 0.2.12 | MIT OR Apache-2.0 | Copyright (c) 2020 Olivier Goffart &lt;ogoffart@sixtyfps.io&gt; | [5](#text-5), [4](#text-4) |
 | downcast-rs | 1.2.1 | MIT/Apache-2.0 | Copyright (c) 2020 Ashish Myles and contributors | [5](#text-5), [4](#text-4) |
 | downcast-rs | 2.0.2 | MIT OR Apache-2.0 | Copyright (c) 2020 Ashish Myles and contributors | [5](#text-5), [4](#text-4) |
 | dpi | 0.1.2 | Apache-2.0 AND MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [27](#text-27), [29](#text-29) |
 | either | 1.18.0 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
-| encase | 0.12.1 | MIT-0 | none given | [30](#text-30) |
-| encase_derive | 0.12.1 | MIT-0 | none given | [25](#text-25) |
-| encase_derive_impl | 0.12.1 | MIT-0 | none given | [25](#text-25) |
+| encase | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [30](#text-30) |
+| encase_derive | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [25](#text-25) |
+| encase_derive_impl | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [25](#text-25) |
 | encoding_rs | 0.8.35 | (Apache-2.0 OR MIT) AND BSD-3-Clause | Copyright Mozilla Foundation<br>Copyright © WHATWG (Apple, Google, Mozilla, Microsoft). | [31](#text-31), [5](#text-5), [4](#text-4), [32](#text-32) |
 | equivalent | 1.0.2 | Apache-2.0 OR MIT | Copyright (c) 2016--2023 | [5](#text-5), [4](#text-4) |
 | erased-serde | 0.4.10 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
@@ -270,7 +270,7 @@ license it names.
 | icu_segmenter | 2.3.0 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | icu_segmenter_data | 2.3.0 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | image | 0.25.6 | MIT OR Apache-2.0 | by The image-rs Developers | [1](#text-1), [9](#text-9) |
-| image-webp | 0.2.4 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| image-webp | 0.2.4 | MIT OR Apache-2.0 | the contributors to https://github.com/image-rs/image-webp | [1](#text-1), [9](#text-9) |
 | indexmap | 2.14.1 | Apache-2.0 OR MIT | Copyright (c) 2016--2017 | [5](#text-5), [4](#text-4) |
 | inflections | 1.1.1 | MIT | Copyright (c) 2016 Caleb Meredith | [4](#text-4) |
 | inotify | 0.11.5 | ISC | Copyright (c) Hanno Braun and contributors | [37](#text-37) |
@@ -280,7 +280,7 @@ license it names.
 | itoa | 1.0.18 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | jni | 0.21.1 | MIT/Apache-2.0 | Copyright (c) 2016 Prevoty, Inc. and jni-rs contributors | [5](#text-5), [7](#text-7) |
 | jni | 0.22.4 | MIT OR Apache-2.0 | by jni team | [4](#text-4), [5](#text-5) |
-| jni-macros | 0.22.4 | MIT OR Apache-2.0 | none given | [4](#text-4), [5](#text-5) |
+| jni-macros | 0.22.4 | MIT OR Apache-2.0 | the contributors to https://github.com/jni-rs/jni-rs | [4](#text-4), [5](#text-5) |
 | jni-sys | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [27](#text-27), [4](#text-4) |
 | jni-sys | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [27](#text-27), [4](#text-4) |
 | jni-sys-macros | 0.4.1 | MIT OR Apache-2.0 | by Robert Bragg &lt;robert@sixbynine.org&gt; | [4](#text-4), [5](#text-5) |
@@ -296,7 +296,7 @@ license it names.
 | libm | 0.2.16 | MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [39](#text-39) |
 | libredox | 0.1.21 | MIT | Copyright (c) 2023 4lDO2 | [9](#text-9) |
 | libudev-sys | 0.1.4 | MIT | Copyright (c) 2015 David Cuddeback | [4](#text-4) |
-| linebender_resource_handle | 0.1.1 | Apache-2.0 OR MIT | none given | [1](#text-1), [9](#text-9) |
+| linebender_resource_handle | 0.1.1 | Apache-2.0 OR MIT | the contributors to https://github.com/linebender/raw_resource_handle | [1](#text-1), [9](#text-9) |
 | linux-raw-sys | 0.4.15 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [40](#text-40), [5](#text-5), [41](#text-41), [4](#text-4) |
 | linux-raw-sys | 0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [40](#text-40), [5](#text-5), [41](#text-41), [4](#text-4) |
 | litemap | 0.8.3 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
@@ -315,7 +315,7 @@ license it names.
 | miniz_oxide | 0.9.1 | MIT OR Zlib OR Apache-2.0 | Copyright 2013-2014 RAD Game Tools and Valve Software<br>Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC<br>Copyright (c) 2017 Frommi<br>Copyright (c) 2017-2024 oyvindln<br>Copyright (c) 2020 Frommi | [9](#text-9), [1](#text-1), [22](#text-22) |
 | mio | 1.2.3 | MIT | Copyright (c) 2014 Carl Lerche and other MIO contributors | [4](#text-4) |
 | naga | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| naga_oil | 0.22.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| naga_oil | 0.22.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/naga_oil/ | [1](#text-1), [9](#text-9) |
 | ndk | 0.9.0 | MIT OR Apache-2.0 | by The Rust Mobile contributors | [4](#text-4), [5](#text-5) |
 | ndk-context | 0.1.1 | MIT OR Apache-2.0 | by The Rust Windowing contributors | [4](#text-4), [5](#text-5) |
 | ndk-sys | 0.6.0+11769913 | MIT OR Apache-2.0 | by The Rust Windowing contributors | [4](#text-4), [5](#text-5) |
@@ -336,33 +336,33 @@ license it names.
 | objc-sys | 0.3.5 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.5.2 | MIT | by Steven Sheldon, Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.6.4 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
-| objc2-app-kit | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-app-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-audio-toolbox | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-avf-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-cloud-kit | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-contacts | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-core-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-audio-types | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-data | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-core-foundation | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-graphics | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-image | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-core-location | 0.2.2 | MIT | none given | [4](#text-4) |
+| objc2-app-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-app-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-audio-toolbox | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-avf-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-cloud-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-contacts | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-core-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-audio-types | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-data | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-core-foundation | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-graphics | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-image | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-core-location | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-encode | 4.1.0 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
-| objc2-foundation | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-foundation | 0.3.2 | MIT | none given | [4](#text-4) |
-| objc2-io-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-io-surface | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-link-presentation | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-metal | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-metal | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-quartz-core | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-quartz-core | 0.3.2 | Zlib OR Apache-2.0 OR MIT | none given | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-symbols | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-ui-kit | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-uniform-type-identifiers | 0.2.2 | MIT | none given | [4](#text-4) |
-| objc2-user-notifications | 0.2.2 | MIT | none given | [4](#text-4) |
+| objc2-foundation | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-foundation | 0.3.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-io-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-io-surface | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-link-presentation | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-metal | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-metal | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-quartz-core | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-quartz-core | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-symbols | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-ui-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-uniform-type-identifiers | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
+| objc2-user-notifications | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | offset-allocator | 0.2.0 | MIT | Copyright (c) 2023 Sebastian Aaltonen, Patrick Walton | [9](#text-9) |
 | ogg | 0.8.0 | BSD-3-Clause | Copyright (c) 2016-2017 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2002-2015 Xiph.org Foundation | [46](#text-46) |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 | by Aleksey Kladov &lt;aleksey.kladov@gmail.com&gt; | [5](#text-5), [4](#text-4) |
@@ -378,16 +378,16 @@ license it names.
 | parley_data | 0.9.0 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
 | percent-encoding | 2.3.2 | MIT OR Apache-2.0 | Copyright (c) 2013-2025 The rust-url developers | [5](#text-5), [4](#text-4) |
 | petgraph | 0.8.3 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4), [49](#text-49) |
-| pin-project | 1.1.13 | Apache-2.0 OR MIT | none given | [1](#text-1), [4](#text-4) |
-| pin-project-internal | 1.1.13 | Apache-2.0 OR MIT | none given | [1](#text-1), [4](#text-4) |
-| pin-project-lite | 0.2.17 | Apache-2.0 OR MIT | none given | [1](#text-1), [4](#text-4) |
+| pin-project | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
+| pin-project-internal | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
+| pin-project-lite | 0.2.17 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project-lite | [1](#text-1), [4](#text-4) |
 | piper | 0.2.5 | MIT OR Apache-2.0 | by Stjepan Glavina &lt;stjepang@gmail.com&gt;, John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
 | pkg-config | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | plain | 0.2.3 | MIT/Apache-2.0 | Copyright (c) 2017 Plain contributors | [5](#text-5), [4](#text-4) |
 | png | 0.17.16 | MIT OR Apache-2.0 | Copyright (c) 2015 nwin | [5](#text-5), [4](#text-4) |
 | polling | 3.11.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt;, John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
-| portable-atomic | 1.15.0 | Apache-2.0 OR MIT | none given | [1](#text-1), [4](#text-4) |
-| portable-atomic-util | 0.2.7 | Apache-2.0 OR MIT | none given | [1](#text-1), [4](#text-4) |
+| portable-atomic | 1.15.0 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/portable-atomic | [1](#text-1), [4](#text-4) |
+| portable-atomic-util | 0.2.7 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/portable-atomic-util | [1](#text-1), [4](#text-4) |
 | potential_utf | 0.1.6 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | pp-rs | 0.2.1 | BSD-3-Clause | Copyright (c) 2020, Corentin Wallez | [50](#text-50) |
 | presser | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2019 Embark Studios | [5](#text-5), [4](#text-4) |
@@ -397,8 +397,8 @@ license it names.
 | quick-error | 2.0.1 | MIT/Apache-2.0 | Copyright (c) 2015 The quick-error Developers | [27](#text-27), [4](#text-4) |
 | quick-xml | 0.41.0 | MIT | Copyright (c) 2016 Johann Tuffe | [7](#text-7) |
 | quote | 1.0.47 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
-| r-efi | 5.3.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | none given | [4](#text-4), [5](#text-5) |
-| r-efi | 6.0.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | none given | [4](#text-4), [5](#text-5) |
+| r-efi | 5.3.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | the contributors to https://github.com/r-efi/r-efi | [4](#text-4), [5](#text-5) |
+| r-efi | 6.0.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | the contributors to https://github.com/r-efi/r-efi | [4](#text-4), [5](#text-5) |
 | radium | 0.7.0 | MIT | Copyright (c) 2019 kneecaw (Nika Layzell) | [9](#text-9) |
 | radsort | 0.1.1 | MIT OR Apache-2.0 | Copyright 2020 Jakub Valtar | [5](#text-5), [4](#text-4) |
 | rand | 0.10.2 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project<br>Copyright (c) 2014 The Rust Project Developers | [51](#text-51), [52](#text-52), [4](#text-4) |
@@ -406,7 +406,7 @@ license it names.
 | rand_distr | 0.6.0 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project | [51](#text-51), [54](#text-54), [4](#text-4) |
 | range-alloc | 0.1.5 | MIT OR Apache-2.0 | Copyright (c) 2023 The gfx-rs developers | [1](#text-1), [9](#text-9) |
 | raw-window-handle | 0.6.2 | MIT OR Apache-2.0 OR Zlib | Copyright (c) 2019 Osspial<br>Copyright (c) 2020 Osspial | [1](#text-1), [9](#text-9), [22](#text-22) |
-| raw-window-metal | 1.1.0 | MIT OR Apache-2.0 | none given | [5](#text-5), [4](#text-4) |
+| raw-window-metal | 1.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/rust-windowing/raw-window-metal | [5](#text-5), [4](#text-4) |
 | read-fonts | 0.39.2 | MIT OR Apache-2.0 | Copyright 2019 Colin Rothfels<br>Copyright (c) 2019 Colin Rothfels | [15](#text-15), [4](#text-4) |
 | read-fonts | 0.41.0 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [15](#text-15), [4](#text-4) |
 | rectangle-pack | 0.4.2 | MIT/Apache-2.0 | Copyright 2021 Chinedu Francis Nwafili<br>Copyright (c) 2021 Chinedu Francis Nwafili | [18](#text-18), [4](#text-4) |
@@ -497,13 +497,13 @@ license it names.
 | unicode-xid | 0.2.6 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [26](#text-26), [5](#text-5), [4](#text-4) |
 | utf8_iter | 1.0.4 | Apache-2.0 OR MIT | Copyright Mozilla Foundation | [62](#text-62), [5](#text-5), [4](#text-4) |
 | uuid | 1.26.0 | Apache-2.0 OR MIT | Copyright (c) 2014 The Rust Project Developers<br>Copyright (c) 2018 Ashley Mannix, Christopher Armstrong, Dylan DPC, Hunar Roop Kahlon | [5](#text-5), [4](#text-4) |
-| valuable | 0.1.1 | MIT | none given | [4](#text-4) |
-| variadics_please | 1.1.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| valuable | 0.1.1 | MIT | the contributors to https://github.com/tokio-rs/valuable | [4](#text-4) |
+| variadics_please | 1.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/variadics_please | [1](#text-1), [9](#text-9) |
 | vec_map | 0.8.2 | MIT/Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | version_check | 0.9.5 | MIT/Apache-2.0 | Copyright (c) 2017-2018 Sergio Benitez<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [5](#text-5), [13](#text-13) |
 | walkdir | 2.5.0 | Unlicense/MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
 | wasi | 0.11.1+wasi-snapshot-preview1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by The Cranelift Project Developers | [5](#text-5), [41](#text-41), [4](#text-4) |
-| wasip2 | 1.0.4+wasi-0.2.12 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | none given | [5](#text-5), [41](#text-41), [4](#text-4) |
+| wasip2 | 1.0.4+wasi-0.2.12 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | the contributors to https://github.com/bytecodealliance/wasi-rs | [5](#text-5), [41](#text-41), [4](#text-4) |
 | wasm-bindgen | 0.2.127 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | wasm-bindgen-futures | 0.4.77 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | wasm-bindgen-macro | 0.2.127 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
@@ -573,7 +573,7 @@ license it names.
 | windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
 | windows_x86_64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
 | winit | 0.30.13 | Apache-2.0 | by The winit contributors, Pierre Krieger &lt;pierre.krieger1708@gmail.com&gt; | [27](#text-27) |
-| winnow | 1.0.4 | MIT | none given | [4](#text-4) |
+| winnow | 1.0.4 | MIT | the contributors to https://github.com/winnow-rs/winnow | [4](#text-4) |
 | wit-bindgen | 0.57.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Alex Crichton &lt;alex@alexcrichton.com&gt; | [5](#text-5), [41](#text-41), [4](#text-4) |
 | wl-clipboard-rs | 0.9.3 | MIT/Apache-2.0 | Copyright (c) 2019 Ivan Molodetskikh | [5](#text-5), [4](#text-4) |
 | writeable | 0.6.4 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
@@ -595,9 +595,9 @@ license it names.
 | zerotrie | 0.2.5 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zerovec | 0.11.8 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zerovec-derive | 0.11.6 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
-| zlib-rs | 0.6.7 | Zlib | none given | [67](#text-67) |
+| zlib-rs | 0.6.7 | Zlib | the contributors to https://github.com/trifectatechfoundation/zlib-rs | [67](#text-67) |
 | zmij | 1.0.23 | MIT | by David Tolnay &lt;dtolnay@gmail.com&gt; | [4](#text-4) |
-| zune-core | 0.4.12 | MIT OR Apache-2.0 OR Zlib | none given | [4](#text-4), [5](#text-5), [22](#text-22) |
+| zune-core | 0.4.12 | MIT OR Apache-2.0 OR Zlib | the contributors to https://github.com/etemesi254/zune-image/tree/dev/zune-core | [4](#text-4), [5](#text-5), [22](#text-22) |
 | zune-jpeg | 0.4.21 | MIT OR Apache-2.0 OR Zlib | by caleb &lt;etemesicaleb@gmail.com&gt; | [4](#text-4), [5](#text-5), [22](#text-22) |
 
 Bevy's default font, a subset of Fira Mono that bevy_text compiles into the bridge, is under the

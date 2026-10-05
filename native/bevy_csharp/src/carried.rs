@@ -59,37 +59,41 @@ pub unsafe extern "C" fn bcs_assets_carried(
     paths: *const u8,
     paths_len: usize,
 ) -> i32 {
-    let Some(read) = read else {
-        *CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
-        return status::OK;
-    };
+    // Guarded as every entry point is, so a panic in reading the list, or in the lock, is a status
+    // to the managed side rather than an unwind across the boundary.
+    crate::interop::guard(|| {
+        let Some(read) = read else {
+            *CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
+            return status::OK;
+        };
 
-    if paths.is_null() && paths_len > 0 {
-        return status::NULL_ARG;
-    }
-
-    let text = if paths_len == 0 {
-        ""
-    } else {
-        // SAFETY: the caller promises `paths_len` readable bytes at `paths`.
-        match std::str::from_utf8(unsafe { std::slice::from_raw_parts(paths, paths_len) }) {
-            Ok(text) => text,
-            Err(_) => return status::NULL_ARG,
+        if paths.is_null() && paths_len > 0 {
+            return status::NULL_ARG;
         }
-    };
 
-    let files = text
-        .split('\n')
-        .filter(|line| !line.is_empty())
-        .map(PathBuf::from)
-        .collect();
+        let text = if paths_len == 0 {
+            ""
+        } else {
+            // SAFETY: the caller promises `paths_len` readable bytes at `paths`.
+            match std::str::from_utf8(unsafe { std::slice::from_raw_parts(paths, paths_len) }) {
+                Ok(text) => text,
+                Err(_) => return status::NULL_ARG,
+            }
+        };
 
-    *CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(Carried {
-        read,
-        files: Arc::new(files),
-    });
+        let files = text
+            .split('\n')
+            .filter(|line| !line.is_empty())
+            .map(PathBuf::from)
+            .collect();
 
-    status::OK
+        *CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(Carried {
+            read,
+            files: Arc::new(files),
+        });
+
+        status::OK
+    })
 }
 
 /// Replaces the default asset source with one that reads disk first and the managed side's

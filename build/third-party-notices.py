@@ -206,9 +206,9 @@ def build(packages):
     out.append("Every crate `native/Cargo.lock` names, which is every crate a profile of the bridge compiles for any")
     out.append("system the package is built for, and some that no shipped profile compiles. A crate offered under a")
     out.append("choice of licenses is offered so here as its authors offer it. The copyright column gives the")
-    out.append("holders its files name, or else the authors its manifest names, and the last column the texts")
-    out.append("below that its files hold, or for a crate whose package holds none, the standard text of each")
-    out.append("license it names.\n")
+    out.append("holders its files name, or else the authors its manifest names, or else the contributors to the")
+    out.append("repository or the home its manifest names, and the last column the texts below that its files")
+    out.append("hold, or for a crate whose package holds none, the standard text of each license it names.\n")
     out.append("| Crate | Version | License | Copyright | Texts |")
     out.append("|---|---|---|---|---|")
     for row in rows:
@@ -217,6 +217,8 @@ def build(packages):
             holders = "<br>".join(cell(line) for line in row["holders"])
         elif package.get("authors"):
             holders = "by " + cell(", ".join(package["authors"]))
+        elif package.get("repository") or package.get("homepage"):
+            holders = "the contributors to " + cell(package.get("repository") or package["homepage"])
         else:
             holders = "none given"
         links = ", ".join(f"[{number}](#text-{number})" for number in row["texts"]) or "none"
