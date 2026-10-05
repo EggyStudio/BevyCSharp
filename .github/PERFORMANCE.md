@@ -261,23 +261,35 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 
 | test, with its own defaults | Bevy alone | through the bridge |
 |---|---:|---:|
+| bevymark --benchmark --waves 100 --per-wave 1000 | 74.91 | 74.19 |
+| bevymark_3d --benchmark --waves 100 --per-wave 1000 | 30.12 | 29.83 |
 | many_animated_sprite_meshes | 14.34 | 13.84 |
 | many_animated_sprites | 6.51 | 6.75 |
+| many_buttons | 44.56 | 45.30 |
 | many_cameras_lights | 43.27 | 44.98 |
+| many_cubes | 33.81 | 34.23 |
+| many_foxes | 8.78 | 10.41 |
 | many_gizmos | 6.97 | 10.68 |
 | many_glyphs | 18.60 | 20.86 |
 | many_gradients | 4.83 | 5.74 |
 | many_lights | 6.60 | 7.30 |
 | many_materials | 7.01 | 7.64 |
+| many_morph_targets | 4.43 | 4.59 |
 | many_sprite_meshes | 5.23 | 5.52 |
 | many_sprites | 3.89 | 4.69 |
 | many_text | 16.83 | 20.90 |
 | many_text2d | 8.68 | 9.55 |
 | text_pipeline | 3.76 | 4.34 |
+| transform_hierarchy humanoids_active | 17.05 | 14.19 |
 
 The rows are as they stand since the mends above. Most cost the bridge under a millisecond more,
 or a few against a frame of tens. Four cost far more when first measured, each for a reason
-measuring found, and each has been mended since, many_gizmos in part.
+measuring found, and each has been mended since, many_gizmos in part. bevymark and many_foxes run
+with Bevy's static transform optimizations on, which Bevy's programs turn off and the bridge cannot
+reach, and transform_hierarchy is faster through the bridge, its moving nodes moved by a behavior
+spread across the thread pool where Bevy's system walks them on one thread. many_foxes asked each
+fox's animation state every frame when first written, 18.95 ms, and asks it only when a key that
+changes it is down, as Bevy's program does its work only then.
 
 - **many_sprite_meshes cost 9 ms more for Bevy's 2D wireframe plugin**, which the bridge added to
   every app so a 2D mesh could be outlined, and which looks at every 2D mesh in its prepare and

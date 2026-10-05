@@ -2,16 +2,22 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
+bevymark 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+bevymark_3d 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 grid 800x600	its example asks for this window, as Bevy's does
 headless_renderer 1920x1080	its example renders at this size, as Bevy's does
 many_animated_sprite_meshes 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_animated_sprites 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+many_buttons 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_cameras_lights 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+many_cubes 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+many_foxes 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_gizmos 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_glyphs 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_gradients 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_lights 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_materials 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+many_morph_targets 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_sprite_meshes 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_sprites 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_text 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for

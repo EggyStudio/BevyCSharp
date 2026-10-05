@@ -10,7 +10,14 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3d55c94`. `Gizmos.Lines` builds a long run in an array kept for its thread
+Reviewed up to `ccb5a09`. `Render2d.SetSpriteFrames` moves many sprites and sprite meshes to the
+frames of their sheets in one call, which takes many_animated_sprites from 15.95 ms to 6.75
+beside Bevy's 6.51 and many_animated_sprite_meshes from 212.54 to 13.84 beside Bevy's 14.34,
+measured again into PERFORMANCE.md, with `SpriteFrameTests`. The call is new to the bridge, so
+the number B 1's check reads is 200, a second number for the owner to set beside the 199 the
+wireframes took.
+
+Before it, `Gizmos.Lines` builds a long run in an array kept for its thread
 between calls, which takes many_gizmos from 12.39 ms to 10.68 beside Bevy's 6.97, measured
 again into PERFORMANCE.md. What is left there is each line written into the bridge's general
 description of a shape. `App.cs` and `Gizmos.cs` are split by moves alone (`10b5588`,
@@ -70,9 +77,10 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    wireframe plugins are asked for in the config since `9ff5abc`, and the owner numbers the
    package for that break. `Gizmos.cs` is split and `Lines` keeps its array (`f91aa59`,
    `3d55c94`), and a call that takes lines as they are comes after the sprite frames, as the
-   reply says. One call moves the atlas frames of many sprites, which mends both of the
-   animated tests. Each mend is measured again by `build/measure-stress.sh`, and the table in
-   PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven stress tests. An
+   reply says. One call moves the atlas frames of many sprites (`ccb5a09`), which brought both
+   animated tests level with Bevy's. Each mend is measured again by `build/measure-stress.sh`,
+   and the table in PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven
+   stress tests. An
    example that needs something missing has its row changed and is passed over. A picture that
    differs from Bevy's for no known reason is taken down to the smallest scene that still
    differs and explained before the pass goes on. The second paragraph of item 3 holds for
@@ -276,9 +284,10 @@ None open.
 
 ## Replies
 
-Item 1, the sprite frames: `Render2d.SetSpriteFrames` moves sprites and sprite meshes to the
-frames of their sheets together, writing only each one's atlas index in one call, and the two
-animated stress tests use it, which takes many_animated_sprites to 6.75 ms against Bevy's 6.51
-and many_animated_sprite_meshes to 13.84 against 14.34, from 15.95 and 212.54. The call is new to
-the bridge, in a module of its own, so `ABI_VERSION` and `ExpectedAbiVersion` are 200, a second
-number for the owner to set beside the 199 the wireframes took.
+Item 1, the last seven stress tests: bevymark, bevymark_3d, many_buttons, many_cubes, many_foxes,
+many_morph_targets and transform_hierarchy, which empties the column of rows that can be written.
+bevymark and many_foxes are in part, for Bevy's static transform optimizations, a resource Bevy
+reflects but not as a resource, and many_cubes for the three switches whose components Bevy does
+not reflect. All seven are measured into PERFORMANCE.md's table, every one within two
+milliseconds of Bevy's, transform_hierarchy faster than it, its nodes moved by a behavior across
+the thread pool.

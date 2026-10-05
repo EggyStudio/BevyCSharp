@@ -49,7 +49,16 @@ trap './bcs stop >/dev/null 2>&1 || true' EXIT
 flat=false
 [ -f "BevyCSharp.Examples/2d/$example.cs" ] || [ -f "BevyCSharp.Examples/ui/$example.cs" ] && flat=true
 grep -qs "SpawnCamera2d" BevyCSharp.Examples/*/"$example.cs" && flat=true
-./bcs open --example "$example" --offscreen --quiet -- --size 1280x720
+# One that asks for an argument to run at all is given it, by name.
+arguments=()
+case "$example" in
+  # A shape of hierarchy to build, which draws nothing, as Bevy's draws nothing.
+  transform_hierarchy) arguments=(humanoids_mixed) ;;
+  # Waves thrown at once, where Bevy's waits for the left button to throw any.
+  bevymark|bevymark_3d) arguments=(--benchmark --waves 20 --per-wave 1000) ;;
+  *) ;;
+esac
+./bcs open --example "$example" --offscreen --quiet -- --size 1280x720 "${arguments[@]}"
 
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in

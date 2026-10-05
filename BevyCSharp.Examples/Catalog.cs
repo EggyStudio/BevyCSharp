@@ -243,19 +243,26 @@ internal static class Catalog
         new("sub_states", SubStates.Build),
 
         // Stress Tests
+        new("bevymark", Bevymark.Build, Bevymark.Configure),
+        new("bevymark_3d", Bevymark3d.Build, Bevymark3d.Configure),
         new("many_animated_sprite_meshes", ManyAnimatedSpriteMeshes.Build, ManyAnimatedSpriteMeshes.Configure),
         new("many_animated_sprites", ManyAnimatedSprites.Build, ManyAnimatedSprites.Configure),
+        new("many_buttons", ManyButtons.Build, ManyButtons.Configure),
         new("many_cameras_lights", ManyCamerasLights.Build, ManyCamerasLights.Configure),
+        new("many_cubes", ManyCubes.Build, ManyCubes.Configure),
+        new("many_foxes", ManyFoxes.Build, ManyFoxes.Configure),
         new("many_gizmos", ManyGizmos.Build, ManyGizmos.Configure),
         new("many_glyphs", ManyGlyphs.Build, ManyGlyphs.Configure),
         new("many_gradients", ManyGradients.Build, ManyGradients.Configure),
         new("many_lights", ManyLights.Build, ManyLights.Configure),
         new("many_materials", ManyMaterials.Build, ManyMaterials.Configure),
+        new("many_morph_targets", ManyMorphTargets.Build, ManyMorphTargets.Configure),
         new("many_sprite_meshes", ManySpriteMeshes.Build, ManySpriteMeshes.Configure),
         new("many_sprites", ManySprites.Build, ManySprites.Configure),
         new("many_text", ManyText.Build, ManyText.Configure),
         new("many_text2d", ManyText2d.Build, ManyText2d.Configure),
         new("text_pipeline", TextPipeline.Build, TextPipeline.Configure),
+        new("transform_hierarchy", TransformHierarchy.Build, TransformHierarchy.Configure),
 
         // Time
         new("timers", Timers.Build, Prints: 1300),
