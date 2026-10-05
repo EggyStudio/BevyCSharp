@@ -15,6 +15,9 @@ internal static class Example3dShapes
 {
     private const float ShapesXExtent = 14f, ExtrusionXExtent = 14f, ZExtent = 8f;
 
+    // Bevy's wireframe plugin, which Bevy's example adds for Space to draw the shapes' edges.
+    public static void Configure(Config config) => config.Wireframes = true;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>

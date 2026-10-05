@@ -204,6 +204,24 @@ left is Bevy's schedule, mostly propagating the transforms that moved, 7 ms at 4
 few thousand entities the method runs across the thread pool, which a method reaching the world
 through `ctx.Ecs` could not.
 
+### Wireframes only where an app asks
+
+The bridge added Bevy's wireframe plugins, for 3D meshes and 2D ones, to every app with a renderer,
+and each looks at every mesh of its kind every frame. They are added where an app's
+`Config.Wireframes` asks, as Bevy's own wireframe examples add them, and `Render.SetWireframe`
+refuses to turn a wireframe on where it did not, rather than drawing nothing. The editor asks.
+
+| test | Bevy alone, before | through the bridge, before | Bevy alone, after | through the bridge, after |
+|---|---:|---:|---:|---:|
+| many_sprite_meshes | 4.87 | 13.96 | 5.23 | 5.52 |
+| many_materials | 6.89 | 7.10 | 7.01 | 7.64 |
+| many_cameras_lights | 42.16 | 46.19 | 43.27 | 44.98 |
+| many_lights | 6.98 | 6.66 | 6.60 | 7.30 |
+
+The 2D test lost what the plugin cost it. The 3D ones moved within the spread between runs, as
+the earlier measurement of the drawn scene found the 3D plugin costing less than the spread at a
+thousand cubes.
+
 ## Bevy's stress tests, beside Bevy
 
 Bevy's stress tests are written in C# in `BevyCSharp.Examples/stress_tests`, and each is measured
@@ -219,29 +237,31 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 
 | test, with its own defaults | Bevy alone | through the bridge |
 |---|---:|---:|
-| many_animated_sprite_meshes | 14.83 | 212.54 |
+| many_animated_sprite_meshes | 14.57 | 213.24 |
 | many_animated_sprites | 6.64 | 15.95 |
-| many_cameras_lights | 42.16 | 46.19 |
+| many_cameras_lights | 43.27 | 44.98 |
 | many_gizmos | 6.54 | 12.39 |
 | many_glyphs | 18.60 | 20.86 |
 | many_gradients | 4.83 | 5.74 |
-| many_lights | 6.98 | 6.66 |
-| many_materials | 6.89 | 7.10 |
-| many_sprite_meshes | 4.87 | 13.96 |
+| many_lights | 6.60 | 7.30 |
+| many_materials | 7.01 | 7.64 |
+| many_sprite_meshes | 5.23 | 5.52 |
 | many_sprites | 3.89 | 4.69 |
 | many_text | 16.83 | 20.90 |
 | many_text2d | 8.68 | 9.55 |
 | text_pipeline | 3.76 | 4.34 |
 
-Most cost the bridge under a millisecond more, or a few against a frame of tens. Four cost far
-more, each for a reason measuring found.
+The rows are as they stand since the mends below. Most cost the bridge under a millisecond more,
+or a few against a frame of tens. Four cost far more when first measured, each for a reason
+measuring found, and one of them has since been mended.
 
-- **many_sprite_meshes, 9 ms more, is Bevy's 2D wireframe plugin.** The bridge adds
-  `Wireframe2dPlugin` to every app, so a 2D mesh can be outlined, and the plugin looks at every 2D
-  mesh in its prepare and queue phases whether or not any is outlined. Bevy's program with it
-  added (`BEVY_STRESS_WITH=wireframe2d`) goes from 5.12 ms to 12.98, its prepare meshes from 0.18 to
-  3.59 and its queue from 0.10 to 4.33, which is the bridge's frame. A sprite mesh is a 2D mesh to
-  Bevy, and a sprite is not, which is why many_sprites does not pay it.
+- **many_sprite_meshes cost 9 ms more for Bevy's 2D wireframe plugin**, which the bridge added to
+  every app so a 2D mesh could be outlined, and which looks at every 2D mesh in its prepare and
+  queue phases whether or not any is outlined. Bevy's program with it added
+  (`BEVY_STRESS_WITH=wireframe2d`) went from 5.12 ms to 12.98, its prepare meshes from 0.18 to 3.59
+  and its queue from 0.10 to 4.33, which was the bridge's frame. A sprite mesh is a 2D mesh to
+  Bevy, and a sprite is not, which is why many_sprites did not pay it. The plugins are now added
+  only where an app asks (above).
 - **many_gizmos, 6 ms more, is a copy of every line.** `Gizmos.Lines` takes a run of lines in one
   call, and built a new array of the bridge's layout for every call, ten of 5,000 lines a frame
   here, each on .NET's large object heap. The ten systems take 4.98 ms of the frame between

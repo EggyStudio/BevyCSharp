@@ -15,6 +15,9 @@ internal static class Shapes2d
     private static readonly List<Entity> Meshes = [];
     private static bool _rotating;
 
+    // Bevy's 2D wireframe plugin, which Bevy's example adds for Space to draw the shapes' edges.
+    public static void Configure(Config config) => config.Wireframes = true;
+
     public static void Build(App app)
     {
         Meshes.Clear();

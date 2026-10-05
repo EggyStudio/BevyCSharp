@@ -272,6 +272,18 @@ public sealed class Config
     public bool GpuTimings { get; set; }
 
     /// <summary>
+    /// Add Bevy's wireframe plugins, so <see cref="Render.SetWireframe"/> can draw a mesh as its
+    /// edges, and Bevy's wireframe components and settings, for 3D and 2D meshes, are drawn.
+    /// </summary>
+    /// <remarks>
+    /// Off by default, as Bevy leaves the plugins out of its defaults, which its own wireframe
+    /// examples add. Each plugin looks at every mesh of its kind in the render's prepare and queue
+    /// phases on every frame, whether or not any is drawn as edges, which costs about 8 ms a frame
+    /// at a hundred thousand sprite meshes. An editor outlining what is selected turns it on.
+    /// </remarks>
+    public bool Wireframes { get; set; }
+
+    /// <summary>
     /// Make the window see-through wherever what is drawn into it has no alpha, so the desktop
     /// shows behind it there.
     /// </summary>

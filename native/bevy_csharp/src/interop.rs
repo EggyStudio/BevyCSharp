@@ -252,6 +252,10 @@ pub struct BcsConfig {
     pub x: i32,
     /// See `x`.
     pub y: i32,
+    /// Non-zero to add Bevy's wireframe plugins, for 3D meshes and 2D ones, which an app that
+    /// draws a mesh as its edges asks for. Each looks at every mesh of its kind every frame
+    /// whether or not one is drawn so, which an app with no wireframes should not pay for.
+    pub wireframes: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

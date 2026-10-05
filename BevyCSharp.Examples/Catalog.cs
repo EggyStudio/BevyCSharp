@@ -37,7 +37,7 @@ internal static class Catalog
     public static readonly Example[] All =
     [
         // 2D Rendering
-        new("2d_shapes", Shapes2d.Build),
+        new("2d_shapes", Shapes2d.Build, Shapes2d.Configure),
         new("2d_viewport_to_world", Example2dViewportToWorld.Build),
         new("bloom_2d", Bloom2d.Build),
         new("cpu_draw", CpuDraw.Build, CpuDraw.Configure),
@@ -58,18 +58,18 @@ internal static class Catalog
         new("sprite_tile", SpriteTile.Build),
         new("text2d", Text2dExample.Build),
         new("transparency_2d", Transparency2d.Build),
-        new("wireframe_2d", Wireframe2dExample.Build),
+        new("wireframe_2d", Wireframe2dExample.Build, Wireframe2dExample.Configure),
 
         // 3D Rendering
         new("3d_scene", Example3dScene.Build),
-        new("3d_shapes", Example3dShapes.Build),
+        new("3d_shapes", Example3dShapes.Build, Example3dShapes.Configure),
         new("lighting", Lighting.Build),
         new("spotlight", Spotlight.Build),
         new("pbr", Pbr.Build),
         new("transparency_3d", Transparency3d.Build),
         new("two_passes", TwoPasses.Build),
         new("vertex_colors", VertexColors.Build),
-        new("wireframe", Wireframe.Build),
+        new("wireframe", Wireframe.Build, Wireframe.Configure),
         new("bloom_3d", Bloom3d.Build),
         new("shadow_caster_receiver", ShadowCasterReceiver.Build),
         new("anisotropy", Anisotropy.Build),

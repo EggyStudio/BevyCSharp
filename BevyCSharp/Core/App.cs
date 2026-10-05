@@ -217,6 +217,7 @@ public sealed unsafe class App : IDisposable
                 HasPosition = opening.HasPosition ? 1u : 0u,
                 X = opening.X,
                 Y = opening.Y,
+                Wireframes = Config.Wireframes ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -235,6 +236,7 @@ public sealed unsafe class App : IDisposable
         // Sounds and buses belong to the app that played them, and meshes to the app that made them.
         Audio.ResetMixer();
         Render.ForgetMade();
+        Render.Wireframes = Config.Wireframes;
         MaterialFiles.Forget();
         MeshFiles.Forget();
         Bevy.Physics.Colliders.Forget();

@@ -737,6 +737,22 @@ The guide's page is [drawing.md](https://github.com/EggyStudio/BevyCSharp/blob/m
 ### `Render`
 
 ```csharp
+static Entity SpawnCamera3d();                                  // Spawns a 3D camera and returns it
+static void SetViewport(Entity camera, uint x, uint y, uint width, uint height);  // Gives a camera part of the window to draw into, or the whole of it
+static void SetPerspective(Entity camera, float fieldOfView, float near, float far);  // Sets a camera's field of view and how near and how far it sees, making it a perspective camera if it was not one
+static void SetRoundedCorners(Entity camera, float radius, (float R, float G, float B, float A) fill = default);  // Rounds the corners of a camera's picture, showing fill outside them, which is clear unless given
+static void SetClearColor((float R, float G, float B, float A) color);  // Sets the world's clear color, in linear RGBA, which a camera clearing to World clears to
+static Entity SpawnCamera3d(CameraSettings settings);           // Spawns a 3D camera set up by settings
+static Entity SpawnLight(LightKind kind, float intensity);      // Spawns a light and returns it
+static Entity SpawnLight(LightSettings settings);               // Spawns a light set up by settings
+static void SetShadowCascades(Entity light, int cascades = 0, float minimum = 0f, float maximum = 0f, float firstBound = 0f, float overlap = 0f);  // Sets how a directional light divides its shadows across the distance
+static void SetLightCookie(Entity light, AssetHandle cookie);   // Shapes a spot light's beam with a picture, the way a gobo shapes a stage light
+static void SetSoftShadows(Entity light, float size);           // Softens a light's shadow the farther it falls from what casts it, as a light size world units across does
+static void SetShadowFiltering(Entity camera, ShadowFiltering filtering);  // Sets how a camera filters the shadow maps it reads
+static void SetPostProcessing(Entity camera, PostSettings settings);  // Sets what a camera does to the picture after the scene has been drawn
+static void SetEffects(Entity camera, EffectSettings settings);  // Sets the lens a camera draws through
+static void SetAtmosphere(Entity camera, AtmosphereSettings settings);  // Draws the sky the air scatters, seen from a camera
+static void ClearAtmosphere(Entity camera);                     // Stops a camera drawing the sky
 static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a mesh primitive and returns a handle to it
 static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and measures a mesh was made from, or null for one that was not made by CreateMesh
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle
@@ -755,34 +771,6 @@ static AssetHandle CreateMaterial(MaterialSettings settings);   // Builds a mate
 static bool WriteMaterial(AssetHandle material, MaterialSettings settings);  // Writes settings over a standard material in place, so everything drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh to draw
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a material to draw its mesh with
-static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
-static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
-static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
-static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
-static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
-static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had
-static AssetHandle CreateClusterMaterial();                     // Makes a material that draws each cluster of a meshlet mesh in a color of its own
-static string MeshPathOf(Entity entity);                        // Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere
-static string MaterialPathOf(Entity entity);                    // Where an entity's material was loaded from, or empty when it was not
-static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an entity is drawn with, or None when it has none
-static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
-static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
-static Entity SpawnCamera3d();                                  // Spawns a 3D camera and returns it
-static void SetViewport(Entity camera, uint x, uint y, uint width, uint height);  // Gives a camera part of the window to draw into, or the whole of it
-static void SetPerspective(Entity camera, float fieldOfView, float near, float far);  // Sets a camera's field of view and how near and how far it sees, making it a perspective camera if it was not one
-static void SetRoundedCorners(Entity camera, float radius, (float R, float G, float B, float A) fill = default);  // Rounds the corners of a camera's picture, showing fill outside them, which is clear unless given
-static void SetClearColor((float R, float G, float B, float A) color);  // Sets the world's clear color, in linear RGBA, which a camera clearing to World clears to
-static Entity SpawnCamera3d(CameraSettings settings);           // Spawns a 3D camera set up by settings
-static Entity SpawnLight(LightKind kind, float intensity);      // Spawns a light and returns it
-static Entity SpawnLight(LightSettings settings);               // Spawns a light set up by settings
-static void SetShadowCascades(Entity light, int cascades = 0, float minimum = 0f, float maximum = 0f, float firstBound = 0f, float overlap = 0f);  // Sets how a directional light divides its shadows across the distance
-static void SetLightCookie(Entity light, AssetHandle cookie);   // Shapes a spot light's beam with a picture, the way a gobo shapes a stage light
-static void SetSoftShadows(Entity light, float size);           // Softens a light's shadow the farther it falls from what casts it, as a light size world units across does
-static void SetShadowFiltering(Entity camera, ShadowFiltering filtering);  // Sets how a camera filters the shadow maps it reads
-static void SetPostProcessing(Entity camera, PostSettings settings);  // Sets what a camera does to the picture after the scene has been drawn
-static void SetEffects(Entity camera, EffectSettings settings);  // Sets the lens a camera draws through
-static void SetAtmosphere(Entity camera, AtmosphereSettings settings);  // Draws the sky the air scatters, seen from a camera
-static void ClearAtmosphere(Entity camera);                     // Stops a camera drawing the sky
 static void Screenshot(string path);                            // Writes what is being drawn to a PNG file
 static void Screenshot(string path, AssetHandle target);        // Writes what a camera drew into an image to a PNG file
 static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null);  // Lights the scene from a cubemap, filtered on the GPU
@@ -822,9 +810,21 @@ static void SetCameraTarget(Entity camera, AssetHandle target, int layer);  // P
 static bool TryProject(Entity camera, Vec3 point, out float x, out float y);  // Where a world point lands on a camera's viewport, in logical pixels
 static bool TryRay(Entity camera, float x, float y, out Vec3 origin, out Vec3 direction);  // The ray through a point on a camera's viewport
 static bool TryGetBounds(Entity entity, out Vec3 min, out Vec3 max);  // The box an entity occupies in the world, or false when it has none
-static void SetWireframe(Entity entity, bool on, (float R, float G, float B, float A) color = default);  // Draws an entity's mesh as its own edges, or stops drawing them
+static void SetWireframe(Entity entity, bool on, (float R, float G, float B, float A) color = default);  // Draws an entity's mesh as its own edges in an app that asked for wireframes with Wireframes, or stops drawing them
 static void SetShadowMapSize(uint directional = 0, uint point = 0);  // Sets how large a shadow map each kind of light gets, in pixels on a side
 static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an entity on a set of render layers, as a bit per layer
+static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
+static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
+static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
+static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
+static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
+static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had
+static AssetHandle CreateClusterMaterial();                     // Makes a material that draws each cluster of a meshlet mesh in a color of its own
+static string MeshPathOf(Entity entity);                        // Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere
+static string MaterialPathOf(Entity entity);                    // Where an entity's material was loaded from, or empty when it was not
+static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an entity is drawn with, or None when it has none
+static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
+static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
 ```
 
 ### `MeshShape`

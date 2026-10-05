@@ -54,6 +54,9 @@ config.GameName = "BevyCSharp Editor";
 config.Gui = true;
 config.WatchAssets = true;
 
+// Bevy's wireframes, which outline what is selected and draw a mesh's preview as its edges.
+config.Wireframes = true;
+
 // See-through where nothing is drawn, so the editor is the shape of its panels and its scene rather
 // than a black rectangle round them. The platform decides, and it falls back to an opaque window,
 // which looks as the editor always did.

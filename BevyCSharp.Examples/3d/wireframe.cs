@@ -28,6 +28,9 @@ internal static class Wireframe
 
     private static Entity _orange, _plane, _toggle, _purple, _text;
 
+    // Bevy's wireframe plugin, which Bevy's example adds.
+    public static void Configure(Config config) => config.Wireframes = true;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>

@@ -506,21 +506,41 @@ public static unsafe partial class Render
         return true;
     }
 
+    /// <summary>Whether the running app asked for wireframes, from its <see cref="Config.Wireframes"/>.</summary>
+    internal static bool Wireframes;
+
     /// <summary>
-    /// Draws an entity's mesh as its own edges, or stops drawing them.
+    /// Draws an entity's mesh as its own edges in an app that asked for wireframes with
+    /// <see cref="Config.Wireframes"/>, or stops drawing them.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The shape itself rather than a box round it, which an editor outlines a selection with when
     /// the box is not enough. The line pipeline it needs is a desktop one. Where a backend cannot
     /// draw lines, this is accepted and nothing appears.
+    /// </para>
+    /// <para>
+    /// The app has to have asked for wireframes with <see cref="Config.Wireframes"/>, which adds
+    /// the plugins that draw them, and turning one on is refused where it did not. Turning one off
+    /// is accepted either way, since there is nothing to stop.
+    /// </para>
     /// </remarks>
     /// <param name="entity">What to draw, or stop drawing.</param>
     /// <param name="on">Whether to draw it.</param>
     /// <param name="color">Linear RGBA for the lines.</param>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// A wireframe is turned on in an app whose config did not ask for wireframes.
+    /// </exception>
     public static void SetWireframe(
         Entity entity, bool on, (float R, float G, float B, float A) color = default)
     {
+        if (on && !Wireframes)
+        {
+            throw new InvalidOperationException(
+                "Drawing a mesh as its edges needs the app's Config.Wireframes, which adds Bevy's wireframe plugins.");
+        }
+
         var status = Native.bcs_render_wireframe(
             entity.Bits, on ? 1 : 0, color.R, color.G, color.B, color.A);
 

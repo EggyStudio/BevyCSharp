@@ -341,13 +341,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             crate::profile::install_render(&mut app);
 
             // Drawing a mesh as its edges, which an editor offers as a way to outline what is
-            // selected. Off unless something asks for it per entity, so it costs a pipeline that is
-            // never specialized in an app that never does.
-            app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
-
-            // The same for a 2D mesh, which Bevy draws through its own pipeline and so outlines
-            // with its own plugin, marked per entity with Wireframe2d.
-            app.add_plugins(bevy::sprite_render::Wireframe2dPlugin::default());
+            // selected, and the same for a 2D mesh, which Bevy draws through its own pipeline and
+            // so outlines with its own plugin. Only where the app asked, since each plugin looks at
+            // every mesh of its kind in its prepare and queue phases every frame whether or not any
+            // is outlined, which at a hundred thousand sprite meshes is 8 ms of the render.
+            if config.wireframes != 0 {
+                app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
+                app.add_plugins(bevy::sprite_render::Wireframe2dPlugin::default());
+            }
 
             // Materials drawn by shaders the game wrote, and what compiles and reloads them. The
             // asset root is resolved the way the asset server resolves it, because a Slang file is

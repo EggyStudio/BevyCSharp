@@ -10,7 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `49781de`. N 7.2's check leaves out a commit of `build/version.txt` alone, as the
+Reviewed up to `b72f28d`, which splits `Native.cs` and `Render.cs` into partial files by area,
+by moves alone, with the five other types `Render.cs` held in files of their own, and takes
+both off the lists of N 1.3 and N 1.2. Before it, `84a55e0` split `interop.rs` the same way,
+the first step of item 1.
+
+Before it, thirteen of Bevy's stress tests are written (`1fc9c9c`), each measured beside Bevy's
+own program built from its source, and PERFORMANCE.md names the two scripts that measure and
+four costs with their causes: the 2D wireframe plugin added to every app, an array made for
+every call of `Gizmos.Lines`, a call for every sprite whose frame turns, and reflected writes
+that feed themselves once frames are slow. `many_sprites` was read against Bevy's source and
+carries its numbers. Two faults that measuring found are mended with a test each, a request
+answered at 30 seconds whatever `--timeout` said and a wrapper's `Option` losing what its
+record does not hold. `app.rs` is split by moves and off N 1.3's list (`6991a12`).
+
+Before them, N 7.2's check leaves out a commit of `build/version.txt` alone (`49781de`), as the
 owner's `08fb5b5` setting 0.4 is, and reads a list for the owner's other commits. The notices
 name the contributors to a crate's repository where nothing else names a holder, and
 `bcs_assets_carried` is under the guard, which leaves one entry point on B 3's list.
@@ -25,10 +39,11 @@ run and in the package where there is one, and the pack workflow runs the script
 the owner makes next carries all of it.
 
 Before it, four commits were settled, the last being the tests of what is no area of the library
-in folders named for what they test (`a714bb8`). The table stands at 225 written, 13 written in
-part, 20 that can be, 105 missing and 58 that do not apply, and what can be written is the stress
-tests alone. The lists stand at 347 places for N 1.2, 32 for N 1.3, 113 for N 1.4 and 55 for
-N 3.4, with one entry point of B 3 to bring under the guard.
+in folders named for what they test (`a714bb8`). The table stands at 235 written, 16 written in
+part, 7 that can be, 105 missing and 58 that do not apply, and what can be written is the last
+seven stress tests. The lists stand at 342 places for N 1.2, 28 for N 1.3, 113 for N 1.4 and 55
+for N 3.4, with one entry point of B 3 to bring under the guard, `bcs_shader_entity_program`, in
+the batch that splits `render/shaders.rs`.
 
 The owner took three more rules into the norm on 2026-10-05, N 2.9, N 2.10 and N 6.5, and then
 N 3.7, N 6.7 and N 6.8, and N 6.6 came from 3DEngine with its check. Item 2 has all seven.
@@ -40,12 +55,20 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
 and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
-1. **The 20 rows that say `can be written` are written**, the stress tests, which are also
-   numbers for PERFORMANCE.md beside Bevy's own. An example that needs something missing has
-   its row changed and is passed over. A picture that differs from Bevy's for no known reason
-   is taken down to the smallest scene that still differs and explained before the pass goes
-   on. The second paragraph of item 3 holds for each example written from here on, which
-   Annex B of the norm has as B 4.
+1. **What measuring found, and then the seven rows left.** The order the reply gives stands,
+   and `interop.rs` is split for it (`84a55e0`). The wireframe plugins are added where the
+   config asks for them, which is 9 ms of every frame with many 2D meshes given back. It
+   changes the struct the two sides share, so
+   the number B 1's check reads at load moves with it, and it changes what a game gets without
+   asking, so the reply says what a game that outlines meshes adds, and the owner numbers the
+   package for it. `Gizmos.cs` is split and `Lines` takes its points without a new array for
+   each call. One call moves the atlas frames of many sprites, which mends both of the animated
+   tests. Each mend is measured again by `build/measure-stress.sh`, and the table in
+   PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven stress tests. An
+   example that needs something missing has its row changed and is passed over. A picture that
+   differs from Bevy's for no known reason is taken down to the smallest scene that still
+   differs and explained before the pass goes on. The second paragraph of item 3 holds for
+   each example written from here on, which Annex B of the norm has as B 4.
 2. **The norm's checks, what is left of them.** The check of N 1.5 reads top folders as the norm
    has it since, with a row for `docs/`, and the check of N 1.4 leaves out a test of what is no
    area of the library with that reason. The rules still `to take` here each have their item:
@@ -55,9 +78,8 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    it, and the workflow running `build/examples-table.py` and failing when what it writes differs
    from the table checked in. The lists are paid down as the norm says, a listed file mended
    when a batch next touches it, in a commit of its own, the largest first where there is a
-   choice, `Render.cs`, `RenderShaders.cs` and `Native.cs` among the library's and
-   `render/shaders.rs` among the bridge's. The one entry point B 3 still lists is brought under
-   the guard.
+   choice, `RenderShaders.cs` among the library's and `render/shaders.rs` among the bridge's.
+   The one entry point B 3 still lists is brought under the guard.
 
    The owner took three more rules into the norm on 2026-10-05. A loader keeps no file open
    once a load returns (N 2.9), which one test over every loader finds, on Linux among the
@@ -110,6 +132,11 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    and in the cheatsheet, and `Example.cs` keeps only what drives an example for its capture.
    A check builds a handful of examples in a project of their own on the packed package, as the
    README's walk does, so one that leans on the examples project fails it.
+   `stress_tests/StressTest.cs` is such a helper as well. The window's three settings are said
+   by each test, as Bevy's says them, and the log of frame times is Bevy's own
+   `FrameTimeDiagnosticsPlugin` and `LogDiagnosticsPlugin`, added by the bridge where an app
+   asks, so the two programs measured log by the same code and the C# one runs no system of
+   its own for it.
 
    The README's first program is `[Behavior]` on a struct, which 8 examples use while 136 keep
    their state in static fields. Where Bevy's example keeps state on an entity, in a component
@@ -205,7 +232,13 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
     A host that compiles on each save gathers them. They are read once for the process and
     shared, as `EditorEval` keeps its own, and a test compiles a hundred times and finds the
     process holding within a few megabytes of what it held after ten, read before any
-    collection. The row on an app's whole life in SHARED.md is checked in the same batch.
+    collection. The row on an app's whole life in SHARED.md is checked in the same batch. So is
+    whether a script's generation unloads when it is compiled again, as 3DEngine's
+    `ScriptGenerationTests` holds since `d7e370ed` there, where a registration kept by the
+    process held every generation and ran a stale script in every later app. `BehaviorsPlugin`
+    passes over a collectible assembly's behaviors here, and whether a script's assembly adds
+    schemas, commands or states to the lists of the process, as the module initializers the
+    generator writes do for a game's, is read with it.
 
 ## Verdicts
 
@@ -235,31 +268,11 @@ None open.
 
 ## Replies
 
-Item 1, the first thirteen stress tests: many_sprites, many_sprite_meshes, many_animated_sprites,
-many_animated_sprite_meshes, many_materials, many_cameras_lights, many_gizmos, many_glyphs,
-many_gradients, many_lights, text_pipeline, many_text and many_text2d. many_text and many_text2d
-are in part, for what Bevy's FontAtlasSet holds, and many_lights for the lights its render world
-counts. They share a file for the window, the warning and the log of frame times
-Bevy's diagnostics write, and what Bevy keeps on an entity is in a behavior (AnimationTimer,
-Lorem, NumberSpan, GradientNode). Each is measured beside Bevy's own program, built from its
-source through native/stress by `build/bevy-stress.sh` and run in turn with the C# one by
-`build/measure-stress.sh`, and PERFORMANCE.md has the table. Four cost far more than Bevy, each
-for a cause measured: the 2D wireframe plugin the bridge adds to every app (many_sprite_meshes,
-9 ms), a new array for every call of `Gizmos.Lines` (many_gizmos, 6 ms), a `SetSprite` call for
-every frame turned (many_animated_sprites, 9 ms), and two reflected calls for every frame turned,
-which feed themselves once frames are slow (many_animated_sprite_meshes, 198 ms). Their fixes
-are batches of their own next: the wireframe plugins asked for in the config, which changes the
-ABI, Gizmos.cs split first as N 1.3 asks, and a call that moves sprites' atlas frames together.
-Measuring also found the app answering a request at 30 seconds whatever `--timeout` said, and a
-wrapper's `Option` written while `Some` losing what the record does not hold, both fixed here
-with a test each. The installer of the offscreen image the harness reuses was in
-`app.rs`, which is on N 1.3's list, so the commit before this one splits it by moving code only,
-into `offscreen.rs`, `component_registry.rs`, `capabilities.rs` and `systems.rs`, with `app.rs`
-naming the moved items where the rest of the bridge reaches them, and it comes off the list.
-
-Item 2: N 7.2's check passes over a commit of `build/version.txt` alone and reads
-`build/norm/7.2.txt` for the rest. Where neither a crate's files nor its manifest names a holder,
-the notices name the contributors to the repository or the home its manifest gives, which leaves
-four of Bevy's macro crates whose manifests give neither. `bcs_assets_carried` is under the
-guard. `bcs_shader_entity_program` is in `render/shaders.rs`, which is on N 1.3's list, so it
-comes under the guard in the batch that splits that file.
+Item 1, the first of the mends: Bevy's wireframe plugins, for 3D meshes and 2D ones, are added
+only to an app whose `Config.Wireframes` asks, which the editor and the four examples that draw
+wireframes do, as Bevy's own wireframe examples add the plugins themselves. Before it, interop.rs
+(`84a55e0`), and Native.cs and Render.cs with Render.cs's five other types (`b72f28d`), were split
+by moving code only, since the change touches each and each was on N 1.3's list. A break for the
+owner to number: the config the bridge reads gained a field, so `ABI_VERSION` and
+`ExpectedAbiVersion` are 199, and `Render.SetWireframe` refuses to turn a wireframe on in an app
+that did not ask, which a game drawing wireframes now asks for in its config.

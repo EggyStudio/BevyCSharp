@@ -74,6 +74,9 @@ public unsafe struct NativeConfig
 
     /// <summary>See <see cref="X"/>.</summary>
     public int Y;
+
+    /// <summary>Non-zero to add Bevy's wireframe plugins, for 3D and 2D meshes.</summary>
+    public uint Wireframes;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

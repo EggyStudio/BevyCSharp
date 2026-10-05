@@ -17,6 +17,9 @@ internal static class Wireframe2dExample
     private static bool _circleGreen;
     private static Entity _circle, _text;
 
+    // Bevy's 2D wireframe plugin, which Bevy's example adds.
+    public static void Configure(Config config) => config.Wireframes = true;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>
