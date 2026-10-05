@@ -195,6 +195,11 @@ dotnet pack BevyCSharp/BevyCSharp.csproj -c Release
 Packing fails with `BCS101` if the staged bridge is older than the Rust sources, because shipping
 a stale one produces an `EntryPointNotFoundException` far from its cause.
 
+The package carries `THIRD-PARTY-NOTICES.md`, which names every crate of `native/Cargo.lock` with
+its license and the notices its own files give. `build/third-party-notices.py` writes it through
+`cargo metadata`, and a change to the lock is followed by running it again, which the pack
+workflow checks with `--check` and NormTests' N 6.4 holds to the lock.
+
 To ship more than one platform, run `build-native.sh --target <triple>` for each; every staged RID
 slot is picked up at pack time and missing ones are skipped.
 
@@ -233,13 +238,14 @@ dotnet build BevyCSharp.Examples
 ./bcs open --example 3d_scene              # or dotnet run --project BevyCSharp.Examples -- 3d_scene
 build/capture-example.sh 3d_scene          # its picture in .github/assets/examples
 build/capture-examples.sh                  # every one, failing on one that does not start or is blank
-build/examples-table.py                    # .github/EXAMPLES.md and the README's count, from Bevy's metadata
+build/examples-table.py                    # .github/EXAMPLES.md, the README's count and each example's head
 ```
 
 `build/examples-table.py` reads Bevy's example metadata from the cargo registry, which holds the
 bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.tsv`, where each
-example not yet written has its state and what it waits on. The package workflow captures every
-example on the Linux bridge it built.
+example not yet written has its state and what it waits on. It also writes the comment each
+written example opens with, naming the example of Bevy's it is written from, at which version and
+under Bevy's licenses. The package workflow captures every example on the Linux bridge it built.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is

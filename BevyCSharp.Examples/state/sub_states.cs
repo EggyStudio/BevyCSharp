@@ -1,3 +1,6 @@
+// Bevy's sub_states example, examples/state/sub_states.rs at v0.19.1, by Bevy's contributors under
+// MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using AppState = BevyCSharp.Examples.States.StatesExample.AppState;
 

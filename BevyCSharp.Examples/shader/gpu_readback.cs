@@ -1,3 +1,6 @@
+// Bevy's gpu_readback example, examples/shader/gpu_readback.rs at v0.19.1, by Bevy's contributors
+// under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 
 namespace BevyCSharp.Examples.Shading;

@@ -296,7 +296,9 @@ padded section banners, and comments that explain why rather than restate the co
 ## License
 
 Mozilla Public License 2.0. The full text is in [LICENSE](https://github.com/EggyStudio/BevyCSharp/blob/main/LICENSE), and it ships inside the
-package.
+package. So does [THIRD-PARTY-NOTICES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/THIRD-PARTY-NOTICES.md), which names the work of
+others the package carries, Bevy and every crate the bridge is built from among it, each with its
+license and the notices its own files give, for a game shipped on the package to carry in turn.
 
 MPL-2.0 is file-level copyleft, meaning changes to files that are part of this project have to stay
 under it and be made available in source form, while anything you build *around* it, including a

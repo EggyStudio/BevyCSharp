@@ -1,3 +1,6 @@
+// Bevy's update_gltf_scene example, examples/gltf/update_gltf_scene.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 
 namespace BevyCSharp.Examples.Gltf;

@@ -1,3 +1,6 @@
+// Bevy's scrolling_fog example, examples/3d/scrolling_fog.rs at v0.19.1, by Bevy's contributors
+// under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 

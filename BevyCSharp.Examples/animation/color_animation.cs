@@ -1,3 +1,6 @@
+// Bevy's color_animation example, examples/animation/color_animation.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 using Vec4 = System.Numerics.Vector4;

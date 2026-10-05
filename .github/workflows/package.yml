@@ -319,6 +319,12 @@ jobs:
           done
           find build/artifacts -type f | sort
 
+      # The notices the package carries, written from the crates of native/Cargo.lock, which a
+      # change to the lock leaves out of date until the script is run again.
+      - name: Check the third-party notices
+        shell: bash
+        run: build/third-party-notices.py --check
+
       # The staleness guard in the csproj compares timestamps against the Rust sources, and a
       # fresh checkout writes those after the downloaded artifacts. The binaries came from this
       # very commit, so the check has nothing useful to say here.
@@ -335,8 +341,8 @@ jobs:
         shell: bash
         run: unzip -l build/package/*.nupkg
 
-      # N 6.4 of NORM.md, the package holding the library, its generator, its build files and the
-      # natives of every system staged above.
+      # N 6.4 of NORM.md, the package holding the library, its generator, its build files, the
+      # notices naming every crate of the lock and the natives of every system staged above.
       - name: Check what the package holds
         shell: bash
         run: |

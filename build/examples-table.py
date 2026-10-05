@@ -13,12 +13,17 @@ list come last.
 
 The README's gallery shows every written example's capture, each picture opening the C# program
 that drew it, so a reader goes from what an example draws to the code that draws it.
+
+Each written example says at its head which of Bevy's it is written from, at which version and
+under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
+example and a new Bevy have it without anybody writing it by hand.
 """
 
 import glob
 import os
 import re
 import sys
+import textwrap
 import tomllib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -224,6 +229,34 @@ def build(version, examples, order, triage, written):
     return table, status, gallery
 
 
+def head(example, version):
+    """The comment an example opens with, naming the example of Bevy's it is written from."""
+    words = (f"Bevy's {example['name']} example, {example['path']} at v{version}, by Bevy's contributors "
+             "under MIT or Apache-2.0, written again in C#.")
+    return ["// " + line for line in textwrap.wrap(words, 97)]
+
+
+def heads(examples, written, version):
+    """Each written example's file as it reads with its head, by its path, where that differs."""
+    changed = {}
+    for example in examples:
+        path = written.get(example["name"])
+        if not path or not example["path"]:
+            continue
+        with open(os.path.join(ROOT, path), encoding="utf-8") as file:
+            lines = file.read().split("\n")
+
+        # The head written before, up to the blank line after it, is replaced rather than kept.
+        if lines[0].startswith(f"// Bevy's {example['name']} example,") and "" in lines:
+            lines = lines[lines.index("") + 1:]
+
+        text = "\n".join(head(example, version) + [""] + lines)
+        with open(os.path.join(ROOT, path), encoding="utf-8") as file:
+            if file.read() != text:
+                changed[path] = text
+    return changed
+
+
 def main():
     check = "--check" in sys.argv[1:]
     version = bevy_version()
@@ -244,8 +277,10 @@ def main():
     readme_text = pictures.sub(lambda match: match.group(1) + (gallery + "\n" if gallery else "") + match.group(2), readme_text, count=1)
 
     current = open(TABLE, encoding="utf-8").read() if os.path.exists(TABLE) else ""
+    changed = heads(examples, written_examples(), version)
     if check:
         stale = [path for path, old, new in ((TABLE, current, table), (README, text, readme_text)) if old != new]
+        stale += [os.path.join(ROOT, path) for path in sorted(changed)]
         if stale:
             sys.exit("out of date, run build/examples-table.py: " + ", ".join(os.path.relpath(p, ROOT) for p in stale))
         return
@@ -254,6 +289,9 @@ def main():
         out.write(table)
     with open(README, "w", encoding="utf-8") as out:
         out.write(readme_text)
+    for path, text in changed.items():
+        with open(os.path.join(ROOT, path), "w", encoding="utf-8") as out:
+            out.write(text)
     print(status)
 
 

@@ -48,11 +48,13 @@
         <BevyCSharpIcon>$(BevyCSharpRoot).github/assets/icon.png</BevyCSharpIcon>
         <BevyCSharpReadme>$(BevyCSharpRoot)README.md</BevyCSharpReadme>
         <BevyCSharpLicense>$(BevyCSharpRoot)LICENSE</BevyCSharpLicense>
+        <BevyCSharpNotices>$(BevyCSharpRoot)THIRD-PARTY-NOTICES.md</BevyCSharpNotices>
     </PropertyGroup>
 
     <!--
-      The icon, readme and license carried in the package, taken from where the repository
-      already keeps them rather than duplicated next to the project.
+      The icon, readme, license and third-party notices carried in the package, taken from where
+      the repository already keeps them rather than duplicated next to the project. The notices name
+      whose work the bridge is built from, which build/third-party-notices.py writes.
 
       This has to come after the property group above, because MSBuild evaluates a file top to
       bottom and the paths would otherwise still be empty. A blank PackagePath means the package
@@ -67,6 +69,8 @@
               Condition="Exists('$(BevyCSharpReadme)')"/>
         <None Include="$(BevyCSharpLicense)" Pack="true" PackagePath="" Visible="false"
               Condition="Exists('$(BevyCSharpLicense)')"/>
+        <None Include="$(BevyCSharpNotices)" Pack="true" PackagePath="" Visible="false"
+              Condition="Exists('$(BevyCSharpNotices)')"/>
     </ItemGroup>
 
     <!--

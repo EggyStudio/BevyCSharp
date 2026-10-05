@@ -1,3 +1,6 @@
+// Bevy's return_after_run example, examples/app/return_after_run.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 
 namespace BevyCSharp.Examples.Application;

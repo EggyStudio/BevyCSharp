@@ -1,3 +1,6 @@
+// Bevy's 2d_top_down_camera example, examples/camera/2d_top_down_camera.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 

@@ -180,6 +180,11 @@ public sealed class NormTests
     [SkippableFact]
     public void N_6_4()
     {
+        // Whose work the package carries, every crate of the bridge's lock named with its version,
+        // held on the file the package is packed from, which needs no package to read.
+        var crates = LockedCrates();
+        NamesEvery(File.ReadAllText(Full("THIRD-PARTY-NOTICES.md")), crates, "THIRD-PARTY-NOTICES.md");
+
         var package = Environment.GetEnvironmentVariable("BCS_PACKAGE");
         if (string.IsNullOrEmpty(package))
         {
@@ -200,6 +205,7 @@ public sealed class NormTests
             "build/BevyCSharp.props",
             "build/BevyCSharp.targets",
             "README.md",
+            "THIRD-PARTY-NOTICES.md",
         };
 
         // The natives staged for the pack, a system a folder, each in its runtime's folder.
@@ -215,6 +221,25 @@ public sealed class NormTests
 
         var missing = wanted.Where(path => !held.Contains(path)).ToList();
         Assert.True(missing.Count == 0, $"N 6.4: {Path.GetFileName(package)} does not hold {string.Join(", ", missing)}");
+
+        using var notices = new StreamReader(zip.GetEntry("THIRD-PARTY-NOTICES.md")!.Open());
+        NamesEvery(notices.ReadToEnd(), crates, $"the THIRD-PARTY-NOTICES.md of {Path.GetFileName(package)}");
+    }
+
+    /// <summary>Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.</summary>
+    private static List<string> LockedCrates() =>
+        Regex.Matches(File.ReadAllText(Full("native/Cargo.lock")), @"^\[\[package\]\]\nname = ""([^""]+)""\nversion = ""([^""]+)""", RegexOptions.Multiline)
+            .Where(match => match.Groups[1].Value != "bevy_csharp")
+            .Select(match => $"{match.Groups[1].Value} {match.Groups[2].Value}")
+            .ToList();
+
+    /// <summary>Fails for each crate the notices have no row for, by its name and version.</summary>
+    private static void NamesEvery(string notices, List<string> crates, string what)
+    {
+        var unnamed = crates
+            .Where(crate => crate.Split(' ') is var parts && !notices.Contains($"| {parts[0]} | {parts[1]} |", StringComparison.Ordinal))
+            .ToList();
+        Assert.True(unnamed.Count == 0, $"N 6.4: {what} names no {string.Join(", ", unnamed)}, which build/third-party-notices.py writes in");
     }
 
     [SkippableFact]

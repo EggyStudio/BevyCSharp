@@ -1,3 +1,6 @@
+// Bevy's text_gizmos_font example, examples/gizmos/text_gizmos_font.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 
 namespace BevyCSharp.Examples.Gizmo;

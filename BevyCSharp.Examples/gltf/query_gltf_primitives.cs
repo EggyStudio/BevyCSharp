@@ -1,3 +1,6 @@
+// Bevy's query_gltf_primitives example, examples/gltf/query_gltf_primitives.rs at v0.19.1, by
+// Bevy's contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 

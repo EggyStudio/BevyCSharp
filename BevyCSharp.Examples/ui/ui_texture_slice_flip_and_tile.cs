@@ -1,3 +1,7 @@
+// Bevy's ui_texture_slice_flip_and_tile example,
+// examples/ui/images/ui_texture_slice_flip_and_tile.rs at v0.19.1, by Bevy's contributors under MIT
+// or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 

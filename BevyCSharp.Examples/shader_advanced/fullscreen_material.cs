@@ -1,3 +1,6 @@
+// Bevy's fullscreen_material example, examples/shader_advanced/fullscreen_material.rs at v0.19.1,
+// by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 
 namespace BevyCSharp.Examples.Shading;

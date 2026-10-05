@@ -1,3 +1,6 @@
+// Bevy's shader_material example, examples/shader/shader_material.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
 using System.Numerics;
 using Bevy;
 

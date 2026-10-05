@@ -1,3 +1,6 @@
+// Bevy's post_processing example, examples/3d/post_processing.rs at v0.19.1, by Bevy's contributors
+// under MIT or Apache-2.0, written again in C#.
+
 using System.Globalization;
 using Bevy;
 using Bevy.Reflected;

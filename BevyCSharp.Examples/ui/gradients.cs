@@ -1,3 +1,6 @@
+// Bevy's gradients example, examples/ui/styling/gradients.rs at v0.19.1, by Bevy's contributors
+// under MIT or Apache-2.0, written again in C#.
+
 using System.Text.Json.Nodes;
 using Bevy;
 using Bevy.Reflected;

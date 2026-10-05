@@ -5,3 +5,4 @@
 .github/COMMITS.md	names the dash STYLE.md forbids
 .github/STYLE.md	names the dash it forbids
 BevyCSharp.Examples/3d/blend_modes.cs	Bevy's own text on the screen, written as Bevy writes it
+THIRD-PARTY-NOTICES.md	the license texts and credits of others, written as they wrote them

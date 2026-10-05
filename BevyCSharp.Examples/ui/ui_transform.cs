@@ -1,3 +1,6 @@
+// Bevy's ui_transform example, examples/ui/ui_transform.rs at v0.19.1, by Bevy's contributors under
+// MIT or Apache-2.0, written again in C#.
+
 using Bevy;
 using Bevy.Reflected;
 
