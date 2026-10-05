@@ -119,14 +119,19 @@ public sealed class ReflectedComponentTests
                 ComponentSchemas.All, schema => schema.QualifiedName == TransformPath);
 
             // The hierarchy has no mirror, so it is described from Bevy's reflection. It is a
-            // newtype over an entity, and immutable, so it reads and refuses to be written.
+            // newtype over an entity, and immutable, so writing it inserts it again, which moves
+            // the child under the new parent as Bevy's own insert does.
             var childOf = Assert.Single(schemas, schema => schema?.QualifiedName == ChildOfPath);
             Assert.Equal(SchemaOrigin.Reflected, childOf!.Origin);
 
             var link = Assert.Single(childOf.Fields);
             Assert.Equal(FieldKind.Entity, link.Kind);
             Assert.Equal(parent, link.Read(ctx.Ecs, child));
-            Assert.False(link.Write(ctx.Ecs, child, ctx.Ecs.Spawn()));
+
+            var other = ctx.Ecs.Spawn();
+            Assert.True(link.Write(ctx.Ecs, child, other));
+            Assert.Equal(other, link.Read(ctx.Ecs, child));
+            Assert.Contains(child, ctx.Ecs.ChildrenOf(other));
         });
 
         harness.Run();

@@ -8,8 +8,10 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `862d8e8`. Text drawn as gizmos with its four examples (`862d8e8`) is settled on its
-description and reply. The table stands at 157 written, 8 written in part, 95 that can be, 104
+Reviewed up to `327f86a`. Bevy's widgets and interface picking built in, a text field made from C#
+and three examples (`327f86a`) are settled on the description and the reply, which was read. An
+offscreen run cannot type into a field, Bevy handing keys to one only through a primary window,
+which the docs say. The table stands at 160 written, 8 written in part, 95 that can be, 101
 missing and 57 that do not apply.
 
 ## Now
@@ -25,7 +27,7 @@ taken from [SHARED.md](SHARED.md).
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
    stands: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
    decal's tag and a volume's voxels, for `ssr`, `clustered_decals` and `irradiance_volumes`);
-   then editable text and Bevy's widgets.
+   then what Bevy's widgets still hold.
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
@@ -84,13 +86,13 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 2, editable text. The render profile builds Bevy's widgets now, its editable text among
-  them, and the interface's picking that a click focuses a field with, which the full suite ran
-  against unchanged. `EditableText` holds an editor no reflection carries, so `Ui.SetEditableText`
-  makes a field, with a limit, a size in glyphs and lines, and the characters it takes in place of
-  Bevy's filter function, and `EditableTextOf` and `SetEditableValue` read and replace it, with a
-  test. The bridge adds Bevy's tab navigation. `editable_text_filter`, `text_input` and
-  `tab_navigation` are written. `ime_support` waits on system fonts, and the two multi-field
-  examples on keys observed as they reach a field, each in TODO.md. Bevy hands a key to the focused
-  field only through a primary window, so an offscreen run cannot type into one, which the test
-  leaves out and the docs say.
+- Item 2, Bevy's widgets. The description of Bevy's components is dumped again from a build with
+  the widgets, which gives wrappers for the slider, checkbox, radio group, scrollbar and the rest.
+  `Ui.SelfUpdate` attaches Bevy's observer that keeps a slider, checkbox or radio group's state, and
+  two things the widgets showed are fixed in the bridge for every component: one of unnamed fields
+  with no default, as a slider's value, is inserted at its fields' defaults, an entity field takes
+  Bevy's placeholder, and an immutable component, as a slider's value or the hierarchy's `ChildOf`,
+  is written by inserting a written copy, so writing a `ChildOf` reparents, which a test now checks
+  in place of the refusal it checked. `vertical_slider` and `scrollbars` are written, and `widgets`
+  is marked as the helpers module it is. The two standard widget examples wait on the widgets'
+  events as observers, Feathers is not built, and directional navigation waits on Bevy's map.

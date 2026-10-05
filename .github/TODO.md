@@ -24,10 +24,10 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **Bevy's widgets, eleven examples.** Its core widgets and widget helpers (four), Feathers (three),
-  scrollbars, and directional navigation (two). The widgets are built with the render profile and
-  Bevy's defaults add them, so what is left is their components reached from C#, which a fresh
-  description of Bevy's components gives wrappers for, and the navigation's resources.
+- **Bevy's widgets, five examples.** Feathers, Bevy's styled widgets over its core ones (three),
+  which the bridge does not build, and directional navigation (two), which needs Bevy's map of
+  which node is beside which. The core widgets are built and reached through their wrappers, and
+  what the two standard widget examples wait on is their events, under the entry on observers.
 - **Fonts and text styling, ten examples.** Font weights, OpenType variations and features (`text`
   among them), generic families and system fonts (`ime_support` among them), querying fonts and
   their atlases, strikethrough and underline, and text background colors.
@@ -38,12 +38,14 @@ the most examples, and the largest is taken between groups of examples. The coun
   into Bevy's deferred buffers, which needs a Slang material to write them, and `clustered_decals`
   and `irradiance_volumes` read the decal over a surface and the volume's voxels through Bevy's
   WGSL functions, which need the same kind of named call `bcs::light` makes.
-- **Picking's events as observers, eight examples.** A click, a drag or a pointer moving over what
-  they draw, which `error_handling`, `delayed_commands`, `entity_disabling`, `ui_drag_and_drop`,
+- **Bevy's events as observers, ten examples.** A click, a drag or a pointer moving over what they
+  draw, which `error_handling`, `delayed_commands`, `entity_disabling`, `ui_drag_and_drop`,
   `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` observe on the entity it
-  happened to. C# observers run for a game's own events and for a component's coming and going,
-  and Bevy's `Pointer<Click>`, `Pointer<Over>`, `Pointer<Drag>` and the rest need the same bridge
-  for events Bevy triggers, with each event's fields read into a C# struct.
+  happened to, and the widgets' own `Activate`, `ValueChange` and menu events, which
+  `standard_widgets` and `standard_widgets_observers` observe. C# observers run for a game's own
+  events and for a component's coming and going, and Bevy's `Pointer<Click>`, `Pointer<Over>`,
+  `Pointer<Drag>` and the rest need the same bridge for events Bevy triggers, with each event's
+  fields read into a C# struct.
 - **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused

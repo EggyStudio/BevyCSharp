@@ -1045,6 +1045,7 @@ static void SetScroll(Entity entity, float x, float y);         // Moves a scrol
 static void SetEditableText(Entity node, UiEditableTextSettings settings);  // Makes a node a text field the player types into
 static string EditableTextOf(Entity node);                      // What a text field holds, or null for a node that is no field
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end
+static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
 ```
 
 ### `UiGrid`

@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**160 written, 8 written in part, 95 can be written, 101 missing and 57 do not apply.** Of the 364 that apply, 263 can be written with what is bridged, 8 of them leaving something out.
+**162 written, 8 written in part, 95 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 8 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -22,7 +22,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 0 | 0 | 6 | 0 | 0 |
 | [Gizmos](#gizmos) | 4 | 0 | 4 | 1 | 0 |
-| [Helpers](#helpers) | 0 | 0 | 0 | 1 | 0 |
+| [Helpers](#helpers) | 0 | 0 | 0 | 0 | 1 |
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 |
 | [Movement](#movement) | 0 | 0 | 1 | 0 | 0 |
@@ -37,12 +37,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
-| [UI (User Interface)](#ui-user-interface) | 29 | 1 | 0 | 30 | 0 |
+| [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 |
 | [Usage](#usage) | 0 | 0 | 3 | 0 | 0 |
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **160** | **8** | **95** | **101** | **57** |
+| **All** | **162** | **8** | **95** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -342,7 +342,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`widgets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/helpers/widgets.rs) | Example UI Widgets | missing, Bevy's widget helpers (bevy_ui_widgets) |
+| [`widgets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/helpers/widgets.rs) | Example UI Widgets | does not apply, a module of helpers Bevy's examples share rather than an example, which BevyCSharp.Examples/Widgets.cs is here |
 
 ## Input
 
@@ -552,11 +552,11 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`relative_cursor_position`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/relative_cursor_position.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/relative-cursor-position/) | Showcases the RelativeCursorPosition component | [written](../BevyCSharp.Examples/ui/relative_cursor_position.cs), through Bevy's reflected RelativeCursorPosition |
 | [`render_ui_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/render_ui_to_texture.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/render-ui-to-texture/) | An example of rendering UI as a part of a 3D world | missing, observers of the pointer pressing and dragging over an interface drawn into a texture |
 | [`scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scroll.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/scroll/) | Demonstrates scrolling UI containers | missing, observers of the pointer over scrolled nodes, and mouse wheel events as messages |
-| [`scrollbars`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scrollbars.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/scrollbars/) | Demonstrates use of core scrollbar in Bevy UI | missing, Bevy's core scrollbars |
+| [`scrollbars`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scrollbars.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/scrollbars/) | Demonstrates use of core scrollbar in Bevy UI | [written](../BevyCSharp.Examples/ui/scrollbars.cs) |
 | [`size_constraints`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/size_constraints.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/size-constraints/) | Demonstrates how the to use the size constraints to control the size of a UI node. | [written](../BevyCSharp.Examples/ui/size_constraints.cs) |
 | [`stacked_gradients`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/stacked_gradients.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/stacked-gradients/) | An example demonstrating stacked gradients | [written](../BevyCSharp.Examples/ui/stacked_gradients.cs), through Bevy's reflected BackgroundGradient |
-| [`standard_widgets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/standard-widgets/) | Demonstrates use of core (headless) widgets in Bevy UI | missing, Bevy's core widgets (bevy_ui_widgets) |
-| [`standard_widgets_observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets_observers.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/standard-widgets-observers/) | Demonstrates use of core (headless) widgets in Bevy UI, with Observers | missing, Bevy's core widgets (bevy_ui_widgets) |
+| [`standard_widgets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/standard-widgets/) | Demonstrates use of core (headless) widgets in Bevy UI | missing, observers of the widgets' own events (Activate, ValueChange, MenuEvent) |
+| [`standard_widgets_observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets_observers.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/standard-widgets-observers/) | Demonstrates use of core (headless) widgets in Bevy UI, with Observers | missing, observers of the widgets' own events and of their components' coming and going |
 | [`strikethrough_and_underline`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/strikethrough_and_underline.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/strikethrough-and-underline/) | Demonstrates how to display text with strikethrough and underline. | missing, strikethrough and underline on text |
 | [`system_fonts`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/system_fonts.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/system-fonts/) | Demonstrates how to use system fonts | missing, system fonts |
 | [`tab_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/tab_navigation.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/tab-navigation/) | Demonstration of Tab Navigation between UI elements | [written](../BevyCSharp.Examples/ui/tab_navigation.cs), the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks |
@@ -575,7 +575,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`ui_texture_slice`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/ui_texture_slice.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/ui-texture-slice/) | Illustrates how to use 9 Slicing in UI | [written](../BevyCSharp.Examples/ui/ui_texture_slice.cs) |
 | [`ui_texture_slice_flip_and_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/ui_texture_slice_flip_and_tile.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/ui-texture-slice-flip-and-tile/) | Illustrates how to flip and tile images with 9 Slicing in UI | [written](../BevyCSharp.Examples/ui/ui_texture_slice_flip_and_tile.cs) |
 | [`ui_transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_transform.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/ui-transform/) | An example demonstrating how to translate, rotate and scale UI elements. | [written](../BevyCSharp.Examples/ui/ui_transform.cs), through Bevy's reflected UiTransform |
-| [`vertical_slider`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/vertical_slider.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/vertical-slider/) | Simple example showing vertical and horizontal slider widgets with snap behavior and value labels | missing, Bevy's core widgets (bevy_ui_widgets) |
+| [`vertical_slider`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/vertical_slider.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/vertical-slider/) | Simple example showing vertical and horizontal slider widgets with snap behavior and value labels | [written](../BevyCSharp.Examples/ui/vertical_slider.cs), the slider kept up to date by Bevy's own observer, which Ui.SelfUpdate attaches |
 | [`viewport_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/viewport_node.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/viewport-node/) | Demonstrates how to create a viewport node with picking support | missing, observers of the pointer dragging a mesh and the node that shows it |
 | [`virtual_keyboard`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/virtual_keyboard.rs), [live in Bevy](https://bevy.org/examples/ui-user-interface/virtual-keyboard/) | Example demonstrating a virtual keyboard widget | missing, Bevy's Feathers widgets |
 | [`window_fallthrough`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/window_fallthrough.rs) | Illustrates how to access `winit::window::Window`'s `hittest` functionality. | missing, letting the pointer pass through the window to what is behind it |

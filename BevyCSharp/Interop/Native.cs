@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 188;
+    internal const int ExpectedAbiVersion = 189;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1011,6 +1011,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_set_editable_value(ulong entity, string text);
+
+    /// <summary>Makes one of Bevy's widgets keep its own state.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_widget_self_update(ulong entity, int kind);
 
     /// <summary>Records a run of gizmo text to draw this frame.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

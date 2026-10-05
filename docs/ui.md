@@ -283,6 +283,28 @@ the only characters a field takes, where Bevy's filter is a function of the game
 field's font, size and wrapping are the node's `TextFont` and `TextLayout`. Bevy hands each key to
 the focused field through the primary window, so a field in an offscreen run takes no keys.
 
+Bevy's widgets are its own components, a slider, a checkbox, a radio group, a scrollbar, put on a
+node through their wrappers. A widget reports a change rather than making it, and
+`Ui.SelfUpdate` attaches Bevy's own listener that makes it, so the state is read back from the
+widget's components:
+
+```csharp
+var volume = Ui.SpawnNode(new UiSettings { Width = Length.Px(200f), Height = Length.Px(12f) });
+ctx.Ecs.Insert<SliderRef>(volume);
+var range = ctx.Ecs.Insert<SliderRangeRef>(volume);
+(range.Start, range.End) = (0f, 100f);
+ctx.Ecs.Insert<SliderValueRef>(volume).Value = 80f;
+Ui.SelfUpdate(volume, UiWidgetKind.Slider);
+
+float level = ctx.Ecs.Wrap<SliderValueRef>(volume).Value;   // as the player drags it
+```
+
+What a widget looks like is the game's: the thumb is a child node marked `SliderThumbRef` that the
+game places from the value, and a scrollbar's `ScrollbarRef.Target` names the node it scrolls. Some
+of a widget's components, as a slider's value, are immutable in Bevy, so writing one through its
+wrapper inserts it again, which is how Bevy means them to change. A widget is worked by the pointer
+through Bevy's picking, which an offscreen run cannot send a pointer to.
+
 ---
 
 Before this, [Gizmos](gizmos.md).

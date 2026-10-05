@@ -804,6 +804,9 @@ component	bevy_ui::interaction_states::Checked	Checked
 component	bevy_ui::interaction_states::InteractionDisabled	InteractionDisabled
 component	bevy_ui::interaction_states::Pressed	Pressed
 component	bevy_ui::measurement::ContentSize	ContentSize
+component	bevy_ui::picking_backend::UiPickingCamera	UiPickingCamera
+component	bevy_ui::picking_backend::UiPickingSettings	UiPickingSettings
+field	bevy_ui::picking_backend::UiPickingSettings	require_markers	.require_markers	Bool	bool	
 component	bevy_ui::stack::ComputedStackIndex	ComputedStackIndex
 field	bevy_ui::stack::ComputedStackIndex	0	.0	Int	u32	
 component	bevy_ui::stack::UiStack	UiStack
@@ -1129,7 +1132,7 @@ variant	bevy_ui::ui_transform::UiTransform	translation.y	VMax		.translation.y.0	
 field	bevy_ui::ui_transform::UiTransform	scale	.scale	Vec2	glam::Vec2	
 field	bevy_ui::ui_transform::UiTransform	rotation.cos	.rotation.cos	Float	f32	
 field	bevy_ui::ui_transform::UiTransform	rotation.sin	.rotation.sin	Float	f32	
-component	bevy_ui::widget::button::Button	Button
+component	bevy_ui::widget::button::Button	bevy_ui::widget::button::Button
 component	bevy_ui::widget::image::ImageNode	ImageNode
 field	bevy_ui::widget::image::ImageNode	color	.color	Color	Color	
 field	bevy_ui::widget::image::ImageNode	image	.image	Asset	Handle<Image>	Image
@@ -1201,6 +1204,109 @@ variant	bevy_ui_render::debug_overlay::UiDebugOptions	line_color_override	Some	a
 field	bevy_ui_render::debug_overlay::UiDebugOptions	show_hidden	.show_hidden	Bool	bool	
 field	bevy_ui_render::debug_overlay::UiDebugOptions	show_clipped	.show_clipped	Bool	bool	
 field	bevy_ui_render::debug_overlay::UiDebugOptions	ignore_border_radius	.ignore_border_radius	Bool	bool	
+component	bevy_ui_widgets::button::ActivateOnPress	ActivateOnPress
+component	bevy_ui_widgets::button::Button	bevy_ui_widgets::button::Button
+component	bevy_ui_widgets::checkbox::Checkbox	Checkbox
+component	bevy_ui_widgets::list::ActiveDescendant	ActiveDescendant
+field	bevy_ui_widgets::list::ActiveDescendant	0	.0	Enum	Option<Entity>	None,Some
+variant	bevy_ui_widgets::list::ActiveDescendant	0	Some		.0.0	Entity	bevy_ecs::entity::Entity	
+component	bevy_ui_widgets::list::ListItem	ListItem
+component	bevy_ui_widgets::menu::MenuButton	MenuButton
+component	bevy_ui_widgets::menu::MenuFocusState	MenuFocusState
+field	bevy_ui_widgets::menu::MenuFocusState	value		Enum	MenuFocusState	Opening,Open,Closed
+variant	bevy_ui_widgets::menu::MenuFocusState	value	Opening		.0	Enum	NavAction	Next,Previous,First,Last
+component	bevy_ui_widgets::menu::MenuItem	MenuItem
+component	bevy_ui_widgets::menu::MenuPopup	MenuPopup
+field	bevy_ui_widgets::menu::MenuPopup	layout	.layout	Enum	MenuLayout	Column,Row,Grid
+component	bevy_ui_widgets::popover::Popover	Popover
+field	bevy_ui_widgets::popover::Popover	window_margin	.window_margin	Float	f32	
+component	bevy_ui_widgets::radio::RadioButton	RadioButton
+component	bevy_ui_widgets::radio::RadioGroup	RadioGroup
+component	bevy_ui_widgets::scrollarea::ScrollArea	ScrollArea
+component	bevy_ui_widgets::scrollbar::Scrollbar	Scrollbar
+field	bevy_ui_widgets::scrollbar::Scrollbar	target	.target	Entity	bevy_ecs::entity::Entity	
+field	bevy_ui_widgets::scrollbar::Scrollbar	orientation	.orientation	Enum	ControlOrientation	Horizontal,Vertical
+field	bevy_ui_widgets::scrollbar::Scrollbar	min_thumb_length	.min_thumb_length	Float	f32	
+component	bevy_ui_widgets::scrollbar::ScrollbarDragState	ScrollbarDragState
+field	bevy_ui_widgets::scrollbar::ScrollbarDragState	dragging	.dragging	Bool	bool	
+field	bevy_ui_widgets::scrollbar::ScrollbarDragState	drag_origin	.drag_origin	Float	f32	
+component	bevy_ui_widgets::scrollbar::ScrollbarThumb	ScrollbarThumb
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	.border_radius.top_left	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	Px		.border_radius.top_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	Percent		.border_radius.top_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	Vw		.border_radius.top_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	Vh		.border_radius.top_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	VMin		.border_radius.top_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left	VMax		.border_radius.top_left.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	.border_radius.top_right	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	Px		.border_radius.top_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	Percent		.border_radius.top_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	Vw		.border_radius.top_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	Vh		.border_radius.top_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	VMin		.border_radius.top_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_right	VMax		.border_radius.top_right.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	.border_radius.bottom_right	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	Px		.border_radius.bottom_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	Percent		.border_radius.bottom_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	Vw		.border_radius.bottom_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	Vh		.border_radius.bottom_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	VMin		.border_radius.bottom_right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_right	VMax		.border_radius.bottom_right.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	.border_radius.bottom_left	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	Px		.border_radius.bottom_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	Percent		.border_radius.bottom_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	Vw		.border_radius.bottom_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	Vh		.border_radius.bottom_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	VMin		.border_radius.bottom_left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.bottom_left	VMax		.border_radius.bottom_left.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	.border.left	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	Px		.border.left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	Percent		.border.left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	Vw		.border.left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	Vh		.border.left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	VMin		.border.left.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.left	VMax		.border.left.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	.border.right	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	Px		.border.right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	Percent		.border.right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	Vw		.border.right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	Vh		.border.right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	VMin		.border.right.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.right	VMax		.border.right.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	.border.top	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	Px		.border.top.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	Percent		.border.top.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	Vw		.border.top.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	Vh		.border.top.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	VMin		.border.top.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.top	VMax		.border.top.0	Float	f32	
+field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	.border.bottom	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	Px		.border.bottom.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	Percent		.border.bottom.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	Vw		.border.bottom.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	Vh		.border.bottom.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	VMin		.border.bottom.0	Float	f32	
+variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	VMax		.border.bottom.0	Float	f32	
+component	bevy_ui_widgets::slider::Slider	Slider
+field	bevy_ui_widgets::slider::Slider	track_click	.track_click	Enum	TrackClick	Drag,Step,Snap
+field	bevy_ui_widgets::slider::Slider	orientation	.orientation	Enum	SliderOrientation	Auto,Horizontal,Vertical
+component	bevy_ui_widgets::slider::SliderDragState	SliderDragState
+field	bevy_ui_widgets::slider::SliderDragState	dragging	.dragging	Bool	bool	
+field	bevy_ui_widgets::slider::SliderDragState	offset	.offset	Float	f32	
+component	bevy_ui_widgets::slider::SliderPrecision	SliderPrecision
+field	bevy_ui_widgets::slider::SliderPrecision	0	.0	Int	i32	
+component	bevy_ui_widgets::slider::SliderRange	SliderRange
+field	bevy_ui_widgets::slider::SliderRange	start	.start	Float	f32	
+field	bevy_ui_widgets::slider::SliderRange	end	.end	Float	f32	
+component	bevy_ui_widgets::slider::SliderStep	SliderStep
+field	bevy_ui_widgets::slider::SliderStep	0	.0	Float	f32	
+component	bevy_ui_widgets::slider::SliderThumb	SliderThumb
+component	bevy_ui_widgets::slider::SliderValue	SliderValue
+field	bevy_ui_widgets::slider::SliderValue	0	.0	Float	f32	
+component	bevy_ui_widgets::text_input::QueuedSelectAll	QueuedSelectAll
+field	bevy_ui_widgets::text_input::QueuedSelectAll	0	.0	Enum	Option<Entity>	None,Some
+variant	bevy_ui_widgets::text_input::QueuedSelectAll	0	Some		.0.0	Entity	bevy_ecs::entity::Entity	
+component	bevy_ui_widgets::text_input::SelectAllOnFocus	SelectAllOnFocus
 component	bevy_window::cursor::CursorIcon	CursorIcon
 field	bevy_window::cursor::CursorIcon	value		Enum	CursorIcon	System
 variant	bevy_window::cursor::CursorIcon	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut

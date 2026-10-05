@@ -209,6 +209,7 @@ internal static class Catalog
         new("overflow_clip_margin", OverflowClipMargin.Build),
         new("overflow_debug", OverflowDebug.Build),
         new("relative_cursor_position", RelativeCursorPosition.Build),
+        new("scrollbars", Scrollbars.Build),
         new("size_constraints", SizeConstraints.Build),
         new("stacked_gradients", StackedGradients.Build),
         new("tab_navigation", TabNavigation.Build),
@@ -223,6 +224,7 @@ internal static class Catalog
         new("ui_texture_atlas_slice", UiTextureAtlasSlice.Build),
         new("ui_texture_slice", UiTextureSlice.Build),
         new("ui_texture_slice_flip_and_tile", UiTextureSliceFlipAndTile.Build),
+        new("vertical_slider", VerticalSlider.Build),
         new("z_index", ZIndex.Build),
     ];
 

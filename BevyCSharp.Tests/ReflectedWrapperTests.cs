@@ -263,4 +263,32 @@ public sealed class ReflectedWrapperTests
         Assert.NotNull(classes);
         Assert.Contains("Mesh3d", classes);
     }
+
+    /// <summary>
+    /// A component of unnamed fields with no default of its own, as a slider's value is, is
+    /// inserted at its fields' defaults, as one of named fields is.
+    /// </summary>
+    [SkippableFact]
+    public void AStructOfUnnamedFieldsWithNoDefaultIsInsertedAtItsFieldsDefaults()
+    {
+        Needs.Renderer();
+
+        float? inserted = null, written = null;
+
+        using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 3 });
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            var slider = Ui.SpawnNode(new UiSettings());
+            var value = ecs.Insert<Bevy.Reflected.SliderValueRef>(slider);
+            inserted = value.Value;
+            value.Value = 42f;
+            written = ecs.Get<Bevy.Reflected.SliderValueRef>(slider)?.Value;
+        }, "Test.Insert"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.Equal(0f, inserted);
+        Assert.Equal(42f, written);
+    }
 }

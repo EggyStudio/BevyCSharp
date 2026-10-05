@@ -237,7 +237,7 @@ load_gltf_extras	missing	a glTF node's extras
 load_gltf	can
 query_gltf_primitives	can
 update_gltf_scene	can
-widgets	missing	Bevy's widget helpers (bevy_ui_widgets)
+widgets	n/a	a module of helpers Bevy's examples share rather than an example, which BevyCSharp.Examples/Widgets.cs is here
 char_input_events	can
 gamepad_input_events	missing	a gamepad's button and axis changes as messages, in the order they happened
 gamepad_input	can
@@ -384,12 +384,12 @@ overflow_debug	can
 overflow	can
 relative_cursor_position	can	through Bevy's reflected RelativeCursorPosition
 render_ui_to_texture	missing	observers of the pointer pressing and dragging over an interface drawn into a texture
-scrollbars	missing	Bevy's core scrollbars
+scrollbars	can
 scroll	missing	observers of the pointer over scrolled nodes, and mouse wheel events as messages
 size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
-standard_widgets	missing	Bevy's core widgets (bevy_ui_widgets)
-standard_widgets_observers	missing	Bevy's core widgets (bevy_ui_widgets)
+standard_widgets	missing	observers of the widgets' own events (Activate, ValueChange, MenuEvent)
+standard_widgets_observers	missing	observers of the widgets' own events and of their components' coming and going
 strikethrough_and_underline	missing	strikethrough and underline on text
 system_fonts	missing	system fonts
 tab_navigation	can	the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks
@@ -408,7 +408,7 @@ ui_texture_atlas_slice	can
 ui_texture_slice_flip_and_tile	can
 ui_texture_slice	can
 ui_transform	can	through Bevy's reflected UiTransform
-vertical_slider	missing	Bevy's core widgets (bevy_ui_widgets)
+vertical_slider	can	the slider kept up to date by Bevy's own observer, which Ui.SelfUpdate attaches
 viewport_node	missing	observers of the pointer dragging a mesh and the node that shows it
 virtual_keyboard	missing	Bevy's Feathers widgets
 window_fallthrough	missing	letting the pointer pass through the window to what is behind it

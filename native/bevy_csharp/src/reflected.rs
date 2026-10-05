@@ -156,6 +156,13 @@ fn default_of(
         return Ok(default.default().into_partial_reflect());
     }
 
+    // An entity has no default, and a component pointing at one, as a scrollbar names the node it
+    // scrolls, is made pointing at Bevy's placeholder, which names nothing, for the caller to
+    // write the real one over.
+    if type_id == TypeId::of::<bevy::ecs::entity::Entity>() {
+        return Ok(Box::new(bevy::ecs::entity::Entity::PLACEHOLDER));
+    }
+
     // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
     // holds nothing, which a caller choosing it then writes over.
     if let Some(TypeInfo::Enum(info)) = registry.get_type_info(type_id)
@@ -535,19 +542,6 @@ pub unsafe extern "C" fn bcs_reflect_variant(
     })
 }
 
-/// Checks a component can be written in place, before `reflect_mut` is asked to and panics.
-fn writable(world: &mut World, reflect: &ReflectComponent, type_path: &str) -> Result<(), i32> {
-    let id = reflect.register_component(world);
-    match world.components().get_info(id) {
-        Some(info) if !info.mutable() => Err(fail(
-            status::UNSUPPORTED,
-            format!(
-                "'{type_path}' is immutable, so it is replaced by inserting it rather than written."
-            ),
-        )),
-        _ => Ok(()),
-    }
-}
 
 /// Writes a value read from JSON over a component or one field of it.
 ///
@@ -583,9 +577,6 @@ pub unsafe extern "C" fn bcs_reflect_set(
                 Ok(found) => found,
                 Err(code) => return code,
             };
-            if let Err(code) = writable(world, reflect, &type_path) {
-                return code;
-            }
 
             let entity = entity_from(entity);
             let value = {
@@ -623,6 +614,14 @@ fn apply(
     path: &str,
     value: &dyn PartialReflect,
 ) -> i32 {
+    // An immutable component, as a slider's value is, is changed by inserting it again, which
+    // runs its hooks and observers as Bevy means it to. So it is copied, the copy written, and the
+    // copy inserted in its place.
+    let id = reflect.register_component(world);
+    if world.components().get_info(id).is_some_and(|info| !info.mutable()) {
+        return replace(world, reflect, entity, type_path, path, value);
+    }
+
     let Ok(mut found) = world.get_entity_mut(entity) else {
         return fail(status::NO_ENTITY, "The entity does not exist.");
     };
@@ -647,6 +646,49 @@ fn apply(
             format!("'{path}' could not take the value. {error}"),
         ),
     }
+}
+
+/// Writes a value over an immutable component, or one field of it, by inserting a written copy.
+fn replace(
+    world: &mut World,
+    reflect: &ReflectComponent,
+    entity: bevy::ecs::entity::Entity,
+    type_path: &str,
+    path: &str,
+    value: &dyn PartialReflect,
+) -> i32 {
+    let mut copy = {
+        let Ok(found) = world.get_entity(entity) else {
+            return fail(status::NO_ENTITY, "The entity does not exist.");
+        };
+        let Some(component) = reflect.reflect(found) else {
+            return fail(status::NOT_PRESENT, format!("The entity has no '{type_path}'."));
+        };
+        component.as_partial_reflect().to_dynamic()
+    };
+
+    let target = if path.is_empty() {
+        copy.as_mut()
+    } else {
+        match path.reflect_element_mut(copy.as_mut()) {
+            Ok(target) => target,
+            Err(error) => return unfollowed(path, error),
+        }
+    };
+    if let Err(error) = target.try_apply(value) {
+        return fail(
+            status::INVALID_STATE,
+            format!("'{path}' could not take the value. {error}"),
+        );
+    }
+
+    let registry = world.resource::<AppTypeRegistry>().clone();
+    let registry = registry.read();
+    let Ok(mut found) = world.get_entity_mut(entity) else {
+        return fail(status::NO_ENTITY, "The entity does not exist.");
+    };
+    reflect.insert(&mut found, copy.as_ref(), &registry);
+    status::OK
 }
 
 /// Switches an enum field to another variant, with every field of that variant at its default.
@@ -681,9 +723,6 @@ pub unsafe extern "C" fn bcs_reflect_set_variant(
                 Ok(found) => found,
                 Err(code) => return code,
             };
-            if let Err(code) = writable(world, reflect, &type_path) {
-                return code;
-            }
 
             let entity = entity_from(entity);
             let made = {
@@ -795,6 +834,17 @@ pub unsafe extern "C" fn bcs_reflect_insert(
                 for field in info.iter() {
                     match default_of(&registry, field.type_id(), field.type_path()) {
                         Ok(value) => fields.insert_boxed(field.name(), value),
+                        Err(code) => return code,
+                    }
+                }
+                fields.set_represented_type(Some(registration.type_info()));
+                Box::new(fields)
+            } else if let TypeInfo::TupleStruct(info) = registration.type_info() {
+                // The same for a struct of unnamed fields, as a slider's value is.
+                let mut fields = bevy::reflect::tuple_struct::DynamicTupleStruct::default();
+                for field in info.iter() {
+                    match default_of(&registry, field.type_id(), field.type_path()) {
+                        Ok(value) => fields.insert_boxed(value),
                         Err(code) => return code,
                     }
                 }
@@ -1012,9 +1062,6 @@ pub unsafe extern "C" fn bcs_reflect_set_asset(
                 Ok(found) => found,
                 Err(code) => return code,
             };
-            if let Err(code) = writable(world, reflect, &type_path) {
-                return code;
-            }
             let Some(handle) = crate::assets::clone_handle(world, key) else {
                 return fail(status::INVALID_STATE, format!("The key {key} names no asset."));
             };
@@ -1187,9 +1234,6 @@ pub unsafe extern "C" fn bcs_reflect_set_color(
                 Ok(found) => found,
                 Err(code) => return code,
             };
-            if let Err(code) = writable(world, reflect, &type_path) {
-                return code;
-            }
 
             let entity = entity_from(entity);
             let value = {
@@ -1312,9 +1356,6 @@ fn write_field(
             Ok(found) => found,
             Err(code) => return code,
         };
-        if let Err(code) = writable(world, reflect, type_path) {
-            return code;
-        }
 
         let entity = entity_from(entity);
         let value = {
@@ -1739,14 +1780,13 @@ mod tests {
     }
 
     #[test]
-    fn an_immutable_component_is_refused_rather_than_written() {
-        // `reflect_mut` panics on an immutable component, so the export has to ask first. The
-        // guard would turn the panic into a status, but without the reason.
+    fn an_immutable_component_is_written_by_inserting_a_written_copy() {
+        // `reflect_mut` panics on an immutable component, so the export never asks for it there,
+        // and writes a copy it inserts over the component instead, as Bevy changes one.
         let (mut app, entity) = probe_app();
         loan_world(app.world_mut(), || {
-            assert_eq!(status::UNSUPPORTED, set(entity, FROZEN, "0", "3.0"));
-            assert!(last_error().contains("immutable"));
+            assert_eq!(status::OK, set(entity, FROZEN, "0", "3.0"));
         });
-        assert_eq!(1.0, app.world().get::<Frozen>(entity).unwrap().0);
+        assert_eq!(3.0, app.world().get::<Frozen>(entity).unwrap().0);
     }
 }

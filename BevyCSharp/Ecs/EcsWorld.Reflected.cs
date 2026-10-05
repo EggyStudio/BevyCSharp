@@ -59,12 +59,13 @@ public sealed unsafe partial class EcsWorld
     /// <remarks>
     /// The value is read against the field's own type before anything is written, so a malformed one
     /// leaves the component untouched and unmarked. The write goes through Bevy's change detection,
-    /// so a system filtering on the component being changed sees it. An immutable component cannot
-    /// be written in place and is replaced with <see cref="InsertReflected"/> instead.
+    /// so a system filtering on the component being changed sees it. An immutable component, as
+    /// the hierarchy's <c>ChildOf</c> or a slider's value is, cannot be written in place, so it is
+    /// copied, the copy written, and the copy inserted over it, which runs its hooks and observers
+    /// as Bevy's own insert does: writing a <c>ChildOf</c> moves the child under the new parent.
     /// </remarks>
     /// <exception cref="BevyNativeException">
-    /// The entity does not carry the component, the value does not fit the field, or the component
-    /// is immutable.
+    /// The entity does not carry the component, or the value does not fit the field.
     /// </exception>
     public void SetReflected(Entity entity, string typePath, string path, string json)
     {
