@@ -222,6 +222,18 @@ The 2D test lost what the plugin cost it. The 3D ones moved within the spread be
 the earlier measurement of the drawn scene found the 3D plugin costing less than the spread at a
 thousand cubes.
 
+### A run of lines in an array kept between calls
+
+`Gizmos.Lines` built a run longer than 64 lines in an array made for the call. It builds it in
+one kept between calls, grown when a run is longer than any before.
+
+| test | Bevy alone, before | through the bridge, before | Bevy alone, after | through the bridge, after |
+|---|---:|---:|---:|---:|
+| many_gizmos | 6.54 | 12.39 | 6.97 | 10.68 |
+
+The ten systems drawing the lines take 3.9 ms of the frame between them, where they took 4.9, 0.7
+of it in their calls into the bridge either way.
+
 ## Bevy's stress tests, beside Bevy
 
 Bevy's stress tests are written in C# in `BevyCSharp.Examples/stress_tests`, and each is measured
@@ -240,7 +252,7 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 | many_animated_sprite_meshes | 14.57 | 213.24 |
 | many_animated_sprites | 6.64 | 15.95 |
 | many_cameras_lights | 43.27 | 44.98 |
-| many_gizmos | 6.54 | 12.39 |
+| many_gizmos | 6.97 | 10.68 |
 | many_glyphs | 18.60 | 20.86 |
 | many_gradients | 4.83 | 5.74 |
 | many_lights | 6.60 | 7.30 |
@@ -262,11 +274,11 @@ measuring found, and one of them has since been mended.
   and its queue from 0.10 to 4.33, which was the bridge's frame. A sprite mesh is a 2D mesh to
   Bevy, and a sprite is not, which is why many_sprites did not pay it. The plugins are now added
   only where an app asks (above).
-- **many_gizmos, 6 ms more, is a copy of every line.** `Gizmos.Lines` takes a run of lines in one
-  call, and built a new array of the bridge's layout for every call, ten of 5,000 lines a frame
-  here, each on .NET's large object heap. The ten systems take 4.98 ms of the frame between
-  them, 0.73 of it in their calls into the bridge and the rest in C#, filling the lines and
-  copying each into the array made for it.
+- **many_gizmos cost 6 ms more for a copy of every line.** `Gizmos.Lines` takes a run of lines in
+  one call, and built a new array of the bridge's layout for every call, ten of 5,000 lines a
+  frame here, each on .NET's large object heap. The array is now kept between calls (above), which
+  took 1.7 ms off. What is left is the copy itself, each line written into the bridge's general
+  description of a shape, about 200 bytes, which a call taking lines as they are would not need.
 - **many_animated_sprites, 9 ms more, is a call a frame turned.** Bevy moves a sprite's atlas index
   where it is. The bridge has no call that does only that, so each sprite whose timer finished is
   set again through `Render2d.SetSprite`, about 18,000 a frame, which is 11.3 ms of the frame.

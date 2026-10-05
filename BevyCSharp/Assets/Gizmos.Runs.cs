@@ -6,6 +6,13 @@ namespace Bevy;
 public static unsafe partial class Gizmos
 {
     /// <summary>
+    /// The last long run of lines in the bridge's layout, one array a thread, which
+    /// <see cref="Lines"/> builds each run into rather than making a new one.
+    /// </summary>
+    [ThreadStatic]
+    private static NativeGizmoConfig[]? _run;
+
+    /// <summary>
     /// Draws a whole run of lines in one crossing.
     /// </summary>
     /// <remarks>
@@ -42,10 +49,16 @@ public static unsafe partial class Gizmos
         if (lines.IsEmpty) return;
 
         // Built here rather than by the caller, so the wire format stays this file's business the
-        // way it is for every single-shape call above.
+        // way it is for every single-shape call above. A short run is built on the stack and a
+        // longer one in an array kept between calls, grown when a run is longer than any before,
+        // since one made anew each call is large enough to land on .NET's large object heap, and a
+        // game drawing thousands of lines a frame in a few runs paid for that every call.
+        if (lines.Length > 64 && (_run is null || _run.Length < lines.Length))
+            _run = new NativeGizmoConfig[Math.Max(lines.Length, (_run?.Length ?? 0) * 2)];
+
         var configs = lines.Length <= 64
             ? stackalloc NativeGizmoConfig[lines.Length]
-            : new NativeGizmoConfig[lines.Length];
+            : _run.AsSpan(0, lines.Length);
 
         for (var i = 0; i < lines.Length; i++)
         {

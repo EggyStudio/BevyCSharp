@@ -10,10 +10,15 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b72f28d`, which splits `Native.cs` and `Render.cs` into partial files by area,
-by moves alone, with the five other types `Render.cs` held in files of their own, and takes
-both off the lists of N 1.3 and N 1.2. Before it, `84a55e0` split `interop.rs` the same way,
-the first step of item 1.
+Reviewed up to `9ff5abc`. Bevy's wireframe plugins are added only to an app whose config asks
+(`Config.Wireframes`), which gives a frame of a hundred thousand sprite meshes 8 ms back, 13.96
+to 5.52 beside Bevy's 5.23, measured again into PERFORMANCE.md. The number B 1's check reads
+is 199, and the break is said for the owner to number: a game that draws wireframes asks for
+them in its config, and `Render.SetWireframe` refuses in an app that did not.
+
+Before it, `b72f28d` split `Native.cs` and `Render.cs` into partial files by area, by moves
+alone, with the five other types `Render.cs` held in files of their own, and `84a55e0` split
+`interop.rs` the same way.
 
 Before it, thirteen of Bevy's stress tests are written (`1fc9c9c`), each measured beside Bevy's
 own program built from its source, and PERFORMANCE.md names the two scripts that measure and
@@ -41,7 +46,7 @@ the owner makes next carries all of it.
 Before it, four commits were settled, the last being the tests of what is no area of the library
 in folders named for what they test (`a714bb8`). The table stands at 235 written, 16 written in
 part, 7 that can be, 105 missing and 58 that do not apply, and what can be written is the last
-seven stress tests. The lists stand at 342 places for N 1.2, 28 for N 1.3, 113 for N 1.4 and 55
+seven stress tests. The lists stand at 342 places for N 1.2, 27 for N 1.3, 113 for N 1.4 and 55
 for N 3.4, with one entry point of B 3 to bring under the guard, `bcs_shader_entity_program`, in
 the batch that splits `render/shaders.rs`.
 
@@ -55,13 +60,9 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
 and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
-1. **What measuring found, and then the seven rows left.** The order the reply gives stands,
-   and `interop.rs` is split for it (`84a55e0`). The wireframe plugins are added where the
-   config asks for them, which is 9 ms of every frame with many 2D meshes given back. It
-   changes the struct the two sides share, so
-   the number B 1's check reads at load moves with it, and it changes what a game gets without
-   asking, so the reply says what a game that outlines meshes adds, and the owner numbers the
-   package for it. `Gizmos.cs` is split and `Lines` takes its points without a new array for
+1. **What measuring found, and then the seven rows left.** The order the reply gives stands. The
+   wireframe plugins are asked for in the config since `9ff5abc`, and the owner numbers the
+   package for that break. `Gizmos.cs` is split and `Lines` takes its points without a new array for
    each call. One call moves the atlas frames of many sprites, which mends both of the animated
    tests. Each mend is measured again by `build/measure-stress.sh`, and the table in
    PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven stress tests. An
@@ -268,11 +269,9 @@ None open.
 
 ## Replies
 
-Item 1, the first of the mends: Bevy's wireframe plugins, for 3D meshes and 2D ones, are added
-only to an app whose `Config.Wireframes` asks, which the editor and the four examples that draw
-wireframes do, as Bevy's own wireframe examples add the plugins themselves. Before it, interop.rs
-(`84a55e0`), and Native.cs and Render.cs with Render.cs's five other types (`b72f28d`), were split
-by moving code only, since the change touches each and each was on N 1.3's list. A break for the
-owner to number: the config the bridge reads gained a field, so `ABI_VERSION` and
-`ExpectedAbiVersion` are 199, and `Render.SetWireframe` refuses to turn a wireframe on in an app
-that did not ask, which a game drawing wireframes now asks for in its config.
+Item 1, the next mends: App.cs, which the wireframe batch touched, was split by moving code only
+in the commit after it (`10b5588`), where it should have come before, and Gizmos.cs was split
+(`f91aa59`) before `Gizmos.Lines` builds a long run in an array kept between calls, which takes
+many_gizmos from 12.39 ms to 10.68 against Bevy's 6.97. What is left there is each line written
+into the bridge's general description of a shape, which a call taking lines as they are would not
+need, and which comes after the sprite frames since it touches gizmos.rs, on N 1.3's list too.
