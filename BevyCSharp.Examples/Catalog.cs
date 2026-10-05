@@ -228,6 +228,7 @@ internal static class Catalog
         new("external_source_external_thread", ExternalSourceExternalThread.Build, ExternalSourceExternalThread.Configure),
 
         // Movement
+        new("physics_in_fixed_timestep", PhysicsInFixedTimestep.Build),
         new("smooth_follow", SmoothFollow.Build),
 
         // Picking

@@ -243,6 +243,35 @@ pub extern "C" fn bcs_time_set_virtual(paused: i32, speed: f32) -> i32 {
     })
 }
 
+/// Writes how far the fixed clock has run past its last step, as a share of a step, from zero up
+/// to less than one.
+///
+/// Bevy runs as many fixed steps in a frame as the time gone has room for, and what is left over
+/// waits for the next frame. Something moved in fixed steps and drawn every frame is drawn that
+/// far between its last two places, so it moves smoothly when the frame rate and the step rate
+/// differ. Read when asked, since it is right only once this frame's fixed steps have run,
+/// after the top of the frame the rest of time is taken at.
+///
+/// # Safety
+/// `fraction` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_time_fixed_overstep(fraction: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        if fraction.is_null() {
+            return status::NULL_ARG;
+        }
+
+        with_world(|world| {
+            let Some(time) = world.get_resource::<bevy::time::Time<bevy::time::Fixed>>() else {
+                return status::NOT_PRESENT;
+            };
+
+            unsafe { fraction.write(time.overstep_fraction()) };
+            status::OK
+        })
+    })
+}
+
 /// Writes whether the game's clock is paused and how fast it runs, as `bcs_time_set_virtual` sets them.
 ///
 /// # Safety

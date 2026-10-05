@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**222 written, 13 written in part, 26 can be written, 102 missing and 58 do not apply.** Of the 363 that apply, 261 can be written with what is bridged, 13 of them leaving something out.
+**223 written, 13 written in part, 25 can be written, 102 missing and 58 do not apply.** Of the 363 that apply, 261 can be written with what is bridged, 13 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -25,7 +25,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Helpers](#helpers) | 0 | 0 | 0 | 0 | 1 |
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 |
-| [Movement](#movement) | 0 | 0 | 1 | 0 | 0 |
+| [Movement](#movement) | 1 | 0 | 0 | 0 | 0 |
 | [Picking](#picking) | 2 | 0 | 0 | 3 | 1 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |
-| **All** | **222** | **13** | **26** | **102** | **58** |
+| **All** | **223** | **13** | **25** | **102** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -376,7 +376,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`physics_in_fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/movement/physics_in_fixed_timestep.rs) | Handles input, physics, and rendering in an industry-standard way by using a fixed timestep | can be written |
+| [`physics_in_fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/movement/physics_in_fixed_timestep.rs) | Handles input, physics, and rendering in an industry-standard way by using a fixed timestep | [written](../BevyCSharp.Examples/movement/physics_in_fixed_timestep.cs), the player a behavior holding what Bevy keeps in four components |
 
 ## Picking
 

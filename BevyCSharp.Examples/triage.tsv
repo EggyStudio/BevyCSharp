@@ -256,7 +256,7 @@ custom_primitives	n/a	implements Rust traits for a primitive
 random_sampling	missing	points sampled inside and on the boundary of Bevy's shapes
 render_primitives	missing	gizmos of Bevy's primitive shapes
 smooth_follow	can
-physics_in_fixed_timestep	can
+physics_in_fixed_timestep	can	the player a behavior holding what Bevy keeps in four components
 ambiguity_detection	n/a	a test of Bevy's schedules, hidden from its list
 desktop_request_redraw	n/a	a test of winit's redraw requests, hidden from Bevy's list
 fallback_image	n/a	a test of shader fallback images, hidden from Bevy's list

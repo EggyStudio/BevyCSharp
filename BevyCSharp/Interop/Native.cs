@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 197;
+    internal const int ExpectedAbiVersion = 198;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1251,6 +1251,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_time_virtual(int* paused, float* speed);
+
+    /// <summary>Writes how far the fixed clock has run past its last step, as a share of one.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_time_fixed_overstep(float* fraction);
 
     /// <summary>Reports whether a game's assets are compiled in.</summary>
     [LibraryImport(Library)]

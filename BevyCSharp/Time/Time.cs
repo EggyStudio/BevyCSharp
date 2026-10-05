@@ -77,6 +77,35 @@ public sealed unsafe class Time
         if (_stepping > 0 && --_stepping == 0) Pause();
     }
 
+    /// <summary>
+    /// How far the fixed clock has run past its last <see cref="Stage.FixedUpdate"/> step, as a
+    /// share of a step, from zero up to less than one.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy runs as many fixed steps in a frame as the time gone has room for, and what is left
+    /// over waits for the next frame. Something moved in fixed steps and drawn every frame is drawn
+    /// this far between its place before the last step and its place after it, which keeps it
+    /// smooth when the frame rate and the step rate differ:
+    /// </para>
+    /// <code>
+    /// var drawn = body.Previous + (body.Current - body.Previous) * ctx.Time.FixedOverstep;
+    /// </code>
+    /// <para>
+    /// Read from the engine when asked, since it is right only once the frame's fixed steps have
+    /// run, which is after the top of the frame the rest of this class is taken at, so a system in
+    /// <see cref="Stage.Update"/> reads this frame's. Zero where there is no engine to ask.
+    /// </para>
+    /// </remarks>
+    public float FixedOverstep
+    {
+        get
+        {
+            float fraction;
+            return Native.bcs_time_fixed_overstep(&fraction) == 0 ? fraction : 0f;
+        }
+    }
+
     /// <summary>Whether the game's clock is stopped.</summary>
     /// <remarks>
     /// <para>

@@ -96,12 +96,12 @@ table also answers whether the two agree.
 | A contact says how hard its pair hit, as the speed they closed at | to take | has (`ContactStarted.Speed`, `c5227118`) |
 | A ball joint kept within a cone it swings and twists in, and a distance joint whose range changes after it is made | to take | has (`c5227118`) |
 | The sync reads only bodies that changed and writes only bodies that moved | has (`ba5cff4`) | has (`e612ac63` and after) |
-| What rests on a kinematic body that a transform moves keeps the mover's pace at any frame rate, the body moving at the mover's speed through every step and not a frame's distance in one | to take, measured first, where a body gets a frame's distance over one step and a turn gives it no spin | to take, where a body under a parent covers a frame's distance in one step (REVIEW.md, Verdict 2) |
-| A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | to take, where the frame is clamped at 0.25 s and the steps at five (REVIEW.md, Verdict 3) |
-| Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow | to take | has (`8520dbe1`) |
+| What rests on a kinematic body that a transform moves keeps the mover's pace at any frame rate, the body moving at the mover's speed through every step and not a frame's distance in one | to take, measured first, where a body gets a frame's distance over one step and a turn gives it no spin | taken at `15fa305a`, a crate at 2.00 within a hundredth at seven frame rates and uneven frames |
+| A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | taken at `ee3b47dd`, the frame's clamp of a quarter second the one kept |
+| Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow, a sleeping body woken when its layer or trigger changes | to take | has (`8520dbe1`, `ac897afa`) |
 | A body a game knows is fast swept over each step, so it does not cross a thin wall within one, chosen for each body | to take | has (`SetPhysicsBodyContinuous`, `799a9d56`) |
 | A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | to take | has (`979c97be`) |
-| A game asks how hard two touching bodies press, answered while they sleep too | to take, as the push alone | has (`GetPhysicsContactImpulse`, `53cd565f`), a twist and the friction added in (REVIEW.md, Verdict 6) |
+| A game asks how hard two touching bodies press, answered while they sleep too | to take, as the push alone | has (`GetPhysicsContactImpulse`, `53cd565f`), the push alone since `c774a379` |
 
 ### Scenes, saves and files
 
@@ -110,6 +110,7 @@ table also answers whether the two agree.
 | A scene file placed inside another, its entities left out of the outer file's save | has (`SceneInstances`) | has (`SceneRef`, `0502362d`) |
 | A scene file holds arrays, so a mesh made in code is saved with its level | has | has (`8567bea6`) |
 | A placed scene file written while the level runs is spawned again in place of its copies, under the entity that placed it and giving back what the old copy held | to check against `SceneInstances` | has (`6059b57a`, `5b2234d2`) |
+| A model's sibling files, an OBJ's `.mtl` and a glTF's `.bin`, come from the reader the model came from, whatever reader that is, and no native code opens a file | has for glTF, the loader being Bevy's | has (`AssimpFiles`, `abc24192`) |
 | A model file with animation clips placed in a level plays, where its meshes would stand at rest | to check | has (`ba328b18`) |
 | What a level loaded through its references is let go once nothing uses it | has, Bevy counting its handles | has (`4e765797`) |
 | A renamed or reshaped type still reads its old files | has (`FormerName`, `DataVersion`) | to consider |
@@ -140,7 +141,7 @@ table also answers whether the two agree.
 | A test that cannot run is reported as skipped with its reason | has (`e857326`) | has (`939ba258`) |
 | Examples picked by name as an argument, each with a capture CI takes | taken at `661682e`, measured against Bevy's own 421 examples in EXAMPLES.md | has (`3DEngine.Examples`, `048c072c`) |
 | Behaviors registered by a module initializer the generator writes, so a game published trimmed or as native AOT keeps them | has | has (`425ffc31`), with Pusher published native |
-| A game published as native AOT and run by CI | to take | has (`458cd909`) |
+| A game published as native AOT and run by CI | to take | to take, where Pusher is published native by hand (`458cd909`) and no workflow does it |
 | Whole pictures compared with checked-in references, a small share of pixels allowed to differ between devices | to take, for the examples' captures | has (`771f10e9`, `fd5bcc84`) |
 | Seven games of different kinds built from the package, the later ones finding nothing new | has one, Courtyard | has (`games/`, to `7a8360ae`) |
 | A game written in behaviors alone, with hundreds of entities, played by CI and profiled | to take | has (`games/Swarm`, `3c9c7ac8`) |
@@ -157,9 +158,9 @@ table also answers whether the two agree.
 | A version whose patch counts commits since the owner last set the major and minor | taken at `88954d5` | has (`609bd859`) |
 | A package made by a workflow run by hand, after tests on Linux and Windows | taken at `88954d5` | has (`22c766be`) |
 | Graphics run under a validation layer in CI, an error failing the run | does not apply, since wgpu validates for Bevy | has (`a2e19d7c`) |
-| A clock stepped by a set amount a frame, for a test and for a run with no window, so motion is measured in frames and is the same on every machine | to take, through Bevy's `TimeUpdateStrategy::ManualDuration` | to take (REVIEW.md, Verdict 1) |
-| A loader lets go of its file when a load returns, checked on Linux as well as Windows, and a test's folder that cannot be removed says which process holds it | to check | to take (REVIEW.md, Verdict 4) |
-| Every example of the engine it follows is a row of a table a script makes from that engine's own list, each written, written in part, able to be written, missing or not applying | has (`.github/EXAMPLES.md`, 207 written of the 363 that apply) | to take, against the examples in raylib's checkout (REVIEW.md, Now 4) |
+| A clock stepped by a set amount a frame, for a test and for a run with no window, so motion is measured in frames and is the same on every machine | to take, through Bevy's `TimeUpdateStrategy::ManualDuration` | taken at `966c2c88`, `Time.FrameSeconds` and `--frame-time` |
+| A loader lets go of its file when a load returns, checked on Linux as well as Windows, and a test's folder that cannot be removed says which process holds it | to check | taken at `abc24192`, `FileHandleTests` over eleven loaders and `TestFolder` |
+| Every example of the engine it follows is a row of a table a script makes from that engine's own list, each written, written in part, able to be written, missing or not applying | has (`.github/EXAMPLES.md`, 222 written of the 363 that apply) | to take, against the examples in raylib's checkout (REVIEW.md, Now 4) |
 | An example compiles on the package alone, what the examples share to say a thing in one word being the package's own calls | to take, where 208 of 231 examples call helpers of the examples project | has, an example being one file on the flat API |
 
 ### Documents
@@ -175,4 +176,5 @@ table also answers whether the two agree.
 | A page comparing the engine with the one it follows: what is the same, what it adds, what it costs, and what was measured | taken at `e98b3b0`, with Bevy | has (`docs/compared-with-raylib.md`, `b0d719cc`), with raylib built in C and measured beside it |
 | A picture of an example opens that example's source in the repository, the owner's choice on 2026-10-05 over the live demo on the followed engine's site, so nothing is cached from another project | taken at `57fc7e9`, all 198 pictures | to take, where 17 pictures open raylib.com (`ac529628`) |
 | A first game told from an empty folder a step at a time, each step a whole program the workflow builds and runs and the page is held to | to take, where `docs/making-a-game.md` describes a finished one | has (`docs/first-game.md`, `d5d2578d`) |
+| The rules both engines keep are numbered in one file, each with its reason and a check named for it, and a list of what does not yet keep a rule that only gets shorter | to take, the checks (`NORM.md`, REVIEW.md) | to take, the checks (`NORM.md`, REVIEW.md) |
 | Captures stored as WebP at the size of the window the followed engine uses, lossy for a lit scene and lossless for flat color | has (`29ebd78`), at Bevy's 1280 by 720 | taken at `e673197a`, at raylib's 800 by 450 |

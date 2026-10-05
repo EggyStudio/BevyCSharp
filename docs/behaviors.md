@@ -156,6 +156,11 @@ Keep a simulation on one clock or the other. Accelerating on the fixed step whil
 position per frame is half a simulation, and inherits the frame-rate dependence you moved the
 other half away from.
 
+What moves in fixed steps is drawn every frame, so it is drawn between its place before the last
+step and its place after it, `ctx.Time.FixedOverstep` of the way, the share of a step the fixed
+clock has run past the last one. That keeps it smooth when the frame rate and the step rate
+differ, and `physics_in_fixed_timestep` in the examples does it.
+
 ## Filters
 
 `[With]` and `[Without]` restrict an instance method to a subset of entities. They are resolved

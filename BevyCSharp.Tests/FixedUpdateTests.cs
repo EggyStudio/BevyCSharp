@@ -47,6 +47,24 @@ public sealed class FixedUpdateTests
         Assert.Equal(0.02f, fixedDelta, 5);
     }
 
+    /// <summary>
+    /// With a step longer than a run of frames, the share of a step the fixed clock has run past
+    /// its last one grows frame by frame and stays below a whole step.
+    /// </summary>
+    [Fact]
+    public void TheOverstepGrowsBetweenStepsAndStaysUnderOne()
+    {
+        using var harness = new EngineHarness(frames: 12, fps: 60, fixedHz: 1);
+        var oversteps = new List<float>();
+
+        harness.OnContext(Stage.Update, ctx => oversteps.Add(ctx.Time.FixedOverstep));
+        harness.Run();
+
+        Assert.All(oversteps, overstep => Assert.InRange(overstep, 0f, 0.9999f));
+        Assert.True(oversteps[^1] > oversteps[0], $"the overstep went from {oversteps[0]} to {oversteps[^1]}");
+        for (var i = 1; i < oversteps.Count; i++) Assert.True(oversteps[i] >= oversteps[i - 1], $"the overstep fell from {oversteps[i - 1]} to {oversteps[i]}");
+    }
+
     [Fact]
     public void FixedUpdateRunsMoreOftenThanTheFrameWhenTheRateIsHigh()
     {
