@@ -131,3 +131,19 @@ models/animated/MorphStressTest.gltf
 textures/Game Icons/right.png
 textures/Game Icons/wrench.png
 textures/Game Icons/exitRight.png
+textures/rpg/tiles/generic-rpg-tile19.png
+textures/rpg/tiles/generic-rpg-tile23.png
+textures/rpg/tiles/generic-rpg-tile04.png
+textures/rpg/tiles/generic-rpg-tile33.png
+textures/rpg/tiles/generic-rpg-tile12.png
+textures/rpg/tiles/generic-rpg-tile69.png
+textures/rpg/tiles/generic-rpg-tile30.png
+textures/rpg/tiles/generic-rpg-tile48.png
+textures/rpg/tiles/generic-rpg-tile10.png
+textures/rpg/tiles/generic-rpg-tile65.png
+textures/rpg/tiles/generic-rpg-tile40.png
+textures/rpg/tiles/generic-rpg-tile47.png
+textures/rpg/tiles/generic-rpg-tile57.png
+textures/rpg/tiles/generic-rpg-tile41.png
+textures/rpg/tiles/generic-rpg-tile44.png
+textures/rpg/tiles/generic-rpg-tile46.png

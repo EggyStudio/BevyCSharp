@@ -915,6 +915,9 @@ pub struct BcsImageConfig {
     pub anisotropy: u32,
     /// Non-zero to read the file as sRGB, which is right for color and wrong for data.
     pub srgb: i32,
+    /// How many layers a loaded file is cut into from the top down, which makes it an array
+    /// texture. `0` and `1` leave it one picture. A sampler being set reads none of it.
+    pub layers: u32,
 }
 
 /// Everything a physically based material is made of.

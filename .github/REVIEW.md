@@ -91,3 +91,11 @@ None open.
 ## Replies
   `extra_asset_source` from the asset batch was filed under Bevy's source file name rather than
   its example's, so the table still counted it as one to write. It is renamed in this batch.
+- Item 1, shaders, the materials. Nine of the shader rows are written, each with its WGSL put into
+  Slang. `bcs::VertexOutput` now carries the instance index Bevy's vertex shader always hands on,
+  and `bcs::tag` reads a mesh's `MeshTag` with it, and `TextureSettings.Layers` loads a stacked
+  picture as an array texture, which `array_texture`, `storage_buffer` and `automatic_instancing`
+  needed, with a test of both. `shader_defs` compiles its program with the define and without,
+  where Bevy specializes one material's pipeline, and `shader_material_bindless` binds per
+  material, as Bevy does without bindless support. The seven rows left in the group, compute,
+  passes and drawing on a camera, are the next batch.

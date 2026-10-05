@@ -230,6 +230,18 @@ public sealed class TextureSettings
     /// </remarks>
     public bool Srgb { get; set; } = true;
 
+    /// <summary>
+    /// How many layers the file is cut into, from the top down, which loads it as an array
+    /// texture. Zero or one loads it as one picture.
+    /// </summary>
+    /// <remarks>
+    /// Several pictures of one size stacked in one file, a tile set or the frames of a terrain's
+    /// blend, read by a shader as a <c>Texture2DArray</c> and picked by layer, often by
+    /// <c>bcs::tag</c>. The file's height has to divide into this many equal rows, or the load
+    /// fails and says so on the log.
+    /// </remarks>
+    public uint Layers { get; set; }
+
     /// <summary>Repeat filtering, for a texture meant to tile across a large surface.</summary>
     public static TextureSettings Tiling => new()
     {
@@ -324,6 +336,7 @@ public static unsafe class AssetServer
             MipmapFilter = (int)settings.MipmapFilter,
             Anisotropy = settings.Anisotropy,
             Srgb = settings.Srgb ? 1 : 0,
+            Layers = settings.Layers,
         };
 
         var key = Native.bcs_asset_load_image(path, &native);

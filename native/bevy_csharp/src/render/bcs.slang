@@ -125,6 +125,14 @@ public float3 local_to_world(uint instance, float3 position)
     return float3(dot(rows[0], p), dot(rows[1], p), dot(rows[2], p));
 }
 
+/// The number an entity's `MeshTag` gives the mesh drawn as `instance`, zero without one, for a
+/// shader to tell apart meshes that share a material: which layer of an array texture, which color
+/// of a buffer, which pixel of a picture.
+public uint tag(uint instance)
+{
+    return meshes[instance].tag;
+}
+
 /// Where the same point was in the world on the previous frame, for motion vectors.
 public float3 previous_local_to_world(uint instance, float3 position)
 {
@@ -187,6 +195,11 @@ public struct VertexOutput
     public float4 world_position : TEXCOORD0;
     public float3 world_normal : TEXCOORD1;
     public float2 uv : TEXCOORD2;
+    /// Which of the meshes drawn together this one is, which Bevy's vertex shader always hands on,
+    /// for `tag` and anything else read per mesh in the fragment shader. Not marked
+    /// `nointerpolation`, because Slang copies the mark onto the struct a shader copies its inputs
+    /// into, where WGSL refuses it, and an integer passed between stages is never interpolated.
+    public uint instance_index : TEXCOORD6;
 };
 
 /// Does what Bevy's own vertex shader does, for a shader that starts from it.
@@ -198,6 +211,7 @@ public VertexOutput standard_vertex(Vertex vertex)
     output.position = world_to_clip(world);
     output.world_normal = normal_local_to_world(vertex.instance_index, vertex.normal);
     output.uv = vertex.uv;
+    output.instance_index = vertex.instance_index;
     return output;
 }
 

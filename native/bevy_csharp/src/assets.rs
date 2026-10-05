@@ -299,6 +299,7 @@ pub unsafe extern "C" fn bcs_asset_load_image(
 
         let descriptor = sampler_from(&config);
         let srgb = config.srgb != 0;
+        let layers = config.layers;
 
         with_world(|world| {
             let Some(server) = world.get_resource::<AssetServer>() else {
@@ -310,6 +311,12 @@ pub unsafe extern "C" fn bcs_asset_load_image(
                 .with_settings(move |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::Descriptor(descriptor.clone());
                     settings.is_srgb = srgb;
+
+                    // Rows of equal height, one layer each, as Bevy's own loader cuts a strip of
+                    // pictures stacked in one file.
+                    if layers > 1 {
+                        settings.array_layout = Some(bevy::image::ImageArrayLayout::RowCount { rows: layers });
+                    }
                 })
                 .load::<bevy::image::Image>(path.to_string())
                 .untyped();

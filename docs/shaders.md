@@ -77,7 +77,10 @@ var grass = Shaders.CreateProgram(new ShaderProgramSettings
 
 `import bcs;` gives a shader Bevy's view, time and mesh transforms, and vertex structs that line up
 with Bevy's own, so a fragment shader works after Bevy's vertex shader, and `bcs::standard_vertex`
-does what Bevy's does for a vertex shader that starts from it:
+does what Bevy's does for a vertex shader that starts from it. `bcs::tag(mesh.instance_index)` reads
+the number an entity's `MeshTag` gives it, set with `ecs.Insert<MeshTagRef>(entity).Value`, so
+meshes sharing one material are told apart in the shader, each picking its layer of an array
+texture (loaded with `TextureSettings.Layers`) or its entry of a buffer:
 
 ```slang
 import bcs;

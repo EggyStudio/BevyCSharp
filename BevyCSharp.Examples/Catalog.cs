@@ -225,8 +225,19 @@ internal static class Catalog
         new("virtual_time", VirtualTime.Build),
 
         // Shaders
+        new("animate_shader", AnimateShader.Build),
+        new("array_texture", ArrayTexture.Build),
+        new("automatic_instancing", AutomaticInstancing.Build),
         new("extended_material", ExtendedMaterial.Build),
         new("extended_material_bindless", ExtendedMaterialBindless.Build),
+        new("shader_defs", ShaderDefs.Build),
+        new("shader_material", ShaderMaterialExample.Build),
+        new("shader_material_bindless", ShaderMaterialBindless.Build),
+        new("shader_material_screenspace_texture", ShaderMaterialScreenspaceTexture.Build),
+        new("storage_buffer", StorageBuffer.Build),
+
+        // Shaders - Advanced
+        new("texture_binding_array", TextureBindingArray.Build),
 
         // UI (User Interface)
         new("anchor_layout", AnchorLayout.Build),

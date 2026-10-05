@@ -312,6 +312,9 @@ public struct NativeImageConfig
 
     /// <summary>Non-zero to read the file as sRGB.</summary>
     public int Srgb;
+
+    /// <summary>How many layers a loaded file is cut into, top to bottom; 0 or 1 for one picture.</summary>
+    public uint Layers;
 }
 
 /// <summary>How a sprite is drawn.</summary>
