@@ -8,21 +8,21 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `3e694f0`. `physics_in_fixed_timestep` (`3e694f0`) is settled on its reply, which
-was read: its player is a behavior with a method a stage, as B 4 asks, and `Time.FixedOverstep` is
-Bevy's own number for drawing between two steps. The table stands at 223 written, 13 written in
-part, 25 that can be, 102 missing and 58 that do not apply.
+Reviewed up to `8e98bfa`. The norm's checks (`e7d788a`) and the check of N 1.4 passing over what
+is no test (`8e98bfa`) are settled on the reply, which was read. One `Hold` for every rule, lists
+written from the tests' own findings with a reason where one helps, and a test holding NORM.md
+and the class to each other: 3DEngine wrote its own after this one in its `9decca1d`, and its
+first run found 30 of its commits out of the form COMMITS.md gives.
 
-The norm's checks were read as they are staged and are as asked: one `Hold` for every rule, lists
-written from the tests' own findings with a reason where one helps, and a test holding NORM.md and
-the class to each other. 3DEngine is told to write its own after this one. The three lines
-beginning `Rule:` are answered in [NORM.md](NORM.md), which says three things more. A rule may
-leave a kind of place out, and those places are on its list with their reason and stay, which is
-what the five windows of N 4.5, the seventeen constant answers of B 3, the three files of N 4.1
-and the four waits of N 3.3 are. What the tests share is at the test project's root, so N 1.4's
-test passes over a file that is no test class and its list loses three lines. A mending that only
-moves code is a commit of its own. The table under Conformance has this engine's counts, 348
-places for N 1.2, 32 for N 1.3, 133 for N 1.4 and 55 for N 3.4.
+[NORM.md](NORM.md) has since said three things more, from 3DEngine's questions. The table of
+areas is held to the top folders of the repository and of the library, a row naming a folder by
+itself or by a folder within it, where the check here reads projects (N 1.5), which leaves
+`docs/` the one top folder with no row. A test of what is no area of the library, the documents,
+the package or the examples, is in a folder named for what it tests and is left out, and the
+norm's own class is at the root (N 1.4). A game's capture is left out of the size (N 4.5). The
+table under Conformance has this engine at 15 rules checked, 4 with places listed, 8 still to
+take and 9 by review. The examples table stands at 223 written, 13 written in part, 25 that can
+be, 102 missing and 58 that do not apply.
 
 ## Now
 
@@ -36,15 +36,17 @@ and 11 to 14 are taken from [SHARED.md](SHARED.md).
    that differs from Bevy's for no known reason is taken down to the smallest scene that still
    differs and explained before the pass goes on. The second paragraph of item 3 holds for each
    example written from here on, which Annex B of the norm has as B 4.
-2. **The norm's checks, what is left of them.** N 1.4's test passes over what is no test class,
-   as the norm has it since. The rules still `to take` here each have their item: N 2.2 and N 6.1
-   are the settings of item 6, N 2.1 the listing of item 13, N 2.6 the table of bad files in item
-   12, N 2.7 item 3, and N 2.5, N 2.8 and N 5.2 are a game published native in the workflow, the
-   list of packages in BUILDING.md with a test that holds the project files to it, and the
-   workflow running `build/examples-table.py` and failing when what it writes differs from the
-   table checked in. The lists are paid down as the norm says, a listed file mended when a batch
-   next touches it, the largest first where there is a choice, `Render.cs`, `RenderShaders.cs`
-   and `Native.cs` among the library's and `render/shaders.rs` among the bridge's.
+2. **The norm's checks, what is left of them.** The check of N 1.5 reads top folders as the norm
+   has it since, with a row for `docs/`, and the check of N 1.4 leaves out a test of what is no
+   area of the library with that reason. The rules still `to take` here each have their item:
+   N 2.2 and N 6.1 are the settings of item 6, N 2.1 the listing of item 13, N 2.6 the table of
+   bad files in item 12, N 2.7 item 3, and N 2.5, N 2.8 and N 5.2 are a game published native in
+   the workflow, the list of packages in BUILDING.md with a test that holds the project files to
+   it, and the workflow running `build/examples-table.py` and failing when what it writes differs
+   from the table checked in. The lists are paid down as the norm says, a listed file mended
+   when a batch next touches it, in a commit of its own, the largest first where there is a
+   choice, `Render.cs`, `RenderShaders.cs` and `Native.cs` among the library's and
+   `render/shaders.rs` among the bridge's.
 3. **An example is a program somebody could write on the package.** A picture in the README
    opens an example as the way to do a thing, and what opens is written in words the package
    does not have. `BevyCSharp.Examples/Example.cs` holds helpers, in its own words for what
@@ -163,14 +165,13 @@ None open.
    is right to, and waits for that word.
 
 ## Replies
-- Item 2, the norm's checks. `NormTests` checks N 1.1 to 1.5, 3.3, 3.4, 4.1, 4.2, 4.5, 6.4,
-  7.2 and B 3, and `NormAndItsTestsAgree` holds the class and NORM.md to each other. The lists, in
-  `build/norm`, hold 348 places for N 1.2, 32 for N 1.3 (11 files of the library, 3 of the tests
-  and 18 of the bridge), 136 for N 1.4, 4 for N 3.3, 55 for N 3.4, 3 for N 4.1, 5 for N 4.5 and
-  17 for B 3. N 1.1, N 4.2 and N 7.2 hold with nothing listed, and N 1.5 holds since the rows it
-  asked for are added to AGENTS.md, as its bullet allows. N 6.4 opens the package `BCS_PACKAGE`
-  names, or the newest one in `build/package`, and the pack job now runs it on what it packed,
-  which no run has tried yet. N 7.2 reads the commits after `3e694f0`.
-- Item 2, N 1.4. Its test now places only a file that holds a test, found by a test attribute at
-  the start of a line, so `EngineFixture.cs`, `Needs.cs` and `PictureRun.cs` come off its list,
-  which holds 133.
+
+Item 1: gamepad_viewer is written with its buttons, knobs and readouts as behaviors, and
+hotpatching_systems through .NET's own hot reload, run under `dotnet watch`, which was checked
+by changing the text of the running example and reading it on the next frames. Bevy's
+gamepad_viewer writes the lower triggers' values as interface text its update never finds, and
+here they are text in the world, so they show. log_diagnostics, world_serialization and
+scene_viewer are changed to missing, for Bevy's diagnostics store and its logging, for a
+component holding a string with a field a scene file leaves out and a resource written with the
+entities, and for Bevy's infinite grid from its dev tools. The column of rows that can be written
+holds the 20 stress tests, which come next.

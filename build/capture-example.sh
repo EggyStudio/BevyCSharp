@@ -55,6 +55,13 @@ grep -qs "SpawnCamera2d" BevyCSharp.Examples/*/"$example.cs" && flat=true
 case "$example" in
   # A level, which the screen loads once 1 is pressed.
   loading_screen) ./bcs command input.hold Digit1 2 --quiet ;;
+  # A pad pretended, as one in the hands, its left stick pushed up and to the right, its right
+  # stick down, and its right trigger far enough down to count as held.
+  gamepad_viewer)
+    ./bcs command input.axis 0 LeftX 0.6 --quiet
+    ./bcs command input.axis 0 LeftY 0.4 --quiet
+    ./bcs command input.axis 0 RightY -0.7 --quiet
+    ./bcs command input.axis 0 RightTrigger 0.8 --quiet ;;
   *) ;;
 esac
 

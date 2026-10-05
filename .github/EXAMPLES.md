@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**223 written, 13 written in part, 25 can be written, 102 missing and 58 do not apply.** Of the 363 that apply, 261 can be written with what is bridged, 13 of them leaving something out.
+**225 written, 13 written in part, 20 can be written, 105 missing and 58 do not apply.** Of the 363 that apply, 258 can be written with what is bridged, 13 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -17,8 +17,8 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |
-| [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
+| [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 15 | 0 | 0 | 11 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 5 | 1 | 0 | 0 | 0 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 |
@@ -29,20 +29,20 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Picking](#picking) | 2 | 0 | 0 | 3 | 1 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
-| [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
+| [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |
 | [Shaders](#shaders) | 17 | 0 | 0 | 3 | 5 |
 | [Shaders Advanced](#shaders-advanced) | 1 | 0 | 0 | 0 | 1 |
 | [State](#state) | 2 | 0 | 0 | 2 | 0 |
 | [Stress Tests](#stress-tests) | 0 | 0 | 20 | 0 | 1 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
-| [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
+| [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
 | [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 |
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |
-| **All** | **223** | **13** | **25** | **102** | **58** |
+| **All** | **225** | **13** | **20** | **105** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -265,7 +265,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`custom_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/diagnostics/custom_diagnostic.rs) | Shows how to create a custom diagnostic | missing, diagnostics a game registers in Bevy's store |
 | [`enabling_disabling_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/diagnostics/enabling_disabling_diagnostic.rs) | Shows how to disable/re-enable a Diagnostic during runtime | missing, turning one of Bevy's diagnostics on and off |
-| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | can be written, through frame.profile and the frame panel |
+| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | missing, Bevy's diagnostics store and its logging, which the bridge reads only render timings from |
 
 ## ECS (Entity Component System)
 
@@ -288,7 +288,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fixed_timestep.rs) | Shows how to create systems that run every fixed timestep, rather than every tick | [written](../BevyCSharp.Examples/ecs/fixed_timestep.cs), prints [its output](assets/examples/fixed_timestep.txt) |
 | [`generic_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/generic_system.rs) | Shows how to create systems that can be reused with different types | [written](../BevyCSharp.Examples/ecs/generic_system.cs), prints [its output](assets/examples/generic_system.txt) |
 | [`hierarchy`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hierarchy.rs) | Creates a hierarchy of parents and children entities | [written](../BevyCSharp.Examples/ecs/hierarchy.cs) |
-| [`hotpatching_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hotpatching_systems.rs) | Demonstrates how to hotpatch systems | can be written, as scripts reloaded while the app runs |
+| [`hotpatching_systems`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/hotpatching_systems.rs) | Demonstrates how to hotpatch systems | [written](../BevyCSharp.Examples/ecs/hotpatching_systems.cs), through .NET's own hot reload, under dotnet watch |
 | [`immutable_components`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/immutable_components.rs) | Demonstrates the creation and utility of immutable components | does not apply, about Rust's component mutability |
 | [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | [written](../BevyCSharp.Examples/ecs/iter_combinations.cs) |
 | [`message`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | missing, a message changed in place by a later system and read by a later one the same frame |
@@ -417,7 +417,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`bsn`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/scene/bsn.rs) | Demonstrates how to use BSN to compose scenes | missing, BSN scene notation |
-| [`world_serialization`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/scene/world_serialization.rs) | Demonstrates loading from and saving world to files | can be written |
+| [`world_serialization`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/scene/world_serialization.rs) | Demonstrates loading from and saving world to files | missing, a component holding a string, a field a scene file leaves out, and a resource written with the entities |
 
 ## Shaders
 
@@ -503,8 +503,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| `gamepad_viewer` | Shows a visualization of gamepad buttons, sticks, and triggers | can be written |
-| `scene_viewer` | A simple way to view glTF models with Bevy. Just run `cargo run --release --example scene_viewer /path/to/model.gltf#Scene0`, replacing the path as appropriate. With no arguments it will load the FieldHelmet glTF model from the repository assets subdirectory | can be written |
+| `gamepad_viewer` | Shows a visualization of gamepad buttons, sticks, and triggers | [written](../BevyCSharp.Examples/tools/gamepad_viewer.cs) |
+| `scene_viewer` | A simple way to view glTF models with Bevy. Just run `cargo run --release --example scene_viewer /path/to/model.gltf#Scene0`, replacing the path as appropriate. With no arguments it will load the FieldHelmet glTF model from the repository assets subdirectory | missing, Bevy's infinite grid, from its dev tools, which the bridge does not compile in |
 
 ## Transforms
 

@@ -16,6 +16,7 @@ using BevyCSharp.Examples.Shading;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
 using BevyCSharp.Examples.ThreeD;
+using BevyCSharp.Examples.Tools;
 using BevyCSharp.Examples.Transforms;
 using BevyCSharp.Examples.TwoD;
 using BevyCSharp.Examples.Usage;
@@ -171,6 +172,7 @@ internal static class Catalog
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
         new("generic_system", GenericSystem.Build, Prints: 130),
         new("hierarchy", Hierarchy.Build),
+        new("hotpatching_systems", HotpatchingSystems.Build),
         new("iter_combinations", IterCombinations.Build),
         new("observer_propagation", ObserverPropagation.Build, Prints: 1800),
         new("observers", Observers.Build),
@@ -242,6 +244,9 @@ internal static class Catalog
         // Time
         new("timers", Timers.Build, Prints: 1300),
         new("virtual_time", VirtualTime.Build),
+
+        // Tools
+        new("gamepad_viewer", GamepadViewer.Build),
 
         // Shaders
         new("animate_shader", AnimateShader.Build),

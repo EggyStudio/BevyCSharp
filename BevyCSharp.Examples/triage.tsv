@@ -176,7 +176,7 @@ infinite_grid	missing	Bevy's infinite grid
 schedule_data	n/a	reads Bevy's schedule graphs from Rust
 custom_diagnostic	missing	diagnostics a game registers in Bevy's store
 enabling_disabling_diagnostic	missing	turning one of Bevy's diagnostics on and off
-log_diagnostics	can	through frame.profile and the frame panel
+log_diagnostics	missing	Bevy's diagnostics store and its logging, which the bridge reads only render timings from
 callbacks	can
 change_detection	missing	a resource's change ticks, and when a component was added and by what
 component_hooks	missing	a component's add, insert and discard hooks, which only Bevy's remove hook has here, for the generator
@@ -194,7 +194,7 @@ fallible_params	n/a	about Rust system parameters that fail validation, where a C
 fixed_timestep	can
 generic_system	can
 hierarchy	can
-hotpatching_systems	can	as scripts reloaded while the app runs
+hotpatching_systems	can	through .NET's own hot reload, under dotnet watch
 immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
 message	missing	a message changed in place by a later system and read by a later one the same frame
@@ -290,7 +290,7 @@ client	n/a	a Rust client of Bevy's remote protocol
 integration_test	missing	Bevy's remote protocol, where bcs is this engine's own
 server	missing	Bevy's remote protocol, where bcs is this engine's own
 bsn	missing	BSN scene notation
-world_serialization	can
+world_serialization	missing	a component holding a string, a field a scene file leaves out, and a resource written with the entities
 fullscreen_material	can	as a pass the camera runs
 manual_material	n/a	writes a material with Rust's mid-level render API
 animate_shader	can
@@ -347,7 +347,7 @@ time	n/a	replaces Bevy's runner with one stepping the app from the console, and 
 timers	can
 virtual_time	can
 gamepad_viewer	can
-scene_viewer	can
+scene_viewer	missing	Bevy's infinite grid, from its dev tools, which the bridge does not compile in
 3d_rotation	can
 align	can
 scale	can
