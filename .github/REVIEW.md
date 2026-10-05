@@ -173,3 +173,18 @@ None open.
   `Time.FixedOverstep` added for it, Bevy's `overstep_fraction`, read from the engine when asked
   since the frame's time is taken before its fixed steps run, with a test. The norm's checks, item
   2, come next, and the rows left in item 1 after them.
+- Item 2, the norm's checks. `NormTests` checks N 1.1 to 1.5, 3.3, 3.4, 4.1, 4.2, 4.5, 6.4,
+  7.2 and B 3, and `NormAndItsTestsAgree` holds the class and NORM.md to each other. The lists, in
+  `build/norm`, hold 348 places for N 1.2, 32 for N 1.3 (11 files of the library, 3 of the tests
+  and 18 of the bridge), 136 for N 1.4, 4 for N 3.3, 55 for N 3.4, 3 for N 4.1, 5 for N 4.5 and
+  17 for B 3. N 1.1, N 4.2 and N 7.2 hold with nothing listed, and N 1.5 holds since the rows it
+  asked for are added to AGENTS.md, as its bullet allows. N 6.4 opens the package `BCS_PACKAGE`
+  names, or the newest one in `build/package`, and the pack job now runs it on what it packed,
+  which no run has tried yet. N 7.2 reads the commits after `3e694f0`.
+- Rule: N 4.5 holds a capture to Bevy's window, and five examples ask for a window of their own as
+  Bevy's do (`grid`, `headless_renderer`, `resizing`, `scale_factor_override`, `window_settings`),
+  so they are listed for want of a rule that says the size the example asks for.
+- Rule: B 3 lists 17 entry points that answer a constant, a flag or a count and cannot panic, such
+  as `bcs_abi_version` and the `bcs_has_*` checks, which a rule might leave out by name.
+- Rule: N 1.4 has no folder for what the tests share, `EngineFixture.cs`, `PictureRun.cs` and the
+  like, which test no area of the library and sit at the root with the rest.

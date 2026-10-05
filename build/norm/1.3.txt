@@ -1,0 +1,36 @@
+# N 1.3, a source file of at most 800 lines.
+# A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
+# off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
+
+BevyCSharp.Tests/ComputeShaderTests.cs
+BevyCSharp.Tests/RenderControlTests.cs
+BevyCSharp.Tests/ViewShaderTests.cs
+BevyCSharp/Assets/Gizmos.cs
+BevyCSharp/Assets/Render.cs
+BevyCSharp/Assets/RenderShaders.cs
+BevyCSharp/Core/App.cs
+BevyCSharp/Diagnostics/ConsoleWorldCommands.cs
+BevyCSharp/Ecs/ComponentSchema.cs
+BevyCSharp/Interop/Native.cs
+BevyCSharp/Interop/NativeTypes.Render.cs
+BevyCSharp/Physics/PhysicsWorld.cs
+BevyCSharp/Scenes/SceneFile.cs
+BevyCSharp/Scenes/SceneInstances.cs
+native/bevy_csharp/src/app.rs
+native/bevy_csharp/src/ecs.rs
+native/bevy_csharp/src/gizmos.rs
+native/bevy_csharp/src/interop.rs
+native/bevy_csharp/src/reflected.rs
+native/bevy_csharp/src/render/assets.rs
+native/bevy_csharp/src/render/compute.rs
+native/bevy_csharp/src/render/post.rs
+native/bevy_csharp/src/render/programs.rs
+native/bevy_csharp/src/render/reflect.rs
+native/bevy_csharp/src/render/scene.rs
+native/bevy_csharp/src/render/shaders.rs
+native/bevy_csharp/src/render/slang.rs
+native/bevy_csharp/src/render/values.rs
+native/bevy_csharp/src/render/views.rs
+native/bevy_csharp/src/states.rs
+native/bevy_csharp/src/ui.rs
+native/bevy_csharp/src/window.rs

@@ -1,0 +1,9 @@
+# N 4.5, a capture at Bevy's window of 1280 by 720. A place is the capture and its size.
+# A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
+# off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
+
+grid 800x600	its example asks for this window, as Bevy's does
+headless_renderer 1920x1080	its example renders at this size, as Bevy's does
+resizing 401x401	its example asks for this window, as Bevy's test does
+scale_factor_override 500x300	its example asks for this window, as Bevy's does
+window_settings 500x300	its example asks for this window, as Bevy's does

@@ -80,6 +80,22 @@ Stop any serving session before running the suite.
 | `BevyCSharp.Scripting` | The script host that compiles behavior scripts while an app runs |
 | `BevyCSharp.Player` | Plays a scene file with its scripts, which the editor's Play scene runs |
 | `native/bevy_csharp/src` | The Rust bridge, one module per subsystem |
+| `BevyCSharp/Assets` | Assets and what draws them, in `AssetServer`, `Render`, `Render2d`, `Shaders`, `Ui`, `Gizmos`, `Audio` and `Animation` |
+| `BevyCSharp/Behaviors` | The `[Behavior]` attributes, run conditions, `BehaviorContext` and the runner behaviors are registered with |
+| `BevyCSharp/Generated` | `bevy-components.tsv`, Bevy's components as the wrappers in `Bevy.Reflected` are generated from |
+| `BevyCSharp/Input` | `Input`, `Key`, gamepads and `SyntheticInput` |
+| `BevyCSharp/Math` | `Vec2`, `Vec3`, `Quat`, `Transform` and `GlobalTransform` |
+| `BevyCSharp/Scenes` | Scene files, saved games and `Persistent<T>` settings |
+| `BevyCSharp/Time` | `Time`, the frame's clock and the fixed one |
+| `BevyCSharp/Ui` | ImGui's runtime, input and textures |
+| `BevyCSharp/build` | The props and targets the package adds to a game's build |
+| `BevyCSharp.Cli` | `./bcs`, the command line that drives a running app |
+| `BevyCSharp.Examples` | Bevy's examples written in C#, opened by name, and `triage.tsv` for the rest |
+| `BevyCSharp.Sample` | A rotating cube from behavior scripts, run with a window or headless |
+| `BevyCSharp.Tests` | The test suite, run on real engines through `EngineHarness` |
+| `build/cheatsheet` | Writes CHEATSHEET.md from the built library |
+| `games/Courtyard` | A game built from the packed package, which the workflow plays |
+| `games/Stress` | The engine under load, for the measurements of PERFORMANCE.md |
 
 ## Conventions
 

@@ -335,6 +335,14 @@ jobs:
         shell: bash
         run: unzip -l build/package/*.nupkg
 
+      # N 6.4 of NORM.md, the package holding the library, its generator, its build files and the
+      # natives of every system staged above.
+      - name: Check what the package holds
+        shell: bash
+        run: |
+          export BCS_PACKAGE="$(ls build/package/*.nupkg | head -1)"
+          dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4"
+
       - uses: actions/upload-artifact@v7
         with:
           name: BevyCSharp-${{ inputs.version }}

@@ -1,0 +1,7 @@
+# N 4.1, prose without the dashes STYLE.md forbids.
+# A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
+# off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
+
+.github/COMMITS.md	names the dash STYLE.md forbids
+.github/STYLE.md	names the dash it forbids
+BevyCSharp.Examples/3d/blend_modes.cs	Bevy's own text on the screen, written as Bevy writes it
