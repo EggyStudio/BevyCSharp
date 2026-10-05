@@ -372,4 +372,9 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_sprite(ulong entity, NativeSpriteConfig* config);
+
+    /// <summary>Moves each sprite or sprite mesh to the atlas frame beside it, answering how many it moved.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_sprite_frames(ulong* entities, uint* frames, int count);
 }

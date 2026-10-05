@@ -234,6 +234,18 @@ one kept between calls, grown when a run is longer than any before.
 The ten systems drawing the lines take 3.9 ms of the frame between them, where they took 4.9, 0.7
 of it in their calls into the bridge either way.
 
+### Sprites' frames moved together
+
+A sprite animated through a sheet was set again for each frame it turned, which replaces the
+whole sprite, and a sprite mesh's frame was written through reflection. `Render2d.SetSpriteFrames`
+takes the sprites and the frame each moves to, writes only the index of each one's atlas, as a
+Rust system does, and crosses into the bridge once for the run.
+
+| test | Bevy alone, before | through the bridge, before | Bevy alone, after | through the bridge, after |
+|---|---:|---:|---:|---:|
+| many_animated_sprites | 6.64 | 15.95 | 6.51 | 6.75 |
+| many_animated_sprite_meshes | 14.83 | 212.54 | 14.34 | 13.84 |
+
 ## Bevy's stress tests, beside Bevy
 
 Bevy's stress tests are written in C# in `BevyCSharp.Examples/stress_tests`, and each is measured
@@ -249,8 +261,8 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 
 | test, with its own defaults | Bevy alone | through the bridge |
 |---|---:|---:|
-| many_animated_sprite_meshes | 14.57 | 213.24 |
-| many_animated_sprites | 6.64 | 15.95 |
+| many_animated_sprite_meshes | 14.34 | 13.84 |
+| many_animated_sprites | 6.51 | 6.75 |
 | many_cameras_lights | 43.27 | 44.98 |
 | many_gizmos | 6.97 | 10.68 |
 | many_glyphs | 18.60 | 20.86 |
@@ -263,9 +275,9 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 | many_text2d | 8.68 | 9.55 |
 | text_pipeline | 3.76 | 4.34 |
 
-The rows are as they stand since the mends below. Most cost the bridge under a millisecond more,
+The rows are as they stand since the mends above. Most cost the bridge under a millisecond more,
 or a few against a frame of tens. Four cost far more when first measured, each for a reason
-measuring found, and one of them has since been mended.
+measuring found, and each has been mended since, many_gizmos in part.
 
 - **many_sprite_meshes cost 9 ms more for Bevy's 2D wireframe plugin**, which the bridge added to
   every app so a 2D mesh could be outlined, and which looks at every 2D mesh in its prepare and
@@ -279,14 +291,15 @@ measuring found, and one of them has since been mended.
   frame here, each on .NET's large object heap. The array is now kept between calls (above), which
   took 1.7 ms off. What is left is the copy itself, each line written into the bridge's general
   description of a shape, about 200 bytes, which a call taking lines as they are would not need.
-- **many_animated_sprites, 9 ms more, is a call a frame turned.** Bevy moves a sprite's atlas index
-  where it is. The bridge has no call that does only that, so each sprite whose timer finished is
-  set again through `Render2d.SetSprite`, about 18,000 a frame, which is 11.3 ms of the frame.
-- **many_animated_sprite_meshes, 198 ms more, is the same done through reflection, and it feeds
-  itself.** The frame is written through the sprite mesh's reflected atlas, two calls a sprite,
-  and once frames are slow every timer of a tenth of a second finishes every frame, so all
-  102,400 sprites are written each frame, 614,000 calls, where Bevy writes the 15 in 100 whose
-  timers finished.
+- **many_animated_sprites cost 9 ms more for a call a frame turned.** Bevy moves a sprite's atlas
+  index where it is. The bridge had no call that did only that, so each sprite whose timer
+  finished was set again through `Render2d.SetSprite`, about 18,000 a frame, which was 11.3 ms of
+  the frame. `Render2d.SetSpriteFrames` now moves them together (above).
+- **many_animated_sprite_meshes cost 198 ms more for the same done through reflection, which fed
+  itself.** The frame was written through the sprite mesh's reflected atlas, two calls a sprite,
+  and once frames were slow every timer of a tenth of a second finished every frame, so all
+  102,400 sprites were written each frame, 614,000 calls, where Bevy writes the 15 in 100 whose
+  timers finished. The same call moves sprite meshes.
 
 ## What measuring turned up
 

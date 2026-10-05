@@ -144,4 +144,47 @@ public static unsafe partial class Render2d
 
         Native.Check(status, $"attaching a sprite to {entity}");
     }
+
+    /// <summary>
+    /// Moves sprites and sprite meshes to frames of their sheets, each to the frame beside it, in
+    /// one call.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For an animation over many sprites, which turns many of them a frame. Only the index of each
+    /// one's atlas is written, where <see cref="SetSprite(EcsWorld, Entity, AssetHandle, SpriteSettings)"/>
+    /// replaces the whole sprite, and the run crosses into the bridge once rather than a call a
+    /// sprite.
+    /// </para>
+    /// <para>
+    /// A sprite mesh, which Bevy's reflected <c>SpriteMesh</c> puts on, moves the same way. An
+    /// entity that is gone, that has neither, or whose sprite shows no sheet is passed over, which
+    /// the count answered says.
+    /// </para>
+    /// </remarks>
+    /// <param name="sprites">The sprites to move.</param>
+    /// <param name="frames">The frame each moves to, in the same order.</param>
+    /// <returns>How many were moved.</returns>
+    /// <exception cref="ArgumentException">The two runs are of different lengths.</exception>
+    /// <exception cref="BevyNativeException">
+    /// This build has no renderer, or no world is on loan, as outside a system.
+    /// </exception>
+    public static int SetSpriteFrames(ReadOnlySpan<Entity> sprites, ReadOnlySpan<uint> frames)
+    {
+        if (sprites.Length != frames.Length)
+            throw new ArgumentException("There is a frame for each sprite.", nameof(frames));
+
+        int moved;
+        fixed (Entity* entities = sprites)
+        fixed (uint* each = frames)
+            moved = Native.bcs_sprite_frames((ulong*)entities, each, sprites.Length);
+
+        if (moved == NativeStatus.Unsupported)
+            throw new BevyNativeException(
+                NativeStatus.Unsupported,
+                "Moving sprites' frames failed, because this native build has no renderer. Rebuild "
+                + "the bridge with build/build-native.sh --render.");
+
+        return Native.Check(moved, $"moving {sprites.Length} sprites' frames");
+    }
 }

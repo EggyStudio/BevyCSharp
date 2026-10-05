@@ -1,6 +1,7 @@
 // Bevy's many_animated_sprite_meshes example, examples/stress_tests/many_animated_sprite_meshes.rs
 // at v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
+using System.Runtime.InteropServices;
 using Bevy;
 using Bevy.Reflected;
 
@@ -101,9 +102,10 @@ internal static class ManyAnimatedSpriteMeshes
 public partial struct SpriteMeshAnimationTimer
 {
     private const float Duration = 0.1f;
-    private const uint Frames = 7;
+    private const uint SheetFrames = 7;
 
-    private static readonly List<(Entity Sprite, uint Frame)> Turned = [];
+    private static readonly List<Entity> Turned = [];
+    private static readonly List<uint> Frames = [];
 
     /// <summary>How far the timer has run, which may start past its length.</summary>
     public float Elapsed;
@@ -116,14 +118,15 @@ public partial struct SpriteMeshAnimationTimer
     /// </summary>
     /// <remarks>
     /// Bevy's system walks the timers and the sprite meshes together. A frame is written to the
-    /// sprite mesh here, which reaches the world, so the timers are walked first and the frames
-    /// written after the walk, on the thread that holds the world.
+    /// sprite mesh in the world here, so the timers are walked first, and the sprite meshes that
+    /// turned are moved to their frames together after the walk, in one call.
     /// </remarks>
     [OnUpdate]
     public static void AnimateSprite(BehaviorContext ctx)
     {
         var delta = ctx.Time.Delta;
         Turned.Clear();
+        Frames.Clear();
         foreach (var row in ctx.Ecs.Query<SpriteMeshAnimationTimer>())
         {
             ref var timer = ref row.Component;
@@ -131,11 +134,11 @@ public partial struct SpriteMeshAnimationTimer
             if (timer.Elapsed < Duration) continue;
 
             timer.Elapsed %= Duration;
-            timer.Frame = (timer.Frame + 1) % Frames;
-            Turned.Add((row.Entity, timer.Frame));
+            timer.Frame = (timer.Frame + 1) % SheetFrames;
+            Turned.Add(row.Entity);
+            Frames.Add(timer.Frame);
         }
 
-        foreach (var (sprite, frame) in Turned)
-            ctx.Ecs.Wrap<SpriteMeshRef>(sprite).TextureAtlas = new TextureAtlas(frame);
+        Render2d.SetSpriteFrames(CollectionsMarshal.AsSpan(Turned), CollectionsMarshal.AsSpan(Frames));
     }
 }

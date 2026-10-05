@@ -1,6 +1,7 @@
 // Bevy's many_animated_sprites example, examples/stress_tests/many_animated_sprites.rs at v0.19.1,
 // by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
+using System.Runtime.InteropServices;
 using Bevy;
 
 namespace BevyCSharp.Examples.StressTests;
@@ -11,14 +12,14 @@ namespace BevyCSharp.Examples.StressTests;
 internal static class ManyAnimatedSprites
 {
     private const float CameraSpeed = 1000f;
-    internal const float TileSize = 64f;
+    private const float TileSize = 64f;
 
     private static Entity _camera;
     private static int _sprites;
     private static float _printing;
 
     // The sheet and its layout, which every sprite shows a frame of.
-    internal static AssetHandle Texture, Layout;
+    private static AssetHandle _texture, _layout;
 
     public static void Configure(Config config) => StressTest.Configure(config);
 
@@ -39,8 +40,8 @@ internal static class ManyAnimatedSprites
         var random = new Random();
         const int Half = 320 / 2;
 
-        Texture = AssetServer.Load(AssetKind.Image, "textures/rpg/chars/gabe/gabe-idle-run.png");
-        Layout = Render2d.CreateAtlas(24, 24, 7, 1);
+        _texture = AssetServer.Load(AssetKind.Image, "textures/rpg/chars/gabe/gabe-idle-run.png");
+        _layout = Render2d.CreateAtlas(24, 24, 7, 1);
         _camera = Render2d.SpawnCamera2d();
 
         for (var y = -Half; y < Half; y++)
@@ -53,7 +54,7 @@ internal static class ManyAnimatedSprites
 
                 var sprite = ecs.Spawn();
                 ecs.Add(sprite, new Transform(translation, rotation, scale));
-                Render2d.SetSprite(ecs, sprite, Texture, new SpriteSettings { Size = (TileSize, TileSize), Atlas = Layout, Frame = 0 });
+                Render2d.SetSprite(ecs, sprite, _texture, new SpriteSettings { Size = (TileSize, TileSize), Atlas = _layout, Frame = 0 });
 
                 // A timer a tenth of a second long, started at a random point up to a second in,
                 // as Bevy sets it, so the sprites do not all turn their frames at once.
@@ -88,9 +89,10 @@ internal static class ManyAnimatedSprites
 public partial struct AnimationTimer
 {
     private const float Duration = 0.1f;
-    private const uint Frames = 7;
+    private const uint SheetFrames = 7;
 
-    private static readonly List<(Entity Sprite, uint Frame)> Turned = [];
+    private static readonly List<Entity> Turned = [];
+    private static readonly List<uint> Frames = [];
 
     /// <summary>How far the timer has run, which may start past its length.</summary>
     public float Elapsed;
@@ -102,15 +104,16 @@ public partial struct AnimationTimer
     /// Each timer ticked, and the sprite of each that finished on to its next frame.
     /// </summary>
     /// <remarks>
-    /// Bevy's system walks the timers and the sprites together. A frame is a sprite set again
-    /// here, which reaches the world, so the timers are walked first and the sprites set after
-    /// the walk, on the thread that holds the world.
+    /// Bevy's system walks the timers and the sprites together. A frame is written to the sprite
+    /// in the world here, so the timers are walked first, and the sprites that turned are moved
+    /// to their frames together after the walk, in one call.
     /// </remarks>
     [OnUpdate]
     public static void AnimateSprite(BehaviorContext ctx)
     {
         var delta = ctx.Time.Delta;
         Turned.Clear();
+        Frames.Clear();
         foreach (var row in ctx.Ecs.Query<AnimationTimer>())
         {
             ref var timer = ref row.Component;
@@ -118,11 +121,11 @@ public partial struct AnimationTimer
             if (timer.Elapsed < Duration) continue;
 
             timer.Elapsed %= Duration;
-            timer.Frame = (timer.Frame + 1) % Frames;
-            Turned.Add((row.Entity, timer.Frame));
+            timer.Frame = (timer.Frame + 1) % SheetFrames;
+            Turned.Add(row.Entity);
+            Frames.Add(timer.Frame);
         }
 
-        foreach (var (sprite, frame) in Turned)
-            Render2d.SetSprite(ctx.Ecs, sprite, ManyAnimatedSprites.Texture, new SpriteSettings { Size = (ManyAnimatedSprites.TileSize, ManyAnimatedSprites.TileSize), Atlas = ManyAnimatedSprites.Layout, Frame = frame });
+        Render2d.SetSpriteFrames(CollectionsMarshal.AsSpan(Turned), CollectionsMarshal.AsSpan(Frames));
     }
 }

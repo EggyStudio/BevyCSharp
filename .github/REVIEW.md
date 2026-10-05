@@ -10,7 +10,13 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9ff5abc`. Bevy's wireframe plugins are added only to an app whose config asks
+Reviewed up to `3d55c94`. `Gizmos.Lines` builds a long run in an array kept for its thread
+between calls, which takes many_gizmos from 12.39 ms to 10.68 beside Bevy's 6.97, measured
+again into PERFORMANCE.md. What is left there is each line written into the bridge's general
+description of a shape. `App.cs` and `Gizmos.cs` are split by moves alone (`10b5588`,
+`f91aa59`) and are off the lists of N 1.3 and N 1.2.
+
+Before them, Bevy's wireframe plugins are added only to an app whose config asks since `9ff5abc`
 (`Config.Wireframes`), which gives a frame of a hundred thousand sprite meshes 8 ms back, 13.96
 to 5.52 beside Bevy's 5.23, measured again into PERFORMANCE.md. The number B 1's check reads
 is 199, and the break is said for the owner to number: a game that draws wireframes asks for
@@ -46,7 +52,7 @@ the owner makes next carries all of it.
 Before it, four commits were settled, the last being the tests of what is no area of the library
 in folders named for what they test (`a714bb8`). The table stands at 235 written, 16 written in
 part, 7 that can be, 105 missing and 58 that do not apply, and what can be written is the last
-seven stress tests. The lists stand at 342 places for N 1.2, 27 for N 1.3, 113 for N 1.4 and 55
+seven stress tests. The lists stand at 337 places for N 1.2, 26 for N 1.3, 113 for N 1.4 and 55
 for N 3.4, with one entry point of B 3 to bring under the guard, `bcs_shader_entity_program`, in
 the batch that splits `render/shaders.rs`.
 
@@ -62,9 +68,10 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
 1. **What measuring found, and then the seven rows left.** The order the reply gives stands. The
    wireframe plugins are asked for in the config since `9ff5abc`, and the owner numbers the
-   package for that break. `Gizmos.cs` is split and `Lines` takes its points without a new array for
-   each call. One call moves the atlas frames of many sprites, which mends both of the animated
-   tests. Each mend is measured again by `build/measure-stress.sh`, and the table in
+   package for that break. `Gizmos.cs` is split and `Lines` keeps its array (`f91aa59`,
+   `3d55c94`), and a call that takes lines as they are comes after the sprite frames, as the
+   reply says. One call moves the atlas frames of many sprites, which mends both of the
+   animated tests. Each mend is measured again by `build/measure-stress.sh`, and the table in
    PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven stress tests. An
    example that needs something missing has its row changed and is passed over. A picture that
    differs from Bevy's for no known reason is taken down to the smallest scene that still
@@ -269,9 +276,9 @@ None open.
 
 ## Replies
 
-Item 1, the next mends: App.cs, which the wireframe batch touched, was split by moving code only
-in the commit after it (`10b5588`), where it should have come before, and Gizmos.cs was split
-(`f91aa59`) before `Gizmos.Lines` builds a long run in an array kept between calls, which takes
-many_gizmos from 12.39 ms to 10.68 against Bevy's 6.97. What is left there is each line written
-into the bridge's general description of a shape, which a call taking lines as they are would not
-need, and which comes after the sprite frames since it touches gizmos.rs, on N 1.3's list too.
+Item 1, the sprite frames: `Render2d.SetSpriteFrames` moves sprites and sprite meshes to the
+frames of their sheets together, writing only each one's atlas index in one call, and the two
+animated stress tests use it, which takes many_animated_sprites to 6.75 ms against Bevy's 6.51
+and many_animated_sprite_meshes to 13.84 against 14.34, from 15.95 and 212.54. The call is new to
+the bridge, in a module of its own, so `ABI_VERSION` and `ExpectedAbiVersion` are 200, a second
+number for the owner to set beside the 199 the wireframes took.
