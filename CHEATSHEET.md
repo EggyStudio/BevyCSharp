@@ -742,6 +742,9 @@ static MeshData DataOf(AssetHandle mesh);                       // The geometry 
 static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of: its counts, its attributes and its bounds, read without copying its vertices
 static bool TryReadMaterial(AssetHandle material, out MaterialSettings settings);  // A standard material's settings, read back from the engine, whether code made the material or a glTF file brought it
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
+static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
+static bool TryReadImage(AssetHandle image, out ImagePixels pixels);  // Reads an image's texels from the copy the app keeps of it, or answers false while it is loading or where no copy is kept
+static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels);  // Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given them again and everything showing the image changes
 static bool TryReadMesh(AssetHandle mesh, out MeshData triangles);  // Reads a mesh's triangles back: where each vertex is, and which three make each triangle
 static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals);  // Reads a mesh's positions back with the normal at each
 static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags);  // Says how an entity's mesh is treated beyond what it looks like

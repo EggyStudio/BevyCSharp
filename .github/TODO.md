@@ -85,7 +85,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Eight examples are written in part, each leaving out a feature named in its row.
+Nine examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -105,6 +105,9 @@ Eight examples are written in part, each leaving out a feature named in its row.
   added, and the cell count is one of Bevy's render diagnostics that is a number rather than a
   time, which `Render.Timings()` does not carry. Its scene of many lights, which Bevy's command line
   chooses, is left out too, though everything it draws is bridged.
+- **A folder loaded at once**, which `asset_loading` loads its models without. Bevy's
+  `load_folder` answers one asset holding a handle to each file in a folder, loaded in parallel,
+  which the asset server here would need a call for, answering the handles it holds.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

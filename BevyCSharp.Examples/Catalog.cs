@@ -1,4 +1,5 @@
 using BevyCSharp.Examples.Application;
+using BevyCSharp.Examples.Assets;
 using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
@@ -119,6 +120,18 @@ internal static class Catalog
         new("plugin_group", PluginGroupExample.Build, Prints: 3),
         new("return_after_run", ReturnAfterRun.Build, Prints: 3, Returned: ReturnAfterRun.Returned),
         new("settings", Settings.Build),
+
+        // Assets
+        new("alter_mesh", AlterMesh.Build),
+        new("alter_sprite", AlterSprite.Build),
+        new("asset_loading", AssetLoading.Build),
+        new("custom_asset", CustomAssetExample.Build, Prints: 30),
+        new("embedded_asset", EmbeddedAsset.Build),
+        new("extra_asset_source", ExtraSource.Build, ExtraSource.Configure),
+        new("generated_assets", GeneratedAssets.Build),
+        new("hot_asset_reloading", HotAssetReloading.Build),
+        new("multi_asset_sync", MultiAssetSync.Build),
+        new("repeated_texture", RepeatedTexture.Build),
 
         // Audio
         new("audio", AudioExample.Build),

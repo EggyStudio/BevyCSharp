@@ -370,88 +370,13 @@ pub struct BcsMeshData {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
     crate::interop::guard(|| {
-        use bevy::asset::{Assets, RenderAssetUsages};
-        use bevy::mesh::{Indices, Mesh, PrimitiveTopology};
+        use bevy::asset::Assets;
+        use bevy::mesh::Mesh;
 
-        if data.is_null() {
-            return status::NULL_ARG;
-        }
-
-        let data = unsafe { *data };
-
-        if data.vertex_count <= 0
-            || data.positions.is_null()
-            || data.index_count < 0
-            || (data.indices.is_null() && data.index_count > 0)
-        {
-            return status::NULL_ARG;
-        }
-
-        let count = data.vertex_count as usize;
-
-        let floats = |pointer: *const f32, width: usize| -> Option<&[f32]> {
-            (!pointer.is_null())
-                .then(|| unsafe { core::slice::from_raw_parts(pointer, count * width) })
+        let mesh = match unsafe { mesh_from(data) } {
+            Ok(mesh) => mesh,
+            Err(code) => return code,
         };
-
-        let topology = match data.topology {
-            1 => PrimitiveTopology::LineList,
-            2 => PrimitiveTopology::PointList,
-            3 => PrimitiveTopology::LineStrip,
-            4 => PrimitiveTopology::TriangleStrip,
-            _ => PrimitiveTopology::TriangleList,
-        };
-
-        let positions = floats(data.positions, 3)
-            .map(|all| all.chunks_exact(3).map(|p| [p[0], p[1], p[2]]).collect::<Vec<_>>())
-            .unwrap_or_default();
-
-        let mut mesh = Mesh::new(topology, RenderAssetUsages::default())
-            .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-
-        if let Some(normals) = floats(data.normals, 3) {
-            let normals: Vec<[f32; 3]> =
-                normals.chunks_exact(3).map(|n| [n[0], n[1], n[2]]).collect();
-            mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-        }
-
-        if let Some(uvs) = floats(data.uvs, 2) {
-            let uvs: Vec<[f32; 2]> = uvs.chunks_exact(2).map(|t| [t[0], t[1]]).collect();
-            mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-        }
-
-        if let Some(colors) = floats(data.colors, 4) {
-            let colors: Vec<[f32; 4]> =
-                colors.chunks_exact(4).map(|c| [c[0], c[1], c[2], c[3]]).collect();
-            mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
-        }
-
-        if data.index_count > 0 {
-            let indices =
-                unsafe { core::slice::from_raw_parts(data.indices, data.index_count as usize) };
-
-            // A strip is broken where an index is the largest there is, which starts the strip
-            // again from the next, as the GPU reads it. Anywhere else that index names no vertex.
-            let strip = matches!(topology, PrimitiveTopology::LineStrip | PrimitiveTopology::TriangleStrip);
-            if indices
-                .iter()
-                .any(|index| *index as usize >= count && !(strip && *index == u32::MAX))
-            {
-                return status::NULL_ARG;
-            }
-
-            mesh.insert_indices(Indices::U32(indices.to_vec()));
-        }
-
-        if data.normals.is_null() && topology == PrimitiveTopology::TriangleList {
-            // Smooth normals need indices, and flat ones need there to be none, so the mesh is
-            // asked for whichever its shape allows.
-            if mesh.indices().is_some() {
-                mesh.compute_smooth_normals();
-            } else {
-                mesh.compute_flat_normals();
-            }
-        }
 
         crate::state::with_world(|world| {
             let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
@@ -460,6 +385,137 @@ pub unsafe extern "C" fn bcs_mesh_create_from(data: *const BcsMeshData) -> i32 {
 
             let handle = meshes.add(mesh).untyped();
             crate::assets::insert_handle(world, handle)
+        })
+    })
+}
+
+/// The mesh vertices describe, or [`status::NULL_ARG`] where a count is negative, a pointer the count
+/// needs is null, or an index names no vertex.
+///
+/// # Safety
+/// `data` must be null or point to a readable [`BcsMeshData`] whose arrays hold what their counts
+/// say.
+unsafe fn mesh_from(data: *const BcsMeshData) -> Result<bevy::mesh::Mesh, i32> {
+    use bevy::asset::RenderAssetUsages;
+    use bevy::mesh::{Indices, Mesh, PrimitiveTopology};
+
+    if data.is_null() {
+        return Err(status::NULL_ARG);
+    }
+
+    let data = unsafe { *data };
+
+    if data.vertex_count <= 0
+        || data.positions.is_null()
+        || data.index_count < 0
+        || (data.indices.is_null() && data.index_count > 0)
+    {
+        return Err(status::NULL_ARG);
+    }
+
+    let count = data.vertex_count as usize;
+
+    let floats = |pointer: *const f32, width: usize| -> Option<&[f32]> {
+        (!pointer.is_null())
+            .then(|| unsafe { core::slice::from_raw_parts(pointer, count * width) })
+    };
+
+    let topology = match data.topology {
+        1 => PrimitiveTopology::LineList,
+        2 => PrimitiveTopology::PointList,
+        3 => PrimitiveTopology::LineStrip,
+        4 => PrimitiveTopology::TriangleStrip,
+        _ => PrimitiveTopology::TriangleList,
+    };
+
+    let positions = floats(data.positions, 3)
+        .map(|all| all.chunks_exact(3).map(|p| [p[0], p[1], p[2]]).collect::<Vec<_>>())
+        .unwrap_or_default();
+
+    let mut mesh = Mesh::new(topology, RenderAssetUsages::default())
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+
+    if let Some(normals) = floats(data.normals, 3) {
+        let normals: Vec<[f32; 3]> =
+            normals.chunks_exact(3).map(|n| [n[0], n[1], n[2]]).collect();
+        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    }
+
+    if let Some(uvs) = floats(data.uvs, 2) {
+        let uvs: Vec<[f32; 2]> = uvs.chunks_exact(2).map(|t| [t[0], t[1]]).collect();
+        mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    }
+
+    if let Some(colors) = floats(data.colors, 4) {
+        let colors: Vec<[f32; 4]> =
+            colors.chunks_exact(4).map(|c| [c[0], c[1], c[2], c[3]]).collect();
+        mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+    }
+
+    if data.index_count > 0 {
+        let indices =
+            unsafe { core::slice::from_raw_parts(data.indices, data.index_count as usize) };
+
+        // A strip is broken where an index is the largest there is, which starts the strip
+        // again from the next, as the GPU reads it. Anywhere else that index names no vertex.
+        let strip = matches!(topology, PrimitiveTopology::LineStrip | PrimitiveTopology::TriangleStrip);
+        if indices
+            .iter()
+            .any(|index| *index as usize >= count && !(strip && *index == u32::MAX))
+        {
+            return Err(status::NULL_ARG);
+        }
+
+        mesh.insert_indices(Indices::U32(indices.to_vec()));
+    }
+
+    if data.normals.is_null() && topology == PrimitiveTopology::TriangleList {
+        // Smooth normals need indices, and flat ones need there to be none, so the mesh is
+        // asked for whichever its shape allows.
+        if mesh.indices().is_some() {
+            mesh.compute_smooth_normals();
+        } else {
+            mesh.compute_flat_normals();
+        }
+    }
+
+    Ok(mesh)
+}
+
+/// Writes vertices over the mesh a handle names, so everything drawn with it changes without being
+/// pointed at a new one, as a mesh changed in place in Bevy does.
+///
+/// Returns what [`bcs_mesh_create_from`] refuses, and [`status::INVALID_STATE`] for a handle to
+/// something other than a mesh.
+///
+/// # Safety
+/// `data` must point to a readable [`BcsMeshData`] whose arrays hold what their counts say.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_mesh_write(handle: i32, data: *const BcsMeshData) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::asset::Assets;
+        use bevy::mesh::Mesh;
+
+        let mesh = match unsafe { mesh_from(data) } {
+            Ok(mesh) => mesh,
+            Err(code) => return code,
+        };
+
+        crate::state::with_world(|world| {
+            let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                return status::NO_COMPONENT;
+            };
+            let Ok(handle) = handle.try_typed::<Mesh>() else {
+                return status::INVALID_STATE;
+            };
+            let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
+                return status::UNSUPPORTED;
+            };
+
+            match meshes.insert(&handle, mesh) {
+                Ok(_) => status::OK,
+                Err(_) => status::INVALID_STATE,
+            }
         })
     })
 }
@@ -1722,4 +1778,110 @@ mod tests {
             assert_eq!(status::NOT_PRESENT, unsafe { bcs_render_material_write(9999, &changed) });
         });
     }
+}
+
+/// Writes an image's width, height and bytes a texel to `size`, and copies the copy of its texels
+/// the app keeps, row after row, to `out`, answering their length in bytes.
+///
+/// Returns [`status::NOT_PRESENT`] while the image is loading, and for one whose texels were
+/// handed to the GPU without a copy kept, and [`status::INVALID_STATE`] for a compressed format,
+/// whose texels are blocks rather than a row of values each.
+///
+/// # Safety
+/// `size` must be writable for three integers, and `out` for `capacity` bytes or null when
+/// `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_image_pixels(image: i32, size: *mut u32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (image, size, out, capacity);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if size.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let handle = match crate::render::image_handle(world, image) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(refusal) => return refusal,
+                };
+                let Some(found) = world.resource::<bevy::asset::Assets<bevy::image::Image>>().get(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+                let format = found.texture_descriptor.format;
+                if format.block_dimensions() != (1, 1) {
+                    return status::INVALID_STATE;
+                }
+                let Some(data) = found.data.as_ref() else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    size.write(found.width());
+                    size.add(1).write(found.height());
+                    size.add(2).write(format.block_copy_size(None).unwrap_or(0));
+                }
+
+                let length = data.len().min(i32::MAX as usize) as i32;
+                if !out.is_null() && capacity >= length {
+                    unsafe { core::ptr::copy_nonoverlapping(data.as_ptr(), out, length as usize) };
+                }
+                length
+            })
+        }
+    })
+}
+
+/// Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given them
+/// again and everything drawn with the image changes.
+///
+/// Returns what [`bcs_render_image_pixels`] refuses, and [`status::NULL_ARG`] where the bytes are
+/// not as many as the image holds.
+///
+/// # Safety
+/// `data` must be readable for `length` bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_image_set_pixels(image: i32, data: *const u8, length: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (image, data, length);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if data.is_null() || length < 0 {
+                return status::NULL_ARG;
+            }
+            let bytes = unsafe { core::slice::from_raw_parts(data, length as usize) };
+
+            with_world(|world| {
+                let handle = match crate::render::image_handle(world, image) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(refusal) => return refusal,
+                };
+                let mut images = world.resource_mut::<bevy::asset::Assets<bevy::image::Image>>();
+                let Some(mut found) = images.get_mut(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+                let Some(kept) = found.data.as_mut() else {
+                    return status::NOT_PRESENT;
+                };
+                if kept.len() != bytes.len() {
+                    return status::NULL_ARG;
+                }
+
+                kept.copy_from_slice(bytes);
+                status::OK
+            })
+        }
+    })
 }

@@ -8,29 +8,33 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `327f86a`. Bevy's widgets and interface picking built in, a text field made from C#
-and three examples (`327f86a`) are settled on the description and the reply, which was read. An
-offscreen run cannot type into a field, Bevy handing keys to one only through a primary window,
-which the docs say. The table stands at 160 written, 8 written in part, 95 that can be, 101
-missing and 57 that do not apply.
+Reviewed up to `bb508d9`. Bevy's widgets reached through wrappers with two examples (`bb508d9`) is
+settled on its description and reply. Writing an immutable component by reinserting it, so that
+writing a `ChildOf` reparents, is a change to what every component does and is noted. The table
+stands at 162 written, 8 written in part, 95 that can be, 98 missing and 58 that do not apply.
 
 ## Now
 
-Item 1 is the owner's request of 2026-10-04 and goes on a group at a time. Items 4 to 6 are
-taken from [SHARED.md](SHARED.md).
+The owner asked that the work does not stop. A batch that ends is followed by the next item
+here with no wait for a reply, and the list is long so that it does not run out. Items 4 to 6
+and 8 to 10 are taken from [SHARED.md](SHARED.md).
 
-1. **Bevy's examples, what is left of the pass.** Math, then the rest of 3D, an example that
-   needs something missing marked and passed over. A picture that differs from Bevy's for no
-   known reason is taken down to the smallest scene that still differs and explained before
-   the pass goes on, as `grid` was, since that is where the table finds a fault.
-2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
-   bridged from Bevy with the examples it unlocks written in its batch. By the table as it
-   stands: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
-   decal's tag and a volume's voxels, for `ssr`, `clustered_decals` and `irradiance_volumes`);
-   then what Bevy's widgets still hold.
-   When the captures have settled, they are compared whole with checked-in references by the
-   workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
-   `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
+1. **The 95 rows that say `can be written` are written**, until that column is empty, many a
+   batch. They stand, by the table: stress tests (20), shaders (15), assets (10), animation (6),
+   the games (6), gizmos (4), application (3), usage (3), picking (2), tools (2) and one each in
+   five more groups. In this order: assets, animation, the six games, since Breakout and its
+   kind are what a reader opens first, gizmos, shaders, application, usage, picking and the
+   rest, then the stress tests, which are also numbers for PERFORMANCE.md beside Bevy's own.
+   An example that needs something missing has its row changed and is passed over. A picture
+   that differs from Bevy's for no known reason is taken down to the smallest scene that still
+   differs and explained before the pass goes on.
+2. **The gaps, by how many rows each holds**, once item 1 is through, each bridged from Bevy
+   with the examples it unlocks written in its batch: more of Bevy's WGSL reached as its
+   lighting is (the deferred buffers, a decal's tag and a volume's voxels), the widgets' events
+   as observers, keys observed as they reach a field, and what the table then names most. When
+   the captures have settled, they are compared whole with checked-in references by the
+   workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
+   scenes.
 3. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
@@ -86,13 +90,10 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 2, Bevy's widgets. The description of Bevy's components is dumped again from a build with
-  the widgets, which gives wrappers for the slider, checkbox, radio group, scrollbar and the rest.
-  `Ui.SelfUpdate` attaches Bevy's observer that keeps a slider, checkbox or radio group's state, and
-  two things the widgets showed are fixed in the bridge for every component: one of unnamed fields
-  with no default, as a slider's value, is inserted at its fields' defaults, an entity field takes
-  Bevy's placeholder, and an immutable component, as a slider's value or the hierarchy's `ChildOf`,
-  is written by inserting a written copy, so writing a `ChildOf` reparents, which a test now checks
-  in place of the refusal it checked. `vertical_slider` and `scrollbars` are written, and `widgets`
-  is marked as the helpers module it is. The two standard widget examples wait on the widgets'
-  events as observers, Feathers is not built, and directional navigation waits on Bevy's map.
+- Item 1, assets. The ten asset rows are written, `asset_loading` in part for want of a folder
+  load. `alter_mesh` and `alter_sprite` change an asset in place as Bevy's do, which needed three
+  calls: `Render.WriteMesh` writes vertices over a mesh's handle, sharing `CreateMesh`'s checks, and
+  `Render.TryReadImage` and `WriteImagePixels` read and write an image's texels, with a test of all
+  three. `embedded_asset` carries its picture as a resource of the examples' assembly, which is how
+  a C# game carries its assets, `extra_asset_source` names a source through `Config.AssetSources`,
+  and `custom_asset` reads its files with code of its own, as a C# game reads its own formats.

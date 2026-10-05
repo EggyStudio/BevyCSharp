@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 189;
+    internal const int ExpectedAbiVersion = 190;
 
     static Native() => NativeLoader.Initialize();
 
@@ -824,6 +824,21 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_buffer_take(int ticket, byte* buffer, int capacity);
+
+    /// <summary>Writes vertices over a mesh.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_write(int handle, NativeMeshData* data);
+
+    /// <summary>Reads an image's size and texels.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_image_pixels(int image, uint* size, byte* output, int capacity);
+
+    /// <summary>Writes texels over an image.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_image_set_pixels(int image, byte* data, int length);
 
     /// <summary>Builds a mesh from vertices and returns an asset key.</summary>
     [LibraryImport(Library)]

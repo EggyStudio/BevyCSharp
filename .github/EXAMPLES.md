@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**162 written, 8 written in part, 95 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 8 of them leaving something out.
+**170 written, 9 written in part, 86 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 9 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -12,7 +12,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [3D Rendering](#3d-rendering) | 53 | 5 | 0 | 9 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
-| [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
+| [Assets](#assets) | 8 | 1 | 1 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **162** | **8** | **95** | **98** | **58** |
+| **All** | **170** | **9** | **86** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -198,22 +198,22 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`alter_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/alter_mesh.rs) | Shows how to modify the underlying asset of a Mesh after spawning. | can be written |
-| [`alter_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/alter_sprite.rs) | Shows how to modify texture assets after spawning. | can be written |
+| [`alter_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/alter_mesh.rs) | Shows how to modify the underlying asset of a Mesh after spawning. | [written](../BevyCSharp.Examples/asset/alter_mesh.cs) |
+| [`alter_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/alter_sprite.rs) | Shows how to modify texture assets after spawning. | [written](../BevyCSharp.Examples/asset/alter_sprite.cs) |
 | [`asset_decompression`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_decompression.rs) | Demonstrates loading a compressed asset | does not apply, writes a Rust asset loader |
-| [`asset_loading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_loading.rs) | Demonstrates various methods to load assets | can be written |
+| [`asset_loading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_loading.rs) | Demonstrates various methods to load assets | [written in part](../BevyCSharp.Examples/asset/asset_loading.cs), loading a whole folder at once, which the asset server has no call for |
 | [`asset_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/processing/asset_processing.rs) | Demonstrates how to process and load custom assets | does not apply, writes Rust asset processors |
 | [`asset_saving`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_saving.rs), [live in Bevy](https://bevy.org/examples/assets/asset-saving/) | Demonstrates how to save an asset | does not apply, writes a Rust asset saver |
 | [`asset_saving_with_subassets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_saving_with_subassets.rs), [live in Bevy](https://bevy.org/examples/assets/asset-saving-with-subassets/) | Demonstrates how to save an asset with subassets | does not apply, writes a Rust asset saver |
 | [`asset_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/asset_settings.rs) | Demonstrates various methods of applying settings when loading an asset | missing, settings given to a loader per load, such as an image's sampler |
-| [`custom_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/custom_asset.rs), [live in Bevy](https://bevy.org/examples/assets/custom-asset/) | Implements a custom asset loader | can be written, as a data asset, which is how a C# game has assets of its own types |
+| [`custom_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/custom_asset.rs), [live in Bevy](https://bevy.org/examples/assets/custom-asset/) | Implements a custom asset loader | [written](../BevyCSharp.Examples/asset/custom_asset.cs), prints [its output](assets/examples/custom_asset.txt), as a data asset, which is how a C# game has assets of its own types |
 | [`custom_asset_reader`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/custom_asset_reader.rs) | Implements a custom AssetReader | does not apply, writes a Rust AssetReader |
-| [`embedded_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/embedded_asset.rs), [live in Bevy](https://bevy.org/examples/assets/embedded-asset/) | Embed an asset in the application binary and load it | can be written |
-| [`extra_asset_source`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/extra_source.rs) | Load an asset from a non-standard asset source | can be written |
-| [`generated_assets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/generated_assets.rs), [live in Bevy](https://bevy.org/examples/assets/generated-assets/) | Shows how to generate and store assets at runtime | can be written |
-| [`hot_asset_reloading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/hot_asset_reloading.rs) | Demonstrates automatic reloading of assets when modified on disk | can be written |
-| [`multi_asset_sync`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/multi_asset_sync.rs), [live in Bevy](https://bevy.org/examples/assets/multi-asset-sync/) | Demonstrates how to wait for multiple assets to be loaded. | can be written |
-| [`repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/repeated_texture.rs), [live in Bevy](https://bevy.org/examples/assets/repeated-texture/) | How to configure the texture to repeat instead of the default clamp to edges | can be written |
+| [`embedded_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/embedded_asset.rs), [live in Bevy](https://bevy.org/examples/assets/embedded-asset/) | Embed an asset in the application binary and load it | [written](../BevyCSharp.Examples/asset/embedded_asset.cs), the picture carried as a resource of the program's assembly, which is how a C# game carries its assets |
+| [`extra_asset_source`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/extra_source.rs) | Load an asset from a non-standard asset source | can be written, the source a folder of the examples' assets, where Bevy's is a folder beside its example |
+| [`generated_assets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/generated_assets.rs), [live in Bevy](https://bevy.org/examples/assets/generated-assets/) | Shows how to generate and store assets at runtime | [written](../BevyCSharp.Examples/asset/generated_assets.cs), the cone's vertices worked out on a worker and made a mesh in a system, since a mesh is made where the world is |
+| [`hot_asset_reloading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/hot_asset_reloading.rs) | Demonstrates automatic reloading of assets when modified on disk | [written](../BevyCSharp.Examples/asset/hot_asset_reloading.cs), the files watched only where the editor profile is built, which builds Bevy's file watcher |
+| [`multi_asset_sync`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/multi_asset_sync.rs), [live in Bevy](https://bevy.org/examples/assets/multi-asset-sync/) | Demonstrates how to wait for multiple assets to be loaded. | [written](../BevyCSharp.Examples/asset/multi_asset_sync.cs), the loads asked for their state each frame, a task waiting on the count in place of Bevy's guards |
+| [`repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/repeated_texture.rs), [live in Bevy](https://bevy.org/examples/assets/repeated-texture/) | How to configure the texture to repeat instead of the default clamp to edges | [written](../BevyCSharp.Examples/asset/repeated_texture.cs) |
 | [`web_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/web_asset.rs), [live in Bevy](https://bevy.org/examples/assets/web-asset/) | Load an asset from the web | missing, loading assets over HTTP |
 
 ## Async Tasks

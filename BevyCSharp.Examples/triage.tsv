@@ -137,18 +137,18 @@ without_winit	n/a	takes winit out of Bevy's plugins, which the bridge chooses
 alter_mesh	can
 alter_sprite	can
 asset_decompression	n/a	writes a Rust asset loader
-asset_loading	can
+asset_loading	part	loading a whole folder at once, which the asset server has no call for
 asset_processing	n/a	writes Rust asset processors
 asset_saving	n/a	writes a Rust asset saver
 asset_saving_with_subassets	n/a	writes a Rust asset saver
 asset_settings	missing	settings given to a loader per load, such as an image's sampler
 custom_asset	can	as a data asset, which is how a C# game has assets of its own types
 custom_asset_reader	n/a	writes a Rust AssetReader
-embedded_asset	can
-extra_asset_source	can
-generated_assets	can
-hot_asset_reloading	can
-multi_asset_sync	can
+embedded_asset	can	the picture carried as a resource of the program's assembly, which is how a C# game carries its assets
+extra_asset_source	can	the source a folder of the examples' assets, where Bevy's is a folder beside its example
+generated_assets	can	the cone's vertices worked out on a worker and made a mesh in a system, since a mesh is made where the world is
+hot_asset_reloading	can	the files watched only where the editor profile is built, which builds Bevy's file watcher
+multi_asset_sync	can	the loads asked for their state each frame, a task waiting on the count in place of Bevy's guards
 repeated_texture	can
 web_asset	missing	loading assets over HTTP
 async_channel_pattern	can	with .NET's tasks and channels

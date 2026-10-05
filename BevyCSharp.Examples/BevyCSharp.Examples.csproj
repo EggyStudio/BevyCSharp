@@ -28,4 +28,13 @@
               Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
+    <!-- The picture embedded_asset carries in the program rather than beside it, named as an asset
+         is under the asset root, which is how a game's assembly carries the assets it ships. -->
+    <ItemGroup>
+        <EmbeddedResource Include="bevy-assets/pixel/bevy_pixel_light.png"
+                          LogicalName="assets/embedded_asset/files/bevy_pixel_light.png"
+                          WithCulture="false"
+                          Condition="Exists('bevy-assets/pixel/bevy_pixel_light.png')"/>
+    </ItemGroup>
+
 </Project>

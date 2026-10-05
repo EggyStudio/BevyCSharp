@@ -56,6 +56,19 @@ once becomes uploads spread over a few frames rather than a hitch; the first rea
 always handed over, however large. A finished read of higher priority goes first, and a file that
 could not be read throws from `TryTake`.
 
+A loaded mesh or image is changed in place as Bevy changes one, so everything drawn with it
+changes too. `Render.TryReadMesh` and `Render.WriteMesh` read a mesh's triangles and write new ones
+over the same handle, and `Render.TryReadImage` and `Render.WriteImagePixels` read an image's
+texels, row after row, and write them back:
+
+```csharp
+if (Render.TryReadImage(portrait, out var pixels))
+    Render.WriteImagePixels(portrait, pixels!.Data.Select(b => (byte)(255 - b)).ToArray());   // inverted
+```
+
+An image reads only while the app keeps a copy of its texels, which a loaded picture and one made
+with `Render.CreateImage` do, and a compressed one is refused, since its texels are blocks.
+
 ## Models
 
 A glTF file holds many assets, so one is named with a label after the path. `LoadGltfMesh` builds

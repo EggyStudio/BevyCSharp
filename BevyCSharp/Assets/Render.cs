@@ -253,6 +253,33 @@ public static unsafe class Render
     /// </exception>
     public static AssetHandle CreateMesh(MeshData mesh)
     {
+        var key = Send(mesh, AssetHandle.None);
+        Keep(key, mesh);
+        return new AssetHandle(key);
+    }
+
+    /// <summary>Writes vertices over a mesh, so everything drawn with it changes. Only valid inside a system.</summary>
+    /// <remarks>
+    /// Bevy's way of changing a mesh in place, as a mesh deformed while the game runs is, rather
+    /// than making a new one and pointing every entity at it. <see cref="TryReadMesh"/> reads what a
+    /// mesh holds, so a loaded model can be read, changed and written back. What
+    /// <see cref="CreateMesh(MeshData)"/> checks, this checks, and the mesh's recipe, if it was
+    /// built from a primitive, is forgotten, since it no longer describes it.
+    /// </remarks>
+    /// <exception cref="ArgumentException">As for <see cref="CreateMesh(MeshData)"/>.</exception>
+    /// <exception cref="BevyNativeException">The handle names no mesh, or this build has no renderer.</exception>
+    public static void WriteMesh(AssetHandle mesh, MeshData data)
+    {
+        Send(data, mesh);
+        Keep(mesh.Key, data);
+    }
+
+    /// <summary>
+    /// Checks a mesh's vertices and hands them over, as a new mesh, or written over the one
+    /// <paramref name="into"/> names.
+    /// </summary>
+    private static int Send(MeshData mesh, AssetHandle into)
+    {
         ArgumentNullException.ThrowIfNull(mesh);
 
         var count = mesh.Positions.Length;
@@ -293,25 +320,87 @@ public static unsafe class Render
                 Topology = (int)mesh.Topology,
             };
 
-            var key = Native.Check(
-                Native.bcs_mesh_create_from(&native),
-                $"building a mesh of {count} vertices");
+            if (into == AssetHandle.None)
+                return Native.Check(Native.bcs_mesh_create_from(&native), $"building a mesh of {count} vertices");
 
-            // A copy, so the caller changing its arrays afterward does not change what a scene
-            // writes for a mesh already drawn.
-            var kept = new MeshData
-            {
-                Positions = [.. mesh.Positions],
-                Normals = mesh.Normals is { } n ? [.. n] : null,
-                Uvs = mesh.Uvs is { } u ? [.. u] : null,
-                Colors = mesh.Colors is { } c ? [.. c] : null,
-                Indices = mesh.Indices is { } i ? [.. i] : null,
-                Topology = mesh.Topology,
-            };
-            lock (Built) Built[key] = kept;
-            lock (Recipes) Recipes.Remove(key);
+            Native.Check(Native.bcs_mesh_write(into.Key, &native), $"writing {count} vertices over the mesh {into}");
+            return into.Key;
+        }
+    }
 
-            return new AssetHandle(key);
+    /// <summary>
+    /// Keeps a copy of the vertices a mesh was given, so the caller changing its arrays afterward
+    /// does not change what a scene writes for a mesh already drawn.
+    /// </summary>
+    private static void Keep(int key, MeshData mesh)
+    {
+        var kept = new MeshData
+        {
+            Positions = [.. mesh.Positions],
+            Normals = mesh.Normals is { } n ? [.. n] : null,
+            Uvs = mesh.Uvs is { } u ? [.. u] : null,
+            Colors = mesh.Colors is { } c ? [.. c] : null,
+            Indices = mesh.Indices is { } i ? [.. i] : null,
+            Topology = mesh.Topology,
+        };
+        lock (Built) Built[key] = kept;
+        lock (Recipes) Recipes.Remove(key);
+    }
+
+    /// <summary>
+    /// Reads an image's texels from the copy the app keeps of it, or answers false while it is
+    /// loading or where no copy is kept.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The texels are row after row from the top, each the image format's own bytes, four for the
+    /// sRGB and linear eight-bit formats a picture loads as. An image loaded from a file keeps its
+    /// copy unless it was loaded for the GPU alone, and one made with <see cref="CreateImage"/> keeps
+    /// its own. A compressed format, whose texels are blocks, is refused.
+    /// </para>
+    /// <para>
+    /// With <see cref="WriteImagePixels"/>, how an image is changed in place, inverted, painted on or
+    /// tinted, so every sprite and material showing it changes with it, as Bevy's
+    /// <c>Assets&lt;Image&gt;::get_mut</c> changes one.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The format is compressed, or this build has no renderer.</exception>
+    public static bool TryReadImage(AssetHandle image, out ImagePixels? pixels)
+    {
+        var size = stackalloc uint[3];
+        var length = Native.bcs_render_image_pixels(image.Key, size, null, 0);
+        if (length == NativeStatus.NotPresent)
+        {
+            pixels = null;
+            return false;
+        }
+        if (length == NativeStatus.Unsupported) throw NoRenderer("Reading an image");
+        Native.Check(length, $"reading the image {image}");
+
+        var data = new byte[length];
+        fixed (byte* at = data)
+            Native.Check(Native.bcs_render_image_pixels(image.Key, size, at, length), $"reading the image {image}");
+
+        pixels = new ImagePixels(size[0], size[1], size[2], data);
+        return true;
+    }
+
+    /// <summary>
+    /// Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given
+    /// them again and everything showing the image changes.
+    /// </summary>
+    /// <remarks>See <see cref="TryReadImage"/> for the layout, which these bytes follow.</remarks>
+    /// <exception cref="BevyNativeException">
+    /// The image is loading or keeps no copy, the bytes are not as many as it holds, or this build
+    /// has no renderer.
+    /// </exception>
+    public static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels)
+    {
+        fixed (byte* at = texels)
+        {
+            var status = Native.bcs_render_image_set_pixels(image.Key, at, texels.Length);
+            if (status == NativeStatus.Unsupported) throw NoRenderer("Writing an image");
+            Native.Check(status, $"writing {texels.Length} bytes over the image {image}");
         }
     }
 
@@ -2703,3 +2792,10 @@ public sealed class ReflectionSettings
     /// <summary>Whether a hit is refined once more by where the ray and the surface cross.</summary>
     public bool Secant { get; set; } = true;
 }
+
+/// <summary>An image's texels as <see cref="Render.TryReadImage"/> reads them.</summary>
+/// <param name="Width">Texels across.</param>
+/// <param name="Height">Texels down.</param>
+/// <param name="BytesPerTexel">Bytes each texel takes, four for an eight-bit RGBA picture.</param>
+/// <param name="Data">The texels, row after row from the top.</param>
+public sealed record ImagePixels(uint Width, uint Height, uint BytesPerTexel, byte[] Data);

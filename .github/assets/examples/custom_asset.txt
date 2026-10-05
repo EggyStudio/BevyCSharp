@@ -1,0 +1,4 @@
+Loading Blob...
+Custom asset loaded: CustomAsset { value: 42 }
+Custom asset loaded: CustomAsset { value: 13 }
+Blob Size: 29 Bytes
