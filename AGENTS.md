@@ -106,3 +106,10 @@ Stop any serving session before running the suite.
   written by the session that writes REVIEW.md. A batch that touches a shared area is offered
   with a line under Replies in REVIEW.md beginning `Shared:`, and the other repository, checked
   out beside this one, may be read for a model and is never edited from here.
+- `.github/NORM.md` holds the rules this engine and its sibling keep, each with a number, a reason
+  and what checks it. It is the same file in both repositories and is written by the session that
+  writes REVIEW.md. `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter NormTests` says
+  whether the rules hold. A rule read as wrong, or a fault of a kind no rule names, is said with a
+  line under Replies in REVIEW.md beginning `Rule:`. A row that the table under Where things are
+  lacks is added here when N 1.5 asks for it, which the owner allowed on 2026-10-05, and nothing
+  else in this file changes without the owner's word.

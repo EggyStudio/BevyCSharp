@@ -19,6 +19,7 @@ using BevyCSharp.Examples.ThreeD;
 using BevyCSharp.Examples.Transforms;
 using BevyCSharp.Examples.TwoD;
 using BevyCSharp.Examples.Usage;
+using BevyCSharp.Examples.Windowing;
 
 namespace BevyCSharp.Examples;
 
@@ -301,6 +302,20 @@ internal static class Catalog
         new("context_menu", ContextMenu.Build),
         new("cooldown", Cooldown.Build),
         new("debug_frustum_culling", DebugFrustumCulling.Build),
+
+        // Window
+        new("clear_color", ClearColor.Build),
+        new("persisting_window_settings", PersistingWindowSettings.Build, PersistingWindowSettings.Configure),
+        new("scale_factor_override", ScaleFactorOverride.Build, ScaleFactorOverride.Configure),
+        new("screenshot", Screenshot.Build),
+        new("transparent_window", TransparentWindow.Build, TransparentWindow.Configure),
+        new("window_drag_move", WindowDragMove.Build),
+        new("window_resizing", WindowResizing.Build),
+        new("window_settings", WindowSettings.Build, WindowSettings.Configure),
+
+        // Kept out of Bevy's list
+        new("minimizing", Minimizing.Build, Minimizing.Configure),
+        new("resizing", Resizing.Build, Resizing.Configure),
     ];
 
     public static bool TryFind(string name, out Example example)

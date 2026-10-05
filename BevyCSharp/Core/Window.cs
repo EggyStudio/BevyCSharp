@@ -123,6 +123,12 @@ public enum CursorShape
 
     /// <summary>A closed hand, while something is held.</summary>
     Grabbing = 10,
+
+    /// <summary>The platform's sign to wait, while nothing can be done.</summary>
+    Wait = 11,
+
+    /// <summary>The platform's sign of work going on that still takes clicks, such as a file being saved.</summary>
+    Progress = 12,
 }
 
 /// <summary>An edge or corner of the window, counted clockwise from the top.</summary>

@@ -126,7 +126,7 @@ log_layers_ecs	n/a	adds a tracing layer, written in Rust
 log_layers	n/a	adds a tracing layer, written in Rust
 logs	missing	Bevy's log written from C# at its levels, and a message logged once
 no_renderer	n/a	builds Bevy's renderer with no graphics backend, which the bridge sets up
-persisting_window_settings	can
+persisting_window_settings	can	through Config.RememberWindow, which keeps the window's place, size and fullscreen in the game's persistent settings as Bevy's settings plugin keeps them
 plugin	can
 plugin_group	can
 render_recovery	missing	recovering from a lost GPU device
@@ -417,13 +417,13 @@ context_menu	can	its nodes' interactions read as they change, where Bevy observe
 cooldown	can
 debug_frustum_culling	can	each shape's box tested against the small camera's frustum, read through Bevy's reflected Frustum, where Bevy reads the camera's visible entities
 clear_color	can
-custom_cursor_image	can	through Bevy's reflected CursorIcon, its image set as a reflected asset
-low_power	can
-monitor_info	can
+custom_cursor_image	missing	custom cursor images, Bevy's custom_cursor feature, which the bridge does not compile in
+low_power	missing	Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default
+monitor_info	missing	a window on each monitor, which is a second window
 multiple_windows	missing	a second window
 scale_factor_override	can	through the resolution of Bevy's reflected Window
-screenshot	can
+screenshot	can	the pictures saved beside the program
 transparent_window	can
 window_drag_move	can
-window_resizing	can
-window_settings	can
+window_resizing	can	the size read each frame and shown when it changes, where Bevy reads its resize messages
+window_settings	part	the custom cursor image among its pointers, Bevy's custom_cursor feature, which the bridge does not compile in, and the frame time it logs

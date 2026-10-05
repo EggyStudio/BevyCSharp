@@ -86,7 +86,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Twelve examples are written in part, each leaving out a feature named in its row.
+Thirteen examples are written in part, each leaving out a feature named in its row.
 
 - **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
   polyline and convex polygon, and the extrusion of a ring around a flat shape. `MeshShape`
@@ -119,6 +119,10 @@ Twelve examples are written in part, each leaving out a feature named in its row
   pauses its schedule and runs the next system on a key, and which `system_stepping` shows alone.
   Bevy's `Stepping` resource works on a schedule's systems by their ids, and the bridge would need
   to add it and say which system is the one a C# delegate runs as.
+- **A cursor of an image**, which `window_settings` leaves out of the pointers it steps through
+  and `custom_cursor_image` is about. Bevy's `CursorIcon::Custom` is behind its `custom_cursor`
+  feature, which the bridge does not compile in, so the component reflects with its system
+  cursors alone.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
   `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
   against.

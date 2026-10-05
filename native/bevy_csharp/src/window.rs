@@ -365,9 +365,10 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
 ///
 /// `0` the platform's arrow, `1` a text caret, `2` a hand for something to press, `3` four arrows
 /// for moving, `4` a no-entry sign, `5` left and right, `6` up and down, `7` the diagonal from the
-/// bottom left to the top right, `8` the other diagonal, `9` an open hand, `10` a closed one. The
+/// bottom left to the top right, `8` the other diagonal, `9` an open hand, `10` a closed one, `11`
+/// the platform's sign to wait, and `12` its sign of work going on that still takes clicks. The
 /// shapes an interface asks for as the pointer crosses what it draws, which makes a field
-/// read as one to type in and an edge as one to drag.
+/// read as one to type in and an edge as one to drag, and the two a game shows while it is busy.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
     crate::interop::guard(|| {
@@ -393,6 +394,8 @@ pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
                 8 => SystemCursorIcon::NwseResize,
                 9 => SystemCursorIcon::Grab,
                 10 => SystemCursorIcon::Grabbing,
+                11 => SystemCursorIcon::Wait,
+                12 => SystemCursorIcon::Progress,
                 _ => return status::NULL_ARG,
             };
 

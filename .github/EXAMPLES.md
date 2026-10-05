@@ -4,14 +4,14 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**213 written, 12 written in part, 39 can be written, 99 missing and 58 do not apply.** Of the 363 that apply, 264 can be written with what is bridged, 12 of them leaving something out.
+**222 written, 13 written in part, 26 can be written, 102 missing and 58 do not apply.** Of the 363 that apply, 261 can be written with what is bridged, 13 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
 | [3D Rendering](#3d-rendering) | 53 | 5 | 0 | 9 | 0 |
 | [Animation](#animation) | 4 | 2 | 0 | 7 | 0 |
-| [Application](#application) | 9 | 0 | 1 | 2 | 7 |
+| [Application](#application) | 10 | 0 | 0 | 2 | 7 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
@@ -39,10 +39,10 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
 | [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 |
-| [Window](#window) | 0 | 0 | 10 | 1 | 0 |
+| [Window](#window) | 6 | 1 | 0 | 4 | 0 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 |
-| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 1 | 0 | 2 | 0 | 10 |
-| **All** | **213** | **12** | **39** | **99** | **58** |
+| [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |
+| **All** | **222** | **13** | **26** | **102** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -185,7 +185,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`log_layers_ecs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/log_layers_ecs.rs) | Illustrate how to transfer data between log layers and Bevy's ECS | does not apply, adds a tracing layer, written in Rust |
 | [`logs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/logs.rs) | Illustrate how to use generate log output | missing, Bevy's log written from C# at its levels, and a message logged once |
 | [`no_renderer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/no_renderer.rs) | An application that runs with default plugins and displays an empty window, but without an actual renderer | does not apply, builds Bevy's renderer with no graphics backend, which the bridge sets up |
-| [`persisting_window_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/persisting_window_settings.rs) | Demonstrates saving window position settings | can be written |
+| [`persisting_window_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/persisting_window_settings.rs) | Demonstrates saving window position settings | [written](../BevyCSharp.Examples/window/persisting_window_settings.cs), through Config.RememberWindow, which keeps the window's place, size and fullscreen in the game's persistent settings as Bevy's settings plugin keeps them |
 | [`plugin`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin.rs) | Demonstrates the creation and registration of a custom plugin | [written](../BevyCSharp.Examples/app/plugin.cs), prints [its output](assets/examples/plugin.txt) |
 | [`plugin_group`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/plugin_group.rs) | Demonstrates the creation and registration of a custom plugin group | [written](../BevyCSharp.Examples/app/plugin_group.cs), prints [its output](assets/examples/plugin_group.txt) |
 | [`render_recovery`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/app/render_recovery.rs) | Demonstrates how bevy can recover from rendering failures. | missing, recovering from a lost GPU device |
@@ -593,17 +593,17 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`clear_color`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/clear_color.rs) | Creates a solid color window | can be written |
-| [`custom_cursor_image`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/custom_cursor_image.rs) | Demonstrates creating an animated custom cursor from an image | can be written, through Bevy's reflected CursorIcon, its image set as a reflected asset |
-| [`low_power`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/low_power.rs) | Demonstrates settings to reduce power use for bevy applications | can be written |
-| [`monitor_info`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/monitor_info.rs) | Displays information about available monitors (displays). | can be written |
+| [`clear_color`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/clear_color.rs) | Creates a solid color window | [written](../BevyCSharp.Examples/window/clear_color.cs) |
+| [`custom_cursor_image`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/custom_cursor_image.rs) | Demonstrates creating an animated custom cursor from an image | missing, custom cursor images, Bevy's custom_cursor feature, which the bridge does not compile in |
+| [`low_power`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/low_power.rs) | Demonstrates settings to reduce power use for bevy applications | missing, Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default |
+| [`monitor_info`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/monitor_info.rs) | Displays information about available monitors (displays). | missing, a window on each monitor, which is a second window |
 | [`multiple_windows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multiple_windows.rs) | Demonstrates creating multiple windows, and rendering to them | missing, a second window |
-| [`scale_factor_override`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/scale_factor_override.rs) | Illustrates how to customize the default window settings | can be written, through the resolution of Bevy's reflected Window |
-| [`screenshot`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/screenshot.rs) | Shows how to save screenshots to disk | can be written |
-| [`transparent_window`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/transparent_window.rs) | Illustrates making the window transparent and hiding the window decoration | can be written |
-| [`window_drag_move`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_drag_move.rs) | Demonstrates drag move and drag resize without window decoration | can be written |
-| [`window_resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_resizing.rs) | Demonstrates resizing and responding to resizing a window | can be written |
-| [`window_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_settings.rs) | Demonstrates customizing default window settings | can be written |
+| [`scale_factor_override`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/scale_factor_override.rs) | Illustrates how to customize the default window settings | [written](../BevyCSharp.Examples/window/scale_factor_override.cs), through the resolution of Bevy's reflected Window |
+| [`screenshot`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/screenshot.rs) | Shows how to save screenshots to disk | [written](../BevyCSharp.Examples/window/screenshot.cs), the pictures saved beside the program |
+| [`transparent_window`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/transparent_window.rs) | Illustrates making the window transparent and hiding the window decoration | [written](../BevyCSharp.Examples/window/transparent_window.cs) |
+| [`window_drag_move`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_drag_move.rs) | Demonstrates drag move and drag resize without window decoration | [written](../BevyCSharp.Examples/window/window_drag_move.cs) |
+| [`window_resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_resizing.rs) | Demonstrates resizing and responding to resizing a window | [written](../BevyCSharp.Examples/window/window_resizing.cs), the size read each frame and shown when it changes, where Bevy reads its resize messages |
+| [`window_settings`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/window_settings.rs) | Demonstrates customizing default window settings | [written in part](../BevyCSharp.Examples/window/window_settings.cs), the custom cursor image among its pointers, Bevy's custom_cursor feature, which the bridge does not compile in, and the frame time it logs |
 
 ## glTF
 
@@ -627,9 +627,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`desktop_request_redraw`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/desktop_request_redraw.rs) |   | does not apply, a test of winit's redraw requests, hidden from Bevy's list |
 | [`fallback_image`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/fallback_image.rs) |   | does not apply, a test of shader fallback images, hidden from Bevy's list |
 | [`hello_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/hello_world.rs) |   | [written](../BevyCSharp.Examples/app/hello_world.cs), prints [its output](assets/examples/hello_world.txt) |
-| [`minimizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/minimizing.rs) |   | can be written |
+| [`minimizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/minimizing.rs) |   | [written](../BevyCSharp.Examples/window/minimizing.cs) |
 | [`no_prepass`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/3d/no_prepass.rs) |   | does not apply, a test of the prepass, hidden from Bevy's list |
-| [`resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/resizing.rs) |   | can be written |
+| [`resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/window/resizing.rs) |   | [written](../BevyCSharp.Examples/window/resizing.cs) |
 | [`test_invalid_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/3d/test_invalid_skinned_mesh.rs) |   | does not apply, a test of skinned mesh validation, hidden from Bevy's list |
 | [`test_skinned_mesh_bounds`](https://github.com/bevyengine/bevy/blob/v0.19.1/tests/3d/test_skinned_mesh_bounds.rs) |   | does not apply, a test of skinned mesh bounds, hidden from Bevy's list |
 | [`testbed_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/testbed/2d.rs) |   | does not apply, Bevy's visual regression scenes, hidden from its list |
