@@ -40,6 +40,8 @@ pub mod gamepad;
 pub mod gizmos;
 pub mod input;
 pub mod interop;
+pub mod interop_render;
+pub mod interop_window;
 pub mod lifecycle;
 pub mod observe;
 pub mod pick;
