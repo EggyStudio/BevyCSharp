@@ -8,11 +8,11 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `7b1e48f`. The ten asset examples (`fbc5045`) and the six animation examples
-(`7b1e48f`) are settled on their descriptions and the replies, which were read, with a mesh and
-an image written in place and a clip's repeat count changed as it plays added for them. The
-table stands at 174 written, 11 written in part, 80 that can be, 98 missing and 58 that do not
-apply.
+Reviewed up to `1ad2179`. Bevy's six games (`1ad2179`) are settled on the description and the reply,
+which was read, with an offscreen camera spawned after startup found never to draw and fixed.
+The gizmo examples and the rest of Bevy's gizmos are in the working tree and are settled when
+committed. The table stands at 183 written, 12 written in part, 70 that can be, 98 missing and
+58 that do not apply.
 
 ## Now
 
@@ -20,10 +20,10 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4 to 6
 and 8 to 10 are taken from [SHARED.md](SHARED.md).
 
-1. **The 80 rows that say `can be written` are written**, until that column is empty, many a
-   batch. Assets and animation are done. In this order from here: the six games, since Breakout and its
-   kind are what a reader opens first, gizmos, shaders, application, usage, picking and the
-   rest, then the stress tests, which are also numbers for PERFORMANCE.md beside Bevy's own.
+1. **The 70 rows that say `can be written` are written**, until that column is empty, many a
+   batch. Assets, animation, the games and gizmos are done. In this order from here: shaders,
+   application, usage, picking and the rest, then the stress tests, which are also numbers for
+   PERFORMANCE.md beside Bevy's own.
    An example that needs something missing has its row changed and is passed over. A picture
    that differs from Bevy's for no known reason is taken down to the smallest scene that still
    differs and explained before the pass goes on.
@@ -89,12 +89,5 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 1, the games. The six game rows are written, `breakout` in part for want of Bevy's
-  stepping, which TODO.md now lists. `desk_toy` lets the pointer through its window by Bevy's
-  `CursorOptions`, reached through the new `Window.Entity()`, and `loading_screen` waits on two
-  new calls, `AssetServer.StateWithDependenciesOf` for a scene and everything it loads, and
-  `Render.PipelinesReady` for the pipelines Bevy compiles before it draws, with a test of both.
-  That example also showed that an offscreen run never drew through a camera spawned after
-  startup, since Bevy sizes a camera's target only when it is added or its projection changes.
-  The bridge now marks the projection when it points such a camera at the run's image, and a test
-  covers it, so a capture of any example that spawns its camera later is right from now on.
+  `extra_asset_source` from the asset batch was filed under Bevy's source file name rather than
+  its example's, so the table still counted it as one to write. It is renamed in this batch.

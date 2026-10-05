@@ -42,7 +42,18 @@ pub struct QueuedGizmo {
 /// Text is kept beside the shapes rather than among them, since a shape is a handful of numbers
 /// that copy as they are and a run of text owns its string.
 #[derive(bevy::ecs::resource::Resource, Default)]
-pub struct GizmoQueue(pub Vec<QueuedGizmo>, pub Vec<QueuedText>);
+pub struct GizmoQueue(pub Vec<QueuedGizmo>, pub Vec<QueuedText>, pub Option<Vec<QueuedGizmo>>);
+
+impl GizmoQueue {
+    /// Where a shape asked for now goes, into the recording when one is open, so it is kept in an
+    /// asset rather than drawn once, and otherwise into this frame's drawing.
+    fn shapes(&mut self) -> &mut Vec<QueuedGizmo> {
+        match &mut self.2 {
+            Some(recording) => recording,
+            None => &mut self.0,
+        }
+    }
+}
 
 /// One run of text to draw this frame, in Bevy's stroke font.
 pub struct QueuedText {
@@ -79,6 +90,14 @@ pub struct BcsGizmoText {
 #[derive(Default, bevy::reflect::Reflect, bevy::gizmos::config::GizmoConfigGroup)]
 pub struct FrontGizmos;
 
+/// A grid's cell size, the radius across and the third number down where it is given, which
+/// draws a grid of cells longer one way than the other. Zero there is a square cell.
+#[cfg(feature = "render")]
+fn spacing(shape: &QueuedGizmo) -> bevy::math::Vec2 {
+    let down = if shape.end[2] > 0.0 { shape.end[2] } else { shape.radius };
+    bevy::math::Vec2::new(shape.radius, down)
+}
+
 /// Draws one recorded shape, with whichever set of gizmos it belongs to.
 ///
 /// A macro rather than a function, because `Gizmos` and `Gizmos<FrontGizmos>` are different types
@@ -108,11 +127,22 @@ macro_rules! draw_shape {
 
         match shape.kind {
             1 => {
-                $gizmos.sphere(at, shape.radius, $color);
+                // A resolution of zero is Bevy's own, which every shape that has one reads the
+                // same way, since a caller passing nothing asks for the default.
+                let mut sphere = $gizmos.sphere(at, shape.radius, $color);
+                if far.x >= 1.0 {
+                    sphere = sphere.resolution(far.x as u32);
+                }
+                drop(sphere);
             }
             2 => {
+                // Scaled as the transform is, so an arm's length is measured in the entity's own
+                // units, as Bevy's own axes are. A scale of zero is one left unsaid.
+                let scale = if far == Vec3::ZERO { Vec3::ONE } else { far };
                 $gizmos.axes(
-                    Transform::from_translation(position).with_rotation(rotation),
+                    Transform::from_translation(position)
+                        .with_rotation(rotation)
+                        .with_scale(scale),
                     shape.radius,
                 );
             }
@@ -123,15 +153,32 @@ macro_rules! draw_shape {
                 $gizmos.rect(at, Vec2::new(far.x, far.y), $color);
             }
             5 => {
-                $gizmos.circle(at, shape.radius, $color);
+                let mut circle = $gizmos.circle(at, shape.radius, $color);
+                if far.x >= 1.0 {
+                    circle = circle.resolution(far.x as u32);
+                }
+                drop(circle);
             }
             6 => {
                 // The angle is in radians, and the arc starts where the isometry's own X axis
                 // points, so turning the shape is how an arc is aimed.
-                $gizmos.arc_3d(far.x, shape.radius, at, $color);
+                let mut arc = $gizmos.arc_3d(far.x, shape.radius, at, $color);
+                if far.y >= 1.0 {
+                    arc = arc.resolution(far.y as u32);
+                }
+                drop(arc);
             }
-            7 => {
-                $gizmos.arrow(position, far, $color);
+            7 | 25 => {
+                // A tip length of zero is Bevy's own, a tenth of the arrow. `25` has a head at
+                // both ends, for a span measured between two points.
+                let mut arrow = $gizmos.arrow(position, far, $color);
+                if shape.radius > 0.0 {
+                    arrow = arrow.with_tip_length(shape.radius);
+                }
+                if shape.kind == 25 {
+                    arrow = arrow.with_double_end();
+                }
+                drop(arrow);
             }
             8 => {
                 // Counts rather than a size, because a grid is described by how many cells it has
@@ -142,7 +189,7 @@ macro_rules! draw_shape {
                     far.y.clamp(0.0, 4096.0) as u32,
                 );
 
-                $gizmos.grid(at, cells, Vec2::splat(shape.radius), $color);
+                $gizmos.grid(at, cells, spacing(&shape), $color);
             }
             9 => {
                 $gizmos.primitive_3d(
@@ -211,16 +258,31 @@ macro_rules! draw_shape {
                 $gizmos.rect_2d(turn, Vec2::new(far.x, far.y), $color);
             }
             15 => {
-                $gizmos.circle_2d(turn, shape.radius, $color);
+                let mut circle = $gizmos.circle_2d(turn, shape.radius, $color);
+                if far.x >= 1.0 {
+                    circle = circle.resolution(far.x as u32);
+                }
+                drop(circle);
             }
             16 => {
                 $gizmos.line_gradient_2d(flat, Vec2::new(far.x, far.y), $color, $fades_to);
             }
-            17 => {
-                $gizmos.arrow_2d(flat, Vec2::new(far.x, far.y), $color);
+            17 | 26 => {
+                let mut arrow = $gizmos.arrow_2d(flat, Vec2::new(far.x, far.y), $color);
+                if shape.radius > 0.0 {
+                    arrow = arrow.with_tip_length(shape.radius);
+                }
+                if shape.kind == 26 {
+                    arrow = arrow.with_double_end();
+                }
+                drop(arrow);
             }
             18 => {
-                $gizmos.arc_2d(turn, far.x, shape.radius, $color);
+                let mut arc = $gizmos.arc_2d(turn, far.x, shape.radius, $color);
+                if far.y >= 1.0 {
+                    arc = arc.resolution(far.y as u32);
+                }
+                drop(arc);
             }
             19 => {
                 let cells = UVec2::new(
@@ -228,7 +290,60 @@ macro_rules! draw_shape {
                     far.y.clamp(0.0, 4096.0) as u32,
                 );
 
-                $gizmos.grid_2d(turn, cells, Vec2::splat(shape.radius), $color);
+                $gizmos.grid_2d(turn, cells, spacing(&shape), $color);
+            }
+
+            // An ellipse is a circle with a half size on each axis, which `end` carries, and its
+            // resolution after them.
+            21 => {
+                let mut ellipse = $gizmos.ellipse(at, Vec2::new(far.x, far.y), $color);
+                if far.z >= 1.0 {
+                    ellipse = ellipse.resolution(far.z as u32);
+                }
+                drop(ellipse);
+            }
+            22 => {
+                let mut ellipse = $gizmos.ellipse_2d(turn, Vec2::new(far.x, far.y), $color);
+                if far.z >= 1.0 {
+                    ellipse = ellipse.resolution(far.z as u32);
+                }
+                drop(ellipse);
+            }
+
+            // Rounded boxes, sized by `end` and rounded by the radius. Not a number is Bevy's own
+            // rounding, a tenth of the shortest side, since zero is a box with square corners and
+            // a negative radius turns the corners inward, which Bevy draws as well. How many
+            // segments each rounded corner has rides in the second color, which a box of one
+            // color has no other use for, zero being Bevy's own.
+            23 => {
+                let mut rect = $gizmos.rounded_rect_2d(turn, Vec2::new(far.x, far.y), $color);
+                if !shape.radius.is_nan() {
+                    rect = rect.corner_radius(shape.radius);
+                }
+                if shape.end_color[0] >= 1.0 {
+                    rect = rect.arc_resolution(shape.end_color[0] as u32);
+                }
+                drop(rect);
+            }
+            24 => {
+                let mut cuboid = $gizmos.rounded_cuboid(at, far, $color);
+                if !shape.radius.is_nan() {
+                    cuboid = cuboid.edge_radius(shape.radius);
+                }
+                if shape.end_color[0] >= 1.0 {
+                    cuboid = cuboid.arc_resolution(shape.end_color[0] as u32);
+                }
+                drop(cuboid);
+            }
+            27 => {
+                let mut rect = $gizmos.rounded_rect(at, Vec2::new(far.x, far.y), $color);
+                if !shape.radius.is_nan() {
+                    rect = rect.corner_radius(shape.radius);
+                }
+                if shape.end_color[0] >= 1.0 {
+                    rect = rect.arc_resolution(shape.end_color[0] as u32);
+                }
+                drop(rect);
             }
             _ => {
                 $gizmos.line(position, far, $color);
@@ -306,6 +421,60 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
     config.depth_bias = -1.0;
 }
 
+/// Hands each group `which` names to `apply`, one at a time.
+///
+/// `0` the two this bridge draws with, `1` the one the scene can hide, `2` the one it cannot, `3`
+/// Bevy's light gizmos, `4` its bounding boxes, and `5` every group the store holds, Bevy's own
+/// among them. One at a time because the store hands out a borrow of itself per group. A group
+/// whose plugin this build left out is passed over rather than panicking, as asking the store for
+/// it by type would.
+#[cfg(feature = "render")]
+fn for_groups(
+    store: &mut bevy::gizmos::config::GizmoConfigStore,
+    which: i32,
+    mut apply: impl FnMut(&mut bevy::gizmos::config::GizmoConfig),
+) {
+    use bevy::gizmos::aabb::AabbGizmoConfigGroup;
+    use bevy::gizmos::config::DefaultGizmoConfigGroup;
+    use bevy::light::gizmos::LightGizmoConfigGroup;
+
+    match which {
+        1 => {
+            if let Some((config, _)) = store.get_config_mut::<DefaultGizmoConfigGroup>() {
+                apply(config);
+            }
+        }
+        2 => {
+            if let Some((config, _)) = store.get_config_mut::<FrontGizmos>() {
+                apply(config);
+            }
+        }
+        3 => {
+            if let Some((config, _)) = store.get_config_mut::<LightGizmoConfigGroup>() {
+                apply(config);
+            }
+        }
+        4 => {
+            if let Some((config, _)) = store.get_config_mut::<AabbGizmoConfigGroup>() {
+                apply(config);
+            }
+        }
+        5 => {
+            for (_, config, _) in store.iter_mut() {
+                apply(config);
+            }
+        }
+        _ => {
+            if let Some((config, _)) = store.get_config_mut::<DefaultGizmoConfigGroup>() {
+                apply(config);
+            }
+            if let Some((config, _)) = store.get_config_mut::<FrontGizmos>() {
+                apply(config);
+            }
+        }
+    }
+}
+
 /// Sets how gizmos are drawn.
 ///
 /// `width` is the line thickness in pixels, and `layers` is the render layer mask deciding which
@@ -313,10 +482,9 @@ pub fn draw_in_front(mut store: bevy::ecs::system::ResMut<bevy::gizmos::config::
 /// stops the drawing without the caller having to stop asking for it, for a debug overlay bound to
 /// a key.
 ///
-/// `which` picks the group: `0` both, `1` the one the scene can hide, `2` the one it cannot. A
-/// shape's `in_front` already chooses between the two groups, so setting them apart turns a floor
-/// grid off while leaving the handles drawn over it, without either side of the editor knowing
-/// about the other.
+/// `which` picks the groups, as [`for_groups`] reads it. A shape's `in_front` already chooses
+/// between the bridge's two, so setting them apart turns a floor grid off while leaving the
+/// handles drawn over it, without either side of the editor knowing about the other.
 ///
 /// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
 #[unsafe(no_mangle)]
@@ -331,7 +499,7 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, whi
         #[cfg(feature = "render")]
         {
             use bevy::camera::visibility::RenderLayers;
-            use bevy::gizmos::config::{DefaultGizmoConfigGroup, GizmoConfigStore};
+            use bevy::gizmos::config::GizmoConfigStore;
 
             crate::state::with_world(|world| {
                 let Some(mut store) = world.get_resource_mut::<GizmoConfigStore>() else {
@@ -347,8 +515,6 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, whi
                     crate::render::scene::layers_from(layers).unwrap_or_default()
                 };
 
-                // One group at a time, because the store hands out a borrow of itself per group
-                // and both are wanted with the same values rather than at the same moment.
                 let apply = |config: &mut bevy::gizmos::config::GizmoConfig| {
                     // A width of zero is a caller leaving it alone rather than asking for lines
                     // with no thickness, which would draw nothing and read as a broken bridge.
@@ -360,21 +526,14 @@ pub extern "C" fn bcs_gizmo_configure(width: f32, layers: u32, enabled: i32, whi
                     config.enabled = enabled != 0;
                 };
 
-                if which != 2 {
-                    apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
-                }
-
-                if which != 1 {
-                    apply(store.config_mut::<FrontGizmos>().0);
-                }
-
+                for_groups(&mut store, which, apply);
                 status::OK
             })
         }
     })
 }
 
-/// Sets what a gizmo line looks like, for both groups at once.
+/// Sets what a gizmo line looks like, for the groups `which` names as [`for_groups`] reads it.
 ///
 /// `style` is `0` solid, `1` dotted and `2` dashed, where `gap_scale` and `line_scale` are the
 /// lengths of the gap and of the visible run, both measured in line widths. `joint` is `0` none,
@@ -395,19 +554,18 @@ pub extern "C" fn bcs_gizmo_style(
     joint: i32,
     joint_resolution: u32,
     perspective: i32,
+    which: i32,
 ) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (style, gap_scale, line_scale, joint, joint_resolution, perspective);
+            let _ = (style, gap_scale, line_scale, joint, joint_resolution, perspective, which);
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            use bevy::gizmos::config::{
-                DefaultGizmoConfigGroup, GizmoConfigStore, GizmoLineJoint, GizmoLineStyle,
-            };
+            use bevy::gizmos::config::{GizmoConfigStore, GizmoLineJoint, GizmoLineStyle};
 
             crate::state::with_world(|world| {
                 let Some(mut store) = world.get_resource_mut::<GizmoConfigStore>() else {
@@ -443,12 +601,214 @@ pub extern "C" fn bcs_gizmo_style(
                     config.line.perspective = perspective != 0;
                 };
 
-                apply(store.config_mut::<DefaultGizmoConfigGroup>().0);
-                apply(store.config_mut::<FrontGizmos>().0);
-
+                for_groups(&mut store, which, apply);
                 status::OK
             })
         }
+    })
+}
+
+/// Moves the gizmos of the groups `which` names toward the camera or away from it before they are
+/// depth tested, from `-1`, in front of everything, through `0`, where they are, to `1`, behind
+/// everything. Bevy clamps it to that range.
+///
+/// What draws a group over the scene or into it after the fact, which a debug view bound to a key
+/// toggles. The bridge's in-front group starts at `-1` and every other at `0`.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_gizmo_depth_bias(bias: f32, which: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (bias, which);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<bevy::gizmos::config::GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                for_groups(&mut store, which, |config| config.depth_bias = bias.clamp(-1.0, 1.0));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets how Bevy draws the shapes of lights, whether every light is drawn rather than only those
+/// carrying `ShowLightGizmo`, and how they are colored, `0` all in `color`, `1` a color for each
+/// entity, `2` each in its light's own color, and `3` a color for each kind of light.
+///
+/// `color` is linear RGBA, read only by the first mode, and may be null for the others.
+///
+/// # Safety
+/// `color` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_lights(draw_all: i32, mode: i32, color: *const f32) -> i32 {
+    crate::interop::guard(|| {
+        let color = (!color.is_null()).then(|| unsafe { core::slice::from_raw_parts(color, 4) }.to_vec());
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (draw_all, mode, color);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::light::gizmos::{LightGizmoColor, LightGizmoConfigGroup};
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<bevy::gizmos::config::GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some((_, lights)) = store.get_config_mut::<LightGizmoConfigGroup>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                lights.draw_all = draw_all != 0;
+                lights.color = match mode {
+                    0 => {
+                        let Some(color) = &color else {
+                            return status::NULL_ARG;
+                        };
+                        LightGizmoColor::Manual(Color::linear_rgba(color[0], color[1], color[2], color[3]))
+                    }
+                    1 => LightGizmoColor::Varied,
+                    3 => LightGizmoColor::ByLightType,
+                    _ => LightGizmoColor::MatchLightColor,
+                };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets whether Bevy draws every entity's bounding box rather than only those carrying
+/// `ShowAabbGizmo`, and in what color, linear RGBA, or a color for each box where `color` is
+/// null.
+///
+/// # Safety
+/// `color` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_bounds(draw_all: i32, color: *const f32) -> i32 {
+    crate::interop::guard(|| {
+        let color = (!color.is_null()).then(|| unsafe { core::slice::from_raw_parts(color, 4) }.to_vec());
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (draw_all, color);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::gizmos::aabb::AabbGizmoConfigGroup;
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<bevy::gizmos::config::GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some((_, bounds)) = store.get_config_mut::<AabbGizmoConfigGroup>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                bounds.draw_all = draw_all != 0;
+                bounds.default_color = color.map(|c| Color::linear_rgba(c[0], c[1], c[2], c[3]));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Starts keeping the shapes asked for, rather than drawing them this frame, until
+/// [`bcs_gizmo_record_end`] makes them an asset.
+///
+/// For lines that do not change, a level's outline or a model's skeleton, which an entity then
+/// draws every frame from the asset with nothing asked for again, at a fraction of the cost of
+/// asking. Text is not kept and is drawn the frame it is asked for. Returns
+/// [`status::INVALID_STATE`] while a recording is already open, since they do not nest.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_gizmo_record_begin() -> i32 {
+    crate::interop::guard(|| {
+        crate::state::with_world(|world| {
+            let Some(mut queue) = world.get_resource_mut::<GizmoQueue>() else {
+                return status::UNSUPPORTED;
+            };
+            if queue.2.is_some() {
+                return status::INVALID_STATE;
+            }
+
+            queue.2 = Some(Vec::new());
+            status::OK
+        })
+    })
+}
+
+/// Ends the recording [`bcs_gizmo_record_begin`] opened, draws what it kept into a new
+/// `GizmoAsset`, and writes the key of its handle to `out`.
+///
+/// Every shape lands in the one asset whichever group it was asked in, since an entity's `Gizmo`
+/// component carries its own line settings and depth bias. Returns [`status::INVALID_STATE`]
+/// where no recording is open.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_record_end(out: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+
+        crate::state::with_world(|world| {
+            let Some(mut queue) = world.get_resource_mut::<GizmoQueue>() else {
+                return status::UNSUPPORTED;
+            };
+            let Some(recorded) = queue.2.take() else {
+                return status::INVALID_STATE;
+            };
+
+            #[cfg(not(feature = "render"))]
+            {
+                let _ = recorded;
+                status::UNSUPPORTED
+            }
+
+            #[cfg(feature = "render")]
+            {
+                use bevy::color::Color;
+                use bevy::gizmos::GizmoAsset;
+                use bevy::gizmos::primitives::dim3::GizmoPrimitive3d;
+                use bevy::math::{Quat, Vec3};
+
+                let mut asset = GizmoAsset::new();
+                for shape in recorded {
+                    let position = Vec3::from_array(shape.start);
+                    let rotation = Quat::from_array(shape.rotation);
+                    let color = Color::linear_rgba(shape.color[0], shape.color[1], shape.color[2], shape.color[3]);
+                    let fades_to = Color::linear_rgba(
+                        shape.end_color[0],
+                        shape.end_color[1],
+                        shape.end_color[2],
+                        shape.end_color[3],
+                    );
+                    draw_shape!(asset, shape, position, rotation, color, fades_to);
+                }
+
+                let Some(mut assets) = world.get_resource_mut::<bevy::asset::Assets<GizmoAsset>>() else {
+                    return status::UNSUPPORTED;
+                };
+                let handle = assets.add(asset);
+                let key = crate::assets::insert_handle(world, handle.untyped());
+                unsafe { out.write(key) };
+                status::OK
+            }
+        })
     })
 }
 
@@ -472,7 +832,7 @@ pub unsafe extern "C" fn bcs_gizmo_draw(config: *const BcsGizmoConfig) -> i32 {
                 return status::UNSUPPORTED;
             };
 
-            queue.0.push(queued(&config));
+            queue.shapes().push(queued(&config));
             status::OK
         })
     })
@@ -510,8 +870,9 @@ pub unsafe extern "C" fn bcs_gizmo_draw_many(configs: *const BcsGizmoConfig, cou
                 return status::UNSUPPORTED;
             };
 
-            queue.0.reserve(described.len());
-            queue.0.extend(described.iter().map(queued));
+            let shapes = queue.shapes();
+            shapes.reserve(described.len());
+            shapes.extend(described.iter().map(queued));
 
             status::OK
         })

@@ -988,32 +988,42 @@ The guide's page is [gizmos.md](https://github.com/EggyStudio/BevyCSharp/blob/ma
 ```csharp
 static void Fade(Vec3 start, Vec3 end, (float R, float G, float B, float A) from, (float R, float G, float B, float A) to, bool inFront = true);  // Draws a line that fades from one color to another along its length
 static void Line(Vec3 start, Vec3 end, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a line between two points
-static void Sphere(Vec3 center, float radius, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a sphere
-static void Arrow(Vec3 start, Vec3 end, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a line with a head on its far end
-static void Circle(Vec3 center, Quat rotation, float radius, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a circle
-static void Arc(Vec3 center, Quat rotation, float radius, float angle, (float R, float G, float B, float A) color, bool inFront = true);  // Draws part of a circle
+static void Sphere(Vec3 center, float radius, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws the outline of a sphere
+static void Arrow(Vec3 start, Vec3 end, (float R, float G, float B, float A) color, bool inFront = true, float tipLength = 0f, bool doubleEnd = false);  // Draws a line with a head on its far end
+static void Circle(Vec3 center, Quat rotation, float radius, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws the outline of a circle
+static void Ellipse(Vec3 center, Quat rotation, float halfWidth, float halfHeight, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws the outline of an ellipse
+static void Arc(Vec3 center, Quat rotation, float radius, float angle, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws part of a circle
 static void Rect(Vec3 center, Quat rotation, float width, float height, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a rectangle
+static void RoundedRect(Vec3 center, Quat rotation, float width, float height, (float R, float G, float B, float A) color, float? cornerRadius = null, bool inFront = true, uint arcResolution = 0);  // Draws the outline of a rectangle with rounded corners
 static void Box(Vec3 center, Quat rotation, Vec3 size, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the twelve edges of a box
+static void RoundedCuboid(Vec3 center, Quat rotation, Vec3 size, (float R, float G, float B, float A) color, float? edgeRadius = null, bool inFront = true, uint arcResolution = 0);  // Draws the edges of a box with rounded edges and corners
 static void Capsule(Vec3 center, Quat rotation, float radius, float length, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a capsule
 static void Cone(Vec3 center, Quat rotation, float radius, float height, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a cone
 static void Cylinder(Vec3 center, Quat rotation, float radius, float halfHeight, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a cylinder
 static void Torus(Vec3 center, Quat rotation, float major, float minor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a torus
-static void Grid(Vec3 center, Quat rotation, uint across, uint down, float spacing, (float R, float G, float B, float A) color, bool inFront = false);  // Draws a flat grid of lines
+static void Grid(Vec3 center, Quat rotation, uint across, uint down, float spacing, (float R, float G, float B, float A) color, bool inFront = false, float spacingDown = 0f);  // Draws a flat grid of lines
 static void Frustum(Vec3 center, Quat rotation, float bottom, float top, float height, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a cone with its point cut off
 static void Rect2d((float X, float Y) center, float width, float height, (float R, float G, float B, float A) color, float angle = 0f, bool inFront = true);  // Draws the outline of a rectangle, flat, for a 2D camera
-static void Circle2d((float X, float Y) center, float radius, (float R, float G, float B, float A) color, bool inFront = true);  // Draws the outline of a circle, flat, for a 2D camera
+static void RoundedRect2d((float X, float Y) center, float width, float height, (float R, float G, float B, float A) color, float? cornerRadius = null, float angle = 0f, bool inFront = true, uint arcResolution = 0);  // Draws the outline of a rectangle with rounded corners, flat, for a 2D camera
+static void Circle2d((float X, float Y) center, float radius, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws the outline of a circle, flat, for a 2D camera
+static void Ellipse2d((float X, float Y) center, float halfWidth, float halfHeight, (float R, float G, float B, float A) color, float angle = 0f, bool inFront = true, uint resolution = 0);  // Draws the outline of an ellipse, flat, for a 2D camera
 static void Line2d((float X, float Y) start, (float X, float Y) end, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a line between two points, flat, for a 2D camera
 static void Line2d((float X, float Y) start, (float X, float Y) end, (float R, float G, float B, float A) from, (float R, float G, float B, float A) to, bool inFront = true);  // Draws a line that fades from one color to another, flat, for a 2D camera
-static void Arrow2d((float X, float Y) start, (float X, float Y) end, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a line with a head on its far end, flat, for a 2D camera
-static void Arc2d((float X, float Y) center, float radius, float angle, (float R, float G, float B, float A) color, float from = 0f, bool inFront = true);  // Draws part of a circle, flat, for a 2D camera
-static void Grid2d((float X, float Y) center, uint across, uint down, float spacing, (float R, float G, float B, float A) color, float angle = 0f, bool inFront = false);  // Draws a grid of lines, flat, for a 2D camera
+static void Arrow2d((float X, float Y) start, (float X, float Y) end, (float R, float G, float B, float A) color, bool inFront = true, float tipLength = 0f, bool doubleEnd = false);  // Draws a line with a head on its far end, flat, for a 2D camera
+static void Arc2d((float X, float Y) center, float radius, float angle, (float R, float G, float B, float A) color, float from = 0f, bool inFront = true, uint resolution = 0);  // Draws part of a circle, flat, for a 2D camera
+static void Grid2d((float X, float Y) center, uint across, uint down, float spacing, (float R, float G, float B, float A) color, float angle = 0f, bool inFront = false, float spacingDown = 0f);  // Draws a grid of lines, flat, for a 2D camera
 static void Lines(ReadOnlySpan<GizmoSegment> lines, bool inFront = false);  // Draws a whole run of lines in one crossing
 static void Polyline(ReadOnlySpan<Vec3> points, (float R, float G, float B, float A) color, bool closed = false, bool inFront = false);  // Draws a line through a run of points, joining the last back to the first where closed is set
 static void Triangle(Vec3 a, Vec3 b, Vec3 c, (float R, float G, float B, float A) color, bool inFront = false);  // Draws the outline of a triangle through three points
 static void Tetrahedron(Vec3 a, Vec3 b, Vec3 c, Vec3 d, (float R, float G, float B, float A) color, bool inFront = false);  // Draws the six edges of a tetrahedron through four points
 static void Tetrahedron(Vec3 center, float size, (float R, float G, float B, float A) color, bool inFront = false);  // Draws a regular tetrahedron standing on its base, centered on a point
 static void Configure(float width = 0f, uint layers = 0, bool enabled = true, GizmoGroup which = GizmoGroup.Both);  // Sets how every gizmo is drawn
-static void SetLineStyle(GizmoLine style = GizmoLine.Solid, float gapScale = 0f, float lineScale = 0f, GizmoJoint joint = GizmoJoint.None, uint jointResolution = 0, bool perspective = false);  // Sets what a gizmo line looks like
+static void SetLineStyle(GizmoLine style = GizmoLine.Solid, float gapScale = 0f, float lineScale = 0f, GizmoJoint joint = GizmoJoint.None, uint jointResolution = 0, bool perspective = false, GizmoGroup which = GizmoGroup.Both);  // Sets what a gizmo line looks like
+static void SetDepthBias(float bias, GizmoGroup which = GizmoGroup.Both);  // Moves a group's gizmos toward the camera or away from it before they are tested against the scene's depth
+static void ShowLights(bool all, LightGizmoColoring coloring = LightGizmoColoring.MatchLight, (float R, float G, float B, float A) color = default);  // Sets whether Bevy draws the shape of every light, and how it colors them
+static void ShowBounds(bool all, (float R, float G, float B, float A)? color = null);  // Sets whether Bevy draws every entity's bounding box, and in what color
+static AssetHandle Record(Action draw);                         // Keeps the shapes draw asks for in an asset, rather than drawing them for one frame, for an entity to draw every frame with Attach
+static void Attach(EcsWorld world, Entity entity, AssetHandle gizmo);  // Has an entity draw a gizmo asset Record made, every frame, placed by the entity's transform
 static void Axes(Transform transform, float length = 1f, bool inFront = true);  // Draws a set of axes, so an orientation can be read at a glance
 static Gizmos.BatchScope Batch();                               // Gathers every shape drawn until the returned scope ends, and hands them over in one call
 static void Text(string text, Vec3 position, Quat rotation, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text in the world, in Bevy's stroke font, facing the way it is turned

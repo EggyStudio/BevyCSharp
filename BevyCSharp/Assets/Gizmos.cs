@@ -116,11 +116,16 @@ public static unsafe class Gizmos
     /// <param name="radius">How large.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">
+    /// How many segments each circle is drawn with, or zero for Bevy's own. A sphere drawn large or
+    /// close needs more to stay round, and one drawn many times a frame fewer.
+    /// </param>
     public static void Sphere(
         Vec3 center,
         float radius,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
+        bool inFront = true,
+        uint resolution = 0) =>
         Draw(new NativeGizmoConfig
         {
             Kind = 1,
@@ -128,6 +133,7 @@ public static unsafe class Gizmos
             StartX = center.X,
             StartY = center.Y,
             StartZ = center.Z,
+            EndX = resolution,
             RotationW = 1f,
             Radius = radius,
             ColorR = color.R,
@@ -146,14 +152,19 @@ public static unsafe class Gizmos
     /// <param name="end">Where the head is.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="tipLength">How long the head is, or zero for Bevy's own, a tenth of the arrow.</param>
+    /// <param name="doubleEnd">Whether there is a head at the start as well, for a span between two points.</param>
     public static void Arrow(
         Vec3 start,
         Vec3 end,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
+        bool inFront = true,
+        float tipLength = 0f,
+        bool doubleEnd = false) =>
         Draw(new NativeGizmoConfig
         {
-            Kind = 7,
+            Kind = doubleEnd ? 25 : 7,
+            Radius = tipLength,
             InFront = inFront ? 1 : 0,
             StartX = start.X,
             StartY = start.Y,
@@ -179,13 +190,37 @@ public static unsafe class Gizmos
     /// <param name="radius">How large.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
     public static void Circle(
         Vec3 center,
         Quat rotation,
         float radius,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(5, center, rotation, color, inFront, radius: radius));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(5, center, rotation, color, inFront, radius: radius, end: new Vec3(resolution, 0f, 0f)));
+
+    /// <summary>Draws the outline of an ellipse.</summary>
+    /// <remarks>
+    /// A circle stretched along its own axes, which is a circle seen at an angle, an orbit, or the
+    /// reach of something that reaches further one way than the other.
+    /// </remarks>
+    /// <param name="center">Where it sits, in world space.</param>
+    /// <param name="rotation">Which way it faces. Unrotated is the XY plane.</param>
+    /// <param name="halfWidth">Half its extent along its own X axis.</param>
+    /// <param name="halfHeight">Half its extent along its own Y axis.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
+    public static void Ellipse(
+        Vec3 center,
+        Quat rotation,
+        float halfWidth,
+        float halfHeight,
+        (float R, float G, float B, float A) color,
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(21, center, rotation, color, inFront, end: new Vec3(halfWidth, halfHeight, resolution)));
 
     /// <summary>Draws part of a circle.</summary>
     /// <remarks>
@@ -199,14 +234,16 @@ public static unsafe class Gizmos
     /// <param name="angle">How much of the circle to draw, in radians.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
     public static void Arc(
         Vec3 center,
         Quat rotation,
         float radius,
         float angle,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(6, center, rotation, color, inFront, radius: radius, end: new Vec3(angle, 0f, 0f)));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(6, center, rotation, color, inFront, radius: radius, end: new Vec3(angle, resolution, 0f)));
 
     /// <summary>Draws the outline of a rectangle.</summary>
     /// <param name="center">Where the middle of it sits, in world space.</param>
@@ -223,6 +260,29 @@ public static unsafe class Gizmos
         (float R, float G, float B, float A) color,
         bool inFront = true) =>
         Draw(Shape(4, center, rotation, color, inFront, end: new Vec3(width, height, 0f)));
+
+    /// <summary>Draws the outline of a rectangle with rounded corners.</summary>
+    /// <param name="center">Where the middle of it sits, in world space.</param>
+    /// <param name="rotation">Which way it faces. Unrotated is the XY plane.</param>
+    /// <param name="width">How wide, along the rectangle's own X axis.</param>
+    /// <param name="height">How tall, along its own Y axis.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="cornerRadius">
+    /// How round the corners are, or null for Bevy's own, a tenth of the shorter side. A negative
+    /// radius turns the corners inward.
+    /// </param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="arcResolution">How many segments each corner is drawn with, or zero for Bevy's own.</param>
+    public static void RoundedRect(
+        Vec3 center,
+        Quat rotation,
+        float width,
+        float height,
+        (float R, float G, float B, float A) color,
+        float? cornerRadius = null,
+        bool inFront = true,
+        uint arcResolution = 0) =>
+        Draw(Shape(27, center, rotation, color, inFront, cornerRadius ?? float.NaN, new Vec3(width, height, 0f)) with { EndColorR = arcResolution });
 
     /// <summary>Draws the twelve edges of a box.</summary>
     /// <remarks>
@@ -242,6 +302,27 @@ public static unsafe class Gizmos
         (float R, float G, float B, float A) color,
         bool inFront = true) =>
         Draw(Shape(9, center, rotation, color, inFront, end: size));
+
+    /// <summary>Draws the edges of a box with rounded edges and corners.</summary>
+    /// <param name="center">Where the middle of it sits, in world space.</param>
+    /// <param name="rotation">Which way it is turned.</param>
+    /// <param name="size">How large along each of its own axes.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="edgeRadius">
+    /// How round the edges are, or null for Bevy's own, a tenth of the shortest side. A negative
+    /// radius turns them inward.
+    /// </param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="arcResolution">How many segments each rounded edge is drawn with, or zero for Bevy's own.</param>
+    public static void RoundedCuboid(
+        Vec3 center,
+        Quat rotation,
+        Vec3 size,
+        (float R, float G, float B, float A) color,
+        float? edgeRadius = null,
+        bool inFront = true,
+        uint arcResolution = 0) =>
+        Draw(Shape(24, center, rotation, color, inFront, edgeRadius ?? float.NaN, size) with { EndColorR = arcResolution });
 
     /// <summary>Draws the outline of a capsule.</summary>
     /// <remarks>
@@ -326,9 +407,10 @@ public static unsafe class Gizmos
     /// <param name="rotation">Which plane it lies in. Unrotated is the XY plane.</param>
     /// <param name="across">How many cells wide.</param>
     /// <param name="down">How many cells tall.</param>
-    /// <param name="spacing">How large one cell is, along both axes.</param>
+    /// <param name="spacing">How large one cell is, along both axes unless <paramref name="spacingDown"/> says otherwise.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="spacingDown">How tall one cell is, or zero for as tall as it is wide.</param>
     public static void Grid(
         Vec3 center,
         Quat rotation,
@@ -336,11 +418,12 @@ public static unsafe class Gizmos
         uint down,
         float spacing,
         (float R, float G, float B, float A) color,
-        bool inFront = false) =>
+        bool inFront = false,
+        float spacingDown = 0f) =>
         Draw(Shape(
             8, center, rotation, color, inFront,
             radius: spacing,
-            end: new Vec3(across, down, 0f)));
+            end: new Vec3(across, down, spacingDown)));
 
     /// <summary>Draws a cone with its point cut off.</summary>
     /// <remarks>
@@ -398,18 +481,64 @@ public static unsafe class Gizmos
         Draw(Shape(
             14, Flat(center), Turn(angle), color, inFront, end: new Vec3(width, height, 0f)));
 
+    /// <summary>Draws the outline of a rectangle with rounded corners, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="center">Where the middle of it sits, on the XY plane.</param>
+    /// <param name="width">How wide, along the rectangle's own X axis.</param>
+    /// <param name="height">How tall, along its own Y axis.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="cornerRadius">
+    /// How round the corners are, or null for Bevy's own, a tenth of the shorter side. A negative
+    /// radius turns the corners inward.
+    /// </param>
+    /// <param name="angle">How far it is turned about Z, in radians.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="arcResolution">How many segments each corner is drawn with, or zero for Bevy's own.</param>
+    public static void RoundedRect2d(
+        (float X, float Y) center,
+        float width,
+        float height,
+        (float R, float G, float B, float A) color,
+        float? cornerRadius = null,
+        float angle = 0f,
+        bool inFront = true,
+        uint arcResolution = 0) =>
+        Draw(Shape(
+            23, Flat(center), Turn(angle), color, inFront, cornerRadius ?? float.NaN, new Vec3(width, height, 0f)) with { EndColorR = arcResolution });
+
     /// <summary>Draws the outline of a circle, flat, for a 2D camera.</summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
     /// <param name="center">Where it sits, on the XY plane.</param>
     /// <param name="radius">How large.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
     public static void Circle2d(
         (float X, float Y) center,
         float radius,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(15, Flat(center), Quat.Identity, color, inFront, radius: radius));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(15, Flat(center), Quat.Identity, color, inFront, radius: radius, end: new Vec3(resolution, 0f, 0f)));
+
+    /// <summary>Draws the outline of an ellipse, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Rect2d" path="/remarks"/>
+    /// <param name="center">Where it sits, on the XY plane.</param>
+    /// <param name="halfWidth">Half its extent along its own X axis.</param>
+    /// <param name="halfHeight">Half its extent along its own Y axis.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="angle">How far it is turned about Z, in radians.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
+    public static void Ellipse2d(
+        (float X, float Y) center,
+        float halfWidth,
+        float halfHeight,
+        (float R, float G, float B, float A) color,
+        float angle = 0f,
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(22, Flat(center), Turn(angle), color, inFront, end: new Vec3(halfWidth, halfHeight, resolution)));
 
     /// <summary>Draws a line between two points, flat, for a 2D camera.</summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
@@ -445,12 +574,20 @@ public static unsafe class Gizmos
     /// <param name="end">Where the head is.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="tipLength">How long the head is, or zero for Bevy's own, a tenth of the arrow.</param>
+    /// <param name="doubleEnd">Whether there is a head at the start as well, for a span between two points.</param>
     public static void Arrow2d(
         (float X, float Y) start,
         (float X, float Y) end,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Gradient(17, start, end, color, color, inFront));
+        bool inFront = true,
+        float tipLength = 0f,
+        bool doubleEnd = false)
+    {
+        var config = Gradient(doubleEnd ? 26 : 17, start, end, color, color, inFront);
+        config.Radius = tipLength;
+        Draw(config);
+    }
 
     /// <summary>Draws part of a circle, flat, for a 2D camera.</summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
@@ -460,27 +597,30 @@ public static unsafe class Gizmos
     /// <param name="color">Linear RGBA.</param>
     /// <param name="from">Where the arc starts, as an angle about Z in radians.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments it is drawn with, or zero for Bevy's own.</param>
     public static void Arc2d(
         (float X, float Y) center,
         float radius,
         float angle,
         (float R, float G, float B, float A) color,
         float from = 0f,
-        bool inFront = true) =>
+        bool inFront = true,
+        uint resolution = 0) =>
         Draw(Shape(
             18, Flat(center), Turn(from), color, inFront,
             radius: radius,
-            end: new Vec3(angle, 0f, 0f)));
+            end: new Vec3(angle, resolution, 0f)));
 
     /// <summary>Draws a grid of lines, flat, for a 2D camera.</summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
     /// <param name="center">Where the middle of the grid sits, on the XY plane.</param>
     /// <param name="across">How many cells wide.</param>
     /// <param name="down">How many cells tall.</param>
-    /// <param name="spacing">How large one cell is, along both axes.</param>
+    /// <param name="spacing">How large one cell is, along both axes unless <paramref name="spacingDown"/> says otherwise.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="angle">How far it is turned about Z, in radians.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="spacingDown">How tall one cell is, or zero for as tall as it is wide.</param>
     public static void Grid2d(
         (float X, float Y) center,
         uint across,
@@ -488,11 +628,12 @@ public static unsafe class Gizmos
         float spacing,
         (float R, float G, float B, float A) color,
         float angle = 0f,
-        bool inFront = false) =>
+        bool inFront = false,
+        float spacingDown = 0f) =>
         Draw(Shape(
             19, Flat(center), Turn(angle), color, inFront,
             radius: spacing,
-            end: new Vec3(across, down, 0f)));
+            end: new Vec3(across, down, spacingDown)));
 
     /// <summary>A point on the XY plane, as the queue's three numbers.</summary>
     private static Vec3 Flat((float X, float Y) point) => new(point.X, point.Y, 0f);
@@ -683,8 +824,9 @@ public static unsafe class Gizmos
     /// <para>
     /// <paramref name="which"/> is the only way one kind of debug drawing is told from another
     /// here. Bevy groups gizmos by a config group, which is a Rust type rather than a value, so
-    /// the two that exist are the two a shape's <c>inFront</c> already chooses between, and a
-    /// game wanting more than that runs out of groups rather than of settings.
+    /// the two a game draws in are the two a shape's <c>inFront</c> already chooses between, and a
+    /// game wanting more than that runs out of groups rather than of settings. Bevy's own groups,
+    /// for lights and bounding boxes, are set here as well.
     /// </para>
     /// <para>
     /// Those two are enough for the thing usually wanted, because what is drawn *in* a scene and
@@ -753,7 +895,8 @@ public static unsafe class Gizmos
         float lineScale = 0f,
         GizmoJoint joint = GizmoJoint.None,
         uint jointResolution = 0,
-        bool perspective = false) =>
+        bool perspective = false,
+        GizmoGroup which = GizmoGroup.Both) =>
         Native.Check(
             Native.bcs_gizmo_style(
                 (int)style,
@@ -761,8 +904,150 @@ public static unsafe class Gizmos
                 lineScale,
                 (int)joint,
                 jointResolution,
-                perspective ? 1 : 0),
+                perspective ? 1 : 0,
+                (int)which),
             "styling gizmo lines");
+
+    /// <summary>
+    /// Moves a group's gizmos toward the camera or away from it before they are tested against
+    /// the scene's depth.
+    /// </summary>
+    /// <remarks>
+    /// From -1, in front of everything, through 0, where they are, to 1, behind everything. The
+    /// group drawn with <c>inFront</c> starts at -1, which is how it stays in front, and every
+    /// other group at 0. A small negative bias keeps a wireframe drawn over a model from flickering
+    /// through its surface, and a key that toggles -1 shows a group through walls on demand.
+    /// </remarks>
+    /// <param name="bias">From -1 to 1, clamped.</param>
+    /// <param name="which">Which groups it applies to.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void SetDepthBias(float bias, GizmoGroup which = GizmoGroup.Both) =>
+        Native.Check(Native.bcs_gizmo_depth_bias(bias, (int)which), "setting the gizmo depth bias");
+
+    /// <summary>
+    /// Sets whether Bevy draws the shape of every light, and how it colors them.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A point light is drawn as a sphere of its radius and range, a spot light as its cone, a
+    /// directional light as an arrow and a rectangle light as its rectangle. Without
+    /// <paramref name="all"/> only lights carrying Bevy's <c>ShowLightGizmo</c> are drawn, which
+    /// is reached as <c>ShowLightGizmoRef</c> and also holds a color of its own for one light.
+    /// </para>
+    /// <para>
+    /// How thick the lines are, whether they are drawn at all and whether the scene can hide them
+    /// are set for <see cref="GizmoGroup.Lights"/> by <see cref="Configure"/> and
+    /// <see cref="SetDepthBias"/>, as for any group.
+    /// </para>
+    /// </remarks>
+    /// <param name="all">Whether every light is drawn.</param>
+    /// <param name="coloring">How their colors are chosen.</param>
+    /// <param name="color">The one color for <see cref="LightGizmoColoring.Manual"/>, linear RGBA.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void ShowLights(
+        bool all,
+        LightGizmoColoring coloring = LightGizmoColoring.MatchLight,
+        (float R, float G, float B, float A) color = default)
+    {
+        var rgba = stackalloc float[] { color.R, color.G, color.B, color.A };
+        Native.Check(Native.bcs_gizmo_lights(all ? 1 : 0, (int)coloring, rgba), "showing light gizmos");
+    }
+
+    /// <summary>
+    /// Sets whether Bevy draws every entity's bounding box, and in what color.
+    /// </summary>
+    /// <remarks>
+    /// The box Bevy culls an entity by, the one to look at when something vanishes at the edge of
+    /// the screen or a picking ray misses what it looks to hit. Without
+    /// <paramref name="all"/> only entities carrying Bevy's <c>ShowAabbGizmo</c> are drawn,
+    /// reached as <c>ShowAabbGizmoRef</c>. <see cref="GizmoGroup.Bounds"/> sets their lines.
+    /// </remarks>
+    /// <param name="all">Whether every entity's box is drawn.</param>
+    /// <param name="color">One color for all of them, linear RGBA, or null for a color of each box's own.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void ShowBounds(bool all, (float R, float G, float B, float A)? color = null)
+    {
+        if (color is not { } c)
+        {
+            Native.Check(Native.bcs_gizmo_bounds(all ? 1 : 0, null), "showing bounding boxes");
+            return;
+        }
+
+        var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
+        Native.Check(Native.bcs_gizmo_bounds(all ? 1 : 0, rgba), "showing bounding boxes");
+    }
+
+    /// <summary>
+    /// Keeps the shapes <paramref name="draw"/> asks for in an asset, rather than drawing them for
+    /// one frame, for an entity to draw every frame with <see cref="Attach"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's retained gizmos. Lines that do not change, an outline, a skeleton, a sphere drawn
+    /// with tens of thousands of segments, are made once and drawn from the asset with nothing
+    /// asked for again, which costs a fraction of asking for them every frame. Lines that change
+    /// stay with the calls above.
+    /// </para>
+    /// <para>
+    /// Every shape call here can be made inside <paramref name="draw"/>, and they all land in the
+    /// one asset, whatever their <c>inFront</c> says, since the entity drawing it carries its own
+    /// line settings and depth bias. Text is drawn the frame it is asked for rather than kept.
+    /// Recordings do not nest. Only valid inside a system.
+    /// </para>
+    /// </remarks>
+    /// <param name="draw">Draws the shapes to keep.</param>
+    /// <returns>The asset, for <see cref="Attach"/>.</returns>
+    /// <exception cref="BevyNativeException">There is nothing to draw on, or a recording is already open.</exception>
+    public static AssetHandle Record(Action draw)
+    {
+        ArgumentNullException.ThrowIfNull(draw);
+
+        // Anything a batch gathered so far is handed over first, so it is drawn this frame
+        // rather than kept, and the recording starts empty.
+        var batch = _batch;
+        if (batch is { Count: > 0 })
+        {
+            DrawMany(CollectionsMarshal.AsSpan(batch), "drawing a batch of gizmos");
+            batch.Clear();
+        }
+
+        Native.Check(Native.bcs_gizmo_record_begin(), "starting a gizmo recording");
+        int key;
+        try
+        {
+            draw();
+            if (_batch is { Count: > 0 } gathered)
+            {
+                DrawMany(CollectionsMarshal.AsSpan(gathered), "recording a batch of gizmos");
+                gathered.Clear();
+            }
+        }
+        finally
+        {
+            Native.Check(Native.bcs_gizmo_record_end(&key), "ending a gizmo recording");
+        }
+
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// Has an entity draw a gizmo asset <see cref="Record"/> made, every frame, placed by the
+    /// entity's transform.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>Gizmo</c> component, reached as <c>GizmoRef</c>, whose line width, style, joints
+    /// and depth bias are the entity's own rather than a group's and are set on that wrapper. A
+    /// width of zero, which a new one starts with, is Bevy's two pixels.
+    /// </remarks>
+    /// <param name="world">The world the entity is in.</param>
+    /// <param name="entity">The entity to draw it.</param>
+    /// <param name="gizmo">The asset.</param>
+    public static void Attach(EcsWorld world, Entity entity, AssetHandle gizmo)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        world.InsertReflected(entity, "bevy_gizmos::retained::Gizmo");
+        world.SetReflectedAsset(entity, "bevy_gizmos::retained::Gizmo", "handle", gizmo);
+    }
 
     /// <summary>
     /// Fills in the shape every call above builds, so each of them is its own arguments and
@@ -800,11 +1085,13 @@ public static unsafe class Gizmos
     /// Draws a set of axes, so an orientation can be read at a glance.
     /// </summary>
     /// <remarks>
-    /// Colored by Bevy: red for X, green for Y, blue for Z. Drawing these on an entity is the
-    /// quickest way to see whether something is facing where it should.
+    /// Colored by Bevy, red for X, green for Y and blue for Z. Drawing these on an entity is the
+    /// quickest way to see whether something is facing where it should. The arms are scaled as
+    /// the transform is, so each is as long as <paramref name="length"/> in the entity's own units
+    /// and a stretched entity shows it.
     /// </remarks>
-    /// <param name="transform">Where the axes sit and which way they point.</param>
-    /// <param name="length">How long each arm is.</param>
+    /// <param name="transform">Where the axes sit, which way they point and how they are scaled.</param>
+    /// <param name="length">How long each arm is, before the transform's scale.</param>
     /// <param name="inFront">Whether the scene can hide them. See <see cref="Line"/>.</param>
     public static void Axes(Transform transform, float length = 1f, bool inFront = true) =>
         Draw(new NativeGizmoConfig
@@ -818,6 +1105,9 @@ public static unsafe class Gizmos
             RotationY = transform.Rotation.Y,
             RotationZ = transform.Rotation.Z,
             RotationW = transform.Rotation.W,
+            EndX = transform.Scale.X,
+            EndY = transform.Scale.Y,
+            EndZ = transform.Scale.Z,
             Radius = length,
             ColorA = 1f,
         });
@@ -1094,18 +1384,24 @@ public readonly struct GizmoSegment
 }
 
 /// <summary>
-/// Which of the two gizmo groups a setting applies to.
+/// Which gizmo groups a setting applies to.
 /// </summary>
 /// <remarks>
-/// The same split a shape's <c>inFront</c> chooses between, seen from the other end. A handle, an
-/// outline or a marker is drawn about the scene and has to be reachable; a grid, a path or a
-/// wireframe is drawn in it and has to be behind what is in front of it. Because the two kinds of
-/// drawing already fall on opposite sides of that line, it doubles as the category a game turns
-/// one kind of debug drawing off by.
+/// <para>
+/// The first two are the split a shape's <c>inFront</c> chooses between, seen from the other end.
+/// A handle, an outline or a marker is drawn about the scene and has to be reachable, and a grid, a
+/// path or a wireframe is drawn in it and has to be behind what is in front of it. Because the two
+/// kinds of drawing already fall on opposite sides of that line, it doubles as the category a game
+/// turns one kind of debug drawing off by, or draws thicker than the other.
+/// </para>
+/// <para>
+/// The rest are Bevy's own groups for what it draws itself, the shapes of lights and the bounding
+/// boxes, set apart so that their lines can be set without touching a game's.
+/// </para>
 /// </remarks>
 public enum GizmoGroup
 {
-    /// <summary>Both, for a setting meant for everything.</summary>
+    /// <summary>Both of the groups shapes are drawn in here, <see cref="Behind"/> and <see cref="InFront"/>.</summary>
     Both = 0,
 
     /// <summary>The group the scene can hide, which is where a grid or a path is drawn.</summary>
@@ -1113,4 +1409,29 @@ public enum GizmoGroup
 
     /// <summary>The group nothing can hide, which is where a handle or a marker is drawn.</summary>
     InFront = 2,
+
+    /// <summary>Bevy's own group for the shapes of lights, which <see cref="Gizmos.ShowLights"/> turns on.</summary>
+    Lights = 3,
+
+    /// <summary>Bevy's own group for bounding boxes, which <see cref="Gizmos.ShowBounds"/> turns on.</summary>
+    Bounds = 4,
+
+    /// <summary>Every group there is, these and any of Bevy's own, for a setting such as a depth bias toggled for everything.</summary>
+    All = 5,
+}
+
+/// <summary>How <see cref="Gizmos.ShowLights"/> colors the shapes of lights.</summary>
+public enum LightGizmoColoring
+{
+    /// <summary>All in the one color given.</summary>
+    Manual = 0,
+
+    /// <summary>A color of its own for each light, chosen from its entity.</summary>
+    Varied = 1,
+
+    /// <summary>Each in its light's own color.</summary>
+    MatchLight = 2,
+
+    /// <summary>A color for each kind of light, Bevy's choice for each.</summary>
+    ByKind = 3,
 }

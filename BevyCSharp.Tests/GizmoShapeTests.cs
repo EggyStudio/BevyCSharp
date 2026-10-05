@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -33,6 +34,10 @@ public sealed class GizmoShapeTests
     [InlineData("frustum")]
     [InlineData("tetrahedron")]
     [InlineData("text")]
+    [InlineData("ellipse")]
+    [InlineData("rounded rect")]
+    [InlineData("rounded cuboid")]
+    [InlineData("double arrow")]
     public void AShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -84,6 +89,9 @@ public sealed class GizmoShapeTests
     [InlineData("arc")]
     [InlineData("grid")]
     [InlineData("text")]
+    [InlineData("ellipse")]
+    [InlineData("rounded rect")]
+    [InlineData("double arrow")]
     public void AFlatShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -174,6 +182,86 @@ public sealed class GizmoShapeTests
         Assert.True(
             broken < whole,
             $"the line covered {whole} pixels solid and {broken} dashed");
+    }
+
+    /// <summary>
+    /// Shapes recorded into an asset are drawn every frame by the entity it is attached to, with
+    /// nothing asked for again, and placed by that entity, and a recording does not nest.
+    /// </summary>
+    [SkippableFact]
+    public void ARecordedGizmoIsDrawnByItsEntityEveryFrame()
+    {
+        Needs.Renderer();
+
+        BevyNativeException? nested = null;
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
+
+                var sphere = Gizmos.Record(() =>
+                {
+                    Gizmos.Sphere(Vec3.Zero, 1f, (0f, 1f, 0f, 1f), resolution: 64);
+                    nested = Assert.Throws<BevyNativeException>(() => Gizmos.Record(() => { }));
+                });
+
+                // Moved off to the right by its entity, so the picture says the transform placed it.
+                var holder = ecs.Spawn();
+                ecs.Add(holder, Transform.At(2f, 0f, 0f));
+                Gizmos.Attach(ecs, holder, sphere);
+                ecs.Wrap<Bevy.Reflected.GizmoRef>(holder).LineConfigWidth = 4f;
+            },
+        };
+        run.Wait((uint)Settled).Capture("kept").Go();
+
+        var picture = run.Picture("kept");
+        var (left, right) = (0, 0);
+        for (uint y = 0; y < picture.Height; y++)
+        {
+            for (uint x = 0; x < picture.Width; x++)
+            {
+                if (picture.At(x, y).G <= 100) continue;
+                if (x < picture.Width / 2) left++;
+                else right++;
+            }
+        }
+
+        Assert.Equal(NativeStatus.InvalidState, nested!.Status);
+        Assert.True(right > 0, "the recorded sphere was not drawn");
+        Assert.True(right > left * 3, $"the sphere drew {left} pixels left of the middle and {right} right of it, so its entity did not place it");
+    }
+
+    /// <summary>Every entity's bounding box is drawn once asked for, in the color given, and not before.</summary>
+    [SkippableFact]
+    public void EveryBoundingBoxIsDrawnOnceAskedFor()
+    {
+        Needs.Renderer();
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(3f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
+
+                var cube = ecs.Spawn();
+                ecs.Add(cube, Transform.Identity);
+                Render.SetMesh(ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f));
+                Render.SetMaterial(ecs, cube, Render.CreateMaterial(new MaterialSettings { BaseColor = (0.02f, 0.02f, 0.02f, 1f), Unlit = true }));
+                Gizmos.Configure(width: 4f, which: GizmoGroup.Bounds);
+            },
+        };
+        run.Wait((uint)Settled)
+            .Capture("plain")
+            .Do("showing the boxes", _ => Gizmos.ShowBounds(true, (0f, 1f, 0f, 1f)))
+            .Wait(5)
+            .Capture("boxed")
+            .Go();
+
+        Assert.Equal(0, Lit(run.Picture("plain")));
+        Assert.True(Lit(run.Picture("boxed")) > 50, "no bounding box was drawn");
     }
 
     /// <summary>How many pixels the shape reached.</summary>
@@ -299,6 +387,22 @@ public sealed class GizmoShapeTests
                         Gizmos.Tetrahedron(Vec3.Zero, 2f, green);
                         break;
 
+                    case "ellipse":
+                        Gizmos.Ellipse(Vec3.Zero, Quat.Identity, 2.5f, 1f, green, resolution: 48);
+                        break;
+
+                    case "rounded rect":
+                        Gizmos.RoundedRect(Vec3.Zero, Quat.Identity, 3f, 2f, green, cornerRadius: 0.5f);
+                        break;
+
+                    case "rounded cuboid":
+                        Gizmos.RoundedCuboid(Vec3.Zero, Quat.Identity, new Vec3(2f, 2f, 2f), green);
+                        break;
+
+                    case "double arrow":
+                        Gizmos.Arrow(new Vec3(-2f, -1f, 0f), new Vec3(2f, 1f, 0f), green, tipLength: 0.8f, doubleEnd: true);
+                        break;
+
                     default:
                         Gizmos.Box(Vec3.Zero, Quat.Identity, new Vec3(2f, 2f, 2f), green);
                         break;
@@ -376,6 +480,18 @@ public sealed class GizmoShapeTests
 
                     case "arc":
                         Gizmos.Arc2d((0f, 0f), 30f, 2f, green);
+                        break;
+
+                    case "ellipse":
+                        Gizmos.Ellipse2d((0f, 0f), 36f, 16f, green, angle: 0.4f);
+                        break;
+
+                    case "rounded rect":
+                        Gizmos.RoundedRect2d((0f, 0f), 40f, 30f, green, cornerRadius: -8f);
+                        break;
+
+                    case "double arrow":
+                        Gizmos.Arrow2d((-30f, -10f), (30f, 10f), green, tipLength: 12f, doubleEnd: true);
                         break;
 
                     default:

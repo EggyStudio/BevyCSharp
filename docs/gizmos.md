@@ -11,11 +11,11 @@ Gizmos.Sphere(position, 0.35f, (1f, 0.85f, 0.2f, 1f));
 Gizmos.Axes(transform, 1.5f);
 ```
 
-Fifteen shapes in all. `Line` and `Fade` for a plain or a dying line, `Arrow` where a line has to
-say which way along it, `Sphere`, `Circle`, `Arc`, `Rect` and `Grid` for a volume, a plane, an angle
-or a floor, `Box`, `Capsule`, `Cone`, `Cylinder`, `Torus` and `Frustum` for the shapes a collider or
-a radius of effect usually is, and `Axes` for an orientation. Everything but a line takes a `Quat`, because a
-shape with a flat side has to be told which way it faces.
+`Line` and `Fade` draw a plain or a dying line, `Arrow` a line that has to say which way along it,
+`Sphere`, `Circle`, `Ellipse`, `Arc`, `Rect`, `RoundedRect` and `Grid` a volume, a plane, an angle
+or a floor, `Box`, `RoundedCuboid`, `Capsule`, `Cone`, `Cylinder`, `Torus` and `Frustum` the shapes
+a collider or a radius of effect usually is, and `Axes` an orientation. Everything but a line takes
+a `Quat`, because a shape with a flat side has to be told which way it faces.
 
 ```csharp
 Gizmos.Arc(joint, facing, radius: 1.2f, angle: MathF.PI / 3f, (0.9f, 0.9f, 0.2f, 1f));
@@ -23,18 +23,49 @@ Gizmos.Box(bounds.Center, Quat.Identity, bounds.Size, (0.2f, 1f, 0.4f, 1f));
 Gizmos.Grid(Vec3.Zero, Quat.Identity, across: 20, down: 20, spacing: 1f, (1f, 1f, 1f, 0.15f));
 ```
 
+A curved shape takes a `resolution`, the segments it is drawn with, where a large circle needs
+more to stay round and a small one drawn many times fewer, and zero leaves Bevy's own. An arrow
+takes the length of its head and whether it has one at each end, for a span between two points.
+A rounded box takes how round its corners are, a negative radius turning them inward, and a grid a
+second spacing for cells longer one way than the other.
+
 A gizmo lasts one frame, so anything that should stay on screen is asked for again every frame. That
-makes them right for a value that changes and wrong for anything permanent, which needs an entity.
-`Axes` colors itself red, green and blue for X, Y and Z, which is the quickest way to see whether
-something faces where it should.
+makes them right for a value that changes. `Axes` colors itself red, green and blue for X, Y and Z,
+scaled as the transform is, which is the quickest way to see whether something faces where it
+should.
+
+Lines that do not change are kept instead. `Gizmos.Record` keeps every shape asked for inside it in
+an asset, and `Gizmos.Attach` has an entity draw that asset every frame, placed by the entity's
+transform, with nothing asked for again:
+
+```csharp
+var outline = Gizmos.Record(() => Gizmos.Sphere(Vec3.Zero, 1f, (1f, 0.2f, 0.2f, 1f), resolution: 512));
+Gizmos.Attach(ecs, entity, outline);
+ecs.Wrap<GizmoRef>(entity).LineConfigWidth = 4f;
+```
+
+The entity's `GizmoRef` holds its own line width, style and depth bias, where a group's settings
+apply to the shapes asked for each frame.
 
 `inFront` decides whether the scene may hide a shape, and it is true everywhere except `Grid`. A
 handle, an outline or a marker is drawn *about* the scene and has to be reachable; a grid, a path or
 a wireframe is drawn *in* it and has to be behind what is in front of it. `Gizmos.Configure` sets
 the line width, which render layers gizmos appear on, and whether they are drawn at all, for a debug
-overlay bound to a key. Its `which` names one of the two groups, so a floor grid and a set of
-handles can be turned on and off apart. The groups are the same split `inFront` chooses between,
-which is why they line up with the two kinds of drawing already.
+overlay bound to a key. Its `which` names a group, so a floor grid and a set of handles can be
+turned on and off apart. The two a game draws in are the same split `inFront` chooses between,
+which is why they line up with the two kinds of drawing already. `Lights` and `Bounds` are Bevy's
+own groups for what it draws itself, and `All` is every group at once.
+
+`Gizmos.SetDepthBias` moves a group toward the camera or away before the scene's depth is tested,
+from -1, in front of everything, to 1, behind it. The in-front group sits at -1, and a key that
+sets every group there shows the lot through walls.
+
+Bevy draws two things of its own on request. `Gizmos.ShowLights` draws the shape of every light,
+a point light's sphere, a spot light's cone, a directional light's arrow and a rectangle light's
+rectangle, colored by the light, by its kind, by its entity or all alike. `Gizmos.ShowBounds` draws
+the bounding box Bevy culls each entity by, which is where to look when something vanishes at the
+edge of the screen. Without them, a light or an entity carrying `ShowLightGizmoRef` or
+`ShowAabbGizmoRef` is drawn alone.
 
 `Gizmos.SetLineStyle` decides what the line itself looks like. A dotted or dashed line tells one
 meaning from another without spending a second color on it, so a path already walked can be drawn
@@ -61,8 +92,8 @@ using (Gizmos.Batch())
 }
 ```
 
-`Rect2d`, `Circle2d`, `Line2d`, `Arrow2d`, `Arc2d` and `Grid2d` are the same shapes for a 2D
-camera. They take a point on the XY plane and an angle about Z, because that is all a flat shape
+`Rect2d`, `RoundedRect2d`, `Circle2d`, `Ellipse2d`, `Line2d`, `Arrow2d`, `Arc2d` and `Grid2d` are
+the same shapes for a 2D camera. They take a point on the XY plane and an angle about Z, because that is all a flat shape
 can be turned by, and they go through Bevy's own flat calls rather than through the solid ones at
 zero depth, which differ once a line has width.
 

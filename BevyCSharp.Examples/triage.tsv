@@ -219,13 +219,13 @@ contributors	can	its birds hold a place in a list for the name, since a componen
 desk_toy	can	through Bevy's reflected CursorOptions on Window.Entity for the pointer passing through
 game_menu	can
 loading_screen	can
-2d_gizmos	can
+2d_gizmos	can	the bridge's two gizmo groups standing for Bevy's own and the example's
 2d_text_gizmos	can
-3d_gizmos	can
+3d_gizmos	can	the bridge's two gizmo groups standing for Bevy's own and the example's, with the sphere kept in an asset by Gizmos.Record
 3d_text_gizmos	can
 anchored_text_gizmos	can
-axes	can
-light_gizmos	can	through Bevy's reflected ShowLightGizmo
+axes	can	reading each cube's bounding box through Bevy's reflected Aabb
+light_gizmos	can
 text_gizmos_font	can
 transform_gizmo	missing	Bevy's interactive transform gizmo
 custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material

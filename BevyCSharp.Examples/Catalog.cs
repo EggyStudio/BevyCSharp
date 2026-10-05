@@ -183,9 +183,13 @@ internal static class Catalog
         new("loading_screen", LoadingScreen.Build),
 
         // Gizmos
+        new("2d_gizmos", Gizmos2d.Build),
         new("2d_text_gizmos", TextGizmos2d.Build),
+        new("3d_gizmos", Gizmos3d.Build),
         new("3d_text_gizmos", TextGizmos3d.Build),
         new("anchored_text_gizmos", AnchoredTextGizmos.Build),
+        new("axes", Axes.Build),
+        new("light_gizmos", LightGizmos.Build),
         new("text_gizmos_font", TextGizmosFont.Build),
 
         // Input

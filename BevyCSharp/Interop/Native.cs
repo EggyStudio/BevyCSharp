@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 192;
+    internal const int ExpectedAbiVersion = 193;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1052,13 +1052,13 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_draw_many(NativeGizmoConfig* configs, int count);
 
-    /// <summary>Sets how gizmos are drawn, for both groups at once.</summary>
+    /// <summary>Sets how gizmos are drawn, for the groups named.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_configure(
         float width, uint layers, int enabled, int which);
 
-    /// <summary>Sets what a gizmo line looks like, for both groups at once.</summary>
+    /// <summary>Sets what a gizmo line looks like, for the groups named.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_style(
@@ -1067,7 +1067,33 @@ internal static unsafe partial class Native
         float lineScale,
         int joint,
         uint jointResolution,
-        int perspective);
+        int perspective,
+        int which);
+
+    /// <summary>Moves the named groups' gizmos toward the camera or away before depth testing.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_depth_bias(float bias, int which);
+
+    /// <summary>Sets whether every light's gizmo is drawn and how they are colored.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_lights(int drawAll, int mode, float* color);
+
+    /// <summary>Sets whether every bounding box is drawn and in what color.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_bounds(int drawAll, float* color);
+
+    /// <summary>Starts keeping the gizmo shapes asked for rather than drawing them.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_record_begin();
+
+    /// <summary>Makes the shapes kept since the recording began into a gizmo asset.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_record_end(int* handle);
 
     /// <summary>Spawns a 2D camera and returns its entity, or 0.</summary>
     [LibraryImport(Library)]

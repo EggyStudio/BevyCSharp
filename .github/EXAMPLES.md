@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**179 written, 12 written in part, 74 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
+**184 written, 12 written in part, 69 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -12,7 +12,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [3D Rendering](#3d-rendering) | 53 | 5 | 0 | 9 | 0 |
 | [Animation](#animation) | 4 | 2 | 0 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
-| [Assets](#assets) | 8 | 1 | 1 | 2 | 5 |
+| [Assets](#assets) | 9 | 1 | 0 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
 | [Audio](#audio) | 5 | 0 | 0 | 3 | 0 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 |
@@ -21,7 +21,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |
 | [Games](#games) | 5 | 1 | 0 | 0 | 0 |
-| [Gizmos](#gizmos) | 4 | 0 | 4 | 1 | 0 |
+| [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 |
 | [Helpers](#helpers) | 0 | 0 | 0 | 0 | 1 |
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **179** | **12** | **74** | **98** | **58** |
+| **All** | **184** | **12** | **69** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -209,7 +209,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/custom_asset.rs), [live in Bevy](https://bevy.org/examples/assets/custom-asset/) | Implements a custom asset loader | [written](../BevyCSharp.Examples/asset/custom_asset.cs), prints [its output](assets/examples/custom_asset.txt), as a data asset, which is how a C# game has assets of its own types |
 | [`custom_asset_reader`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/custom_asset_reader.rs) | Implements a custom AssetReader | does not apply, writes a Rust AssetReader |
 | [`embedded_asset`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/embedded_asset.rs), [live in Bevy](https://bevy.org/examples/assets/embedded-asset/) | Embed an asset in the application binary and load it | [written](../BevyCSharp.Examples/asset/embedded_asset.cs), the picture carried as a resource of the program's assembly, which is how a C# game carries its assets |
-| [`extra_asset_source`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/extra_source.rs) | Load an asset from a non-standard asset source | can be written, the source a folder of the examples' assets, where Bevy's is a folder beside its example |
+| [`extra_asset_source`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/extra_source.rs) | Load an asset from a non-standard asset source | [written](../BevyCSharp.Examples/asset/extra_asset_source.cs), the source a folder of the examples' assets, where Bevy's is a folder beside its example |
 | [`generated_assets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/generated_assets.rs), [live in Bevy](https://bevy.org/examples/assets/generated-assets/) | Shows how to generate and store assets at runtime | [written](../BevyCSharp.Examples/asset/generated_assets.cs), the cone's vertices worked out on a worker and made a mesh in a system, since a mesh is made where the world is |
 | [`hot_asset_reloading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/hot_asset_reloading.rs) | Demonstrates automatic reloading of assets when modified on disk | [written](../BevyCSharp.Examples/asset/hot_asset_reloading.cs), the files watched only where the editor profile is built, which builds Bevy's file watcher |
 | [`multi_asset_sync`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/asset/multi_asset_sync.rs), [live in Bevy](https://bevy.org/examples/assets/multi-asset-sync/) | Demonstrates how to wait for multiple assets to be loaded. | [written](../BevyCSharp.Examples/asset/multi_asset_sync.cs), the loads asked for their state each frame, a task waiting on the count in place of Bevy's guards |
@@ -328,13 +328,13 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`2d_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/2d_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/2d-gizmos/) | A scene showcasing 2D gizmos | can be written |
+| [`2d_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/2d_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/2d-gizmos/) | A scene showcasing 2D gizmos | [written](../BevyCSharp.Examples/gizmos/2d_gizmos.cs), the bridge's two gizmo groups standing for Bevy's own and the example's |
 | [`2d_text_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/2d_text_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/2d-text-gizmos/) | A scene showcasing 2d text gizmos | [written](../BevyCSharp.Examples/gizmos/2d_text_gizmos.cs) |
-| [`3d_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/3d_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/3d-gizmos/) | A scene showcasing 3D gizmos | can be written |
+| [`3d_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/3d_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/3d-gizmos/) | A scene showcasing 3D gizmos | [written](../BevyCSharp.Examples/gizmos/3d_gizmos.cs), the bridge's two gizmo groups standing for Bevy's own and the example's, with the sphere kept in an asset by Gizmos.Record |
 | [`3d_text_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/3d_text_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/3d-text-gizmos/) | A scene showcasing 3d text gizmos | [written](../BevyCSharp.Examples/gizmos/3d_text_gizmos.cs) |
 | [`anchored_text_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/anchored_text_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/anchored-text-gizmos/) | Demonstrates anchored text gizmos | [written](../BevyCSharp.Examples/gizmos/anchored_text_gizmos.cs) |
-| [`axes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/axes.rs), [live in Bevy](https://bevy.org/examples/gizmos/axes/) | Demonstrates the function of axes gizmos | can be written |
-| [`light_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/light_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/light-gizmos/) | A scene showcasing light gizmos | can be written, through Bevy's reflected ShowLightGizmo |
+| [`axes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/axes.rs), [live in Bevy](https://bevy.org/examples/gizmos/axes/) | Demonstrates the function of axes gizmos | [written](../BevyCSharp.Examples/gizmos/axes.cs), reading each cube's bounding box through Bevy's reflected Aabb |
+| [`light_gizmos`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/light_gizmos.rs), [live in Bevy](https://bevy.org/examples/gizmos/light-gizmos/) | A scene showcasing light gizmos | [written](../BevyCSharp.Examples/gizmos/light_gizmos.cs) |
 | [`text_gizmos_font`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/text_gizmos_font.rs), [live in Bevy](https://bevy.org/examples/gizmos/text-gizmos-font/) | Example displaying the font used by text gizmos | [written](../BevyCSharp.Examples/gizmos/text_gizmos_font.cs) |
 | [`transform_gizmo`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/gizmos/transform_gizmo.rs), [live in Bevy](https://bevy.org/examples/gizmos/transform-gizmo/) | Interactive transform gizmo for translating, rotating, and scaling entities | missing, Bevy's interactive transform gizmo |
 
