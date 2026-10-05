@@ -88,8 +88,11 @@ public sealed class NormTests
     public void N_1_4()
     {
         var areas = LibraryFolders().Select(folder => folder["BevyCSharp/".Length..]).ToHashSet(StringComparer.Ordinal);
+        // What the tests share, a harness or a helper with no test of its own, is at the project's
+        // root, so only a file holding a test is placed by the area it tests.
         var found = Sources("BevyCSharp.Tests/", ".cs")
             .Where(file => !file.StartsWith("BevyCSharp.Tests/assets/", StringComparison.Ordinal))
+            .Where(file => Regex.IsMatch(File.ReadAllText(Full(file)), @"^\s*\[(Skippable)?(Fact|Theory)\b", RegexOptions.Multiline))
             .Where(file => file.Split('/') is var parts && (parts.Length < 3 || !areas.Contains(parts[1])));
         Hold("1.4", found, "a test outside the folder of the area it tests");
     }

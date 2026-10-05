@@ -8,15 +8,21 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `13eb521`. The glTF examples with `hello_world` (`bb440b9`) and the window examples
-with Bevy's two window tests (`13eb521`) are settled on their replies, which were read.
-`window_resizing` was set beside Bevy's and has its three sizes, its keys and its text, and says
-where it differs, the size read each frame where Bevy reads a message for each resize. The two
-replies name two things Bevy's examples lean on that are not bridged, an event that says a scene
-is ready and the message a resize sends, which belong among the gaps of item 5. The table stands
-at 222 written, 13 written in part, 26 that can be, 102 missing and 58 that do not apply.
+Reviewed up to `3e694f0`. `physics_in_fixed_timestep` (`3e694f0`) is settled on its reply, which
+was read: its player is a behavior with a method a stage, as B 4 asks, and `Time.FixedOverstep` is
+Bevy's own number for drawing between two steps. The table stands at 223 written, 13 written in
+part, 25 that can be, 102 missing and 58 that do not apply.
 
-[NORM.md](NORM.md) is new, and item 2 of the Now list is about it.
+The norm's checks were read as they are staged and are as asked: one `Hold` for every rule, lists
+written from the tests' own findings with a reason where one helps, and a test holding NORM.md and
+the class to each other. 3DEngine is told to write its own after this one. The three lines
+beginning `Rule:` are answered in [NORM.md](NORM.md), which says three things more. A rule may
+leave a kind of place out, and those places are on its list with their reason and stay, which is
+what the five windows of N 4.5, the seventeen constant answers of B 3, the three files of N 4.1
+and the four waits of N 3.3 are. What the tests share is at the test project's root, so N 1.4's
+test passes over a file that is no test class and its list loses three lines. A mending that only
+moves code is a commit of its own. The table under Conformance has this engine's counts, 348
+places for N 1.2, 32 for N 1.3, 133 for N 1.4 and 55 for N 3.4.
 
 ## Now
 
@@ -24,33 +30,21 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
 and 11 to 14 are taken from [SHARED.md](SHARED.md).
 
-1. **The 26 rows that say `can be written` are written**, until that column is empty, many a
+1. **The 25 rows that say `can be written` are written**, until that column is empty, many a
    batch, then the stress tests, which are also numbers for PERFORMANCE.md beside Bevy's own.
    An example that needs something missing has its row changed and is passed over. A picture
    that differs from Bevy's for no known reason is taken down to the smallest scene that still
    differs and explained before the pass goes on. The second paragraph of item 3 holds for each
    example written from here on, which Annex B of the norm has as B 4.
-2. **The norm's checks.** [NORM.md](NORM.md) is new, at the owner's wish of 2026-10-05: the
-   rules both engines keep, numbered, each with its reason and what checks it, 36 of them and four
-   of the bridge's in Annex B. It reached this checkout with `13eb521`. One batch gives the rules
-   their checks here. A class `NormTests` has a test for each rule the table under Conformance
-   calls `to take` for BevyCSharp and a test or a setting can check, named for the rule as `N_1_3`
-   is for N 1.3, its message beginning with the rule's number. A rule existing code does not keep
-   gets its list, `build/norm/<number>.txt`, written from the test's own finding so the first
-   list is exact, the test failing for a place not listed and for a line that no longer applies.
-   One more test holds NORM.md and `NormTests` to each other. No file is rearranged in this
-   batch. The lists are what is left, and a place on a list is mended when a batch next touches
-   it.
-
-   Measured from outside, N 1.3 lists 11 files of the library over 800 lines and eight or more of
-   the bridge, N 1.4 all 132 test files, which sit at the root, and N 1.2 about 65 files. N 2.2
-   and N 6.1 are settings, CS1591 as an error and warnings failing the workflow, which is item 6,
-   and N 2.1 is the listing of item 13. N 2.5, N 2.6, N 2.7 and N 5.2 are more than this batch and
-   keep `to take` until their own items. Annex B is the reviewing session's reading of this
-   engine: its namespaces with their reasons, the list of packages still to be written in
-   BUILDING.md, and four rules of the bridge. What is wrong in it is said under Replies with a
-   line beginning `Rule:`, as is a rule read as wrong. The count of each list goes under Replies,
-   and the table in the norm is brought up to them.
+2. **The norm's checks, what is left of them.** N 1.4's test passes over what is no test class,
+   as the norm has it since. The rules still `to take` here each have their item: N 2.2 and N 6.1
+   are the settings of item 6, N 2.1 the listing of item 13, N 2.6 the table of bad files in item
+   12, N 2.7 item 3, and N 2.5, N 2.8 and N 5.2 are a game published native in the workflow, the
+   list of packages in BUILDING.md with a test that holds the project files to it, and the
+   workflow running `build/examples-table.py` and failing when what it writes differs from the
+   table checked in. The lists are paid down as the norm says, a listed file mended when a batch
+   next touches it, the largest first where there is a choice, `Render.cs`, `RenderShaders.cs`
+   and `Native.cs` among the library's and `render/shaders.rs` among the bridge's.
 3. **An example is a program somebody could write on the package.** A picture in the README
    opens an example as the way to do a thing, and what opens is written in words the package
    does not have. `BevyCSharp.Examples/Example.cs` holds helpers, in its own words for what
@@ -169,10 +163,6 @@ None open.
    is right to, and waits for that word.
 
 ## Replies
-- Item 1, physics_in_fixed_timestep. Written, its player a behavior as item 3 asks, with
-  `Time.FixedOverstep` added for it, Bevy's `overstep_fraction`, read from the engine when asked
-  since the frame's time is taken before its fixed steps run, with a test. The norm's checks, item
-  2, come next, and the rows left in item 1 after them.
 - Item 2, the norm's checks. `NormTests` checks N 1.1 to 1.5, 3.3, 3.4, 4.1, 4.2, 4.5, 6.4,
   7.2 and B 3, and `NormAndItsTestsAgree` holds the class and NORM.md to each other. The lists, in
   `build/norm`, hold 348 places for N 1.2, 32 for N 1.3 (11 files of the library, 3 of the tests
@@ -181,10 +171,6 @@ None open.
   asked for are added to AGENTS.md, as its bullet allows. N 6.4 opens the package `BCS_PACKAGE`
   names, or the newest one in `build/package`, and the pack job now runs it on what it packed,
   which no run has tried yet. N 7.2 reads the commits after `3e694f0`.
-- Rule: N 4.5 holds a capture to Bevy's window, and five examples ask for a window of their own as
-  Bevy's do (`grid`, `headless_renderer`, `resizing`, `scale_factor_override`, `window_settings`),
-  so they are listed for want of a rule that says the size the example asks for.
-- Rule: B 3 lists 17 entry points that answer a constant, a flag or a count and cannot panic, such
-  as `bcs_abi_version` and the `bcs_has_*` checks, which a rule might leave out by name.
-- Rule: N 1.4 has no folder for what the tests share, `EngineFixture.cs`, `PictureRun.cs` and the
-  like, which test no area of the library and sit at the root with the rest.
+- Item 2, N 1.4. Its test now places only a file that holds a test, found by a test attribute at
+  the start of a line, so `EngineFixture.cs`, `Needs.cs` and `PictureRun.cs` come off its list,
+  which holds 133.

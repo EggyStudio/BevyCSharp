@@ -46,7 +46,6 @@ BevyCSharp.Tests/EditorTabTests.cs
 BevyCSharp.Tests/EditorTableTests.cs
 BevyCSharp.Tests/EditorThemeTests.cs
 BevyCSharp.Tests/EditorWorldTests.cs
-BevyCSharp.Tests/EngineFixture.cs
 BevyCSharp.Tests/EngineTests.cs
 BevyCSharp.Tests/EnvironmentOptionTests.cs
 BevyCSharp.Tests/ExampleStringPathTests.cs
@@ -84,7 +83,6 @@ BevyCSharp.Tests/MeshletTests.cs
 BevyCSharp.Tests/MessageTests.cs
 BevyCSharp.Tests/NativeComponentTests.cs
 BevyCSharp.Tests/NativeInputLayoutTests.cs
-BevyCSharp.Tests/Needs.cs
 BevyCSharp.Tests/NormTests.cs
 BevyCSharp.Tests/ObserverTests.cs
 BevyCSharp.Tests/OffscreenTests.cs
@@ -94,7 +92,6 @@ BevyCSharp.Tests/PersistentTests.cs
 BevyCSharp.Tests/PhysicsComponentTests.cs
 BevyCSharp.Tests/PhysicsTests.cs
 BevyCSharp.Tests/PickRayTests.cs
-BevyCSharp.Tests/PictureRun.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
 BevyCSharp.Tests/PreviewRendererTests.cs
