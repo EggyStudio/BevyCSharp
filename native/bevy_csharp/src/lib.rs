@@ -38,6 +38,7 @@ pub mod ecs;
 pub mod events;
 pub mod gamepad;
 pub mod gizmos;
+pub mod gizmo_settings;
 pub mod input;
 pub mod interop;
 pub mod interop_render;

@@ -13,7 +13,6 @@ BevyCSharp/Physics/PhysicsWorld.cs
 BevyCSharp/Scenes/SceneFile.cs
 BevyCSharp/Scenes/SceneInstances.cs
 native/bevy_csharp/src/ecs.rs
-native/bevy_csharp/src/gizmos.rs
 native/bevy_csharp/src/reflected.rs
 native/bevy_csharp/src/render/assets.rs
 native/bevy_csharp/src/render/compute.rs
