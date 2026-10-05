@@ -1010,6 +1010,8 @@ static void Configure(float width = 0f, uint layers = 0, bool enabled = true, Gi
 static void SetLineStyle(GizmoLine style = GizmoLine.Solid, float gapScale = 0f, float lineScale = 0f, GizmoJoint joint = GizmoJoint.None, uint jointResolution = 0, bool perspective = false);  // Sets what a gizmo line looks like
 static void Axes(Transform transform, float length = 1f, bool inFront = true);  // Draws a set of axes, so an orientation can be read at a glance
 static Gizmos.BatchScope Batch();                               // Gathers every shape drawn until the returned scope ends, and hands them over in one call
+static void Text(string text, Vec3 position, Quat rotation, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text in the world, in Bevy's stroke font, facing the way it is turned
+static void Text2d(string text, (float X, float Y) position, float angle, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text, flat, for a 2D camera
 ```
 
 ### `Gizmos.BatchScope`

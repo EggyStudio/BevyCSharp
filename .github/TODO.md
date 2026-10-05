@@ -49,7 +49,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   `touch_input_events` and `gamepad_input_events` print, and logical keys as Bevy's
   `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input` holds each
   frame's state, which tells what is down and what changed but not in what order.
-- **Text gizmos, four examples.**
 - **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
   (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
   (`random_sampling`), which the managed math, a transform and its vectors, does not have.

@@ -892,6 +892,83 @@ public static unsafe class Gizmos
         }
     }
 
+    /// <summary>Draws a run of text in the world, in Bevy's stroke font, facing the way it is turned.</summary>
+    /// <param name="text">What to write, in printable ASCII, a line break starting a new line.</param>
+    /// <param name="position">Where its anchor sits, in world space.</param>
+    /// <param name="rotation">
+    /// Which way it faces. Unturned, it reads along X and up Y, so a camera looking down negative Z
+    /// reads it.
+    /// </param>
+    /// <param name="size">The height of a capital letter, in world units.</param>
+    /// <param name="anchor">
+    /// The point of the text's bounds at <paramref name="position"/>, from minus a half to a half
+    /// on each axis: (0, 0) its middle, (-0.5, 0) the middle of its left side, (0, 0.5) the middle
+    /// of its top.
+    /// </param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <remarks>
+    /// <para>
+    /// Bevy's text gizmos, drawn as lines in its Simplex stroke font, so a label costs no font
+    /// asset, no texture and no entity, and lasts the frame it was asked for like any gizmo. For a
+    /// value watched as it changes, a name over what it names, or a measurement beside what it
+    /// measures. Text a player reads belongs in <see cref="Ui"/> or on an entity with
+    /// <c>Text2d</c>, which are shaped by a real font and kept.
+    /// </para>
+    /// <para>
+    /// The font has the ninety-five printable ASCII characters and draws anything else as a space.
+    /// Its lines are as thick as <see cref="Configure"/> sets every gizmo's, in pixels, so a large
+    /// letter is drawn in the same thin line as a small one.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void Text(
+        string text,
+        Vec3 position,
+        Quat rotation,
+        float size,
+        (float X, float Y) anchor,
+        (float R, float G, float B, float A) color,
+        bool inFront = true)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        var settings = new NativeGizmoText { Size = size, InFront = inFront ? 1 : 0 };
+        (settings.Position[0], settings.Position[1], settings.Position[2]) = (position.X, position.Y, position.Z);
+        (settings.Rotation[0], settings.Rotation[1], settings.Rotation[2], settings.Rotation[3]) = (rotation.X, rotation.Y, rotation.Z, rotation.W);
+        (settings.Anchor[0], settings.Anchor[1]) = anchor;
+        (settings.Color[0], settings.Color[1], settings.Color[2], settings.Color[3]) = color;
+
+        var status = Native.bcs_gizmo_text(text, &settings);
+        if (status == NativeStatus.Unsupported)
+            throw new BevyNativeException(
+                NativeStatus.Unsupported,
+                "Drawing gizmo text failed, because gizmos are drawn by a plugin that comes with the "
+                + "window, so a windowless run has nothing to draw on.");
+
+        Native.Check(status, "drawing gizmo text");
+    }
+
+    /// <summary>Draws a run of text, flat, for a 2D camera.</summary>
+    /// <inheritdoc cref="Text" path="/remarks"/>
+    /// <param name="text">What to write, in printable ASCII, a line break starting a new line.</param>
+    /// <param name="position">Where its anchor sits, on the XY plane.</param>
+    /// <param name="angle">How far it is turned about Z, in radians, counterclockwise.</param>
+    /// <param name="size">The height of a capital letter, in pixels under a 2D camera.</param>
+    /// <param name="anchor">The point of its bounds at <paramref name="position"/>. See <see cref="Text"/>.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void Text2d(
+        string text,
+        (float X, float Y) position,
+        float angle,
+        float size,
+        (float X, float Y) anchor,
+        (float R, float G, float B, float A) color,
+        bool inFront = true) =>
+        Text(text, Flat(position), Turn(angle), size, anchor, color, inFront);
+
     private static void Draw(NativeGizmoConfig config)
     {
         if (_batch is { } gathering)

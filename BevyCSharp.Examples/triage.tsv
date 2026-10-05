@@ -220,13 +220,13 @@ desk_toy	can
 game_menu	can
 loading_screen	can
 2d_gizmos	can
-2d_text_gizmos	missing	text gizmos
+2d_text_gizmos	can
 3d_gizmos	can
-3d_text_gizmos	missing	text gizmos
-anchored_text_gizmos	missing	text gizmos
+3d_text_gizmos	can
+anchored_text_gizmos	can
 axes	can
 light_gizmos	can	through Bevy's reflected ShowLightGizmo
-text_gizmos_font	missing	text gizmos
+text_gizmos_font	can
 transform_gizmo	missing	Bevy's interactive transform gizmo
 custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material
 edit_material_on_gltf	can

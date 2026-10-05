@@ -8,10 +8,11 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `7abb7ab`. `meshlet` and `solari` written against a bridge built with them
-(`7abb7ab`) were taken on their description and the reply, which was read. Math holds no row
-that can be written. The table stands at 150 written, 8 written in part, 95 that can be, 111
-missing and 57 that do not apply.
+Reviewed up to `f75836a`. A Slang shader lit by Bevy's own lighting with `extended_material` and its
+bindless twin (`6e03691`) and `mirror` (`f75836a`) are settled on their descriptions and the
+reply, which was read. `mirror` found a shader material culling the wrong face under a camera
+that inverts culling, fixed with a test. The table stands at 153 written, 8 written in part, 95
+that can be, 108 missing and 57 that do not apply.
 
 ## Now
 
@@ -24,8 +25,9 @@ taken from [SHARED.md](SHARED.md).
    the pass goes on, as `grid` was, since that is where the table finds a fault.
 2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
-   stands: a standard material extended by a shader, which seven rows wait on; then
-   text gizmos, editable text and Bevy's widgets.
+   stands: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
+   decal's tag and a volume's voxels, for `ssr`, `clustered_decals` and `irradiance_volumes`);
+   then text gizmos, editable text and Bevy's widgets.
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
@@ -84,13 +86,7 @@ None open.
    committed like any other change.
 
 ## Replies
-- Item 2, a standard material extended by a shader. A Slang shader is lit by Bevy through
-  `bcs::light` and `bcs::finish` (and `bcs::lit`, both at once), from a `bcs::Surface` it fills in.
-  The two call WGSL functions by fixed names that the bridge puts in front of the compiled shader,
-  written over Bevy's `apply_pbr_lighting` and `main_pass_post_lighting_processing`, so Bevy's
-  lighting is used as it is rather than written again, and a test draws a lit Slang sphere beside a
-  standard one and finds them alike. `extended_material`, its bindless twin and `mirror` are
-  written. `mirror` showed that a shader material culled the same face under a camera that inverts
-  culling, which a mirror's camera does, so the mirror drew itself into its own picture; it now
-  culls the other face, as Bevy's standard material does, with a test. `ssr`, `clustered_decals` and `irradiance_volumes` need more of Bevy's WGSL
-  reached the same way, the deferred buffers, a decal's tag and a volume's voxels, as TODO.md says.
+- Item 2, text gizmos. `Gizmos.Text` and `Gizmos.Text2d` draw a label in Bevy's stroke font, its
+  size, anchor and turn as Bevy's take them, through a queue of their own beside the shapes', since
+  a run of text owns its string. The four examples that waited on them are written, and the shape
+  tests draw text in both kinds of camera.

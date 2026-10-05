@@ -3,6 +3,7 @@ using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
+using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
 using BevyCSharp.Examples.Movement;
@@ -149,6 +150,12 @@ internal static class Catalog
         new("run_conditions", RunConditions.Build, Prints: 160),
         new("startup_system", StartupSystem.Build, Prints: 1),
         new("system_closure", SystemClosure.Build, Prints: 3),
+
+        // Gizmos
+        new("2d_text_gizmos", TextGizmos2d.Build),
+        new("3d_text_gizmos", TextGizmos3d.Build),
+        new("anchored_text_gizmos", AnchoredTextGizmos.Build),
+        new("text_gizmos_font", TextGizmosFont.Build),
 
         // Input
         new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: CharInputEvents.Drive),

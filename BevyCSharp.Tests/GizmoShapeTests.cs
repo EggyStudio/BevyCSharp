@@ -32,6 +32,7 @@ public sealed class GizmoShapeTests
     [InlineData("torus")]
     [InlineData("frustum")]
     [InlineData("tetrahedron")]
+    [InlineData("text")]
     public void AShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -82,6 +83,7 @@ public sealed class GizmoShapeTests
     [InlineData("arrow")]
     [InlineData("arc")]
     [InlineData("grid")]
+    [InlineData("text")]
     public void AFlatShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -230,6 +232,10 @@ public sealed class GizmoShapeTests
 
                 switch (shape)
                 {
+                    case "text":
+                        Gizmos.Text("HI", Vec3.Zero, Quat.Identity, 1.5f, (0f, 0f), green);
+                        break;
+
                     case "rect":
                         Gizmos.Rect(Vec3.Zero, Quat.Identity, 3f, 2f, green);
                         break;
@@ -358,6 +364,10 @@ public sealed class GizmoShapeTests
 
                     case "line":
                         Gizmos.Line2d((-30f, -20f), (30f, 20f), green);
+                        break;
+
+                    case "text":
+                        Gizmos.Text2d("HI", (0f, 0f), 0f, 30f, (0f, 0f), green);
                         break;
 
                     case "arrow":

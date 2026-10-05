@@ -38,8 +38,35 @@ pub struct QueuedGizmo {
 }
 
 /// What C# has asked to be drawn this frame.
+///
+/// Text is kept beside the shapes rather than among them, since a shape is a handful of numbers
+/// that copy as they are and a run of text owns its string.
 #[derive(bevy::ecs::resource::Resource, Default)]
-pub struct GizmoQueue(pub Vec<QueuedGizmo>);
+pub struct GizmoQueue(pub Vec<QueuedGizmo>, pub Vec<QueuedText>);
+
+/// One run of text to draw this frame, in Bevy's stroke font.
+pub struct QueuedText {
+    pub text: String,
+    pub settings: BcsGizmoText,
+}
+
+/// Where and how a run of text is drawn, as C# describes it.
+///
+/// The text lies in the plane its rotation turns the XY plane to, its size the height of a capital
+/// letter in world units, and `anchor` the point of its bounds that sits at `position`, from minus
+/// a half to a half on each axis, zero being the middle.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGizmoText {
+    pub position: [f32; 3],
+    pub rotation: [f32; 4],
+    pub size: f32,
+    pub anchor: [f32; 2],
+    /// Linear RGBA.
+    pub color: [f32; 4],
+    /// Whether the scene can hide it, as for a shape.
+    pub in_front: i32,
+}
 
 /// The group whose shapes nothing in the scene can hide.
 ///
@@ -246,6 +273,22 @@ pub fn drain(
             draw_shape!(gizmos, shape, position, rotation, color, fades_to);
         } else {
             draw_shape!(behind, shape, position, rotation, color, fades_to);
+        }
+    }
+
+    for queued in queue.1.drain(..) {
+        let settings = queued.settings;
+        let at = bevy::math::Isometry3d::new(
+            Vec3::from_array(settings.position),
+            Quat::from_array(settings.rotation),
+        );
+        let anchor = bevy::math::Vec2::from_array(settings.anchor);
+        let color = Color::linear_rgba(settings.color[0], settings.color[1], settings.color[2], settings.color[3]);
+
+        if settings.in_front != 0 {
+            gizmos.text(at, &queued.text, settings.size, anchor, color);
+        } else {
+            behind.text(at, &queued.text, settings.size, anchor, color);
         }
     }
 }
@@ -470,6 +513,36 @@ pub unsafe extern "C" fn bcs_gizmo_draw_many(configs: *const BcsGizmoConfig, cou
             queue.0.reserve(described.len());
             queue.0.extend(described.iter().map(queued));
 
+            status::OK
+        })
+    })
+}
+
+/// Records a run of text to draw this frame, in Bevy's stroke font.
+///
+/// The font has the printable ASCII characters and draws any other as a space, and a line break
+/// starts a new line below. Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
+///
+/// # Safety
+/// `text` must be a NUL-terminated UTF-8 string, and `settings` point to a readable
+/// [`BcsGizmoText`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_text(text: *const core::ffi::c_char, settings: *const BcsGizmoText) -> i32 {
+    crate::interop::guard(|| {
+        if settings.is_null() {
+            return status::NULL_ARG;
+        }
+        let Some(text) = (unsafe { crate::interop::cstr_to_string(text) }) else {
+            return status::NULL_ARG;
+        };
+        let settings = unsafe { *settings };
+
+        crate::state::with_world(|world| {
+            let Some(mut queue) = world.get_resource_mut::<GizmoQueue>() else {
+                return status::UNSUPPORTED;
+            };
+
+            queue.1.push(QueuedText { text, settings });
             status::OK
         })
     })

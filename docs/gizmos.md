@@ -66,6 +66,20 @@ camera. They take a point on the XY plane and an angle about Z, because that is 
 can be turned by, and they go through Bevy's own flat calls rather than through the solid ones at
 zero depth, which differ once a line has width.
 
+`Gizmos.Text` writes a label in the world, and `Text2d` the same for a 2D camera, drawn as lines in
+Bevy's stroke font, so it costs no font asset and no entity and lasts the frame it was asked for:
+
+```csharp
+Gizmos.Text($"{speed:0.0} m/s", position + Vec3.UnitY, Quat.Identity, 0.3f, (0f, -0.5f), (1f, 1f, 1f, 1f));
+Gizmos.Text2d("spawn", (120f, -40f), 0f, 16f, (0f, 0f), (1f, 0.8f, 0f, 1f));
+```
+
+Its size is the height of a capital letter, and its anchor the point of its bounds that stands at
+the position, from minus a half to a half on each axis, so `(0f, -0.5f)` puts the middle of its
+bottom edge there. The font has the printable ASCII characters and a line break starts a new line.
+Its lines are as thick as every gizmo's, so text a player reads belongs in `Ui` or on a `Text2d`
+entity instead, which a real font shapes.
+
 Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
 collecting shapes nothing will draw. Guard with `App.HasRenderer`.
 
