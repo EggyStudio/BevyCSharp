@@ -14,14 +14,12 @@ BevyCSharp.Tests/BehaviorTests.cs
 BevyCSharp.Tests/CaptureTests.cs
 BevyCSharp.Tests/ChangingTypeTests.cs
 BevyCSharp.Tests/CharacterControllerTests.cs
-BevyCSharp.Tests/CheatsheetTests.cs
 BevyCSharp.Tests/CliCommandSchemaTests.cs
 BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/CliEnvelopeTests.cs
 BevyCSharp.Tests/CliServerTests.cs
 BevyCSharp.Tests/CliSessionTests.cs
 BevyCSharp.Tests/CloneTests.cs
-BevyCSharp.Tests/ColorPickerTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/ComputeShaderTests.cs
 BevyCSharp.Tests/ComputedStateTests.cs
@@ -29,31 +27,35 @@ BevyCSharp.Tests/ConsoleTests.cs
 BevyCSharp.Tests/DataAssetTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
+BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
 BevyCSharp.Tests/DrawnTests.cs
 BevyCSharp.Tests/DynamicSystemTests.cs
 BevyCSharp.Tests/EcsListTests.cs
 BevyCSharp.Tests/EcsWorldTests.cs
 BevyCSharp.Tests/EditableTextTests.cs
-BevyCSharp.Tests/EditorFieldTests.cs
-BevyCSharp.Tests/EditorHierarchyTests.cs
-BevyCSharp.Tests/EditorHistoryTests.cs
-BevyCSharp.Tests/EditorMultiEditTests.cs
-BevyCSharp.Tests/EditorRemoteTests.cs
-BevyCSharp.Tests/EditorSceneTests.cs
-BevyCSharp.Tests/EditorSelectionTests.cs
-BevyCSharp.Tests/EditorSortTests.cs
-BevyCSharp.Tests/EditorTabTests.cs
-BevyCSharp.Tests/EditorTableTests.cs
-BevyCSharp.Tests/EditorThemeTests.cs
-BevyCSharp.Tests/EditorWorldTests.cs
+BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorHierarchyTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorHistoryTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorMultiEditTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorRemoteTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorSceneTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorSelectionTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorSortTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorTabTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorTableTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorThemeTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/EditorWorldTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/LevelCameraTests.cs	tests the editor, which is no area of the library
+BevyCSharp.Tests/Editor/PreviewRendererTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/EngineTests.cs
 BevyCSharp.Tests/EnvironmentOptionTests.cs
-BevyCSharp.Tests/ExampleStringPathTests.cs
+BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
 BevyCSharp.Tests/FixedUpdateTests.cs
 BevyCSharp.Tests/FrameProfileTests.cs
 BevyCSharp.Tests/GBufferTests.cs
 BevyCSharp.Tests/GamepadTests.cs
-BevyCSharp.Tests/GeneratorAttributeTests.cs
+BevyCSharp.Tests/Generator/GeneratorAttributeTests.cs	tests the generators, which are no area of the library
 BevyCSharp.Tests/GizmoShapeTests.cs
 BevyCSharp.Tests/GizmoTests.cs
 BevyCSharp.Tests/GltfContentsTests.cs
@@ -68,7 +70,6 @@ BevyCSharp.Tests/IntrospectionTests.cs
 BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/JointStateTests.cs
 BevyCSharp.Tests/LensTests.cs
-BevyCSharp.Tests/LevelCameraTests.cs
 BevyCSharp.Tests/LightProbeTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
 BevyCSharp.Tests/LitShaderTests.cs
@@ -94,7 +95,6 @@ BevyCSharp.Tests/PhysicsTests.cs
 BevyCSharp.Tests/PickRayTests.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
-BevyCSharp.Tests/PreviewRendererTests.cs
 BevyCSharp.Tests/ProjectSettingsTests.cs
 BevyCSharp.Tests/RayTracingTests.cs
 BevyCSharp.Tests/ReflectedComponentTests.cs
@@ -112,7 +112,7 @@ BevyCSharp.Tests/SaveGameTests.cs
 BevyCSharp.Tests/ScaleTests.cs
 BevyCSharp.Tests/SceneFileTests.cs
 BevyCSharp.Tests/SceneValueTests.cs
-BevyCSharp.Tests/ScriptReloadTests.cs
+BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/ShaderLayoutTests.cs
 BevyCSharp.Tests/ShaderMaterialTests.cs
 BevyCSharp.Tests/ShaderPassTests.cs
