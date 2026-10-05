@@ -48,7 +48,7 @@ public static class CliClient
                 NewLine = "\n",
             };
 
-            writer.WriteLine(Request(session.Token, operation, line));
+            writer.WriteLine(Request(session.Token, operation, line, seconds));
 
             using var reader = new StreamReader(stream, Encoding.UTF8);
 
@@ -68,8 +68,8 @@ public static class CliClient
         }
     }
 
-    /// <summary>One request, as the line the app reads.</summary>
-    private static string Request(string token, string operation, string? line)
+    /// <summary>One request, as the line the app reads, with how long the caller will wait for it.</summary>
+    private static string Request(string token, string operation, string? line, double seconds)
     {
         var buffer = new MemoryStream(256);
 
@@ -80,6 +80,7 @@ public static class CliClient
             writer.WriteString("token", token);
 
             if (line is not null) writer.WriteString("line", line);
+            writer.WriteNumber("wait", seconds);
 
             writer.WriteEndObject();
         }

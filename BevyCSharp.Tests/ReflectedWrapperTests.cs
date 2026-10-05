@@ -174,6 +174,38 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// An <c>Option</c> of a record written while it is already <c>Some</c> keeps what the record
+    /// does not hold, as a sprite's texture atlas keeps its layout when its frame is written.
+    /// </summary>
+    [SkippableFact]
+    public void AnOptionalRecordWrittenAgainKeepsWhatItDoesNotHold()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var layout = AssetHandle.None;
+        AssetHandle? kept = AssetHandle.None;
+        TextureAtlas? frame = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            layout = Render2d.CreateAtlas(24, 24, 7, 1);
+            var sprite = ctx.Ecs.Insert<SpriteRef>(ctx.Ecs.Spawn());
+            sprite.TextureAtlas = new TextureAtlas(0);
+            ctx.Ecs.SetReflectedAsset(sprite.Entity, SpriteRef.TypePath, ".texture_atlas.0.layout", layout);
+
+            sprite.TextureAtlas = new TextureAtlas(3);
+            frame = sprite.TextureAtlas;
+            kept = ctx.Ecs.GetReflectedAsset(sprite.Entity, SpriteRef.TypePath, ".texture_atlas.0.layout");
+        });
+
+        harness.Run();
+
+        Assert.Equal(new TextureAtlas(3), frame);
+        Assert.Equal(layout, kept);
+    }
+
+    /// <summary>
     /// A variant holding a handle can be chosen, and a component holding one inserted, which need a
     /// handle made for them before the one written arrives, since Bevy registers no default for a
     /// handle.

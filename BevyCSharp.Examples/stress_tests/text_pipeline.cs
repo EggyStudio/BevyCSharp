@@ -1,0 +1,62 @@
+// Bevy's text_pipeline example, examples/stress_tests/text_pipeline.rs at v0.19.1, by Bevy's
+// contributors under MIT or Apache-2.0, written again in C#.
+
+using Bevy;
+using Bevy.Reflected;
+using Justify = Bevy.Reflected.TextLayoutRef.JustifyVariant;
+using Linebreak = Bevy.Reflected.TextLayoutRef.LinebreakVariant;
+
+namespace BevyCSharp.Examples.StressTests;
+
+// Text in the world of many spans in two fonts at many sizes, whose bounds widen and narrow with
+// the clock, so it is laid out again every frame.
+internal static class TextPipeline
+{
+    private static Entity _text;
+
+    public static void Configure(Config config) => StressTest.Configure(config);
+
+    public static void Build(App app)
+    {
+        StressTest.Add(app);
+        app.Startup(Spawn, "text_pipeline.Spawn");
+        app.Update(UpdateTextBounds, "text_pipeline.UpdateTextBounds");
+    }
+
+    private static void Spawn(BehaviorContext ctx)
+    {
+        StressTest.Warn();
+        var ecs = ctx.Ecs;
+        Render2d.SpawnCamera2d();
+
+        _text = ecs.Spawn();
+        ecs.Add(_text, Transform.Identity);
+        ecs.Insert<Text2dRef>(_text);
+        var layout = ecs.Insert<TextLayoutRef>(_text);
+        (layout.Justify, layout.Linebreak) = (Justify.Center, Linebreak.AnyCharacter);
+        ecs.Insert<TextBoundsRef>(_text);
+
+        var mono = AssetServer.Load(AssetKind.Font, "fonts/FiraMono-Medium.ttf");
+        var sans = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
+        for (var i = 1; i < 50; i++)
+        {
+            Span(ecs, string.Concat(Enumerable.Repeat("text", i)), mono, 4 + i % 10, Color.FromSrgb(0f, 0f, 1f));
+            Span(ecs, string.Concat(Enumerable.Repeat("pipeline", i)), sans, 4 + i % 11, Color.FromSrgb(1f, 1f, 0f));
+        }
+    }
+
+    private static void Span(EcsWorld ecs, string text, AssetHandle font, int size, Color color)
+    {
+        var span = ecs.Spawn();
+        ecs.Insert<TextSpanRef>(span).Value = text;
+        var style = ecs.Insert<TextFontRef>(span);
+        style.Font = new FontSource.Handle(font);
+        style.FontSize = new FontSize.Px(size);
+        ecs.Insert<TextColorRef>(span).Value = color;
+        ecs.SetParent(span, _text);
+    }
+
+    // Changing the bounds has the text laid out again.
+    private static void UpdateTextBounds(BehaviorContext ctx) =>
+        ctx.Ecs.Wrap<TextBoundsRef>(_text).Width = (1f + MathF.Sin(ctx.Time.Elapsed)) * 600f;
+}

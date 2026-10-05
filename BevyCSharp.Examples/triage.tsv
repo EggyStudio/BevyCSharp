@@ -334,13 +334,13 @@ many_foxes	can
 many_gizmos	can
 many_glyphs	can
 many_gradients	can	through Bevy's reflected BackgroundGradient
-many_lights	can
+many_lights	part	the lights its render world saw and drew, counted in its log, which no wrapper reaches there, and its sphere subdivided as Bevy subdivides one by default rather than nine times
 many_materials	can
 many_morph_targets	can	through Bevy's reflected MorphWeights
 many_sprite_meshes	can	through Bevy's reflected SpriteMesh
 many_sprites	can
-many_text2d	can	through Bevy's reflected Text2d
-many_text	can
+many_text2d	part	the font atlases' count and bytes in its log, which Bevy's FontAtlasSet holds and no wrapper reaches
+many_text	part	--clear-font-atlases, which empties Bevy's FontAtlasSet, which no wrapper reaches
 text_pipeline	can
 transform_hierarchy	can
 time	n/a	replaces Bevy's runner with one stepping the app from the console, and the bridge owns the runner

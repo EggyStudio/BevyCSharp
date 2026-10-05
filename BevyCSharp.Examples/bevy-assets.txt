@@ -104,6 +104,8 @@ textures/simplespace/enemy_A.png
 textures/simplespace/enemy_B.png
 fonts/FiraMono-Medium.ttf
 fonts/FiraSans-Bold.ttf
+fonts/EBGaramond12-Regular.otf
+fonts/MonaSans-VariableFont.ttf
 textures/slice_square_2.png
 branding/banner.png
 textures/fantasy_ui_borders/panel-border-010.png

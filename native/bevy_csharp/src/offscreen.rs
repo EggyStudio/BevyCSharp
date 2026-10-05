@@ -28,8 +28,11 @@ pub struct OffscreenTarget {
 /// large the window is, and a game's own startup system lays out what it spawns by that answer.
 /// A resource inserted by a startup system's commands lands only once the schedule applies them,
 /// so made in Startup it would be missing for a startup system asking the size.
+///
+/// Public for `native/stress`, which runs Bevy's own stress tests drawn as an offscreen run here
+/// is drawn, so a test is measured beside its C# version with nothing between them but the bridge.
 #[cfg(feature = "render")]
-pub(crate) fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
+pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     use bevy::asset::Assets;
     use bevy::camera::{Camera, RenderTarget};
     use bevy::ecs::change_detection::DetectChangesMut;

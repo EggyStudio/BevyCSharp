@@ -531,7 +531,10 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
         var cases = CasesOf(field, parts);
         if (cases is null) return false;
 
-        // Rust's Option is a value that may be absent, which C# writes as a nullable.
+        // Rust's Option is a value that may be absent, which C# writes as a nullable. Only a field
+        // that is None is switched to Some before the value is written, since switching makes the
+        // variant again with every field at its default, and a field the record does not hold, such
+        // as a texture atlas's layout, would be lost each time the record is written.
         var options = field.Extra.Split(',').Where(v => v.Length > 0).ToArray();
         if (options.Length == 2 && options[0] == "None" && options[1] == "Some")
         {
@@ -556,7 +559,8 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                                     return;
                                 }
 
-                                _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
+                                if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
+                                    _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
                                 {{Writing(part.Field, at, "held")}}
                             }
                         }
@@ -583,7 +587,8 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                                 return;
                             }
 
-                            _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
+                            if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
+                                _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
                             {{string.Join("\n                ", some.Parts.Select(p => Writing(p.Field, Quoted(p.Field.Reflect), "value." + p.Name)))}}
                         }
                     }

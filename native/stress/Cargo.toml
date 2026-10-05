@@ -1,6 +1,8 @@
-# games/Stress's drawn scene written against Bevy alone, to measure beside the bridge. A workspace
-# of its own, so the bridge's stays one crate, which the build commands name features at the root
-# of, with the bridge's lock file copied in so the two build the same versions.
+# games/Stress's drawn scene written against Bevy alone, to measure beside the bridge, and Bevy's
+# own stress tests run as an offscreen run of the bridge runs, to measure beside their C# versions
+# (build/bevy-stress.sh). A workspace of its own, so the bridge's stays one crate, which the build
+# commands name features at the root of, with the bridge's lock file copied in so the two build
+# the same versions.
 [workspace]
 
 [package]
@@ -15,6 +17,13 @@ publish = false
 [dependencies]
 bevy = { version = "0.19.1", default-features = false }
 bevy_csharp = { path = "../bevy_csharp", default-features = false, features = ["render"] }
+
+# What Bevy's examples use beside Bevy, at the versions its own Cargo.toml names for them, for the
+# stress tests build/bevy-stress.sh fetches into examples/.
+[dev-dependencies]
+argh = "0.1.12"
+chacha20 = { version = "0.10.0", default-features = false, features = ["rng"] }
+rand = "0.10.0"
 
 [profile.release]
 opt-level = 3

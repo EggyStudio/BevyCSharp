@@ -59,13 +59,24 @@ internal sealed class CliServer : IDisposable
     /// <summary>What a request has to carry to be answered.</summary>
     public string Token { get; }
 
-    /// <summary>How long a request may sit in the queue before the caller is told it timed out.</summary>
+    /// <summary>
+    /// How long a request may sit in the queue before the caller is told it timed out, where the
+    /// request does not say how long its caller will wait.
+    /// </summary>
     /// <remarks>
     /// A backstop rather than a policy. A frame answers in milliseconds, so reaching this means the
     /// app stopped running frames, and a caller learning that in thirty seconds is better than one
     /// waiting on a socket that will never answer.
     /// </remarks>
     public static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
+
+    /// <summary>The longest a caller can ask a request to be waited on, with <c>"wait"</c> in seconds.</summary>
+    /// <remarks>
+    /// A caller asks for longer than <see cref="Patience"/> when what it runs takes many frames of
+    /// an app that draws slowly, as <c>frame.profile</c> over a stress test does, and the bound
+    /// keeps a mistyped number from holding a connection open for good.
+    /// </remarks>
+    public static readonly TimeSpan LongestWait = TimeSpan.FromHours(1);
 
     /// <summary>Takes calls until the listener is closed.</summary>
     private void Accept()
@@ -141,6 +152,7 @@ internal sealed class CliServer : IDisposable
         string? command;
         string? id;
         string? token;
+        var patience = Patience;
 
         try
         {
@@ -151,6 +163,11 @@ internal sealed class CliServer : IDisposable
             command = root.TryGetProperty("line", out var body) ? body.GetString() : null;
             id = root.TryGetProperty("id", out var given) ? given.GetString() : null;
             token = root.TryGetProperty("token", out var carried) ? carried.GetString() : null;
+
+            // As long as the caller is willing to wait, up to an hour, so a command that runs for
+            // many frames of a slow app is answered rather than given up on at the backstop.
+            if (root.TryGetProperty("wait", out var wait) && wait.TryGetDouble(out var seconds) && seconds > 0)
+                patience = TimeSpan.FromSeconds(Math.Min(seconds, LongestWait.TotalSeconds));
         }
         catch (Exception error) when (error is JsonException or InvalidOperationException)
         {
@@ -177,13 +194,13 @@ internal sealed class CliServer : IDisposable
         var request = new CliRequest(operation, command, id);
         _queue.Add(request);
 
-        return request.Answer.Wait(Patience)
+        return request.Answer.Wait(patience)
             ? request.Answer.Result
             : CliJson.Fail(
                 operation,
                 "TIMEOUT",
-                $"The app did not answer within {Patience.TotalSeconds:0} seconds. It may be "
-                + "stalled, or stopped running frames.",
+                $"The app did not answer within {patience.TotalSeconds:0} {(patience.TotalSeconds == 1 ? "second" : "seconds")}. "
+                + "It may be stalled, or stopped running frames.",
                 id);
     }
 

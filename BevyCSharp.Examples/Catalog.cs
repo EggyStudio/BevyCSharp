@@ -15,6 +15,7 @@ using BevyCSharp.Examples.Pointers;
 using BevyCSharp.Examples.Shading;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
+using BevyCSharp.Examples.StressTests;
 using BevyCSharp.Examples.ThreeD;
 using BevyCSharp.Examples.Tools;
 using BevyCSharp.Examples.Transforms;
@@ -240,6 +241,21 @@ internal static class Catalog
         // State
         new("states", StatesExample.Build),
         new("sub_states", SubStates.Build),
+
+        // Stress Tests
+        new("many_animated_sprite_meshes", ManyAnimatedSpriteMeshes.Build, ManyAnimatedSpriteMeshes.Configure),
+        new("many_animated_sprites", ManyAnimatedSprites.Build, ManyAnimatedSprites.Configure),
+        new("many_cameras_lights", ManyCamerasLights.Build, ManyCamerasLights.Configure),
+        new("many_gizmos", ManyGizmos.Build, ManyGizmos.Configure),
+        new("many_glyphs", ManyGlyphs.Build, ManyGlyphs.Configure),
+        new("many_gradients", ManyGradients.Build, ManyGradients.Configure),
+        new("many_lights", ManyLights.Build, ManyLights.Configure),
+        new("many_materials", ManyMaterials.Build, ManyMaterials.Configure),
+        new("many_sprite_meshes", ManySpriteMeshes.Build, ManySpriteMeshes.Configure),
+        new("many_sprites", ManySprites.Build, ManySprites.Configure),
+        new("many_text", ManyText.Build, ManyText.Configure),
+        new("many_text2d", ManyText2d.Build, ManyText2d.Configure),
+        new("text_pipeline", TextPipeline.Build, TextPipeline.Configure),
 
         // Time
         new("timers", Timers.Build, Prints: 1300),

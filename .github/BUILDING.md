@@ -239,6 +239,7 @@ dotnet build BevyCSharp.Examples
 build/capture-example.sh 3d_scene          # its picture in .github/assets/examples
 build/capture-examples.sh                  # every one, failing on one that does not start or is blank
 build/examples-table.py                    # .github/EXAMPLES.md, the README's count and each example's head
+build/measure-stress.sh many_sprites       # a stress test beside Bevy's own program, as PERFORMANCE.md has them
 ```
 
 `build/examples-table.py` reads Bevy's example metadata from the cargo registry, which holds the

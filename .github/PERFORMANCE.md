@@ -204,6 +204,58 @@ left is Bevy's schedule, mostly propagating the transforms that moved, 7 ms at 4
 few thousand entities the method runs across the thread pool, which a method reaching the world
 through `ctx.Ecs` could not.
 
+## Bevy's stress tests, beside Bevy
+
+Bevy's stress tests are written in C# in `BevyCSharp.Examples/stress_tests`, and each is measured
+beside Bevy's own program, built from its source at the version the bridge builds, on the
+bridge's render profile, by `build/bevy-stress.sh`. Both are drawn as an offscreen run of the
+bridge draws, unpaced, into an image of the size the test asks for, 1920 by 1080. Bevy's program
+has its window left out and its cameras pointed at the image by the bridge's own code, so what
+differs between the two is the bridge and the C#. `build/measure-stress.sh <test> [arguments]`
+runs the two in turn three times, lets each settle for 300 frames and measures the next 240, and
+gives the median of each, in milliseconds a frame. Bevy's program also prints its render
+schedule's phases, as frame.profile prints the bridge's, and `BEVY_STRESS_WITH` adds what the
+bridge adds to every app to Bevy's program by name, which is how a difference is placed.
+
+| test, with its own defaults | Bevy alone | through the bridge |
+|---|---:|---:|
+| many_animated_sprite_meshes | 14.83 | 212.54 |
+| many_animated_sprites | 6.64 | 15.95 |
+| many_cameras_lights | 42.16 | 46.19 |
+| many_gizmos | 6.54 | 12.39 |
+| many_glyphs | 18.60 | 20.86 |
+| many_gradients | 4.83 | 5.74 |
+| many_lights | 6.98 | 6.66 |
+| many_materials | 6.89 | 7.10 |
+| many_sprite_meshes | 4.87 | 13.96 |
+| many_sprites | 3.89 | 4.69 |
+| many_text | 16.83 | 20.90 |
+| many_text2d | 8.68 | 9.55 |
+| text_pipeline | 3.76 | 4.34 |
+
+Most cost the bridge under a millisecond more, or a few against a frame of tens. Four cost far
+more, each for a reason measuring found.
+
+- **many_sprite_meshes, 9 ms more, is Bevy's 2D wireframe plugin.** The bridge adds
+  `Wireframe2dPlugin` to every app, so a 2D mesh can be outlined, and the plugin looks at every 2D
+  mesh in its prepare and queue phases whether or not any is outlined. Bevy's program with it
+  added (`BEVY_STRESS_WITH=wireframe2d`) goes from 5.12 ms to 12.98, its prepare meshes from 0.18 to
+  3.59 and its queue from 0.10 to 4.33, which is the bridge's frame. A sprite mesh is a 2D mesh to
+  Bevy, and a sprite is not, which is why many_sprites does not pay it.
+- **many_gizmos, 6 ms more, is a copy of every line.** `Gizmos.Lines` takes a run of lines in one
+  call, and built a new array of the bridge's layout for every call, ten of 5,000 lines a frame
+  here, each on .NET's large object heap. The ten systems take 4.98 ms of the frame between
+  them, 0.73 of it in their calls into the bridge and the rest in C#, filling the lines and
+  copying each into the array made for it.
+- **many_animated_sprites, 9 ms more, is a call a frame turned.** Bevy moves a sprite's atlas index
+  where it is. The bridge has no call that does only that, so each sprite whose timer finished is
+  set again through `Render2d.SetSprite`, about 18,000 a frame, which is 11.3 ms of the frame.
+- **many_animated_sprite_meshes, 198 ms more, is the same done through reflection, and it feeds
+  itself.** The frame is written through the sprite mesh's reflected atlas, two calls a sprite,
+  and once frames are slow every timer of a tenth of a second finishes every frame, so all
+  102,400 sprites are written each frame, 614,000 calls, where Bevy writes the 15 in 100 whose
+  timers finished.
+
 ## What measuring turned up
 
 - **A behavior method over many entities could not reach the world, and said the wrong thing.**
@@ -213,3 +265,11 @@ through `ctx.Ecs` could not.
   this, and moves its transform from a static method over a query.
 - **The GPU timings leave the shadow passes out**, so the render's phases are timed as well, which
   is where a cost the passes do not show is found.
+- **A request to a running app gave up after half a minute whatever its caller said.** A command
+  over many frames of an app that draws slowly, frame.profile over a stress test, was answered
+  with a timeout at 30 seconds although `--timeout` asked for longer. The request carries how long
+  its caller will wait, and the app waits that long, up to an hour.
+- **Setting a reflected `Option` that was already set reset what the wrapper does not hold.**
+  Writing a sprite's texture atlas through its wrapper switched the field to `Some` again, which
+  makes the variant anew with its defaults and loses the layout. A field already `Some` is written
+  in place.

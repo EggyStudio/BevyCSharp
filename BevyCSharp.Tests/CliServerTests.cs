@@ -179,6 +179,26 @@ public sealed class CliServerTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// A request is waited on as long as its caller says it will wait, rather than the half minute
+    /// one that says nothing is given, so a command over many frames of a slow app is answered.
+    /// </summary>
+    /// <remarks>
+    /// The queue is never drained, as an app that stopped running frames leaves it, so the answer
+    /// is the one the wait ran out with, which names how long it was.
+    /// </remarks>
+    [Fact]
+    public void ARequestIsWaitedOnAsLongAsItsCallerSays()
+    {
+        using var server = new CliServer(new CliQueue());
+
+        var answer = Send(server.Port, $$"""{"op":"status","token":"{{server.Token}}","wait":1}""");
+
+        var error = answer.GetProperty("errors")[0];
+        Assert.Equal("TIMEOUT", error.GetProperty("code").GetString());
+        Assert.StartsWith("The app did not answer within 1 second.", error.GetProperty("message").GetString());
+    }
+
     /// <summary>A headless engine with the server on, and a backstop so nothing can hang.</summary>
     private static App Serving()
     {
