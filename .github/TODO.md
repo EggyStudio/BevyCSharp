@@ -24,10 +24,10 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
-  widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
-  navigation (three). Needs `EditableText` and the widget components spawned and read, and the
-  navigation resources.
+- **Interface widgets and text input, sixteen examples.** Bevy's editable text (five, `ime_support`
+  among them), its core widgets and widget helpers (four), Feathers (three), scrollbars, and
+  directional and tab navigation (three). Needs `EditableText` and the widget components spawned and
+  read, and the navigation resources.
 - **Fonts and text styling, nine examples.** Font weights, OpenType variations and features (`text`
   among them), generic families and system fonts, querying fonts and their atlases, strikethrough
   and underline, and text background colors.
@@ -69,20 +69,16 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **An image loaded as an array of layers, two examples.** `tilemap_chunk` and
   `tilemap_chunk_orientation` draw Bevy's `TilemapChunk`, whose tiles are the layers of one image
   cut as it loads.
-- **Bevy's resources through reflection, five examples.** Its components are reached by their type
-  paths and its resources are not, so `ui_scaling`, `ui_texture_slice_flip_and_tile` and
-  `drag_to_scroll` cannot set `UiScale`, `image_node_resizing` cannot set `GlobalUiDebugOptions`,
-  `ime_support` cannot read `InputFocus`, and `button` is written in part without it. In this Bevy a
-  resource is a component on an entity of its own, so reaching one is finding that entity.
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Eleven more, one example each.** A resource's change ticks and when a component was added
+- **Twelve more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
   picking's events), Bevy's log written from C# at its levels (`logs`), a playing sound's speed
   changed as it plays (`audio_control`), an atlas built from a folder of images as the app runs
-  (`texture_atlas`), gizmos of Bevy's primitive shapes (`render_primitives`), the
+  (`texture_atlas`), gizmos of Bevy's primitive shapes (`render_primitives`), Bevy's outlines of
+  interface nodes for debugging, a feature the bridge does not build (`image_node_resizing`), the
   pointer passing through the window to what is behind it (`window_fallthrough`), the schedule
   reporting systems whose order is ambiguous (`nondeterministic_system_order`), and a message
   changed in place by a later system and read the same frame, where a C# message is read the frame
@@ -100,8 +96,9 @@ Seven examples are written in part, each leaving out a feature named in its row.
 - **An underline under text**, which `text2d` draws its first box's text without and
   `letter_spacing` its heading. Bevy's `Underline` is not reflected, so no call reaches it, and it
   is one of the text styles the fonts entry above names.
-- **The input focus**, which `button` leaves unset as the pointer moves over it, since `InputFocus`
-  is a resource the bridge does not reach, as the entry above on Bevy's resources says.
+- **How large an image is**, which `tonemapping`'s image viewer reads in Bevy to size its square
+  to a dropped picture. The bridge loads and draws an image without saying its size, which a call
+  reading the loaded image's width and height would.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

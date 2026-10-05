@@ -73,7 +73,7 @@ clustered_decal_maps	can
 mirror	missing	the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space
 pccm	can
 light_probe_blending	can
-2d_shapes	can	through Bevy's reflected Wireframe2d, put on each mesh where Bevy's sets its global one
+2d_shapes	can
 2d_viewport_to_world	can	zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types
 bloom_2d	can	through Bevy's reflected Bloom
 cpu_draw	can
@@ -101,7 +101,7 @@ texture_atlas	missing	an atlas built from a folder of images as the app runs
 tilemap_chunk_orientation	missing	an image loaded as an array of layers, a row of tiles to a layer
 tilemap_chunk	missing	an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from
 transparency_2d	can
-wireframe_2d	can	through Bevy's reflected Wireframe2d, the global one stood in for by the mesh it reaches
+wireframe_2d	can
 animated_mesh_control	can
 animated_mesh_events	missing	events placed on an animation clip
 animated_mesh	can
@@ -356,11 +356,11 @@ translation	can
 anchor_layout	can
 borders	can
 box_shadow	can	through Bevy's reflected BoxShadow
-button	part	the input focus given to the button, a resource of Bevy's
+button	can	the input focus set through Bevy's reflected InputFocus, without the record of changes its own set keeps, which is a list no wrapper reaches
 directional_navigation	missing	directional navigation between interface nodes
 directional_navigation_overrides	missing	directional navigation between interface nodes
 display_and_visibility	can
-drag_to_scroll	missing	observers of the pointer dragging a scrolled node, and Bevy's UiScale resource
+drag_to_scroll	missing	observers of the pointer dragging a scrolled node
 editable_text_filter	missing	Bevy's editable text (EditableText)
 feathers_counter	missing	Bevy's Feathers widgets
 feathers_gallery	missing	Bevy's Feathers widgets
@@ -374,8 +374,8 @@ ghost_nodes	missing	ghost nodes (GhostNode)
 gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
 grid	can
 image_node	can
-image_node_resizing	missing	Bevy's resources reached through reflection, here GlobalUiDebugOptions
-ime_support	missing	Bevy's resources reached through reflection, here InputFocus
+image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
+ime_support	missing	Bevy's editable text (EditableText)
 letter_spacing	part	the underline under the heading
 multiline_text_input	missing	Bevy's editable text (EditableText)
 multiple_text_inputs	missing	Bevy's editable text (EditableText)
@@ -401,11 +401,11 @@ text_wrap_debug	can
 transparency_ui	can
 ui_drag_and_drop	missing	observers of the pointer dragging and dropping interface nodes
 ui_material	missing	interface materials (UiMaterial)
-ui_scaling	missing	Bevy's resources reached through reflection, here UiScale
+ui_scaling	can
 ui_target_camera	can
 ui_texture_atlas	can
 ui_texture_atlas_slice	can
-ui_texture_slice_flip_and_tile	missing	Bevy's resources reached through reflection, here UiScale
+ui_texture_slice_flip_and_tile	can
 ui_texture_slice	can
 ui_transform	can	through Bevy's reflected UiTransform
 vertical_slider	missing	Bevy's core widgets (bevy_ui_widgets)

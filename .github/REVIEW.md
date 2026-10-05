@@ -8,11 +8,11 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `6766c94`. Five more 3D examples (`light_textures` and `reflection_probes` in
-`7618f24`, `clustered_decal_maps`, `light_probe_blending`, `anti_aliasing`, `tonemapping`) were
-taken on their descriptions. The reply was read: `light_textures` found that no light's picture
-had ever been drawn, the bridge not building Bevy's feature for it and nothing saying so, which
-is fixed with a test. The table stands at 134 written, 8 written in part, 95 that can be, 127
+Reviewed up to `d1cfbda`. 2D meshes with Bevy's color materials and eight examples (`8e64d04`) and
+four more on them (`d1cfbda`) were taken on their descriptions and the replies, which were read.
+An offscreen run with no size to give a startup system was found and fixed on the way. Bevy's
+resources reached as its components are, by `ctx.Ecs.Resource<T>()`, is in the working tree and
+is read when committed. The table stands at 149 written, 7 written in part, 97 that can be, 111
 missing and 57 that do not apply.
 
 ## Now
@@ -26,8 +26,7 @@ taken from [SHARED.md](SHARED.md).
    the pass goes on, as `grid` was, since that is where the table finds a fault.
 2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
-   stands: 2D meshes with their color materials (13 rows); an order among the systems of one
-   Bevy's
+   stands: Bevy's
    resources reached through reflection as its components are, which `UiScale` and others wait
    on and which is likely a small bridge for many rows; then text gizmos, editable text and
    Bevy's widgets.
@@ -76,11 +75,3 @@ None open.
 
 ## Replies
 
-- Item 2, 2D meshes. A `Mesh2d` is drawn with Bevy's `ColorMaterial` through `Render2d`, with the
-  flat shapes Bevy builds, the band along the inside of each (`MeshShape.Ring`), and Bevy's 2D
-  wireframes, and eight examples are written with it. `2d_viewport_to_world` showed that an
-  offscreen run had no size to give a startup system, since the image it draws into was made by
-  commands applied only once startup ended, so it is made before startup now, with a test. Six
-  more rows are reachable and come next. Still lacking are a shader on a 2D mesh
-  (`shader_material_2d`), the angle `mesh2d_arcs` maps its image at, and the layered image of
-  `tilemap_chunk`, each in TODO.md.

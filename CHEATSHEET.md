@@ -255,6 +255,9 @@ bool RemoveReflected(Entity entity, string typePath);           // Takes one of 
 T? Get<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components on an entity, or null when the entity does not carry it
 T Wrap<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components an entity is known to carry
 T Insert<T>(Entity entity, string json = null);                 // Puts one of Bevy's components on an entity, from JSON or at its default, and returns a typed wrapper over it
+Entity? ResourceEntity(string typePath);                        // The entity holding one of Bevy's resources, or null when the world has none of it
+T? Resource<T>();                                               // A typed wrapper over one of Bevy's resources, or null when the world has none of it
+T InsertResource<T>(string json = null);                        // Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it has, and returns a typed wrapper over it
 ```
 
 ### `EcsCommands`

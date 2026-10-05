@@ -343,6 +343,68 @@ public sealed unsafe partial class EcsWorld
         return T.Create(this, entity);
     }
 
+    /// <summary>
+    /// The entity holding one of Bevy's resources, or <see langword="null"/> when the world has none
+    /// of it.
+    /// </summary>
+    /// <param name="typePath">The resource's full type path, such as <c>bevy_ui::UiScale</c>.</param>
+    /// <remarks>
+    /// <para>
+    /// In this Bevy a resource is a component on an entity of its own, so once that entity is
+    /// found, every call here that reads or writes a component reads or writes the resource, and
+    /// <see cref="Resource{T}"/> gives its wrapper. A resource is found afresh each time rather
+    /// than kept, since a plugin may take one away and insert it again on another entity.
+    /// </para>
+    /// <para>
+    /// A type that is a component and no resource is refused rather than answered with
+    /// <see langword="null"/>, since asking for it this way is a mistake absence would hide.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The type is not one of Bevy's reflected resources.</exception>
+    public Entity? ResourceEntity(string typePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typePath);
+
+        ulong bits;
+        var status = Native.bcs_reflect_resource_entity(typePath, &bits);
+        if (status == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(status, $"Finding the resource {typePath}");
+        return new Entity(bits);
+    }
+
+    /// <summary>
+    /// A typed wrapper over one of Bevy's resources, or <see langword="null"/> when the world has
+    /// none of it.
+    /// </summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.UiScaleRef</c>.</typeparam>
+    /// <remarks>
+    /// The wrappers Bevy's components have serve its resources too, since a resource is a component
+    /// on an entity of its own, so <c>if (ctx.Ecs.Resource&lt;UiScaleRef&gt;() is { } scale)
+    /// scale.Value = 2f;</c> doubles the interface's scale. See <see cref="ResourceEntity"/>.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The type is not one of Bevy's reflected resources.</exception>
+    public T? Resource<T>() where T : struct, IReflectedComponent<T> =>
+        ResourceEntity(T.TypePath) is { } entity ? T.Create(this, entity) : null;
+
+    /// <summary>
+    /// Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it
+    /// has, and returns a typed wrapper over it.
+    /// </summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.ClearColorRef</c>.</typeparam>
+    /// <param name="json">The whole resource as JSON, or <see langword="null"/> for its default.</param>
+    /// <remarks>
+    /// A resource the world lacks is inserted on a new entity, which Bevy makes the resource's own.
+    /// One the world has is replaced where it is, since Bevy refuses a second entity holding the
+    /// same resource, and removes the newer with a warning.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">As <see cref="InsertReflected"/>, or the type is no resource.</exception>
+    public T InsertResource<T>(string? json = null) where T : struct, IReflectedComponent<T>
+    {
+        var entity = ResourceEntity(T.TypePath) ?? Spawn();
+        return Insert<T>(entity, json);
+    }
+
     /// <summary>Describes every reflected component and the types its fields reach, as JSON.</summary>
     /// <remarks>
     /// <see langword="null"/> when no world is on loan, because the description is the running

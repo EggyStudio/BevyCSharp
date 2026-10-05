@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 184;
+    internal const int ExpectedAbiVersion = 185;
 
     static Native() => NativeLoader.Initialize();
 
@@ -1105,6 +1105,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_reflect_remove(ulong entity, string typePath);
+
+    /// <summary>Finds the entity holding one of Bevy's resources.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_resource_entity(string typePath, ulong* entity);
 
     /// <summary>Reads an asset handle a component holds, as an asset key.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

@@ -4,8 +4,9 @@ using Bevy.Reflected;
 namespace BevyCSharp.Examples.Interface;
 
 // Illustrates a button, its label, background and border changing as the pointer moves over it and
-// presses it. Bevy's also gives the button the input focus, which is not reachable here, so this
-// is written in part.
+// presses it, and the input focus, which accessibility reads, given to it while the pointer is on
+// it. Bevy's InputFocus resource is written through its wrapper, which sets the focus without the
+// record of changes Bevy's own set keeps, a list no wrapper reaches.
 internal static class ButtonExample
 {
 
@@ -43,6 +44,9 @@ internal static class ButtonExample
             _label = Ui.SpawnText("Button", new UiSettings { Color = (light.R, light.G, light.B, 1f) }, new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 33f });
             ecs.Insert<TextShadowRef>(_label);
             ecs.SetParent(_label, _button);
+
+            // Bevy's example puts the resource in the world itself, which accessibility needs.
+            if (ecs.Resource<InputFocusRef>() is null) ecs.InsertResource<InputFocusRef>();
         }, "button.Setup");
 
         // Each change of the pointer over the button, as Bevy's Changed<Interaction> sees it.
@@ -59,6 +63,7 @@ internal static class ButtonExample
                 _ => ("Button", Normal, Color.Black),
             };
             Ui.SetText(_label, text);
+            if (ctx.Ecs.Resource<InputFocusRef>() is { } focus) focus.CurrentFocus = interaction == UiInteraction.None ? null : _button;
             ctx.Ecs.Wrap<BackgroundColorRef>(_button).Value = color;
             var edge = ctx.Ecs.Wrap<BorderColorRef>(_button);
             edge.Top = edge.Right = edge.Bottom = edge.Left = border;

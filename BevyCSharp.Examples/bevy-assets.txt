@@ -111,3 +111,4 @@ textures/fantasy_ui_borders/border_sheet.png
 textures/fantasy_ui_borders/panel-border-010-repeated.png
 pixel/bevy_pixel_dark.png
 pixel/bevy_pixel_light.png
+textures/fantasy_ui_borders/numbered_slices.png

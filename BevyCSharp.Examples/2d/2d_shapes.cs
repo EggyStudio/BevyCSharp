@@ -10,12 +10,12 @@ internal static class Shapes2d
     private const float XExtent = 1000f, YExtent = 150f, Thickness = 5f;
 
     private static readonly List<Entity> Meshes = [];
-    private static bool _rotating, _wireframes;
+    private static bool _rotating;
 
     public static void Build(App app)
     {
         Meshes.Clear();
-        (_rotating, _wireframes) = (false, false);
+        _rotating = false;
 
         app.Startup(Setup, "2d_shapes.Setup");
         app.Update(ToggleWireframes, "2d_shapes.ToggleWireframes");
@@ -82,17 +82,12 @@ internal static class Shapes2d
         }
     }
 
-    // Bevy turns its global wireframe on and off. Here each mesh is given its outline or has it
-    // taken off, which is the same to see.
+    // Bevy's global wireframe, in its Wireframe2dConfig resource, drawn over every mesh.
     private static void ToggleWireframes(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.Space)) return;
-        _wireframes = !_wireframes;
-        foreach (var entity in Meshes)
-        {
-            if (_wireframes) ctx.Ecs.Insert<Wireframe2dRef>(entity);
-            else ctx.Ecs.Wrap<Wireframe2dRef>(entity).Remove();
-        }
+        var config = ctx.Ecs.Resource<Wireframe2dConfigRef>() ?? ctx.Ecs.InsertResource<Wireframe2dConfigRef>();
+        config.Global = !config.Global;
     }
 
     private static void Rotate(BehaviorContext ctx)

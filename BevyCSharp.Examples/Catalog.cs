@@ -199,10 +199,12 @@ internal static class Catalog
         new("text_wrap_debug", TextWrapDebug.Build),
         new("transparency_ui", TransparencyUi.Build),
         new("ui_target_camera", UiTargetCamera.Build),
+        new("ui_scaling", UiScaling.Build),
         new("ui_transform", UiTransformExample.Build),
         new("ui_texture_atlas", UiTextureAtlas.Build),
         new("ui_texture_atlas_slice", UiTextureAtlasSlice.Build),
         new("ui_texture_slice", UiTextureSlice.Build),
+        new("ui_texture_slice_flip_and_tile", UiTextureSliceFlipAndTile.Build),
         new("z_index", ZIndex.Build),
     ];
 

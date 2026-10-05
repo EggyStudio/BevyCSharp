@@ -102,6 +102,21 @@ Rust's `Option` is a nullable, `float?` for a text box's width or a record such 
 for a camera's sub view, and null writes `None`. A component that is itself an enum, such as
 `Visibility`, has the one property `Value`.
 
+Bevy's resources are reached the same way, since in this Bevy a resource is a component on an
+entity of its own. `Resource<T>` finds that entity and gives the wrapper over it, or null when the
+world has none, and `InsertResource<T>` puts one in or replaces the one there:
+
+```csharp
+if (ctx.Ecs.Resource<UiScaleRef>() is { } scale)
+    scale.Value = 2f;                                     // the interface at twice its size
+
+var config = ctx.Ecs.Resource<Wireframe2dConfigRef>() ?? ctx.Ecs.InsertResource<Wireframe2dConfigRef>();
+config.Global = true;                                     // every 2D mesh drawn as its edges
+```
+
+`ResourceEntity` gives the entity itself, for the string calls below. A resource is found afresh
+each time rather than kept, since a plugin may take one away and put it back on another entity.
+
 What a wrapper adds over a string path is the compiler, because a field Bevy renames stops
 compiling once the description is regenerated after an upgrade, rather than failing on the day the
 line runs. It goes through the same reflection, so it costs what a string path costs.
