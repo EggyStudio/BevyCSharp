@@ -23,7 +23,10 @@ public static unsafe class Render
     /// <summary>
     /// Builds a mesh primitive and returns a handle to it.
     /// </summary>
-    /// <param name="shape">One of the constants on <see cref="MeshShape"/>.</param>
+    /// <param name="shape">
+    /// One of the constants on <see cref="MeshShape"/>, or a band around a flat one from
+    /// <see cref="MeshShape.Ring"/>.
+    /// </param>
     /// <param name="a">
     /// Width for a cuboid, plane or rectangle, radius for a sphere, capsule, cylinder, cone or
     /// circle, top radius for a conical frustum, inner radius for a torus or annulus, and the scale
@@ -33,7 +36,10 @@ public static unsafe class Render
     /// Height for a cuboid, cylinder, cone or rectangle, depth for a plane, length for a capsule,
     /// bottom radius for a conical frustum, and outer radius for a torus or annulus.
     /// </param>
-    /// <param name="c">Depth for a cuboid, height for a conical frustum.</param>
+    /// <param name="c">
+    /// Depth for a cuboid, height for a conical frustum, and the band's width for a ring, whose
+    /// first two numbers measure the shape it runs around.
+    /// </param>
     /// <remarks>
     /// The shape and its measures are kept beside the handle (<see cref="RecipeOf"/>), so the mesh
     /// can be shown and saved as the shape it is.
@@ -2557,7 +2563,7 @@ public static unsafe class Render
     }
 
     /// <summary>Attaches a handle through one of the components that carry one.</summary>
-    private static void Attach(
+    internal static void Attach(
         EcsWorld world,
         Entity entity,
         string component,
@@ -2583,7 +2589,7 @@ public static unsafe class Render
     }
 
     /// <summary>The error for asking a headless build to do something graphical.</summary>
-    private static BevyNativeException NoRenderer(string attempted) =>
+    internal static BevyNativeException NoRenderer(string attempted) =>
         new(NativeStatus.Unsupported,
             $"{attempted} needs a native build with the renderer compiled in. Rebuild the bridge "
             + "with build/build-native.sh --render, or guard the call with App.HasRenderer.");

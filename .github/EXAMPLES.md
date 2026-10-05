@@ -4,18 +4,18 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**134 written, 8 written in part, 95 can be written, 127 missing and 57 do not apply.** Of the 364 that apply, 237 can be written with what is bridged, 8 of them leaving something out.
+**142 written, 8 written in part, 101 can be written, 113 missing and 57 do not apply.** Of the 364 that apply, 251 can be written with what is bridged, 8 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 12 | 1 | 0 | 15 | 1 |
+| [2D Rendering](#2d-rendering) | 20 | 1 | 1 | 6 | 1 |
 | [3D Rendering](#3d-rendering) | 51 | 4 | 2 | 10 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 |
-| [Audio](#audio) | 4 | 0 | 0 | 4 | 0 |
-| [Camera](#camera) | 4 | 0 | 0 | 5 | 0 |
+| [Audio](#audio) | 4 | 0 | 1 | 3 | 0 |
+| [Camera](#camera) | 4 | 0 | 2 | 3 | 0 |
 | [Dev tools](#dev-tools) | 0 | 0 | 1 | 1 | 1 |
 | [Diagnostics](#diagnostics) | 0 | 0 | 1 | 2 | 0 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 14 | 0 | 1 | 11 | 9 |
@@ -33,7 +33,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Shaders](#shaders) | 0 | 0 | 15 | 5 | 5 |
 | [Shaders Advanced](#shaders-advanced) | 0 | 0 | 1 | 0 | 1 |
 | [State](#state) | 2 | 0 | 0 | 2 | 0 |
-| [Stress Tests](#stress-tests) | 0 | 0 | 18 | 2 | 1 |
+| [Stress Tests](#stress-tests) | 0 | 0 | 20 | 0 | 1 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
 | [Tools](#tools) | 0 | 0 | 2 | 0 | 0 |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **134** | **8** | **95** | **127** | **57** |
+| **All** | **142** | **8** | **101** | **113** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -50,20 +50,20 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`2d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_shapes.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/2d-shapes/) | Renders simple 2D primitive shapes like circles and polygons | missing, 2D meshes and their color materials |
-| [`2d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_viewport_to_world.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/2d-viewport-to-world/) | Demonstrates how to use the `Camera::viewport_to_world_2d` method with a dynamic viewport and camera. | missing, 2D meshes and their color materials |
-| [`bloom_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/bloom_2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/bloom-2d/) | Illustrates bloom post-processing in 2d | missing, 2D meshes and their color materials |
+| [`2d_shapes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_shapes.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/2d-shapes/) | Renders simple 2D primitive shapes like circles and polygons | [written](../BevyCSharp.Examples/2d/2d_shapes.cs), through Bevy's reflected Wireframe2d, put on each mesh where Bevy's sets its global one |
+| [`2d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/2d_viewport_to_world.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/2d-viewport-to-world/) | Demonstrates how to use the `Camera::viewport_to_world_2d` method with a dynamic viewport and camera. | [written](../BevyCSharp.Examples/2d/2d_viewport_to_world.cs), zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types |
+| [`bloom_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/bloom_2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/bloom-2d/) | Illustrates bloom post-processing in 2d | [written](../BevyCSharp.Examples/2d/bloom_2d.cs), through Bevy's reflected Bloom |
 | [`cpu_draw`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/cpu_draw.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/cpu-draw/) | Manually read/write the pixels of a texture | [written](../BevyCSharp.Examples/2d/cpu_draw.cs) |
 | [`dynamic_mip_generation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/dynamic_mip_generation.rs) | Demonstrates use of the mipmap generation plugin to generate mipmaps for a texture | missing, generating an image's mipmaps on the GPU |
-| [`mesh2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d/) | Renders a 2d mesh | missing, 2D meshes (Mesh2d with ColorMaterial) |
-| [`mesh2d_alpha_mode`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_alpha_mode.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-alpha-mode/) | Used to test alpha modes with mesh2d | missing, 2D meshes (Mesh2d with ColorMaterial) |
-| [`mesh2d_arcs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_arcs.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-arcs/) | Demonstrates UV-mapping of the circular segment and sector primitives | missing, 2D meshes (Mesh2d with ColorMaterial) and the arc primitives |
+| [`mesh2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d/) | Renders a 2d mesh | [written](../BevyCSharp.Examples/2d/mesh2d.cs) |
+| [`mesh2d_alpha_mode`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_alpha_mode.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-alpha-mode/) | Used to test alpha modes with mesh2d | [written](../BevyCSharp.Examples/2d/mesh2d_alpha_mode.cs) |
+| [`mesh2d_arcs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_arcs.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-arcs/) | Demonstrates UV-mapping of the circular segment and sector primitives | missing, the angle a sector's or a segment's mesh maps its image at |
 | [`mesh2d_manual`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_manual.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-manual/) | Renders a custom mesh "manually" with "mid-level" renderer apis | does not apply, writes a render pipeline in Rust with the mid-level render API |
-| [`mesh2d_repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_repeated_texture.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-repeated-texture/) | Showcase of using `uv_transform` on the `ColorMaterial` of a `Mesh2d` | missing, 2D meshes (Mesh2d with ColorMaterial) and its uv transform |
-| [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-vertex-color-texture/) | Renders a 2d mesh with vertex color attributes | missing, 2D meshes (Mesh2d with ColorMaterial) |
+| [`mesh2d_repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_repeated_texture.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-repeated-texture/) | Showcase of using `uv_transform` on the `ColorMaterial` of a `Mesh2d` | [written](../BevyCSharp.Examples/2d/mesh2d_repeated_texture.cs) |
+| [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/mesh2d-vertex-color-texture/) | Renders a 2d mesh with vertex color attributes | [written](../BevyCSharp.Examples/2d/mesh2d_vertex_color_texture.cs) |
 | [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/move_sprite.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/move-sprite/) | Changes the transform of a sprite | [written](../BevyCSharp.Examples/2d/move_sprite.cs) |
 | [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multi_window_text.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/multi-window-text/) | Renders text to multiple windows with different scale factors using both Text and Text2d | missing, a second window |
-| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/pixel-grid-snap/) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | missing, 2D meshes and their color materials |
+| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/pixel-grid-snap/) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | can be written |
 | [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotate_to_cursor.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/rotate-to-cursor/) | Demonstrates rotating entities in 2D to follow the cursor | [written](../BevyCSharp.Examples/2d/rotate_to_cursor.cs) |
 | [`rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotation.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/rotation/) | Demonstrates rotating entities in 2D with quaternions | [written](../BevyCSharp.Examples/2d/rotation.cs) |
 | [`sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/sprite/) | Renders a sprite | [written](../BevyCSharp.Examples/2d/sprite.cs) |
@@ -75,10 +75,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`sprite_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_tile.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/sprite-tile/) | Renders a sprite tiled in a grid | [written](../BevyCSharp.Examples/2d/sprite_tile.cs) |
 | [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/text2d/) | Generates text in 2D | [written in part](../BevyCSharp.Examples/2d/text2d.cs), the underline under the first box's text |
 | [`texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/texture_atlas.rs) | Generates a texture atlas (sprite sheet) from individual sprites | missing, an atlas built from a folder of images as the app runs |
-| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/tilemap-chunk/) | Renders a tilemap chunk | missing, 2D meshes and their color materials |
+| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/tilemap-chunk/) | Renders a tilemap chunk | missing, an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from |
 | [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/tilemap-chunk-orientation/) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | missing, an image loaded as an array of layers, a row of tiles to a layer |
 | [`transparency_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/transparency_2d.rs), [live in Bevy](https://bevy.org/examples/2d-rendering/transparency-2d/) | Demonstrates transparency in 2d | [written](../BevyCSharp.Examples/2d/transparency_2d.cs) |
-| [`wireframe_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/wireframe_2d.rs) | Showcases wireframes for 2d meshes | missing, 2D meshes (Mesh2d) and their wireframes |
+| [`wireframe_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/wireframe_2d.rs) | Showcases wireframes for 2d meshes | [written](../BevyCSharp.Examples/2d/wireframe_2d.cs), through Bevy's reflected Wireframe2d, the global one stood in for by the mesh it reaches |
 
 ## 3D Rendering
 
@@ -234,7 +234,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`pitch`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/pitch.rs), [live in Bevy](https://bevy.org/examples/audio/pitch/) | Shows how to directly play a simple pitch | missing, a generated tone (Pitch) |
 | [`play_sound_effect`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/play_sound_effect.rs), [live in Bevy](https://bevy.org/examples/audio/play-sound-effect/) | Shows how to play a sound effect in response to an event | [written](../BevyCSharp.Examples/audio/play_sound_effect.cs) |
 | [`soundtrack`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/soundtrack.rs), [live in Bevy](https://bevy.org/examples/audio/soundtrack/) | Shows how to play different soundtracks based on game state | [written](../BevyCSharp.Examples/audio/soundtrack.cs) |
-| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-2d/) | Shows how to play spatial audio, and moving the emitter in 2D | missing, 2D meshes and their color materials |
+| [`spatial_audio_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_2d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-2d/) | Shows how to play spatial audio, and moving the emitter in 2D | can be written |
 | [`spatial_audio_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/spatial_audio_3d.rs), [live in Bevy](https://bevy.org/examples/audio/spatial-audio-3d/) | Shows how to play spatial audio, and moving the emitter in 3D | [written](../BevyCSharp.Examples/audio/spatial_audio_3d.cs) |
 
 ## Camera
@@ -242,8 +242,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`2d_on_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_on_ui.rs), [live in Bevy](https://bevy.org/examples/camera/2d-on-ui/) | Shows how to render 2D objects on top of Bevy UI | [written](../BevyCSharp.Examples/camera/2d_on_ui.cs) |
-| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs), [live in Bevy](https://bevy.org/examples/camera/2d-screen-shake/) | A simple 2D screen shake effect | missing, 2D meshes and their color materials |
-| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs), [live in Bevy](https://bevy.org/examples/camera/2d-top-down-camera/) | A 2D top-down camera smoothly following player movements | missing, 2D meshes and their color materials |
+| [`2d_screen_shake`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_screen_shake.rs), [live in Bevy](https://bevy.org/examples/camera/2d-screen-shake/) | A simple 2D screen shake effect | can be written |
+| [`2d_top_down_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/2d_top_down_camera.rs), [live in Bevy](https://bevy.org/examples/camera/2d-top-down-camera/) | A 2D top-down camera smoothly following player movements | can be written, through Bevy's reflected Bloom |
 | [`camera_orbit`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/camera_orbit.rs), [live in Bevy](https://bevy.org/examples/camera/camera-orbit/) | Shows how to orbit a static scene using pitch, yaw, and roll. | [written](../BevyCSharp.Examples/camera/camera_orbit.cs) |
 | [`custom_projection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/custom_projection.rs), [live in Bevy](https://bevy.org/examples/camera/custom-projection/) | Shows how to create custom camera projections. | missing, custom camera projections |
 | [`first_person_view_model`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/camera/first_person_view_model.rs), [live in Bevy](https://bevy.org/examples/camera/first-person-view-model/) | A first-person camera that uses a world model and a view model with different field of views (FOV) | [written](../BevyCSharp.Examples/camera/first_person_view_model.cs) |
@@ -281,7 +281,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs), [live in Bevy](https://bevy.org/examples/ecs-entity-component-system/delayed-commands/) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay, and a click observed on a sprite |
 | [`dynamic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/dynamic.rs) | Dynamically create components, spawn entities with those components and query those components | does not apply, builds components from raw layouts in Rust |
 | [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | [written](../BevyCSharp.Examples/ecs/ecs_guide.cs), prints [its output](assets/examples/ecs_guide.txt) |
-| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs), [live in Bevy](https://bevy.org/examples/ecs-entity-component-system/entity-disabling/) | Demonstrates how to hide entities from the ECS without deleting them | missing, 2D meshes and their color materials, and a click observed on a mesh |
+| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs), [live in Bevy](https://bevy.org/examples/ecs-entity-component-system/entity-disabling/) | Demonstrates how to hide entities from the ECS without deleting them | missing, a click observed on a mesh |
 | [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, an observer of the pointer moving over a mesh, and points sampled over a mesh's surface |
 | [`extraction`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/extraction.rs) | Demonstrates different ways of extracting components, copying them from the main world to the render world | does not apply, writes render world extraction in Rust |
 | [`fallible_params`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fallible_params.rs) | Systems are skipped if their parameters cannot be acquired | does not apply, about Rust system parameters that fail validation, where a C# system checks what it needs itself |
@@ -369,7 +369,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`cubic_splines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/cubic_splines.rs), [live in Bevy](https://bevy.org/examples/math/cubic-splines/) | Exhibits different modes of constructing cubic curves using splines | missing, Bevy's cubic curves, Hermite, cardinal and B-spline |
 | [`custom_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/custom_primitives.rs), [live in Bevy](https://bevy.org/examples/math/custom-primitives/) | Demonstrates how to add custom primitives and useful traits for them. | does not apply, implements Rust traits for a primitive |
 | [`random_sampling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/random_sampling.rs), [live in Bevy](https://bevy.org/examples/math/random-sampling/) | Demonstrates how to sample random points from mathematical primitives | missing, points sampled inside and on the boundary of Bevy's shapes |
-| [`render_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/render_primitives.rs), [live in Bevy](https://bevy.org/examples/math/render-primitives/) | Shows off rendering for all math primitives as both Meshes and Gizmos | missing, 2D meshes and their color materials, and gizmos of Bevy's primitive shapes |
+| [`render_primitives`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/math/render_primitives.rs), [live in Bevy](https://bevy.org/examples/math/render-primitives/) | Shows off rendering for all math primitives as both Meshes and Gizmos | missing, gizmos of Bevy's primitive shapes |
 | [`smooth_follow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/movement/smooth_follow.rs), [live in Bevy](https://bevy.org/examples/math/smooth-follow/) | Demonstrates how to make an entity smoothly follow another using interpolation | [written](../BevyCSharp.Examples/movement/smooth_follow.cs) |
 
 ## Movement
@@ -471,7 +471,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`bevymark`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/bevymark.rs), [live in Bevy](https://bevy.org/examples/stress-tests/bevymark/) | A heavy sprite rendering workload to benchmark your system with Bevy | can be written |
 | [`bevymark_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/bevymark_3d.rs), [live in Bevy](https://bevy.org/examples/stress-tests/bevymark-3d/) | A heavy 3D cube rendering workload to benchmark your system with Bevy | can be written |
-| [`many_animated_sprite_meshes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_animated_sprite_meshes.rs) | Displays many animated sprite meshes in a grid arrangement with slight offsets to their animation timers. Used for performance testing. | missing, 2D meshes (Mesh2d) for sprites |
+| [`many_animated_sprite_meshes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_animated_sprite_meshes.rs) | Displays many animated sprite meshes in a grid arrangement with slight offsets to their animation timers. Used for performance testing. | can be written, through Bevy's reflected SpriteMesh |
 | [`many_animated_sprites`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_animated_sprites.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-animated-sprites/) | Displays many animated sprites in a grid arrangement with slight offsets to their animation timers. Used for performance testing. | can be written |
 | [`many_buttons`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_buttons.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-buttons/) | Test rendering of many UI elements | can be written |
 | [`many_cameras_lights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_cameras_lights.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-cameras-lights/) | Test rendering of many cameras and lights | can be written |
@@ -484,7 +484,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`many_lights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_lights.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-lights/) | Simple benchmark to test rendering many point lights. Run with `WGPU_SETTINGS_PRIO=webgl2` to restrict to uniform buffers and max 256 lights | can be written |
 | [`many_materials`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_materials.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-materials/) | Benchmark to test rendering many animated materials | can be written |
 | [`many_morph_targets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_morph_targets.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-morph-targets/) | Simple benchmark to test rendering many meshes with animated morph targets. | can be written, through Bevy's reflected MorphWeights |
-| [`many_sprite_meshes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_sprite_meshes.rs) | Displays many sprite meshes in a grid arrangement! Used for performance testing. Use `--colored` to enable color tinted sprites. | missing, 2D meshes (Mesh2d) for sprites |
+| [`many_sprite_meshes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_sprite_meshes.rs) | Displays many sprite meshes in a grid arrangement! Used for performance testing. Use `--colored` to enable color tinted sprites. | can be written, through Bevy's reflected SpriteMesh |
 | [`many_sprites`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_sprites.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-sprites/) | Displays many sprites in a grid arrangement! Used for performance testing. Use `--colored` to enable color tinted sprites. | can be written |
 | [`many_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_text.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-text/) | Displays many UI Text nodes. Used for performance testing. | can be written |
 | [`many_text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_text2d.rs), [live in Bevy](https://bevy.org/examples/stress-tests/many-text2d/) | Displays many Text2d! Used for performance testing. | can be written, through Bevy's reflected Text2d |

@@ -115,6 +115,11 @@ pub struct OffscreenTarget {
 /// managed code asked for one, at whatever point in the run it asked. Creating the target once at
 /// startup and re-pointing cameras every frame covers a camera the app spawns later, and one the
 /// interface spawns for itself, without either having to know how this run is drawing.
+///
+/// The image is made before startup, in PreStartup, because it is also the run's answer to how
+/// large the window is, and a game's own startup system lays out what it spawns by that answer.
+/// A resource inserted by a startup system's commands lands only once the schedule applies them,
+/// so made in Startup it would be missing for a startup system asking the size.
 #[cfg(feature = "render")]
 fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     use bevy::asset::Assets;
@@ -125,7 +130,7 @@ fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     use bevy::window::WindowRef;
 
     app.add_systems(
-        Startup,
+        bevy::app::PreStartup,
         move |mut commands: Commands, mut images: ResMut<Assets<Image>>| {
             // The same image a camera is given one of when a portal or a minimap asks for one.
             // What makes this one the run's is that every camera is pointed at it below.
@@ -476,6 +481,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // selected. Off unless something asks for it per entity, so it costs a pipeline that is
             // never specialized in an app that never does.
             app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
+
+            // The same for a 2D mesh, which Bevy draws through its own pipeline and so outlines
+            // with its own plugin, marked per entity with Wireframe2d.
+            app.add_plugins(bevy::sprite_render::Wireframe2dPlugin::default());
 
             // Materials drawn by shaders the game wrote, and what compiles and reloads them. The
             // asset root is resolved the way the asset server resolves it, because a Slang file is

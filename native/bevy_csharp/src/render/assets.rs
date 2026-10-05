@@ -64,10 +64,15 @@ pub unsafe extern "C" fn bcs_mesh_create(
 #[cfg(feature = "render")]
 fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
     use bevy::math::primitives::{
-        Annulus, Capsule3d, Circle, Cone, ConicalFrustum, Cuboid, Cylinder, Plane3d, Rectangle,
+        Annulus, Capsule2d, Capsule3d, Circle, CircularSector, CircularSegment, Cone,
+        ConicalFrustum, Cuboid, Cylinder, Ellipse, Plane3d, Rectangle, RegularPolygon, Rhombus,
         Sphere, Tetrahedron, Torus, Triangle3d,
     };
     use bevy::mesh::{Mesh, Meshable};
+
+    if let Some(outline) = kind.strip_prefix("Ring(").and_then(|rest| rest.strip_suffix(')')) {
+        return ring(outline, a, b, c);
+    }
 
     let mesh: Mesh = match kind {
         "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
@@ -90,6 +95,16 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
         "Circle" => Circle::new(a).mesh().into(),
         "Annulus" => Annulus::new(a, b).mesh().into(),
         "Rectangle" => Rectangle::new(a, b).mesh().into(),
+        // The flat shapes a 2D camera draws, in the plane a rectangle is, by Bevy's own measures:
+        // a sector or a segment by its radius and the half angle it spans, an ellipse by its half
+        // width and half height, a capsule by its radius and the length between its ends, a
+        // rhombus by its two diagonals, and a regular polygon by its circumradius and sides.
+        "CircularSector" => CircularSector::new(a, b).mesh().into(),
+        "CircularSegment" => CircularSegment::new(a, b).mesh().into(),
+        "Ellipse" => Ellipse::new(a, b).mesh().into(),
+        "Capsule2d" => Capsule2d::new(a, b).mesh().into(),
+        "Rhombus" => Rhombus::new(a, b).mesh().into(),
+        "RegularPolygon" => RegularPolygon::new(a, (b.max(3.0)) as u32).mesh().into(),
         // The two shapes made of points rather than measures are the default ones, a
         // unit across, scaled by the first number.
         "Triangle" => {
@@ -106,6 +121,42 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
             )
             .mesh()
             .into()
+        }
+        _ => return None,
+    };
+
+    Some(mesh)
+}
+
+/// The band a flat shape's outline makes, `thickness` wide on the inside of the shape `a` and `b`
+/// measure, or nothing for a shape with no inside.
+///
+/// Bevy insets most shapes by the thickness on every side. A sector and an ellipse it cannot inset
+/// evenly, since the curve inside an ellipse is no ellipse, so they are given the inner shape its
+/// examples give them, the same sector of a smaller radius and an ellipse smaller on each axis.
+#[cfg(feature = "render")]
+fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mesh> {
+    use bevy::math::primitives::{
+        Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Rectangle, RegularPolygon,
+        Rhombus, Ring, ToRing, Triangle2d,
+    };
+
+    let mesh = match outline {
+        "Circle" => Circle::new(a).to_ring(thickness).into(),
+        "CircularSector" => {
+            Ring::new(CircularSector::new(a, b), CircularSector::new(a - thickness, b)).into()
+        }
+        "CircularSegment" => CircularSegment::new(a, b).to_ring(thickness).into(),
+        "Ellipse" => Ring::new(Ellipse::new(a, b), Ellipse::new(a - thickness, b - thickness)).into(),
+        "Capsule2d" => Capsule2d::new(a, b).to_ring(thickness).into(),
+        "Rhombus" => Rhombus::new(a, b).to_ring(thickness).into(),
+        "Rectangle" => Rectangle::new(a, b).to_ring(thickness).into(),
+        "RegularPolygon" => RegularPolygon::new(a, (b.max(3.0)) as u32).to_ring(thickness).into(),
+        // Bevy's default flat triangle stands where its default triangle in space does, so this is
+        // the band around the one Triangle draws.
+        "Triangle" => {
+            let [first, second, third] = Triangle2d::default().vertices;
+            Triangle2d::new(first * a, second * a, third * a).to_ring(thickness).into()
         }
         _ => return None,
     };
@@ -1073,6 +1124,21 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                     "Mesh3d" => match untyped.try_typed::<Mesh>() {
                         Ok(handle) => {
                             entity_mut.insert(Mesh3d(handle));
+                            status::OK
+                        }
+                        Err(_) => status::NO_COMPONENT,
+                    },
+                    // A mesh a 2D camera draws, with the color material 2D meshes are drawn with.
+                    "Mesh2d" => match untyped.try_typed::<Mesh>() {
+                        Ok(handle) => {
+                            entity_mut.insert(bevy::mesh::Mesh2d(handle));
+                            status::OK
+                        }
+                        Err(_) => status::NO_COMPONENT,
+                    },
+                    "MeshMaterial2d" => match untyped.try_typed::<bevy::sprite_render::ColorMaterial>() {
+                        Ok(handle) => {
+                            entity_mut.insert(bevy::sprite_render::MeshMaterial2d(handle));
                             status::OK
                         }
                         Err(_) => status::NO_COMPONENT,

@@ -108,3 +108,4 @@ textures/slice_square_2.png
 branding/banner.png
 textures/fantasy_ui_borders/panel-border-010.png
 textures/fantasy_ui_borders/border_sheet.png
+textures/fantasy_ui_borders/panel-border-010-repeated.png

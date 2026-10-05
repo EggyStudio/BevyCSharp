@@ -24,12 +24,6 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **2D meshes, nineteen examples.** A `Mesh2d` drawn with a `ColorMaterial`, which no C# call makes
-  (`2d_shapes`, `2d_viewport_to_world`, `bloom_2d`, `pixel_grid_snap`, `tilemap_chunk`, `mesh2d`,
-  `mesh2d_alpha_mode`, `mesh2d_arcs`, `mesh2d_repeated_texture`, `mesh2d_vertex_color_texture`,
-  `wireframe_2d`, `shader_material_2d`, `entity_disabling`, `2d_screen_shake`, `2d_top_down_camera`,
-  `spatial_audio_2d`, `render_primitives`, and the two stress tests of sprite meshes). Needs the
-  material made and set as `StandardMaterial` is, and a shader material that draws on a 2D mesh.
 - **Interface widgets and text input, fifteen examples.** Bevy's editable text (four), its core
   widgets and widget helpers (four), Feathers (three), scrollbars, and directional and tab
   navigation (three). Needs `EditableText` and the widget components spawned and read, and the
@@ -67,6 +61,14 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
+- **A 2D mesh drawn by a shader, and the angle a round one maps its image at, two examples.** A
+  `Mesh2d` is drawn with Bevy's `ColorMaterial`, and `shader_material_2d` needs a Slang material
+  that draws on one as `Material` does on a 3D mesh. `mesh2d_arcs` needs the angle at which a
+  sector's or a segment's mesh maps its image, which Bevy's mesh builder takes and `MeshShape` does
+  not.
+- **An image loaded as an array of layers, two examples.** `tilemap_chunk` and
+  `tilemap_chunk_orientation` draw Bevy's `TilemapChunk`, whose tiles are the layers of one image
+  cut as it loads.
 - **Bevy's resources through reflection, five examples.** Its components are reached by their type
   paths and its resources are not, so `ui_scaling`, `ui_texture_slice_flip_and_tile` and
   `drag_to_scroll` cannot set `UiScale`, `image_node_resizing` cannot set `GlobalUiDebugOptions`,
@@ -80,7 +82,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
   picking's events), Bevy's log written from C# at its levels (`logs`), a playing sound's speed
   changed as it plays (`audio_control`), an atlas built from a folder of images as the app runs
-  (`texture_atlas`), an image loaded as an array of layers (`tilemap_chunk_orientation`), the
+  (`texture_atlas`), gizmos of Bevy's primitive shapes (`render_primitives`), the
   pointer passing through the window to what is behind it (`window_fallthrough`), the schedule
   reporting systems whose order is ambiguous (`nondeterministic_system_order`), and a message
   changed in place by a later system and read the same frame, where a C# message is read the frame

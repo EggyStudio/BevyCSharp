@@ -26,7 +26,14 @@ internal static class Catalog
     public static readonly Example[] All =
     [
         // 2D Rendering
+        new("2d_shapes", Shapes2d.Build),
+        new("2d_viewport_to_world", Example2dViewportToWorld.Build),
+        new("bloom_2d", Bloom2d.Build),
         new("cpu_draw", CpuDraw.Build, CpuDraw.Configure),
+        new("mesh2d", Mesh2dExample.Build),
+        new("mesh2d_alpha_mode", Mesh2dAlphaMode.Build),
+        new("mesh2d_repeated_texture", Mesh2dRepeatedTexture.Build),
+        new("mesh2d_vertex_color_texture", Mesh2dVertexColorTexture.Build),
         new("move_sprite", MoveSprite.Build),
         new("rotate_to_cursor", RotateToCursor.Build),
         new("rotation", Rotation2d.Build, Rotation2d.Configure),
@@ -39,6 +46,7 @@ internal static class Catalog
         new("sprite_tile", SpriteTile.Build),
         new("text2d", Text2dExample.Build),
         new("transparency_2d", Transparency2d.Build),
+        new("wireframe_2d", Wireframe2dExample.Build),
 
         // 3D Rendering
         new("3d_scene", Example3dScene.Build),

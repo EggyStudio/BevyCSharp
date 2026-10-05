@@ -29,6 +29,7 @@ pub mod compute;
 pub mod instances;
 pub mod layers;
 pub mod material;
+pub mod materials2d;
 pub mod meshlets;
 pub mod passes;
 pub mod pools;

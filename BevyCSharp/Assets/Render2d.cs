@@ -19,7 +19,7 @@ namespace Bevy;
 /// ctx.Ecs.Add(badge, Transform.At(120f, -80f, 0f));
 /// </code>
 /// </example>
-public static unsafe class Render2d
+public static unsafe partial class Render2d
 {
     /// <summary>
     /// Spawns a 2D camera and returns it.

@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 183;
+    internal const int ExpectedAbiVersion = 184;
 
     static Native() => NativeLoader.Initialize();
 
@@ -527,6 +527,16 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_scene_spawn(int asset);
+
+    /// <summary>Builds a 2D mesh's color material and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_color_material_create(NativeColorMaterial* config);
+
+    /// <summary>Writes over a 2D mesh's color material in place.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_color_material_write(int handle, NativeColorMaterial* config);
 
     /// <summary>Builds a material and returns an asset key.</summary>
     [LibraryImport(Library)]

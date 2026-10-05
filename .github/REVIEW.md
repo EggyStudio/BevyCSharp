@@ -8,12 +8,12 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `18c7c2f`. Bevy's components written with no string paths (`18c7c2f`) is settled. The
-`fog` example was read and sets its fog as `_fog.Falloff = new FogFalloff.Linear(_start, _end)`,
-with no path and no number made into text. The examples hold 13 string-path calls where they
-held 292, each beside its reason, and a test holds them there. Floats, whole numbers and flags
-cross as numbers. What no wrapper types yet is said in the reply, which was read: lists, an enum
-inside a variant, and a range of numbers.
+Reviewed up to `6766c94`. Five more 3D examples (`light_textures` and `reflection_probes` in
+`7618f24`, `clustered_decal_maps`, `light_probe_blending`, `anti_aliasing`, `tonemapping`) were
+taken on their descriptions. The reply was read: `light_textures` found that no light's picture
+had ever been drawn, the bridge not building Bevy's feature for it and nothing saying so, which
+is fixed with a test. The table stands at 134 written, 8 written in part, 95 that can be, 127
+missing and 57 that do not apply.
 
 ## Now
 
@@ -54,6 +54,13 @@ taken from [SHARED.md](SHARED.md).
    a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
    orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13
    string paths the examples still hold.
+8. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
+   each taken if it is missing and answered under Replies if it is not. A behavior method that
+   writes a resource, draws interface or plays a sound while others run beside it on worker
+   threads. A script compiled while the game runs naming the game's own types, with the scripts
+   watched being the project's and not a copy in the build folder, which Courtyard would show.
+   And a game written in behaviors alone with hundreds of entities, played by the workflow and
+   profiled, which `games/Stress` measures and no game here plays.
 
 ## Verdicts
 
@@ -69,11 +76,11 @@ None open.
 
 ## Replies
 
-- Item 2, light textures. `light_textures` showed that no light's picture had ever been drawn:
-  the bridge did not build Bevy's `pbr_light_textures` (and with it its clustered decals), so
-  `SetLightCookie` inserted a texture Bevy ignored, and nothing reported it. The render profile
-  builds it now, and `LightTextureTests` checks a cookie by the floor it shades. The same example
-  showed that a component holding a handle, or an enum with no default, could not be inserted
-  at its default, which the bridge now builds from its fields. `reflection_probes` showed that a
-  generated environment map's source has to be copyable, which Bevy leaves to the game, so the
-  bridge gives the source image that usage itself.
+- Item 2, 2D meshes. A `Mesh2d` is drawn with Bevy's `ColorMaterial` through `Render2d`, with the
+  flat shapes Bevy builds, the band along the inside of each (`MeshShape.Ring`), and Bevy's 2D
+  wireframes, and eight examples are written with it. `2d_viewport_to_world` showed that an
+  offscreen run had no size to give a startup system, since the image it draws into was made by
+  commands applied only once startup ended, so it is made before startup now, with a test. Six
+  more rows are reachable and come next. Still lacking are a shader on a 2D mesh
+  (`shader_material_2d`), the angle `mesh2d_arcs` maps its image at, and the layered image of
+  `tilemap_chunk`, each in TODO.md.

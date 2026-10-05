@@ -36,11 +36,47 @@ public static class MeshShape
     /// <summary>A flat rectangle facing the viewer, sized by width and height.</summary>
     public const string Rectangle = "Rectangle";
 
+    /// <summary>A flat slice of a disc, sized by its radius and the half angle it spans, in radians.</summary>
+    public const string CircularSector = "CircularSector";
+
+    /// <summary>A flat disc cut by a chord, sized by its radius and the half angle the chord spans.</summary>
+    public const string CircularSegment = "CircularSegment";
+
+    /// <summary>A flat oval, sized by its half width and half height.</summary>
+    public const string Ellipse = "Ellipse";
+
+    /// <summary>A flat capsule, sized by its radius and the length between its two round ends.</summary>
+    public const string Capsule2d = "Capsule2d";
+
+    /// <summary>A flat rhombus, sized by its horizontal and vertical diagonals.</summary>
+    public const string Rhombus = "Rhombus";
+
+    /// <summary>A flat regular polygon, sized by its circumradius and given its number of sides.</summary>
+    public const string RegularPolygon = "RegularPolygon";
+
     /// <summary>A flat triangle, Bevy's default one scaled by the first number.</summary>
     public const string Triangle = "Triangle";
 
     /// <summary>A four-sided solid, Bevy's default one scaled by the first number.</summary>
     public const string Tetrahedron = "Tetrahedron";
+
+    /// <summary>
+    /// A flat band along the inside of another flat shape's outline, sized by that shape's
+    /// measures and, third, how wide the band is.
+    /// </summary>
+    /// <param name="outline">
+    /// <see cref="Circle"/>, <see cref="CircularSector"/>, <see cref="CircularSegment"/>,
+    /// <see cref="Ellipse"/>, <see cref="Capsule2d"/>, <see cref="Rhombus"/>,
+    /// <see cref="Rectangle"/>, <see cref="RegularPolygon"/> or <see cref="Triangle"/>.
+    /// </param>
+    /// <remarks>
+    /// Bevy's <c>to_ring</c>. Most shapes are inset by the width evenly on every side. A sector
+    /// and an ellipse cannot be, since the curve inside an ellipse at an even distance is no
+    /// ellipse, so the inside of a sector is the same sector of a smaller radius and the inside of
+    /// an ellipse is an ellipse smaller on each axis, as Bevy's examples draw them. A ring of
+    /// a circle is the same mesh an <see cref="Annulus"/> makes.
+    /// </remarks>
+    public static string Ring(string outline) => $"Ring({outline})";
 }
 
 /// <summary>How a primitive mesh was made, which is enough to make it again.</summary>

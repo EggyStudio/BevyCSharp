@@ -817,6 +817,12 @@ static void SetShadowMapSize(uint directional = 0, uint point = 0);  // Sets how
 static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an entity on a set of render layers, as a bit per layer
 ```
 
+### `MeshShape`
+
+```csharp
+static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
+```
+
 ### `Render2d`
 
 ```csharp
@@ -824,6 +830,10 @@ static Entity SpawnCamera2d(int order = 0);                     // Spawns a 2D c
 static AssetHandle CreateAtlas(uint tileWidth, uint tileHeight, uint columns, uint rows, (uint X, uint Y) padding = default, (uint X, uint Y) offset = default);  // Builds an atlas layout over a grid of equal tiles and returns it
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image);  // Attaches a sprite to an entity, or replaces the one it has
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image, SpriteSettings settings);  // Attaches a sprite drawn as settings describes
+static AssetHandle CreateMaterial(ColorMaterialSettings settings);  // Makes a 2D mesh's material and returns it
+static void WriteMaterial(AssetHandle material, ColorMaterialSettings settings);  // Writes settings over a 2D mesh's material in place, so every mesh drawn with it changes
+static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh for a 2D camera to draw
+static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a 2D material, from CreateMaterial, to draw its mesh with
 ```
 
 ### `CapturedImage`

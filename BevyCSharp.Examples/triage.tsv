@@ -73,20 +73,20 @@ clustered_decal_maps	can
 mirror	missing	the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space
 pccm	can
 light_probe_blending	can
-2d_shapes	missing	2D meshes and their color materials
-2d_viewport_to_world	missing	2D meshes and their color materials
-bloom_2d	missing	2D meshes and their color materials
+2d_shapes	can	through Bevy's reflected Wireframe2d, put on each mesh where Bevy's sets its global one
+2d_viewport_to_world	can	zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types
+bloom_2d	can	through Bevy's reflected Bloom
 cpu_draw	can
 dynamic_mip_generation	missing	generating an image's mipmaps on the GPU
-mesh2d_alpha_mode	missing	2D meshes (Mesh2d with ColorMaterial)
-mesh2d_arcs	missing	2D meshes (Mesh2d with ColorMaterial) and the arc primitives
+mesh2d_alpha_mode	can
+mesh2d_arcs	missing	the angle a sector's or a segment's mesh maps its image at
 mesh2d_manual	n/a	writes a render pipeline in Rust with the mid-level render API
-mesh2d	missing	2D meshes (Mesh2d with ColorMaterial)
-mesh2d_repeated_texture	missing	2D meshes (Mesh2d with ColorMaterial) and its uv transform
-mesh2d_vertex_color_texture	missing	2D meshes (Mesh2d with ColorMaterial)
+mesh2d	can
+mesh2d_repeated_texture	can
+mesh2d_vertex_color_texture	can
 move_sprite	can
 multi_window_text	missing	a second window
-pixel_grid_snap	missing	2D meshes and their color materials
+pixel_grid_snap	can
 rotate_to_cursor	can
 rotation	can
 sprite_animation	can
@@ -99,9 +99,9 @@ sprite_tile	can
 text2d	part	the underline under the first box's text
 texture_atlas	missing	an atlas built from a folder of images as the app runs
 tilemap_chunk_orientation	missing	an image loaded as an array of layers, a row of tiles to a layer
-tilemap_chunk	missing	2D meshes and their color materials
+tilemap_chunk	missing	an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from
 transparency_2d	can
-wireframe_2d	missing	2D meshes (Mesh2d) and their wireframes
+wireframe_2d	can	through Bevy's reflected Wireframe2d, the global one stood in for by the mesh it reaches
 animated_mesh_control	can
 animated_mesh_events	missing	events placed on an animation clip
 animated_mesh	can
@@ -160,11 +160,11 @@ decodable	missing	audio sources a game generates (Decodable)
 pitch	missing	a generated tone (Pitch)
 play_sound_effect	can
 soundtrack	can
-spatial_audio_2d	missing	2D meshes and their color materials
+spatial_audio_2d	can
 spatial_audio_3d	can
 2d_on_ui	can
-2d_screen_shake	missing	2D meshes and their color materials
-2d_top_down_camera	missing	2D meshes and their color materials
+2d_screen_shake	can
+2d_top_down_camera	can	through Bevy's reflected Bloom
 camera_orbit	can
 custom_projection	missing	custom camera projections
 first_person_view_model	can
@@ -187,7 +187,7 @@ custom_schedule	missing	schedules a game adds of its own
 delayed_commands	missing	commands queued to run after a delay, and a click observed on a sprite
 dynamic	n/a	builds components from raw layouts in Rust
 ecs_guide	can
-entity_disabling	missing	2D meshes and their color materials, and a click observed on a mesh
+entity_disabling	missing	a click observed on a mesh
 error_handling	missing	an observer of the pointer moving over a mesh, and points sampled over a mesh's surface
 extraction	n/a	writes render world extraction in Rust
 fallible_params	n/a	about Rust system parameters that fail validation, where a C# system checks what it needs itself
@@ -254,7 +254,7 @@ bounding_2d	missing	Bevy's bounding volumes, their casts and their intersection 
 cubic_splines	missing	Bevy's cubic curves, Hermite, cardinal and B-spline
 custom_primitives	n/a	implements Rust traits for a primitive
 random_sampling	missing	points sampled inside and on the boundary of Bevy's shapes
-render_primitives	missing	2D meshes and their color materials, and gizmos of Bevy's primitive shapes
+render_primitives	missing	gizmos of Bevy's primitive shapes
 smooth_follow	can
 physics_in_fixed_timestep	can
 ambiguity_detection	n/a	a test of Bevy's schedules, hidden from its list
@@ -324,7 +324,7 @@ states	can
 sub_states	can
 bevymark_3d	can
 bevymark	can
-many_animated_sprite_meshes	missing	2D meshes (Mesh2d) for sprites
+many_animated_sprite_meshes	can	through Bevy's reflected SpriteMesh
 many_animated_sprites	can
 many_buttons	can
 many_cameras_lights	can
@@ -337,7 +337,7 @@ many_gradients	can	through Bevy's reflected BackgroundGradient
 many_lights	can
 many_materials	can
 many_morph_targets	can	through Bevy's reflected MorphWeights
-many_sprite_meshes	missing	2D meshes (Mesh2d) for sprites
+many_sprite_meshes	can	through Bevy's reflected SpriteMesh
 many_sprites	can
 many_text2d	can	through Bevy's reflected Text2d
 many_text	can

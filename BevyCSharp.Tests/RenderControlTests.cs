@@ -750,6 +750,22 @@ public sealed class RenderControlTests
         harness.Run();
     }
 
+    /// <summary>
+    /// An offscreen run answers the window's size with its image's from the first startup system
+    /// on, since a game lays out what it spawns at startup by that size.
+    /// </summary>
+    [SkippableFact]
+    public void AnOffscreenRunHasItsSizeAtStartup()
+    {
+        Needs.Renderer();
+
+        (uint Width, uint Height)? size = null;
+        var run = new PictureRun { Width = 120, Height = 80, Scene = _ => size = Window.Size() };
+        run.Wait(2).Go();
+
+        Assert.Equal((120u, 80u), size);
+    }
+
     [Fact]
     public void MonitorsAreCountedWithoutThrowing()
     {
