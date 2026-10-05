@@ -60,7 +60,8 @@ and `Bc6hFloat` make images a shader samples and never writes, whose sides are w
 blocks and whose regions are written a block at a time, at a quarter or an eighth of the memory the
 texels would take. A buffer's size is fixed when it is made, and `WriteBuffer` replaces its contents
 in place. `BeginBufferRead` copies one back, and `TryReadBuffer<T>` hands over the elements a frame
-or two later, which any readback costs. A program's state stays `Compiling` until its compute
+or two later, which any readback costs. `BeginImageRead` does the same for an image a shader wrote,
+its texels row after row with nothing between the rows. A program's state stays `Compiling` until its compute
 pipeline has been built, so a dispatch made once it is `Ready` runs rather than being dropped.
 
 Atomics reach a buffer through Slang's `Atomic<T>`, as in `RWStructuredBuffer<Atomic<uint>>` and

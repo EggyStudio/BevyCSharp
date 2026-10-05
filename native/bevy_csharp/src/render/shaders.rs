@@ -2382,6 +2382,24 @@ pub extern "C" fn bcs_shader_buffer_grow(buffer: i32, size: i32) -> i32 {
     })
 }
 
+/// Starts copying an image back from the GPU, and answers the ticket its texels arrive under, which
+/// [`bcs_shader_buffer_take`] takes as it takes a buffer's bytes.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_image_read(image: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = image;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| super::compute::read_image(world, image))
+        }
+    })
+}
+
 /// Starts copying a buffer back from the GPU, and answers the ticket its bytes arrive under.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_buffer_read(buffer: i32) -> i32 {

@@ -244,12 +244,15 @@ struct PreparedDispatch {
 #[derive(Resource, Default)]
 struct PreparedDispatches(Vec<PreparedDispatch>);
 
-/// Buffers being read back, and what has arrived.
+/// Buffers and images being read back, and what has arrived.
 #[derive(Resource, Default)]
 pub struct BufferReads {
     next: i32,
     pending: HashMap<Entity, i32>,
     done: HashMap<i32, Vec<u8>>,
+    /// For an image's read, how many bytes a row of it holds and how many the copy gave each row,
+    /// which differ where the GPU pads every row to a whole 256 bytes.
+    rows: HashMap<i32, (usize, usize)>,
 }
 
 /// Adds what runs dispatches and reads buffers back.
@@ -581,7 +584,19 @@ fn on_readback(event: On<ReadbackComplete>, mut reads: ResMut<BufferReads>, mut 
         return;
     };
 
-    reads.done.insert(ticket, event.data.clone());
+    // An image comes back with each row padded out as the copy needed it, and the padding is cut
+    // away so the texels are row after row, as an image's texels are written.
+    let data = match reads.rows.remove(&ticket) {
+        Some((row, padded)) if padded > row => event
+            .data
+            .chunks(padded)
+            .flat_map(|chunk| &chunk[..row.min(chunk.len())])
+            .copied()
+            .collect(),
+        _ => event.data.clone(),
+    };
+
+    reads.done.insert(ticket, data);
 
     // A readback component reads again every frame it is there, and only one answer was asked for.
     if let Ok(mut entity) = commands.get_entity(entity) {
@@ -754,6 +769,42 @@ pub fn read_buffer(world: &mut World, key: i32) -> i32 {
     reads.next += 1;
     let ticket = reads.next;
     reads.pending.insert(entity, ticket);
+    ticket
+}
+
+/// Starts copying an image back, and answers the ticket its texels will arrive under, as a buffer
+/// read's bytes do.
+///
+/// Any image the GPU can copy from, which every image made for a shader is. Its texels arrive row
+/// after row in the image's own format, each row as many bytes as its texels take.
+pub fn read_image(world: &mut World, key: i32) -> i32 {
+    let Some(handle) = crate::assets::clone_handle(world, key).and_then(|handle| handle.try_typed::<bevy::image::Image>().ok()) else {
+        return status::NO_COMPONENT;
+    };
+
+    // How long a row is and how long the copy makes it, which Bevy rounds up to 256 bytes, the
+    // buffer it copies into being sized so even for an image of one row. A compressed image has no
+    // size per texel and is refused.
+    let Some(descriptor) = world.get_resource::<Assets<bevy::image::Image>>().and_then(|images| images.get(&handle)).map(|image| image.texture_descriptor.clone()) else {
+        return status::NOT_PRESENT;
+    };
+    use bevy::image::TextureFormatPixelInfo;
+    let Ok(texel) = descriptor.format.pixel_size() else {
+        return status::INVALID_STATE;
+    };
+    let row = descriptor.size.width as usize * texel;
+    let padded = row.div_ceil(256) * 256;
+
+    let entity = world.spawn(Readback::texture(handle)).id();
+
+    let Some(mut reads) = world.get_resource_mut::<BufferReads>() else {
+        return status::UNSUPPORTED;
+    };
+
+    reads.next += 1;
+    let ticket = reads.next;
+    reads.pending.insert(entity, ticket);
+    reads.rows.insert(ticket, (row, padded));
     ticket
 }
 

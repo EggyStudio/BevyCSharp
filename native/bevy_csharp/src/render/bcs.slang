@@ -126,8 +126,8 @@ public float3 local_to_world(uint instance, float3 position)
 }
 
 /// The number an entity's `MeshTag` gives the mesh drawn as `instance`, zero without one, for a
-/// shader to tell apart meshes that share a material: which layer of an array texture, which color
-/// of a buffer, which pixel of a picture.
+/// shader to tell apart meshes that share a material, such as which layer of an array texture,
+/// which color of a buffer or which pixel of a picture each one shows.
 public uint tag(uint instance)
 {
     return meshes[instance].tag;

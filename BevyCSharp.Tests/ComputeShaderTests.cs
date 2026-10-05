@@ -51,6 +51,55 @@ public sealed class ComputeShaderTests
         for (var i = 0; i < 100; i++) Assert.Equal(i * 3f, numbers[i]);
     }
 
+    /// <summary>
+    /// An image a compute shader wrote is read back texel by texel in order, its rows without the
+    /// padding the GPU's copy gives them, which a row three texels long has most of.
+    /// </summary>
+    [SkippableFact]
+    public void AnImageAComputeShaderWroteIsReadBackInOrder()
+    {
+        Needs.Shaders();
+
+        var write = default(ShaderInstance);
+        var image = AssetHandle.None;
+        var read = default(BufferRead);
+        uint[]? texels = null;
+
+        var run = new PictureRun
+        {
+            Scene = _ =>
+            {
+                image = Shaders.CreateImage(3, 5, ShaderImageFormat.R32UInt);
+                write = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                {
+                    Compute = ShaderStage.Slang("""
+                        import bcs_compute;
+
+                        [format("r32ui")] RWTexture2D<uint> texels;
+
+                        [shader("compute")]
+                        [numthreads(1, 1, 1)]
+                        void main(uint3 id : SV_DispatchThreadID)
+                        {
+                            texels[id.xy] = id.y * 10 + id.x;
+                        }
+                        """),
+                })).SetTexture("texels", image);
+            },
+        };
+
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Do("writing", _ => Shaders.Dispatch(write, 3, 5))
+            .Wait(2)
+            .Do("asking for it back", _ => read = Shaders.BeginImageRead(image))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out texels))
+            .Go();
+
+        Assert.Equal(
+            [0u, 1u, 2u, 10u, 11u, 12u, 20u, 21u, 22u, 30u, 31u, 32u, 40u, 41u, 42u],
+            texels);
+    }
+
     /// <summary>A material bound to a buffer draws what a compute shader wrote into it.</summary>
     [SkippableFact]
     public void AMaterialDrawsWhatAComputeShaderWrote()

@@ -228,15 +228,22 @@ internal static class Catalog
         new("animate_shader", AnimateShader.Build),
         new("array_texture", ArrayTexture.Build),
         new("automatic_instancing", AutomaticInstancing.Build),
+        new("compute_shader_game_of_life", ComputeShaderGameOfLife.Build, ComputeShaderGameOfLife.Configure),
         new("extended_material", ExtendedMaterial.Build),
         new("extended_material_bindless", ExtendedMaterialBindless.Build),
+        new("gpu_readback", GpuReadback.Build),
         new("shader_defs", ShaderDefs.Build),
         new("shader_material", ShaderMaterialExample.Build),
         new("shader_material_bindless", ShaderMaterialBindless.Build),
         new("shader_material_screenspace_texture", ShaderMaterialScreenspaceTexture.Build),
+        new("shader_prepass", ShaderPrepass.Build),
         new("storage_buffer", StorageBuffer.Build),
 
         // Shaders - Advanced
+        new("compute_mesh", ComputeMesh.Build),
+        new("custom_post_processing", CustomPostProcessing.Build),
+        new("custom_shader_instancing", CustomShaderInstancing.Build),
+        new("fullscreen_material", FullscreenMaterial.Build),
         new("texture_binding_array", TextureBindingArray.Build),
 
         // UI (User Interface)

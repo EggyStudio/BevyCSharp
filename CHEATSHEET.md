@@ -911,6 +911,7 @@ static AssetHandle CreateMaterialBuffer(int capacity);          // Makes a buffe
 static void SetInstance(AssetHandle buffer, int slot, Entity entity);  // Puts an entity in a slot of an instance or material buffer, or with None empties the slot
 static int BufferSize(AssetHandle buffer);                      // A buffer's size in bytes
 static BufferRead BeginBufferRead(AssetHandle buffer);          // Starts copying a buffer back from the GPU. Only valid inside a system
+static BufferRead BeginImageRead(AssetHandle image);            // Starts copying an image back from the GPU, as BeginBufferRead copies a buffer
 static bool TryReadBuffer(BufferRead read, out byte[] bytes);   // The bytes a read brought back, once they have arrived
 static bool TryReadBuffer<T>(BufferRead read, out T[] items);   // The elements a read brought back, once they have arrived
 static AssetHandle CreateImage(uint width, uint height, ShaderImageFormat format = ShaderImageFormat.Rgba8, uint depth = 1, uint mips = 1);  // Makes an image a compute shader writes and anything samples

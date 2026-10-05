@@ -1260,6 +1260,26 @@ public static unsafe class Shaders
         new(Native.Check(Native.bcs_shader_buffer_read(buffer.Key), "reading a shader buffer back"));
 
     /// <summary>
+    /// Starts copying an image back from the GPU, as <see cref="BeginBufferRead"/> copies a buffer.
+    /// Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The texels arrive through <see cref="TryReadBuffer"/> a frame or two later, row after row in
+    /// the image's own format, four bytes a texel for <see cref="ShaderImageFormat.Rgba8"/> or
+    /// <see cref="ShaderImageFormat.R32UInt"/>, with no padding between rows. For what a compute
+    /// shader wrote into an image of its own, which lives on the GPU alone.
+    /// </para>
+    /// <para>
+    /// A picture a camera drew is read with <see cref="Render.BeginCapture()"/>, which hands it
+    /// over as colors. A block-compressed image has no size a texel and is refused.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The image is not loaded, or is block-compressed.</exception>
+    public static BufferRead BeginImageRead(AssetHandle image) =>
+        new(Native.Check(Native.bcs_shader_image_read(image.Key), "reading an image back"));
+
+    /// <summary>
     /// The bytes a read brought back, once they have arrived. Only valid inside a system.
     /// </summary>
     /// <returns>True once the bytes have arrived, after which the read is spent.</returns>

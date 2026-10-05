@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**193 written, 12 written in part, 60 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
+**200 written, 12 written in part, 53 can be written, 98 missing and 58 do not apply.** Of the 363 that apply, 265 can be written with what is bridged, 12 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
@@ -30,8 +30,8 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |
 | [Scene](#scene) | 0 | 0 | 1 | 1 | 0 |
-| [Shaders](#shaders) | 11 | 0 | 6 | 3 | 5 |
-| [Shaders Advanced](#shaders-advanced) | 0 | 0 | 1 | 0 | 1 |
+| [Shaders](#shaders) | 17 | 0 | 0 | 3 | 5 |
+| [Shaders Advanced](#shaders-advanced) | 1 | 0 | 0 | 0 | 1 |
 | [State](#state) | 2 | 0 | 0 | 2 | 0 |
 | [Stress Tests](#stress-tests) | 0 | 0 | 20 | 0 | 1 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **193** | **12** | **60** | **98** | **58** |
+| **All** | **200** | **12** | **53** | **98** | **58** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -426,16 +426,16 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`animate_shader`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/animate_shader.rs), [live in Bevy](https://bevy.org/examples/shaders/animate-shader/) | A shader that uses dynamic data like the time since startup | [written](../BevyCSharp.Examples/shader/animate_shader.cs) |
 | [`array_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/array_texture.rs), [live in Bevy](https://bevy.org/examples/shaders/array-texture/) | A shader that shows how to reuse the core bevy PBR shading functionality in a custom material that obtains the base color from an array texture. | [written](../BevyCSharp.Examples/shader/array_texture.cs), its layers cut by TextureSettings.Layers and picked by bcs::tag |
 | [`automatic_instancing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/automatic_instancing.rs), [live in Bevy](https://bevy.org/examples/shaders/automatic-instancing/) | Shows that multiple instances of a cube are automatically instanced in one draw call | [written](../BevyCSharp.Examples/shader/automatic_instancing.cs) |
-| [`compute_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/compute_mesh.rs) | A compute shader that generates a mesh that is controlled by a Handle | can be written |
-| [`compute_shader_game_of_life`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/compute_shader_game_of_life.rs) | A compute shader that simulates Conway's Game of Life | can be written |
+| [`compute_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/compute_mesh.rs) | A compute shader that generates a mesh that is controlled by a Handle | [written](../BevyCSharp.Examples/shader_advanced/compute_mesh.cs), the compute shader writing buffers the material reads its vertices from, where Bevy's writes into the mesh's own buffers, which the bridge does not hand a compute shader |
+| [`compute_shader_game_of_life`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/compute_shader_game_of_life.rs) | A compute shader that simulates Conway's Game of Life | [written](../BevyCSharp.Examples/shader/compute_shader_game_of_life.cs) |
 | [`custom_phase_item`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_phase_item.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-phase-item/) | Demonstrates how to enqueue custom draw commands in a render phase | does not apply, enqueues Rust draw commands in a render phase |
-| [`custom_post_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_post_processing.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-post-processing/) | A custom post processing effect, using a custom render pass that runs after the main pass | can be written |
+| [`custom_post_processing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_post_processing.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-post-processing/) | A custom post processing effect, using a custom render pass that runs after the main pass | [written](../BevyCSharp.Examples/shader_advanced/custom_post_processing.cs), as a pass the camera runs |
 | [`custom_render_phase`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_render_phase.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-render-phase/) | Shows how to make a complete render phase | does not apply, builds a render phase in Rust |
-| [`custom_shader_instancing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_shader_instancing.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-shader-instancing/) | A shader that renders a mesh multiple times in one draw call using low level rendering api | can be written |
+| [`custom_shader_instancing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_shader_instancing.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-shader-instancing/) | A shader that renders a mesh multiple times in one draw call using low level rendering api | [written](../BevyCSharp.Examples/shader_advanced/custom_shader_instancing.cs), as a draw on the camera, its cube's corners worked out from the vertex number, since such a draw reads buffers rather than a mesh |
 | [`custom_vertex_attribute`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/custom_vertex_attribute.rs), [live in Bevy](https://bevy.org/examples/shaders/custom-vertex-attribute/) | A shader that reads a mesh's custom vertex attribute | missing, vertex attributes a game defines |
 | [`extended_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material.rs), [live in Bevy](https://bevy.org/examples/shaders/extended-material/) | A custom shader that builds on the standard material | [written](../BevyCSharp.Examples/shader/extended_material.cs), the extension a Slang shader lighting its surface through bcs::light and bcs::finish |
 | [`extended_material_bindless`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/extended_material_bindless.rs) | Demonstrates bindless `ExtendedMaterial` | [written](../BevyCSharp.Examples/shader/extended_material_bindless.cs), the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays |
-| [`gpu_readback`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/gpu_readback.rs) | A very simple compute shader that writes to a buffer that is read by the cpu | can be written |
+| [`gpu_readback`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/gpu_readback.rs) | A very simple compute shader that writes to a buffer that is read by the cpu | [written](../BevyCSharp.Examples/shader/gpu_readback.cs), the buffer read whole and its range taken from it, and each read asked for again as it arrives |
 | [`render_depth_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/render_depth_to_texture.rs), [live in Bevy](https://bevy.org/examples/shaders/render-depth-to-texture/) | Demonstrates how to use depth-only cameras | missing, depth-only cameras rendered to a texture |
 | [`shader_defs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_defs.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-defs/) | A shader that uses "shaders defs" (a bevy tool to selectively toggle parts of a shader) | [written](../BevyCSharp.Examples/shader/shader_defs.cs), a program compiled with the define and one without, where Bevy's material sets it as its pipeline is specialized |
 | [`shader_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_material.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-material/) | A shader and a material that uses it | [written](../BevyCSharp.Examples/shader/shader_material.cs) |
@@ -444,7 +444,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`shader_material_glsl`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_material_glsl.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-material-glsl/) | A shader that uses the GLSL shading language | does not apply, GLSL, where shaders here are Slang |
 | [`shader_material_screenspace_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_material_screenspace_texture.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-material-screenspace-texture/) | A shader that samples a texture with view-independent UV coordinates | [written](../BevyCSharp.Examples/shader/shader_material_screenspace_texture.cs) |
 | [`shader_material_wesl`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_material_wesl.rs), [live in Bevy](https://bevy.org/examples/shaders/shader-material-wesl/) | A shader that uses WESL | does not apply, WESL, where shaders here are Slang |
-| [`shader_prepass`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_prepass.rs) | A shader that uses the various textures generated by the prepass | can be written |
+| [`shader_prepass`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/shader_prepass.rs) | A shader that uses the various textures generated by the prepass | [written](../BevyCSharp.Examples/shader/shader_prepass.cs), the prepass shown by a pass over the picture, where Bevy's material on a quad filling the view reads it, since a material here does not |
 | [`specialized_mesh_pipeline`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/specialized_mesh_pipeline.rs), [live in Bevy](https://bevy.org/examples/shaders/specialized-mesh-pipeline/) | Demonstrates how to write a specialized mesh pipeline | does not apply, writes a mesh pipeline in Rust |
 | [`storage_buffer`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader/storage_buffer.rs), [live in Bevy](https://bevy.org/examples/shaders/storage-buffer/) | A shader that shows how to bind a storage buffer using a custom material. | [written](../BevyCSharp.Examples/shader/storage_buffer.cs) |
 | [`texture_binding_array`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/texture_binding_array.rs) | A shader that shows how to bind and sample multiple textures as a binding array (a.k.a. bindless textures). | [written](../BevyCSharp.Examples/shader_advanced/texture_binding_array.cs), without Bevy's check that the GPU indexes such an array by a value that differs from pixel to pixel |
@@ -453,7 +453,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`fullscreen_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/fullscreen_material.rs), [live in Bevy](https://bevy.org/examples/shaders-advanced/fullscreen-material/) | Demonstrates how to write a fullscreen material | can be written |
+| [`fullscreen_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/fullscreen_material.rs), [live in Bevy](https://bevy.org/examples/shaders-advanced/fullscreen-material/) | Demonstrates how to write a fullscreen material | [written](../BevyCSharp.Examples/shader_advanced/fullscreen_material.cs), as a pass the camera runs |
 | [`manual_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/shader_advanced/manual_material.rs), [live in Bevy](https://bevy.org/examples/shaders-advanced/manual-material/) | Demonstrates how to implement a material manually using the mid-level render APIs | does not apply, writes a material with Rust's mid-level render API |
 
 ## State

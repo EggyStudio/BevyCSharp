@@ -8,11 +8,10 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `1ad2179`. Bevy's six games (`1ad2179`) are settled on the description and the reply,
-which was read, with an offscreen camera spawned after startup found never to draw and fixed.
-The gizmo examples and the rest of Bevy's gizmos are in the working tree and are settled when
-committed. The table stands at 183 written, 12 written in part, 70 that can be, 98 missing and
-58 that do not apply.
+Reviewed up to `e454755`. The four gizmo examples with the rest of Bevy's gizmos (`75bf3ee`) and nine
+shader examples written in Slang (`e454755`) are settled on their descriptions and the replies,
+which were read. The table stands at 193 written, 12 written in part, 60 that can be, 98
+missing and 58 that do not apply.
 
 ## Now
 
@@ -20,9 +19,8 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4 to 6
 and 8 to 10 are taken from [SHARED.md](SHARED.md).
 
-1. **The 70 rows that say `can be written` are written**, until that column is empty, many a
-   batch. Assets, animation, the games and gizmos are done. In this order from here: shaders,
-   application, usage, picking and the rest, then the stress tests, which are also numbers for
+1. **The 60 rows that say `can be written` are written**, until that column is empty, many a
+   batch. In this order from here: the seven shader rows left, application, usage, picking and the rest, then the stress tests, which are also numbers for
    PERFORMANCE.md beside Bevy's own.
    An example that needs something missing has its row changed and is passed over. A picture
    that differs from Bevy's for no known reason is taken down to the smallest scene that still
@@ -89,13 +87,11 @@ None open.
    committed like any other change.
 
 ## Replies
-  `extra_asset_source` from the asset batch was filed under Bevy's source file name rather than
-  its example's, so the table still counted it as one to write. It is renamed in this batch.
-- Item 1, shaders, the materials. Nine of the shader rows are written, each with its WGSL put into
-  Slang. `bcs::VertexOutput` now carries the instance index Bevy's vertex shader always hands on,
-  and `bcs::tag` reads a mesh's `MeshTag` with it, and `TextureSettings.Layers` loads a stacked
-  picture as an array texture, which `array_texture`, `storage_buffer` and `automatic_instancing`
-  needed, with a test of both. `shader_defs` compiles its program with the define and without,
-  where Bevy specializes one material's pipeline, and `shader_material_bindless` binds per
-  material, as Bevy does without bindless support. The seven rows left in the group, compute,
-  passes and drawing on a camera, are the next batch.
+- Item 1, shaders, compute and passes. The last seven shader rows are written. `gpu_readback`
+  needed an image read back, which `Shaders.BeginImageRead` now does, the padding the GPU's copy
+  gives each row cut away, with a test over several rows. The rest are made of what was bridged:
+  `custom_post_processing`, `fullscreen_material` and `shader_prepass` are passes on the camera,
+  the last because a material here does not read the prepass, `custom_shader_instancing` is a
+  draw on the camera, and `compute_mesh` writes buffers its material reads its vertices from,
+  since a compute shader is not handed a mesh's own buffers. The shader group's can-be-written
+  column is empty, and application, usage and picking come next.
