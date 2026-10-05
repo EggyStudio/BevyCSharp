@@ -138,3 +138,8 @@ None open.
   `3d_shapes` drew its torus too thin, its measures being the inner and outer radius, and draws
   Bevy's default one now. `headless` runs its second app from the hook that runs after the first
   stops, and `headless_renderer`'s capture is the picture it saves itself.
+- Item 1, the README's pictures. Every picture in the gallery opens its example's C# file by full
+  address, and the sentence above it says so. `bevy-live.txt`, `--live` with the code that asked
+  bevy.org, the live links on the rows of EXAMPLES.md and the pass `check-docs.py` gave bevy.org
+  are gone. `check-docs.py` now reads an HTML link's address as it reads a Markdown one, so each
+  picture's link is held to a file in the checkout with no request made.

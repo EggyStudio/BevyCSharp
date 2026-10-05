@@ -46,7 +46,8 @@ def anchor(text):
 
 
 def links(text):
-    """Every link target of a Markdown text, outside code blocks, with images' sources."""
+    """Every link target of a Markdown text, outside code blocks, with images' sources and the
+    addresses an HTML link opens, which is how a picture in the README's gallery links."""
     found, fence = [], False
     for line in text.split("\n"):
         if line.startswith("```"):
@@ -57,6 +58,7 @@ def links(text):
         line = re.sub(r"`[^`]*`", "", line)
         found += re.findall(r"\]\(([^)\s]+)\)", line)
         found += re.findall(r'src="([^"]+)"', line)
+        found += re.findall(r'href="([^"]+)"', line)
     return found
 
 
@@ -96,9 +98,6 @@ def check_links(external):
                     problems.append(f"{name}: '{target}' names a heading {os.path.relpath(local, ROOT)} does not have")
 
     if external:
-        # Bevy's live examples are listed by build/examples-table.py --live, which asked the site
-        # for each, and are a few hundred requests to one host that this would only repeat.
-        outside = {target for target in outside if not target.startswith("https://bevy.org/examples/")}
         for target in sorted(outside):
             try:
                 request = urllib.request.Request(target, method="HEAD", headers={"User-Agent": "check-docs"})

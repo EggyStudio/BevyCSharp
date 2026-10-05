@@ -3,7 +3,6 @@
 
     build/examples-table.py            # write the table and the README's count
     build/examples-table.py --check    # fail where either is out of date, or an example has no row
-    build/examples-table.py --live     # ask bevy.org which examples run live there, then write
 
 The examples are read from the metadata of the Bevy this bridge builds against, the version
 native/Cargo.lock pins, in the cargo registry, so none is left out and a new Bevy brings its new
@@ -12,10 +11,8 @@ and otherwise its state is the line BevyCSharp.Examples/triage.tsv has for it. T
 Bevy's own, in the order its examples/README.md lists them, and the examples it keeps out of that
 list come last.
 
-Bevy's site runs each example its metadata marks for the web, its Rust original built to
-WebAssembly, at an address made from its group and name. The address is a pattern the site may not
-keep, so `--live` asks the site for each one and writes those that answer to
-BevyCSharp.Examples/bevy-live.txt, and every other run reads that list and needs no network.
+The README's gallery shows every written example's capture, each picture opening the C# program
+that drew it, so a reader goes from what an example draws to the code that draws it.
 """
 
 import glob
@@ -23,7 +20,6 @@ import os
 import re
 import sys
 import tomllib
-import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLE = os.path.join(ROOT, ".github", "EXAMPLES.md")
@@ -31,8 +27,6 @@ README = os.path.join(ROOT, "README.md")
 TRIAGE = os.path.join(ROOT, "BevyCSharp.Examples", "triage.tsv")
 EXAMPLES = os.path.join(ROOT, "BevyCSharp.Examples")
 CAPTURES = os.path.join(ROOT, ".github", "assets", "examples")
-LIVE = os.path.join(ROOT, "BevyCSharp.Examples", "bevy-live.txt")
-SITE = "https://bevy.org/examples/"
 
 HIDDEN = "Kept out of Bevy's list"
 
@@ -76,7 +70,6 @@ def read_examples(source):
             "group": group,
             "description": meta.get("description", "").strip(),
             "path": paths.get(name, ""),
-            "wasm": bool(meta.get("wasm")) and group != HIDDEN,
         })
     return examples
 
@@ -111,47 +104,6 @@ def read_triage():
     return triage
 
 
-def slug(text):
-    """A group or an example's name as the site writes it in an address, lower case and hyphenated."""
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-
-
-def ask_site(examples):
-    """Asks bevy.org for each example its metadata marks for the web, and writes those that answer."""
-    from concurrent.futures import ThreadPoolExecutor
-
-    def answers(example):
-        address = f"{SITE}{slug(example['group'])}/{slug(example['name'])}/"
-        try:
-            request = urllib.request.Request(address, headers={"User-Agent": "examples-table"})
-            with urllib.request.urlopen(request, timeout=30) as response:
-                return example["name"], address if response.status == 200 else None
-        except Exception:
-            return example["name"], None
-
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        found = sorted((name, address) for name, address in pool.map(answers, [e for e in examples if e["wasm"]]) if address)
-
-    with open(LIVE, "w", encoding="utf-8") as out:
-        out.write("# Bevy's examples that run live on its site, its Rust original built to WebAssembly, by\n")
-        out.write("# name and address. build/examples-table.py --live asks the site and writes this.\n")
-        for name, address in found:
-            out.write(f"{name}\t{address}\n")
-    print(f"{len(found)} of {sum(1 for e in examples if e['wasm'])} examples marked for the web answer on bevy.org")
-
-
-def read_live():
-    """The address each example runs live at on Bevy's site, by name, from the checked-in list."""
-    live = {}
-    if os.path.exists(LIVE):
-        with open(LIVE, encoding="utf-8") as lines:
-            for line in lines:
-                if line.strip() and not line.startswith("#"):
-                    name, address = line.rstrip("\n").split("\t")
-                    live[name] = address
-    return live
-
-
 def written_examples():
     """Each example written here, by name, with its file relative to the checkout."""
     written = {}
@@ -161,7 +113,7 @@ def written_examples():
     return written
 
 
-def build(version, examples, order, triage, written, live):
+def build(version, examples, order, triage, written):
     unknown = sorted(set(triage) - {example["name"] for example in examples})
     if unknown:
         sys.exit("triage.tsv names examples Bevy does not have: " + ", ".join(unknown))
@@ -228,9 +180,7 @@ def build(version, examples, order, triage, written, live):
         "picture of what it draws or, for one with nothing to draw, the text it prints. Every "
         "picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and "
         "kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a "
-        "3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs "
-        "the example in a browser, the row links it live, which is Bevy's Rust original rather than "
-        "the C# one here.")
+        "3D one, so a label reads as Bevy draws it and a sky does not band.")
 
     for group in groups:
         out.append("")
@@ -241,8 +191,6 @@ def build(version, examples, order, triage, written, live):
         for example in sorted((e for e in examples if e["group"] == group), key=lambda e: e["name"]):
             source = f"https://github.com/bevyengine/bevy/blob/v{version}/{example['path']}" if example["path"] else ""
             name = f"[`{example['name']}`]({source})" if source else f"`{example['name']}`"
-            if example["name"] in live:
-                name += f", [live in Bevy]({live[example['name']]})"
             state = STATES[example["state"]]
             if example["state"] in ("written", "part"):
                 state = f"[{STATES[example['state']]}](../{written[example['name']]})"
@@ -256,7 +204,8 @@ def build(version, examples, order, triage, written, live):
 
     table = "\n".join(out) + "\n"
 
-    # Every written example's capture, four to a row, for the README.
+    # Every written example's capture, four to a row, for the README, each opening the C# file
+    # that drew it.
     shown = [example for example in examples if example["state"] in ("written", "part")
              and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))]
     gallery = []
@@ -264,8 +213,7 @@ def build(version, examples, order, triage, written, live):
         cells = []
         for example in shown[start:start + 4]:
             picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200"/>'
-            if example["name"] in live:
-                picture = f'<a href="{live[example["name"]]}">{picture}</a>'
+            picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
             cells.append(f'<td>{picture}<br><code>{example["name"]}</code></td>')
         gallery.append("<tr>" + "".join(cells) + "</tr>")
     gallery = "<table>\n" + "\n".join(gallery) + "\n</table>" if gallery else ""
@@ -281,9 +229,7 @@ def main():
     version = bevy_version()
     source = bevy_source(version)
     examples = read_examples(source)
-    if "--live" in sys.argv[1:]:
-        ask_site(examples)
-    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples(), read_live())
+    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples())
 
     with open(README, encoding="utf-8") as readme:
         text = readme.read()
