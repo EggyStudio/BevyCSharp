@@ -89,6 +89,8 @@ None open.
   The two call WGSL functions by fixed names that the bridge puts in front of the compiled shader,
   written over Bevy's `apply_pbr_lighting` and `main_pass_post_lighting_processing`, so Bevy's
   lighting is used as it is rather than written again, and a test draws a lit Slang sphere beside a
-  standard one and finds them alike. `extended_material` and its bindless twin are written, and
-  `mirror` is reachable. `ssr`, `clustered_decals` and `irradiance_volumes` need more of Bevy's WGSL
+  standard one and finds them alike. `extended_material`, its bindless twin and `mirror` are
+  written. `mirror` showed that a shader material culled the same face under a camera that inverts
+  culling, which a mirror's camera does, so the mirror drew itself into its own picture; it now
+  culls the other face, as Bevy's standard material does, with a test. `ssr`, `clustered_decals` and `irradiance_volumes` need more of Bevy's WGSL
   reached the same way, the deferred buffers, a decal's tag and a volume's voxels, as TODO.md says.

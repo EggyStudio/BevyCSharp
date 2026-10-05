@@ -82,6 +82,7 @@ internal static class Catalog
         new("generate_custom_mesh", GenerateCustomMesh.Build),
         new("light_probe_blending", LightProbeBlending.Build),
         new("meshlet", Meshlet.Build, Meshlet.Configure),
+        new("mirror", Mirror.Build),
         new("solari", Solari.Build, Solari.Configure),
         new("light_textures", LightTextures.Build),
         new("lines", Lines.Build),

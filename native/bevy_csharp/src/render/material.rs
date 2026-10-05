@@ -425,9 +425,17 @@ fn user_specialize(
 ) -> Result<(), SpecializedMeshPipelineError> {
     let material: BcsMaterialKey = key.material_key.to_key();
 
-    descriptor.primitive.cull_mode = match material.cull {
-        0 => Some(Face::Back),
-        1 => Some(Face::Front),
+    // A camera that inverts culling, as a mirror's does, sees the world reflected, which turns
+    // every face's winding around, so the face culled is the other one, as Bevy's standard
+    // material does. The mirror's own surface, seen from behind by that camera, is culled by it.
+    let invert = key
+        .mesh_key
+        .downcast::<bevy::pbr::MeshPipelineKey>()
+        .contains(bevy::pbr::MeshPipelineKey::INVERT_CULLING);
+
+    descriptor.primitive.cull_mode = match (material.cull, invert) {
+        (0, false) | (1, true) => Some(Face::Back),
+        (1, false) | (0, true) => Some(Face::Front),
         _ => None,
     };
 

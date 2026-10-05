@@ -70,7 +70,7 @@ clustered_decals	missing	a shader reading the tag of the clustered decal over it
 light_textures	can
 occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers
 clustered_decal_maps	can
-mirror	can	the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
+mirror	can	the mirror a Slang shader lighting its surface through bcs::lit, and the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
 pccm	can
 light_probe_blending	can
 2d_shapes	can

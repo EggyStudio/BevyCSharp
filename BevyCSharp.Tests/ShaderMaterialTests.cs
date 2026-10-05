@@ -63,6 +63,46 @@ public sealed class ShaderMaterialTests
             $"the cube came out {middle} rather than green");
     }
 
+    /// <summary>
+    /// A camera that inverts culling, as a mirror's does, draws the faces a shader material's own
+    /// culling would leave out and leaves out the ones it would draw, as Bevy's standard material
+    /// does under one.
+    /// </summary>
+    [SkippableFact]
+    public void ACameraThatInvertsCullingCullsTheOtherFace()
+    {
+        Needs.Shaders();
+
+        Vector3? Seen(bool invert)
+        {
+            var run = new PictureRun
+            {
+                Scene = ecs =>
+                {
+                    var camera = PictureRun.Camera(ecs);
+                    if (invert) ecs.Wrap<Bevy.Reflected.CameraRef>(camera).InvertCulling = true;
+
+                    // A plane turned to face away from the camera, so the camera sees its back,
+                    // which is culled.
+                    var plane = ecs.Spawn();
+                    ecs.Add(plane, new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+                    Render.SetMesh(ecs, plane, Render.CreateMesh(MeshShape.Plane, 3f, 3f));
+                    Render.SetMaterial(ecs, plane, Flat(Green));
+                },
+            };
+
+            run.Until("compiled", _ => ProgramsReady()).Wait(Settled).Capture("picture").Go();
+            var middle = run.Picture("picture").At(48, 48);
+            return new Vector3(middle.R, middle.G, middle.B);
+        }
+
+        var normal = Seen(invert: false)!.Value;
+        var inverted = Seen(invert: true)!.Value;
+
+        Assert.True(normal.Y < 60, $"the back of the plane was drawn, {normal}, by a camera that culls backs");
+        Assert.True(inverted.Y > 120, $"the back of the plane was culled, {inverted}, by a camera that inverts culling");
+    }
+
     /// <summary>A vertex shader moves the mesh, which shows as the shape covering more of it.</summary>
     /// <remarks>
     /// The same cube drawn twice by the same program, pushed along its own normals by
