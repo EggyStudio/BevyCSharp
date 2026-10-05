@@ -3,7 +3,8 @@
 # native/Cargo.lock pins, into BevyCSharp.Examples/bevy-assets, which a build of the examples copies
 # beside the program as its assets. A file already there is kept, so this is cheap to run again.
 # A line that is a full address is a file an example loads from Bevy's asset_files repository, and
-# is kept at its path after the branch, which is the path the example here loads it by.
+# is kept at its path after the branch or the commit an example pins it at, which is the path the
+# example here loads it by.
 #
 #   build/fetch-bevy-assets.sh
 set -euo pipefail
@@ -16,7 +17,7 @@ into=BevyCSharp.Examples/bevy-assets
 while read -r line; do
     case "$line" in ''|'#'*) continue ;; esac
     case "$line" in
-      https://*) url="$line"; path="${line#*/raw/main/}" ;;
+      https://*) url="$line"; path="${line#*/raw/}"; path="${path#*/}" ;;
       # Some of Bevy's files have spaces in their names, which a URL writes as %20.
       *) url="https://raw.githubusercontent.com/bevyengine/bevy/v$version/assets/${line// /%20}"; path="$line" ;;
     esac

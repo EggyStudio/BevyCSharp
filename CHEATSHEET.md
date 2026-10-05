@@ -755,6 +755,7 @@ static void SetRayTracedLighting(Entity camera, bool on);       // Lights a came
 static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
 static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
 static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had
+static AssetHandle CreateClusterMaterial();                     // Makes a material that draws each cluster of a meshlet mesh in a color of its own
 static string MeshPathOf(Entity entity);                        // Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere
 static string MaterialPathOf(Entity entity);                    // Where an entity's material was loaded from, or empty when it was not
 static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an entity is drawn with, or None when it has none

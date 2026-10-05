@@ -30,8 +30,28 @@ public sealed class RayTracingTests
         Assert.True(raster.R < 15, $"the floor by the wall was {raster} without");
     }
 
-    /// <summary>The floor's color beside the wall, or null where ray tracing is not running.</summary>
-    private static (byte R, byte G, byte B, byte A)? Floor(bool traced)
+    /// <summary>
+    /// A glowing wall made of a mesh with no texture coordinates, as a model drawn in plain colors
+    /// often is, is given coordinates of zero rather than refused, and lights the floor as one with
+    /// coordinates does.
+    /// </summary>
+    [SkippableFact]
+    public void AMeshWithNoTextureCoordinatesIsTracedAllTheSame()
+    {
+        Needs.Renderer();
+
+        var traced = Floor(traced: true, bareWall: true);
+        Needs.RayTracing(traced is not null);
+        var lit = traced!.Value;
+
+        Assert.True(lit.R > 40 && lit.R > lit.G + 20, $"the floor by a wall with no texture coordinates was {lit}");
+    }
+
+    /// <summary>
+    /// The floor's color beside the wall, or null where ray tracing is not running. A bare wall is
+    /// a single face built point by point, with normals and no texture coordinates.
+    /// </summary>
+    private static (byte R, byte G, byte B, byte A)? Floor(bool traced, bool bareWall = false)
     {
         var active = false;
 
@@ -54,7 +74,14 @@ public sealed class RayTracingTests
                 Render.SetMaterial(ecs, floor, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f }));
                 ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
 
-                var wallMesh = Render.CreateMesh(MeshShape.Cuboid, 0.2f, 3f, 4f);
+                var wallMesh = bareWall
+                    ? Render.CreateMesh(new MeshData
+                    {
+                        Positions = [new(0f, -1.5f, -2f), new(0f, 1.5f, -2f), new(0f, 1.5f, 2f), new(0f, -1.5f, 2f)],
+                        Normals = [Vec3.UnitX, Vec3.UnitX, Vec3.UnitX, Vec3.UnitX],
+                        Indices = [0, 1, 2, 0, 2, 3],
+                    })
+                    : Render.CreateMesh(MeshShape.Cuboid, 0.2f, 3f, 4f);
                 var wall = ecs.Spawn();
                 Render.SetMesh(ecs, wall, wallMesh);
                 Render.SetMaterial(ecs, wall, Render.CreateMaterial(new MaterialSettings

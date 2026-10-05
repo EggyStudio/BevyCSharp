@@ -84,7 +84,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Seven examples are written in part, each leaving out a feature named in its row.
+Eight examples are written in part, each leaving out a feature named in its row.
 
 - **Extruded and line meshes**, which `3d_shapes` leaves out of its rows: Bevy's segment and
   polyline, and the extrusion of a 2D shape, solid or as a ring. `MeshShape` builds the solids and
@@ -99,6 +99,11 @@ Seven examples are written in part, each leaving out a feature named in its row.
 - **How large an image is**, which `tonemapping`'s image viewer reads in Bevy to size its square
   to a dropped picture. The bridge loads and draws an image without saying its size, which a call
   reading the loaded image's width and height would.
+- **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
+  its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
+  added, and the cell count is one of Bevy's render diagnostics that is a number rather than a
+  time, which `Render.Timings()` does not carry. Its scene of many lights, which Bevy's command line
+  chooses, is left out too, though everything it draws is bridged.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.

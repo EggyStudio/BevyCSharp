@@ -56,6 +56,53 @@ public sealed class MeshletTests
     }
 
     /// <summary>
+    /// A meshlet mesh drawn with the cluster material shows its clusters each in a color of its
+    /// own, so it holds many colors where a material of one color holds one.
+    /// </summary>
+    [SkippableFact]
+    public void TheClusterMaterialColorsEachClusterItsOwnWay()
+    {
+        Needs.Renderer();
+
+        var active = false;
+
+        var run = new PictureRun
+        {
+            Configure = config => config.MeshletClusters = 1 << 20,
+            Scene = ecs =>
+            {
+                active = Render.MeshletsActive;
+                if (!active) return;
+
+                PictureRun.Camera(ecs);
+                var ball = ecs.Spawn();
+                Render.SetMeshletMesh(ecs, ball, Render.CreateMeshletMesh(Render.CreateMesh(MeshShape.Sphere, 1.5f)));
+                Render.SetMaterial(ecs, ball, Render.CreateClusterMaterial());
+                ecs.Add(ball, Transform.Identity);
+            },
+        };
+
+        run.Wait(ShaderMaterialTests.Settled + 60).Capture("picture").Go();
+
+        Needs.Meshlets(active);
+
+        var picture = run.Picture("picture");
+        // Which channel is strongest in each pixel of the sphere, whatever is not the dark
+        // background. One color shaded from light to dark keeps one strongest channel throughout,
+        // and clusters in colors picked at random have every one of the three somewhere.
+        var strongest = new HashSet<int>();
+        for (uint y = 0; y < picture.Height; y++)
+            for (uint x = 0; x < picture.Width; x++)
+            {
+                var (r, g, b, _) = picture.At(x, y);
+                if (r + g + b < 60) continue;
+                strongest.Add(r >= g && r >= b ? 0 : g >= b ? 1 : 2);
+            }
+
+        Assert.True(strongest.Count == 3, $"the sphere's pixels had {strongest.Count} strongest channels where clusters in random colors have all three");
+    }
+
+    /// <summary>
     /// A meshlet mesh saved while it is made is a file the asset server loads back, and the loaded
     /// one draws as the converted one did.
     /// </summary>

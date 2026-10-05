@@ -4,12 +4,12 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**149 written, 7 written in part, 97 can be written, 111 missing and 57 do not apply.** Of the 364 that apply, 253 can be written with what is bridged, 7 of them leaving something out.
+**150 written, 8 written in part, 95 can be written, 111 missing and 57 do not apply.** Of the 364 that apply, 253 can be written with what is bridged, 8 of them leaving something out.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply |
 |---|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 |
-| [3D Rendering](#3d-rendering) | 51 | 4 | 2 | 10 | 0 |
+| [3D Rendering](#3d-rendering) | 52 | 5 | 0 | 10 | 0 |
 | [Animation](#animation) | 0 | 0 | 6 | 7 | 0 |
 | [Application](#application) | 7 | 0 | 3 | 2 | 7 |
 | [Assets](#assets) | 0 | 0 | 10 | 2 | 5 |
@@ -42,7 +42,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 0 | 0 | 10 | 1 | 0 |
 | [glTF](#gltf) | 0 | 0 | 5 | 1 | 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 0 | 0 | 3 | 0 | 10 |
-| **All** | **149** | **7** | **97** | **111** | **57** |
+| **All** | **150** | **8** | **95** | **111** | **57** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. Where Bevy's site runs the example in a browser, the row links it live, which is Bevy's Rust original rather than the C# one here.
 
@@ -114,7 +114,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`lightmaps`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lightmaps.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lightmaps/) | Rendering a scene with baked lightmaps | [written](../BevyCSharp.Examples/3d/lightmaps.cs), through Bevy's reflected Lightmap and a material's LightmapExposure |
 | [`lines`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lines.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/lines/) | Create a custom material to draw 3d lines | [written](../BevyCSharp.Examples/3d/lines.cs) |
 | [`mesh_ray_cast`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mesh_ray_cast.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mesh-ray-cast/) | Demonstrates ray casting with the `MeshRayCast` system parameter | [written](../BevyCSharp.Examples/3d/mesh_ray_cast.cs) |
-| [`meshlet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/meshlet.rs) | Meshlet rendering for dense high-poly scenes (experimental) | can be written, needs a bridge built with --meshlet |
+| [`meshlet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/meshlet.rs) | Meshlet rendering for dense high-poly scenes (experimental) | [written](../BevyCSharp.Examples/3d/meshlet.cs), needs a bridge built with --meshlet |
 | [`mirror`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mirror.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mirror/) | Demonstrates how to create a mirror with a second camera | missing, the mirror, a standard material extended by a shader of the example's own that samples what a second camera draws in screen space |
 | [`mixed_lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mixed_lighting.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/mixed-lighting/) | Demonstrates how to combine baked and dynamic lighting | [written](../BevyCSharp.Examples/3d/mixed_lighting.cs), through Bevy's reflected Lightmap |
 | [`motion_blur`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/motion_blur.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/motion-blur/) | Demonstrates per-pixel motion blur | [written](../BevyCSharp.Examples/3d/motion_blur.cs) |
@@ -135,7 +135,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`shadow_biases`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/shadow_biases.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/shadow-biases/) | Demonstrates how shadow biases affect shadows in a 3d scene | [written](../BevyCSharp.Examples/3d/shadow_biases.cs) |
 | [`shadow_caster_receiver`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/shadow_caster_receiver.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/shadow-caster-receiver/) | Demonstrates how to prevent meshes from casting/receiving shadows in a 3d scene | [written](../BevyCSharp.Examples/3d/shadow_caster_receiver.cs) |
 | [`skybox`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/skybox.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/skybox/) | Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture formats. | [written in part](../BevyCSharp.Examples/3d/skybox.cs), the ASTC and ETC2 cubemaps, since the bridge does not say which compressed formats the GPU decodes |
-| [`solari`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | can be written, needs a bridge built with --solari and an adapter with ray queries |
+| [`solari`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | [written in part](../BevyCSharp.Examples/3d/solari.cs), Bevy's path tracer and its scene of many lights, which its command line chooses, and the count of the world cache's cells its panel ends with; needs a bridge built with --solari and an adapter with ray queries |
 | [`specular_tint`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/specular_tint.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/specular-tint/) | Demonstrates specular tints and maps | missing, specular tint and the specular maps on the standard material |
 | [`spherical_area_lights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/spherical_area_lights.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/spherical-area-lights/) | Demonstrates how point light radius values affect light behavior | [written](../BevyCSharp.Examples/3d/spherical_area_lights.cs) |
 | [`split_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/split_screen.rs), [live in Bevy](https://bevy.org/examples/3d-rendering/split-screen/) | Demonstrates how to render two cameras to the same window to accomplish "split screen" | [written](../BevyCSharp.Examples/3d/split_screen.cs) |

@@ -112,3 +112,6 @@ textures/fantasy_ui_borders/panel-border-010-repeated.png
 pixel/bevy_pixel_dark.png
 pixel/bevy_pixel_light.png
 textures/fantasy_ui_borders/numbered_slices.png
+https://github.com/bevyengine/bevy_asset_files/raw/6dccaef517bde74d1969734703709aead7211dbc/meshlet/bunny.meshlet_mesh
+https://github.com/bevyengine/bevy_asset_files/raw/2a5950295a8b6d9d051d59c0df69e87abcda58c3/pica_pica/mini_diorama_01.glb
+https://github.com/bevyengine/bevy_asset_files/raw/2a5950295a8b6d9d051d59c0df69e87abcda58c3/pica_pica/robot_01.glb

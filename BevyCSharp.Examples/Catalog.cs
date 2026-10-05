@@ -80,6 +80,8 @@ internal static class Catalog
         new("3d_viewport_to_world", Example3dViewportToWorld.Build),
         new("generate_custom_mesh", GenerateCustomMesh.Build),
         new("light_probe_blending", LightProbeBlending.Build),
+        new("meshlet", Meshlet.Build, Meshlet.Configure),
+        new("solari", Solari.Build, Solari.Configure),
         new("light_textures", LightTextures.Build),
         new("lines", Lines.Build),
         new("mesh_ray_cast", MeshRayCast.Build),

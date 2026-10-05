@@ -1163,6 +1163,11 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                         // caller wrote. The asset table is untyped, so which it is can only be
                         // found by asking.
                         Err(_) => {
+                            #[cfg(feature = "meshlet")]
+                            if crate::render::meshlets::attach_material(&mut entity_mut, &untyped) {
+                                return status::OK;
+                            }
+
                             if crate::render::shaders::attach(&mut entity_mut, &untyped) {
                                 status::OK
                             } else {

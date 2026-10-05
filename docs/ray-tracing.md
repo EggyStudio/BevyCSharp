@@ -23,7 +23,8 @@ before turning it on and `Render.RayTracingActive` reports; turning it on makes 
 materials deferred for the whole app, which is why it is asked for when the app is made.
 `SetRayTraced` reshapes the mesh in place the way ray tracing structures are built from, working out
 tangents where it has none, so the entity keeps drawing it as before and the rays meet the
-triangles the picture shows.
+triangles the picture shows. A mesh with no texture coordinates, as a model drawn in plain colors
+often is, is given coordinates of zero, so every mesh of a loaded model can be handed over.
 
 ### Tracing rays of your own
 

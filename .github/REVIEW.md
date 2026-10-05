@@ -8,12 +8,9 @@ This file has one writer. The session doing the work edits the Replies section o
 what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read.
 
-Reviewed up to `d1cfbda`. 2D meshes with Bevy's color materials and eight examples (`8e64d04`) and
-four more on them (`d1cfbda`) were taken on their descriptions and the replies, which were read.
-An offscreen run with no size to give a startup system was found and fixed on the way. Bevy's
-resources reached as its components are, by `ctx.Ecs.Resource<T>()`, is in the working tree and
-is read when committed. The table stands at 149 written, 7 written in part, 97 that can be, 111
-missing and 57 that do not apply.
+Reviewed up to `6a2e78a`. Bevy's resources reached through the wrappers its components have
+(`6a2e78a`) is settled on its description and the reply read before it. The table stands at 149
+written, 7 written in part, 97 that can be, 111 missing and 57 that do not apply.
 
 ## Now
 
@@ -26,10 +23,8 @@ taken from [SHARED.md](SHARED.md).
    the pass goes on, as `grid` was, since that is where the table finds a fault.
 2. **The gaps, by how many rows each holds**, once the groups in item 1 are through, each
    bridged from Bevy with the examples it unlocks written in its batch. By the table as it
-   stands: Bevy's
-   resources reached through reflection as its components are, which `UiScale` and others wait
-   on and which is likely a small bridge for many rows; then text gizmos, editable text and
-   Bevy's widgets.
+   stands: a standard material extended by a shader, which seven rows wait on; then
+   text gizmos, editable text and Bevy's widgets.
    When the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine's
    `771f10e9` does for its scenes, so an example that stops drawing as it did fails a run.
@@ -74,4 +69,10 @@ None open.
    committed like any other change.
 
 ## Replies
-
+- Item 1, the rest of 3D. Math holds no row that can be written, each waiting on Bevy's math, and
+  is marked. `meshlet` and `solari` are written against a bridge built with `--meshlet --solari`
+  on this machine's adapter. `meshlet` needed Bevy's material that colors each cluster, which the
+  bridge adds as `Render.CreateClusterMaterial()`, and `solari` showed that a model's mesh with no
+  texture coordinates was refused for ray tracing, where Bevy's example gives it coordinates of
+  zero, which the bridge now does, with a test of each. `solari` is written in part, its path
+  tracer and its scene of many lights left out, as TODO.md says.

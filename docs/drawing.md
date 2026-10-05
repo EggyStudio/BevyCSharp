@@ -67,6 +67,8 @@ for a large one, so `CreateMeshletMesh` does it on a worker once the mesh has lo
 handle it answers draws nothing until then. The mesh has to be indexed triangles with texture
 coordinates. A meshlet mesh is drawn with a standard material, and while meshlets run every camera
 draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
+`Render.CreateClusterMaterial()` instead draws each cluster in a color of its own, which shows how
+a mesh was cut and which level of detail is drawn where.
 
 Converting is the slow part, so a game does it once. `saveTo:` writes the finished mesh as a file
 under the asset root, and that file loads as fast as it reads:

@@ -628,12 +628,14 @@ public static unsafe class Render
     /// The mesh is reshaped in place the way ray tracing structures are built from, keeping exactly
     /// positions, normals, texture coordinates and tangents, which are worked out where it has
     /// none, and thirty-two bit indices. So the entity keeps drawing it as before, and the rays
-    /// meet the triangles the picture shows. The entity's material has to be one from
-    /// <see cref="CreateMaterial(MaterialSettings)"/>, and the mesh has to have loaded.
+    /// meet the triangles the picture shows. A mesh with no texture coordinates, as a model drawn in
+    /// plain colors often is, is given coordinates and tangents of zero, as Bevy's own example does.
+    /// The entity's material has to be one from <see cref="CreateMaterial(MaterialSettings)"/>, and
+    /// the mesh has to have loaded.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// Ray-traced lighting is not running, the mesh has not loaded, or it is not indexed triangles
-    /// with normals and texture coordinates.
+    /// with normals.
     /// </exception>
     public static void SetRayTraced(Entity entity, AssetHandle mesh) =>
         Native.Check(Native.bcs_render_set_ray_traced(entity.Bits, mesh.Key), $"making {entity} ray traced");
@@ -693,6 +695,22 @@ public static unsafe class Render
     /// </remarks>
     public static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet) =>
         Attach(world, entity, "MeshletMesh3d", meshlet, "a meshlet mesh");
+
+    /// <summary>
+    /// Makes a material that draws each cluster of a meshlet mesh in a color of its own. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <remarks>
+    /// For seeing how a mesh was cut and which level of detail is drawn where: clusters far from
+    /// the camera are fewer and larger. Each cluster's color is picked from its number, so it holds
+    /// still as the camera moves until a different level is drawn. It is Bevy's own, the material
+    /// its meshlet renderer draws when no fragment program is named, and is given to an entity with
+    /// <see cref="SetMaterial"/> as any other. On an ordinary mesh it draws as Bevy's default
+    /// material.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">Meshlets are not running (see <see cref="MeshletsActive"/>).</exception>
+    public static AssetHandle CreateClusterMaterial() =>
+        new(Native.Check(Native.bcs_render_cluster_material_create(), "making a cluster material"));
 
     /// <summary>
     /// Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere.

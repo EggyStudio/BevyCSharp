@@ -163,13 +163,14 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
 
 /// Makes an entity's mesh take part in ray tracing, reshaping the mesh the way Solari builds its
 /// structures from: exactly positions, normals, texture coordinates and tangents, which are worked
-/// out where it has none, thirty-two bit indices, and ray tracing enabled on it.
+/// out where it has none, thirty-two bit indices, and ray tracing enabled on it. A mesh with no
+/// texture coordinates is given coordinates and tangents of zero.
 ///
 /// The mesh is changed in place, so the entity keeps drawing it as it did and the rays meet the
 /// same triangles the picture shows. The entity's material has to be Bevy's standard material.
-/// Returns [`status::NULL_ARG`] for a mesh that is not indexed triangles with normals and texture
-/// coordinates, [`status::NOT_PRESENT`] where it has not loaded, and [`status::UNSUPPORTED`] where
-/// Solari is not running.
+/// Returns [`status::NULL_ARG`] for a mesh that is not indexed triangles with normals,
+/// [`status::NOT_PRESENT`] where it has not loaded, and [`status::UNSUPPORTED`] where Solari is not
+/// running.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_ray_traced(entity: u64, mesh: i32) -> i32 {
     crate::interop::guard(|| {
@@ -209,10 +210,19 @@ pub extern "C" fn bcs_render_set_ray_traced(entity: u64, mesh: i32) -> i32 {
 
                     if found.primitive_topology() != PrimitiveTopology::TriangleList
                         || found.attribute(Mesh::ATTRIBUTE_NORMAL).is_none()
-                        || found.attribute(Mesh::ATTRIBUTE_UV_0).is_none()
                         || found.indices().is_none()
                     {
                         return status::NULL_ARG;
+                    }
+
+                    // A mesh drawn in plain colors often has no texture coordinates, and Solari
+                    // reads them whether a texture is there or not. Bevy's own example gives such
+                    // a mesh coordinates and tangents of zero, which no texture lookup is then
+                    // made from, rather than refusing it.
+                    if found.attribute(Mesh::ATTRIBUTE_UV_0).is_none() {
+                        let count = found.count_vertices();
+                        found.insert_attribute(Mesh::ATTRIBUTE_UV_0, vec![[0.0f32, 0.0]; count]);
+                        found.insert_attribute(Mesh::ATTRIBUTE_TANGENT, vec![[0.0f32, 0.0, 0.0, 0.0]; count]);
                     }
 
                     let kept = [

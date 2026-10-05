@@ -55,6 +55,8 @@ case "$example" in
   auto_exposure) frames=900 ;;
   # Decals stamped one a second, which take some seconds to be more than one.
   clustered_decal_maps) frames=600 ;;
+  # Lighting that gathers over frames, and a robot that has walked out from behind the console.
+  solari) frames=400 ;;
   *) ;;
 esac
 ./bcs command frames.wait "$frames" --quiet --timeout 600

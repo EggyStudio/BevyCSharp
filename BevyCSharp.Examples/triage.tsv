@@ -37,7 +37,7 @@ render_to_texture	can
 shadow_biases	can
 shadow_caster_receiver	can
 skybox	part	the ASTC and ETC2 cubemaps, since the bridge does not say which compressed formats the GPU decodes
-solari	can	needs a bridge built with --solari and an adapter with ray queries
+solari	part	Bevy's path tracer and its scene of many lights, which its command line chooses, and the count of the world cache's cells its panel ends with; needs a bridge built with --solari and an adapter with ray queries
 spherical_area_lights	can
 split_screen	can
 texture	can

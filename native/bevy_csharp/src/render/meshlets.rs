@@ -71,6 +71,8 @@ pub fn install(app: &mut bevy::app::App, clusters: u32, backends: Option<wgpu::B
         }
     });
 
+    app.add_plugins(bevy::pbr::MaterialPlugin::<ClusterMaterial>::default());
+
     app.init_resource::<Conversions>();
     app.add_systems(Update, (convert_meshes, attach_made).chain());
     ACTIVE.store(true, std::sync::atomic::Ordering::Relaxed);
@@ -261,6 +263,63 @@ fn only_what_meshlets_keep(mesh: &bevy::mesh::Mesh) -> Result<bevy::mesh::Mesh, 
     }
 
     Ok(copy)
+}
+
+/// A material that draws each cluster of a meshlet mesh in a color of its own, picked from the
+/// cluster's number, to see how a mesh was cut and which level of detail is drawn where.
+///
+/// Bevy's meshlet renderer shades a material that names no fragment program of its own this way,
+/// so the material is empty, and only its type says what to draw. Bevy's `meshlet` example draws its
+/// back row with one. On an ordinary mesh it draws as Bevy's default material.
+#[cfg(feature = "meshlet")]
+#[derive(bevy::asset::Asset, bevy::reflect::TypePath, bevy::render::render_resource::AsBindGroup, Clone, Default)]
+pub struct ClusterMaterial {
+    _empty: (),
+}
+
+#[cfg(feature = "meshlet")]
+impl bevy::pbr::Material for ClusterMaterial {}
+
+/// Puts a cluster material on an entity when `material` is one, answering whether it was.
+///
+/// The asset table holds handles untyped, so an attach that is not of the standard material asks
+/// each kind it might be, and this is one.
+#[cfg(feature = "meshlet")]
+pub fn attach_material(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::asset::UntypedHandle) -> bool {
+    match material.clone().try_typed::<ClusterMaterial>() {
+        Ok(handle) => {
+            entity.insert(bevy::pbr::MeshMaterial3d(handle));
+            true
+        }
+        Err(_) => false,
+    }
+}
+
+/// Makes a [`ClusterMaterial`] and returns its key, or [`status::UNSUPPORTED`] where meshlets are
+/// not running, since the material's plugin is added only with them.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_cluster_material_create() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "meshlet"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "meshlet")]
+        {
+            if !ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
+                return status::UNSUPPORTED;
+            }
+
+            with_world(|world| {
+                let handle = world
+                    .resource_mut::<bevy::asset::Assets<ClusterMaterial>>()
+                    .add(ClusterMaterial::default())
+                    .untyped();
+                crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
 }
 
 /// Whether meshlets are running in this app: the bridge was built with them, the app asked for
