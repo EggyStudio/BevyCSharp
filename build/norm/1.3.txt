@@ -7,7 +7,6 @@ BevyCSharp.Tests/RenderControlTests.cs
 BevyCSharp.Tests/ViewShaderTests.cs
 BevyCSharp/Assets/Gizmos.cs
 BevyCSharp/Assets/RenderShaders.cs
-BevyCSharp/Core/App.cs
 BevyCSharp/Diagnostics/ConsoleWorldCommands.cs
 BevyCSharp/Ecs/ComponentSchema.cs
 BevyCSharp/Interop/NativeTypes.Render.cs

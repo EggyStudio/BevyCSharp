@@ -20,14 +20,13 @@ static App Build(Config config = null);                         // Builds an app
 ### `App`
 
 ```csharp
-App AddSystem(Stage stage, SystemFn system);                    // Registers a system function in stage
-App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition);  // Registers a system function with a run condition
-App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a described system in stage
-App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
-App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer each time a TEvent is triggered
-App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
-int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
-IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
+App AddPlugin(IPlugin plugin);                                  // Adds a plugin, building it immediately
+App AddPlugins(IPluginGroup group);                             // Adds every plugin in a group, in Order order
+bool HasPlugin<T>();                                            // True when a plugin of type T is registered
+int Run();                                                      // Runs the engine
+static void RequestExit();                                      // Asks the engine to shut down after the current frame
+static string DescribeAdapter();                                // Describes the graphics adapter the renderer actually chose, or null in a headless run
+void Dispose();                                                 // Releases what it holds
 App AddState<TState>(TState initial);                           // Adds a state machine over TState, starting at initial
 App AddSubState<TState>(TState initial);                        // Adds a sub-state over TState, which exists only while its parent holds the value its SubStateOfAttribute names
 App AddComputedState<TState, TSource>(params (TSource, TState)[] table);  // Adds a state worked out from another rather than set
@@ -39,13 +38,14 @@ static bool TryState<TState>(out TState value);                 // The current v
 static void SetState<TState>(TState value);                     // Queues a transition of TState
 App AddStateSystem<TState>(TState value, bool entering, SystemDescriptor descriptor);  // Registers a system to run once when TState enters or leaves value
 App AddTransitionSystem<TState>(TState from, TState to, SystemDescriptor descriptor);  // Registers a system to run once when TState moves from from to to, and on no other move
-App AddPlugin(IPlugin plugin);                                  // Adds a plugin, building it immediately
-App AddPlugins(IPluginGroup group);                             // Adds every plugin in a group, in Order order
-bool HasPlugin<T>();                                            // True when a plugin of type T is registered
-int Run();                                                      // Runs the engine
-static void RequestExit();                                      // Asks the engine to shut down after the current frame
-static string DescribeAdapter();                                // Describes the graphics adapter the renderer actually chose, or null in a headless run
-void Dispose();                                                 // Releases what it holds
+App AddSystem(Stage stage, SystemFn system);                    // Registers a system function in stage
+App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition);  // Registers a system function with a run condition
+App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a described system in stage
+App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
+App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer each time a TEvent is triggered
+App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
+int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
+IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
 ```
 
 ### `Config`
