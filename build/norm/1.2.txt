@@ -25,11 +25,6 @@ BevyCSharp/Assets/Gizmos.cs GizmoLine
 BevyCSharp/Assets/Gizmos.cs GizmoSegment
 BevyCSharp/Assets/Gizmos.cs LightGizmoColoring
 BevyCSharp/Assets/GltfContents.cs GltfPart
-BevyCSharp/Assets/Render.cs AmbientOcclusionQuality
-BevyCSharp/Assets/Render.cs ImagePixels
-BevyCSharp/Assets/Render.cs PassTiming
-BevyCSharp/Assets/Render.cs ProbeCaptureSettings
-BevyCSharp/Assets/Render.cs ReflectionSettings
 BevyCSharp/Assets/Render2dMaterials.cs AlphaMode2d
 BevyCSharp/Assets/Render2dMaterials.cs ColorMaterialSettings
 BevyCSharp/Assets/Render2dMaterials.cs Render2d
