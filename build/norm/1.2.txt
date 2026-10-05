@@ -267,7 +267,6 @@ BevyCSharp/Input/Input.cs TouchPhase
 BevyCSharp/Input/Key.cs KeyModifier
 BevyCSharp/Input/Key.cs KeyTable
 BevyCSharp/Input/Key.cs MouseButton
-BevyCSharp/Input/SyntheticInput.cs PointerAction
 BevyCSharp/Interop/NativeStatus.cs BevyNativeException
 BevyCSharp/Interop/NativeTypes.App.cs NativeConfig
 BevyCSharp/Interop/NativeTypes.App.cs NativeVideoMode
