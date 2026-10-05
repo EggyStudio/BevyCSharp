@@ -19,11 +19,6 @@ BevyCSharp/Assets/DataAssets.cs DataAssetChanged
 BevyCSharp/Assets/DataAssets.cs DataBox
 BevyCSharp/Assets/DataAssets.cs DataRef
 BevyCSharp/Assets/DataAssets.cs IDataRef
-BevyCSharp/Assets/Gizmos.cs GizmoGroup
-BevyCSharp/Assets/Gizmos.cs GizmoJoint
-BevyCSharp/Assets/Gizmos.cs GizmoLine
-BevyCSharp/Assets/Gizmos.cs GizmoSegment
-BevyCSharp/Assets/Gizmos.cs LightGizmoColoring
 BevyCSharp/Assets/GltfContents.cs GltfPart
 BevyCSharp/Assets/Render2dMaterials.cs AlphaMode2d
 BevyCSharp/Assets/Render2dMaterials.cs ColorMaterialSettings
