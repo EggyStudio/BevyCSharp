@@ -34,9 +34,11 @@ the most examples, and the largest is taken between groups of examples. The coun
   each generic one stands for (`system_fonts`). And reading the atlases Bevy lays a font's glyphs
   out in (`font_atlas_debug`). A run's weight, width, style, OpenType features and axes, its
   underline and strikethrough and its background color are reached.
-- **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
-  graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
-  `eased_motion` is written in part without them, its curves sampled each frame.
+- **Animation built in code, five examples.** Events placed on a clip (`animation_events`,
+  `animated_mesh_events`), graphs that blend clips by weight and their masks (`animation_graph`,
+  `animation_masks`), and skinned meshes built joint by joint (`custom_skinned_mesh`). A clip is
+  made from curves in code, of a transform, an interface node's scale and rotation and a text's
+  color, and played from a graph of it.
 - **Bevy's deferred buffers from a Slang shader, one example.** A Slang shader is lit by Bevy
   through `bcs::light` and `bcs::finish`, reaches the clustered decals over it and an irradiance
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
@@ -80,8 +82,8 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
-tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave
+Fifteen examples are written in part, each leaving out a feature named in its row. Six are stress
+tests, which leave out switches and counts that no wrapper reaches, and the other nine each leave
 out one of these.
 
 - **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
@@ -101,8 +103,6 @@ out one of these.
   which the asset server here would need a call for, answering the handles it holds.
 - **A mesh's morph target names**, which `morph_targets` prints in Bevy as each mesh arrives. A
   call reading a mesh's `morph_target_names` would answer them.
-- **An animation clip made in code**, which `eased_motion` plays its curves with in Bevy, as the
-  entry above on animation built in code says.
 - **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
   those that started, moved and ended, and Bevy's own set of canceled ones is left out.
 - **Stepping through the systems one at a time**, which `breakout` adds in Bevy as a panel that

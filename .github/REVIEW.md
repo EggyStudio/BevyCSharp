@@ -190,3 +190,16 @@ three that need Bevy's system font discovery, which the bridge does not compile 
 `font_atlas_debug`'s atlases, and TODO.md says so. `UiTests` holds the lines drawn and taken off by
 the light pixels they add, and the features and axes reaching the run's `TextFont` through Bevy's
 reflection, replacing what it had.
+
+**Now 3, animation built in code, clips.** A clip is made in code, as Bevy's examples make one
+(`clips.rs`, ABI 213). An `AnimationCurve` is values sampled at times or two values eased between
+by Bevy's own easing, played back and forth where asked, for a transform's translation, rotation or
+scale, an interface node's scale or rotation, or a text's color through a property the bridge
+declares as Bevy's example declares its own. It is aimed at an `AnimationTarget` made from the names
+on the path to an entity, the graph made from the clip is played by `Animation.PlayGraph`, and each
+entity moved carries its target and player through `Animation.Animate`. `animated_transform` and
+`animated_ui` are written and `eased_motion` is whole, 266, each seen to move offscreen as Bevy's
+does. `AnimationClipTests` holds the curve's layout, a clip moving an entity halfway at its middle
+and holding its last value after, and an eased curve going there and back. `Animation.cs` held three
+other public types, which moved to files of their own first (`df97905`), N 1.2 at 276. Events on a
+clip, blend graphs with masks and a skinned mesh built in code are this gap's next batches.

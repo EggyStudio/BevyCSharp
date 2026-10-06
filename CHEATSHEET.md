@@ -716,6 +716,32 @@ static void Seek(Entity scene, float seconds);                  // Moves the cli
 static void SetRepeat(Entity scene, uint times);                // Changes how many times the clip playing plays, counting those it has finished, without starting it over: zero for ever, one for once
 static void SetSpeed(Entity scene, float speed);                // Changes how fast the clip a model is playing goes
 static AnimationState? StateOf(Entity scene);                   // What a model is playing, or nothing while it has not arrived
+static AssetHandle CreateClip();                                // Makes an empty clip, which AddCurve fills
+static void AddCurve(AssetHandle clip, AnimationTarget target, AnimationCurve curve);  // Adds a curve to a clip, moving one property of the entity target names
+static (AssetHandle Graph, uint Node) GraphFromClip(AssetHandle clip);  // A graph holding the one clip, and the clip's node in it, as Bevy's AnimationGraph::from_clip
+static void PlayGraph(Entity player, AssetHandle graph, uint node, bool repeat = false);  // Makes an entity a player of a graph, playing one of its nodes
+static void Animate(Entity entity, AnimationTarget target, Entity player);  // Makes an entity the target a clip's curves are aimed at, moved by a player
+```
+
+### `AnimationCurve`
+
+```csharp
+AnimationCurve PingPong();                                      // The same eased curve going back to its start after reaching its end, as Bevy's ping_pong
+static AnimationCurve Translation(ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values);  // A translation through values at times
+static AnimationCurve Translation(Vec3 from, Vec3 to, EaseFunction ease, float duration);  // A translation eased from one place to another
+static AnimationCurve Rotation(ReadOnlySpan<float> times, ReadOnlySpan<Quat> values);  // A rotation through values at times
+static AnimationCurve Rotation(Quat from, Quat to, EaseFunction ease, float duration);  // A rotation eased from one turn to another
+static AnimationCurve Scale(ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values);  // A scale through values at times
+static AnimationCurve Scale(Vec3 from, Vec3 to, EaseFunction ease, float duration);  // A scale eased from one size to another
+static AnimationCurve UiScale(ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values);  // An interface node's scale through values at times
+static AnimationCurve UiRotation(ReadOnlySpan<float> times, ReadOnlySpan<float> radians);  // An interface node's rotation through values at times
+static AnimationCurve TextColor(ReadOnlySpan<float> times, ReadOnlySpan<Color> values);  // A text's color through values at times, interpolated in sRGB as Bevy's example does
+```
+
+### `AnimationTarget`
+
+```csharp
+static AnimationTarget FromNames(ReadOnlySpan<string> names);   // The target at the end of a path of names, the first the topmost
 ```
 
 ### `MeshFiles`

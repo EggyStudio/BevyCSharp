@@ -105,14 +105,14 @@ wireframe_2d	can
 animated_mesh_control	can
 animated_mesh_events	missing	events placed on an animation clip
 animated_mesh	can
-animated_transform	missing	animation clips built in code (AnimationClip with curves)
-animated_ui	missing	animation clips built in code that drive interface properties
+animated_transform	can
+animated_ui	can	the text's color animated through a property the bridge declares, as Bevy's example declares its own
 animation_events	missing	events placed on an animation clip
 animation_graph	missing	animation graphs that blend clips by weight
 animation_masks	missing	animation masks on a graph
 color_animation	can	the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types
 custom_skinned_mesh	missing	skinned meshes built in code (joints and weights)
-eased_motion	part	the animation clip made of the two curves, which is animation built in code; the curves are sampled each frame instead
+eased_motion	can
 easing_functions	can	Bevy's easing functions written in the examples' Ease as bevy_math writes them
 morph_targets	part	the names of each mesh's morph targets, printed as it arrives, which no call reads
 custom_loop	n/a	replaces Bevy's runner, which the bridge owns

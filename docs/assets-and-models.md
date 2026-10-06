@@ -167,6 +167,24 @@ console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor 
 plays at a time, fading from the last, so masks, additive layers and a state machine over clips
 are left to the game.
 
+A clip is also made in code, as Bevy's examples make one, a curve for each property it moves,
+aimed at an entity by the names on the path down to it. A curve is values sampled at times, or two
+values eased between by one of Bevy's easing functions, and moves a transform's translation,
+rotation or scale, an interface node's scale or rotation, or a text's color. A player plays a graph
+made from the clip, and each entity a curve is aimed at carries its target and the player:
+
+```csharp
+var clip = Animation.CreateClip();
+var door = AnimationTarget.FromNames("door");
+Animation.AddCurve(clip, door, AnimationCurve.Rotation(Quat.Identity, Quat.FromRotationY(1.5f), EaseFunction.BackOut, 0.6f));
+var (graph, node) = Animation.GraphFromClip(clip);
+Animation.PlayGraph(doorEntity, graph, node);
+Animation.Animate(doorEntity, door, player: doorEntity);
+```
+
+A clip made once moves every set of entities named the same way, as a model's clip moves every
+copy of the model.
+
 A file's own materials load too, in a windowed run:
 
 ```csharp

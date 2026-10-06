@@ -357,6 +357,36 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_stop(ulong root);
 
+    /// <summary>Makes an empty clip, answering its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clip_create();
+
+    /// <summary>Writes the target at the end of a path of names, given one a line.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_target(string names, ulong* high, ulong* low);
+
+    /// <summary>Adds a described curve to a clip, aimed at a target.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clip_add_curve(int clip, ulong high, ulong low, NativeAnimationCurve* curve, float* times, float* values, int valueCount);
+
+    /// <summary>Makes a graph of one clip, writing its key and the clip's node.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_from_clip(int clip, int* graph, uint* node);
+
+    /// <summary>Makes an entity a player of a graph, playing a node.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_play_graph(ulong entity, int graph, uint node, int repeat);
+
+    /// <summary>Makes an entity a target of a clip's curves, moved by a player.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_animate(ulong entity, ulong high, ulong low, ulong player);
+
     /// <summary>Changes how many times the playing clip plays.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

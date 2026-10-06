@@ -162,6 +162,104 @@ public static unsafe class Animation
         }
     }
 
+    /// <summary>Makes an empty clip, which <see cref="AddCurve"/> fills.</summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>AnimationClip</c> built in code, as its examples make one, a curve for each
+    /// property each entity it moves goes through. A player plays a graph made from it with
+    /// <see cref="GraphFromClip"/>, and each entity a curve is aimed at carries its
+    /// <see cref="AnimationTarget"/> and the player through <see cref="Animate"/>:
+    /// </para>
+    /// <code>
+    /// var clip = Animation.CreateClip();
+    /// var planet = AnimationTarget.FromNames("planet");
+    /// Animation.AddCurve(clip, planet, AnimationCurve.Translation([0f, 1f, 2f], [a, b, a]));
+    /// var (graph, node) = Animation.GraphFromClip(clip);
+    /// Animation.PlayGraph(sphere, graph, node, repeat: true);
+    /// Animation.Animate(sphere, planet, player: sphere);
+    /// </code>
+    /// <para>
+    /// A model's own clips are played by name with <see cref="Play"/> instead.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static AssetHandle CreateClip()
+    {
+        var key = Native.bcs_animation_clip_create();
+        if (key == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(key, "making an animation clip");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>Adds a curve to a clip, moving one property of the entity <paramref name="target"/> names.</summary>
+    /// <remarks>
+    /// Bevy's <c>add_curve_to_target</c>. A target takes a curve for each of its properties, and
+    /// one curve of each property, a second replacing the first.
+    /// </remarks>
+    /// <param name="clip">A clip from <see cref="CreateClip"/>.</param>
+    /// <param name="target">What the curve moves.</param>
+    /// <param name="curve">How it moves.</param>
+    /// <exception cref="BevyNativeException">The clip is gone, or this build has no renderer.</exception>
+    public static void AddCurve(AssetHandle clip, AnimationTarget target, AnimationCurve curve)
+    {
+        ArgumentNullException.ThrowIfNull(curve);
+
+        var native = new NativeAnimationCurve
+        {
+            Property = (int)curve.Property,
+            Kind = curve.Ease is null ? 0 : 1,
+            Count = curve.Count,
+            Duration = curve.Duration,
+            PingPong = curve.IsPingPong ? 1u : 0u,
+        };
+        if (curve.Ease is { } ease)
+            (native.Ease, native.EaseSteps, native.EaseJump, native.EaseOmega) = ((int)ease.Kind, ease.StepCount, (int)ease.Jump, ease.Omega);
+
+        int status;
+        fixed (float* times = curve.Times)
+        fixed (float* values = curve.Values)
+            status = Native.bcs_animation_clip_add_curve(clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"adding a {curve.Property} curve to clip {clip.Key}");
+    }
+
+    /// <summary>A graph holding the one clip, and the clip's node in it, as Bevy's <c>AnimationGraph::from_clip</c>.</summary>
+    /// <param name="clip">A clip from <see cref="CreateClip"/>.</param>
+    /// <exception cref="BevyNativeException">The clip is gone, or this build has no renderer.</exception>
+    public static (AssetHandle Graph, uint Node) GraphFromClip(AssetHandle clip)
+    {
+        int graph;
+        uint node;
+        var status = Native.bcs_animation_graph_from_clip(clip.Key, &graph, &node);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"making a graph of clip {clip.Key}");
+        return (new AssetHandle(graph), node);
+    }
+
+    /// <summary>Makes an entity a player of a graph, playing one of its nodes.</summary>
+    /// <remarks>
+    /// Bevy's <c>AnimationPlayer</c> and <c>AnimationGraphHandle</c> on the entity, the node played
+    /// once and held at its end, or over and over where <paramref name="repeat"/> says so. The
+    /// player moves the entities that name it through <see cref="Animate"/>, itself among them
+    /// where it is one.
+    /// </remarks>
+    /// <param name="player">The entity that plays it.</param>
+    /// <param name="graph">A graph from <see cref="GraphFromClip"/>.</param>
+    /// <param name="node">The node to play.</param>
+    /// <param name="repeat">Whether it plays over and over.</param>
+    /// <exception cref="BevyNativeException">The entity or the graph is gone, or this build has no renderer.</exception>
+    public static void PlayGraph(Entity player, AssetHandle graph, uint node, bool repeat = false) =>
+        Act(Native.bcs_animation_play_graph(player.Bits, graph.Key, node, repeat ? 1 : 0), "playing a graph as", player);
+
+    /// <summary>Makes an entity the target a clip's curves are aimed at, moved by a player.</summary>
+    /// <remarks>Bevy's <c>AnimationTargetId</c> and <c>AnimatedBy</c> on the entity.</remarks>
+    /// <param name="entity">The entity the curves move.</param>
+    /// <param name="target">The target the curves are aimed at.</param>
+    /// <param name="player">The entity whose player moves it, which may be itself.</param>
+    /// <exception cref="BevyNativeException">An entity is gone, or this build has no renderer.</exception>
+    public static void Animate(Entity entity, AnimationTarget target, Entity player) =>
+        Act(Native.bcs_animation_animate(entity.Bits, target.High, target.Low, player.Bits), "aiming curves at", entity);
+
     /// <summary>A clip's number among a model's, by its exact name, or -1.</summary>
     private static int IndexOf(IReadOnlyList<string> clips, string clip)
     {
