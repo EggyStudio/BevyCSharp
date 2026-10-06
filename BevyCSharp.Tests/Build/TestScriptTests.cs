@@ -8,12 +8,20 @@ namespace Bevy.Tests;
 /// <c>build/test.py</c>, which runs the tests in the workflow and for a working session, writes a
 /// page within its limits whatever the run held, says a process that is lost and runs the suite
 /// again in parts after it, and reads the bridge's failures from what cargo prints, as N 6.7 and
-/// N 6.8 of NORM.md have it.
+/// N 6.8 of NORM.md have it. <c>build/step.py</c>, which runs each step of the pack workflow's jobs
+/// on Linux, says what failed in a step that fails having said nothing.
 /// </summary>
 /// <remarks>
+/// <para>
 /// The path taken after a loss runs on no day the suite passes, so these tests keep it working.
 /// Stand-ins for <c>dotnet</c> (<c>dotnet_standin.py</c>) and <c>cargo</c> (<c>cargo_standin.py</c>)
 /// hang, grow, die, fail or do not build where asked, so they need no suite and no bridge.
+/// </para>
+/// <para>
+/// The pack run of 421d4e1 ended its game job with an exit code and nothing else, what stopped
+/// Courtyard being in the game's log, which no reader of the run's annotations sees. The lines
+/// both scripts write are cut to the page's width by <c>build/page.py</c>, which they share.
+/// </para>
 /// </remarks>
 public sealed class TestScriptTests : IDisposable
 {
@@ -166,6 +174,159 @@ public sealed class TestScriptTests : IDisposable
         var text = File.ReadAllText(_folder.File("digest.md"));
         Assert.Contains("### Lost: the bridge, did not build", text);
         Assert.Contains("error[E0425]: cannot find function `unset` in this scope", text);
+    }
+
+    // A workflow's steps as GitHub reads them, a step run through build/step.py being given its
+    // script as GitHub writes it to a file.
+    private const string Workflow = """
+        jobs:
+          game:
+            steps:
+              - uses: actions/checkout@v5
+
+              - name: Pack
+                run: echo packing ${{ inputs.version }} && exit 6
+
+              # The play.
+              - name: Play Courtyard
+                env:
+                  SHOTS: shots
+                run: |
+                  echo opening
+                  cp ../game.log logs/game.log
+                  ok=$(echo fine)
+                  echo "$ok"
+                  status=$(sh -c 'echo "no app is serving" >&2; exit 4')
+                  echo never
+
+              - name: Walk
+                run: |
+                  walk() { sh -c 'exit 3'; }
+                  walk North
+
+              - run: build/fetch-slang.sh
+        """;
+
+    [SkippableFact]
+    public void AStepWhoseCommandFailsIntoAVariableIsNamedWithTheCommandItsCodeAndTheLogsWarnings()
+    {
+        var python = StepNeeds();
+
+        // As Bevy writes its log, colored and stamped, an information line among a warning and an error.
+        File.WriteAllLines(_folder.File("game.log"),
+        [
+            "\u001b[2m2026-10-06T20:19:03.453266Z\u001b[0m \u001b[32m INFO\u001b[0m bevy_render::renderer: AdapterInfo { name: \"llvmpipe\" }",
+            "\u001b[2m2026-10-06T20:19:03.453281Z\u001b[0m \u001b[33m WARN\u001b[0m bevy_render::renderer: The selected adapter is using a driver that only supports software rendering.",
+            "\u001b[2m2026-10-06T20:19:09.100000Z\u001b[0m \u001b[31mERROR\u001b[0m bevy_csharp: " + new string('x', 400),
+        ]);
+        var (exit, log, summary) = Step(python, StepOf("Play Courtyard"));
+
+        Assert.Equal(4, exit);
+        Assert.Contains("fine", log);
+        Assert.DoesNotContain("never", log);
+        var error = Assert.Single(log.Split('\n'), line => line.StartsWith("::error", StringComparison.Ordinal));
+        Assert.StartsWith("::error title=Play Courtyard%3A exit code 4::", error);
+        Assert.Contains("`status=$(sh -c 'echo \"no app is serving\" >&2; exit 4')` on line 5 of the step ended with exit code 4.", error);
+        Assert.Contains("%0A    no app is serving", error);
+        Assert.Contains("game.log, its last lines at a warning or worse:%0A    WARN bevy_render::renderer: The selected adapter", error);
+        Assert.DoesNotContain("AdapterInfo", error);
+        Assert.All(error.Split("%0A"), line => Assert.True(line.Length <= 240 + 120, "a line of the error is cut to the page's width"));
+        Assert.Contains("### Play Courtyard: exit code 4", summary);
+    }
+
+    [SkippableFact]
+    public void AFunctionThatFailsIsNamedAndAStepThatSaysItsOwnErrorIsGivenNone()
+    {
+        var python = StepNeeds();
+
+        var (exit, log, _) = Step(python, StepOf("Walk"));
+        Assert.Equal(3, exit);
+        Assert.Contains("::error title=Walk%3A exit code 3::`sh -c 'exit 3'` on line 1 of the step ended with exit code 3.", log);
+
+        File.WriteAllText(_folder.File("said.sh"), "echo \"::error::Courtyard: the runner did not reach the goal\"\nexit 1\n");
+        (exit, log, _) = Step(python, _folder.File("said.sh"));
+        Assert.Equal(1, exit);
+        Assert.Single(log.Split('\n'), line => line.StartsWith("::error", StringComparison.Ordinal));
+
+        File.WriteAllText(_folder.File("passes.sh"), "echo played\n");
+        (exit, log, _) = Step(python, _folder.File("passes.sh"));
+        Assert.Equal(0, exit);
+        Assert.Equal("played", log.Trim());
+    }
+
+    [SkippableFact]
+    public void AStepIsNamedThroughItsFilledExpressionsAndOneNotInTheWorkflowByItsFirstLine()
+    {
+        var python = StepNeeds();
+
+        // An expression stands for what GitHub filled it with, here a version.
+        File.WriteAllText(_folder.File("pack.sh"), "echo packing 0.4.1 && exit 6\n");
+        var (_, log, _) = Step(python, _folder.File("pack.sh"));
+        Assert.Contains("::error title=Pack%3A exit code 6::", log);
+
+        File.WriteAllText(_folder.File("slang.sh"), "build/fetch-slang.sh\n");
+        (var exit, log, _) = Step(python, _folder.File("slang.sh"));
+        Assert.NotEqual(0, exit);
+        Assert.Contains($"::error title=Run build/fetch-slang.sh%3A exit code {exit}::", log);
+
+        File.WriteAllText(_folder.File("elsewhere.sh"), "echo first\nexit 5\n");
+        (_, log, _) = Step(python, _folder.File("elsewhere.sh"));
+        Assert.Contains("::error title=The step beginning `echo first`%3A exit code 5::The step ended with exit code 5 by its own exit, no command failing.", log);
+    }
+
+    /// <summary>Python and bash, which build/step.py runs a step in, on a system whose jobs it runs.</summary>
+    private static string StepNeeds()
+    {
+        Skip.If(OperatingSystem.IsWindows(), "build/step.py runs the steps of the jobs on Linux, in bash");
+        return Needs.Python();
+    }
+
+    /// <summary>
+    /// Runs build/step.py on the script, as GitHub runs it, against the workflow above and the
+    /// folder's logs, and returns its exit code, what it printed and the summary it wrote.
+    /// </summary>
+    private (int Exit, string Log, string Summary) Step(string python, string script)
+    {
+        File.WriteAllText(_folder.File("package.yml"), Workflow);
+        Directory.CreateDirectory(_folder.File("play"));
+        Directory.CreateDirectory(_folder.File(Path.Combine("play", "logs")));
+        var summary = _folder.File("summary.md");
+        File.Delete(summary);
+
+        var start = new ProcessStartInfo(python)
+        {
+            WorkingDirectory = _folder.File("play"),
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        foreach (var argument in new[] { Path.Combine(Root, "build", "step.py"), script, "--workflow", _folder.File("package.yml"), "--logs", _folder.File(Path.Combine("play", "logs")) })
+            start.ArgumentList.Add(argument);
+        start.Environment["GITHUB_ACTIONS"] = "true";
+        start.Environment["GITHUB_STEP_SUMMARY"] = summary;
+        start.Environment["PYTHONDONTWRITEBYTECODE"] = "1";
+        start.Environment.Remove("BCS_STEP_LOGS");
+
+        using var step = Process.Start(start)!;
+        var log = step.StandardOutput.ReadToEndAsync();
+        var errors = step.StandardError.ReadToEndAsync();
+        Assert.True(step.WaitForExit(60_000), "the step ends");
+        return (step.ExitCode, log.Result.Replace("\r", "") + errors.Result, File.Exists(summary) ? File.ReadAllText(summary) : "");
+    }
+
+    /// <summary>The script of the named step, as GitHub writes it to a file to run.</summary>
+    private string StepOf(string name)
+    {
+        var lines = Workflow.Split('\n');
+        var at = Array.FindIndex(lines, line => line.Trim() == $"- name: {name}");
+        var run = Array.FindIndex(lines, at, line => line.Trim() == "run: |");
+        var indent = lines[run].Length - lines[run].TrimStart().Length;
+        var block = lines.Skip(run + 1).TakeWhile(line => line.Trim().Length == 0 || line.Length - line.TrimStart().Length > indent).ToList();
+        var depth = block.Where(line => line.Trim().Length > 0).Min(line => line.Length - line.TrimStart().Length);
+        var path = _folder.File(name.Replace(' ', '-') + ".sh");
+        File.WriteAllText(path, string.Join("\n", block.Select(line => line.Length >= depth ? line[depth..] : "")).TrimEnd() + "\n");
+        return path;
     }
 
     /// <summary>Runs build/test.py with the environment and arguments given, and returns its exit code and what it printed.</summary>

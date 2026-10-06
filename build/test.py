@@ -38,6 +38,11 @@ import time
 import xml.etree.ElementTree as ET
 from collections import Counter
 
+# The page's limits and how it reaches GitHub, which build/step.py shares, imported without a
+# compiled copy left beside them in build/.
+sys.dont_write_bytecode = True
+from page import ANNOTATIONS, LINE_WIDTH, annotate, fit, summarize
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT = "BevyCSharp.Tests/BevyCSharp.Tests.csproj"
 RESULTS = os.path.join(ROOT, "BevyCSharp.Tests", "TestResults")
@@ -48,15 +53,12 @@ PREFIX = "Bevy.Tests."
 PARTS = ["bridge", "renderer", "suite"]
 LABELS = {"bridge": "the bridge", "renderer": "the bridge's renderer", "suite": "the suite"}
 
-PAGE_LINES = 200
-LINE_WIDTH = 240
 CAUSES_SHOWN = 10
 FRAMES_SHOWN = 6
 MESSAGE_LINES = 5
 TESTS_SHOWN = 4
 REPEATED_SHOWN = 3
 PART_SIZE = 100
-ANNOTATIONS = 10
 BEGIN = "=" * 30 + " the page " + "=" * 30
 END = "=" * 30 + " end of the page " + "=" * 30
 
@@ -605,13 +607,6 @@ def merged_page(digests):
     return fit(lines), ordered
 
 
-def fit(lines):
-    lines = [line if len(line) <= LINE_WIDTH else line[:LINE_WIDTH - 1] + "…" for line in lines]
-    if len(lines) > PAGE_LINES:
-        lines = lines[:PAGE_LINES - 1] + [f"({len(lines) - PAGE_LINES + 1} lines more are left out)"]
-    return lines
-
-
 def annotations(lost, causes, head_line, repeated):
     """
     The annotations, which anyone can read where a run's log and summary need signing in, an error
@@ -635,19 +630,10 @@ def publish(lines, notes, results_dir=None, d=None):
             f.write("\n".join(lines) + "\n")
         with open(os.path.join(results_dir, "digest.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump(d, f, indent=1)
-    if os.environ.get("GITHUB_ACTIONS") == "true":
-        for title, message in errors:
-            print(f"::error title={escape(title, True)}::{escape(chr(10).join(message))}")
-        print(f"::notice title=The tests::{escape(chr(10).join(notice))}")
-        summary = os.environ.get("GITHUB_STEP_SUMMARY")
-        if summary:
-            with open(summary, "a", encoding="utf-8", newline="\n") as f:
-                f.write("\n".join(lines) + "\n\n")
-
-
-def escape(text, in_property=False):
-    text = text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-    return text.replace(":", "%3A").replace(",", "%2C") if in_property else text
+    for title, message in errors:
+        annotate("error", title, message)
+    annotate("notice", "The tests", notice)
+    summarize(lines)
 
 
 def duration(seconds):

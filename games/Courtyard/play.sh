@@ -61,6 +61,11 @@ trap './bcs stop >/dev/null 2>&1 || true' EXIT
 for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Courtyard" && break; sleep 1; done
 ./bcs status | grep -q "ready.*Courtyard" || fail "the game never answered; its log is $shots/game.log"
 
+# Each frame a sixtieth of a second of the game, however long the machine took to draw it, since a
+# walk is planned in frames at the runner's speed. A software renderer, as the workflow's runner
+# has, draws a few frames a second, and on the machine's clock each held frame carried the runner
+# several times as far as planned, past every coin and into the wall.
+quiet app.frametime 0.0166667
 quiet frames.wait 30
 ./bcs shot "$shots/1-menu.png" >/dev/null
 c entity.get Runner | grep -q "^CharacterController" && fail "the runner is a character before play starts"

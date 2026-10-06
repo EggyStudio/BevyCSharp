@@ -288,6 +288,19 @@ walks the README's install in a container, and packs only once all of them pass.
 kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its **publish**
 box pushes it to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
 
+The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
+GitHub runs the step's script in. A step that fails having said nothing is given an error naming
+the step, the command that failed with its line and exit code, the step's last lines, and the last
+lines at a warning or worse of each log written while it ran, those `bcs open` keeps under
+`build/sessions` and those in the folders `BCS_STEP_LOGS` names, such as the game's own log
+(NORM.md, N 6.7). The error is an annotation and the job's summary, both of which a reader who is
+not signed in to GitHub sees, where the log needs signing in. `build/page.py` holds what it and
+`build/test.py` share in saying so.
+
+Courtyard's play holds each frame to a sixtieth of a second of the game with `app.frametime`,
+since the play plans each walk in frames and the runner draws with Mesa's software Vulkan, a few
+frames a second, which on the machine's clock carried the runner past its coins.
+
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by
 one and a new minor starts it again at 0. To move to `0.4.x`, change `build/version.txt` and

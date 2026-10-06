@@ -67,6 +67,11 @@ done
 if [ ${#failed[@]} -gt 0 ]; then
     printf 'Examples that failed:\n' >&2
     printf '  %s\n' "${failed[@]}" >&2
+    # Every one in the workflow's error, which a reader not signed in sees, where the error
+    # build/step.py would give the step holds its last few lines alone.
+    if [ "${GITHUB_ACTIONS:-}" = true ]; then
+        printf '::error title=%s examples failed::%s\n' "${#failed[@]}" "$(printf '%s%%0A' "${failed[@]}")"
+    fi
     exit 1
 fi
 echo "captured every example into $into"

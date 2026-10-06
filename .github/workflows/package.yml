@@ -220,6 +220,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: [native]
+    # Each step through build/step.py, which gives one that fails having said nothing an error
+    # naming the step, the command that failed with its exit code, its last lines and the last
+    # lines at a warning or worse of the game's logs (NORM.md, N 6.7). The play of 421d4e1 ended
+    # this job with an exit code alone, what stopped the game being in its log.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+    env:
+      BCS_STEP_LOGS: ${{ runner.temp }}/courtyard:${{ runner.temp }}/courtyard-native
 
     steps:
       - uses: actions/checkout@v5
@@ -286,6 +295,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     needs: [native]
+    # Each step through build/step.py, as the game job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
 
     steps:
       - uses: actions/checkout@v5
@@ -327,6 +340,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: [native]
+    # Each step through build/step.py, as the game job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
 
     steps:
       - uses: actions/checkout@v5
@@ -354,6 +371,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [native, test]
+    # Each step through build/step.py, as the game job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
 
     steps:
       - uses: actions/checkout@v5
@@ -369,7 +390,6 @@ jobs:
           path: staging
 
       - name: Collect native artifacts
-        shell: bash
         run: |
           mkdir -p build/artifacts
           for dir in staging/native-*; do
@@ -382,14 +402,12 @@ jobs:
       # The notices the package carries, written from the crates of native/Cargo.lock, which a
       # change to the lock leaves out of date until the script is run again.
       - name: Check the third-party notices
-        shell: bash
         run: build/third-party-notices.py --check
 
       # The staleness guard in the csproj compares timestamps against the Rust sources, and a
       # fresh checkout writes those after the downloaded artifacts. The binaries came from this
       # very commit, so the check has nothing useful to say here.
       - name: Pack
-        shell: bash
         run: |
           args=(-c Release -p:BevyCSharpSkipNativeFreshnessCheck=true)
           if [ -n "${{ inputs.version }}" ]; then
@@ -398,13 +416,11 @@ jobs:
           dotnet pack BevyCSharp/BevyCSharp.csproj "${args[@]}"
 
       - name: Show what shipped
-        shell: bash
         run: unzip -l build/package/*.nupkg
 
       # N 6.4 and N 6.5 of NORM.md, the package holding the library, its generator, its build files
       # and the natives of every system staged above, and the notices naming every crate of the lock.
       - name: Check what the package holds
-        shell: bash
         run: |
           # A whole path, since the test runs from its own folder. It reads a relative one from the
           # checkout as well, and the job does not lean on that.
