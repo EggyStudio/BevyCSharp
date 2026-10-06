@@ -203,3 +203,12 @@ where Bevy sorts it under them, which was not traced.
 Shared: a game observes what a pointer does to an entity as Bevy's `Pointer<E>`, taken here, and an
 offscreen run is pointed at through its image, which may be worth a look in 3DEngine's offscreen
 runs.
+
+**Now 3, two more pointer rows.** `drag_to_scroll` scrolls a board of tiles larger than the window
+by a drag at half the interface's scale, and `viewport_node` picks the cube a widget's camera draws
+through the widget, a left drag turning it and a right drag moving the widget, each driven
+offscreen and seen to do what Bevy's does, 248 written. `viewport_node` marks where the pointer
+meets the cube from the cube's own pointer events, since the hits Bevy keeps on its pointers are
+not reachable from C#, and its row says so. A point exactly where four tiles meet is in none of
+them for Bevy's interface picking, which cost a while before it was seen to be the point and not
+the picking.

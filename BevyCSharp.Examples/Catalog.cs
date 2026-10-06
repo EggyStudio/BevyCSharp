@@ -308,6 +308,8 @@ internal static class Catalog
         new("flex_layout", FlexLayout.Build),
         new("grid", Grid.Build, Grid.Configure),
         new("ui_drag_and_drop", UiDragAndDrop.Build),
+        new("drag_to_scroll", DragToScroll.Build),
+        new("viewport_node", ViewportNode.Build, ViewportNode.Configure),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
         new("letter_spacing", LetterSpacingExample.Build),
