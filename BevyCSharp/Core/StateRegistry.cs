@@ -28,6 +28,10 @@ public static unsafe class StateRegistry
 {
     private static readonly object Gate = new();
     private static readonly Dictionary<Type, int> Slots = new(SameState.Instance);
+
+    // The states the running app has been told it lacks, so it is told once for each.
+    private static readonly HashSet<Type> Reported = new(SameState.Instance);
+
     private static int _generation = -1;
     private static int _next;
 
@@ -134,8 +138,8 @@ public static unsafe class StateRegistry
     }
 
     /// <summary>
-    /// Whether a system scoped to a state declared on its enum and never added says so, once, on
-    /// the console.
+    /// Whether a system scoped to a state declared on its enum and never added says so, once for
+    /// the state, on the console.
     /// </summary>
     /// <remarks>
     /// On, since a state a game declares and never has is usually a mistake. An app that loads a
@@ -170,6 +174,25 @@ public static unsafe class StateRegistry
         }
 
         return names;
+    }
+
+    /// <summary>
+    /// Whether the running app is yet to be told that <typeparamref name="TState"/> was never added,
+    /// counting this as the telling.
+    /// </summary>
+    /// <remarks>
+    /// Once an app for each state rather than once a system, since a game with many systems scoped
+    /// to a state it forgot to add made one mistake, and a line for each of them would bury the
+    /// one that says what it was. A test suite whose apps run every behavior it declares and add
+    /// the state in only some of them would read the same line over and over as well.
+    /// </remarks>
+    internal static bool FirstReportOf<TState>() where TState : struct, Enum
+    {
+        lock (Gate)
+        {
+            Reset();
+            return Reported.Add(typeof(TState));
+        }
     }
 
     /// <summary>The slot <typeparamref name="TState"/> holds, if it was ever added.</summary>
@@ -414,6 +437,7 @@ public static unsafe class StateRegistry
         if (_generation == ComponentRegistry.Generation) return;
 
         Slots.Clear();
+        Reported.Clear();
         _next = 0;
         _generation = ComponentRegistry.Generation;
     }

@@ -52,8 +52,10 @@ public sealed class CliPlugin : IPlugin
         var session = Describe(app, "starting", frame: 0);
         CliSessionFile.Write(session);
 
+        // With its level first, as Bevy's own lines have theirs, so a reader of the output, a person
+        // or the test page counting what was logged as a warning, tells news from a fault.
         Console.WriteLine(
-            $"[bcs] serving on 127.0.0.1:{_server.Port}. "
+            $"INFO [bcs] serving on 127.0.0.1:{_server.Port}. "
             + "Drive it with bcs status, bcs list, bcs command <name>.");
 
         // Announced once the first frame is in, because a caller waiting for "ready" is waiting to

@@ -28,7 +28,7 @@ easing, aimed at entities by name and played from a graph (ABI 213), and `animat
 `animated_ui` and the whole of `eased_motion` are written with it (`421d4e1`). The run of `df97905`
 passed on both systems.
 
-The norm has 44 rules, and this engine stands at 26 checked, 4 with places listed, 5 to take
+The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
 
 
@@ -223,3 +223,19 @@ item 14 is next.
 Shared: the build before a commit runs with `--no-incremental` and `-warnaserror` here now, written
 in COMMITS.md and BUILDING.md, as 3DEngine's `2b39ddd2` has it. A generator that writes public code
 documents each member, so the library's CS1591 holds over what it writes as well.
+
+**Now 13, the warnings the suite repeats.** The 45 lines came from the suite's own behaviors and not
+from examples. `StateTests.cs` declares three systems scoped to `Screen.Playing`, and the fifteen or
+so test apps that discover every behavior to test something else never add `Screen`, so each said
+the line once a system. Those systems are meant to stay silent there, and two tests hold an app
+without `Screen` (`ReadingAStateThatWasNeverAddedSaysSo`, `AScopedBehaviorInAnAppWithoutThatStateDoesNotRun`),
+so declaring the state on its enum was not the mend. An app is now told once for each state it
+lacks, naming the first value a system is scoped to and saying every other system scoped to that
+state is idle too, since a game with many systems scoped to a state it forgot made one mistake.
+That leaves about fifteen lines a run, one an app, which the page will show while the suite runs
+apps of that kind. `StateScopeReportTests` holds one line an app over two apps, and a report made to
+fire every time failed it with three. The `bcs` banner begins with `INFO`, as Bevy's lines carry
+theirs, so the page's `LOGGED` pattern reads it as information and leaves it out. `docs/states.md`
+says a state never added is reported once. The suite passed, 1,069 with 9 skipped. The move before
+it (`ff593c1`) took the toggle registry and the registration scope out of `BehaviorConditions.cs`,
+N 1.2's list at 231. Verdict 3 is next.

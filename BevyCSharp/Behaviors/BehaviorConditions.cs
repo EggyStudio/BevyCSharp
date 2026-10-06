@@ -33,7 +33,7 @@ public static class BehaviorConditions
     /// A state that was never added reads as "not in it", so the system does not run. Throwing
     /// would be the louder answer, but this is evaluated once per system per frame, and the
     /// report would repeat for as long as the app ran. It is written to standard error once
-    /// instead.
+    /// instead, for the state rather than for each system scoped to it, naming the first.
     /// </para>
     /// <para>
     /// A sub-state reads the same way while its parent holds another value, and that is not worth
@@ -60,17 +60,19 @@ public static class BehaviorConditions
             if (!reported && !StateRegistry.IsSub<TState>() && (StateRegistry.ReportUnentered || !StateRegistry.IsDeclared<TState>()))
             {
                 reported = true;
+                if (!StateRegistry.FirstReportOf<TState>()) return false;
 
                 // A state declared on its enum and still not added was declared by an assembly
                 // loaded once the app was running, such as a script the editor loads, which no
                 // AddState call in a program can be told to fix.
+                var state = typeof(TState).Name;
                 Console.Error.WriteLine(StateRegistry.IsDeclared<TState>()
-                    ? $"[BevyCSharp] A system is scoped to {typeof(TState).Name}.{value}, and {typeof(TState).Name} "
-                      + "is declared with [InitialState] but was loaded after the app started, so it was not added "
-                      + "and the system will not run until an app is started with it."
-                    : $"[BevyCSharp] A system is scoped to {typeof(TState).Name}.{value}, but no "
-                      + $"state of type {typeof(TState).Name} was added, so it will never run. Call "
-                      + $"app.AddState({typeof(TState).Name}.<initial>) before running the app.");
+                    ? $"[BevyCSharp] A system is scoped to {state}.{value}, and {state} is declared with "
+                      + "[InitialState] but was loaded after the app started, so it was not added, and no "
+                      + $"system scoped to {state} will run until an app is started with it."
+                    : $"[BevyCSharp] A system is scoped to {state}.{value}, but no state of type {state} "
+                      + $"was added, so it and every other system scoped to {state} will never run. Call "
+                      + $"app.AddState({state}.<initial>) before running the app.");
             }
 
             return false;

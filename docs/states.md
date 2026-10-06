@@ -23,8 +23,10 @@ var screen = ctx.State<Screen>();
 ctx.SetState(Screen.Paused);
 ```
 
-`[InState]` runs a method every frame the state is held. To run one *as* the state changes, on
-the edge rather than throughout, use `[OnEnter]` and `[OnExit]`:
+`[InState]` runs a method every frame the state is held. In an app that never added the state it
+never runs, and the app says so once on the error stream for the state, naming the first method's
+value, however many methods are scoped to it, since they share the one missing `AddState`. To run
+one *as* the state changes, on the edge rather than throughout, use `[OnEnter]` and `[OnExit]`:
 
 ```csharp
 [OnEnter(Screen.Playing)]
@@ -170,7 +172,7 @@ scripts are compiled into it and the editor's player running the same scripts ge
 A state is known by its enum's full name, so a script compiled again while the game runs, whose
 enum is a new type of the same name, reads and changes the state the game started with. One
 declared by an assembly loaded once the app was running, as the editor loads a project's scripts,
-is not added, and a system scoped to it says so once. The editor turns that off
+is not added, and the app says so once for it. The editor turns that off
 (`StateRegistry.ReportUnentered`) and says once which of the game's states it does not enter while
 a level is edited.
 
