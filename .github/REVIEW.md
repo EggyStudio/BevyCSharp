@@ -338,3 +338,13 @@ A small offscreen test with TAA on showed glass gone on its early frames with no
 and back by its hundredth, so the fault does not come with this change, and the capture waits 120
 frames. The job comparing captures with references, when item 5 sets it up, would fail now and then
 on this example until the cause is found.
+
+B 4 for 3D Rendering, its fifth part, 115 of 119. color_grading's buttons and their two texts
+each carry `ColorGradingOptionWidget`, Bevy's enum of the part and the option they stand for as
+its section's place and the option's, a press choosing the option by the button's own method and
+the help text carrying `HelpText`. mixed_lighting's, mirror's and light_probe_blending's help texts
+are `MixedLightingHelpText`, `MirrorHelpText` and `ProbeBlendingHelpText` beside it, mirror's
+camera and mirror carry `MirrorCamera` and `Mirror`, the example's class `MirrorExample`, and
+light_probe_blending's sphere moves by `ReflectiveSphere` while the camera orbits it by an
+`OrbitCamera` keeping its distance and angles, swapped for `FreeCamera` and back by the buttons
+as Bevy swaps them.

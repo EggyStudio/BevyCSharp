@@ -31,7 +31,7 @@ internal static class MixedLighting
 
     private static LightingMode _mode;
     private static RadioButtons<LightingMode>? _buttons;
-    private static Entity _camera, _text, _scene = Entity.None;
+    private static Entity _camera, _scene = Entity.None;
     private static bool _ready;
 
     public static void Build(App app)
@@ -48,7 +48,7 @@ internal static class MixedLighting
             _buttons = new RadioButtons<LightingMode>(ctx.Ecs, RadioButtons<LightingMode>.Column(), "Lighting",
                 [(LightingMode.Baked, "Baked"), (LightingMode.MixedDirect, "Mixed (Direct)"), (LightingMode.MixedIndirect, "Mixed (Indirect)"), (LightingMode.RealTime, "Real-Time")],
                 _mode);
-            _text = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+            ctx.Ecs.Add(Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new MixedLightingHelpText());
         });
 
         app.SpawnGltf("models/MixedLightingExample/MixedLightingExample.gltf", (_, root) => _scene = root);
@@ -80,7 +80,7 @@ internal static class MixedLighting
     private static void ChangeMode(EcsWorld ecs)
     {
         _buttons!.Select(ecs, _mode);
-        Ui.SetText(_text, HelpText());
+        foreach (var help in ecs.EntitiesWith<MixedLightingHelpText>()) Ui.SetText(help, HelpText());
 
         var image = _mode switch
         {
@@ -190,3 +190,10 @@ internal static class MixedLighting
         _ => "Scenery: Dynamic, real-time direct light, no indirect light\nSphere: Dynamic, real-time direct light, no indirect light\nClick in the scene to move the sphere",
     };
 }
+
+/// <summary>
+/// The help text, written again when the lighting mode changes, Bevy's <c>HelpText</c> under
+/// another name since color_grading's shares the namespace.
+/// </summary>
+[Behavior]
+public partial struct MixedLightingHelpText;

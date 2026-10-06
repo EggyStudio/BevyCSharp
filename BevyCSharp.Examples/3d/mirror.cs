@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.ThreeD;
 // Demonstrates a mirror: a second camera, the main one reflected across the mirror's plane, draws
 // the world into an image, and the mirror shows that image at the pixels it covers. Dragging moves
 // the camera around the scene or the running fox across the ground, as the buttons choose.
-internal static class Mirror
+internal static class MirrorExample
 {
     private const string Projection = "bevy_camera::projection::Projection";
 
@@ -22,7 +22,7 @@ internal static class Mirror
     private const float MirrorRotationAngle = -MathF.PI / 2f;
     private static readonly Vec3 MirrorPosition = new(-25f, 75f, 0f);
 
-    private static Entity _camera, _mirrorCamera, _mirror, _fox, _help;
+    private static Entity _camera, _fox;
     private static ShaderMaterial _mirrorMaterial;
     private static AssetHandle _mirrorImage;
     private static (uint Width, uint Height) _imageSize;
@@ -64,19 +64,21 @@ internal static class Mirror
         // the reflection turns every face inside out.
         _imageSize = PhysicalSize();
         _mirrorImage = Render.CreateTarget(_imageSize.Width, _imageSize.Height);
-        _mirrorCamera = Render.SpawnCamera3d(new CameraSettings { Order = -1 });
-        Render.SetCameraTarget(_mirrorCamera, _mirrorImage);
-        ecs.Wrap<CameraRef>(_mirrorCamera).InvertCulling = true;
+        var mirrorCamera = Render.SpawnCamera3d(new CameraSettings { Order = -1 });
+        Render.SetCameraTarget(mirrorCamera, _mirrorImage);
+        ecs.Wrap<CameraRef>(mirrorCamera).InvertCulling = true;
+        ecs.Add(mirrorCamera, new MirrorCamera());
 
         _mirrorMaterial = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/screen_space_texture_material.slang"))
             .SetTexture("emissive_texture", _mirrorImage);
-        _mirror = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 1f, 1f), _mirrorMaterial,
+        var mirror = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 1f, 1f), _mirrorMaterial,
             new Transform(MirrorPosition, Quat.FromRotationX(MirrorRotationAngle), new Vec3(300f, 1f, 150f)));
+        ecs.Add(mirror, new Mirror());
         UpdateMirrorCamera(ecs);
 
         var column = RadioButtons<bool>.Column();
         _buttons = new RadioButtons<bool>(ecs, column, "Drag Action", [(false, "Move Camera"), (true, "Move Fox")], _moveFox);
-        _help = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+        ecs.Add(Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new MirrorHelpText());
     }
 
     private static (uint Width, uint Height) PhysicalSize()
@@ -93,12 +95,14 @@ internal static class Mirror
     private static void UpdateMirrorCamera(EcsWorld ecs)
     {
         var camera = ecs.GetOrDefault<Transform>(_camera);
-        var mirror = ecs.GetOrDefault<Transform>(_mirror);
+        if (ecs.EntitiesWith<Mirror>() is not [var mirrorEntity, ..]) return;
+        var mirror = ecs.GetOrDefault<Transform>(mirrorEntity);
 
         Vec3 Reflect(Vec3 v) => new(v.X, v.Y, -v.Z);
         var (x, y, z) = (camera.Rotation * Vec3.UnitX, camera.Rotation * Vec3.UnitY, camera.Rotation * Vec3.UnitZ);
         var reflected = Quat.FromBasis(Reflect(x) * -1f, Reflect(y), Reflect(z));
-        ecs.Set(_mirrorCamera, new Transform(Reflect(camera.Translation), reflected, new Vec3(-1f, 1f, 1f)));
+        var mirrorCameras = ecs.EntitiesWith<MirrorCamera>();
+        foreach (var mirrorCamera in mirrorCameras) ecs.Set(mirrorCamera, new Transform(Reflect(camera.Translation), reflected, new Vec3(-1f, 1f, 1f)));
 
         // The near plane is the mirror's own, so nothing behind the mirror is drawn into it: its
         // normal in the main camera's view space and its distance from the camera.
@@ -110,8 +114,9 @@ internal static class Mirror
         // Bevy's default perspective, which the main camera has, with the mirror's near plane. The
         // projection holds it in a variant beside the orthographic one's scaling mode, which no
         // wrapper types, so it is written as JSON.
-        ecs.SetReflected(_mirrorCamera, Projection, string.Empty, FormattableString.Invariant(
-            $$$"""{"Perspective":{"fov":0.7853982,"aspect_ratio":1.0,"near":0.1,"far":1000.0,"near_clip_plane":[{{{inView.X}}},{{{inView.Y}}},{{{inView.Z}}},{{{distance}}}]}}"""));
+        var projection = FormattableString.Invariant(
+            $$$"""{"Perspective":{"fov":0.7853982,"aspect_ratio":1.0,"near":0.1,"far":1000.0,"near_clip_plane":[{{{inView.X}}},{{{inView.Y}}},{{{inView.Z}}},{{{distance}}}]}}""");
+        foreach (var mirrorCamera in mirrorCameras) ecs.SetReflected(mirrorCamera, Projection, string.Empty, projection);
     }
 
     // The image is as large as the window, so it is made again when the window is resized.
@@ -122,7 +127,7 @@ internal static class Mirror
 
         _imageSize = size;
         _mirrorImage = Render.CreateTarget(size.Width, size.Height);
-        Render.SetCameraTarget(_mirrorCamera, _mirrorImage);
+        foreach (var mirrorCamera in ctx.Ecs.EntitiesWith<MirrorCamera>()) Render.SetCameraTarget(mirrorCamera, _mirrorImage);
         _mirrorMaterial.SetTexture("emissive_texture", _mirrorImage);
     }
 
@@ -131,7 +136,7 @@ internal static class Mirror
         if (!_buttons!.Pressed(out var moveFox) || moveFox == _moveFox) return;
         _moveFox = moveFox;
         _buttons.Select(ctx.Ecs, moveFox);
-        Ui.SetText(_help, HelpText());
+        foreach (var help in ctx.Ecs.EntitiesWith<MirrorHelpText>()) Ui.SetText(help, HelpText());
     }
 
     // As camera_orbit does, though about the origin, while it keeps looking where it was.
@@ -178,3 +183,18 @@ internal static class Mirror
 
     private static string HelpText() => $"Click and drag to move the {(_moveFox ? "fox" : "camera")}";
 }
+
+/// <summary>The camera that draws the scene reflected into the mirror's picture.</summary>
+[Behavior]
+public partial struct MirrorCamera;
+
+/// <summary>The mirror, whose plane the camera is reflected across.</summary>
+[Behavior]
+public partial struct Mirror;
+
+/// <summary>
+/// The help text, Bevy's <c>HelpText</c> under another name since color_grading's shares the
+/// namespace.
+/// </summary>
+[Behavior]
+public partial struct MirrorHelpText;

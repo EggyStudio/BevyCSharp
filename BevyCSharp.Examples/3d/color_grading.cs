@@ -14,12 +14,12 @@ internal static class ColorGrading
 {
     private const float AdjustmentSpeed = 0.003f;
 
-    private static readonly string[] GlobalOptions = ["Exposure", "Temperature", "Tint", "Hue"];
-    private static readonly string[] Sections = ["Highlights", "Midtones", "Shadows"];
-    private static readonly string[] SectionOptions = ["Saturation", "Contrast", "Gamma", "Gain", "Lift"];
+    internal static readonly string[] GlobalOptions = ["Exposure", "Temperature", "Tint", "Hue"];
+    internal static readonly string[] Sections = ["Highlights", "Midtones", "Shadows"];
+    internal static readonly string[] SectionOptions = ["Saturation", "Contrast", "Gamma", "Gain", "Lift"];
 
     // An option, by its section, or none for the global ones, and its name.
-    private readonly record struct Option(string? Section, string Name)
+    internal readonly record struct Option(string? Section, string Name)
     {
         public override string ToString() => Section is null ? $"\"{Name}\"" : $"\"{Name}\" for \"{Section}\"";
     }
@@ -48,16 +48,14 @@ internal static class ColorGrading
         [("Shadows", "Lift")] = (g => g.ShadowsLift, (g, v) => g.ShadowsLift = v),
     };
 
-    private sealed record Widget(Option Option, Entity Button, Entity Label, Entity Value);
+    private static Entity _camera;
 
-    private static readonly List<Widget> Widgets = [];
-    private static Entity _camera, _help;
+    // Bevy's SelectedColorGradingOption resource, and whether the interface has caught up with it.
     private static Option _selected;
     private static bool _changed;
 
     public static void Build(App app)
     {
-        Widgets.Clear();
         (_selected, _changed) = (new Option(null, "Exposure"), true);
 
         app.Startup(Setup, "color_grading.Setup");
@@ -65,9 +63,10 @@ internal static class ColorGrading
         app.SpawnGltf("models/FlightHelmet/FlightHelmet.gltf", (ctx, root) =>
             ctx.Ecs.Set(root, new Transform(new Vec3(0.5f, 0f, -0.5f), Quat.FromRotationY(-0.15f * MathF.PI), Vec3.One)));
 
+        // Bevy chains the three, the buttons' presses, their own systems, coming first.
         app.Chain(Stage.Update,
-            new SystemDescriptor(world => HandleButtonPresses(), "color_grading.HandleButtonPresses"),
-            new SystemDescriptor(world => AdjustOption(new BehaviorContext(world)), "color_grading.AdjustColorGradingOption"),
+            new SystemDescriptor(world => AdjustOption(new BehaviorContext(world)), "color_grading.AdjustColorGradingOption")
+                .After("ColorGradingOptionWidget.HandleButtonPresses"),
             new SystemDescriptor(world => UpdateUiState(new BehaviorContext(world)), "color_grading.UpdateUiState"));
     }
 
@@ -96,17 +95,18 @@ internal static class ColorGrading
         var global = Ui.SpawnNode(new UiSettings());
         ecs.SetParent(global, column);
         ecs.SetParent(Ui.SpawnNode(new UiSettings { Width = Length.Px(125f) }), global);
-        foreach (var name in GlobalOptions) Button(ecs, global, new Option(null, name), small);
+        for (var option = 0; option < GlobalOptions.Length; option++) Button(ecs, global, -1, option, small);
 
-        foreach (var section in Sections)
+        for (var section = 0; section < Sections.Length; section++)
         {
             var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center });
             ecs.SetParent(row, column);
-            ecs.SetParent(Ui.SpawnText(section, new UiSettings { Width = Length.Px(125f) }, small), row);
-            foreach (var name in SectionOptions) Button(ecs, row, new Option(section, name), small);
+            ecs.SetParent(Ui.SpawnText(Sections[section], new UiSettings { Width = Length.Px(125f) }, small), row);
+            for (var option = 0; option < SectionOptions.Length; option++) Button(ecs, row, section, option, small);
         }
 
-        _help = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) }, new UiTextSettings { Font = font });
+        var help = Ui.SpawnText(DescribeHelp(), new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) }, new UiTextSettings { Font = font });
+        ecs.Add(help, new HelpText());
 
         _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
@@ -125,8 +125,9 @@ internal static class ColorGrading
     }
 
     // A pill of a button with the option's name on its left and its value on its right.
-    private static void Button(EcsWorld ecs, Entity row, Option option, UiTextSettings style)
+    private static void Button(EcsWorld ecs, Entity row, int section, int index, UiTextSettings style)
     {
+        var option = OptionOf(section, index);
         var button = Ui.SpawnNode(new UiSettings
         {
             Interactive = true,
@@ -148,7 +149,20 @@ internal static class ColorGrading
         var value = Ui.SpawnText(Format(DefaultOf(option)), new UiSettings(), style);
         ecs.SetParent(value, button);
 
-        Widgets.Add(new Widget(option, button, label, value));
+        // The button and its two texts each carry the option, and which of the three they are.
+        foreach (var (part, kind) in new[] { (button, ColorGradingOptionWidgetType.Button), (label, ColorGradingOptionWidgetType.Label), (value, ColorGradingOptionWidgetType.Value) })
+            ecs.Add(part, new ColorGradingOptionWidget { WidgetType = kind, Section = section, Option = index });
+    }
+
+    // An option by its section's place, or -1 for a global one, and its own place.
+    internal static Option OptionOf(int section, int index) =>
+        section < 0 ? new Option(null, GlobalOptions[index]) : new Option(Sections[section], SectionOptions[index]);
+
+    // The option chosen, as Bevy's handle_button_presses sets its resource.
+    internal static void Select(Option option)
+    {
+        if (option == _selected) return;
+        (_selected, _changed) = (option, true);
     }
 
     // Bevy's ColorGrading::default, which the buttons show before the camera has one to read.
@@ -157,15 +171,6 @@ internal static class ColorGrading
         "Saturation" or "Contrast" or "Gamma" or "Gain" => 1f,
         _ => 0f,
     };
-
-    private static void HandleButtonPresses()
-    {
-        foreach (var widget in Widgets)
-        {
-            if (Ui.InteractionOf(widget.Button) != UiInteraction.Pressed || widget.Option == _selected) continue;
-            (_selected, _changed) = (widget.Option, true);
-        }
-    }
 
     private static void AdjustOption(BehaviorContext ctx)
     {
@@ -183,27 +188,65 @@ internal static class ColorGrading
         if (!_changed) return;
         _changed = false;
 
+        // The chosen option's button and texts drawn with their colors swapped, and its value said.
         var ecs = ctx.Ecs;
-        foreach (var widget in Widgets)
+        foreach (var entity in ecs.EntitiesWith<ColorGradingOptionWidget>())
         {
-            var chosen = widget.Option == _selected;
-            ecs.Wrap<BackgroundColorRef>(widget.Button).Value = chosen ? Color.White : Color.Black;
-            var border = ecs.Wrap<BorderColorRef>(widget.Button);
-            (border.Top, border.Right, border.Bottom, border.Left) = chosen ? (Color.Black, Color.Black, Color.Black, Color.Black) : (Color.White, Color.White, Color.White, Color.White);
+            var widget = ecs.GetOrDefault<ColorGradingOptionWidget>(entity);
+            var option = OptionOf(widget.Section, widget.Option);
+            var chosen = option == _selected;
+            if (widget.WidgetType == ColorGradingOptionWidgetType.Button)
+            {
+                ecs.Wrap<BackgroundColorRef>(entity).Value = chosen ? Color.White : Color.Black;
+                var border = ecs.Wrap<BorderColorRef>(entity);
+                (border.Top, border.Right, border.Bottom, border.Left) = chosen ? (Color.Black, Color.Black, Color.Black, Color.Black) : (Color.White, Color.White, Color.White, Color.White);
+                continue;
+            }
 
-            foreach (var text in new[] { widget.Label, widget.Value })
-                ecs.Wrap<TextColorRef>(text).Value = chosen ? Color.Black : Color.White;
-            if (chosen) Ui.SetText(widget.Value, Format(Value(ecs, widget.Option)));
+            ecs.Wrap<TextColorRef>(entity).Value = chosen ? Color.Black : Color.White;
+            if (chosen && widget.WidgetType == ColorGradingOptionWidgetType.Value) Ui.SetText(entity, Format(Value(ecs, option)));
         }
 
-        Ui.SetText(_help, HelpText());
+        foreach (var help in ecs.EntitiesWith<HelpText>()) Ui.SetText(help, DescribeHelp());
     }
 
     private static float Value(EcsWorld ecs, Option option) =>
         ecs.Get<ColorGradingRef>(_camera) is { } grading ? Fields[(option.Section, option.Name)].Get(grading) : DefaultOf(option);
 
-    private static string HelpText() => $"Press Left/Right to adjust {_selected}";
+    private static string DescribeHelp() => $"Press Left/Right to adjust {_selected}";
 
     private static string Format(float value) => value.ToString("0.000", CultureInfo.InvariantCulture);
-
 }
+
+/// <summary>Which of an option's three parts a widget is.</summary>
+public enum ColorGradingOptionWidgetType { Button, Label, Value }
+
+/// <summary>
+/// A part of an option's button, the button itself or one of its two texts, and the option it is
+/// for, by its section's place, or -1 for a global one, and its own place.
+/// </summary>
+[Behavior]
+public partial struct ColorGradingOptionWidget
+{
+    /// <summary>Which part.</summary>
+    public ColorGradingOptionWidgetType WidgetType;
+
+    /// <summary>The option's section, or -1 for a global option.</summary>
+    public int Section;
+
+    /// <summary>The option's place in its section, or among the global options.</summary>
+    public int Option;
+
+    /// <summary>A button pressed chooses its option, first of the three Bevy chains.</summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void HandleButtonPresses(BehaviorContext ctx)
+    {
+        if (WidgetType == ColorGradingOptionWidgetType.Button && Ui.InteractionOf(ctx.Entity) == UiInteraction.Pressed)
+            ColorGrading.Select(ColorGrading.OptionOf(Section, Option));
+    }
+}
+
+/// <summary>The help text, which names the option chosen.</summary>
+[Behavior]
+public partial struct HelpText;
