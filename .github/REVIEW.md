@@ -313,3 +313,13 @@ beside it, and the world camera keeps the field of view Bevy keeps in its projec
 `Bird` and `Shape` are enums on their entities, held here as a field of the behavior, and their
 `Left` marks the one changed in place, `LeftShape` for alter_mesh where both share a namespace,
 as `ViewModelPlayer` is for the second of two `Player`s.
+
+B 4 for Usage, 40 of 119, cooldown among them as item 2 has it. Each food's button keeps its
+`GameTimer` in a `Cooldown` behavior, eaten on a changed press and animated while a sparse
+`ActiveCooldown` marks it, which filters the method and is never iterated, a sparse component
+being one a query cannot iterate. The context menu's items each keep their color and react to
+their own interaction changing, armed once the press that opened the menu is let go, as Bevy's
+press events are, and a close is queued once a frame since an item's press and the background's
+both ask. debug_frustum_culling's ring, shapes, wall and camera are each a behavior, the frustum
+read once a frame for every shape. A press could not be checked live, a windowless run having no
+pointer to hold an interaction pressed past Bevy's own focus system, which the old code met too.

@@ -12,7 +12,7 @@ namespace BevyCSharp.Examples.Usage;
 // Bevy observes its pointer events on each node and lets one stop the press from reaching the
 // background behind. Here each node's interaction is read as it changes, and a press is the
 // button's or an item's before it is the background's.
-internal static class ContextMenu
+internal static class ContextMenuExample
 {
     private static readonly (string Name, (float R, float G, float B, float A) Color)[] Items =
     [
@@ -23,9 +23,13 @@ internal static class ContextMenu
         ("teal", Color.FromSrgb8(0, 128, 128)),
     ];
 
-    private static Entity _background, _button, _menu;
-    private static readonly List<(Entity Node, Entity Text, int Item)> MenuItems = [];
+    // The background and its button, which Bevy observes presses on, and the interaction each had
+    // last frame, which tells a new press from one held.
+    private static Entity _background, _button;
     private static readonly Dictionary<Entity, UiInteraction> Last = [];
+
+    // The frame a close was last asked on, since an item's press and the background's can both ask.
+    private static ulong _closedFrame = ulong.MaxValue;
 
     public static void Build(App app)
     {
@@ -36,9 +40,8 @@ internal static class ContextMenu
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        _menu = Entity.None;
-        MenuItems.Clear();
         Last.Clear();
+        _closedFrame = ulong.MaxValue;
         Render2d.SpawnCamera2d();
 
         // The background takes the presses nothing in front of it does, behind everything.
@@ -70,48 +73,32 @@ internal static class ContextMenu
         return changed && interaction == UiInteraction.Pressed;
     }
 
+    // A press on the button opens the menu where the pointer is, and one on the background closes
+    // any, the button's first, as Bevy's stops a press going further. An item takes its own.
     private static void Pointer(BehaviorContext ctx)
     {
-        var ecs = ctx.Ecs;
-
-        // Each item red while the pointer is over it, and white again when it leaves.
-        foreach (var (node, text, _) in MenuItems)
-        {
-            var hovered = Ui.InteractionOf(node) != UiInteraction.None;
-            ecs.Wrap<TextColorRef>(text).Value = hovered ? new Color(1f, 0f, 0f, 1f) : new Color(1f, 1f, 1f, 1f);
-        }
-
-        // The menu's items first, then the button, then the background, so a press is taken by
-        // the nearest of them, as Bevy's stops it going further.
-        foreach (var (node, _, item) in MenuItems)
-        {
-            if (!Pressed(node)) continue;
-            Render.SetClearColor(Items[item].Color);
-            CloseMenus(ecs);
-            return;
-        }
-
         if (Pressed(_button))
         {
-            OpenMenu(ecs, ctx.Input.MousePosition);
+            OpenMenu(ctx, ctx.Input.MousePosition);
             return;
         }
 
-        if (Pressed(_background)) CloseMenus(ecs);
+        if (Pressed(_background)) CloseMenus(ctx);
     }
 
-    private static void CloseMenus(EcsWorld ecs)
+    /// <summary>Every open menu taken away, as Bevy's on_trigger_close_menus despawns them, once a frame.</summary>
+    internal static void CloseMenus(BehaviorContext ctx)
     {
-        if (_menu != Entity.None) ecs.Despawn(_menu);
-        _menu = Entity.None;
-        foreach (var (node, _, _) in MenuItems) Last.Remove(node);
-        MenuItems.Clear();
+        if (ctx.Time.FrameCount == _closedFrame) return;
+        _closedFrame = ctx.Time.FrameCount;
+        foreach (var menu in ctx.Ecs.Query<ContextMenu>(markChanged: false)) ctx.Cmd.Despawn(menu.Entity);
     }
 
-    private static void OpenMenu(EcsWorld ecs, (float X, float Y) at)
+    private static void OpenMenu(BehaviorContext ctx, (float X, float Y) at)
     {
-        CloseMenus(ecs);
-        _menu = Ui.SpawnNode(new UiSettings
+        var ecs = ctx.Ecs;
+        CloseMenus(ctx);
+        var menu = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
             Left = Length.Px(at.X),
@@ -120,17 +107,52 @@ internal static class ContextMenu
             Corners = Corners.All(Length.Px(4f)),
             Color = (0.1f, 0.1f, 0.1f, 1f),
         });
+        ecs.Add(menu, new ContextMenu());
 
-        for (var i = 0; i < Items.Length; i++)
+        foreach (var (name, color) in Items)
         {
             var item = Ui.SpawnNode(new UiSettings { Interactive = true, Padding = Sides.All(Length.Px(5f)) });
-            ecs.SetParent(item, _menu);
-            var text = Ui.SpawnText(Items[i].Name, new UiSettings(), 24f);
-            ecs.SetParent(text, item);
-            MenuItems.Add((item, text, i));
-
-            // A press that opened the menu is still held, so each item starts out as it is.
-            Last[item] = Ui.InteractionOf(item);
+            ecs.Add(item, new ContextMenuItem { Color = new Color(color.R, color.G, color.B, color.A) });
+            ecs.SetParent(item, menu);
+            ecs.SetParent(Ui.SpawnText(name, new UiSettings(), 24f), item);
         }
+    }
+}
+
+/// <summary>An open menu, taken away when a color is picked or anywhere else is pressed.</summary>
+[Behavior]
+public partial struct ContextMenu;
+
+/// <summary>An item of the menu, and the color it sets the background to.</summary>
+[Behavior]
+public partial struct ContextMenuItem
+{
+    /// <summary>The color it sets.</summary>
+    public Color Color;
+
+    /// <summary>Whether a press on it picks it, which one held from opening the menu does not.</summary>
+    public bool Armed;
+
+    /// <summary>
+    /// Its text red while the pointer is over it and white again when it leaves, and a new press
+    /// sets the background to its color and closes the menu, as Bevy's observers of its pointer do.
+    /// </summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void Pointer(BehaviorContext ctx)
+    {
+        var interaction = Ui.InteractionOf(ctx.Entity);
+        foreach (var text in ctx.Ecs.ChildrenOf(ctx.Entity))
+            ctx.Ecs.Wrap<TextColorRef>(text).Value = interaction == UiInteraction.None ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 0f, 0f, 1f);
+
+        if (interaction != UiInteraction.Pressed)
+        {
+            Armed = true;
+            return;
+        }
+
+        if (!Armed) return;
+        Render.SetClearColor((Color.R, Color.G, Color.B, Color.A));
+        ContextMenuExample.CloseMenus(ctx);
     }
 }

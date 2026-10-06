@@ -328,8 +328,8 @@ internal static class Catalog
         new("z_index", ZIndex.Build),
 
         // Usage
-        new("context_menu", ContextMenu.Build),
-        new("cooldown", Cooldown.Build),
+        new("context_menu", ContextMenuExample.Build),
+        new("cooldown", CooldownExample.Build),
         new("debug_frustum_culling", DebugFrustumCulling.Build),
 
         // Window

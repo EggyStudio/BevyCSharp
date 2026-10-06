@@ -9,36 +9,21 @@ namespace BevyCSharp.Examples.Usage;
 // Four foods to click and eat, each then out of reach for its own cooldown, the time left shown by
 // a pale cover over its button that shrinks away. A click on one still cooling down says how long
 // is left.
-internal static class Cooldown
+internal static class CooldownExample
 {
-    private sealed class FoodItem(string name, float cooldown, uint index)
-    {
-        public string Name { get; } = name;
-        public float Seconds { get; } = cooldown;
-        public uint Index { get; } = index;
-        public Entity Button { get; set; }
-        public Entity Cover { get; set; }
-        public float Elapsed { get; set; }
-        public bool Active { get; set; }
-        public UiInteraction Last { get; set; }
-    }
-
-    private static readonly FoodItem[] Foods =
+    // The foods, by name, how long each cools down for and its picture in the sheet.
+    private static readonly (string Name, float Cooldown, uint Index)[] Foods =
     [
-        new("an apple", 2f, 2),
-        new("a burger", 1f, 23),
-        new("chocolate", 10f, 32),
-        new("cherries", 4f, 41),
+        ("an apple", 2f, 2),
+        ("a burger", 1f, 23),
+        ("chocolate", 10f, 32),
+        ("cherries", 4f, 41),
     ];
 
-    private static Entity _text;
+    // The text that says what happened, which Bevy finds as the only text there is.
+    internal static Entity Text;
 
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "cooldown.Setup");
-        app.Update(ActivateAbility, "cooldown.ActivateAbility");
-        app.Update(AnimateCooldowns, "cooldown.AnimateCooldowns");
-    }
+    public static void Build(App app) => app.Startup(Setup, "cooldown.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
@@ -57,13 +42,13 @@ internal static class Cooldown
         });
 
         // Tailwind's slate at 400 behind each picture, and its 50 at half alpha over it while it
-        // cools down.
+        // cools down. Each button carries its name and its cooldown, as Bevy's build_ability gives
+        // them, and its cover is its child.
         var slate400 = Color.FromSrgb8(148, 163, 184);
         var slate50 = Color.FromSrgb8(248, 250, 252) with { A = 0.5f };
-        foreach (var food in Foods)
+        foreach (var (name, cooldown, index) in Foods)
         {
-            (food.Elapsed, food.Active, food.Last) = (0f, false, UiInteraction.None);
-            food.Button = Ui.SpawnNode(new UiSettings
+            var button = Ui.SpawnNode(new UiSettings
             {
                 Interactive = true,
                 Width = Length.Px(80f),
@@ -71,57 +56,68 @@ internal static class Cooldown
                 Direction = UiDirection.ColumnReverse,
                 Color = slate400,
             });
-            Ui.SetImage(food.Button, new UiImageSettings { Image = texture, Atlas = layout, Frame = food.Index });
-            ecs.SetParent(food.Button, row);
+            Ui.SetImage(button, new UiImageSettings { Image = texture, Atlas = layout, Frame = index });
+            ecs.SetName(button, name);
+            ecs.Add(button, new Cooldown { Timer = GameTimer.FromSeconds(cooldown, TimerMode.Once) });
+            ecs.SetParent(button, row);
 
-            food.Cover = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(0f), Color = slate50 });
-            ecs.SetParent(food.Cover, food.Button);
+            ecs.SetParent(Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(0f), Color = slate50 }), button);
         }
 
-        _text = Ui.SpawnText("*Click some food to eat it*", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+        Text = Ui.SpawnText("*Click some food to eat it*", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
+}
 
-    // A press on a food eats it and starts its cooldown, or says how long is left on it, once for
-    // each time the button's interaction changes to pressed, as Bevy's query of a changed
-    // Interaction sees it.
-    private static void ActivateAbility(BehaviorContext ctx)
+/// <summary>A food's cooldown, the time before it can be eaten again once it has been.</summary>
+[Behavior]
+public partial struct Cooldown
+{
+    /// <summary>The cooldown, run once each time the food is eaten.</summary>
+    public GameTimer Timer;
+
+    /// <summary>
+    /// A press on a food eats it and starts its cooldown, or says how long is left on it, once for
+    /// each time the button's interaction changes, as Bevy's <c>activate_ability</c> does.
+    /// </summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void ActivateAbility(BehaviorContext ctx)
     {
-        foreach (var food in Foods)
-        {
-            var interaction = Ui.InteractionOf(food.Button);
-            if (interaction == food.Last) continue;
-            food.Last = interaction;
-            if (interaction != UiInteraction.Pressed) continue;
+        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return;
 
-            if (!food.Active)
-            {
-                (food.Elapsed, food.Active) = (0f, true);
-                Ui.SetText(_text, $"You ate {food.Name}");
-            }
-            else
-            {
-                Ui.SetText(_text, $"You can eat {food.Name} again in {MathF.Ceiling(food.Seconds - food.Elapsed)} seconds.");
-            }
+        var name = ctx.Ecs.NameOf(ctx.Entity);
+        if (!ctx.Ecs.Has<ActiveCooldown>(ctx.Entity))
+        {
+            Timer.Reset();
+            ctx.Cmd.Add(ctx.Entity, new ActiveCooldown());
+            Ui.SetText(CooldownExample.Text, $"You ate {name}");
+        }
+        else
+        {
+            Ui.SetText(CooldownExample.Text, $"You can eat {name} again in {MathF.Ceiling(Timer.Remaining)} seconds.");
         }
     }
 
-    // The cover is as tall as the share of the cooldown still to go, and gone when it is over.
-    private static void AnimateCooldowns(BehaviorContext ctx)
+    /// <summary>
+    /// The cover as tall as the share of the cooldown still to go, and gone with the cooldown once
+    /// it is over, as Bevy's <c>animate_cooldowns</c> does.
+    /// </summary>
+    [OnUpdate]
+    [With(typeof(ActiveCooldown))]
+    public void AnimateCooldowns(BehaviorContext ctx)
     {
-        foreach (var food in Foods)
+        var cover = ctx.Ecs.Wrap<NodeRef>(ctx.Ecs.ChildrenOf(ctx.Entity)[0]);
+        if (Timer.Tick(ctx.Time.Delta).JustFinished)
         {
-            if (!food.Active) continue;
-            food.Elapsed = MathF.Min(food.Elapsed + ctx.Time.Delta, food.Seconds);
-            var node = ctx.Ecs.Wrap<NodeRef>(food.Cover);
-            if (food.Elapsed >= food.Seconds)
-            {
-                food.Active = false;
-                node.Height = new Val.Percent(0f);
-            }
-            else
-            {
-                node.Height = new Val.Percent((1f - food.Elapsed / food.Seconds) * 100f);
-            }
+            ctx.Cmd.Remove<ActiveCooldown>(ctx.Entity);
+            cover.Height = new Val.Percent(0f);
+        }
+        else
+        {
+            cover.Height = new Val.Percent((1f - Timer.Fraction) * 100f);
         }
     }
 }
+
+/// <summary>A food cooling down, added and taken off far more often than it is read, so sparse, as Bevy's is.</summary>
+public struct ActiveCooldown : ISparseComponent;
