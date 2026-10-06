@@ -402,6 +402,51 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_clip_add_event(int clip, float time, uint number, int targeted, ulong high, ulong low);
 
+    /// <summary>Makes an empty graph, writing its key and its root's node.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_create(int* graph, uint* root);
+
+    /// <summary>Adds a blend to a graph, writing its node.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_add_blend(int graph, float weight, uint parent, int additive, uint* node);
+
+    /// <summary>Writes the target an entity is aimed at by, where it has one.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_target_of(ulong entity, ulong* high, ulong* low);
+
+    /// <summary>Adds a clip to a graph, with the mask groups it leaves out, writing its node.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_add_clip(int graph, int clip, ulong mask, float weight, uint parent, uint* node);
+
+    /// <summary>Puts a target into one of a graph's mask groups.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_add_to_mask_group(int graph, ulong high, ulong low, uint group);
+
+    /// <summary>Sets the mask groups a graph's node leaves out.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_graph_set_mask(int graph, uint node, ulong mask);
+
+    /// <summary>Gives an entity a graph to play from.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_set_graph(ulong entity, int graph);
+
+    /// <summary>Starts a node of an entity's graph playing beside the others.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_play_node(ulong entity, uint node, int repeat);
+
+    /// <summary>Sets the weight a playing node is mixed in at.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_node_weight(ulong entity, uint node, float weight);
+
     /// <summary>Changes how many times the playing clip plays.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

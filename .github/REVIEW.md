@@ -10,34 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `df97905`. Text is drawn with a line under or through it, Bevy's `Underline` and
+Reviewed up to `2158ee2`. A game places its own events on an animation clip, made in code or loaded
+from a model, heard at the player or at a target as the clip reaches them (ABI 214), and
+`animation_events` and `animated_mesh_events` are written, 268 (`2158ee2`). The reply on graphs
+built node by node (ABI 216) is written, its commit to come. Verdict 2 is open, the pack job's
+package tests failing by a relative path. The run of `421d4e1` passed on both systems.
+
+Before them, an animation clip came to be built in code from curves sampled or eased by Bevy's own
+easing, aimed at entities by name and played from a graph (ABI 213), and `animated_transform`,
+`animated_ui` and the whole of `eased_motion` are written with it (`421d4e1`). The run of `df97905`
+passed on both systems.
+
+Before them, text came to be drawn with a line under or through it, Bevy's `Underline` and
 `Strikethrough` reflecting but not as components, and a font's OpenType features and variable axes
 are set as tagged values (ABI 212), so eight of Bevy's text examples are written or made whole, 263,
 the three that need Bevy's system font discovery and `font_atlas_debug` left and said so
 (`f0be6da`); the animation settings, state and finished message moved into files of their names,
-N 1.2's list at 276 (`df97905`). The reply on animation built in code, clips from curves played from
-a graph (ABI 213), is written, its commit to come. The run of `f0be6da` was cancelled by the push of
-`df97905`, whose run is under way. No verdict is open.
-
-Before them, the console server came to close the connections still open as it stops and joins their
-threads, so a closed app leaves none alive, held by a test with a caller connected (`b67fb85`), and
-the page's repeated lines count what is logged at warning or error or with no level, leaving the
-section out when nothing repeats (`a80d289`), which settles items 14 and 15. The owner chose on
-2026-10-06 that the next package is 0.4, Decision 8. A key reaching the focused entity is observed
-as Bevy's `FocusedInput<KeyboardInput>`, taken up the parents as the pointer's events are (ABI 211),
-an offscreen run's fields take keys from the bridge's own dispatch, the focus is given and moved
-from C# through Bevy's `InputFocus`, and `multiline_text_input` and `multiple_text_inputs` are
-written, 255, a field set again having been inserted over itself and drawing nothing, mended on the
-way (`f46edec`); the server tests moved to `Cli` by a move alone, N 1.4's list at 90 to mend
-(`15974f1`). The owner pushed, and the run of `15974f1` is under way. No verdict is open.
-
-Before them, a game came to read a key by what it types or by its name as well as by where it is,
-Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended key
-reads as a keyboard's would, named where it types nothing, so Bevy's text fields take a pretended
-Backspace, Enter or arrow, and released as it was pressed, where one that typed a character stayed
-down for good; `keyboard_input` is written, 253 (`b23e532`). Two commits of moves alone put the
-editable text tests in `Assets` and split the bridge's `ui.rs` into its parts, N 1.3's list at 18
-with 11 in the bridge and N 1.4's at 91 to mend (`915514e`, `194a3b7`).
+N 1.2's list at 276 (`df97905`). The run of `f0be6da` was cancelled by the push of `df97905`.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -139,10 +128,29 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
+14. **The warnings the suite repeats, read from the page.** The page of `421d4e1` repeats, on
+   both systems, 45 lines of `A system is scoped to Screen.Playing, but no state of type Screen was
+   added, so it will never run`, from examples whose systems are scoped by `[InState]` while the app
+   running them added no such state, and 4 lines of `[bcs] serving on`, counted because they carry
+   no level. Each scoped system is either meant to stay silent in an app without its state, and then
+   the warning is said once per app rather than per system or the example adds its state, or it is a
+   system that never runs by mistake, mended; and a line of `bcs`'s own carries its level so the
+   page can tell it from a warning.
 
 ## Verdicts
 
-None open.
+2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
+   they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
+   `BevyCSharp.Tests/bin/Release/net10.0/build/package/BevyCSharp.0.4.88.nupkg`. The step exports
+   `BCS_PACKAGE` as `ls build/package/*.nupkg`, a path relative to the checkout, and the tests open
+   it from their own working directory, `bin/Release/net10.0`, so the two never meet; the tests
+   passed only where nobody set the variable and they skipped. Two things: the tests resolve a
+   relative `BCS_PACKAGE` against the repository root, as the norm's other tests find their files,
+   so the variable works from any directory, and the step exports an absolute path as well,
+   `$PWD/...`, so the job does not lean on the test. The pack job was the first to run these tests
+   with a package in hand, which is why the test suite never showed it. The same job's build prints
+   21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which is item 4's
+   `-warnaserror` standing unpaid.
 
 ## Decisions
 
@@ -176,27 +184,15 @@ None open.
 
 ## Replies
 
-**Now 3, animation built in code, clips.** A clip is made in code, as Bevy's examples make one
-(`clips.rs`, ABI 213). An `AnimationCurve` is values sampled at times or two values eased between
-by Bevy's own easing, played back and forth where asked, for a transform's translation, rotation or
-scale, an interface node's scale or rotation, or a text's color through a property the bridge
-declares as Bevy's example declares its own. It is aimed at an `AnimationTarget` made from the names
-on the path to an entity, the graph made from the clip is played by `Animation.PlayGraph`, and each
-entity moved carries its target and player through `Animation.Animate`. `animated_transform` and
-`animated_ui` are written and `eased_motion` is whole, 266, each seen to move offscreen as Bevy's
-does. `AnimationClipTests` holds the curve's layout, a clip moving an entity halfway at its middle
-and holding its last value after, and an eased curve going there and back. `Animation.cs` held three
-other public types, which moved to files of their own first (`df97905`), N 1.2 at 276. Events on a
-clip, blend graphs with masks and a skinned mesh built in code are this gap's next batches.
-
-**Now 3, animation built in code, events.** An event a game declares, implementing
-`IAnimationEvent` as a Rust type derives Bevy's `AnimationEvent`, is placed on a clip at a time with
-`Animation.AddEvent`, at its player or at the entity a target names (ABI 214). The clip holds a
-number through Bevy's `add_event_fn`, and reaching it queues a call into C#, which triggers the
-event as it was given at that entity. The first observer of such an event installs the call. A
-model's clip loads by its label with `Animation.LoadClip`, and `AddEvent` answers false until it
-has arrived. `animation_events` and `animated_mesh_events` are written, 268. The first sets its
-message from a clip with nothing but a length, and the fox throws up dust where each foot lands,
-each seen offscreen. `AnimationClipTests` holds an event at the player and one at a target heard
-once each, in their times' order. The blend graphs with their masks and a skinned mesh built joint
-by joint are this gap's last.
+**Now 3, animation built in code, graphs.** A graph is built node by node (`graphs.rs`, ABI 216).
+`Animation.CreateGraph` makes it, `AddBlend` adds a blend, additive where asked, and `AddClip` adds
+a clip with the mask groups it leaves out. `AddToMaskGroup` puts a target's bones in a group, and
+`SetNodeMask` changes a node's mask as it plays. A player given the graph with `SetGraph` plays
+several nodes at once with `PlayNode`, and `SetNodeWeight` mixes them. `Animation.TargetOf` reads
+the target a bone is aimed at by. `animation_graph` and `animation_masks` are written, 270, both
+drawn offscreen as Bevy's are. Bevy's graph example loads its graph from `Fox.animgraph.ron` unless
+told not to, and builds the same one in code where it is, as this does, the file not being among
+the assets. Their drag and buttons read Bevy's `Interaction` and `RelativeCursorPosition`, which
+read a window's cursor, so they are pressed in a window and not offscreen. `AnimationClipTests`
+holds the mix at 5 with even weights and 2.5 at three to one, and a masked target left where it was
+until the mask is lifted. `custom_skinned_mesh` is this gap's last. New item 14 is next after it.

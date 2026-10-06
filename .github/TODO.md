@@ -34,11 +34,10 @@ the most examples, and the largest is taken between groups of examples. The coun
   each generic one stands for (`system_fonts`). And reading the atlases Bevy lays a font's glyphs
   out in (`font_atlas_debug`). A run's weight, width, style, OpenType features and axes, its
   underline and strikethrough and its background color are reached.
-- **Animation built in code, three examples.** Graphs that blend clips by weight and their masks
-  (`animation_graph`, `animation_masks`), and skinned meshes built joint by joint
-  (`custom_skinned_mesh`). A clip is made from curves in code, of a transform, an interface node's
-  scale and rotation and a text's color, carries events a game places on it, and is played from a
-  graph of it.
+- **A skinned mesh built joint by joint, one example.** `custom_skinned_mesh` makes a mesh with
+  joint indices and weights and the joints' entities in code. A clip is made from curves in code,
+  carries events a game places on it, and is played from a graph built node by node, its clips
+  mixed by weight and masked out of parts of a body.
 - **Bevy's deferred buffers from a Slang shader, one example.** A Slang shader is lit by Bevy
   through `bcs::light` and `bcs::finish`, reaches the clustered decals over it and an irradiance
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws

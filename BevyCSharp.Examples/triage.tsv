@@ -108,8 +108,8 @@ animated_mesh	can
 animated_transform	can
 animated_ui	can	the text's color animated through a property the bridge declares, as Bevy's example declares its own
 animation_events	can
-animation_graph	missing	animation graphs that blend clips by weight
-animation_masks	missing	animation masks on a graph
+animation_graph	can	the graph built in code, Bevy's --no-load path, where its default loads the same graph from Fox.animgraph.ron, which is not among the assets here
+animation_masks	can
 color_animation	can	the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types
 custom_skinned_mesh	missing	skinned meshes built in code (joints and weights)
 eased_motion	can

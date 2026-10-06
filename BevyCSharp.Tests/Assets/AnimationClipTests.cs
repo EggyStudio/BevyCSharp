@@ -139,6 +139,89 @@ public sealed class AnimationClipTests
         Assert.Equal([(2, child), (1, player)], heard);
     }
 
+    /// <summary>
+    /// Two clips played at once from a graph built in code are mixed by their weights, a weight set
+    /// as they play moves the mix, and a clip's node masking the group its target is in leaves the
+    /// target alone until the mask is lifted.
+    /// </summary>
+    [SkippableFact]
+    public void AGraphMixesItsClipsByWeightAndAMaskLeavesItsGroupOut()
+    {
+        Needs.Renderer();
+
+        var (mixed, masked) = (Entity.None, Entity.None);
+        var (mixGraph, maskGraph) = (AssetHandle.None, AssetHandle.None);
+        var (far, near, maskNode) = (0u, 0u, 0u);
+        var frame = 0;
+        float? even = null, weighted = null, left = null, lifted = null;
+
+        var config = Config.OffscreenFor(64, 64, frames: 40);
+        config.FrameSeconds = 0.1;
+        using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+
+            // One clip holding the mover ten along, one holding it at the start.
+            var mover = AnimationTarget.FromNames("mover");
+            var there = Animation.CreateClip();
+            Animation.AddCurve(there, mover, AnimationCurve.Translation([0f, 1f], [new Vec3(10f, 0f, 0f), new Vec3(10f, 0f, 0f)]));
+            var here = Animation.CreateClip();
+            Animation.AddCurve(here, mover, AnimationCurve.Translation([0f, 1f], [Vec3.Zero, Vec3.Zero]));
+
+            (mixGraph, var root) = Animation.CreateGraph();
+            far = Animation.AddClip(mixGraph, there, 1f, root);
+            near = Animation.AddClip(mixGraph, here, 1f, root);
+            mixed = ecs.Spawn();
+            ecs.Add(mixed, Transform.Identity);
+            Animation.SetGraph(mixed, mixGraph);
+            Animation.PlayNode(mixed, far, repeat: true);
+            Animation.PlayNode(mixed, near, repeat: true);
+            Animation.Animate(mixed, mover, mixed);
+
+            // The far clip alone, its node masking the group the target is put in.
+            var held = AnimationTarget.FromNames("held");
+            var away = Animation.CreateClip();
+            Animation.AddCurve(away, held, AnimationCurve.Translation([0f, 1f], [new Vec3(10f, 0f, 0f), new Vec3(10f, 0f, 0f)]));
+            (maskGraph, var maskRoot) = Animation.CreateGraph();
+            maskNode = Animation.AddClip(maskGraph, away, 1f, maskRoot, mask: 1);
+            Animation.AddToMaskGroup(maskGraph, held, 0);
+            masked = ecs.Spawn();
+            ecs.Add(masked, Transform.Identity);
+            Animation.SetGraph(masked, maskGraph);
+            Animation.PlayNode(masked, maskNode, repeat: true);
+            Animation.Animate(masked, held, masked);
+        }, "Test.Setup"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            frame++;
+            float X(Entity entity) => ecs.GetOrDefault<Transform>(entity).Translation.X;
+
+            if (frame == 10)
+            {
+                (even, left) = (X(mixed), X(masked));
+                Assert.True(Animation.SetNodeWeight(mixed, near, 3f));
+                Animation.SetNodeMask(maskGraph, maskNode, 0);
+            }
+
+            if (frame == 20) (weighted, lifted) = (X(mixed), X(masked));
+        }, "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+
+        // Even weights, halfway between, and three to one toward the start, a quarter of the way.
+        Assert.Equal(5f, even!.Value, 2);
+        Assert.Equal(2.5f, weighted!.Value, 2);
+
+        // Masked out, where it began, and with the mask lifted, where the clip holds it.
+        Assert.Equal(0f, left!.Value, 2);
+        Assert.Equal(10f, lifted!.Value, 2);
+    }
+
     /// <summary>A curve whose times do not rise, or whose times and values differ in number, is refused before it reaches Bevy.</summary>
     [Fact]
     public void ACurveWithTimesOutOfOrderOrOfAnotherCountIsRefused()

@@ -725,6 +725,15 @@ static AssetHandle LoadClip(string path);                       // Starts loadin
 static void SetClipDuration(AssetHandle clip, float seconds);   // Sets how long a clip lasts, which one holding only events needs
 static bool AddEvent<TEvent>(AssetHandle clip, float time, TEvent value);  // Places an event on a clip, triggered at its player as the clip reaches the time
 static bool AddEvent<TEvent>(AssetHandle clip, AnimationTarget target, float time, TEvent value);  // Places an event on a clip, triggered at the entity a target names as the clip reaches the time
+static (AssetHandle Graph, uint Root) CreateGraph();            // Makes an empty graph, its root a blend, for AddBlend and AddClip to fill
+static uint AddBlend(AssetHandle graph, float weight, uint parent, bool additive = false);  // Adds a blend to a graph under a node, answering its node
+static uint AddClip(AssetHandle graph, AssetHandle clip, float weight, uint parent, ulong mask = 0);  // Adds a clip to a graph under a node, answering its node
+static void AddToMaskGroup(AssetHandle graph, AnimationTarget target, uint group);  // Puts a target into one of a graph's mask groups, numbered from zero
+static void SetNodeMask(AssetHandle graph, uint node, ulong mask);  // Sets which mask groups a graph's node leaves out, which takes as it plays
+static AnimationTarget? TargetOf(Entity entity);                // The target an entity is aimed at by, or null for one no clip aims at
+static void SetGraph(Entity player, AssetHandle graph);         // Gives an entity a graph to play from, and a player where it has none
+static void PlayNode(Entity player, uint node, bool repeat = false);  // Starts a node of an entity's graph playing beside whatever it plays already
+static bool SetNodeWeight(Entity player, uint node, float weight);  // Sets the weight a playing node is mixed in at
 ```
 
 ### `AnimationCurve`

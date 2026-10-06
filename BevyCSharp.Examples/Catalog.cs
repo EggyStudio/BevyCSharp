@@ -130,6 +130,8 @@ internal static class Catalog
         new("animated_transform", AnimatedTransform.Build),
         new("animated_ui", AnimatedUi.Build),
         new("animation_events", AnimationEvents.Build),
+        new("animation_graph", AnimationGraphExample.Build),
+        new("animation_masks", AnimationMasks.Build),
         new("eased_motion", EasedMotion.Build),
         new("easing_functions", EasingFunctions.Build),
         new("morph_targets", MorphTargets.Build),

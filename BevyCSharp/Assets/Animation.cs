@@ -313,6 +313,144 @@ public static unsafe class Animation
         return true;
     }
 
+    /// <summary>Makes an empty graph, its root a blend, for <see cref="AddBlend"/> and <see cref="AddClip"/> to fill.</summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>AnimationGraph</c> built node by node, as its animation_graph example builds one.
+    /// Clips sit at the leaves and blends above them, each at a weight, and a player playing
+    /// several of its clips at once mixes them by their weights and their blends':
+    /// </para>
+    /// <code>
+    /// var (graph, root) = Animation.CreateGraph();
+    /// var blend = Animation.AddBlend(graph, 0.5f, root);
+    /// var idle = Animation.AddClip(graph, idleClip, 1f, root);
+    /// var walk = Animation.AddClip(graph, walkClip, 1f, blend);
+    /// Animation.SetGraph(fox, graph);
+    /// Animation.PlayNode(fox, idle, repeat: true);
+    /// Animation.PlayNode(fox, walk, repeat: true);
+    /// Animation.SetNodeWeight(fox, walk, 0.3f);
+    /// </code>
+    /// <para>
+    /// A clip's node can leave parts of a body out, the targets of each part put into a mask group
+    /// with <see cref="AddToMaskGroup"/> and the groups a node leaves out its mask's bits.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static (AssetHandle Graph, uint Root) CreateGraph()
+    {
+        int graph;
+        uint root;
+        var status = Native.bcs_animation_graph_create(&graph, &root);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, "making an animation graph");
+        return (new AssetHandle(graph), root);
+    }
+
+    /// <summary>Adds a blend to a graph under a node, answering its node.</summary>
+    /// <remarks>
+    /// An additive blend, Bevy's <c>add_additive_blend</c>, adds what is under it on top of the
+    /// first of its children rather than mixing them, as clips masked to parts of a body are laid
+    /// over one playing on the whole.
+    /// </remarks>
+    /// <param name="graph">A graph from <see cref="CreateGraph"/>.</param>
+    /// <param name="weight">The weight what is under it is mixed in at.</param>
+    /// <param name="parent">The node it sits under.</param>
+    /// <param name="additive">Whether it adds rather than mixes.</param>
+    /// <exception cref="BevyNativeException">The graph is gone, or this build has no renderer.</exception>
+    public static uint AddBlend(AssetHandle graph, float weight, uint parent, bool additive = false)
+    {
+        uint node;
+        var status = Native.bcs_animation_graph_add_blend(graph.Key, weight, parent, additive ? 1 : 0, &node);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"adding a blend to graph {graph.Key}");
+        return node;
+    }
+
+    /// <summary>Adds a clip to a graph under a node, answering its node.</summary>
+    /// <param name="graph">A graph from <see cref="CreateGraph"/>.</param>
+    /// <param name="clip">The clip, made in code or loaded.</param>
+    /// <param name="weight">The weight it is mixed in at.</param>
+    /// <param name="parent">The node it sits under.</param>
+    /// <param name="mask">The mask groups it leaves out, a bit for each, zero for none.</param>
+    /// <exception cref="BevyNativeException">The graph or the clip is gone, or this build has no renderer.</exception>
+    public static uint AddClip(AssetHandle graph, AssetHandle clip, float weight, uint parent, ulong mask = 0)
+    {
+        uint node;
+        var status = Native.bcs_animation_graph_add_clip(graph.Key, clip.Key, mask, weight, parent, &node);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"adding clip {clip.Key} to graph {graph.Key}");
+        return node;
+    }
+
+    /// <summary>Puts a target into one of a graph's mask groups, numbered from zero.</summary>
+    /// <param name="graph">The graph.</param>
+    /// <param name="target">The entity's target, a bone as often as not.</param>
+    /// <param name="group">The group, which a node's mask leaves out with the bit at its number.</param>
+    /// <exception cref="BevyNativeException">The graph is gone, or this build has no renderer.</exception>
+    public static void AddToMaskGroup(AssetHandle graph, AnimationTarget target, uint group)
+    {
+        var status = Native.bcs_animation_graph_add_to_mask_group(graph.Key, target.High, target.Low, group);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"masking a target in graph {graph.Key}");
+    }
+
+    /// <summary>Sets which mask groups a graph's node leaves out, which takes as it plays.</summary>
+    /// <param name="graph">The graph.</param>
+    /// <param name="node">The node.</param>
+    /// <param name="mask">The groups left out, a bit for each.</param>
+    /// <exception cref="BevyNativeException">The graph or the node is gone, or this build has no renderer.</exception>
+    public static void SetNodeMask(AssetHandle graph, uint node, ulong mask)
+    {
+        var status = Native.bcs_animation_graph_set_mask(graph.Key, node, mask);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"masking node {node} of graph {graph.Key}");
+    }
+
+    /// <summary>The target an entity is aimed at by, or null for one no clip aims at.</summary>
+    /// <remarks>
+    /// A model's bones each carry the target its clips aim at them by, as a game's own entity does
+    /// through <see cref="Animate"/>.
+    /// </remarks>
+    /// <param name="entity">The entity.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static AnimationTarget? TargetOf(Entity entity)
+    {
+        ulong high, low;
+        var status = Native.bcs_animation_target_of(entity.Bits, &high, &low);
+        if (status == NativeStatus.NotPresent) return null;
+        Act(status, "reading the target of", entity);
+        return new AnimationTarget(high, low);
+    }
+
+    /// <summary>Gives an entity a graph to play from, and a player where it has none.</summary>
+    /// <param name="player">The entity, often a player a model's scene brought.</param>
+    /// <param name="graph">The graph.</param>
+    /// <exception cref="BevyNativeException">The entity or the graph is gone, or this build has no renderer.</exception>
+    public static void SetGraph(Entity player, AssetHandle graph) =>
+        Act(Native.bcs_animation_set_graph(player.Bits, graph.Key), "giving a graph to", player);
+
+    /// <summary>Starts a node of an entity's graph playing beside whatever it plays already.</summary>
+    /// <param name="player">The entity with the graph.</param>
+    /// <param name="node">The node.</param>
+    /// <param name="repeat">Whether it plays over and over.</param>
+    /// <exception cref="BevyNativeException">The entity is gone or plays no graph, or this build has no renderer.</exception>
+    public static void PlayNode(Entity player, uint node, bool repeat = false) =>
+        Act(Native.bcs_animation_play_node(player.Bits, node, repeat ? 1 : 0), "playing a node as", player);
+
+    /// <summary>Sets the weight a playing node is mixed in at.</summary>
+    /// <param name="player">The entity playing it.</param>
+    /// <param name="node">The node.</param>
+    /// <param name="weight">Its weight, one as it was made and zero gone.</param>
+    /// <returns>False where the node is not playing, or the entity has no player.</returns>
+    /// <exception cref="BevyNativeException">The entity is gone or plays no graph, or this build has no renderer.</exception>
+    public static bool SetNodeWeight(Entity player, uint node, float weight)
+    {
+        var status = Native.bcs_animation_node_weight(player.Bits, node, weight);
+        if (status == NativeStatus.NotPresent) return false;
+        Act(status, "weighting a node of", player);
+        return true;
+    }
+
     /// <summary>A clip's number among a model's, by its exact name, or -1.</summary>
     private static int IndexOf(IReadOnlyList<string> clips, string clip)
     {

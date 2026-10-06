@@ -197,6 +197,21 @@ Animation.AddEvent(run, leftFoot, 0.625f, new Step());    // false until the cli
 ctx.Ecs.Observe<Step>(on => Dust(on.Ecs, on.Entity));
 ```
 
+A graph is built node by node too, clips at its leaves and blends above them, each at a weight.
+A player given it plays several of its clips at once, mixed by their weights, which change as
+they play. A clip's node leaves out the parts of a body whose bones were put in a mask group:
+
+```csharp
+var (graph, root) = Animation.CreateGraph();
+var walk = Animation.AddClip(graph, walkClip, 1f, root);
+var wave = Animation.AddClip(graph, waveClip, 1f, root, mask: 0b10);    // not on group 1, the legs
+Animation.AddToMaskGroup(graph, leftLeg, 1);
+Animation.SetGraph(player, graph);
+Animation.PlayNode(player, walk, repeat: true);
+Animation.PlayNode(player, wave, repeat: true);
+Animation.SetNodeWeight(player, wave, 0.5f);
+```
+
 A file's own materials load too, in a windowed run:
 
 ```csharp
