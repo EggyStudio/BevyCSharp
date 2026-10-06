@@ -28,7 +28,6 @@ BevyCSharp.Tests/DrawnTests.cs
 BevyCSharp.Tests/DynamicSystemTests.cs
 BevyCSharp.Tests/EcsListTests.cs
 BevyCSharp.Tests/EcsWorldTests.cs
-BevyCSharp.Tests/EditableTextTests.cs
 BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorHierarchyTests.cs	tests the editor, which is no area of the library
