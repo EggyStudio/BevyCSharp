@@ -10,6 +10,7 @@ using BevyCSharp.Examples.Gltf;
 using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
+using BevyCSharp.Examples.Maths;
 using BevyCSharp.Examples.Movement;
 using BevyCSharp.Examples.Pointers;
 using BevyCSharp.Examples.Shading;
@@ -232,6 +233,9 @@ internal static class Catalog
         new("mouse_input_events", MouseInputEvents.Build, Prints: 10, Drive: MouseInputEvents.Drive),
         new("touch_input", TouchInput.Build, Prints: 3),
         new("touch_input_events", TouchInputEvents.Build, Prints: 3),
+
+        // Math
+        new("random_sampling", RandomSampling.Build),
 
         // Transforms
         new("3d_rotation", Rotation3d.Build),

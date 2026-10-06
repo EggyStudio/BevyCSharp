@@ -221,3 +221,15 @@ the value Bevy filters through its dead zone, 0.579 for 0.6, where the frame's `
 The suite passed, 1,099 with 9 skipped. The fonts' four wait on Bevy's system font discovery, which
 on Linux brings `yeslogic-fontconfig-sys`, a crate the lock does not hold, and links fontconfig,
 asked of the owner beside `bevy_feathers`. Bevy's math, three examples, is next.
+
+**Now 3, Bevy's math, points sampled in a shape.** `Cuboid` and `Sphere` are shapes as values,
+measured as Bevy measures them, each sampling a point inside it or on its surface from a `Random` a
+game seeds, as Bevy's `ShapeSample` does. A box's surface is landed on by each face's area and a
+ball's inside filled evenly, through the cube root of an even draw, as Bevy's are. `random_sampling`
+is written, 278, scattering a hundred points inside its cube and a hundred on its surface for its
+capture, which `capture-example.sh` drives by name, its points other than Bevy's since .NET's
+generator draws its own from the seed. Its light is Bevy's default point light, a million lumens,
+where `LightSettings` starts at ten thousand. `ShapeSamplingTests` holds the box's faces landed on
+as their areas say, a fifth and two fifths, an eighth of the ball within half its radius, and a seed
+drawing the same points again. `docs/math.md` is new, linked from the README, which stands at its
+320 lines. The suite passed, 1,102 with 9 skipped. Bounding volumes and their casts are next.

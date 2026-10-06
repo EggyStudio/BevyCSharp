@@ -71,6 +71,14 @@ case "$example" in
     ./bcs command input.axis 0 LeftY 0.4 --quiet
     ./bcs command input.axis 0 RightY -0.7 --quiet
     ./bcs command input.axis 0 RightTrigger 0.8 --quiet ;;
+  # A hundred points sampled inside the cube and a hundred on its surface, which D scatters and M
+  # turns from the one to the other.
+  random_sampling)
+    ./bcs command input.key D --quiet
+    ./bcs command frames.wait 2 --quiet
+    ./bcs command input.key M --quiet
+    ./bcs command frames.wait 2 --quiet
+    ./bcs command input.key D --quiet ;;
   *) ;;
 esac
 

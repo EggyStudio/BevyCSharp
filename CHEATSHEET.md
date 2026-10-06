@@ -1404,6 +1404,22 @@ static float Dot(Vec3 a, Vec3 b);                               // The dot produ
 static Vec3 Cross(Vec3 a, Vec3 b);                              // The cross product, perpendicular to both operands
 ```
 
+### `Cuboid`
+
+```csharp
+static Cuboid FromLength(float length);                         // A cube whose sides are each length long
+static Cuboid FromSize(Vec3 size);                              // A box of the size given along each axis
+Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other
+Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
+```
+
+### `Sphere`
+
+```csharp
+Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other
+Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
+```
+
 ### `CompassOctants`
 
 ```csharp

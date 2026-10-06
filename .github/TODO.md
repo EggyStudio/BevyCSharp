@@ -40,9 +40,9 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
-  (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
-  (`random_sampling`), which the managed math, a transform and its vectors, does not have.
+- **Bevy's math, two examples.** Its bounding volumes with their casts and intersection tests
+  (`bounding_2d`) and its cubic curves (`cubic_splines`), which the managed math, a transform, its
+  vectors and the shapes points are sampled in, does not have.
 - **States, three examples.** A state that holds values, as `InGame { paused, turbo }` does
   (`computed_states`, `state_scoped`), despawning as a state is entered or by a rule over the
   transition (`state_scoped`), and transitions to the same state run as schedules of a game's own
