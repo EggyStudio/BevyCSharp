@@ -44,7 +44,6 @@ BevyCSharp.Tests/Editor/EditorThemeTests.cs	tests the editor, which is no area o
 BevyCSharp.Tests/Editor/EditorWorldTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/LevelCameraTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/PreviewRendererTests.cs	tests the editor, which is no area of the library
-BevyCSharp.Tests/EnvironmentOptionTests.cs
 BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
 BevyCSharp.Tests/FixedUpdateTests.cs
 BevyCSharp.Tests/FrameProfileTests.cs
