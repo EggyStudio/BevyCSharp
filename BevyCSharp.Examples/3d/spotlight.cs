@@ -24,22 +24,22 @@ internal static class Spotlight
         var ecs = ctx.Ecs;
         Render.SetAmbientLight((1f, 1f, 1f), 20f);
 
-        var plane = ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Scene.Material((1f, 1f, 1f, 1f)), Transform.Identity);
+        var plane = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Render.CreateMaterial((1f, 1f, 1f, 1f)), Transform.Identity);
         ecs.Add(plane, new Moved());
 
         var random = new Random(19878367);
         var cube = Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f);
-        var blue = Scene.Material(Scene.Srgb8(124, 144, 255));
+        var blue = Render.CreateMaterial(Color.FromSrgb8(124, 144, 255));
         for (var i = 0; i < 40; i++)
         {
             var at = Transform.At(Between(random, -5f, 5f), Between(random, 0f, 3f), Between(random, -5f, 5f));
-            ecs.Add(ecs.Mesh(cube, blue, at), new Moved());
+            ecs.Add(ecs.SpawnMesh(cube, blue, at), new Moved());
         }
 
         var dot = Render.CreateMesh(MeshShape.Sphere, 0.05f);
         var pointer = Render.CreateMesh(MeshShape.Sphere, 0.1f);
         var red = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f), Emissive = (1f, 0f, 0f, 1f) });
-        var maroon = Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb8(128, 0, 0), Emissive = (0.369f, 0f, 0f, 1f) });
+        var maroon = Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb8(128, 0, 0), Emissive = (0.369f, 0f, 0f, 1f) });
 
         for (var x = 0; x < 4; x++)
         {
@@ -56,14 +56,14 @@ internal static class Spotlight
                 ecs.Add(light, Transform.LookingAt(new Vec3(1f + x - 2f, 2f, z - 2f), new Vec3(1f + x - 2f, 0f, z - 2f), Vec3.UnitX));
                 ecs.Add(light, new Sway());
 
-                ecs.SetParent(ecs.Mesh(dot, red, Transform.Identity), light);
-                var tip = ecs.Mesh(pointer, maroon, Transform.At(0f, 0f, -0.1f));
+                ecs.SetParent(ecs.SpawnMesh(dot, red, Transform.Identity), light);
+                var tip = ecs.SpawnMesh(pointer, maroon, Transform.At(0f, 0f, -0.1f));
                 Render.SetMeshFlags(ecs, tip, MeshFlags.NoShadowCasting);
                 ecs.SetParent(tip, light);
             }
         }
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(-4f, 5f, 10f), Vec3.Zero, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-4f, 5f, 10f), Vec3.Zero, Vec3.UnitY));
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
 
         Ui.SpawnText(

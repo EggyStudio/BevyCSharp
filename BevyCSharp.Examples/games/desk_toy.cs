@@ -31,7 +31,7 @@ internal static class DeskToy
         (222f - 128f, -(140f - 128f), 8f),
     ];
 
-    private static readonly (float R, float G, float B, float A) WindowClearColor = Scene.Srgb(0.2f, 0.2f, 0.2f);
+    private static readonly (float R, float G, float B, float A) WindowClearColor = Color.FromSrgb(0.2f, 0.2f, 0.2f);
 
     private static Entity _camera, _logo, _instructions;
     private static Vec2? _cursorWorldPos, _dragOffset;
@@ -80,8 +80,8 @@ internal static class DeskToy
         var circle = Render.CreateMesh(MeshShape.Circle, 1f);
         var outline = Render2d.CreateMaterial(new ColorMaterialSettings { Color = (0f, 0f, 0f, 1f) });
         var sclera = Render2d.CreateMaterial(new ColorMaterialSettings { Color = (1f, 1f, 1f, 1f) });
-        var pupil = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Srgb(0.2f, 0.2f, 0.2f) });
-        var highlight = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Srgb(1f, 1f, 1f, 0.2f) });
+        var pupil = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(0.2f, 0.2f, 0.2f) });
+        var highlight = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(1f, 1f, 1f, 0.2f) });
 
         _logo = ecs.Spawn();
         ecs.Add(_logo, Transform.Identity);

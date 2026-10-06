@@ -142,7 +142,7 @@ internal static class ManyCubes
 
     private static Entity Camera(EcsWorld ecs, Transform at)
     {
-        var camera = ecs.Camera(at);
+        var camera = ecs.SpawnCamera3d(at);
         if (_motionBlur) ecs.Insert<MotionBlurRef>(camera).ShutterAngle = 3f;
         return camera;
     }
@@ -150,14 +150,14 @@ internal static class ManyCubes
     // An inside-out box around the cubes for shadows to fall on, casting none itself.
     private static void Box(EcsWorld ecs, AssetHandle material, Vec3 size, Vec3 at)
     {
-        var box = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, size.X, size.Y, size.Z), material, new Transform(at, Quat.Identity, new Vec3(-1f)));
+        var box = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, size.X, size.Y, size.Z), material, new Transform(at, Quat.Identity, new Vec3(-1f)));
         ecs.Insert<NotShadowCasterRef>(box);
         _meshes++;
     }
 
     private static void Cube(EcsWorld ecs, (AssetHandle Mesh, Transform Shape) mesh, AssetHandle material, Transform at)
     {
-        var cube = ecs.Mesh(mesh.Mesh, material, at);
+        var cube = ecs.SpawnMesh(mesh.Mesh, material, at);
         if (_noFrustumCulling) ecs.Insert<NoFrustumCullingRef>(cube);
         if (_rotateCubes) ecs.Add(cube, new Spinning());
         _meshes++;
@@ -183,7 +183,7 @@ internal static class ManyCubes
         {
             Materials.Add(Render.CreateMaterial(new MaterialSettings
             {
-                BaseColor = Scene.Srgb8((byte)colors.Next(256), (byte)colors.Next(256), (byte)colors.Next(256)),
+                BaseColor = Color.FromSrgb8((byte)colors.Next(256), (byte)colors.Next(256), (byte)colors.Next(256)),
                 BaseColorTexture = textures.Length > 0 ? textures[picks.Next(textures.Length)] : AssetHandle.None,
             }));
         }

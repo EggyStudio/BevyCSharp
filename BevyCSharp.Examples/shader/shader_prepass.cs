@@ -50,13 +50,13 @@ internal static class ShaderPrepass
 
         // Without multisampling, as Bevy's camera, so the pass reads the prepass as one sample a
         // pixel.
-        var camera = ecs.Camera(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
         Shaders.SetPrepass(camera, depth: true, normals: true, motion: true);
         _show = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = "shaders/show_prepass.slang" }));
         Shaders.SetPasses(camera, new ShaderPass(_show));
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
 
         var icon = AssetServer.Load(AssetKind.Image, "branding/icon.png");
         var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
@@ -65,11 +65,11 @@ internal static class ShaderPrepass
             .Set("material_color", new Vector4(1f, 1f, 1f, 1f))
             .SetTexture("material_color_texture", icon);
 
-        _rotating = ecs.Mesh(cube, Custom(AlphaMode.Opaque), Transform.At(-1f, 0.5f, 0f));
-        ecs.Mesh(cube, Render.CreateMaterial(new MaterialSettings { AlphaMode = AlphaMode.Mask, AlphaCutoff = 1f, BaseColorTexture = icon }), Transform.At(0f, 0.5f, 0f));
-        ecs.Mesh(cube, Custom(AlphaMode.Blend), Transform.At(1f, 0.5f, 0f));
+        _rotating = ecs.SpawnMesh(cube, Custom(AlphaMode.Opaque), Transform.At(-1f, 0.5f, 0f));
+        ecs.SpawnMesh(cube, Render.CreateMaterial(new MaterialSettings { AlphaMode = AlphaMode.Mask, AlphaCutoff = 1f, BaseColorTexture = icon }), Transform.At(0f, 0.5f, 0f));
+        ecs.SpawnMesh(cube, Custom(AlphaMode.Blend), Transform.At(1f, 0.5f, 0f));
 
-        ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
+        ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
         var text = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
         var style = new UiTextSettings();

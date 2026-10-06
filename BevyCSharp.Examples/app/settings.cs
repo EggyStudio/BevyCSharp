@@ -39,7 +39,7 @@ internal static class Settings
                 Justify = UiJustify.Center,
             });
 
-            var light = Scene.Srgb(0.9f, 0.9f, 0.9f);
+            var light = Color.FromSrgb(0.9f, 0.9f, 0.9f);
             _display = Ui.SpawnText("---", new UiSettings { Color = light }, 33f);
             ctx.Ecs.SetParent(_display, column);
             ctx.Ecs.SetParent(Ui.SpawnText("Press SPACE to increment, BACKSPACE to decrement.", new UiSettings(), 20f), column);

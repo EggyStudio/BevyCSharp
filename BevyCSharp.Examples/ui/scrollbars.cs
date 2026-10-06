@@ -39,7 +39,7 @@ internal static class Scrollbars
             Direction = UiDirection.Column,
             Padding = Sides.All(Length.Px(3f)),
             RowGap = Length.Px(6f),
-            Color = Scene.Srgb(0.1f, 0.1f, 0.1f),
+            Color = Color.FromSrgb(0.1f, 0.1f, 0.1f),
             Camera = camera,
         });
         ecs.Insert<TabGroupRef>(root);

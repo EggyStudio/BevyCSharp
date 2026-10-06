@@ -21,11 +21,11 @@ internal static class AsyncCompute
             var ecs = ctx.Ecs;
             Pending.Clear();
             _mesh = Render.CreateMesh(MeshShape.Cuboid, 0.25f, 0.25f, 0.25f);
-            _material = Scene.Material(Scene.Srgb(1f, 0.2f, 0.3f));
+            _material = Render.CreateMaterial(Color.FromSrgb(1f, 0.2f, 0.3f));
 
             var offset = Cubes % 2 == 0 ? Cubes / 2 - 0.5f : Cubes / 2;
-            ecs.PointLight(new Vec3(4f, 12f, 15f));
-            ecs.Camera(Transform.LookingAt(new Vec3(offset, offset, 15f), new Vec3(offset, offset, 0f), Vec3.UnitY));
+            ecs.SpawnPointLight(new Vec3(4f, 12f, 15f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(offset, offset, 15f), new Vec3(offset, offset, 0f), Vec3.UnitY));
 
             // .NET's thread pool stands where Bevy's AsyncComputeTaskPool does, each task a wait
             // and then a result.
@@ -49,7 +49,7 @@ internal static class AsyncCompute
             for (var i = Pending.Count - 1; i >= 0; i--)
             {
                 if (!Pending[i].IsCompleted) continue;
-                ctx.Ecs.Mesh(_mesh, _material, new Transform(Pending[i].Result));
+                ctx.Ecs.SpawnMesh(_mesh, _material, new Transform(Pending[i].Result));
                 Pending.RemoveAt(i);
             }
         }, "async_compute.HandleTasks");

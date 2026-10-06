@@ -30,10 +30,10 @@ internal static class MeshRayCast
 
             // A box of planes facing inward, so the laser is trapped inside.
             var plane = Render.CreateMesh(MeshShape.Plane, 1f, 1f);
-            var gray = Scene.Srgb(0.5f, 0.5f, 0.5f, 0.01f);
+            var gray = Color.FromSrgb(0.5f, 0.5f, 0.5f, 0.01f);
             var material = Render.CreateMaterial(new MaterialSettings { BaseColor = gray, AlphaMode = AlphaMode.Blend });
             void Wall(Vec3 at, Vec3 axis, float angle) =>
-                ecs.Mesh(plane, material, new Transform(at, Quat.FromAxisAngle(axis, angle), Vec3.One));
+                ecs.SpawnMesh(plane, material, new Transform(at, Quat.FromAxisAngle(axis, angle), Vec3.One));
 
             Wall(new Vec3(0f, 0.5f, 0f), Vec3.UnitX, MathF.PI);
             Wall(new Vec3(0f, -0.5f, 0f), Vec3.UnitX, 0f);
@@ -46,7 +46,7 @@ internal static class MeshRayCast
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationX(-0.1f) * Quat.FromRotationY(0.2f), Vec3.One));
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(1.5f, 1.5f, 1.5f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1.5f, 1.5f, 1.5f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Bloom = true });
         }, "mesh_ray_cast.Setup");
 
@@ -73,7 +73,7 @@ internal static class MeshRayCast
     // where it began.
     private static void BounceRay(Vec3 origin, Vec3 direction, bool red)
     {
-        var points = new List<(Vec3 At, (float R, float G, float B, float A) Color)> { (origin, Scene.Srgb(30f, 0f, 0f)) };
+        var points = new List<(Vec3 At, (float R, float G, float B, float A) Color)> { (origin, Color.FromSrgb(30f, 0f, 0f)) };
 
         for (var i = 0; i < MaxBounces; i++)
         {
@@ -98,5 +98,5 @@ internal static class MeshRayCast
 
     // CSS red or green, from black, scaled by brightness.
     private static (float R, float G, float B, float A) Shade(bool red, float brightness) =>
-        red ? Scene.Srgb(brightness, 0f, 0f) : Scene.Srgb(0f, 0.5f * brightness, 0f);
+        red ? Color.FromSrgb(brightness, 0f, 0f) : Color.FromSrgb(0f, 0.5f * brightness, 0f);
 }

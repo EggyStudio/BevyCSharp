@@ -17,7 +17,7 @@ internal static class PhysicsInFixedTimestep
         {
             var ecs = ctx.Ecs;
             Player.FixedRan = false;
-            Player.Camera = ecs.Camera(Transform.Identity);
+            Player.Camera = ecs.SpawnCamera3d(Transform.Identity);
 
             var player = ecs.Spawn();
             ecs.Add(player, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.3f)));
@@ -25,7 +25,7 @@ internal static class PhysicsInFixedTimestep
 
             // Tailwind's sky at 200, six spheres across, four up and ten deep, three apart.
             var sphere = Render.CreateMesh(MeshShape.Sphere, 0.3f);
-            var sky = Scene.Material(Scene.Srgb8(186, 230, 253));
+            var sky = Render.CreateMaterial(Color.FromSrgb8(186, 230, 253));
             const int Across = 6, Up = 4, Deep = 10;
             const float Distance = 3f;
             for (var x = 0; x < Across; x++)
@@ -34,7 +34,7 @@ internal static class PhysicsInFixedTimestep
                 {
                     for (var z = 0; z < Deep; z++)
                     {
-                        ecs.Mesh(sphere, sky, Transform.At(
+                        ecs.SpawnMesh(sphere, sky, Transform.At(
                             x * Distance - (Across - 1) * Distance / 2f,
                             y * Distance - (Up - 1) * Distance / 2f,
                             z * Distance - (Deep - 1) * Distance / 2f));

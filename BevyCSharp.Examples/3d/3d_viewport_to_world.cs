@@ -15,12 +15,12 @@ internal static class Example3dViewportToWorld
     {
         app.Startup(ctx =>
         {
-            ctx.Ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+            ctx.Ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
             ctx.Ecs.Add(sun, Transform.LookingAt(Vec3.One, Vec3.Zero, Vec3.UnitY));
 
-            _camera = ctx.Ecs.Camera(Transform.LookingAt(new Vec3(15f, 5f, 15f), Vec3.Zero, Vec3.UnitY));
+            _camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(15f, 5f, 15f), Vec3.Zero, Vec3.UnitY));
         });
 
         app.Update(ctx =>

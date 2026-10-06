@@ -18,7 +18,7 @@ internal static class QueryGltfPrimitives
         {
             var ecs = ctx.Ecs;
             _hue = null;
-            ecs.Camera(Transform.LookingAt(new Vec3(4f, 4f, 12f), new Vec3(0f, 0f, 0.5f), Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(4f, 4f, 12f), new Vec3(0f, 0f, 0.5f), Vec3.UnitY));
 
             // Bevy's EulerRot::ZYX of nothing, a radian about Y and down an eighth of a turn.
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
@@ -44,7 +44,7 @@ internal static class QueryGltfPrimitives
             if (Render.TryReadMaterial(material, out var settings) && settings is not null)
             {
                 _hue = _hue is { } hue ? (hue + ctx.Time.Delta * 100f) % 360f : 0f;
-                settings.BaseColor = Scene.Hsl(_hue.Value, 0.9f, 0.7f);
+                settings.BaseColor = Color.FromHsl(_hue.Value, 0.9f, 0.7f);
                 Render.WriteMaterial(material, settings);
             }
 

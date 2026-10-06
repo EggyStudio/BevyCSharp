@@ -70,7 +70,7 @@ internal static class LoadingScreen
     private static void LoadLevel1(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        LevelComponents.Add(ecs.Camera(Transform.LookingAt(new Vec3(155f, 155f, 155f), new Vec3(0f, 40f, 0f), Vec3.UnitY)));
+        LevelComponents.Add(ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(155f, 155f, 155f), new Vec3(0f, 40f, 0f), Vec3.UnitY)));
         var fox = AssetServer.LoadGltfScene("models/animated/Fox.glb");
         LoadingAssets.Add(fox);
         LevelComponents.Add(ecs.SpawnScene(fox));
@@ -80,7 +80,7 @@ internal static class LoadingScreen
     private static void LoadLevel2(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        LevelComponents.Add(ecs.Camera(Transform.LookingAt(new Vec3(1f, 1f, 1f), new Vec3(0f, 0.2f, 0f), Vec3.UnitY)));
+        LevelComponents.Add(ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 1f, 1f), new Vec3(0f, 0.2f, 0f), Vec3.UnitY)));
         var helmet = AssetServer.LoadGltfScene("models/FlightHelmet/FlightHelmet.gltf");
         LoadingAssets.Add(helmet);
         LevelComponents.Add(ecs.SpawnScene(helmet));

@@ -10,7 +10,16 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3b8fa9e`. A test fails for an error the engine logs that it did not say it expects
+Reviewed up to `c5d08e8`. Courtyard is published from the package as native code and played to its
+win in the game job, its one trim warning suppressed with its reason (`d5c796c`), which checks
+N 2.5 and leaves the rules still to take to their items. Eighteen listed places the batches since
+`a733ca2` touched without mending them first are mended after the fact, each list in a commit of
+its own that moves code alone (`46a692d`, `5f6d5c7`, `fee26df`, `c5d08e8`), and a batch reads
+the lists for the files it will touch before it starts. The lists stand at 291 for N 1.2, 100 for
+N 1.4 and 52 for N 3.4, and this engine stands at 25 checked, 4 with places
+listed, 5 to take and 9 by review.
+
+Before them, a test fails for an error the engine logs that it did not say it expects
 (`76cdb9a`), every error said through `EngineLog` and Bevy's own kept by a layer of the bridge's,
 a system that throws every frame logged whole once and counted after, and the number B 1 reads
 at 202. The survey found 40 tests logging an error, 15 of them tests of a failure that say so and
@@ -20,9 +29,8 @@ wrote a later app's component through an earlier app's hook, and synthetic input
 events into a headless app (`20663fd`). The tests run through `build/test.py` (`3b8fa9e`), its
 parts the bridge, the renderer and the suite from the start, each held to a time and a memory,
 a cargo part compiled first with `--no-run` since rustc passes 6 GB, and a digest job joining the
-systems' pages, with `TestScriptTests` and stand-ins for dotnet and cargo. N 3.7, N 6.7 and N 6.8
-are checked, and this engine stands at 24 checked, 4 with places listed, 6 to take and 9
-by review. AGENTS.md still names `dotnet test` and `cargo test`, which change on the owner's word.
+systems' pages, with `TestScriptTests` and stand-ins for dotnet and cargo. AGENTS.md still names
+`dotnet test` and `cargo test`, which change on the owner's word.
 
 Before them, `render/shaders.rs` and `RenderShaders.cs` are split by moves alone
 (`74e5b76`, `b78e565`), off N 1.3's list and, the library's, N 1.2's, and
@@ -96,8 +104,8 @@ the owner makes next carries all of it.
 
 Before it, four commits were settled, the last being the tests of what is no area of the library
 in folders named for what they test (`a714bb8`). The table stands at 239 written, 19 written in
-part, none that can be, 105 missing and 58 that do not apply. The lists stand at 307 places for
-N 1.2, 23 for N 1.3, 113 for N 1.4 and 55
+part, none that can be, 105 missing and 58 that do not apply. The lists stand at 291 places for
+N 1.2, 23 for N 1.3, 100 for N 1.4 and 52
 for N 3.4, and B 3 has no entry point left to bring under the guard.
 
 The owner took three more rules into the norm on 2026-10-05, N 2.9, N 2.10 and N 6.5, and then
@@ -110,57 +118,11 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 3, 6 to 8
 and 10 to 14 are taken from [SHARED.md](SHARED.md).
 
-1. **The norm's checks, what is left of them.** The check of N 1.5 reads top folders as the norm
-   has it since, with a row for `docs/`, and the check of N 1.4 leaves out a test of what is no
-   area of the library with that reason. The rules still `to take` here each have their item:
-   N 2.2 and N 6.1 are the settings of item 5, N 2.1 the listing of item 12, N 2.6 the table of
-   bad files in item 11, N 2.7 item 2, and N 2.5, N 2.8 and N 5.2 are a game published native in
-   the workflow, the list of packages in BUILDING.md with a test that holds the project files to
-   it, and the workflow running `build/examples-table.py` and failing when what it writes differs
-   from the table checked in. The lists are paid down as the norm says, a listed file mended
-   when a batch next touches it, in a commit of its own, the largest first where there is a
-   choice.
-
-   The owner took three more rules into the norm on 2026-10-05. A loader keeps no file open
-   once a load returns (N 2.9), which one test over every loader finds, on Linux among the
-   entries of `/proc/self/fd` and on Windows by opening the file for writing with no sharing, as
-   3DEngine's `FileHandleTests` does. No exception leaves a callback native code calls (N 2.10),
-   which here is every method the bridge calls back into, each found by the attribute or the
-   delegate it is handed over with and held to catching everything. And the package carries the
-   notices (N 6.5), which the test of N 6.4 holds and which gets a test of its own name.
-
-   Three more came the same day, after a log pasted into the reviewing session ended it, and a
-   fourth with 3DEngine's check. A script that more than one system runs uses only what each
-   system's tools read (N 6.6), which is a test as 3DEngine's `ScriptTests` is (`fd7b17f3`
-   there) over the scripts that the jobs of `package.yml` on Windows and macOS run and those
-   they call, looking for `sed -i`, `grep -P`, `readarray`, `date -d`, `stat -c`, `sha256sum`
-   and `${x,,}`. The one such line today is the `grep -oP` at line 316 of
-   `build/build-native.sh`, which is written with `grep -oE` or listed as left out if its branch
-   runs on Linux alone. 3DEngine's test of N 2.10 is in at `48fbb663` there and finds the
-   methods three ways, by `[UnmanagedCallersOnly]`, by the delegate type they are handed over
-   as, and by a binding's virtual methods that its own callbacks reach, and six of its twelve
-   caught nothing.
-
-   A test in which the engine logs an error fails, unless the test says it expects that error
-   (N 3.7), with a list of the tests that log one today. The errors of this engine are named
-   first, an exception from a behavior that the library logs and goes on from, a panic the
-   guard catches and whatever the bridge logs at Bevy's error level among them, and then how a
-   test hears them, the bridge's log being the process's while tests run side by side. With it,
-   it is checked whether a behavior that throws in every frame writes its trace every frame, as
-   3DEngine's schedule did, and if so it is logged in full once and counted after.
-   3DEngine's hook is `FailOnLoggedErrors` at `99b9c97d` there, with `[ExpectsError]` on a test
-   of a failure, and its schedule counts since `c35472ba`. The hook hears by the thread there,
-   which Verdict 18 of its REVIEW.md mends, so the ears here follow a test over its awaits
-   from the start.
-
-   And a run that fails says what failed in a page, with a test process held to a time and a
-   memory (N 6.7, N 6.8). 3DEngine's script is in at `42b162d9` there, `build/test.py` with
-   `TestScriptTests` and a stand-in for `dotnet` that hangs, grows and dies, and it is taken
-   here. Its annotations carry a cause's first line only, which Verdict 17 there mends, so a
-   cause's whole entry is written from the start. The tests here are three processes,
-   `cargo test` twice and `dotnet test`, so each is a part from the start and the page has a
-   line for each, with the bridge's failures read from what `cargo test` prints under
-   `failures:`.
+1. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
+   commit of its own that moves code alone, the largest first where there is a choice, and a
+   batch reads the lists for the files it will touch before it starts. The rules still to take
+   each have their item: N 2.2 and N 6.1 are the settings of item 5, N 2.1 the listing of item
+   12, N 2.6 the table of bad files in item 11, and N 2.7 item 2.
 2. **An example is a program somebody could write on the package.** A picture in the README
    opens an example as the way to do a thing, and what opens is written in words the package
    does not have. `BevyCSharp.Examples/Example.cs` holds helpers, in its own words for what
@@ -311,19 +273,16 @@ None open.
 
 ## Replies
 
-N 2.5 is `build/play-native.sh`, which publishes Courtyard from the package as native code and plays
-it from its menu to its win with `games/Courtyard/play.sh`, as the game job now does after playing
-it built, with clang and zlib installed for the native compiler. Published here with gcc, it won
-with three coins and every step's capture drawn. Its one trim warning was IL2065 in the iterator
-of `BehaviorsPlugin.FindRegistrations`, the call its IL2075 suppression already names as the
-compiler's iterator reports it, and it is suppressed with that reason, which leaves the publish
-with none.
-
-Item 1 is through with N 2.5, and before item 2 a lapse is mended. The batches since `a733ca2`
-touched eighteen listed places without mending them first, `BehaviorsPlugin.cs`,
-`ComponentHooks.cs` and `Observers.cs` on N 1.2's list, thirteen tests at the root on N 1.4's, and
-`AssetFilesTests.cs` and `EngineFixture.cs` on N 3.4's. Each list is now mended in a commit of its
-own after the fact. The eleven types moved to files of their own (`46a692d`), the thirteen tests
-moved into the folders of their areas (`5f6d5c7`), and both folders are taken from `TestFolder`,
-the harness's user directory removed as the process ends. From here a batch reads the lists for the
-files it will touch before it starts.
+Item 2 begins with the helpers, each the package's own now, documented and in the cheatsheet, and
+`Example.cs` keeps the `Example` record, the size an example was opened at and `Script`, which
+drive a capture. `App` has `Startup`, `Update` and `On`, each handed the frame's context, and
+`SpawnGltf`, which now hands the root over once `WorldInstanceReady` names it rather than on the
+frame the file loaded, when nothing was under it yet. `Color` has `FromSrgb8` and `FromHsl` and
+converts to the tuple of four numbers the settings take, that one way, so a list of colors and
+tuples is a list of tuples. `Quat` has `Slerp` and `Lerp`, `Render.CreateMaterial` takes a color
+alone, and `EcsWorld` has `SpawnMesh`, `SpawnPointLight`, `SpawnCamera3d` and `Descendants`, which
+took the place of three examples' own walks. Vec2, Vec3, Vec4, Quat and Color were split into files
+of their own first (`c5d08e8`), being on N 1.2's list. Captured again, the 27 examples that spawn a
+glTF scene draw as before but for the phase of what moves, since their scenes are handed over a
+frame or more later. `FreeCamera` stays in the examples until it is weighed against Bevy's own
+camera controller.

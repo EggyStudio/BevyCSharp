@@ -50,6 +50,85 @@ public sealed unsafe partial class App : IDisposable
         return this;
     }
 
+    /// <summary>Runs <paramref name="setup"/> once as the app starts, as Bevy's <c>Startup</c> systems do.</summary>
+    /// <param name="setup">What to do, handed the frame's context, where the world is on loan.</param>
+    /// <param name="name">What the system is called, for ordering and for the editor's list of systems.</param>
+    /// <remarks>
+    /// Bevy's <c>app.add_systems(Startup, setup)</c>, which a game says as often as it makes a scene.
+    /// <see cref="AddSystem(Stage, SystemDescriptor)"/> says the same with the stage, a descriptor
+    /// and a context made from the world, which a system that orders itself or runs on a condition
+    /// still needs.
+    /// </remarks>
+    public App Startup(Action<BehaviorContext> setup, string name = "Startup") => On(Stage.Startup, setup, name);
+
+    /// <summary>Runs <paramref name="update"/> every frame, as Bevy's <c>Update</c> systems do.</summary>
+    /// <param name="update">What to do, handed the frame's context, where the world is on loan.</param>
+    /// <param name="name">What the system is called, for ordering and for the editor's list of systems.</param>
+    /// <remarks>Bevy's <c>app.add_systems(Update, update)</c>. See <see cref="Startup"/>.</remarks>
+    public App Update(Action<BehaviorContext> update, string name = "Update") => On(Stage.Update, update, name);
+
+    /// <summary>
+    /// Runs <paramref name="run"/> in <paramref name="stage"/>, as a system Bevy adds to that
+    /// schedule, and only while <paramref name="runIf"/> passes where one is given.
+    /// </summary>
+    /// <param name="stage">When in the frame it runs.</param>
+    /// <param name="run">What to do, handed the frame's context, where the world is on loan.</param>
+    /// <param name="name">What the system is called, for ordering and for the editor's list of systems.</param>
+    /// <param name="runIf">Whether it runs this frame, asked before it does, or none to run every frame.</param>
+    /// <remarks>
+    /// Bevy's <c>app.add_systems(stage, run.run_if(condition))</c>, for the stages <see cref="Startup"/>
+    /// and <see cref="Update"/> leave, such as <see cref="Stage.FixedUpdate"/> or
+    /// <see cref="Stage.PostUpdate"/>.
+    /// </remarks>
+    public App On(Stage stage, Action<BehaviorContext> run, string name, Func<World, bool>? runIf = null)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+        var descriptor = new SystemDescriptor(world => run(new BehaviorContext(world)), name);
+        return AddSystem(stage, runIf is null ? descriptor : descriptor.RunIf(runIf));
+    }
+
+    /// <summary>
+    /// Spawns a glTF file's scene once it has loaded, as Bevy's <c>SceneRoot</c> of a glTF does, and
+    /// hands the root to <paramref name="spawned"/> once the scene is in the world under it.
+    /// </summary>
+    /// <param name="path">The file, under the asset root.</param>
+    /// <param name="spawned">What to do with the scene's root, or none.</param>
+    /// <param name="scene">Which of the file's scenes, by its place in the file.</param>
+    /// <remarks>
+    /// Bevy spawns the root at once and its scene under it when the file has loaded, a frame or more
+    /// later. The root is handed over with <see cref="WorldInstanceReady"/>, once its meshes,
+    /// lights and players are among its <see cref="EcsWorld.Descendants"/>, so
+    /// <paramref name="spawned"/> can reach into the scene at once. A file that never loads hands
+    /// nothing over.
+    /// </remarks>
+    public App SpawnGltf(string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        var handle = AssetHandle.None;
+        var root = Entity.None;
+        var done = false;
+
+        return Update(ctx =>
+        {
+            if (done) return;
+            if (handle == AssetHandle.None) handle = AssetServer.LoadGltfScene(path, scene);
+
+            if (root == Entity.None)
+            {
+                if (AssetServer.StateOf(handle) == AssetLoadState.Loaded) root = ctx.Ecs.SpawnScene(handle);
+                return;
+            }
+
+            foreach (var ready in ctx.Read<WorldInstanceReady>())
+            {
+                if (ready.Entity != root) continue;
+                done = true;
+                spawned?.Invoke(ctx, root);
+                return;
+            }
+        }, $"SpawnGltf({path})");
+    }
+
     /// <summary>
     /// Registers <paramref name="systems"/> in <paramref name="stage"/>, each to run after the one
     /// before it.

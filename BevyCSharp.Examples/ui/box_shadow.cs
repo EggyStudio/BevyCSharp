@@ -52,8 +52,8 @@ internal static class BoxShadowExample
             _camera = Render2d.SpawnCamera2d();
             ecs.Insert<BoxShadowSamplesRef>(_camera).Value = (uint)_settings.Samples;
 
-            var middle = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Scene.Srgb8(128, 128, 128) });
-            _node = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(1f)), Align = UiAlign.Center, Justify = UiJustify.Center, BorderColor = (1f, 1f, 1f, 1f), Color = Scene.Srgb(0.21f, 0.21f, 0.21f) });
+            var middle = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Color.FromSrgb8(128, 128, 128) });
+            _node = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(1f)), Align = UiAlign.Center, Justify = UiJustify.Center, BorderColor = (1f, 1f, 1f, 1f), Color = Color.FromSrgb(0.21f, 0.21f, 0.21f) });
             ecs.InsertReflected(_node, Shadow, "[]");
             ecs.SetParent(_node, middle);
 
@@ -66,7 +66,7 @@ internal static class BoxShadowExample
                 Width = Length.Px(270f),
                 Padding = Sides.All(Length.Px(16f)),
                 Corners = Corners.All(Length.Px(12f)),
-                Color = Scene.Srgb(0.12f, 0.12f, 0.12f, 0.85f),
+                Color = Color.FromSrgb(0.12f, 0.12f, 0.12f, 0.85f),
                 BorderColor = (1f, 1f, 1f, 0.15f),
             });
             ecs.Insert<ZIndexRef>(panel).Value = 10;

@@ -26,13 +26,13 @@ internal static class ArrayTexture
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 2f, 1f), Vec3.Zero, Vec3.UnitY));
-            ecs.Camera(Transform.LookingAt(new Vec3(5f, 5f, 5f), new Vec3(1.5f, 0f, 0f), Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(5f, 5f, 5f), new Vec3(1.5f, 0f, 0f), Vec3.UnitY));
 
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
             var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/array_texture.slang")).SetTexture("my_array_texture", arrayTexture);
             for (var x = -5; x <= 5; x++)
             {
-                var entity = ecs.Mesh(cube, material, Transform.At(x + 0.5f, 0f, 0f));
+                var entity = ecs.SpawnMesh(cube, material, Transform.At(x + 0.5f, 0f, 0f));
 
                 // Bevy's `x as u32 % 4`, which for a negative x wraps through the top of the
                 // unsigned range first.

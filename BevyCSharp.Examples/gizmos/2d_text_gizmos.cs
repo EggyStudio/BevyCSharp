@@ -23,7 +23,7 @@ internal static class TextGizmos2d
 
         app.Update(ctx =>
         {
-            (float, float, float, float)[] colors = [(1f, 0f, 0f, 1f), Scene.Srgb8(0, 128, 0), (0f, 0f, 1f, 1f), (1f, 1f, 0f, 1f)];
+            (float, float, float, float)[] colors = [(1f, 0f, 0f, 1f), Color.FromSrgb8(0, 128, 0), (0f, 0f, 1f, 1f), (1f, 1f, 0f, 1f)];
             for (var i = 0; i < TextCount; i++)
             {
                 var (row, column) = (i / 5, i % 5);

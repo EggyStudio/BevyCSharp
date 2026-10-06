@@ -16,14 +16,14 @@ internal static class OverflowClipMargin
         Render2d.SpawnCamera2d();
         var logo = AssetServer.Load(AssetKind.Image, "branding/icon.png");
 
-        var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, RowGap = Length.Px(40f), Direction = UiDirection.Column, Color = Scene.Srgb8(250, 235, 215) });
+        var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, RowGap = Length.Px(40f), Direction = UiDirection.Column, Color = Color.FromSrgb8(250, 235, 215) });
         foreach (var (box, margin) in new[] { (UiClipBox.Border, 25f), (UiClipBox.Border, 0f), (UiClipBox.Padding, 0f), (UiClipBox.Content, 0f) })
         {
             var row = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Row, ColumnGap = Length.Px(20f) });
             ecs.SetParent(row, root);
 
             // The setting as Bevy's pretty debug output prints it.
-            var labelBox = Ui.SpawnNode(new UiSettings { Padding = Sides.All(Length.Px(10f)), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(25f)), Color = Scene.Srgb(0.25f, 0.25f, 0.25f) });
+            var labelBox = Ui.SpawnNode(new UiSettings { Padding = Sides.All(Length.Px(10f)), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(25f)), Color = Color.FromSrgb(0.25f, 0.25f, 0.25f) });
             ecs.SetParent(labelBox, row);
             var name = box switch { UiClipBox.Border => "BorderBox", UiClipBox.Padding => "PaddingBox", _ => "ContentBox" };
             ecs.SetParent(Ui.SpawnText(FormattableString.Invariant($"OverflowClipMargin {{\n    visual_box: {name},\n    margin: {margin:0.0},\n}}"), new UiSettings()), labelBox);
@@ -39,12 +39,12 @@ internal static class OverflowClipMargin
                 OverflowY = UiOverflow.Clip,
                 ClipBox = box,
                 ClipMargin = margin,
-                Color = Scene.Srgb8(128, 128, 128),
+                Color = Color.FromSrgb8(128, 128, 128),
                 BorderColor = (0f, 0f, 0f, 1f),
             });
             ecs.SetParent(frame, row);
 
-            var cyan = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(50f), MinHeight = Length.Px(50f), Color = Scene.Srgb8(224, 255, 255) });
+            var cyan = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(50f), MinHeight = Length.Px(50f), Color = Color.FromSrgb8(224, 255, 255) });
             ecs.SetParent(cyan, frame);
             var image = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(100f), MinHeight = Length.Px(100f) });
             Ui.SetImage(image, logo);

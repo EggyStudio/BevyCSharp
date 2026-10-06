@@ -42,7 +42,7 @@ internal static class OneShotSystems
             var style = new UiTextSettings { Justify = TextJustify.Center };
             Ui.SpawnTextSpan(text, "Press A or B to trigger a one-shot system\n", style, (1f, 1f, 1f, 1f));
             Ui.SpawnTextSpan(text, "Last Triggered: ", style, (1f, 1f, 1f, 1f));
-            _last = Ui.SpawnTextSpan(text, "-", style, Scene.Srgb8(255, 165, 0));
+            _last = Ui.SpawnTextSpan(text, "-", style, Color.FromSrgb8(255, 165, 0));
 
             Systems.Add(SystemA);
             var a = ecs.Spawn();

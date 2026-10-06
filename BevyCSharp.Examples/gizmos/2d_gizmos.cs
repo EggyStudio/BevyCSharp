@@ -12,10 +12,10 @@ namespace BevyCSharp.Examples.Gizmo;
 internal static class Gizmos2d
 {
     // Bevy's css colors, given in sRGB.
-    private static readonly (float R, float G, float B, float A) Red = Scene.Srgb(1f, 0f, 0f), Lime = Scene.Srgb(0f, 1f, 0f), Blue = Scene.Srgb(0f, 0f, 1f);
-    private static readonly (float R, float G, float B, float A) Black = (0f, 0f, 0f, 1f), Fuchsia = Scene.Srgb(1f, 0f, 1f), Navy = Scene.Srgb8(0, 0, 128);
-    private static readonly (float R, float G, float B, float A) YellowGreen = Scene.Srgb8(154, 205, 50), OrangeRed = Scene.Srgb8(255, 69, 0);
-    private static readonly (float R, float G, float B, float A) Yellow = Scene.Srgb(1f, 1f, 0f), Green = Scene.Srgb8(0, 128, 0);
+    private static readonly (float R, float G, float B, float A) Red = Color.FromSrgb(1f, 0f, 0f), Lime = Color.FromSrgb(0f, 1f, 0f), Blue = Color.FromSrgb(0f, 0f, 1f);
+    private static readonly (float R, float G, float B, float A) Black = (0f, 0f, 0f, 1f), Fuchsia = Color.FromSrgb(1f, 0f, 1f), Navy = Color.FromSrgb8(0, 0, 128);
+    private static readonly (float R, float G, float B, float A) YellowGreen = Color.FromSrgb8(154, 205, 50), OrangeRed = Color.FromSrgb8(255, 69, 0);
+    private static readonly (float R, float G, float B, float A) Yellow = Color.FromSrgb(1f, 1f, 0f), Green = Color.FromSrgb8(0, 128, 0);
 
     // Bevy's own group draws the straight shapes and a group of the example's the round ones. The
     // bridge's two groups stand for them, which under a 2D camera differ in nothing else.
@@ -78,7 +78,7 @@ internal static class Gizmos2d
                 var x = ((float)n / resolution - 0.5f) * 600f;
                 var point = (x, MathF.Sin(x / 25f) * 100f);
                 var mix = (x + 300f) / 600f;
-                var color = Scene.Srgb(0f + (1f - 0f) * mix, 128 / 255f + (105 / 255f - 128 / 255f) * mix, 128 / 255f + (180 / 255f - 128 / 255f) * mix);
+                var color = Color.FromSrgb(0f + (1f - 0f) * mix, 128 / 255f + (105 / 255f - 128 / 255f) * mix, 128 / 255f + (180 / 255f - 128 / 255f) * mix);
                 if (n > 0) Gizmos.Line2d(previous, point, previousColor, color, Straight);
                 (previous, previousColor) = (point, color);
             }

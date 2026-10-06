@@ -21,6 +21,15 @@ var glass = Render.CreateMaterial(new MaterialSettings
 });
 ```
 
+A color is linear, as the renderer works in it, and one picked or written in a palette is sRGB,
+which `Color.FromSrgb`, `Color.FromSrgb8` and `Color.FromHsl` convert. A `Color` is handed to any
+setting that takes four numbers as it is, and a material of one color is one call:
+
+```csharp
+var grass = Render.CreateMaterial(Color.FromSrgb8(76, 128, 76));
+var sky = new MaterialSettings { BaseColor = Color.FromHsl(210f, 0.6f, 0.7f), Unlit = true };
+```
+
 A texture is combined with its matching factor rather than replacing it, so a base color map on the
 default white shows unchanged and tinting it is a matter of setting a color. The image need not have
 finished loading, because the material holds a handle rather than pixels. Five maps are bound this

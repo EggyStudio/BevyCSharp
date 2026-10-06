@@ -26,13 +26,13 @@ internal static class ExtendedMaterial
             var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/extended_material.slang"))
                 .Set("base_color", new Vector4(1f, 0f, 0f, 1f))
                 .Set("quantize_steps", 1u);
-            ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 1f), material, Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 1f), material, Transform.At(0f, 0.5f, 0f));
 
             // Bevy's default directional light, of ten thousand lux.
             _light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(_light, Transform.LookingAt(new Vec3(1f, 1f, 1f), Vec3.Zero, Vec3.UnitY));
 
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "extended_material.Setup");
 
         // Bevy turns the light about its own vertical axis, which for a directional light turns

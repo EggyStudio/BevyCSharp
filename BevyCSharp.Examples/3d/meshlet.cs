@@ -40,7 +40,7 @@ internal static class Meshlet
 
         if (ecs.Resource<DirectionalLightShadowMapRef>() is { } shadowMap) shadowMap.Size = 4096;
 
-        var camera = ecs.Camera(Transform.LookingAt(new Vec3(1.8f, 0.4f, -0.1f), Vec3.Zero, Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1.8f, 0.4f, -0.1f), Vec3.Zero, Vec3.UnitY));
         Render.SetEnvironmentMap(
             camera,
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
@@ -54,7 +54,7 @@ internal static class Meshlet
         ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
         Render.SetShadowCascades(sun, cascades: 1, maximum: 15f);
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f }), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f }), Transform.Identity);
 
         if (!Render.MeshletsActive) return;
 

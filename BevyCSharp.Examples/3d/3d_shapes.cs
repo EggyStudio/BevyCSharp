@@ -54,7 +54,7 @@ internal static class Example3dShapes
                 for (var i = 0; i < meshes.Length; i++)
                 {
                     var x = -extent / 2f + i / (float)(meshes.Length - 1) * extent;
-                    var shape = ctx.Ecs.Mesh(meshes[i], debug, new Transform(new Vec3(x, 2f, Shape.Z(row)), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
+                    var shape = ctx.Ecs.SpawnMesh(meshes[i], debug, new Transform(new Vec3(x, 2f, Shape.Z(row)), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
                     ctx.Ecs.Add(shape, new Shape { Row = row });
                 }
             }
@@ -73,9 +73,9 @@ internal static class Example3dShapes
             ctx.Ecs.Add(light, Transform.At(8f, 16f, 8f));
 
             // Bevy's silver, #c0c0c0.
-            ctx.Ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Scene.Material(Scene.Srgb8(192, 192, 192)), Transform.Identity);
+            ctx.Ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb8(192, 192, 192)), Transform.Identity);
 
-            ctx.Ecs.Camera(Transform.LookingAt(new Vec3(0f, 7f, 14f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
+            ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 7f, 14f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
 
             Ui.SpawnText(
                 "Press 'R' to pause/resume rotation\nPress 'Tab' to cycle through rows\nPress 'Space' to toggle wireframes",

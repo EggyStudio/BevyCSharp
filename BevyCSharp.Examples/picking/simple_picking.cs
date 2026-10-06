@@ -14,7 +14,7 @@ namespace BevyCSharp.Examples.Pointers;
 // down. Picking a mesh needs the editor profile of the bridge, which carries Bevy's mesh picking.
 internal static class SimplePicking
 {
-    private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f), Cyan400 = Scene.Srgb8(34, 211, 238);
+    private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f), Cyan400 = Color.FromSrgb8(34, 211, 238);
 
     private static Entity _camera, _text, _dragged;
     private static UiInteraction _last;
@@ -32,10 +32,10 @@ internal static class SimplePicking
             Cubes.Clear();
             _text = Ui.SpawnText("Click Me to get a box\nDrag cubes to rotate", new UiSettings { Interactive = true, Absolute = true, Top = Length.Percent(12f), Left = Length.Percent(12f), Color = White });
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 4f), Scene.Material(White), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
-            (_cube, _blue) = (Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f), Scene.Material(Scene.Srgb8(124, 144, 255)));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial(White), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
+            (_cube, _blue) = (Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)));
         }, "simple_picking.SetupScene");
 
         app.Update(ClickText, "simple_picking.ClickText");
@@ -52,7 +52,7 @@ internal static class SimplePicking
         ctx.Ecs.Wrap<TextColorRef>(_text).Value = new Color(color.R, color.G, color.B, color.A);
         if (_last == UiInteraction.Pressed && interaction == UiInteraction.Hovered)
         {
-            var cube = ctx.Ecs.Mesh(_cube, _blue, Transform.At(0f, 0.25f + 0.55f * _count, 0f));
+            var cube = ctx.Ecs.SpawnMesh(_cube, _blue, Transform.At(0f, 0.25f + 0.55f * _count, 0f));
             Cubes.Add(cube);
             _count++;
         }

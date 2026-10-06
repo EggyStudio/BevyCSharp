@@ -105,6 +105,15 @@ is answered per entity. The same rows come back, split into the contiguous runs 
 | `[OnLast]`       | End of every frame                                 |
 | `[OnCleanup]`    | Once, on the way out                               |
 
+A system with no component of its own, which sets a scene up or reads what every frame brings,
+is said in one call, as Bevy's `add_systems` says it, each handed the frame's context:
+
+```csharp
+app.Startup(Setup, "Setup");
+app.Update(ctx => score.Tick(ctx.Time.Delta), "Score");
+app.On(Stage.FixedUpdate, Step, "Step", runIf: world => !world.Resource<Time>().Paused);
+```
+
 ## Order within a stage
 
 Systems in one stage run in an order Bevy picks as it builds the schedule, which is not the order

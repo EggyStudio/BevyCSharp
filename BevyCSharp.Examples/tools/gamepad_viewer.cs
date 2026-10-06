@@ -22,8 +22,8 @@ internal static class GamepadViewer
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            ReactTo.Normal = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Srgb(0.3f, 0.3f, 0.3f) });
-            ReactTo.Active = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Srgb(0.5f, 0f, 0.5f) });
+            ReactTo.Normal = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(0.3f, 0.3f, 0.3f) });
+            ReactTo.Active = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(0.5f, 0f, 0.5f) });
             _circle = Render.CreateMesh(MeshShape.Circle, ButtonRadius);
             _triangle = Render.CreateMesh(MeshShape.RegularPolygon, ButtonRadius, 3f);
             _startPause = Render.CreateMesh(MeshShape.Rectangle, StartSize.X, StartSize.Y);

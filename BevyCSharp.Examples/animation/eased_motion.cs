@@ -20,12 +20,12 @@ internal static class EasedMotion
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _cube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f), Scene.Material(Scene.Srgb8(255, 165, 0)), Transform.At(-6f, 2f, 0f));
+            _cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f), Render.CreateMaterial(Color.FromSrgb8(255, 165, 0)), Transform.At(-6f, 2f, 0f));
 
             var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 10_000_000f, Range = 100f, Shadows = true });
             ecs.Add(light, Transform.At(8f, 16f, 8f));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Scene.Material(Scene.Srgb8(192, 192, 192)), Transform.Identity);
-            ecs.Camera(Transform.LookingAt(new Vec3(0f, 6f, 12f), new Vec3(0f, 1.5f, 0f), Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb8(192, 192, 192)), Transform.Identity);
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 6f, 12f), new Vec3(0f, 1.5f, 0f), Vec3.UnitY));
         }, "eased_motion.Setup");
 
         app.Update(ctx =>

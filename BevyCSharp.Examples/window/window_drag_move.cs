@@ -35,7 +35,7 @@ internal static class WindowDragMove
             var ecs = ctx.Ecs;
             (_action, _direction) = (LeftClickAction.Move, 7);
             if (Window.Entity() != Entity.None) Window.SetStyle(decorations: false);
-            ecs.Camera(Transform.Identity);
+            ecs.SpawnCamera3d(Transform.Identity);
 
             var panel = Ui.SpawnNode(new UiSettings { Absolute = true, Padding = Sides.All(Length.Px(5f)), Color = (0f, 0f, 0f, 0.75f) });
             ecs.Insert<GlobalZIndexRef>(panel).Value = int.MaxValue;

@@ -50,13 +50,13 @@ internal static class Mirror
     {
         var ecs = ctx.Ecs;
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(-2f, 1f, -2f).Normalized * CameraOrbitDistance, CameraTarget, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 1f, -2f).Normalized * CameraOrbitDistance, CameraTarget, Vec3.UnitY));
 
         var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 5000f, Shadows = false });
         ecs.Add(sun, Transform.LookingAt(new Vec3(-85f, 16f, -200f), new Vec3(-50f, 0f, 100f), Vec3.UnitY));
 
         // A green disc of ground, laid flat.
-        ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 200f), Scene.Material(Scene.Srgb8(0, 128, 0)),
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 200f), Render.CreateMaterial(Color.FromSrgb8(0, 128, 0)),
             new Transform(new Vec3(-25f, 0f, 0f), Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
 
         // The image the mirror world is drawn into, as large as the window in pixels, and the
@@ -70,7 +70,7 @@ internal static class Mirror
 
         _mirrorMaterial = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/screen_space_texture_material.slang"))
             .SetTexture("emissive_texture", _mirrorImage);
-        _mirror = ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 1f, 1f), _mirrorMaterial,
+        _mirror = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 1f, 1f), _mirrorMaterial,
             new Transform(MirrorPosition, Quat.FromRotationX(MirrorRotationAngle), new Vec3(300f, 1f, 150f)));
         UpdateMirrorCamera(ecs);
 

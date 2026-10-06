@@ -85,7 +85,7 @@ internal static class Bevymark3d
         _materials = InitMaterials([.. textures]);
         _cubeMesh = Render.CreateMesh(MeshShape.Cuboid, CubeScale, CubeScale, CubeScale);
 
-        ecs.Camera(Transform.LookingAt(new Vec3(VolumeWidth * 1.3f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(VolumeWidth * 1.3f), Vec3.Zero, Vec3.UnitY));
         var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
         ecs.Add(light, Transform.LookingAt(new Vec3(1f, 2f, 3f), Vec3.Zero, Vec3.UnitY));
 
@@ -94,7 +94,7 @@ internal static class Bevymark3d
         ecs.Insert<GlobalZIndexRef>(panel).Value = int.MaxValue;
         var text = Ui.SpawnText("", new UiSettings(), 40f);
         ecs.SetParent(text, panel);
-        (float, float, float, float) lime = Scene.Srgb(0f, 1f, 0f), aqua = Scene.Srgb(0f, 1f, 1f);
+        (float, float, float, float) lime = Color.FromSrgb(0f, 1f, 0f), aqua = Color.FromSrgb(0f, 1f, 1f);
         var style = new UiTextSettings { FontSize = 40f };
         Ui.SpawnTextSpan(text, "Cube Count: ", style, lime);
         _countSpan = Ui.SpawnTextSpan(text, "", style, aqua);
@@ -154,7 +154,7 @@ internal static class Bevymark3d
             }
 
             var material = _varyPerInstance ? _materials[_materialRandom.Next(_materials.Length)] : batchMaterial;
-            var cube = ecs.Mesh(_cubeMesh, material, Transform.At(at.X, at.Y, at.Z));
+            var cube = ecs.SpawnMesh(_cubeMesh, material, Transform.At(at.X, at.Y, at.Z));
             ecs.Add(cube, new Cube { Velocity = velocity });
         }
 

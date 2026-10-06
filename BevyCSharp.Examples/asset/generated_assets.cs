@@ -19,7 +19,7 @@ internal static class GeneratedAssets
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            ecs.Camera(Transform.At(0f, 0f, 5f));
+            ecs.SpawnCamera3d(Transform.At(0f, 0f, 5f));
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(sun, Transform.LookingAt(Vec3.Zero, new Vec3(-1f, -1f, -1f), Vec3.UnitY));
 
@@ -35,7 +35,7 @@ internal static class GeneratedAssets
             // The torus's entity draws a mesh with nothing in it yet, as Bevy's reserved handle is,
             // which the next frame fills in.
             _reserved = Render.CreateMesh(MeshShape.Triangle, 0f);
-            ecs.Mesh(_reserved, material, new Transform(new Vec3(2f, 0f, 0f), Quat.FromRotationX(50f * MathF.PI / 180f), Vec3.One));
+            ecs.SpawnMesh(_reserved, material, new Transform(new Vec3(2f, 0f, 0f), Quat.FromRotationX(50f * MathF.PI / 180f), Vec3.One));
         }, "generated_assets.Setup");
 
         var generated = false;

@@ -18,8 +18,8 @@ internal static class Transparency2d
         foreach (var (at, color) in new[]
         {
             (new Vec3(-100f, 0f, 0f), (1f, 1f, 1f, 1f)),
-            (new Vec3(0f, 0f, 0.1f), Scene.Srgb(0f, 0f, 1f, 0.7f)),
-            (new Vec3(100f, 0f, 0.2f), Scene.Srgb(0f, 1f, 0f, 0.3f)),
+            (new Vec3(0f, 0f, 0.1f), Color.FromSrgb(0f, 0f, 1f, 0.7f)),
+            (new Vec3(100f, 0f, 0.2f), Color.FromSrgb(0f, 1f, 0f, 0.3f)),
         })
         {
             var sprite = ecs.Spawn();

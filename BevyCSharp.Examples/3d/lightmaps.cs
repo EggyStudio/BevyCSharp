@@ -23,7 +23,7 @@ internal static class Lightmaps
         {
             // No light at all but what was baked, so a dark corner stays dark.
             Render.SetAmbientLight((1f, 1f, 1f), 0f);
-            ctx.Ecs.Camera(Transform.At(-278f, 273f, 800f));
+            ctx.Ecs.SpawnCamera3d(Transform.At(-278f, 273f, 800f));
         });
 
         app.SpawnGltf("models/CornellBox/CornellBox.glb", (_, root) => _box = root);
@@ -37,7 +37,7 @@ internal static class Lightmaps
         if (_box == Entity.None) return;
 
         var ecs = ctx.Ecs;
-        foreach (var entity in Descendants(ecs, _box))
+        foreach (var entity in ecs.Descendants(_box))
         {
             if (ecs.Get<GltfMeshNameRef>(entity) is not { } meshName || ecs.Get<LightmapRef>(entity) is not null) continue;
 
@@ -62,12 +62,4 @@ internal static class Lightmaps
         }
     }
 
-    private static IEnumerable<Entity> Descendants(EcsWorld ecs, Entity root)
-    {
-        foreach (var child in ecs.ChildrenOf(root))
-        {
-            yield return child;
-            foreach (var below in Descendants(ecs, child)) yield return below;
-        }
-    }
 }

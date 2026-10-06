@@ -21,7 +21,7 @@ internal static class VirtualTime
             ctx.Time.SetSpeed(2f);
             Render2d.SpawnCamera2d();
 
-            var gold = Scene.Srgb8(255, 215, 0);
+            var gold = Color.FromSrgb8(255, 215, 0);
             var texture = AssetServer.Load(AssetKind.Image, "branding/icon.png");
             _real = ecs.Spawn();
             ecs.Add(_real, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.5f, 0.5f, 1f)));
@@ -33,7 +33,7 @@ internal static class VirtualTime
             var row = Ui.SpawnNode(new UiSettings { Absolute = true, Top = Length.Px(0f), Width = Length.Percent(100f), Justify = UiJustify.SpaceBetween, Padding = Sides.All(Length.Px(20f)) });
             _realText = Ui.SpawnText(string.Empty, new UiSettings(), 33f);
             ecs.SetParent(_realText, row);
-            ecs.SetParent(Ui.SpawnText("CONTROLS\n(Un)pause: Space\nSpeed+: Up\nSpeed-: Down", new UiSettings { Color = Scene.Srgb(0.85f, 0.85f, 0.85f) }, new UiTextSettings { FontSize = 33f, Justify = TextJustify.Center }), row);
+            ecs.SetParent(Ui.SpawnText("CONTROLS\n(Un)pause: Space\nSpeed+: Up\nSpeed-: Down", new UiSettings { Color = Color.FromSrgb(0.85f, 0.85f, 0.85f) }, new UiTextSettings { FontSize = 33f, Justify = TextJustify.Center }), row);
             _virtualText = Ui.SpawnText(string.Empty, new UiSettings { Color = gold }, new UiTextSettings { FontSize = 33f, Justify = TextJustify.Right });
             ecs.SetParent(_virtualText, row);
         }, "virtual_time.Setup");

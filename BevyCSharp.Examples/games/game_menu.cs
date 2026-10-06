@@ -19,8 +19,8 @@ internal static class GameMenu
 
     private enum MenuButtonAction { Play, Settings, SettingsDisplay, SettingsSound, BackToMainMenu, BackToSettings, Quit }
 
-    private static readonly (float R, float G, float B, float A) TextColor = Scene.Srgb(0.9f, 0.9f, 0.9f);
-    private static readonly (float R, float G, float B, float A) Crimson = Scene.Srgb8(220, 20, 60);
+    private static readonly (float R, float G, float B, float A) TextColor = Color.FromSrgb(0.9f, 0.9f, 0.9f);
+    private static readonly (float R, float G, float B, float A) Crimson = Color.FromSrgb8(220, 20, 60);
 
     private static readonly Color NormalButton = Color.FromSrgb(0.15f, 0.15f, 0.15f);
     private static readonly Color HoveredButton = Color.FromSrgb(0.25f, 0.25f, 0.25f);

@@ -16,7 +16,7 @@ internal static class Wireframe
 {
 
     private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f);
-    private static readonly (float R, float G, float B, float A) DeepPink = Scene.Srgb8(255, 20, 147);
+    private static readonly (float R, float G, float B, float A) DeepPink = Color.FromSrgb8(255, 20, 147);
     private static readonly (float R, float G, float B, float A) Lime = (0f, 1f, 0f, 1f);
     private static readonly (float R, float G, float B, float A) Red = (1f, 0f, 0f, 1f);
 
@@ -40,19 +40,19 @@ internal static class Wireframe
             (_global, _quads, _width, _globalColor, _toggleColor) = (true, false, 3f, White, Lime);
 
             // The red cube has no wireframe, even under the global one.
-            ecs.Mesh(cube, Scene.Material(Red), Transform.At(-1.5f, 0.5f, -1.5f));
-            _orange = ecs.Mesh(cube, Scene.Material(Scene.Srgb8(255, 165, 0)), Transform.At(-0.5f, 0.5f, -0.5f));
-            _toggle = ecs.Mesh(cube, Scene.Material(Lime), Transform.At(0.5f, 0.5f, 0.5f));
-            _purple = ecs.Mesh(cube, Scene.Material(Scene.Srgb8(128, 0, 128)), Transform.At(1.5f, 0.5f, 1.5f));
-            _plane = ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material((0f, 0f, 1f, 1f)), Transform.Identity);
+            ecs.SpawnMesh(cube, Render.CreateMaterial(Red), Transform.At(-1.5f, 0.5f, -1.5f));
+            _orange = ecs.SpawnMesh(cube, Render.CreateMaterial(Color.FromSrgb8(255, 165, 0)), Transform.At(-0.5f, 0.5f, -0.5f));
+            _toggle = ecs.SpawnMesh(cube, Render.CreateMaterial(Lime), Transform.At(0.5f, 0.5f, 0.5f));
+            _purple = ecs.SpawnMesh(cube, Render.CreateMaterial(Color.FromSrgb8(128, 0, 128)), Transform.At(1.5f, 0.5f, 1.5f));
+            _plane = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial((0f, 0f, 1f, 1f)), Transform.Identity);
 
             // The purple cube's wireframe is its own, wider and drawn over quads.
             Render.SetWireframe(_purple, true, (1f, 1f, 0f, 1f));
             ecs.Insert<WireframeLineWidthRef>(_purple).Width = 3f;
             ecs.Insert<WireframeTopologyRef>(_purple).Value = WireframeTopologyRef.ValueVariant.Quads;
 
-            ecs.PointLight(new Vec3(2f, 4f, 2f));
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnPointLight(new Vec3(2f, 4f, 2f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
             _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
 
             Apply(ecs);

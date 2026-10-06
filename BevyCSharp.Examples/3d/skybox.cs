@@ -31,13 +31,13 @@ internal static class Skybox
             ecs.Add(sun, new Transform(new Vec3(0f, 2f, 0f), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
             ecs.Add(sun, new Sun());
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
             ecs.Add(_camera, new FreeCamera());
             Render.SetPostProcessing(_camera, new PostSettings { Msaa = 1, AntiAlias = AntiAliasPass.Temporal });
             Render.SetAmbientOcclusion(_camera, AmbientOcclusionQuality.High);
             Show(Cubemaps[0]);
 
-            var sky = Scene.Srgb8(210, 220, 240);
+            var sky = Color.FromSrgb8(210, 220, 240);
             Render.SetAmbientLight((sky.R, sky.G, sky.B), 1f);
         });
 

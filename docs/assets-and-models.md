@@ -96,6 +96,23 @@ frame is normal rather than a failure. Wait for the `WorldInstanceReady` message
 posted once the entities are in the world, not for the `WorldInstance` component, which marks the
 spawn as done but can appear a frame before the entities are visible.
 
+`App.SpawnGltf` does all of that for a scene spawned as the app starts, and hands the root over
+once the scene is in, where `EcsWorld.Descendants` walks it nearer entities first:
+
+```csharp
+app.SpawnGltf("models/ship.gltf", (ctx, root) =>
+{
+    foreach (var part in ctx.Ecs.Descendants(root))
+        if (ctx.Ecs.NameOf(part) == "Sail") Render.SetMaterial(ctx.Ecs, part, canvas);
+});
+```
+
+A mesh, a material and a place make one entity in one call, as Bevy's bundle of the three does:
+
+```csharp
+ctx.Ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)), Transform.At(0f, 0.5f, 0f));
+```
+
 Compose on top of what a file describes by patching it after it spawns. Bevy's own `bsn!` does the
 same at compile time in Rust, and the ECS surface here does it at runtime:
 

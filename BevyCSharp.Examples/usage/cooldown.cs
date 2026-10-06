@@ -58,8 +58,8 @@ internal static class Cooldown
 
         // Tailwind's slate at 400 behind each picture, and its 50 at half alpha over it while it
         // cools down.
-        var slate400 = Scene.Srgb8(148, 163, 184);
-        var slate50 = Scene.Srgb8(248, 250, 252) with { A = 0.5f };
+        var slate400 = Color.FromSrgb8(148, 163, 184);
+        var slate50 = Color.FromSrgb8(248, 250, 252) with { A = 0.5f };
         foreach (var food in Foods)
         {
             (food.Elapsed, food.Active, food.Last) = (0f, false, UiInteraction.None);

@@ -20,7 +20,7 @@ internal static class UpdateGltfScene
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = true });
             ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 25f, 8f), Vec3.Zero, Vec3.UnitY));
 
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(-0.5f, 0.9f, 1.5f), new Vec3(-0.5f, 0.3f, 0f), Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-0.5f, 0.9f, 1.5f), new Vec3(-0.5f, 0.3f, 0f), Vec3.UnitY));
             Render.SetEnvironmentMap(camera,
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
@@ -39,7 +39,7 @@ internal static class UpdateGltfScene
             var ecs = ctx.Ecs;
             var t = ctx.Time.Elapsed;
             var offset = 0f;
-            foreach (var entity in Descendants.Of(ecs, _moved))
+            foreach (var entity in ecs.Descendants(_moved))
             {
                 if (!ecs.TryGet<Transform>(entity, out var at)) continue;
                 ecs.Set(entity, at with { Translation = new Vec3(offset * MathF.Sin(t) / 20f, 0f, MathF.Cos(t) / 20f) });

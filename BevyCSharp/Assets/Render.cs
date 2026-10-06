@@ -532,6 +532,15 @@ public static unsafe partial class Render
             Roughness = roughness,
         });
 
+    /// <summary>
+    /// Builds a material of one color and returns a handle to it, as Bevy makes a
+    /// <c>StandardMaterial</c> from a <c>Color</c>.
+    /// </summary>
+    /// <param name="color">The color, linear, which <see cref="Color.FromSrgb"/> makes from a picked one.</param>
+    /// <remarks>Neither metal nor a mirror, as Bevy's own default leaves the rest.</remarks>
+    public static AssetHandle CreateMaterial((float R, float G, float B, float A) color) =>
+        CreateMaterial(new MaterialSettings { BaseColor = color });
+
     /// <summary>Builds a material from <paramref name="settings"/> and returns a handle to it.</summary>
     /// <remarks>
     /// A texture the settings leave at <see cref="AssetHandle.None"/> is one the material does

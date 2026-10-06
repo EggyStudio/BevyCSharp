@@ -22,7 +22,7 @@ internal static class AutoExposure
             (_curve, _masked) = (false, true);
             _meteringMask = AssetServer.Load(AssetKind.Image, "textures/basic_metering_mask.png");
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(1f, 0f, 0f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 0f, 0f), Vec3.Zero, Vec3.UnitY));
             Render.SetSkybox(_camera, AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"), 100_000f);
             Apply();
 
@@ -39,13 +39,13 @@ internal static class AutoExposure
                     var height = Vec3.UnitY * level;
                     var facing = Transform.LookingAt(side * 2f + height, height, Vec3.UnitY);
                     facing.Rotation *= standUp;
-                    var color = Scene.Srgb(0.5f + side.X * 0.5f, 0.75f - level * 0.25f, 0.5f + side.Z * 0.5f);
-                    ecs.Mesh(plane, Render.CreateMaterial(new MaterialSettings { BaseColor = color }), facing);
+                    var color = Color.FromSrgb(0.5f + side.X * 0.5f, 0.75f - level * 0.25f, 0.5f + side.Z * 0.5f);
+                    ecs.SpawnMesh(plane, Render.CreateMaterial(new MaterialSettings { BaseColor = color }), facing);
                 }
             }
 
             Render.SetAmbientLight((1f, 1f, 1f), 0f);
-            ecs.PointLight(Vec3.Zero, intensity: 2000f);
+            ecs.SpawnPointLight(Vec3.Zero, intensity: 2000f);
 
             // The mask over the whole picture, shown while V is held.
             _mask = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Display = UiDisplay.None });

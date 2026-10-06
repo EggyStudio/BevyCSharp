@@ -16,6 +16,6 @@ internal static class Mesh2dExample
         var square = ctx.Ecs.Spawn();
         ctx.Ecs.Add(square, new Transform(Vec3.Zero, Quat.Identity, new Vec3(128f)));
         Render2d.SetMesh(ctx.Ecs, square, Render.CreateMesh(MeshShape.Rectangle));
-        Render2d.SetMaterial(ctx.Ecs, square, Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Srgb(0.5f, 0f, 0.5f) }));
+        Render2d.SetMaterial(ctx.Ecs, square, Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(0.5f, 0f, 0.5f) }));
     }, "mesh2d.Setup");
 }

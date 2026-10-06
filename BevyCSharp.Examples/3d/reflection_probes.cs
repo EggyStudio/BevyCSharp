@@ -37,7 +37,7 @@ internal static class ReflectionProbes
             _cubes = AssetServer.LoadGltfScene("models/cubes/Cubes.glb", 0);
 
             // Bevy's Exposure { ev100: 11.0 }, as a lens: f/1 open for a 2048th of a second at ISO 100.
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(-3.883f, 0.325f, 2.781f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-3.883f, 0.325f, 2.781f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.AcesFitted });
             Render.SetLensExposure(_camera, aperture: 1f, shutter: 1f / 2048f, sensitivity: 100f);
             Render.SetEnvironmentMap(_camera, _diffuse, _specular, EnvMapIntensity);
@@ -45,7 +45,7 @@ internal static class ReflectionProbes
 
             _sphere = new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Metallic = 1f, Roughness = _roughness };
             _sphereMaterial = Render.CreateMaterial(_sphere);
-            ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 1f), _sphereMaterial, Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 1f), _sphereMaterial, Transform.Identity);
 
             SpawnReflectionProbe(ecs);
             _text = Ui.SpawnText(Describe(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });

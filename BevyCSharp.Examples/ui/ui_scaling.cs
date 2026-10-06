@@ -33,7 +33,7 @@ internal static class UiScaling
                 Top = Length.Percent(25f),
                 Justify = UiJustify.SpaceAround,
                 Align = UiAlign.Center,
-                Color = Scene.Srgb8(250, 235, 215),
+                Color = Color.FromSrgb8(250, 235, 215),
             });
 
             var red = Ui.SpawnNode(new UiSettings { Width = Length.Px(40f), Height = Length.Px(40f), Color = (1f, 0f, 0f, 1f) });

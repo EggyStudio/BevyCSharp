@@ -46,13 +46,13 @@ internal static class LightProbeBlending
         var ecs = ctx.Ecs;
         var mirror = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Metallic = 1f, Reflectance = 1f, Roughness = 0f });
 
-        _camera = ecs.Camera(Transform.Identity);
+        _camera = ecs.SpawnCamera3d(Transform.Identity);
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
 
-        _sphere = ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 0.5f), mirror, Transform.Identity);
+        _sphere = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 0.5f), mirror, Transform.Identity);
 
         // A long mirror bar under both rooms, shown in place of the sphere.
-        _prism = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 4f, 2f, 20f), mirror, Transform.At(0f, -4f, -5.5f));
+        _prism = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 4f, 2f, 20f), mirror, Transform.At(0f, -4f, -5.5f));
         ecs.Wrap<VisibilityRef>(_prism).Value = Visibility.Hidden;
 
         // A probe for each room, each a cube larger than its room turned over so it faces in, and
@@ -156,7 +156,7 @@ internal static class LightProbeBlending
     {
         if (!_gizmos) return;
 
-        var (tan, crimson, blue) = (Scene.Srgb8(210, 180, 140), Scene.Srgb8(220, 20, 60), Scene.Srgb8(100, 149, 237));
+        var (tan, crimson, blue) = (Color.FromSrgb8(210, 180, 140), Color.FromSrgb8(220, 20, 60), Color.FromSrgb8(100, 149, 237));
         foreach (var probe in Probes)
         {
             var at = ctx.Ecs.GetOrDefault<Transform>(probe);

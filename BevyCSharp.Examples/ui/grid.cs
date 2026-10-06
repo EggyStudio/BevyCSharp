@@ -35,7 +35,7 @@ internal static class Grid
             Padding = Sides.All(Length.Px(24f)),
             RowGap = Length.Px(12f),
             ColumnGap = Length.Px(12f),
-            Color = Scene.Srgb(0.25f, 0.25f, 0.25f),
+            Color = Color.FromSrgb(0.25f, 0.25f, 0.25f),
         });
         UiGrid.Set(square, new GridSettings { Columns = [Track.Flex(1f).Repeated(4)], Rows = [Track.Flex(1f).Repeated(4)] });
         ecs.SetParent(square, root);
@@ -47,7 +47,7 @@ internal static class Grid
         {
             var frame = Ui.SpawnNode(new UiSettings { Display = UiDisplay.Grid, Padding = Sides.All(Length.Px(3f)), Color = (0f, 0f, 0f, 1f) });
             ecs.SetParent(frame, square);
-            ecs.SetParent(Ui.SpawnNode(new UiSettings { Color = Scene.Srgb8(r, g, b) }), frame);
+            ecs.SetParent(Ui.SpawnNode(new UiSettings { Color = Color.FromSrgb8(r, g, b) }), frame);
         }
 
         var sidebar = Ui.SpawnNode(new UiSettings { Display = UiDisplay.Grid, Align = UiAlign.Start, Padding = Sides.All(Length.Px(10f)), RowGap = Length.Px(10f), Color = (0f, 0f, 0f, 1f) });

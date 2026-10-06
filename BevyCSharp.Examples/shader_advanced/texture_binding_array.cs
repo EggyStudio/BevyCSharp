@@ -17,14 +17,14 @@ internal static class TextureBindingArray
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            ecs.Camera(Transform.LookingAt(new Vec3(2f, 2f, 2f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(2f, 2f, 2f), Vec3.Zero, Vec3.UnitY));
 
             var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/texture_binding_array.slang"))
                 .SetSampler("nearest_sampler", SamplerSettings.Nearest);
             for (var i = 0; i < TileId.Length; i++)
                 material.SetTexture("textures", AssetServer.Load(AssetKind.Image, $"textures/rpg/tiles/generic-rpg-tile{TileId[i]:00}.png"), i);
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.Identity);
         }, "texture_binding_array.Setup");
     }
 }

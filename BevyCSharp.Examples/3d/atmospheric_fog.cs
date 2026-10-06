@@ -20,7 +20,7 @@ internal static class AtmosphericFog
         {
             var ecs = ctx.Ecs;
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(-1f, 0.1f, 1f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-1f, 0.1f, 1f), Vec3.Zero, Vec3.UnitY));
             var fog = ecs.Insert<DistanceFogRef>(_camera);
             fog.Color = Color.FromSrgb(0.35f, 0.48f, 0.66f);
             fog.DirectionalLightColor = Color.FromSrgb(1f, 0.95f, 0.85f, 0.5f);
@@ -37,7 +37,7 @@ internal static class AtmosphericFog
 
             // A box around everything, which the fog colors as the sky.
             var sky = Color.FromHex("888888");
-            var box = ecs.Mesh(
+            var box = ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Cuboid, 2f, 1f, 1f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (sky.R, sky.G, sky.B, 1f), Unlit = true, DoubleSided = true }),
                 new Transform(Vec3.Zero, Quat.Identity, new Vec3(20f)));

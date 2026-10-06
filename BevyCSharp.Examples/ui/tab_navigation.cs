@@ -80,7 +80,7 @@ internal static class TabNavigation
                     Color = (Normal.R, Normal.G, Normal.B, 1f),
                 });
                 ecs.Insert<TabIndexRef>(button).Value = index;
-                ecs.SetParent(Ui.SpawnText($"TabIndex {index}", new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { FontSize = 20f }), button);
+                ecs.SetParent(Ui.SpawnText($"TabIndex {index}", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { FontSize = 20f }), button);
                 ecs.SetParent(button, group);
                 Buttons[button] = UiInteraction.None;
             }

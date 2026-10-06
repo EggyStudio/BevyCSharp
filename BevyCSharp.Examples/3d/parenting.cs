@@ -12,17 +12,17 @@ internal static class Parenting
     public static void Build(App app) => app.Startup(ctx =>
     {
         var cube = Render.CreateMesh(MeshShape.Cuboid, 2f, 2f, 2f);
-        var color = Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f));
+        var color = Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f));
 
-        var parent = ctx.Ecs.Mesh(cube, color, Transform.At(0f, 0f, 1f));
+        var parent = ctx.Ecs.SpawnMesh(cube, color, Transform.At(0f, 0f, 1f));
         ctx.Ecs.Add(parent, new Rotator());
 
         // Placed from its parent, so it turns about the parent as the parent turns.
-        var child = ctx.Ecs.Mesh(cube, color, Transform.At(0f, 0f, 3f));
+        var child = ctx.Ecs.SpawnMesh(cube, color, Transform.At(0f, 0f, 3f));
         ctx.Ecs.SetParent(child, parent);
 
-        ctx.Ecs.PointLight(new Vec3(4f, 5f, -4f));
-        ctx.Ecs.Camera(Transform.LookingAt(new Vec3(5f, 10f, 10f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.SpawnPointLight(new Vec3(4f, 5f, -4f));
+        ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(5f, 10f, 10f), Vec3.Zero, Vec3.UnitY));
     });
 }
 

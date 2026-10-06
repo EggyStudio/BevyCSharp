@@ -9,8 +9,8 @@ namespace BevyCSharp.Examples.Interface;
 // along, each cell labeled with the two it uses.
 internal static class FlexLayout
 {
-    private static readonly (float R, float G, float B, float A) AlignColor = Scene.Srgb(1f, 0.066f, 0.349f);
-    private static readonly (float R, float G, float B, float A) JustifyColor = Scene.Srgb(0.102f, 0.522f, 1f);
+    private static readonly (float R, float G, float B, float A) AlignColor = Color.FromSrgb(1f, 0.066f, 0.349f);
+    private static readonly (float R, float G, float B, float A) JustifyColor = Color.FromSrgb(0.102f, 0.522f, 1f);
 
     public static void Build(App app) => app.Startup(ctx =>
     {
@@ -52,7 +52,7 @@ internal static class FlexLayout
                     Justify = justify,
                     Width = Length.Percent(100f),
                     Height = Length.Percent(100f),
-                    Color = Scene.Srgb(0.25f, 0.25f, 0.25f),
+                    Color = Color.FromSrgb(0.25f, 0.25f, 0.25f),
                 });
                 ecs.SetParent(cell, row);
                 Label(ecs, cell, font, AlignColor, Sides.None, $"{align}");

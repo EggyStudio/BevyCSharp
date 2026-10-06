@@ -25,7 +25,7 @@ internal static class ScaleFactorOverride
 
             Render2d.SpawnCamera2d();
             var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Justify = UiJustify.SpaceBetween });
-            var panel = Ui.SpawnNode(new UiSettings { Width = Length.Px(300f), Height = Length.Percent(100f), Border = Sides.All(Length.Px(2f)), Color = Scene.Srgb(0.65f, 0.65f, 0.65f) });
+            var panel = Ui.SpawnNode(new UiSettings { Width = Length.Px(300f), Height = Length.Percent(100f), Border = Sides.All(Length.Px(2f)), Color = Color.FromSrgb(0.65f, 0.65f, 0.65f) });
             ecs.SetParent(panel, root);
             _text = Ui.SpawnText("Example text", new UiSettings { AlignSelf = UiAlignSelf.FlexEnd }, 25f);
             ecs.SetParent(_text, panel);

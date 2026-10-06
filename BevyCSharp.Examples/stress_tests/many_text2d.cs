@@ -67,7 +67,7 @@ internal static class ManyText2d
                 var translation = new Vec3(x * TileSize, y * TileSize, random.NextSingle());
                 var rotation = Quat.FromRotationZ(random.NextSingle());
                 var scale = new Vec3(random.NextSingle() * 2f);
-                var (r, g, b, a) = Scene.Hsl(random.NextSingle() * 360f, 0.8f, 0.8f);
+                var (r, g, b, a) = Color.FromHsl(random.NextSingle() * 360f, 0.8f, 0.8f);
 
                 var text = ecs.Spawn();
                 ecs.Add(text, new Transform(translation, rotation, scale));

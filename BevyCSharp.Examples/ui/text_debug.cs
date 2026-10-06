@@ -43,26 +43,26 @@ internal static class TextDebug
             }
 
             var white = (1f, 1f, 1f, 1f);
-            var yellow = Scene.Srgb8(255, 255, 0);
+            var yellow = Color.FromSrgb8(255, 255, 0);
             Block(left, "This is\ntext with\nline breaks\nin the top left.", 25f, white);
             Block(left, "This text is right-justified. The `Justify` component controls the horizontal alignment of the lines of multi-line text relative to each other, and does not affect the text node's position in the UI layout.", 25f, yellow, TextJustify.Right, 300f);
             Block(left, "This\ntext has\nline breaks and also a set width in the bottom left.", 25f, white, maxWidth: 300f);
 
-            Block(right, "This text is very long, has a limited width, is center-justified, is positioned in the top right and is also colored pink.", 33f, Scene.Srgb(0.8f, 0.2f, 0.7f), TextJustify.Center, 400f);
+            Block(right, "This text is very long, has a limited width, is center-justified, is positioned in the top right and is also colored pink.", 33f, Color.FromSrgb(0.8f, 0.2f, 0.7f), TextJustify.Center, 400f);
             Block(right, "This text is left-justified and is vertically positioned to distribute the empty space equally above and below it.", 29f, yellow, TextJustify.Left, 300f);
-            Block(right, "This text is fully justified and is positioned in the same way.", 29f, Scene.Srgb8(173, 255, 47), TextJustify.Justified, 300f);
+            Block(right, "This text is fully justified and is positioned in the same way.", 29f, Color.FromSrgb8(173, 255, 47), TextJustify.Justified, 300f);
 
             // The block whose runs change as it runs, in sizes from nothing to below nothing.
             _changes = Block(right, string.Empty, 21f, white);
             Entity Span(string text, float size, (float R, float G, float B, float A) color) => Ui.SpawnTextSpan(_changes, text, new UiTextSettings { Font = font, FontSize = size }, color);
             Span("\nThis text changes in the bottom right", 21f, white);
-            Span(" this text has zero font size", 0f, Scene.Srgb8(0, 0, 255));
-            _line = Span("\nThis text changes in the bottom right - ", 21f, Scene.Srgb8(255, 0, 0));
-            _fps = Span(string.Empty, 21f, Scene.Srgb8(255, 69, 0));
+            Span(" this text has zero font size", 0f, Color.FromSrgb8(0, 0, 255));
+            _line = Span("\nThis text changes in the bottom right - ", 21f, Color.FromSrgb8(255, 0, 0));
+            _fps = Span(string.Empty, 21f, Color.FromSrgb8(255, 69, 0));
             Span(" fps, ", 10f, yellow);
-            _frameTime = Span(string.Empty, 21f, Scene.Srgb8(0, 255, 0));
-            Span(" ms/frame", 42f, Scene.Srgb8(0, 0, 255));
-            Span(" this text has negative font size", -42f, Scene.Srgb8(0, 0, 255));
+            _frameTime = Span(string.Empty, 21f, Color.FromSrgb8(0, 255, 0));
+            Span(" ms/frame", 42f, Color.FromSrgb8(0, 0, 255));
+            Span(" this text has negative font size", -42f, Color.FromSrgb8(0, 0, 255));
         }, "text_debug.Setup");
 
         app.Update(ctx =>

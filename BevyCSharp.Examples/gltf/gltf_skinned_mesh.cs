@@ -17,7 +17,7 @@ internal static class GltfSkinnedMesh
         app.Startup(ctx =>
         {
             Render.SetAmbientLight((1f, 1f, 1f), 750f);
-            ctx.Ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
+            ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
             _scene = ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene("models/SimpleSkin/SimpleSkin.gltf"));
         }, "gltf_skinned_mesh.Setup");
 
@@ -29,7 +29,7 @@ internal static class GltfSkinnedMesh
     private static void JointAnimation(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        foreach (var entity in Descendants.Of(ecs, _scene))
+        foreach (var entity in ecs.Descendants(_scene))
         {
             if (ecs.Get<SkinnedMeshRef>(entity) is null) continue;
             var meshNode = ecs.ParentOf(entity);

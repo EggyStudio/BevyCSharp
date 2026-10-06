@@ -32,9 +32,9 @@ internal static class Align
             var ecs = ctx.Ecs;
             (_random, _inMotion, _shown, _ship) = (new Random(19878367), false, true, Entity.None);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(3f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, -2f, 0f));
-            ecs.PointLight(new Vec3(4f, 7f, -4f), shadows: true);
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, -2f, 0f));
+            ecs.SpawnPointLight(new Vec3(4f, 7f, -4f), shadows: true);
 
             (_first, _second) = (RandomDirection(), RandomDirection());
             _target = Aligned(_first, _second);
@@ -49,12 +49,12 @@ internal static class Align
             var input = ctx.Input;
 
             Gizmos.Arrow(Vec3.Zero, _first * 1.5f, (1f, 1f, 1f, 1f));
-            Gizmos.Arrow(Vec3.Zero, _second * 1.5f, Scene.Srgb(0.5f, 0.5f, 0.5f));
+            Gizmos.Arrow(Vec3.Zero, _second * 1.5f, Color.FromSrgb(0.5f, 0.5f, 0.5f));
             if (_ship == Entity.None) return;
 
             var ship = ecs.GetOrDefault<Transform>(_ship);
             Gizmos.Arrow(ship.Translation, ship.Translation + ship.Rotation * -Vec3.UnitZ * 1.5f, (1f, 0f, 0f, 1f));
-            Gizmos.Arrow(ship.Translation, ship.Translation + ship.Rotation * Vec3.UnitX * 1.5f, Scene.Srgb(0.65f, 0f, 0f));
+            Gizmos.Arrow(ship.Translation, ship.Translation + ship.Rotation * Vec3.UnitX * 1.5f, Color.FromSrgb(0.65f, 0f, 0f));
 
             if (input.KeyPressed(Key.R))
             {
@@ -76,7 +76,7 @@ internal static class Align
             // Bevy's smooth_nudge, which closes the same share of the gap each second whatever the
             // frame rate.
             if (!_inMotion) return;
-            ship.Rotation = Scene.Slerp(ship.Rotation, _target, 1f - MathF.Exp(-3f * ctx.Time.Delta));
+            ship.Rotation = Quat.Slerp(ship.Rotation, _target, 1f - MathF.Exp(-3f * ctx.Time.Delta));
             ecs.Set(_ship, ship);
             var dot = MathF.Abs(ship.Rotation.X * _target.X + ship.Rotation.Y * _target.Y + ship.Rotation.Z * _target.Z + ship.Rotation.W * _target.W);
             if (dot >= 1f - 1e-7f) _inMotion = false;

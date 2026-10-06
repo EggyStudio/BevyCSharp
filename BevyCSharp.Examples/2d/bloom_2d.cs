@@ -46,12 +46,12 @@ internal static class Bloom2d
         var bird = ecs.Spawn();
         ecs.Add(bird, Transform.Identity);
         Render2d.SetSprite(ecs, bird, AssetServer.Load(AssetKind.Image, "branding/bevy_bird_dark.png"),
-            new SpriteSettings { Color = Scene.Srgb(5f, 5f, 5f), Size = (160f, 160f) });
+            new SpriteSettings { Color = Color.FromSrgb(5f, 5f, 5f), Size = (160f, 160f) });
 
         foreach (var (mesh, color, x) in new[]
         {
-            (Render.CreateMesh(MeshShape.Circle, 100f), Scene.Srgb(7.5f, 0f, 7.5f), -200f),
-            (Render.CreateMesh(MeshShape.RegularPolygon, 100f, 6f), Scene.Srgb(6.25f, 9.4f, 9.1f), 200f),
+            (Render.CreateMesh(MeshShape.Circle, 100f), Color.FromSrgb(7.5f, 0f, 7.5f), -200f),
+            (Render.CreateMesh(MeshShape.RegularPolygon, 100f, 6f), Color.FromSrgb(6.25f, 9.4f, 9.1f), 200f),
         })
         {
             var entity = ecs.Spawn();

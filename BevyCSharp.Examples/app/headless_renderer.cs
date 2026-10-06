@@ -30,12 +30,12 @@ internal static class HeadlessRenderer
             var ecs = ctx.Ecs;
             (_capture, _frame, _fileNumber) = (null, 0, 0);
             Render.SetClearColor((0f, 0f, 0f, 1f));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 4f), Scene.Material((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb8(124, 144, 255)), Transform.At(0f, 0.5f, 0f));
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)), Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
             // Tonemapping off, as Bevy's camera has it, so the saved picture is the light as drawn.
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
             ecs.Wrap<TonemappingRef>(camera).Value = TonemappingRef.ValueVariant.None;
         }, "headless_renderer.Setup");
 

@@ -30,11 +30,11 @@ internal static class ShadowCasterReceiver
             var white = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f });
             var sphere = Render.CreateMesh(MeshShape.Sphere, 0.25f);
 
-            Spawn(ecs, sphere, Scene.Material((1f, 0f, 0f, 1f)), Transform.At(-1f, 2f, 0f), MeshFlags.None);
-            Spawn(ecs, sphere, Scene.Material((0f, 0f, 1f, 1f)), Transform.At(1f, 2f, 0f), MeshFlags.NoShadowCasting);
+            Spawn(ecs, sphere, Render.CreateMaterial((1f, 0f, 0f, 1f)), Transform.At(-1f, 2f, 0f), MeshFlags.None);
+            Spawn(ecs, sphere, Render.CreateMaterial((0f, 0f, 1f, 1f)), Transform.At(1f, 2f, 0f), MeshFlags.NoShadowCasting);
 
             var plane = Render.CreateMesh(MeshShape.Plane, 20f, 20f);
-            Spawn(ecs, plane, Scene.Material((0f, 1f, 0f, 1f)), Transform.At(0f, 1f, -10f), MeshFlags.NoShadowCasting | MeshFlags.NoShadowReceiving);
+            Spawn(ecs, plane, Render.CreateMaterial((0f, 1f, 0f, 1f)), Transform.At(0f, 1f, -10f), MeshFlags.NoShadowCasting | MeshFlags.NoShadowReceiving);
             Spawn(ecs, plane, white, Transform.Identity, MeshFlags.None);
 
             Console.WriteLine("Using DirectionalLight");
@@ -46,7 +46,7 @@ internal static class ShadowCasterReceiver
             ecs.Add(_sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 2f) * Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
             Render.SetShadowCascades(_sun, maximum: 25f, firstBound: 7f);
 
-            ecs.Camera(Transform.LookingAt(new Vec3(-5f, 5f, 5f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-5f, 5f, 5f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
         });
 
         app.Update(ctx =>
@@ -75,7 +75,7 @@ internal static class ShadowCasterReceiver
 
     private static void Spawn(EcsWorld ecs, AssetHandle mesh, AssetHandle material, Transform at, MeshFlags flags)
     {
-        var entity = ecs.Mesh(mesh, material, at);
+        var entity = ecs.SpawnMesh(mesh, material, at);
         Render.SetMeshFlags(ecs, entity, flags);
         Flags[entity] = flags;
     }

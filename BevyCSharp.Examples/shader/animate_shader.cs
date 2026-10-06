@@ -15,8 +15,8 @@ internal static class AnimateShader
         {
             var ecs = ctx.Ecs;
             var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/animate_shader.slang"));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.At(0f, 0.5f, 0f));
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "animate_shader.Setup");
     }
 }

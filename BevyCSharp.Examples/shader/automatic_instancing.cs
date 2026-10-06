@@ -30,12 +30,12 @@ internal static class AutomaticInstancing
             for (var index = 0; index < ImageSize * ImageSize; index++)
             {
                 var (x, y) = (index % ImageSize, index / ImageSize);
-                var entity = ecs.Mesh(cube, material, Transform.At((x - ImageSize / 2f) / 50f, -((y - ImageSize / 2f) / 50f), 0f));
+                var entity = ecs.SpawnMesh(cube, material, Transform.At((x - ImageSize / 2f) / 50f, -((y - ImageSize / 2f) / 50f), 0f));
                 ecs.Insert<MeshTagRef>(entity).Value = (uint)index;
                 Index[entity] = index;
             }
 
-            ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "automatic_instancing.Setup");
 
         app.Update(ctx =>

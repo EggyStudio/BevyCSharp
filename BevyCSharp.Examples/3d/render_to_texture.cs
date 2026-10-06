@@ -16,31 +16,31 @@ internal static class RenderToTexture
         var ecs = ctx.Ecs;
         var image = Render.CreateTarget(512, 512);
 
-        var inner = ecs.Mesh(
+        var inner = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Cuboid, 4f, 4f, 4f),
-            Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(0.8f, 0.7f, 0.6f), Reflectance = 0.02f }),
+            Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(0.8f, 0.7f, 0.6f), Reflectance = 0.02f }),
             Transform.At(0f, 0f, 1f));
         Render.SetLayers(ecs, inner, FirstPassLayer);
         ecs.Add(inner, new FirstPassCube());
 
         // Lighting both passes.
-        var light = ecs.PointLight(new Vec3(0f, 0f, 10f));
+        var light = ecs.SpawnPointLight(new Vec3(0f, 0f, 10f));
         Render.SetLayers(ecs, light, 1u | FirstPassLayer);
 
         // Drawn before the main camera, into the image, on a white ground.
-        var first = ecs.Camera(
+        var first = ecs.SpawnCamera3d(
             Transform.LookingAt(new Vec3(0f, 0f, 15f), Vec3.Zero, Vec3.UnitY),
             new CameraSettings { Order = -1, Clear = ClearMode.Custom, ClearColor = (1f, 1f, 1f, 1f), Layers = FirstPassLayer });
         Render.SetCameraTarget(first, image);
 
         // The cube in the main pass, wearing the first pass as its texture.
-        var outer = ecs.Mesh(
+        var outer = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Cuboid, 4f, 4f, 4f),
             Render.CreateMaterial(new MaterialSettings { BaseColorTexture = image, Reflectance = 0.02f }),
             new Transform(new Vec3(0f, 0f, 1.5f), Quat.FromRotationX(-MathF.PI / 5f), Vec3.One));
         ecs.Add(outer, new MainPassCube());
 
-        ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 15f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 15f), Vec3.Zero, Vec3.UnitY));
     });
 }
 

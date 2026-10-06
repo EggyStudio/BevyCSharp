@@ -48,12 +48,12 @@ internal static class ComputeMesh
                 .Set("color", new Vector4(color.R, color.G, color.B, color.A));
 
             // Tailwind's red and sky, each at 400.
-            ecs.Mesh(empty, Material(Scene.Srgb8(248, 113, 113)), Transform.At(-2.5f, 1.5f, 0f));
-            ecs.Mesh(empty, Material(Scene.Srgb8(56, 189, 248)), Transform.At(2.5f, 1.5f, 0f));
+            ecs.SpawnMesh(empty, Material(Color.FromSrgb8(248, 113, 113)), Transform.At(-2.5f, 1.5f, 0f));
+            ecs.SpawnMesh(empty, Material(Color.FromSrgb8(56, 189, 248)), Transform.At(2.5f, 1.5f, 0f));
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 4f), Scene.Material((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
-            ecs.Camera(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
         }, "compute_mesh.Setup");
 
         // Once, as soon as the compute shader can run, as Bevy's runs once for each mesh to make.

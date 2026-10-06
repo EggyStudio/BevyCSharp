@@ -105,7 +105,7 @@ internal static class DisplayAndVisibility
             var key = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Row, Align = UiAlign.Start, Justify = UiJustify.Start, ColumnGap = Length.Px(10f) });
             ecs.SetParent(key, root);
             ecs.SetParent(Ui.SpawnText("Display::None\nVisibility::Hidden\nVisibility::Inherited", new UiSettings { Color = (HiddenColor.R, HiddenColor.G, HiddenColor.B, 1f) }, new UiTextSettings { Font = font, Justify = TextJustify.Center }), key);
-            ecs.SetParent(Ui.SpawnText("-\n-\n-", new UiSettings { Color = Scene.Srgb8(169, 169, 169) }, new UiTextSettings { Font = font, Justify = TextJustify.Center }), key);
+            ecs.SetParent(Ui.SpawnText("-\n-\n-", new UiSettings { Color = Color.FromSrgb8(169, 169, 169) }, new UiTextSettings { Font = font, Justify = TextJustify.Center }), key);
             ecs.SetParent(Ui.SpawnText("The UI Node and its descendants will not be visible and will not be allotted any space in the UI layout.\nThe UI Node will not be visible but will still occupy space in the UI layout.\nThe UI node will inherit the visibility property of its parent. If it has no parent it will be visible.", new UiSettings(), style), key);
         }, "display_and_visibility.Setup");
 
@@ -168,5 +168,5 @@ internal static class DisplayAndVisibility
     }
 
     private static (float R, float G, float B, float A) Hex(string hex) =>
-        Scene.Srgb8(Convert.ToByte(hex[..2], 16), Convert.ToByte(hex[2..4], 16), Convert.ToByte(hex[4..], 16));
+        Color.FromSrgb8(Convert.ToByte(hex[..2], 16), Convert.ToByte(hex[2..4], 16), Convert.ToByte(hex[4..], 16));
 }

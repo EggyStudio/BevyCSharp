@@ -36,7 +36,7 @@ internal static class ManyMaterials
     {
         var ecs = ctx.Ecs;
         var w = (float)n;
-        ecs.Camera(Transform.LookingAt(new Vec3(w * 1.25f, w + 1f, w * 1.25f), new Vec3(0f, w * -1.1f + 1f, 0f), Vec3.UnitY));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(w * 1.25f, w + 1f, w * 1.25f), new Vec3(0f, w * -1.1f + 1f, 0f), Vec3.UnitY));
 
         // Bevy's EulerRot::ZYX of nothing about Z, a radian about Y and an eighth of a turn down.
         var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 3000f, Shadows = true });
@@ -49,7 +49,7 @@ internal static class ManyMaterials
             {
                 var material = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f) });
                 Materials.Add(material);
-                ecs.Mesh(mesh, material, Transform.At(x, 0f, z));
+                ecs.SpawnMesh(mesh, material, Transform.At(x, 0f, z));
             }
         }
     }
@@ -61,7 +61,7 @@ internal static class ManyMaterials
         for (var i = 0; i < Materials.Count; i++)
         {
             var hue = (i * 2.345f + elapsed) * 100f % 360f;
-            Render.WriteMaterial(Materials[i], new MaterialSettings { BaseColor = Scene.Hsl(hue, 1f, 0.5f) });
+            Render.WriteMaterial(Materials[i], new MaterialSettings { BaseColor = Color.FromHsl(hue, 1f, 0.5f) });
         }
     }
 }

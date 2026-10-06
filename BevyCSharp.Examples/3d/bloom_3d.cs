@@ -39,7 +39,7 @@ internal static class Bloom3d
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _camera = ecs.Camera(
+            _camera = ecs.SpawnCamera3d(
                 Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY),
                 new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
             Render.SetPostProcessing(_camera, Bloom);
@@ -66,7 +66,7 @@ internal static class Bloom3d
                         2 => (red, 1f),
                         _ => (black, 1.5f),
                     };
-                    var sphere = ecs.Mesh(mesh, material, new Transform(new Vec3(x * 2f, 0f, z * 2f), Quat.Identity, new Vec3(scale)));
+                    var sphere = ecs.SpawnMesh(mesh, material, new Transform(new Vec3(x * 2f, 0f, z * 2f), Quat.Identity, new Vec3(scale)));
                     ecs.Add(sphere, new Bouncing());
                 }
             }

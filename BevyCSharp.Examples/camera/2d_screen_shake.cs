@@ -35,10 +35,10 @@ internal static class ScreenShake2d
 
         foreach (var (width, height, color, x, y, z) in new[]
         {
-            (1000f, 700f, Scene.Srgb(0.2f, 0.2f, 0.3f), 0f, 0f, 0f),
-            (50f, 100f, Scene.Srgb(0.25f, 0.94f, 0.91f), 0f, 0f, 2f),
-            (50f, 50f, Scene.Srgb(0.85f, 0f, 0.2f), -450f, 200f, 2f),
-            (70f, 50f, Scene.Srgb(0.5f, 0.8f, 0.2f), 450f, -150f, 2f),
+            (1000f, 700f, Color.FromSrgb(0.2f, 0.2f, 0.3f), 0f, 0f, 0f),
+            (50f, 100f, Color.FromSrgb(0.25f, 0.94f, 0.91f), 0f, 0f, 2f),
+            (50f, 50f, Color.FromSrgb(0.85f, 0f, 0.2f), -450f, 200f, 2f),
+            (70f, 50f, Color.FromSrgb(0.5f, 0.8f, 0.2f), 450f, -150f, 2f),
         })
         {
             var entity = ecs.Spawn();

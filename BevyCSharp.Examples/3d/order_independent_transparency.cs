@@ -25,12 +25,12 @@ internal static class OrderIndependentTransparency
             Spawned.Clear();
             (_oit, _scene) = (true, 0);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Msaa = 1 });
             Shaders.SetPrepass(_camera, depth: true);
             Render.SetSortedTransparency(_camera, true);
 
-            ecs.PointLight(new Vec3(4f, 8f, 4f));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f));
             _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
 
             Spheres(ecs);
@@ -65,10 +65,10 @@ internal static class OrderIndependentTransparency
 
     // A color in sRGB with an alpha, blended.
     private static AssetHandle Blend((float R, float G, float B) color, float alpha) =>
-        Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(color.R, color.G, color.B, alpha), AlphaMode = AlphaMode.Blend });
+        Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(color.R, color.G, color.B, alpha), AlphaMode = AlphaMode.Blend });
 
     private static void Spawn(EcsWorld ecs, AssetHandle mesh, AssetHandle material, Transform at) =>
-        Spawned.Add(ecs.Mesh(mesh, material, at));
+        Spawned.Add(ecs.SpawnMesh(mesh, material, at));
 
     private static void Spheres(EcsWorld ecs)
     {
@@ -96,7 +96,7 @@ internal static class OrderIndependentTransparency
     {
         var sphere = Render.CreateMesh(MeshShape.Sphere, 1f);
         var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
-        var solid = Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f));
+        var solid = Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f));
 
         Spawn(ecs, cube, solid, Transform.At(-2.5f, 0f, 2f));
         Spawn(ecs, sphere, Blend(Red, 0.5f), Transform.At(-2.5f, 0f, 0f));

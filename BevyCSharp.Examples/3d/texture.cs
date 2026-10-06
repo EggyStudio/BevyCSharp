@@ -26,9 +26,9 @@ internal static class Texture
                 AlphaMode = AlphaMode.Blend,
                 Unlit = true,
             });
-            ctx.Ecs.Mesh(quad, material, new Transform(new Vec3(0f, 0f, z), tilt, Vec3.One));
+            ctx.Ecs.SpawnMesh(quad, material, new Transform(new Vec3(0f, 0f, z), tilt, Vec3.One));
         }
 
-        ctx.Ecs.Camera(Transform.LookingAt(new Vec3(3f, 5f, 8f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 5f, 8f), Vec3.Zero, Vec3.UnitY));
     });
 }

@@ -80,7 +80,7 @@ internal static class ManyMorphTargets
 
         var (across, _) = Dims(_slotCount);
         var distance = across * (_camera == "far" ? 200f : 4f);
-        var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, distance), Vec3.Zero, Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, distance), Vec3.Zero, Vec3.UnitY));
         if (_motionBlur) ecs.Insert<MotionBlurRef>(camera).ShutterAngle = 3f;
 
         _scene = AssetServer.LoadGltfScene(Path, 0);
@@ -174,7 +174,7 @@ internal static class ManyMorphTargets
     internal static bool SetWeights(EcsWorld ecs, Entity root, float value)
     {
         var any = false;
-        foreach (var child in Descendants.Of(ecs, root))
+        foreach (var child in ecs.Descendants(root))
         {
             if (ecs.GetReflected(child, MorphWeightsType, ".weights") is not { } weights) continue;
 

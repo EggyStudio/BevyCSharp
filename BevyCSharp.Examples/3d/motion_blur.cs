@@ -33,7 +33,7 @@ internal static class MotionBlur
         Racers.Clear();
         (_shutterAngle, _samples, _chase) = (1f, 2, true);
 
-        _camera = ecs.Camera(Transform.Identity);
+        _camera = ecs.SpawnCamera3d(Transform.Identity);
         ApplyBlur();
 
         Render.SetAmbientLight((1f, 1f, 1f), 300f);
@@ -42,7 +42,7 @@ internal static class MotionBlur
         ecs.Add(sun, Transform.LookingAt(Vec3.Zero, new Vec3(-1f, -0.7f, -1f), Vec3.UnitX));
 
         // The sky, a sphere around everything seen from inside.
-        ecs.Mesh(
+        ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Sphere, 0.5f),
             Render.CreateMaterial(new MaterialSettings { Unlit = true, BaseColor = (0.1f, 0.6f, 1f, 1f) }),
             new Transform(Vec3.Zero, Quat.Identity, new Vec3(-4000f)));
@@ -56,7 +56,7 @@ internal static class MotionBlur
             Indices = [0, 3, 2, 0, 2, 1],
         };
         var checker = UvDebugTexture();
-        ecs.Mesh(
+        ecs.SpawnMesh(
             Render.CreateMesh(ground),
             Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f, BaseColorTexture = checker }),
             new Transform(new Vec3(0f, -0.65f, 0f), Quat.Identity, new Vec3(80f)));
@@ -80,13 +80,13 @@ internal static class MotionBlur
         for (var i = 0; i < Cars; i++)
         {
             var color = colors[i % colors.Length];
-            var car = ecs.Mesh(box, color, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.5f)));
-            ecs.SetParent(ecs.Mesh(box, color, new Transform(new Vec3(0f, 0.08f, 0.03f), Quat.Identity, new Vec3(1f, 1f, 0.5f))), car);
+            var car = ecs.SpawnMesh(box, color, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.5f)));
+            ecs.SetParent(ecs.SpawnMesh(box, color, new Transform(new Vec3(0f, 0.08f, 0.03f), Quat.Identity, new Vec3(1f, 1f, 0.5f))), car);
 
             var wheels = new List<Entity>();
             foreach (var (x, z) in new[] { (1f, 1f), (1f, -1f), (-1f, 1f), (-1f, -1f) })
             {
-                var wheel = ecs.Mesh(cylinder, wheelMaterial, new Transform(new Vec3(0.14f * x, -0.045f, 0.15f * z), Quat.FromRotationZ(MathF.PI / 2f), new Vec3(0.15f, 0.04f, 0.15f)));
+                var wheel = ecs.SpawnMesh(cylinder, wheelMaterial, new Transform(new Vec3(0.14f * x, -0.045f, 0.15f * z), Quat.FromRotationZ(MathF.PI / 2f), new Vec3(0.15f, 0.04f, 0.15f)));
                 ecs.SetParent(wheel, car);
                 wheels.Add(wheel);
             }
@@ -107,8 +107,8 @@ internal static class MotionBlur
             for (var i = 0; i < Trees; i++)
             {
                 var (x, z) = TrackPosition(offset, i / (float)Trees * MathF.PI * 2f);
-                ecs.Mesh(sphere, leaves, new Transform(new Vec3(x, -0.3f, z), Quat.Identity, new Vec3(0.3f)));
-                ecs.Mesh(capsule, trunk, new Transform(new Vec3(x, -0.5f, z), Quat.Identity, new Vec3(0.05f, 0.3f, 0.05f)));
+                ecs.SpawnMesh(sphere, leaves, new Transform(new Vec3(x, -0.3f, z), Quat.Identity, new Vec3(0.3f)));
+                ecs.SpawnMesh(capsule, trunk, new Transform(new Vec3(x, -0.5f, z), Quat.Identity, new Vec3(0.05f, 0.3f, 0.05f)));
             }
         }
     }
@@ -116,14 +116,14 @@ internal static class MotionBlur
     private static void SpawnBarriers(EcsWorld ecs)
     {
         var capsule = Render.CreateMesh(MeshShape.Capsule, 0.5f, 1f);
-        var orange = Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb8(255, 87, 51), Reflectance = 1f });
+        var orange = Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb8(255, 87, 51), Reflectance = 1f });
 
         foreach (var offset in new[] { 0.04f, -0.04f })
         {
             for (var i = 0; i < Cones; i++)
             {
                 var (x, z) = TrackPosition(offset, i / (float)Cones * MathF.PI * 2f);
-                ecs.Mesh(capsule, orange, new Transform(new Vec3(x, -0.65f, z), Quat.Identity, new Vec3(0.07f)));
+                ecs.SpawnMesh(capsule, orange, new Transform(new Vec3(x, -0.65f, z), Quat.Identity, new Vec3(0.07f)));
             }
         }
     }

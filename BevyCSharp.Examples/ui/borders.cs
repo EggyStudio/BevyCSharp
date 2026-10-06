@@ -31,7 +31,7 @@ internal static class Borders
         var ecs = ctx.Ecs;
         Render2d.SpawnCamera2d();
 
-        var root = Ui.SpawnNode(new UiSettings { Margin = Sides.All(Length.Px(25f)), Direction = UiDirection.Column, AlignSelf = UiAlignSelf.Stretch, Color = Scene.Srgb(0.25f, 0.25f, 0.25f) });
+        var root = Ui.SpawnNode(new UiSettings { Margin = Sides.All(Length.Px(25f)), Direction = UiDirection.Column, AlignSelf = UiAlignSelf.Stretch, Color = Color.FromSrgb(0.25f, 0.25f, 0.25f) });
         ecs.Wrap<NodeRef>(root).JustifySelf = NodeRef.JustifySelfVariant.Stretch;
 
         Heading(ecs, root, "Borders");
@@ -63,7 +63,7 @@ internal static class Borders
                 Align = UiAlign.Center,
                 Justify = UiJustify.Center,
                 Corners = new Corners(Corner(l, t), Corner(r, t), Corner(r, b), Corner(l, b)),
-                Color = Scene.Srgb8(128, 0, 0),
+                Color = Color.FromSrgb8(128, 0, 0),
             });
             var border = ecs.Wrap<BorderColorRef>(box);
             border.Top = new Color(1f, 0f, 0f);

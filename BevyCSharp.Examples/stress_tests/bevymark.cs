@@ -101,7 +101,7 @@ internal static class Bevymark
         ecs.Insert<GlobalZIndexRef>(panel).Value = int.MaxValue;
         var text = Ui.SpawnText("", new UiSettings(), 40f);
         ecs.SetParent(text, panel);
-        (float, float, float, float) lime = Scene.Srgb(0f, 1f, 0f), aqua = Scene.Srgb(0f, 1f, 1f);
+        (float, float, float, float) lime = Color.FromSrgb(0f, 1f, 0f), aqua = Color.FromSrgb(0f, 1f, 1f);
         var style = new UiTextSettings { FontSize = 40f };
         Ui.SpawnTextSpan(text, "Bird Count: ", style, lime);
         _countSpan = Ui.SpawnTextSpan(text, "", style, aqua);
@@ -250,7 +250,7 @@ internal static class Bevymark
         {
             materials.Add(Render2d.CreateMaterial(new ColorMaterialSettings
             {
-                Color = Scene.Srgb8((byte)colors.Next(256), (byte)colors.Next(256), (byte)colors.Next(256)),
+                Color = Color.FromSrgb8((byte)colors.Next(256), (byte)colors.Next(256), (byte)colors.Next(256)),
                 Texture = textures.Length > 0 ? textures[picks.Next(textures.Length)] : AssetHandle.None,
                 AlphaMode = alphaMode,
             }));

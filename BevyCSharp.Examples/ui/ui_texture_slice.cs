@@ -40,7 +40,7 @@ internal static class UiTextureSlice
                 Ui.SetImage(button, image);
                 ecs.SetParent(button, middle);
 
-                var label = Ui.SpawnText("Button", new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { Font = font, FontSize = 33f });
+                var label = Ui.SpawnText("Button", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { Font = font, FontSize = 33f });
                 ecs.SetParent(label, button);
                 Buttons.Add((button, label, image));
             }
@@ -56,8 +56,8 @@ internal static class UiTextureSlice
 
                 (var text, image.Color) = interaction switch
                 {
-                    UiInteraction.Pressed => ("Press", Scene.Srgb8(255, 215, 0)),
-                    UiInteraction.Hovered => ("Hover", Scene.Srgb8(255, 165, 0)),
+                    UiInteraction.Pressed => ("Press", Color.FromSrgb8(255, 215, 0)),
+                    UiInteraction.Hovered => ("Hover", Color.FromSrgb8(255, 165, 0)),
                     _ => ("Button", (1f, 1f, 1f, 1f)),
                 };
                 Ui.SetText(label, text);

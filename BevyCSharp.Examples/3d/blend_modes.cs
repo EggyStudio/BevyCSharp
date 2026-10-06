@@ -37,7 +37,7 @@ internal static class BlendModes
     {
         var ecs = ctx.Ecs;
         // Bevy sets every material's alpha from the first frame on, so it starts at the alpha.
-        var baseColor = Scene.Srgb(0.9f, 0.2f, 0.3f) with { A = _alpha };
+        var baseColor = Color.FromSrgb(0.9f, 0.2f, 0.3f) with { A = _alpha };
         var sphere = Render.CreateMesh(MeshShape.Sphere, 0.9f);
 
         var spheres = new List<Entity>();
@@ -47,7 +47,7 @@ internal static class BlendModes
             var settings = new MaterialSettings { BaseColor = baseColor, AlphaMode = modes[i] };
             var material = Render.CreateMaterial(settings);
             Materials.Add(new Controlled(material, settings, Unlit: true));
-            spheres.Add(ecs.Mesh(sphere, material, Transform.At(-4f + 2f * i, 0f, 0f)));
+            spheres.Add(ecs.SpawnMesh(sphere, material, Transform.At(-4f + 2f * i, 0f, 0f)));
         }
 
         // A checkered floor, which the keys recolor too but never light differently.
@@ -61,11 +61,11 @@ internal static class BlendModes
         var plane = Render.CreateMesh(MeshShape.Plane, 2f, 2f);
         for (var x = -3; x < 4; x++)
             for (var z = -3; z < 4; z++)
-                ecs.Mesh(plane, (x + z) % 2 == 0 ? blackMaterial : whiteMaterial, Transform.At(x * 2f, -1f, z * 2f));
+                ecs.SpawnMesh(plane, (x + z) % 2 == 0 ? blackMaterial : whiteMaterial, Transform.At(x * 2f, -1f, z * 2f));
 
-        ecs.PointLight(new Vec3(4f, 8f, 4f));
+        ecs.SpawnPointLight(new Vec3(4f, 8f, 4f));
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 2.5f, 10f), Vec3.Zero, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 2.5f, 10f), Vec3.Zero, Vec3.UnitY));
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = _hdr });
 
         var font = AssetServer.Load(AssetKind.Font, "fonts/FiraMono-Medium.ttf");
@@ -76,7 +76,7 @@ internal static class BlendModes
         _display = Ui.SpawnText(Describe(), new UiSettings { Absolute = true, Top = Length.Px(12f), Right = Length.Px(12f) }, style);
 
         // Each label's lines run up from a point over its sphere, which follows the sphere on screen.
-        var orange = Scene.Srgb(1f, 165f / 255f, 0f);
+        var orange = Color.FromSrgb(1f, 165f / 255f, 0f);
         var labelStyle = new UiTextSettings { Font = font, Wrap = TextWrap.NoWrap };
         string[] names = ["┌─ Opaque\n│\n│\n│\n│", "┌─ Blend\n│\n│\n│", "┌─ Premultiplied\n│\n│", "┌─ Add\n│", "┌─ Multiply"];
         for (var i = 0; i < names.Length; i++)
@@ -142,7 +142,6 @@ internal static class BlendModes
 
     // Bevy's random sRGB channel, as linear.
     private static float Linear(float srgb) => Color.FromSrgb(srgb, 0f, 0f).R;
-
 
     private static string Describe() => string.Create(CultureInfo.InvariantCulture, $"  HDR: {(_hdr ? "ON " : "OFF")}\nAlpha: {_alpha:0.00}");
 }

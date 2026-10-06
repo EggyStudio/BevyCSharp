@@ -37,17 +37,17 @@ internal static class Axes
     {
         var ecs = ctx.Ecs;
         _random = new Random(19878367);
-        ecs.PointLight(new Vec3(2f, 6f, 0f), shadows: true);
-        ecs.Camera(Transform.LookingAt(new Vec3(0f, 1.5f, -8f), new Vec3(0f, -0.5f, 0f), Vec3.UnitY));
+        ecs.SpawnPointLight(new Vec3(2f, 6f, 0f), shadows: true);
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, -8f), new Vec3(0f, -0.5f, 0f), Vec3.UnitY));
 
-        foreach (var (size, color) in new[] { (1f, Scene.Srgb(0.8f, 0.7f, 0.6f)), (0.5f, Scene.Srgb(0.6f, 0.7f, 0.8f)) })
+        foreach (var (size, color) in new[] { (1f, Color.FromSrgb(0.8f, 0.7f, 0.6f)), (0.5f, Color.FromSrgb(0.6f, 0.7f, 0.8f)) })
         {
-            var cube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, size, size, size), Scene.Material(color), Transform.Identity);
+            var cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, size, size, size), Render.CreateMaterial(color), Transform.Identity);
             ecs.Add(cube, new ShowAxes());
             ecs.Add(cube, new TransformTracking { Initial = Transform.Identity, Target = RandomTransform() });
         }
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Scene.Material(Scene.Srgb(0.1f, 0.1f, 0.1f)), Transform.At(0f, -2f, 0f));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Render.CreateMaterial(Color.FromSrgb(0.1f, 0.1f, 0.1f)), Transform.At(0f, -2f, 0f));
     }
 
     // The bounding box Bevy keeps for each mesh arrives a frame after the mesh does, and a cube
@@ -109,7 +109,7 @@ internal static class Axes
     private static Transform Interpolate(Transform from, Transform to, float t)
     {
         var translation = from.Translation + (to.Translation - from.Translation) * t;
-        var rotation = Scene.Slerp(from.Rotation, to.Rotation, t);
+        var rotation = Quat.Slerp(from.Rotation, to.Rotation, t);
         static float Elerp(float a, float b, float t) => MathF.Pow(2f, (1f - t) * MathF.Log2(a) + t * MathF.Log2(b));
         var scale = new Vec3(Elerp(from.Scale.X, to.Scale.X, t), Elerp(from.Scale.Y, to.Scale.Y, t), Elerp(from.Scale.Z, to.Scale.Z, t));
         return new Transform(translation, rotation, scale);

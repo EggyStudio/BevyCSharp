@@ -20,10 +20,10 @@ internal static class Hierarchy
             var texture = AssetServer.Load(AssetKind.Image, "branding/icon.png");
 
             _parent = Sprite(ecs, texture, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.75f)), (1f, 1f, 1f, 1f));
-            ecs.SetParent(Sprite(ecs, texture, new Transform(new Vec3(250f, 0f, 0f), Quat.Identity, new Vec3(0.75f)), Scene.Srgb(0f, 0f, 1f)), _parent);
+            ecs.SetParent(Sprite(ecs, texture, new Transform(new Vec3(250f, 0f, 0f), Quat.Identity, new Vec3(0.75f)), Color.FromSrgb(0f, 0f, 1f)), _parent);
 
             // Spawned on its own and given its parent afterward, the other way Bevy shows.
-            var child = Sprite(ecs, texture, new Transform(new Vec3(0f, 250f, 0f), Quat.Identity, new Vec3(0.75f)), Scene.Srgb(0f, 1f, 0f));
+            var child = Sprite(ecs, texture, new Transform(new Vec3(0f, 250f, 0f), Quat.Identity, new Vec3(0.75f)), Color.FromSrgb(0f, 1f, 0f));
             ecs.SetParent(child, _parent);
         }, "hierarchy.Setup");
 

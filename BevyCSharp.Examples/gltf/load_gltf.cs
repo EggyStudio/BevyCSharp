@@ -17,7 +17,7 @@ internal static class LoadGltf
         {
             var ecs = ctx.Ecs;
             Render.SetShadowMapSize(directional: 4096);
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
             Render.SetEnvironmentMap(camera,
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
@@ -37,17 +37,3 @@ internal static class LoadGltf
     }
 }
 
-/// <summary>A scene's entities, nearest first, as Bevy's <c>iter_descendants</c> walks them.</summary>
-internal static class Descendants
-{
-    public static IEnumerable<Entity> Of(EcsWorld ecs, Entity root)
-    {
-        var queue = new Queue<Entity>(ecs.ChildrenOf(root));
-        while (queue.Count > 0)
-        {
-            var entity = queue.Dequeue();
-            yield return entity;
-            foreach (var child in ecs.ChildrenOf(entity)) queue.Enqueue(child);
-        }
-    }
-}

@@ -191,6 +191,50 @@ public struct Quat : IEquatable<Quat>
         return new Vec3(pitch, MathF.Atan2(m13, m33), MathF.Atan2(m21, m22));
     }
 
+    /// <summary>
+    /// The rotation a fraction of the way between two, turning at an even rate the shorter way
+    /// round, as Bevy's <c>Quat::slerp</c> does.
+    /// </summary>
+    /// <param name="from">The rotation at zero.</param>
+    /// <param name="to">The rotation at one.</param>
+    /// <param name="t">How far along, from zero to one.</param>
+    /// <remarks>
+    /// Two rotations a hair apart blend straight, as <see cref="Lerp"/> does, since the angle
+    /// between them is too small to divide by.
+    /// </remarks>
+    public static Quat Slerp(Quat from, Quat to, float t)
+    {
+        var dot = Dot(from, to);
+        if (dot < 0f) (to, dot) = (new Quat(-to.X, -to.Y, -to.Z, -to.W), -dot);
+        if (dot > 0.9995f) return Lerp(from, to, t);
+
+        var angle = MathF.Acos(dot);
+        var (a, b) = (MathF.Sin((1f - t) * angle) / MathF.Sin(angle), MathF.Sin(t * angle) / MathF.Sin(angle));
+        return new Quat(from.X * a + to.X * b, from.Y * a + to.Y * b, from.Z * a + to.Z * b, from.W * a + to.W * b);
+    }
+
+    /// <summary>
+    /// A straight blend of the two rotations, taken the shorter way round and made a rotation again,
+    /// as Bevy's <c>Quat::lerp</c> does.
+    /// </summary>
+    /// <param name="from">The rotation at zero.</param>
+    /// <param name="to">The rotation at one.</param>
+    /// <param name="t">How far along, from zero to one.</param>
+    /// <remarks>Cheaper than <see cref="Slerp"/>, and turning faster in the middle of the way than at its ends.</remarks>
+    public static Quat Lerp(Quat from, Quat to, float t)
+    {
+        var sign = Dot(from, to) < 0f ? -1f : 1f;
+        var blend = new Quat(
+            from.X + (to.X * sign - from.X) * t,
+            from.Y + (to.Y * sign - from.Y) * t,
+            from.Z + (to.Z * sign - from.Z) * t,
+            from.W + (to.W * sign - from.W) * t);
+        var length = MathF.Sqrt(Dot(blend, blend));
+        return new Quat(blend.X / length, blend.Y / length, blend.Z / length, blend.W / length);
+    }
+
+    private static float Dot(Quat a, Quat b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
+
     /// <inheritdoc/>
     public readonly bool Equals(Quat other) =>
         X == other.X && Y == other.Y && Z == other.Z && W == other.W;

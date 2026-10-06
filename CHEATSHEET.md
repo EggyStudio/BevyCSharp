@@ -41,6 +41,10 @@ App AddTransitionSystem<TState>(TState from, TState to, SystemDescriptor descrip
 App AddSystem(Stage stage, SystemFn system);                    // Registers a system function in stage
 App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition);  // Registers a system function with a run condition
 App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a described system in stage
+App Startup(Action<BehaviorContext> setup, string name = "Startup");  // Runs setup once as the app starts, as Bevy's Startup systems do
+App Update(Action<BehaviorContext> update, string name = "Update");  // Runs update every frame, as Bevy's Update systems do
+App On(Stage stage, Action<BehaviorContext> run, string name, Func<World, bool> runIf = null);  // Runs run in stage, as a system Bevy adds to that schedule, and only while runIf passes where one is given
+App SpawnGltf(string path, Action<BehaviorContext, Entity> spawned = null, int scene = 0);  // Spawns a glTF file's scene once it has loaded, as Bevy's SceneRoot of a glTF does, and hands the root to spawned once the scene is in the world under it
 App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
 App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer each time a TEvent is triggered
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
@@ -258,6 +262,10 @@ T Insert<T>(Entity entity, string json = null);                 // Puts one of B
 Entity? ResourceEntity(string typePath);                        // The entity holding one of Bevy's resources, or null when the world has none of it
 T? Resource<T>();                                               // A typed wrapper over one of Bevy's resources, or null when the world has none of it
 T InsertResource<T>(string json = null);                        // Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it has, and returns a typed wrapper over it
+Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spawns an entity drawn with a mesh and a material, placed by a transform, as Bevy's (Mesh3d(mesh), MeshMaterial3d(material), transform) bundle does
+Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, as Bevy's default one is, a million lumens reaching twenty units and casting no shadow unless asked
+Entity SpawnCamera3d(Transform at, CameraSettings settings = null);  // Spawns a 3D camera placed by a transform, with Bevy's defaults or the settings given
+IEnumerable<Entity> Descendants(Entity root);                   // Every entity under root, nearer ones first, as Bevy's iter_descendants walks them
 ```
 
 ### `EcsCommands`
@@ -767,6 +775,7 @@ static bool TryReadMesh(AssetHandle mesh, out MeshData triangles);  // Reads a m
 static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals);  // Reads a mesh's positions back with the normal at each
 static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags);  // Says how an entity's mesh is treated beyond what it looks like
 static AssetHandle CreateMaterial(float red, float green, float blue, float alpha = 1f, float metallic = 0f, float roughness = 0.5f);  // Builds a physically based material and returns a handle to it
+static AssetHandle CreateMaterial((float R, float G, float B, float A) color);  // Builds a material of one color and returns a handle to it, as Bevy makes a StandardMaterial from a Color
 static AssetHandle CreateMaterial(MaterialSettings settings);   // Builds a material from settings and returns a handle to it
 static bool WriteMaterial(AssetHandle material, MaterialSettings settings);  // Writes settings over a standard material in place, so everything drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh to draw
@@ -881,24 +890,6 @@ The guide's page is [shaders.md](https://github.com/EggyStudio/BevyCSharp/blob/m
 ### `Shaders`
 
 ```csharp
-static ShaderProgram CreateProgram(ShaderStage fragment);       // Makes a program drawn by one fragment shader, leaving the rest to Bevy
-static ShaderProgram CreateProgram(ShaderProgramSettings settings);  // Makes a program from the Slang named
-static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque);  // Makes a material drawn by a program
-static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings);  // Makes a material drawn by a program
-static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
-static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
-static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs
-static void SetPasses(Entity camera, params ShaderPass[] passes);  // Replaces the full-screen passes a camera runs over what it drew, in the order given
-static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false, bool deferred = false, bool previous = false, bool pyramid = false);  // Asks a camera to draw its depth, its normals, its motion vectors or any of them before the scene, for its passes and its compute shaders to read
-static void SetViewImages(Entity camera, params ViewImage[] images);  // Gives a camera images that its passes and compute shaders keep from frame to frame, replacing any it had
-static IReadOnlyList<string> DrawnViewImageNames(Entity camera);  // The names a Watch on the camera would find, as of the last frame it drew: its own images and those of EngineViewImageNames it has
-static IReadOnlyList<string> ViewImageNames(Entity camera);     // The names of the images a camera owns, as SetViewImages last gave them, with their _previous and _mip names
-static AssetHandle Watch(Entity camera, string name, uint width = 320, uint height = 180, float scale = 1f, float offset = 0f);  // Starts watching one of a camera's images
-static void Unwatch(Entity camera, string name);                // Stops watching one of a camera's images
-static void SetViewDispatches(Entity camera, params ViewDispatch[] dispatches);  // Replaces the compute shaders a camera runs every frame, in order
-static void Dispatch(ShaderInstance instance, uint x, uint y = 1, uint z = 1);  // Runs an instance's compute shader once, this frame, before any camera draws
-static void SetViewDraws(Entity camera, params ViewDraw[] draws);  // Replaces the geometry a camera draws every frame out of buffers, in order
-static void DispatchIndirect(ShaderInstance instance, AssetHandle buffer, uint offset = 0);  // Runs an instance's compute shader once, this frame, before any camera draws, with as many workgroups as the buffer says
 static AssetHandle CreateBuffer(int size);                      // Makes a buffer of size bytes that shaders read and write, holding zeros
 static AssetHandle CreateBuffer<T>(ReadOnlySpan<T> items, int size = 0);  // Makes a buffer holding items, at least size bytes long
 static void WriteBuffer<T>(AssetHandle buffer, ReadOnlySpan<T> items);  // Replaces a buffer's contents with items, padded with zeros to its size
@@ -920,6 +911,24 @@ static AssetHandle CreateImage(uint width, uint height, ShaderImageFormat format
 static AssetHandle CreateImage<T>(uint width, uint height, ShaderImageFormat format, ReadOnlySpan<T> texels, uint depth = 1);  // Makes an image as CreateImage does, starting with texels rather than zeros
 static void WriteImage<T>(AssetHandle image, ReadOnlySpan<T> texels, uint x, uint y, uint width, uint height, uint z = 0, uint depth = 1, uint mip = 0);  // Writes texels into a region of an image, width by height at x, y, on the GPU before this frame's work runs
 static int TexelBytes(ShaderImageFormat format);                // How many bytes one texel of format takes, or for a block-compressed format one four by four block
+static ShaderProgram CreateProgram(ShaderStage fragment);       // Makes a program drawn by one fragment shader, leaving the rest to Bevy
+static ShaderProgram CreateProgram(ShaderProgramSettings settings);  // Makes a program from the Slang named
+static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque);  // Makes a material drawn by a program
+static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings);  // Makes a material drawn by a program
+static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
+static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
+static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs
+static void SetPasses(Entity camera, params ShaderPass[] passes);  // Replaces the full-screen passes a camera runs over what it drew, in the order given
+static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false, bool deferred = false, bool previous = false, bool pyramid = false);  // Asks a camera to draw its depth, its normals, its motion vectors or any of them before the scene, for its passes and its compute shaders to read
+static void SetViewImages(Entity camera, params ViewImage[] images);  // Gives a camera images that its passes and compute shaders keep from frame to frame, replacing any it had
+static IReadOnlyList<string> DrawnViewImageNames(Entity camera);  // The names a Watch on the camera would find, as of the last frame it drew: its own images and those of EngineViewImageNames it has
+static IReadOnlyList<string> ViewImageNames(Entity camera);     // The names of the images a camera owns, as SetViewImages last gave them, with their _previous and _mip names
+static AssetHandle Watch(Entity camera, string name, uint width = 320, uint height = 180, float scale = 1f, float offset = 0f);  // Starts watching one of a camera's images
+static void Unwatch(Entity camera, string name);                // Stops watching one of a camera's images
+static void SetViewDispatches(Entity camera, params ViewDispatch[] dispatches);  // Replaces the compute shaders a camera runs every frame, in order
+static void Dispatch(ShaderInstance instance, uint x, uint y = 1, uint z = 1);  // Runs an instance's compute shader once, this frame, before any camera draws
+static void SetViewDraws(Entity camera, params ViewDraw[] draws);  // Replaces the geometry a camera draws every frame out of buffers, in order
+static void DispatchIndirect(ShaderInstance instance, AssetHandle buffer, uint offset = 0);  // Runs an instance's compute shader once, this frame, before any camera draws, with as many workgroups as the buffer says
 ```
 
 ### `ShaderValues`
@@ -1328,6 +1337,8 @@ static Quat FromRotationZ(float radians);                       // A rotation ab
 static Quat FromBasis(Vec3 x, Vec3 y, Vec3 z);                  // The rotation whose local axes are x, y and z
 static Quat FromEuler(float x, float y, float z);               // The rotation that rolls about Z, then pitches about X, then turns about Y, in radians
 Vec3 ToEuler();                                                 // The turns about X, Y and Z this rotation is made of, in radians
+static Quat Slerp(Quat from, Quat to, float t);                 // The rotation a fraction of the way between two, turning at an even rate the shorter way round, as Bevy's Quat::slerp does
+static Quat Lerp(Quat from, Quat to, float t);                  // A straight blend of the two rotations, taken the shorter way round and made a rotation again, as Bevy's Quat::lerp does
 ```
 
 ### `Color`
@@ -1335,6 +1346,8 @@ Vec3 ToEuler();                                                 // The turns abo
 ```csharp
 static Color FromSrgb(float r, float g, float b, float a = 1f);  // A color from sRGB components between zero and one, as a color picker gives them
 static Color FromHex(string hex);                               // A color from an sRGB hex string such as #ff8800 or ff8800cc
+static Color FromSrgb8(byte r, byte g, byte b, byte a = 255);   // A color from sRGB bytes, as Bevy's Color::srgb_u8 and a hex code give them
+static Color FromHsl(float hue, float saturation, float lightness, float alpha = 1f);  // A color from a hue in degrees, a saturation and a lightness between zero and one, as Bevy's Color::hsl gives it
 Vec4 ToSrgb();                                                  // The color as sRGB components between zero and one, alpha unchanged
 Color WithAlpha(float alpha);                                   // The color with another alpha
 ```

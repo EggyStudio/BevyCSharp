@@ -27,7 +27,7 @@ internal static class Fog
             (_falloff, _start, _end, _density) = (Falloff.Linear, 5f, 20f, 0.07f);
             _color = new Vec4(0.25f, 0.25f, 0.25f, 1f);
 
-            _camera = ecs.Camera(Transform.Identity);
+            _camera = ecs.SpawnCamera3d(Transform.Identity);
             _fog = ecs.Insert<DistanceFogRef>(_camera);
             Apply();
 
@@ -35,10 +35,10 @@ internal static class Fog
             var stone = Color.FromHex("28221B");
             var stoneMaterial = Render.CreateMaterial(new MaterialSettings { BaseColor = (stone.R, stone.G, stone.B, 1f), Roughness = 1f });
             foreach (var (x, z) in new[] { (-1.5f, -1.5f), (1.5f, -1.5f), (1.5f, 1.5f), (-1.5f, 1.5f) })
-                ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 3f, 1f), stoneMaterial, Transform.At(x, 1.5f, z));
+                ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 3f, 1f), stoneMaterial, Transform.At(x, 1.5f, z));
 
             var glass = Color.FromHex("126212CC");
-            var ball = ecs.Mesh(
+            var ball = ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Sphere, 0.5f),
                 Render.CreateMaterial(new MaterialSettings
                 {
@@ -54,17 +54,17 @@ internal static class Fog
             for (var i = 0; i < 50; i++)
             {
                 var half = i / 2f + 3f;
-                ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 2f * half, 0.5f, 2f * half), stoneMaterial, Transform.At(0f, -i / 2f + 0.25f, 0f));
+                ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 2f * half, 0.5f, 2f * half), stoneMaterial, Transform.At(0f, -i / 2f + 0.25f, 0f));
             }
 
             // A box around everything, which the fog colors.
             var sky = Color.FromHex("888888");
-            ecs.Mesh(
+            ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Cuboid, 2f, 1f, 1f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (sky.R, sky.G, sky.B, 1f), Unlit = true, DoubleSided = true }),
                 new Transform(Vec3.Zero, Quat.Identity, new Vec3(1_000_000f)));
 
-            ecs.PointLight(new Vec3(0f, 1f, 0f), shadows: true);
+            ecs.SpawnPointLight(new Vec3(0f, 1f, 0f), shadows: true);
 
             _text = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
         });

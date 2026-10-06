@@ -40,11 +40,11 @@ internal static class Pbr
                     Metallic = (y + 2) / 4f,
                     Roughness = (x + 5) / 10f,
                 });
-                ecs.Mesh(sphere, material, Transform.At(x, y + 0.5f, 0f));
+                ecs.SpawnMesh(sphere, material, Transform.At(x, y + 0.5f, 0f));
             }
         }
 
-        ecs.Mesh(sphere, Render.CreateMaterial(new MaterialSettings { BaseColor = (gold.R, gold.G, gold.B, 1f), Unlit = true }), Transform.At(-5f, -2.5f, 0f));
+        ecs.SpawnMesh(sphere, Render.CreateMaterial(new MaterialSettings { BaseColor = (gold.R, gold.G, gold.B, 1f), Unlit = true }), Transform.At(-5f, -2.5f, 0f));
 
         var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 1500f, Shadows = false });
         ecs.Add(sun, Transform.LookingAt(new Vec3(50f, 50f, 50f), Vec3.Zero, Vec3.UnitY));
@@ -56,7 +56,7 @@ internal static class Pbr
         (turned.RotationCos, turned.RotationSin) = (0f, 1f);
         _label = Ui.SpawnText("Loading Environment Map...", new UiSettings { Absolute = true, Bottom = Length.Px(20f), Right = Length.Px(20f) }, large);
 
-        var camera = ecs.Camera(
+        var camera = ecs.SpawnCamera3d(
             Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY),
             new CameraSettings { Projection = CameraProjection.Orthographic, Height = 7.2f });
 

@@ -78,7 +78,7 @@ internal static class Observers
             foreach (var entity in ctx.Ecs.EntitiesWith<Mine>())
             {
                 var mine = ctx.Ecs.GetOrDefault<Mine>(entity);
-                Gizmos.Circle2d((mine.X, mine.Y), mine.Size, Scene.Hsl((mine.Size - 4f) / 16f * 360f, 1f, 0.8f));
+                Gizmos.Circle2d((mine.X, mine.Y), mine.Size, Color.FromHsl((mine.Size - 4f) / 16f * 360f, 1f, 0.8f));
             }
         }, "observers.DrawShapes");
 

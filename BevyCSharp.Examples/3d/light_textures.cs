@@ -54,12 +54,12 @@ internal static class LightTextures
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        var silver = Scene.Material(Scene.Srgb8(192, 192, 192));
+        var silver = Render.CreateMaterial(Color.FromSrgb8(192, 192, 192));
 
         // A cube turning in the middle of a larger one seen from inside, which the lights fall on.
         var turned = new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 3f), Vec3.One);
-        _cube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 3f, 3f, 3f), silver, turned);
-        _innerCube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, -13f, -13f, -13f), silver, turned);
+        _cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 3f, 3f, 3f), silver, turned);
+        _innerCube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, -13f, -13f, -13f), silver, turned);
 
         // The directional light hangs hidden from an entity the selection moves, with caustics tiled
         // across it.
@@ -73,11 +73,11 @@ internal static class LightTextures
         ecs.Wrap<VisibilityRef>(_directional).Value = Visibility.Visible;
         Selectable[Selection.DirectionalLight] = directionalParent;
 
-        var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 2.5f, 9f), Vec3.Zero, Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 2.5f, 9f), Vec3.Zero, Vec3.UnitY));
         Selectable[Selection.Camera] = camera;
 
         // A torch's beam on a narrow spotlight.
-        var torch = Scene.Srgb(1f, 1f, 0.8f);
+        var torch = Color.FromSrgb(1f, 1f, 0.8f);
         _spot = Render.SpawnLight(new LightSettings
         {
             Kind = LightKind.Spot,
@@ -98,13 +98,13 @@ internal static class LightTextures
         ecs.Insert<VisibilityRef>(pointParent).Value = Visibility.Hidden;
         Selectable[Selection.PointLight] = pointParent;
 
-        var ball = ecs.Mesh(
+        var ball = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Sphere, 1f),
-            Render.CreateMaterial(new MaterialSettings { Emissive = Scene.Srgb(0f, 0f, 300f) }),
+            Render.CreateMaterial(new MaterialSettings { Emissive = Color.FromSrgb(0f, 0f, 300f) }),
             Transform.Identity);
         ecs.SetParent(ball, pointParent);
 
-        var blue = Scene.Srgb(0f, 0f, 1f);
+        var blue = Color.FromSrgb(0f, 0f, 1f);
         var point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Color = (blue.R, blue.G, blue.B), Intensity = 1e6f, Shadows = true });
         ecs.Add(point, Transform.Identity);
         ecs.SetParent(point, pointParent);
@@ -170,7 +170,7 @@ internal static class LightTextures
 
         var spot = ctx.Ecs.GetOrDefault<GlobalTransform>(_spot);
         var angle = ctx.Ecs.Wrap<SpotLightRef>(_spot).OuterAngle;
-        Gizmos.Cone(spot.Translation * 0.5f, spot.Rotation * Quat.FromRotationX(MathF.PI / 2f), 7f * angle, 7f, Scene.Srgb(1f, 1f, 0f), inFront: false);
+        Gizmos.Cone(spot.Translation * 0.5f, spot.Rotation * Quat.FromRotationX(MathF.PI / 2f), 7f * angle, 7f, Color.FromSrgb(1f, 1f, 0f), inFront: false);
     }
 
     // Everything but the turning cube casts no shadow, as each new mesh is given NotShadowCaster.

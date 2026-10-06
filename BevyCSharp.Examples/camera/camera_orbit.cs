@@ -22,10 +22,10 @@ internal static class CameraOrbit
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(5f, 5f, 5f), Vec3.Zero, Vec3.UnitY));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(0.3f, 0.5f, 0.3f), DoubleSided = true }), Transform.Identity);
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.At(1.5f, 0.51f, 1.5f));
-            ecs.PointLight(new Vec3(3f, 8f, 5f));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(5f, 5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(0.3f, 0.5f, 0.3f), DoubleSided = true }), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(1.5f, 0.51f, 1.5f));
+            ecs.SpawnPointLight(new Vec3(3f, 8f, 5f));
 
             Ui.SpawnText("Mouse up or down: pitch\nMouse left or right: yaw\nMouse buttons: roll",
                 new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });

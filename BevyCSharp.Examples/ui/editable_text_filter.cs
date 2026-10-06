@@ -23,8 +23,8 @@ internal static class EditableTextFilter
             Width = Length.Px(240f),
             Border = Sides.All(Length.Px(2f)),
             Padding = Sides.All(Length.Px(8f)),
-            Color = Scene.Srgb8(47, 79, 79),
-            BorderColor = Scene.Srgb8(203, 213, 225),
+            Color = Color.FromSrgb8(47, 79, 79),
+            BorderColor = Color.FromSrgb8(203, 213, 225),
         });
         Ui.SetEditableText(field, new UiEditableTextSettings { MaxCharacters = 8, Allowed = "0123456789abcdefABCDEF" });
         ecs.Wrap<TextFontRef>(field).FontSize = new FontSize.Px(32f);

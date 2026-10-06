@@ -42,9 +42,9 @@ internal static class MeshPicking
         (_hovered, _pressed) = (Entity.None, Entity.None);
 
         // Tailwind's colors at 300, white while nothing touches a shape.
-        _white = Scene.Material((1f, 1f, 1f, 1f));
-        _hover = Scene.Material(Scene.Srgb8(103, 232, 249));
-        _press = Scene.Material(Scene.Srgb8(253, 224, 71));
+        _white = Render.CreateMaterial((1f, 1f, 1f, 1f));
+        _hover = Render.CreateMaterial(Color.FromSrgb8(103, 232, 249));
+        _press = Render.CreateMaterial(Color.FromSrgb8(253, 224, 71));
 
         // Bevy's default of each, a unit across or half a unit in radius.
         AssetHandle[] shapes =
@@ -75,18 +75,18 @@ internal static class MeshPicking
             for (var i = 0; i < meshes.Length; i++)
             {
                 var x = -extent / 2f + i / (float)(meshes.Length - 1) * extent;
-                Shapes.Add(ecs.Mesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One)));
+                Shapes.Add(ecs.SpawnMesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One)));
             }
         }
 
         Row(shapes, ShapesXExtent, ZExtent / 2f);
         Row(extrusions, ExtrusionXExtent, -ZExtent / 2f);
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Scene.Material(Scene.Srgb8(209, 213, 219)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb8(209, 213, 219)), Transform.Identity);
 
         var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 10_000_000f, Range = 100f, Shadows = true, ShadowDepthBias = 0.2f });
         ecs.Add(light, Transform.At(8f, 16f, 8f));
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 7f, 14f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 7f, 14f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
 
         Ui.SpawnText("Hover over the shapes to pick them\nDrag to rotate", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
@@ -105,8 +105,8 @@ internal static class MeshPicking
             && Shapes.Contains(hit))
         {
             under = hit;
-            Gizmos.Sphere(point, 0.05f, Scene.Srgb8(239, 68, 68), inFront: false);
-            Gizmos.Arrow(point, point + normal * 0.5f, Scene.Srgb8(252, 231, 243), inFront: false);
+            Gizmos.Sphere(point, 0.05f, Color.FromSrgb8(239, 68, 68), inFront: false);
+            Gizmos.Arrow(point, point + normal * 0.5f, Color.FromSrgb8(252, 231, 243), inFront: false);
         }
 
         // Over and out, press and release, each giving the shape the material Bevy's observers do.

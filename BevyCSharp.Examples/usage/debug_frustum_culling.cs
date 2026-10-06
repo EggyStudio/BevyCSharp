@@ -43,12 +43,12 @@ internal static class DebugFrustumCulling
         _timer = 0f;
         if (Window.Entity() != Entity.None) Window.SetStyle(resizable: false);
 
-        _freeCamera = ecs.Camera(Transform.LookingAt(FreeCameraStart, FreeCameraTarget, Vec3.UnitY));
+        _freeCamera = ecs.SpawnCamera3d(Transform.LookingAt(FreeCameraStart, FreeCameraTarget, Vec3.UnitY));
         ecs.Add(_freeCamera, new FreeCamera());
 
         // A third of the window, in its bottom right corner, drawn over the big camera's picture.
         var (width, height) = Scene.Size;
-        _myCamera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 1.5f, 0f), new Vec3(1f, 1.5f, 0f), Vec3.UnitY), new CameraSettings
+        _myCamera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, 0f), new Vec3(1f, 1.5f, 0f), Vec3.UnitY), new CameraSettings
         {
             Order = 1,
             Viewport = (width * 2 / 3, height * 2 / 3, width / 3, height / 3),
@@ -65,14 +65,14 @@ internal static class DebugFrustumCulling
         var myView = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Camera = _myCamera });
         ecs.SetParent(Ui.SpawnText("View of MyCamera", new UiSettings { Absolute = true, Bottom = Length.Px(12f), Right = Length.Px(100f) }), myView);
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, ShapeRingRadius * 4f, ShapeRingRadius * 4f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material(Scene.Srgb(0.3f, 0.3f, 0.5f)), new Transform(new Vec3(20f, 2.5f, 10f), Quat.FromRotationZ(MathF.PI / 2f), Vec3.One));
-        ecs.PointLight(new Vec3(0f, 10f, 0f), shadows: true);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, ShapeRingRadius * 4f, ShapeRingRadius * 4f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.3f, 0.5f)), new Transform(new Vec3(20f, 2.5f, 10f), Quat.FromRotationZ(MathF.PI / 2f), Vec3.One));
+        ecs.SpawnPointLight(new Vec3(0f, 10f, 0f), shadows: true);
 
         // Boxes red unless the small camera sees them.
         Gizmos.ShowBounds(all: false, color: (1f, 0f, 0f, 1f));
 
-        var white = Scene.Material((1f, 1f, 1f, 1f));
+        var white = Render.CreateMaterial((1f, 1f, 1f, 1f));
         AssetHandle[] meshes =
         [
             Render.CreateMesh(MeshShape.Cuboid, 4f, 1f, 2f),
@@ -88,13 +88,13 @@ internal static class DebugFrustumCulling
         for (var i = 0; i < meshes.Length; i++)
         {
             var angle = i * 2f * MathF.PI / meshes.Length;
-            var shape = ecs.Mesh(meshes[i], white, new Transform(new Vec3(ShapeRingRadius * MathF.Cos(angle), 1.5f, ShapeRingRadius * MathF.Sin(angle)), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
+            var shape = ecs.SpawnMesh(meshes[i], white, new Transform(new Vec3(ShapeRingRadius * MathF.Cos(angle), 1.5f, ShapeRingRadius * MathF.Sin(angle)), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
             ecs.SetParent(shape, _ring);
             ecs.Insert<ShowAabbGizmoRef>(shape);
             Shapes.Add(shape);
         }
 
-        _wall = ecs.Mesh(Render.CreateMesh(MeshShape.Torus, 0.5f, 1.5f), white, new Transform(new Vec3(25f, 1.5f, 12.5f), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
+        _wall = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Torus, 0.5f, 1.5f), white, new Transform(new Vec3(25f, 1.5f, 12.5f), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
         ecs.Insert<ShowAabbGizmoRef>(_wall);
         Shapes.Add(_wall);
     }

@@ -33,8 +33,8 @@ internal static class FoxScene
     public static void Setup(EcsWorld ecs)
     {
         Render.SetAmbientLight((1f, 1f, 1f), 2000f);
-        ecs.Camera(Transform.LookingAt(new Vec3(100f, 100f, 150f), new Vec3(0f, 20f, 0f), Vec3.UnitY));
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 500_000f, 500_000f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(100f, 100f, 150f), new Vec3(0f, 20f, 0f), Vec3.UnitY));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 500_000f, 500_000f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
 
         // Bevy's EulerRot::ZYX of nothing, one radian and minus a quarter turn, its cascades
         // reaching four hundred units.

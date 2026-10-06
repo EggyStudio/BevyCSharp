@@ -18,8 +18,8 @@ internal static class RotateEnvironmentMap
             var ecs = ctx.Ecs;
 
             // A gold ball under a scratched clearcoat, whose normal map is data and not color.
-            var gold = Scene.Srgb8(255, 215, 0);
-            ecs.Mesh(
+            var gold = Color.FromSrgb8(255, 215, 0);
+            ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Sphere, 1f),
                 Render.CreateMaterial(new MaterialSettings
                 {
@@ -34,7 +34,7 @@ internal static class RotateEnvironmentMap
 
             Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 100_000f, Shadows = false });
 
-            _camera = ecs.Camera(Transform.At(0f, 0f, 10f), new CameraSettings { FieldOfView = 27f });
+            _camera = ecs.SpawnCamera3d(Transform.At(0f, 0f, 10f), new CameraSettings { FieldOfView = 27f });
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.AcesFitted });
 
             _diffuse = AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2");

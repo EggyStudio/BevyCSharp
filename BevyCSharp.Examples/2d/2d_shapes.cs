@@ -83,7 +83,7 @@ internal static class Shapes2d
             var entity = ecs.Spawn();
             ecs.Add(entity, Transform.At(-XExtent / 2f + i / (float)(count - 1) * XExtent, y, 0f));
             Render2d.SetMesh(ecs, entity, meshes[i]);
-            Render2d.SetMaterial(ecs, entity, Render2d.CreateMaterial(new ColorMaterialSettings { Color = Scene.Hsl(360f * i / count, 0.95f, 0.7f) }));
+            Render2d.SetMaterial(ecs, entity, Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromHsl(360f * i / count, 0.95f, 0.7f) }));
             Meshes.Add(entity);
         }
     }

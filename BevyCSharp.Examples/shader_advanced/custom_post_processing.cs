@@ -18,11 +18,11 @@ internal static class CustomPostProcessing
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY), new CameraSettings { Clear = ClearMode.Custom, ClearColor = (1f, 1f, 1f, 1f) });
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY), new CameraSettings { Clear = ClearMode.Custom, ClearColor = (1f, 1f, 1f, 1f) });
             _settings = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = "shaders/post_processing.slang" })).Set("settings.intensity", 0.02f);
             Shaders.SetPasses(camera, new ShaderPass(_settings, AfterTonemapping: true));
 
-            _cube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
+            _cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
 
             // Bevy's directional light at a tenth of its default, unturned, so shining along -Z.
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 1_000f, Shadows = false });

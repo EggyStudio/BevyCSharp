@@ -29,7 +29,7 @@ internal static class UiTargetCamera
                 new UiSettings { AlignSelf = UiAlignSelf.Center, Bottom = Length.Px(2f * Size) });
             ecs.Wrap<NodeRef>(help).JustifySelf = NodeRef.JustifySelfVariant.Center;
 
-            var colors = new[] { Scene.Srgb8(255, 0, 0), Scene.Srgb8(0, 128, 0), Scene.Srgb8(0, 0, 255) };
+            var colors = new[] { Color.FromSrgb8(255, 0, 0), Color.FromSrgb8(0, 128, 0), Color.FromSrgb8(0, 0, 255) };
             for (var i = 0; i < colors.Length; i++)
             {
                 // A camera drawn as Bevy draws one, clearing to its color and replacing what the
@@ -52,7 +52,7 @@ internal static class UiTargetCamera
                     Height = Length.Px(Size),
                     Border = Sides.All(Length.Px(0.1f * Size)),
                     Color = (0f, 0f, 0f, 1f),
-                    BorderColor = Scene.Srgb8(255, 255, 0),
+                    BorderColor = Color.FromSrgb8(255, 255, 0),
                 });
                 var label = Ui.SpawnText($"{i}", new UiSettings { Color = colors[i] }, 50f);
                 ecs.SetParent(label, box);

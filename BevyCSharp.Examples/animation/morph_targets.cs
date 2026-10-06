@@ -23,7 +23,7 @@ internal static class MorphTargets
             Render.SetAmbientLight((1f, 1f, 1f), 150f);
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ctx.Ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationZ(MathF.PI / 2f), Vec3.One));
-            ctx.Ecs.Camera(Transform.LookingAt(new Vec3(3f, 2.1f, 10.2f), Vec3.Zero, Vec3.UnitY));
+            ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 2.1f, 10.2f), Vec3.Zero, Vec3.UnitY));
         }, "morph_targets.Setup");
 
         app.SpawnGltf("models/animated/MorphStressTest.gltf", (_, root) => _model = root);

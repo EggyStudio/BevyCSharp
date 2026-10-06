@@ -19,7 +19,7 @@ internal static class Lines
             Topology = MeshTopology.Lines,
             Positions = [Vec3.Zero, new(1f, 1f, 0f), new(1f, 1f, 0f), new(1f, 0f, 0f)],
         };
-        ctx.Ecs.Mesh(Render.CreateMesh(list), Unlit(0f, 1f, 0f), Transform.At(-1.5f, 0f, 0f));
+        ctx.Ecs.SpawnMesh(Render.CreateMesh(list), Unlit(0f, 1f, 0f), Transform.At(-1.5f, 0f, 0f));
 
         // A strip of lines, broken in two by the index that restarts it.
         var strip = new MeshData
@@ -28,9 +28,9 @@ internal static class Lines
             Positions = [Vec3.Zero, new(1f, 1f, 0f), new(2f, 0f, 0f), new(2f, 1f, 0f), new(3f, 1f, 0f)],
             Indices = [0, 1, uint.MaxValue, 2, 3, 4],
         };
-        ctx.Ecs.Mesh(Render.CreateMesh(strip), Unlit(0f, 0f, 1f), Transform.At(0.5f, 0f, 0f));
+        ctx.Ecs.SpawnMesh(Render.CreateMesh(strip), Unlit(0f, 0f, 1f), Transform.At(0.5f, 0f, 0f));
 
-        ctx.Ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
     });
 
     private static AssetHandle Unlit(float r, float g, float b) =>

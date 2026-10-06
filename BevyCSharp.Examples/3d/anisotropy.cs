@@ -38,12 +38,12 @@ internal static class Anisotropy
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _camera = ecs.Camera(Transform.LookingAt(CameraStart, Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(CameraStart, Vec3.Zero, Vec3.UnitY));
             _light = SpawnDirectional();
 
             // A sphere with tangents, which a primitive is made with, in Tailwind's gray-300.
             var gray = Color.FromHex("#d1d5db");
-            _sphere = ecs.Mesh(
+            _sphere = ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Sphere, 0.1f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (gray.R, gray.G, gray.B, 1f), AnisotropyRotation = 0.5f, AnisotropyStrength = 1f }),
                 Transform.Identity);

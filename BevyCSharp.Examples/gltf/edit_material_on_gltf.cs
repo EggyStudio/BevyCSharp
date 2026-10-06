@@ -21,7 +21,7 @@ internal static class EditMaterialOnGltf
         {
             var ecs = ctx.Ecs;
             Helmets.Clear();
-            ecs.Camera(Transform.LookingAt(new Vec3(0f, 1f, 2.5f), new Vec3(0f, 0.25f, 0f), Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1f, 2.5f), new Vec3(0f, 0.25f, 0f), Vec3.UnitY));
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(sun, Transform.LookingAt(new Vec3(0f, 1f, 0.25f), Vec3.Zero, Vec3.UnitY));
 
@@ -29,7 +29,7 @@ internal static class EditMaterialOnGltf
             Helmets.Add((ecs.SpawnScene(helmet), null));
 
             // Tailwind's red and green, each at 300.
-            foreach (var (x, color) in new[] { (-1.25f, Scene.Srgb8(252, 165, 165)), (1.25f, Scene.Srgb8(134, 239, 172)) })
+            foreach (var (x, color) in new[] { (-1.25f, Color.FromSrgb8(252, 165, 165)), (1.25f, Color.FromSrgb8(134, 239, 172)) })
             {
                 var root = ecs.SpawnScene(helmet);
                 ecs.Set(root, Transform.At(x, 0f, 0f));
@@ -49,7 +49,7 @@ internal static class EditMaterialOnGltf
 
             // Ready once its parts are there with the names of their materials, and every one of
             // those materials can be read.
-            var named = Descendants.Of(ecs, root)
+            var named = ecs.Descendants(root)
                 .Select(entity => (Entity: entity, Name: ecs.Get<GltfMaterialNameRef>(entity)?.Value))
                 .Where(part => part.Name is not null)
                 .ToList();

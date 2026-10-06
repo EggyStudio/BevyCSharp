@@ -19,9 +19,9 @@ internal static class AnchoredTextGizmos
             foreach (var (label, anchor, color) in new[]
             {
                 ("left", (-0.5f, 0f), (1f, 0f, 0f, 1f)),
-                ("right", (0.5f, 0f), Scene.Srgb8(255, 165, 0)),
+                ("right", (0.5f, 0f), Color.FromSrgb8(255, 165, 0)),
                 ("center", (0f, 0f), (1f, 1f, 0f, 1f)),
-                ("top", (0f, 0.5f), Scene.Srgb8(0, 128, 0)),
+                ("top", (0f, 0.5f), Color.FromSrgb8(0, 128, 0)),
                 ("bottom", (0f, -0.5f), (0f, 0f, 1f, 1f)),
             })
             {

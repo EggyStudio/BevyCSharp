@@ -24,13 +24,13 @@ internal static class Breakout
 
     private const float ScoreboardFontSize = 33f;
 
-    private static readonly (float R, float G, float B, float A) BackgroundColor = Scene.Srgb(0.9f, 0.9f, 0.9f);
-    private static readonly (float R, float G, float B, float A) PaddleColor = Scene.Srgb(0.3f, 0.3f, 0.7f);
-    private static readonly (float R, float G, float B, float A) BallColor = Scene.Srgb(1f, 0.5f, 0.5f);
-    private static readonly (float R, float G, float B, float A) BrickColor = Scene.Srgb(0.5f, 0.5f, 1f);
-    private static readonly (float R, float G, float B, float A) WallColor = Scene.Srgb(0.8f, 0.8f, 0.8f);
-    private static readonly (float R, float G, float B, float A) TextColor = Scene.Srgb(0.5f, 0.5f, 1f);
-    private static readonly (float R, float G, float B, float A) ScoreColor = Scene.Srgb(1f, 0.5f, 0.5f);
+    private static readonly (float R, float G, float B, float A) BackgroundColor = Color.FromSrgb(0.9f, 0.9f, 0.9f);
+    private static readonly (float R, float G, float B, float A) PaddleColor = Color.FromSrgb(0.3f, 0.3f, 0.7f);
+    private static readonly (float R, float G, float B, float A) BallColor = Color.FromSrgb(1f, 0.5f, 0.5f);
+    private static readonly (float R, float G, float B, float A) BrickColor = Color.FromSrgb(0.5f, 0.5f, 1f);
+    private static readonly (float R, float G, float B, float A) WallColor = Color.FromSrgb(0.8f, 0.8f, 0.8f);
+    private static readonly (float R, float G, float B, float A) TextColor = Color.FromSrgb(0.5f, 0.5f, 1f);
+    private static readonly (float R, float G, float B, float A) ScoreColor = Color.FromSrgb(1f, 0.5f, 0.5f);
 
     internal struct Paddle;
 

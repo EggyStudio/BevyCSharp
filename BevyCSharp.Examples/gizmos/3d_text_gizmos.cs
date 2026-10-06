@@ -13,7 +13,7 @@ internal static class TextGizmos3d
     {
         app.Startup(ctx =>
         {
-            ctx.Ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
+            ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
             Gizmos.Configure(width: 4f);
         }, "3d_text_gizmos.SetupCamera");
 
@@ -21,7 +21,7 @@ internal static class TextGizmos3d
         {
             var t = 0.2f * ctx.Time.Elapsed;
             Gizmos.Text("Hello", new Vec3(0f, 1.5f, 0f), Quat.FromRotationY(-t), 1f, (0f, 0f), (1f, 0f, 0f, 1f));
-            Gizmos.Text("Text", Vec3.Zero, Quat.FromRotationY(t + 0.25f), 1f, (0f, 0f), Scene.Srgb8(255, 165, 0));
+            Gizmos.Text("Text", Vec3.Zero, Quat.FromRotationY(t + 0.25f), 1f, (0f, 0f), Color.FromSrgb8(255, 165, 0));
             Gizmos.Text("Gizmos", new Vec3(0f, -1.5f, 0f), Quat.FromRotationY(-t - 0.5f), 1f, (0f, 0f), (1f, 1f, 0f, 1f));
         }, "3d_text_gizmos.HelloWorld");
     }

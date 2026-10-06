@@ -37,13 +37,13 @@ internal static class StorageBuffer
             {
                 for (var j = -3; j <= 3; j++)
                 {
-                    var entity = ecs.Mesh(cube, material, Transform.At(i, j, 0f));
+                    var entity = ecs.SpawnMesh(cube, material, Transform.At(i, j, 0f));
                     ecs.Insert<MeshTagRef>(entity).Value = currentColorId % 5;
                     currentColorId++;
                 }
             }
 
-            ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 10f), Vec3.Zero, Vec3.UnitY));
         }, "storage_buffer.Setup");
 
         app.Update(ctx =>

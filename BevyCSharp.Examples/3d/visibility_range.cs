@@ -49,14 +49,14 @@ internal static class VisibilityRange
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Scene.Material(Scene.Srgb(0.1f, 0.2f, 0.1f)), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb(0.1f, 0.2f, 0.1f)), Transform.Identity);
 
             // Bevy's FULL_DAYLIGHT, turned by its EulerRot::ZYX, and cascades kept close.
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 20_000f, Shadows = true });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
             Render.SetShadowCascades(sun, maximum: 30f, firstBound: 0.9f);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), FocalPoint, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), FocalPoint, Vec3.UnitY));
             Render.SetEnvironmentMap(
                 _camera,
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),

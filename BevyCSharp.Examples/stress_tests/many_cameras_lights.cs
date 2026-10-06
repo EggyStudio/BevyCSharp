@@ -26,19 +26,19 @@ internal static class ManyCamerasLights
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        var white = Scene.Material((1f, 1f, 1f, 1f));
+        var white = Render.CreateMaterial((1f, 1f, 1f, 1f));
 
         // A circular base, laid flat.
-        ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 4f), white, new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), white, new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), white, Transform.At(0f, 0.5f, 0f));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), white, Transform.At(0f, 0.5f, 0f));
 
         // The lights around it, their hues spread around the circle. Bevy's hue at full saturation
         // and value is the same color as at full saturation and half lightness.
         for (var i = 0; i < NumLights; i++)
         {
             var angle = i / (float)NumLights * MathF.PI * 2f;
-            var (r, g, b, _) = Scene.Hsl(angle * 180f / MathF.PI, 1f, 0.5f);
+            var (r, g, b, _) = Color.FromHsl(angle * 180f / MathF.PI, 1f, 0.5f);
             var light = Render.SpawnLight(new LightSettings
             {
                 Kind = LightKind.Point,
@@ -59,7 +59,7 @@ internal static class ManyCamerasLights
             for (var x = 0; x < CameraRows; x++)
             {
                 var angle = index / (float)(CameraRows * CameraCols) * MathF.PI * 2f;
-                Cameras.Add(ecs.Camera(
+                Cameras.Add(ecs.SpawnCamera3d(
                     Transform.LookingAt(new Vec3(MathF.Sin(angle) * 4f, 2.5f, MathF.Cos(angle) * 4f), Vec3.Zero, Vec3.UnitY),
                     new CameraSettings { Order = index, Viewport = ((uint)x * cellWidth, (uint)y * cellHeight, cellWidth, cellHeight) }));
                 index++;

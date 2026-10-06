@@ -33,10 +33,10 @@ internal static class ProjectionZoom
             var ecs = ctx.Ecs;
             (_orthographic, _scale, _fieldOfView, _orthographicJson) = (true, 1f, PerspectiveZoom.Min, null);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(5f, 5f, 5f), Vec3.Zero, Vec3.UnitY),
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(5f, 5f, 5f), Vec3.Zero, Vec3.UnitY),
                 new CameraSettings { Projection = CameraProjection.Orthographic, Height = OrthographicHeight });
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = Scene.Srgb(0.3f, 0.5f, 0.3f), DoubleSided = true }), Transform.Identity);
-            ecs.PointLight(new Vec3(3f, 8f, 5f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(0.3f, 0.5f, 0.3f), DoubleSided = true }), Transform.Identity);
+            ecs.SpawnPointLight(new Vec3(3f, 8f, 5f));
 
             Ui.SpawnText("Scroll mouse wheel to zoom in/out\nSpace: switch between orthographic and perspective projections",
                 new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });

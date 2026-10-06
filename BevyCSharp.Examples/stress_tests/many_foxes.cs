@@ -87,10 +87,10 @@ internal static class ManyFoxes
 
         const float Zoom = 0.8f;
         var translation = new Vec3(radius * 1.25f * Zoom, radius * 0.5f * Zoom, radius * 1.5f * Zoom);
-        var camera = ecs.Camera(Transform.LookingAt(translation, 0.2f * new Vec3(translation.X, 0f, translation.Z), Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(translation, 0.2f * new Vec3(translation.X, 0f, translation.Z), Vec3.UnitY));
         if (_motionBlur) ecs.Insert<MotionBlurRef>(camera).ShutterAngle = 3f;
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5000f, 5000f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5000f, 5000f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
 
         // Bevy's EulerRot::ZYX of nothing about Z, a radian about Y and an eighth of a turn down,
         // its shadow cascades fitted to the rings.

@@ -16,11 +16,11 @@ internal static class ContextMenu
 {
     private static readonly (string Name, (float R, float G, float B, float A) Color)[] Items =
     [
-        ("fuchsia", Scene.Srgb8(255, 0, 255)),
-        ("gray", Scene.Srgb8(128, 128, 128)),
-        ("maroon", Scene.Srgb8(128, 0, 0)),
-        ("purple", Scene.Srgb8(128, 0, 128)),
-        ("teal", Scene.Srgb8(0, 128, 128)),
+        ("fuchsia", Color.FromSrgb8(255, 0, 255)),
+        ("gray", Color.FromSrgb8(128, 128, 128)),
+        ("maroon", Color.FromSrgb8(128, 0, 0)),
+        ("purple", Color.FromSrgb8(128, 0, 128)),
+        ("teal", Color.FromSrgb8(0, 128, 128)),
     ];
 
     private static Entity _background, _button, _menu;

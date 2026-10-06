@@ -15,8 +15,8 @@ internal static class ManyText
     internal const string LoremText2 = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
     // Bevy's palette of CSS colors, and the white text is drawn in where none is given.
-    private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f), Yellow = Scene.Srgb8(255, 255, 0), Navy = Scene.Srgb8(0, 0, 128),
-        PaleGreen = Scene.Srgb8(152, 251, 152), MistyRose = Scene.Srgb8(255, 228, 225), Maroon = Scene.Srgb8(128, 0, 0);
+    private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f), Yellow = Color.FromSrgb8(255, 255, 0), Navy = Color.FromSrgb8(0, 0, 128),
+        PaleGreen = Color.FromSrgb8(152, 251, 152), MistyRose = Color.FromSrgb8(255, 228, 225), Maroon = Color.FromSrgb8(128, 0, 0);
 
     private static readonly string[] Fonts =
     [

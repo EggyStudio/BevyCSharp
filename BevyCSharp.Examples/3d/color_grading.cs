@@ -108,11 +108,11 @@ internal static class ColorGrading
 
         _help = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) }, new UiTextSettings { Font = font });
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
         ecs.Insert<ColorGradingRef>(_camera);
 
-        var fogColor = Scene.Srgb8(43, 44, 47);
+        var fogColor = Color.FromSrgb8(43, 44, 47);
         var fog = ecs.Insert<DistanceFogRef>(_camera);
         fog.Color = new Color(fogColor.R, fogColor.G, fogColor.B, fogColor.A);
         fog.Falloff = new FogFalloff.Linear(1f, 8f);

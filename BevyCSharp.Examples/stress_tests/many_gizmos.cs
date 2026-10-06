@@ -74,7 +74,7 @@ internal static class ManyGizmos
     private static void Setup(BehaviorContext ctx)
     {
         StressTest.Warn();
-        ctx.Ecs.Camera(Transform.LookingAt(new Vec3(3f, 1f, 5f), Vec3.Zero, Vec3.UnitY));
+        ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 1f, 5f), Vec3.Zero, Vec3.UnitY));
         _text = Ui.SpawnText("", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
 

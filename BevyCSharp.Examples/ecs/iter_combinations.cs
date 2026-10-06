@@ -48,23 +48,23 @@ internal static class IterCombinations
             {
                 var radius = Range(0.1f, 0.7f);
                 var position = new Vec3(Range(-1f, 1f), Range(-1f, 1f), Range(-1f, 1f)).Normalized * MathF.Cbrt(Range(0.2f, 1f)) * 15f;
-                var color = Scene.Srgb(Range(0.5f, 1f), Range(0.5f, 1f), Range(0.5f, 1f));
+                var color = Color.FromSrgb(Range(0.5f, 1f), Range(0.5f, 1f), Range(0.5f, 1f));
 
-                var body = ecs.Mesh(mesh, Scene.Material(color), new Transform(position, Quat.Identity, new Vec3(radius)));
+                var body = ecs.SpawnMesh(mesh, Render.CreateMaterial(color), new Transform(position, Quat.Identity, new Vec3(radius)));
                 ecs.Add(body, new Mass { Value = radius * radius * radius * 10f });
                 ecs.Add(body, new Acceleration());
                 ecs.Add(body, new LastPosition { Value = position - new Vec3(Range(-0.5f, 0.5f), Range(-0.5f, 0.5f), Range(-0.5f, 0.5f)) * Step });
             }
 
-            var orangeRed = Scene.Srgb8(255, 69, 0);
-            _star = ecs.Mesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 1f) }), Transform.Identity);
+            var orangeRed = Color.FromSrgb8(255, 69, 0);
+            _star = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 1f) }), Transform.Identity);
             ecs.Add(_star, new Mass { Value = 500f });
             ecs.Add(_star, new Acceleration());
             ecs.Add(_star, new LastPosition());
             ecs.Add(_star, new Star());
-            ecs.SetParent(ecs.PointLight(Vec3.Zero, range: 100f, radius: 1f), _star);
+            ecs.SetParent(ecs.SpawnPointLight(Vec3.Zero, range: 100f, radius: 1f), _star);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 10.5f, -30f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10.5f, -30f), Vec3.Zero, Vec3.UnitY));
         }, "iter_combinations.GenerateBodies");
 
         app.On(Stage.FixedUpdate, InteractBodies, "iter_combinations.InteractBodies");
@@ -118,7 +118,7 @@ internal static class IterCombinations
         var ecs = ctx.Ecs;
         var camera = ecs.GetOrDefault<Transform>(_camera);
         var toward = Transform.LookingAt(camera.Translation, ecs.GetOrDefault<Transform>(_star).Translation, Vec3.UnitY).Rotation;
-        camera.Rotation = Scene.Lerp(toward, camera.Rotation, 0.1f);
+        camera.Rotation = Quat.Lerp(toward, camera.Rotation, 0.1f);
         ecs.Set(_camera, camera);
     }
 }

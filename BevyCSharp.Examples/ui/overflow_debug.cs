@@ -133,7 +133,7 @@ internal static class OverflowDebug
             Justify = UiJustify.Center,
             OverflowX = UiOverflow.Clip,
             OverflowY = UiOverflow.Clip,
-            Color = Scene.Srgb(0.25f, 0.25f, 0.25f),
+            Color = Color.FromSrgb(0.25f, 0.25f, 0.25f),
         });
         ecs.SetParent(container, grid);
         Containers.Add(container);

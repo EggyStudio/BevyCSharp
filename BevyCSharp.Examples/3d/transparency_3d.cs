@@ -21,23 +21,23 @@ internal static class Transparency3d
             var ecs = ctx.Ecs;
             Materials.Clear();
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 6f, 6f), Make(new MaterialSettings { BaseColor = Scene.Srgb(0.3f, 0.5f, 0.3f) }), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 6f, 6f), Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.3f, 0.5f, 0.3f) }), Transform.Identity);
 
             var sphere = Render.CreateMesh(MeshShape.Sphere, 0.5f);
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
 
             // A sphere cut at half its alpha, and an unlit one cut at a tenth.
-            ecs.Mesh(sphere, Make(new MaterialSettings { BaseColor = Scene.Srgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.5f }), Transform.At(1f, 0.5f, -1.5f));
-            ecs.Mesh(sphere, Make(new MaterialSettings { BaseColor = Scene.Srgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.1f, Unlit = true }), Transform.At(-1f, 0.5f, -1.5f));
+            ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.5f }), Transform.At(1f, 0.5f, -1.5f));
+            ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.1f, Unlit = true }), Transform.At(-1f, 0.5f, -1.5f));
 
             // A color with an alpha below one blends, as Bevy makes a material from one.
-            ecs.Mesh(cube, Make(new MaterialSettings { BaseColor = Scene.Srgb(0.5f, 0.5f, 1f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(0f, 0.5f, 0f));
-            ecs.Mesh(cube, Make(new MaterialSettings { BaseColor = Scene.Srgb(0.5f, 1f, 0.5f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(-1.5f, 0.5f, 0f));
+            ecs.SpawnMesh(cube, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 0.5f, 1f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnMesh(cube, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 1f, 0.5f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(-1.5f, 0.5f, 0f));
 
-            ecs.Mesh(sphere, Make(new MaterialSettings { BaseColor = Scene.Srgb(0.7f, 0.2f, 0.1f) }), Transform.At(0f, 0.5f, -1.5f));
+            ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.7f, 0.2f, 0.1f) }), Transform.At(0f, 0.5f, -1.5f));
 
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
         });
 
         // Every material's alpha, from nothing to whole and back.

@@ -13,7 +13,6 @@ internal static class MixedLighting
 {
     private enum LightingMode { Baked, MixedDirect, MixedIndirect, RealTime }
 
-
     private const float LightmapExposure = 600f;
     private const float SphereOffset = 0.2f;
     private static readonly Vec3 InitialSpherePosition = new(0f, 0.5233223f, 0f);
@@ -42,9 +41,9 @@ internal static class MixedLighting
             (_mode, _ready) = (LightingMode.MixedIndirect, false);
 
             // Bevy's clear color, the ambient light's too, bright enough to read on lightmapped meshes.
-            var clear = Scene.Srgb8(43, 44, 47);
+            var clear = Color.FromSrgb8(43, 44, 47);
             Render.SetAmbientLight((clear.R, clear.G, clear.B), 10000f);
-            _camera = ctx.Ecs.Camera(Transform.LookingAt(new Vec3(-0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+            _camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
 
             _buttons = new RadioButtons<LightingMode>(ctx.Ecs, RadioButtons<LightingMode>.Column(), "Lighting",
                 [(LightingMode.Baked, "Baked"), (LightingMode.MixedDirect, "Mixed (Direct)"), (LightingMode.MixedIndirect, "Mixed (Indirect)"), (LightingMode.RealTime, "Real-Time")],
@@ -118,7 +117,7 @@ internal static class MixedLighting
 
         // The sun lights the scenery itself only where its direct light was not baked in.
         var realTime = _mode is LightingMode.MixedIndirect or LightingMode.RealTime;
-        foreach (var entity in Descendants(ecs, _scene))
+        foreach (var entity in ecs.Descendants(_scene))
         {
             if (ecs.Get<DirectionalLightRef>(entity) is not { } sun) continue;
             (sun.AffectsLightmappedMeshDiffuse, sun.ShadowMapsEnabled) = (realTime, realTime);
@@ -175,20 +174,11 @@ internal static class MixedLighting
     // The meshes the lightmaps are for, by the names the file gives them.
     private static IEnumerable<(Entity Entity, string Name)> Meshes(EcsWorld ecs)
     {
-        foreach (var entity in Descendants(ecs, _scene))
+        foreach (var entity in ecs.Descendants(_scene))
         {
             if (ecs.Get<GltfMeshNameRef>(entity) is not { } meshName) continue;
             var name = meshName.Value;
             if (name == "Sphere" || Lightmaps.ContainsKey(name)) yield return (entity, name);
-        }
-    }
-
-    private static IEnumerable<Entity> Descendants(EcsWorld ecs, Entity root)
-    {
-        foreach (var child in ecs.ChildrenOf(root))
-        {
-            yield return child;
-            foreach (var below in Descendants(ecs, child)) yield return below;
         }
     }
 

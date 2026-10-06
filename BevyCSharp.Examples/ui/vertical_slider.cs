@@ -39,7 +39,7 @@ internal static class VerticalSlider
         ecs.Insert<TabGroupRef>(page);
 
         var font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
-        var light = Scene.Srgb(0.9f, 0.9f, 0.9f);
+        var light = Color.FromSrgb(0.9f, 0.9f, 0.9f);
         foreach (var (title, vertical) in new[] { ("Vertical", true), ("Horizontal", false) })
         {
             var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Align = UiAlign.Center, RowGap = Length.Px(10f) });

@@ -23,9 +23,9 @@ internal static class ShaderMaterialBindless
                 .Set("material_color.base_color", color)
                 .SetTexture("material_color_texture", AssetServer.Load(AssetKind.Image, texture));
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Material(new Vector4(0f, 0f, 1f, 1f), "branding/bevy_logo_dark.png"), Transform.At(-2f, 0.5f, 0f));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cylinder, 0.5f, 1f), Material(new Vector4(1f, 0f, 0f, 1f), "branding/bevy_logo_light.png"), Transform.At(2f, 0.5f, 0f));
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Material(new Vector4(0f, 0f, 1f, 1f), "branding/bevy_logo_dark.png"), Transform.At(-2f, 0.5f, 0f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cylinder, 0.5f, 1f), Material(new Vector4(1f, 0f, 0f, 1f), "branding/bevy_logo_light.png"), Transform.At(2f, 0.5f, 0f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "shader_material_bindless.Setup");
     }
 }

@@ -102,7 +102,7 @@ internal static class ManyButtons
         : null;
 
     // Around the color wheel by the row, its lightness high.
-    private static (float R, float G, float B, float A) AsRainbow(int i) => Scene.Hsl(i / (float)_buttons * 360f, 0.9f, 0.8f);
+    private static (float R, float G, float B, float A) AsRainbow(int i) => Color.FromHsl(i / (float)_buttons * 360f, 0.9f, 0.8f);
 
     private static void SetupFlex(BehaviorContext ctx)
     {
@@ -214,8 +214,8 @@ internal static class ManyButtons
         if (_text)
         {
             // Split in two spans, to measure text of many spans.
-            var label = Ui.SpawnText($"{column}, ", new UiSettings { Color = Scene.Srgb(0.5f, 0.2f, 0.2f) }, FontSize);
-            Ui.SpawnTextSpan(label, $"{line}", new UiTextSettings { FontSize = FontSize }, Scene.Srgb(0.2f, 0.2f, 0.5f));
+            var label = Ui.SpawnText($"{column}, ", new UiSettings { Color = Color.FromSrgb(0.5f, 0.2f, 0.2f) }, FontSize);
+            Ui.SpawnTextSpan(label, $"{line}", new UiTextSettings { FontSize = FontSize }, Color.FromSrgb(0.2f, 0.2f, 0.5f));
             ecs.SetParent(label, button);
             Texts.Add(label);
         }
@@ -240,7 +240,7 @@ public partial struct IdleColor
     [Changed(typeof(Interaction))]
     public void ButtonSystem(BehaviorContext ctx)
     {
-        var (r, g, b, a) = Ui.InteractionOf(ctx.Entity) == UiInteraction.Hovered ? Scene.Srgb8(255, 69, 0) : (Idle.X, Idle.Y, Idle.Z, Idle.W);
+        var (r, g, b, a) = Ui.InteractionOf(ctx.Entity) == UiInteraction.Hovered ? Color.FromSrgb8(255, 69, 0) : (Idle.X, Idle.Y, Idle.Z, Idle.W);
         ctx.Ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = new Color(r, g, b, a);
     }
 }

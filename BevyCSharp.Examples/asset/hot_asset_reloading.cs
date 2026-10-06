@@ -19,7 +19,7 @@ internal static class HotAssetReloading
             var ecs = ctx.Ecs;
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 5f, 4f), Vec3.Zero, Vec3.UnitY));
-            ecs.Camera(Transform.LookingAt(new Vec3(2f, 2f, 6f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(2f, 2f, 6f), Vec3.Zero, Vec3.UnitY));
         }, "hot_asset_reloading.Setup");
 
         app.SpawnGltf("models/torus/torus.gltf");

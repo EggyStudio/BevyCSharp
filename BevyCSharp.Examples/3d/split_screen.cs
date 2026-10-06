@@ -22,7 +22,7 @@ internal static class SplitScreen
             Buttons.Clear();
             Was.Clear();
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = true });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(1f) * Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
@@ -41,7 +41,7 @@ internal static class SplitScreen
             for (var index = 0; index < players.Length; index++)
             {
                 var (name, at) = players[index];
-                var camera = ecs.Camera(
+                var camera = ecs.SpawnCamera3d(
                     Transform.LookingAt(at, Vec3.Zero, Vec3.UnitY),
                     new CameraSettings
                     {
@@ -77,7 +77,7 @@ internal static class SplitScreen
                         Justify = UiJustify.Center,
                         Align = UiAlign.Center,
                         BorderColor = (1f, 1f, 1f, 1f),
-                        Color = Scene.Srgb(0.25f, 0.25f, 0.25f),
+                        Color = Color.FromSrgb(0.25f, 0.25f, 0.25f),
                     });
                     ecs.SetParent(button, row);
                     ecs.SetParent(Ui.SpawnText(caption, new UiSettings()), button);

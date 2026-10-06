@@ -41,8 +41,8 @@ internal static class ClusteredDecalMaps
             _emissive = AssetServer.Load(AssetKind.Image, "clustered_decal_maps/BevyLogo-Emissive.png");
 
             // A crimson wall facing the camera, scratched by its normal map.
-            var crimson = Scene.Srgb8(220, 20, 60);
-            ecs.Mesh(
+            var crimson = Color.FromSrgb8(220, 20, 60);
+            ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Plane, PlaneHalfSize * 2f, PlaneHalfSize * 2f),
                 Render.CreateMaterial(new MaterialSettings
                 {
@@ -51,9 +51,9 @@ internal static class ClusteredDecalMaps
                 }),
                 new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
 
-            ecs.PointLight(new Vec3(8f, 16f, -8f), intensity: 10_000_000f, range: 100f);
+            ecs.SpawnPointLight(new Vec3(8f, 16f, -8f), intensity: 10_000_000f, range: 100f);
 
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(2f, 0f, -7f), Vec3.Zero, Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(2f, 0f, -7f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
 
             _buttons = new RadioButtons<bool>(ecs, RadioButtons<bool>.Column(), "Emissive Decals", [(true, "On"), (false, "Off")], _emissiveDecals);
@@ -98,7 +98,7 @@ internal static class ClusteredDecalMaps
     {
         var ecs = ctx.Ecs;
         var now = ctx.Time.Elapsed;
-        var gold = Scene.Srgb(1f, 215f / 255f, 0f);
+        var gold = Color.FromSrgb(1f, 215f / 255f, 0f);
 
         foreach (var decal in Decals.ToArray())
         {

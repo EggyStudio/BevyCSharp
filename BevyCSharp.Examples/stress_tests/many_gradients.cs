@@ -46,10 +46,10 @@ internal static class ManyGradients
         UiGrid.Set(grid, new GridSettings { Columns = [Track.Flex(1f).Repeated(Cols)], Rows = [Track.Flex(1f).Repeated(rows)] });
 
         // Bevy's palette of CSS colors: red, blue, green, yellow, orange, lime and dark cyan.
-        (float R, float G, float B, float A)[] colors =
+        Color[] colors =
         [
-            Scene.Srgb8(255, 0, 0), Scene.Srgb8(0, 0, 255), Scene.Srgb8(0, 128, 0), Scene.Srgb8(255, 255, 0),
-            Scene.Srgb8(255, 165, 0), Scene.Srgb8(0, 255, 0), Scene.Srgb8(0, 139, 139),
+            Color.FromSrgb8(255, 0, 0), Color.FromSrgb8(0, 0, 255), Color.FromSrgb8(0, 128, 0), Color.FromSrgb8(255, 255, 0),
+            Color.FromSrgb8(255, 165, 0), Color.FromSrgb8(0, 255, 0), Color.FromSrgb8(0, 139, 139),
         ];
         float[] points = [0f, 100f, 20f, 40f, 60f, 80f, 90f];
 
@@ -65,7 +65,7 @@ internal static class ManyGradients
     }
 
     // One linear gradient, its stops each given a point along it.
-    internal static JsonArray Linear(float angle, (float R, float G, float B, float A)[] colors, float[] points) =>
+    internal static JsonArray Linear(float angle, Color[] colors, float[] points) =>
     [
         new JsonObject
         {
@@ -107,7 +107,7 @@ public partial struct GradientNode
         if (!ManyGradients.Animate) return;
 
         var hueShift = MathF.Sin(ctx.Time.Elapsed + Index * 0.01f) * 0.5f + 0.5f;
-        var colors = Shifts.Select(shift => Scene.Hsl((hueShift + shift) * 360f % 360f, 1f, 0.5f)).ToArray();
+        var colors = Shifts.Select(shift => Color.FromHsl((hueShift + shift) * 360f % 360f, 1f, 0.5f)).ToArray();
         ctx.Ecs.SetReflected(ctx.Entity, ManyGradients.Background, string.Empty, ManyGradients.Linear(Angle, colors, Points).ToJsonString());
     }
 }

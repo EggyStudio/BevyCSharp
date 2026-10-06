@@ -37,9 +37,9 @@ internal static class CameraSubView
             var ecs = ctx.Ecs;
             var at = Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY);
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
             // Each camera with the full view it draws a part of, where it starts in it, and how much
             // of it, or none for the whole view.
@@ -58,7 +58,7 @@ internal static class CameraSubView
             for (var order = 0; order < views.Length; order++)
             {
                 var (place, orthographic, full, offset, size) = views[order];
-                var camera = ecs.Camera(at, new CameraSettings
+                var camera = ecs.SpawnCamera3d(at, new CameraSettings
                 {
                     Order = order,
                     Projection = orthographic ? CameraProjection.Orthographic : CameraProjection.Perspective,

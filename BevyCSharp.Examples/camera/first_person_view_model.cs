@@ -31,25 +31,25 @@ internal static class FirstPersonViewModel
             ecs.Add(_player, Transform.At(0f, 1f, 0f));
             ecs.Add(_player, Visibility.Inherited);
 
-            _worldCamera = ecs.Camera(Transform.Identity, new CameraSettings { FieldOfView = _fieldOfView });
+            _worldCamera = ecs.SpawnCamera3d(Transform.Identity, new CameraSettings { FieldOfView = _fieldOfView });
             ecs.SetParent(_worldCamera, _player);
 
-            var viewModelCamera = ecs.Camera(Transform.Identity, new CameraSettings { FieldOfView = 70f, Order = 1, Layers = ViewModelLayer });
+            var viewModelCamera = ecs.SpawnCamera3d(Transform.Identity, new CameraSettings { FieldOfView = 70f, Order = 1, Layers = ViewModelLayer });
             ecs.SetParent(viewModelCamera, _player);
 
-            var arm = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 0.1f, 0.1f, 0.5f), Scene.Material(Scene.Srgb8(153, 246, 228)), Transform.At(0.2f, -0.1f, -0.25f));
+            var arm = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 0.1f, 0.1f, 0.5f), Render.CreateMaterial(Color.FromSrgb8(153, 246, 228)), Transform.At(0.2f, -0.1f, -0.25f));
             Render.SetLayers(ecs, arm, ViewModelLayer);
             ecs.Insert<NotShadowCasterRef>(arm);
             ecs.SetParent(arm, _player);
 
-            var white = Scene.Material((1f, 1f, 1f, 1f));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), white, Transform.Identity);
+            var white = Render.CreateMaterial((1f, 1f, 1f, 1f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), white, Transform.Identity);
             var cube = Render.CreateMesh(MeshShape.Cuboid, 2f, 0.5f, 1f);
-            ecs.Mesh(cube, white, Transform.At(0f, 0.25f, -3f));
-            ecs.Mesh(cube, white, Transform.At(0.75f, 1.75f, 0f));
+            ecs.SpawnMesh(cube, white, Transform.At(0f, 0.25f, -3f));
+            ecs.SpawnMesh(cube, white, Transform.At(0.75f, 1.75f, 0f));
 
             // On both layers, so the arm is lit as the room is.
-            var rose = Scene.Srgb8(253, 164, 175);
+            var rose = Color.FromSrgb8(253, 164, 175);
             var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 1_000_000f, Range = 20f, Shadows = true, Color = (rose.R, rose.G, rose.B) });
             ecs.Add(light, Transform.At(-2f, 4f, -0.75f));
             Render.SetLayers(ecs, light, WorldLayer | ViewModelLayer);

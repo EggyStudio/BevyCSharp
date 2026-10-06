@@ -13,6 +13,12 @@ namespace Bevy;
 /// <see cref="ToSrgb"/> converts back for showing it.
 /// </para>
 /// <para>
+/// The settings of a material, a light or a gizmo take a color as four linear numbers in a tuple,
+/// and a color converts to that tuple as it is handed over, so one made here is given to any of
+/// them as it is. The conversion goes that one way, so a list of colors and tuples is a list of
+/// tuples, as the settings take them.
+/// </para>
+/// <para>
 /// A component field of this type is drawn as a swatch and written to a scene as four linear
 /// numbers. One of Bevy's own <c>Color</c> fields, which can hold a color in any of ten spaces,
 /// reads as this whatever space it holds, converted by Bevy.
@@ -75,6 +81,45 @@ public struct Color : IEquatable<Color>
             ((packed >> 8) & 0xFF) / 255f,
             (packed & 0xFF) / 255f);
     }
+
+    /// <summary>A color from sRGB bytes, as Bevy's <c>Color::srgb_u8</c> and a hex code give them.</summary>
+    public static Color FromSrgb8(byte r, byte g, byte b, byte a = 255) =>
+        FromSrgb(r / 255f, g / 255f, b / 255f, a / 255f);
+
+    /// <summary>
+    /// A color from a hue in degrees, a saturation and a lightness between zero and one, as Bevy's
+    /// <c>Color::hsl</c> gives it.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's own conversion, through sRGB by the hue's sixth of the circle and the chroma, so a
+    /// color made here and one Bevy made from the same numbers agree. A hue past a turn or below
+    /// zero goes round the circle.
+    /// </remarks>
+    public static Color FromHsl(float hue, float saturation, float lightness, float alpha = 1f)
+    {
+        var chroma = (1f - MathF.Abs(2f * lightness - 1f)) * saturation;
+        var sixth = (hue % 360f + 360f) % 360f / 60f;
+        var x = chroma * (1f - MathF.Abs(sixth % 2f - 1f));
+        var (r, g, b) = (int)sixth switch
+        {
+            0 => (chroma, x, 0f),
+            1 => (x, chroma, 0f),
+            2 => (0f, chroma, x),
+            3 => (0f, x, chroma),
+            4 => (x, 0f, chroma),
+            _ => (chroma, 0f, x),
+        };
+        var m = lightness - chroma / 2f;
+        return FromSrgb(r + m, g + m, b + m, alpha);
+    }
+
+    /// <summary>The color as the four linear numbers a material's or a light's settings take.</summary>
+    public static implicit operator (float R, float G, float B, float A)(Color color) =>
+        (color.R, color.G, color.B, color.A);
+
+    /// <summary>The color's four linear numbers, as <c>var (r, g, b, a) = color</c> takes them apart.</summary>
+    public readonly void Deconstruct(out float r, out float g, out float b, out float a) =>
+        (r, g, b, a) = (R, G, B, A);
 
     /// <summary>The color as sRGB components between zero and one, alpha unchanged.</summary>
     public readonly Vec4 ToSrgb() => new(Gamma(R), Gamma(G), Gamma(B), A);

@@ -28,12 +28,12 @@ internal static class ExtendedMaterialBindless
                 .Set("base_color", new Vector4(gray.R, gray.G, gray.B, 1f))
                 .Set("modulate_color", new Vector4(1f, 0f, 0f, 1f))
                 .SetTexture("modulate_texture", AssetServer.Load(AssetKind.Image, "textures/uv_checker_bw.png"));
-            _sphere = ecs.Mesh(Render.CreateMesh(MeshShape.UvSphere, 1f, 20f, 20f), material, Transform.At(0f, 0.5f, 0f));
+            _sphere = ecs.SpawnMesh(Render.CreateMesh(MeshShape.UvSphere, 1f, 20f, 20f), material, Transform.At(0f, 0.5f, 0f));
 
             var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
             ecs.Add(light, Transform.LookingAt(new Vec3(1f, 1f, 1f), Vec3.Zero, Vec3.UnitY));
 
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "extended_material_bindless.Setup");
 
         // Bevy's EulerRot::YXZ of minus the time, three quarters of a turn and nothing.

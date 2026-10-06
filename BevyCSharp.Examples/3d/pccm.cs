@@ -25,7 +25,7 @@ internal static class Pccm
         {
             var ecs = ctx.Ecs;
 
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 4f), new Vec3(0f, -2.5f, 0f), Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 4f), new Vec3(0f, -2.5f, 0f), Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
             ecs.Add(camera, new FreeCamera());
 
@@ -37,7 +37,7 @@ internal static class Pccm
                 Reflectance = 1f,
                 Roughness = 0f,
             });
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 10f, 2f, 4f), slab, Transform.At(0f, -4f, -2.5f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 10f, 2f, 4f), slab, Transform.At(0f, -4f, -2.5f));
 
             // The probe's box is its transform, the room's size, and the maps were captured in it.
             _probe = ecs.Spawn();

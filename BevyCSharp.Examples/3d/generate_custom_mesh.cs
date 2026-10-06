@@ -20,14 +20,14 @@ internal static class GenerateCustomMesh
         app.Startup(ctx =>
         {
             _mesh = CreateCubeMesh();
-            _cube = ctx.Ecs.Mesh(
+            _cube = ctx.Ecs.SpawnMesh(
                 Render.CreateMesh(_mesh),
                 Render.CreateMaterial(new MaterialSettings { BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/array_texture.png") }),
                 Transform.Identity);
 
             var view = Transform.LookingAt(new Vec3(1.8f, 1.8f, 1.8f), Vec3.Zero, Vec3.UnitY);
-            ctx.Ecs.Camera(view);
-            ctx.Ecs.Set(ctx.Ecs.PointLight(new Vec3(1.8f, 1.8f, 1.8f)), view);
+            ctx.Ecs.SpawnCamera3d(view);
+            ctx.Ecs.Set(ctx.Ecs.SpawnPointLight(new Vec3(1.8f, 1.8f, 1.8f)), view);
 
             Ui.SpawnText(
                 "Controls:\nSpace: Change UVs\nX/Y/Z: Rotate\nR: Reset orientation",

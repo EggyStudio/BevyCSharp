@@ -23,7 +23,7 @@ internal static class SpatialAudio3d
             var ecs = ctx.Ecs;
             (_stopwatch, _paused, _muted) = (0f, false, false);
 
-            _emitter = ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 0.2f), Scene.Material(Scene.Srgb(0f, 0f, 1f)), Transform.Identity);
+            _emitter = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 0.2f), Render.CreateMaterial(Color.FromSrgb(0f, 0f, 1f)), Transform.Identity);
             _playing = Audio.Play(AssetServer.Load(AssetKind.Audio, "sounds/Windless Slopes.ogg"), new AudioSettings { Mode = PlaybackMode.Loop, Spatial = true });
             ecs.SetParent(_playing, _emitter);
 
@@ -32,15 +32,15 @@ internal static class SpatialAudio3d
             ecs.Add(_listener, Transform.Identity);
             Audio.SetListener(_listener, Gap);
             var ear = Render.CreateMesh(MeshShape.Cuboid, 0.2f, 0.2f, 0.2f);
-            ecs.SetParent(ecs.Mesh(ear, Scene.Material(Scene.Srgb(1f, 0f, 0f)), Transform.At(-Gap / 2f, 0f, 0f)), _listener);
-            ecs.SetParent(ecs.Mesh(ear, Scene.Material(Scene.Srgb(0f, 1f, 0f)), Transform.At(Gap / 2f, 0f, 0f)), _listener);
+            ecs.SetParent(ecs.SpawnMesh(ear, Render.CreateMaterial(Color.FromSrgb(1f, 0f, 0f)), Transform.At(-Gap / 2f, 0f, 0f)), _listener);
+            ecs.SetParent(ecs.SpawnMesh(ear, Render.CreateMaterial(Color.FromSrgb(0f, 1f, 0f)), Transform.At(Gap / 2f, 0f, 0f)), _listener);
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
             ecs.Add(sun, Transform.LookingAt(new Vec3(4f, 8f, 4f), Vec3.Zero, Vec3.UnitY));
 
             Ui.SpawnText("Up/Down/Left/Right: Move Listener\nSpace: Toggle Emitter Movement\nM: Toggle Mute",
                 new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
-            ecs.Camera(Transform.LookingAt(new Vec3(0f, 5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "spatial_audio_3d.Setup");
 
         app.Update(ctx =>

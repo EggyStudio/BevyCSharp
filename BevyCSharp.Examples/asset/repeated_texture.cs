@@ -17,12 +17,12 @@ internal static class RepeatedTexture
         var clamped = AssetServer.Load(AssetKind.Image, "textures/fantasy_ui_borders/panel-border-010.png");
         var repeated = AssetServer.LoadImage("textures/fantasy_ui_borders/panel-border-010-repeated.png", new TextureSettings { Wrap = TextureWrap.Repeat });
 
-        ecs.Mesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = clamped }), Transform.Identity);
-        ecs.Mesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = repeated, UvScale = (2f, 3f) }), Transform.At(-1.5f, 0f, 0f));
-        ecs.Mesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = clamped, UvScale = (2f, 3f) }), Transform.At(1.5f, 0f, 0f));
+        ecs.SpawnMesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = clamped }), Transform.Identity);
+        ecs.SpawnMesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = repeated, UvScale = (2f, 3f) }), Transform.At(-1.5f, 0f, 0f));
+        ecs.SpawnMesh(cube, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = clamped, UvScale = (2f, 3f) }), Transform.At(1.5f, 0f, 0f));
 
         var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Shadows = true });
         ecs.Add(light, Transform.At(4f, 8f, 4f));
-        ecs.Camera(Transform.LookingAt(new Vec3(0f, 1.5f, 4f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, 4f), Vec3.Zero, Vec3.UnitY));
     }, "repeated_texture.Setup");
 }

@@ -74,10 +74,10 @@ internal static class TonemappingExample
     {
         var ecs = ctx.Ecs;
 
-        _camera = ecs.Camera(CameraAt);
+        _camera = ecs.SpawnCamera3d(CameraAt);
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
         ecs.Insert<ColorGradingRef>(_camera);
-        var fogColor = Scene.Srgb8(43, 44, 47);
+        var fogColor = Color.FromSrgb8(43, 44, 47);
         var fog = ecs.Insert<DistanceFogRef>(_camera);
         fog.Color = new Color(fogColor.R, fogColor.G, fogColor.B, fogColor.A);
         fog.Falloff = new FogFalloff.Linear(1f, 8f);
@@ -107,7 +107,7 @@ internal static class TonemappingExample
 
         // An unlit square for an image dropped on the window, and the line asking for one.
         _viewerMaterial = Render.CreateMaterial(new MaterialSettings { Unlit = true });
-        _viewer = ecs.Mesh(Render.CreateMesh(MeshShape.Rectangle, 1f, 1f), _viewerMaterial, inFront);
+        _viewer = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Rectangle, 1f, 1f), _viewerMaterial, inFront);
         ecs.Insert<VisibilityRef>(_viewer).Value = VisibilityRef.ValueVariant.Hidden;
         InScene(3, _viewer);
 

@@ -31,7 +31,7 @@ internal static class FogVolumes
             ecs.Add(sun, Transform.LookingAt(new Vec3(1f, 1f, -0.3f), new Vec3(0f, 0.5f, 0f), Vec3.UnitY));
             ecs.Insert<VolumetricLightRef>(sun);
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(-0.75f, 1f, 2f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-0.75f, 1f, 2f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
             var volumetric = ecs.Insert<VolumetricFogRef>(_camera);
             (volumetric.StepCount, volumetric.AmbientIntensity) = (64u, 0f);

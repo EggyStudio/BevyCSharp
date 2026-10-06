@@ -42,10 +42,10 @@ internal static class MultiAssetSync
             Render.SetAmbientLight((1f, 1f, 1f), 2000f);
             _text = Ui.SpawnText("Loading...", new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) });
 
-            ecs.Camera(Transform.LookingAt(new Vec3(10f, 10f, 15f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(10f, 10f, 15f), Vec3.Zero, Vec3.UnitY));
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = true });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(1f) * Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
-            _redFloor = ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Scene.Material(Scene.Srgb(0.7f, 0.2f, 0.2f)), Transform.Identity);
+            _redFloor = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Render.CreateMaterial(Color.FromSrgb(0.7f, 0.2f, 0.2f)), Transform.Identity);
         }, "multi_asset_sync.Setup");
 
         app.Update(ctx =>
@@ -59,7 +59,7 @@ internal static class MultiAssetSync
             if (!_loaded || _spawned) return;
             _spawned = true;
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, 0f, -0.01f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, 0f, -0.01f));
             for (var i = 0; i < 10; i++)
             {
                 for (var j = 0; j < 10; j++)

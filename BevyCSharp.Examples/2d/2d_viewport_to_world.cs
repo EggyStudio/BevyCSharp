@@ -36,7 +36,7 @@ internal static class Example2dViewportToWorld
 
         // A green rectangle to see the camera move by, and a near-black floor far larger than the
         // window behind it, to see where the viewport ends.
-        foreach (var (w, h, color, z) in new[] { (40f, 20f, Scene.Srgb8(0, 128, 0), 0f), (50_000f, 50_000f, (0.01f, 0.01f, 0.01f, 1f), -200f) })
+        foreach (var (w, h, color, z) in new[] { (40f, 20f, Color.FromSrgb8(0, 128, 0), 0f), (50_000f, 50_000f, (0.01f, 0.01f, 0.01f, 1f), -200f) })
         {
             var entity = ecs.Spawn();
             ecs.Add(entity, Transform.At(0f, 0f, z));

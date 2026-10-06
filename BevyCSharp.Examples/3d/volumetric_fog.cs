@@ -22,10 +22,10 @@ internal static class VolumetricFog
         {
             var ecs = ctx.Ecs;
             (_root, _sun, _volumetricPoint, _volumetricSpot, _pointSpeed) = (Entity.None, Entity.None, true, true, -0.2f);
-            Render.SetClearColor(Scene.Srgb(0.02f, 0.02f, 0.02f));
+            Render.SetClearColor(Color.FromSrgb(0.02f, 0.02f, 0.02f));
             Render.SetAmbientLight((1f, 1f, 1f), 0f);
 
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(-1.7f, 1.5f, 4.5f), new Vec3(-1.5f, 1.7f, 3.5f), Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-1.7f, 1.5f, 4.5f), new Vec3(-1.5f, 1.7f, 3.5f), Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Bloom = true });
             Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"), 1000f);
             ecs.Insert<VolumetricFogRef>(camera).AmbientIntensity = 0f;

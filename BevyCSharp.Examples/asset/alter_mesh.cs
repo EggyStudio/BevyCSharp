@@ -28,14 +28,14 @@ internal static class AlterMesh
         var ecs = ctx.Ecs;
         (_rightShape, _scaled) = (0, false);
 
-        var material = Scene.Material(Scene.Srgb(0.6f, 0.8f, 0.6f));
-        _left = ecs.Mesh(AssetServer.LoadGltfMesh(Shapes[0]), material, Transform.At(-3f, 0f, 0f));
-        _right = ecs.Mesh(AssetServer.LoadGltfMesh(Shapes[0]), material, Transform.At(3f, 0f, 0f));
+        var material = Render.CreateMaterial(Color.FromSrgb(0.6f, 0.8f, 0.6f));
+        _left = ecs.SpawnMesh(AssetServer.LoadGltfMesh(Shapes[0]), material, Transform.At(-3f, 0f, 0f));
+        _right = ecs.SpawnMesh(AssetServer.LoadGltfMesh(Shapes[0]), material, Transform.At(3f, 0f, 0f));
         ecs.SetName(_left, "Left Shape");
         ecs.SetName(_right, "Right Shape");
 
-        ecs.PointLight(new Vec3(4f, 5f, 4f));
-        ecs.Camera(Transform.LookingAt(new Vec3(0f, 3f, 20f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnPointLight(new Vec3(4f, 5f, 4f));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 3f, 20f), Vec3.Zero, Vec3.UnitY));
 
         Ui.SpawnText("Space: swap meshes by mutating a Handle<Mesh>\nReturn: mutate the mesh itself, changing all copies of it",
             new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });

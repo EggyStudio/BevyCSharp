@@ -36,7 +36,7 @@ internal static class TextWrapDebug
                     Width = Length.Percent(16f),
                     Height = Length.Percent(95f),
                     OverflowX = UiOverflow.Clip,
-                    Color = Scene.Srgb(0.5f, c, 1f - c),
+                    Color = Color.FromSrgb(0.5f, c, 1f - c),
                 });
                 ecs.SetParent(column, row);
 

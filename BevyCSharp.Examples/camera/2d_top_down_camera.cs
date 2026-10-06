@@ -38,8 +38,8 @@ internal static class TopDownCamera2d
             return entity;
         }
 
-        Shape(Render.CreateMesh(MeshShape.Rectangle, 1000f, 700f), Scene.Srgb(0.2f, 0.2f, 0.3f), 0f);
-        _player = Shape(Render.CreateMesh(MeshShape.Circle, 25f), Scene.Srgb(6.25f, 9.4f, 9.1f), 2f);
+        Shape(Render.CreateMesh(MeshShape.Rectangle, 1000f, 700f), Color.FromSrgb(0.2f, 0.2f, 0.3f), 0f);
+        _player = Shape(Render.CreateMesh(MeshShape.Circle, 25f), Color.FromSrgb(6.25f, 9.4f, 9.1f), 2f);
 
         Ui.SpawnText("Move the light with WASD.\nThe camera will smoothly track the light.",
             new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });

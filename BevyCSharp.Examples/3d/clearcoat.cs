@@ -35,7 +35,7 @@ internal static class Clearcoat
 
             Ball(ecs, sphere, new MaterialSettings
             {
-                BaseColor = Scene.Srgb(0.9f, 0.9f, 0.9f, 0.3f),
+                BaseColor = Color.FromSrgb(0.9f, 0.9f, 0.9f, 0.3f),
                 Metallic = 0.5f,
                 Roughness = 0.1f,
                 Clearcoat = 1f,
@@ -45,7 +45,7 @@ internal static class Clearcoat
 
             Ball(ecs, sphere, new MaterialSettings
             {
-                BaseColor = Scene.Srgb8(255, 215, 0),
+                BaseColor = Color.FromSrgb8(255, 215, 0),
                 Metallic = 0.9f,
                 Roughness = 0.1f,
                 Clearcoat = 1f,
@@ -55,7 +55,7 @@ internal static class Clearcoat
 
             _light = Light(ecs, Transform.Identity);
 
-            var camera = ecs.Camera(Transform.At(0f, 0f, 10f), new CameraSettings { FieldOfView = 27f });
+            var camera = ecs.SpawnCamera3d(Transform.At(0f, 0f, 10f), new CameraSettings { FieldOfView = 27f });
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.AcesFitted });
             var specular = AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2");
             Render.SetSkybox(camera, specular, 5000f);
@@ -89,7 +89,7 @@ internal static class Clearcoat
 
     private static void Ball(EcsWorld ecs, AssetHandle sphere, MaterialSettings material, Vec3 at)
     {
-        var ball = ecs.Mesh(sphere, Render.CreateMaterial(material), new Transform(at, Quat.Identity, new Vec3(SphereScale)));
+        var ball = ecs.SpawnMesh(sphere, Render.CreateMaterial(material), new Transform(at, Quat.Identity, new Vec3(SphereScale)));
         ecs.Add(ball, new ExampleSphere());
     }
 

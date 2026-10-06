@@ -23,13 +23,13 @@ internal static class AssetLoading
         Console.WriteLine(AssetServer.StateOf(sphere) == AssetLoadState.Loaded ? "sphere has loaded" : "sphere hasn't loaded yet");
 
         var torus = AssetServer.LoadGltfMesh("models/torus/torus.gltf");
-        var material = Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f));
+        var material = Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f));
 
-        ecs.Mesh(torus, material, Transform.At(-3f, 0f, 0f));
-        ecs.Mesh(cube, material, Transform.Identity);
-        ecs.Mesh(sphere, material, Transform.At(3f, 0f, 0f));
+        ecs.SpawnMesh(torus, material, Transform.At(-3f, 0f, 0f));
+        ecs.SpawnMesh(cube, material, Transform.Identity);
+        ecs.SpawnMesh(sphere, material, Transform.At(3f, 0f, 0f));
 
-        ecs.PointLight(new Vec3(4f, 5f, 4f));
-        ecs.Camera(Transform.LookingAt(new Vec3(0f, 3f, 10f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnPointLight(new Vec3(4f, 5f, 4f));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 3f, 10f), Vec3.Zero, Vec3.UnitY));
     }, "asset_loading.Setup");
 }

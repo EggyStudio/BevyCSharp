@@ -47,7 +47,7 @@ internal static class SizeConstraints
             Active.Clear();
             Render2d.SpawnCamera2d();
             var style = new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 33f };
-            var light = Scene.Srgb(0.9f, 0.9f, 0.9f);
+            var light = Color.FromSrgb(0.9f, 0.9f, 0.9f);
 
             var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = (0f, 0f, 0f, 1f) });
             var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Align = UiAlign.Center, Justify = UiJustify.Center });
@@ -55,7 +55,7 @@ internal static class SizeConstraints
             ecs.SetParent(Ui.SpawnText("Size Constraints Example", new UiSettings { Color = light, Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(25f)) }, style), column);
 
             // The bar, white inside a black track inside yellow.
-            var yellow = Scene.Srgb8(255, 255, 0);
+            var yellow = Color.FromSrgb8(255, 255, 0);
             var frame = Ui.SpawnNode(new UiSettings { Basis = Length.Percent(100f), AlignSelf = UiAlignSelf.Stretch, Padding = Sides.All(Length.Px(10f)), Color = yellow });
             ecs.SetParent(frame, column);
             var track = Ui.SpawnNode(new UiSettings { Align = UiAlign.Stretch, Width = Length.Percent(100f), Height = Length.Px(100f), Padding = Sides.All(Length.Px(4f)), Color = (0f, 0f, 0f, 1f) });
@@ -102,7 +102,7 @@ internal static class SizeConstraints
 
         var name = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(200f), MaxWidth = Length.Px(200f), Justify = UiJustify.Center, Align = UiAlign.Center });
         ecs.SetParent(name, row);
-        ecs.SetParent(Ui.SpawnText(field, new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, style), name);
+        ecs.SetParent(Ui.SpawnText(field, new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, style), name);
 
         var buttons = Ui.SpawnNode(new UiSettings());
         ecs.SetParent(buttons, row);

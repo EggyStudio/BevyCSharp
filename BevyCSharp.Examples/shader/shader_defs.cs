@@ -26,9 +26,9 @@ internal static class ShaderDefs
                 return Shaders.CreateMaterial(Shaders.CreateProgram(settings)).Set("material.color", color);
             }
 
-            ecs.Mesh(cube, Material(new Vector4(0f, 0f, 1f, 1f), isRed: false), Transform.At(-1f, 0.5f, 0f));
-            ecs.Mesh(cube, Material(new Vector4(0f, 1f, 0f, 1f), isRed: true), Transform.At(1f, 0.5f, 0f));
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(cube, Material(new Vector4(0f, 0f, 1f, 1f), isRed: false), Transform.At(-1f, 0.5f, 0f));
+            ecs.SpawnMesh(cube, Material(new Vector4(0f, 1f, 0f, 1f), isRed: true), Transform.At(1f, 0.5f, 0f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "shader_defs.Setup");
     }
 }

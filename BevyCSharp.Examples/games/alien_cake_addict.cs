@@ -43,7 +43,7 @@ internal static class AlienCakeAddict
     private static void SetupCameras(BehaviorContext ctx)
     {
         (_cameraShouldFocus, _cameraIsFocus, _bonusTimer) = (ResetFocus, ResetFocus, 0f);
-        _camera = ctx.Ecs.Camera(Transform.LookingAt(new Vec3(-(BoardSizeI / 2f), 2f * BoardSizeJ / 3f, BoardSizeJ / 2f - 0.5f), _cameraIsFocus, Vec3.UnitY));
+        _camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-(BoardSizeI / 2f), 2f * BoardSizeJ / 3f, BoardSizeJ / 2f - 0.5f), _cameraIsFocus, Vec3.UnitY));
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -81,7 +81,7 @@ internal static class AlienCakeAddict
 
         _cake = AssetServer.LoadGltfScene("models/AlienCake/cakeBirthday.glb");
 
-        _scoreboard = Ui.SpawnText("Score:", new UiSettings { Absolute = true, Top = Length.Px(5f), Left = Length.Px(5f), Color = Scene.Srgb(0.5f, 0.5f, 1f) }, 33f);
+        _scoreboard = Ui.SpawnText("Score:", new UiSettings { Absolute = true, Top = Length.Px(5f), Left = Length.Px(5f), Color = Color.FromSrgb(0.5f, 0.5f, 1f) }, 33f);
         ecs.DespawnOnExit(_scoreboard, GameState.Playing);
     }
 
@@ -175,7 +175,7 @@ internal static class AlienCakeAddict
     {
         var ecs = ctx.Ecs;
         var screen = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center });
-        ecs.SetParent(Ui.SpawnText($"Cake eaten: {_cakeEaten}", new UiSettings { Color = Scene.Srgb(0.5f, 0.5f, 1f) }, 67f), screen);
+        ecs.SetParent(Ui.SpawnText($"Cake eaten: {_cakeEaten}", new UiSettings { Color = Color.FromSrgb(0.5f, 0.5f, 1f) }, 67f), screen);
         ecs.DespawnOnExit(screen, GameState.GameOver);
     }
 }

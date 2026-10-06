@@ -25,14 +25,14 @@ internal static class OverflowExample
             Render2d.SpawnCamera2d();
             var logo = AssetServer.Load(AssetKind.Image, "branding/icon.png");
 
-            var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Scene.Srgb8(250, 235, 215) });
+            var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Color.FromSrgb8(250, 235, 215) });
             foreach (var (x, y) in new[] { (UiOverflow.Visible, UiOverflow.Visible), (UiOverflow.Clip, UiOverflow.Visible), (UiOverflow.Visible, UiOverflow.Clip), (UiOverflow.Clip, UiOverflow.Clip) })
             {
                 var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Align = UiAlign.Center, Margin = Sides.Horizontal(Length.Px(25f)) });
                 ecs.SetParent(column, root);
 
                 // Bevy's label is the overflow as its pretty debug output prints it.
-                var labelBox = Ui.SpawnNode(new UiSettings { Padding = Sides.All(Length.Px(10f)), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(25f)), Color = Scene.Srgb(0.25f, 0.25f, 0.25f) });
+                var labelBox = Ui.SpawnNode(new UiSettings { Padding = Sides.All(Length.Px(10f)), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(25f)), Color = Color.FromSrgb(0.25f, 0.25f, 0.25f) });
                 ecs.SetParent(labelBox, column);
                 ecs.SetParent(Ui.SpawnText($"Overflow {{\n    x: {x},\n    y: {y},\n}}", new UiSettings()), labelBox);
 
@@ -45,7 +45,7 @@ internal static class OverflowExample
                     OverflowX = x,
                     OverflowY = y,
                     BorderColor = (0f, 0f, 0f, 1f),
-                    Color = Scene.Srgb8(128, 128, 128),
+                    Color = Color.FromSrgb8(128, 128, 128),
                 });
                 ecs.SetParent(frame, column);
 

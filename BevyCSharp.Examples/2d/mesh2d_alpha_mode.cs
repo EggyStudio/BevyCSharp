@@ -16,7 +16,7 @@ internal static class Mesh2dAlphaMode
         var icon = AssetServer.Load(AssetKind.Image, "branding/icon.png");
         var square = Render.CreateMesh(MeshShape.Rectangle, 256f, 256f);
         // CSS white, blue and green, the last half bright, as on the web.
-        (float R, float G, float B, float A) white = (1f, 1f, 1f, 1f), blue = (0f, 0f, 1f, 1f), green = Scene.Srgb8(0, 128, 0);
+        (float R, float G, float B, float A) white = (1f, 1f, 1f, 1f), blue = (0f, 0f, 1f, 1f), green = Color.FromSrgb8(0, 128, 0);
 
         void Spawn((float R, float G, float B, float A) color, AlphaMode2d mode, float x, float z)
         {

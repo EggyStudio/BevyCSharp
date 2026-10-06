@@ -42,7 +42,7 @@ internal static class Transmission
     {
         var material = Render.CreateMaterial(settings);
         Materials.Add(new Controlled(material, settings, color, specular, diffuse));
-        return ecs.Mesh(mesh, material, at);
+        return ecs.SpawnMesh(mesh, material, at);
     }
 
     // Bevy's EulerRot::XYZ.
@@ -65,13 +65,13 @@ internal static class Transmission
         Spawn(ecs, cube, new MaterialSettings(), new Transform(new Vec3(-0.75f, 0.7f, -2f), Euler(0.4f, 2.3f, 4.7f), Vec3.One));
 
         // The candle's wax, which passes its flame's light diffusely.
-        Spawn(ecs, cylinder, new MaterialSettings { BaseColor = Scene.Srgb(0.9f, 0.2f, 0.3f), DiffuseTransmission = 0.7f, Roughness = 0.32f, Thickness = 0.2f },
+        Spawn(ecs, cylinder, new MaterialSettings { BaseColor = Color.FromSrgb(0.9f, 0.2f, 0.3f), DiffuseTransmission = 0.7f, Roughness = 0.32f, Thickness = 0.2f },
             Transform.At(-1f, 0f, 0f), diffuse: true);
 
         // The flame, white hot with an orange edge, which casts no shadow of its own.
         var (white, orange) = (Color.FromSrgb(0.98f, 0.92f, 0.84f), Color.FromSrgb(1f, 0.27f, 0f));
         var emissive = (white.R * 20f + orange.R * 4f, white.G * 20f + orange.G * 4f, white.B * 20f + orange.B * 4f, 1f);
-        _flame = ecs.Mesh(sphere, Render.CreateMaterial(new MaterialSettings { Emissive = emissive, DiffuseTransmission = 1f }),
+        _flame = ecs.SpawnMesh(sphere, Render.CreateMaterial(new MaterialSettings { Emissive = emissive, DiffuseTransmission = 1f }),
             new Transform(new Vec3(-1f, 1.15f, 0f), Quat.Identity, new Vec3(0.1f, 0.2f, 0.1f)));
         Render.SetMeshFlags(ecs, _flame, MeshFlags.NoShadowCasting);
 
@@ -79,9 +79,9 @@ internal static class Transmission
         foreach (var (color, at, scale) in new[]
         {
             ((1f, 1f, 1f, 1f), new Vec3(1f, 0f, 0f), 1f),
-            (Scene.Srgb(1f, 0f, 0f), new Vec3(1f, -0.5f, 2f), 0.5f),
-            (Scene.Srgb(0f, 1f, 0f), new Vec3(0f, -0.5f, 2f), 0.5f),
-            (Scene.Srgb(0f, 0f, 1f), new Vec3(-1f, -0.5f, 2f), 0.5f),
+            (Color.FromSrgb(1f, 0f, 0f), new Vec3(1f, -0.5f, 2f), 0.5f),
+            (Color.FromSrgb(0f, 1f, 0f), new Vec3(0f, -0.5f, 2f), 0.5f),
+            (Color.FromSrgb(0f, 0f, 1f), new Vec3(-1f, -0.5f, 2f), 0.5f),
         })
         {
             Spawn(ecs, sphere, new MaterialSettings
@@ -103,7 +103,7 @@ internal static class Transmission
         Materials.Add(new Controlled(whiteMaterial, whiteFloor, true, false, false));
         for (var x = -3; x < 4; x++)
             for (var z = -3; z < 4; z++)
-                ecs.Mesh(plane, (x + z) % 2 == 0 ? blackMaterial : whiteMaterial, Transform.At(x * 2f, -1f, z * 2f));
+                ecs.SpawnMesh(plane, (x + z) % 2 == 0 ? blackMaterial : whiteMaterial, Transform.At(x * 2f, -1f, z * 2f));
 
         // A sheet of paper standing behind the candle, which its shadow shows through.
         var paper = Spawn(ecs, plane,
@@ -115,7 +115,7 @@ internal static class Transmission
         _light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Color = mix, Intensity = 4000f, Radius = 0.2f, Range = 5f, Shadows = true });
         ecs.Add(_light, Transform.At(-1f, 1.7f, 0f));
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(1f, 1.8f, 7f), Vec3.Zero, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 1.8f, 7f), Vec3.Zero, Vec3.UnitY));
         ApplyPost();
         // Bevy's Exposure { ev100: 6.0 }, as a lens: f/1 open for a 64th of a second at ISO 100.
         Render.SetLensExposure(_camera, aperture: 1f, shutter: 1f / 64f, sensitivity: 100f);

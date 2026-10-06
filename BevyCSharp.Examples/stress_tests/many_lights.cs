@@ -37,7 +37,7 @@ internal static class ManyLights
 
         // The sphere they light, turned inside out so its inside faces the camera. Bevy subdivides
         // it nine times where the bridge's sphere is subdivided Bevy's default five.
-        ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, Radius), Scene.Material((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.Identity, new Vec3(-1f)));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, Radius), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.Identity, new Vec3(-1f)));
 
         // A spiral over the sphere, which gives about as many lights in view whichever way the
         // camera looks, in doubles so the spread has no seams.
@@ -49,7 +49,7 @@ internal static class ManyLights
             var phi = Math.Acos(1.0 - 2.0 * (i + Epsilon) / (NLights - 1.0 + 2.0 * Epsilon));
             var at = new Vec3((float)(Math.Cos(theta) * Math.Sin(phi)), (float)(Math.Sin(theta) * Math.Sin(phi)), (float)Math.Cos(phi)) * Radius;
 
-            var (r, g, b, _) = Scene.Hsl(random.NextSingle() * 360f, 1f, 0.5f);
+            var (r, g, b, _) = Color.FromHsl(random.NextSingle() * 360f, 1f, 0.5f);
             var light = Render.SpawnLight(new LightSettings
             {
                 Kind = LightKind.Point,
@@ -65,12 +65,12 @@ internal static class ManyLights
         // orthographic camera is given as the height that matches it.
         var orthographic = Environment.GetCommandLineArgs().Contains("orthographic");
         var (width, height) = Window.Size();
-        _camera = ecs.Camera(Transform.Identity, orthographic
+        _camera = ecs.SpawnCamera3d(Transform.Identity, orthographic
             ? new CameraSettings { Projection = CameraProjection.Orthographic, Height = 20f * height / width }
             : new CameraSettings());
 
         // One cube in deep pink, a mark to see the turning by.
-        ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb8(255, 20, 147)), new Transform(new Vec3(0f, Radius, 0f), Quat.Identity, new Vec3(5f)));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb8(255, 20, 147)), new Transform(new Vec3(0f, Radius, 0f), Quat.Identity, new Vec3(5f)));
     }
 
     // Turned about its own Z and X, a little each frame.

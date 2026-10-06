@@ -11,14 +11,14 @@ internal static class TwoPasses
     public static void Build(App app) => app.Startup(ctx =>
     {
         var ecs = ctx.Ecs;
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
-        ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
-        ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
+        ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
-        ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
 
         // Drawn after the first and over it, keeping what the first drew rather than clearing it.
-        ecs.Camera(
+        ecs.SpawnCamera3d(
             Transform.LookingAt(new Vec3(10f, 10f, -5f), Vec3.Zero, Vec3.UnitY),
             new CameraSettings { Order = 1, Clear = ClearMode.Keep });
     });

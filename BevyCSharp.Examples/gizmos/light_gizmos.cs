@@ -30,12 +30,12 @@ internal static class LightGizmos
         var ecs = ctx.Ecs;
         (_coloring, _width, _enabled, _onTop) = (LightGizmoColoring.MatchLight, 2f, true, false);
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Circle, 4f), Scene.Material((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
         var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
-        var blue = Scene.Material(Scene.Srgb8(124, 144, 255));
-        foreach (var x in new[] { -2f, 0f, 2f }) ecs.Mesh(cube, blue, Transform.At(x, 0.5f, 0f));
+        var blue = Render.CreateMaterial(Color.FromSrgb8(124, 144, 255));
+        foreach (var x in new[] { -2f, 0f, 2f }) ecs.SpawnMesh(cube, blue, Transform.At(x, 0.5f, 0f));
 
-        var point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 1_000_000f, Range = 2f, Color = Rgb(Scene.Srgb8(0, 139, 139)), Shadows = true });
+        var point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 1_000_000f, Range = 2f, Color = Rgb(Color.FromSrgb8(0, 139, 139)), Shadows = true });
         ecs.Add(point, Transform.At(0f, 1.5f, 0f));
 
         var spot = Render.SpawnLight(new LightSettings
@@ -43,7 +43,7 @@ internal static class LightGizmos
             Kind = LightKind.Spot,
             Intensity = 1_000_000f,
             Range = 3.5f,
-            Color = Rgb(Scene.Srgb8(128, 0, 128)),
+            Color = Rgb(Color.FromSrgb8(128, 0, 128)),
             OuterAngle = MathF.PI / 4f,
             InnerAngle = MathF.PI / 4f * 0.8f,
             Shadows = true,
@@ -51,16 +51,16 @@ internal static class LightGizmos
         ecs.Add(spot, Transform.LookingAt(new Vec3(4f, 2f, 0f), new Vec3(1.5f, 0f, 0f), Vec3.UnitY));
 
         // A twentieth of Bevy's default daylight.
-        var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f * 0.05f, Color = Rgb(Scene.Srgb8(255, 215, 0)), Shadows = true });
+        var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f * 0.05f, Color = Rgb(Color.FromSrgb8(255, 215, 0)), Shadows = true });
         ecs.Add(sun, Transform.LookingAt(new Vec3(-4f, 2f, 0f), new Vec3(-1.5f, 0f, 0f), Vec3.UnitY));
 
         var rect = ecs.Spawn();
         ecs.Add(rect, Transform.LookingAt(new Vec3(0f, 3f, -3f), Vec3.Zero, Vec3.UnitY));
-        var orange = Scene.Srgb8(255, 165, 0);
+        var orange = Color.FromSrgb8(255, 165, 0);
         var light = ecs.Insert<RectLightRef>(rect);
         (light.Color, light.Intensity, light.Width, light.Height, light.Range) = (new Color(orange.R, orange.G, orange.B, 1f), 200_000f, 1.5f, 0.8f, 20f);
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
 
         Ui.SpawnText(
             "Press 'D' to toggle drawing gizmos on top of everything else in the scene\n"
@@ -114,7 +114,7 @@ internal static class LightGizmos
                 LightGizmoColoring.MatchLight => LightGizmoColoring.ByKind,
                 _ => LightGizmoColoring.Manual,
             };
-            var gray = Scene.Srgb8(128, 128, 128);
+            var gray = Color.FromSrgb8(128, 128, 128);
             Gizmos.ShowLights(all: true, _coloring, gray);
             ctx.Ecs.Wrap<TextSpanRef>(_colorText).Value = ColorText();
         }

@@ -73,7 +73,7 @@ internal static class Solari
         var ecs = ctx.Ecs;
         _sun = SpawnSun(ecs);
 
-        var camera = ecs.Camera(
+        var camera = ecs.SpawnCamera3d(
             new Transform(new Vec3(0.219417f, 2.5764852f, 6.9718704f), new Quat(-0.1466768f, 0.013738206f, 0.002037309f, 0.989087f), Vec3.One),
             new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
         ecs.Add(camera, new FreeCamera { Speed = 3f });
@@ -87,7 +87,7 @@ internal static class Solari
             Right = Length.Px(0f),
             Padding = Sides.All(Length.Px(4f)),
             Corners = new Corners(Length.Zero, Length.Zero, Length.Zero, Length.Px(4f)),
-            Color = Scene.Srgb(0.1f, 0.1f, 0.1f, 0.8f),
+            Color = Color.FromSrgb(0.1f, 0.1f, 0.1f, 0.8f),
         });
         _performance = Ui.SpawnText(string.Empty, new UiSettings(), new UiTextSettings { FontSize = 8f });
         ecs.SetParent(_performance, panel);
@@ -112,7 +112,7 @@ internal static class Solari
 
         foreach (var root in Roots)
         {
-            foreach (var entity in Descendants(ecs, root))
+            foreach (var entity in ecs.Descendants(root))
             {
                 if (Traced.Contains(entity)) continue;
                 var mesh = Render.MeshOf(ecs, entity);
@@ -235,12 +235,4 @@ internal static class Solari
 
     private static (float R, float G, float B, float A) Scaled(Color color, float by) => (color.R * by, color.G * by, color.B * by, 1f);
 
-    private static IEnumerable<Entity> Descendants(EcsWorld ecs, Entity root)
-    {
-        foreach (var child in ecs.ChildrenOf(root))
-        {
-            yield return child;
-            foreach (var below in Descendants(ecs, child)) yield return below;
-        }
-    }
 }

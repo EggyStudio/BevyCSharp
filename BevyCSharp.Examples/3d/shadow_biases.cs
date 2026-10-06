@@ -71,15 +71,15 @@ internal static class ShadowBiases
             ecs.SetParent(light, _lights);
         }
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(-1f, 1f, 1f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-1f, 1f, 1f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
         ecs.Add(_camera, new FreeCamera());
         Render.SetShadowFiltering(_camera, _filter);
 
         // Every other sphere raised, so the shadows fall at two distances from what casts them.
         for (var z = -(int)depth; z <= 0; z += 2)
-            ecs.Mesh(sphere, white, Transform.At(0f, z % 4 == 0 ? height : radius, z));
+            ecs.SpawnMesh(sphere, white, Transform.At(0f, z % 4 == 0 ? height : radius, z));
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 2f * depth, 2f * depth), white, Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 2f * depth, 2f * depth), white, Transform.Identity);
 
         var panel = Ui.SpawnNode(new UiSettings { Absolute = true, Padding = Sides.All(Length.Px(5f)), Color = (0f, 0f, 0f, 0.75f) });
         _text = Ui.SpawnText(Describe(), new UiSettings());

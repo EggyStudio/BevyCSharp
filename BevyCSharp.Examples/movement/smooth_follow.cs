@@ -23,12 +23,12 @@ internal static class SmoothFollow
             var ecs = ctx.Ecs;
             (_random, _targetPosition) = (new Random(68941654), Vec3.Zero);
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 12f, 12f), Scene.Material(Scene.Srgb(0.3f, 0.15f, 0.3f)), Transform.At(0f, -2.5f, 0f));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 12f, 12f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.15f, 0.3f)), Transform.At(0f, -2.5f, 0f));
             var sphere = Render.CreateMesh(MeshShape.Sphere, 0.3f);
-            _target = ecs.Mesh(sphere, Scene.Material(Scene.Srgb(0.3f, 0.15f, 0.9f)), Transform.Identity);
-            _follower = ecs.Mesh(sphere, Scene.Material(Scene.Srgb(0.9f, 0.3f, 0.3f)), Transform.At(0f, -2f, 0f));
-            ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true, intensity: 15_000_000f);
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
+            _target = ecs.SpawnMesh(sphere, Render.CreateMaterial(Color.FromSrgb(0.3f, 0.15f, 0.9f)), Transform.Identity);
+            _follower = ecs.SpawnMesh(sphere, Render.CreateMaterial(Color.FromSrgb(0.9f, 0.3f, 0.3f)), Transform.At(0f, -2f, 0f));
+            ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true, intensity: 15_000_000f);
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 3f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "smooth_follow.Setup");
 
         // Bevy chains the two, and one system moving the target and then the follower is that order.

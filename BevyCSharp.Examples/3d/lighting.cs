@@ -28,18 +28,18 @@ internal static class Lighting
     {
         var ecs = ctx.Ecs;
         var matte = (float R, float G, float B, float A) => Render.CreateMaterial(new MaterialSettings { BaseColor = (R, G, B, A), Roughness = 1f });
-        var indigo = Scene.Srgb8(75, 0, 130);
+        var indigo = Color.FromSrgb8(75, 0, 130);
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 10f, 10f), matte(1f, 1f, 1f, 1f), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 10f, 10f), matte(1f, 1f, 1f, 1f), Transform.Identity);
 
         // The left wall and the back one.
         var wall = Render.CreateMesh(MeshShape.Cuboid, 5f, 0.15f, 5f);
         var walls = matte(indigo.R, indigo.G, indigo.B, 1f);
-        ecs.Mesh(wall, walls, new Transform(new Vec3(2.5f, 2.5f, 0f), Quat.FromRotationZ(MathF.PI / 2f), Vec3.One));
-        ecs.Mesh(wall, walls, new Transform(new Vec3(0f, 2.5f, -2.5f), Quat.FromRotationX(MathF.PI / 2f), Vec3.One));
+        ecs.SpawnMesh(wall, walls, new Transform(new Vec3(2.5f, 2.5f, 0f), Quat.FromRotationZ(MathF.PI / 2f), Vec3.One));
+        ecs.SpawnMesh(wall, walls, new Transform(new Vec3(0f, 2.5f, -2.5f), Quat.FromRotationX(MathF.PI / 2f), Vec3.One));
 
         // Bevy's logo, to show the shadows of a mask.
-        var logo = ecs.Mesh(
+        var logo = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Rectangle, 2f, 0.5f),
             Render.CreateMaterial(new MaterialSettings
             {
@@ -52,10 +52,10 @@ internal static class Lighting
             new Transform(new Vec3(-2.2f, 0.5f, 1f), Quat.FromRotationY(MathF.PI / 8f), Vec3.One));
         ecs.Add(logo, new Movable());
 
-        var cube = ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb8(255, 20, 147)), Transform.At(0f, 0.5f, 0f));
+        var cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb8(255, 20, 147)), Transform.At(0f, 0.5f, 0f));
         ecs.Add(cube, new Movable());
 
-        var sphere = ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 0.5f), Scene.Material(Scene.Srgb8(50, 205, 50)), Transform.At(1.5f, 1f, 1.5f));
+        var sphere = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 0.5f), Render.CreateMaterial(Color.FromSrgb8(50, 205, 50)), Transform.At(1.5f, 1f, 1.5f));
         ecs.Add(sphere, new Movable());
 
         Render.SetAmbientLight(OrangeRed, 200f);
@@ -79,7 +79,7 @@ internal static class Lighting
 
         _text = Ui.SpawnText(Instructions(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         Render.SetLensExposure(_camera, _aperture, _shutter, _sensitivity);
     }
 
@@ -139,13 +139,13 @@ internal static class Lighting
 
     private static void Bulb(EcsWorld ecs, Entity light, AssetHandle mesh, (float R, float G, float B, float A) color, (float R, float G, float B, float A) glow, Transform at)
     {
-        var bulb = ecs.Mesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = color, Emissive = glow }), at);
+        var bulb = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = color, Emissive = glow }), at);
         ecs.SetParent(bulb, light);
     }
 
     private static (float R, float G, float B) Linear(byte r, byte g, byte b)
     {
-        var color = Scene.Srgb8(r, g, b);
+        var color = Color.FromSrgb8(r, g, b);
         return (color.R, color.G, color.B);
     }
 }

@@ -44,13 +44,13 @@ internal static class AnchorLayout
             ("right: 10px\nbottom: 10px", new UiSettings { Right = px10, Bottom = px10 }),
         })
         {
-            var cell = Ui.SpawnNode(new UiSettings { Color = Scene.Srgb(0.25f, 0.25f, 0.25f) });
+            var cell = Ui.SpawnNode(new UiSettings { Color = Color.FromSrgb(0.25f, 0.25f, 0.25f) });
             ecs.SetParent(cell, grid);
 
             place.Display = UiDisplay.Block;
             place.Absolute = true;
             place.Padding = new Sides(Length.Px(5f), Length.Px(1f), Length.Px(5f), Length.Px(1f));
-            place.Color = Scene.Srgb(1f, 0.066f, 0.349f);
+            place.Color = Color.FromSrgb(1f, 0.066f, 0.349f);
             var tag = Ui.SpawnNode(place);
             ecs.SetParent(tag, cell);
             ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = (0f, 0f, 0f, 1f) }, new UiTextSettings { Font = font }), tag);

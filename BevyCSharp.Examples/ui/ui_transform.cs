@@ -37,7 +37,7 @@ internal static class UiTransformExample
 
             Controls(ecs, row, ("<--", -MathF.PI / 8f, 0f), ("-", 0f, -0.25f));
 
-            _target = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center, Width = Length.Px(300f), Height = Length.Px(300f), Color = Scene.Srgb8(64, 64, 64) });
+            _target = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center, Width = Length.Px(300f), Height = Length.Px(300f), Color = Color.FromSrgb8(64, 64, 64) });
             ecs.Insert<UiTransformRef>(_target);
             ecs.SetParent(_target, row);
 

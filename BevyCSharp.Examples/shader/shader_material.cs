@@ -18,8 +18,8 @@ internal static class ShaderMaterialExample
             var material = Shaders.CreateMaterial(Shaders.CreateProgram("shaders/custom_material.slang"), AlphaMode.Blend)
                 .Set("material_color", new Vector4(0f, 0f, 1f, 1f))
                 .SetTexture("material_color_texture", AssetServer.Load(AssetKind.Image, "branding/icon.png"));
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.At(0f, 0.5f, 0f));
-            ecs.Camera(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.At(0f, 0.5f, 0f));
+            ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "shader_material.Setup");
     }
 }

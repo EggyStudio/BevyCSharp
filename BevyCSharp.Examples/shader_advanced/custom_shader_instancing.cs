@@ -33,12 +33,12 @@ internal static class CustomShaderInstancing
                 for (var yi = 1; yi <= 10; yi++)
                 {
                     var (x, y) = (xi / 10f, yi / 10f);
-                    var (r, g, b, a) = Scene.Hsl(x * 360f, y, 0.5f);
+                    var (r, g, b, a) = Color.FromHsl(x * 360f, y, 0.5f);
                     instances.Add(new InstanceData { PositionScale = new Vector4(x * 10f - 5f, y * 10f - 5f, 0f, 1f), Color = new Vector4(r, g, b, a) });
                 }
             }
 
-            var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 15f), Vec3.Zero, Vec3.UnitY));
+            var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 15f), Vec3.Zero, Vec3.UnitY));
             var draw = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
             {
                 DrawVertex = "shaders/instancing.slang",

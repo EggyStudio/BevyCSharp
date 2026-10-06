@@ -17,11 +17,11 @@ internal static class TransparencyUi
         var font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
 
         var row = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.SpaceAround });
-        foreach (var (label, color) in new[] { ("Button 1", Scene.Srgb(0.1f, 0.5f, 0.1f)), ("Button 2", Scene.Srgb(0.5f, 0.1f, 0.5f)) })
+        foreach (var (label, color) in new[] { ("Button 1", Color.FromSrgb(0.1f, 0.5f, 0.1f)), ("Button 2", Color.FromSrgb(0.5f, 0.1f, 0.5f)) })
         {
             var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(150f), Height = Length.Px(65f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = color });
             ecs.SetParent(button, row);
-            ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = Scene.Srgb(1f, 1f, 1f, 0.2f) }, new UiTextSettings { Font = font, FontSize = 33f }), button);
+            ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = Color.FromSrgb(1f, 1f, 1f, 0.2f) }, new UiTextSettings { Font = font, FontSize = 33f }), button);
         }
     }, "transparency_ui.Setup");
 }

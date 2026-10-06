@@ -24,11 +24,11 @@ internal static class FullscreenMaterial
         {
             var ecs = ctx.Ecs;
             (_on, _intensity, _lastIntensity, _phaseOffset) = (true, 0f, 0f, 0f);
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 5f), Vec3.Zero, Vec3.UnitY));
             _effect = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = "shaders/fullscreen_effect.slang" }));
             Shaders.SetPasses(_camera, new ShaderPass(_effect, AfterTonemapping: true));
 
-            ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.Identity);
+            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.Identity);
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 1_000f, Shadows = false });
             ecs.Add(sun, Transform.Identity);
 

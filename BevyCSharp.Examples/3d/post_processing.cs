@@ -36,7 +36,7 @@ internal static class PostProcessing
             // Each effect at Bevy's own default.
             _values = [0.02f, 1f, 0.75f, 5f, 1f, 1f, 0.5f, 1f, 1f];
 
-            _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true });
             Render.SetEnvironmentMap(
                 _camera,

@@ -11,10 +11,10 @@ namespace BevyCSharp.Examples.Gizmo;
 // the camera flies with WASD and the mouse.
 internal static class Gizmos3d
 {
-    private static readonly (float R, float G, float B, float A) Crimson = Scene.Srgb8(220, 20, 60), Purple = Scene.Srgb8(128, 0, 128), Green = Scene.Srgb8(0, 128, 0);
-    private static readonly (float R, float G, float B, float A) Black = (0f, 0f, 0f, 1f), Lime = Scene.Srgb(0f, 1f, 0f), Fuchsia = Scene.Srgb(1f, 0f, 1f);
-    private static readonly (float R, float G, float B, float A) Red = Scene.Srgb(1f, 0f, 0f), Turquoise = Scene.Srgb8(64, 224, 208), Blue = Scene.Srgb(0f, 0f, 1f);
-    private static readonly (float R, float G, float B, float A) Orange = Scene.Srgb8(255, 165, 0), Navy = Scene.Srgb8(0, 0, 128), Yellow = Scene.Srgb(1f, 1f, 0f), OrangeRed = Scene.Srgb8(255, 69, 0);
+    private static readonly (float R, float G, float B, float A) Crimson = Color.FromSrgb8(220, 20, 60), Purple = Color.FromSrgb8(128, 0, 128), Green = Color.FromSrgb8(0, 128, 0);
+    private static readonly (float R, float G, float B, float A) Black = (0f, 0f, 0f, 1f), Lime = Color.FromSrgb(0f, 1f, 0f), Fuchsia = Color.FromSrgb(1f, 0f, 1f);
+    private static readonly (float R, float G, float B, float A) Red = Color.FromSrgb(1f, 0f, 0f), Turquoise = Color.FromSrgb8(64, 224, 208), Blue = Color.FromSrgb(0f, 0f, 1f);
+    private static readonly (float R, float G, float B, float A) Orange = Color.FromSrgb8(255, 165, 0), Navy = Color.FromSrgb8(0, 0, 128), Yellow = Color.FromSrgb(1f, 1f, 0f), OrangeRed = Color.FromSrgb8(255, 69, 0);
 
     private static GizmoLines _straight = new(GizmoGroup.Behind), _round = new(GizmoGroup.InFront);
     private static bool _onTop, _bounds;
@@ -39,12 +39,12 @@ internal static class Gizmos3d
         Gizmos.Attach(ecs, holder, sphere);
         ecs.Wrap<Bevy.Reflected.GizmoRef>(holder).LineConfigWidth = 5f;
 
-        var camera = ecs.Camera(Transform.LookingAt(new Vec3(0f, 1.5f, 6f), Vec3.Zero, Vec3.UnitY));
+        var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, 6f), Vec3.Zero, Vec3.UnitY));
         ecs.Add(camera, new FreeCamera());
 
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Scene.Material(Scene.Srgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
-        ecs.Mesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Scene.Material(Scene.Srgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
-        ecs.PointLight(new Vec3(4f, 8f, 4f), shadows: true);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));
+        ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
         Ui.SpawnText(
             "Press 'T' to toggle drawing gizmos on top of everything else in the scene\n"
@@ -96,7 +96,7 @@ internal static class Gizmos3d
                 var s = (float)n / resolution * 5f;
                 var point = new Vec3(MathF.Sin(s * 10f), MathF.Cos(s * 10f), s - 6f);
                 var mix = s / 5f;
-                var color = Scene.Srgb(mix, (128f + (105f - 128f) * mix) / 255f, (128f + (180f - 128f) * mix) / 255f);
+                var color = Color.FromSrgb(mix, (128f + (105f - 128f) * mix) / 255f, (128f + (180f - 128f) * mix) / 255f);
                 if (n > 0) Gizmos.Fade(previous, point, previousColor, color, Straight);
                 (previous, previousColor) = (point, color);
             }

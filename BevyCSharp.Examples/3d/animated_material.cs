@@ -19,7 +19,7 @@ internal static class AnimatedMaterial
         {
             Cubes.Clear();
 
-            var camera = ctx.Ecs.Camera(Transform.LookingAt(new Vec3(3f, 1f, 3f), new Vec3(0f, -0.5f, 0f), Vec3.UnitY));
+            var camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 1f, 3f), new Vec3(0f, -0.5f, 0f), Vec3.UnitY));
             Render.SetEnvironmentMap(
                 camera,
                 AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
@@ -32,10 +32,10 @@ internal static class AnimatedMaterial
             {
                 for (var z = -1; z < 2; z++)
                 {
-                    var settings = new MaterialSettings { BaseColor = Scene.Hsl(hue, 1f, 0.5f) };
+                    var settings = new MaterialSettings { BaseColor = Color.FromHsl(hue, 1f, 0.5f) };
                     var material = Render.CreateMaterial(settings);
                     Cubes.Add((material, settings, hue));
-                    ctx.Ecs.Mesh(cube, material, Transform.At(x, 0f, z));
+                    ctx.Ecs.SpawnMesh(cube, material, Transform.At(x, 0f, z));
                     hue += GoldenAngle;
                 }
             }
@@ -48,7 +48,7 @@ internal static class AnimatedMaterial
             {
                 var (handle, settings, hue) = Cubes[i];
                 hue += ctx.Time.Delta * 100f;
-                settings.BaseColor = Scene.Hsl(hue, 1f, 0.5f);
+                settings.BaseColor = Color.FromHsl(hue, 1f, 0.5f);
                 Render.WriteMaterial(handle, settings);
                 Cubes[i] = (handle, settings, hue);
             }

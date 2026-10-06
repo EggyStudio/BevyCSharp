@@ -24,6 +24,14 @@ Render.SpawnLight(new LightSettings
 });
 ```
 
+A camera placed by a transform and a point light at a place, as Bevy's examples spawn them, are one
+call each, with Bevy's defaults where nothing is said:
+
+```csharp
+ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
+ctx.Ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
+```
+
 `CameraProjection.Orthographic` swaps perspective for a fixed vertical `Height`, for an isometric or
 top-down view. `Order` decides which camera draws over which, and `ClearMode.Keep` layers one on
 another. A light is aimed by its `Transform`, since a directional or spot light shines down its own

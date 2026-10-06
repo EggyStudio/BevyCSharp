@@ -61,7 +61,7 @@ internal static class ContactShadows
         var ecs = ctx.Ecs;
         Render.SetAmbientLight((1f, 1f, 1f), 0f);
 
-        var camera = _camera = ecs.Camera(Transform.LookingAt(new Vec3(-0.8f, 0.6f, -0.8f), new Vec3(0f, 0.35f, 0f), Vec3.UnitY));
+        var camera = _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-0.8f, 0.6f, -0.8f), new Vec3(0f, 0.35f, 0f), Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings
         {
             Hdr = true,
@@ -92,9 +92,9 @@ internal static class ContactShadows
             ecs.Wrap<VisibilityRef>(light).Value = type == _lightType ? Visibility.Visible : Visibility.Hidden;
         }
 
-        _ground = ecs.Mesh(
+        _ground = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Circle, 0.5f),
-            Scene.Material(Scene.Srgb(0.06f, 0.06f, 0.06f)),
+            Render.CreateMaterial(Color.FromSrgb(0.06f, 0.06f, 0.06f)),
             new Transform(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitX, -MathF.PI / 2f), Vec3.One));
 
         var column = RadioButtons<bool>.Column();

@@ -23,7 +23,7 @@ internal static class TransformExample
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _sphere = ecs.Mesh(Render.CreateMesh(MeshShape.Sphere, 3f), Scene.Material(Scene.Srgb(1f, 1f, 0f)), Transform.Identity);
+            _sphere = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 3f), Render.CreateMaterial(Color.FromSrgb(1f, 1f, 0f)), Transform.Identity);
 
             var spawn = new Transform(new Vec3(0f, 0f, -10f), Quat.FromRotationY(MathF.PI / 2f), Vec3.One);
             _start = spawn.Translation;
@@ -41,7 +41,7 @@ internal static class TransformExample
             // A little of the way toward facing the sphere each frame, up being the cube's own.
             var center = ecs.GetOrDefault<Transform>(_sphere).Translation;
             var facing = Transform.LookingAt(cube.Translation, center, cube.Rotation * Vec3.UnitY).Rotation;
-            cube.Rotation = Scene.Lerp(cube.Rotation, facing, TurnSpeed * ctx.Time.Delta);
+            cube.Rotation = Quat.Lerp(cube.Rotation, facing, TurnSpeed * ctx.Time.Delta);
             ecs.Set(_cube, cube);
 
             var size = MathF.Max(MaxSize - ScaleFactor * (_start - cube.Translation).Length, MinSize);

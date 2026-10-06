@@ -23,11 +23,11 @@ internal static class RelativeCursorPosition
             ecs.Wrap<CameraRef>(camera).Viewport = new Viewport(200, 100, 600, 600);
 
             var column = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Direction = UiDirection.Column });
-            _square = Ui.SpawnNode(new UiSettings { Width = Length.Px(250f), Height = Length.Px(250f), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(15f)), Color = Scene.Srgb(0.92f, 0.14f, 0.05f) });
+            _square = Ui.SpawnNode(new UiSettings { Width = Length.Px(250f), Height = Length.Px(250f), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(15f)), Color = Color.FromSrgb(0.92f, 0.14f, 0.05f) });
             ecs.Insert<RelativeCursorPositionRef>(_square);
             ecs.SetParent(_square, column);
 
-            _text = Ui.SpawnText("(0.0, 0.0)", new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 33f });
+            _text = Ui.SpawnText("(0.0, 0.0)", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { Font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"), FontSize = 33f });
             ecs.SetParent(_text, column);
         }, "relative_cursor_position.Setup");
 

@@ -91,7 +91,7 @@ internal static class Gradients
                 BorderColor = (1f, 1f, 1f, 1f),
                 Color = (0f, 0f, 0f, 1f),
             });
-            var text = Ui.SpawnText("next color space", new UiSettings { Color = Scene.Srgb(0.9f, 0.9f, 0.9f) });
+            var text = Ui.SpawnText("next color space", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) });
             ecs.Insert<TextShadowRef>(text);
             ecs.SetParent(text, _button);
             ecs.SetParent(_button, footer);

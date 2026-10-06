@@ -55,7 +55,7 @@ internal static class EasingFunctions
         for (var i = 0; i < Functions.Length; i++)
         {
             var (row, column) = (i / Columns, i % Columns);
-            var color = Scene.Hsl(column / (float)Columns * 360f, 0.8f, 0.75f);
+            var color = Color.FromHsl(column / (float)Columns * 360f, 0.8f, 0.75f);
             var center = new Vec2(-halfExtent.X + Extent.X / (Columns - 1) * column, halfExtent.Y - Extent.Y / (rows - 1) * row);
 
             Entity Dot(float size, Vec2 at)
@@ -100,19 +100,19 @@ internal static class EasingFunctions
             Gizmos.Polyline(
                 [new Vec3(center.X + half, center.Y + half, 0f), new Vec3(center.X - half, center.Y + half, 0f),
                  new Vec3(center.X - half, center.Y - half, 0f), new Vec3(center.X + half, center.Y - half, 0f)],
-                Scene.Hsl(hue, 0.8f, 0.35f), closed: true, inFront: true);
+                Color.FromHsl(hue, 0.8f, 0.35f), closed: true, inFront: true);
 
             for (var i = 0; i < Samples; i++)
             {
                 var x = i / (Samples - 1f);
                 curve[i] = new Vec3(center.X - half + x * PlotSize, center.Y - half + function(x) * PlotSize, 0f);
             }
-            Gizmos.Polyline(curve, Scene.Hsl(hue, 0.8f, 0.75f), inFront: true);
+            Gizmos.Polyline(curve, Color.FromHsl(hue, 0.8f, 0.75f), inFront: true);
 
             var y = function(now) * PlotSize;
             ctx.Ecs.Set(edge, Transform.At(center.X + half + 5f, center.Y - half + y, 0f));
             ctx.Ecs.Set(climber, Transform.At(center.X - half + now * PlotSize, center.Y - half + y, 0f));
-            Gizmos.Line2d((center.X - half, center.Y - half + y), (center.X + half, center.Y - half + y), Scene.Hsl(hue, 0.8f, 0.55f));
+            Gizmos.Line2d((center.X - half, center.Y - half + y), (center.X + half, center.Y - half + y), Color.FromHsl(hue, 0.8f, 0.55f));
         }
     }
 }

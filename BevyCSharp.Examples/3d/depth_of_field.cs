@@ -34,7 +34,7 @@ internal static class DepthOfField
             Tweaked.Clear();
             (_focalDistance, _aperture, _mode) = (7f, 1f / 8f, DepthOfFieldMode.Bokeh);
 
-            _camera = ctx.Ecs.Camera(Transform.LookingAt(new Vec3(0f, 4.5f, 8.25f), Vec3.Zero, Vec3.UnitY));
+            _camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 4.5f, 8.25f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.TonyMcMapface, Bloom = true });
             ApplyFocus();
 
@@ -85,7 +85,7 @@ internal static class DepthOfField
     {
         if (_scene == Entity.None) return;
 
-        foreach (var entity in Descendants(ecs, _scene))
+        foreach (var entity in ecs.Descendants(_scene))
         {
             if (Tweaked.Contains(entity)) continue;
 
@@ -106,15 +106,6 @@ internal static class DepthOfField
                 ecs.Insert<LightmapRef>(entity).Image = AssetServer.Load(AssetKind.Image, "models/DepthOfFieldExample/CircuitBoardLightmap.hdr");
                 Tweaked.Add(entity);
             }
-        }
-    }
-
-    private static IEnumerable<Entity> Descendants(EcsWorld ecs, Entity root)
-    {
-        foreach (var child in ecs.ChildrenOf(root))
-        {
-            yield return child;
-            foreach (var below in Descendants(ecs, child)) yield return below;
         }
     }
 

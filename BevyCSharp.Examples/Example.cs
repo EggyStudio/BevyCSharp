@@ -29,7 +29,7 @@ internal sealed record Example(
     Action? Returned = null,
     Action<App>? Drive = null);
 
-/// <summary>Helpers for what Bevy's examples say in one word and the bridge in several.</summary>
+/// <summary>What drives an example for its capture, beside what the package says for it.</summary>
 internal static class Scene
 {
     /// <summary>
@@ -37,24 +37,6 @@ internal static class Scene
     /// since an offscreen run has no window to ask.
     /// </summary>
     public static (uint Width, uint Height) Size { get; set; } = (1280, 720);
-
-    /// <summary>Runs <paramref name="setup"/> once as the app starts, as Bevy's <c>Startup</c> systems do.</summary>
-    public static App Startup(this App app, Action<BehaviorContext> setup, string name = "Example.Setup") =>
-        app.AddSystem(Stage.Startup, new SystemDescriptor(world => setup(new BehaviorContext(world)), name));
-
-    /// <summary>Runs <paramref name="update"/> every frame, as Bevy's <c>Update</c> systems do.</summary>
-    public static App Update(this App app, Action<BehaviorContext> update, string name = "Example.Update") =>
-        app.AddSystem(Stage.Update, new SystemDescriptor(world => update(new BehaviorContext(world)), name));
-
-    /// <summary>
-    /// Runs <paramref name="run"/> in <paramref name="stage"/>, as a system Bevy's example adds to
-    /// that schedule, and only while <paramref name="runIf"/> passes where one is given.
-    /// </summary>
-    public static App On(this App app, Stage stage, Action<BehaviorContext> run, string name, Func<World, bool>? runIf = null)
-    {
-        var descriptor = new SystemDescriptor(world => run(new BehaviorContext(world)), name);
-        return app.AddSystem(stage, runIf is null ? descriptor : descriptor.RunIf(runIf));
-    }
 
     /// <summary>
     /// Runs each step on its frame, counted from the first update, for input pretended where a
@@ -69,129 +51,6 @@ internal static class Scene
             foreach (var (at, step) in steps)
                 if (at == frame) step();
         }, "Example.Script");
-    }
-
-    /// <summary>
-    /// Bevy's <c>Quat::lerp</c>, a straight blend taken the short way round and made a rotation
-    /// again, which the library leaves to a game.
-    /// </summary>
-    public static Quat Lerp(Quat from, Quat to, float t)
-    {
-        var sign = Dot(from, to) < 0f ? -1f : 1f;
-        return Normalize(new Quat(
-            from.X + (to.X * sign - from.X) * t,
-            from.Y + (to.Y * sign - from.Y) * t,
-            from.Z + (to.Z * sign - from.Z) * t,
-            from.W + (to.W * sign - from.W) * t));
-    }
-
-    /// <summary>Bevy's <c>Quat::slerp</c>, turning at an even rate along the shorter way.</summary>
-    public static Quat Slerp(Quat from, Quat to, float t)
-    {
-        var dot = Dot(from, to);
-        if (dot < 0f) (to, dot) = (new Quat(-to.X, -to.Y, -to.Z, -to.W), -dot);
-
-        // Nearly the same rotation, where the angle is too small to divide by.
-        if (dot > 0.9995f) return Lerp(from, to, t);
-
-        var angle = MathF.Acos(dot);
-        var (a, b) = (MathF.Sin((1f - t) * angle) / MathF.Sin(angle), MathF.Sin(t * angle) / MathF.Sin(angle));
-        return new Quat(from.X * a + to.X * b, from.Y * a + to.Y * b, from.Z * a + to.Z * b, from.W * a + to.W * b);
-    }
-
-    private static float Dot(Quat a, Quat b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
-
-    private static Quat Normalize(Quat q)
-    {
-        var length = MathF.Sqrt(Dot(q, q));
-        return new Quat(q.X / length, q.Y / length, q.Z / length, q.W / length);
-    }
-
-    /// <summary>A color given in sRGB, as Bevy's <c>Color::srgb</c>, in the linear terms a material takes.</summary>
-    public static (float R, float G, float B, float A) Srgb(float r, float g, float b, float a = 1f)
-    {
-        var linear = Color.FromSrgb(r, g, b, a);
-        return (linear.R, linear.G, linear.B, linear.A);
-    }
-
-    /// <summary>A color given as sRGB bytes, as Bevy's <c>Color::srgb_u8</c>.</summary>
-    public static (float R, float G, float B, float A) Srgb8(byte r, byte g, byte b) => Srgb(r / 255f, g / 255f, b / 255f);
-
-    /// <summary>
-    /// A color given as hue in degrees, saturation and lightness, as Bevy's <c>Hsla</c>, in the
-    /// linear terms a material takes.
-    /// </summary>
-    public static (float R, float G, float B, float A) Hsl(float hue, float saturation, float lightness)
-    {
-        // Bevy's conversion, from HSL to sRGB by the chroma and the hue's sixth of the circle.
-        var chroma = (1f - MathF.Abs(2f * lightness - 1f)) * saturation;
-        var h = (hue % 360f + 360f) % 360f / 60f;
-        var x = chroma * (1f - MathF.Abs(h % 2f - 1f));
-        var (r, g, b) = (int)h switch
-        {
-            0 => (chroma, x, 0f),
-            1 => (x, chroma, 0f),
-            2 => (0f, chroma, x),
-            3 => (0f, x, chroma),
-            4 => (x, 0f, chroma),
-            _ => (chroma, 0f, x),
-        };
-        var m = lightness - chroma / 2f;
-        return Srgb(r + m, g + m, b + m);
-    }
-
-    /// <summary>A material of one color, as Bevy makes one from a <c>Color</c>.</summary>
-    public static AssetHandle Material((float R, float G, float B, float A) color) =>
-        Render.CreateMaterial(new MaterialSettings { BaseColor = color });
-
-    /// <summary>
-    /// Spawns a glTF file's scene once it has loaded, as Bevy's <c>WorldAssetRoot</c> does, and
-    /// hands the root it spawned to <paramref name="spawned"/>.
-    /// </summary>
-    public static void SpawnGltf(this App app, string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0)
-    {
-        var handle = AssetHandle.None;
-        var done = false;
-
-        app.Update(ctx =>
-        {
-            if (done) return;
-            if (handle == AssetHandle.None) handle = AssetServer.LoadGltfScene(path, scene);
-            if (AssetServer.StateOf(handle) != AssetLoadState.Loaded) return;
-
-            done = true;
-            var root = ctx.Ecs.SpawnScene(handle);
-            spawned?.Invoke(ctx, root);
-        }, $"Example.SpawnGltf({path})");
-    }
-
-    /// <summary>Spawns an entity drawn with a mesh and a material, placed by a transform.</summary>
-    public static Entity Mesh(this EcsWorld ecs, AssetHandle mesh, AssetHandle material, Transform at)
-    {
-        var entity = ecs.Spawn();
-        ecs.Add(entity, at);
-        Render.SetMesh(ecs, entity, mesh);
-        Render.SetMaterial(ecs, entity, material);
-        return entity;
-    }
-
-    /// <summary>
-    /// A point light as Bevy's default one is, a million lumens reaching twenty units and casting
-    /// no shadow unless asked.
-    /// </summary>
-    public static Entity PointLight(this EcsWorld ecs, Vec3 at, bool shadows = false, float intensity = 1_000_000f, float range = 20f, float radius = 0f)
-    {
-        var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = intensity, Range = range, Radius = radius, Shadows = shadows });
-        ecs.Add(light, Transform.At(at.X, at.Y, at.Z));
-        return light;
-    }
-
-    /// <summary>A camera placed by a transform, with Bevy's defaults otherwise.</summary>
-    public static Entity Camera(this EcsWorld ecs, Transform at, CameraSettings? settings = null)
-    {
-        var camera = settings is null ? Render.SpawnCamera3d() : Render.SpawnCamera3d(settings);
-        ecs.Add(camera, at);
-        return camera;
     }
 }
 

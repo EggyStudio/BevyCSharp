@@ -48,26 +48,26 @@ internal static class AntiAliasing
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        ecs.Mesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Scene.Material(Scene.Srgb(0.1f, 0.2f, 0.1f)), Transform.Identity);
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Render.CreateMaterial(Color.FromSrgb(0.1f, 0.2f, 0.1f)), Transform.Identity);
 
         var cube = Render.CreateMesh(MeshShape.Cuboid, 0.25f, 0.25f, 0.25f);
         var checker = Render.CreateMaterial(new MaterialSettings { BaseColorTexture = UvDebugTexture() });
         for (var i = 0; i < 5; i++)
-            ecs.Mesh(cube, checker, Transform.At(i * 0.25f - 1f, 0.125f, -i * 0.5f));
+            ecs.SpawnMesh(cube, checker, Transform.At(i * 0.25f - 1f, 0.125f, -i * 0.5f));
 
         // Bevy's FULL_DAYLIGHT, turned by its EulerRot::ZYX, with its cascades kept close.
         var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 20_000f, Shadows = true });
         ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
         Render.SetShadowCascades(sun, maximum: 3f, firstBound: 0.9f);
 
-        _camera = ecs.Camera(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+        _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
         Apply(ecs);
         Render.SetEnvironmentMap(
             _camera,
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
             150f);
-        var fogColor = Scene.Srgb8(43, 44, 47);
+        var fogColor = Color.FromSrgb8(43, 44, 47);
         var fog = ecs.Insert<DistanceFogRef>(_camera);
         fog.Color = new Color(fogColor.R, fogColor.G, fogColor.B, fogColor.A);
         fog.Falloff = new FogFalloff.Linear(1f, 4f);

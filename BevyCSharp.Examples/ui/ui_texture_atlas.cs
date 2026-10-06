@@ -31,7 +31,7 @@ internal static class UiTextureAtlas
                 RowGap = Length.Px(40f),
             });
 
-            _image = Ui.SpawnNode(new UiSettings { Width = Length.Px(256f), Height = Length.Px(256f), Color = Scene.Srgb8(250, 235, 215) });
+            _image = Ui.SpawnNode(new UiSettings { Width = Length.Px(256f), Height = Length.Px(256f), Color = Color.FromSrgb8(250, 235, 215) });
             _settings = new UiImageSettings
             {
                 Image = AssetServer.LoadImage("textures/rpg/chars/gabe/gabe-idle-run.png", new TextureSettings()),
@@ -44,7 +44,7 @@ internal static class UiTextureAtlas
 
             var style = new UiTextSettings { FontSize = 20f };
             var text = Ui.SpawnText("press ", new UiSettings(), style);
-            Ui.SpawnTextSpan(text, "space", style, Scene.Srgb(1f, 1f, 0f));
+            Ui.SpawnTextSpan(text, "space", style, Color.FromSrgb(1f, 1f, 0f));
             Ui.SpawnTextSpan(text, " to advance frames", style, (1f, 1f, 1f, 1f));
             ecs.SetParent(text, column);
         }, "ui_texture_atlas.Setup");

@@ -31,7 +31,7 @@ internal static class TwoDOnUi
                 Height = Length.Percent(100f),
                 Justify = UiJustify.Center,
                 Align = UiAlign.Center,
-                Color = Scene.Srgb8(251, 113, 133),
+                Color = Color.FromSrgb8(251, 113, 133),
             });
             var frame = Ui.SpawnNode(new UiSettings
             {

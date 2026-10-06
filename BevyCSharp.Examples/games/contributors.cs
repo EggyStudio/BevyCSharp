@@ -107,7 +107,7 @@ internal static class Contributors
     private static Color Paint(EcsWorld ecs, Entity entity, bool selected)
     {
         var hue = ecs.GetOrDefault<Contributor>(entity).Hue;
-        var (r, g, b, a) = selected ? Scene.Hsl(hue, 0.9f, 0.7f) : Deselected(hue);
+        var (r, g, b, a) = selected ? Color.FromHsl(hue, 0.9f, 0.7f) : Deselected(hue);
         var color = new Color(r, g, b, a);
         ecs.Wrap<SpriteRef>(entity).Color = color;
 
@@ -117,7 +117,7 @@ internal static class Contributors
         return color;
     }
 
-    private static (float R, float G, float B, float A) Deselected(float hue) => Scene.Hsl(hue, 0.3f, 0.2f) with { A = 0.92f };
+    private static (float R, float G, float B, float A) Deselected(float hue) => Color.FromHsl(hue, 0.3f, 0.2f) with { A = 0.92f };
 
     private static void ApplyGravity(BehaviorContext ctx)
     {

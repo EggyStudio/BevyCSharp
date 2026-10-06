@@ -46,7 +46,7 @@ internal static class TextInput
         ecs.SetParent(row, root);
         foreach (var (name, index) in new[] { ("Left", 0), ("Right", 1) })
         {
-            var field = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(2f)), BorderColor = Scene.Srgb8(203, 213, 225), Color = Scene.Srgb8(169, 169, 169) });
+            var field = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(2f)), BorderColor = Color.FromSrgb8(203, 213, 225), Color = Color.FromSrgb8(169, 169, 169) });
             Ui.SetEditableText(field, new UiEditableTextSettings { VisibleWidth = 10f });
             ecs.Wrap<TextLayoutRef>(field).Linebreak = TextLayoutRef.LinebreakVariant.NoWrap;
             ecs.Wrap<TextFontRef>(field).FontSize = new FontSize.Px(24f);
@@ -58,7 +58,7 @@ internal static class TextInput
         // What was submitted, a line tall while it is empty, wrapping at a word or, where a word
         // is too long, anywhere.
         _output = Ui.SpawnText(string.Empty,
-            new UiSettings { Width = Length.Px(400f), Border = Sides.All(Length.Px(2f)), Padding = Sides.All(Length.Px(8f)), BorderColor = Scene.Srgb8(203, 213, 225) },
+            new UiSettings { Width = Length.Px(400f), Border = Sides.All(Length.Px(2f)), Padding = Sides.All(Length.Px(8f)), BorderColor = Color.FromSrgb8(203, 213, 225) },
             new UiTextSettings { FontSize = 24f });
         ecs.Wrap<TextLayoutRef>(_output).Linebreak = TextLayoutRef.LinebreakVariant.WordOrCharacter;
         ecs.SetParent(_output, root);

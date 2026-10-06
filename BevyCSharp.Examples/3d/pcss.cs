@@ -14,7 +14,6 @@ internal static class Pcss
 
     private enum ShadowFilter { NonTemporal, Temporal }
 
-
     // The size of the light, which is how wide a shadow's soft edge grows, and the rest of Bevy's
     // constants for it.
     private const float LightRadius = 10f;
@@ -42,7 +41,7 @@ internal static class Pcss
             (_lightType, _filter, _soft) = (LightType.Directional, ShadowFilter.NonTemporal, true);
 
             var at = new Vec3(-12.912f, 4.466f, -10.624f) * 0.7f;
-            _camera = ecs.Camera(new Transform(at, Quat.FromEuler(-0.175f, -134.76f / 180f * MathF.PI, 0f), Vec3.One));
+            _camera = ecs.SpawnCamera3d(new Transform(at, Quat.FromEuler(-0.175f, -134.76f / 180f * MathF.PI, 0f), Vec3.One));
             Render.SetPostProcessing(_camera, new PostSettings { Msaa = 1 });
             Shaders.SetPrepass(_camera, depth: true, motion: true);
             Render.SetShadowFiltering(_camera, ShadowFiltering.Gaussian);
