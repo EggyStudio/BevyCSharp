@@ -286,3 +286,7 @@ of their own first (`c5d08e8`), being on N 1.2's list. Captured again, the 27 ex
 glTF scene draw as before but for the phase of what moves, since their scenes are handed over a
 frame or more later. `FreeCamera` stays in the examples until it is weighed against Bevy's own
 camera controller.
+
+N 2.7 is `build/examples-on-package.sh`, which builds every example rather than a handful, their
+sources alone in a project of their own outside the repository on the packed package, and the game
+job runs it beside Courtyard. Every one builds on the package since `f9c14be`.
