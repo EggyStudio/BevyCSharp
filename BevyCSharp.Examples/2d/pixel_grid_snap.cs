@@ -12,22 +12,13 @@ namespace BevyCSharp.Examples.TwoD;
 internal static class PixelGridSnap
 {
     // The game's own resolution.
-    private const uint ResWidth = 160, ResHeight = 90;
+    internal const uint ResWidth = 160, ResHeight = 90;
 
     // What the low-resolution camera draws, and what the window's camera draws, the canvas among it.
     private const uint PixelPerfectLayers = 1u << 0;
     private const uint HighResLayers = 1u << 1;
 
-    private static readonly List<Entity> Rotating = [];
-    private static Entity _outerCamera;
-
-    public static void Build(App app)
-    {
-        Rotating.Clear();
-        app.Startup(Setup, "pixel_grid_snap.Setup");
-        app.Update(Rotate, "pixel_grid_snap.Rotate");
-        app.Update(ctx => FitCanvas(ctx.Ecs), "pixel_grid_snap.FitCanvas");
-    }
+    public static void Build(App app) => app.Startup(Setup, "pixel_grid_snap.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
@@ -45,15 +36,18 @@ internal static class PixelGridSnap
         ecs.Wrap<CameraRef>(inGame).ClearColor = new ClearColorConfig.Custom(Color.FromSrgb(0.5f, 0.5f, 0.5f));
         ecs.Insert<MsaaRef>(inGame).Value = MsaaRef.ValueVariant.Off;
         Render.SetLayers(ecs, inGame, PixelPerfectLayers);
+        ecs.Add(inGame, new InGameCamera());
 
         // The canvas as a sprite in the window's world, and the camera that draws it there.
         var shown = ecs.Spawn();
         ecs.Add(shown, Transform.Identity);
         Render2d.SetSprite(ecs, shown, canvas);
         Render.SetLayers(ecs, shown, HighResLayers);
-        _outerCamera = Render2d.SpawnCamera2d();
-        ecs.Insert<MsaaRef>(_outerCamera).Value = MsaaRef.ValueVariant.Off;
-        Render.SetLayers(ecs, _outerCamera, HighResLayers);
+        ecs.Add(shown, new Canvas());
+        var outerCamera = Render2d.SpawnCamera2d();
+        ecs.Insert<MsaaRef>(outerCamera).Value = MsaaRef.ValueVariant.Off;
+        Render.SetLayers(ecs, outerCamera, HighResLayers);
+        ecs.Add(outerCamera, new OuterCamera());
 
         // A sprite in each world, the dark one on the canvas and the light one at the window's
         // resolution, and a black capsule on the canvas.
@@ -63,7 +57,7 @@ internal static class PixelGridSnap
             ecs.Add(sprite, Transform.At(-45f, y, 2f));
             Render2d.SetSprite(ecs, sprite, AssetServer.LoadImage(image, nearest));
             Render.SetLayers(ecs, sprite, layers);
-            Rotating.Add(sprite);
+            ecs.Add(sprite, new Rotate());
         }
 
         var capsule = ecs.Spawn();
@@ -71,32 +65,47 @@ internal static class PixelGridSnap
         Render2d.SetMesh(ecs, capsule, Render.CreateMesh(MeshShape.Capsule2d, 0.5f, 1f));
         Render2d.SetMaterial(ecs, capsule, Render2d.CreateMaterial(new ColorMaterialSettings { Color = (0f, 0f, 0f, 1f) }));
         Render.SetLayers(ecs, capsule, PixelPerfectLayers);
-        Rotating.Add(capsule);
+        ecs.Add(capsule, new Rotate());
     }
+}
 
-    private static void Rotate(BehaviorContext ctx)
-    {
-        var turn = Quat.FromRotationZ(ctx.Time.Delta);
-        foreach (var entity in Rotating)
-        {
-            var at = ctx.Ecs.GetOrDefault<Transform>(entity);
-            ctx.Ecs.Set(entity, at with { Rotation = turn * at.Rotation });
-        }
-    }
+/// <summary>The sprite the canvas is drawn on in the window's world.</summary>
+[Behavior]
+public partial struct Canvas;
 
-    // The canvas is scaled by a whole number, the largest that fits the window, so each of its
-    // pixels is the same number of the window's. Bevy sets the window camera's projection when the
-    // window is resized. Here the camera's own scale stands for the projection's, which sits beside
-    // a scaling mode no wrapper types, and is worked out from the window's size every frame, which
-    // also covers the first.
-    private static void FitCanvas(EcsWorld world)
+/// <summary>The camera that draws the pixel-perfect world into the canvas.</summary>
+[Behavior]
+public partial struct InGameCamera;
+
+/// <summary>The window's camera, which draws the canvas scaled up.</summary>
+[Behavior]
+public partial struct OuterCamera
+{
+    /// <summary>
+    /// The canvas scaled by a whole number, the largest that fits the window, so each of its pixels
+    /// is the same number of the window's.
+    /// </summary>
+    /// <remarks>
+    /// Bevy sets the camera's projection when the window is resized. Here the camera's own scale
+    /// stands for the projection's, which sits beside a scaling mode no wrapper types, and is
+    /// worked out from the window's size every frame, which also covers the first.
+    /// </remarks>
+    [OnUpdate]
+    public void FitCanvas(BehaviorContext ctx, ref Transform transform)
     {
         var (width, height) = Window.Size();
-        var fit = MathF.Round(MathF.Min(width / (float)ResWidth, height / (float)ResHeight));
-        if (fit < 1f) fit = 1f;
-
-        var camera = world.GetOrDefault<Transform>(_outerCamera);
+        var fit = MathF.Max(MathF.Round(MathF.Min(width / (float)PixelGridSnap.ResWidth, height / (float)PixelGridSnap.ResHeight)), 1f);
         var scale = new Vec3(1f / fit, 1f / fit, 1f);
-        if (camera.Scale != scale) world.Set(_outerCamera, camera with { Scale = scale });
+        if (transform.Scale != scale) transform.Scale = scale;
     }
+}
+
+/// <summary>A thing that turns, a radian a second, to show which world snaps to its pixels.</summary>
+[Behavior]
+public partial struct Rotate
+{
+    /// <summary>Turned about Z by the frame's time, as Bevy's <c>rotate</c> turns it.</summary>
+    [OnUpdate]
+    public void Turn(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationZ(ctx.Time.Delta) * transform.Rotation;
 }

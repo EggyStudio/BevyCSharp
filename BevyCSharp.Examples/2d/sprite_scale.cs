@@ -43,49 +43,28 @@ internal static class SpriteScale
         (120f, 50f, "Fit End", 160f, -200f, SpriteScaling.FitEnd),
     ];
 
-    private static readonly List<(Entity Sprite, SpriteSettings Settings)> Running = [];
-    private static AssetHandle _gabe;
-    private static uint _frame;
-    private static float _timer;
-
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
+        var ecs = ctx.Ecs;
+        Render2d.SpawnCamera2d();
+
+        var square = AssetServer.Load(AssetKind.Image, "textures/slice_square_2.png");
+        var banner = AssetServer.Load(AssetKind.Image, "branding/banner.png");
+        foreach (var (w, h, text, x, y, isBanner, scaling) in Pictures)
+            Labeled(ecs, isBanner ? banner : square, Settings(w, h, scaling), text, x, y, h);
+
+        // Each running character with the frames of its sheet and a tenth of a second for each.
+        var gabe = AssetServer.Load(AssetKind.Image, "textures/rpg/chars/gabe/gabe-idle-run.png");
+        var layout = Render2d.CreateAtlas(24, 24, 7, 1);
+        foreach (var (w, h, text, x, y, scaling) in Sheets)
         {
-            var ecs = ctx.Ecs;
-            Running.Clear();
-            (_frame, _timer) = (0, 0f);
-            Render2d.SpawnCamera2d();
-
-            var square = AssetServer.Load(AssetKind.Image, "textures/slice_square_2.png");
-            var banner = AssetServer.Load(AssetKind.Image, "branding/banner.png");
-            foreach (var (w, h, text, x, y, isBanner, scaling) in Pictures)
-                Labeled(ecs, isBanner ? banner : square, Settings(w, h, scaling), text, x, y, h);
-
-            _gabe = AssetServer.Load(AssetKind.Image, "textures/rpg/chars/gabe/gabe-idle-run.png");
-            var layout = Render2d.CreateAtlas(24, 24, 7, 1);
-            foreach (var (w, h, text, x, y, scaling) in Sheets)
-            {
-                var settings = Settings(w, h, scaling);
-                settings.Atlas = layout;
-                Running.Add((Labeled(ecs, _gabe, settings, text, x, y, h), settings));
-            }
-        }, "sprite_scale.Setup");
-
-        // Every running character a frame on each tenth of a second, the seven in turn.
-        app.Update(ctx =>
-        {
-            _timer += ctx.Time.Delta;
-            if (_timer < 0.1f) return;
-            _timer -= 0.1f;
-            _frame = _frame == 6 ? 0 : _frame + 1;
-            foreach (var (sprite, settings) in Running)
-            {
-                settings.Frame = _frame;
-                Render2d.SetSprite(ctx.Ecs, sprite, _gabe, settings);
-            }
-        }, "sprite_scale.AnimateSprite");
-    }
+            var settings = Settings(w, h, scaling);
+            settings.Atlas = layout;
+            var sprite = Labeled(ecs, gabe, settings, text, x, y, h);
+            ecs.Add(sprite, new ScaleAnimationIndices { First = 0, Last = 6 });
+            ecs.Add(sprite, new ScaleAnimationTimer { Timer = GameTimer.FromSeconds(0.1f, TimerMode.Repeating) });
+        }
+    }, "sprite_scale.Setup");
 
     private static SpriteSettings Settings(float width, float height, SpriteScaling? scaling) => new()
     {
@@ -109,5 +88,38 @@ internal static class SpriteScale
         ecs.Insert<AnchorRef>(label).Value = new Vec2(0f, 0.5f);
         ecs.SetParent(label, sprite);
         return sprite;
+    }
+}
+
+/// <summary>
+/// The frames of a sprite's animation on its sheet, Bevy's <c>AnimationIndices</c> under another
+/// name since sprite_sheet's shares the namespace.
+/// </summary>
+[Behavior]
+public partial struct ScaleAnimationIndices
+{
+    /// <summary>The first frame.</summary>
+    public int First;
+
+    /// <summary>The last frame.</summary>
+    public int Last;
+}
+
+/// <summary>
+/// The time each frame of a sprite's animation is shown, Bevy's <c>AnimationTimer</c> under another
+/// name since sprite_sheet's shares the namespace.
+/// </summary>
+[Behavior]
+public partial struct ScaleAnimationTimer
+{
+    /// <summary>A tenth of a second, over and over.</summary>
+    public GameTimer Timer;
+
+    /// <summary>On to the next frame each time the timer runs out, from the last back to the first.</summary>
+    [OnUpdate]
+    public void AnimateSprite(BehaviorContext ctx, in ScaleAnimationIndices indices)
+    {
+        if (!Timer.Tick(ctx.Time.Delta).JustFinished || ctx.Ecs.Wrap<SpriteRef>(ctx.Entity).TextureAtlas is not { } atlas) return;
+        Render2d.SetSpriteFrames([ctx.Entity], [(int)atlas.Index == indices.Last ? (uint)indices.First : (uint)atlas.Index + 1]);
     }
 }

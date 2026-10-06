@@ -8,28 +8,30 @@ namespace BevyCSharp.Examples.TwoD;
 // Demonstrates rotating a ship to face the cursor, turned on the fixed timestep.
 internal static class RotateToCursor
 {
-    private static Entity _camera, _ship;
+    internal static Entity Camera;
 
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
-        {
-            _camera = Render2d.SpawnCamera2d();
-            _ship = ctx.Ecs.Spawn();
-            ctx.Ecs.Add(_ship, Transform.Identity);
-            Render2d.SetSprite(ctx.Ecs, _ship, AssetServer.Load(AssetKind.Image, "textures/simplespace/ship_C.png"));
-        }, "rotate_to_cursor.Setup");
+        Camera = Render2d.SpawnCamera2d();
+        var ship = ctx.Ecs.Spawn();
+        ctx.Ecs.Add(ship, Transform.Identity);
+        Render2d.SetSprite(ctx.Ecs, ship, AssetServer.Load(AssetKind.Image, "textures/simplespace/ship_C.png"));
+        ctx.Ecs.Add(ship, new CursorPlayer());
+    }, "rotate_to_cursor.Setup");
+}
 
-        app.On(Stage.FixedUpdate, ctx =>
-        {
-            var (x, y) = ctx.Input.MousePosition;
-            if (!Render.TryRay(_camera, x, y, out var cursor, out _)) return;
+/// <summary>The ship, Bevy's <c>Player</c> under another name since rotation's shares the namespace.</summary>
+[Behavior]
+public partial struct CursorPlayer
+{
+    /// <summary>Turned on the fixed timestep to face the cursor, its nose up, a quarter turn from the angle the direction makes.</summary>
+    [OnFixedUpdate]
+    public void PlayerMovementSystem(BehaviorContext ctx, ref Transform transform)
+    {
+        var (x, y) = ctx.Input.MousePosition;
+        if (!Render.TryRay(RotateToCursor.Camera, x, y, out var cursor, out _)) return;
 
-            // The ship's nose is up, a quarter turn from the angle the direction makes.
-            var transform = ctx.Ecs.GetOrDefault<Transform>(_ship);
-            var angle = MathF.Atan2(cursor.Y - transform.Translation.Y, cursor.X - transform.Translation.X);
-            transform.Rotation = Quat.FromRotationZ(angle - MathF.PI / 2f);
-            ctx.Ecs.Set(_ship, transform);
-        }, "rotate_to_cursor.PlayerMovement");
+        var angle = MathF.Atan2(cursor.Y - transform.Translation.Y, cursor.X - transform.Translation.X);
+        transform.Rotation = Quat.FromRotationZ(angle - MathF.PI / 2f);
     }
 }

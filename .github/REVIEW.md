@@ -413,3 +413,13 @@ behavior's, and ecs_guide's systems order themselves about the players' by name.
 observer_propagation names its entities with Bevy's `Name` rather than an index of its own.
 ecs_guide prints its joins and its rounds in another order, which Bevy leaves unordered too, and
 its capture was written again, the game played the same to the same winner.
+
+B 4 for 2D Rendering, 79 of 119. The moving sprite carries its `Direction`, the ships and enemies
+their `Player`, `SnapToPlayer` and `RotateToPlayer`, `CursorPlayer` in rotate_to_cursor beside
+rotation's, and each text and capsule its marker with the work Bevy does over it. The sprite
+animations keep Bevy's `AnimationConfig`, `AnimationIndices` and `AnimationTimer`, each with a
+`GameTimer`, and read and write the frame on the sprite's own atlas as Bevy's do, through
+`SpriteRef.TextureAtlas` and `Render2d.SetSpriteFrames`, rather than an index of their own.
+sprite_scale's are `ScaleAnimationIndices` and `ScaleAnimationTimer`, sprite_sheet's sharing the
+namespace. pixel_grid_snap's window camera carries `OuterCamera` and fits the canvas to the window
+itself.

@@ -2,6 +2,7 @@
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
 
@@ -9,40 +10,48 @@ namespace BevyCSharp.Examples.TwoD;
 // frame each tenth of a second.
 internal static class SpriteSheet
 {
-    private const uint First = 1;
-    private const uint Last = 6;
-
-    private static Entity _sprite;
-    private static AssetHandle _texture, _layout;
-    private static uint _index;
-    private static float _timer;
-
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
-        {
-            Render2d.SpawnCamera2d();
-            (_index, _timer) = (First, 0f);
+        var ecs = ctx.Ecs;
+        Render2d.SpawnCamera2d();
 
-            // Read at its nearest pixel, as Bevy's ImagePlugin::default_nearest has every image,
-            // so the pixel art stays sharp scaled six times.
-            _texture = AssetServer.LoadImage("textures/rpg/chars/gabe/gabe-idle-run.png", new TextureSettings());
-            _layout = Render2d.CreateAtlas(24, 24, 7, 1);
-            _sprite = ctx.Ecs.Spawn();
-            ctx.Ecs.Add(_sprite, new Transform(Vec3.Zero, Quat.Identity, new Vec3(6f)));
-            Show(ctx.Ecs);
-        }, "sprite_sheet.Setup");
+        // Read at its nearest pixel, as Bevy's ImagePlugin::default_nearest has every image,
+        // so the pixel art stays sharp scaled six times.
+        var texture = AssetServer.LoadImage("textures/rpg/chars/gabe/gabe-idle-run.png", new TextureSettings());
+        var layout = Render2d.CreateAtlas(24, 24, 7, 1);
+        var indices = new AnimationIndices { First = 1, Last = 6 };
 
-        app.Update(ctx =>
-        {
-            _timer += ctx.Time.Delta;
-            if (_timer < 0.1f) return;
-            _timer -= 0.1f;
-            _index = _index == Last ? First : _index + 1;
-            Show(ctx.Ecs);
-        }, "sprite_sheet.AnimateSprite");
+        var sprite = ecs.Spawn();
+        ecs.Add(sprite, new Transform(Vec3.Zero, Quat.Identity, new Vec3(6f)));
+        Render2d.SetSprite(ecs, sprite, texture, new SpriteSettings { Atlas = layout, Frame = (uint)indices.First });
+        ecs.Add(sprite, indices);
+        ecs.Add(sprite, new AnimationTimer { Timer = GameTimer.FromSeconds(0.1f, TimerMode.Repeating) });
+    }, "sprite_sheet.Setup");
+}
+
+/// <summary>The frames of a sprite's animation on its sheet.</summary>
+[Behavior]
+public partial struct AnimationIndices
+{
+    /// <summary>The first frame.</summary>
+    public int First;
+
+    /// <summary>The last frame.</summary>
+    public int Last;
+}
+
+/// <summary>The time each frame of a sprite's animation is shown.</summary>
+[Behavior]
+public partial struct AnimationTimer
+{
+    /// <summary>A tenth of a second, over and over.</summary>
+    public GameTimer Timer;
+
+    /// <summary>On to the next frame each time the timer runs out, from the last back to the first.</summary>
+    [OnUpdate]
+    public void AnimateSprite(BehaviorContext ctx, in AnimationIndices indices)
+    {
+        if (!Timer.Tick(ctx.Time.Delta).JustFinished || ctx.Ecs.Wrap<SpriteRef>(ctx.Entity).TextureAtlas is not { } atlas) return;
+        Render2d.SetSpriteFrames([ctx.Entity], [(int)atlas.Index == indices.Last ? (uint)indices.First : (uint)atlas.Index + 1]);
     }
-
-    private static void Show(EcsWorld ecs) =>
-        Render2d.SetSprite(ecs, _sprite, _texture, new SpriteSettings { Atlas = _layout, Frame = _index });
 }

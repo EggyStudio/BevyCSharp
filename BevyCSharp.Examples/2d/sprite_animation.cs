@@ -2,6 +2,7 @@
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
 
@@ -9,74 +10,94 @@ namespace BevyCSharp.Examples.TwoD;
 // and the right one at twenty.
 internal static class SpriteAnimation
 {
-    private const uint First = 1;
-    private const uint Last = 6;
-
-    private sealed class Animation(Entity sprite, float fps)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        public Entity Sprite { get; } = sprite;
-        public float FrameTime { get; } = 1f / fps;
-        public uint Index { get; set; } = First;
+        var ecs = ctx.Ecs;
+        Render2d.SpawnCamera2d();
+        Ui.SpawnText("Left Arrow: Animate Left Sprite\nRight Arrow: Animate Right Sprite",
+            new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
 
-        // Bevy's one-shot frame timer, which runs out once and is set going again for each frame.
-        public float? Remaining { get; set; } = 1f / fps;
-    }
+        var texture = AssetServer.LoadImage("textures/rpg/chars/gabe/gabe-idle-run.png", new TextureSettings());
+        var layout = Render2d.CreateAtlas(24, 24, 7, 1);
 
-    private static Animation? _left, _right;
-    private static AssetHandle _texture, _layout;
-
-    public static void Build(App app)
-    {
-        app.Startup(ctx =>
+        Entity Spawn(float x, AnimationConfig config)
         {
-            var ecs = ctx.Ecs;
-            Render2d.SpawnCamera2d();
-            Ui.SpawnText("Left Arrow: Animate Left Sprite\nRight Arrow: Animate Right Sprite",
-                new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+            var sprite = ecs.Spawn();
+            ecs.Add(sprite, new Transform(new Vec3(x, 0f, 0f), Quat.Identity, new Vec3(6f)));
+            Render2d.SetSprite(ecs, sprite, texture, new SpriteSettings { Atlas = layout, Frame = (uint)config.FirstSpriteIndex });
+            ecs.Add(sprite, config);
+            return sprite;
+        }
 
-            _texture = AssetServer.LoadImage("textures/rpg/chars/gabe/gabe-idle-run.png", new TextureSettings());
-            _layout = Render2d.CreateAtlas(24, 24, 7, 1);
-            _left = new Animation(Spawn(ecs, -70f), 10f);
-            _right = new Animation(Spawn(ecs, 70f), 20f);
-        }, "sprite_animation.Setup");
+        ecs.Add(Spawn(-70f, AnimationConfig.New(1, 6, 10)), new LeftSprite());
+        ecs.Add(Spawn(70f, AnimationConfig.New(1, 6, 20)), new RightSprite());
+    }, "sprite_animation.Setup");
+}
 
-        app.Update(ctx =>
-        {
-            if (ctx.Input.KeyPressed(Key.ArrowLeft)) _left!.Remaining = _left.FrameTime;
-            if (ctx.Input.KeyPressed(Key.ArrowRight)) _right!.Remaining = _right.FrameTime;
+/// <summary>How a sprite's animation runs, its frames, its speed and the timer for the frame it is on.</summary>
+[Behavior]
+public partial struct AnimationConfig
+{
+    /// <summary>The first frame on the sheet.</summary>
+    public int FirstSpriteIndex;
 
-            foreach (var animation in new[] { _left!, _right! })
-            {
-                if (animation.Remaining is not { } remaining) continue;
-                remaining -= ctx.Time.Delta;
-                if (remaining > 0f)
-                {
-                    animation.Remaining = remaining;
-                    continue;
-                }
+    /// <summary>The last frame on the sheet.</summary>
+    public int LastSpriteIndex;
 
-                // At the last frame it goes back to the first and stops until a key starts it.
-                if (animation.Index == Last)
-                {
-                    animation.Index = First;
-                    animation.Remaining = null;
-                }
-                else
-                {
-                    animation.Index++;
-                    animation.Remaining = animation.FrameTime;
-                }
+    /// <summary>How many frames a second.</summary>
+    public int Fps;
 
-                Render2d.SetSprite(ctx.Ecs, animation.Sprite, _texture, new SpriteSettings { Atlas = _layout, Frame = animation.Index });
-            }
-        }, "sprite_animation.ExecuteAnimations");
-    }
+    /// <summary>The time the frame shown has left, which runs out once and is set going again for the next.</summary>
+    public GameTimer FrameTimer;
 
-    private static Entity Spawn(EcsWorld ecs, float x)
+    /// <summary>An animation over the frames given, its first frame's timer already running.</summary>
+    public static AnimationConfig New(int first, int last, int fps) =>
+        new() { FirstSpriteIndex = first, LastSpriteIndex = last, Fps = fps, FrameTimer = TimerFromFps(fps) };
+
+    /// <summary>A frame's time at the speed given, once.</summary>
+    public static GameTimer TimerFromFps(int fps) => GameTimer.FromSeconds(1f / fps, TimerMode.Once);
+
+    /// <summary>
+    /// On to the next frame as the frame's time runs out, its timer set going again, or at the last
+    /// frame back to the first, where it stops until a key starts it.
+    /// </summary>
+    [OnUpdate]
+    public void ExecuteAnimations(BehaviorContext ctx)
     {
-        var sprite = ecs.Spawn();
-        ecs.Add(sprite, new Transform(new Vec3(x, 0f, 0f), Quat.Identity, new Vec3(6f)));
-        Render2d.SetSprite(ecs, sprite, _texture, new SpriteSettings { Atlas = _layout, Frame = First });
-        return sprite;
+        if (!FrameTimer.Tick(ctx.Time.Delta).JustFinished || ctx.Ecs.Wrap<SpriteRef>(ctx.Entity).TextureAtlas is not { } atlas) return;
+
+        if ((int)atlas.Index == LastSpriteIndex)
+        {
+            Render2d.SetSpriteFrames([ctx.Entity], [(uint)FirstSpriteIndex]);
+        }
+        else
+        {
+            Render2d.SetSpriteFrames([ctx.Entity], [(uint)atlas.Index + 1]);
+            FrameTimer = TimerFromFps(Fps);
+        }
+    }
+}
+
+/// <summary>The sprite on the left, which the left arrow starts.</summary>
+[Behavior]
+public partial struct LeftSprite
+{
+    /// <summary>Its animation started again by the left arrow.</summary>
+    [OnUpdate]
+    public void TriggerAnimation(BehaviorContext ctx, ref AnimationConfig animation)
+    {
+        if (ctx.Input.KeyPressed(Key.ArrowLeft)) animation.FrameTimer = AnimationConfig.TimerFromFps(animation.Fps);
+    }
+}
+
+/// <summary>The sprite on the right, which the right arrow starts.</summary>
+[Behavior]
+public partial struct RightSprite
+{
+    /// <summary>Its animation started again by the right arrow.</summary>
+    [OnUpdate]
+    public void TriggerAnimation(BehaviorContext ctx, ref AnimationConfig animation)
+    {
+        if (ctx.Input.KeyPressed(Key.ArrowRight)) animation.FrameTimer = AnimationConfig.TimerFromFps(animation.Fps);
     }
 }
