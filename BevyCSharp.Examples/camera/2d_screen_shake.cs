@@ -15,23 +15,25 @@ internal static class ScreenShake2d
     private const float MaxAngle = 10f * MathF.PI / 180f;
     private const float MaxTranslation = 20f;
     private const float NoiseSpeed = 20f;
-    private const float TraumaPerPress = 0.4f;
+    internal const float TraumaPerPress = 0.4f;
 
-    private static Entity _camera;
-    private static float _trauma;
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "2d_screen_shake.Setup");
-        app.Update(IncreaseTrauma, "2d_screen_shake.IncreaseTrauma");
-        app.Update(ShakeCamera, "2d_screen_shake.ShakeCamera");
-    }
+    public static void Build(App app) => app.Startup(Setup, "2d_screen_shake.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        _trauma = 0f;
-        _camera = Render2d.SpawnCamera2d();
+        // The camera shaken, its configuration and the state Bevy's requires beside it, which
+        // starts at the camera's own place.
+        var camera = Render2d.SpawnCamera2d();
+        ecs.Add(camera, new CameraShakeConfig
+        {
+            TraumaDecayPerSecond = TraumaDecayPerSecond,
+            Exponent = TraumaExponent,
+            MaxAngle = MaxAngle,
+            MaxTranslation = MaxTranslation,
+            NoiseSpeed = NoiseSpeed,
+        });
+        ecs.Add(camera, new CameraShakeState { OriginalTransform = Transform.Identity });
 
         foreach (var (width, height, color, x, y, z) in new[]
         {
@@ -51,28 +53,8 @@ internal static class ScreenShake2d
             new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
     }
 
-    private static void IncreaseTrauma(BehaviorContext ctx)
-    {
-        if (ctx.Input.KeyPressed(Key.Space)) _trauma = Math.Clamp(_trauma + TraumaPerPress, 0f, 1f);
-    }
-
-    // Bevy keeps the camera's own transform aside and puts it back before anything else runs, so
-    // the shake never moves the camera for good. Nothing else moves this camera, so the shake is
-    // laid over where it stands, the identity, each frame instead.
-    private static void ShakeCamera(BehaviorContext ctx)
-    {
-        var t = ctx.Time.Elapsed * NoiseSpeed;
-        var shake = MathF.Pow(_trauma, TraumaExponent);
-        var roll = PerlinNoise(t) * shake * MaxAngle;
-        var x = PerlinNoise(t + 100f) * shake * MaxTranslation;
-        var y = PerlinNoise(t + 200f) * shake * MaxTranslation;
-        ctx.Ecs.Set(_camera, new Transform(new Vec3(x, y, 0f), Quat.FromRotationZ(roll), Vec3.One));
-
-        _trauma = Math.Clamp(_trauma - TraumaDecayPerSecond * ctx.Time.Delta, 0f, 1f);
-    }
-
     // One-dimensional Perlin noise as Bevy's example works it out, over Ken Perlin's table.
-    private static float PerlinNoise(float x)
+    internal static float PerlinNoise(float x)
     {
         var floor = (int)MathF.Floor(x);
         var (xf0, xf1) = (x - floor, x - floor - 1f);
@@ -103,4 +85,66 @@ internal static class ScreenShake2d
         0xDE, 0x72, 0x43, 0x1D, 0x18, 0x48, 0xF3, 0x8D, 0x80, 0xC3, 0x4E, 0x42, 0xD7, 0x3D, 0x9C,
         0xB4,
     ];
+}
+
+/// <summary>How much a camera is shaken now, and where it stands without the shake.</summary>
+[Behavior]
+public partial struct CameraShakeState
+{
+    /// <summary>The trauma, from zero to one.</summary>
+    public float Trauma;
+
+    /// <summary>Where the camera stands before this frame's shake, put back before anything else runs.</summary>
+    public Transform OriginalTransform;
+
+    /// <summary>The camera put back where it stands, so the shake never moves it for good.</summary>
+    [OnPreUpdate]
+    public void ResetTransform(BehaviorContext ctx, ref Transform transform) => transform = OriginalTransform;
+
+    /// <summary>Space adds trauma, up to one.</summary>
+    [OnUpdate]
+    public void IncreaseTrauma(BehaviorContext ctx)
+    {
+        if (ctx.Input.KeyPressed(Key.Space)) Trauma = Math.Clamp(Trauma + ScreenShake2d.TraumaPerPress, 0f, 1f);
+    }
+}
+
+/// <summary>How a camera is shaken, by Squirrel Eiserloh's trauma, which decays over time.</summary>
+[Behavior]
+public partial struct CameraShakeConfig
+{
+    /// <summary>How much trauma is lost each second.</summary>
+    public float TraumaDecayPerSecond;
+
+    /// <summary>The power the trauma is raised to, so a little shakes little and a lot shakes hard.</summary>
+    public float Exponent;
+
+    /// <summary>How far the camera turns at full trauma, in radians.</summary>
+    public float MaxAngle;
+
+    /// <summary>How far the camera moves at full trauma.</summary>
+    public float MaxTranslation;
+
+    /// <summary>How fast the noise the shake follows changes.</summary>
+    public float NoiseSpeed;
+
+    /// <summary>
+    /// The camera moved and turned by Perlin noise scaled by the trauma, after everything else has
+    /// placed it and before Bevy carries the place to its children, and the trauma decayed.
+    /// </summary>
+    [OnPostUpdate]
+    public void ShakeCamera(BehaviorContext ctx, ref Transform transform, ref CameraShakeState state)
+    {
+        state.OriginalTransform = transform;
+
+        var t = ctx.Time.Elapsed * NoiseSpeed;
+        var shake = MathF.Pow(state.Trauma, Exponent);
+        var roll = ScreenShake2d.PerlinNoise(t) * shake * MaxAngle;
+        var x = ScreenShake2d.PerlinNoise(t + 100f) * shake * MaxTranslation;
+        var y = ScreenShake2d.PerlinNoise(t + 200f) * shake * MaxTranslation;
+
+        transform.Translation += new Vec3(x, y, 0f);
+        transform.Rotation = Quat.FromRotationZ(roll) * transform.Rotation;
+        state.Trauma = Math.Clamp(state.Trauma - TraumaDecayPerSecond * ctx.Time.Delta, 0f, 1f);
+    }
 }

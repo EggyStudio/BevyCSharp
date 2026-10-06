@@ -10,49 +10,77 @@ namespace BevyCSharp.Examples.Assets;
 // byte of it, which every sprite showing that image would show.
 internal static class AlterSprite
 {
-    private static readonly string[] Birds = ["branding/bevy_bird_dark.png", "branding/bevy_logo_dark.png"];
-
-    private static Entity _left, _right;
-    private static int _rightBird;
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "alter_sprite.Setup");
-        app.Update(AlterHandle, "alter_sprite.AlterHandle");
-        app.Update(AlterAsset, "alter_sprite.AlterAsset");
-    }
+    public static void Build(App app) => app.Startup(Setup, "alter_sprite.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        _rightBird = 0;
         Render2d.SpawnCamera2d();
 
-        (_left, _right) = (ecs.Spawn(), ecs.Spawn());
-        ecs.Add(_left, Transform.At(-200f, 0f, 0f));
-        ecs.Add(_right, Transform.At(200f, 0f, 0f));
-        ecs.SetName(_left, "Bird Left");
-        ecs.SetName(_right, "Bird Right");
-        Render2d.SetSprite(ecs, _left, AssetServer.Load(AssetKind.Image, Birds[0]));
-        Render2d.SetSprite(ecs, _right, AssetServer.Load(AssetKind.Image, Birds[0]));
+        // Both sprites carry which bird they show, and the left one is marked so the two can be
+        // told apart, as Bevy's are.
+        var (left, right) = (ecs.Spawn(), ecs.Spawn());
+        ecs.Add(left, Transform.At(-200f, 0f, 0f));
+        ecs.Add(right, Transform.At(200f, 0f, 0f));
+        ecs.SetName(left, "Bird Left");
+        ecs.SetName(right, "Bird Right");
+        ecs.Add(left, new Bird());
+        ecs.Add(right, new Bird());
+        ecs.Add(left, new Left());
+        Render2d.SetSprite(ecs, left, AssetServer.Load(AssetKind.Image, Bird.TexturePath(BirdKind.Normal)));
+        Render2d.SetSprite(ecs, right, AssetServer.Load(AssetKind.Image, Bird.TexturePath(BirdKind.Normal)));
 
         Ui.SpawnText("Space: swap the right sprite's image handle\nReturn: modify the image Asset of the left sprite, affecting all uses of it",
             new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
+}
 
-    private static void AlterHandle(BehaviorContext ctx)
+/// <summary>Which of the two images a bird shows.</summary>
+public enum BirdKind
+{
+    /// <summary>Bevy's bird.</summary>
+    Normal,
+
+    /// <summary>Bevy's logo.</summary>
+    Logo,
+}
+
+/// <summary>A sprite showing a bird, and which one, as Bevy's <c>Bird</c> keeps it.</summary>
+[Behavior]
+public partial struct Bird
+{
+    /// <summary>Which image it shows.</summary>
+    public BirdKind Kind;
+
+    /// <summary>The image a kind of bird is drawn from.</summary>
+    public static string TexturePath(BirdKind kind) =>
+        kind == BirdKind.Normal ? "branding/bevy_bird_dark.png" : "branding/bevy_logo_dark.png";
+
+    /// <summary>Space points the right bird at the other image, as Bevy's <c>alter_handle</c> does.</summary>
+    [OnUpdate]
+    [Without(typeof(Left))]
+    public void AlterHandle(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.Space)) return;
-        _rightBird = 1 - _rightBird;
-        Render2d.SetSprite(ctx.Ecs, _right, AssetServer.Load(AssetKind.Image, Birds[_rightBird]));
+        Kind = Kind == BirdKind.Normal ? BirdKind.Logo : BirdKind.Normal;
+        Render2d.SetSprite(ctx.Ecs, ctx.Entity, AssetServer.Load(AssetKind.Image, TexturePath(Kind)));
     }
+}
 
-    // Every byte of the image turned to its opposite, alpha as well, as Bevy's does.
-    private static void AlterAsset(BehaviorContext ctx)
+/// <summary>The bird on the left, whose image itself is changed.</summary>
+[Behavior]
+public partial struct Left
+{
+    /// <summary>
+    /// Return turns every byte of the left bird's image to its opposite, alpha as well, as Bevy's
+    /// <c>alter_asset</c> does, which every sprite showing that image shows.
+    /// </summary>
+    [OnUpdate]
+    public void AlterAsset(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.Enter)) return;
 
-        var image = AssetServer.Load(AssetKind.Image, Birds[0]);
+        var image = AssetServer.Load(AssetKind.Image, Bird.TexturePath(ctx.Ecs.GetOrDefault<Bird>(ctx.Entity).Kind));
         if (!Render.TryReadImage(image, out var pixels)) return;
         Render.WriteImagePixels(image, pixels!.Data.Select(b => (byte)(255 - b)).ToArray());
     }

@@ -23,7 +23,6 @@ internal static class MultiAssetSync
     private static TaskCompletionSource? _barrier;
     private static Task? _waiting;
     private static volatile bool _loaded;
-    private static Entity _redFloor, _text;
     private static bool _spawned;
 
     public static void Build(App app)
@@ -40,12 +39,12 @@ internal static class MultiAssetSync
             _waiting = _barrier.Task.ContinueWith(_ => _loaded = true);
 
             Render.SetAmbientLight((1f, 1f, 1f), 2000f);
-            _text = Ui.SpawnText("Loading...", new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) });
+            ecs.Add(Ui.SpawnText("Loading...", new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(12f) }), new LoadingText());
 
             ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(10f, 10f, 15f), Vec3.Zero, Vec3.UnitY));
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = true });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(1f) * Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
-            _redFloor = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Render.CreateMaterial(Color.FromSrgb(0.7f, 0.2f, 0.2f)), Transform.Identity);
+            ecs.Add(ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50_000f, 50_000f), Render.CreateMaterial(Color.FromSrgb(0.7f, 0.2f, 0.2f)), Transform.Identity), new Loading());
         }, "multi_asset_sync.Setup");
 
         app.Update(ctx =>
@@ -69,8 +68,18 @@ internal static class MultiAssetSync
                 }
             }
 
-            Ui.SetText(_text, "Loaded!");
-            ecs.Despawn(_redFloor);
+            // What Bevy's states do on leaving Loading, the text told and what only stood for the
+            // wait taken away.
+            foreach (var text in ecs.Query<LoadingText>(markChanged: false)) Ui.SetText(text.Entity, "Loaded!");
+            foreach (var loading in ecs.Query<Loading>(markChanged: false)) ctx.Cmd.Despawn(loading.Entity);
         }, "multi_asset_sync.WaitOnLoad");
     }
 }
+
+/// <summary>What stands for the wait, the red floor, taken away once every load is in.</summary>
+[Behavior]
+public partial struct Loading;
+
+/// <summary>The text that says whether the loads are in.</summary>
+[Behavior]
+public partial struct LoadingText;

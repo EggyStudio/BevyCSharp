@@ -305,3 +305,11 @@ example's behaviors register in every example app, so an `[After]` names only a 
 since one naming an example's own system stopped every other example when tried. headless_renderer
 is not counted and has nothing to bring, its two components being the render world's copying of
 the picture, which the capture does in its place.
+
+B 4 for Camera and Assets, 37 of 119. The shaking camera carries its configuration and its state
+as Bevy's does, the state putting the camera back before each frame and the configuration shaking
+it after, with the state taken beside it. The first person player turns with its sensitivity
+beside it, and the world camera keeps the field of view Bevy keeps in its projection. Bevy's
+`Bird` and `Shape` are enums on their entities, held here as a field of the behavior, and their
+`Left` marks the one changed in place, `LeftShape` for alter_mesh where both share a namespace,
+as `ViewModelPlayer` is for the second of two `Player`s.
