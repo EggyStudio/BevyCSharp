@@ -318,6 +318,18 @@ run with none, so a test or `./bcs command input.key` types into an offscreen ru
 would. Tab moves the focus there only through `Ui.Navigate`, since Bevy's own Tab is heard at the
 window.
 
+The arrows or a pad move the focus by direction where a node carries Bevy's
+`AutoDirectionalNavigation`. `Navigation.Move` moves it to the nearest such node on the screen that
+way, eight ways round, and a game calls it on whichever keys or buttons it chooses. An edge drawn
+with `Navigation.AddEdge` goes before the search, so a row wraps to the next, a far node is joined
+to the others, or a way is blocked with `Navigation.BlockEdge`:
+
+```csharp
+ctx.Ecs.Insert<AutoDirectionalNavigationRef>(button);
+Navigation.AddEdge(endOfRow, startOfNextRow, CompassOctant.East, bothWays: true);
+if (CompassOctants.Of(stick) is { } way) Navigation.Move(way);   // the focus moved, or null
+```
+
 Bevy's widgets are its own components, a slider, a checkbox, a radio group, a scrollbar, put on a
 node through their wrappers. A widget reports a change rather than making it, and
 `Ui.SelfUpdate` attaches Bevy's own listener that makes it, so the state is read back from the

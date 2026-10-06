@@ -4,9 +4,9 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**271 written, 15 written in part, 0 can be written, 77 missing and 58 do not apply.** Of the 363 that apply, 286 can be written with what is bridged, 15 of them leaving something out.
+**273 written, 15 written in part, 0 can be written, 75 missing and 58 do not apply.** Of the 363 that apply, 288 can be written with what is bridged, 15 of them leaving something out.
 
-**132 of the 137 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**133 of the 139 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -39,12 +39,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 47 | 0 | 0 | 13 | 0 | 16 of 18 |
+| [UI (User Interface)](#ui-user-interface) | 49 | 0 | 0 | 11 | 0 | 17 of 20 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **271** | **15** | **0** | **77** | **58** | **132 of 137** |
+| **All** | **273** | **15** | **0** | **75** | **58** | **133 of 139** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -526,8 +526,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`borders`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/borders.rs) | Demonstrates how to create a node with a border | [written](../BevyCSharp.Examples/ui/borders.cs) |
 | [`box_shadow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/box_shadow.rs) | Demonstrates how to create a node with a shadow | [written](../BevyCSharp.Examples/ui/box_shadow.cs), through Bevy's reflected BoxShadow |
 | [`button`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/button.rs) | Illustrates creating and updating a button | [written](../BevyCSharp.Examples/ui/button.cs), the input focus set through Bevy's reflected InputFocus, without the record of changes its own set keeps, which is a list no wrapper reaches |
-| [`directional_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation.rs) | Demonstration of automatic directional navigation based on UI element positions | missing, directional navigation between interface nodes |
-| [`directional_navigation_overrides`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation_overrides.rs) | Demonstration of automatic directional navigation between UI elements with manual overrides | missing, directional navigation between interface nodes |
+| [`directional_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation.rs) | Demonstration of automatic directional navigation based on UI element positions | [written](../BevyCSharp.Examples/ui/directional_navigation.cs) |
+| [`directional_navigation_overrides`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/navigation/directional_navigation_overrides.rs) | Demonstration of automatic directional navigation between UI elements with manual overrides | [written](../BevyCSharp.Examples/ui/directional_navigation_overrides.cs) |
 | [`display_and_visibility`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/display_and_visibility.rs) | Demonstrates how Display and Visibility work in the UI. | [written](../BevyCSharp.Examples/ui/display_and_visibility.cs) |
 | [`drag_to_scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/drag_to_scroll.rs) | This example tests scale factor, dragging and scrolling | [written](../BevyCSharp.Examples/ui/drag_to_scroll.cs) |
 | [`editable_text_filter`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/editable_text_filter.rs) | Demonstrates an 8-character hex input using EditableTextFilter | [written](../BevyCSharp.Examples/ui/editable_text_filter.cs), the filter the characters the field takes, where Bevy's is a function of the example's own |

@@ -311,6 +311,8 @@ internal static class Catalog
         new("borders", Borders.Build),
         new("box_shadow", BoxShadowExample.Build),
         new("button", ButtonExample.Build),
+        new("directional_navigation", DirectionalNavigationExample.Build),
+        new("directional_navigation_overrides", DirectionalNavigationOverrides.Build),
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("editable_text_filter", EditableTextFilter.Build),
         new("flex_layout", FlexLayout.Build),

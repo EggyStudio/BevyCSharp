@@ -447,6 +447,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_node_weight(ulong entity, uint node, float weight);
 
+    /// <summary>Moves the input focus by direction, writing where it moved, answering 1 where it did.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_nav_move(int direction, ulong* moved);
+
+    /// <summary>Draws or blocks an edge of the navigation map, one way or both.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_nav_edge(ulong from, ulong to, int direction, int kind);
+
+    /// <summary>Draws edges between nodes in their order, looping where asked.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_nav_edges(ulong* entities, int count, int direction, int looping);
+
+    /// <summary>Takes a node's edges out of the navigation map, or all of them for none.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_nav_forget(ulong entity);
+
     /// <summary>Gives a mesh the joints each vertex follows and their weights, four of each a vertex.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

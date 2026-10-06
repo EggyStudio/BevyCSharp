@@ -24,10 +24,11 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **Bevy's widgets, five examples.** Feathers, Bevy's styled widgets over its core ones (three),
-  which the bridge does not build, and directional navigation (two), which needs Bevy's map of
-  which node is beside which. The core widgets are built and reached through their wrappers, and
-  what they report reaches C# as Bevy's `Activate`, `ValueChange` and `MenuEvent`.
+- **Bevy's styled widgets, three examples.** Feathers, Bevy's styled widgets over its core ones,
+  which the bridge does not build, its crate not being in the lock, and which Bevy spawns from its
+  scene templates (`feathers_counter`, `feathers_gallery`, `virtual_keyboard`). The core widgets are
+  built and reached through their wrappers, what they report reaches C# as Bevy's `Activate`,
+  `ValueChange` and `MenuEvent`, and the focus moves between nodes by direction.
 - **System fonts and the font atlases, four examples.** Bevy's system font discovery, which the
   bridge does not compile in, so a generic family such as sans-serif resolves to the system's font
   (`generic_font_families`, `ime_support`), and the families Bevy's `FontCx` lists and the family

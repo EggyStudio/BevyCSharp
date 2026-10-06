@@ -1180,6 +1180,17 @@ static void Begin(BehaviorContext ctx);                         // Starts a fram
 static void End();                                              // Ends the frame and hands the engine what came of it
 ```
 
+### `Navigation`
+
+```csharp
+static Entity? Move(CompassOctant direction);                   // Moves the input focus to the node beside the one holding it in a direction, and answers the node, or null where nothing lies that way, an edge blocks it or nothing holds the focus
+static void AddEdge(Entity from, Entity to, CompassOctant direction, bool bothWays = false);  // Draws an edge from one node to another in a direction, and back the opposite way where asked
+static void BlockEdge(Entity node, CompassOctant direction, Entity other = default);  // Blocks a direction a node would otherwise be left by, and the opposite one from another node where asked
+static void AddEdges(ReadOnlySpan<Entity> nodes, CompassOctant direction, bool looping = false);  // Draws edges between nodes in their order in a direction, each to the next and back, and around from the last where asked
+static void Forget(Entity node);                                // Takes a node's edges out, those from it and to it, as one taken off the screen needs
+static void Clear();                                            // Takes every edge out, leaving the nearest nodes on the screen
+```
+
 ### `ImGuiTextures`
 
 ```csharp
@@ -1391,6 +1402,12 @@ static void SetCursor(CursorGrab grab, bool visible);           // Sets whether 
 ```csharp
 static float Dot(Vec3 a, Vec3 b);                               // The dot product
 static Vec3 Cross(Vec3 a, Vec3 b);                              // The cross product, perpendicular to both operands
+```
+
+### `CompassOctants`
+
+```csharp
+static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
 ```
 
 ### `Quat`

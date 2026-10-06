@@ -357,8 +357,8 @@ anchor_layout	can
 borders	can
 box_shadow	can	through Bevy's reflected BoxShadow
 button	can	the input focus set through Bevy's reflected InputFocus, without the record of changes its own set keeps, which is a list no wrapper reaches
-directional_navigation	missing	directional navigation between interface nodes
-directional_navigation_overrides	missing	directional navigation between interface nodes
+directional_navigation	can
+directional_navigation_overrides	can
 display_and_visibility	can
 drag_to_scroll	can
 editable_text_filter	can	the filter the characters the field takes, where Bevy's is a function of the example's own

@@ -215,3 +215,19 @@ foot once the upper joint moves, and holds joints that do not fit the mesh refus
 The animation gap is closed. The suite passed, 1,074 with 9 skipped. The widgets are the largest
 gap left, five examples, and Feathers' three need `bevy_feathers`, a crate the lock does not hold,
 which is asked of you before it is added; directional navigation's two come first.
+
+**Now 3, the widgets, directional navigation.** The focus moves between interface nodes by direction
+(`navigation.rs`, ABI 218). The bridge adds Bevy's `DirectionalNavigationPlugin` beside its tab
+navigation, and `Navigation.Move` moves the focus with Bevy's `AutoDirectionalNavigator`, an edge of
+the map first and the nearest node carrying `AutoDirectionalNavigation` that way otherwise, which a
+game calls on the keys or buttons it chooses. `AddEdge` draws an edge one way or both, `BlockEdge`
+blocks a way, `AddEdges` draws a run of them looping where asked, and `Forget` and `Clear` take them
+out. `CompassOctant` is Bevy's eight directions, and `CompassOctants.Of` finds one from a stick or
+the arrows held. `directional_navigation` and `directional_navigation_overrides` are written, 273,
+sharing their input and highlight as Bevy's repeat theirs, and both were driven offscreen with
+`bcs`, where the arrows moved the focus where Bevy's would, a row wrapped by its edge, the first page's
+up and down were blocked, Enter pressed the focused button, and moving onto the second page showed
+it and hid the first. `NavigationTests` holds the nearest node each way, nothing past the end, a
+blocked way, an edge before the search, a loop and a cleared map, and the octant of each direction.
+The suite passed, 1,084 with 9 skipped. Feathers' three wait on the owner's word on `bevy_feathers`;
+input as Bevy's messages, four examples, is next.
