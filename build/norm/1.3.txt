@@ -5,7 +5,6 @@
 BevyCSharp.Tests/ComputeShaderTests.cs
 BevyCSharp.Tests/RenderControlTests.cs
 BevyCSharp.Tests/ViewShaderTests.cs
-BevyCSharp/Diagnostics/ConsoleWorldCommands.cs
 BevyCSharp/Ecs/ComponentSchema.cs
 BevyCSharp/Interop/NativeTypes.Render.cs
 BevyCSharp/Scenes/SceneFile.cs
