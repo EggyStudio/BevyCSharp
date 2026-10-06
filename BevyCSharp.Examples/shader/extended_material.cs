@@ -15,8 +15,6 @@ namespace BevyCSharp.Examples.Shading;
 // bcs::light and bcs::finish, so the steps between them are the shader's.
 internal static class ExtendedMaterial
 {
-    private static Entity _light;
-
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -29,18 +27,21 @@ internal static class ExtendedMaterial
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 1f), material, Transform.At(0f, 0.5f, 0f));
 
             // Bevy's default directional light, of ten thousand lux.
-            _light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
-            ecs.Add(_light, Transform.LookingAt(new Vec3(1f, 1f, 1f), Vec3.Zero, Vec3.UnitY));
+            var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = false });
+            ecs.Add(light, Transform.LookingAt(new Vec3(1f, 1f, 1f), Vec3.Zero, Vec3.UnitY));
+            ecs.Add(light, new Rotate());
 
             ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2.5f, 5f), Vec3.Zero, Vec3.UnitY));
         }, "extended_material.Setup");
-
-        // Bevy turns the light about its own vertical axis, which for a directional light turns
-        // the direction it shines from.
-        app.Update(ctx =>
-        {
-            var at = ctx.Ecs.GetOrDefault<Transform>(_light);
-            ctx.Ecs.Set(_light, at with { Rotation = Quat.FromRotationY(ctx.Time.Delta) * at.Rotation });
-        }, "extended_material.RotateThings");
     }
+}
+
+/// <summary>The light, turned about its own vertical axis, which for a directional light turns the direction it shines from.</summary>
+[Behavior]
+public partial struct Rotate
+{
+    /// <summary>Turned a radian a second, as Bevy's <c>rotate_things</c> turns it.</summary>
+    [OnUpdate]
+    public void RotateThings(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationY(ctx.Time.Delta) * transform.Rotation;
 }

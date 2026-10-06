@@ -11,58 +11,80 @@ internal static class Soundtrack
 {
     private enum GameState { Peaceful, Battle }
 
-    private const float FadeTime = 2f;
+    internal const float FadeTime = 2f;
     private const float StateTime = 10f;
 
-    private static readonly List<Entity> FadingIn = [];
-    private static readonly List<Entity> FadingOut = [];
+    // Bevy's GameStateTimer resource, the time since the state last changed, which both fades
+    // follow, and its SoundtrackPlayer resource, the two tracks.
+    internal static GameTimer StateTimer;
     private static AssetHandle[] _tracks = [];
     private static GameState _state;
-    private static float _timer;
-    private static bool _changed;
 
     public static void Build(App app)
     {
-        app.Startup(_ =>
+        app.Startup(ctx =>
         {
-            FadingIn.Clear();
-            FadingOut.Clear();
-            (_state, _timer, _changed) = (GameState.Peaceful, 0f, true);
+            (_state, StateTimer) = (GameState.Peaceful, GameTimer.FromSeconds(StateTime, TimerMode.Repeating));
             _tracks =
             [
                 AssetServer.Load(AssetKind.Audio, "sounds/Mysterious acoustic guitar.ogg"),
                 AssetServer.Load(AssetKind.Audio, "sounds/Epic orchestra music.ogg"),
             ];
+            ChangeTrack(ctx);
         }, "soundtrack.Setup");
 
+        // The state changes each time ten seconds pass, and with it the track.
         app.Update(ctx =>
         {
-            // The state changes each time ten seconds pass.
-            _timer += ctx.Time.Delta;
-            if (_timer >= StateTime)
-            {
-                _timer -= StateTime;
-                _state = _state == GameState.Battle ? GameState.Peaceful : GameState.Battle;
-                _changed = true;
-            }
+            if (!StateTimer.Tick(ctx.Time.Delta).JustFinished) return;
+            _state = _state == GameState.Battle ? GameState.Peaceful : GameState.Battle;
+            ChangeTrack(ctx);
+        }, "soundtrack.CycleGameState");
+    }
 
-            // A change fades out whatever is playing and starts the state's track, silent.
-            if (_changed)
-            {
-                _changed = false;
-                FadingOut.AddRange(FadingIn);
-                FadingIn.Clear();
-                FadingIn.Add(Audio.Play(_tracks[(int)_state], new AudioSettings { Mode = PlaybackMode.Loop, Volume = 0f }));
-            }
+    // Whatever is playing fades out, and the state's track starts silent and fades in, as Bevy's
+    // change_track does on entering a state.
+    private static void ChangeTrack(BehaviorContext ctx)
+    {
+        foreach (var track in ctx.Ecs.Query<FadeIn>(markChanged: false))
+        {
+            ctx.Cmd.Remove<FadeIn>(track.Entity);
+            ctx.Cmd.Add(track.Entity, new FadeOut());
+        }
 
-            // Both fades follow the time since the state changed, as Bevy's follow its timer.
-            var faded = Math.Min(_timer / FadeTime, 1f);
-            foreach (var track in FadingIn) Audio.SetVolume(track, faded);
-            foreach (var track in FadingOut) Audio.SetVolume(track, 1f - faded);
-            if (_timer < FadeTime) return;
+        var playing = Audio.Play(_tracks[(int)_state], new AudioSettings { Mode = PlaybackMode.Loop, Volume = 0f });
+        ctx.Ecs.Add(playing, new FadeIn());
+    }
+}
 
-            foreach (var track in FadingOut) Audio.Stop(track);
-            FadingOut.Clear();
-        }, "soundtrack.ChangeTrackAndFade");
+/// <summary>The track of the state the game is in, fading in, and kept playing once it has.</summary>
+[Behavior]
+public partial struct FadeIn
+{
+    /// <summary>Whether it has faded all the way in.</summary>
+    public bool Done;
+
+    /// <summary>Louder with the time since the state changed, to full once the fade's two seconds are over.</summary>
+    [OnUpdate]
+    public void Fade(BehaviorContext ctx)
+    {
+        if (Done) return;
+        var elapsed = Soundtrack.StateTimer.Elapsed;
+        Audio.SetVolume(ctx.Entity, Math.Min(elapsed / Soundtrack.FadeTime, 1f));
+        Done = elapsed >= Soundtrack.FadeTime;
+    }
+}
+
+/// <summary>The track of the state the game left, fading out, and gone once it has.</summary>
+[Behavior]
+public partial struct FadeOut
+{
+    /// <summary>Quieter with the time since the state changed, and despawned once the fade's two seconds are over.</summary>
+    [OnUpdate]
+    public void Fade(BehaviorContext ctx)
+    {
+        var elapsed = Soundtrack.StateTimer.Elapsed;
+        Audio.SetVolume(ctx.Entity, Math.Max(1f - elapsed / Soundtrack.FadeTime, 0f));
+        if (elapsed >= Soundtrack.FadeTime) ctx.Cmd.Despawn(ctx.Entity);
     }
 }

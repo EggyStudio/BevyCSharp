@@ -10,8 +10,6 @@ namespace BevyCSharp.Examples.Shading;
 // picture stays where it is on the screen and the cube's edges cut it out.
 internal static class ShaderMaterialScreenspaceTexture
 {
-    private static Entity _camera;
-
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -24,15 +22,20 @@ internal static class ShaderMaterialScreenspaceTexture
                 .SetTexture("texture", AssetServer.Load(AssetKind.Image, "models/FlightHelmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png"));
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.At(0f, 0.5f, 0f));
 
-            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(4f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
+            ecs.Add(ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(4f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY)), new MainCamera());
         }, "shader_material_screenspace_texture.Setup");
+    }
+}
 
-        // Around the middle at forty-five degrees a second, looking at it.
-        app.Update(ctx =>
-        {
-            var at = ctx.Ecs.GetOrDefault<Transform>(_camera).Translation;
-            var turned = Quat.FromAxisAngle(Vec3.UnitY, MathF.PI / 4f * ctx.Time.Delta) * at;
-            ctx.Ecs.Set(_camera, Transform.LookingAt(turned, Vec3.Zero, Vec3.UnitY));
-        }, "shader_material_screenspace_texture.RotateCamera");
+/// <summary>The camera, which goes round the middle looking at it.</summary>
+[Behavior]
+public partial struct MainCamera
+{
+    /// <summary>Around the middle at forty-five degrees a second, looking at it, as Bevy's <c>rotate_camera</c> moves it.</summary>
+    [OnUpdate]
+    public void RotateCamera(BehaviorContext ctx, ref Transform transform)
+    {
+        var turned = Quat.FromAxisAngle(Vec3.UnitY, MathF.PI / 4f * ctx.Time.Delta) * transform.Translation;
+        transform = Transform.LookingAt(turned, Vec3.Zero, Vec3.UnitY);
     }
 }

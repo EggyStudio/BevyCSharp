@@ -13,9 +13,8 @@ internal static class SpatialAudio2d
     // The space between the two ears.
     private const float Gap = 400f;
 
-    private static Entity _emitter, _listener;
-    private static float _stopwatch;
-    private static bool _paused;
+    // The listener, which Bevy finds by its SpatialListener.
+    private static Entity _listener;
 
     // A 2D camera measures a pixel to a unit, so a hundred of them make the meter a sound fades by,
     // as Bevy's AUDIO_SCALE of a hundredth does.
@@ -26,14 +25,13 @@ internal static class SpatialAudio2d
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_stopwatch, _paused) = (0f, false);
-
-            _emitter = ecs.Spawn();
-            ecs.Add(_emitter, Transform.At(0f, 50f, 0f));
-            Render2d.SetMesh(ecs, _emitter, Render.CreateMesh(MeshShape.Circle, 15f));
-            Render2d.SetMaterial(ecs, _emitter, Render2d.CreateMaterial(new ColorMaterialSettings { Color = (0f, 0f, 1f, 1f) }));
+            var emitter = ecs.Spawn();
+            ecs.Add(emitter, Transform.At(0f, 50f, 0f));
+            ecs.Add(emitter, new Emitter());
+            Render2d.SetMesh(ecs, emitter, Render.CreateMesh(MeshShape.Circle, 15f));
+            Render2d.SetMaterial(ecs, emitter, Render2d.CreateMaterial(new ColorMaterialSettings { Color = (0f, 0f, 1f, 1f) }));
             var playing = Audio.Play(AssetServer.Load(AssetKind.Audio, "sounds/Windless Slopes.ogg"), new AudioSettings { Mode = PlaybackMode.Loop, Spatial = true });
-            ecs.SetParent(playing, _emitter);
+            ecs.SetParent(playing, emitter);
 
             // The listener's ears sit half the gap to either side, each a square of one color, as
             // Bevy's Sprite::from_color draws them, a white pixel tinted and sized.
@@ -57,15 +55,6 @@ internal static class SpatialAudio2d
         app.Update(ctx =>
         {
             var (ecs, input) = (ctx.Ecs, ctx.Input);
-
-            if (input.KeyPressed(Key.Space)) _paused = !_paused;
-            if (!_paused)
-            {
-                _stopwatch += ctx.Time.Delta;
-                var emitter = ecs.GetOrDefault<Transform>(_emitter);
-                ecs.Set(_emitter, emitter with { Translation = emitter.Translation with { X = MathF.Sin(_stopwatch) * 500f } });
-            }
-
             const float Speed = 200f;
             var step = Speed * ctx.Time.Delta;
             var listener = ecs.GetOrDefault<Transform>(_listener);
@@ -74,6 +63,27 @@ internal static class SpatialAudio2d
             if (input.KeyDown(Key.ArrowUp)) listener.Translation += new Vec3(0f, step, 0f);
             if (input.KeyDown(Key.ArrowDown)) listener.Translation -= new Vec3(0f, step, 0f);
             ecs.Set(_listener, listener);
-        }, "spatial_audio_2d.Update");
+        }, "spatial_audio_2d.UpdateListener");
+    }
+}
+
+/// <summary>The circle the music plays from, and the stopwatch it moves by, which Space stops and starts.</summary>
+[Behavior]
+public partial struct Emitter
+{
+    /// <summary>How long it has run, in seconds.</summary>
+    public float Elapsed;
+
+    /// <summary>Whether it is stopped.</summary>
+    public bool Paused;
+
+    /// <summary>Moved side to side by its stopwatch while it runs, as Bevy's <c>update_emitters</c> moves it.</summary>
+    [OnUpdate]
+    public void UpdateEmitters(BehaviorContext ctx, ref Transform transform)
+    {
+        if (ctx.Input.KeyPressed(Key.Space)) Paused = !Paused;
+        if (Paused) return;
+        Elapsed += ctx.Time.Delta;
+        transform.Translation.X = MathF.Sin(Elapsed) * 500f;
     }
 }

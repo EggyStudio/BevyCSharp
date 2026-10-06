@@ -323,3 +323,10 @@ press events are, and a close is queued once a frame since an item's press and t
 both ask. debug_frustum_culling's ring, shapes, wall and camera are each a behavior, the frustum
 read once a frame for every shape. A press could not be checked live, a windowless run having no
 pointer to hold an interaction pressed past Bevy's own focus system, which the old code met too.
+
+B 4 for Shaders and Audio, 46 of 119. Each turning thing of the shader examples turns by its own
+behavior. Each emitter keeps its stopwatch, its time run and whether Space stopped it, the 3D one
+as `Emitter3d` beside the 2D one's `Emitter` in the namespace they share. The soundtrack's tracks
+carry `FadeIn` and `FadeOut` and fade by the state's `GameTimer`. Bevy takes `FadeIn` off once a
+track is in and finds it again by its sink, where here it stays on with a flag, the mark the next
+change finds the playing track by.

@@ -12,20 +12,21 @@ internal static class SpatialAudio3d
 {
     private const float Gap = 4f;
 
-    private static Entity _emitter, _listener, _playing;
-    private static float _stopwatch;
-    private static bool _paused, _muted;
+    // The listener, which Bevy finds by its SpatialListener, and the music playing, which M mutes.
+    private static Entity _listener, _playing;
+    private static bool _muted;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_stopwatch, _paused, _muted) = (0f, false, false);
+            _muted = false;
 
-            _emitter = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 0.2f), Render.CreateMaterial(Color.FromSrgb(0f, 0f, 1f)), Transform.Identity);
+            var emitter = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 0.2f), Render.CreateMaterial(Color.FromSrgb(0f, 0f, 1f)), Transform.Identity);
+            ecs.Add(emitter, new Emitter3d());
             _playing = Audio.Play(AssetServer.Load(AssetKind.Audio, "sounds/Windless Slopes.ogg"), new AudioSettings { Mode = PlaybackMode.Loop, Spatial = true });
-            ecs.SetParent(_playing, _emitter);
+            ecs.SetParent(_playing, emitter);
 
             // The listener's ears sit half the gap to either side, and a cube marks each.
             _listener = ecs.Spawn();
@@ -48,13 +49,6 @@ internal static class SpatialAudio3d
             var ecs = ctx.Ecs;
             var input = ctx.Input;
 
-            if (input.KeyPressed(Key.Space)) _paused = !_paused;
-            if (!_paused)
-            {
-                _stopwatch += ctx.Time.Delta;
-                ecs.Set(_emitter, Transform.At(MathF.Sin(_stopwatch) * 3f, 0f, MathF.Cos(_stopwatch) * 3f));
-            }
-
             const float Speed = 2f;
             var listener = ecs.GetOrDefault<Transform>(_listener);
             var step = Speed * ctx.Time.Delta;
@@ -70,5 +64,26 @@ internal static class SpatialAudio3d
                 Audio.SetVolume(_playing, _muted ? 0f : 1f);
             }
         }, "spatial_audio_3d.Update");
+    }
+}
+
+/// <summary>Bevy's <c>Emitter</c>, the sphere the music plays from, and the stopwatch it circles by, which Space stops and starts.</summary>
+[Behavior]
+public partial struct Emitter3d
+{
+    /// <summary>How long it has run, in seconds.</summary>
+    public float Elapsed;
+
+    /// <summary>Whether it is stopped.</summary>
+    public bool Paused;
+
+    /// <summary>Moved round the listener by its stopwatch while it runs, as Bevy's <c>update_positions</c> moves it.</summary>
+    [OnUpdate]
+    public void UpdatePositions(BehaviorContext ctx, ref Transform transform)
+    {
+        if (ctx.Input.KeyPressed(Key.Space)) Paused = !Paused;
+        if (Paused) return;
+        Elapsed += ctx.Time.Delta;
+        (transform.Translation.X, transform.Translation.Z) = (MathF.Sin(Elapsed) * 3f, MathF.Cos(Elapsed) * 3f);
     }
 }

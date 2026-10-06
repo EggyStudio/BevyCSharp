@@ -6,7 +6,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 
 **239 written, 19 written in part, 0 can be written, 105 missing and 58 do not apply.** Of the 363 that apply, 258 can be written with what is bridged, 19 of them leaving something out.
 
-**40 of the 119 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**46 of the 119 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Audio](#audio) | 5 | 0 | 0 | 3 | 0 | 0 of 3 |
+| [Audio](#audio) | 5 | 0 | 0 | 3 | 0 | 3 of 3 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |  |
@@ -32,7 +32,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
-| [Shaders](#shaders) | 17 | 0 | 0 | 3 | 5 | 0 of 6 |
+| [Shaders](#shaders) | 17 | 0 | 0 | 3 | 5 | 3 of 6 |
 | [Shaders Advanced](#shaders-advanced) | 1 | 0 | 0 | 0 | 1 | 0 of 1 |
 | [State](#state) | 2 | 0 | 0 | 2 | 0 |  |
 | [Stress Tests](#stress-tests) | 14 | 6 | 0 | 0 | 1 | 10 of 10 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **239** | **19** | **0** | **105** | **58** | **40 of 119** |
+| **All** | **239** | **19** | **0** | **105** | **58** | **46 of 119** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 

@@ -18,19 +18,13 @@ internal static class ShaderPrepass
 {
     private static readonly string[] Outputs = ["transparent", "depth", "normals", "motion vectors"];
 
-    private static Entity _rotating, _label;
+    private static Entity _label;
     private static ShaderInstance _show;
     private static uint _view;
 
     public static void Build(App app)
     {
         app.Startup(Setup, "shader_prepass.Setup");
-
-        app.Update(ctx =>
-        {
-            var turn = (MathF.Sin(ctx.Time.Elapsed) * 0.5f + 0.5f) * MathF.PI * 2f;
-            ctx.Ecs.Set(_rotating, ctx.Ecs.GetOrDefault<Transform>(_rotating) with { Rotation = Quat.FromRotationZ(turn) });
-        }, "shader_prepass.Rotate");
 
         app.Update(ctx =>
         {
@@ -65,7 +59,7 @@ internal static class ShaderPrepass
             .Set("material_color", new Vector4(1f, 1f, 1f, 1f))
             .SetTexture("material_color_texture", icon);
 
-        _rotating = ecs.SpawnMesh(cube, Custom(AlphaMode.Opaque), Transform.At(-1f, 0.5f, 0f));
+        ecs.Add(ecs.SpawnMesh(cube, Custom(AlphaMode.Opaque), Transform.At(-1f, 0.5f, 0f)), new Rotates());
         ecs.SpawnMesh(cube, Render.CreateMaterial(new MaterialSettings { AlphaMode = AlphaMode.Mask, AlphaCutoff = 1f, BaseColorTexture = icon }), Transform.At(0f, 0.5f, 0f));
         ecs.SpawnMesh(cube, Custom(AlphaMode.Blend), Transform.At(1f, 0.5f, 0f));
 
@@ -77,4 +71,14 @@ internal static class ShaderPrepass
         foreach (var line in new[] { "\n\n", "Controls\n", "---------------\n", "Space - Change output\n" })
             Ui.SpawnTextSpan(text, line, style, (1f, 1f, 1f, 1f));
     }
+}
+
+/// <summary>The opaque cube, which swings about Z so the motion vectors have something to show.</summary>
+[Behavior]
+public partial struct Rotates
+{
+    /// <summary>Turned to a full turn and back as the sine of the time goes, as Bevy's <c>rotate</c> turns it.</summary>
+    [OnUpdate]
+    public void Rotate(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationZ((MathF.Sin(ctx.Time.Elapsed) * 0.5f + 0.5f) * MathF.PI * 2f);
 }
