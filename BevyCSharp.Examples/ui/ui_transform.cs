@@ -10,86 +10,41 @@ namespace BevyCSharp.Examples.Interface;
 // turn and grow or shrink and the arrow keys slide, its own buttons turned to face its edges.
 internal static class UiTransformExample
 {
+    internal static readonly Color Normal = Color.White;
+    internal static readonly Color Hovered = Color.FromSrgb(1f, 1f, 0f);
+    internal static readonly Color Pressed = Color.FromSrgb(1f, 0f, 0f);
 
-    private static readonly Color Normal = Color.White;
-    private static readonly Color Hovered = Color.FromSrgb(1f, 1f, 0f);
-    private static readonly Color Pressed = Color.FromSrgb(1f, 0f, 0f);
-
-    // What each button does when pressed, a turn in radians or a change of scale.
-    private static readonly List<(Entity Button, float Turn, float Scale)> Buttons = [];
-    private static readonly Dictionary<Entity, UiInteraction> Last = [];
-    private static Entity _target;
-    private static float _angle, _scale, _x, _y;
-
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
-        {
-            var ecs = ctx.Ecs;
-            Buttons.Clear();
-            Last.Clear();
-            (_angle, _scale, _x, _y) = (0f, 1f, 0f, 0f);
-            Render2d.SpawnCamera2d();
+        var ecs = ctx.Ecs;
+        Render2d.SpawnCamera2d();
 
-            var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (0f, 0f, 0f, 1f) });
-            var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, Justify = UiJustify.SpaceEvenly, ColumnGap = Length.Px(25f), RowGap = Length.Px(25f), Color = (0f, 0f, 0f, 1f) });
-            ecs.SetParent(row, root);
+        var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (0f, 0f, 0f, 1f) });
+        var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, Justify = UiJustify.SpaceEvenly, ColumnGap = Length.Px(25f), RowGap = Length.Px(25f), Color = (0f, 0f, 0f, 1f) });
+        ecs.SetParent(row, root);
 
-            Controls(ecs, row, ("<--", -MathF.PI / 8f, 0f), ("-", 0f, -0.25f));
+        Controls(ecs, row, ("<--", -MathF.PI / 8f, 0f), ("-", 0f, -0.25f));
 
-            _target = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center, Width = Length.Px(300f), Height = Length.Px(300f), Color = Color.FromSrgb8(64, 64, 64) });
-            ecs.Insert<UiTransformRef>(_target);
-            ecs.SetParent(_target, row);
+        var target = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center, Width = Length.Px(300f), Height = Length.Px(300f), Color = Color.FromSrgb8(64, 64, 64) });
+        ecs.Insert<UiTransformRef>(target);
+        ecs.SetParent(target, row);
+        ecs.Add(target, new TargetNode());
 
-            Edge(ecs, _target, "Top", 0f);
-            var middle = Ui.SpawnNode(new UiSettings { AlignSelf = UiAlignSelf.Stretch, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center });
-            ecs.SetParent(middle, _target);
-            Edge(ecs, middle, "Left", -MathF.PI / 2f);
-            var logo = Ui.SpawnNode(new UiSettings { Width = Length.Px(100f), Height = Length.Px(100f) });
-            Ui.SetImage(logo, new UiImageSettings { Image = AssetServer.Load(AssetKind.Image, "branding/icon.png"), Mode = UiImageMode.Stretch });
-            ecs.SetParent(logo, middle);
-            Edge(ecs, middle, "Right", MathF.PI / 2f);
-            Edge(ecs, _target, "Bottom", MathF.PI);
+        Edge(ecs, target, "Top", 0f);
+        var middle = Ui.SpawnNode(new UiSettings { AlignSelf = UiAlignSelf.Stretch, Justify = UiJustify.SpaceBetween, Align = UiAlign.Center });
+        ecs.SetParent(middle, target);
+        Edge(ecs, middle, "Left", -MathF.PI / 2f);
+        var logo = Ui.SpawnNode(new UiSettings { Width = Length.Px(100f), Height = Length.Px(100f) });
+        Ui.SetImage(logo, new UiImageSettings { Image = AssetServer.Load(AssetKind.Image, "branding/icon.png"), Mode = UiImageMode.Stretch });
+        ecs.SetParent(logo, middle);
+        Edge(ecs, middle, "Right", MathF.PI / 2f);
+        Edge(ecs, target, "Bottom", MathF.PI);
 
-            Controls(ecs, row, ("-->", MathF.PI / 8f, 0f), ("+", 0f, 0.25f));
-        }, "ui_transform.Setup");
+        Controls(ecs, row, ("-->", MathF.PI / 8f, 0f), ("+", 0f, 0.25f));
+    }, "ui_transform.Setup");
 
-        app.Update(ctx =>
-        {
-            var ecs = ctx.Ecs;
-            var changed = false;
-            foreach (var (button, turn, scale) in Buttons)
-            {
-                var interaction = Ui.InteractionOf(button);
-                if (Last.TryGetValue(button, out var last) && last == interaction) continue;
-                Last[button] = interaction;
-
-                ecs.Wrap<BackgroundColorRef>(button).Value = interaction switch { UiInteraction.Pressed => Pressed, UiInteraction.Hovered => Hovered, _ => Normal };
-                if (interaction != UiInteraction.Pressed) continue;
-                _angle += turn;
-                _scale = Math.Clamp(_scale + scale, 0.25f, 3f);
-                changed = true;
-            }
-
-            // The arrow keys slide the panel fifty pixels a second, no farther than 150 either way.
-            var input = ctx.Input;
-            var step = 50f * ctx.Time.Delta;
-            var (dx, dy) = ((input.KeyDown(Key.ArrowRight) ? 1 : 0) - (input.KeyDown(Key.ArrowLeft) ? 1 : 0), (input.KeyDown(Key.ArrowDown) ? 1 : 0) - (input.KeyDown(Key.ArrowUp) ? 1 : 0));
-            if (dx != 0 || dy != 0)
-            {
-                (_x, _y) = (Math.Clamp(_x + dx * step, -150f, 150f), Math.Clamp(_y + dy * step, -150f, 150f));
-                changed = true;
-            }
-
-            if (!changed) return;
-            Turn(ecs, _target, _angle);
-            var target = ecs.Wrap<UiTransformRef>(_target);
-            target.Scale = new Vec2(_scale, _scale);
-            (target.TranslationX, target.TranslationY) = (new Val.Px(_x), new Val.Px(_y));
-        }, "ui_transform.ButtonsAndTranslation");
-    }
-
-    // A column of two small buttons beside the panel, drawn over it when it grows.
+    // A column of two small buttons beside the panel, drawn over it when it grows, each turning or
+    // scaling the panel.
     private static void Controls(EcsWorld ecs, Entity row, params (string Label, float Turn, float Scale)[] buttons)
     {
         var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, Justify = UiJustify.Center, RowGap = Length.Px(10f), ColumnGap = Length.Px(10f), Padding = Sides.All(Length.Px(10f)), Color = (0f, 0f, 0f, 1f) });
@@ -100,7 +55,9 @@ internal static class UiTransformExample
             var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(50f), Height = Length.Px(50f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (1f, 1f, 1f, 1f) });
             ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = (0f, 0f, 0f, 1f) }), button);
             ecs.SetParent(button, column);
-            Buttons.Add((button, turn, scale));
+            ecs.Add(button, new TransformButton());
+            if (turn != 0f) ecs.Add(button, new RotateButton { Angle = turn });
+            if (scale != 0f) ecs.Add(button, new ScaleButton { Step = scale });
         }
     }
 
@@ -112,11 +69,90 @@ internal static class UiTransformExample
         ecs.Insert<UiTransformRef>(button);
         Turn(ecs, button, angle);
         ecs.SetParent(button, parent);
+        ecs.Add(button, new TransformButton());
     }
 
-    private static void Turn(EcsWorld ecs, Entity node, float angle)
+    internal static void Turn(EcsWorld ecs, Entity node, float angle)
     {
         var transform = ecs.Wrap<UiTransformRef>(node);
         (transform.RotationCos, transform.RotationSin) = (MathF.Cos(angle), MathF.Sin(angle));
+    }
+}
+
+/// <summary>A button turning the panel by an angle, Bevy's <c>RotateButton</c> of a <c>Rot2</c>.</summary>
+[Behavior]
+public partial struct RotateButton
+{
+    /// <summary>The turn, in radians.</summary>
+    public float Angle;
+}
+
+/// <summary>A button growing or shrinking the panel.</summary>
+[Behavior]
+public partial struct ScaleButton
+{
+    /// <summary>What it adds to the panel's scale.</summary>
+    public float Step;
+}
+
+/// <summary>The panel the buttons turn and scale and the arrow keys slide.</summary>
+[Behavior]
+public partial struct TargetNode
+{
+    /// <summary>
+    /// Each held arrow slides the panel fifty pixels a second its way, no farther than 150 either
+    /// way, as Bevy's <c>translation_system</c> does.
+    /// </summary>
+    [OnUpdate]
+    public void TranslationSystem(BehaviorContext ctx)
+    {
+        var input = ctx.Input;
+        var transform = ctx.Ecs.Wrap<UiTransformRef>(ctx.Entity);
+        foreach (var (key, dx, dy) in new[] { (Key.ArrowLeft, -1f, 0f), (Key.ArrowRight, 1f, 0f), (Key.ArrowUp, 0f, -1f), (Key.ArrowDown, 0f, 1f) })
+        {
+            if (!input.KeyDown(key) || transform.TranslationX is not Val.Px x || transform.TranslationY is not Val.Px y) continue;
+            var step = 50f * ctx.Time.Delta;
+            (transform.TranslationX, transform.TranslationY) = (new Val.Px(Math.Clamp(x.Value + dx * step, -150f, 150f)), new Val.Px(Math.Clamp(y.Value + dy * step, -150f, 150f)));
+        }
+    }
+}
+
+/// <summary>
+/// A button of the example, Bevy's <c>Button</c>, which a node made interactive here does not carry
+/// by that name, so the example marks its own.
+/// </summary>
+[Behavior]
+public partial struct TransformButton
+{
+    /// <summary>
+    /// Colored by its interaction as it changes, and when pressed turning or scaling the panel by
+    /// what the button carries, the scale kept between a quarter and three.
+    /// </summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void ButtonSystem(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var interaction = Ui.InteractionOf(ctx.Entity);
+        ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = interaction switch
+        {
+            UiInteraction.Pressed => UiTransformExample.Pressed,
+            UiInteraction.Hovered => UiTransformExample.Hovered,
+            _ => UiTransformExample.Normal,
+        };
+        if (interaction != UiInteraction.Pressed) return;
+
+        foreach (var target in ecs.EntitiesWith<TargetNode>())
+        {
+            var transform = ecs.Wrap<UiTransformRef>(target);
+            if (ecs.Has<RotateButton>(ctx.Entity))
+                UiTransformExample.Turn(ecs, target, MathF.Atan2(transform.RotationSin, transform.RotationCos) + ecs.GetOrDefault<RotateButton>(ctx.Entity).Angle);
+            if (ecs.Has<ScaleButton>(ctx.Entity))
+            {
+                var step = ecs.GetOrDefault<ScaleButton>(ctx.Entity).Step;
+                var scale = transform.Scale;
+                transform.Scale = new Vec2(Math.Clamp(scale.X + step, 0.25f, 3f), Math.Clamp(scale.Y + step, 0.25f, 3f));
+            }
+        }
     }
 }

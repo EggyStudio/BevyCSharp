@@ -8,23 +8,16 @@ namespace BevyCSharp.Examples.Interface;
 
 // Shows Bevy's slider widget standing up and lying down, each with its value written above it, the
 // thumb lighter while the pointer is on the slider or drags it.
-internal static class VerticalSlider
+internal static class VerticalSliderExample
 {
     private static readonly Color Track = Color.FromSrgb(0.05f, 0.05f, 0.05f);
-    private static readonly Color Thumb = Color.FromSrgb(0.35f, 0.75f, 0.35f);
+    internal static readonly Color Thumb = Color.FromSrgb(0.35f, 0.75f, 0.35f);
 
-    private static readonly List<(Entity Slider, Entity Thumb, Entity Label, bool Vertical)> Sliders = [];
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "vertical_slider.Setup");
-        app.Update(UpdateSliders, "vertical_slider.UpdateSliders");
-    }
+    public static void Build(App app) => app.Startup(Setup, "vertical_slider.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Sliders.Clear();
         Render2d.SpawnCamera2d();
 
         var page = Ui.SpawnNode(new UiSettings
@@ -48,15 +41,15 @@ internal static class VerticalSlider
             var label = Ui.SpawnText("50", new UiSettings { Color = light }, new UiTextSettings { Font = font, FontSize = 24f });
             ecs.SetParent(label, column);
 
-            var (slider, thumb) = SpawnSlider(ecs, vertical);
+            var slider = SpawnSlider(ecs, vertical);
             ecs.SetParent(slider, column);
-            Sliders.Add((slider, thumb, label, vertical));
+            ecs.Add(slider, new ValueLabel { Label = label });
         }
     }
 
     // A track down the middle and a thumb that travels along it, its travel inset by its own size
     // at one end so it stops at the track's ends.
-    private static (Entity Slider, Entity Thumb) SpawnSlider(EcsWorld ecs, bool vertical)
+    private static Entity SpawnSlider(EcsWorld ecs, bool vertical)
     {
         var slider = Ui.SpawnNode(new UiSettings
         {
@@ -74,6 +67,8 @@ internal static class VerticalSlider
         (range.Start, range.End) = (0f, 100f);
         ecs.Insert<TabIndexRef>(slider);
         Ui.SelfUpdate(slider, UiWidgetKind.Slider);
+        ecs.Add(slider, new DemoSlider());
+        if (vertical) ecs.Add(slider, new VerticalSlider());
 
         var track = Ui.SpawnNode(new UiSettings
         {
@@ -106,37 +101,68 @@ internal static class VerticalSlider
         });
         ecs.Insert<SliderThumbRef>(thumb);
         ecs.SetParent(thumb, travel);
-        return (slider, thumb);
-    }
-
-    // Each slider's thumb placed at its value and lit while the slider is hovered or dragged, and
-    // its value written above it.
-    private static void UpdateSliders(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        foreach (var (slider, thumb, label, vertical) in Sliders)
-        {
-            var value = ecs.Wrap<SliderValueRef>(slider).Value;
-            var range = ecs.Wrap<SliderRangeRef>(slider);
-            var position = Math.Clamp((value - range.Start) / (range.End - range.Start), 0f, 1f) * 100f;
-
-            var node = ecs.Wrap<NodeRef>(thumb);
-            if (vertical) node.Bottom = new Val.Percent(position);
-            else node.Left = new Val.Percent(position);
-
-            var active = ecs.Wrap<HoveredRef>(slider).Value || (ecs.Get<SliderDragStateRef>(slider)?.Dragging ?? false);
-            ecs.Wrap<BackgroundColorRef>(thumb).Value = active ? Lighter(Thumb, 0.3f) : Thumb;
-            Ui.SetText(label, value.ToString("0", System.Globalization.CultureInfo.InvariantCulture));
-        }
+        ecs.Add(thumb, new DemoSliderThumb());
+        return slider;
     }
 
     // Bevy's Color::lighter, which raises a linear color's luminance by the amount by mixing it
     // toward white.
-    private static Color Lighter(Color color, float amount)
+    internal static Color Lighter(Color color, float amount)
     {
         var luminance = 0.2126f * color.R + 0.7152f * color.G + 0.0722f * color.B;
         var target = Math.Clamp(luminance + amount, 0f, 1f);
         var t = (target - luminance) / (1f - luminance);
         return new Color(color.R + (1f - color.R) * t, color.G + (1f - color.G) * t, color.B + (1f - color.B) * t, color.A);
     }
+}
+
+/// <summary>A slider of the example.</summary>
+[Behavior]
+public partial struct DemoSlider
+{
+    /// <summary>
+    /// The slider's thumb placed at its value and lit while the slider is hovered or dragged.
+    /// Bevy's runs when the value, the hover or the drag changes, which no filter here asks of
+    /// those components, so this runs each frame.
+    /// </summary>
+    [OnUpdate]
+    public void UpdateSliderVisuals(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var value = ecs.Wrap<SliderValueRef>(ctx.Entity).Value;
+        var range = ecs.Wrap<SliderRangeRef>(ctx.Entity);
+        var position = Math.Clamp((value - range.Start) / (range.End - range.Start), 0f, 1f) * 100f;
+        var active = ecs.Wrap<HoveredRef>(ctx.Entity).Value || (ecs.Get<SliderDragStateRef>(ctx.Entity)?.Dragging ?? false);
+        var vertical = ecs.Has<VerticalSlider>(ctx.Entity);
+
+        foreach (var thumb in ecs.Descendants(ctx.Entity))
+        {
+            if (!ecs.Has<DemoSliderThumb>(thumb)) continue;
+            var node = ecs.Wrap<NodeRef>(thumb);
+            if (vertical) node.Bottom = new Val.Percent(position);
+            else node.Left = new Val.Percent(position);
+            ecs.Wrap<BackgroundColorRef>(thumb).Value = active ? VerticalSliderExample.Lighter(VerticalSliderExample.Thumb, 0.3f) : VerticalSliderExample.Thumb;
+        }
+    }
+}
+
+/// <summary>A slider's thumb.</summary>
+[Behavior]
+public partial struct DemoSliderThumb;
+
+/// <summary>A slider that stands up, its thumb placed from the bottom.</summary>
+[Behavior]
+public partial struct VerticalSlider;
+
+/// <summary>The text a slider's value is written in.</summary>
+[Behavior]
+public partial struct ValueLabel
+{
+    /// <summary>The text.</summary>
+    public Entity Label;
+
+    /// <summary>The slider's value written in the text, rounded to a whole number.</summary>
+    [OnUpdate]
+    public void UpdateValueLabels(BehaviorContext ctx) =>
+        Ui.SetText(Label, ctx.Ecs.Wrap<SliderValueRef>(ctx.Entity).Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture));
 }

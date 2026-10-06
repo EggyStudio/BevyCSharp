@@ -11,29 +11,14 @@ namespace BevyCSharp.Examples.Interface;
 // with no display taking no room and a hidden one keeping its room.
 internal static class DisplayAndVisibility
 {
-
-    private static readonly Color HiddenColor = Color.FromSrgb(1f, 0.7f, 0.7f);
+    internal static readonly Color HiddenColor = Color.FromSrgb(1f, 0.7f, 0.7f);
     private static readonly string[] Palette = ["27496D", "466B7A", "669DB3", "ADCBE3"];
-
-    // A button switching one property of one box on the left, and the text that says its value.
-    private sealed class Switch(Entity button, Entity label, Entity target, bool display)
-    {
-        public Entity Button { get; } = button;
-        public Entity Label { get; } = label;
-        public Entity Target { get; } = target;
-        public bool Display { get; } = display;
-        public string Text { get; set; } = display ? "Display::Flex" : "Visibility::Inherited";
-        public UiInteraction Last { get; set; }
-    }
-
-    private static readonly List<Switch> Switches = [];
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            Switches.Clear();
             Render2d.SpawnCamera2d();
             var font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
             var style = new UiTextSettings { Font = font };
@@ -108,46 +93,6 @@ internal static class DisplayAndVisibility
             ecs.SetParent(Ui.SpawnText("-\n-\n-", new UiSettings { Color = Color.FromSrgb8(169, 169, 169) }, new UiTextSettings { Font = font, Justify = TextJustify.Center }), key);
             ecs.SetParent(Ui.SpawnText("The UI Node and its descendants will not be visible and will not be allotted any space in the UI layout.\nThe UI Node will not be visible but will still occupy space in the UI layout.\nThe UI node will inherit the visibility property of its parent. If it has no parent it will be visible.", new UiSettings(), style), key);
         }, "display_and_visibility.Setup");
-
-        app.Update(ctx =>
-        {
-            var ecs = ctx.Ecs;
-            foreach (var item in Switches)
-            {
-                var interaction = Ui.InteractionOf(item.Button);
-                if (interaction == item.Last) continue;
-                item.Last = interaction;
-
-                if (interaction == UiInteraction.Pressed)
-                {
-                    if (item.Display)
-                    {
-                        var none = item.Text == "Display::Flex";
-                        ecs.Wrap<NodeRef>(item.Target).Display = none ? NodeRef.DisplayVariant.None : NodeRef.DisplayVariant.Flex;
-                        item.Text = none ? "Display::None" : "Display::Flex";
-                    }
-                    else
-                    {
-                        // Inherited, then Visible, then Hidden, and round again.
-                        (var visibility, item.Text) = item.Text switch
-                        {
-                            "Visibility::Inherited" => (Visibility.Visible, "Visibility::Visible"),
-                            "Visibility::Visible" => (Visibility.Hidden, "Visibility::Hidden"),
-                            _ => (Visibility.Inherited, "Visibility::Inherited"),
-                        };
-                        ecs.Set(item.Target, visibility);
-                    }
-
-                    Ui.SetText(item.Label, item.Text);
-                }
-
-                // Hovered, the button darkens and its text turns yellow, and otherwise the text is
-                // pink for a value that hides the box.
-                var hovered = interaction == UiInteraction.Hovered;
-                ecs.Wrap<BackgroundColorRef>(item.Button).Value = new Color(0f, 0f, 0f, hovered ? 0.6f : 0.5f);
-                ecs.Wrap<TextColorRef>(item.Label).Value = hovered ? Color.FromSrgb(1f, 1f, 0f) : Hides(item.Text) ? HiddenColor : Color.White;
-            }
-        }, "display_and_visibility.Buttons");
     }
 
     private static void Button(EcsWorld ecs, Entity parent, UiTextSettings style, Entity target, bool display)
@@ -156,10 +101,11 @@ internal static class DisplayAndVisibility
         ecs.SetParent(button, parent);
         var label = Ui.SpawnText(display ? "Display::Flex" : "Visibility::Inherited", new UiSettings(), new UiTextSettings { Font = style.Font, Justify = TextJustify.Center });
         ecs.SetParent(label, button);
-        Switches.Add(new Switch(button, label, target, display));
+        if (display) ecs.Add(button, new DisplayTarget { Id = target });
+        else ecs.Add(button, new VisibilityTarget { Id = target });
     }
 
-    private static bool Hides(string text) => text.Contains("None", StringComparison.Ordinal) || text.Contains("Hidden", StringComparison.Ordinal);
+    internal static bool Hides(string text) => text.Contains("None", StringComparison.Ordinal) || text.Contains("Hidden", StringComparison.Ordinal);
 
     private static void OutlineOf(EcsWorld ecs, Entity node)
     {
@@ -169,4 +115,79 @@ internal static class DisplayAndVisibility
 
     private static (float R, float G, float B, float A) Hex(string hex) =>
         Color.FromSrgb8(Convert.ToByte(hex[..2], 16), Convert.ToByte(hex[2..4], 16), Convert.ToByte(hex[4..], 16));
+
+    // The button's label written and colored pink where the value hides the box, as Bevy's
+    // buttons_handler writes it.
+    internal static void Say(EcsWorld ecs, Entity button, string text)
+    {
+        var label = ecs.ChildrenOf(button)[0];
+        Ui.SetText(label, text);
+        ecs.Wrap<TextColorRef>(label).Value = Hides(text) ? HiddenColor : Color.White;
+    }
+
+    // Hovered, the button darkens and its text turns yellow, and otherwise the text is pink for a
+    // value that hides the box, as Bevy's text_hover colors it.
+    internal static void TextHover(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var hovered = Ui.InteractionOf(ctx.Entity) == UiInteraction.Hovered;
+        ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = new Color(0f, 0f, 0f, hovered ? 0.6f : 0.5f);
+        var label = ecs.ChildrenOf(ctx.Entity)[0];
+        ecs.Wrap<TextColorRef>(label).Value = hovered ? Color.FromSrgb(1f, 1f, 0f) : Hides(ecs.Wrap<TextRef>(label).Value) ? HiddenColor : Color.White;
+    }
+}
+
+/// <summary>A button switching the display of a box on the left, Bevy's <c>Target</c> of a <c>Display</c>.</summary>
+[Behavior]
+public partial struct DisplayTarget
+{
+    /// <summary>The box.</summary>
+    public Entity Id;
+
+    /// <summary>Pressed, the box's display switched between flex and none, and the button saying which.</summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void ButtonsHandler(BehaviorContext ctx)
+    {
+        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return;
+
+        var node = ctx.Ecs.Wrap<NodeRef>(Id);
+        node.Display = node.Display == NodeRef.DisplayVariant.Flex ? NodeRef.DisplayVariant.None : NodeRef.DisplayVariant.Flex;
+        DisplayAndVisibility.Say(ctx.Ecs, ctx.Entity, $"Display::{node.Display}");
+    }
+
+    /// <summary>Colored by its hover as its interaction changes.</summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void TextHover(BehaviorContext ctx) => DisplayAndVisibility.TextHover(ctx);
+}
+
+/// <summary>A button switching the visibility of a box on the left, Bevy's <c>Target</c> of a <c>Visibility</c>.</summary>
+[Behavior]
+public partial struct VisibilityTarget
+{
+    /// <summary>The box.</summary>
+    public Entity Id;
+
+    /// <summary>Pressed, the box's visibility moved on from inherited to visible to hidden and round again, and the button saying which.</summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void ButtonsHandler(BehaviorContext ctx)
+    {
+        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return;
+
+        var visibility = ctx.Ecs.GetOrDefault<Visibility>(Id).Mode switch
+        {
+            VisibilityMode.Inherited => VisibilityMode.Visible,
+            VisibilityMode.Visible => VisibilityMode.Hidden,
+            _ => VisibilityMode.Inherited,
+        };
+        ctx.Ecs.Set(Id, new Visibility(visibility));
+        DisplayAndVisibility.Say(ctx.Ecs, ctx.Entity, $"Visibility::{visibility}");
+    }
+
+    /// <summary>Colored by its hover as its interaction changes.</summary>
+    [OnUpdate]
+    [Changed(typeof(Interaction))]
+    public void TextHover(BehaviorContext ctx) => DisplayAndVisibility.TextHover(ctx);
 }

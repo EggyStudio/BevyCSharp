@@ -283,3 +283,16 @@ text_debug's columns, a margin inside a node that stretches, came out smaller th
 and Bevy's border radius asserted on them, so the example stopped on its first frame, offscreen
 and so in every capture, whatever its code. The choice is chained after the pointing, and a test
 holds the camera to be the interface's on the first frame, which it fails on the bridge before.
+
+B 4 for UI, 89 of 119. Each of Bevy's components is a behavior on its node, its system the
+behavior's method where it is about that node, among them the output text's submission, the
+changing text's spans written by their places, the letter spacing toggled and widened on the texts
+that carry it, the transform panel slid by its `TargetNode`, a gradient turned by its
+`AnimateMarker`, the bar's sizes set by each button's `Constraint` and `ButtonValue`, a slider's
+thumb placed by its `DemoSlider`, the frames clipped and sized by their `Container`, a box shown or
+hidden by `DisplayTarget` and `VisibilityTarget` in place of Bevy's generic `Target<T>`, and the
+shadow's buttons acting by their `SettingsButton`. A `TransformButton` stands in for Bevy's
+`Button` in ui_transform, whose button system is over every button, where the panel's own buttons
+now light under the pointer as Bevy's do. A value that is no component's field here, a gradient's
+stops and a `Val`, is kept beside its node or as the two values its buttons hold, and
+vertical_slider's class is `VerticalSliderExample` beside Bevy's `VerticalSlider` marker.

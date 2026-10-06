@@ -19,18 +19,18 @@ internal static class Gradients
 
     private static readonly string[] Spaces = ["Oklaba", "Oklcha", "OklchaLong", "Srgba", "LinearRgba", "Hsla", "HslaLong", "Hsva", "HsvaLong"];
 
-    // A node's gradient, kept to be written again when its color space or its angle changes.
-    private sealed class Painted(Entity node, string kind, float angle, (Color Color, float? Percent)[] stops, bool animated)
+    // A node's gradient, kept beside it to be written again when its color space or its angle
+    // changes, since what Bevy's BackgroundGradient holds is no value a component here can keep.
+    internal sealed class Painted(Entity node, string kind, float angle, (Color Color, float? Percent)[] stops)
     {
         public Entity Node { get; } = node;
         public string Kind { get; } = kind;
         public float Angle { get; set; } = angle;
         public (Color Color, float? Percent)[] Stops { get; } = stops;
-        public bool Animated { get; } = animated;
     }
 
-    private static readonly List<Painted> Nodes = [];
-    private static Entity _button, _label;
+    internal static readonly Dictionary<Entity, Painted> Nodes = [];
+    private static Entity _button;
     private static int _space;
     private static UiInteraction _last;
 
@@ -77,8 +77,9 @@ internal static class Gradients
 
             var footer = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, RowGap = Length.Px(10f), Align = UiAlign.Center });
             ecs.SetParent(footer, root);
-            _label = Ui.SpawnText(Spaces[0], new UiSettings(), 25f);
-            ecs.SetParent(_label, footer);
+            var label = Ui.SpawnText(Spaces[0], new UiSettings(), 25f);
+            ecs.SetParent(label, footer);
+            ecs.Add(label, new CurrentColorSpaceLabel());
 
             _button = Ui.SpawnNode(new UiSettings
             {
@@ -112,31 +113,30 @@ internal static class Gradients
                 if (_last == UiInteraction.Pressed && interaction == UiInteraction.Hovered)
                 {
                     _space = (_space + 1) % Spaces.Length;
-                    Ui.SetText(_label, Spaces[_space]);
-                    foreach (var painted in Nodes) ecs.SetReflected(painted.Node, Background, string.Empty, Gradient(painted).ToJsonString());
+                    foreach (var label in ecs.EntitiesWith<CurrentColorSpaceLabel>()) Ui.SetText(label, Spaces[_space]);
+                    foreach (var painted in Nodes.Values) Repaint(ecs, painted);
                 }
 
                 _last = interaction;
             }
-
-            foreach (var painted in Nodes.Where(painted => painted.Animated && painted.Kind == "Linear"))
-            {
-                painted.Angle += 0.5f * ctx.Time.Delta;
-                ecs.SetReflected(painted.Node, Background, string.Empty, Gradient(painted).ToJsonString());
-            }
         }, "gradients.Update");
     }
+
+    // The node's gradient written again, as it is now.
+    internal static void Repaint(EcsWorld ecs, Painted painted) =>
+        ecs.SetReflected(painted.Node, Background, string.Empty, Gradient(painted).ToJsonString());
 
     private static void Paint(EcsWorld ecs, Entity parent, UiSettings settings, string kind, float angle, (Color, float?)[] stops, bool animated)
     {
         var node = Ui.SpawnNode(settings);
         ecs.SetParent(node, parent);
-        var painted = new Painted(node, kind, angle, stops, animated);
-        Nodes.Add(painted);
+        var painted = new Painted(node, kind, angle, stops);
+        Nodes[node] = painted;
+        if (animated) ecs.Add(node, new AnimateMarker());
         ecs.InsertReflected(node, Background, Gradient(painted).ToJsonString());
 
         // Every border the same gradient, yellow to white to orange at three eighths of a turn.
-        var border = new Painted(node, "Linear", 3f * MathF.Tau / 8f, [(C(255, 255, 0), null), (Color.White, null), (C(255, 165, 0), null)], false);
+        var border = new Painted(node, "Linear", 3f * MathF.Tau / 8f, [(C(255, 255, 0), null), (Color.White, null), (C(255, 165, 0), null)]);
         ecs.InsertReflected(node, Border, new JsonArray(Single(border, "Oklaba")).ToJsonString());
     }
 
@@ -175,4 +175,22 @@ internal static class Gradients
     };
 
     private static Color C(byte r, byte g, byte b) => Color.FromSrgb(r / 255f, g / 255f, b / 255f);
+}
+
+/// <summary>The label that names the color space the gradients are blended in.</summary>
+[Behavior]
+public partial struct CurrentColorSpaceLabel;
+
+/// <summary>A large node whose gradient turns, where it is linear.</summary>
+[Behavior]
+public partial struct AnimateMarker
+{
+    /// <summary>A linear gradient turned half a radian a second, as Bevy's <c>update</c> turns it.</summary>
+    [OnUpdate]
+    public void Update(BehaviorContext ctx)
+    {
+        if (!Gradients.Nodes.TryGetValue(ctx.Entity, out var painted) || painted.Kind != "Linear") return;
+        painted.Angle += 0.5f * ctx.Time.Delta;
+        Gradients.Repaint(ctx.Ecs, painted);
+    }
 }

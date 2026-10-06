@@ -10,19 +10,11 @@ namespace BevyCSharp.Examples.Interface;
 // below them and clearing it.
 internal static class TextInput
 {
-    private static readonly Dictionary<Entity, string> Names = [];
-    private static Entity _output;
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "text_input.Setup");
-        app.Update(TextSubmission, "text_input.TextSubmission");
-    }
+    public static void Build(App app) => app.Startup(Setup, "text_input.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Names.Clear();
         Render2d.SpawnCamera2d();
 
         var root = Ui.SpawnNode(new UiSettings
@@ -52,24 +44,35 @@ internal static class TextInput
             ecs.Wrap<TextFontRef>(field).FontSize = new FontSize.Px(24f);
             ecs.Insert<TabIndexRef>(field).Value = index;
             ecs.SetParent(field, row);
-            Names[field] = name;
+            ecs.SetName(field, name);
         }
 
         // What was submitted, a line tall while it is empty, wrapping at a word or, where a word
         // is too long, anywhere.
-        _output = Ui.SpawnText(string.Empty,
+        var output = Ui.SpawnText(string.Empty,
             new UiSettings { Width = Length.Px(400f), Border = Sides.All(Length.Px(2f)), Padding = Sides.All(Length.Px(8f)), BorderColor = Color.FromSrgb8(203, 213, 225) },
             new UiTextSettings { FontSize = 24f });
-        ecs.Wrap<TextLayoutRef>(_output).Linebreak = TextLayoutRef.LinebreakVariant.WordOrCharacter;
-        ecs.SetParent(_output, root);
+        ecs.Wrap<TextLayoutRef>(output).Linebreak = TextLayoutRef.LinebreakVariant.WordOrCharacter;
+        ecs.Add(output, new TextOutput());
+        ecs.SetParent(output, root);
     }
+}
 
-    private static void TextSubmission(BehaviorContext ctx)
+/// <summary>The text that shows what was submitted.</summary>
+[Behavior]
+public partial struct TextOutput
+{
+    /// <summary>
+    /// Enter writes the focused field's name and what it holds here, and clears the field, a
+    /// field being the focused entity with editable text and a name.
+    /// </summary>
+    [OnUpdate]
+    public void TextSubmission(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.Enter)) return;
-        if (ctx.Ecs.Resource<InputFocusRef>()?.CurrentFocus is not { } focused || !Names.TryGetValue(focused, out var name)) return;
+        if (ctx.Ecs.Resource<InputFocusRef>()?.CurrentFocus is not { } focused || ctx.Ecs.NameOf(focused) is not { } name) return;
 
-        Ui.SetText(_output, $"{name}: {Ui.EditableTextOf(focused)}");
+        Ui.SetText(ctx.Entity, $"{name}: {Ui.EditableTextOf(focused)}");
         Ui.SetEditableValue(focused, string.Empty);
     }
 }
