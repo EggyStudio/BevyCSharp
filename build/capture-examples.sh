@@ -22,7 +22,7 @@ printing=$("$program" --printing)
 # Examples that show and print nothing by design, Bevy's two empty applications and its two that
 # play music in a window with no camera, and those that wait for a file dropped, the mouse or a
 # touch, which a capture has none of, so their capture is not held to saying something.
-empty="audio drag_and_drop empty empty_defaults mouse_grab mouse_input soundtrack touch_input"
+empty="audio drag_and_drop empty empty_defaults mouse_grab mouse_input soundtrack touch_input touch_input_events"
 
 for example in $("$program" --list); do
     if ! build/capture-example.sh "$example" "$into/$example.webp"; then

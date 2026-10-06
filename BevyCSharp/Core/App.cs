@@ -341,6 +341,7 @@ public sealed unsafe partial class App : IDisposable
             // Posted before the swap, so what the window reported at the top of this frame is
             // readable during it rather than during the next one.
             PostWindowMessages(world.Resource<MessageBus>());
+            PostInputMessages(world.Resource<MessageBus>());
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());

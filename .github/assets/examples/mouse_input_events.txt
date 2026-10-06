@@ -1,0 +1,2 @@
+MouseWheel { Unit = Line, X = 0, Y = 1, Window = Entity(4294967294v0), Phase = Moved }
+MouseWheel { Unit = Line, X = 1, Y = 0, Window = Entity(4294967294v0), Phase = Moved }

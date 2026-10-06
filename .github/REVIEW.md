@@ -10,17 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `aa55e0d`. An app is told once for each state it never added rather than once for
-each system scoped to it, the suite's own `Screen` behaviors having been the 45 lines, and the
-console server says it is serving at the info level, which the page tells from a warning
-(`0013c52`), which settles item 13. Verdict 3's cause, found by playing Courtyard from the package
-on lavapipe pinned to four cores: the walk was planned in frames at sixty a second on the machine's
-clock, so each held frame overshot past the coin, and `play.sh` sets a sixtieth of a second a frame
-through `app.frametime`, said as the likeliest cause since nobody read the run's log;
-`build/step.py` and `build/page.py` are taken from 3DEngine as the default shell of the game,
-examples, README and pack jobs, the test and native jobs keeping their own, and `test.py` reads the
-page's code from `page.py` (`aa55e0d`); Verdicts 2 and 3 settle with a pack run. The run of
-`0013c52` passed on both systems.
+Reviewed up to `dfa22f2`. A mesh made in code is skinned to joint entities, four joints and weights
+a vertex, inverse bindposes made from transforms and Bevy's `SkinnedMesh` with the bounds that
+follow (ABI 217), `custom_skinned_mesh` written, 271, which closes the animation gap (`3208c70`);
+the input focus moves between interface nodes by direction with edges a game draws before the
+nearest node (ABI 218), `directional_navigation` and its overrides written, 273 (`f127b1f`); and a
+touch and its phase moved into files of their names, N 1.2's list at 229 (`dfa22f2`). Feathers'
+three widget examples need `bevy_feathers`, a crate the lock does not hold, which waits on the
+owner's word; the reply on input as Bevy's messages (ABI 219) is being written, its commit to come.
+Nothing was pushed since `0013c52`, whose run passed on both systems.
+
+Before them, an app came to be told once for each state it never added rather than once for each
+system scoped to it, the suite's own `Screen` behaviors having been the 45 lines, and the console
+server says it is serving at the info level, which the page tells from a warning (`0013c52`), which
+settles item 13. Verdict 3's cause, found by playing Courtyard from the package on lavapipe pinned
+to four cores: the walk was planned in frames at sixty a second on the machine's clock, so each held
+frame overshot past the coin, and `play.sh` sets a sixtieth of a second a frame through
+`app.frametime`, said as the likeliest cause since nobody read the run's log; `build/step.py` and
+`build/page.py` are taken from 3DEngine as the default shell of the game, examples, README and pack
+jobs, the test and native jobs keeping their own, and `test.py` reads the page's code from `page.py`
+(`aa55e0d`); Verdicts 2 and 3 settle with a pack run. The run of `0013c52` passed on both systems.
 
 Before them, a warning came to fail the workflow on both sides, the managed build with
 `-warnaserror` and every cargo build with `CARGO_BUILD_WARNINGS=deny`, every public member of the
@@ -31,14 +40,6 @@ had slid onto a neighbor given them back, and `NormTests.N_4_7` reads the README
 of their names and the compute tests split, N 1.2's list at 231 and N 1.4's at 88 to mend
 (`5b38404`, `ff593c1`). The pack run of `421d4e1` failed in the package tests, Verdict 2's, and in
 the step that plays Courtyard, which is Verdict 3. The run of `5b38404` passed on both systems.
-
-Before them, an animation graph came to be built in code from blends and clips, played several nodes
-at once at their weights and masked by groups of bones (ABI 216), and `animation_graph` and
-`animation_masks` are written (`5d5a982`). Verdict 2's mend: `NormTests.Package()` reads a relative
-`BCS_PACKAGE` from the repository root and fails naming a file that is not there, and the pack step
-exports a whole path, tried four ways (`7f5286c`); the verdict settles when a pack job passes. Moves
-on the way take N 1.2's list to 233, N 1.3's to 17 with 11 in the bridge and N 1.4's to 88 to mend.
-The run of `2158ee2` passed on both systems.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -199,35 +200,24 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, a skinned mesh built joint by joint.** A mesh made in code is skinned as a model's is
-(`skins.rs`, ABI 217). `Render.SetMeshJoints` gives a mesh four joints a vertex and their weights
-and works out the boxes Bevy culls a skinned mesh by, `Render.CreateSkin` makes the inverse
-bindposes from transforms, which hold any rig without shear since nothing here has a matrix, and
-`Render.SetSkin` gives the entity drawing it Bevy's `SkinnedMesh` with its joint entities and the
-bounds that follow them. The joints are apart from `MeshData`, so a mesh without a skin crosses as
-it did, and the three listed files the mesh's own path runs through, `RenderMaterials.cs`,
-`NativeTypes.Render.cs` and the bridge's `render/assets.rs` at 1,922 lines, were left untouched
-rather than mended for one field. `custom_skinned_mesh` is written, 271, its ten strips bent,
-stretched and slid by their upper joints with each joint's axes drawn, seen offscreen; its colors
-come from .NET's generator seeded as Bevy seeds its ChaCha8Rng and are other colors than Bevy's.
-`SkinTests` draws the example's strip unlit, finds its head where its joints put it and beside its
-foot once the upper joint moves, and holds joints that do not fit the mesh refused with the reason.
-The animation gap is closed. The suite passed, 1,074 with 9 skipped. The widgets are the largest
-gap left, five examples, and Feathers' three need `bevy_feathers`, a crate the lock does not hold,
-which is asked of you before it is added; directional navigation's two come first.
-
-**Now 3, the widgets, directional navigation.** The focus moves between interface nodes by direction
-(`navigation.rs`, ABI 218). The bridge adds Bevy's `DirectionalNavigationPlugin` beside its tab
-navigation, and `Navigation.Move` moves the focus with Bevy's `AutoDirectionalNavigator`, an edge of
-the map first and the nearest node carrying `AutoDirectionalNavigation` that way otherwise, which a
-game calls on the keys or buttons it chooses. `AddEdge` draws an edge one way or both, `BlockEdge`
-blocks a way, `AddEdges` draws a run of them looping where asked, and `Forget` and `Clear` take them
-out. `CompassOctant` is Bevy's eight directions, and `CompassOctants.Of` finds one from a stick or
-the arrows held. `directional_navigation` and `directional_navigation_overrides` are written, 273,
-sharing their input and highlight as Bevy's repeat theirs, and both were driven offscreen with
-`bcs`, where the arrows moved the focus where Bevy's would, a row wrapped by its edge, the first page's
-up and down were blocked, Enter pressed the focused button, and moving onto the second page showed
-it and hid the first. `NavigationTests` holds the nearest node each way, nothing past the end, a
-blocked way, an edge before the search, a loop and a cleared map, and the octant of each direction.
-The suite passed, 1,084 with 9 skipped. Feathers' three wait on the owner's word on `bevy_feathers`;
-input as Bevy's messages, four examples, is next.
+**Now 3, input as Bevy's messages.** Each change of the keyboard, the mouse, a touch and a pad is
+read as its message, one for each change in the order it came (`input_messages.rs`, ABI 219). The
+bridge drains every kind into one array a frame through cursors of its own, and the app posts each
+to the message bus as the window's messages are, so `ctx.Read<KeyboardInput>()` reads them as
+Bevy's examples read theirs. `MouseButtonInput`, `MouseMotion`, `CursorMoved`, `MouseWheel`, the
+touchpad's `PinchGesture`, `RotationGesture` and `DoubleTapGesture`, `TouchInput` with its
+`TouchForce`, the pad's `GamepadConnectionEvent`, `GamepadButtonChangedEvent`,
+`GamepadButtonStateChangedEvent` and `GamepadAxisChangedEvent`, and Bevy's ordered `GamepadEvent`
+are new, each in a file of its name, and `KeyboardInput` is posted as it stands. `TouchPhase` gains
+Bevy's `Moved` and `Canceled`, moved first out of `Input.cs` with `Touch` (`dfa22f2`).
+`keyboard_input_events`, `mouse_input_events`, `touch_input_events` and `gamepad_input_events` are
+written, 277, each printing its messages as C# writes the records. The mouse's capture rolls the
+wheel alone, since a capture runs with no window and nothing drawn and a pretended button there is
+refused, and the touch example prints nothing without a touch screen, beside `touch_input` among
+the captures held to saying nothing. `InputMessageTests` holds a pad's connection, its button
+pressed and let go and its stick tilted as messages of their kinds and in one order, a key, a
+button and the wheel offscreen, and the mirror's layout field by field. A stick's message carries
+the value Bevy filters through its dead zone, 0.579 for 0.6, where the frame's `Gamepad` reads 0.6.
+The suite passed, 1,099 with 9 skipped. The fonts' four wait on Bevy's system font discovery, which
+on Linux brings `yeslogic-fontconfig-sys`, a crate the lock does not hold, and links fontconfig,
+asked of the owner beside `bevy_feathers`. Bevy's math, three examples, is next.

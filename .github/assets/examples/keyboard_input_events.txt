@@ -1,0 +1,6 @@
+KeyboardInput { KeyCode = H, LogicalKey = Character("h"), State = Pressed, Text = h, Repeat = False }
+KeyboardInput { KeyCode = H, LogicalKey = Character("h"), State = Released, Text = , Repeat = False }
+KeyboardInput { KeyCode = LShift, LogicalKey = Shift, State = Pressed, Text = , Repeat = False }
+KeyboardInput { KeyCode = LShift, LogicalKey = Shift, State = Released, Text = , Repeat = False }
+KeyboardInput { KeyCode = Enter, LogicalKey = Enter, State = Pressed, Text = , Repeat = False }
+KeyboardInput { KeyCode = Enter, LogicalKey = Enter, State = Released, Text = , Repeat = False }

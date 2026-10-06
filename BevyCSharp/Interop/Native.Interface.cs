@@ -447,6 +447,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_node_weight(ulong entity, uint node, float weight);
 
+    /// <summary>Copies Bevy's input messages since the last call, answering how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_messages(NativeInputMessage* messages, int capacity);
+
     /// <summary>Moves the input focus by direction, writing where it moved, answering 1 where it did.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

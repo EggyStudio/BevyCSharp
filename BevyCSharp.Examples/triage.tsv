@@ -239,17 +239,17 @@ query_gltf_primitives	can
 update_gltf_scene	can
 widgets	n/a	a module of helpers Bevy's examples share rather than an example, which BevyCSharp.Examples/Widgets.cs is here
 char_input_events	can
-gamepad_input_events	missing	a gamepad's button and axis changes as messages, in the order they happened
+gamepad_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form
 gamepad_input	can
 gamepad_rumble	can
 keyboard_input	can
-keyboard_input_events	missing	keyboard events as messages, each with its key code, logical key and state
+keyboard_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form
 keyboard_modifiers	can
 mouse_grab	can
 mouse_input	can
-mouse_input_events	missing	mouse button, motion, cursor, wheel and gesture events as messages
+mouse_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form, and its capture rolling the wheel alone, a run with no window having nothing for a pretended button to press on
 touch_input	part	a touch the platform cancels, which is not reported
-touch_input_events	missing	touch events as messages
+touch_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form, and none on a machine with no touch screen
 bounding_2d	missing	Bevy's bounding volumes, their casts and their intersection tests
 cubic_splines	missing	Bevy's cubic curves, Hermite, cardinal and B-spline
 custom_primitives	n/a	implements Rust traits for a primitive

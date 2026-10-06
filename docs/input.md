@@ -76,6 +76,28 @@ gilrs in the render and editor profiles, and every profile reads a pad pretended
 `SyntheticInput.ConnectGamepad`, which is how a test or `./bcs command input.button 0 South 10`
 presses a button on a machine with none attached.
 
+## Each change as a message
+
+`Input` holds where each frame leaves things, which says what is down and what changed, but not in
+what order, nor how often the mouse moved between frames. Bevy reports each change as a message as
+well, and they are read as any message is, each kind in the order it came:
+
+```csharp
+foreach (var key in ctx.Read<KeyboardInput>()) Log(key.KeyCode, key.LogicalKey, key.State, key.Text);
+foreach (var motion in ctx.Read<MouseMotion>()) look += motion.Delta;      // the hand's travel, past the screen's edge
+foreach (var moved in ctx.Read<CursorMoved>()) Trace(moved.Position);
+foreach (var touch in ctx.Read<TouchInput>()) Paint(touch.Id, touch.Position, touch.Phase);
+foreach (var e in ctx.Read<GamepadEvent>()) Record(e);                    // a pad's connections, buttons and axes in one order
+```
+
+The mouse's buttons and wheel are `MouseButtonInput` and `MouseWheel`, a touchpad's gestures
+`PinchGesture`, `RotationGesture` and `DoubleTapGesture`, and a pad's changes come in kinds of their
+own as well, `GamepadConnectionEvent`, `GamepadButtonChangedEvent` for each value a button passes,
+`GamepadButtonStateChangedEvent` where it comes to count as pressed or released, and
+`GamepadAxisChangedEvent` for a stick, the value as Bevy filters it through its dead zone. A
+`GamepadEvent` holds one of the three in the order they came across kinds, which the messages of
+each kind do not keep between them.
+
 ## What a pointer does to an entity
 
 Bevy's picking finds what is under the mouse or a finger, an interface node, a sprite or a mesh,

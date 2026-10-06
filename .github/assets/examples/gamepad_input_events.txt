@@ -1,0 +1,10 @@
+GamepadConnectionEvent { Gamepad = Entity(120v0), Connected = True, Name = Console pad, VendorId = , ProductId =  }
+GamepadConnectionEvent { Gamepad = Entity(120v0), Connected = True, Name = Console pad, VendorId = , ProductId =  }
+GamepadButtonChangedEvent { Gamepad = Entity(120v0), Button = South, State = Pressed, Value = 1 }
+South of Entity(120v0) is changed to 1
+GamepadButtonStateChangedEvent { Gamepad = Entity(120v0), Button = South, State = Pressed }
+GamepadButtonChangedEvent { Gamepad = Entity(120v0), Button = South, State = Released, Value = 0 }
+South of Entity(120v0) is changed to 0
+GamepadButtonStateChangedEvent { Gamepad = Entity(120v0), Button = South, State = Released }
+GamepadAxisChangedEvent { Gamepad = Entity(120v0), Axis = LeftX, Value = 0.4736842 }
+LeftX of Entity(120v0) is changed to 0.4736842

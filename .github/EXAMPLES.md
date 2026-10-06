@@ -4,7 +4,7 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**273 written, 15 written in part, 0 can be written, 75 missing and 58 do not apply.** Of the 363 that apply, 288 can be written with what is bridged, 15 of them leaving something out.
+**277 written, 15 written in part, 0 can be written, 71 missing and 58 do not apply.** Of the 363 that apply, 292 can be written with what is bridged, 15 of them leaving something out.
 
 **133 of the 139 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -25,7 +25,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Games](#games) | 5 | 1 | 0 | 0 | 0 | 5 of 5 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
 | [Helpers](#helpers) | 0 | 0 | 0 | 0 | 1 |  |
-| [Input](#input) | 7 | 1 | 0 | 4 | 0 |  |
+| [Input](#input) | 11 | 1 | 0 | 0 | 0 |  |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 | 1 of 1 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Picking](#picking) | 4 | 0 | 0 | 1 | 1 | 3 of 3 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **273** | **15** | **0** | **75** | **58** | **133 of 139** |
+| **All** | **277** | **15** | **0** | **71** | **58** | **133 of 139** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -352,16 +352,16 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`char_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/char_input_events.rs) | Prints out all chars as they are inputted | [written](../BevyCSharp.Examples/input/char_input_events.cs), prints [its output](assets/examples/char_input_events.txt) |
 | [`gamepad_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input.rs) | Shows handling of gamepad input, connections, and disconnections | [written](../BevyCSharp.Examples/input/gamepad_input.cs), prints [its output](assets/examples/gamepad_input.txt) |
-| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | missing, a gamepad's button and axis changes as messages, in the order they happened |
+| [`gamepad_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_input_events.rs) | Iterates and prints gamepad input and connection events | [written](../BevyCSharp.Examples/input/gamepad_input_events.cs), prints [its output](assets/examples/gamepad_input_events.txt), each message printed as C# writes the record, where Bevy prints its debug form |
 | [`gamepad_rumble`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/gamepad_rumble.rs) | Shows how to rumble a gamepad using force feedback | [written](../BevyCSharp.Examples/input/gamepad_rumble.cs), prints [its output](assets/examples/gamepad_rumble.txt) |
 | [`keyboard_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input.rs) | Demonstrates handling a key press/release | [written](../BevyCSharp.Examples/input/keyboard_input.cs), prints [its output](assets/examples/keyboard_input.txt) |
-| [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | missing, keyboard events as messages, each with its key code, logical key and state |
+| [`keyboard_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_input_events.rs) | Prints out all keyboard events | [written](../BevyCSharp.Examples/input/keyboard_input_events.cs), prints [its output](assets/examples/keyboard_input_events.txt), each message printed as C# writes the record, where Bevy prints its debug form |
 | [`keyboard_modifiers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/keyboard_modifiers.rs) | Demonstrates using key modifiers (ctrl, shift) | [written](../BevyCSharp.Examples/input/keyboard_modifiers.cs), prints [its output](assets/examples/keyboard_modifiers.txt) |
 | [`mouse_grab`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_grab.rs) | Demonstrates how to grab the mouse, locking the cursor to the app's screen | [written](../BevyCSharp.Examples/input/mouse_grab.cs) |
 | [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | [written](../BevyCSharp.Examples/input/mouse_input.cs), prints [its output](assets/examples/mouse_input.txt) |
-| [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | missing, mouse button, motion, cursor, wheel and gesture events as messages |
+| [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | [written](../BevyCSharp.Examples/input/mouse_input_events.cs), prints [its output](assets/examples/mouse_input_events.txt), each message printed as C# writes the record, where Bevy prints its debug form, and its capture rolling the wheel alone, a run with no window having nothing for a pretended button to press on |
 | [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written in part](../BevyCSharp.Examples/input/touch_input.cs), prints [its output](assets/examples/touch_input.txt), a touch the platform cancels, which is not reported |
-| [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input_events.rs) | Prints out all touch inputs | missing, touch events as messages |
+| [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/input/touch_input_events.rs) | Prints out all touch inputs | [written](../BevyCSharp.Examples/input/touch_input_events.cs), each message printed as C# writes the record, where Bevy prints its debug form, and none on a machine with no touch screen |
 
 ## Math
 
