@@ -144,6 +144,12 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
    closes its open connections as it stops, and a test holds that a disposed server with a caller
    connected leaves no thread of its own alive, the caller's answered request showing the thread
    ran, with no wait on the clock.
+15. **The page's repeated lines count warnings and errors alone.** The owner asked on 2026-10-06,
+   the page's "Repeated most in the output" having shown 3DEngine's banner at every app's start,
+   2,190 lines of `====`, where it was meant for the error a system logs every frame.
+   `build/test.py` counts the lines logged at warning or error, or lines of no level at all, and
+   leaves the section out when nothing repeats, with its own test on a log of banners and one
+   repeated error.
 
 ## Verdicts
 
@@ -171,6 +177,10 @@ None open.
    N 6.7, N 6.8 and N 3.7, and the reviewing session reads a run's jobs and annotations from
    GitHub.
 
+7. **The page's repeated lines are warnings and errors.** The owner chose it on 2026-10-06, after
+   the page of `98f6d8e5` repeated the engine's banner, so the section counts what is logged at
+   warning or error or with no level and is left out when nothing repeats.
+
 ## Replies
 
 **Now 3, keys as they reach a field.** A key handed to the focused entity reaches C# as Bevy's
@@ -189,3 +199,16 @@ it, and it is now changed where it stands, `EditableTextTests` holding its text 
 text tests moved to `Assets` (`915514e`), N 1.4's at 92. One difference stays, said in
 `FocusedInput`'s remarks. A C# observer of a parent hears a key a Bevy field took, where Bevy's
 own stop at the field. Item 14 is next.
+
+**Item 14, a closed server leaves no thread alive.** `CliServer` keeps the connections open now,
+each leaving the set as its thread ends, so the set does not grow by one per command. `Dispose`
+closes each, which ends its read, ends any wait on a frame with `SESSION_CLOSING`, and joins every
+thread it started before it returns. The wait ends because a request that arrived after the app let
+go of its queue was never answered, and its connection would have waited out its patience after
+the app had gone. `CliServerTests` moved to `Tests/Cli` first, by a move alone, with its places on
+N 3.3's and N 3.4's lists renamed (`15974f1`), N 1.4 at 91. It holds a server stopped with a caller
+connected, the caller's request answered by the connection's thread to show it ran, leaving no
+thread of its own alive and the connection closed, with no wait on the clock.
+
+Shared: the console's connections closed and their threads joined as the app stops, taken here as
+3DEngine's `27f949bf` has it, for its row in SHARED.md.

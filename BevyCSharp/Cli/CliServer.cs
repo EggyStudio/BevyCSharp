@@ -31,6 +31,10 @@ internal sealed class CliServer : IDisposable
 {
     private readonly CliQueue _queue;
     private readonly TcpListener _listener;
+    private readonly Thread _accepting;
+    private readonly CancellationTokenSource _stop = new();
+    private readonly Lock _gate = new();
+    private readonly Dictionary<TcpClient, Thread> _open = [];
     private volatile bool _stopping;
 
     /// <summary>Starts listening, on a port chosen by the kernel.</summary>
@@ -44,13 +48,13 @@ internal sealed class CliServer : IDisposable
         Port = ((IPEndPoint)_listener.LocalEndpoint).Port;
         Token = Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
 
-        var accepting = new Thread(Accept)
+        _accepting = new Thread(Accept)
         {
             IsBackground = true,
             Name = "bcs-cli-accept",
         };
 
-        accepting.Start();
+        _accepting.Start();
     }
 
     /// <summary>Where it is listening.</summary>
@@ -95,14 +99,28 @@ internal sealed class CliServer : IDisposable
                 return;
             }
 
-            // Not tracked once started. A connection ends with its socket, the thread is a
-            // background one so it holds nothing open, and a list of them would grow by one per
-            // command for the life of the app and never be read.
-            new Thread(() => Serve(caller))
+            // Kept while it is open, so stopping can close it, since its thread otherwise waits on
+            // its read for as long as the caller keeps the connection, after the app is gone. It
+            // leaves the set as it ends, so the set holds the connections open now and does not
+            // grow by one per command.
+            var serving = new Thread(() => Serve(caller))
             {
                 IsBackground = true,
                 Name = "bcs-cli-connection",
-            }.Start();
+            };
+
+            lock (_gate)
+            {
+                if (_stopping)
+                {
+                    caller.Dispose();
+                    return;
+                }
+
+                _open[caller] = serving;
+            }
+
+            serving.Start();
         }
     }
 
@@ -133,7 +151,12 @@ internal sealed class CliServer : IDisposable
             catch (Exception error) when (error is IOException or SocketException
                                               or ObjectDisposedException)
             {
-                // The caller hung up, which is an ordinary way for a request to end.
+                // The caller hung up, which is an ordinary way for a request to end, or the server
+                // closed the connection as it stopped.
+            }
+            finally
+            {
+                lock (_gate) _open.Remove(caller);
             }
         }
     }
@@ -194,7 +217,20 @@ internal sealed class CliServer : IDisposable
         var request = new CliRequest(operation, command, id);
         _queue.Add(request);
 
-        return request.Answer.Wait(patience)
+        // Waited on until the server stops as well, since a request that arrived after the app
+        // let go of its queue is never answered, and its connection would wait out its patience
+        // after the app had gone.
+        bool answered;
+        try
+        {
+            answered = request.Answer.Wait(patience, _stop.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return CliJson.Fail(operation, "SESSION_CLOSING", "The app is shutting down.", id);
+        }
+
+        return answered
             ? request.Answer.Result
             : CliJson.Fail(
                 operation,
@@ -204,11 +240,18 @@ internal sealed class CliServer : IDisposable
                 id);
     }
 
-    /// <summary>Stops listening. Connections in flight end with their sockets.</summary>
+    /// <summary>Stops listening, closes the connections still open, and waits for their threads to end.</summary>
+    /// <remarks>
+    /// A connection's thread waits on its read for as long as the caller keeps it open, so one left
+    /// alone would outlive the app, which is how 3DEngine found the same leak on macOS. Closing the
+    /// socket ends the read, a request still waiting on a frame is told the app is shutting down,
+    /// and every thread the server started has ended by the time this returns.
+    /// </remarks>
     public void Dispose()
     {
         if (_stopping) return;
         _stopping = true;
+        _stop.Cancel();
 
         try
         {
@@ -217,6 +260,39 @@ internal sealed class CliServer : IDisposable
         catch (SocketException)
         {
             // Already down; there is nothing to close.
+        }
+
+        KeyValuePair<TcpClient, Thread>[] open;
+        lock (_gate) open = [.. _open];
+
+        foreach (var (caller, _) in open)
+        {
+            try
+            {
+                caller.Client.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception error) when (error is SocketException or ObjectDisposedException)
+            {
+                // The caller hung up already.
+            }
+
+            caller.Close();
+        }
+
+        _accepting.Join();
+        foreach (var (_, serving) in open) serving.Join();
+        _stop.Dispose();
+    }
+
+    /// <summary>The threads the server started that have not ended, for a test to see none are left.</summary>
+    internal IReadOnlyList<Thread> LiveThreads
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return [.. _open.Values.Prepend(_accepting).Where(thread => thread.IsAlive)];
+            }
         }
     }
 }

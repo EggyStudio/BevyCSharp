@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -301,5 +302,48 @@ public sealed class CliServerTests : IDisposable
         // Cloned, because the document owns the buffer the element points into and this outlives it.
         using var document = JsonDocument.Parse(answer);
         return document.RootElement.Clone();
+    }
+
+    /// <summary>
+    /// A server stopped with a caller still connected closes the connection and leaves no thread of
+    /// its own alive, the caller's answered request showing the connection's thread had run.
+    /// </summary>
+    /// <remarks>
+    /// No app, since the request is answered by the connection's thread itself, a wrong token
+    /// needing no frame, and no wait on the clock, since stopping returns once the threads end.
+    /// </remarks>
+    [Fact]
+    public void AStoppedServerWithACallerConnectedLeavesNoThreadAlive()
+    {
+        var server = new CliServer(new CliQueue());
+        using var caller = new TcpClient();
+        caller.Connect(IPAddress.Loopback, server.Port);
+        using var stream = caller.GetStream();
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        using var writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" };
+
+        writer.WriteLine("{\"op\":\"run\",\"token\":\"wrong\",\"line\":\"help\"}");
+        Assert.Contains("BAD_TOKEN", reader.ReadLine());
+
+        // The thread taking calls and the one serving this caller, waiting on its next line.
+        var threads = server.LiveThreads;
+        Assert.Equal(2, threads.Count);
+
+        server.Dispose();
+
+        Assert.All(threads, thread => Assert.False(thread.IsAlive, $"{thread.Name} outlived the server"));
+
+        // And the connection is closed rather than left for the caller to hang up.
+        string? after;
+        try
+        {
+            after = reader.ReadLine();
+        }
+        catch (IOException)
+        {
+            after = null;
+        }
+
+        Assert.Null(after);
     }
 }
