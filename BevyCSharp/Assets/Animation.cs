@@ -3,52 +3,6 @@ using Bevy.Interop;
 
 namespace Bevy;
 
-/// <summary>How a clip is played, for <see cref="Animation.Play"/>.</summary>
-public sealed class AnimationSettings
-{
-    /// <summary>Whether it plays over and over, rather than once and holding its last pose.</summary>
-    public bool Repeat { get; set; }
-
-    /// <summary>
-    /// How many times it plays before holding its last pose, where it does not repeat. Zero and one
-    /// are once.
-    /// </summary>
-    /// <remarks>
-    /// Bevy's <c>RepeatAnimation::Count</c>, for a gesture made twice or a bell rung three times.
-    /// <see cref="Animation.SetRepeat"/> changes it while the clip plays, without starting it over.
-    /// </remarks>
-    public uint Times { get; set; }
-
-    /// <summary>How fast, one being as it was made, two twice as fast, and below zero backwards.</summary>
-    public float Speed { get; set; } = 1f;
-
-    /// <summary>
-    /// Seconds over which whatever played before fades out as this fades in, or zero for a cut.
-    /// </summary>
-    /// <remarks>
-    /// A walk turning into a run over a fifth of a second keeps a character from snapping between
-    /// poses. Both clips play during the fade, each weighted by how far it has gone.
-    /// </remarks>
-    public float Blend { get; set; }
-}
-
-/// <summary>What a model is playing, as <see cref="Animation.StateOf"/> reads it.</summary>
-/// <param name="Clip">The clip, by name, or nothing when none is playing.</param>
-/// <param name="Seconds">Seconds into it.</param>
-/// <param name="Speed">How fast it plays.</param>
-/// <param name="Paused">Whether it is held where it is.</param>
-/// <param name="Finished">Whether a clip that plays once has reached its end.</param>
-/// <param name="Completions">How many times a repeating clip has come round to its start.</param>
-public readonly record struct AnimationState(
-    string? Clip, float Seconds, float Speed, bool Paused, bool Finished, uint Completions);
-
-/// <summary>
-/// A clip that plays once reached its end, posted as a message the frame after it did.
-/// </summary>
-/// <param name="Scene">The entity the model's scene was spawned under, as it was played on.</param>
-/// <param name="Clip">The clip, by name.</param>
-public readonly record struct AnimationFinished(Entity Scene, string Clip);
-
 /// <summary>
 /// Plays a model's animation clips by name, on the entity its scene was spawned under.
 /// </summary>
