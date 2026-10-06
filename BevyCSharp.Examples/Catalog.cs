@@ -132,6 +132,7 @@ internal static class Catalog
         new("animation_events", AnimationEvents.Build),
         new("animation_graph", AnimationGraphExample.Build),
         new("animation_masks", AnimationMasks.Build),
+        new("custom_skinned_mesh", CustomSkinnedMesh.Build),
         new("eased_motion", EasedMotion.Build),
         new("easing_functions", EasingFunctions.Build),
         new("morph_targets", MorphTargets.Build),

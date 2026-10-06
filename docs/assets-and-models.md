@@ -212,6 +212,18 @@ Animation.PlayNode(player, wave, repeat: true);
 Animation.SetNodeWeight(player, wave, 0.5f);
 ```
 
+A mesh made in code is skinned as a model's is. Each vertex names four joints and how much each
+moves it, a skin holds the inverse of where each joint stood when the mesh was bound to it, and
+the joints are entities whose transforms bend the mesh as they move:
+
+```csharp
+var mesh = Render.CreateMesh(strip);
+Render.SetMeshJoints(mesh, joints, weights);              // four of each a vertex
+var skin = Render.CreateSkin([Transform.At(-0.5f, -1f, 0f), Transform.At(-0.5f, -1f, 0f)]);
+var drawn = ctx.Ecs.SpawnMesh(mesh, material, Transform.Identity);
+Render.SetSkin(drawn, skin, [hip, knee]);                 // the knee's transform bends it
+```
+
 A file's own materials load too, in a windowed run:
 
 ```csharp

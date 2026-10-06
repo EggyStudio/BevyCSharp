@@ -447,6 +447,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_node_weight(ulong entity, uint node, float weight);
 
+    /// <summary>Gives a mesh the joints each vertex follows and their weights, four of each a vertex.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_set_joints(int mesh, ushort* joints, float* weights, int count);
+
+    /// <summary>Makes a skin's inverse bindposes from transforms of ten floats each, writing its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_skin_create(float* transforms, int count, int* key);
+
+    /// <summary>Skins an entity's mesh with a skin and the joint entities that move it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_skin_set(ulong entity, int skin, ulong* joints, int count);
+
     /// <summary>Changes how many times the playing clip plays.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

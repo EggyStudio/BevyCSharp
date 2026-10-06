@@ -4,15 +4,15 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**270 written, 15 written in part, 0 can be written, 78 missing and 58 do not apply.** Of the 363 that apply, 285 can be written with what is bridged, 15 of them leaving something out.
+**271 written, 15 written in part, 0 can be written, 77 missing and 58 do not apply.** Of the 363 that apply, 286 can be written with what is bridged, 15 of them leaving something out.
 
-**131 of the 136 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**132 of the 137 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 22 | 0 | 0 | 6 | 1 | 8 of 8 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
-| [Animation](#animation) | 11 | 1 | 0 | 1 | 0 | 7 of 8 |
+| [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **270** | **15** | **0** | **78** | **58** | **131 of 136** |
+| **All** | **271** | **15** | **0** | **77** | **58** | **132 of 137** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -167,7 +167,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`animation_graph`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_graph.rs) | Blends multiple animations together with a graph | [written](../BevyCSharp.Examples/animation/animation_graph.cs), the graph built in code, Bevy's --no-load path, where its default loads the same graph from Fox.animgraph.ron, which is not among the assets here |
 | [`animation_masks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_masks.rs) | Demonstrates animation masks | [written](../BevyCSharp.Examples/animation/animation_masks.cs) |
 | [`color_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/color_animation.rs) | Demonstrates how to animate colors using mixing and splines in different color spaces | [written](../BevyCSharp.Examples/animation/color_animation.cs), the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types |
-| [`custom_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/custom_skinned_mesh.rs) | Skinned mesh example with mesh and joints data defined in code | missing, skinned meshes built in code (joints and weights) |
+| [`custom_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/custom_skinned_mesh.rs) | Skinned mesh example with mesh and joints data defined in code | [written](../BevyCSharp.Examples/animation/custom_skinned_mesh.cs), the strips' colors drawn from .NET's generator seeded as Bevy seeds its ChaCha8Rng, so they are other colors than Bevy's |
 | [`eased_motion`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/eased_motion.rs) | Demonstrates the application of easing curves to animate an object | [written](../BevyCSharp.Examples/animation/eased_motion.cs) |
 | [`easing_functions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/easing_functions.rs) | Showcases the built-in easing functions | [written](../BevyCSharp.Examples/animation/easing_functions.cs), Bevy's easing functions written in the examples' Ease as bevy_math writes them |
 | [`morph_targets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/morph_targets.rs) | Plays an animation from a glTF file with meshes with morph targets | [written in part](../BevyCSharp.Examples/animation/morph_targets.cs), the names of each mesh's morph targets, printed as it arrives, which no call reads |

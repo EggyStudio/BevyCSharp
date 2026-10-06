@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ff593c1`. A warning fails the workflow on both sides, the managed build with
+Reviewed up to `aa55e0d`. An app is told once for each state it never added rather than once for
+each system scoped to it, the suite's own `Screen` behaviors having been the 45 lines, and the
+console server says it is serving at the info level, which the page tells from a warning
+(`0013c52`), which settles item 13. Verdict 3's cause, found by playing Courtyard from the package
+on lavapipe pinned to four cores: the walk was planned in frames at sixty a second on the machine's
+clock, so each held frame overshot past the coin, and `play.sh` sets a sixtieth of a second a frame
+through `app.frametime`, said as the likeliest cause since nobody read the run's log;
+`build/step.py` and `build/page.py` are taken from 3DEngine as the default shell of the game,
+examples, README and pack jobs, the test and native jobs keeping their own, and `test.py` reads the
+page's code from `page.py` (`aa55e0d`); Verdicts 2 and 3 settle with a pack run. The run of
+`0013c52` passed on both systems.
+
+Before them, a warning came to fail the workflow on both sides, the managed build with
 `-warnaserror` and every cargo build with `CARGO_BUILD_WARNINGS=deny`, every public member of the
 library is documented, 297 generated enum variants by the generator and four types whose comments
 had slid onto a neighbor given them back, and `NormTests.N_4_7` reads the README, the cheatsheet and
@@ -27,11 +39,6 @@ at once at their weights and masked by groups of bones (ABI 216), and `animation
 exports a whole path, tried four ways (`7f5286c`); the verdict settles when a pack job passes. Moves
 on the way take N 1.2's list to 233, N 1.3's to 17 with 11 in the bridge and N 1.4's to 88 to mend.
 The run of `2158ee2` passed on both systems.
-
-Before them, a game came to place its own events on an animation clip, made in code or loaded from a
-model, heard at the player or at a target as the clip reaches them (ABI 214), and `animation_events`
-and `animated_mesh_events` are written, 268 (`2158ee2`). The run of `421d4e1` passed on both
-systems.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -127,14 +134,6 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
-13. **The warnings the suite repeats, read from the page.** The page of `421d4e1` repeats, on
-   both systems, 45 lines of `A system is scoped to Screen.Playing, but no state of type Screen was
-   added, so it will never run`, from examples whose systems are scoped by `[InState]` while the app
-   running them added no such state, and 4 lines of `[bcs] serving on`, counted because they carry
-   no level. Each scoped system is either meant to stay silent in an app without its state, and then
-   the warning is said once per app rather than per system or the example adds its state, or it is a
-   system that never runs by mistake, mended; and a line of `bcs`'s own carries its level so the
-   page can tell it from a warning.
 
 ## Verdicts
 
@@ -200,41 +199,19 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 13, the warnings the suite repeats.** The 45 lines came from the suite's own behaviors and not
-from examples. `StateTests.cs` declares three systems scoped to `Screen.Playing`, and the fifteen or
-so test apps that discover every behavior to test something else never add `Screen`, so each said
-the line once a system. Those systems are meant to stay silent there, and two tests hold an app
-without `Screen` (`ReadingAStateThatWasNeverAddedSaysSo`, `AScopedBehaviorInAnAppWithoutThatStateDoesNotRun`),
-so declaring the state on its enum was not the mend. An app is now told once for each state it
-lacks, naming the first value a system is scoped to and saying every other system scoped to that
-state is idle too, since a game with many systems scoped to a state it forgot made one mistake.
-That leaves about fifteen lines a run, one an app, which the page will show while the suite runs
-apps of that kind. `StateScopeReportTests` holds one line an app over two apps, and a report made to
-fire every time failed it with three. The `bcs` banner begins with `INFO`, as Bevy's lines carry
-theirs, so the page's `LOGGED` pattern reads it as information and leaves it out. `docs/states.md`
-says a state never added is reported once. The suite passed, 1,069 with 9 skipped. The move before
-it (`ff593c1`) took the toggle registry and the registration scope out of `BehaviorConditions.cs`,
-N 1.2's list at 231. Verdict 3 is next.
-
-**Verdict 3, Courtyard's play stopping with a bare exit code.** Played here as the workflow plays it,
-from a package packed of `0013c52` and built on by `play.sh`, it won on the machine's graphics card
-and failed on Mesa's software Vulkan held to four cores, as the runner draws, saying `the runner
-did not reach -5,-4 and stands at -7.4,-7.4`. `play.sh` plans each walk in frames at the runner's speed,
-sixty to a second, and a software renderer draws a few a second, so on the machine's clock each held
-frame carried the runner several times as far as planned, past the second coin and into the wall.
-The play now sets `app.frametime 0.0166667` once the game answers, so each frame is a sixtieth of a
-second of the game however long it took, and it wins on Mesa in 52 seconds and on the card in 20.
-That it was this on the runner is the likeliest reading and not a certain one, the run's log being
-unread, and the next pack run says. Every step of the game, examples, README and pack jobs now runs
-through `build/step.py`, the job's default shell, taken from 3DEngine's `38e81c4f`, with
-`build/page.py` holding what it and `build/test.py` share. A step that fails having said nothing
-is given an `::error::` and the job's summary, naming the step, the command that failed with its line
-and exit code, its last lines and the last lines at a warning or worse of each log written while it
-ran, those `bcs open` keeps and those in the folders `BCS_STEP_LOGS` names, which the game job sets
-to the play's folders. Here a step is found among every workflow file, since `GITHUB_WORKFLOW_REF`
-names the workflow that called `package.yml`, and an expression GitHub filled in matches what it was
-filled with, so all 29 steps are named. `capture-examples.sh` says its own error with every example
-that failed, where the step's would hold the last few. `TestScriptTests` holds the three cases
-3DEngine's tests hold, on Linux and macOS, since the native job's matrix and the test job run on
-Windows, where `python3` and the bash GitHub picks are not the step's to count on, and those keep
-their own shells. The script tests and the norm's pass, 43.
+**Now 3, a skinned mesh built joint by joint.** A mesh made in code is skinned as a model's is
+(`skins.rs`, ABI 217). `Render.SetMeshJoints` gives a mesh four joints a vertex and their weights
+and works out the boxes Bevy culls a skinned mesh by, `Render.CreateSkin` makes the inverse
+bindposes from transforms, which hold any rig without shear since nothing here has a matrix, and
+`Render.SetSkin` gives the entity drawing it Bevy's `SkinnedMesh` with its joint entities and the
+bounds that follow them. The joints are apart from `MeshData`, so a mesh without a skin crosses as
+it did, and the three listed files the mesh's own path runs through, `RenderMaterials.cs`,
+`NativeTypes.Render.cs` and the bridge's `render/assets.rs` at 1,922 lines, were left untouched
+rather than mended for one field. `custom_skinned_mesh` is written, 271, its ten strips bent,
+stretched and slid by their upper joints with each joint's axes drawn, seen offscreen; its colors
+come from .NET's generator seeded as Bevy seeds its ChaCha8Rng and are other colors than Bevy's.
+`SkinTests` draws the example's strip unlit, finds its head where its joints put it and beside its
+foot once the upper joint moves, and holds joints that do not fit the mesh refused with the reason.
+The animation gap is closed. The suite passed, 1,074 with 9 skipped. The widgets are the largest
+gap left, five examples, and Feathers' three need `bevy_feathers`, a crate the lock does not hold,
+which is asked of you before it is added; directional navigation's two come first.

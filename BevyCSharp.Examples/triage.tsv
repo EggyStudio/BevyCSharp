@@ -111,7 +111,7 @@ animation_events	can
 animation_graph	can	the graph built in code, Bevy's --no-load path, where its default loads the same graph from Fox.animgraph.ron, which is not among the assets here
 animation_masks	can
 color_animation	can	the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types
-custom_skinned_mesh	missing	skinned meshes built in code (joints and weights)
+custom_skinned_mesh	can	the strips' colors drawn from .NET's generator seeded as Bevy seeds its ChaCha8Rng, so they are other colors than Bevy's
 eased_motion	can
 easing_functions	can	Bevy's easing functions written in the examples' Ease as bevy_math writes them
 morph_targets	part	the names of each mesh's morph targets, printed as it arrives, which no call reads
