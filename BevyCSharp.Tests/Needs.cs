@@ -46,6 +46,36 @@ internal static class Needs
         Skip.IfNot(Bevy.Shaders.SlangAvailable, "needs slangc, which build/fetch-slang.sh puts in build/tools/slang");
     }
 
+    /// <summary>
+    /// Python, as <c>python3</c> where it is, as on Linux and macOS, or as <c>python</c>, as on
+    /// Windows, answering the name it runs by.
+    /// </summary>
+    internal static string Python()
+    {
+        Skip.If(PythonName.Value is null, "needs python3 or python to run the build scripts");
+        return PythonName.Value!;
+    }
+
+    private static readonly Lazy<string?> PythonName = new(() =>
+    {
+        foreach (var name in new[] { "python3", "python" })
+        {
+            try
+            {
+                using var python = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(name, "--version") { RedirectStandardOutput = true, RedirectStandardError = true });
+                if (python is null) continue;
+                python.WaitForExit(10_000);
+                if (python.HasExited && python.ExitCode == 0) return name;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // Not on the path.
+            }
+        }
+
+        return null;
+    });
+
     /// <summary>A system that says which files a process has open, Linux by its descriptors or Windows by its locks.</summary>
     internal static void OpenFiles() =>
         Skip.IfNot(OperatingSystem.IsLinux() || OperatingSystem.IsWindows(), "needs Linux's /proc/self/fd or Windows' locks to find a file held open");

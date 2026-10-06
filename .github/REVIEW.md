@@ -322,3 +322,14 @@ memory written wrong, and both tables are forgotten as an app is made, with a te
 without it. Synthetic input wrote window events into a headless app, which keeps none and logged
 each as an error. Six handle-table tests load the tests' own images in place of files no loader
 reads, so they no longer depend on Bevy's failure arriving within their few frames.
+
+N 6.7 and N 6.8 are `build/test.py`, taken from 3DEngine's with its annotations carrying a cause's
+whole entry. Its parts are the three processes from the start, `bridge` and `renderer` through cargo
+and `suite` through dotnet test, each held to a time and a memory and each a line on the page, and
+the bridge's failures are read from what cargo prints under `failures:`, a panic's message and the
+place it names. A cargo part is compiled first with `--no-run`, held to the time alone, since rustc
+compiling the renderer's crates passes 6 GB and is no test process. The suite's tests share one
+namespace, so a part of a suite run again is a run of its classes of a hundred tests or more. The
+test job runs it, `renderer` on Linux alone as before, and a digest job makes one page of the
+systems' pages. `TestScriptTests` holds it with stand-ins for dotnet and cargo that hang, grow, die,
+fail and do not build.

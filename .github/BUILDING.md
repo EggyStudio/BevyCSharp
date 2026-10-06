@@ -9,16 +9,23 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
 ```bash
 build/build-native.sh          # build the native bridge (headless profile)
 dotnet build                   # build the managed side
-dotnet test                    # run the suite
-cargo test --manifest-path native/Cargo.toml    # and the bridge's own
+build/test.py                  # run the bridge's tests and the suite, with a page of what failed
 dotnet run --project BevyCSharp.Sample -- --frames 120 --verbose
 ```
 
-Most of what the bridge does is only observable from managed code, so `dotnet test` is where
-nearly all of the coverage is. The Rust tests cover what it cannot reach from there: the
-convention for returning text through a caller's buffer, the guard that turns a panic into a
-status code rather than an unwind into .NET, and the asset registration that has to stay inert
-when it is asked twice.
+Most of what the bridge does is only observable from managed code, so the suite is where nearly
+all of the coverage is. The Rust tests cover what it cannot reach from there: the convention for
+returning text through a caller's buffer, the guard that turns a panic into a status code rather
+than an unwind into .NET, and the asset registration that has to stay inert when it is asked twice.
+
+`build/test.py` runs three parts, each a process held to a time and a memory: `bridge`, cargo's
+tests of the bridge, `renderer`, the same with the renderer's crates, and `suite`, the managed
+suite. Naming parts runs those alone, as `build/test.py suite` does. The log ends with a page of at
+most 200 lines, the counts and a line for each part, any process lost, and the failures by cause,
+which is also written to `BevyCSharp.Tests/TestResults/digest.md`. A suite that is lost, by a crash,
+a hang, its time or its memory, runs again in parts, so one crash costs only its own part's tests.
+`dotnet test` and `cargo test` still run as they always did. A test during which the engine logs an
+error fails unless it says it expects that error with `[ExpectsError]`.
 
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.

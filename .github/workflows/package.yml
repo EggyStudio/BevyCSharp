@@ -109,7 +109,7 @@ jobs:
   test:
     name: test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -146,26 +146,12 @@ jobs:
         if: runner.os == 'Linux'
         run: python3 build/examples-table.py --check
 
-      # The bridge's own tests, which cover the pieces no managed test can reach: the text
-      # protocol, the panic guard, and that registering an asset type twice is inert.
-      - name: Test the bridge
-        working-directory: native
-        run: cargo test
-
       # The renderer brings audio and gamepads, and cpal links against ALSA and gilrs against
-      # libudev, so the next step cannot build without their headers. The native job installs
-      # the same packages for the same reason.
+      # libudev, so the renderer's part of the tests cannot build without their headers. The native
+      # job installs the same packages for the same reason.
       - name: Install ALSA and libudev headers
         if: runner.os == 'Linux'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev pkg-config
-
-      # Again with the renderer, which is where shader reflection and the packing of values by
-      # name live. Their tests read saved compiler output, so they need no slangc, but they do
-      # need the renderer's crates, which is a longer build and why this runs on Linux alone.
-      - name: Test the bridge's renderer
-        if: runner.os == 'Linux'
-        working-directory: native
-        run: cargo test --no-default-features --features render
 
       # The suite covers the library; this covers everything else in the solution. Neither the
       # sample nor the editor is reached by `dotnet test`, so without it a runnable project can
@@ -173,8 +159,50 @@ jobs:
       - name: Build the solution
         run: dotnet build BevyCSharp.slnx -c Release
 
+      # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
+      # managed test can reach, the bridge's again with the renderer's crates, where shader
+      # reflection and the packing of values by name live, and the managed suite, each a process
+      # held to a time and a memory. A suite that is lost runs again in parts, and the log ends with
+      # a page of what failed, which is the job's summary and its annotations. The renderer's part
+      # runs on Linux alone, since it is the longer build and its tests read saved compiler output
+      # that is the same on every system.
       - name: Test
-        run: dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            python3 build/test.py --no-build --configuration Release --timeout-minutes 30
+          else
+            python build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
+          fi
+
+      # The page, from every run, for the digest job below.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-digest-${{ matrix.os }}
+          path: |
+            BevyCSharp.Tests/TestResults/digest.md
+            BevyCSharp.Tests/TestResults/digest.json
+          if-no-files-found: ignore
+
+  # One page for the commit from each system's page, a line for each system and each cause with
+  # the systems it was seen on, the one place that says where a commit fails.
+  digest:
+    name: test digest
+    needs: [test]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: test-digest-*
+          path: digests
+
+      - run: python3 build/test.py --digest digests/*
 
   # Courtyard, the small game under games/, built on a package as a project outside this
   # repository is, and played from its menu to its win by games/Courtyard/play.sh with no display.
