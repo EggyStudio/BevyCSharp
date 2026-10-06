@@ -124,7 +124,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
 
                 // And again as a window event, which is the one picking reads. Winit writes both
                 // for every real pointer, so writing one is writing half a pointer.
-                world.write_message(bevy::window::WindowEvent::CursorMoved(moved));
+                write_window_event(world, bevy::window::WindowEvent::CursorMoved(moved));
 
                 // And the window is told where the pointer now is, which everything asking for a
                 // cursor position reads. Not `set_cursor_position`, which moves the hand's own
@@ -160,7 +160,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                 // press written after the frame's input was read was cleared before anything saw
                 // it. A press and a release in one call still reads as both, on the same frame.
                 world.write_message(pressed.clone());
-                world.write_message(bevy::window::WindowEvent::MouseButtonInput(pressed));
+                write_window_event(world, bevy::window::WindowEvent::MouseButtonInput(pressed));
 
                 crate::interop::status::OK
             })
@@ -308,10 +308,19 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
                 // And as a window event, for the same reason the pointer writes both, which is that
                 // winit writes each of them for every real key, so writing one is writing half a
                 // keyboard.
-                world.write_message(bevy::window::WindowEvent::KeyboardInput(press));
+                write_window_event(world, bevy::window::WindowEvent::KeyboardInput(press));
 
                 crate::interop::status::OK
             })
         }
     })
+}
+
+/// Writes a window event where the app keeps them, which an app with no window plugin, a headless
+/// one, does not, and where Bevy says so as an error for every event written.
+#[cfg(feature = "render")]
+fn write_window_event(world: &mut bevy::ecs::world::World, event: bevy::window::WindowEvent) {
+    if world.contains_resource::<bevy::ecs::message::Messages<bevy::window::WindowEvent>>() {
+        world.write_message(event);
+    }
 }

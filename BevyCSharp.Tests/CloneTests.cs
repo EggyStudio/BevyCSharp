@@ -49,6 +49,43 @@ public sealed class CloneTests
     }
 
     [Fact]
+    public void ACloneInALaterAppRunsNoHookAnEarlierAppAttachedUnderItsComponentsId()
+    {
+        // The first app's first C# component holds a list, so cloning it runs a hook that copies
+        // the list. The bridge kept that hook by the component's id, from one app to the next.
+        var listId = -1;
+        using (var first = new EngineHarness(frames: 1))
+        {
+            first.OnContext(Stage.Startup, ctx =>
+            {
+                var bag = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(bag, default(Bag));
+                ctx.Ecs.GetRef<Bag>(bag).Names.Add("rope");
+                ctx.Ecs.Clone(bag);
+                listId = ComponentType<Bag>.Id;
+            });
+            first.Run();
+        }
+
+        // The second app's first C# component takes the same id and holds no list, and a clone of
+        // it ran the first app's hook over its bytes.
+        var plainId = -2;
+        var copied = 0f;
+        using var second = new EngineHarness(frames: 1);
+        second.OnContext(Stage.Startup, ctx =>
+        {
+            var sprung = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(sprung, new Sprung { Mass = 4f, Front = new Spring { Stiffness = 5f } });
+            plainId = ComponentType<Sprung>.Id;
+            copied = ctx.Ecs.GetOrDefault<Sprung>(ctx.Ecs.Clone(sprung)).Mass;
+        });
+        second.Run();
+
+        Assert.Equal(listId, plainId);
+        Assert.Equal(4f, copied);
+    }
+
+    [Fact]
     public void ACloneHasStoredListsOfItsOwn()
     {
         using var harness = new EngineHarness(frames: 2);

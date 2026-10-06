@@ -39,8 +39,8 @@ pub type RemoveCallback = unsafe extern "C" fn(entity: u64, component: i32, data
 /// The callback for each component id that has one.
 ///
 /// Global rather than per world, because a hook has no world-specific state to find it through.
-/// Ids are reused by the next app in the same process, and registering for the new app replaces
-/// the old entry, which only the old world's hooks could have reached.
+/// Ids are reused by the next app in the same process, so the table is forgotten as each app is
+/// made, by [`forget`].
 static CALLBACKS: Mutex<Option<HashMap<usize, RemoveCallback>>> = Mutex::new(None);
 
 /// What C# is called with when a component is cloned, the clone's bytes, to rewrite in place before
@@ -48,7 +48,21 @@ static CALLBACKS: Mutex<Option<HashMap<usize, RemoveCallback>>> = Mutex::new(Non
 pub type CloneCallback = unsafe extern "C" fn(component: i32, data: *mut u8);
 
 /// The clone callback for each component id that has one, kept as [`CALLBACKS`] is.
+///
+/// Every C# component clones through [`cloned`], which looks here by id, so an earlier app's
+/// callback left in the table ran for whichever component of the next app took its id, over bytes
+/// of another layout, as a test cloning a plain component after one that cloned a list found.
 static CLONERS: Mutex<Option<HashMap<usize, CloneCallback>>> = Mutex::new(None);
+
+/// Forgets every callback, as a new app is made, whose components take their ids anew.
+pub(crate) fn forget() {
+    if let Ok(mut table) = CALLBACKS.lock() {
+        *table = None;
+    }
+    if let Ok(mut table) = CLONERS.lock() {
+        *table = None;
+    }
+}
 
 /// How every C# component is cloned, its bytes copied after C# has rewritten the handles in them.
 ///

@@ -690,6 +690,10 @@ pub unsafe extern "C" fn bcs_app_create(config: *const BcsConfig) -> *mut BcsApp
         let config = unsafe { *config };
         let title = unsafe { crate::interop::cstr_to_string(config.title) };
         let cleanup: CleanupList = Default::default();
+
+        // The last app's component callbacks, by ids this app gives to components of its own.
+        crate::lifecycle::forget();
+
         let app = build_app(&config, title, cleanup.clone());
         Box::into_raw(Box::new(BcsApp::new(app, cleanup)))
     })
