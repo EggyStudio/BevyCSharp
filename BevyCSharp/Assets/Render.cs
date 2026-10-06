@@ -387,6 +387,31 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Reads how large an image is in texels, once it has loaded. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The depth is a 3D image's slices, or a cube's or an array's layers, and one for a plain
+    /// picture. For sizing something by an image the game did not make, a viewer's square to the
+    /// picture it shows or a cube for every voxel of a volume read from a file. Unlike
+    /// <see cref="TryReadImage"/> it answers for any image Bevy holds, compressed or kept on the GPU
+    /// alone, since the size is Bevy's description of the texture and not its texels.
+    /// </remarks>
+    /// <returns>False while the image is loading.</returns>
+    /// <exception cref="BevyNativeException">The handle names no image, or this build has no renderer.</exception>
+    public static bool TryImageSize(AssetHandle image, out uint width, out uint height, out uint depth)
+    {
+        var size = stackalloc uint[3];
+        var status = Native.bcs_render_image_size(image.Key, size);
+        (width, height, depth) = (0, 0, 0);
+        if (status == NativeStatus.NotPresent) return false;
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Reading an image's size");
+        Native.Check(status, $"reading the size of the image {image}");
+
+        (width, height, depth) = (size[0], size[1], size[2]);
+        return true;
+    }
+
+    /// <summary>
     /// Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given
     /// them again and everything showing the image changes.
     /// </summary>

@@ -152,3 +152,5 @@ textures/rpg/tiles/generic-rpg-tile46.png
 textures/food_kenney.png
 models/SimpleSkin/SimpleSkin.gltf
 models/GltfPrimitives/gltf_primitives.glb
+irradiance_volumes/Example.vxgi.ktx2
+models/IrradianceVolumeExample/IrradianceVolumeExample.glb

@@ -23,9 +23,10 @@ struct Prelude {
 }
 
 /// Every prelude, in the order they are put in front.
-const PRELUDES: [Prelude; 2] = [
+const PRELUDES: [Prelude; 3] = [
     Prelude { call: "bcs_pbr_", source: LIGHTING, stand_in: LIGHTING_STAND_IN },
     Prelude { call: "bcs_decal_", source: DECALS, stand_in: DECALS_STAND_IN },
+    Prelude { call: "bcs_irradiance_", source: IRRADIANCE, stand_in: IRRADIANCE_STAND_IN },
 ];
 
 /// A compiled fragment shader with each prelude it calls put in front of it.
@@ -237,6 +238,43 @@ fn bcs_decal_normal(frag_coord: vec4<f32>, world_position: vec4<f32>, index: u32
     }
 #endif
     return normal;
+}
+"#;
+
+// -- Bevy's irradiance volumes
+
+/// A function of the same signature as the one [`IRRADIANCE`] defines, which finds no light.
+const IRRADIANCE_STAND_IN: &str = "fn bcs_irradiance_light(frag_coord: vec4<f32>, world_position: vec4<f32>, \
+    normal: vec3<f32>) -> vec3<f32> { return vec3<f32>(0.0); }\n";
+
+/// What `bcs::irradiance` calls: Bevy's own `irradiance_volume_light`, the diffuse light the
+/// irradiance volumes over a point give a surface facing a way there, at each volume's intensity,
+/// found through the view's clusters as Bevy's standard material finds it. Where the device cannot
+/// have irradiance volumes Bevy compiles none of their bindings, and every point has none over it.
+const IRRADIANCE: &str = r#"#import bevy_pbr::{
+    clustered_forward,
+    irradiance_volume,
+    mesh_view_bindings::view,
+}
+
+fn bcs_irradiance_light(frag_coord: vec4<f32>, world_position: vec4<f32>, normal: vec3<f32>) -> vec3<f32> {
+#ifdef IRRADIANCE_VOLUMES_ARE_USABLE
+    let view_z = dot(vec4<f32>(
+        view.view_from_world[0].z,
+        view.view_from_world[1].z,
+        view.view_from_world[2].z,
+        view.view_from_world[3].z,
+    ), world_position);
+    let cluster_index = clustered_forward::view_fragment_cluster_index(
+        frag_coord.xy,
+        view_z,
+        view.clip_from_view[3].w == 1.0,
+    );
+    var ranges = clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
+    return irradiance_volume::irradiance_volume_light(world_position.xyz, normalize(normal), &ranges);
+#else
+    return vec3<f32>(0.0);
+#endif
 }
 "#;
 

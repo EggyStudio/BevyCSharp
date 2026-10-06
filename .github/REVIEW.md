@@ -180,3 +180,24 @@ list (`programs/wgsl.rs`), each put in front of a fragment shader calling it and
 stand-ins, which a native test holds. Two commits that move code alone came first, `programs.rs`
 and `reflect.rs` split into parts (`5be8291`) and the lit shader's tests into `Assets`
 (`56ad9a2`). The volume's voxels and the deferred buffers are next.
+
+**Now 3, a volume's voxels.** `bcs::irradiance(mesh, normal)` is Bevy's own
+`irradiance_volume_light` from a Slang material, the light the volumes over a point give a surface
+facing a way, through a third prelude in the same list as the lighting and the decals.
+`Render.TryImageSize` reads an image's width, height and depth once it has loaded, compressed or not
+(`bcs_render_image_size`, ABI 205), in a module of its own, `render/images.rs`, since `assets.rs`
+holds the other image calls and is on N 1.3's list. `irradiance_volumes` is written with them, its
+voxels a cube each in the light the volume holds, the volume's box Bevy's `VOXEL_FROM_WORLD`
+written as a translation, a half turn and a scale. Bevy's voxel shader works out the middle of the
+voxel and then reads at the fragment's own place, so the port reads at the fragment and says why.
+`tonemapping`'s image viewer is sized to the dropped image with the same call, the one thing it
+left out, so it is written whole, though no test here drops a file on it. `LightProbeTests` draws
+its computed volume's cube with a shader showing `bcs::irradiance` and finds the top green and the
+front red as the standard material's are, and the volume's image 4 by 8 by 12 as made. The tests
+moved to `Assets` first by a move alone (`67d179b`).
+
+The deferred buffers wait behind the pointer's events as observers, which hold ten rows to their
+one or two, since the item takes the gaps by rows. A material drawing into them needs a stage of
+its own whose outputs follow the camera's prepasses, the normal at location 0 only with a normal
+prepass and the motion at 1 only with motion vectors, which a Slang entry point cannot declare by
+itself, and inputs that the prepass vertex shader in use writes, so it is a design of its own.

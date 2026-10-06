@@ -188,6 +188,14 @@ the bridge puts in front of a shader that calls them, as it does for the lightin
 cannot have clustered decals, which Bevy decides by whether it can bind arrays of textures, has none
 over any point.
 
+### Irradiance volumes
+
+`bcs::light` takes the irradiance volumes over a surface into account as the standard material
+does. `bcs::irradiance(mesh, normal)` is the light they give a surface facing `normal` there, by
+Bevy's own `irradiance_volume_light`, at each volume's intensity, for a shader that shows that light
+itself, as Bevy's irradiance_volumes example draws each voxel of its volume as a cube in the light
+it holds.
+
 ### The compiler
 
 `slangc` compiles each stage to WGSL in the background. `./bcs build` and

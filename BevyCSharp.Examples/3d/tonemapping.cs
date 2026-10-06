@@ -29,6 +29,9 @@ internal static class TonemappingExample
     private static int _scene, _selected;
     private static bool _hideUi;
 
+    // The image last dropped, until the viewer has been sized to it.
+    private static AssetHandle _dropped;
+
     private static readonly Transform CameraAt = Transform.LookingAt(new Vec3(0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY);
 
     public static void Build(App app)
@@ -36,6 +39,7 @@ internal static class TonemappingExample
         PerMethod.Clear();
         foreach (var method in Methods) PerMethod[method] = Recommended(method);
         (_method, _scene, _selected, _hideUi) = (Tonemapping.TonyMcMapface, 1, 0, false);
+        _dropped = AssetHandle.None;
 
         app.Startup(Setup, "tonemapping.Setup");
         app.SpawnGltf("models/TonemappingTest/TonemappingTest.gltf", (ctx, root) => InScene(ctx.Ecs, 1, root));
@@ -118,11 +122,24 @@ internal static class TonemappingExample
         var ecs = ctx.Ecs;
         foreach (var dropped in ctx.Read<FileDropped>())
         {
+            _dropped = AssetServer.Load(AssetKind.Image, dropped.Path);
             foreach (var viewer in ecs.EntitiesWith<HDRViewer>())
-                Render.WriteMaterial(Render.MaterialOf(ecs, viewer), new MaterialSettings { Unlit = true, BaseColorTexture = AssetServer.Load(AssetKind.Image, dropped.Path) });
+                Render.WriteMaterial(Render.MaterialOf(ecs, viewer), new MaterialSettings { Unlit = true, BaseColorTexture = _dropped });
             foreach (var entity in ecs.EntitiesWith<SceneNumber>())
                 if (ecs.Get<TextRef>(entity) is not null) ecs.Despawn(entity);
         }
+
+        // The viewer's square made the shape of the image once it has loaded, its diagonal 1.4 long,
+        // as Bevy's resize_image makes it.
+        if (_dropped == AssetHandle.None || !Render.TryImageSize(_dropped, out var width, out var height, out _)) return;
+        var length = MathF.Sqrt((float)width * width + (float)height * height);
+        if (length > 0f)
+        {
+            foreach (var viewer in ecs.EntitiesWith<HDRViewer>())
+                Render.SetMesh(ecs, viewer, Render.CreateMesh(MeshShape.Rectangle, width / length * 1.4f, height / length * 1.4f));
+        }
+
+        _dropped = AssetHandle.None;
     }
 
     private static void ToggleScene(BehaviorContext ctx)

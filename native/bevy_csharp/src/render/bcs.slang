@@ -505,4 +505,27 @@ public Surface decals(Surface surface, VertexOutput mesh)
     return output;
 }
 
+
+// -- Bevy's irradiance volumes
+
+float3 pbr_irradiance(float4 frag_coord, float4 world_position, float3 normal)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_irradiance_light($0, $1, $2)";
+    default:
+        return float3(0.0);
+    }
+}
+
+/// The diffuse light the irradiance volumes over this point of the mesh give a surface facing
+/// `normal`, at each volume's intensity, as Bevy's `irradiance_volume_light` works it out for its
+/// standard material, or nothing where no volume is over it. `light` already takes it into account,
+/// so this is for a shader that shows the volume's light itself, such as one drawing its voxels.
+public float3 irradiance(VertexOutput mesh, float3 normal)
+{
+    return pbr_irradiance(mesh.position, mesh.world_position, normal);
+}
+
 }

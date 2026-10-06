@@ -34,6 +34,39 @@ public sealed class LightProbeTests
         Assert.True(front.R > 60 && front.R > front.G + 40 && front.R > front.B + 40, $"the front was {front}");
     }
 
+    // The light the volume gives each point, shown as it is, unlit by anything else.
+    private const string ShowsIrradiance = """
+        import bcs;
+
+        [shader("fragment")]
+        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        {
+            return float4(bcs::irradiance(mesh, mesh.world_normal) / 1000.0, 1.0);
+        }
+        """;
+
+    /// <summary>
+    /// A shader shows the light the volume gives each face through <c>bcs::irradiance</c>, green
+    /// on top and red in front as the standard material is lit, and the volume's image reads as
+    /// the size it was made.
+    /// </summary>
+    [SkippableFact]
+    public void AShaderReadsTheLightTheVolumeGivesEachFace()
+    {
+        Needs.Shaders();
+
+        var picture = VolumeScene(filled: true, ShowsIrradiance);
+        var top = picture.At(48, 30);
+        var front = picture.At(48, 62);
+
+        Assert.True(top.G > 60 && top.G > top.R + 40 && top.G > top.B + 40, $"the top was {top}");
+        Assert.True(front.R > 60 && front.R > front.G + 40 && front.R > front.B + 40, $"the front was {front}");
+        Assert.Equal((4u, 8u, 12u), _volumeSize);
+    }
+
+    /// <summary>The volume's image's size, read where the scene made it.</summary>
+    private static (uint, uint, uint) _volumeSize;
+
     /// <summary>The same scene with the volume never written is dark, so the light came from it.</summary>
     [SkippableFact]
     public void AnEmptyVolumeLightsNothing()
@@ -250,9 +283,9 @@ public sealed class LightProbeTests
 
     /// <summary>
     /// A white cube in a volume lit green from above, red from the front and blue from behind,
-    /// with nothing else lighting the scene.
+    /// with nothing else lighting the scene, or the same cube drawn by a shader of its own.
     /// </summary>
-    private static CapturedImage VolumeScene(bool filled)
+    private static CapturedImage VolumeScene(bool filled, string? shader = null)
     {
         ShaderInstance writer = default;
         AssetHandle volume = AssetHandle.None;
@@ -274,6 +307,7 @@ public sealed class LightProbeTests
                 const uint size = 4;
 
                 volume = Shaders.CreateImage(size, size * 2, ShaderImageFormat.Rgba16Float, depth: size * 3);
+                _volumeSize = Render.TryImageSize(volume, out var across, out var down, out var deep) ? (across, down, deep) : default;
 
                 var probe = ecs.Spawn();
                 ecs.Add(probe, new Transform
@@ -302,11 +336,9 @@ public sealed class LightProbeTests
 
                 var cube = ecs.Spawn();
                 Render.SetMesh(ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.5f, 1.5f, 1.5f));
-                Render.SetMaterial(ecs, cube, Render.CreateMaterial(new MaterialSettings
-                {
-                    BaseColor = (1f, 1f, 1f, 1f),
-                    Roughness = 1f,
-                }));
+                Render.SetMaterial(ecs, cube, shader is null
+                    ? Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f })
+                    : Shaders.CreateMaterial(Shaders.CreateProgram(ShaderStage.Slang(shader))));
                 ecs.Add(cube, Transform.Identity);
             },
 

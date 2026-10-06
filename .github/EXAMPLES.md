@@ -4,14 +4,14 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**240 written, 19 written in part, 0 can be written, 104 missing and 58 do not apply.** Of the 363 that apply, 259 can be written with what is bridged, 19 of them leaving something out.
+**242 written, 18 written in part, 0 can be written, 103 missing and 58 do not apply.** Of the 363 that apply, 260 can be written with what is bridged, 18 of them leaving something out.
 
-**118 of the 120 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**119 of the 121 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 | 8 of 8 |
-| [3D Rendering](#3d-rendering) | 54 | 5 | 0 | 8 | 0 | 36 of 36 |
+| [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
 | [Animation](#animation) | 4 | 2 | 0 | 7 | 0 | 4 of 4 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **240** | **19** | **0** | **104** | **58** | **118 of 120** |
+| **All** | **242** | **18** | **0** | **103** | **58** | **119 of 121** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -109,7 +109,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
 | [`generate_custom_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/generate_custom_mesh.rs) | Simple showcase of how to generate a custom mesh with a custom texture | [written](../BevyCSharp.Examples/3d/generate_custom_mesh.cs) |
-| [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | missing, Bevy's irradiance volume asset, and a shader drawing its voxels by reading the volume, which Bevy's WGSL reaches and a Slang shader does not |
+| [`irradiance_volumes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/irradiance_volumes.rs) | Demonstrates irradiance volumes | [written](../BevyCSharp.Examples/3d/irradiance_volumes.cs) |
 | [`light_probe_blending`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_probe_blending.rs) | Demonstrates blending between multiple reflection probes | [written](../BevyCSharp.Examples/3d/light_probe_blending.cs) |
 | [`light_textures`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/light_textures.rs) | Demonstrates light textures | [written](../BevyCSharp.Examples/3d/light_textures.cs) |
 | [`lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/lighting.rs) | Illustrates various lighting options in a simple scene | [written](../BevyCSharp.Examples/3d/lighting.cs) |
@@ -145,7 +145,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`ssao`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssao.rs) | A scene showcasing screen space ambient occlusion | [written](../BevyCSharp.Examples/3d/ssao.cs) |
 | [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | missing, the water drawn into Bevy's deferred buffers, which a material drawn by a Slang shader does not draw into |
 | [`texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/texture.rs) | Shows configuration of texture materials | [written](../BevyCSharp.Examples/3d/texture.cs) |
-| [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/tonemapping.rs) | Compares tonemapping options | [written in part](../BevyCSharp.Examples/3d/tonemapping.cs), the image viewer's square sized to the dropped image, since the bridge does not say how large an image is |
+| [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/tonemapping.rs) | Compares tonemapping options | [written](../BevyCSharp.Examples/3d/tonemapping.cs) |
 | [`transmission`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transmission.rs) | Showcases light transmission in the PBR material | [written](../BevyCSharp.Examples/3d/transmission.cs) |
 | [`transparency_3d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transparency_3d.rs) | Demonstrates transparency in 3d | [written in part](../BevyCSharp.Examples/3d/transparency_3d.cs), its alpha to coverage cube, a mode the bridge's materials do not have |
 | [`two_passes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/two_passes.rs) | Renders two 3d passes to the same window from different perspectives | [written](../BevyCSharp.Examples/3d/two_passes.cs) |
