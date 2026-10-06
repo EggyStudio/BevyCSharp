@@ -10,14 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a733ca2`. The four costs measuring found are mended, the last with `Gizmos.Lines`
+Reviewed up to `9f74107`. N 2.10 finds every method native code calls and fails for a call no
+catch covers (`869c9fb`), eight of them, and two caught nothing before taking a lock, the
+computed and the joint state's rule, which take it inside the `try`. N 2.9 is `FileHandleTests`
+over fourteen loaders in a folder from `TestFolder`, the one helper N 3.4 names, which is new
+here (`9f74107`), and none holds a file. This engine stands at 22 checked, 4 with places listed,
+8 to take and 9 by review.
+
+Before them, the four costs measuring found were mended, the last with `Gizmos.Lines`
 handing a run to the bridge as lines (`de790e4`), which takes many_gizmos to 8.59 ms beside
 Bevy's 6.95, a third number for the owner beside 199 and 200, the bridge's being 201. Four of the
 norm's checks are in (`a733ca2`): the notices under a test of N 6.5's own name, the packages
 against BUILDING.md's list (N 2.8), `ScriptTests` over the scripts the Windows and macOS jobs
 run (N 6.6), with the one `grep -oP` written as `grep -oE`, and the table of examples checked in
-the workflow (N 5.2). This engine stands at 20 checked, 4 with places listed, 10 to take and 9
-by review. N 2.10's check is in the working tree with its reply, and is read when it is in.
+the workflow (N 5.2).
 
 Before them, the last seven of Bevy's stress tests were written and measured, every
 one within two milliseconds of Bevy's and transform_hierarchy faster than it (`d71ff6a`), which
@@ -288,32 +294,3 @@ None open.
    GitHub.
 
 ## Replies
-
-Item 2, the first four checks. The notices have a test of their own name, N 6.5, which holds
-`THIRD-PARTY-NOTICES.md` to the lock and the copy in a package where there is one, and N 6.4
-keeps what else the package holds. The pack job runs both. BUILDING.md has a section of packages,
-the library's two, the generator's two and the bridge's nine crates, each with what it is used
-for, and N 2.8 fails for a package the project files reference that the list does not name, and
-for a row that names nothing they do. `ScriptTests` (N 6.6) reads the scripts named by every
-job whose `runs-on` is not an Ubuntu label, `build/build-native.sh` today, which calls none, and
-finds none of the seven forms since the `grep -oP` is written with `grep -oE` and `sed`. It is on
-N 1.4's list as a test of the build scripts, as the tests of a document and of the examples are.
-The test job runs `build/examples-table.py --check` on Linux after the bridge's build, which
-fills the registry the script reads Bevy's list from (N 5.2).
-
-N 2.10 is in NormTests, taken from 3DEngine's `48fbb663` with the two ways this engine hands a
-method over, by `[UnmanagedCallersOnly]` and by a delegate of a type marked to be handed to native
-code, which none is today. It reads the library's and the editor's methods and finds eight, the
-bridge's seven and ImGui's input method. Two caught nothing before the rule lookup, the computed
-and the joint state's rule, whose lock was taken outside the `try`, and both now take it inside.
-
-N 2.9 is `FileHandleTests` in the tests' Assets folder, taken from 3DEngine's. It loads through
-fourteen loaders and looks, while the app still runs, for any file of a folder of its own that this
-process holds, on Linux among `/proc/self/fd` and on Windows by opening each alone. The loaders are
-the asset server's image, model and sound, the scene, mesh and material files, a data asset, an
-asset's id, the project's settings, a persistent value, a streamed read, a pack once disposed, a
-behavior script and a Slang program, the five that need a renderer, and slangc for the program,
-skipped without them. None holds a file today. A fact checks the check, a file left open found held
-and then not. The folder comes from `TestFolder`, 3DEngine's helper, which N 3.4 names as the one
-and which is new here, so N 3.4's check passes over it and its wait for a held file is on N 3.3's
-list with that reason.

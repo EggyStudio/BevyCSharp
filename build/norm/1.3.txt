@@ -20,7 +20,6 @@ native/bevy_csharp/src/render/post.rs
 native/bevy_csharp/src/render/programs.rs
 native/bevy_csharp/src/render/reflect.rs
 native/bevy_csharp/src/render/scene.rs
-native/bevy_csharp/src/render/shaders.rs
 native/bevy_csharp/src/render/slang.rs
 native/bevy_csharp/src/render/values.rs
 native/bevy_csharp/src/render/views.rs
