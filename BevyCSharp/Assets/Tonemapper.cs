@@ -1,19 +1,6 @@
 namespace Bevy;
 
 /// <summary>
-/// How a camera should see.
-/// </summary>
-/// <remarks>
-/// Every value has a usable default, so setting one property and leaving the rest is the normal
-/// way to use this. Position and aim the camera by writing its <see cref="Transform"/>.
-/// </remarks>
-/// <example>
-/// <code>
-/// var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
-/// ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
-/// </code>
-/// </example>
-/// <summary>
 /// The curve that maps what was rendered onto what a screen can show.
 /// </summary>
 /// <remarks>

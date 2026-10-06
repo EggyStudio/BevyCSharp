@@ -112,7 +112,7 @@ public sealed class ClockTests
     [Fact]
     public void TheCommandSetsTheClockAndLetsItGo()
     {
-        var answers = new List<string>();
+        var answers = new List<string?>();
         var frame = 0;
         var deltas = new Dictionary<int, double>();
 

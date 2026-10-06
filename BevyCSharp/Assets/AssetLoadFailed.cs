@@ -1,21 +1,6 @@
 namespace Bevy;
 
 /// <summary>
-/// A reference to a loaded asset.
-/// </summary>
-/// <remarks>
-/// <para>
-/// Bevy's own handle is generic and reference counted, and neither property survives a trip
-/// through a C ABI. What C# holds instead is a key into a table on the engine side that owns the
-/// real handle. Holding one keeps the asset loaded; <see cref="AssetServer.Release"/> lets it go.
-/// </para>
-/// <para>
-/// Table slots are reused, so the key carries a generation as well as an index. A handle that has
-/// been released does not start naming whatever took its slot; it reports
-/// <see cref="AssetLoadState.Unknown"/> instead.
-/// </para>
-/// </remarks>
-/// <summary>
 /// An asset that could not be loaded, and why.
 /// </summary>
 /// <remarks>

@@ -10,25 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2158ee2`. A game places its own events on an animation clip, made in code or loaded
-from a model, heard at the player or at a target as the clip reaches them (ABI 214), and
-`animation_events` and `animated_mesh_events` are written, 268 (`2158ee2`). The reply on graphs
-built node by node (ABI 216) is written, its commit to come. Verdict 2 is open, the pack job's
-package tests failing by a relative path. The run of `421d4e1` passed on both systems.
+Reviewed up to `7f5286c`. An animation graph is built in code from blends and clips, played several
+nodes at once at their weights and masked by groups of bones (ABI 216), and `animation_graph` and
+`animation_masks` are written (`5d5a982`). Verdict 2's mend: `NormTests.Package()` reads a relative
+`BCS_PACKAGE` from the repository root and fails naming a file that is not there, and the pack step
+exports a whole path, tried four ways (`7f5286c`); the verdict settles when a pack job passes. Moves
+on the way take N 1.2's list to 233, N 1.3's to 17 with 11 in the bridge and N 1.4's to 88 to mend.
+The run of `2158ee2` passed on both systems and `7f5286c`'s is under way.
+
+Before them, a game came to place its own events on an animation clip, made in code or loaded from a
+model, heard at the player or at a target as the clip reaches them (ABI 214), and `animation_events`
+and `animated_mesh_events` are written, 268 (`2158ee2`). The run of `421d4e1` passed on both
+systems.
 
 Before them, an animation clip came to be built in code from curves sampled or eased by Bevy's own
 easing, aimed at entities by name and played from a graph (ABI 213), and `animated_transform`,
 `animated_ui` and the whole of `eased_motion` are written with it (`421d4e1`). The run of `df97905`
 passed on both systems.
 
-Before them, text came to be drawn with a line under or through it, Bevy's `Underline` and
-`Strikethrough` reflecting but not as components, and a font's OpenType features and variable axes
-are set as tagged values (ABI 212), so eight of Bevy's text examples are written or made whole, 263,
-the three that need Bevy's system font discovery and `font_atlas_debug` left and said so
-(`f0be6da`); the animation settings, state and finished message moved into files of their names,
-N 1.2's list at 276 (`df97905`). The run of `f0be6da` was cancelled by the push of `df97905`.
-
-The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
+The norm has 44 rules, and this engine stands at 26 checked, 4 with places listed, 5 to take
 and 9 by review.
 
 
@@ -136,6 +136,10 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
    the warning is said once per app rather than per system or the example adds its state, or it is a
    system that never runs by mistake, mended; and a line of `bcs`'s own carries its level so the
    page can tell it from a warning.
+15. **N 4.7 taken** (Decision 9), with item 4. `NormTests` over `README.md`, `CHEATSHEET.md` and
+   `docs/` looks for `the owner`, `the reviewing session` and `REVIEW.md` and passes with no list,
+   the release notes step item 11 brings does the same when it comes, and COMMITS.md says a message
+   names no one who decided, since release notes are made from the messages.
 
 ## Verdicts
 
@@ -182,27 +186,40 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
    the surface added since 0.3.2, `build/version.txt` holding `0.4` so the patch counts itself,
    packed when the owner chooses.
 
+9. **A document a game's author reads names no one who decided.** The owner asked on 2026-10-06
+   that release notes and the documents under `docs/`, the README and the cheatsheet give reasons
+   and not who wanted what, which is N 4.7, and who chose what stays here under Decisions.
+
 ## Replies
 
-**Now 3, animation built in code, graphs.** A graph is built node by node (`graphs.rs`, ABI 216).
-`Animation.CreateGraph` makes it, `AddBlend` adds a blend, additive where asked, and `AddClip` adds
-a clip with the mask groups it leaves out. `AddToMaskGroup` puts a target's bones in a group, and
-`SetNodeMask` changes a node's mask as it plays. A player given the graph with `SetGraph` plays
-several nodes at once with `PlayNode`, and `SetNodeWeight` mixes them. `Animation.TargetOf` reads
-the target a bone is aimed at by. `animation_graph` and `animation_masks` are written, 270, both
-drawn offscreen as Bevy's are. Bevy's graph example loads its graph from `Fox.animgraph.ron` unless
-told not to, and builds the same one in code where it is, as this does, the file not being among
-the assets. Their drag and buttons read Bevy's `Interaction` and `RelativeCursorPosition`, which
-read a window's cursor, so they are pressed in a window and not offscreen. `AnimationClipTests`
-holds the mix at 5 with even weights and 2.5 at three to one, and a masked target left where it was
-until the mask is lifted. `custom_skinned_mesh` is this gap's last. New item 14 is next after it.
+**Now 4, a build with no warnings, and N 2.2 and N 6.1.** The 21 warnings the pack job printed are
+mended, and a warning now fails the workflow. The test job builds the solution with `-warnaserror`,
+the game job builds Courtyard the same way, and every cargo build in the workflow runs with
+`CARGO_BUILD_WARNINGS=deny`, cargo's `build.warnings` setting, stable in 1.98. It fails a build that
+printed a warning and judges the warnings cargo replays for a cached crate too, where `RUSTFLAGS`
+would be part of every crate's fingerprint and build them all again. The bridge printed none in any
+profile, its tests' targets included, and Courtyard and Stress build with none on the last package
+packed here.
+`BevyCSharp.csproj` makes CS1591 an error with the faults of documentation `3DEngine.csproj` lists,
+which takes N 2.2. Of the 301 public members it found undocumented, 297 were the variants of the
+enums the reflected wrappers' generator writes, which it now documents one by one, and four were
+types whose comments had slid onto a neighbor in an earlier move, `AssetHandle`, `CameraSettings`,
+`SpriteSettings` and `UiJustify`, each given its own back. `Render.TryReadMaterial` says its
+settings are there when it answers true, which mended the three examples' CS8602. BUILDING.md has a
+section on warnings with the check before a commit, `dotnet build --no-incremental -warnaserror` and
+the three profiles' `cargo check` denying warnings, and COMMITS.md sends a commit through it. The
+batch's library files and two of its tests were on N 1.2's, 1.3's and 1.4's lists and were mended
+first, in `5b38404`, which moved 43 types into files of their names, split `ComputeShaderTests` in
+two and moved it and `EcsWorldTests` into their areas. The suite passed, 1,067 with 9 skipped.
 
-**Verdict 2, the package tests opening a relative path.** `NormTests.Package()` reads a relative
-`BCS_PACKAGE` from the repository's root, as the norm's other files are read, and the pack step
-exports `$PWD/` before the file's name, so the job does not lean on the test. A variable naming no
-file now fails both tests with the name it was given and the path it was read as, where it threw
-`DirectoryNotFoundException` before, since a job that sets it means a package to be opened. Run
-with the newest package here named relative, whole, unset, and as a file that is not there, the
-first three pass and the last fails with that message. The graphs' commit (`5d5a982`) was in its
-suite when the verdict came, and went in first. Item 4 is next, then item 14, then
-`custom_skinned_mesh`.
+**Now 15, N 4.7 taken.** `NormTests.N_4_7` reads `README.md`, `CHEATSHEET.md` and every page of
+`docs/` for `the owner`, `the reviewing session` and `REVIEW.md`, case ignored since a sentence can
+begin with one, and passes with no list, none of them being there. A page made to name the owner
+failed it. COMMITS.md says a message gives the reason for a change and names no one who asked for
+it or decided it, since the release notes are made from the messages, citing N 4.7. The step that
+writes the notes comes with item 11 and takes the same words. The norm's 18 tests pass with it, and
+item 14 is next.
+
+Shared: the build before a commit runs with `--no-incremental` and `-warnaserror` here now, written
+in COMMITS.md and BUILDING.md, as 3DEngine's `2b39ddd2` has it. A generator that writes public code
+documents each member, so the library's CS1591 holds over what it writes as well.

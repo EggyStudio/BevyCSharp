@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -177,8 +178,8 @@ public static unsafe partial class Render
     /// same material again. Each texture comes back as the handle the program already holds for it,
     /// or a new one.
     /// </remarks>
-    /// <returns>Whether there was a standard material to read.</returns>
-    public static bool TryReadMaterial(AssetHandle material, out MaterialSettings? settings)
+    /// <returns>Whether there was a standard material to read, and so whether the settings are there.</returns>
+    public static bool TryReadMaterial(AssetHandle material, [NotNullWhen(true)] out MaterialSettings? settings)
     {
         settings = null;
         if (!material.IsValid) return false;

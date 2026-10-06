@@ -607,7 +607,6 @@ public sealed class ComputeShaderTests
         Assert.Throws<ArgumentException>(() => Shaders.Dispatch(default, 1));
     }
 
-    /// <summary>An instance of the compute shader in <paramref name="file"/>.</summary>
     /// <summary>
     /// <c>shader.buffer</c> run through the command line answers once the buffer is back from the
     /// GPU, a frame or more after it was asked, with the numbers the buffer holds.
@@ -651,6 +650,7 @@ public sealed class ComputeShaderTests
         Assert.DoesNotContain("reading buffer", envelope);
     }
 
+    /// <summary>An instance of the compute shader in <paramref name="file"/>.</summary>
     internal static ShaderInstance Compute(string file) =>
         Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = file }));
 

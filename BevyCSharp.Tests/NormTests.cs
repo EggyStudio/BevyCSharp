@@ -232,6 +232,21 @@ public sealed class NormTests
         Hold("4.5", found, "a capture not at Bevy's window of 1280 by 720, or a README picture that does not open its example");
     }
 
+    [Fact]
+    public void N_4_7()
+    {
+        // The pages a game's author reads, none of whom has an owner or a session to follow. Case
+        // is ignored, since a sentence can begin with any of the words.
+        string[] deciders = ["the owner", "the reviewing session", "REVIEW.md"];
+        var found = new[] { "README.md", "CHEATSHEET.md" }.Concat(Sources("docs/", ".md"))
+            .SelectMany(page =>
+            {
+                var text = Text(page);
+                return deciders.Where(word => text.Contains(word, StringComparison.OrdinalIgnoreCase)).Select(word => $"{page} {word}");
+            });
+        Hold("4.7", found, "a page a game's author reads naming who decided rather than why");
+    }
+
     [SkippableFact]
     public void N_6_4()
     {

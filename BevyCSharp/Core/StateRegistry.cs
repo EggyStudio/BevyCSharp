@@ -133,7 +133,6 @@ public static unsafe class StateRegistry
         }
     }
 
-    /// <summary>The slot <typeparamref name="TState"/> holds, if it was ever added.</summary>
     /// <summary>
     /// Whether a system scoped to a state declared on its enum and never added says so, once, on
     /// the console.
@@ -173,6 +172,7 @@ public static unsafe class StateRegistry
         return names;
     }
 
+    /// <summary>The slot <typeparamref name="TState"/> holds, if it was ever added.</summary>
     internal static bool TryGetSlot<TState>(out int slot) where TState : struct, Enum
     {
         lock (Gate)

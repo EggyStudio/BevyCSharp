@@ -50,6 +50,11 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   CARGO_TERM_COLOR: always
+  # A warning from the bridge fails its build, as -warnaserror does for the managed side below,
+  # since a warning left standing hides the next one (NORM.md, N 6.1). Cargo's own setting rather
+  # than RUSTFLAGS, which is part of every crate's fingerprint and would build them all again,
+  # while this judges what cargo prints, the warnings of a crate it replays from its cache as well.
+  CARGO_BUILD_WARNINGS: deny
 
 
 jobs:
@@ -155,9 +160,10 @@ jobs:
 
       # The suite covers the library; this covers everything else in the solution. Neither the
       # sample nor the editor is reached by `dotnet test`, so without it a runnable project can
-      # stop compiling without CI noticing.
+      # stop compiling without CI noticing. A warning anywhere in it fails the step (NORM.md, N 6.1),
+      # and one that is right to keep is turned off where it arises, with its reason beside it.
       - name: Build the solution
-        run: dotnet build BevyCSharp.slnx -c Release
+        run: dotnet build BevyCSharp.slnx -c Release -warnaserror
 
       # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
       # managed test can reach, the bridge's again with the renderer's crates, where shader
@@ -238,7 +244,7 @@ jobs:
         run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       - name: Build Courtyard
-        run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci
+        run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
       # Every example built in a project of its own on the package alone, as a reader copying one
       # into a game of their own builds it (NORM.md, N 2.7).

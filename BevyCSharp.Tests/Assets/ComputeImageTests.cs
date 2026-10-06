@@ -60,6 +60,7 @@ public sealed class ComputeImageTests
             .Until("read back", _ => Shaders.TryReadBuffer(read, out texels))
             .Go();
 
+        Assert.NotNull(texels);
         Assert.Equal(
             [0u, 1u, 2u, 10u, 11u, 12u, 20u, 21u, 22u, 30u, 31u, 32u, 40u, 41u, 42u],
             texels);

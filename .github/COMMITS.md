@@ -28,6 +28,11 @@ The grep finds the mechanical faults. The rest of STYLE.md (colons joining claus
 about earlier revisions, American spelling) is checked by reading the staged diff, since no pattern
 tells a label from a joint. A fix found here is made and staged, and the commit follows.
 
+The build is checked for warnings too, from nothing, with the commands under Warnings in
+[BUILDING.md](BUILDING.md), since a build that reuses what an earlier one left up to date prints
+none of that earlier build's warnings and passes with them standing. A warning found here is
+mended before the commit, as a fault of style is.
+
 ## The message
 
 Three lines, of which the first reads as nothing and the third says what the commit does.
@@ -39,8 +44,10 @@ Three lines, of which the first reads as nothing and the third says what the com
    out loud.
 
 The sentence has no colons, no headings, no lists, no prefixes such as `feat` or `fix`, and no
-trailers. It names no tool, model or assistant, and carries no `Co-Authored-By` line. It is short,
-and it follows [STYLE.md](STYLE.md) like the rest of the prose here.
+trailers. It names no tool, model or assistant, and carries no `Co-Authored-By` line. It gives the
+reason for a change and names no one who asked for it or decided it, since the release notes are
+made from the messages (NORM.md, N 4.7). It is short, and it follows [STYLE.md](STYLE.md) like the
+rest of the prose here.
 
 Written from a shell, so the marks are exact rather than pasted:
 

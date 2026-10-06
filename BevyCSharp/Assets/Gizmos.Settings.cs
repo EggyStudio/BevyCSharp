@@ -49,8 +49,8 @@ public static unsafe partial class Gizmos
     /// <remarks>
     /// <para>
     /// Apart from <see cref="Configure"/> because how thick a line is and who can see it is one
-    /// decision, and what the line looks like is another. Both cover every gizmo, for the same
-    /// reason.
+    /// decision, and what the line looks like is another. Both cover every gizmo of the group they
+    /// are given, for the same reason.
     /// </para>
     /// <para>
     /// A dotted or dashed line tells one meaning from another without a second color, so a path
@@ -76,6 +76,7 @@ public static unsafe partial class Gizmos
     /// Whether the width is a size at the camera's near plane rather than a size on screen, so a
     /// line further away is drawn thinner. Only a perspective 3D camera can honor it.
     /// </param>
+    /// <param name="which">Which group's lines take the style, both of the engine's own by default.</param>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
     public static void SetLineStyle(
         GizmoLine style = GizmoLine.Solid,

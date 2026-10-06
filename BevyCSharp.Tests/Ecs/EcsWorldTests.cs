@@ -407,9 +407,9 @@ public sealed class EcsWorldTests
         harness.Run();
 
         Assert.Equal(new[] { first, second, gone }.ToHashSet(), everything!.ToHashSet());
-        Assert.Equal([true, true, false], has);
-        Assert.Equal([true, true, false], alive);
-        Assert.Equal([false, true, false], moved);
+        Assert.Equal([true, true, false], has!);
+        Assert.Equal([true, true, false], alive!);
+        Assert.Equal([false, true, false], moved!);
         Assert.Equal([second], changed);
         Assert.Empty(nothing!);
     }

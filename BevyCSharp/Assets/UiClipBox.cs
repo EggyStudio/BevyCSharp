@@ -1,12 +1,5 @@
 namespace Bevy;
 
-/// <summary>
-/// How a node spreads its children along its own axis.
-/// </summary>
-/// <remarks>
-/// The main axis is <see cref="UiSettings.Direction"/>. `Start` and `End` are the edges of the
-/// node itself; the `Flex` pair follows the direction instead, so they swap when it is reversed.
-/// </remarks>
 /// <summary>Which box a node that clips its overflow clips at.</summary>
 /// <remarks>
 /// The three boxes a node has: the content it holds, that plus its padding, and that plus its

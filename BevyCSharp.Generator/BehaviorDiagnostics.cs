@@ -36,7 +36,7 @@ internal static class BehaviorDiagnostics
         messageFormat:
         "'{0}' carries a stage attribute, so it must return void and take a BehaviorContext, "
         + "followed in an instance method by up to two other components of the entity, each ref or "
-        + "in and each a different struct, as in 'void {0}(BehaviorContext ctx, ref Transform transform)'.",
+        + "in and each a different struct. One such is 'void {0}(BehaviorContext ctx, ref Transform transform)'.",
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

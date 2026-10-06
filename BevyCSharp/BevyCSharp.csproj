@@ -6,6 +6,17 @@
         <AssemblyName>BevyCSharp</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <IsAotCompatible>true</IsAotCompatible>
+        <!--
+          A public member with no documentation is an error here, though Directory.Build.props
+          turns the warning off for every other project, since the summary is the help a game's
+          author sees at the call and the package carries it (NORM.md, N 2.2). The wrappers the
+          generator writes for Bevy's components count as well, and it documents what it writes.
+          A fault in the documentation that is there stops the build too, where it is written,
+          such as a comment malformed or on nothing, a param or typeparam for nothing or missing
+          beside the others, or a cref or paramref naming nothing or more than one thing.
+        -->
+        <NoWarn>$(NoWarn.Replace(';CS1591', ''))</NoWarn>
+        <WarningsAsErrors>$(WarningsAsErrors);CS1591;CS0419;CS1570;CS1571;CS1572;CS1573;CS1574;CS1580;CS1581;CS1584;CS1587;CS1589;CS1590;CS1592;CS1710;CS1711;CS1712;CS1723;CS1734;CS1735</WarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup>

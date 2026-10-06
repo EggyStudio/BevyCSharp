@@ -43,6 +43,35 @@ build/                 the native build scripts, and everything they generate
 .github/workflows/     CI: builds every runtime identifier, then packs them together
 ```
 
+## Warnings
+
+A build has no warnings, and a warning fails the workflow (NORM.md, N 6.1). The test job builds the
+solution with `-warnaserror`, the game job builds Courtyard the same way, and every cargo build in
+the workflow runs with `CARGO_BUILD_WARNINGS=deny`, cargo's own setting, which fails a build that
+printed a warning, the warnings of a crate it replays from its cache included. A warning that is
+right to keep is turned off where it arises, with its reason beside it.
+
+The library is held further. A public member with no documentation is an error in
+`BevyCSharp.csproj`, and so is a fault in the documentation that is there, such as a `param` for
+nothing or a `cref` naming nothing (N 2.2), since the summary is the help a game's author sees at
+the call. The wrappers the generator writes for Bevy's components count as the library's, and the
+generator documents each member it writes.
+
+Before a commit the same check runs here:
+
+```bash
+dotnet build BevyCSharp.slnx --no-incremental -warnaserror
+for f in headless render editor; do
+  cargo check --manifest-path native/Cargo.toml --no-default-features --features $f --all-targets \
+    --config 'build.warnings="deny"'
+done
+```
+
+`--no-incremental` matters. An incremental build passes over a project an earlier build left up to
+date and prints none of its warnings again, so a strict build after a plain one passes with a
+warning standing, which is how one reached 3DEngine's `main`. Cargo replays a cached crate's
+warnings, so its check needs no such flag.
+
 ## Native profiles
 
 The bridge builds in two profiles:

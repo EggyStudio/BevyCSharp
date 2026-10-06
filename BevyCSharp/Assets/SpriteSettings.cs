@@ -1,5 +1,13 @@
 namespace Bevy;
 
+/// <summary>
+/// How a sprite is drawn.
+/// </summary>
+/// <remarks>
+/// A sprite is a picture in the world rather than on the screen. It carries a
+/// <see cref="Transform"/> like anything else, and a 2D camera decides what a world unit is worth
+/// in pixels. For something pinned to the screen, use <see cref="Ui"/>.
+/// </remarks>
 public sealed class SpriteSettings
 {
     /// <summary>Tint, multiplied with the image. White leaves it unchanged.</summary>

@@ -488,7 +488,7 @@ public sealed class GeneratorAttributeTests
             .ToHashSet(StringComparer.Ordinal);
 
         Assert.Equal(declared.Order(StringComparer.Ordinal), RecognizedAttributes.All.Order(StringComparer.Ordinal));
-        Assert.Empty(RecognizedAttributes.All.Where(name => !Cases.ContainsKey(name)));
+        Assert.DoesNotContain(RecognizedAttributes.All, name => !Cases.ContainsKey(name));
     }
 
     [Fact]

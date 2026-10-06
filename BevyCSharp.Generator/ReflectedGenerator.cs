@@ -72,6 +72,10 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
     /// <param name="Enum">The enum field's row name, as its <see cref="FieldModel.Name"/>.</param>
     /// <param name="Variant">The variant it belongs to.</param>
     /// <param name="Field">The part of the row's name after the variant's, empty for a variant wrapping one value.</param>
+    /// <param name="Reflect">Bevy's reflect path, as its <see cref="FieldModel.Reflect"/>.</param>
+    /// <param name="Kind">The <c>FieldKind</c> it is read as.</param>
+    /// <param name="Rust">The Rust type.</param>
+    /// <param name="Extra">An enum's variants or a handle's asset kind, as its <see cref="FieldModel.Extra"/>.</param>
     private readonly record struct VariantFieldModel(
         string Enum, string Variant, string Field, string Reflect, string Kind, string Rust, string Extra)
     {
@@ -465,7 +469,10 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
             switch (field.Kind)
             {
                 case "Enum":
-                    var variants = field.Extra.Split(',').Where(v => v.Length > 0).Select(Escaped);
+                    // Each with its line of documentation, since the library treats a public member
+                    // without one as an error (NORM.md, N 2.2) and these are the library's.
+                    var variants = field.Extra.Split(',').Where(v => v.Length > 0)
+                        .Select(v => $"/// <summary>The variant <c>{Xml(Last(field.Rust))}::{Xml(v)}</c>.</summary>\n        {Escaped(v)},");
                     var named = unique + "Variant";
                     used.Add(named);
                     text.Append($$"""
@@ -479,7 +486,7 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                             /// <summary>The variants <see cref="{{unique}}"/> can hold.</summary>
                             public enum {{named}}
                             {
-                                {{string.Join(",\n        ", variants)}},
+                                {{string.Join("\n\n        ", variants)}}
                             }
 
                         """);

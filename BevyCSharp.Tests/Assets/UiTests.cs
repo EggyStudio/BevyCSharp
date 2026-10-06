@@ -768,7 +768,7 @@ public sealed class UiTests
             {
                 Render2d.SpawnCamera2d();
                 var text = Ui.SpawnText("fi 1/2", new UiSettings());
-                Ui.SetFontFeatures(text, ("liga", 0), ("frac", 1));
+                Ui.SetFontFeatures(text, ("liga", 0u), ("frac", 1u));
                 Ui.SetFontVariations(text, ("wght", 650f));
                 features = ecs.GetReflected(text, TextFontRef.TypePath, ".font_features");
                 variations = ecs.GetReflected(text, TextFontRef.TypePath, ".font_variations");
@@ -776,7 +776,7 @@ public sealed class UiTests
                 Ui.SetFontVariations(text, ("wdth", 75f));
                 replaced = ecs.GetReflected(text, TextFontRef.TypePath, ".font_variations");
 
-                badTag = Assert.Throws<ArgumentException>(() => Ui.SetFontFeatures(text, ("ligatures", 1)));
+                badTag = Assert.Throws<ArgumentException>(() => Ui.SetFontFeatures(text, ("ligatures", 1u)));
                 var dead = ecs.Spawn();
                 ecs.Despawn(dead);
                 gone = Assert.Throws<BevyNativeException>(() => Ui.SetFontVariations(dead, ("wght", 400f)));

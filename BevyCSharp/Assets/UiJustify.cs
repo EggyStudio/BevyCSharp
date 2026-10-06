@@ -1,5 +1,13 @@
 namespace Bevy;
 
+/// <summary>
+/// How a node spreads its children along its own axis.
+/// </summary>
+/// <remarks>
+/// The main axis is <see cref="UiSettings.Direction"/>. <c>Start</c> and <c>End</c> are the
+/// edges of the node itself, and the <c>Flex</c> pair follows the direction instead, so they swap
+/// when it is reversed.
+/// </remarks>
 public enum UiJustify
 {
     /// <summary>Whatever the layout would do unasked.</summary>
