@@ -62,7 +62,6 @@ BevyCSharp.Tests/IntrospectionTests.cs
 BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/JointStateTests.cs
 BevyCSharp.Tests/LensTests.cs
-BevyCSharp.Tests/LightProbeTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
 BevyCSharp.Tests/MaterialFileTests.cs
 BevyCSharp.Tests/MaterialSurfaceTests.cs
