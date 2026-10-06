@@ -117,7 +117,6 @@ BevyCSharp/Ecs/ComponentSchema.cs ComponentSchemas
 BevyCSharp/Ecs/ComponentSchema.cs FieldKind
 BevyCSharp/Ecs/ComponentSchema.cs SchemaOrigin
 BevyCSharp/Ecs/EcsMap.cs MapValue
-BevyCSharp/Ecs/EcsWorld.cs PatchOf
 BevyCSharp/Ecs/FieldHints.cs FieldCondition
 BevyCSharp/Ecs/FieldHints.cs MethodHints
 BevyCSharp/Ecs/InlineList.cs IInlineList

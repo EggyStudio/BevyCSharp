@@ -10,10 +10,10 @@ native/bevy_csharp/src/capabilities.rs bcs_has_render	answers a constant or a fl
 native/bevy_csharp/src/capabilities.rs bcs_is_main_thread	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/render/meshlets.rs bcs_render_meshlets_active	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/render/solari.rs bcs_render_ray_tracing_active	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_computed_count	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_computed_per_slot	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_joint_count	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_joint_sub_count	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_slots	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_sub_count	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/states.rs bcs_state_subs_per_slot	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_computed_count	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_computed_per_slot	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_joint_count	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_joint_sub_count	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_slots	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_sub_count	answers a constant or a flag and cannot panic
+native/bevy_csharp/src/states/mod.rs bcs_state_subs_per_slot	answers a constant or a flag and cannot panic
