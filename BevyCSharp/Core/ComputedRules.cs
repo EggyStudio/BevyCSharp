@@ -80,14 +80,13 @@ internal static unsafe class ComputedRules
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int Compute(int slot, int source, int* result)
     {
-        Func<int, int?>? rule;
-        lock (Gate) Rules.TryGetValue(slot, out rule);
-
-        if (rule is null) return 0;
-
+        // The lookup is inside the catch with the rule, since taking the lock is a call as well.
         try
         {
-            if (rule(source) is not { } value) return 0;
+            Func<int, int?>? rule;
+            lock (Gate) Rules.TryGetValue(slot, out rule);
+
+            if (rule is null || rule(source) is not { } value) return 0;
 
             *result = value;
             return 1;
@@ -107,13 +106,13 @@ internal static unsafe class ComputedRules
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int Joint(int slot, int* values, uint present, int* result)
     {
-        Func<int[], uint, int?>? rule;
-        lock (Gate) Joints.TryGetValue(slot, out rule);
-
-        if (rule is null) return 0;
-
         try
         {
+            Func<int[], uint, int?>? rule;
+            lock (Gate) Joints.TryGetValue(slot, out rule);
+
+            if (rule is null) return 0;
+
             var axes = new int[StateRegistry.SlotCount];
             for (var axis = 0; axis < axes.Length; axis++) axes[axis] = values[axis];
 
