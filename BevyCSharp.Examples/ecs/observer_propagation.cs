@@ -14,31 +14,11 @@ internal static class ObserverPropagation
     // blocks it, as Bevy's #[entity_event(propagate, auto_propagate)] does.
     internal record struct Attack(Entity Entity, int Damage) : IPropagatingEvent;
 
-    // A name, by its place in Names, since a component here holds no string.
-    internal struct Named
-    {
-        public int Name;
-    }
-
-    internal struct HitPoints
-    {
-        public int Value;
-    }
-
-    // For damage to reach the wearer, it must exceed the armor.
-    internal struct Armor
-    {
-        public int Value;
-    }
-
-    private static readonly List<string> Names = [];
-
     // Seeded, so a capture plays the same fight each time, where Bevy's draws from the system.
     private static Random _random = new(19878367);
 
     public static void Build(App app)
     {
-        Names.Clear();
         _random = new Random(19878367);
 
         app.Startup(ctx =>
@@ -127,12 +107,26 @@ internal static class ObserverPropagation
 
     private static Entity Spawn(EcsWorld ecs, string name)
     {
-        Names.Add(name);
         var entity = ecs.Spawn();
-        ecs.Add(entity, new Named { Name = Names.Count - 1 });
+        ecs.SetName(entity, name);
         return entity;
     }
 
-    private static string NameOf(EcsWorld ecs, Entity entity) =>
-        ecs.Has<Named>(entity) ? Names[ecs.GetOrDefault<Named>(entity).Name] : entity.ToString();
+    private static string NameOf(EcsWorld ecs, Entity entity) => ecs.NameOf(entity) ?? entity.ToString();
+}
+
+/// <summary>How much harm a creature can take.</summary>
+[Behavior]
+public partial struct HitPoints
+{
+    /// <summary>The hit points left.</summary>
+    public int Value;
+}
+
+/// <summary>A piece of armor, which an attack's damage must exceed to reach the wearer.</summary>
+[Behavior]
+public partial struct Armor
+{
+    /// <summary>How much damage it blocks.</summary>
+    public int Value;
 }

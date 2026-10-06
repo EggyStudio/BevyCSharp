@@ -9,75 +9,64 @@ namespace BevyCSharp.Examples.Ecs;
 // one another, each pair once, under gravity worked out on the fixed timestep.
 internal static class IterCombinations
 {
-    private const float GravityConstant = 0.001f;
+    internal const float GravityConstant = 0.001f;
     private const int Bodies = 100;
 
-    internal struct Mass
+    internal static Entity Camera;
+
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        public float Value;
-    }
+        var ecs = ctx.Ecs;
+        Render.SetClearColor((0f, 0f, 0f, 1f));
 
-    internal struct Acceleration
-    {
-        public Vec3 Value;
-    }
+        var mesh = Render.CreateMesh(MeshShape.Sphere, 1f);
+        var random = new Random(19878367);
+        float Range(float low, float high) => low + random.NextSingle() * (high - low);
 
-    internal struct LastPosition
-    {
-        public Vec3 Value;
-    }
-
-    internal struct Star;
-
-    private static Entity _camera, _star;
-
-    public static void Build(App app)
-    {
-        app.Startup(ctx =>
+        // Each body starts with a small speed, given as where it was a step ago.
+        const float Step = 1f / 64f;
+        for (var i = 0; i < Bodies; i++)
         {
-            var ecs = ctx.Ecs;
-            Render.SetClearColor((0f, 0f, 0f, 1f));
+            var radius = Range(0.1f, 0.7f);
+            var position = new Vec3(Range(-1f, 1f), Range(-1f, 1f), Range(-1f, 1f)).Normalized * MathF.Cbrt(Range(0.2f, 1f)) * 15f;
+            var color = Color.FromSrgb(Range(0.5f, 1f), Range(0.5f, 1f), Range(0.5f, 1f));
 
-            var mesh = Render.CreateMesh(MeshShape.Sphere, 1f);
-            var random = new Random(19878367);
-            float Range(float low, float high) => low + random.NextSingle() * (high - low);
+            var body = ecs.SpawnMesh(mesh, Render.CreateMaterial(color), new Transform(position, Quat.Identity, new Vec3(radius)));
+            ecs.Add(body, new Mass { Value = radius * radius * radius * 10f });
+            ecs.Add(body, new Acceleration());
+            ecs.Add(body, new LastPos { Value = position - new Vec3(Range(-0.5f, 0.5f), Range(-0.5f, 0.5f), Range(-0.5f, 0.5f)) * Step });
+        }
 
-            // Each body starts with a small speed, given as where it was a step ago.
-            const float Step = 1f / 64f;
-            for (var i = 0; i < Bodies; i++)
-            {
-                var radius = Range(0.1f, 0.7f);
-                var position = new Vec3(Range(-1f, 1f), Range(-1f, 1f), Range(-1f, 1f)).Normalized * MathF.Cbrt(Range(0.2f, 1f)) * 15f;
-                var color = Color.FromSrgb(Range(0.5f, 1f), Range(0.5f, 1f), Range(0.5f, 1f));
+        var orangeRed = Color.FromSrgb8(255, 69, 0);
+        var star = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 1f) }), Transform.Identity);
+        ecs.Add(star, new Mass { Value = 500f });
+        ecs.Add(star, new Acceleration());
+        ecs.Add(star, new LastPos());
+        ecs.Add(star, new Star());
+        ecs.SetParent(ecs.SpawnPointLight(Vec3.Zero, range: 100f, radius: 1f), star);
 
-                var body = ecs.SpawnMesh(mesh, Render.CreateMaterial(color), new Transform(position, Quat.Identity, new Vec3(radius)));
-                ecs.Add(body, new Mass { Value = radius * radius * radius * 10f });
-                ecs.Add(body, new Acceleration());
-                ecs.Add(body, new LastPosition { Value = position - new Vec3(Range(-0.5f, 0.5f), Range(-0.5f, 0.5f), Range(-0.5f, 0.5f)) * Step });
-            }
+        Camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10.5f, -30f), Vec3.Zero, Vec3.UnitY));
+    }, "iter_combinations.GenerateBodies");
+}
 
-            var orangeRed = Color.FromSrgb8(255, 69, 0);
-            _star = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 1f) }), Transform.Identity);
-            ecs.Add(_star, new Mass { Value = 500f });
-            ecs.Add(_star, new Acceleration());
-            ecs.Add(_star, new LastPosition());
-            ecs.Add(_star, new Star());
-            ecs.SetParent(ecs.SpawnPointLight(Vec3.Zero, range: 100f, radius: 1f), _star);
+/// <summary>How heavy a body is, which is how hard it pulls on the rest.</summary>
+[Behavior]
+public partial struct Mass
+{
+    /// <summary>The mass.</summary>
+    public float Value;
 
-            _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10.5f, -30f), Vec3.Zero, Vec3.UnitY));
-        }, "iter_combinations.GenerateBodies");
-
-        app.On(Stage.FixedUpdate, InteractBodies, "iter_combinations.InteractBodies");
-        app.On(Stage.FixedUpdate, Integrate, "iter_combinations.Integrate");
-        app.Update(LookAtStar, "iter_combinations.LookAtStar");
-    }
-
-    // Every pair once, each pulling the other by the other's mass, as Bevy's iter_combinations_mut
-    // hands out each pair of a query's rows.
-    private static void InteractBodies(BehaviorContext ctx)
+    /// <summary>
+    /// Every pair of bodies once, each pulling the other by the other's mass, as Bevy's
+    /// <c>iter_combinations_mut</c> hands out each pair of a query's rows.
+    /// </summary>
+    [OnFixedUpdate]
+    public static void InteractBodies(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
         var bodies = ecs.EntitiesWith<Mass>();
+        if (bodies.Length < 2) return;
+
         var at = bodies.Select(body => ecs.GetOrDefault<Transform>(body).Translation).ToArray();
         var mass = bodies.Select(body => ecs.GetOrDefault<Mass>(body).Value).ToArray();
         var pull = bodies.Select(body => ecs.GetOrDefault<Acceleration>(body).Value).ToArray();
@@ -87,7 +76,7 @@ internal static class IterCombinations
             for (var b = a + 1; b < bodies.Length; b++)
             {
                 var delta = at[b] - at[a];
-                var force = delta * (GravityConstant / delta.LengthSquared);
+                var force = delta * (IterCombinations.GravityConstant / delta.LengthSquared);
                 pull[a] += force * mass[b];
                 pull[b] -= force * mass[a];
             }
@@ -95,30 +84,50 @@ internal static class IterCombinations
 
         for (var i = 0; i < bodies.Length; i++) ecs.Set(bodies[i], new Acceleration { Value = pull[i] });
     }
+}
 
-    // Verlet, each body moved by how far it moved last step and by what pulls on it now.
-    private static void Integrate(BehaviorContext ctx)
+/// <summary>What pulls on a body this step.</summary>
+[Behavior]
+public partial struct Acceleration
+{
+    /// <summary>The pull.</summary>
+    public Vec3 Value;
+
+    /// <summary>
+    /// The body moved by Verlet's step, by how far it moved last step and by what pulls on it now,
+    /// after the pull is worked out, the order Bevy lists the two in and leaves to its schedule.
+    /// </summary>
+    [OnFixedUpdate]
+    [After("Mass.InteractBodies")]
+    public void Integrate(BehaviorContext ctx, ref Transform transform, ref LastPos lastPos)
     {
-        var ecs = ctx.Ecs;
         var dtSquared = ctx.Time.FixedDelta * ctx.Time.FixedDelta;
-        foreach (var body in ecs.EntitiesWith<Mass>())
-        {
-            var transform = ecs.GetOrDefault<Transform>(body);
-            var next = transform.Translation * 2f - ecs.GetOrDefault<LastPosition>(body).Value + ecs.GetOrDefault<Acceleration>(body).Value * dtSquared;
-            ecs.Set(body, new Acceleration());
-            ecs.Set(body, new LastPosition { Value = transform.Translation });
-            transform.Translation = next;
-            ecs.Set(body, transform);
-        }
+        var next = transform.Translation * 2f - lastPos.Value + Value * dtSquared;
+        Value = Vec3.Zero;
+        lastPos.Value = transform.Translation;
+        transform.Translation = next;
     }
+}
 
-    // The camera turns a tenth of the way toward the star each frame.
-    private static void LookAtStar(BehaviorContext ctx)
+/// <summary>Where a body was a step ago.</summary>
+[Behavior]
+public partial struct LastPos
+{
+    /// <summary>The place.</summary>
+    public Vec3 Value;
+}
+
+/// <summary>The star at the middle, which the camera keeps turning toward.</summary>
+[Behavior]
+public partial struct Star
+{
+    /// <summary>The camera turned a tenth of the way toward the star each frame.</summary>
+    [OnUpdate]
+    public void LookAtStar(BehaviorContext ctx, in Transform transform)
     {
-        var ecs = ctx.Ecs;
-        var camera = ecs.GetOrDefault<Transform>(_camera);
-        var toward = Transform.LookingAt(camera.Translation, ecs.GetOrDefault<Transform>(_star).Translation, Vec3.UnitY).Rotation;
+        var camera = ctx.Ecs.GetOrDefault<Transform>(IterCombinations.Camera);
+        var toward = Transform.LookingAt(camera.Translation, transform.Translation, Vec3.UnitY).Rotation;
         camera.Rotation = Quat.Lerp(toward, camera.Rotation, 0.1f);
-        ecs.Set(_camera, camera);
+        ctx.Ecs.Set(IterCombinations.Camera, camera);
     }
 }

@@ -9,35 +9,33 @@ namespace BevyCSharp.Examples.Ecs;
 // id, and here the component keeps the system's place in a list, which is the same thing.
 internal static class Callbacks
 {
-    internal struct Callback
+    // The systems the callbacks name, Bevy's registered systems.
+    internal static readonly List<Action<EcsWorld>> Systems = [];
+
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        public int System;
-    }
+        Systems.Clear();
+        var ecs = ctx.Ecs;
+        Spawn(ecs, _ => Console.WriteLine("This is the trivial callback system"));
+        Spawn(ecs, world => Console.WriteLine($"This is the ordinary callback system. There are currently {world.Count<Callback>()} callbacks in the world."));
+        Spawn(ecs, world => Console.WriteLine($"This is the exclusive callback system. There are currently {world.All().Length} entities in the world."));
+    }, "callbacks.Setup");
 
-    private static readonly List<Action<BehaviorContext>> Systems = [];
-
-    public static void Build(App app)
-    {
-        app.Startup(ctx =>
-        {
-            Systems.Clear();
-            var ecs = ctx.Ecs;
-
-            Spawn(ecs, _ => Console.WriteLine("This is the trivial callback system"));
-            Spawn(ecs, inner => Console.WriteLine($"This is the ordinary callback system. There are currently {inner.Ecs.Count<Callback>()} callbacks in the world."));
-            Spawn(ecs, inner => Console.WriteLine($"This is the exclusive callback system. There are currently {inner.Ecs.All().Length} entities in the world."));
-        }, "callbacks.Setup");
-
-        app.Update(ctx =>
-        {
-            foreach (var entity in ctx.Ecs.EntitiesWith<Callback>())
-                Systems[ctx.Ecs.GetOrDefault<Callback>(entity).System](ctx);
-        }, "callbacks.Run");
-    }
-
-    private static void Spawn(EcsWorld ecs, Action<BehaviorContext> system)
+    private static void Spawn(EcsWorld ecs, Action<EcsWorld> system)
     {
         Systems.Add(system);
         ecs.Add(ecs.Spawn(), new Callback { System = Systems.Count - 1 });
     }
+}
+
+/// <summary>A system kept on an entity, by its place among the example's systems, as Bevy keeps its id.</summary>
+[Behavior]
+public partial struct Callback
+{
+    /// <summary>The system's place.</summary>
+    public int System;
+
+    /// <summary>The system run, each frame, as Bevy's <c>run_callbacks</c> runs each by a command.</summary>
+    [OnUpdate]
+    public void RunCallbacks(BehaviorContext ctx) => ctx.Cmd.Run(Callbacks.Systems[System]);
 }

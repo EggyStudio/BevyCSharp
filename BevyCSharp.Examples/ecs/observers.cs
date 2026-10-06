@@ -10,19 +10,6 @@ namespace BevyCSharp.Examples.Ecs;
 // explodes the mines under it, and each mine that explodes sets off the ones it overlaps.
 internal static class Observers
 {
-    internal struct Mine
-    {
-        public float X, Y;
-        public float Size;
-
-        public static Mine Random(Random random) => new()
-        {
-            X = (random.NextSingle() - 0.5f) * 1200f,
-            Y = (random.NextSingle() - 0.5f) * 600f,
-            Size = 4f + random.NextSingle() * 16f,
-        };
-    }
-
     // An ordinary event, which every observer of it runs for.
     internal readonly record struct ExplodeMines(float X, float Y, float Radius);
 
@@ -72,15 +59,6 @@ internal static class Observers
         {
             if (Index.TryGetValue(Cell(remove.Event.Value.X, remove.Event.Value.Y), out var cell)) cell.Remove(remove.Event.Entity);
         });
-
-        app.Update(ctx =>
-        {
-            foreach (var entity in ctx.Ecs.EntitiesWith<Mine>())
-            {
-                var mine = ctx.Ecs.GetOrDefault<Mine>(entity);
-                Gizmos.Circle2d((mine.X, mine.Y), mine.Size, Color.FromHsl((mine.Size - 4f) / 16f * 360f, 1f, 0.8f));
-            }
-        }, "observers.DrawShapes");
 
         app.Update(ctx =>
         {
@@ -151,4 +129,31 @@ internal static class Observers
             if (Index.TryGetValue((cx + dx, cy + dy), out var mines)) nearby.AddRange(mines);
         return nearby;
     }
+}
+
+/// <summary>A mine, a circle at a place that explodes when clicked on or when an explosion reaches it.</summary>
+[Behavior]
+public partial struct Mine
+{
+    /// <summary>Where it is across.</summary>
+    public float X;
+
+    /// <summary>Where it is up.</summary>
+    public float Y;
+
+    /// <summary>Its radius.</summary>
+    public float Size;
+
+    /// <summary>A mine somewhere in the field, of a size between four and twenty.</summary>
+    public static Mine Random(Random random) => new()
+    {
+        X = (random.NextSingle() - 0.5f) * 1200f,
+        Y = (random.NextSingle() - 0.5f) * 600f,
+        Size = 4f + random.NextSingle() * 16f,
+    };
+
+    /// <summary>Drawn as a circle, its hue by its size.</summary>
+    [OnUpdate]
+    public void DrawShapes(BehaviorContext ctx) =>
+        Gizmos.Circle2d((X, Y), Size, Color.FromHsl((Size - 4f) / 16f * 360f, 1f, 0.8f));
 }

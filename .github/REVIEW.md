@@ -401,3 +401,15 @@ editor's bridge alone was loaded and dropped at once, Bevy saying the file faile
 later, while the headless bridge the suite runs on loads nothing. The bridge now loads nothing
 while no interface keeps pictures, on every profile, `ImGuiTextures.Load` keeps no zero so a path
 asked for early loads once the interface runs, and the test holds that no error comes.
+
+B 4 for ECS, 71 of 119. Each of Bevy's components is a behavior on its entity, and the systems over
+one entity at a time are its methods, among them a printer's repeating `GameTimer` beside its line,
+the players' scoring and check, the bodies' Verlet step after the pull, which stays one static
+system over every pair as `iter_combinations_mut` is, and a mine drawing itself. A callback runs
+its system by a command, `OneShotCallback` in one_shot_systems where callbacks' shares the
+namespace. Commands land once a frame, after PostUpdate, so a mark another system reads in the same
+frame, as `Triggered` is between Bevy's chained two, is added by an app system ordered `Before` the
+behavior's, and ecs_guide's systems order themselves about the players' by name.
+observer_propagation names its entities with Bevy's `Name` rather than an index of its own.
+ecs_guide prints its joins and its rounds in another order, which Bevy leaves unordered too, and
+its capture was written again, the game played the same to the same winner.

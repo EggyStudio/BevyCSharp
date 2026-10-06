@@ -11,31 +11,6 @@ namespace BevyCSharp.Examples.Ecs;
 // the whole world, and an order among them.
 internal static class EcsGuide
 {
-    // A player, by its place in Names, since a component here holds no string.
-    internal struct Player
-    {
-        public int Name;
-    }
-
-    internal struct Score
-    {
-        public int Value;
-    }
-
-    // Bevy's PlayerStreak enum, Hot(n), None or Cold(n), as a sign and a count.
-    internal struct PlayerStreak
-    {
-        public int Sign;
-        public int Rounds;
-
-        public override readonly string ToString() => Sign switch
-        {
-            > 0 => $"{Rounds} round hot streak",
-            < 0 => $"{Rounds} round cold streak",
-            _ => "0 round streak",
-        };
-    }
-
     internal sealed class GameState
     {
         public int CurrentRound;
@@ -50,15 +25,16 @@ internal static class EcsGuide
         public int MaxPlayers;
     }
 
-    private static readonly List<string> Names = [];
+    // The players' names, which a player points into, since a component here holds no string.
+    internal static readonly List<string> Names = [];
 
     // Seeded, so a capture plays the same game each time, where Bevy's draws from the system.
-    private static Random _random = new(19878367);
+    internal static Random Random = new(19878367);
 
     public static void Build(App app)
     {
         Names.Clear();
-        _random = new Random(19878367);
+        Random = new Random(19878367);
 
         app.Startup(ctx =>
         {
@@ -72,13 +48,13 @@ internal static class EcsGuide
         // In no order against the rest, as Bevy's is in no set.
         app.Update(_ => Console.WriteLine("This game is fun!"), "ecs_guide.PrintMessage");
 
-        // Bevy's three sets, before the round, the round and after it, each after the one before,
-        // stated here as each system after the ones it follows. The two that add players run in
-        // either order, as they do in Bevy's set.
-        app.Chain(Stage.Update, System(NewRound, "ecs_guide.NewRound"), System(NewPlayer, "ecs_guide.NewPlayer"));
-        app.AddSystem(Stage.Update, System(ExclusivePlayer, "ecs_guide.ExclusivePlayer"));
-        app.AddSystem(Stage.Update, System(ScoreRound, "ecs_guide.Score").After("ecs_guide.NewPlayer").After("ecs_guide.ExclusivePlayer"));
-        app.Chain(Stage.Update, System(ScoreCheck, "ecs_guide.ScoreCheck").After("ecs_guide.Score"), System(GameOver, "ecs_guide.GameOver"));
+        // Bevy's three sets, before the round, the round and after it, each after the one before.
+        // The players' own systems are the round and the check after it, and the example's are
+        // ordered about them by their names. The two that add players run in either order, as
+        // they do in Bevy's set.
+        app.Chain(Stage.Update, System(NewRound, "ecs_guide.NewRound"), System(NewPlayer, "ecs_guide.NewPlayer").Before("Player.ScoreSystem"));
+        app.AddSystem(Stage.Update, System(ExclusivePlayer, "ecs_guide.ExclusivePlayer").Before("Player.ScoreSystem"));
+        app.AddSystem(Stage.Update, System(GameOver, "ecs_guide.GameOver").After("Player.ScoreCheckSystem"));
 
         var counter = 0;
         app.On(Stage.Last, _ =>
@@ -101,7 +77,7 @@ internal static class EcsGuide
     private static void NewPlayer(BehaviorContext ctx)
     {
         var state = ctx.Res<GameState>();
-        if (_random.Next(2) == 0 || state.TotalPlayers >= ctx.Res<GameRules>().MaxPlayers) return;
+        if (Random.Next(2) == 0 || state.TotalPlayers >= ctx.Res<GameRules>().MaxPlayers) return;
 
         state.TotalPlayers++;
         AddPlayer(ctx.Ecs, $"Player {state.TotalPlayers}");
@@ -112,44 +88,11 @@ internal static class EcsGuide
     private static void ExclusivePlayer(BehaviorContext ctx)
     {
         var state = ctx.World.Resource<GameState>();
-        if (_random.Next(2) == 0 || state.TotalPlayers >= ctx.World.Resource<GameRules>().MaxPlayers) return;
+        if (Random.Next(2) == 0 || state.TotalPlayers >= ctx.World.Resource<GameRules>().MaxPlayers) return;
 
         Console.WriteLine($"Player {state.TotalPlayers + 1} has joined the game!");
         AddPlayer(ctx.Ecs, $"Player {state.TotalPlayers + 1}");
         state.TotalPlayers++;
-    }
-
-    private static void ScoreRound(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        foreach (var entity in ecs.EntitiesWith<Player>())
-        {
-            var name = Names[ecs.GetOrDefault<Player>(entity).Name];
-            var score = ecs.GetOrDefault<Score>(entity);
-            var streak = ecs.GetOrDefault<PlayerStreak>(entity);
-
-            if (_random.Next(2) == 1)
-            {
-                score.Value++;
-                streak = streak.Sign > 0 ? streak with { Rounds = streak.Rounds + 1 } : new PlayerStreak { Sign = 1, Rounds = 1 };
-                Console.WriteLine($"{name} scored a point! Their score is: {score.Value} ({streak})");
-            }
-            else
-            {
-                streak = streak.Sign < 0 ? streak with { Rounds = streak.Rounds + 1 } : new PlayerStreak { Sign = -1, Rounds = 1 };
-                Console.WriteLine($"{name} did not score a point! Their score is: {score.Value} ({streak})");
-            }
-
-            ecs.Set(entity, score);
-            ecs.Set(entity, streak);
-        }
-    }
-
-    private static void ScoreCheck(BehaviorContext ctx)
-    {
-        foreach (var entity in ctx.Ecs.EntitiesWith<Player>())
-            if (ctx.Ecs.GetOrDefault<Score>(entity).Value == ctx.Res<GameRules>().WinningScore)
-                ctx.Res<GameState>().WinningPlayer = Names[ctx.Ecs.GetOrDefault<Player>(entity).Name];
     }
 
     private static void GameOver(BehaviorContext ctx)
@@ -175,4 +118,68 @@ internal static class EcsGuide
         ecs.Add(player, new Score());
         ecs.Add(player, new PlayerStreak());
     }
+}
+
+/// <summary>A player, by its place among the names.</summary>
+[Behavior]
+public partial struct Player
+{
+    /// <summary>The player's place among the names.</summary>
+    public int Name;
+
+    /// <summary>
+    /// The round played, each player scoring a point or not at random, with their score and their
+    /// streak kept beside them, as Bevy's <c>score_system</c> plays it.
+    /// </summary>
+    [OnUpdate]
+    public void ScoreSystem(BehaviorContext ctx, ref Score score, ref PlayerStreak streak)
+    {
+        var name = EcsGuide.Names[Name];
+        if (EcsGuide.Random.Next(2) == 1)
+        {
+            score.Value++;
+            streak = streak.Sign > 0 ? streak with { Rounds = streak.Rounds + 1 } : new PlayerStreak { Sign = 1, Rounds = 1 };
+            Console.WriteLine($"{name} scored a point! Their score is: {score.Value} ({streak})");
+        }
+        else
+        {
+            streak = streak.Sign < 0 ? streak with { Rounds = streak.Rounds + 1 } : new PlayerStreak { Sign = -1, Rounds = 1 };
+            Console.WriteLine($"{name} did not score a point! Their score is: {score.Value} ({streak})");
+        }
+    }
+
+    /// <summary>A player who has reached the winning score made the winner, after the round.</summary>
+    [OnUpdate]
+    [After("Player.ScoreSystem")]
+    public void ScoreCheckSystem(BehaviorContext ctx, in Score score)
+    {
+        if (score.Value == ctx.Res<EcsGuide.GameRules>().WinningScore) ctx.Res<EcsGuide.GameState>().WinningPlayer = EcsGuide.Names[Name];
+    }
+}
+
+/// <summary>A player's score.</summary>
+[Behavior]
+public partial struct Score
+{
+    /// <summary>The points scored.</summary>
+    public int Value;
+}
+
+/// <summary>Bevy's <c>PlayerStreak</c> enum, <c>Hot(n)</c>, <c>None</c> or <c>Cold(n)</c>, as a sign and a count.</summary>
+[Behavior]
+public partial struct PlayerStreak
+{
+    /// <summary>Above zero for a hot streak, below it for a cold one, and zero for none.</summary>
+    public int Sign;
+
+    /// <summary>How many rounds it has run.</summary>
+    public int Rounds;
+
+    /// <summary>The streak as Bevy prints it.</summary>
+    public override readonly string ToString() => Sign switch
+    {
+        > 0 => $"{Rounds} round hot streak",
+        < 0 => $"{Rounds} round cold streak",
+        _ => "0 round streak",
+    };
 }
