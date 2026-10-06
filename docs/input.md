@@ -87,7 +87,8 @@ examples give theirs (`ecs.Insert<PickableRef>(sprite)`). Meshes are found where
 `Config.MeshPicking`, since that casts a ray at every mesh as the pointer moves, and Bevy's own
 programs add mesh picking only where they pick one. It all needs a bridge with the renderer. An
 offscreen run has the pretend pointer of `SyntheticInput` put on the image it draws into, so a
-test or `./bcs command input.click` picks there as a hand would in a window.
+test or `./bcs command input.click` picks there as a hand would in a window, and its wheel,
+`SyntheticInput.Wheel` or `input.wheel`, scrolls whatever that pointer is over as `Pointer<Scroll>`.
 
 A game can have pointers of its own, for an interface drawn into an image that a mesh in the scene
 wears, where no mouse is. `Picking.SpawnPointer()` makes one, and `Picking.MovePointer`,

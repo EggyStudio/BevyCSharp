@@ -1277,7 +1277,7 @@ static void DisconnectGamepad(Entity gamepad);                  // Disconnects a
 static void SetGamepadButton(Entity gamepad, GamepadButton button, float value = 1f);  // Sets one of a pretended pad's buttons, from zero, up, to one, down
 static void SetGamepadAxis(Entity gamepad, GamepadAxis axis, float value);  // Sets one of a pretended pad's axes, a stick from minus one to one and a trigger from zero to one
 static void Wheel(float lines, float sideways = 0f);            // Rolls the wheel, in the lines a wheel with detents reports
-static void Press(Key key, string typed = "");                  // Presses a button where the pointer is put
+static void Press(Key key, string typed = "");                  // Presses a key where a real one is reported, at the window
 static void Lift(Key key);                                      // Lets a key go, where a real one is reported
 static void Tap(Key key, string typed = "");                    // Presses a key and lets it go again
 static void Key(ImGuiKey key, string typed = null);             // Presses and releases a key in the interface's own queue

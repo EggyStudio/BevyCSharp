@@ -179,3 +179,23 @@ TODO.md's example gaps are rewritten around what is left, the observers entry do
 two, and `error_handling`, `delayed_commands` and `scroll` name only what they still wait on, a
 mesh's surface sampled, commands run after a delay, and the mouse wheel as messages with what each
 pointer is over.
+
+**Now 3, `scroll`.** Written, 250. The pretend wheel, `SyntheticInput.Wheel` and `input.wheel`,
+went into ImGui's queue alone, so a game reading the wheel and Bevy's picking never saw it. It is
+Bevy's `MouseWheel` now, as a real wheel's report begins (`bcs_input_wheel`, ABI 208). The frame's
+input counts it in every profile, ImGui reads it from there, and picking sends it to whatever the
+pointer is over as `Pointer<Scroll>`, in a window through the window's event and offscreen on the
+image the run draws into. The example starts its own propagating `Scroll` from picking's
+`Pointer<Scroll>`, which is the pair Bevy's reads by hand, one for each turn of the wheel at each
+entity a pointer is over, and takes the delta up the parents by reference as Bevy's does. Driven
+offscreen by `bcs`, the lists scroll, Ctrl turns the wheel sideways, a press removes an item, and
+what an inner list cannot take goes on to the outer one. The grid with the headers that stay put
+does not scroll, here or in Bevy, since Taffy 0.10.1 measures a grid's content from each item's own
+cell rather than from the grid (`compute/grid/alignment.rs`, the contribution taken from
+`grid_area`), so the grid reads as one cell's size and Bevy holds its scroll within that. That is
+upstream's to mend and the example says so. `PointerTests` holds the wheel scrolling the node under
+the pointer and going on to its parent, and `InputTests` the wheel read on one frame in a run with
+no window. The input tests moved to `Input` first, by a move alone (`ba5f72c`), N 1.4's list at 94
+to mend. `SyntheticInput.Send`'s remarks said an offscreen run picks nothing, which `b548987`
+changed, and they say what it does now. Two cref warnings that `d59365f`'s overload made, and a
+`<para>` left open in the key's remarks, are mended.

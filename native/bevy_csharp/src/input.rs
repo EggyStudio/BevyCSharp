@@ -169,6 +169,68 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
     })
 }
 
+/// Turns the wheel as though a hand had. `y` is away from the hand, which is up a list, and `x` is
+/// to the right, in lines when `unit` is 0 and in pixels when it is 1.
+///
+/// Written as Bevy's `MouseWheel`, which is where a real wheel's report begins, so the frame's
+/// accumulated scroll counts it, a game reading the wheel sees it, and an interface fed from that
+/// sees it. A window's wheel goes to picking as a window event as well, as winit writes both, and
+/// picking turns it into a scroll of the mouse's pointer where that last was. An offscreen run has
+/// no window for that to name, so the scroll is put straight onto the image it draws into, where the
+/// pretend pointer was last put (see [`offscreen_pointer`]). A headless run has no picking, and the
+/// message alone is all a wheel there is.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_input_wheel(x: f32, y: f32, unit: i32) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+        use bevy::input::touch::TouchPhase;
+        use bevy::prelude::Entity;
+
+        let unit = if unit == 1 { MouseScrollUnit::Pixel } else { MouseScrollUnit::Line };
+
+        crate::state::with_world(|world| {
+            #[cfg(feature = "render")]
+            {
+                use bevy::window::PrimaryWindow;
+
+                let mut windows = world.query_filtered::<Entity, bevy::prelude::With<PrimaryWindow>>();
+                if let Ok(window) = windows.single(world) {
+                    let wheel = MouseWheel { unit, x, y, window, phase: TouchPhase::Moved };
+                    world.write_message(wheel);
+                    write_window_event(world, bevy::window::WindowEvent::MouseWheel(wheel));
+                    return crate::interop::status::OK;
+                }
+
+                offscreen_wheel(world, x, y, unit);
+            }
+
+            // Naming no window, which the accumulated scroll does not ask about.
+            world.write_message(MouseWheel { unit, x, y, window: Entity::PLACEHOLDER, phase: TouchPhase::Moved });
+            crate::interop::status::OK
+        })
+    })
+}
+
+/// Scrolls the mouse's pointer on the image an offscreen run draws into, where it was last put,
+/// through Bevy's `PointerInput`, which picking sends to everything the pointer is over as a
+/// `Pointer<Scroll>`. Nothing for a run with no such image.
+#[cfg(feature = "render")]
+fn offscreen_wheel(world: &mut bevy::prelude::World, x: f32, y: f32, unit: bevy::input::mouse::MouseScrollUnit) {
+    use bevy::camera::NormalizedRenderTarget;
+    use bevy::input::touch::TouchPhase;
+    use bevy::picking::pointer::{Location, PointerAction, PointerId, PointerInput};
+
+    let Some(target) = world.get_resource::<crate::offscreen::OffscreenTarget>() else {
+        return;
+    };
+    let location = Location {
+        target: NormalizedRenderTarget::Image(target.image.clone().into()),
+        position: world.get_resource::<OffscreenPointer>().map_or(bevy::prelude::Vec2::ZERO, |at| at.0),
+    };
+    let action = PointerAction::Scroll { x, y, unit, phase: TouchPhase::Moved };
+    world.write_message(PointerInput::new(PointerId::Mouse, location, action));
+}
+
 /// Where the pretend pointer was last put in an offscreen run, for how far the next move goes and
 /// for the cursor's position the frame's input reports.
 #[cfg(feature = "render")]

@@ -95,16 +95,25 @@ public static class SyntheticInput
     /// Rolls the wheel, in the lines a wheel with detents reports.
     /// </summary>
     /// <remarks>
-    /// Positive is away from the hand, which is up in a list. The pointer is not moved first,
-    /// because what the wheel affects is decided by where it already is, so a test moves it and then
-    /// rolls.
+    /// <para>
+    /// Positive is away from the hand, which is up in a list, and sideways is to the right. The
+    /// pointer is not moved first, because what the wheel affects is decided by where it already
+    /// is, so a test moves it and then rolls.
+    /// </para>
+    /// <para>
+    /// It is written into Bevy as a real wheel's report begins, as a message Bevy counts into the
+    /// frame's scroll at the start of the next frame, so <see cref="Input.WheelY"/> reads it then
+    /// and the interface, which is fed from that, scrolls then too. Picking sends it to whatever the
+    /// pointer is over as <see cref="Pointer{TEvent}"/> of <see cref="Scroll"/>, in a window and on
+    /// the image an offscreen run draws into alike. Writing it into the interface's queue as well
+    /// would count it twice, once now and once when the frame's input carries it.
+    /// </para>
     /// </remarks>
-    public static void Wheel(float lines, float sideways = 0f)
-    {
-        if (!ImGuiRuntime.IsRunning) return;
-
-        ImGui.GetIO().AddMouseWheelEvent(sideways, lines);
-    }
+    /// <param name="lines">How far away from the hand.</param>
+    /// <param name="sideways">How far to the right.</param>
+    /// <exception cref="BevyNativeException">Called from outside a system.</exception>
+    public static void Wheel(float lines, float sideways = 0f) =>
+        Native.Check(Native.bcs_input_wheel(sideways, lines, (int)ScrollUnit.Line), $"rolling the wheel {lines}");
 
     /// <summary>
     /// Presses a key where a real one is reported, at the window.
@@ -122,6 +131,7 @@ public static class SyntheticInput
     /// frame after. So a key pressed from an update is <see cref="Input.KeyPressed"/> on exactly
     /// one frame, two after the one it was pressed on, and a <see cref="Tap"/> is pressed and
     /// released on that same frame.
+    /// </para>
     /// </remarks>
     /// <param name="key">Which key.</param>
     /// <param name="typed">What it typed, or nothing for a key that types nothing.</param>
@@ -234,13 +244,13 @@ public static class SyntheticInput
     /// only one of them tests half the path a hand takes.
     /// </para>
     /// <para>
-    /// A run with no window, such as an editor opened with <c>--offscreen</c>, takes the
-    /// interface's half alone, so its panels, buttons and fields can be clicked, while the camera
-    /// is not steered and Bevy's picking hits nothing, since those read the window's pointer. A
-    /// left press and release in one place there is also kept as a click
-    /// (<see cref="TryTakeClickWithoutWindow"/>), for a tool to answer by casting a ray, as the
-    /// editor selects what is under it. A run with neither a window nor an interface has nowhere
-    /// to send a pointer and refuses.
+    /// A run with no window, such as an editor opened with <c>--offscreen</c>, has the pointer put
+    /// on the image it draws into, so picking finds what is drawn under it there as it would in a
+    /// window. One that draws nowhere takes the interface's half alone, so its panels, buttons and
+    /// fields can be clicked while nothing in the scene is, and a left press and release in one
+    /// place there is also kept as a click (<see cref="TryTakeClickWithoutWindow"/>), for a tool to
+    /// answer by casting a ray. A run with nowhere to draw and no interface has nowhere to send a
+    /// pointer and refuses.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">This run has neither a window nor an interface.</exception>
@@ -304,7 +314,7 @@ public static class SyntheticInput
     /// For a run with neither a window nor an image it draws into, where Bevy's picking has nothing
     /// to find a pointer on, so a click reaches the interface and nothing in the scene. This hands
     /// such a click to whoever answers clicks on the scene, which casts a ray from its camera
-    /// through the point (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast"/>). An offscreen
+    /// through the point (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)"/>). An offscreen
     /// run has its pointer put on the image it draws into, where picking finds what is under it,
     /// and gives nothing here.
     /// </para>

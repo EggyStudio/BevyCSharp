@@ -188,6 +188,55 @@ public sealed class PointerTests
     }
 
     /// <summary>
+    /// The wheel rolled over a node scrolls it as Bevy's <c>Pointer&lt;Scroll&gt;</c>, in lines, and the
+    /// scroll goes on up to the node's parent.
+    /// </summary>
+    [SkippableFact]
+    public void TheWheelScrollsTheNodeThePointerIsOver()
+    {
+        Needs.Renderer();
+
+        var (scrolls, parentScrolls) = (new List<Pointer<Scroll>>(), new List<Entity>());
+        Entity inner = default, outer = default;
+        var frame = 0;
+
+        using var app = new App(Config.OffscreenFor(200, 200, frames: 30));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+
+            outer = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(0f), Width = Length.Px(100f), Height = Length.Px(100f) });
+            inner = Ui.SpawnNode(new UiSettings { Width = Length.Px(80f), Height = Length.Px(80f) });
+            ecs.SetParent(inner, outer);
+
+            ecs.Observe<Pointer<Scroll>>(inner, on => scrolls.Add(on.Event));
+            ecs.Observe<Pointer<Scroll>>(outer, on => parentScrolls.Add(on.Entity));
+        }, "Test.Setup"));
+
+        // Rolled a few frames after the pointer is put there, since what it is over is found a
+        // frame after it moves.
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ =>
+        {
+            frame++;
+            if (frame == 10) SyntheticInput.MoveTo(40f, 40f);
+            if (frame == 14) SyntheticInput.Wheel(-2f, 1f);
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        var scroll = Assert.Single(scrolls);
+        Assert.Equal(inner, scroll.Entity);
+        Assert.Equal(PointerKind.Mouse, scroll.PointerId.Kind);
+        Assert.Equal(ScrollUnit.Line, scroll.Event.Unit);
+        Assert.Equal(1f, scroll.Event.X);
+        Assert.Equal(-2f, scroll.Event.Y);
+        Assert.Equal([outer], parentScrolls);
+    }
+
+    /// <summary>
     /// A pointer of the game's own, put on an image an interface is drawn into, clicks a node there
     /// where it is put, and the click says which pointer.
     /// </summary>

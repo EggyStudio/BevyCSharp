@@ -112,4 +112,27 @@ public sealed class InputTests
         Assert.Single(pressed);
         Assert.Single(released);
     }
+
+    [Fact]
+    public void TheWheelIsReadOnOneFrameAsARealOneIs()
+    {
+        // Rolled on the third update, in a run with no window, where the wheel is Bevy's message
+        // all the same, so the frame's input carries it once, both ways, and then nothing.
+        using var harness = new EngineHarness(frames: 10);
+        var frame = 0;
+        var wheels = new List<(int Frame, float X, float Y)>();
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            if (ctx.Input.WheelX != 0f || ctx.Input.WheelY != 0f) wheels.Add((frame, ctx.Input.WheelX, ctx.Input.WheelY));
+            if (frame == 3) SyntheticInput.Wheel(-2f, 0.5f);
+        });
+        harness.Run();
+
+        var wheel = Assert.Single(wheels);
+        Assert.InRange(wheel.Frame, 4, 5);
+        Assert.Equal(0.5f, wheel.X);
+        Assert.Equal(-2f, wheel.Y);
+    }
 }

@@ -385,7 +385,7 @@ overflow	can
 relative_cursor_position	can	through Bevy's reflected RelativeCursorPosition
 render_ui_to_texture	can	the cube's pointer is spawned by the game and put where a ray from the mouse meets the cube, at the texture coordinate the cast answers
 scrollbars	can
-scroll	missing	mouse wheel events as messages, and which entities each pointer is over
+scroll	can	the wheel taken from picking's Pointer<Scroll> at what the mouse's pointer is over, where Bevy's reads the wheel's messages and every pointer's hovers itself, and the items' list item role for accessibility, which Bevy's AccessibilityNode carries and no wrapper reaches
 size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
 standard_widgets	missing	observers of the widgets' own events (Activate, ValueChange, MenuEvent)
