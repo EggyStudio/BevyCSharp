@@ -1440,3 +1440,15 @@ static IReadOnlyList<CliSession> All();                         // Every session
 static void Remove(int pid);                                    // Takes one back out, on the way down
 static int Prune();                                             // Deletes the files of sessions whose processes are no longer there
 ```
+
+## Everything else
+
+### `GameTimer`
+
+```csharp
+static GameTimer FromSeconds(float seconds, TimerMode mode);    // A timer of seconds that runs once or over and over, as Bevy's Timer::from_seconds
+GameTimer Tick(float delta);                                    // Runs it on by delta seconds, and answers it as it is after, so timer.Tick(delta).JustFinished reads as Bevy's timer.tick(delta).just_finished()
+void Pause();                                                   // Stops it where it is until Unpause
+void Unpause();                                                 // Lets it run again from where it was paused
+void Reset();                                                   // Starts it again from nothing, unfinished, its duration and mode kept
+```

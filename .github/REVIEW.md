@@ -10,14 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c5d08e8`. Courtyard is published from the package as native code and played to its
+Reviewed up to `b263f6d`, which brings the first three groups of examples to B 4, what Bevy's keep
+on an entity kept in a behavior, and the owner pushed up to it on 2026-10-06. The run of `b091fe3`
+was canceled by that push before its tests ended, and its build printed warnings, a possibly null
+dereference and XML comments that do not match their members among them, which item 5's N 6.1
+clears.
+
+Before it, the owner pushed up to `b091fe3` on 2026-10-06. The examples' helpers
+are the package's own (`f9c14be`), `App`'s `Startup`, `Update`, `On` and `SpawnGltf`, `Color`'s
+sRGB and HSL, `Quat`'s `Slerp` and `Lerp` and `EcsWorld`'s spawning and walk, with `SpawnGltf`
+handing a scene's root over once it is named, which moves what moves by a frame in 27 captures.
+Every example builds on the packed package alone in the game job (`b091fe3`), which checks N 2.7.
+Each stress test says its window as Bevy's does and logs its frames by Bevy's own diagnostic
+plugins through `Config.LogFrameTimes` (`2a782d0`), the config growing two fields, so the number
+B 1 reads is 203, a fifth number for the owner. EXAMPLES.md counts B 4 by group, 19 of 119
+written keeping on an entity in a behavior what Bevy keeps on one (`0528144`), and the bridge's
+stages are in `stages.rs` by moves alone (`70e2f83`). This engine stands at 26 checked, 4 with
+places listed, 4 to take and 9 by review.
+
+Before them, Courtyard is published from the package as native code and played to its
 win in the game job, its one trim warning suppressed with its reason (`d5c796c`), which checks
 N 2.5 and leaves the rules still to take to their items. Eighteen listed places the batches since
 `a733ca2` touched without mending them first are mended after the fact, each list in a commit of
 its own that moves code alone (`46a692d`, `5f6d5c7`, `fee26df`, `c5d08e8`), and a batch reads
 the lists for the files it will touch before it starts. The lists stand at 291 for N 1.2, 100 for
-N 1.4 and 52 for N 3.4, and this engine stands at 25 checked, 4 with places
-listed, 5 to take and 9 by review.
+N 1.4 and 52 for N 3.4.
 
 Before them, a test fails for an error the engine logs that it did not say it expects
 (`76cdb9a`), every error said through `EngineLog` and Bevy's own kept by a layer of the bridge's,
@@ -273,43 +290,9 @@ None open.
 
 ## Replies
 
-Item 2 begins with the helpers, each the package's own now, documented and in the cheatsheet, and
-`Example.cs` keeps the `Example` record, the size an example was opened at and `Script`, which
-drive a capture. `App` has `Startup`, `Update` and `On`, each handed the frame's context, and
-`SpawnGltf`, which now hands the root over once `WorldInstanceReady` names it rather than on the
-frame the file loaded, when nothing was under it yet. `Color` has `FromSrgb8` and `FromHsl` and
-converts to the tuple of four numbers the settings take, that one way, so a list of colors and
-tuples is a list of tuples. `Quat` has `Slerp` and `Lerp`, `Render.CreateMaterial` takes a color
-alone, and `EcsWorld` has `SpawnMesh`, `SpawnPointLight`, `SpawnCamera3d` and `Descendants`, which
-took the place of three examples' own walks. Vec2, Vec3, Vec4, Quat and Color were split into files
-of their own first (`c5d08e8`), being on N 1.2's list. Captured again, the 27 examples that spawn a
-glTF scene draw as before but for the phase of what moves, since their scenes are handed over a
-frame or more later. `FreeCamera` stays in the examples until it is weighed against Bevy's own
-camera controller.
-
-N 2.7 is `build/examples-on-package.sh`, which builds every example rather than a handful, their
-sources alone in a project of their own outside the repository on the packed package, and the game
-job runs it beside Courtyard. Every one builds on the package since `f9c14be`.
-
-`StressTest.cs` keeps Bevy's shared warning alone. Each test says its window in its configuration,
-1920 by 1080 at a scale factor of one with no vertical sync, as Bevy's says them, by
-`Config.ScaleFactor`, Bevy's `with_scale_factor_override`, which the bridge gives the window. And
-the log of frame times is Bevy's `FrameTimeDiagnosticsPlugin` and `LogDiagnosticsPlugin`, which the
-bridge adds where `Config.LogFrameTimes` asks, with Bevy's `DiagnosticsPlugin` first for a
-windowless app, so the program here runs no system of its own for it and logs as Bevy's does,
-`fps`, `frame_time` and `frame_count` once a second. transform_hierarchy opens no window, as Bevy's
-does not. The config grew two fields, so the number B 1 reads is 203, a second break for the owner
-beside 202.
-
-EXAMPLES.md counts B 4, by a sentence and a column of the group table that
-`build/examples-table.py` writes. An example of Bevy's keeps state on an entity where it declares
-a component of its own, and the program here keeps it in a behavior where it declares one, which
-the count reads and a reviewer reads further: 19 of the 119 written today, the stress tests and
-seven of 3D Rendering's among them. The groups are brought over from the next batch on, the
-smallest first, the count moving with each.
-
-B 4, the first groups: Movement's `smooth_follow`, Picking's `mesh_picking` and Async Tasks'
-`async_compute` keep on their entities what Bevy's do, in behaviors. The two spheres move by their
-own behaviors, the follower after the target as Bevy chains them; each shape turns by its own; and
-each task's entity holds its task by its slot among the example's tasks, a task being no value a
-component keeps, and gives itself its cube once the task is done. 22 of 119 now.
+`GameTimer` and `TimerMode` are the package's own, Bevy's `Timer` as a struct a behavior keeps on
+its entity and ticks in place, ticked as Bevy ticks its own, a repeating one counting each time a
+long tick runs it out. It is not called `Timer`, since `System.Threading.Timer` is among the names
+every C# program imports and the two would be ambiguous in every game. The examples that keep
+timers on entities, cooldown and the sprite animations among them, are written on it as their
+groups come.
