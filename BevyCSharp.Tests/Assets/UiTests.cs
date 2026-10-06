@@ -664,4 +664,29 @@ public sealed class UiTests
         harness.Run();
     }
 
+    /// <summary>
+    /// A windowless run's camera spawned at startup draws the interface from the first frame, the
+    /// mark chosen once the camera is pointed at the run's image. Chosen before, the interface was
+    /// laid out that frame against no camera at no size, where a node with a margin inside one that
+    /// stretches came out smaller than nothing and Bevy's border radius asserted on it, which
+    /// text_debug did, so no such node is spawned here and the mark is read instead.
+    /// </summary>
+    [SkippableFact]
+    public void AWindowlessRunsCameraDrawsTheInterfaceFromTheFirstFrame()
+    {
+        Needs.Renderer();
+
+        var camera = Entity.None;
+        bool? markedFirst = null;
+
+        using var app = new App(Config.OffscreenFor(64, 64, frames: 3));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ => camera = Render2d.SpawnCamera2d(), "Test.Camera"));
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world => markedFirst ??= world.Resource<EcsWorld>().Get<Bevy.Reflected.IsDefaultUiCameraRef>(camera) is not null,
+            "Test.Look"));
+
+        Assert.Equal(0, app.Run());
+        Assert.True(markedFirst, "the camera was not the interface's on the first frame");
+    }
 }

@@ -10,12 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e805d3a`. Nine commits bring the examples' groups to B 4, what Bevy's keep on an
+Reviewed up to `4e15bea`. Verdict 1 is settled (`5264257`): every text file checks out with LF
+ends, the norm's tests read files through one helper that ends lines with `\n`, the page's test
+reads the script in UTF-8 on either ending and the script writes `\n` alone, and a picture asked
+for with no interface running loads nothing on any bridge, the expected error never having been
+possible on the headless bridge where the suite runs. Three more groups of examples keep on
+their entities what Bevy's keep on theirs (`8637e7c`, `2724064`, `4e15bea`). No verdict is open.
+
+Before them, nine commits brought the examples' groups to B 4, what Bevy's keep on an
 entity kept in a behavior, with `GameTimer` as Bevy's `Timer` and `EaseFunction` as the package's
 own (`3944016` to `e805d3a`). The run of `b263f6d` is the first with this engine's page, read from
 GitHub: Linux passed 722 and failed 1, Windows passed 638 and failed 3, with 351 skipped on each
-where there is no device, and the digest job joined the two. The three failures are Verdict 1,
-which comes before the next batch.
+where there is no device, and the digest job joined the two.
 
 Before them, `b263f6d` brings the first three groups of examples to B 4, what Bevy's keep
 on an entity kept in a behavior, and the owner pushed up to it on 2026-10-06. The run of `b091fe3`
@@ -23,118 +29,8 @@ was canceled by that push before its tests ended, and its build printed warnings
 dereference and XML comments that do not match their members among them, which item 6's N 6.1
 clears.
 
-Before it, the owner pushed up to `b091fe3` on 2026-10-06. The examples' helpers
-are the package's own (`f9c14be`), `App`'s `Startup`, `Update`, `On` and `SpawnGltf`, `Color`'s
-sRGB and HSL, `Quat`'s `Slerp` and `Lerp` and `EcsWorld`'s spawning and walk, with `SpawnGltf`
-handing a scene's root over once it is named, which moves what moves by a frame in 27 captures.
-Every example builds on the packed package alone in the game job (`b091fe3`), which checks N 2.7.
-Each stress test says its window as Bevy's does and logs its frames by Bevy's own diagnostic
-plugins through `Config.LogFrameTimes` (`2a782d0`), the config growing two fields, so the number
-B 1 reads is 203, a fifth number for the owner. EXAMPLES.md counts B 4 by group, 19 of 119
-written keeping on an entity in a behavior what Bevy keeps on one (`0528144`), and the bridge's
-stages are in `stages.rs` by moves alone (`70e2f83`). This engine stands at 26 checked, 4 with
-places listed, 4 to take and 9 by review.
-
-Before them, Courtyard is published from the package as native code and played to its
-win in the game job, its one trim warning suppressed with its reason (`d5c796c`), which checks
-N 2.5 and leaves the rules still to take to their items. Eighteen listed places the batches since
-`a733ca2` touched without mending them first are mended after the fact, each list in a commit of
-its own that moves code alone (`46a692d`, `5f6d5c7`, `fee26df`, `c5d08e8`), and a batch reads
-the lists for the files it will touch before it starts. The lists stand at 291 for N 1.2, 100 for
-N 1.4 and 52 for N 3.4.
-
-Before them, a test fails for an error the engine logs that it did not say it expects
-(`76cdb9a`), every error said through `EngineLog` and Bevy's own kept by a layer of the bridge's,
-a system that throws every frame logged whole once and counted after, and the number B 1 reads
-at 202. The survey found 40 tests logging an error, 15 of them tests of a failure that say so and
-the rest faults, each mended in its own commit: the editor's behaviors ran inside 17 other tests'
-apps (`ba388ab`), the bridge kept clone callbacks by component id from one app to the next and
-wrote a later app's component through an earlier app's hook, and synthetic input wrote window
-events into a headless app (`20663fd`). The tests run through `build/test.py` (`3b8fa9e`), its
-parts the bridge, the renderer and the suite from the start, each held to a time and a memory,
-a cargo part compiled first with `--no-run` since rustc passes 6 GB, and a digest job joining the
-systems' pages, with `TestScriptTests` and stand-ins for dotnet and cargo. AGENTS.md still names
-`dotnet test` and `cargo test`, which change on the owner's word.
-
-Before them, `render/shaders.rs` and `RenderShaders.cs` are split by moves alone
-(`74e5b76`, `b78e565`), off N 1.3's list and, the library's, N 1.2's, and
-`bcs_shader_entity_program` runs under the guard (`333ff9b`), the last entry point B 3 listed,
-so B 3 is checked with its 15 left out. The lists stand at 307 for N 1.2 and 23 for N 1.3.
-
-Before them, N 2.10 finds every method native code calls and fails for a call no
-catch covers (`869c9fb`), eight of them, and two caught nothing before taking a lock, the
-computed and the joint state's rule, which take it inside the `try`. N 2.9 is `FileHandleTests`
-over fourteen loaders in a folder from `TestFolder`, the one helper N 3.4 names, which is new
-here (`9f74107`), and none holds a file.
-
-Before them, the four costs measuring found were mended, the last with `Gizmos.Lines`
-handing a run to the bridge as lines (`de790e4`), which takes many_gizmos to 8.59 ms beside
-Bevy's 6.95, a third number for the owner beside 199 and 200, the bridge's being 201. Four of the
-norm's checks are in (`a733ca2`): the notices under a test of N 6.5's own name, the packages
-against BUILDING.md's list (N 2.8), `ScriptTests` over the scripts the Windows and macOS jobs
-run (N 6.6), with the one `grep -oP` written as `grep -oE`, and the table of examples checked in
-the workflow (N 5.2).
-
-Before them, the last seven of Bevy's stress tests were written and measured, every
-one within two milliseconds of Bevy's and transform_hierarchy faster than it (`d71ff6a`), which
-empties the column of rows that can be written, three of the seven in part for what Bevy does
-not reflect. `gizmos.rs` is split by moves alone (`2e3fbc3`) and off N 1.3's list.
-
-Before them, `Render2d.SetSpriteFrames` moves many sprites and sprite meshes to the
-frames of their sheets in one call, which takes many_animated_sprites from 15.95 ms to 6.75
-beside Bevy's 6.51 and many_animated_sprite_meshes from 212.54 to 13.84 beside Bevy's 14.34,
-measured again into PERFORMANCE.md, with `SpriteFrameTests`. The call is new to the bridge, so
-the number B 1's check reads is 200, a second number for the owner to set beside the 199 the
-wireframes took.
-
-Before it, `Gizmos.Lines` builds a long run in an array kept for its thread
-between calls, which takes many_gizmos from 12.39 ms to 10.68 beside Bevy's 6.97, measured
-again into PERFORMANCE.md. What is left there is each line written into the bridge's general
-description of a shape. `App.cs` and `Gizmos.cs` are split by moves alone (`10b5588`,
-`f91aa59`) and are off the lists of N 1.3 and N 1.2.
-
-Before them, Bevy's wireframe plugins are added only to an app whose config asks since `9ff5abc`
-(`Config.Wireframes`), which gives a frame of a hundred thousand sprite meshes 8 ms back, 13.96
-to 5.52 beside Bevy's 5.23, measured again into PERFORMANCE.md. The number B 1's check reads
-is 199, and the break is said for the owner to number: a game that draws wireframes asks for
-them in its config, and `Render.SetWireframe` refuses in an app that did not.
-
-Before it, `b72f28d` split `Native.cs` and `Render.cs` into partial files by area, by moves
-alone, with the five other types `Render.cs` held in files of their own, and `84a55e0` split
-`interop.rs` the same way.
-
-Before it, thirteen of Bevy's stress tests are written (`1fc9c9c`), each measured beside Bevy's
-own program built from its source, and PERFORMANCE.md names the two scripts that measure and
-four costs with their causes: the 2D wireframe plugin added to every app, an array made for
-every call of `Gizmos.Lines`, a call for every sprite whose frame turns, and reflected writes
-that feed themselves once frames are slow. `many_sprites` was read against Bevy's source and
-carries its numbers. Two faults that measuring found are mended with a test each, a request
-answered at 30 seconds whatever `--timeout` said and a wrapper's `Option` losing what its
-record does not hold. `app.rs` is split by moves and off N 1.3's list (`6991a12`).
-
-Before them, N 7.2's check leaves out a commit of `build/version.txt` alone (`49781de`), as the
-owner's `08fb5b5` setting 0.4 is, and reads a list for the owner's other commits. The notices
-name the contributors to a crate's repository where nothing else names a holder, and
-`bcs_assets_carried` is under the guard, which leaves one entry point on B 3's list.
-
-Before it, the package's notices were settled on the reply, which was read (`00c3db9`).
-`THIRD-PARTY-NOTICES.md` names 569 of the 570 crates of the lock, the one left out being the
-bridge's own, each with its license, the holders its files name and the texts, 69 of them
-written once each, with Bevy's default font, the library's packages and whose the examples and
-their assets are. It is packed at the package's root, N 6.4's test holds it to the lock on every
-run and in the package where there is one, and the pack workflow runs the script's check. The
-218 examples written each say at their head which of Bevy's they are written from. The package
-the owner makes next carries all of it.
-
-Before it, four commits were settled, the last being the tests of what is no area of the library
-in folders named for what they test (`a714bb8`). The table stands at 239 written, 19 written in
-part, none that can be, 105 missing and 58 that do not apply. The lists stand at 291 places for
-N 1.2, 23 for N 1.3, 100 for N 1.4 and 52
-for N 3.4, and B 3 has no entry point left to bring under the guard.
-
-The owner took three more rules into the norm on 2026-10-05, N 2.9, N 2.10 and N 6.5, and then
-N 3.7, N 6.7 and N 6.8, and N 6.6 came from 3DEngine with its check. Item 1 has what is left of
-them.
+The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
+and 9 by review.
 
 ## Now
 
@@ -142,7 +38,8 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
 and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
-1. **Verdict 1 first**, the page's three failures, then the rest of this list in order.
+1. **What the next page says.** The run after `5264257` is pushed shows whether the three failures
+   are gone, which the reviewing session reads and says here. The list goes on meanwhile.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a
    batch reads the lists for the files it will touch before it starts. The rules still to take
@@ -272,18 +169,7 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-**1. The first page says Windows reads files with other line ends, and one test waits on Bevy**
-(N 6.2, N 3.3). The run of `b263f6d` has three failures. On Windows `N_2_8` finds no section of
-packages in BUILDING.md, and `TestScriptTests` finds the page's lines ending in `\r`. The repository
-has no `.gitattributes`, so git on Windows checks text out with CRLF ends, and Python prints them
-there, which 3DEngine met in its first page and mended with `* text=auto eol=lf` (`1c1a3cea`).
-The same file comes here, and `TestScriptTests` splits lines on either ending or the script
-writes `\n` alone, so the page's tests read the same on every system. On both systems
-`ImGuiTests.APictureFromNowhereIsNoPicture` expects Bevy's error for `nowhere.png`, and on the
-runners none comes within the test's frames. The test waits for the asset's failure as it
-arrives, an event or the handle's state, as six handle-table tests were changed to at `76cdb9a`,
-or loads a file of its own that fails at once (N 3.3). The build's warnings on the page, a
-possibly null dereference and XML comments that do not match their members, are item 6's.
+None open.
 
 ## Decisions
 
@@ -389,37 +275,11 @@ command, with a `MenuButton` in place of Bevy's `Button`, and each screen carrie
 methods ask the state themselves rather than by `[InState]`, which would warn in every other
 example that its state was never added.
 
-Verdict 1. `.gitattributes` holds every text file to LF in every checkout, as 3DEngine's `1c1a3cea`
-does, the index already LF throughout, and NormTests reads each file through one helper that ends
-its lines with `\n`, so a rule's pattern does not pass on Windows by finding nothing. The page's
-test split the script's output on `\n` alone, which the run's annotation shows as a `\r` ending
-each line, and read it in the console's code page, where the `×` of the notice it looks for is
-another character, the likelier reason it found none. It reads UTF-8 and splits on either ending,
-and build/test.py writes `\n` alone to its log and its files. The ImGui test expected an error the
-runners could never give. A picture asked for with no interface running answered zero, and on the
-editor's bridge alone was loaded and dropped at once, Bevy saying the file failed some frames
-later, while the headless bridge the suite runs on loads nothing. The bridge now loads nothing
-while no interface keeps pictures, on every profile, `ImGuiTextures.Load` keeps no zero so a path
-asked for early loads once the interface runs, and the test holds that no error comes.
-
-B 4 for ECS, 71 of 119. Each of Bevy's components is a behavior on its entity, and the systems over
-one entity at a time are its methods, among them a printer's repeating `GameTimer` beside its line,
-the players' scoring and check, the bodies' Verlet step after the pull, which stays one static
-system over every pair as `iter_combinations_mut` is, and a mine drawing itself. A callback runs
-its system by a command, `OneShotCallback` in one_shot_systems where callbacks' shares the
-namespace. Commands land once a frame, after PostUpdate, so a mark another system reads in the same
-frame, as `Triggered` is between Bevy's chained two, is added by an app system ordered `Before` the
-behavior's, and ecs_guide's systems order themselves about the players' by name.
-observer_propagation names its entities with Bevy's `Name` rather than an index of its own.
-ecs_guide prints its joins and its rounds in another order, which Bevy leaves unordered too, and
-its capture was written again, the game played the same to the same winner.
-
-B 4 for 2D Rendering, 79 of 119. The moving sprite carries its `Direction`, the ships and enemies
-their `Player`, `SnapToPlayer` and `RotateToPlayer`, `CursorPlayer` in rotate_to_cursor beside
-rotation's, and each text and capsule its marker with the work Bevy does over it. The sprite
-animations keep Bevy's `AnimationConfig`, `AnimationIndices` and `AnimationTimer`, each with a
-`GameTimer`, and read and write the frame on the sprite's own atlas as Bevy's do, through
-`SpriteRef.TextureAtlas` and `Render2d.SetSpriteFrames`, rather than an index of their own.
-sprite_scale's are `ScaleAnimationIndices` and `ScaleAnimationTimer`, sprite_sheet's sharing the
-namespace. pixel_grid_snap's window camera carries `OuterCamera` and fits the canvas to the window
-itself.
+A windowless run's interface had no camera on its first frame. The bridge points the cameras at
+the run's image and chooses the interface's camera among those pointed there, two systems in
+First with no order between them, and the choice came first, found the camera still pointed at
+the window, and left the interface to be laid out that frame against no camera at no size.
+text_debug's columns, a margin inside a node that stretches, came out smaller than nothing there
+and Bevy's border radius asserted on them, so the example stopped on its first frame, offscreen
+and so in every capture, whatever its code. The choice is chained after the pointing, and a test
+holds the camera to be the interface's on the first frame, which it fails on the bridge before.

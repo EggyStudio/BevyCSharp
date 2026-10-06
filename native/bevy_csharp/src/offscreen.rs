@@ -37,6 +37,7 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
     use bevy::camera::{Camera, RenderTarget};
     use bevy::ecs::change_detection::DetectChangesMut;
     use bevy::ecs::query::With;
+    use bevy::ecs::schedule::IntoScheduleConfigs;
     use bevy::ecs::system::{Commands, Query, Res, ResMut};
     use bevy::image::Image;
     use bevy::window::WindowRef;
@@ -54,36 +55,44 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
         },
     );
 
+    // Every camera still pointed at the window pointed at the image instead.
+    fn point_cameras_at_image(
+        target: Option<Res<OffscreenTarget>>,
+        mut cameras: Query<(&mut RenderTarget, &mut bevy::camera::Projection), With<Camera>>,
+    ) {
+        let Some(target) = target else {
+            return;
+        };
+
+        for (mut render_target, mut projection) in &mut cameras {
+            // Read through the shared borrow, so a camera that is already pointed at the image is
+            // not marked changed by the asking, every frame, for the life of the run.
+            let current: &RenderTarget = &render_target;
+            if !matches!(current, RenderTarget::Window(WindowRef::Primary)) {
+                continue;
+            }
+
+            *render_target = RenderTarget::Image(target.image.clone().into());
+
+            // Bevy works out a camera's target size when the camera is added or its projection
+            // changes, and not when its target does. A camera spawned at startup is pointed here
+            // before that first look, but one spawned while the run goes on was added pointing at a
+            // window that is not there, found nothing to size, and would draw nothing for the rest
+            // of the run. Marking the projection changed has the target looked at again.
+            projection.set_changed();
+        }
+    }
+
     app.add_systems(
         First,
-        |target: Option<Res<OffscreenTarget>>,
-         mut cameras: Query<(&mut RenderTarget, &mut bevy::camera::Projection), With<Camera>>| {
-            let Some(target) = target else {
-                return;
-            };
-
-            for (mut render_target, mut projection) in &mut cameras {
-                // Read through the shared borrow, so a camera that is already pointed at the image
-                // is not marked changed by the asking, every frame, for the life of the run.
-                let current: &RenderTarget = &render_target;
-                if !matches!(current, RenderTarget::Window(WindowRef::Primary)) {
-                    continue;
-                }
-
-                *render_target = RenderTarget::Image(target.image.clone().into());
-
-                // Bevy works out a camera's target size when the camera is added or its
-                // projection changes, and not when its target does. A camera spawned at startup
-                // is pointed here before that first look, but one spawned while the run goes on
-                // was added pointing at a window that is not there, found nothing to size, and
-                // would draw nothing for the rest of the run. Marking the projection changed has
-                // the target looked at again.
-                projection.set_changed();
-            }
-        },
+        // Chosen once the cameras are pointed at the image, which is how it tells the run's cameras
+        // from the rest, so a camera spawned at startup draws the interface from the first frame.
+        // Looking first, it would find that camera still pointed at the window, and the interface
+        // would be laid out that frame against no camera, at no size, where a node with a margin
+        // inside one that stretches comes out smaller than nothing and Bevy's border radius asserts
+        // on it.
+        (point_cameras_at_image, choose_offscreen_ui_camera).chain(),
     );
-
-    app.add_systems(First, choose_offscreen_ui_camera);
 }
 
 /// Marks the camera an offscreen run's interface is drawn on, which this bridge chose rather than
