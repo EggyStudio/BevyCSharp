@@ -55,7 +55,17 @@ internal static unsafe partial class Native
     /// <summary>Casts a ray at the scene's meshes and writes the nearest it meets.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_pick_ray(float* origin, float* direction, ulong* entity, float* point, float* normal);
+    internal static partial int bcs_pick_ray(float* origin, float* direction, ulong* entity, float* point, float* normal, float* uv);
+
+    /// <summary>Spawns a pointer of the game's own and writes its number.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pointer_spawn(ulong* number);
+
+    /// <summary>Moves, presses or releases a pointer of the game's own on an image.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pointer_input(ulong number, int image, float x, float y, int action, int button);
 
     /// <summary>Projects a world point onto a camera's viewport, in logical pixels.</summary>
     [LibraryImport(Library)]

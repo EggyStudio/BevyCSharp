@@ -4,9 +4,9 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**248 written, 18 written in part, 0 can be written, 97 missing and 58 do not apply.** Of the 363 that apply, 266 can be written with what is bridged, 18 of them leaving something out.
+**249 written, 18 written in part, 0 can be written, 96 missing and 58 do not apply.** Of the 363 that apply, 267 can be written with what is bridged, 18 of them leaving something out.
 
-**124 of the 126 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**125 of the 127 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -39,12 +39,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 34 | 1 | 0 | 25 | 0 | 12 of 12 |
+| [UI (User Interface)](#ui-user-interface) | 35 | 1 | 0 | 24 | 0 | 13 of 13 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **248** | **18** | **0** | **97** | **58** | **124 of 126** |
+| **All** | **249** | **18** | **0** | **96** | **58** | **125 of 127** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -280,11 +280,11 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_executor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_executor.rs) | Demonstrates how to make a custom SystemExecutor | does not apply, replaces Bevy's system executor, which is Rust |
 | [`custom_query_param`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_query_param.rs) | Groups commonly used compound queries and query filters into a single type | does not apply, derives a Rust query type |
 | [`custom_schedule`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/custom_schedule.rs) | Demonstrates how to add custom schedules | missing, schedules a game adds of its own |
-| [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay, and a click observed on a sprite |
+| [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay |
 | [`dynamic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/dynamic.rs) | Dynamically create components, spawn entities with those components and query those components | does not apply, builds components from raw layouts in Rust |
 | [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | [written](../BevyCSharp.Examples/ecs/ecs_guide.cs), prints [its output](assets/examples/ecs_guide.txt) |
 | [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | [written](../BevyCSharp.Examples/ecs/entity_disabling.cs) |
-| [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, an observer of the pointer moving over a mesh, and points sampled over a mesh's surface |
+| [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, points sampled over a mesh's surface |
 | [`extraction`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/extraction.rs) | Demonstrates different ways of extracting components, copying them from the main world to the render world | does not apply, writes render world extraction in Rust |
 | [`fallible_params`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fallible_params.rs) | Systems are skipped if their parameters cannot be acquired | does not apply, about Rust system parameters that fail validation, where a C# system checks what it needs itself |
 | [`fixed_timestep`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fixed_timestep.rs) | Shows how to create systems that run every fixed timestep, rather than every tick | [written](../BevyCSharp.Examples/ecs/fixed_timestep.cs), prints [its output](assets/examples/fixed_timestep.txt) |
@@ -552,8 +552,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`overflow_clip_margin`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/overflow_clip_margin.rs) | Simple example demonstrating the OverflowClipMargin style property | [written](../BevyCSharp.Examples/ui/overflow_clip_margin.cs) |
 | [`overflow_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/overflow_debug.rs) | An example to debug overflow and clipping behavior | [written](../BevyCSharp.Examples/ui/overflow_debug.cs) |
 | [`relative_cursor_position`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/relative_cursor_position.rs) | Showcases the RelativeCursorPosition component | [written](../BevyCSharp.Examples/ui/relative_cursor_position.cs), through Bevy's reflected RelativeCursorPosition |
-| [`render_ui_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/render_ui_to_texture.rs) | An example of rendering UI as a part of a 3D world | missing, observers of the pointer pressing and dragging over an interface drawn into a texture |
-| [`scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scroll.rs) | Demonstrates scrolling UI containers | missing, observers of the pointer over scrolled nodes, and mouse wheel events as messages |
+| [`render_ui_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/render_ui_to_texture.rs) | An example of rendering UI as a part of a 3D world | [written](../BevyCSharp.Examples/ui/render_ui_to_texture.cs), the cube's pointer is spawned by the game and put where a ray from the mouse meets the cube, at the texture coordinate the cast answers |
+| [`scroll`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scroll.rs) | Demonstrates scrolling UI containers | missing, mouse wheel events as messages, and which entities each pointer is over |
 | [`scrollbars`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/scrollbars.rs) | Demonstrates use of core scrollbar in Bevy UI | [written](../BevyCSharp.Examples/ui/scrollbars.cs) |
 | [`size_constraints`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/size_constraints.rs) | Demonstrates how the to use the size constraints to control the size of a UI node. | [written](../BevyCSharp.Examples/ui/size_constraints.cs) |
 | [`stacked_gradients`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/stacked_gradients.rs) | An example demonstrating stacked gradients | [written](../BevyCSharp.Examples/ui/stacked_gradients.cs), through Bevy's reflected BackgroundGradient |

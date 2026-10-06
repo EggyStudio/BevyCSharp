@@ -23,7 +23,8 @@ use crate::interop::status;
 #[derive(Clone, Copy, Default)]
 pub struct BcsPointerEvent {
     pub entity: u64,
-    /// Which finger for a touch, the first eight bytes of the identifier for a pointer of the game's own.
+    /// Which finger for a touch, the last eight bytes of the identifier for a pointer of the game's
+    /// own, which for one [`bcs_pointer_spawn`] made is its number.
     pub pointer_number: u64,
     pub hit_camera: u64,
     /// The entity dragged, or the one dropped.
@@ -115,7 +116,7 @@ mod observers {
         let (pointer_kind, pointer_number) = match pointer.pointer_id {
             PointerId::Mouse => (0, 0),
             PointerId::Touch(id) => (1, id),
-            PointerId::Custom(uuid) => (2, uuid.as_u64_pair().0),
+            PointerId::Custom(uuid) => (2, uuid.as_u64_pair().1),
         };
         BcsPointerEvent {
             entity: pointer.entity.to_bits(),
@@ -288,6 +289,107 @@ pub unsafe extern "C" fn bcs_observe_pointer(
                 Some(app) => watch(app.app.world_mut()),
                 None => status::NULL_ARG,
             }
+        }
+    })
+}
+
+/// What the first eight bytes of a pointer this bridge makes say, so its identifier is its number
+/// and nothing a game or Bevy makes with a random one is taken for it.
+#[cfg(feature = "render")]
+const OWN_POINTER: u64 = 0x6263_735f_706f_696e;
+
+/// The number of the next pointer [`bcs_pointer_spawn`] makes.
+#[cfg(feature = "render")]
+static NEXT_POINTER: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(1);
+
+/// Spawns a pointer of the game's own, Bevy's `PointerId::Custom`, and writes its number.
+///
+/// A pointer a game drives itself, as one moving over an interface drawn into a texture on a
+/// cube, which the game moves to where a ray from the mouse meets the cube. Bevy finds what it is
+/// over as it finds what the mouse is over, wherever [`bcs_pointer_input`] puts it.
+///
+/// # Safety
+/// `number` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_pointer_spawn(number: *mut u64) -> i32 {
+    crate::interop::guard(|| {
+        if number.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let next = NEXT_POINTER.fetch_add(1, core::sync::atomic::Ordering::Relaxed);
+            crate::state::with_world(|world| {
+                let id = bevy::picking::pointer::PointerId::Custom(bevy::asset::uuid::Uuid::from_u64_pair(OWN_POINTER, next));
+                world.spawn(id);
+                unsafe { number.write(next) };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Moves, presses or releases a pointer [`bcs_pointer_spawn`] made, at `x` and `y` on the image
+/// `image`, in its pixels from the top left.
+///
+/// Bevy's own `PointerInput`, which picking reads every pointer from, so what is drawn on the
+/// image, an interface a camera draws there, is pointed at as the mouse points at a window.
+/// `action` is 0 to move, 1 to press and 2 to release, `button` 0 for the primary button, 1 for
+/// the secondary and 2 for the middle one. A move goes from where the pointer was.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_pointer_input(number: u64, image: i32, x: f32, y: f32, action: i32, button: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (number, image, x, y, action, button);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::NormalizedRenderTarget;
+            use bevy::math::Vec2;
+            use bevy::picking::pointer::{Location, PointerAction, PointerButton, PointerId, PointerInput, PointerLocation};
+
+            crate::state::with_world(|world| {
+                let handle = match crate::render::image_handle(world, image) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(refusal) => return refusal,
+                };
+                let id = PointerId::Custom(bevy::asset::uuid::Uuid::from_u64_pair(OWN_POINTER, number));
+                let at = Vec2::new(x, y);
+
+                // How far it went, from where Bevy last put it.
+                let mut pointers = world.query::<(&PointerId, &PointerLocation)>();
+                let Some(was) = pointers.iter(world).find(|(found, _)| **found == id).map(|(_, location)| location.location().map(|place| place.position)) else {
+                    return status::NO_ENTITY;
+                };
+
+                let location = Location {
+                    target: NormalizedRenderTarget::Image(handle.into()),
+                    position: at,
+                };
+                let button = match button {
+                    1 => PointerButton::Secondary,
+                    2 => PointerButton::Middle,
+                    _ => PointerButton::Primary,
+                };
+                let act = match action {
+                    1 => PointerAction::Press(button),
+                    2 => PointerAction::Release(button),
+                    _ => PointerAction::Move { delta: was.map_or(Vec2::ZERO, |was| at - was) },
+                };
+
+                world.write_message(PointerInput::new(id, location, act));
+                status::OK
+            })
         }
     })
 }

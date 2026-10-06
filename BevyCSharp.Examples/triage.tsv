@@ -184,11 +184,11 @@ contiguous_query	n/a	about a Rust query's memory layout
 custom_executor	n/a	replaces Bevy's system executor, which is Rust
 custom_query_param	n/a	derives a Rust query type
 custom_schedule	missing	schedules a game adds of its own
-delayed_commands	missing	commands queued to run after a delay, and a click observed on a sprite
+delayed_commands	missing	commands queued to run after a delay
 dynamic	n/a	builds components from raw layouts in Rust
 ecs_guide	can
 entity_disabling	can
-error_handling	missing	an observer of the pointer moving over a mesh, and points sampled over a mesh's surface
+error_handling	missing	points sampled over a mesh's surface
 extraction	n/a	writes render world extraction in Rust
 fallible_params	n/a	about Rust system parameters that fail validation, where a C# system checks what it needs itself
 fixed_timestep	can
@@ -383,9 +383,9 @@ overflow_clip_margin	can
 overflow_debug	can
 overflow	can
 relative_cursor_position	can	through Bevy's reflected RelativeCursorPosition
-render_ui_to_texture	missing	observers of the pointer pressing and dragging over an interface drawn into a texture
+render_ui_to_texture	can	the cube's pointer is spawned by the game and put where a ray from the mouse meets the cube, at the texture coordinate the cast answers
 scrollbars	can
-scroll	missing	observers of the pointer over scrolled nodes, and mouse wheel events as messages
+scroll	missing	mouse wheel events as messages, and which entities each pointer is over
 size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
 standard_widgets	missing	observers of the widgets' own events (Activate, ValueChange, MenuEvent)

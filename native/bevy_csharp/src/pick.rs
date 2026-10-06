@@ -97,9 +97,12 @@ pub unsafe extern "C" fn bcs_pick_events(out: *mut u64, capacity: i32) -> i32 {
 ///
 /// Returns [`status::NOT_PRESENT`] when the ray meets nothing.
 ///
+/// `uv` is where on the mesh's texture the ray met it, as Bevy's ray cast says from the mesh's
+/// texture coordinates, or two NaNs for a mesh with none.
+///
 /// # Safety
-/// `origin` and `direction` must hold three floats each. `entity` must be writable, and `point`
-/// and `normal` writable for three floats each, or null to skip them.
+/// `origin` and `direction` must hold three floats each. `entity` must be writable, `point` and
+/// `normal` writable for three floats each and `uv` for two, or null to skip them.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_pick_ray(
     origin: *const f32,
@@ -107,6 +110,7 @@ pub unsafe extern "C" fn bcs_pick_ray(
     entity: *mut u64,
     point: *mut f32,
     normal: *mut f32,
+    uv: *mut f32,
 ) -> i32 {
     crate::interop::guard(|| {
         if origin.is_null() || direction.is_null() || entity.is_null() {
@@ -115,7 +119,7 @@ pub unsafe extern "C" fn bcs_pick_ray(
 
         #[cfg(not(feature = "render"))]
         {
-            let _ = (point, normal);
+            let _ = (point, normal, uv);
             status::UNSUPPORTED
         }
 
@@ -162,6 +166,10 @@ pub unsafe extern "C" fn bcs_pick_ray(
                     }
                     if !normal.is_null() {
                         std::ptr::copy_nonoverlapping(at.normal.normalize_or_zero().to_array().as_ptr(), normal, 3);
+                    }
+                    if !uv.is_null() {
+                        let at_uv = at.uv.map_or([f32::NAN; 2], |found| found.to_array());
+                        std::ptr::copy_nonoverlapping(at_uv.as_ptr(), uv, 2);
                     }
                 }
 

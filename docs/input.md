@@ -89,6 +89,20 @@ programs add mesh picking only where they pick one. It all needs a bridge with t
 offscreen run has the pretend pointer of `SyntheticInput` put on the image it draws into, so a
 test or `./bcs command input.click` picks there as a hand would in a window.
 
+A game can have pointers of its own, for an interface drawn into an image that a mesh in the scene
+wears, where no mouse is. `Picking.SpawnPointer()` makes one, and `Picking.MovePointer`,
+`PressPointer` and `ReleasePointer` put it on that image and press it there, so the interface's
+nodes hear it as they would the mouse, its events saying which pointer it was. Where it goes on the
+image is the game's to say, usually where a ray from the mouse meets the mesh, which
+`Picking.TryCast` answers with the texture coordinate there:
+
+```csharp
+if (Render.TryRay(camera, x, y, out var origin, out var direction)
+    && Picking.TryCast(origin, direction, out var hit, out _, out _, out var uv)
+    && uv is { } at)
+    Picking.MovePointer(screenPointer, screenImage, new Vec2(512f * at.X, 512f * at.Y));
+```
+
 ---
 
 Before this, [Physics](physics.md).

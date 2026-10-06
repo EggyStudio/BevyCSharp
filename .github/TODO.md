@@ -34,19 +34,16 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
   `eased_motion` is written in part without them, its curves sampled each frame.
-- **What Bevy's WGSL reaches and a Slang shader does not, three examples.** A Slang shader is lit
-  by Bevy through `bcs::light` and `bcs::finish`, and draws in the forward pass. `ssr`'s water draws
-  into Bevy's deferred buffers, which needs a Slang material to write them, and `clustered_decals`
-  and `irradiance_volumes` read the decal over a surface and the volume's voxels through Bevy's
-  WGSL functions, which need the same kind of named call `bcs::light` makes.
-- **Bevy's events as observers, ten examples.** A click, a drag or a pointer moving over what they
-  draw, which `error_handling`, `delayed_commands`, `entity_disabling`, `ui_drag_and_drop`,
-  `viewport_node`, `drag_to_scroll`, `render_ui_to_texture` and `scroll` observe on the entity it
-  happened to, and the widgets' own `Activate`, `ValueChange` and menu events, which
-  `standard_widgets` and `standard_widgets_observers` observe. C# observers run for a game's own
-  events and for a component's coming and going, and Bevy's `Pointer<Click>`, `Pointer<Over>`,
-  `Pointer<Drag>` and the rest need the same bridge for events Bevy triggers, with each event's
-  fields read into a C# struct.
+- **Bevy's deferred buffers from a Slang shader, one example.** A Slang shader is lit by Bevy
+  through `bcs::light` and `bcs::finish`, reaches the clustered decals over it and an irradiance
+  volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
+  into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
+  whose outputs follow the camera's prepasses.
+- **The widgets' events as observers, two examples.** The widgets' own `Activate`, `ValueChange`
+  and menu events, which `standard_widgets` and `standard_widgets_observers` observe. What a
+  pointer does to an entity reaches C# as Bevy's `Pointer<E>`, from a pointer of the platform's or
+  one a game spawns itself, and the widgets' events need the same bridge, an observer in the
+  bridge for each kind copying its fields into a C# struct.
 - **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused
@@ -86,7 +83,9 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Thirteen examples are written in part, each leaving out a feature named in its row.
+Eighteen examples are written in part, each leaving out a feature named in its row. Six are stress
+tests, which leave out switches and counts that no wrapper reaches, and the other twelve each leave
+out one of these.
 
 - **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
   polyline and convex polygon, and the extrusion of a ring around a flat shape. `MeshShape`
@@ -98,9 +97,6 @@ Thirteen examples are written in part, each leaving out a feature named in its r
 - **An underline under text**, which `text2d` draws its first box's text without and
   `letter_spacing` its heading. Bevy's `Underline` is not reflected, so no call reaches it, and it
   is one of the text styles the fonts entry above names.
-- **How large an image is**, which `tonemapping`'s image viewer reads in Bevy to size its square
-  to a dropped picture. The bridge loads and draws an image without saying its size, which a call
-  reading the loaded image's width and height would.
 - **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
   its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
   added, and the cell count is one of Bevy's render diagnostics that is a number rather than a

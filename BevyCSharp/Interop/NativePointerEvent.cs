@@ -13,7 +13,7 @@ public struct NativePointerEvent
     /// <summary>The entity it happened to.</summary>
     public ulong Entity;
 
-    /// <summary>Which finger for a touch, the first eight bytes of the identifier for a pointer of the game's own.</summary>
+    /// <summary>Which finger for a touch, the last eight bytes of the identifier for a pointer of the game's own.</summary>
     public ulong PointerNumber;
 
     /// <summary>The camera the hit was seen through.</summary>

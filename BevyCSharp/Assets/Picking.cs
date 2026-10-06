@@ -68,11 +68,31 @@ public static unsafe class Picking
     /// <param name="point">Where it met it, in world space.</param>
     /// <param name="normal">Which way the surface faces there, of length one.</param>
     /// <returns>Whether it met anything.</returns>
-    public static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal)
+    public static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal) =>
+        TryCast(origin, direction, out entity, out point, out normal, out _);
+
+    /// <summary>
+    /// The nearest mesh a ray meets, as <see cref="TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)"/>
+    /// says, and where on its texture.
+    /// </summary>
+    /// <remarks>
+    /// The texture coordinate is the mesh's own at that point, from zero to one across its image,
+    /// so a pointer moved over an interface drawn into the image with <see cref="MovePointer"/> is
+    /// at <c>uv</c> times the image's size. Nothing for a mesh with no texture coordinates.
+    /// </remarks>
+    /// <param name="origin">Where the ray starts, in world space.</param>
+    /// <param name="direction">Which way it goes, of any length but zero.</param>
+    /// <param name="entity">The mesh it met.</param>
+    /// <param name="point">Where it met it, in world space.</param>
+    /// <param name="normal">Which way the surface faces there, of length one.</param>
+    /// <param name="uv">Where on the mesh's texture it met it.</param>
+    /// <returns>Whether it met anything.</returns>
+    public static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal, out Vec2? uv)
     {
         entity = Entity.None;
         point = Vec3.Zero;
         normal = Vec3.Zero;
+        uv = null;
 
         if (!App.HasRenderer || direction == Vec3.Zero) return false;
 
@@ -80,13 +100,72 @@ public static unsafe class Picking
         var towards = stackalloc float[3] { direction.X, direction.Y, direction.Z };
         var at = stackalloc float[3];
         var facing = stackalloc float[3];
+        var texel = stackalloc float[2];
         ulong hit;
 
-        if (Native.bcs_pick_ray(from, towards, &hit, at, facing) != 0) return false;
+        if (Native.bcs_pick_ray(from, towards, &hit, at, facing, texel) != 0) return false;
 
         entity = new Entity(hit);
         point = new Vec3(at[0], at[1], at[2]);
         normal = new Vec3(facing[0], facing[1], facing[2]);
+        if (!float.IsNaN(texel[0])) uv = new Vec2(texel[0], texel[1]);
         return true;
+    }
+
+    /// <summary>
+    /// Makes a pointer of the game's own, which it moves and presses itself. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>PointerId::Custom</c>. Bevy finds what such a pointer is over as it finds what the
+    /// mouse is over, and an entity hears what it does through <see cref="Pointer{TEvent}"/> with
+    /// this as <see cref="Pointer{TEvent}.PointerId"/>. It is for a pointer that is not the mouse,
+    /// as a game's own cursor moving over an interface drawn into a texture on a screen in the
+    /// world, put where a ray from the mouse meets the screen (<see cref="TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3, out Vec2?)"/>).
+    /// </para>
+    /// </remarks>
+    /// <returns>The pointer, to move and press.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static PointerId SpawnPointer()
+    {
+        ulong number;
+        Native.Check(Native.bcs_pointer_spawn(&number), "making a pointer");
+        return new PointerId(PointerKind.Custom, number);
+    }
+
+    /// <summary>Moves a pointer from <see cref="SpawnPointer"/> to a place on an image. Only valid inside a system.</summary>
+    /// <param name="pointer">The pointer.</param>
+    /// <param name="image">The image it is on, which a camera draws into, from <see cref="Render.CreateTarget"/>.</param>
+    /// <param name="position">Where on it, in its pixels from the top left.</param>
+    /// <exception cref="BevyNativeException">The pointer or the image is not there, or this build has no renderer.</exception>
+    public static void MovePointer(PointerId pointer, AssetHandle image, Vec2 position) => Send(pointer, image, position, 0, PointerButton.Primary);
+
+    /// <summary>Presses a button of a pointer from <see cref="SpawnPointer"/> where it is put. Only valid inside a system.</summary>
+    /// <param name="pointer">The pointer.</param>
+    /// <param name="image">The image it is on, which a camera draws into, from <see cref="Render.CreateTarget"/>.</param>
+    /// <param name="position">Where on it, in its pixels from the top left.</param>
+    /// <param name="button">Which button.</param>
+    /// <exception cref="BevyNativeException">The pointer or the image is not there, or this build has no renderer.</exception>
+    public static void PressPointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary) =>
+        Send(pointer, image, position, 1, button);
+
+    /// <summary>Lets a button of a pointer from <see cref="SpawnPointer"/> go where it is put. Only valid inside a system.</summary>
+    /// <param name="pointer">The pointer.</param>
+    /// <param name="image">The image it is on, which a camera draws into, from <see cref="Render.CreateTarget"/>.</param>
+    /// <param name="position">Where on it, in its pixels from the top left.</param>
+    /// <param name="button">Which button.</param>
+    /// <exception cref="BevyNativeException">The pointer or the image is not there, or this build has no renderer.</exception>
+    public static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary) =>
+        Send(pointer, image, position, 2, button);
+
+    private static void Send(PointerId pointer, AssetHandle image, Vec2 position, int action, PointerButton button)
+    {
+        if (pointer.Kind != PointerKind.Custom)
+            throw new ArgumentException("Only a pointer of the game's own, from SpawnPointer, is moved and pressed here.", nameof(pointer));
+
+        Native.Check(
+            Native.bcs_pointer_input(pointer.Number, image.Key, position.X, position.Y, action, (int)button),
+            $"moving {pointer} on {image}");
     }
 }

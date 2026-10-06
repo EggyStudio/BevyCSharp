@@ -310,6 +310,7 @@ internal static class Catalog
         new("ui_drag_and_drop", UiDragAndDrop.Build),
         new("drag_to_scroll", DragToScroll.Build),
         new("viewport_node", ViewportNode.Build, ViewportNode.Configure),
+        new("render_ui_to_texture", RenderUiToTexture.Build),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
         new("letter_spacing", LetterSpacingExample.Build),

@@ -882,6 +882,11 @@ EffectSettings Through(PhysicalLens lens);                      // Takes the dep
 ```csharp
 static Entity[] Drain();                                        // Takes the scene entities clicked since the last call, none where meshes are not picked
 static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal);  // The nearest mesh a ray meets, where, and which way the surface there faces
+static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal, out Vec2? uv);  // The nearest mesh a ray meets, as TryCast says, and where on its texture
+static PointerId SpawnPointer();                                // Makes a pointer of the game's own, which it moves and presses itself
+static void MovePointer(PointerId pointer, AssetHandle image, Vec2 position);  // Moves a pointer from SpawnPointer to a place on an image
+static void PressPointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary);  // Presses a button of a pointer from SpawnPointer where it is put
+static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary);  // Lets a button of a pointer from SpawnPointer go where it is put
 ```
 
 ## Shaders

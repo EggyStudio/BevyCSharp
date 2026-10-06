@@ -10,33 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1a4b821`. A Slang material reaches the clustered decals over it through Bevy's own
-iterator, laying them on as the standard material does or reading each one's tag and textures, with
+Reviewed up to `4034f91`. A game observes what a pointer does to an entity as Bevy's `Pointer<E>`,
+the seventeen kinds, taken up the parents and stopped with `on.Propagate(false)` (ABI 206); picking
+is in the render profile as decided, measured as one clean release build each at 3 seconds and 0.6
+percent more, mesh picking compiled in and added where `Config.MeshPicking` asks; an offscreen run
+is pointed at through its image, the rays Bevy casts for no primary window added by `offscreen.rs`,
+so an offscreen editor takes clicks on its scene; six more examples are written on the pointer's
+events, 248, and `mesh_picking` and `simple_picking` run on observers in the render profile
+(`b548987`, `4034f91`). Two things seen there are not mended: a move and a press at a new place in
+one frame miss, as a window's mouse does in Bevy, and `dragdrop_picking`'s preview draws over the
+words Bevy sorts it under, untraced, which item 4 holds with the captures. The pick ray's tests
+moved to `Assets` by a move alone, N 1.4's list at 95 to mend (`96a61e6`). No verdict is open.
+
+Before them, a Slang material reached the clustered decals over it through Bevy's own iterator,
+laying them on as the standard material does or reading each one's tag and textures, with
 `clustered_decals` written and `LitShaderTests` holding it within 12 a channel (`4bbcec0`), and
 reads the light an irradiance volume gives through Bevy's own function, `Render.TryImageSize` giving
 an image's size (ABI 205), with `irradiance_volumes` and the whole of `tonemapping` written
 (`1a4b821`); the light probes' tests moved to `Assets` by a move alone, so N 1.4's list stands at 96
-to mend (`67d179b`). The deferred buffers wait behind the pointer's events as observers, ten rows to
-their one or two, since a material drawing into them needs a stage of its own whose outputs follow
-the camera's prepasses, and picking moves into the render profile, decided here on 2026-10-06, its
-size and build time measured. No verdict is open.
+to mend (`67d179b`). The deferred buffers wait as a design of their own, whose outputs follow the
+camera's prepasses, and picking into the render profile was decided here on 2026-10-06.
 
 Before them, two commits of moves alone split the bridge's `programs.rs` and `reflect.rs` into parts
 and put the lit shader's tests in `Assets`, so N 1.3's list stands at 19 from 21, 12 of them in the
 bridge, and N 1.4's at 97 to mend (`5be8291`, `56ad9a2`).
-
-Before them, a kinematic body followed its entity at the speed and rate of turning the entity moves
-at, through every step of a frame, so a crate on a platform moved at 2.00 rides at 2.00 within 0.02
-at seven frame rates and over uneven frames where it rode at 1.80 to 0.02 before, a turned platform
-carries it round, and `MarkPlaced` or `PlaceBeyond` says when an entity was put somewhere rather
-than moved (`05bc3b4`), which settles item 3. A body at rest given a velocity, an impulse, a motor
-or a changed joint moves in the next step, `PhysicsWorld.Wake` clearing Bepu's candidate flag and
-its count of steps under the threshold, with `SleepTests` over ten cases after 32 and 128 steps of
-rest, of which the velocity and the impulse after 32 were lost before (`8557a75`). A convex
-manifold's friction is scaled by its contact count, as 3DEngine's `ed0f3aa6` has it, so a box on a
-box slides to 2.55 and 1.27 units at frictions of a half and 1 where it slid 10.15 and 5.06, and on
-a floor of triangles as well, `FrictionTests` holding each within a tenth of the distance friction
-allows (`e5c8110`), which settles item 14. No verdict is open.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -64,6 +61,8 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
    scenes. Transmission's glass spheres are missing from about one capture in four with TAA
    on, before `6a84286` as after it, so the cause is found before that job is red for them, or
    the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared.
 4. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
@@ -164,51 +163,19 @@ None open.
 
 ## Replies
 
-**Now 3, the pointer's events as observers.** A game observes what a pointer does to an entity as
-Bevy's `Pointer<E>`, `ecs.Observe<Pointer<Click>>(button, on => ...)`, with Bevy's seventeen kinds
-from `Over` to `Cancel` in `BevyCSharp/Input`, each carrying the entity, the pointer, where it is
-and what it did, most with where it met the entity. The first observer of a kind has the bridge
-spawn a Bevy observer of it (`pointer.rs`), which copies the event into one shape and calls C# with
-the world on loan at its first step only, and C# takes it up the parents as Bevy does, so
-`on.Propagate(false)` stops it (ABI 206).
-
-Picking is in the render profile as you said: `mesh_picking` moved there and `sprite_picking`
-added, file_watcher, ImGui and reflect_documentation staying in the editor. Measured as one clean
-release build of the render profile each, on this machine and not in the container: 836 s and
-138,009,608 bytes before, 839 s and 138,862,344 after, 3 s and 0.6% more, the first run having had
-a short managed build overlap it. Mesh picking is compiled in and added only where an app asks,
-`Config.MeshPicking`, which the editor has, since Bevy leaves it out of its default plugins for the
-ray it casts at every mesh as the pointer moves, and its own programs add it where they pick one.
-Sprites are picked as Bevy's default plugins pick them, a sprite carrying `Pickable`.
-
-An offscreen run had no window for a pointer, so `SyntheticInput` there puts the mouse's pointer on
-the image the run draws into, through Bevy's `PointerInput`, and its button and place reach
-`ctx.Input`. Bevy's ray map asks for a primary window first and built no ray at all without one, so
-meshes and sprites went unpicked offscreen, and `offscreen.rs` adds the rays it would have cast for
-cameras drawing into that image, where Bevy's documentation of the map says to add such rays. An
-offscreen editor now takes clicks on the scene through picking as a window does.
-
-`sprite_picking`, `dragdrop_picking`, `entity_disabling` and `ui_drag_and_drop` are written, each
-driven offscreen by `bcs` and seen to do what Bevy's does, 246 written, and `mesh_picking` and
-`simple_picking` are on observers in the render profile. `mesh_picking` still marks the point under
-the pointer from a ray it casts each frame, since the hits Bevy keeps on its pointer are not
-reachable from C#, and its row says so. `PointerTests` holds the mirror's layout, a click on a node
-heard there and at its parent and stopped at the node, a click on a cube saying where it met the
-face and which way that faces, and a sprite picked where it is drawn and nowhere else.
-`PickRayTests` moved to `Assets` first by a move alone (`96a61e6`). Two things were seen and not
-mended. A move and a press at a new place in one frame miss, the hover being a frame behind, as a
-window's mouse is in Bevy. And `dragdrop_picking`'s pale preview draws over the words "Drop here",
-where Bevy sorts it under them, which was not traced.
-
-Shared: a game observes what a pointer does to an entity as Bevy's `Pointer<E>`, taken here, and an
-offscreen run is pointed at through its image, which may be worth a look in 3DEngine's offscreen
-runs.
-
-**Now 3, two more pointer rows.** `drag_to_scroll` scrolls a board of tiles larger than the window
-by a drag at half the interface's scale, and `viewport_node` picks the cube a widget's camera draws
-through the widget, a left drag turning it and a right drag moving the widget, each driven
-offscreen and seen to do what Bevy's does, 248 written. `viewport_node` marks where the pointer
-meets the cube from the cube's own pointer events, since the hits Bevy keeps on its pointers are
-not reachable from C#, and its row says so. A point exactly where four tiles meet is in none of
-them for Bevy's interface picking, which cost a while before it was seen to be the point and not
-the picking.
+**Now 3, the last pointer row.** `render_ui_to_texture` is written. An interface is drawn into an
+image a turning cube wears, and a pointer of the game's own is put where a ray from the mouse meets
+the cube, so the box on it lights under the mouse and is dragged across the texture. Driven
+offscreen by `bcs` and seen to do what Bevy's does, 249 written. `Picking.SpawnPointer` makes a
+pointer of Bevy's `PointerId::Custom` kind, and `MovePointer`, `PressPointer` and `ReleasePointer`
+send Bevy's `PointerInput` for it on an image, as Bevy's example sends it for its
+`CUBE_POINTER_ID`. `Picking.TryCast` also answers the texture coordinate where the ray met the mesh,
+which Bevy's ray cast keeps on its hit (ABI 207). A pointer's number is the last eight bytes of its
+UUID, so a spawned one is told apart by the number `SpawnPointer` gave. The box goes blue again
+under a mouse held still, since the cube turns the texture out from under the pointer, which is
+right and Bevy's does the same. `PointerTests` holds a spawned pointer clicking a node drawn into an
+image, at the place it was put, and `PickRayTests` the middle of a cube's top face at (0.5, 0.5).
+TODO.md's example gaps are rewritten around what is left, the observers entry down to the widgets'
+two, and `error_handling`, `delayed_commands` and `scroll` name only what they still wait on, a
+mesh's surface sampled, commands run after a delay, and the mouse wheel as messages with what each
+pointer is over.

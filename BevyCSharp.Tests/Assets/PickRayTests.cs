@@ -24,7 +24,7 @@ public sealed class PickRayTests
         app.AddPlugin(new EnginePlugin());
 
         Entity cube = default;
-        (bool Hit, Entity Entity, Vec3 Point, Vec3 Normal)? down = null;
+        (bool Hit, Entity Entity, Vec3 Point, Vec3 Normal, Vec2? Uv)? down = null;
         bool? beside = null;
         bool? hidden = null;
 
@@ -58,9 +58,9 @@ public sealed class PickRayTests
             {
                 if (world.Resource<Time>().FrameCount != 60) return;
 
-                down = Picking.TryCast(new Vec3(0f, 5f, 0f), -Vec3.UnitY, out var entity, out var point, out var normal)
-                    ? (true, entity, point, normal)
-                    : (false, Entity.None, Vec3.Zero, Vec3.Zero);
+                down = Picking.TryCast(new Vec3(0f, 5f, 0f), -Vec3.UnitY, out var entity, out var point, out var normal, out var uv)
+                    ? (true, entity, point, normal, uv)
+                    : (false, Entity.None, Vec3.Zero, Vec3.Zero, null);
 
                 beside = Picking.TryCast(new Vec3(-3f, 5f, 0f), -Vec3.UnitY, out _, out _, out _);
                 hidden = Picking.TryCast(new Vec3(3f, 5f, 0f), -Vec3.UnitY, out _, out _, out _);
@@ -74,6 +74,11 @@ public sealed class PickRayTests
         Assert.Equal(cube, down.Value.Entity);
         Assert.Equal(0.5f, down.Value.Point.Y, 3);
         Assert.Equal(1f, down.Value.Normal.Y, 3);
+
+        // The middle of the top face, which is the middle of the texture that face wears.
+        Assert.NotNull(down.Value.Uv);
+        Assert.Equal(0.5f, down.Value.Uv.Value.X, 3);
+        Assert.Equal(0.5f, down.Value.Uv.Value.Y, 3);
 
         // Nothing to meet beside it, and the one on the preview layer is passed through.
         Assert.False(beside);

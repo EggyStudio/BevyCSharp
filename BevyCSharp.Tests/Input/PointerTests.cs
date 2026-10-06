@@ -187,6 +187,52 @@ public sealed class PointerTests
         Assert.Equal(0, misses);
     }
 
+    /// <summary>
+    /// A pointer of the game's own, put on an image an interface is drawn into, clicks a node there
+    /// where it is put, and the click says which pointer.
+    /// </summary>
+    [SkippableFact]
+    public void APointerOfTheGamesOwnClicksAnInterfaceDrawnIntoAnImage()
+    {
+        Needs.Renderer();
+
+        var clicks = new List<Pointer<Click>>();
+        var (frame, pointer, image) = (0, default(PointerId), AssetHandle.None);
+
+        using var app = new App(Config.OffscreenFor(200, 200, frames: 40));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+
+            // An image a hundred pixels square, which a camera of its own draws an interface into.
+            image = Render.CreateTarget(100, 100);
+            var camera = Render2d.SpawnCamera2d(order: -1);
+            Render.SetCameraTarget(camera, image);
+            var node = Ui.SpawnNode(new UiSettings { Camera = camera, Width = Length.Percent(100f), Height = Length.Percent(100f) });
+            ecs.Observe<Pointer<Click>>(node, on => clicks.Add(on.Event));
+
+            pointer = Picking.SpawnPointer();
+        }, "Test.Setup"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ =>
+        {
+            frame++;
+            if (frame == 10) Picking.MovePointer(pointer, image, new Vec2(30f, 70f));
+            if (frame == 14) Picking.PressPointer(pointer, image, new Vec2(30f, 70f));
+            if (frame == 18) Picking.ReleasePointer(pointer, image, new Vec2(30f, 70f));
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        var click = Assert.Single(clicks);
+        Assert.Equal(pointer, click.PointerId);
+        Assert.Equal(PointerKind.Custom, click.PointerId.Kind);
+        Assert.Equal(new Vec2(30f, 70f), click.Position);
+    }
+
     /// <summary>An observer that stops the click keeps it from the parent.</summary>
     [SkippableFact]
     public void AClickStoppedAtANodeDoesNotReachItsParent()
