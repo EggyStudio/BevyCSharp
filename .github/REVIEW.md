@@ -307,3 +307,9 @@ a component of its own, and the program here keeps it in a behavior where it dec
 the count reads and a reviewer reads further: 19 of the 119 written today, the stress tests and
 seven of 3D Rendering's among them. The groups are brought over from the next batch on, the
 smallest first, the count moving with each.
+
+B 4, the first groups: Movement's `smooth_follow`, Picking's `mesh_picking` and Async Tasks'
+`async_compute` keep on their entities what Bevy's do, in behaviors. The two spheres move by their
+own behaviors, the follower after the target as Bevy chains them; each shape turns by its own; and
+each task's entity holds its task by its slot among the example's tasks, a task being no value a
+component keeps, and gives itself its cube once the task is done. 22 of 119 now.

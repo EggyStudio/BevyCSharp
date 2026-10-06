@@ -11,47 +11,66 @@ internal static class AsyncCompute
 {
     private const int Cubes = 6;
 
-    private static readonly List<Task<Vec3>> Pending = [];
-    private static AssetHandle _mesh, _material;
+    // Bevy's BoxMeshHandle and BoxMaterialHandle resources, and the tasks, which an entity holds by
+    // its slot here, since a task is no value a component can keep.
+    internal static AssetHandle BoxMesh, BoxMaterial;
+    internal static readonly List<Task<Vec3>> Tasks = [];
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            Pending.Clear();
-            _mesh = Render.CreateMesh(MeshShape.Cuboid, 0.25f, 0.25f, 0.25f);
-            _material = Render.CreateMaterial(Color.FromSrgb(1f, 0.2f, 0.3f));
+            Tasks.Clear();
+            BoxMesh = Render.CreateMesh(MeshShape.Cuboid, 0.25f, 0.25f, 0.25f);
+            BoxMaterial = Render.CreateMaterial(Color.FromSrgb(1f, 0.2f, 0.3f));
 
             var offset = Cubes % 2 == 0 ? Cubes / 2 - 0.5f : Cubes / 2;
             ecs.SpawnPointLight(new Vec3(4f, 12f, 15f));
             ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(offset, offset, 15f), new Vec3(offset, offset, 0f), Vec3.UnitY));
 
             // .NET's thread pool stands where Bevy's AsyncComputeTaskPool does, each task a wait
-            // and then a result.
+            // and then a result, and an empty entity holding each until it is done.
             for (var x = 0; x < Cubes; x++)
             for (var y = 0; y < Cubes; y++)
             for (var z = 0; z < Cubes; z++)
             {
                 var at = new Vec3(x, y, z);
-                Pending.Add(Task.Run(async () =>
+                Tasks.Add(Task.Run(async () =>
                 {
                     await Task.Delay(TimeSpan.FromSeconds(0.05 + Random.Shared.NextDouble() * 4.95));
                     return at;
                 }));
+                ecs.Add(ecs.Spawn(), new ComputeTransform { Slot = Tasks.Count - 1 });
             }
         }, "async_compute.Setup");
+    }
+}
 
-        // Each frame takes the tasks that have finished and gives their cubes to the world, which
-        // only a system may touch.
-        app.Update(ctx =>
+/// <summary>A task on its way, which gives its entity a cube where the task says once it is done.</summary>
+[Behavior]
+public partial struct ComputeTransform
+{
+    /// <summary>The task's place among the example's tasks.</summary>
+    public int Slot;
+
+    /// <summary>
+    /// The task's cube put on its entity once the task is done, and this taken off, as Bevy
+    /// appends the commands the task made and removes the component.
+    /// </summary>
+    [OnUpdate]
+    public void HandleTasks(BehaviorContext ctx)
+    {
+        var task = AsyncCompute.Tasks[Slot];
+        if (!task.IsCompleted) return;
+
+        var (entity, at) = (ctx.Entity, task.Result);
+        ctx.Cmd.Run(ecs =>
         {
-            for (var i = Pending.Count - 1; i >= 0; i--)
-            {
-                if (!Pending[i].IsCompleted) continue;
-                ctx.Ecs.SpawnMesh(_mesh, _material, new Transform(Pending[i].Result));
-                Pending.RemoveAt(i);
-            }
-        }, "async_compute.HandleTasks");
+            ecs.Add(entity, new Transform(at));
+            Render.SetMesh(ecs, entity, AsyncCompute.BoxMesh);
+            Render.SetMaterial(ecs, entity, AsyncCompute.BoxMaterial);
+        });
+        ctx.Cmd.Remove<ComputeTransform>(entity);
     }
 }

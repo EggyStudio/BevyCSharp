@@ -18,27 +18,17 @@ internal static class MeshPicking
 
     private static Entity _camera, _hovered, _pressed;
     private static AssetHandle _white, _hover, _press;
-    private static readonly HashSet<Entity> Shapes = [];
     private static (float X, float Y) _pointer;
 
     public static void Build(App app)
     {
         app.Startup(Setup, "mesh_picking.SetupScene");
         app.Update(Pick, "mesh_picking.Pick");
-        app.Update(ctx =>
-        {
-            foreach (var shape in Shapes)
-            {
-                var at = ctx.Ecs.GetOrDefault<Transform>(shape);
-                ctx.Ecs.Set(shape, at with { Rotation = Quat.FromRotationY(ctx.Time.Delta / 2f) * at.Rotation });
-            }
-        }, "mesh_picking.Rotate");
     }
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Shapes.Clear();
         (_hovered, _pressed) = (Entity.None, Entity.None);
 
         // Tailwind's colors at 300, white while nothing touches a shape.
@@ -75,7 +65,7 @@ internal static class MeshPicking
             for (var i = 0; i < meshes.Length; i++)
             {
                 var x = -extent / 2f + i / (float)(meshes.Length - 1) * extent;
-                Shapes.Add(ecs.SpawnMesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One)));
+                ecs.Add(ecs.SpawnMesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One)), new Shape());
             }
         }
 
@@ -102,7 +92,7 @@ internal static class MeshPicking
         var under = Entity.None;
         if (Render.TryRay(_camera, pointer.X, pointer.Y, out var origin, out var direction)
             && Picking.TryCast(origin, direction, out var hit, out var point, out var normal)
-            && Shapes.Contains(hit))
+            && ecs.Has<Shape>(hit))
         {
             under = hit;
             Gizmos.Sphere(point, 0.05f, Color.FromSrgb8(239, 68, 68), inFront: false);
@@ -136,4 +126,14 @@ internal static class MeshPicking
             ecs.Set(_pressed, at with { Rotation = Quat.FromRotationX(dy * 0.02f) * Quat.FromRotationY(dx * 0.02f) * at.Rotation });
         }
     }
+}
+
+/// <summary>One of the shapes to pick, which turns slowly about its own up.</summary>
+[Behavior]
+public partial struct Shape
+{
+    /// <summary>Turned by half a radian a second, as Bevy's <c>rotate</c> turns each shape.</summary>
+    [OnUpdate]
+    public void Rotate(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationY(ctx.Time.Delta / 2f) * transform.Rotation;
 }
