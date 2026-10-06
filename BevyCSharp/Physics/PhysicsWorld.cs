@@ -24,8 +24,10 @@ namespace Bevy.Physics;
 /// It steps once per <see cref="Stage.FixedUpdate"/>, so Bevy's fixed timestep does the
 /// accumulating and a slow frame is caught up in whole steps, which keeps a simulation the same on
 /// every machine. A body starts where its entity's transform is when it is added. A dynamic body
-/// is written back each step; a kinematic one is read each step, and its velocity worked out from
-/// how far it moved, so what it pushes is pushed at the speed it moved.
+/// is written back each step. A kinematic one follows its entity at the speed and rate of turning
+/// the entity moves at, whether the game moves it once a frame or once a step, so what it pushes is
+/// pushed at that speed and what rests on it is carried at that pace whatever the frame rate.
+/// <see cref="MarkPlaced"/> puts one where its entity was put instead.
 /// </para>
 /// <para>
 /// A body belongs to its entity. Despawning the entity removes the body on the next step, and
@@ -48,9 +50,6 @@ public sealed partial class PhysicsWorld : IDisposable
     private readonly Dictionary<Entity, Body> _bodies = [];
     private readonly Dictionary<BodyHandle, Entity> _byBody = [];
     private readonly Dictionary<StaticHandle, Entity> _byStatic = [];
-
-    /// <summary>Where each kinematic body was, for its velocity from how far it moved.</summary>
-    private readonly Dictionary<Entity, Vec3> _kinematicWas = [];
 
     /// <summary>What the narrow phase found touching this step, and which bodies are sensors.</summary>
     private readonly ContactLog _contacts = new();
@@ -96,6 +95,7 @@ public sealed partial class PhysicsWorld : IDisposable
 
         _threads = new ThreadDispatcher(Math.Max(1, Environment.ProcessorCount - 1));
         _gravity = ToBepu(settings.Gravity);
+        _placeBeyond = Math.Max(0f, settings.PlaceBeyond);
 
         _simulation = Simulation.Create(
             _pool,
@@ -170,7 +170,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 var handle = _simulation.Bodies.Add(BodyDescription.CreateKinematic(pose, Collidable(index), new BodyActivityDescription(-1f)));
                 _bodies[entity] = new Body(kind, handle, default, index, center);
                 _byBody[handle] = entity;
-                _kinematicWas[entity] = at.Translation;
+                BeginFollowing(entity, at);
                 if (sensor) _contacts.Sensors.Add(new CollidableReference(CollidableMobility.Kinematic, handle).Packed);
                 break;
             }
@@ -243,7 +243,7 @@ public sealed partial class PhysicsWorld : IDisposable
             _contacts.Sensors.Remove(new CollidableReference(mobility, body.Moving).Packed);
             _simulation.Bodies.Remove(body.Moving);
             _byBody.Remove(body.Moving);
-            _kinematicWas.Remove(entity);
+            StopFollowing(entity);
         }
 
         // And the memory behind it, which for a mesh is its triangles.
@@ -345,20 +345,10 @@ public sealed partial class PhysicsWorld : IDisposable
                 continue;
             }
 
-            var body = _bodies[entity];
-            if (body.Kind != BodyKind.Kinematic || !ecs.TryGet<Transform>(entity, out var transform)) continue;
-
-            // Moved by the game, and given the velocity that move took, so it pushes what it
-            // meets rather than passing through it.
-            var reference = _simulation.Bodies[body.Moving];
-            var was = _kinematicWas[entity];
-
-            reference.Pose.Orientation = ToBepu(transform.Rotation);
-            reference.Pose.Position = ToBepu(transform.Translation) + Vector3.Transform(body.Center, reference.Pose.Orientation);
-            reference.Velocity.Linear = ToBepu((transform.Translation - was) * (1f / seconds));
-            reference.Awake = true;
-
-            _kinematicWas[entity] = transform.Translation;
+            // Moved by the game, and moved after it at the speed it moves, so it pushes what it
+            // meets rather than passing through it, and carries what rests on it at its pace.
+            if (_bodies[entity].Kind != BodyKind.Kinematic || !ecs.TryGet<Transform>(entity, out var transform)) continue;
+            Follow(entity, transform, seconds);
         }
 
         if (gone is not null)

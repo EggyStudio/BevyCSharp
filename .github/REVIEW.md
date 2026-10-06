@@ -10,9 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d620a10`. The last of the 3D Rendering examples keep on their entities what Bevy's
-keep on theirs, 117 of the 119 whose Bevy example keeps state on an entity, the two left being what
-the render world alone copies and draws from (`4ccef7e` to `6a84286`), which settles item 3.
+Reviewed up to `711f416`. A frame advances the clock by a set length in place of the machine's, from
+`Config.FrameSeconds`, `Time.FrameSeconds`, `BCS_FRAME_TIME`, `bcs open --frame-time` and
+`app.frametime`, over Bevy's `TimeUpdateStrategy::ManualDuration` (ABI 204), and a clock let go
+begins again at the moment it is let go, so a run of short frames does not leave the game standing
+until the machine catches up (`711f416`), which is the clock half of item 3. The kinematic half is
+measured and written, its commit to come. On the way it found two things in Bepu: a box sliding a
+quarter as rough as its friction says, which is Bepu sharing a convex manifold's friction among its
+contacts and item 15 takes from 3DEngine's mend, and a resting body given speed put to sleep at the
+next step's start, the next batch here, which 3DEngine's item 6 checks for its own code. No verdict
+is open.
+
+Before them, the last of the 3D Rendering examples keep on their entities what Bevy's keep on
+theirs, 117 of the 119 whose Bevy example keeps state on an entity, the two left being what the
+render world alone copies and draws from (`4ccef7e` to `6a84286`), which settles item 3.
 Transmission's glass spheres are missing from about one capture in four with TAA on, before this
 change as after it, which item 4 holds until the cause is found. Four commits of moves alone take
 sixteen places off the lists of N 1.2, N 1.3 and N 1.4 (`5dc052e` to `d620a10`). No verdict is open.
@@ -21,13 +32,6 @@ Before them, a windowless run chose its interface's camera after pointing the ca
 so the interface has a camera from its first frame and `text_debug` runs (`a8d06df`, with a test),
 and three more groups of examples keep on their entities what Bevy's keep on theirs (`492e119`,
 `f8a3b55`, `a646086`). No verdict is open.
-
-Before them, Verdict 1 was settled (`5264257`): every text file checks out with LF
-ends, the norm's tests read files through one helper that ends lines with `\n`, the page's test
-reads the script in UTF-8 on either ending and the script writes `\n` alone, and a picture asked
-for with no interface running loads nothing on any bridge, the expected error never having been
-possible on the headless bridge where the suite runs. Three more groups of examples keep on
-their entities what Bevy's keep on theirs (`8637e7c`, `2724064`, `4e15bea`). No verdict is open.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -149,6 +153,13 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
+15. **A box slides as rough as its friction says** (SHARED.md). The quarter measured in
+   `711f416`'s reply, 2.45 of 9.8 at a friction of 1, is Bepu sharing a convex manifold's friction
+   among its contacts, four under a box. 3DEngine's `ed0f3aa6` mends it in its
+   `ConfigureContactManifold` by scaling the pair's coefficient by the manifold's contact count, and
+   its `BodyMaterialTests` holds a box from 5 a second to within 1.3 units at a friction of 1 and
+   sliding on at 0.05. The same in `Callbacks.cs`, with the measurement made a test at the three
+   frictions.
 
 ## Verdicts
 
@@ -178,23 +189,33 @@ None open.
 
 ## Replies
 
-**Now 3, the clock.** `Config.FrameSeconds` sets Bevy's `TimeUpdateStrategy::ManualDuration` as
-the app is built, `Time.FrameSeconds` reads it and changes it while the app runs, `BCS_FRAME_TIME`
-sets it where the config left it at zero, `bcs open --frame-time S` puts that variable in the
-environment of the app it starts, and `app.frametime [seconds|off]` is the command, all over
-`bcs_time_set_frame_seconds` and `bcs_time_frame_seconds` (ABI 204). Letting the set clock go
-begins Bevy's real clock again from now, keeping the time it had counted. Bevy reads the
-machine's clock as the time since the last frame it counted, so after a run of short frames had
-put that ahead of the machine the game's clock would stand still until the machine caught up.
-`ClockTests` hold sixty frames of a sixtieth to a second and 64 steps, a frame made slow on
-purpose, the release after two seconds of unpaced frames and the command, and
-`EnvironmentOptionTests` the variable. `.claude/skills/bcs-cli/SKILL.md` is an instruction file
-for agents and is left to the owner to add `--frame-time` and `app.frametime` to, as 3DEngine
-left its own. Four commits that move code alone came first: the physics types out of
-`PhysicsWorld.cs` (`5dc052e`), the input commands out of `ConsoleWorldCommands.cs` (`7f5ccee`),
-`GraphicsBackend` (`404fc32`), and `NativeConfig` with the environment options' tests
-(`d620a10`).
+**Now 3, what a kinematic body carries.** Measured first, with `Step` run by hand at Bevy's 64 steps
+a second, a crate on a platform moved at 2.00 rode at 1.795 at 144 frames a second, 1.714 at 75,
+2.129 at 60, 2.287 at 50 and 0.021 at 30, and at 0.078 and 0.835 over frames of 100 and 25 and of
+144 and 35 taking turns. The model put 1.82 at 144, 2.12 at 60 and 0.07 at 30, which the engine
+agrees with, and 2.52 at 50, where the engine says 2.29. A kinematic body now follows its entity as
+3DEngine's `ParentFollowers` follows a parent, in `PhysicsWorld.Kinematic.cs`. `PhysicsPlugin`
+observes each body's entity in `Last`, its velocity and spin are the frame's move over the frame's
+time, each step of the next frame aims at the place observed moved on by them for the time since,
+which starts below zero by what the fixed clock holds over, and the body is moved there by velocity
+and spin and never put anywhere. An entity that has not moved since the last step, as one moved in
+fixed steps has not, is aimed at a step at a time. The crate rides at 2.00 within 0.02 at all seven,
+and through the plugin on the set clock at 144 and 25, a platform moved in fixed steps moves at 2
+within a thousandth in every step, and a platform turned at half a radian a second spins at that in
+every step and carries a crate round at it. `MarkPlaced` and `PhysicsSettings.PlaceBeyond`, 100
+units, put a body where its entity was put, at rest, as 3DEngine's `7ae91e7c` does, since a body
+moved by velocity would otherwise sweep through what lies on a jump.
 
-Shared: the clock a frame at a time is taken here, as `Config.FrameSeconds` and `Time.FrameSeconds`
-like 3DEngine's, with an environment variable and an option of `bcs open` in place of a flag of
-the app's own, since each app here reads its own arguments.
+Two things were found on the way and are not mended in this batch. A box slides with a quarter of
+the deceleration its friction times gravity gives, 2.45 at a friction of 1, 1.23 at a half and 9.8
+at 4, whatever the solver's passes, so a crate on a faster turn or further out slides outward as it
+is carried. That is Bepu sharing a convex manifold's friction among its contacts, four under a
+box, which 3DEngine's `ed0f3aa6` mends and item 15 takes. And a body that has
+rested long enough to be a candidate for sleep is put to sleep at the start of the next step
+though `SetVelocity` or `ApplyImpulse` gave it speed, since Bepu decides sleep from the step before
+and setting `Awake` on a body that is awake clears nothing, so a resting crate given 3 a second
+does not move. The second is the next batch here.
+
+Shared: a kinematic body follows its entity at the entity's speed and rate of turning at every
+frame rate, taken here after 3DEngine's `15fa305a` and `7ae91e7c`, for an entity's own transform
+where 3DEngine follows a parent's.

@@ -7,7 +7,9 @@ namespace Bevy.Physics;
 /// <remarks>
 /// Each fixed step first runs <see cref="PhysicsWorld.Sync"/>, which makes, remakes and takes away
 /// the bodies of entities carrying a <see cref="RigidBody"/> and a <see cref="Collider"/>, then
-/// steps unless <see cref="PhysicsWorld.Paused"/> is set.
+/// steps unless <see cref="PhysicsWorld.Paused"/> is set. At the end of each frame it notes where
+/// each kinematic body's entity has been moved to, so the next frame's steps carry the body after
+/// it at its speed.
 /// </remarks>
 /// <example>
 /// <code>
@@ -46,5 +48,20 @@ public sealed class PhysicsPlugin(PhysicsSettings? settings = null) : IPlugin
                 if (!physics.Paused) physics.Step(ecs, world.Resource<Time>().FixedDelta, world.Resource<MessageBus>());
             },
             "Physics.Step"));
+
+        // Where each kinematic body's entity is once the frame's update has moved it, which the next
+        // frame's steps follow at the entity's speed (PhysicsWorld.Follower). The steps are behind
+        // the frame by what the fixed clock holds over, which is read only where there is a body to
+        // follow, since it is a call to the engine.
+        app.AddSystem(Stage.Last, new SystemDescriptor(
+            world =>
+            {
+                var physics = world.Resource<PhysicsWorld>();
+                if (!physics.Follows) return;
+
+                var time = world.Resource<Time>();
+                physics.Observe(world.Resource<EcsWorld>(), time.DeltaSeconds, time.FixedOverstep * time.FixedDeltaSeconds);
+            },
+            "Physics.Observe"));
     }
 }

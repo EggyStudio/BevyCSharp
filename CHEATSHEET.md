@@ -1173,9 +1173,6 @@ bool IsCharacter(Entity entity);                                // Whether an en
 bool Has(Entity entity);                                        // Whether an entity has a body
 void Add(Entity entity, PhysicsShape shape, BodyKind kind, Transform at, float mass = 1f, bool sensor = false, PhysicsMaterial? material = null);  // Gives an entity a body, starting where at puts it
 void SetMaterial(Entity entity, PhysicsMaterial material);      // Changes how a body's surface slides and bounces, from the next step
-JointHandle Connect(Entity a, Entity b, Joint joint);           // Joins two bodies with a joint, which holds from the next step on
-bool SetMotor(JointHandle joint, float degreesPerSecond, float torque);  // Changes a hinge's motor while it runs, to open a door on command or stop a fan
-bool Disconnect(JointHandle joint);                             // Takes a joint away, leaving both bodies free
 bool Remove(Entity entity);                                     // Takes an entity's body away, leaving the entity where it is
 (Vec3 Linear, Vec3 Angular) Velocity(Entity entity);            // A body's velocity: how fast it moves, and how fast it turns about each axis
 void SetVelocity(Entity entity, Vec3 linear, Vec3 angular = default);  // Sets a dynamic body's velocity, waking it if it had come to rest
@@ -1184,6 +1181,10 @@ bool IsAsleep(Entity entity);                                   // Whether a dyn
 PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance);  // The nearest body a ray meets within distance, or null for none
 void Step(EcsWorld ecs, float seconds, MessageBus messages = null);  // Advances the simulation by seconds: kinematic bodies follow their entities, everything is stepped, and dynamic bodies are written back
 void Dispose();                                                 // Tears the simulation down, returning its memory
+JointHandle Connect(Entity a, Entity b, Joint joint);           // Joins two bodies with a joint, which holds from the next step on
+bool SetMotor(JointHandle joint, float degreesPerSecond, float torque);  // Changes a hinge's motor while it runs, to open a door on command or stop a fan
+bool Disconnect(JointHandle joint);                             // Takes a joint away, leaving both bodies free
+void MarkPlaced(Entity entity);                                 // Says that entity was put where it is rather than moved there, as when a level starts again, so its kinematic body is put at the new place, at rest, and not carried there through whatever is between
 void Sync(EcsWorld ecs);                                        // Makes, remakes and takes away the bodies of entities carrying a RigidBody and a Collider, so the simulation holds what the world says
 ```
 

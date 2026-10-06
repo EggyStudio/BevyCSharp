@@ -21,9 +21,13 @@ if (physics.Raycast(eye, forward, 50f) is { } hit) Select(hit.Entity);
 
 The simulation steps once per `FixedUpdate`, so Bevy's fixed timestep does the accumulating and a
 slow frame is caught up in whole steps, which keeps a run the same on every machine. A dynamic body
-is written back to its entity every step. A kinematic one follows its entity's transform, with the
-velocity of how far it moved, so a moving platform pushes what stands on it. A static one never
-moves. Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled
+is written back to its entity every step. A kinematic one follows its entity's transform at the
+speed and rate of turning the entity moves at, so a moving platform pushes what it meets and
+carries what stands on it at its own pace, turning or not, whether the game moves it once a frame
+or once a fixed step and at any frame rate. An entity put somewhere rather than moved there, as a
+level begun again puts its platforms back, is said to be with `physics.MarkPlaced(platform)`, or
+goes further in a frame than `PhysicsSettings.PlaceBeyond`, and its body is put there at rest
+rather than swept through what lies between. A static one never moves. Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled
 with the entity, and a level's floors and walls are a mesh shape made from triangles, such as a
 mesh `Render.TryReadMesh` reads back once it has loaded:
 

@@ -19,4 +19,16 @@ public sealed class PhysicsSettings
     /// How many solver passes a step makes. More holds a tall stack steadier and costs more.
     /// </summary>
     public int Iterations { get; set; } = 8;
+
+    /// <summary>
+    /// How far, in units, an entity can move in one frame or one step and have its kinematic body
+    /// carried after it, past which the body is put at the new place, at rest.
+    /// </summary>
+    /// <remarks>
+    /// A kinematic body is moved after its entity by a velocity, so it pushes what it meets on the
+    /// way. A move this long is a placing, a door put back or a level begun again, and carried there
+    /// it would fling whatever it passed through. A placing shorter than this is said with
+    /// <see cref="PhysicsWorld.MarkPlaced"/>. 100 units, as in 3DEngine.
+    /// </remarks>
+    public float PlaceBeyond { get; set; } = 100f;
 }
