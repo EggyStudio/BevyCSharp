@@ -15,20 +15,19 @@ namespace BevyCSharp.Examples.Shading;
 // number, in the main pass and in the prepass that draws its shadow.
 internal static class ComputeMesh
 {
-    private static ShaderInstance _generate;
-    private static bool _generated;
+    // The compute shader's pipeline and the buffers it writes, Bevy's ComputePipeline resource.
+    internal static ShaderInstance Pipeline;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            _generated = false;
             Render.SetClearColor((0f, 0f, 0f, 1f));
 
             var vertexData = Shaders.CreateBuffer(192 * sizeof(float));
             var indexData = Shaders.CreateBuffer(36 * sizeof(uint));
-            _generate = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/compute_mesh.slang" }))
+            Pipeline = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/compute_mesh.slang" }))
                 .SetBuffer("vertex_data", vertexData)
                 .SetBuffer("index_data", indexData);
 
@@ -47,8 +46,8 @@ internal static class ComputeMesh
                 .SetBuffer("index_data", indexData)
                 .Set("color", new Vector4(color.R, color.G, color.B, color.A));
 
-            // Tailwind's red and sky, each at 400.
-            ecs.SpawnMesh(empty, Material(Color.FromSrgb8(248, 113, 113)), Transform.At(-2.5f, 1.5f, 0f));
+            // Tailwind's red and sky, each at 400, the red one marked as the one whose mesh is made.
+            ecs.Add(ecs.SpawnMesh(empty, Material(Color.FromSrgb8(248, 113, 113)), Transform.At(-2.5f, 1.5f, 0f)), new GenerateMesh());
             ecs.SpawnMesh(empty, Material(Color.FromSrgb8(56, 189, 248)), Transform.At(2.5f, 1.5f, 0f));
 
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
@@ -56,12 +55,26 @@ internal static class ComputeMesh
             ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
         }, "compute_mesh.Setup");
 
-        // Once, as soon as the compute shader can run, as Bevy's runs once for each mesh to make.
-        app.Update(_ =>
-        {
-            if (_generated || _generate.Program.State != ShaderProgramState.Ready) return;
-            Shaders.Dispatch(_generate, 1);
-            _generated = true;
-        }, "compute_mesh.Generate");
+    }
+}
+
+/// <summary>
+/// A mesh made by the compute shader, once. Bevy's holds the mesh it writes into, and here the
+/// shader writes into the buffers both materials read, so this marks the entity the mesh is made
+/// for and remembers it has been, as Bevy's render world keeps a set of the meshes it has made.
+/// </summary>
+[Behavior]
+public partial struct GenerateMesh
+{
+    /// <summary>Whether the compute shader has run for it.</summary>
+    public bool Generated;
+
+    /// <summary>The compute shader run once, as soon as it can run, as Bevy's runs once for each mesh to make.</summary>
+    [OnUpdate]
+    public void Generate(BehaviorContext ctx)
+    {
+        if (Generated || ComputeMesh.Pipeline.Program.State != ShaderProgramState.Ready) return;
+        Shaders.Dispatch(ComputeMesh.Pipeline, 1);
+        Generated = true;
     }
 }

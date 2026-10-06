@@ -346,3 +346,13 @@ model are spawned at once with `AnimationToPlay` on their roots, which plays the
 model has come, `MorphAnimationToPlay` in morph_targets where the two share a namespace. Bevy's
 generic `Curve<T>` and `Mixed<T>` are one `Curve` and one `Mixed` holding their space beside four
 points in an `InlineList4`.
+
+B 4 for the examples in shader_advanced, 58 of 119, all but one of them under Shaders in Bevy's
+list. Each camera's `PostProcessSettings` and `FullscreenEffect` carry their intensity, set by
+their own method and copied into the pass's values after Update, as Bevy extracts the component
+each frame, and T takes `FullscreenEffect` off the camera and puts it back as Bevy's does. The cube
+turns by `PostProcessRotates`, shader_prepass's `Rotates` sharing the namespace, and the red cube
+carries `GenerateMesh`, which runs the compute shader for it once. custom_shader_instancing is left
+as headless_renderer is, its two components being the list of instances Bevy's render world draws
+from and the buffer it makes of them, with no system over either in the main world, which the
+camera's draw holds here in their place.
