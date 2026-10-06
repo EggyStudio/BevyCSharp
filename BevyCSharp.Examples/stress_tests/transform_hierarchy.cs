@@ -48,7 +48,7 @@ internal static class TransformHierarchy
 
     private static Cfg? _cfg;
 
-    public static void Configure(Config config) => (config.Vsync, config.HeadlessFps) = (false, 0u);
+    public static void Configure(Config config) => (config.Vsync, config.HeadlessFps, config.LogFrameTimes) = (false, 0u, true);
 
     public static void Build(App app)
     {
@@ -66,7 +66,6 @@ internal static class TransformHierarchy
 
         Console.WriteLine($"test configuration: {name}");
         Console.WriteLine($"\n{_cfg}");
-        StressTest.Add(app);
         app.Startup(Setup, "transform_hierarchy.Setup");
     }
 

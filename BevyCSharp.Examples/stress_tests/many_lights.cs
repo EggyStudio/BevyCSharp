@@ -19,12 +19,19 @@ internal static class ManyLights
     private static Entity _camera;
     private static float _printing;
 
-    public static void Configure(Config config) => StressTest.Configure(config);
+    // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
+    // sync, drawn as fast as it can, and its frame times logged once a second by Bevy's plugins.
+    public static void Configure(Config config)
+    {
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
+    }
 
     public static void Build(App app)
     {
         _printing = 0f;
-        StressTest.Add(app);
         app.Startup(Setup, "many_lights.Setup");
         app.Update(MoveCamera, "many_lights.MoveCamera");
         app.Update(PrintLightCount, "many_lights.PrintLightCount");

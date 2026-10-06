@@ -23,12 +23,19 @@ internal static class ManyGizmos
     // once, as the bridge asks of anything drawn in runs.
     private static readonly GizmoSegment[][] Buffers = new GizmoSegment[SystemCount][];
 
-    public static void Configure(Config config) => StressTest.Configure(config);
+    // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
+    // sync, drawn as fast as it can, and its frame times logged once a second by Bevy's plugins.
+    public static void Configure(Config config)
+    {
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
+    }
 
     public static void Build(App app)
     {
         (_lineCount, _fancy) = (50_000, false);
-        StressTest.Add(app);
 
         app.Startup(Setup, "many_gizmos.Setup");
         app.Update(Input, "many_gizmos.Input");

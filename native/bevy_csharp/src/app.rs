@@ -151,7 +151,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     } else {
                         Some(Window {
                             title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
-                            resolution: (config.width, config.height).into(),
+                            resolution: if config.scale_factor > 0.0 {
+                                bevy::window::WindowResolution::new(config.width, config.height)
+                                    .with_scale_factor_override(config.scale_factor)
+                            } else {
+                                (config.width, config.height).into()
+                            },
                             // Where it was last closed, when the game asks for that, so it does
                             // not open where the platform chooses and then jump.
                             position: if config.has_position != 0 {
@@ -407,6 +412,19 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     }
 
     let _ = title;
+
+    // Bevy's frame time diagnostics and its log of every diagnostic once a second, where the app
+    // asks, as Bevy's stress tests add them, so a program measured beside Bevy's logs by the same
+    // code. A windowless app has no diagnostics plugin among its minimal ones, and is given it.
+    if config.log_frame_times != 0 {
+        if !app.is_plugin_added::<bevy::diagnostic::DiagnosticsPlugin>() {
+            app.add_plugins(bevy::diagnostic::DiagnosticsPlugin);
+        }
+        app.add_plugins((
+            bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),
+            bevy::diagnostic::LogDiagnosticsPlugin::default(),
+        ));
+    }
 
     // Bevy refuses to allocate a handle for an asset type it has not been told about, and says
     // so by panicking rather than failing the load. `DefaultPlugins` registers these three, so

@@ -290,3 +290,13 @@ camera controller.
 N 2.7 is `build/examples-on-package.sh`, which builds every example rather than a handful, their
 sources alone in a project of their own outside the repository on the packed package, and the game
 job runs it beside Courtyard. Every one builds on the package since `f9c14be`.
+
+`StressTest.cs` keeps Bevy's shared warning alone. Each test says its window in its configuration,
+1920 by 1080 at a scale factor of one with no vertical sync, as Bevy's says them, by
+`Config.ScaleFactor`, Bevy's `with_scale_factor_override`, which the bridge gives the window. And
+the log of frame times is Bevy's `FrameTimeDiagnosticsPlugin` and `LogDiagnosticsPlugin`, which the
+bridge adds where `Config.LogFrameTimes` asks, with Bevy's `DiagnosticsPlugin` first for a
+windowless app, so the program here runs no system of its own for it and logs as Bevy's does,
+`fps`, `frame_time` and `frame_count` once a second. transform_hierarchy opens no window, as Bevy's
+does not. The config grew two fields, so the number B 1 reads is 203, a second break for the owner
+beside 202.

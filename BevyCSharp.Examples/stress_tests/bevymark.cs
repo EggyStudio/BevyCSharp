@@ -52,7 +52,10 @@ internal static class Bevymark
 
     public static void Configure(Config config)
     {
-        StressTest.Configure(config);
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
         config.FixedHz = 1.0 / FixedTimestep;
     }
 
@@ -74,7 +77,6 @@ internal static class Bevymark
         (_colorRandom, _materialRandom, _velocityRandom, _transformRandom, _mouseRandom) = (new(42), new(42), new(42), new(42), new(42));
         Fps.Clear();
 
-        StressTest.Add(app);
         app.Startup(Setup, "bevymark.Setup");
         app.On(Stage.FixedUpdate, ScheduledSpawner, "bevymark.ScheduledSpawner");
         app.Update(MouseHandler, "bevymark.MouseHandler");

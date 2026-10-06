@@ -19,14 +19,21 @@ internal static class ManyGlyphs
     // The texts laid out, which Bevy finds by their layouts each frame it lays them out again.
     private static readonly List<Entity> Texts = [];
 
-    public static void Configure(Config config) => StressTest.Configure(config);
+    // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
+    // sync, drawn as fast as it can, and its frame times logged once a second by Bevy's plugins.
+    public static void Configure(Config config)
+    {
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
+    }
 
     public static void Build(App app)
     {
         var arguments = Environment.GetCommandLineArgs();
         (_noUi, _noText2d) = (arguments.Contains("--no-ui"), arguments.Contains("--no-text2d"));
         Texts.Clear();
-        StressTest.Add(app);
 
         app.Startup(Setup, "many_glyphs.Setup");
         if (arguments.Contains("--recompute-text")) app.Update(ForceTextRecomputation, "many_glyphs.ForceTextRecomputation");

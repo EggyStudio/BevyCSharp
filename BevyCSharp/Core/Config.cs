@@ -284,6 +284,28 @@ public sealed class Config
     public bool Wireframes { get; set; }
 
     /// <summary>
+    /// Log how fast frames run once a second, by Bevy's own <c>FrameTimeDiagnosticsPlugin</c> and
+    /// <c>LogDiagnosticsPlugin</c>.
+    /// </summary>
+    /// <remarks>
+    /// What Bevy's stress tests add, so a program written again on this package and Bevy's own,
+    /// measured side by side, log their frames by the same code, and the program here runs no system
+    /// of its own for it. The lines go to the log Bevy writes to the console.
+    /// </remarks>
+    public bool LogFrameTimes { get; set; }
+
+    /// <summary>
+    /// The window's scale factor in place of the display's, or zero to keep the display's.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>WindowResolution::with_scale_factor_override</c>. A window of 1920 by 1080 on a
+    /// display scaled to two is 3840 by 2160 pixels unless its scale factor is held at one, as
+    /// Bevy's stress tests hold it, so the pixels a frame fills are the ones its size says. An image
+    /// drawn offscreen has no display to scale it and takes none.
+    /// </remarks>
+    public float ScaleFactor { get; set; }
+
+    /// <summary>
     /// Make the window see-through wherever what is drawn into it has no alpha, so the desktop
     /// shows behind it there.
     /// </summary>

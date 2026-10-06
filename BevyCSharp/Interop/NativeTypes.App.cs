@@ -77,6 +77,12 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to add Bevy's wireframe plugins, for 3D and 2D meshes.</summary>
     public uint Wireframes;
+
+    /// <summary>Non-zero to add Bevy's frame time diagnostics and its log of them once a second.</summary>
+    public uint LogFrameTimes;
+
+    /// <summary>The window's scale factor in place of the display's, or zero for the display's.</summary>
+    public float ScaleFactor;
 }
 
 /// <summary>One video mode a monitor can be driven at.</summary>

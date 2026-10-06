@@ -21,12 +21,19 @@ internal static class ManyAnimatedSprites
     // The sheet and its layout, which every sprite shows a frame of.
     private static AssetHandle _texture, _layout;
 
-    public static void Configure(Config config) => StressTest.Configure(config);
+    // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
+    // sync, drawn as fast as it can, and its frame times logged once a second by Bevy's plugins.
+    public static void Configure(Config config)
+    {
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
+    }
 
     public static void Build(App app)
     {
         (_sprites, _printing) = (0, 0f);
-        StressTest.Add(app);
 
         app.Startup(Setup, "many_animated_sprites.Setup");
         app.Update(PrintSpriteCount, "many_animated_sprites.PrintSpriteCount");

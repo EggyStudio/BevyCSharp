@@ -256,6 +256,12 @@ pub struct BcsConfig {
     /// draws a mesh as its edges asks for. Each looks at every mesh of its kind every frame
     /// whether or not one is drawn so, which an app with no wireframes should not pay for.
     pub wireframes: u32,
+    /// Non-zero to add Bevy's frame time diagnostics and the plugin that logs every diagnostic once
+    /// a second, which Bevy's stress tests add to say how fast their frames run.
+    pub log_frame_times: u32,
+    /// The window's scale factor in place of the display's, or `0` for the display's. Bevy's stress
+    /// tests hold it at one, so their window is as many pixels as they say on a display that scales.
+    pub scale_factor: f32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

@@ -229,6 +229,8 @@ public sealed unsafe partial class App : IDisposable
                 X = opening.X,
                 Y = opening.Y,
                 Wireframes = Config.Wireframes ? 1u : 0u,
+                LogFrameTimes = Config.LogFrameTimes ? 1u : 0u,
+                ScaleFactor = Config.ScaleFactor,
             };
             _handle = Native.bcs_app_create(&native);
         }

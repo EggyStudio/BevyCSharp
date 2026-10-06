@@ -13,12 +13,18 @@ internal static class ManyCamerasLights
 
     private static readonly List<Entity> Cameras = [];
 
-    public static void Configure(Config config) => StressTest.Configure(config);
+    // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
+    // sync, drawn as fast as it can, and, as Bevy's leaves them out, no frame times logged.
+    public static void Configure(Config config)
+    {
+        (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
+        config.Vsync = false;
+        config.HeadlessFps = 0;
+    }
 
     public static void Build(App app)
     {
         Cameras.Clear();
-        StressTest.Add(app, log: false);
         app.Startup(Setup, "many_cameras_lights.Setup");
         app.Update(RotateCameras, "many_cameras_lights.RotateCameras");
     }
