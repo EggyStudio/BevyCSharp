@@ -251,7 +251,7 @@ mouse_input_events	can	each message printed as C# writes the record, where Bevy 
 touch_input	part	a touch the platform cancels, which is not reported
 touch_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form, and none on a machine with no touch screen
 bounding_2d	can	each shape drawn from gizmo lines as Bevy's primitive_2d draws it, the capsule's ends from short lines, and its three systems after the update run as one in Bevy's order
-cubic_splines	missing	Bevy's cubic curves, Hermite, cardinal and B-spline
+cubic_splines	can	its points added by a drag in a window, where an offscreen run's pretended pointer moves no cursor
 custom_primitives	n/a	implements Rust traits for a primitive
 random_sampling	can	the points drawn from .NET's generator seeded as Bevy seeds its ChaCha8Rng, so they are other points than Bevy's
 render_primitives	missing	gizmos of Bevy's primitive shapes

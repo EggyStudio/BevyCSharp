@@ -236,6 +236,7 @@ internal static class Catalog
 
         // Math
         new("bounding_2d", Bounding2d.Build),
+        new("cubic_splines", CubicSplines.Build),
         new("random_sampling", RandomSampling.Build),
 
         // Transforms

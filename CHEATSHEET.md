@@ -1524,6 +1524,52 @@ Aabb2d AabbAt(Isometry2d isometry);                             // The box about
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
 ```
 
+### `CubicSegment<T>`
+
+```csharp
+static CubicSegment<T> Coefficients(T p0, T p1, T p2, T p3, float[,] matrix);  // The segment four control points make under a spline's characteristic matrix, row by row
+T Position(float t);                                            // The point at t, from zero at its start to one at its end
+T Velocity(float t);                                            // How fast the point moves at t, the first derivative
+T Acceleration(float t);                                        // How fast that changes at t, the second derivative
+```
+
+### `CubicCurve<T>`
+
+```csharp
+T Position(float t);                                            // The point at t, from zero to its number of segments
+T Velocity(float t);                                            // How fast the point moves at t
+T Acceleration(float t);                                        // How fast that changes at t
+IEnumerable<T> IterPositions(int subdivisions);                 // Points along the whole curve at even steps of t, subdivisions of them and one more for the end
+```
+
+### `CubicBezier<T>`
+
+```csharp
+CubicCurve<T>? ToCurve();                                       // The curve of Bézier segments, four control points each, or null where there is none
+```
+
+### `CubicHermite<T>`
+
+```csharp
+CubicCurve<T>? ToCurve();                                       // The curve through each point along its tangent, first to last, or null with fewer than two
+CubicCurve<T>? ToCurveCyclic();                                 // The curve round through the last point and back to the first, or null with none
+```
+
+### `CubicCardinalSpline<T>`
+
+```csharp
+static CubicCardinalSpline<T> CatmullRom(IEnumerable<T> points);  // A Catmull-Rom spline, a cardinal spline of tension one half
+CubicCurve<T>? ToCurve();                                       // The curve through each point, first to last, or null with fewer than two
+CubicCurve<T>? ToCurveCyclic();                                 // The curve round through the last point and back to the first, or null with fewer than two
+```
+
+### `CubicBSpline<T>`
+
+```csharp
+CubicCurve<T>? ToCurve();                                       // The curve drawn toward the points, a segment for each four in a row, or null with fewer than four
+CubicCurve<T>? ToCurveCyclic();                                 // The curve round its points and back, a segment starting at each, or null with none
+```
+
 ### `Cuboid`
 
 ```csharp

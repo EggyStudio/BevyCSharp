@@ -4,7 +4,7 @@ namespace Bevy;
 
 /// <summary>A three-component vector, laid out exactly as Bevy's <c>Vec3</c>.</summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct Vec3 : IEquatable<Vec3>
+public struct Vec3 : IEquatable<Vec3>, System.Numerics.IAdditionOperators<Vec3, Vec3, Vec3>, System.Numerics.IMultiplyOperators<Vec3, float, Vec3>
 {
     /// <summary>The X component.</summary>
     public float X;

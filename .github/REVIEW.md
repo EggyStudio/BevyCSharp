@@ -10,11 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a31e3b3`. Each change of the keyboard, the mouse, a touch and a pad is read as its
-Bevy message in the order it came, 14 message records drained into the bus each frame (ABI 219), and
-the four input event examples are written, 277 (`b0f9841`); a box and a ball are shapes as values
-that points are sampled in and on as Bevy samples them, and `random_sampling` is written
-(`a31e3b3`). The owner pushed, and both workflows failed before any job began, which is Verdict 4.
+Reviewed up to `3397439`. Shapes in the plane give boxes and circles about them as Bevy bounds them,
+rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is written (`cbe9a1f`).
+Verdict 4's mend: the two plays name their logs folder in their own steps, where the runner context
+is allowed, and `WorkflowTests` holds every expression in the workflows to the contexts GitHub
+allows at its place, naming the refused line of `aa55e0d`'s file when run over it, listed under
+N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs. The suite: 1,109
+passed, 9 skipped.
+
+Before them, each change of the keyboard, the mouse, a touch and a pad is read as its Bevy message
+in the order it came, 14 message records drained into the bus each frame (ABI 219), and the four
+input event examples are written, 277 (`b0f9841`); a box and a ball are shapes as values that points
+are sampled in and on as Bevy samples them, and `random_sampling` is written (`a31e3b3`). The owner
+pushed, and both workflows failed before any job began, which is Verdict 4.
 
 Before them, a mesh made in code came to be skinned to joint entities, four joints and weights a
 vertex, inverse bindposes made from transforms and Bevy's `SkinnedMesh` with the bounds that follow
@@ -25,17 +33,6 @@ phase moved into files of their names, N 1.2's list at 229 (`dfa22f2`). Feathers
 examples need `bevy_feathers`, a crate the lock does not hold, which waits on the owner's word; the
 reply on input as Bevy's messages (ABI 219) is being written, its commit to come. Nothing was pushed
 since `0013c52`, whose run passed on both systems.
-
-Before them, an app came to be told once for each state it never added rather than once for each
-system scoped to it, the suite's own `Screen` behaviors having been the 45 lines, and the console
-server says it is serving at the info level, which the page tells from a warning (`0013c52`), which
-settles item 13. Verdict 3's cause, found by playing Courtyard from the package on lavapipe pinned
-to four cores: the walk was planned in frames at sixty a second on the machine's clock, so each held
-frame overshot past the coin, and `play.sh` sets a sixtieth of a second a frame through
-`app.frametime`, said as the likeliest cause since nobody read the run's log; `build/step.py` and
-`build/page.py` are taken from 3DEngine as the default shell of the game, examples, README and pack
-jobs, the test and native jobs keeping their own, and `test.py` reads the page's code from `page.py`
-(`aa55e0d`); Verdicts 2 and 3 settle with a pack run. The run of `0013c52` passed on both systems.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -207,27 +204,15 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, Bevy's math, bounding volumes and casts.** A shape in the plane gives its bounds where an
-`Isometry2d` places it, a box along the axes or a circle, as Bevy's `Bounded2d` does, `Rectangle`,
-`Circle`, `Triangle2d`, `Segment2d`, `Capsule2d` and `RegularPolygon` each an `IBounded2d`. `Aabb2d`
-and `BoundingCircle` test their overlaps, `RayCast2d` finds how far along a `Ray2d` it meets either,
-and `AabbCast2d` and `BoundingCircleCast` sweep a volume along one, each Bevy's code written again,
-the slab test with Rust's `min` and `max` passing over a not-a-number as Bevy's do, and the triangle's
-circle the one on its wide angle's side where it has one. `Rot2` and the few operations `Vec2` lacked,
-`Dot`, `PerpDot`, `Min`, `Max`, `Clamp`, a length squared, a unit length and its operators, are
-added. `bounding_2d` is written, 279, and driven offscreen through its tests with Space. Bevy chains
-its three systems after the update, and registered apart here one ran a frame behind, a box touched
-by the swept box drawn as missed, so they run as one in Bevy's order. `BoundingTests` holds known
-distances for a ray against a box and a circle, two sweeps meeting at their edges, overlaps at a
-touch, each shape's bounds turned a quarter and moved, and both of a triangle's circles. The suite
-passed, 1,109 with 9 skipped. Verdict 4 is next, then the cubic curves.
-
-**Verdict 4, the workflows GitHub refused.** The game job's `env` read `runner.temp`, which GitHub
-gives to steps alone. The two plays now name their logs' folder in their own `env` beside `SHOTS`,
-and the job sets none. `WorkflowTests` walks each workflow by its indentation, a block scalar's lines
-taken as its key's, and holds every `${{ }}` and every `if` to the contexts GitHub's table of
-availability gives its place, a place the table here lacks failing as such so it is looked up. Run
-over `aa55e0d`'s `package.yml` it names line 231 reading `runner` in `jobs.game.env`, and over the
-mended files it passes, with the refused forms and the allowed ones held by a theory of small
-workflows. It is listed under N 1.4 beside the other tests of the build, as no area of the library.
-The cubic curves are next.
+**Now 3, Bevy's math, cubic curves.** A spline is made from control points into a `CubicCurve`, a
+run of `CubicSegment`s each multiplying its points by the spline's characteristic matrix, as Bevy's
+`cubic_splines` do. `CubicHermite`, `CubicCardinalSpline` with `CatmullRom`, `CubicBSpline` and
+`CubicBezier` each make one open or looping, null where the points are too few, as Bevy gives an
+error, the cardinal one mirroring its ends and starting its loop at the first point as Bevy's does.
+They are generic over `Vec2` and `Vec3`, which declare .NET's addition and scaling interfaces for
+it. `cubic_splines` is written, 280, its keys turning the modes offscreen, and a drag adds a point
+in a window, an offscreen run's pretended pointer moving no cursor. `CubicSplineTests` holds the
+Hermite curve through each point along its tangent, the Catmull-Rom curve through each and leaving
+its first toward its second, the B-spline starting at the mix of its first three, a Bézier's ends
+and midpoint, and even samples from end to end. The math gap is closed. The suite passed, 1,121
+with 9 skipped. The states, three examples, are next.

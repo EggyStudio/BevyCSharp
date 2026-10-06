@@ -40,9 +40,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **Bevy's cubic curves, one example.** Hermite, cardinal and B-splines made into curves and
-  sampled along (`cubic_splines`), which the managed math, its shapes, their bounds and the points
-  sampled in them, does not have.
 - **States, three examples.** A state that holds values, as `InGame { paused, turbo }` does
   (`computed_states`, `state_scoped`), despawning as a state is entered or by a rule over the
   transition (`state_scoped`), and transitions to the same state run as schedules of a game's own
