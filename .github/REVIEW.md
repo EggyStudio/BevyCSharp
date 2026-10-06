@@ -337,3 +337,12 @@ have moved and turned, as Bevy chains the three. align's ship carries its target
 turns, the two directions sit on an entity of their own as `RandomAxes`, and H hides the
 instructions by their `Visibility` as Bevy's does, where the text was emptied before. Its own
 `FromAxes` gave way to `Quat.FromBasis`, which the library already had.
+
+B 4 for Animation, 55 of 119, with Bevy's `EaseFunction` made the package's own first, a struct
+a behavior keeps as a field, its kinds in `EaseKind` and its staircases' `JumpAt`, held to
+bevy_math's own tests of it, and the examples' `Ease.cs` gone. Each easing plot carries its
+function and its hue, its dots and label its children as Bevy's are. The fox and the morphing
+model are spawned at once with `AnimationToPlay` on their roots, which plays the clip once the
+model has come, `MorphAnimationToPlay` in morph_targets where the two share a namespace. Bevy's
+generic `Curve<T>` and `Mixed<T>` are one `Curve` and one `Mixed` holding their space beside four
+points in an `InlineList4`.

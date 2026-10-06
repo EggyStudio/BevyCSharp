@@ -9,21 +9,35 @@ namespace BevyCSharp.Examples.Animations;
 // the model has arrived.
 internal static class AnimatedMesh
 {
-    private static Entity _fox;
-    private static bool _playing;
+    private const string GltfPath = "models/animated/Fox.glb";
 
     public static void Build(App app)
     {
-        (_fox, _playing) = (Entity.None, false);
+        // The fox's root, spawned at once, and the clip it plays, its scene arriving under it later.
+        app.Startup(ctx => ctx.Ecs.Add(ctx.Ecs.SpawnScene(AssetServer.LoadGltfScene(GltfPath)), new AnimationToPlay { Clip = 2 }), "animated_mesh.SetupMeshAndAnimation");
         app.Startup(ctx => FoxScene.Setup(ctx.Ecs), "animated_mesh.SetupCameraAndEnvironment");
-        app.SpawnGltf("models/animated/Fox.glb", (_, root) => _fox = root);
+    }
+}
 
-        // Bevy plays the clip once its scene is ready, as this does once the clips are there.
-        app.Update(_ =>
-        {
-            if (_playing || _fox == Entity.None || !Animation.TryClips(_fox, out var clips) || clips.Count < 3) return;
-            _playing = Animation.Play(_fox, clips[2], new AnimationSettings { Repeat = true });
-        }, "animated_mesh.PlayAnimationWhenReady");
+/// <summary>A model's clip, played over and over once the model has arrived.</summary>
+[Behavior]
+public partial struct AnimationToPlay
+{
+    /// <summary>Which of the model's clips, by its place in the file.</summary>
+    public int Clip;
+
+    /// <summary>Whether it has been started.</summary>
+    public bool Playing;
+
+    /// <summary>
+    /// The clip played on repeat once the model's clips are there, as Bevy plays it when the
+    /// model's scene is ready.
+    /// </summary>
+    [OnUpdate]
+    public void PlayAnimationWhenReady(BehaviorContext ctx)
+    {
+        if (Playing || !Animation.TryClips(ctx.Entity, out var clips) || clips.Count <= Clip) return;
+        Playing = Animation.Play(ctx.Entity, clips[Clip], new AnimationSettings { Repeat = true });
     }
 }
 
