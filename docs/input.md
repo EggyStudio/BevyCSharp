@@ -62,6 +62,33 @@ gilrs in the render and editor profiles, and every profile reads a pad pretended
 `SyntheticInput.ConnectGamepad`, which is how a test or `./bcs command input.button 0 South 10`
 presses a button on a machine with none attached.
 
+## What a pointer does to an entity
+
+Bevy's picking finds what is under the mouse or a finger, an interface node, a sprite or a mesh,
+and says what the pointer does to it: comes over it, presses it, clicks it, drags it or drops
+something on it. A game observes that at the entity, as Bevy's `Pointer<E>` events are observed:
+
+```csharp
+ctx.Ecs.Observe<Pointer<Click>>(button, on => Spawn(on.Ecs));
+ctx.Ecs.Observe<Pointer<Over>>(card, on => Highlight(on.Ecs, on.Entity));
+ctx.Ecs.Observe<Pointer<Drag>>(cube, on => Turn(on.Ecs, on.Entity, on.Event.Event.Delta));
+ctx.Ecs.Observe<Pointer<DragDrop>>(bin, on => on.Ecs.Despawn(on.Event.Event.Dropped));
+```
+
+Each carries the entity, which pointer, where it is in the window and what it did, and most say
+where the pointer met the entity, which for a mesh or a sprite is a point in the world. They go up
+the entity's parents as Bevy's do, so a panel hears what happens to the text inside it, until an
+observer calls `on.Propagate(false)`. There are seventeen, `Over`, `Out`, `Enter`, `Leave`, `Press`,
+`Release`, `Click`, `Move`, `DragStart`, `Drag`, `DragEnd`, `DragEnter`, `DragOver`, `DragLeave`,
+`DragDrop`, `Scroll` and `Cancel`, named as Bevy names them.
+
+Nodes are found as in Bevy, and a sprite where it carries Bevy's `Pickable`, as Bevy's own
+examples give theirs (`ecs.Insert<PickableRef>(sprite)`). Meshes are found where the app asks, with
+`Config.MeshPicking`, since that casts a ray at every mesh as the pointer moves, and Bevy's own
+programs add mesh picking only where they pick one. It all needs a bridge with the renderer. An
+offscreen run has the pretend pointer of `SyntheticInput` put on the image it draws into, so a
+test or `./bcs command input.click` picks there as a hand would in a window.
+
 ---
 
 Before this, [Physics](physics.md).

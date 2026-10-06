@@ -4,10 +4,13 @@ using Bevy.Interop;
 
 namespace Bevy;
 
-/// <summary>A change to a component that Bevy reports and the registry asks it to.</summary>
-internal interface ILifecycleEvent
+/// <summary>
+/// An event Bevy reports once the registry asks it to, a change to a component or something a
+/// pointer did.
+/// </summary>
+internal interface IReportedEvent
 {
-    /// <summary>Asks Bevy to report this kind of change to this component.</summary>
+    /// <summary>Asks Bevy to report this kind of event.</summary>
     void Watch(ObserverRegistry registry);
 }
 
@@ -33,6 +36,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly Dictionary<Type, List<Delegate>> _global = [];
     private readonly Dictionary<(Type, Entity), List<Delegate>> _onEntity = [];
     private readonly HashSet<(int Kind, int Component)> _watched = [];
+    private readonly HashSet<int> _watchedPointers = [];
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
     private GCHandle _self;
 
@@ -47,8 +51,9 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     {
         ArgumentNullException.ThrowIfNull(handler);
 
-        // A change to a component is Bevy's to report, so watching one starts the report.
-        if (default(TEvent) is ILifecycleEvent lifecycle) lifecycle.Watch(this);
+        // A change to a component, or what a pointer did, is Bevy's to report, so watching one
+        // starts the report.
+        if (default(TEvent) is IReportedEvent reported) reported.Watch(this);
 
         var list = entity is { } at
             ? GetOrAdd(_onEntity, (typeof(TEvent), at))
@@ -100,6 +105,36 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         Native.Check(
             Native.bcs_observe_component(ComponentRegistry.AppHandle, kind, component, &Reported, GCHandle.ToIntPtr(_self), &observer),
             $"observing {typeof(T).Name}");
+    }
+
+    /// <summary>Asks the bridge to report one kind of thing a pointer does, once.</summary>
+    /// <remarks>
+    /// A bridge without picking answers that it has none, and nothing is ever reported, which is
+    /// right for a build that draws nothing a pointer could be over.
+    /// </remarks>
+    internal void WatchPointer(int kind)
+    {
+        if (!_watchedPointers.Add(kind)) return;
+
+        ulong observer;
+        var status = Native.bcs_observe_pointer(ComponentRegistry.AppHandle, kind, &PointerReported, GCHandle.ToIntPtr(_self), &observer);
+        if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a pointer does");
+    }
+
+    /// <summary>Where the bridge reports what a pointer did, with the world on loan.</summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static void PointerReported(NativePointerEvent* reported, IntPtr user)
+    {
+        try
+        {
+            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry || reported == null) return;
+            PointerEvents.Trigger(registry, *reported);
+        }
+        catch (Exception ex)
+        {
+            // An exception crossing back into Rust is undefined, so it ends here, said.
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
+        }
     }
 
     /// <summary>Where the bridge reports a change, with the world on loan.</summary>

@@ -12,9 +12,10 @@ namespace Bevy;
 /// panel, and the interface answers for it.
 /// </para>
 /// <para>
-/// Needs a bridge built with the editor profile, which <see cref="App.HasEditor"/> reports.
-/// Drained rather than subscribed to, for the same reason the interface events are, which is that a
-/// C# system is handed the world and cannot hold an observer.
+/// Needs a bridge with the renderer, which <see cref="App.HasRenderer"/> reports, and an app with
+/// <see cref="Config.MeshPicking"/>, which the editor has. A game observes what a pointer does to
+/// an entity with <see cref="Pointer{TEvent}"/>, as Bevy's do, and this queue is the editor's
+/// older way of hearing a click.
 /// </para>
 /// </remarks>
 public static unsafe class Picking
@@ -22,10 +23,10 @@ public static unsafe class Picking
     /// <summary>How many picks one call carries at most.</summary>
     private const int BatchSize = 16;
 
-    /// <summary>Takes the scene entities clicked since the last call.</summary>
+    /// <summary>Takes the scene entities clicked since the last call, none where meshes are not picked.</summary>
     public static Entity[] Drain()
     {
-        if (!App.HasEditor) return [];
+        if (!App.HasRenderer) return [];
 
         var drained = new List<Entity>();
         var buffer = stackalloc ulong[BatchSize];
@@ -33,8 +34,10 @@ public static unsafe class Picking
         int count;
         do
         {
-            count = Native.Check(
-                Native.bcs_pick_events(buffer, BatchSize), "draining the scene picks");
+            // An app that did not ask for meshes to be picked has no queue, and nothing in it.
+            count = Native.bcs_pick_events(buffer, BatchSize);
+            if (count == NativeStatus.Unsupported) return [];
+            Native.Check(count, "draining the scene picks");
 
             for (var i = 0; i < count; i++) drained.Add(new Entity(buffer[i]));
         }
@@ -55,8 +58,8 @@ public static unsafe class Picking
     /// what is under the pointer, which is where a model dropped on the scene belongs.
     /// </para>
     /// <para>
-    /// Needs a bridge built with the editor profile, which carries Bevy's mesh picking, and answers
-    /// false on any other.
+    /// Needs a bridge with the renderer, which carries Bevy's mesh picking, and answers false on any
+    /// other. The app need not have asked for meshes to be picked under the pointer.
     /// </para>
     /// </remarks>
     /// <param name="origin">Where the ray starts, in world space.</param>
@@ -71,7 +74,7 @@ public static unsafe class Picking
         point = Vec3.Zero;
         normal = Vec3.Zero;
 
-        if (!App.HasEditor || direction == Vec3.Zero) return false;
+        if (!App.HasRenderer || direction == Vec3.Zero) return false;
 
         var from = stackalloc float[3] { origin.X, origin.Y, origin.Z };
         var towards = stackalloc float[3] { direction.X, direction.Y, direction.Z };

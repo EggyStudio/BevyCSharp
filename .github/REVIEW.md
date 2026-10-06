@@ -10,11 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `56ad9a2`. Two commits of moves alone split the bridge's `programs.rs` and
-`reflect.rs` into parts and put the lit shader's tests in `Assets`, so N 1.3's list stands at 19
-from 21, 12 of them in the bridge, and N 1.4's at 97 to mend (`5be8291`, `56ad9a2`). The reply on
-item 3's first gap, a decal's tag reached from a Slang material over Bevy's clustered decals, is
-written and its commit to come. No verdict is open.
+Reviewed up to `1a4b821`. A Slang material reaches the clustered decals over it through Bevy's own
+iterator, laying them on as the standard material does or reading each one's tag and textures, with
+`clustered_decals` written and `LitShaderTests` holding it within 12 a channel (`4bbcec0`), and
+reads the light an irradiance volume gives through Bevy's own function, `Render.TryImageSize` giving
+an image's size (ABI 205), with `irradiance_volumes` and the whole of `tonemapping` written
+(`1a4b821`); the light probes' tests moved to `Assets` by a move alone, so N 1.4's list stands at 96
+to mend (`67d179b`). The deferred buffers wait behind the pointer's events as observers, ten rows to
+their one or two, since a material drawing into them needs a stage of its own whose outputs follow
+the camera's prepasses, and picking moves into the render profile, decided here on 2026-10-06, its
+size and build time measured. No verdict is open.
+
+Before them, two commits of moves alone split the bridge's `programs.rs` and `reflect.rs` into parts
+and put the lit shader's tests in `Assets`, so N 1.3's list stands at 19 from 21, 12 of them in the
+bridge, and N 1.4's at 97 to mend (`5be8291`, `56ad9a2`).
 
 Before them, a kinematic body followed its entity at the speed and rate of turning the entity moves
 at, through every step of a frame, so a crate on a platform moved at 2.00 rides at 2.00 within 0.02
@@ -28,17 +37,6 @@ manifold's friction is scaled by its contact count, as 3DEngine's `ed0f3aa6` has
 box slides to 2.55 and 1.27 units at frictions of a half and 1 where it slid 10.15 and 5.06, and on
 a floor of triangles as well, `FrictionTests` holding each within a tenth of the distance friction
 allows (`e5c8110`), which settles item 14. No verdict is open.
-
-Before them, a frame advanced the clock by a set length in place of the machine's, from
-`Config.FrameSeconds`, `Time.FrameSeconds`, `BCS_FRAME_TIME`, `bcs open --frame-time` and
-`app.frametime`, over Bevy's `TimeUpdateStrategy::ManualDuration` (ABI 204), and a clock let go
-begins again at the moment it is let go, so a run of short frames does not leave the game standing
-until the machine catches up (`711f416`), which is the clock half of item 3. The kinematic half is
-measured and written, its commit to come. On the way it found two things in Bepu: a box sliding a
-quarter as rough as its friction says, which is Bepu sharing a convex manifold's friction among its
-contacts and item 15 takes from 3DEngine's mend, and a resting body given speed put to sleep at the
-next step's start, the next batch here, which 3DEngine's item 6 checks for its own code. No verdict
-is open.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -166,38 +164,42 @@ None open.
 
 ## Replies
 
-**Now 3, a decal's tag.** A Slang material reaches Bevy's clustered decals as it reaches the
-lighting, by WGSL the bridge puts in front of a shader that calls it, over Bevy's own
-`ClusteredDecalIterator` and the textures Bevy holds for the decals. `bcs::decal_count`,
-`bcs::decal_tag`, `bcs::decal_has` and `bcs::decal_sample` walk the decals over a point, and
-`bcs::decals` lays them on a surface as the standard material does, color, metallic and roughness,
-normal map and light given off. `clustered_decals` is written with the Slang port of Bevy's
-`custom_clustered_decal.wgsl`, the icon tinted red and blue by the two decals' tags, and the
-capture shows Bevy's scene. `LitShaderTests` colors cubes by the tag over them and lays a half
-transparent decal on with `bcs::decals` beside the standard material laying it, within 12 a
-channel, both skipping on a device whose standard material shows no decal. The preludes are now a
-list (`programs/wgsl.rs`), each put in front of a fragment shader calling it and read through
-stand-ins, which a native test holds. Two commits that move code alone came first, `programs.rs`
-and `reflect.rs` split into parts (`5be8291`) and the lit shader's tests into `Assets`
-(`56ad9a2`). The volume's voxels and the deferred buffers are next.
+**Now 3, the pointer's events as observers.** A game observes what a pointer does to an entity as
+Bevy's `Pointer<E>`, `ecs.Observe<Pointer<Click>>(button, on => ...)`, with Bevy's seventeen kinds
+from `Over` to `Cancel` in `BevyCSharp/Input`, each carrying the entity, the pointer, where it is
+and what it did, most with where it met the entity. The first observer of a kind has the bridge
+spawn a Bevy observer of it (`pointer.rs`), which copies the event into one shape and calls C# with
+the world on loan at its first step only, and C# takes it up the parents as Bevy does, so
+`on.Propagate(false)` stops it (ABI 206).
 
-**Now 3, a volume's voxels.** `bcs::irradiance(mesh, normal)` is Bevy's own
-`irradiance_volume_light` from a Slang material, the light the volumes over a point give a surface
-facing a way, through a third prelude in the same list as the lighting and the decals.
-`Render.TryImageSize` reads an image's width, height and depth once it has loaded, compressed or not
-(`bcs_render_image_size`, ABI 205), in a module of its own, `render/images.rs`, since `assets.rs`
-holds the other image calls and is on N 1.3's list. `irradiance_volumes` is written with them, its
-voxels a cube each in the light the volume holds, the volume's box Bevy's `VOXEL_FROM_WORLD`
-written as a translation, a half turn and a scale. Bevy's voxel shader works out the middle of the
-voxel and then reads at the fragment's own place, so the port reads at the fragment and says why.
-`tonemapping`'s image viewer is sized to the dropped image with the same call, the one thing it
-left out, so it is written whole, though no test here drops a file on it. `LightProbeTests` draws
-its computed volume's cube with a shader showing `bcs::irradiance` and finds the top green and the
-front red as the standard material's are, and the volume's image 4 by 8 by 12 as made. The tests
-moved to `Assets` first by a move alone (`67d179b`).
+Picking is in the render profile as you said: `mesh_picking` moved there and `sprite_picking`
+added, file_watcher, ImGui and reflect_documentation staying in the editor. Measured as one clean
+release build of the render profile each, on this machine and not in the container: 836 s and
+138,009,608 bytes before, 839 s and 138,862,344 after, 3 s and 0.6% more, the first run having had
+a short managed build overlap it. Mesh picking is compiled in and added only where an app asks,
+`Config.MeshPicking`, which the editor has, since Bevy leaves it out of its default plugins for the
+ray it casts at every mesh as the pointer moves, and its own programs add it where they pick one.
+Sprites are picked as Bevy's default plugins pick them, a sprite carrying `Pickable`.
 
-The deferred buffers wait behind the pointer's events as observers, which hold ten rows to their
-one or two, since the item takes the gaps by rows. A material drawing into them needs a stage of
-its own whose outputs follow the camera's prepasses, the normal at location 0 only with a normal
-prepass and the motion at 1 only with motion vectors, which a Slang entry point cannot declare by
-itself, and inputs that the prepass vertex shader in use writes, so it is a design of its own.
+An offscreen run had no window for a pointer, so `SyntheticInput` there puts the mouse's pointer on
+the image the run draws into, through Bevy's `PointerInput`, and its button and place reach
+`ctx.Input`. Bevy's ray map asks for a primary window first and built no ray at all without one, so
+meshes and sprites went unpicked offscreen, and `offscreen.rs` adds the rays it would have cast for
+cameras drawing into that image, where Bevy's documentation of the map says to add such rays. An
+offscreen editor now takes clicks on the scene through picking as a window does.
+
+`sprite_picking`, `dragdrop_picking`, `entity_disabling` and `ui_drag_and_drop` are written, each
+driven offscreen by `bcs` and seen to do what Bevy's does, 246 written, and `mesh_picking` and
+`simple_picking` are on observers in the render profile. `mesh_picking` still marks the point under
+the pointer from a ray it casts each frame, since the hits Bevy keeps on its pointer are not
+reachable from C#, and its row says so. `PointerTests` holds the mirror's layout, a click on a node
+heard there and at its parent and stopped at the node, a click on a cube saying where it met the
+face and which way that faces, and a sprite picked where it is drawn and nowhere else.
+`PickRayTests` moved to `Assets` first by a move alone (`96a61e6`). Two things were seen and not
+mended. A move and a press at a new place in one frame miss, the hover being a frame behind, as a
+window's mouse is in Bevy. And `dragdrop_picking`'s pale preview draws over the words "Drop here",
+where Bevy sorts it under them, which was not traced.
+
+Shared: a game observes what a pointer does to an entity as Bevy's `Pointer<E>`, taken here, and an
+offscreen run is pointed at through its image, which may be worth a look in 3DEngine's offscreen
+runs.

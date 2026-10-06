@@ -4,9 +4,9 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**242 written, 18 written in part, 0 can be written, 103 missing and 58 do not apply.** Of the 363 that apply, 260 can be written with what is bridged, 18 of them leaving something out.
+**246 written, 18 written in part, 0 can be written, 99 missing and 58 do not apply.** Of the 363 that apply, 264 can be written with what is bridged, 18 of them leaving something out.
 
-**119 of the 121 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**122 of the 124 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -20,7 +20,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |  |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 15 | 0 | 0 | 11 | 9 | 9 of 9 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 16 | 0 | 0 | 10 | 9 | 10 of 10 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 5 | 1 | 0 | 0 | 0 | 5 of 5 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
@@ -28,7 +28,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Input](#input) | 6 | 1 | 0 | 5 | 0 |  |
 | [Math](#math) | 1 | 0 | 0 | 4 | 1 | 1 of 1 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Picking](#picking) | 2 | 0 | 0 | 3 | 1 | 1 of 1 |
+| [Picking](#picking) | 4 | 0 | 0 | 1 | 1 | 3 of 3 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 9 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
@@ -39,12 +39,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 31 | 1 | 0 | 28 | 0 | 10 of 10 |
+| [UI (User Interface)](#ui-user-interface) | 32 | 1 | 0 | 27 | 0 | 10 of 10 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **242** | **18** | **0** | **103** | **58** | **119 of 121** |
+| **All** | **246** | **18** | **0** | **99** | **58** | **122 of 124** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -283,7 +283,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`delayed_commands`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/delayed_commands.rs) | Demonstrates how to schedule ECS commands with a delay | missing, commands queued to run after a delay, and a click observed on a sprite |
 | [`dynamic`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/dynamic.rs) | Dynamically create components, spawn entities with those components and query those components | does not apply, builds components from raw layouts in Rust |
 | [`ecs_guide`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/ecs_guide.rs) | Full guide to Bevy's ECS | [written](../BevyCSharp.Examples/ecs/ecs_guide.cs), prints [its output](assets/examples/ecs_guide.txt) |
-| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | missing, a click observed on a mesh |
+| [`entity_disabling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/entity_disabling.rs) | Demonstrates how to hide entities from the ECS without deleting them | [written](../BevyCSharp.Examples/ecs/entity_disabling.cs) |
 | [`error_handling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/error_handling.rs) | How to return and handle errors across the ECS | missing, an observer of the pointer moving over a mesh, and points sampled over a mesh's surface |
 | [`extraction`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/extraction.rs) | Demonstrates different ways of extracting components, copying them from the main world to the render world | does not apply, writes render world extraction in Rust |
 | [`fallible_params`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/fallible_params.rs) | Systems are skipped if their parameters cannot be acquired | does not apply, about Rust system parameters that fail validation, where a C# system checks what it needs itself |
@@ -386,10 +386,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`custom_hit_data`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/custom_hit_data.rs) | Demonstrates a custom picking backend with custom hit data. | does not apply, writes a Rust picking backend |
 | [`debug_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/debug_picking.rs) | Demonstrates picking debug overlay | missing, Bevy's picking debug overlay |
-| [`dragdrop_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/dragdrop_picking.rs) | Demonstrates drag and drop using picking events | missing, drag and drop picking events |
-| [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/mesh_picking.rs) | Demonstrates picking meshes | [written](../BevyCSharp.Examples/picking/mesh_picking.cs), in the editor profile, the shape under the pointer found by a ray cast each frame where Bevy observes pointer events |
-| [`simple_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/simple_picking.rs) | Demonstrates how to use picking events to spawn simple objects | [written](../BevyCSharp.Examples/picking/simple_picking.cs), in the editor profile, a drag found by a ray cast as the button goes down where Bevy observes pointer events |
-| [`sprite_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/sprite_picking.rs) | Demonstrates picking sprites and sprite atlases | missing, picking sprites |
+| [`dragdrop_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/dragdrop_picking.rs) | Demonstrates drag and drop using picking events | [written](../BevyCSharp.Examples/picking/dragdrop_picking.cs) |
+| [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/mesh_picking.rs) | Demonstrates picking meshes | [written](../BevyCSharp.Examples/picking/mesh_picking.cs), the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps |
+| [`simple_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/simple_picking.rs) | Demonstrates how to use picking events to spawn simple objects | [written](../BevyCSharp.Examples/picking/simple_picking.cs) |
+| [`sprite_picking`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/picking/sprite_picking.rs) | Demonstrates picking sprites and sprite atlases | [written](../BevyCSharp.Examples/picking/sprite_picking.cs) |
 
 ## Reflection
 
@@ -568,7 +568,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`text_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_input.rs) | Demonstrates a simple, unstyled text input widget | [written](../BevyCSharp.Examples/ui/text_input.cs) |
 | [`text_wrap_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_wrap_debug.rs) | Demonstrates text wrapping | [written](../BevyCSharp.Examples/ui/text_wrap_debug.cs) |
 | [`transparency_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/transparency_ui.rs) | Demonstrates transparency for UI | [written](../BevyCSharp.Examples/ui/transparency_ui.cs) |
-| [`ui_drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_drag_and_drop.rs) | Demonstrates dragging and dropping UI nodes | missing, observers of the pointer dragging and dropping interface nodes |
+| [`ui_drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_drag_and_drop.rs) | Demonstrates dragging and dropping UI nodes | [written](../BevyCSharp.Examples/ui/ui_drag_and_drop.cs) |
 | [`ui_material`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_material.rs) | Demonstrates creating and using custom Ui materials | missing, interface materials (UiMaterial) |
 | [`ui_scaling`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_scaling.rs) | Illustrates how to scale the UI | [written](../BevyCSharp.Examples/ui/ui_scaling.cs) |
 | [`ui_target_camera`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/ui_target_camera.rs) | Demonstrates how to use `UiTargetCamera` and camera ordering. | [written](../BevyCSharp.Examples/ui/ui_target_camera.cs) |

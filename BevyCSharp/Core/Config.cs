@@ -199,6 +199,18 @@ public sealed class Config
     public double FrameSeconds { get; set; }
 
     /// <summary>
+    /// Find the mesh under a pointer, for what a pointer does to it (<see cref="Pointer{TEvent}"/>)
+    /// and for <see cref="Picking.Drain"/>.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>MeshPickingPlugin</c>, which casts a ray at every mesh in the scene as the pointer
+    /// moves. The interface's nodes and sprites are found without it, as in Bevy, whose default
+    /// plugins leave meshes out for that cost and a program adds the plugin where it picks one. A
+    /// bridge with the renderer is needed, and the editor has it whatever this says.
+    /// </remarks>
+    public bool MeshPicking { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>

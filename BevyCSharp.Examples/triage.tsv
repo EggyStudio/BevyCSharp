@@ -187,7 +187,7 @@ custom_schedule	missing	schedules a game adds of its own
 delayed_commands	missing	commands queued to run after a delay, and a click observed on a sprite
 dynamic	n/a	builds components from raw layouts in Rust
 ecs_guide	can
-entity_disabling	missing	a click observed on a mesh
+entity_disabling	can
 error_handling	missing	an observer of the pointer moving over a mesh, and points sampled over a mesh's surface
 extraction	n/a	writes render world extraction in Rust
 fallible_params	n/a	about Rust system parameters that fail validation, where a C# system checks what it needs itself
@@ -272,10 +272,10 @@ test_invalid_skinned_mesh	n/a	a test of skinned mesh validation, hidden from Bev
 test_skinned_mesh_bounds	n/a	a test of skinned mesh bounds, hidden from Bevy's list
 custom_hit_data	n/a	writes a Rust picking backend
 debug_picking	missing	Bevy's picking debug overlay
-dragdrop_picking	missing	drag and drop picking events
-mesh_picking	can	in the editor profile, the shape under the pointer found by a ray cast each frame where Bevy observes pointer events
-simple_picking	can	in the editor profile, a drag found by a ray cast as the button goes down where Bevy observes pointer events
-sprite_picking	missing	picking sprites
+dragdrop_picking	can
+mesh_picking	can	the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps
+simple_picking	can
+sprite_picking	can
 auto_register_static	n/a	about Rust reflection registration
 custom_attributes	n/a	about Rust reflection
 dynamic_types	n/a	about Rust reflection
@@ -399,7 +399,7 @@ text	missing	an underline and OpenType font features
 text_input	can
 text_wrap_debug	can
 transparency_ui	can
-ui_drag_and_drop	missing	observers of the pointer dragging and dropping interface nodes
+ui_drag_and_drop	can
 ui_material	missing	interface materials (UiMaterial)
 ui_scaling	can
 ui_target_camera	can

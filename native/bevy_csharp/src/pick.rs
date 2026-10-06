@@ -1,25 +1,25 @@
-//! What was clicked in the scene, rather than in the interface.
+//! What was clicked in the scene, rather than in the interface, and the mesh a ray meets.
 //!
-//! Needs the `editor` feature. The entry point exists in every profile and reports
-//! [`status::UNSUPPORTED`] without it, the same as the rest of the editor surface.
+//! Needs the `render` feature. The entry points exist in every profile and report
+//! [`status::UNSUPPORTED`] without it.
 //!
-//! Bevy's picking is already compiled in, since the interface crate depends on it, but it only
-//! knows about the interface. Hitting a mesh needs `MeshPickingPlugin`, which raycasts the meshes
-//! in the scene against the pointer. Adding it here turns a click on the viewport into an entity,
-//! which is the half of selection a hierarchy list cannot give.
+//! Bevy's picking knows the interface's nodes and sprites by default. Hitting a mesh needs
+//! `MeshPickingPlugin`, which raycasts the meshes in the scene against the pointer, and which an app
+//! asks for (`Config.MeshPicking`) and the editor has. Adding it here turns a click on the viewport
+//! into an entity, which is the half of selection a hierarchy list cannot give, and gives a game's
+//! observers of what a pointer does (see [`crate::pointer`]) the meshes too.
 //!
-//! Clicks are queued and drained rather than observed, for the same reason as every other report
-//! here, because a C# system is handed the world and cannot hold an observer.
+//! The editor's clicks are queued and drained, an older way than the observers a game has.
 
 use crate::interop::status;
 
 /// The scene entities clicked since the managed side last looked.
-#[cfg(feature = "editor")]
+#[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct Picks(pub Vec<u64>);
 
 /// Adds mesh picking and the queue behind [`bcs_pick_events`].
-#[cfg(feature = "editor")]
+#[cfg(feature = "render")]
 pub fn install(app: &mut bevy::app::App) {
     use bevy::picking::events::{Click, Pointer};
     use bevy::prelude::*;
@@ -57,13 +57,13 @@ pub fn install(app: &mut bevy::app::App) {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_pick_events(out: *mut u64, capacity: i32) -> i32 {
     crate::interop::guard(|| {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = (out, capacity);
             status::UNSUPPORTED
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             if out.is_null() && capacity > 0 {
                 return status::NULL_ARG;
@@ -113,13 +113,13 @@ pub unsafe extern "C" fn bcs_pick_ray(
             return status::NULL_ARG;
         }
 
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = (point, normal);
             status::UNSUPPORTED
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             use bevy::camera::visibility::RenderLayers;
             use bevy::ecs::system::SystemState;

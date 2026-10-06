@@ -93,6 +93,59 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
         // on it.
         (point_cameras_at_image, choose_offscreen_ui_camera).chain(),
     );
+
+    app.add_systems(
+        bevy::app::PreUpdate,
+        offscreen_rays
+            .after(bevy::picking::backend::ray::RayMap::repopulate)
+            .in_set(bevy::picking::PickingSystems::ProcessInput),
+    );
+}
+
+/// Casts the rays of pointers on the image an offscreen run draws into, which Bevy's ray map leaves
+/// out.
+///
+/// Bevy builds a ray for each camera and pointer whose targets agree, asking first which window is
+/// the primary one, and a run with no window has none, so it builds no ray at all, even for a
+/// camera drawing into an image a pointer is put on. Meshes and sprites are found along those rays,
+/// while the interface compares targets without asking, so only it was picked offscreen.
+/// The rays are the ones Bevy would cast, from the same camera through the same point, added as
+/// Bevy's own documentation of the map says to add rays for a camera drawing into a texture.
+#[cfg(feature = "render")]
+fn offscreen_rays(
+    mut rays: bevy::prelude::ResMut<bevy::picking::backend::ray::RayMap>,
+    windows: bevy::prelude::Query<(), bevy::prelude::With<bevy::window::PrimaryWindow>>,
+    cameras: bevy::prelude::Query<(
+        bevy::prelude::Entity,
+        &bevy::camera::Camera,
+        &bevy::camera::RenderTarget,
+        &bevy::prelude::GlobalTransform,
+    )>,
+    pointers: bevy::prelude::Query<(&bevy::picking::pointer::PointerId, &bevy::picking::pointer::PointerLocation)>,
+) {
+    if !windows.is_empty() {
+        return;
+    }
+
+    for (entity, camera, target, transform) in &cameras {
+        let Some(target) = camera.is_active.then(|| target.normalize(None)).flatten() else {
+            continue;
+        };
+
+        for (&pointer, location) in &pointers {
+            let Some(location) = location.location() else {
+                continue;
+            };
+            if location.target != target
+                || !camera.logical_viewport_rect().is_some_and(|rect| rect.contains(location.position))
+            {
+                continue;
+            }
+            if let Ok(ray) = camera.viewport_to_world(transform, location.position) {
+                rays.map.insert(bevy::picking::backend::ray::RayId::new(entity, pointer), ray);
+            }
+        }
+    }
 }
 
 /// Marks the camera an offscreen run's interface is drawn on, which this bridge chose rather than

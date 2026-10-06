@@ -880,7 +880,7 @@ EffectSettings Through(PhysicalLens lens);                      // Takes the dep
 ### `Picking`
 
 ```csharp
-static Entity[] Drain();                                        // Takes the scene entities clicked since the last call
+static Entity[] Drain();                                        // Takes the scene entities clicked since the last call, none where meshes are not picked
 static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal);  // The nearest mesh a ray meets, where, and which way the surface there faces
 ```
 

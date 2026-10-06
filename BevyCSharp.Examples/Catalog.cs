@@ -182,6 +182,7 @@ internal static class Catalog
         new("one_shot_systems", OneShotSystems.Build),
         new("parallel_query", ParallelQueryExample.Build),
         new("removal_detection", RemovalDetection.Build),
+        new("entity_disabling", EntityDisabling.Build, EntityDisabling.Configure),
         new("run_conditions", RunConditions.Build, Prints: 160),
         new("startup_system", StartupSystem.Build, Prints: 1),
         new("system_closure", SystemClosure.Build, Prints: 3),
@@ -237,8 +238,10 @@ internal static class Catalog
         new("smooth_follow", SmoothFollow.Build),
 
         // Picking
-        new("mesh_picking", MeshPicking.Build),
-        new("simple_picking", SimplePicking.Build),
+        new("mesh_picking", MeshPicking.Build, MeshPicking.Configure),
+        new("simple_picking", SimplePicking.Build, SimplePicking.Configure),
+        new("sprite_picking", SpritePicking.Build),
+        new("dragdrop_picking", DragdropPicking.Build, DragdropPicking.Configure),
 
         // State
         new("states", StatesExample.Build),
@@ -304,6 +307,7 @@ internal static class Catalog
         new("editable_text_filter", EditableTextFilter.Build),
         new("flex_layout", FlexLayout.Build),
         new("grid", Grid.Build, Grid.Configure),
+        new("ui_drag_and_drop", UiDragAndDrop.Build),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
         new("letter_spacing", LetterSpacingExample.Build),

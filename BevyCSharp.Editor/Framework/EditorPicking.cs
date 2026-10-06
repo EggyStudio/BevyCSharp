@@ -33,14 +33,14 @@ public static class EditorPicking
 
 
     /// <summary>
-    /// Answers the clicks given to an editor with no window, which Bevy's picking cannot see, by
-    /// casting a ray from the scene camera through each.
+    /// Answers the clicks given to an editor with neither a window nor an image it draws into,
+    /// which Bevy's picking cannot see, by casting a ray from the scene camera through each.
     /// </summary>
     /// <remarks>
-    /// An editor opened with <c>--offscreen</c> and driven by <c>bcs</c> takes clicks on its
-    /// panels from the interface and these from nothing else, so a click on the scene there
-    /// selects what is under it and a click on nothing clears the selection, as it does in a
-    /// window. The triangles the ray meets are the meshes', as a pick's are.
+    /// An editor opened with <c>--offscreen</c> has its pretend pointer put on the image it draws
+    /// into, where picking finds what is under it as in a window, so its clicks come through
+    /// <see cref="Picking.Drain"/> and none arrive here. The triangles the ray meets are the
+    /// meshes', as a pick's are.
     /// </remarks>
     private static void Unwindowed()
     {

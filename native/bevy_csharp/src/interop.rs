@@ -266,6 +266,9 @@ pub struct BcsConfig {
     /// machine's. Bevy's `TimeUpdateStrategy::ManualDuration`, so a test or a capture runs the same
     /// on every machine, a frame at a time.
     pub frame_seconds: f64,
+    /// Non-zero to add Bevy's mesh picking, which finds the mesh under a pointer for its events.
+    /// Needs the `render` feature, and costs a ray cast at every mesh as the pointer moves.
+    pub mesh_picking: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

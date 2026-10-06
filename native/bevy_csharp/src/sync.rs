@@ -107,16 +107,20 @@ pub unsafe extern "C" fn bcs_frame_state(out: *mut BcsFrameState) -> i32 {
                 state.input.wheel_y = scroll.delta.y;
             }
 
-            // Cursor position needs a window, so it stays zero in headless builds.
+            // Cursor position needs a window, so it stays zero in headless builds. An offscreen run
+            // has none either, and reads where its pretend pointer was last put instead.
             #[cfg(feature = "render")]
             {
                 use bevy::window::{PrimaryWindow, Window};
                 let mut windows = world.query_filtered::<&Window, bevy::prelude::With<PrimaryWindow>>();
-                if let Ok(window) = windows.single(world)
-                    && let Some(position) = window.cursor_position()
-                {
-                    state.input.mouse_x = position.x;
-                    state.input.mouse_y = position.y;
+                if let Ok(window) = windows.single(world) {
+                    if let Some(position) = window.cursor_position() {
+                        state.input.mouse_x = position.x;
+                        state.input.mouse_y = position.y;
+                    }
+                } else if let Some(pointer) = world.get_resource::<crate::input::OffscreenPointer>() {
+                    state.input.mouse_x = pointer.0.x;
+                    state.input.mouse_y = pointer.0.y;
                 }
             }
 

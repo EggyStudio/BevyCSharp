@@ -2,6 +2,7 @@
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Pointers;
 
@@ -9,27 +10,27 @@ namespace BevyCSharp.Examples.Pointers;
 // cyan under it and yellow while pressed, the point the pointer meets is marked with its normal,
 // and a drag turns the shape.
 //
-// Bevy observes its pointer events on each shape and keeps the nearest hit under each pointer.
-// Here a ray is cast from the pointer each frame and the shape it meets is the one under it, the
-// ground being left out as Bevy's is. Picking a mesh needs the editor profile of the bridge.
+// Bevy marks the nearest hit its pointer keeps each frame. Here the same ray is cast from the
+// pointer each frame for the mark, the ground being left out as Bevy's is.
 internal static class MeshPicking
 {
     private const float ShapesXExtent = 14f, ExtrusionXExtent = 16f, ZExtent = 5f;
 
-    private static Entity _camera, _hovered, _pressed;
+    private static Entity _camera;
     private static AssetHandle _white, _hover, _press;
-    private static (float X, float Y) _pointer;
 
     public static void Build(App app)
     {
         app.Startup(Setup, "mesh_picking.SetupScene");
-        app.Update(Pick, "mesh_picking.Pick");
+        app.Update(DrawMeshIntersections, "mesh_picking.DrawMeshIntersections");
     }
+
+    // Meshes are picked, as Bevy's adds MeshPickingPlugin.
+    public static void Configure(Config config) => config.MeshPicking = true;
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        (_hovered, _pressed) = (Entity.None, Entity.None);
 
         // Tailwind's colors at 300, white while nothing touches a shape.
         _white = Render.CreateMaterial((1f, 1f, 1f, 1f));
@@ -65,14 +66,30 @@ internal static class MeshPicking
             for (var i = 0; i < meshes.Length; i++)
             {
                 var x = -extent / 2f + i / (float)(meshes.Length - 1) * extent;
-                ecs.Add(ecs.SpawnMesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One)), new Shape());
+                var shape = ecs.SpawnMesh(meshes[i], _white, new Transform(new Vec3(x, 2f, z), Quat.FromRotationX(-MathF.PI / 4f), Vec3.One));
+                ecs.Add(shape, new Shape());
+
+                // Bevy's update_material_on for each, and rotate_on_drag.
+                ecs.Observe<Pointer<Over>>(shape, on => Render.SetMaterial(on.Ecs, on.Entity, _hover));
+                ecs.Observe<Pointer<Out>>(shape, on => Render.SetMaterial(on.Ecs, on.Entity, _white));
+                ecs.Observe<Pointer<Press>>(shape, on => Render.SetMaterial(on.Ecs, on.Entity, _press));
+                ecs.Observe<Pointer<Release>>(shape, on => Render.SetMaterial(on.Ecs, on.Entity, _hover));
+                ecs.Observe<Pointer<Drag>>(shape, on =>
+                {
+                    var delta = on.Event.Event.Delta;
+                    var at = on.Ecs.GetOrDefault<Transform>(on.Entity);
+                    on.Ecs.Set(on.Entity, at with { Rotation = Quat.FromRotationX(delta.Y * 0.02f) * Quat.FromRotationY(delta.X * 0.02f) * at.Rotation });
+                });
             }
         }
 
         Row(shapes, ShapesXExtent, ZExtent / 2f);
         Row(extrusions, ExtrusionXExtent, -ZExtent / 2f);
 
-        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb8(209, 213, 219)), Transform.Identity);
+        // The ground, which picking passes through.
+        var ground = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 50f, 50f), Render.CreateMaterial(Color.FromSrgb8(209, 213, 219)), Transform.Identity);
+        var ignore = ecs.Insert<PickableRef>(ground);
+        (ignore.ShouldBlockLower, ignore.IsHoverable) = (false, false);
 
         var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 10_000_000f, Range = 100f, Shadows = true, ShadowDepthBias = 0.2f });
         ecs.Add(light, Transform.At(8f, 16f, 8f));
@@ -81,50 +98,19 @@ internal static class MeshPicking
         Ui.SpawnText("Hover over the shapes to pick them\nDrag to rotate", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
 
-    private static void Pick(BehaviorContext ctx)
+    // The point a ray from the pointer meets a shape, with the way the surface faces there.
+    private static void DrawMeshIntersections(BehaviorContext ctx)
     {
-        var (ecs, input) = (ctx.Ecs, ctx.Input);
-        var pointer = input.MousePosition;
-        var (dx, dy) = (pointer.X - _pointer.X, pointer.Y - _pointer.Y);
-        _pointer = pointer;
-
-        // The shape under the pointer and where on it, the ground meeting the ray being nothing.
-        var under = Entity.None;
-        if (Render.TryRay(_camera, pointer.X, pointer.Y, out var origin, out var direction)
-            && Picking.TryCast(origin, direction, out var hit, out var point, out var normal)
-            && ecs.Has<Shape>(hit))
+        var (x, y) = ctx.Input.MousePosition;
+        if (!Render.TryRay(_camera, x, y, out var origin, out var direction)
+            || !Picking.TryCast(origin, direction, out var hit, out var point, out var normal)
+            || !ctx.Ecs.Has<Shape>(hit))
         {
-            under = hit;
-            Gizmos.Sphere(point, 0.05f, Color.FromSrgb8(239, 68, 68), inFront: false);
-            Gizmos.Arrow(point, point + normal * 0.5f, Color.FromSrgb8(252, 231, 243), inFront: false);
+            return;
         }
 
-        // Over and out, press and release, each giving the shape the material Bevy's observers do.
-        if (under != _hovered)
-        {
-            if (_hovered != Entity.None && _hovered != _pressed) Render.SetMaterial(ecs, _hovered, _white);
-            if (under != Entity.None && under != _pressed) Render.SetMaterial(ecs, under, _hover);
-            _hovered = under;
-        }
-
-        if (input.MousePressed(MouseButton.Left) && under != Entity.None)
-        {
-            _pressed = under;
-            Render.SetMaterial(ecs, under, _press);
-        }
-
-        if (_pressed != Entity.None && !input.MouseDown(MouseButton.Left))
-        {
-            Render.SetMaterial(ecs, _pressed, _pressed == _hovered ? _hover : _white);
-            _pressed = Entity.None;
-        }
-
-        // A drag turns the shape it started on.
-        if (_pressed != Entity.None && (dx != 0f || dy != 0f))
-        {
-            var at = ecs.GetOrDefault<Transform>(_pressed);
-            ecs.Set(_pressed, at with { Rotation = Quat.FromRotationX(dy * 0.02f) * Quat.FromRotationY(dx * 0.02f) * at.Rotation });
-        }
+        Gizmos.Sphere(point, 0.05f, Color.FromSrgb8(239, 68, 68), inFront: false);
+        Gizmos.Arrow(point, point + normal * 0.5f, Color.FromSrgb8(252, 231, 243), inFront: false);
     }
 }
 

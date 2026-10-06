@@ -86,4 +86,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Seconds each frame advances the clock by, or zero for the machine's clock.</summary>
     public double FrameSeconds;
+
+    /// <summary>Non-zero to add Bevy's mesh picking.</summary>
+    public uint MeshPicking;
 }

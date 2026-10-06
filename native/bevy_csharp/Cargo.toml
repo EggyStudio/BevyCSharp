@@ -23,9 +23,6 @@ default = ["headless"]
 editor = [
     "render",
     "bevy/file_watcher",
-    # Clicking a mesh to select it, which is the other half of what a hierarchy list does.
-    "bevy/bevy_picking",
-    "bevy/mesh_picking",
     # Bevy's doc comments, kept with its reflected types, so the inspector can show what a field of
     # a light or a camera is for. Here rather than in the render profile because a game shipping on
     # that profile has nobody to show them to and would carry every comment in its library.
@@ -169,6 +166,14 @@ render = [
     # comes with them, since a click gives a field its focus and drags a slider.
     "bevy/bevy_ui_widgets",
     "bevy/ui_picking",
+    # What a pointer is over and does to it, the interface's nodes, sprites and meshes, as a game
+    # observes it. Picking is here already for the interface, and these are its backends for the
+    # other two. Sprites are picked as Bevy's default plugins pick them, and meshes only in an app
+    # that asks (`Config.MeshPicking`), since Bevy's mesh picking casts a ray at every mesh as the
+    # pointer moves and Bevy's own programs leave it out unless they use it.
+    "bevy/bevy_picking",
+    "bevy/sprite_picking",
+    "bevy/mesh_picking",
     "bevy/bevy_gizmos",
     "bevy/bevy_gizmos_render",
     # Sound. Unlike everything else here this needs a system library at build time: cpal, which

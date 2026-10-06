@@ -324,9 +324,15 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             if config.gui != 0 {
                 crate::imgui::install(&mut app);
                 crate::capabilities::INTERFACE_INSTALLED.store(true, std::sync::atomic::Ordering::Relaxed);
+            }
 
-                // Clicking a mesh to select it is the other half of what a hierarchy list does,
-                // and it costs a raycast per click rather than anything per frame.
+            // The mesh under a pointer, where an app asks for it, and in the editor, where
+            // clicking a mesh to select it is the other half of what a hierarchy list does.
+            #[cfg(feature = "editor")]
+            let wants_meshes = config.mesh_picking != 0 || config.gui != 0;
+            #[cfg(not(feature = "editor"))]
+            let wants_meshes = config.mesh_picking != 0;
+            if wants_meshes {
                 crate::pick::install(&mut app);
             }
 

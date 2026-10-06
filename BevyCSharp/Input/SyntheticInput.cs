@@ -20,6 +20,11 @@ namespace Bevy;
 /// cursor, and does not try to, because what it drives is the application rather than the desktop.
 /// </para>
 /// <para>
+/// A pointer is written into Bevy as the window's own messages too, and in an offscreen run, which
+/// has no window, it is put on the image the run draws into, through Bevy's own pointer input, so
+/// picking finds what is drawn under it there as it would under a hand's pointer in a window.
+/// </para>
+/// <para>
 /// While anything here has been called, the pointer the interface sees is the one that was asked
 /// for rather than the one on the desk. <see cref="Release"/> leaves it where it was put; there is
 /// no need to hand it back.
@@ -296,11 +301,12 @@ public static class SyntheticInput
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Bevy's picking finds what a pointer is over only on a window, so a click given to an
-    /// offscreen run reaches the interface and nothing in the scene. This hands such a click to
-    /// whoever answers clicks on the scene, which casts a ray from its camera through the point
-    /// (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast"/>), as the editor does to select
-    /// what is under it.
+    /// For a run with neither a window nor an image it draws into, where Bevy's picking has nothing
+    /// to find a pointer on, so a click reaches the interface and nothing in the scene. This hands
+    /// such a click to whoever answers clicks on the scene, which casts a ray from its camera
+    /// through the point (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast"/>). An offscreen
+    /// run has its pointer put on the image it draws into, where picking finds what is under it,
+    /// and gives nothing here.
     /// </para>
     /// <para>
     /// A click is a press and a release no more than a few pixels apart, so a drag is not one.

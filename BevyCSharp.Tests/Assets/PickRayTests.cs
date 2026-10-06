@@ -9,7 +9,8 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// An offscreen app with a camera, since Bevy's mesh ray cast only meets what a camera can see, and
-/// the editor profile, which carries mesh picking. Without either the test has nothing to ask.
+/// a bridge with the renderer, which carries mesh picking. Without either the test has nothing to
+/// ask.
 /// </remarks>
 [Collection("engine")]
 public sealed class PickRayTests
@@ -17,7 +18,7 @@ public sealed class PickRayTests
     [SkippableFact]
     public void ARayMeetsTheTopOfACubeAndPassesWhatIsOffTheDefaultLayer()
     {
-        Needs.Editor();
+        Needs.Renderer();
 
         using var app = new App(Config.OffscreenFor(320, 180, frames: 90));
         app.AddPlugin(new EnginePlugin());

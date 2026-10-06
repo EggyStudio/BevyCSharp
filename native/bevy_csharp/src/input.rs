@@ -84,7 +84,8 @@ pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
 ///
 /// What a test drives the scene with. The window's own messages are written, which is where a real
 /// pointer's report begins, so everything downstream behaves exactly as it would. The camera reads
-/// the button, picking raycasts the meshes, and a gizmo takes hold.
+/// the button, picking raycasts the meshes, and a gizmo takes hold. An offscreen run, which has no
+/// window, has the pointer put on the image it draws into, for picking (see [`offscreen_pointer`]).
 ///
 /// `action` is 0 to move, 1 to press and 2 to release; `button` is 0 for left, 1 for right and 2
 /// for middle. The position is in logical pixels from the window's top left.
@@ -109,7 +110,7 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     world.query_filtered::<Entity, bevy::prelude::With<PrimaryWindow>>();
 
                 let Ok(window) = windows.single(world) else {
-                    return crate::interop::status::INVALID_STATE;
+                    return offscreen_pointer(world, Vec2::new(x, y), action, button);
                 };
 
                 // Moved first whatever the action is, because a press somewhere the pointer has
@@ -166,6 +167,65 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
             })
         }
     })
+}
+
+/// Where the pretend pointer was last put in an offscreen run, for how far the next move goes and
+/// for the cursor's position the frame's input reports.
+#[cfg(feature = "render")]
+#[derive(bevy::prelude::Resource, Default)]
+pub(crate) struct OffscreenPointer(pub bevy::prelude::Vec2);
+
+/// Moves, presses or releases the mouse's pointer over the image an offscreen run draws into.
+///
+/// An offscreen run has no window for the cursor's messages to name, and its cameras draw into an
+/// image, so the pointer is put on that image instead, through Bevy's own `PointerInput`, which is
+/// what picking reads every pointer from. What is drawn there is then pointed at as it would be in
+/// a window, the interface's nodes, sprites and meshes alike, so a test or a script drives an
+/// offscreen run as it would a windowed one. The button is written as Bevy's `MouseButtonInput` as
+/// well, naming no window, which Bevy's input turns into the button's state and picking does not
+/// read, so a game reading the mouse sees it too. Returns
+/// [`crate::interop::status::INVALID_STATE`] for a run with neither a window nor such an image.
+#[cfg(feature = "render")]
+fn offscreen_pointer(world: &mut bevy::prelude::World, at: bevy::prelude::Vec2, action: i32, button: i32) -> i32 {
+    use bevy::camera::NormalizedRenderTarget;
+    use bevy::picking::pointer::{Location, PointerAction, PointerButton, PointerId, PointerInput};
+
+    let Some(target) = world.get_resource::<crate::offscreen::OffscreenTarget>() else {
+        return crate::interop::status::INVALID_STATE;
+    };
+    let location = Location {
+        target: NormalizedRenderTarget::Image(target.image.clone().into()),
+        position: at,
+    };
+
+    let was = world.get_resource_or_insert_with(OffscreenPointer::default).0;
+    world.resource_mut::<OffscreenPointer>().0 = at;
+
+    // Moved first whatever the action is, as a window's pointer is, so a press lands where it is.
+    world.write_message(PointerInput::new(PointerId::Mouse, location.clone(), PointerAction::Move { delta: at - was }));
+
+    let button = match button {
+        1 => PointerButton::Secondary,
+        2 => PointerButton::Middle,
+        _ => PointerButton::Primary,
+    };
+    let (pressed, state) = match action {
+        1 => (PointerAction::Press(button), bevy::input::ButtonState::Pressed),
+        2 => (PointerAction::Release(button), bevy::input::ButtonState::Released),
+        _ => return crate::interop::status::OK,
+    };
+    world.write_message(PointerInput::new(PointerId::Mouse, location, pressed));
+    world.write_message(bevy::input::mouse::MouseButtonInput {
+        button: match button {
+            PointerButton::Secondary => bevy::input::mouse::MouseButton::Right,
+            PointerButton::Middle => bevy::input::mouse::MouseButton::Middle,
+            PointerButton::Primary => bevy::input::mouse::MouseButton::Left,
+        },
+        state,
+        window: bevy::prelude::Entity::PLACEHOLDER,
+    });
+
+    crate::interop::status::OK
 }
 
 /// Says something as the platform's input method would: `0` composing `text` with the caret over
