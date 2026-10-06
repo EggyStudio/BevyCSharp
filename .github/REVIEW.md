@@ -305,3 +305,13 @@ slab, the rect light's roughness text, the occlusion's bobbing sphere, the fog's
 back and forth between its two places at its speed, and the wireframe's green cube. meshlet's
 capture here draws the floor alone, this bridge built without `--meshlet`, as the example says it
 does.
+
+B 4 for 3D Rendering, its second part, 104 of 119. auto_exposure's text carries `ExampleDisplay`,
+each stamped decal its `ExampleDecal` with Bevy's three stages, a `GameTimer` for each, growing,
+staying and shrinking away by its own method until a command despawns it, split_screen's cameras
+their `CameraPosition`, setting their quarter of the window from its size, and its buttons their
+`RotateCamera`, turning the camera their interface is drawn on, which Bevy finds and here is read
+from the target the interface carries down. shadow_biases' lights move by their parent's
+`Lights`, visibility_range's helmets carry `MainModel` from their roots to each mesh as it
+appears, and camera_sub_view's cameras lay out their own viewports by `ExampleViewports`, the two
+that sweep their view carrying `MovingCameraMarker`.

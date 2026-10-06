@@ -20,15 +20,15 @@ internal static class ShadowBiases
     // Bevy's light_consts, a very large cinema light and ambient daylight.
     private const float CinemaLumens = 1_000_000f, DaylightLux = 10_000f;
 
-    private static Entity _lights, _point, _directional, _camera, _text;
-    private static Vec3 _lightAt;
+    private static Entity _point, _directional, _camera, _text;
+    internal static Vec3 LightAt;
     private static bool _pointOn;
     private static ShadowFiltering _filter;
     private static float _pointDepth, _pointNormal, _directionalDepth, _directionalNormal;
 
     public static void Build(App app)
     {
-        (_lightAt, _pointOn, _filter) = (new Vec3(5f, 5f, 0f), false, ShadowFiltering.Hardware2x2);
+        (LightAt, _pointOn, _filter) = (new Vec3(5f, 5f, 0f), false, ShadowFiltering.Hardware2x2);
         (_pointDepth, _pointNormal) = (PointDepthDefault, PointNormalDefault);
         (_directionalDepth, _directionalNormal) = (DirectionalDepthDefault, DirectionalNormalDefault);
 
@@ -45,8 +45,9 @@ internal static class ShadowBiases
         var sphere = Render.CreateMesh(MeshShape.Sphere, radius);
 
         // Both lights hang from one entity that the arrow keys move, and only one is on at a time.
-        _lights = ecs.Spawn();
-        ecs.Add(_lights, Transform.LookingAt(_lightAt, Vec3.Zero, Vec3.UnitY));
+        var lights = ecs.Spawn();
+        ecs.Add(lights, Transform.LookingAt(LightAt, Vec3.Zero, Vec3.UnitY));
+        ecs.Add(lights, new Lights());
 
         _point = Render.SpawnLight(new LightSettings
         {
@@ -68,7 +69,7 @@ internal static class ShadowBiases
         foreach (var light in new[] { _point, _directional })
         {
             ecs.Add(light, Transform.Identity);
-            ecs.SetParent(light, _lights);
+            ecs.SetParent(light, lights);
         }
 
         _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-1f, 1f, 1f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
@@ -112,20 +113,6 @@ internal static class ShadowBiases
             changed = true;
         }
 
-        var offset = Vec3.Zero;
-        if (input.KeyPressed(Key.ArrowLeft)) offset.X -= 1f;
-        if (input.KeyPressed(Key.ArrowRight)) offset.X += 1f;
-        if (input.KeyPressed(Key.ArrowUp)) offset.Z -= 1f;
-        if (input.KeyPressed(Key.ArrowDown)) offset.Z += 1f;
-        if (input.KeyPressed(Key.PageDown)) offset.Y -= 1f;
-        if (input.KeyPressed(Key.PageUp)) offset.Y += 1f;
-        if (offset != Vec3.Zero)
-        {
-            _lightAt += offset;
-            ecs.Set(_lights, Transform.LookingAt(_lightAt, Vec3.Zero, Vec3.UnitY));
-            changed = true;
-        }
-
         const float depthStep = 0.01f, normalStep = 0.1f;
         var biased = false;
         void Step(Key down, Key up, ref float value, float step)
@@ -161,6 +148,9 @@ internal static class ShadowBiases
         if (changed || biased) Ui.SetText(_text, Describe());
     }
 
+    // The controls and the settings they are at, said again.
+    internal static void Show() => Ui.SetText(_text, Describe());
+
     private static string Describe() => string.Create(CultureInfo.InvariantCulture,
         $"""
         Controls:
@@ -171,7 +161,34 @@ internal static class ShadowBiases
         3/4   - change point light normal bias [{_pointNormal:0.0}]
         5/6   - change direction light depth bias [{_directionalDepth:0.00}]
         7/8   - change direction light normal bias [{_directionalNormal:0.0}]
-        left/right/up/down/pgup/pgdown - adjust light position (looking at 0,0,0) [{_lightAt.X:0.0}, {_lightAt.Y:0.0}, {_lightAt.Z:0.0}]
+        left/right/up/down/pgup/pgdown - adjust light position (looking at 0,0,0) [{LightAt.X:0.0}, {LightAt.Y:0.0}, {LightAt.Z:0.0}]
 
         """);
+}
+
+/// <summary>The lights' parent, which the arrows and Page Up and Down move about the origin.</summary>
+[Behavior]
+public partial struct Lights
+{
+    /// <summary>
+    /// Moved a unit along X by left and right, along Z by up and down, and along Y by Page Up and
+    /// Page Down, looking at the origin wherever it goes, the text saying where.
+    /// </summary>
+    [OnUpdate]
+    public void AdjustLightPosition(BehaviorContext ctx, ref Transform transform)
+    {
+        var input = ctx.Input;
+        var offset = Vec3.Zero;
+        if (input.KeyPressed(Key.ArrowLeft)) offset.X -= 1f;
+        if (input.KeyPressed(Key.ArrowRight)) offset.X += 1f;
+        if (input.KeyPressed(Key.ArrowUp)) offset.Z -= 1f;
+        if (input.KeyPressed(Key.ArrowDown)) offset.Z += 1f;
+        if (input.KeyPressed(Key.PageDown)) offset.Y -= 1f;
+        if (input.KeyPressed(Key.PageUp)) offset.Y += 1f;
+        if (offset == Vec3.Zero) return;
+
+        transform = Transform.LookingAt(transform.Translation + offset, Vec3.Zero, Vec3.UnitY);
+        ShadowBiases.LightAt = transform.Translation;
+        ShadowBiases.Show();
+    }
 }

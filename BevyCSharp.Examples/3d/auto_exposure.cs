@@ -10,7 +10,7 @@ namespace BevyCSharp.Examples.ThreeD;
 // brightness of the scene in a way that mimics the function of the human eye.
 internal static class AutoExposure
 {
-    private static Entity _camera, _display, _mask;
+    private static Entity _camera, _mask;
     private static AssetHandle _meteringMask;
     private static bool _curve, _masked;
 
@@ -54,7 +54,7 @@ internal static class AutoExposure
             Ui.SpawnText(
                 "Left / Right - Rotate Camera\nC - Toggle Compensation Curve\nM - Toggle Metering Mask\nV - Visualize Metering Mask",
                 new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
-            _display = Ui.SpawnText(Display(), new UiSettings { Absolute = true, Top = Length.Px(12f), Right = Length.Px(12f) });
+            ecs.Add(Ui.SpawnText(Display(), new UiSettings { Absolute = true, Top = Length.Px(12f), Right = Length.Px(12f) }), new ExampleDisplay());
         });
 
         app.Update(ctx =>
@@ -75,7 +75,7 @@ internal static class AutoExposure
             if (changed)
             {
                 Apply();
-                Ui.SetText(_display, Display());
+                foreach (var display in ctx.Ecs.EntitiesWith<ExampleDisplay>()) Ui.SetText(display, Display());
             }
 
             if (input.KeyPressed(Key.V) || input.KeyReleased(Key.V))
@@ -95,3 +95,7 @@ internal static class AutoExposure
     private static string Display() =>
         $"Compensation Curve: {(_curve ? "Enabled" : "Disabled")}\nMetering Mask: {(_masked ? "Enabled" : "Disabled")}";
 }
+
+/// <summary>The text that says how the exposure is set.</summary>
+[Behavior]
+public partial struct ExampleDisplay;

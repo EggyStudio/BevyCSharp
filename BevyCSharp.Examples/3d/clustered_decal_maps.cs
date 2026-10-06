@@ -13,12 +13,8 @@ internal static class ClusteredDecalMaps
 {
     private const float PlaneHalfSize = 2f;
     private const float DecalMinSize = 0.5f, DecalMaxSize = 1.5f;
-    private const float AnimateIn = 0.3f, Idle = 10f, AnimateOut = 0.3f;
+    internal const float AnimateIn = 0.3f, Idle = 10f, AnimateOut = 0.3f;
 
-    // A decal, how large it grows, and when it was stamped.
-    private sealed record Decal(Entity Entity, float Size, float Born);
-
-    private static readonly List<Decal> Decals = [];
     private static AssetHandle _baseColor, _normal, _metallicRoughness, _emissive;
     private static bool _emissiveDecals;
     private static float _nextSpawn;
@@ -27,7 +23,6 @@ internal static class ClusteredDecalMaps
 
     public static void Build(App app)
     {
-        Decals.Clear();
         (_emissiveDecals, _nextSpawn) = (false, 1f);
         _random = new Random(19878367);
 
@@ -60,7 +55,6 @@ internal static class ClusteredDecalMaps
         }, "clustered_decal_maps.Setup");
 
         app.Update(SpawnDecal, "clustered_decal_maps.SpawnDecal");
-        app.Update(AnimateDecals, "clustered_decal_maps.AnimateDecals");
         app.Update(ctx =>
         {
             if (_buttons is null || !_buttons.Pressed(out var on) || on == _emissiveDecals) return;
@@ -90,35 +84,60 @@ internal static class ClusteredDecalMaps
         decal.NormalMapTexture = _normal;
         decal.MetallicRoughnessTexture = _metallicRoughness;
         decal.EmissiveTexture = _emissiveDecals ? _emissive : null;
-        Decals.Add(new Decal(entity, size, now));
-    }
-
-    // Each decal grows in, stays, and shrinks away, and its outline is drawn as it stands.
-    private static void AnimateDecals(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        var now = ctx.Time.Elapsed;
-        var gold = Color.FromSrgb(1f, 215f / 255f, 0f);
-
-        foreach (var decal in Decals.ToArray())
-        {
-            var age = now - decal.Born;
-            if (age >= AnimateIn + Idle + AnimateOut)
-            {
-                ecs.Despawn(decal.Entity);
-                Decals.Remove(decal);
-                continue;
-            }
-
-            var factor = age < AnimateIn ? age / AnimateIn
-                : age < AnimateIn + Idle ? 1f
-                : 1f - (age - AnimateIn - Idle) / AnimateOut;
-            var transform = ecs.GetOrDefault<Transform>(decal.Entity);
-            var scale = new Vec3(decal.Size * factor, decal.Size * factor, 1f);
-            ecs.Set(decal.Entity, transform with { Scale = scale });
-            Gizmos.Box(transform.Translation, transform.Rotation, scale, gold);
-        }
+        ecs.Add(entity, new ExampleDecal { Size = size, State = ExampleDecalState.AnimatingIn, Timer = GameTimer.FromSeconds(AnimateIn, TimerMode.Once) });
     }
 
     private static float Between(float low, float high) => low + _random.NextSingle() * (high - low);
+}
+
+/// <summary>Where a decal is in its life, growing in, staying, or shrinking away.</summary>
+public enum ExampleDecalState { AnimatingIn, Idling, AnimatingOut }
+
+/// <summary>A decal stamped on the wall, how large it grows, and where it is in its life.</summary>
+[Behavior]
+public partial struct ExampleDecal
+{
+    /// <summary>Its width and height at full size.</summary>
+    public float Size;
+
+    /// <summary>Where it is in its life.</summary>
+    public ExampleDecalState State;
+
+    /// <summary>The time left in that part of its life, which moves it on to the next when it runs out.</summary>
+    public GameTimer Timer;
+
+    /// <summary>
+    /// Grown in, kept, and shrunk away, each part of its life by its timer, and despawned by a
+    /// command once it has shrunk away.
+    /// </summary>
+    [OnUpdate]
+    public void AnimateDecals(BehaviorContext ctx, ref Transform transform)
+    {
+        var finished = Timer.Tick(ctx.Time.Delta).JustFinished;
+        switch (State)
+        {
+            case ExampleDecalState.AnimatingIn when finished:
+                (State, Timer) = (ExampleDecalState.Idling, GameTimer.FromSeconds(ClusteredDecalMaps.Idle, TimerMode.Once));
+                break;
+            case ExampleDecalState.Idling when finished:
+                (State, Timer) = (ExampleDecalState.AnimatingOut, GameTimer.FromSeconds(ClusteredDecalMaps.AnimateOut, TimerMode.Once));
+                break;
+            case ExampleDecalState.AnimatingOut when finished:
+                ctx.Cmd.Despawn(ctx.Entity);
+                return;
+        }
+
+        var factor = State switch
+        {
+            ExampleDecalState.AnimatingIn => Timer.Fraction,
+            ExampleDecalState.Idling => 1f,
+            _ => 1f - Timer.Fraction,
+        };
+        transform.Scale = new Vec3(Size * factor, Size * factor, 1f);
+    }
+
+    /// <summary>Its outline drawn as it stands, in gold.</summary>
+    [OnUpdate]
+    public void DrawGizmos(BehaviorContext ctx, in Transform transform) =>
+        Gizmos.Box(transform.Translation, transform.Rotation, transform.Scale, Color.FromSrgb(1f, 215f / 255f, 0f));
 }

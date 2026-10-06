@@ -28,14 +28,7 @@ internal static class VisibilityRange
     private static readonly string SingleModelRange = Range(0f, 0f, 8f, 9f);
     private static readonly string InvisibleRange = Range(0f, 0f, 0f, 0f);
 
-    // Which model a mesh belongs to, put on each mesh as its range is.
-    internal struct MainModel
-    {
-        public bool HighPoly;
-    }
-
     private static Entity _camera, _text;
-    private static readonly List<(Entity Root, bool HighPoly)> Roots = [];
 
     // Null shows both, by distance, and otherwise which one alone.
     private static bool? _showOnly;
@@ -43,7 +36,6 @@ internal static class VisibilityRange
 
     public static void Build(App app)
     {
-        Roots.Clear();
         (_showOnly, _prepass) = (null, false);
 
         app.Startup(ctx =>
@@ -64,10 +56,11 @@ internal static class VisibilityRange
                 150f);
 
             _text = Ui.SpawnText(Describe(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
-        }, "visibility_range.Setup");
 
-        app.SpawnGltf("models/FlightHelmet/FlightHelmet.gltf", (_, root) => Roots.Add((root, true)));
-        app.SpawnGltf("models/FlightHelmetLowPoly/FlightHelmetLowPoly.gltf", (_, root) => Roots.Add((root, false)));
+            // Each model's root, which its meshes take their range from as they appear.
+            ecs.Add(ecs.SpawnScene(AssetServer.LoadGltfScene("models/FlightHelmet/FlightHelmet.gltf")), new MainModel { Kind = MainModelKind.HighPoly });
+            ecs.Add(ecs.SpawnScene(AssetServer.LoadGltfScene("models/FlightHelmetLowPoly/FlightHelmetLowPoly.gltf")), new MainModel { Kind = MainModelKind.LowPoly });
+        }, "visibility_range.Setup");
 
         app.Update(SetVisibilityRanges, "visibility_range.SetVisibilityRanges");
         app.Update(MoveCamera, "visibility_range.MoveCamera");
@@ -75,23 +68,21 @@ internal static class VisibilityRange
         app.Update(TogglePrepass, "visibility_range.TogglePrepass");
     }
 
-    // Gives each mesh of either model its range as it appears, as Bevy's does for each new Mesh3d,
-    // by the model it hangs under.
+    // Gives each mesh of either model its range and its model as it appears, as Bevy's does for
+    // each new Mesh3d, by the model it hangs under.
     private static void SetVisibilityRanges(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        foreach (var (root, highPoly) in Roots)
-            Walk(root, highPoly);
-
-        void Walk(Entity entity, bool highPoly)
+        foreach (var model in ecs.EntitiesWith<MainModel>())
         {
-            if (!ecs.Has<MainModel>(entity) && ecs.Get<Mesh3dRef>(entity) is not null)
+            if (ecs.Get<Mesh3dRef>(model) is not null) continue;
+            var kind = ecs.GetOrDefault<MainModel>(model).Kind;
+            foreach (var entity in ecs.Descendants(model).ToArray())
             {
-                ecs.InsertReflected(entity, RangeType, RangeFor(highPoly));
-                ecs.Add(entity, new MainModel { HighPoly = highPoly });
+                if (ecs.Has<MainModel>(entity) || ecs.Get<Mesh3dRef>(entity) is null) continue;
+                ecs.InsertReflected(entity, RangeType, RangeFor(kind == MainModelKind.HighPoly));
+                ecs.Add(entity, new MainModel { Kind = kind });
             }
-
-            foreach (var child in ecs.ChildrenOf(entity)) Walk(child, highPoly);
         }
     }
 
@@ -134,7 +125,10 @@ internal static class VisibilityRange
 
         var ecs = ctx.Ecs;
         foreach (var entity in ecs.EntitiesWith<MainModel>())
-            ecs.InsertReflected(entity, RangeType, RangeFor(ecs.GetOrDefault<MainModel>(entity).HighPoly));
+        {
+            if (ecs.Get<Mesh3dRef>(entity) is not null)
+                ecs.InsertReflected(entity, RangeType, RangeFor(ecs.GetOrDefault<MainModel>(entity).Kind == MainModelKind.HighPoly));
+        }
         Ui.SetText(_text, Describe());
     }
 
@@ -165,4 +159,18 @@ internal static class VisibilityRange
         Press WASD or use the mouse wheel to move the camera
         Press Space to {(_prepass ? "disable" : "enable")} the prepass
         """;
+}
+
+/// <summary>Which of the two helmets a model is.</summary>
+public enum MainModelKind { HighPoly, LowPoly }
+
+/// <summary>
+/// The helmet a model's root, and each of its meshes once it appears, belongs to, as Bevy's
+/// <c>MainModel</c> enum keeps it on them.
+/// </summary>
+[Behavior]
+public partial struct MainModel
+{
+    /// <summary>Which helmet.</summary>
+    public MainModelKind Kind;
 }
