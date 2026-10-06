@@ -17,7 +17,6 @@ BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/CliEnvelopeTests.cs
 BevyCSharp.Tests/CliSessionTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
-BevyCSharp.Tests/ComputeShaderTests.cs
 BevyCSharp.Tests/ConsoleTests.cs
 BevyCSharp.Tests/DataAssetTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
@@ -26,7 +25,6 @@ BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of t
 BevyCSharp.Tests/DrawnTests.cs
 BevyCSharp.Tests/DynamicSystemTests.cs
 BevyCSharp.Tests/EcsListTests.cs
-BevyCSharp.Tests/EcsWorldTests.cs
 BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorHierarchyTests.cs	tests the editor, which is no area of the library

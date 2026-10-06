@@ -2,13 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Assets/AssetServer.cs AssetHandle
-BevyCSharp/Assets/AssetServer.cs AssetKind
-BevyCSharp/Assets/AssetServer.cs AssetLoadFailed
-BevyCSharp/Assets/AssetServer.cs AssetLoadState
-BevyCSharp/Assets/AssetServer.cs TextureFilter
-BevyCSharp/Assets/AssetServer.cs TextureSettings
-BevyCSharp/Assets/AssetServer.cs TextureWrap
 BevyCSharp/Assets/Audio.cs AudioSettings
 BevyCSharp/Assets/Audio.cs PlaybackMode
 BevyCSharp/Assets/DataAssets.cs DataAssetAttribute
@@ -20,19 +13,6 @@ BevyCSharp/Assets/GltfContents.cs GltfPart
 BevyCSharp/Assets/Render2dMaterials.cs AlphaMode2d
 BevyCSharp/Assets/Render2dMaterials.cs ColorMaterialSettings
 BevyCSharp/Assets/Render2dMaterials.cs Render2d
-BevyCSharp/Assets/RenderCameras.cs AntiAliasPass
-BevyCSharp/Assets/RenderCameras.cs AntiAliasQuality
-BevyCSharp/Assets/RenderCameras.cs AtmosphereSettings
-BevyCSharp/Assets/RenderCameras.cs BloomMode
-BevyCSharp/Assets/RenderCameras.cs CameraProjection
-BevyCSharp/Assets/RenderCameras.cs CameraSettings
-BevyCSharp/Assets/RenderCameras.cs ClearMode
-BevyCSharp/Assets/RenderCameras.cs DepthOfFieldMode
-BevyCSharp/Assets/RenderCameras.cs EffectSettings
-BevyCSharp/Assets/RenderCameras.cs PhysicalLens
-BevyCSharp/Assets/RenderCameras.cs PostSettings
-BevyCSharp/Assets/RenderCameras.cs SkyQuality
-BevyCSharp/Assets/RenderCameras.cs Tonemapper
 BevyCSharp/Assets/RenderCaptures.cs Capture
 BevyCSharp/Assets/RenderCaptures.cs CapturedImage
 BevyCSharp/Assets/RenderCaptures.cs CapturedTexels
@@ -52,10 +32,6 @@ BevyCSharp/Assets/RenderMaterials.cs MeshInfo
 BevyCSharp/Assets/RenderMaterials.cs MeshRecipe
 BevyCSharp/Assets/RenderMaterials.cs MeshShape
 BevyCSharp/Assets/RenderMaterials.cs MeshTopology
-BevyCSharp/Assets/RenderSprites.cs SpriteAnchor
-BevyCSharp/Assets/RenderSprites.cs SpriteImageMode
-BevyCSharp/Assets/RenderSprites.cs SpriteScaling
-BevyCSharp/Assets/RenderSprites.cs SpriteSettings
 BevyCSharp/Assets/Streaming.cs StreamRead
 BevyCSharp/Assets/UiEditableText.cs Ui
 BevyCSharp/Assets/UiEditableText.cs UiEditableTextSettings
@@ -67,21 +43,6 @@ BevyCSharp/Assets/UiGrid.cs Track
 BevyCSharp/Assets/UiImages.cs SliceTiling
 BevyCSharp/Assets/UiImages.cs UiImageMode
 BevyCSharp/Assets/UiImages.cs UiImageSettings
-BevyCSharp/Assets/UiLayout.cs BoxSizing
-BevyCSharp/Assets/UiLayout.cs Corners
-BevyCSharp/Assets/UiLayout.cs Length
-BevyCSharp/Assets/UiLayout.cs LengthUnit
-BevyCSharp/Assets/UiLayout.cs Sides
-BevyCSharp/Assets/UiLayout.cs UiAlign
-BevyCSharp/Assets/UiLayout.cs UiAlignSelf
-BevyCSharp/Assets/UiLayout.cs UiClipBox
-BevyCSharp/Assets/UiLayout.cs UiDirection
-BevyCSharp/Assets/UiLayout.cs UiDisplay
-BevyCSharp/Assets/UiLayout.cs UiInteraction
-BevyCSharp/Assets/UiLayout.cs UiJustify
-BevyCSharp/Assets/UiLayout.cs UiOverflow
-BevyCSharp/Assets/UiLayout.cs UiSettings
-BevyCSharp/Assets/UiLayout.cs UiWrap
 BevyCSharp/Assets/UiText.cs TextJustify
 BevyCSharp/Assets/UiText.cs TextWrap
 BevyCSharp/Assets/UiText.cs UiTextSettings
@@ -116,10 +77,6 @@ BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
 BevyCSharp/Cli/CliClient.cs CliAnswer
 BevyCSharp/Cli/CliJson.cs CliError
 BevyCSharp/Cli/CliSession.cs CliSessionFile
-BevyCSharp/Core/GameState.cs ComputedFromAttribute
-BevyCSharp/Core/GameState.cs InitialStateAttribute
-BevyCSharp/Core/GameState.cs StateRegistry
-BevyCSharp/Core/GameState.cs SubStateOfAttribute
 BevyCSharp/Core/Messages.cs MessageBus
 BevyCSharp/Core/Plugin.cs DefaultPlugins
 BevyCSharp/Core/Plugin.cs IPlugin
