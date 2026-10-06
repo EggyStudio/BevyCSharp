@@ -5,14 +5,6 @@ using Bevy.Interop;
 
 namespace Bevy;
 
-/// <summary>Reads a component's value as it leaves an entity.</summary>
-/// <typeparam name="T">The component.</typeparam>
-public delegate void RemoveHook<T>(in T component) where T : unmanaged;
-
-/// <summary>Rewrites the copy of a component an entity clone is about to receive.</summary>
-/// <typeparam name="T">The component.</typeparam>
-public delegate void CloneHook<T>(ref T component) where T : unmanaged;
-
 /// <summary>
 /// What runs when a C# component leaves an entity, by removal or by despawn.
 /// </summary>

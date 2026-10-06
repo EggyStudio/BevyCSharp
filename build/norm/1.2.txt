@@ -116,7 +116,6 @@ BevyCSharp/Behaviors/BehaviorConditions.cs SystemRegistrationSourceScope
 BevyCSharp/Behaviors/BehaviorConditions.cs SystemToggleRegistry
 BevyCSharp/Behaviors/BehaviorRunner.Others.cs BehaviorRunners
 BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
-BevyCSharp/Behaviors/BehaviorsPlugin.cs EnginePlugin
 BevyCSharp/Cli/CliClient.cs CliAnswer
 BevyCSharp/Cli/CliJson.cs CliError
 BevyCSharp/Cli/CliSession.cs CliSessionFile
@@ -160,8 +159,6 @@ BevyCSharp/Diagnostics/ConsoleLog.cs LogLine
 BevyCSharp/Diagnostics/FrameProfile.cs FrameCosts
 BevyCSharp/Ecs/ChunkSet.cs ComponentQuery
 BevyCSharp/Ecs/ChunkSet.cs ComponentRow
-BevyCSharp/Ecs/ComponentHooks.cs CloneHook
-BevyCSharp/Ecs/ComponentHooks.cs RemoveHook
 BevyCSharp/Ecs/ComponentRegistry.cs ComponentType
 BevyCSharp/Ecs/ComponentSchema.cs ComponentField
 BevyCSharp/Ecs/ComponentSchema.cs ComponentMethod
@@ -207,14 +204,6 @@ BevyCSharp/Ecs/NativeComponents.cs ChildOf
 BevyCSharp/Ecs/NativeComponents.cs Children
 BevyCSharp/Ecs/NativeComponents.cs Interaction
 BevyCSharp/Ecs/NativeComponents.cs WorldInstance
-BevyCSharp/Ecs/Observers.cs Add
-BevyCSharp/Ecs/Observers.cs Despawn
-BevyCSharp/Ecs/Observers.cs Discard
-BevyCSharp/Ecs/Observers.cs IEntityEvent
-BevyCSharp/Ecs/Observers.cs IPropagatingEvent
-BevyCSharp/Ecs/Observers.cs Insert
-BevyCSharp/Ecs/Observers.cs On
-BevyCSharp/Ecs/Observers.cs Remove
 BevyCSharp/Ecs/Visibility.cs InheritedVisibility
 BevyCSharp/Ecs/Visibility.cs ViewVisibility
 BevyCSharp/Ecs/Visibility.cs VisibilityMode
