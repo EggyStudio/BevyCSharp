@@ -128,7 +128,7 @@ public static class SyntheticInput
     /// <para>
     /// It arrives as a real key does, as a message Bevy reads into the key's state at the start of
     /// the next frame, and <see cref="Input"/> takes its picture of that state at the top of the
-    /// frame after. So a key pressed from an update is <see cref="Input.KeyPressed"/> on exactly
+    /// frame after. So a key pressed from an update is <see cref="Input.KeyPressed(Key)"/> on exactly
     /// one frame, two after the one it was pressed on, and a <see cref="Tap"/> is pressed and
     /// released on that same frame.
     /// </para>

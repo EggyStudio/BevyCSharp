@@ -333,6 +333,7 @@ public sealed unsafe partial class App : IDisposable
             world.Resource<Time>().Update(state.Time);
             world.Resource<Input>().Update(state.Input);
             world.Resource<Input>().UpdateGamepads(world.Resource<MessageBus>());
+            world.Resource<Input>().UpdateLogicalKeys();
 
             // A new frame's worth of streamed bytes to hand over.
             Streaming.BeginFrame();

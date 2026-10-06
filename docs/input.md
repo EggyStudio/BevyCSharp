@@ -18,6 +18,20 @@ Control characters are left out, because Backspace and Enter arrive as text on s
 a field that inserted them would be wrong on all of them. Read those as keys, as above. `Text` is
 empty on most frames and never null.
 
+A `Key` is a place on the keyboard, the same whatever layout is set, which suits moving with WASD.
+A `LogicalKey` names what that place means in the layout, the character it types or its name,
+which suits a key named by what it types, as '?' for help or '+' for zoom, wherever the layout puts
+it. Both are read through the same calls:
+
+```csharp
+if (ctx.Input.KeyPressed(LogicalKey.Character("?"))) ShowHelp();
+if (ctx.Input.KeyPressed(LogicalKey.Enter) && ctx.Input.KeyDown(LogicalKey.Control)) Submit();
+```
+
+A named key is named as Bevy names it, and those without a property of their own are
+`LogicalKey.Named("MediaPlayPause")`. A key pretended through `SyntheticInput` reads as a keyboard's
+would, its name for one that types nothing, as Enter or Backspace, and what it typed for any other.
+
 Japanese, Chinese and Korean are typed through the platform's input method, which composes a
 candidate before it becomes text. A field turns it on while it has the focus, and shows what is
 being composed until it is committed:

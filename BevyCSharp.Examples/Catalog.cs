@@ -216,6 +216,7 @@ internal static class Catalog
         new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: CharInputEvents.Drive),
         new("gamepad_input", GamepadInput.Build, Prints: 12, Drive: GamepadInput.Drive),
         new("gamepad_rumble", GamepadRumble.Build, Prints: 24, Drive: GamepadRumble.Drive),
+        new("keyboard_input", KeyboardInputExample.Build, Prints: 10, Drive: KeyboardInputExample.Drive),
         new("keyboard_modifiers", KeyboardModifiers.Build, Prints: 10, Drive: KeyboardModifiers.Drive),
         new("mouse_grab", MouseGrab.Build),
         new("mouse_input", MouseInput.Build, Prints: 3),

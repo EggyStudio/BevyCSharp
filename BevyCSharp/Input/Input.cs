@@ -26,6 +26,9 @@ public sealed class Input
     private readonly ulong[] _down = new ulong[NativeInput.KeyWords];
     private readonly ulong[] _pressed = new ulong[NativeInput.KeyWords];
     private readonly ulong[] _released = new ulong[NativeInput.KeyWords];
+    private readonly HashSet<LogicalKey> _logicalDown = [];
+    private readonly HashSet<LogicalKey> _logicalPressed = [];
+    private readonly HashSet<LogicalKey> _logicalReleased = [];
 
     private uint _mouseDown;
     private uint _mousePressed;
@@ -67,6 +70,19 @@ public sealed class Input
 
     /// <summary>True on the single frame <paramref name="key"/> went up.</summary>
     public bool KeyReleased(Key key) => TestBit(_released, key);
+
+    /// <summary>True while the key that reads as <paramref name="key"/> is held down.</summary>
+    /// <remarks>
+    /// Bevy's <c>ButtonInput&lt;Key&gt;</c>, a key as the keyboard's layout reads it rather than
+    /// where it is, as <see cref="LogicalKey"/> says.
+    /// </remarks>
+    public bool KeyDown(LogicalKey key) => _logicalDown.Contains(key);
+
+    /// <summary>True on the single frame the key that reads as <paramref name="key"/> went down.</summary>
+    public bool KeyPressed(LogicalKey key) => _logicalPressed.Contains(key);
+
+    /// <summary>True on the single frame the key that reads as <paramref name="key"/> went up.</summary>
+    public bool KeyReleased(LogicalKey key) => _logicalReleased.Contains(key);
 
     /// <summary>True while any key at all is held.</summary>
     public bool AnyKeyDown() => AnyBit(_down);
@@ -177,6 +193,38 @@ public sealed class Input
         UpdateTextAndTouches(snapshot);
     }
 
+    /// <summary>Reads the logical keys held, pressed and released, at the same moment as the rest of the frame's input.</summary>
+    /// <remarks>
+    /// One call into the bridge a frame for them all. A keyboard holds a handful of keys at once,
+    /// so thirty-two is more than a hand presses, and any past them would be read as up.
+    /// </remarks>
+    internal unsafe void UpdateLogicalKeys()
+    {
+        const int Capacity = 32;
+        var natives = stackalloc NativeLogicalKey[Capacity];
+        var count = Math.Clamp(Native.bcs_logical_keys(natives, Capacity), 0, Capacity);
+
+        _logicalDown.Clear();
+        _logicalPressed.Clear();
+        _logicalReleased.Clear();
+
+        for (var i = 0; i < count; i++)
+        {
+            var native = natives[i];
+            var text = Encoding.UTF8.GetString(native.Text, Math.Min((int)native.Length, NativeLogicalKey.TextCapacity));
+            var key = (LogicalKeyKind)native.Kind switch
+            {
+                LogicalKeyKind.Character => LogicalKey.Character(text),
+                LogicalKeyKind.Dead => LogicalKey.Dead(text),
+                _ => LogicalKey.Named(text),
+            };
+
+            if ((native.Flags & 1) != 0) _logicalDown.Add(key);
+            if ((native.Flags & 2) != 0) _logicalPressed.Add(key);
+            if ((native.Flags & 4) != 0) _logicalReleased.Add(key);
+        }
+    }
+
     /// <summary>The connected gamepads, in the order Bevy found them, as they stood at the start of this frame.</summary>
     /// <remarks>
     /// <para>
@@ -246,7 +294,7 @@ public sealed class Input
     /// <para>
     /// Control characters are left out. Backspace and Enter arrive as text on some platforms, and
     /// a field that inserted them as characters would be wrong on all of them; read those with
-    /// <see cref="KeyPressed"/> instead.
+    /// <see cref="KeyPressed(Key)"/> instead.
     /// </para>
     /// <para>
     /// Empty on most frames, and never null. A frame carrying more than 32 bytes of text loses

@@ -242,7 +242,7 @@ char_input_events	can
 gamepad_input_events	missing	a gamepad's button and axis changes as messages, in the order they happened
 gamepad_input	can
 gamepad_rumble	can
-keyboard_input	missing	logical keys as Bevy's ButtonInput<Key>, such as the key that types '?'
+keyboard_input	can
 keyboard_input_events	missing	keyboard events as messages, each with its key code, logical key and state
 keyboard_modifiers	can
 mouse_grab	can
@@ -377,8 +377,8 @@ image_node	can
 image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
 ime_support	missing	a system font chosen by its generic family, sans-serif
 letter_spacing	part	the underline under the heading
-multiline_text_input	missing	keys observed as they reach the focused field, Bevy's input as events
-multiple_text_inputs	missing	keys observed as they reach the focused field, Bevy's input as events
+multiline_text_input	missing	keys observed as they reach the focused field, Bevy's FocusedInput, which an offscreen run is not handed either
+multiple_text_inputs	missing	the focus moved on to the next field from C# as Bevy's TabNavigation moves it
 overflow_clip_margin	can
 overflow_debug	can
 overflow	can

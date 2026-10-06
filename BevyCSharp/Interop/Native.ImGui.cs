@@ -35,6 +35,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gamepads(NativeGamepad* gamepads, int capacity);
 
+    /// <summary>Copies the logical keys held, pressed or released this frame out, answering how many there are.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_logical_keys(NativeLogicalKey* keys, int capacity);
+
     /// <summary>Rumbles a pad, or stops it where the seconds are zero or less.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -410,9 +410,28 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
                 let mut windows = world.query_filtered::<Entity, With<PrimaryWindow>>();
                 let window = windows.single(world).unwrap_or(Entity::PLACEHOLDER);
 
-                let logical = match typed.clone() {
-                    Some(text) => Key::Character(text),
-                    None => Key::Unidentified(bevy::input::keyboard::NativeKey::Unidentified),
+                // The name a keyboard gives a key that types nothing, Enter, Backspace, an arrow or
+                // Shift, the names Bevy's text fields and its `ButtonInput<Key>` go by, and the
+                // character typed for any other. A release reads as its press did, remembered,
+                // since a release types nothing and a key has to leave Bevy's logical keys as it
+                // entered them.
+                let unidentified = || Key::Unidentified(bevy::input::keyboard::NativeKey::Unidentified);
+                let logical = match state {
+                    ButtonState::Pressed => {
+                        let logical = match (named_key(code), typed.clone()) {
+                            (Some(named), _) => named,
+                            (None, Some(text)) => Key::Character(text),
+                            (None, None) => unidentified(),
+                        };
+                        world.get_resource_or_insert_with(PretendKeys::default).0.insert(code, logical.clone());
+                        logical
+                    }
+                    ButtonState::Released => world
+                        .get_resource_or_insert_with(PretendKeys::default)
+                        .0
+                        .remove(&code)
+                        .or_else(|| named_key(code))
+                        .unwrap_or_else(unidentified),
                 };
 
                 let press = KeyboardInput {
@@ -438,11 +457,149 @@ pub unsafe extern "C" fn bcs_input_key(key: i32, action: i32, text: *const u8, l
     })
 }
 
+/// The logical key each pretend key held down was pressed as, for its release.
+#[cfg(feature = "render")]
+#[derive(bevy::prelude::Resource, Default)]
+struct PretendKeys(std::collections::HashMap<KeyCode, bevy::input::keyboard::Key>);
+
+/// The name a keyboard gives a key that types nothing, as winit reports it for a layout like the
+/// one the physical key's own name assumes.
+#[cfg(feature = "render")]
+fn named_key(code: KeyCode) -> Option<bevy::input::keyboard::Key> {
+    use bevy::input::keyboard::Key;
+
+    Some(match code {
+        KeyCode::Enter | KeyCode::NumpadEnter => Key::Enter,
+        KeyCode::Tab => Key::Tab,
+        KeyCode::Space => Key::Space,
+        KeyCode::Backspace => Key::Backspace,
+        KeyCode::Delete => Key::Delete,
+        KeyCode::Insert => Key::Insert,
+        KeyCode::Escape => Key::Escape,
+        KeyCode::Home => Key::Home,
+        KeyCode::End => Key::End,
+        KeyCode::PageUp => Key::PageUp,
+        KeyCode::PageDown => Key::PageDown,
+        KeyCode::ArrowUp => Key::ArrowUp,
+        KeyCode::ArrowDown => Key::ArrowDown,
+        KeyCode::ArrowLeft => Key::ArrowLeft,
+        KeyCode::ArrowRight => Key::ArrowRight,
+        KeyCode::ShiftLeft | KeyCode::ShiftRight => Key::Shift,
+        KeyCode::ControlLeft | KeyCode::ControlRight => Key::Control,
+        KeyCode::AltLeft | KeyCode::AltRight => Key::Alt,
+        KeyCode::SuperLeft | KeyCode::SuperRight => Key::Super,
+        KeyCode::CapsLock => Key::CapsLock,
+        KeyCode::NumLock => Key::NumLock,
+        KeyCode::ScrollLock => Key::ScrollLock,
+        KeyCode::PrintScreen => Key::PrintScreen,
+        KeyCode::Pause => Key::Pause,
+        KeyCode::ContextMenu => Key::ContextMenu,
+        KeyCode::F1 => Key::F1,
+        KeyCode::F2 => Key::F2,
+        KeyCode::F3 => Key::F3,
+        KeyCode::F4 => Key::F4,
+        KeyCode::F5 => Key::F5,
+        KeyCode::F6 => Key::F6,
+        KeyCode::F7 => Key::F7,
+        KeyCode::F8 => Key::F8,
+        KeyCode::F9 => Key::F9,
+        KeyCode::F10 => Key::F10,
+        KeyCode::F11 => Key::F11,
+        KeyCode::F12 => Key::F12,
+        _ => return None,
+    })
+}
+
 /// Writes a window event where the app keeps them, which an app with no window plugin, a headless
 /// one, does not, and where Bevy says so as an error for every event written.
 #[cfg(feature = "render")]
 fn write_window_event(world: &mut bevy::ecs::world::World, event: bevy::window::WindowEvent) {
     if world.contains_resource::<bevy::ecs::message::Messages<bevy::window::WindowEvent>>() {
         world.write_message(event);
+    }
+}
+
+/// How long a logical key's name or character may be, in bytes of UTF-8, which the longest of the
+/// names a keyboard gives a key fits.
+pub const LOGICAL_KEY_CAPACITY: usize = 28;
+
+/// One of Bevy's logical keys as C# reads it, the managed side's `NativeLogicalKey` field for
+/// field.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsLogicalKey {
+    /// One while it is held, two on the frame it went down and four on the frame it came up,
+    /// added.
+    pub flags: u8,
+    /// Zero for a named key, one for a character and two for a dead key.
+    pub kind: u8,
+    /// How many bytes of `text` are its name or its character.
+    pub len: u16,
+    pub text: [u8; LOGICAL_KEY_CAPACITY],
+}
+
+/// Copies the logical keys held, pressed this frame or released this frame, Bevy's
+/// `ButtonInput<Key>`, and answers how many there are, which may be more than were copied.
+///
+/// A logical key is a key as the keyboard's layout reads it, the character it types or the name it
+/// has, so a game asks for the key that types '?' wherever the layout puts it. A named key is
+/// written as Bevy's `Debug` writes it, `Enter` or `ArrowLeft`, and a character as itself. A key
+/// the platform could not identify is left out, since nothing could ask for it by name.
+///
+/// # Safety
+/// `out` must be writable for `capacity` entries, or null with a capacity of zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_logical_keys(out: *mut BcsLogicalKey, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        use bevy::input::keyboard::Key;
+
+        crate::state::with_world(|world| {
+            let Some(keys) = world.get_resource::<bevy::input::ButtonInput<Key>>() else {
+                return 0;
+            };
+
+            let mut found: Vec<(Key, u8)> = Vec::new();
+            let mut mark = |key: &Key, flag: u8| match found.iter_mut().find(|(seen, _)| seen == key) {
+                Some((_, flags)) => *flags |= flag,
+                None => found.push((key.clone(), flag)),
+            };
+            keys.get_pressed().for_each(|key| mark(key, 1));
+            keys.get_just_pressed().for_each(|key| mark(key, 2));
+            keys.get_just_released().for_each(|key| mark(key, 4));
+
+            let mut count = 0i32;
+            for (key, flags) in found {
+                let (kind, text) = match &key {
+                    Key::Character(character) => (1u8, character.to_string()),
+                    Key::Dead(character) => (2, character.map(String::from).unwrap_or_default()),
+                    Key::Unidentified(_) => continue,
+                    named => (0, format!("{named:?}")),
+                };
+
+                if count < capacity && !out.is_null() {
+                    let bytes = text.as_bytes();
+                    let len = bytes.len().min(LOGICAL_KEY_CAPACITY);
+                    let mut entry = BcsLogicalKey { flags, kind, len: len as u16, text: [0; LOGICAL_KEY_CAPACITY] };
+                    entry.text[..len].copy_from_slice(&bytes[..len]);
+                    unsafe { out.add(count as usize).write(entry) };
+                }
+                count += 1;
+            }
+            count
+        })
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_logical_key_sits_where_the_managed_side_reads_it() {
+        assert_eq!(core::mem::offset_of!(BcsLogicalKey, flags), 0);
+        assert_eq!(core::mem::offset_of!(BcsLogicalKey, kind), 1);
+        assert_eq!(core::mem::offset_of!(BcsLogicalKey, len), 2);
+        assert_eq!(core::mem::offset_of!(BcsLogicalKey, text), 4);
+        assert_eq!(core::mem::size_of::<BcsLogicalKey>(), 32);
     }
 }

@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -111,6 +113,53 @@ public sealed class InputTests
 
         Assert.Single(pressed);
         Assert.Single(released);
+    }
+
+    /// <summary>Each field of a logical key sits where the bridge writes it.</summary>
+    [Theory]
+    [InlineData(nameof(NativeLogicalKey.Flags), 0)]
+    [InlineData(nameof(NativeLogicalKey.Kind), 1)]
+    [InlineData(nameof(NativeLogicalKey.Length), 2)]
+    [InlineData(nameof(NativeLogicalKey.Text), 4)]
+    public void EveryFieldOfALogicalKeySitsWhereTheBridgePutsIt(string field, int offset)
+    {
+        Assert.Equal(offset, Marshal.OffsetOf<NativeLogicalKey>(field).ToInt32());
+        Assert.Equal(32, Marshal.SizeOf<NativeLogicalKey>());
+    }
+
+    /// <summary>
+    /// A key read by what it types or by its name is pressed and released on one frame each, as the
+    /// physical key is, and a held key that types nothing reads as its name while it is held.
+    /// </summary>
+    [SkippableFact]
+    public void AKeyIsReadByWhatItTypesAndByItsName()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 20);
+        var frame = 0;
+        var seen = new List<string>();
+        var stuck = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            var input = ctx.Input;
+            if (input.KeyPressed(LogicalKey.Character("?"))) seen.Add($"? pressed {frame}");
+            if (input.KeyReleased(LogicalKey.Character("?"))) seen.Add($"? released {frame}");
+            if (input.KeyPressed(LogicalKey.Enter)) seen.Add($"enter pressed {input.KeyDown(LogicalKey.Control)}");
+            if (frame == 18) stuck = input.KeyDown(LogicalKey.Character("?")) || input.KeyDown(LogicalKey.Enter);
+
+            if (frame == 3) SyntheticInput.Tap(Key.Slash, "?");
+            if (frame == 8) SyntheticInput.Press(Key.ControlLeft);
+            if (frame == 10) SyntheticInput.Tap(Key.Enter);
+            if (frame == 12) SyntheticInput.Lift(Key.ControlLeft);
+        });
+        harness.Run();
+
+        // Tapped, it goes down and comes up on the one frame, two after the tap, as a physical key does.
+        Assert.Equal(["? pressed 5", "? released 5", "enter pressed True"], seen);
+        Assert.False(stuck, "a logical key stayed down after it was let go");
     }
 
     [Fact]

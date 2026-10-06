@@ -39,12 +39,13 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
+- **Input as events, six examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused
-  text field, which `multiline_text_input` and `multiple_text_inputs` submit with, and logical keys
-  as Bevy's `ButtonInput<Key>`, which `keyboard_input` reads for the key that types '?'. `Input`
-  holds each frame's state, which tells what is down and what changed but not in what order.
+  text field, Bevy's `FocusedInput`, which `multiline_text_input` submits with, and the focus moved
+  on to the next field as Bevy's tab navigation moves it, which `multiple_text_inputs` does after a
+  submission. `Input` holds each frame's state, its logical keys among it, which tells what is down
+  and what changed but not in what order.
 - **Bevy's math, three examples.** Its bounding volumes with their casts and intersection tests
   (`bounding_2d`), its cubic curves (`cubic_splines`), and points sampled inside and on its shapes
   (`random_sampling`), which the managed math, a transform and its vectors, does not have.

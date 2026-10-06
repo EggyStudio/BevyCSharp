@@ -1242,6 +1242,9 @@ The guide's page is [input.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 bool KeyDown(Key key);                                          // True while key is held down
 bool KeyPressed(Key key);                                       // True on the single frame key went down
 bool KeyReleased(Key key);                                      // True on the single frame key went up
+bool KeyDown(LogicalKey key);                                   // True while the key that reads as key is held down
+bool KeyPressed(LogicalKey key);                                // True on the single frame the key that reads as key went down
+bool KeyReleased(LogicalKey key);                               // True on the single frame the key that reads as key went up
 bool AnyKeyDown();                                              // True while any key at all is held
 bool AnyKeyPressed();                                           // True when any key at all went down this frame
 bool AnyKeyDown(ReadOnlySpan<Key> keys);                        // True while at least one of keys is held
@@ -1253,6 +1256,14 @@ bool MousePressed(MouseButton button);                          // True on the s
 bool MouseReleased(MouseButton button);                         // True on the single frame button went up
 bool AnyMouseDown();                                            // True while any mouse button is held
 bool AnyMousePressed();                                         // True when any mouse button went down this frame
+```
+
+### `LogicalKey`
+
+```csharp
+static LogicalKey Character(string text);                       // The key that types text
+static LogicalKey Named(string name);                           // The key Bevy names name, as Enter or ArrowLeft
+static LogicalKey Dead(string text);                            // A dead key, which changes the character the next key types
 ```
 
 ### `Gamepad`

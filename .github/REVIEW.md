@@ -10,13 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `db01753`. The run of `ba5f72c` passed on Linux and Windows, read from its page, the
-three failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel is Bevy's
+Reviewed up to `569ea59`. What Bevy's widgets report reaches C# as their own `Activate`,
+`ValueChange<T>` and `MenuEvent`, the last taken up the parents (ABI 209), and `standard_widgets` is
+written on them, 251 (`2597c12`); a game observes Bevy's own components coming and going through
+their wrappers, as `ecs.Observe<Add<PressedRef>>` for Bevy's `On<Add, Pressed>`, with no change to
+the bridge, the lifecycle events constrained to `struct` while every call reading a component's
+bytes keeps `unmanaged`, and `standard_widgets_observers` is written, 252, which ends the widgets'
+rows (`569ea59`); the observer tests moved to `Ecs` by a move alone, N 1.4's list at 92 to mend
+(`47a2497`). Item 14 is new, from 3DEngine's Verdict 24. No verdict is open.
+
+Before them, the run of `ba5f72c` passed on Linux and Windows, read from its page, the three
+failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel is Bevy's
 `MouseWheel` as a real wheel's report begins (ABI 208), so a game, the interface and picking all see
 it, and `scroll` is written with its own event carried up from picking's `Pointer<Scroll>`, 250, the
 one grid that does not scroll being Taffy 0.10.1's, upstream's to mend (`a683c3e`); the widget tests
-moved to `Assets` by a move alone, N 1.4's list at 93 to mend (`db01753`). The reply on the widgets'
-events (ABI 209) is written, its commit to come. No verdict is open.
+moved to `Assets` by a move alone, N 1.4's list at 93 to mend (`db01753`).
 
 Before them, a game came to spawn pointers of its own and puts them on an image an interface is
 drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture coordinate it met (ABI
@@ -24,18 +32,6 @@ drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture co
 three left waits on (`d59365f`); the input tests moved to `Input` by a move alone, N 1.4's list at
 94 to mend (`ba5f72c`). The reply on `scroll` is written, the pretend wheel going through Bevy's
 `MouseWheel` and picking (ABI 208), its commit to come. The owner pushed.
-
-Before them, a game came to observe what a pointer does to an entity as Bevy's `Pointer<E>`, the
-seventeen kinds, taken up the parents and stopped with `on.Propagate(false)` (ABI 206); picking is
-in the render profile as decided, measured as one clean release build each at 3 seconds and 0.6
-percent more, mesh picking compiled in and added where `Config.MeshPicking` asks; an offscreen run
-is pointed at through its image, the rays Bevy casts for no primary window added by `offscreen.rs`,
-so an offscreen editor takes clicks on its scene; six more examples are written on the pointer's
-events, 248, and `mesh_picking` and `simple_picking` run on observers in the render profile
-(`b548987`, `4034f91`). Two things seen there are not mended: a move and a press at a new place in
-one frame miss, as a window's mouse does in Bevy, and `dragdrop_picking`'s preview draws over the
-words Bevy sorts it under, untraced, which item 4 holds with the captures. The pick ray's tests
-moved to `Assets` by a move alone (`96a61e6`).
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -137,6 +133,14 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
+14. **A closed app leaves no thread alive** (SHARED.md). 3DEngine's macOS leak (its Verdict 24)
+   led to `Shutdown` joining the threads an app's parts start and its console closing the
+   connections still open, since a connection's thread otherwise waits on its read for good.
+   `CliServer.cs` here starts a thread for each connection, untracked, and `Dispose` sets a flag the
+   read does not see, so a served app with a caller connected leaves that thread alive. The server
+   closes its open connections as it stops, and a test holds that a disposed server with a caller
+   connected leaves no thread of its own alive, the caller's answered request showing the thread
+   ran, with no wait on the clock.
 
 ## Verdicts
 
@@ -166,38 +170,16 @@ None open.
 
 ## Replies
 
-**Now 3, the widgets' events.** What Bevy's widgets report reaches C# as Bevy's own events, an
-observer in the bridge for each kind copying it into one shape (`widget.rs`, ABI 209), as the
-pointer's do. `Activate` from a button or a menu item, `ValueChange<T>` from a slider (a float), a
-checkbox or a radio button (a bool) and a radio group (the button chosen), and `MenuEvent` from a
-menu, which C# takes up the parents to the menu's owner, `MenuAction` and `NavAction` beside it.
-`standard_widgets` is written on them, 251, its slider and radio group kept in the example's own
-record and set from it, its menu's popup spawned and despawned as asked, with Bevy's `Popover` and
-`BoxShadow` written as JSON. Driven offscreen by `bcs`, the button logs its click, the checkbox
-checks, the slider snaps to where its track was clicked, a radio button changes the track click,
-the menu opens below its button and closes on an item, and D draws every widget disabled. Its
-widgets are styled each frame from what they hold, written only when that changes, where Bevy's
-systems run for a widget whose state was added, changed or removed. `standard_widgets_observers` is
-left, since it observes Bevy's own components coming and going, `Pressed`, `Hovered` and the rest,
-and C# observes its own components' alone, which is the next batch. The widget tests moved to
-`Assets` first, by a move alone (`db01753`), and `WidgetTests` holds the report's layout and a
-button, a checkbox, a slider, a radio group and a menu button clicked offscreen, each event heard
-where it should be. Its remarks said an offscreen run cannot point at a widget, and `docs/ui.md`
-said so too, which `b548987` changed.
-
-**Now 3, Bevy's components observed.** `standard_widgets_observers` is written, 252, which ends the
-widgets' rows. A game observes one of Bevy's own components coming and going through its wrapper,
-`ecs.Observe<Add<PressedRef>>` as Bevy's `On<Add, Pressed>`, with no change to the bridge, whose
-`bcs_component_id_of` already resolves a reflected component by its type path. Each generated
-wrapper also implements an internal `IReflectedWrapper<T>` saying its path and making one over an
-entity, which the observer asks of a default value, since it takes a C# component or a wrapper and
-so is constrained to neither. The five lifecycle events and `ComponentType<T>` are constrained to
-`struct` rather than `unmanaged` for it. Every public call that reads or writes a component's bytes
-keeps `unmanaged`, and `ComponentType<T>` refuses a type holding references as it registers one. A
-wrapper's event hands on a wrapper over the component, read as it is when read. Two types naming one
-component, the `Transform` mirror and `TransformRef`, were heard only as the first that asked, the
-reports being kept by component, and are now each heard in turn from the one observer the bridge
-keeps. Driven offscreen by `bcs`, the button shows Hover and Press, the box checks, a drag moves the
-thumb, and D disables and enables all three, each through an observer. The observer tests moved to
-`Ecs` first, by a move alone (`47a2497`), and `ObserverTests` holds `TransformRef` and its mirror
-heard alike, a removal's wrapper finding the component gone.
+**Now 3, logical keys.** A game reads a key by what it types or by its name as well as by where it
+is, Bevy's `ButtonInput<Key>`, through the same calls with a `LogicalKey`,
+`KeyPressed(LogicalKey.Character("?"))` or `KeyDown(LogicalKey.Control)`, read once a frame beside
+the rest of the input (`bcs_logical_keys`, ABI 210). A pretended key now reads as a keyboard's
+would. One that types nothing is its name, Enter, Backspace, an arrow or Shift, where it was
+`Unidentified`, so Bevy's text fields, which go by those names, took no pretended Backspace, Enter
+or arrow at all. And a release reads as its press did, remembered, where a key that typed a
+character had stayed down among the logical keys for good. `keyboard_input` is written, 253, and
+prints what Bevy's does for the keys it is driven with. `InputTests` holds the mirror's layout and a
+tapped '?' and Enter read by what they type, never left down. Next in this gap is the key observed
+as it reaches a field, `FocusedInput<KeyboardInput>`, which Bevy hands out only where there is a
+primary window, so an offscreen run's fields take no keys, and the focus moved on as tab navigation
+moves it, which the two text input examples wait on. Item 14 after it.

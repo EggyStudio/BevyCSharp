@@ -32,7 +32,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("The interface", "ui.md", ["Ui", "UiGrid", "Length", "Sides", "Corners", "Track", "ImGuiRuntime", "ImGuiTextures"]),
     ("Audio", "audio.md", ["Audio"]),
     ("Physics", "physics.md", ["Physics.PhysicsWorld", "Physics.PhysicsPlugin", "Physics.PhysicsShape", "Physics.Joint", "Physics.Colliders"]),
-    ("Input", "input.md", ["Input", "Gamepad", "SyntheticInput", "KeyTable"]),
+    ("Input", "input.md", ["Input", "LogicalKey", "Gamepad", "SyntheticInput", "KeyTable"]),
     ("The window", "window.md", ["Window"]),
     ("Math", "", ["Vec3", "Quat", "Color", "Transform", "GlobalTransform", "EaseFunction"]),
     ("The tools", "tools.md", ["ConsoleCommands", "ConsoleHost", "ConsoleHost+Scope", "ConsoleLog", "CliClient", "CliJson", "CliPlugin", "CliSessionFile"]),
