@@ -88,7 +88,13 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
         var first = Log.Materials.TryGetValue(pair.A.Packed, out var a) ? a : new Bevy.Physics.PhysicsMaterial(Friction);
         var second = Log.Materials.TryGetValue(pair.B.Packed, out var b) ? b : new Bevy.Physics.PhysicsMaterial(Friction);
 
-        material.FrictionCoefficient = MathF.Sqrt(first.Friction * second.Friction);
+        // Bepu shares a convex manifold's friction among its contacts, so a box resting on four
+        // corners slid as though a quarter as rough, slowing by 2.45 a second each second at a
+        // friction of 1 where gravity times the friction is 9.81. The coefficient is scaled by the
+        // count, so it holds back what it says, as 3DEngine's does since its ed0f3aa6, which
+        // leaves a manifold that is not convex as it was.
+        var contacts = manifold.Convex ? Math.Max(1, manifold.Count) : 1;
+        material.FrictionCoefficient = MathF.Sqrt(first.Friction * second.Friction) * contacts;
         material.MaximumRecoveryVelocity = MaxRecoveryVelocity;
         material.SpringSettings = Spring;
 

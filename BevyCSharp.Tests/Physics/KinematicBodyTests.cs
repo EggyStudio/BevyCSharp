@@ -99,23 +99,23 @@ public sealed class KinematicBodyTests
     /// crate standing off its middle is carried round with it.
     /// </summary>
     /// <remarks>
-    /// Half a radian a second at two units out, which friction holds. A box sliding here slows at a
-    /// quarter of what its friction times gravity would give, so a faster turn or a crate further
-    /// out slides outward as it is carried, which is the friction's and not the platform's.
+    /// A radian a second at three units out, which asks 3 a second squared of the friction toward
+    /// the middle and 9.81 is there. When a box slid a quarter as rough as its friction, the crate
+    /// slid outward as it was carried and went 1.64 radians round in the two seconds.
     /// </remarks>
     [Theory]
     [InlineData(144.0)]
     [InlineData(30.0)]
     public void ATurningPlatformCarriesACrateRound(double fps)
     {
-        const float Rate = 0.5f;
+        const float Rate = 1f;
         var spins = new List<float>();
         var (from, to, radius) = (0f, 0f, 0f);
 
         InAWorld((ecs, physics) =>
         {
             var platform = Platform(ecs, physics);
-            var crate = Crate(ecs, physics, new Vec3(2f, 0f, 0f));
+            var crate = Crate(ecs, physics, new Vec3(3f, 0f, 0f));
 
             var frames = new Frames(ecs, physics, fps, fps);
             frames.Run(0.5);
@@ -138,9 +138,12 @@ public sealed class KinematicBodyTests
             radius = MathF.Sqrt(at.X * at.X + at.Z * at.Z);
         });
 
-        Assert.All(spins, spin => Assert.InRange(spin, 0.495f, 0.505f));
-        Assert.True(Math.Abs(to - from - 1f) < 0.025f, $"the crate went {to - from} radians round in two seconds of half a radian");
-        Assert.True(Math.Abs(radius - 2f) < 0.05f, $"the crate slid out to {radius} from 2");
+        // Two radians, unwound once, since past a half turn the angle comes back from the other side.
+        var swept = to - from;
+        if (swept < 0f) swept += 2f * MathF.PI;
+        Assert.All(spins, spin => Assert.InRange(spin, 0.99f, 1.01f));
+        Assert.True(Math.Abs(swept - 2f) < 0.05f, $"the crate went {swept} radians round in two seconds of a radian");
+        Assert.True(Math.Abs(radius - 3f) < 0.075f, $"the crate slid out to {radius} from 3");
     }
 
     /// <summary>
