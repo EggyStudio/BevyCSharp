@@ -14,8 +14,6 @@ native/bevy_csharp/src/reflected.rs
 native/bevy_csharp/src/render/assets.rs
 native/bevy_csharp/src/render/compute.rs
 native/bevy_csharp/src/render/post.rs
-native/bevy_csharp/src/render/programs.rs
-native/bevy_csharp/src/render/reflect.rs
 native/bevy_csharp/src/render/scene.rs
 native/bevy_csharp/src/render/slang.rs
 native/bevy_csharp/src/render/values.rs
