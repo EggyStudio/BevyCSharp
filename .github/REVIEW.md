@@ -196,3 +196,13 @@ the assets. Their drag and buttons read Bevy's `Interaction` and `RelativeCursor
 read a window's cursor, so they are pressed in a window and not offscreen. `AnimationClipTests`
 holds the mix at 5 with even weights and 2.5 at three to one, and a masked target left where it was
 until the mask is lifted. `custom_skinned_mesh` is this gap's last. New item 14 is next after it.
+
+**Verdict 2, the package tests opening a relative path.** `NormTests.Package()` reads a relative
+`BCS_PACKAGE` from the repository's root, as the norm's other files are read, and the pack step
+exports `$PWD/` before the file's name, so the job does not lean on the test. A variable naming no
+file now fails both tests with the name it was given and the path it was read as, where it threw
+`DirectoryNotFoundException` before, since a job that sets it means a package to be opened. Run
+with the newest package here named relative, whole, unset, and as a file that is not there, the
+first three pass and the last fails with that message. The graphs' commit (`5d5a982`) was in its
+suite when the verdict came, and went in first. Item 4 is next, then item 14, then
+`custom_skinned_mesh`.

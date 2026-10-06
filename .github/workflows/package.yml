@@ -400,7 +400,9 @@ jobs:
       - name: Check what the package holds
         shell: bash
         run: |
-          export BCS_PACKAGE="$(ls build/package/*.nupkg | head -1)"
+          # A whole path, since the test runs from its own folder. It reads a relative one from the
+          # checkout as well, and the job does not lean on that.
+          export BCS_PACKAGE="$PWD/$(ls build/package/*.nupkg | head -1)"
           dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4|FullyQualifiedName~NormTests.N_6_5"
 
       - uses: actions/upload-artifact@v7

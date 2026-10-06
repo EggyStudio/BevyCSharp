@@ -285,10 +285,24 @@ public sealed class NormTests
     /// The package to open, the one <c>BCS_PACKAGE</c> names or else the newest packed into
     /// build/package, or none.
     /// </summary>
+    /// <remarks>
+    /// A path the variable gives relative is taken from the repository's root, as the norm's other
+    /// files are. A step names it from the checkout and the test runs from its own folder,
+    /// bin/Release/net10.0, so read from there it named nothing, and the pack job of 421d4e1 failed
+    /// opening a folder that is not there. A variable naming no file fails here and says so, with
+    /// the path it was read as, rather than skipping as an unset one does, since a job that sets it
+    /// means a package to be opened.
+    /// </remarks>
     private static string? Package()
     {
-        var package = Environment.GetEnvironmentVariable("BCS_PACKAGE");
-        if (!string.IsNullOrEmpty(package)) return package;
+        var named = Environment.GetEnvironmentVariable("BCS_PACKAGE");
+        if (!string.IsNullOrEmpty(named))
+        {
+            var package = Path.IsPathRooted(named) ? named : Path.GetFullPath(Path.Combine(Root, named));
+            Assert.True(File.Exists(package), $"BCS_PACKAGE names {named}, read as {package}, and no file is there");
+            return package;
+        }
+
         var packed = Path.Combine(Root, "build", "package");
         return Directory.Exists(packed)
             ? Directory.EnumerateFiles(packed, "BevyCSharp.*.nupkg").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
