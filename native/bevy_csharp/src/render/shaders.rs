@@ -736,7 +736,7 @@ pub struct Instance {
 /// drawn by one.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_entity_program(entity: u64) -> i32 {
-    bcs_shader_target_program(TARGET_ENTITY, entity as i64)
+    crate::interop::guard(|| bcs_shader_target_program(TARGET_ENTITY, entity as i64))
 }
 
 #[cfg(test)]

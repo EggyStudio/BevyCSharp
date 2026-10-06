@@ -9,7 +9,6 @@ native/bevy_csharp/src/capabilities.rs bcs_has_interface	answers a constant or a
 native/bevy_csharp/src/capabilities.rs bcs_has_render	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/capabilities.rs bcs_is_main_thread	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/render/meshlets.rs bcs_render_meshlets_active	answers a constant or a flag and cannot panic
-native/bevy_csharp/src/render/shaders.rs bcs_shader_entity_program
 native/bevy_csharp/src/render/solari.rs bcs_render_ray_tracing_active	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/states.rs bcs_state_computed_count	answers a constant or a flag and cannot panic
 native/bevy_csharp/src/states.rs bcs_state_computed_per_slot	answers a constant or a flag and cannot panic
