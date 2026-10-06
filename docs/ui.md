@@ -299,11 +299,25 @@ Ui.SelfUpdate(volume, UiWidgetKind.Slider);
 float level = ctx.Ecs.Wrap<SliderValueRef>(volume).Value;   // as the player drags it
 ```
 
-What a widget looks like is the game's: the thumb is a child node marked `SliderThumbRef` that the
+A game that decides a change itself, keeping the value somewhere of its own or refusing it,
+observes what the widget reports instead. A button and a menu item report Bevy's `Activate`, a
+slider a `ValueChange<float>`, a checkbox or a radio button a `ValueChange<bool>`, and a radio
+group a `ValueChange<Entity>` naming the button chosen. A menu reports `MenuEvent`, asking to open
+or close, which goes up from the item to the menu's owner, where the game spawns the menu's popup
+or despawns it:
+
+```csharp
+ctx.Ecs.Observe<Activate>(save, on => Save(on.Ecs));
+ctx.Ecs.Observe<ValueChange<float>>(volume, on => settings.Volume = on.Event.Value);
+ctx.Ecs.Observe<MenuEvent>(owner, on => ToggleMenu(on.Ecs, on.Entity, on.Event.Action));
+```
+
+What a widget looks like is the game's. The thumb is a child node marked `SliderThumbRef` that the
 game places from the value, and a scrollbar's `ScrollbarRef.Target` names the node it scrolls. Some
 of a widget's components, as a slider's value, are immutable in Bevy, so writing one through its
 wrapper inserts it again, which is how Bevy means them to change. A widget is worked by the pointer
-through Bevy's picking, which an offscreen run cannot send a pointer to.
+through Bevy's picking, which an offscreen run points at through the image it draws into, so a test
+or `./bcs command input.click` works a widget there as a hand would.
 
 ---
 

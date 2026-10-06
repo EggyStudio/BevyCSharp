@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 208;
+    internal const int ExpectedAbiVersion = 209;
 
     static Native() => NativeLoader.Initialize();
 
@@ -120,6 +120,16 @@ internal static unsafe partial class Native
         IntPtr app,
         int kind,
         delegate* unmanaged[Cdecl]<NativePointerEvent*, IntPtr, void> callback,
+        IntPtr user,
+        ulong* observer);
+
+    /// <summary>Asks Bevy to report one kind of thing its widgets report, through an observer it spawns.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_observe_widget(
+        IntPtr app,
+        int kind,
+        delegate* unmanaged[Cdecl]<NativeWidgetEvent*, IntPtr, void> callback,
         IntPtr user,
         ulong* observer);
 

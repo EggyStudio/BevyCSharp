@@ -388,8 +388,8 @@ scrollbars	can
 scroll	can	the wheel taken from picking's Pointer<Scroll> at what the mouse's pointer is over, where Bevy's reads the wheel's messages and every pointer's hovers itself, and the items' list item role for accessibility, which Bevy's AccessibilityNode carries and no wrapper reaches
 size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
-standard_widgets	missing	observers of the widgets' own events (Activate, ValueChange, MenuEvent)
-standard_widgets_observers	missing	observers of the widgets' own events and of their components' coming and going
+standard_widgets	can	the widgets styled each frame from what they hold, where Bevy's systems run for a widget whose state was added, changed or removed
+standard_widgets_observers	missing	observers of Bevy's own components coming and going, a widget's Pressed, Hovered, Checked, InteractionDisabled and slider value, where C# observes its own components'
 strikethrough_and_underline	missing	strikethrough and underline on text
 system_fonts	missing	system fonts
 tab_navigation	can	the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks

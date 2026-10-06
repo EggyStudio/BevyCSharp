@@ -10,9 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4034f91`. A game observes what a pointer does to an entity as Bevy's `Pointer<E>`,
-the seventeen kinds, taken up the parents and stopped with `on.Propagate(false)` (ABI 206); picking
-is in the render profile as decided, measured as one clean release build each at 3 seconds and 0.6
+Reviewed up to `ba5f72c`. A game spawns pointers of its own and puts them on an image an interface
+is drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture coordinate it met
+(ABI 207), so `render_ui_to_texture` is written, 249, and TODO.md's example gaps say what each of
+the three left waits on (`d59365f`); the input tests moved to `Input` by a move alone, N 1.4's list
+at 94 to mend (`ba5f72c`). The reply on `scroll` is written, the pretend wheel going through Bevy's
+`MouseWheel` and picking (ABI 208), its commit to come. The owner pushed, and the run of `ba5f72c`
+is under way. No verdict is open.
+
+Before them, a game came to observe what a pointer does to an entity as Bevy's `Pointer<E>`, the
+seventeen kinds, taken up the parents and stopped with `on.Propagate(false)` (ABI 206); picking is
+in the render profile as decided, measured as one clean release build each at 3 seconds and 0.6
 percent more, mesh picking compiled in and added where `Config.MeshPicking` asks; an offscreen run
 is pointed at through its image, the rays Bevy casts for no primary window added by `offscreen.rs`,
 so an offscreen editor takes clicks on its scene; six more examples are written on the pointer's
@@ -20,7 +28,7 @@ events, 248, and `mesh_picking` and `simple_picking` run on observers in the ren
 (`b548987`, `4034f91`). Two things seen there are not mended: a move and a press at a new place in
 one frame miss, as a window's mouse does in Bevy, and `dragdrop_picking`'s preview draws over the
 words Bevy sorts it under, untraced, which item 4 holds with the captures. The pick ray's tests
-moved to `Assets` by a move alone, N 1.4's list at 95 to mend (`96a61e6`). No verdict is open.
+moved to `Assets` by a move alone (`96a61e6`).
 
 Before them, a Slang material reached the clustered decals over it through Bevy's own iterator,
 laying them on as the standard material does or reading each one's tag and textures, with
@@ -30,10 +38,6 @@ an image's size (ABI 205), with `irradiance_volumes` and the whole of `tonemappi
 (`1a4b821`); the light probes' tests moved to `Assets` by a move alone, so N 1.4's list stands at 96
 to mend (`67d179b`). The deferred buffers wait as a design of their own, whose outputs follow the
 camera's prepasses, and picking into the render profile was decided here on 2026-10-06.
-
-Before them, two commits of moves alone split the bridge's `programs.rs` and `reflect.rs` into parts
-and put the lit shader's tests in `Assets`, so N 1.3's list stands at 19 from 21, 12 of them in the
-bridge, and N 1.4's at 97 to mend (`5be8291`, `56ad9a2`).
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -163,23 +167,6 @@ None open.
 
 ## Replies
 
-**Now 3, the last pointer row.** `render_ui_to_texture` is written. An interface is drawn into an
-image a turning cube wears, and a pointer of the game's own is put where a ray from the mouse meets
-the cube, so the box on it lights under the mouse and is dragged across the texture. Driven
-offscreen by `bcs` and seen to do what Bevy's does, 249 written. `Picking.SpawnPointer` makes a
-pointer of Bevy's `PointerId::Custom` kind, and `MovePointer`, `PressPointer` and `ReleasePointer`
-send Bevy's `PointerInput` for it on an image, as Bevy's example sends it for its
-`CUBE_POINTER_ID`. `Picking.TryCast` also answers the texture coordinate where the ray met the mesh,
-which Bevy's ray cast keeps on its hit (ABI 207). A pointer's number is the last eight bytes of its
-UUID, so a spawned one is told apart by the number `SpawnPointer` gave. The box goes blue again
-under a mouse held still, since the cube turns the texture out from under the pointer, which is
-right and Bevy's does the same. `PointerTests` holds a spawned pointer clicking a node drawn into an
-image, at the place it was put, and `PickRayTests` the middle of a cube's top face at (0.5, 0.5).
-TODO.md's example gaps are rewritten around what is left, the observers entry down to the widgets'
-two, and `error_handling`, `delayed_commands` and `scroll` name only what they still wait on, a
-mesh's surface sampled, commands run after a delay, and the mouse wheel as messages with what each
-pointer is over.
-
 **Now 3, `scroll`.** Written, 250. The pretend wheel, `SyntheticInput.Wheel` and `input.wheel`,
 went into ImGui's queue alone, so a game reading the wheel and Bevy's picking never saw it. It is
 Bevy's `MouseWheel` now, as a real wheel's report begins (`bcs_input_wheel`, ABI 208). The frame's
@@ -199,3 +186,22 @@ no window. The input tests moved to `Input` first, by a move alone (`ba5f72c`), 
 to mend. `SyntheticInput.Send`'s remarks said an offscreen run picks nothing, which `b548987`
 changed, and they say what it does now. Two cref warnings that `d59365f`'s overload made, and a
 `<para>` left open in the key's remarks, are mended.
+
+**Now 3, the widgets' events.** What Bevy's widgets report reaches C# as Bevy's own events, an
+observer in the bridge for each kind copying it into one shape (`widget.rs`, ABI 209), as the
+pointer's do. `Activate` from a button or a menu item, `ValueChange<T>` from a slider (a float), a
+checkbox or a radio button (a bool) and a radio group (the button chosen), and `MenuEvent` from a
+menu, which C# takes up the parents to the menu's owner, `MenuAction` and `NavAction` beside it.
+`standard_widgets` is written on them, 251, its slider and radio group kept in the example's own
+record and set from it, its menu's popup spawned and despawned as asked, with Bevy's `Popover` and
+`BoxShadow` written as JSON. Driven offscreen by `bcs`, the button logs its click, the checkbox
+checks, the slider snaps to where its track was clicked, a radio button changes the track click,
+the menu opens below its button and closes on an item, and D draws every widget disabled. Its
+widgets are styled each frame from what they hold, written only when that changes, where Bevy's
+systems run for a widget whose state was added, changed or removed. `standard_widgets_observers` is
+left, since it observes Bevy's own components coming and going, `Pressed`, `Hovered` and the rest,
+and C# observes its own components' alone, which is the next batch. The widget tests moved to
+`Assets` first, by a move alone (`db01753`), and `WidgetTests` holds the report's layout and a
+button, a checkbox, a slider, a radio group and a menu button clicked offscreen, each event heard
+where it should be. Its remarks said an offscreen run cannot point at a widget, and `docs/ui.md`
+said so too, which `b548987` changed.

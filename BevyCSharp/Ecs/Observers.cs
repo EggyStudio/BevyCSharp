@@ -37,6 +37,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly Dictionary<(Type, Entity), List<Delegate>> _onEntity = [];
     private readonly HashSet<(int Kind, int Component)> _watched = [];
     private readonly HashSet<int> _watchedPointers = [];
+    private readonly HashSet<int> _watchedWidgets = [];
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
     private GCHandle _self;
 
@@ -119,6 +120,35 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         ulong observer;
         var status = Native.bcs_observe_pointer(ComponentRegistry.AppHandle, kind, &PointerReported, GCHandle.ToIntPtr(_self), &observer);
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a pointer does");
+    }
+
+    /// <summary>Asks the bridge to report one kind of thing Bevy's widgets report, once.</summary>
+    /// <remarks>
+    /// A bridge without the renderer has no widgets, answers so, and nothing is ever reported.
+    /// </remarks>
+    internal void WatchWidget(int kind)
+    {
+        if (!_watchedWidgets.Add(kind)) return;
+
+        ulong observer;
+        var status = Native.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &WidgetReported, GCHandle.ToIntPtr(_self), &observer);
+        if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a widget reports");
+    }
+
+    /// <summary>Where the bridge reports what a widget reported, with the world on loan.</summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static void WidgetReported(NativeWidgetEvent* reported, IntPtr user)
+    {
+        try
+        {
+            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry || reported == null) return;
+            WidgetEvents.Trigger(registry, *reported);
+        }
+        catch (Exception ex)
+        {
+            // An exception crossing back into Rust is undefined, so it ends here, said.
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
+        }
     }
 
     /// <summary>Where the bridge reports what a pointer did, with the world on loan.</summary>

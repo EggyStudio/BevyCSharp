@@ -27,7 +27,7 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's widgets, five examples.** Feathers, Bevy's styled widgets over its core ones (three),
   which the bridge does not build, and directional navigation (two), which needs Bevy's map of
   which node is beside which. The core widgets are built and reached through their wrappers, and
-  what the two standard widget examples wait on is their events, under the entry on observers.
+  what they report reaches C# as Bevy's `Activate`, `ValueChange` and `MenuEvent`.
 - **Fonts and text styling, ten examples.** Font weights, OpenType variations and features (`text`
   among them), generic families and system fonts (`ime_support` among them), querying fonts and
   their atlases, strikethrough and underline, and text background colors.
@@ -39,11 +39,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **The widgets' events as observers, two examples.** The widgets' own `Activate`, `ValueChange`
-  and menu events, which `standard_widgets` and `standard_widgets_observers` observe. What a
-  pointer does to an entity reaches C# as Bevy's `Pointer<E>`, from a pointer of the platform's or
-  one a game spawns itself, and the widgets' events need the same bridge, an observer in the
-  bridge for each kind copying its fields into a C# struct.
+- **Bevy's own components observed as they come and go, one example.** C# observes its own
+  components added, inserted and removed, and `standard_widgets_observers` observes Bevy's, a
+  widget's `Pressed`, `Hovered`, `Checked`, `InteractionDisabled` and slider value, to restyle it
+  as they change. The bridge's observer watches a component by its id, which for one of Bevy's is
+  found from its type path, and the C# event would name the component by its wrapper rather than
+  carry its bytes.
 - **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused
