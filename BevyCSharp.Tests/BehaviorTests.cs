@@ -287,4 +287,25 @@ public sealed class BehaviorTests
         Assert.True(plugin.RegistrationsFound >= 1);
         Assert.Contains(app.SystemsIn(Stage.Update), s => s.Name == "Counter.Tick");
     }
+
+    [Fact]
+    public void BehaviorsPluginNamedItsAssembliesRegistersTheirBehaviorsAlone()
+    {
+        // The editor's assembly loaded, as the suite loads it to test the editor's panels, which
+        // put the editor's own behaviors into every app that registered them all.
+        Assert.NotNull(typeof(BevyCSharp.Editor.EditorBoot).Assembly);
+
+        using (var every = new App(Config.HeadlessFor(1)))
+        {
+            every.AddPlugin(new EnginePlugin());
+            every.AddPlugin(new BehaviorsPlugin());
+            Assert.Contains(every.SystemsIn(Stage.Startup), s => s.Name == "EditorBoot.Start");
+        }
+
+        using var app = new App(Config.HeadlessFor(1));
+        app.AddPlugin(new EnginePlugin());
+        app.AddPlugin(EngineHarness.Behaviors());
+        Assert.Contains(app.SystemsIn(Stage.Update), s => s.Name == "Counter.Tick");
+        Assert.DoesNotContain(app.SystemsIn(Stage.Startup), s => s.Name == "EditorBoot.Start");
+    }
 }

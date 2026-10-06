@@ -95,8 +95,15 @@ public sealed class EngineHarness : IDisposable
         });
 
         _app.AddPlugin(new EnginePlugin());
-        if (discoverBehaviors) _app.AddPlugin(new BehaviorsPlugin());
+        if (discoverBehaviors) _app.AddPlugin(Behaviors());
     }
+
+    /// <summary>
+    /// The behaviors of the tests and of the library, and not those of the editor, whose assembly
+    /// the suite loads to test its panels and whose behaviors would bring the editor up inside
+    /// the app.
+    /// </summary>
+    public static BehaviorsPlugin Behaviors() => new() { Assemblies = [typeof(EngineHarness).Assembly, typeof(App).Assembly] };
 
     /// <summary>Adds a system, capturing anything it throws for the test to re-raise.</summary>
     public EngineHarness On(Stage stage, Action<World> body, string? name = null)

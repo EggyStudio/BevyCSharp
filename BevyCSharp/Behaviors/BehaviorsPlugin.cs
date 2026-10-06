@@ -35,6 +35,15 @@ public sealed class BehaviorsPlugin : IPlugin
     /// </remarks>
     public bool ScanLoadedAssemblies { get; init; } = true;
 
+    /// <summary>The assemblies whose behaviors are registered, or none for every assembly loaded.</summary>
+    /// <remarks>
+    /// Every loaded assembly by default, since a game asks for its own behaviors and its libraries'.
+    /// A process that loads an app's assembly without being that app names its own, as a test
+    /// suite that loads the editor's to test its panels does, since the editor's behaviors would
+    /// otherwise bring the editor up inside every app the suite runs.
+    /// </remarks>
+    public IReadOnlyCollection<Assembly>? Assemblies { get; init; }
+
     /// <summary>How many registration methods the last <see cref="Build"/> invoked.</summary>
     public int RegistrationsFound { get; private set; }
 
@@ -51,6 +60,7 @@ public sealed class BehaviorsPlugin : IPlugin
             {
                 // A script's, which its host registers, as the scan below leaves them too.
                 if (register.Method.DeclaringType?.Assembly.IsCollectible == true) continue;
+                if (Assemblies is { } only && register.Method.DeclaringType?.Assembly is { } from && !only.Contains(from)) continue;
 
                 register(app);
                 found++;
@@ -58,7 +68,7 @@ public sealed class BehaviorsPlugin : IPlugin
 
             // Fallback: assemblies that are loaded but have not been touched, so their module
             // initializer has not fired. Anything already in the registry is skipped.
-            if (ScanLoadedAssemblies) found += ScanForMissedRegistrations(app);
+            if (ScanLoadedAssemblies) found += ScanForMissedRegistrations(app, Assemblies);
         }
 
         RegistrationsFound = found;
@@ -71,7 +81,7 @@ public sealed class BehaviorsPlugin : IPlugin
             "Best-effort fallback only. Every registration is also reported by a generated "
             + "module initializer, which a trimmed build relies on; finding nothing "
             + "here is correct rather than a failure.")]
-    private static int ScanForMissedRegistrations(App app)
+    private static int ScanForMissedRegistrations(App app, IReadOnlyCollection<Assembly>? only)
     {
         var found = 0;
 
@@ -81,6 +91,7 @@ public sealed class BehaviorsPlugin : IPlugin
             // a host has retired may still be in the process until the runtime unloads it, so
             // finding it here would run a generation nobody asked for beside the current one.
             if (assembly.IsDynamic || assembly.IsCollectible) continue;
+            if (only is not null && !only.Contains(assembly)) continue;
 
             foreach (var method in FindRegistrations(assembly))
             {
