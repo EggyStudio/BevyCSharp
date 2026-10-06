@@ -1,4 +1,6 @@
+using System.Runtime.InteropServices;
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -43,6 +45,22 @@ public sealed class GizmoRunTests
         Assert.True(redBottom > 100, $"the red run drew {redBottom} pixels in the bottom half");
         Assert.Equal(0, greenBottom);
         Assert.Equal(0, redTop);
+    }
+
+    /// <summary>
+    /// A line crosses as the bridge reads it, each field where the bridge asserts it is, since a
+    /// mirror the right size with one field out of place draws every line from its neighbor's
+    /// numbers.
+    /// </summary>
+    [Theory]
+    [InlineData(nameof(NativeGizmoSegment.EndX), 12)]
+    [InlineData(nameof(NativeGizmoSegment.ColorR), 24)]
+    [InlineData(nameof(NativeGizmoSegment.EndColorR), 40)]
+    [InlineData(nameof(NativeGizmoSegment.Fades), 56)]
+    public void ALineIsLaidOutAsTheBridgeReadsIt(string field, int offset)
+    {
+        Assert.Equal(offset, (int)Marshal.OffsetOf<NativeGizmoSegment>(field));
+        Assert.Equal(60, Marshal.SizeOf<NativeGizmoSegment>());
     }
 
     /// <summary>Horizontal lines four units long, spread evenly between two heights.</summary>

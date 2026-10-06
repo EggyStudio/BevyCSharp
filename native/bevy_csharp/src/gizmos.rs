@@ -605,6 +605,69 @@ pub unsafe extern "C" fn bcs_gizmo_text(text: *const core::ffi::c_char, settings
     })
 }
 
+/// One line of a run, as [`bcs_gizmo_lines`] takes it and the managed side mirrors it.
+///
+/// Fifteen numbers a line, where a shape is described by every number any shape reads, so a run
+/// of thousands of lines crosses as lines rather than as shapes.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsGizmoSegment {
+    /// Where it begins, in world space.
+    pub start: [f32; 3],
+    /// Where it ends.
+    pub end: [f32; 3],
+    /// Its color at the start, linear RGBA.
+    pub color: [f32; 4],
+    /// Its color at the end.
+    pub end_color: [f32; 4],
+    /// Non-zero where it fades from one color to the other.
+    pub fades: i32,
+}
+
+/// Records a run of lines to draw this frame, all of them in front of the scene where `in_front`
+/// is non-zero and all behind otherwise.
+///
+/// Returns [`status::UNSUPPORTED`] where there is nothing to draw on.
+///
+/// # Safety
+/// `segments` must point at `count` lines.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_lines(segments: *const BcsGizmoSegment, count: i32, in_front: i32) -> i32 {
+    crate::interop::guard(|| {
+        if count <= 0 {
+            return status::OK;
+        }
+
+        if segments.is_null() {
+            return status::NULL_ARG;
+        }
+
+        let lines = unsafe { core::slice::from_raw_parts(segments, count as usize) };
+
+        crate::state::with_world(|world| {
+            let Some(mut queue) = world.get_resource_mut::<GizmoQueue>() else {
+                return status::UNSUPPORTED;
+            };
+
+            // A line is kind 0 and one that fades kind 3, as a shape described in full says.
+            let shapes = queue.shapes();
+            shapes.reserve(lines.len());
+            shapes.extend(lines.iter().map(|line| QueuedGizmo {
+                kind: if line.fades != 0 { 3 } else { 0 },
+                start: line.start,
+                end: line.end,
+                rotation: [0.0, 0.0, 0.0, 1.0],
+                radius: 0.0,
+                color: line.color,
+                end_color: line.end_color,
+                in_front,
+            }));
+
+            status::OK
+        })
+    })
+}
+
 /// One described shape as the queue holds it.
 fn queued(config: &BcsGizmoConfig) -> QueuedGizmo {
     QueuedGizmo {
@@ -616,5 +679,22 @@ fn queued(config: &BcsGizmoConfig) -> QueuedGizmo {
         color: config.color,
         end_color: config.end_color,
         in_front: config.in_front,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::mem::{offset_of, size_of};
+
+    /// `NativeGizmoSegment` on the managed side asserts the same numbers, so neither half of a
+    /// line moves without the other.
+    #[test]
+    fn a_line_has_the_layout_the_managed_side_mirrors() {
+        assert_eq!(offset_of!(BcsGizmoSegment, end), 12);
+        assert_eq!(offset_of!(BcsGizmoSegment, color), 24);
+        assert_eq!(offset_of!(BcsGizmoSegment, end_color), 40);
+        assert_eq!(offset_of!(BcsGizmoSegment, fades), 56);
+        assert_eq!(size_of::<BcsGizmoSegment>(), 60);
     }
 }

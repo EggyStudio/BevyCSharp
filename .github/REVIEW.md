@@ -10,7 +10,12 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ccb5a09`. `Render2d.SetSpriteFrames` moves many sprites and sprite meshes to the
+Reviewed up to `2e3fbc3`. The last seven of Bevy's stress tests are written and measured, every
+one within two milliseconds of Bevy's and transform_hierarchy faster than it (`d71ff6a`), which
+empties the column of rows that can be written, three of the seven in part for what Bevy does
+not reflect. `gizmos.rs` is split by moves alone (`2e3fbc3`) and off N 1.3's list.
+
+Before them, `Render2d.SetSpriteFrames` moves many sprites and sprite meshes to the
 frames of their sheets in one call, which takes many_animated_sprites from 15.95 ms to 6.75
 beside Bevy's 6.51 and many_animated_sprite_meshes from 212.54 to 13.84 beside Bevy's 14.34,
 measured again into PERFORMANCE.md, with `SpriteFrameTests`. The call is new to the bridge, so
@@ -57,9 +62,9 @@ run and in the package where there is one, and the pack workflow runs the script
 the owner makes next carries all of it.
 
 Before it, four commits were settled, the last being the tests of what is no area of the library
-in folders named for what they test (`a714bb8`). The table stands at 235 written, 16 written in
-part, 7 that can be, 105 missing and 58 that do not apply, and what can be written is the last
-seven stress tests. The lists stand at 337 places for N 1.2, 26 for N 1.3, 113 for N 1.4 and 55
+in folders named for what they test (`a714bb8`). The table stands at 239 written, 19 written in
+part, none that can be, 105 missing and 58 that do not apply. The lists stand at 337 places for
+N 1.2, 25 for N 1.3, 113 for N 1.4 and 55
 for N 3.4, with one entry point of B 3 to bring under the guard, `bcs_shader_entity_program`, in
 the batch that splits `render/shaders.rs`.
 
@@ -79,8 +84,8 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    `3d55c94`), and a call that takes lines as they are comes after the sprite frames, as the
    reply says. One call moves the atlas frames of many sprites (`ccb5a09`), which brought both
    animated tests level with Bevy's. Each mend is measured again by `build/measure-stress.sh`,
-   and the table in PERFORMANCE.md is the measurement after it (N 3.6). Then the last seven
-   stress tests. An
+   and the table in PERFORMANCE.md is the measurement after it (N 3.6). The last seven stress
+   tests are written (`d71ff6a`), and the gizmo lines are left of this item. An
    example that needs something missing has its row changed and is passed over. A picture that
    differs from Bevy's for no known reason is taken down to the smallest scene that still
    differs and explained before the pass goes on. The second paragraph of item 3 holds for
@@ -210,7 +215,10 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    writing a field that holds a list from items split by semicolons, a command that pretends
    files dropped on the window, a command's parameter with a default being left off, and a
    placed scene file spawned again when it is written while the level runs, under the entity
-   that placed it and giving back what the old copy held (`5b2234d2`).
+   that placed it and giving back what the old copy held (`5b2234d2`). A third: a command takes
+   an enum member by its name alone, where `Enum.TryParse` takes any number as well, as
+   `ConsoleWorldCommands.cs` reads gamepad buttons, axes and keys, and as 3DEngine's
+   `InputCommands.TryName` does since `ef042886`, where a button of 100 stopped the program.
 10. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
     a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
     orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13
@@ -284,10 +292,9 @@ None open.
 
 ## Replies
 
-Item 1, the last seven stress tests: bevymark, bevymark_3d, many_buttons, many_cubes, many_foxes,
-many_morph_targets and transform_hierarchy, which empties the column of rows that can be written.
-bevymark and many_foxes are in part, for Bevy's static transform optimizations, a resource Bevy
-reflects but not as a resource, and many_cubes for the three switches whose components Bevy does
-not reflect. All seven are measured into PERFORMANCE.md's table, every one within two
-milliseconds of Bevy's, transform_hierarchy faster than it, its nodes moved by a behavior across
-the thread pool.
+Item 1, the last of the mends: gizmos.rs was split first by moving its settings into
+`gizmo_settings.rs` (`2e3fbc3`), since it was on N 1.3's list, and `Gizmos.Lines` now hands a
+run to `bcs_gizmo_lines` as lines of fifteen numbers rather than as shapes of every number any
+shape reads, which takes many_gizmos to 8.59 ms against Bevy's 6.95, from 10.68. The call is new,
+so `ABI_VERSION` and `ExpectedAbiVersion` are 201, a third number for the owner beside 199 and
+200. Item 1 is done with this, and item 2 comes next.

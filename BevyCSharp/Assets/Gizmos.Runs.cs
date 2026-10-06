@@ -10,7 +10,7 @@ public static unsafe partial class Gizmos
     /// <see cref="Lines"/> builds each run into rather than making a new one.
     /// </summary>
     [ThreadStatic]
-    private static NativeGizmoConfig[]? _run;
+    private static NativeGizmoSegment[]? _run;
 
     /// <summary>
     /// Draws a whole run of lines in one crossing.
@@ -48,44 +48,65 @@ public static unsafe partial class Gizmos
     {
         if (lines.IsEmpty) return;
 
-        // Built here rather than by the caller, so the wire format stays this file's business the
-        // way it is for every single-shape call above. A short run is built on the stack and a
-        // longer one in an array kept between calls, grown when a run is longer than any before,
-        // since one made anew each call is large enough to land on .NET's large object heap, and a
-        // game drawing thousands of lines a frame in a few runs paid for that every call.
-        if (lines.Length > 64 && (_run is null || _run.Length < lines.Length))
-            _run = new NativeGizmoConfig[Math.Max(lines.Length, (_run?.Length ?? 0) * 2)];
+        // Inside a batch the run joins it as shapes, so the whole frame's shapes still cross once.
+        if (_batch is { } gathering)
+        {
+            foreach (var line in lines)
+            {
+                var config = Shape(line.Fades ? 3 : 0, line.Start, Quat.Identity, line.Color, inFront, end: line.End);
+                (config.EndColorR, config.EndColorG, config.EndColorB, config.EndColorA) = line.EndColor;
+                gathering.Add(config);
+            }
 
-        var configs = lines.Length <= 64
-            ? stackalloc NativeGizmoConfig[lines.Length]
+            return;
+        }
+
+        // Otherwise it crosses as lines, each its ends and its colors and nothing a shape reads
+        // besides. A short run is built on the stack and a longer one in an array kept between
+        // calls, grown when a run is longer than any before, since one made anew each call is
+        // large enough to land on .NET's large object heap.
+        if (lines.Length > 64 && (_run is null || _run.Length < lines.Length))
+            _run = new NativeGizmoSegment[Math.Max(lines.Length, (_run?.Length ?? 0) * 2)];
+
+        var segments = lines.Length <= 64
+            ? stackalloc NativeGizmoSegment[lines.Length]
             : _run.AsSpan(0, lines.Length);
 
         for (var i = 0; i < lines.Length; i++)
         {
             var line = lines[i];
-
-            configs[i] = Shape(
-                line.Fades ? 3 : 0,
-                line.Start,
-                Quat.Identity,
-                line.Color,
-                inFront,
-                end: line.End);
-
-            configs[i].EndColorR = line.EndColor.R;
-            configs[i].EndColorG = line.EndColor.G;
-            configs[i].EndColorB = line.EndColor.B;
-            configs[i].EndColorA = line.EndColor.A;
+            segments[i] = new NativeGizmoSegment
+            {
+                StartX = line.Start.X,
+                StartY = line.Start.Y,
+                StartZ = line.Start.Z,
+                EndX = line.End.X,
+                EndY = line.End.Y,
+                EndZ = line.End.Z,
+                ColorR = line.Color.R,
+                ColorG = line.Color.G,
+                ColorB = line.Color.B,
+                ColorA = line.Color.A,
+                EndColorR = line.EndColor.R,
+                EndColorG = line.EndColor.G,
+                EndColorB = line.EndColor.B,
+                EndColorA = line.EndColor.A,
+                Fades = line.Fades ? 1 : 0,
+            };
         }
 
-        // Inside a batch the run joins it, so the whole frame's shapes still cross once.
-        if (_batch is { } gathering)
+        fixed (NativeGizmoSegment* at = segments)
         {
-            foreach (var config in configs) gathering.Add(config);
-            return;
-        }
+            var status = Native.bcs_gizmo_lines(at, segments.Length, inFront ? 1 : 0);
+            if (status == NativeStatus.Unsupported)
+                throw new BevyNativeException(
+                    NativeStatus.Unsupported,
+                    "Drawing gizmos failed, because gizmos are drawn by a plugin that comes with "
+                    + "the window, so a windowless run has nothing to draw on. Guard with "
+                    + "App.HasRenderer and Config.Headless.");
 
-        DrawMany(configs, "drawing a run of gizmo lines");
+            Native.Check(status, "drawing a run of gizmo lines");
+        }
     }
 
     /// <summary>

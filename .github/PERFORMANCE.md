@@ -229,10 +229,21 @@ one kept between calls, grown when a run is longer than any before.
 
 | test | Bevy alone, before | through the bridge, before | Bevy alone, after | through the bridge, after |
 |---|---:|---:|---:|---:|
-| many_gizmos | 6.54 | 12.39 | 6.97 | 10.68 |
+| many_gizmos | 6.95 | 8.59 |
 
 The ten systems drawing the lines take 3.9 ms of the frame between them, where they took 4.9, 0.7
 of it in their calls into the bridge either way.
+
+### Lines that cross as lines
+
+Each line still crossed as the bridge's general description of a shape, every number any shape
+reads, about 200 bytes. `Gizmos.Lines` hands a run to `bcs_gizmo_lines` as lines, fifteen numbers
+each, which the bridge queues as it queues any shape. A run inside a `Gizmos.Batch` still joins
+the batch as shapes, so a batch crosses once.
+
+| test | Bevy alone, before | through the bridge, before | Bevy alone, after | through the bridge, after |
+|---|---:|---:|---:|---:|
+| many_gizmos | 6.97 | 10.68 | 6.95 | 8.59 |
 
 ### Sprites' frames moved together
 
@@ -284,7 +295,7 @@ bridge adds to every app to Bevy's program by name, which is how a difference is
 
 The rows are as they stand since the mends above. Most cost the bridge under a millisecond more,
 or a few against a frame of tens. Four cost far more when first measured, each for a reason
-measuring found, and each has been mended since, many_gizmos in part. bevymark and many_foxes run
+measuring found, and each has been mended since. bevymark and many_foxes run
 with Bevy's static transform optimizations on, which Bevy's programs turn off and the bridge cannot
 reach, and transform_hierarchy is faster through the bridge, its moving nodes moved by a behavior
 spread across the thread pool where Bevy's system walks them on one thread. many_foxes asked each
@@ -301,8 +312,8 @@ changes it is down, as Bevy's program does its work only then.
 - **many_gizmos cost 6 ms more for a copy of every line.** `Gizmos.Lines` takes a run of lines in
   one call, and built a new array of the bridge's layout for every call, ten of 5,000 lines a
   frame here, each on .NET's large object heap. The array is now kept between calls (above), which
-  took 1.7 ms off. What is left is the copy itself, each line written into the bridge's general
-  description of a shape, about 200 bytes, which a call taking lines as they are would not need.
+  took 1.7 ms off, and the lines cross as lines rather than as shapes, which took 2.1 more. What
+  is left is the example's own building of 50,000 lines a frame in C# and copying each across.
 - **many_animated_sprites cost 9 ms more for a call a frame turned.** Bevy moves a sprite's atlas
   index where it is. The bridge had no call that did only that, so each sprite whose timer
   finished was set again through `Render2d.SetSprite`, about 18,000 a frame, which was 11.3 ms of

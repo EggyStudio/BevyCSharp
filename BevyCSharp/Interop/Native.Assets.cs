@@ -546,6 +546,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_draw_many(NativeGizmoConfig* configs, int count);
 
+    /// <summary>Records a run of lines to draw this frame, all in front of the scene or all behind it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_lines(NativeGizmoSegment* segments, int count, int inFront);
+
     /// <summary>Sets how gizmos are drawn, for the groups named.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
