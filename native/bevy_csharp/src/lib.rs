@@ -51,6 +51,7 @@ pub mod profile;
 pub mod reflected;
 pub mod render;
 pub mod state;
+pub mod stages;
 pub mod states;
 pub mod sync;
 pub mod ui;
