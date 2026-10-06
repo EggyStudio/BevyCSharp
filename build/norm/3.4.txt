@@ -8,8 +8,8 @@ BevyCSharp.Tests/AssetPackTests.cs Directory.Delete
 BevyCSharp.Tests/AssetPackTests.cs Path.GetTempPath
 BevyCSharp.Tests/ChangingTypeTests.cs Directory.Delete
 BevyCSharp.Tests/ChangingTypeTests.cs Path.GetTempPath
-BevyCSharp.Tests/CliServerTests.cs Directory.Delete
-BevyCSharp.Tests/CliServerTests.cs Path.GetTempPath
+BevyCSharp.Tests/Cli/CliServerTests.cs Directory.Delete
+BevyCSharp.Tests/Cli/CliServerTests.cs Path.GetTempPath
 BevyCSharp.Tests/CliSessionTests.cs Directory.Delete
 BevyCSharp.Tests/CliSessionTests.cs Path.GetTempPath
 BevyCSharp.Tests/DataAssetTests.cs Directory.Delete

@@ -15,7 +15,6 @@ BevyCSharp.Tests/CharacterControllerTests.cs
 BevyCSharp.Tests/CliCommandSchemaTests.cs
 BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/CliEnvelopeTests.cs
-BevyCSharp.Tests/CliServerTests.cs
 BevyCSharp.Tests/CliSessionTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/ComputeShaderTests.cs

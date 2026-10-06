@@ -3,8 +3,8 @@
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
 BevyCSharp.Tests/Assets/AssetTests.cs DateTime.UtcNow	a deadline for a load the asset server does on its own threads, which no frame count bounds
-BevyCSharp.Tests/CliServerTests.cs DateTime.UtcNow	a deadline for the socket server, which answers outside the frame
-BevyCSharp.Tests/CliServerTests.cs Thread.Sleep	waits between asks of the socket server, which answers outside the frame
+BevyCSharp.Tests/Cli/CliServerTests.cs DateTime.UtcNow	a deadline for the socket server, which answers outside the frame
+BevyCSharp.Tests/Cli/CliServerTests.cs Thread.Sleep	waits between asks of the socket server, which answers outside the frame
 BevyCSharp.Tests/DataAssetTests.cs Thread.Sleep	gives the file watcher's thread, which runs outside the frame, time to report a save
 BevyCSharp.Tests/TestFolder.cs Stopwatch	a delete tried again while another process lets go of a file
 BevyCSharp.Tests/TestFolder.cs Thread.Sleep	a delete tried again while another process lets go of a file
