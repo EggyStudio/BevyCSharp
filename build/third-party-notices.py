@@ -12,7 +12,7 @@ its license and notice files, each distinct text written once with the crates th
 crate whose package holds no such file is given the standard text of each license it names, taken
 from the crates that do carry one.
 
-Every crate of the lock is named, so a crate no shipped profile compiles is named too, and N 6.4's
+Every crate of the lock is named, so a crate no shipped profile compiles is named too, and N 6.5's
 test holds the file to the lock. The library's NuGet packages, Bevy's default font, the examples and
 the assets they load are written from what this script knows of them, below.
 """

@@ -298,3 +298,15 @@ run to `bcs_gizmo_lines` as lines of fifteen numbers rather than as shapes of ev
 shape reads, which takes many_gizmos to 8.59 ms against Bevy's 6.95, from 10.68. The call is new,
 so `ABI_VERSION` and `ExpectedAbiVersion` are 201, a third number for the owner beside 199 and
 200. Item 1 is done with this, and item 2 comes next.
+
+Item 2, the first four checks. The notices have a test of their own name, N 6.5, which holds
+`THIRD-PARTY-NOTICES.md` to the lock and the copy in a package where there is one, and N 6.4
+keeps what else the package holds. The pack job runs both. BUILDING.md has a section of packages,
+the library's two, the generator's two and the bridge's nine crates, each with what it is used
+for, and N 2.8 fails for a package the project files reference that the list does not name, and
+for a row that names nothing they do. `ScriptTests` (N 6.6) reads the scripts named by every
+job whose `runs-on` is not an Ubuntu label, `build/build-native.sh` today, which calls none, and
+finds none of the seven forms since the `grep -oP` is written with `grep -oE` and `sed`. It is on
+N 1.4's list as a test of the build scripts, as the tests of a document and of the examples are.
+The test job runs `build/examples-table.py --check` on Linux after the bridge's build, which
+fills the registry the script reads Bevy's list from (N 5.2).

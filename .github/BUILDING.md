@@ -198,10 +198,48 @@ a stale one produces an `EntryPointNotFoundException` far from its cause.
 The package carries `THIRD-PARTY-NOTICES.md`, which names every crate of `native/Cargo.lock` with
 its license and the notices its own files give. `build/third-party-notices.py` writes it through
 `cargo metadata`, and a change to the lock is followed by running it again, which the pack
-workflow checks with `--check` and NormTests' N 6.4 holds to the lock.
+workflow checks with `--check` and NormTests' N 6.5 holds to the lock.
 
 To ship more than one platform, run `build-native.sh --target <triple>` for each; every staged RID
 slot is picked up at pack time and missing ones are skipped.
+
+## Packages
+
+Every package the library and its generator reference and every crate the bridge names, with what
+each is used for. A dependency is surface the engine answers for, so adding one is the owner's
+decision, and NormTests' N 2.8 fails for one the project files reference and this list does not
+name, and for a row that names nothing they reference. The versions are the project files' own.
+
+The library's, in `BevyCSharp/BevyCSharp.csproj`:
+
+| Package | Used for |
+|---|---|
+| `Twizzle.ImGui-Bundle.NET` | Dear ImGui, which the interface and the editor are drawn with, carrying its native library for every platform the bridge builds for. |
+| `BepuPhysics` | The rigid bodies of `Bevy.Physics`, simulated in C# on this side of the bridge. On a beta line, pinned so an update is a decision. |
+
+The generator's, in `BevyCSharp.Generator/BevyCSharp.Generator.csproj`, which the package carries as
+an analyzer. Both are private to the build, since the compiler that runs the generator brings its
+own Roslyn.
+
+| Package | Used for |
+|---|---|
+| `Microsoft.CodeAnalysis.CSharp` | Roslyn, through which the generators read a game's code and write its behaviors, schemas and commands. |
+| `Microsoft.CodeAnalysis.Analyzers` | The rules Roslyn holds a generator to while it is built, such as the calls a generator may not make. |
+
+The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy and the embedding are in the tree
+through Bevy already, at the version it builds, so naming them adds nothing to the build.
+
+| Crate | Used for |
+|---|---|
+| `bevy` | The engine, its features chosen by the profile. |
+| `nonmax` | Building the row number of a table, for reading a component's column directly. |
+| `bytemuck` | Casting the interface's vertices to bytes for the GPU. |
+| `naga` | Reading the WGSL a Slang shader compiles to, to check its bindings before a pipeline is built with them (render). |
+| `serde_json` | Components read and written through Bevy's reflection, which cross as JSON, and the reflection slangc writes beside a compile. |
+| `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
+| `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
+| `bevy_embedded_assets` | A game's assets compiled into the library (embed). |
+| `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 
 ## Publishing
 

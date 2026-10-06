@@ -138,6 +138,14 @@ jobs:
         shell: bash
         run: build/build-native.sh
 
+      # N 5.2 of NORM.md, the table of Bevy's examples written again from Bevy's own list and held
+      # to the one checked in, with the README's count and each example's head. The list is read
+      # from the Bevy crate in cargo's registry, which the build above fills. Linux alone,
+      # since the table is the same on every system.
+      - name: Check the table of examples
+        if: runner.os == 'Linux'
+        run: python3 build/examples-table.py --check
+
       # The bridge's own tests, which cover the pieces no managed test can reach: the text
       # protocol, the panic guard, and that registering an asset type twice is inert.
       - name: Test the bridge
@@ -341,13 +349,13 @@ jobs:
         shell: bash
         run: unzip -l build/package/*.nupkg
 
-      # N 6.4 of NORM.md, the package holding the library, its generator, its build files, the
-      # notices naming every crate of the lock and the natives of every system staged above.
+      # N 6.4 and N 6.5 of NORM.md, the package holding the library, its generator, its build files
+      # and the natives of every system staged above, and the notices naming every crate of the lock.
       - name: Check what the package holds
         shell: bash
         run: |
           export BCS_PACKAGE="$(ls build/package/*.nupkg | head -1)"
-          dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4"
+          dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4|FullyQualifiedName~NormTests.N_6_5"
 
       - uses: actions/upload-artifact@v7
         with:

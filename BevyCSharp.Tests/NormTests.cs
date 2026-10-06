@@ -123,6 +123,41 @@ public sealed class NormTests
     }
 
     [Fact]
+    public void N_2_8()
+    {
+        // The list Annex B names, the rows of BUILDING.md's tables under its section of packages.
+        var building = File.ReadAllText(Full(".github/BUILDING.md"));
+        var start = building.IndexOf("\n## Packages\n", StringComparison.Ordinal);
+        Assert.True(start >= 0, "N 2.8: BUILDING.md has no section of packages, which Annex B names as the list");
+        var end = building.IndexOf("\n## ", start + 1, StringComparison.Ordinal);
+        var named = Regex.Matches(building[start..(end < 0 ? building.Length : end)], @"^\| `([^`]+)` \|", RegexOptions.Multiline)
+            .Select(match => match.Groups[1].Value)
+            .ToHashSet(StringComparer.Ordinal);
+
+        // What the package carries, the library and its generator, and the bridge's crates, those of
+        // a platform's own table among them.
+        var referenced = new[] { "BevyCSharp/BevyCSharp.csproj", "BevyCSharp.Generator/BevyCSharp.Generator.csproj" }
+            .SelectMany(project => Regex.Matches(File.ReadAllText(Full(project)), @"<PackageReference Include=""([^""]+)""").Select(match => match.Groups[1].Value))
+            .Concat(Crates("native/bevy_csharp/Cargo.toml"))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var found = referenced.Where(name => !named.Contains(name)).Select(name => $"{name} is referenced and not listed")
+            .Concat(named.Where(name => !referenced.Contains(name)).Select(name => $"{name} is listed and referenced nowhere"));
+        Hold("2.8", found, "a package the project files and BUILDING.md's list of packages disagree on");
+    }
+
+    /// <summary>The crates a manifest's tables of dependencies name, a platform's own among them.</summary>
+    private static IEnumerable<string> Crates(string manifest)
+    {
+        var inDependencies = false;
+        foreach (var line in File.ReadLines(Full(manifest)))
+        {
+            if (line.StartsWith('[')) inDependencies = line.TrimEnd().EndsWith("dependencies]", StringComparison.Ordinal);
+            else if (inDependencies && Regex.Match(line, @"^([A-Za-z0-9_-]+)\s*=") is { Success: true } crate) yield return crate.Groups[1].Value;
+        }
+    }
+
+    [Fact]
     public void N_3_3()
     {
         string[] clocks = ["Thread.Sleep", "Task.Delay", "Stopwatch", "DateTime.Now", "DateTime.UtcNow", "Environment.TickCount", "SpinWait"];
@@ -180,20 +215,7 @@ public sealed class NormTests
     [SkippableFact]
     public void N_6_4()
     {
-        // Whose work the package carries, every crate of the bridge's lock named with its version,
-        // held on the file the package is packed from, which needs no package to read.
-        var crates = LockedCrates();
-        NamesEvery(File.ReadAllText(Full("THIRD-PARTY-NOTICES.md")), crates, "THIRD-PARTY-NOTICES.md");
-
-        var package = Environment.GetEnvironmentVariable("BCS_PACKAGE");
-        if (string.IsNullOrEmpty(package))
-        {
-            var packed = Path.Combine(Root, "build", "package");
-            package = Directory.Exists(packed)
-                ? Directory.EnumerateFiles(packed, "BevyCSharp.*.nupkg").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
-                : null;
-        }
-
+        var package = Package();
         Skip.If(package is null, "N 6.4 has no package to open; BCS_PACKAGE names one, and the pack job sets it");
 
         using var zip = ZipFile.OpenRead(package!);
@@ -205,7 +227,6 @@ public sealed class NormTests
             "build/BevyCSharp.props",
             "build/BevyCSharp.targets",
             "README.md",
-            "THIRD-PARTY-NOTICES.md",
         };
 
         // The natives staged for the pack, a system a folder, each in its runtime's folder.
@@ -221,9 +242,37 @@ public sealed class NormTests
 
         var missing = wanted.Where(path => !held.Contains(path)).ToList();
         Assert.True(missing.Count == 0, $"N 6.4: {Path.GetFileName(package)} does not hold {string.Join(", ", missing)}");
+    }
 
-        using var notices = new StreamReader(zip.GetEntry("THIRD-PARTY-NOTICES.md")!.Open());
-        NamesEvery(notices.ReadToEnd(), crates, $"the THIRD-PARTY-NOTICES.md of {Path.GetFileName(package)}");
+    [Fact]
+    public void N_6_5()
+    {
+        // Whose work the package carries, every crate of the bridge's lock named with its version,
+        // held on the file the package is packed from, which needs no package to read, and then on
+        // the copy in the package where there is one.
+        var crates = LockedCrates();
+        NamesEvery(File.ReadAllText(Full("THIRD-PARTY-NOTICES.md")), crates, "THIRD-PARTY-NOTICES.md");
+
+        if (Package() is not { } package) return;
+        using var zip = ZipFile.OpenRead(package);
+        var notices = zip.GetEntry("THIRD-PARTY-NOTICES.md");
+        Assert.True(notices is not null, $"N 6.5: {Path.GetFileName(package)} carries no THIRD-PARTY-NOTICES.md at its root");
+        using var reader = new StreamReader(notices!.Open());
+        NamesEvery(reader.ReadToEnd(), crates, $"the THIRD-PARTY-NOTICES.md of {Path.GetFileName(package)}");
+    }
+
+    /// <summary>
+    /// The package to open, the one <c>BCS_PACKAGE</c> names or else the newest packed into
+    /// build/package, or none.
+    /// </summary>
+    private static string? Package()
+    {
+        var package = Environment.GetEnvironmentVariable("BCS_PACKAGE");
+        if (!string.IsNullOrEmpty(package)) return package;
+        var packed = Path.Combine(Root, "build", "package");
+        return Directory.Exists(packed)
+            ? Directory.EnumerateFiles(packed, "BevyCSharp.*.nupkg").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
+            : null;
     }
 
     /// <summary>Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.</summary>
@@ -239,7 +288,7 @@ public sealed class NormTests
         var unnamed = crates
             .Where(crate => crate.Split(' ') is var parts && !notices.Contains($"| {parts[0]} | {parts[1]} |", StringComparison.Ordinal))
             .ToList();
-        Assert.True(unnamed.Count == 0, $"N 6.4: {what} names no {string.Join(", ", unnamed)}, which build/third-party-notices.py writes in");
+        Assert.True(unnamed.Count == 0, $"N 6.5: {what} names no {string.Join(", ", unnamed)}, which build/third-party-notices.py writes in");
     }
 
     [SkippableFact]

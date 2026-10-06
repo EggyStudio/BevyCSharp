@@ -313,7 +313,7 @@ echo "==> staged $ARTIFACT_DIR/$RID/$LIBNAME"
 echo "==> staged $BUILD_DIR/target/release/$LIBNAME (for local runs)"
 
 if [[ "$TARGET" == *linux-gnu ]] && command -v objdump >/dev/null 2>&1; then
-    floor=$(objdump -T "$BUILT" | grep -oP 'GLIBC_\K[0-9]+\.[0-9]+' | sort -uV | tail -1)
+    floor=$(objdump -T "$BUILT" | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sed 's/^GLIBC_//' | sort -uV | tail -1)
     echo "==> needs glibc $floor or newer"
 
     # A machine that defaulted to the container path did so because what it builds otherwise does
