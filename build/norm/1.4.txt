@@ -80,7 +80,6 @@ BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
 BevyCSharp.Tests/PersistentTests.cs
 BevyCSharp.Tests/PhysicsComponentTests.cs
-BevyCSharp.Tests/PickRayTests.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
 BevyCSharp.Tests/ProjectSettingsTests.cs
