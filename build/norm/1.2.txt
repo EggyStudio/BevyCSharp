@@ -119,7 +119,6 @@ BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
 BevyCSharp/Cli/CliClient.cs CliAnswer
 BevyCSharp/Cli/CliJson.cs CliError
 BevyCSharp/Cli/CliSession.cs CliSessionFile
-BevyCSharp/Core/Config.cs GraphicsBackend
 BevyCSharp/Core/GameState.cs ComputedFromAttribute
 BevyCSharp/Core/GameState.cs InitialStateAttribute
 BevyCSharp/Core/GameState.cs StateRegistry
