@@ -14,7 +14,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // wrappers.
 internal static class Wireframe
 {
-
     private static readonly (float R, float G, float B, float A) White = (1f, 1f, 1f, 1f);
     private static readonly (float R, float G, float B, float A) DeepPink = Color.FromSrgb8(255, 20, 147);
     private static readonly (float R, float G, float B, float A) Lime = (0f, 1f, 0f, 1f);
@@ -26,7 +25,7 @@ internal static class Wireframe
     private static (float R, float G, float B, float A) _globalColor = White;
     private static (float R, float G, float B, float A) _toggleColor = Lime;
 
-    private static Entity _orange, _plane, _toggle, _purple, _text;
+    private static Entity _orange, _plane, _purple, _text;
 
     // Bevy's wireframe plugin, which Bevy's example adds.
     public static void Configure(Config config) => config.Wireframes = true;
@@ -42,7 +41,7 @@ internal static class Wireframe
             // The red cube has no wireframe, even under the global one.
             ecs.SpawnMesh(cube, Render.CreateMaterial(Red), Transform.At(-1.5f, 0.5f, -1.5f));
             _orange = ecs.SpawnMesh(cube, Render.CreateMaterial(Color.FromSrgb8(255, 165, 0)), Transform.At(-0.5f, 0.5f, -0.5f));
-            _toggle = ecs.SpawnMesh(cube, Render.CreateMaterial(Lime), Transform.At(0.5f, 0.5f, 0.5f));
+            ecs.Add(ecs.SpawnMesh(cube, Render.CreateMaterial(Lime), Transform.At(0.5f, 0.5f, 0.5f)), new ColorToggleCube());
             _purple = ecs.SpawnMesh(cube, Render.CreateMaterial(Color.FromSrgb8(128, 0, 128)), Transform.At(1.5f, 0.5f, 1.5f));
             _plane = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial((0f, 0f, 1f, 1f)), Transform.Identity);
 
@@ -84,11 +83,12 @@ internal static class Wireframe
     // the plane the global one in black, each drawn as the global topology says.
     private static void Apply(EcsWorld ecs)
     {
-        Render.SetWireframe(_toggle, true, _toggleColor);
+        var toggles = ecs.EntitiesWith<ColorToggleCube>();
+        foreach (var toggle in toggles) Render.SetWireframe(toggle, true, _toggleColor);
         Render.SetWireframe(_orange, _global, _globalColor);
         Render.SetWireframe(_plane, _global, (0f, 0f, 0f, 1f));
 
-        foreach (var entity in new[] { _toggle, _orange, _plane })
+        foreach (var entity in toggles.Append(_orange).Append(_plane))
         {
             ecs.Insert<WireframeTopologyRef>(entity).Value = _quads ? WireframeTopologyRef.ValueVariant.Quads : WireframeTopologyRef.ValueVariant.Triangles;
         }
@@ -101,3 +101,7 @@ internal static class Wireframe
         + $"B - Toggle topology (current: {(_quads ? "Quads" : "Triangles")})\n"
         + $"WireframeConfig\n-------------\nGlobal: {_global}\nColor: {(_globalColor == White ? "white" : "deep pink")}";
 }
+
+/// <summary>The green cube, whose wireframe has a color of its own that C changes.</summary>
+[Behavior]
+public partial struct ColorToggleCube;

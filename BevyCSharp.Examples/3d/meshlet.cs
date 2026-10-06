@@ -14,29 +14,14 @@ namespace BevyCSharp.Examples.ThreeD;
 // draws the floor alone, since a meshlet mesh is drawn by nothing else.
 internal static class Meshlet
 {
-    private static Entity _wiggler;
-
     // Room for the clusters Bevy's example asks for, which turns meshlets on.
     public static void Configure(Config config) => config.MeshletClusters = 1 << 14;
 
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "meshlet.Setup");
-
-        // Bevy's BunnyWiggler, one bunny moved back and forth along Z.
-        app.Update(ctx =>
-        {
-            if (_wiggler == Entity.None) return;
-            var at = ctx.Ecs.GetOrDefault<Transform>(_wiggler);
-            at.Translation += new Vec3(0f, 0f, MathF.Cos(ctx.Time.Elapsed * 10f) * 0.003f);
-            ctx.Ecs.Set(_wiggler, at);
-        }, "meshlet.BunnyWiggler");
-    }
+    public static void Build(App app) => app.Startup(Setup, "meshlet.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        _wiggler = Entity.None;
 
         if (ecs.Resource<DirectionalLightShadowMapRef>() is { } shadowMap) shadowMap.Size = 4096;
 
@@ -69,7 +54,7 @@ internal static class Meshlet
             var hex = Color.FromHex(colors[x + 2]);
             var front = Spawn(ecs, bunny, Render.CreateMaterial(new MaterialSettings { BaseColor = (hex.R, hex.G, hex.B, 1f), Roughness = (x + 2) / 4f }),
                 new Transform(new Vec3(x / 2f, 0f, -0.3f), Quat.Identity, new Vec3(0.2f)));
-            if (x == 1) _wiggler = front;
+            if (x == 1) ecs.Add(front, new BunnyWiggler());
 
             Spawn(ecs, bunny, clusters, new Transform(new Vec3(x / 2f, 0f, 0.3f), Quat.FromRotationY(MathF.PI), new Vec3(0.2f)));
         }
@@ -83,4 +68,14 @@ internal static class Meshlet
         Render.SetMaterial(ecs, entity, material);
         return entity;
     }
+}
+
+/// <summary>A bunny moved back and forth along Z, to show a meshlet mesh drawn where it moves.</summary>
+[Behavior]
+public partial struct BunnyWiggler
+{
+    /// <summary>Moved along Z by the cosine of ten times the time, three thousandths at most a frame.</summary>
+    [OnUpdate]
+    public void Wiggle(BehaviorContext ctx, ref Transform transform) =>
+        transform.Translation.Z += MathF.Cos(ctx.Time.Elapsed * 10f) * 0.003f;
 }

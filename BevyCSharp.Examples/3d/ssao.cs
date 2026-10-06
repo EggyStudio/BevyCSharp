@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.ThreeD;
 // A scene showcasing screen space ambient occlusion.
 internal static class Ssao
 {
-    private static Entity _camera, _sphere, _text;
+    private static Entity _camera, _text;
     private static AmbientOcclusionQuality? _quality;
     private static float _thickness;
     private static bool _temporal;
@@ -31,10 +31,11 @@ internal static class Ssao
             ecs.SpawnMesh(cube, gray, Transform.At(0f, -1f, 0f));
             ecs.SpawnMesh(cube, gray, Transform.At(1f, 0f, 0f));
 
-            _sphere = ecs.SpawnMesh(
+            var sphere = ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Sphere, 0.4f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(0.4f, 0.4f, 0.4f), Roughness = 1f, Reflectance = 0f }),
                 Transform.Identity);
+            ecs.Add(sphere, new SphereMarker());
 
             var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = true });
             ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
@@ -45,10 +46,6 @@ internal static class Ssao
         app.Update(ctx =>
         {
             var input = ctx.Input;
-            var sphere = ctx.Ecs.GetOrDefault<Transform>(_sphere);
-            sphere.Translation = sphere.Translation with { Y = MathF.Sin(ctx.Time.Elapsed / 1.7f) * 0.7f };
-            ctx.Ecs.Set(_sphere, sphere);
-
             var changed = true;
             if (input.KeyPressed(Key.Digit1)) _quality = null;
             else if (input.KeyPressed(Key.Digit2)) _quality = AmbientOcclusionQuality.Low;
@@ -87,4 +84,14 @@ internal static class Ssao
             + "Temporal Antialiasing:\n"
             + (_temporal ? "(Space) Enabled" : "(Space) Disabled");
     }
+}
+
+/// <summary>The sphere that bobs among the cubes, to show the occlusion change as it moves.</summary>
+[Behavior]
+public partial struct SphereMarker
+{
+    /// <summary>Raised and lowered by the sine of the time, as Bevy's <c>update</c> moves it.</summary>
+    [OnUpdate]
+    public void Bob(BehaviorContext ctx, ref Transform transform) =>
+        transform.Translation.Y = MathF.Sin(ctx.Time.Elapsed / 1.7f) * 0.7f;
 }

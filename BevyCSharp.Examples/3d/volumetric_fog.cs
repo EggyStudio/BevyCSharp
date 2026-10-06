@@ -14,14 +14,13 @@ internal static class VolumetricFog
 
     private static Entity _root, _sun, _point, _spot, _text;
     private static bool _volumetricPoint = true, _volumetricSpot = true;
-    private static float _pointSpeed = -0.2f;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_root, _sun, _volumetricPoint, _volumetricSpot, _pointSpeed) = (Entity.None, Entity.None, true, true, -0.2f);
+            (_root, _sun, _volumetricPoint, _volumetricSpot) = (Entity.None, Entity.None, true, true);
             Render.SetClearColor(Color.FromSrgb(0.02f, 0.02f, 0.02f));
             Render.SetAmbientLight((1f, 1f, 1f), 0f);
 
@@ -33,6 +32,7 @@ internal static class VolumetricFog
             _point = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 10_000f, Range = 150f, Color = (1f, 0f, 0f), Shadows = true });
             ecs.Add(_point, Transform.At(-0.4f, 1.9f, 1f));
             ecs.Insert<VolumetricLightRef>(_point);
+            ecs.Add(_point, new MoveBackAndForthHorizontally { MinX = -1.93f, MaxX = -0.4f, Speed = -0.2f });
 
             _spot = Render.SpawnLight(new LightSettings { Kind = LightKind.Spot, Intensity = 50_000f, Shadows = true, InnerAngle = 0.76f, OuterAngle = 0.94f });
             ecs.Add(_spot, Transform.LookingAt(new Vec3(-1.8f, 3.9f, -2.7f), Vec3.Zero, Vec3.UnitY));
@@ -73,13 +73,6 @@ internal static class VolumetricFog
                 }
             }
 
-            // The red light goes back and forth along X.
-            var point = ecs.GetOrDefault<Transform>(_point);
-            var x = point.Translation.X + _pointSpeed * ctx.Time.Delta;
-            if (x > -0.4f || x < -1.93f) (x, _pointSpeed) = (Math.Clamp(x, -1.93f, -0.4f), -_pointSpeed);
-            point.Translation = point.Translation with { X = x };
-            ecs.Set(_point, point);
-
             var changed = false;
             if (input.KeyPressed(Key.P)) { _volumetricPoint = !_volumetricPoint; Toggle(ecs, _point, _volumetricPoint); changed = true; }
             if (input.KeyPressed(Key.L)) { _volumetricSpot = !_volumetricSpot; Toggle(ecs, _spot, _volumetricSpot); changed = true; }
@@ -105,4 +98,27 @@ internal static class VolumetricFog
         "Press WASD or the arrow keys to change the direction of the directional light\n"
         + (_volumetricPoint ? "Press P to turn volumetric point light off\n" : "Press P to turn volumetric point light on\n")
         + (_volumetricSpot ? "Press L to turn volumetric spot light off" : "Press L to turn volumetric spot light on");
+}
+
+/// <summary>A thing that goes back and forth along X between two places, the red light here.</summary>
+[Behavior]
+public partial struct MoveBackAndForthHorizontally
+{
+    /// <summary>The leftmost it goes.</summary>
+    public float MinX;
+
+    /// <summary>The rightmost it goes.</summary>
+    public float MaxX;
+
+    /// <summary>How fast it goes, its sign the way.</summary>
+    public float Speed;
+
+    /// <summary>Moved by its speed, and turned back at either end.</summary>
+    [OnUpdate]
+    public void MovePointLight(BehaviorContext ctx, ref Transform transform)
+    {
+        var x = transform.Translation.X + Speed * ctx.Time.Delta;
+        if (x > MaxX || x < MinX) (x, Speed) = (Math.Clamp(x, MinX, MaxX), -Speed);
+        transform.Translation.X = x;
+    }
 }

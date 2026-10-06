@@ -37,7 +37,7 @@ internal static class Pccm
                 Reflectance = 1f,
                 Roughness = 0f,
             });
-            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 10f, 2f, 4f), slab, Transform.At(0f, -4f, -2.5f));
+            ecs.Add(ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 10f, 2f, 4f), slab, Transform.At(0f, -4f, -2.5f)), new InnerCube());
 
             // The probe's box is its transform, the room's size, and the maps were captured in it.
             _probe = ecs.Spawn();
@@ -70,3 +70,7 @@ internal static class Pccm
         }, "pccm.HandlePccmEnableChange");
     }
 }
+
+/// <summary>The mirrored slab inside the room, which the probe's reflections are seen in.</summary>
+[Behavior]
+public partial struct InnerCube;

@@ -296,3 +296,12 @@ shadow's buttons acting by their `SettingsButton`. A `TransformButton` stands in
 now light under the pointer as Bevy's do. A value that is no component's field here, a gradient's
 stops and a `Val`, is kept beside its node or as the two values its buttons hold, and
 vertical_slider's class is `VerticalSliderExample` beside Bevy's `VerticalSlider` marker.
+
+B 4 for 3D Rendering, the first of its parts, 98 of 119. Nine of its examples carry Bevy's marker
+or component where Bevy's does, with the work Bevy does over it as its method where it is about
+that entity, among them the ground under the cursor, the custom mesh's UVs and its turning, the
+meshlet bunny that wiggles, the environment map's label that goes once the maps load, the pccm's
+slab, the rect light's roughness text, the occlusion's bobbing sphere, the fog's red light going
+back and forth between its two places at its speed, and the wireframe's green cube. meshlet's
+capture here draws the floor alone, this bridge built without `--meshlet`, as the example says it
+does.

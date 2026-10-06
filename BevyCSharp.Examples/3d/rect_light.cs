@@ -14,7 +14,6 @@ internal static class RectLight
     private static readonly List<Entity> Lights = [];
     private static MaterialSettings _floor = null!;
     private static AssetHandle _floorMaterial;
-    private static Entity _text;
     private static bool _gizmos = true;
 
     public static void Build(App app)
@@ -37,7 +36,7 @@ internal static class RectLight
             ecs.Add(camera, new FreeCamera());
 
             var gray = Color.FromSrgb(0.9f, 0.9f, 0.9f);
-            _text = Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f), Color = (gray.R, gray.G, gray.B, 1f) }, 18f);
+            ecs.Add(Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f), Color = (gray.R, gray.G, gray.B, 1f) }, 18f), new RoughnessDisplay());
         });
 
         app.Update(ctx =>
@@ -57,7 +56,7 @@ internal static class RectLight
 
             _floor.Roughness = Math.Clamp(_floor.Roughness + delta, 0f, 1f);
             Render.WriteMaterial(_floorMaterial, _floor);
-            Ui.SetText(_text, Text());
+            foreach (var display in ctx.Ecs.EntitiesWith<RoughnessDisplay>()) Ui.SetText(display, Text());
         }, "rect_light.Controls");
     }
 
@@ -74,3 +73,7 @@ internal static class RectLight
     private static string Text() =>
         FormattableString.Invariant($"Controls\nArrow Up/Down: Adjust floor roughness\nG: Toggle light gizmos\n\nRoughness: {_floor.Roughness:0.00}");
 }
+
+/// <summary>The text that says the floor's roughness.</summary>
+[Behavior]
+public partial struct RoughnessDisplay;

@@ -12,46 +12,26 @@ namespace BevyCSharp.Examples.ThreeD;
 // coordinates moved and puts it on the entity in place of the old one.
 internal static class GenerateCustomMesh
 {
-    private static Entity _cube;
-    private static MeshData _mesh = null!;
+    // The mesh's data, kept to be changed and built again, as Bevy changes its mesh asset in place.
+    internal static MeshData Mesh = null!;
 
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
-        {
-            _mesh = CreateCubeMesh();
-            _cube = ctx.Ecs.SpawnMesh(
-                Render.CreateMesh(_mesh),
-                Render.CreateMaterial(new MaterialSettings { BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/array_texture.png") }),
-                Transform.Identity);
+        Mesh = CreateCubeMesh();
+        var cube = ctx.Ecs.SpawnMesh(
+            Render.CreateMesh(Mesh),
+            Render.CreateMaterial(new MaterialSettings { BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/array_texture.png") }),
+            Transform.Identity);
+        ctx.Ecs.Add(cube, new CustomUV());
 
-            var view = Transform.LookingAt(new Vec3(1.8f, 1.8f, 1.8f), Vec3.Zero, Vec3.UnitY);
-            ctx.Ecs.SpawnCamera3d(view);
-            ctx.Ecs.Set(ctx.Ecs.SpawnPointLight(new Vec3(1.8f, 1.8f, 1.8f)), view);
+        var view = Transform.LookingAt(new Vec3(1.8f, 1.8f, 1.8f), Vec3.Zero, Vec3.UnitY);
+        ctx.Ecs.SpawnCamera3d(view);
+        ctx.Ecs.Set(ctx.Ecs.SpawnPointLight(new Vec3(1.8f, 1.8f, 1.8f)), view);
 
-            Ui.SpawnText(
-                "Controls:\nSpace: Change UVs\nX/Y/Z: Rotate\nR: Reset orientation",
-                new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
-        });
-
-        app.Update(ctx =>
-        {
-            var input = ctx.Input;
-            if (input.KeyPressed(Key.Space))
-            {
-                ToggleTexture(_mesh);
-                Render.SetMesh(ctx.Ecs, _cube, Render.CreateMesh(_mesh));
-            }
-
-            var transform = ctx.Ecs.GetOrDefault<Transform>(_cube);
-            var turn = ctx.Time.Delta / 1.2f;
-            if (input.KeyDown(Key.X)) transform.Rotation = Quat.FromRotationX(turn) * transform.Rotation;
-            if (input.KeyDown(Key.Y)) transform.Rotation = Quat.FromRotationY(turn) * transform.Rotation;
-            if (input.KeyDown(Key.Z)) transform.Rotation = Quat.FromRotationZ(turn) * transform.Rotation;
-            if (input.KeyDown(Key.R)) transform.Rotation = Quat.Identity;
-            ctx.Ecs.Set(_cube, transform);
-        }, "generate_custom_mesh.InputHandler");
-    }
+        Ui.SpawnText(
+            "Controls:\nSpace: Change UVs\nX/Y/Z: Rotate\nR: Reset orientation",
+            new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+    }, "generate_custom_mesh.Setup");
 
     // Four vertices to a face, each with its own normal and its own place on the texture.
     private static MeshData CreateCubeMesh() => new()
@@ -92,9 +72,35 @@ internal static class GenerateCustomMesh
     };
 
     // Each coordinate's V moved half the texture down, or back up where that would leave it.
-    private static void ToggleTexture(MeshData mesh)
+    internal static void ToggleTexture(MeshData mesh)
     {
         for (var i = 1; i < mesh.Uvs!.Length; i += 2)
             mesh.Uvs[i] = mesh.Uvs[i] + 0.5f < 1f ? mesh.Uvs[i] + 0.5f : mesh.Uvs[i] - 0.5f;
+    }
+}
+
+/// <summary>The cube whose texture coordinates are made here and moved by Space.</summary>
+[Behavior]
+public partial struct CustomUV
+{
+    /// <summary>
+    /// Space moves the texture coordinates and builds the cube again, the held X, Y and Z keys turn
+    /// it about the world's axes, and R faces it forward again.
+    /// </summary>
+    [OnUpdate]
+    public void InputHandler(BehaviorContext ctx, ref Transform transform)
+    {
+        var input = ctx.Input;
+        if (input.KeyPressed(Key.Space))
+        {
+            GenerateCustomMesh.ToggleTexture(GenerateCustomMesh.Mesh);
+            Render.SetMesh(ctx.Ecs, ctx.Entity, Render.CreateMesh(GenerateCustomMesh.Mesh));
+        }
+
+        var turn = ctx.Time.Delta / 1.2f;
+        if (input.KeyDown(Key.X)) transform.Rotation = Quat.FromRotationX(turn) * transform.Rotation;
+        if (input.KeyDown(Key.Y)) transform.Rotation = Quat.FromRotationY(turn) * transform.Rotation;
+        if (input.KeyDown(Key.Z)) transform.Rotation = Quat.FromRotationZ(turn) * transform.Rotation;
+        if (input.KeyDown(Key.R)) transform.Rotation = Quat.Identity;
     }
 }
