@@ -162,8 +162,6 @@ BevyCSharp/Input/Gamepad.cs GamepadAxis
 BevyCSharp/Input/Gamepad.cs GamepadButton
 BevyCSharp/Input/Gamepad.cs GamepadConnected
 BevyCSharp/Input/Gamepad.cs GamepadDisconnected
-BevyCSharp/Input/Input.cs Touch
-BevyCSharp/Input/Input.cs TouchPhase
 BevyCSharp/Input/Key.cs KeyModifier
 BevyCSharp/Input/Key.cs KeyTable
 BevyCSharp/Input/Key.cs MouseButton

@@ -340,23 +340,3 @@ public sealed class Input
         }
     }
 }
-
-/// <summary>Where a touch is in its life.</summary>
-public enum TouchPhase
-{
-    /// <summary>Still down, and not new this frame.</summary>
-    Held = 0,
-
-    /// <summary>Went down this frame.</summary>
-    Started = 1,
-
-    /// <summary>Came up this frame. Reported once, then gone.</summary>
-    Ended = 2,
-}
-
-/// <summary>One finger on a touchscreen.</summary>
-/// <param name="Id">Identifies this finger while it stays down.</param>
-/// <param name="X">Position in physical window pixels.</param>
-/// <param name="Y">Position in physical window pixels.</param>
-/// <param name="Phase">Where the touch is in its life.</param>
-public readonly record struct Touch(ulong Id, float X, float Y, TouchPhase Phase);
