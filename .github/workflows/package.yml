@@ -223,12 +223,12 @@ jobs:
     # Each step through build/step.py, which gives one that fails having said nothing an error
     # naming the step, the command that failed with its exit code, its last lines and the last
     # lines at a warning or worse of the game's logs (NORM.md, N 6.7). The play of 421d4e1 ended
-    # this job with an exit code alone, what stopped the game being in its log.
+    # this job with an exit code alone, what stopped the game being in its log. The plays name
+    # their logs' folder in their own env, since a job's env cannot read the runner's context and
+    # GitHub refuses a workflow whose job's env does.
     defaults:
       run:
         shell: python3 build/step.py {0}
-    env:
-      BCS_STEP_LOGS: ${{ runner.temp }}/courtyard:${{ runner.temp }}/courtyard-native
 
     steps:
       - uses: actions/checkout@v5
@@ -263,6 +263,7 @@ jobs:
       - name: Play Courtyard
         env:
           SHOTS: ${{ runner.temp }}/courtyard
+          BCS_STEP_LOGS: ${{ runner.temp }}/courtyard
         run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
 
       # The same game published as native code from the package, as a player gets it, which keeps
@@ -274,6 +275,7 @@ jobs:
       - name: Publish Courtyard native and play it
         env:
           SHOTS: ${{ runner.temp }}/courtyard-native
+          BCS_STEP_LOGS: ${{ runner.temp }}/courtyard-native
         run: mkdir -p "$SHOTS" && build/play-native.sh 0.0.0-ci
 
       # What each step looked like and the game's own log, which say where a failed run went wrong.

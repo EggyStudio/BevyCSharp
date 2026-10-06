@@ -9,6 +9,7 @@ BevyCSharp.Tests/AssetPackTests.cs
 BevyCSharp.Tests/AudioTests.cs
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
+BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
 BevyCSharp.Tests/CaptureTests.cs
 BevyCSharp.Tests/ChangingTypeTests.cs
 BevyCSharp.Tests/CharacterControllerTests.cs

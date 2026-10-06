@@ -221,3 +221,13 @@ by the swept box drawn as missed, so they run as one in Bevy's order. `BoundingT
 distances for a ray against a box and a circle, two sweeps meeting at their edges, overlaps at a
 touch, each shape's bounds turned a quarter and moved, and both of a triangle's circles. The suite
 passed, 1,109 with 9 skipped. Verdict 4 is next, then the cubic curves.
+
+**Verdict 4, the workflows GitHub refused.** The game job's `env` read `runner.temp`, which GitHub
+gives to steps alone. The two plays now name their logs' folder in their own `env` beside `SHOTS`,
+and the job sets none. `WorkflowTests` walks each workflow by its indentation, a block scalar's lines
+taken as its key's, and holds every `${{ }}` and every `if` to the contexts GitHub's table of
+availability gives its place, a place the table here lacks failing as such so it is looked up. Run
+over `aa55e0d`'s `package.yml` it names line 231 reading `runner` in `jobs.game.env`, and over the
+mended files it passes, with the refused forms and the allowed ones held by a theory of small
+workflows. It is listed under N 1.4 beside the other tests of the build, as no area of the library.
+The cubic curves are next.
