@@ -300,3 +300,10 @@ windowless app, so the program here runs no system of its own for it and logs as
 `fps`, `frame_time` and `frame_count` once a second. transform_hierarchy opens no window, as Bevy's
 does not. The config grew two fields, so the number B 1 reads is 203, a second break for the owner
 beside 202.
+
+EXAMPLES.md counts B 4, by a sentence and a column of the group table that
+`build/examples-table.py` writes. An example of Bevy's keeps state on an entity where it declares
+a component of its own, and the program here keeps it in a behavior where it declares one, which
+the count reads and a reviewer reads further: 19 of the 119 written today, the stress tests and
+seven of 3D Rendering's among them. The groups are brought over from the next batch on, the
+smallest first, the count moving with each.

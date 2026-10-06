@@ -118,7 +118,22 @@ def written_examples():
     return written
 
 
-def build(version, examples, order, triage, written):
+def keeps_components(source, example):
+    """Whether Bevy's example keeps state on an entity, in a component of its own."""
+    path = os.path.join(source, example["path"]) if example["path"] else ""
+    if not path or not os.path.exists(path):
+        return False
+    with open(path, encoding="utf-8") as rust:
+        return re.search(r"#\[derive\([^)]*\bComponent\b", rust.read()) is not None
+
+
+def on_behaviors(path):
+    """Whether a written example keeps what is on its entities in a behavior."""
+    with open(os.path.join(ROOT, path), encoding="utf-8") as program:
+        return "[Behavior]" in program.read()
+
+
+def build(version, examples, order, triage, written, source):
     unknown = sorted(set(triage) - {example["name"] for example in examples})
     if unknown:
         sys.exit("triage.tsv names examples Bevy does not have: " + ", ".join(unknown))
@@ -142,6 +157,17 @@ def build(version, examples, order, triage, written):
 
     def counts(rows):
         return {state: sum(1 for row in rows if row["state"] == state) for state in ORDER}
+
+    # B 4 of NORM.md, an example keeping on an entity what Bevy's example keeps on one, in a
+    # behavior. Bevy's keeps state on an entity where it declares a component of its own, and the
+    # program here does where it declares a behavior, which a reviewer reads further.
+    for example in examples:
+        example["components"] = example["state"] in ("written", "part") and keeps_components(source, example)
+        example["behaviors"] = example["components"] and on_behaviors(written[example["name"]])
+
+    def kept(rows):
+        rows = list(rows)
+        return sum(1 for row in rows if row["behaviors"]), sum(1 for row in rows if row["components"])
 
     total = counts(examples)
     listed = [example for example in examples if example["group"] != HIDDEN]
@@ -171,13 +197,22 @@ def build(version, examples, order, triage, written):
         f"{total['written'] + total['part'] + total['can']} can be written with what is bridged, "
         f"{total['part']} of them leaving something out.")
     out.append("")
-    out.append("| Group | Written | Written in part | Can be written | Missing | Does not apply |")
-    out.append("|---|---:|---:|---:|---:|---:|")
+    on, of = kept(examples)
+    out.append(
+        f"**{on} of the {of} written whose Bevy example keeps state on an entity, in a component of "
+        "its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest "
+        "keeping it in static fields until their group is brought over. The last column counts them "
+        "by group.")
+    out.append("")
+    out.append("| Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |")
+    out.append("|---|---:|---:|---:|---:|---:|---:|")
     for group in groups:
         c = counts([example for example in examples if example["group"] == group])
         anchor = re.sub(r"[^a-z0-9 -]", "", group.lower()).replace(" ", "-")
-        out.append(f"| [{group}](#{anchor}) | {c['written']} | {c['part']} | {c['can']} | {c['missing']} | {c['n/a']} |")
-    out.append(f"| **All** | **{total['written']}** | **{total['part']}** | **{total['can']}** | **{total['missing']}** | **{total['n/a']}** |")
+        group_on, group_of = kept(example for example in examples if example["group"] == group)
+        behaviors = f"{group_on} of {group_of}" if group_of else ""
+        out.append(f"| [{group}](#{anchor}) | {c['written']} | {c['part']} | {c['can']} | {c['missing']} | {c['n/a']} | {behaviors} |")
+    out.append(f"| **All** | **{total['written']}** | **{total['part']}** | **{total['can']}** | **{total['missing']}** | **{total['n/a']}** | **{on} of {of}** |")
     out.append("")
     out.append(
         "A row's example links to Bevy's source, at the release the bridge builds. A written "
@@ -262,7 +297,7 @@ def main():
     version = bevy_version()
     source = bevy_source(version)
     examples = read_examples(source)
-    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples())
+    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples(), source)
 
     with open(README, encoding="utf-8") as readme:
         text = readme.read()
