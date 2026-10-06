@@ -387,6 +387,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_animate(ulong entity, ulong high, ulong low, ulong player);
 
+    /// <summary>Has the clips' events call back into C#, through the handle given.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_observe_clip_events(IntPtr app, delegate* unmanaged[Cdecl]<uint, ulong, IntPtr, void> callback, IntPtr user);
+
+    /// <summary>Sets how long a clip lasts.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clip_set_duration(int clip, float seconds);
+
+    /// <summary>Places an event on a clip, at its player or at a target.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clip_add_event(int clip, float time, uint number, int targeted, ulong high, ulong low);
+
     /// <summary>Changes how many times the playing clip plays.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -10,18 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a80d289`. The console server closes the connections still open as it stops and joins
-their threads, so a closed app leaves none alive, held by a test with a caller connected
-(`b67fb85`), and the page's repeated lines count what is logged at warning or error or with no
-level, leaving the section out when nothing repeats (`a80d289`), which settles items 14 and 15. The
-owner chose on 2026-10-06 that the next package is 0.4, Decision 8. A key reaching the focused
-entity is observed as Bevy's `FocusedInput<KeyboardInput>`, taken up the parents as the pointer's
-events are (ABI 211), an offscreen run's fields take keys from the bridge's own dispatch, the focus
-is given and moved from C# through Bevy's `InputFocus`, and `multiline_text_input` and
-`multiple_text_inputs` are written, 255, a field set again having been inserted over itself and
-drawing nothing, mended on the way (`f46edec`); the server tests moved to `Cli` by a move alone,
-N 1.4's list at 90 to mend (`15974f1`). The owner pushed, and the run of `15974f1` is under way. No
-verdict is open.
+Reviewed up to `df97905`. Text is drawn with a line under or through it, Bevy's `Underline` and
+`Strikethrough` reflecting but not as components, and a font's OpenType features and variable axes
+are set as tagged values (ABI 212), so eight of Bevy's text examples are written or made whole, 263,
+the three that need Bevy's system font discovery and `font_atlas_debug` left and said so
+(`f0be6da`); the animation settings, state and finished message moved into files of their names,
+N 1.2's list at 276 (`df97905`). The reply on animation built in code, clips from curves played from
+a graph (ABI 213), is written, its commit to come. The run of `f0be6da` was cancelled by the push of
+`df97905`, whose run is under way. No verdict is open.
+
+Before them, the console server came to close the connections still open as it stops and joins their
+threads, so a closed app leaves none alive, held by a test with a caller connected (`b67fb85`), and
+the page's repeated lines count what is logged at warning or error or with no level, leaving the
+section out when nothing repeats (`a80d289`), which settles items 14 and 15. The owner chose on
+2026-10-06 that the next package is 0.4, Decision 8. A key reaching the focused entity is observed
+as Bevy's `FocusedInput<KeyboardInput>`, taken up the parents as the pointer's events are (ABI 211),
+an offscreen run's fields take keys from the bridge's own dispatch, the focus is given and moved
+from C# through Bevy's `InputFocus`, and `multiline_text_input` and `multiple_text_inputs` are
+written, 255, a field set again having been inserted over itself and drawing nothing, mended on the
+way (`f46edec`); the server tests moved to `Cli` by a move alone, N 1.4's list at 90 to mend
+(`15974f1`). The owner pushed, and the run of `15974f1` is under way. No verdict is open.
 
 Before them, a game came to read a key by what it types or by its name as well as by where it is,
 Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended key
@@ -30,15 +38,6 @@ Backspace, Enter or arrow, and released as it was pressed, where one that typed 
 down for good; `keyboard_input` is written, 253 (`b23e532`). Two commits of moves alone put the
 editable text tests in `Assets` and split the bridge's `ui.rs` into its parts, N 1.3's list at 18
 with 11 in the bridge and N 1.4's at 91 to mend (`915514e`, `194a3b7`).
-
-Before them, what Bevy's widgets report came to reach C# as their own `Activate`, `ValueChange<T>`
-and `MenuEvent`, the last taken up the parents (ABI 209), and `standard_widgets` is written on them,
-251 (`2597c12`); a game observes Bevy's own components coming and going through their wrappers, as
-`ecs.Observe<Add<PressedRef>>` for Bevy's `On<Add, Pressed>`, with no change to the bridge, the
-lifecycle events constrained to `struct` while every call reading a component's bytes keeps
-`unmanaged`, and `standard_widgets_observers` is written, 252, which ends the widgets' rows
-(`569ea59`); the observer tests moved to `Ecs` by a move alone, N 1.4's list at 92 to mend
-(`47a2497`). Item 14 came from 3DEngine's Verdict 24.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -177,20 +176,6 @@ None open.
 
 ## Replies
 
-**Now 3, fonts and text styling.** Bevy's `Underline` and `Strikethrough` reflect but not as
-components, so `Ui.SetUnderline` and `Ui.SetStrikethrough` put them on a run, and
-`Ui.SetFontFeatures` and `Ui.SetFontVariations` set a run's OpenType features and a variable font's
-axes as four-letter tags and values, which the `TextFont` wrapper does not type (ABI 212). The rows'
-reasons predated `TextFont`'s weight, width and style being wrapped, and read again, eight are
-written, 263. `text`, `strikethrough_and_underline`, `text_background_colors`, `font_weights`,
-`font_variations` and `font_query` are new, and `text2d` and `letter_spacing` are whole, each driven
-offscreen and seen to draw as Bevy's does. `font_query`'s oblique and italic draw upright, its
-variable font having no slant, though Bevy holds each style as asked. Left in that group are the
-three that need Bevy's system font discovery, which the bridge does not compile in, and
-`font_atlas_debug`'s atlases, and TODO.md says so. `UiTests` holds the lines drawn and taken off by
-the light pixels they add, and the features and axes reaching the run's `TextFont` through Bevy's
-reflection, replacing what it had.
-
 **Now 3, animation built in code, clips.** A clip is made in code, as Bevy's examples make one
 (`clips.rs`, ABI 213). An `AnimationCurve` is values sampled at times or two values eased between
 by Bevy's own easing, played back and forth where asked, for a transform's translation, rotation or
@@ -203,3 +188,15 @@ does. `AnimationClipTests` holds the curve's layout, a clip moving an entity hal
 and holding its last value after, and an eased curve going there and back. `Animation.cs` held three
 other public types, which moved to files of their own first (`df97905`), N 1.2 at 276. Events on a
 clip, blend graphs with masks and a skinned mesh built in code are this gap's next batches.
+
+**Now 3, animation built in code, events.** An event a game declares, implementing
+`IAnimationEvent` as a Rust type derives Bevy's `AnimationEvent`, is placed on a clip at a time with
+`Animation.AddEvent`, at its player or at the entity a target names (ABI 214). The clip holds a
+number through Bevy's `add_event_fn`, and reaching it queues a call into C#, which triggers the
+event as it was given at that entity. The first observer of such an event installs the call. A
+model's clip loads by its label with `Animation.LoadClip`, and `AddEvent` answers false until it
+has arrived. `animation_events` and `animated_mesh_events` are written, 268. The first sets its
+message from a clip with nothing but a length, and the fox throws up dust where each foot lands,
+each seen offscreen. `AnimationClipTests` holds an event at the player and one at a target heard
+once each, in their times' order. The blend graphs with their masks and a skinned mesh built joint
+by joint are this gap's last.

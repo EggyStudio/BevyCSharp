@@ -124,10 +124,12 @@ internal static class Catalog
 
         // Animation
         new("animated_mesh", AnimatedMesh.Build),
+        new("animated_mesh_events", AnimatedMeshEvents.Build),
         new("animated_mesh_control", AnimatedMeshControl.Build),
         new("color_animation", ColorAnimation.Build),
         new("animated_transform", AnimatedTransform.Build),
         new("animated_ui", AnimatedUi.Build),
+        new("animation_events", AnimationEvents.Build),
         new("eased_motion", EasedMotion.Build),
         new("easing_functions", EasingFunctions.Build),
         new("morph_targets", MorphTargets.Build),

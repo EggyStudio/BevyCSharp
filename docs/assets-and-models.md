@@ -185,6 +185,18 @@ Animation.Animate(doorEntity, door, player: doorEntity);
 A clip made once moves every set of entities named the same way, as a model's clip moves every
 copy of the model.
 
+An event a game declares, implementing `IAnimationEvent`, is placed on a clip at a time, made in
+code or one of a model's loaded by its label with `Animation.LoadClip`, and is heard as the clip
+reaches it, at the player or at the entity a target names:
+
+```csharp
+record struct Step : IAnimationEvent;
+
+var run = Animation.LoadClip("models/animated/Fox.glb#Animation2");
+Animation.AddEvent(run, leftFoot, 0.625f, new Step());    // false until the clip has arrived
+ctx.Ecs.Observe<Step>(on => Dust(on.Ecs, on.Entity));
+```
+
 A file's own materials load too, in a windowed run:
 
 ```csharp

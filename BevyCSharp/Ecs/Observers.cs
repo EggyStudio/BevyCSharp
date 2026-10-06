@@ -40,6 +40,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly HashSet<int> _watchedPointers = [];
     private readonly HashSet<int> _watchedWidgets = [];
     private bool _watchedFocusedKeys;
+    private bool _watchedClipEvents;
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
     private GCHandle _self;
 
@@ -55,8 +56,9 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         ArgumentNullException.ThrowIfNull(handler);
 
         // A change to a component, or what a pointer did, is Bevy's to report, so watching one
-        // starts the report.
+        // starts the report, as watching an event placed on a clip starts the clips' reports.
         if (default(TEvent) is IReportedEvent reported) reported.Watch(this);
+        if (default(TEvent) is IAnimationEvent) WatchClipEvents();
 
         var list = entity is { } at
             ? GetOrAdd(_onEntity, (typeof(TEvent), at))
@@ -89,6 +91,45 @@ internal sealed unsafe class ObserverRegistry : IDisposable
             var parent = ecs.ParentOf(at);
             if (parent == Entity.None) return;
             at = parent;
+        }
+    }
+
+    /// <summary>Runs the observers of an event at an entity it happened at, without taking it further.</summary>
+    /// <remarks>
+    /// For an event that is no <see cref="IEntityEvent"/> and still happens somewhere, as an event
+    /// placed on a clip happens at its player or target, Bevy's <c>AnimationEventTrigger</c>.
+    /// </remarks>
+    internal void TriggerAt<TEvent>(TEvent value, Entity at)
+    {
+        var on = new On<TEvent>(_world, value, at);
+        Run(_global, typeof(TEvent), on);
+        if (at != Entity.None) Run(_onEntity, (typeof(TEvent), at), on);
+    }
+
+    /// <summary>Asks the bridge to report the events this app's clips reach, once.</summary>
+    /// <remarks>A bridge without the renderer has no animation, answers so, and reports nothing.</remarks>
+    internal void WatchClipEvents()
+    {
+        if (_watchedClipEvents) return;
+        _watchedClipEvents = true;
+
+        var status = Native.bcs_observe_clip_events(ComponentRegistry.AppHandle, &ClipEventReported, GCHandle.ToIntPtr(_self));
+        if (status != NativeStatus.Unsupported) Native.Check(status, "observing the events placed on clips");
+    }
+
+    /// <summary>Where the bridge reports a clip reaching an event placed on it, with the world on loan.</summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static void ClipEventReported(uint number, ulong entity, IntPtr user)
+    {
+        try
+        {
+            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry) return;
+            ClipEvents.Fire(registry, number, new Entity(entity));
+        }
+        catch (Exception ex)
+        {
+            // An exception crossing back into Rust is undefined, so it ends here, said.
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
         }
     }
 

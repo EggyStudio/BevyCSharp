@@ -94,6 +94,51 @@ public sealed class AnimationClipTests
         Assert.Equal(0f, easedHome!.Value, 2);
     }
 
+    /// <summary>An event placed on a clip, one a game declares.</summary>
+    private readonly record struct Ping(int Number) : IAnimationEvent;
+
+    /// <summary>
+    /// Events placed on a clip with nothing but a length are heard as the clip reaches them, one at
+    /// the player and one at the entity a target names, in the order of their times.
+    /// </summary>
+    [SkippableFact]
+    public void EventsPlacedOnAClipAreHeardWhereAndWhenTheyArePlaced()
+    {
+        Needs.Renderer();
+
+        var (player, child) = (Entity.None, Entity.None);
+        var heard = new List<(int Number, Entity At)>();
+
+        var config = Config.OffscreenFor(64, 64, frames: 20);
+        config.FrameSeconds = 0.1;
+        using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            ecs.Observe<Ping>(on => heard.Add((on.Event.Number, on.Entity)));
+
+            var clip = Animation.CreateClip();
+            Animation.SetClipDuration(clip, 1f);
+            var target = AnimationTarget.FromNames("child");
+            Assert.True(Animation.AddEvent(clip, 0.5f, new Ping(1)));
+            Assert.True(Animation.AddEvent(clip, target, 0.25f, new Ping(2)));
+            var (graph, node) = Animation.GraphFromClip(clip);
+
+            player = ecs.Spawn();
+            child = ecs.Spawn();
+            ecs.SetParent(child, player);
+            Animation.PlayGraph(player, graph, node);
+            Animation.Animate(child, target, player);
+        }, "Test.Setup"));
+
+        Assert.Equal(0, app.Run());
+
+        // Once each, the clip playing once, the target's first.
+        Assert.Equal([(2, child), (1, player)], heard);
+    }
+
     /// <summary>A curve whose times do not rise, or whose times and values differ in number, is refused before it reaches Bevy.</summary>
     [Fact]
     public void ACurveWithTimesOutOfOrderOrOfAnotherCountIsRefused()

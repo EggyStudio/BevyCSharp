@@ -4,15 +4,15 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**266 written, 15 written in part, 0 can be written, 82 missing and 58 do not apply.** Of the 363 that apply, 281 can be written with what is bridged, 15 of them leaving something out.
+**268 written, 15 written in part, 0 can be written, 80 missing and 58 do not apply.** Of the 363 that apply, 283 can be written with what is bridged, 15 of them leaving something out.
 
-**128 of the 132 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**129 of the 134 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 22 | 0 | 0 | 6 | 1 | 8 of 8 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
-| [Animation](#animation) | 7 | 1 | 0 | 5 | 0 | 4 of 4 |
+| [Animation](#animation) | 9 | 1 | 0 | 3 | 0 | 5 of 6 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **266** | **15** | **0** | **82** | **58** | **128 of 132** |
+| **All** | **268** | **15** | **0** | **80** | **58** | **129 of 134** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -160,10 +160,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`animated_mesh`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh.rs) | Plays an animation on a skinned glTF model of a fox | [written](../BevyCSharp.Examples/animation/animated_mesh.cs) |
 | [`animated_mesh_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_control.rs) | Plays an animation from a skinned glTF with keyboard controls | [written](../BevyCSharp.Examples/animation/animated_mesh_control.cs) |
-| [`animated_mesh_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_events.rs) | Plays an animation from a skinned glTF with events | missing, events placed on an animation clip |
+| [`animated_mesh_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_mesh_events.rs) | Plays an animation from a skinned glTF with events | [written](../BevyCSharp.Examples/animation/animated_mesh_events.cs), the puffs' directions and sizes drawn from .NET's seeded Random, where Bevy's draws from a seeded ChaCha8 |
 | [`animated_transform`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_transform.rs) | Create and play an animation defined by code that operates on the `Transform` component | [written](../BevyCSharp.Examples/animation/animated_transform.cs) |
 | [`animated_ui`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animated_ui.rs) | Shows how to use animation clips to animate UI properties | [written](../BevyCSharp.Examples/animation/animated_ui.cs), the text's color animated through a property the bridge declares, as Bevy's example declares its own |
-| [`animation_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_events.rs) | Demonstrate how to use animation events | missing, events placed on an animation clip |
+| [`animation_events`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_events.rs) | Demonstrate how to use animation events | [written](../BevyCSharp.Examples/animation/animation_events.cs) |
 | [`animation_graph`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_graph.rs) | Blends multiple animations together with a graph | missing, animation graphs that blend clips by weight |
 | [`animation_masks`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/animation_masks.rs) | Demonstrates animation masks | missing, animation masks on a graph |
 | [`color_animation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/animation/color_animation.rs) | Demonstrates how to animate colors using mixing and splines in different color spaces | [written](../BevyCSharp.Examples/animation/color_animation.cs), the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types |

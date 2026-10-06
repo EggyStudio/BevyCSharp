@@ -233,6 +233,8 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
             .untyped(),
         #[cfg(feature = "render")]
         "Font" => server.load::<bevy::text::Font>(path.to_string()).untyped(),
+        #[cfg(feature = "render")]
+        "AnimationClip" => server.load::<bevy::animation::AnimationClip>(path.to_string()).untyped(),
         #[cfg(feature = "meshlet")]
         "MeshletMesh" => server
             .load::<bevy::pbr::experimental::meshlet::MeshletMesh>(path.to_string())

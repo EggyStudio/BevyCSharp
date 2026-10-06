@@ -260,6 +260,59 @@ public static unsafe class Animation
     public static void Animate(Entity entity, AnimationTarget target, Entity player) =>
         Act(Native.bcs_animation_animate(entity.Bits, target.High, target.Low, player.Bits), "aiming curves at", entity);
 
+    /// <summary>Starts loading one of a model file's clips by its label, as <c>models/Fox.glb#Animation2</c>.</summary>
+    /// <remarks>
+    /// Bevy's <c>GltfAssetLabel::Animation</c>, for a clip played from a graph of its own rather than
+    /// by name on the scene it came with, as one with events placed on it is. It arrives a few
+    /// frames later, which <see cref="AddEvent{TEvent}(AssetHandle, float, TEvent)"/> answers false
+    /// until it has.
+    /// </remarks>
+    /// <param name="path">The file and the clip's label, as an asset path.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static AssetHandle LoadClip(string path) => AssetServer.Load("AnimationClip", path);
+
+    /// <summary>Sets how long a clip lasts, which one holding only events needs.</summary>
+    /// <param name="clip">A clip from <see cref="CreateClip"/>.</param>
+    /// <param name="seconds">Its length.</param>
+    /// <exception cref="BevyNativeException">The clip is gone, or this build has no renderer.</exception>
+    public static void SetClipDuration(AssetHandle clip, float seconds)
+    {
+        var status = Native.bcs_animation_clip_set_duration(clip.Key, seconds);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        Native.Check(status, $"setting the length of clip {clip.Key}");
+    }
+
+    /// <summary>Places an event on a clip, triggered at its player as the clip reaches the time.</summary>
+    /// <remarks>Bevy's <c>add_event</c>. See <see cref="IAnimationEvent"/>.</remarks>
+    /// <param name="clip">The clip, made in code or loaded.</param>
+    /// <param name="time">When, in seconds into the clip.</param>
+    /// <param name="value">The event, triggered as it is given here each time the clip reaches it.</param>
+    /// <returns>False while a loaded clip has not arrived, for the event to be placed again later.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static bool AddEvent<TEvent>(AssetHandle clip, float time, TEvent value) where TEvent : IAnimationEvent =>
+        PlaceEvent(clip, time, value, null);
+
+    /// <summary>Places an event on a clip, triggered at the entity a target names as the clip reaches the time.</summary>
+    /// <remarks>Bevy's <c>add_event_to_target</c>, as a step lands at the foot that takes it.</remarks>
+    /// <param name="clip">The clip, made in code or loaded.</param>
+    /// <param name="target">Where it happens.</param>
+    /// <param name="time">When, in seconds into the clip.</param>
+    /// <param name="value">The event, triggered as it is given here each time the clip reaches it.</param>
+    /// <returns>False while a loaded clip has not arrived, for the event to be placed again later.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static bool AddEvent<TEvent>(AssetHandle clip, AnimationTarget target, float time, TEvent value) where TEvent : IAnimationEvent =>
+        PlaceEvent(clip, time, value, target);
+
+    private static bool PlaceEvent<TEvent>(AssetHandle clip, float time, TEvent value, AnimationTarget? target) where TEvent : IAnimationEvent
+    {
+        var at = target ?? default;
+        var status = Native.bcs_animation_clip_add_event(clip.Key, time, ClipEvents.Keep(value), target is null ? 0 : 1, at.High, at.Low);
+        if (status == NativeStatus.Unsupported) throw NoRenderer();
+        if (status == NativeStatus.NotPresent) return false;
+        Native.Check(status, $"placing a {typeof(TEvent).Name} on clip {clip.Key}");
+        return true;
+    }
+
     /// <summary>A clip's number among a model's, by its exact name, or -1.</summary>
     private static int IndexOf(IReadOnlyList<string> clips, string clip)
     {

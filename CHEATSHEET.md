@@ -721,6 +721,10 @@ static void AddCurve(AssetHandle clip, AnimationTarget target, AnimationCurve cu
 static (AssetHandle Graph, uint Node) GraphFromClip(AssetHandle clip);  // A graph holding the one clip, and the clip's node in it, as Bevy's AnimationGraph::from_clip
 static void PlayGraph(Entity player, AssetHandle graph, uint node, bool repeat = false);  // Makes an entity a player of a graph, playing one of its nodes
 static void Animate(Entity entity, AnimationTarget target, Entity player);  // Makes an entity the target a clip's curves are aimed at, moved by a player
+static AssetHandle LoadClip(string path);                       // Starts loading one of a model file's clips by its label, as models/Fox.glb#Animation2
+static void SetClipDuration(AssetHandle clip, float seconds);   // Sets how long a clip lasts, which one holding only events needs
+static bool AddEvent<TEvent>(AssetHandle clip, float time, TEvent value);  // Places an event on a clip, triggered at its player as the clip reaches the time
+static bool AddEvent<TEvent>(AssetHandle clip, AnimationTarget target, float time, TEvent value);  // Places an event on a clip, triggered at the entity a target names as the clip reaches the time
 ```
 
 ### `AnimationCurve`

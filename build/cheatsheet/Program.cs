@@ -25,7 +25,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Messages", "messages-and-hierarchy.md", ["MessageBus", "On`1"]),
     ("Components", "components.md", ["ComponentHooks", "ComponentSchema", "ComponentSchemas", "ComponentField", "ItemFields", "EcsList`1", "EcsMap`2", "IInlineList`1", "InlineList4`1", "InlineList8`1", "InlineList16`1", "InlineList32`1", "InlineList64`1", "ListValue", "MapValue", "IReflectedComponent`1"]),
     ("Scenes and saves", "scenes-and-saves.md", ["DataAssets", "SceneFile", "SceneInstances", "SceneReferences", "SceneValue", "SaveGame", "SaveId", "Persistent`1", "IPersistentValue", "ProjectSettings", "UserData"]),
-    ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "MeshFiles", "MaterialFiles"]),
+    ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "IAnimationEvent", "MeshFiles", "MaterialFiles"]),
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
     ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),

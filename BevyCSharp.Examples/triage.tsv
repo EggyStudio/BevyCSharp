@@ -103,11 +103,11 @@ tilemap_chunk	missing	an image loaded as an array of layers, which Bevy's Tilema
 transparency_2d	can
 wireframe_2d	can
 animated_mesh_control	can
-animated_mesh_events	missing	events placed on an animation clip
+animated_mesh_events	can	the puffs' directions and sizes drawn from .NET's seeded Random, where Bevy's draws from a seeded ChaCha8
 animated_mesh	can
 animated_transform	can
 animated_ui	can	the text's color animated through a property the bridge declares, as Bevy's example declares its own
-animation_events	missing	events placed on an animation clip
+animation_events	can
 animation_graph	missing	animation graphs that blend clips by weight
 animation_masks	missing	animation masks on a graph
 color_animation	can	the conversions between color spaces written in the example as Bevy writes them, since Bevy's colors are its own types

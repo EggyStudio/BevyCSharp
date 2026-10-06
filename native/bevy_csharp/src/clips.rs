@@ -430,6 +430,149 @@ pub extern "C" fn bcs_animation_animate(entity: u64, high: u64, low: u64, player
     })
 }
 
+/// What C# is called with when a clip reaches an event placed on it, the number C# gave the event,
+/// the entity it happens at, and the handle C# finds its handlers through.
+pub type ClipEventCallback = unsafe extern "C" fn(event: u32, entity: u64, user: *mut core::ffi::c_void);
+
+/// The callback an app's managed side installed to hear its clips' events, which a clip reaching
+/// one calls with the world on loan.
+#[cfg(feature = "render")]
+#[derive(bevy::prelude::Resource, Clone, Copy)]
+struct ClipEvents {
+    callback: ClipEventCallback,
+    user: *mut core::ffi::c_void,
+}
+
+// SAFETY: the pointers are only dereferenced by calling back into the .NET runtime, which is
+// thread-safe itself, and Bevy needs the bound to keep them in a resource.
+#[cfg(feature = "render")]
+unsafe impl Send for ClipEvents {}
+#[cfg(feature = "render")]
+unsafe impl Sync for ClipEvents {}
+
+/// Has every event placed on a clip in this app call `callback`, once the frame's commands are
+/// applied, with the event's number and the entity it happens at.
+///
+/// On the app before it runs, or on the world from inside a system where `app` is null.
+///
+/// # Safety
+/// `app` must be a live app or null, and `callback` callable for the app's life.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_observe_clip_events(
+    app: *mut crate::state::BcsApp,
+    callback: Option<ClipEventCallback>,
+    user: *mut core::ffi::c_void,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(callback) = callback else {
+            return status::NULL_ARG;
+        };
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (app, callback, user);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let install = |world: &mut bevy::ecs::world::World| -> i32 {
+                world.insert_resource(ClipEvents { callback, user });
+                status::OK
+            };
+            if app.is_null() {
+                return crate::state::with_world(install);
+            }
+            match unsafe { crate::state::app_mut(app) } {
+                Some(app) => install(app.app.world_mut()),
+                None => status::NULL_ARG,
+            }
+        }
+    })
+}
+
+/// Sets how long a clip lasts, which one holding only events needs, since its curves otherwise give
+/// it its length.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_animation_clip_set_duration(clip: i32, seconds: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (clip, seconds);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_clip(clip, |clip| {
+                clip.set_duration(seconds.max(0.0));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Places an event on a clip at a time, which the clip reaching it reports to C# by `event`, the
+/// number C# gave it. At the player where `targeted` is zero, and at the entity the target whose
+/// identifier's halves are given names where it is one.
+///
+/// A loaded clip that has not arrived yet answers [`status::NOT_PRESENT`], for C# to place it again
+/// next frame.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_animation_clip_add_event(clip: i32, time: f32, event: u32, targeted: i32, high: u64, low: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (clip, time, event, targeted, high, low);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::world::World;
+            use bevy::prelude::{Commands, Entity};
+
+            // Queued, as Bevy's own events are triggered from the commands the player's system
+            // holds, so C# is called with the whole world once they are applied.
+            let fire = move |commands: &mut Commands, at: Entity, _time: f32, _weight: f32| {
+                commands.queue(move |world: &mut World| {
+                    let Some(events) = world.get_resource::<ClipEvents>().copied() else {
+                        return;
+                    };
+                    crate::state::loan_world(world, || unsafe { (events.callback)(event, at.to_bits(), events.user) });
+                });
+            };
+
+            with_clip(clip, |clip| {
+                if targeted == 0 {
+                    clip.add_event_fn(time, fire);
+                } else {
+                    let target = bevy::animation::AnimationTargetId(bevy::asset::uuid::Uuid::from_u64_pair(high, low));
+                    clip.add_event_fn_to_target(target, time, fire);
+                }
+                status::OK
+            })
+        }
+    })
+}
+
+/// Runs `f` on the clip behind a key, or answers why it cannot.
+#[cfg(feature = "render")]
+fn with_clip(clip: i32, f: impl FnOnce(&mut bevy::animation::AnimationClip) -> i32) -> i32 {
+    crate::state::with_world(|world| {
+        let Some(handle) = crate::assets::clone_handle(world, clip).and_then(|handle| handle.try_typed::<bevy::animation::AnimationClip>().ok()) else {
+            return status::NOT_PRESENT;
+        };
+        let Some(mut clips) = world.get_resource_mut::<bevy::asset::Assets<bevy::animation::AnimationClip>>() else {
+            return status::UNSUPPORTED;
+        };
+        match clips.get_mut(&handle) {
+            Some(clip) => f(clip.into_inner()),
+            None => status::NOT_PRESENT,
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
