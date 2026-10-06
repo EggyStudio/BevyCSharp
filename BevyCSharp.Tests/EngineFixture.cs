@@ -26,9 +26,26 @@ public sealed class EngineHarness : IDisposable
     /// starts and a test run would otherwise leave one in the home directory of whoever ran it.
     /// </summary>
     /// <remarks>A test that needs a directory of its own sets <see cref="UserData.Root"/> and puts this back.</remarks>
-    public static readonly string UserDirectory = Path.Combine(Path.GetTempPath(), "bcs-tests-user");
+    public static string UserDirectory => User.Path;
 
-    static EngineHarness() => UserData.Root = UserDirectory;
+    // From the one helper, and removed as the process ends, since every test of the run shares it.
+    private static readonly TestFolder User = new("bcs-tests-user-");
+
+    static EngineHarness()
+    {
+        UserData.Root = UserDirectory;
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            // A file held as the process ends is the process's to let go, and fails no test.
+            try
+            {
+                User.Dispose();
+            }
+            catch (IOException)
+            {
+            }
+        };
+    }
 
     private readonly App _app;
     private readonly List<Exception> _failures = [];

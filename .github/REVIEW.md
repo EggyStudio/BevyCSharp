@@ -318,3 +318,12 @@ with three coins and every step's capture drawn. Its one trim warning was IL2065
 of `BehaviorsPlugin.FindRegistrations`, the call its IL2075 suppression already names as the
 compiler's iterator reports it, and it is suppressed with that reason, which leaves the publish
 with none.
+
+Item 1 is through with N 2.5, and before item 2 a lapse is mended. The batches since `a733ca2`
+touched eighteen listed places without mending them first, `BehaviorsPlugin.cs`,
+`ComponentHooks.cs` and `Observers.cs` on N 1.2's list, thirteen tests at the root on N 1.4's, and
+`AssetFilesTests.cs` and `EngineFixture.cs` on N 3.4's. Each list is now mended in a commit of its
+own after the fact. The eleven types moved to files of their own (`46a692d`), the thirteen tests
+moved into the folders of their areas (`5f6d5c7`), and both folders are taken from `TestFolder`,
+the harness's user directory removed as the process ends. From here a batch reads the lists for the
+files it will touch before it starts.

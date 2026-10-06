@@ -6,8 +6,6 @@ BevyCSharp.Tests/AssetIdTests.cs Directory.Delete
 BevyCSharp.Tests/AssetIdTests.cs Path.GetTempPath
 BevyCSharp.Tests/AssetPackTests.cs Directory.Delete
 BevyCSharp.Tests/AssetPackTests.cs Path.GetTempPath
-BevyCSharp.Tests/Assets/AssetFilesTests.cs Directory.Delete
-BevyCSharp.Tests/Assets/AssetFilesTests.cs Path.GetTempPath
 BevyCSharp.Tests/ChangingTypeTests.cs Directory.Delete
 BevyCSharp.Tests/ChangingTypeTests.cs Path.GetTempPath
 BevyCSharp.Tests/CliServerTests.cs Directory.Delete
@@ -22,7 +20,6 @@ BevyCSharp.Tests/Editor/EditorSceneTests.cs Path.GetTempPath
 BevyCSharp.Tests/Editor/EditorWorldTests.cs Path.GetTempPath
 BevyCSharp.Tests/Editor/LevelCameraTests.cs Directory.Delete
 BevyCSharp.Tests/Editor/LevelCameraTests.cs Path.GetTempPath
-BevyCSharp.Tests/EngineFixture.cs Path.GetTempPath
 BevyCSharp.Tests/GltfContentsTests.cs Directory.Delete
 BevyCSharp.Tests/GltfContentsTests.cs Path.GetTempPath
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs Directory.Delete

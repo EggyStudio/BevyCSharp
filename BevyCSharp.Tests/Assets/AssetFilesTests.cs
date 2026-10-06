@@ -15,13 +15,15 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class AssetFilesTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-files-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-files-");
     private readonly string _was = Streaming.AssetRoot;
+
+    private string Root => _folder.Path;
 
     public AssetFilesTests()
     {
-        Directory.CreateDirectory(Path.Combine(_root, "carried"));
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(Path.Combine(Root, "carried"));
+        Streaming.AssetRoot = Root;
         AssetFiles.Use(typeof(AssetFilesTests).Assembly);
         AssetIds.Reindex();
     }
@@ -31,7 +33,7 @@ public sealed class AssetFilesTests : IDisposable
         AssetFiles.Use(null);
         Streaming.AssetRoot = _was;
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -42,10 +44,10 @@ public sealed class AssetFilesTests : IDisposable
         Assert.Contains("from the assembly", AssetFiles.ReadAllText("carried/note.json"));
 
         // Asked for by its full path under the root, as a scene path resolves.
-        Assert.Contains("from the assembly", AssetFiles.ReadAllText(Path.Combine(_root, "carried", "note.json")));
+        Assert.Contains("from the assembly", AssetFiles.ReadAllText(Path.Combine(Root, "carried", "note.json")));
 
         // A file beside the game replaces the one it carries.
-        File.WriteAllText(Path.Combine(_root, "carried", "note.json"), """{ "carried": "from the folder" }""");
+        File.WriteAllText(Path.Combine(Root, "carried", "note.json"), """{ "carried": "from the folder" }""");
         Assert.Contains("from the folder", AssetFiles.ReadAllText("carried/note.json"));
 
         // Neither has it.
@@ -53,7 +55,7 @@ public sealed class AssetFilesTests : IDisposable
         Assert.Throws<FileNotFoundException>(() => AssetFiles.ReadAllText("carried/missing.json"));
 
         // A path outside the root is never looked for among the resources.
-        Assert.False(AssetFiles.Exists(Path.Combine(Path.GetTempPath(), "carried", "note.json")));
+        Assert.False(AssetFiles.Exists(Path.Combine(Path.GetDirectoryName(Root)!, "carried", "note.json")));
     }
 
     [SkippableFact]
