@@ -264,11 +264,6 @@ BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiTextConfig
 BevyCSharp/Interop/NativeTypes.Window.cs NativeMonitor
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowEvent
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowPlace
-BevyCSharp/Math/Transform.cs Quat
-BevyCSharp/Math/Transform.cs Vec3
-BevyCSharp/Math/Vectors.cs Color
-BevyCSharp/Math/Vectors.cs Vec2
-BevyCSharp/Math/Vectors.cs Vec4
 BevyCSharp/Physics/PhysicsComponents.cs CharacterController
 BevyCSharp/Physics/PhysicsComponents.cs Collider
 BevyCSharp/Physics/PhysicsComponents.cs ColliderFit
