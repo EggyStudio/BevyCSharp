@@ -185,8 +185,10 @@ public sealed class NormTests
     [Fact]
     public void N_3_4()
     {
+        // The one helper, TestFolder, makes and removes them, and is the place that may.
         string[] temporary = ["Path.GetTempPath", "GetTempFileName", "CreateTempSubdirectory", "Directory.Delete"];
-        Hold("3.4", Uses("BevyCSharp.Tests/", temporary), "a temporary folder made or removed without the one helper");
+        var found = Uses("BevyCSharp.Tests/", temporary).Where(place => !place.StartsWith("BevyCSharp.Tests/TestFolder.cs ", StringComparison.Ordinal));
+        Hold("3.4", found, "a temporary folder made or removed without the one helper");
     }
 
     [Fact]

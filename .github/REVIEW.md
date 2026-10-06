@@ -306,3 +306,14 @@ method over, by `[UnmanagedCallersOnly]` and by a delegate of a type marked to b
 code, which none is today. It reads the library's and the editor's methods and finds eight, the
 bridge's seven and ImGui's input method. Two caught nothing before the rule lookup, the computed
 and the joint state's rule, whose lock was taken outside the `try`, and both now take it inside.
+
+N 2.9 is `FileHandleTests` in the tests' Assets folder, taken from 3DEngine's. It loads through
+fourteen loaders and looks, while the app still runs, for any file of a folder of its own that this
+process holds, on Linux among `/proc/self/fd` and on Windows by opening each alone. The loaders are
+the asset server's image, model and sound, the scene, mesh and material files, a data asset, an
+asset's id, the project's settings, a persistent value, a streamed read, a pack once disposed, a
+behavior script and a Slang program, the five that need a renderer, and slangc for the program,
+skipped without them. None holds a file today. A fact checks the check, a file left open found held
+and then not. The folder comes from `TestFolder`, 3DEngine's helper, which N 3.4 names as the one
+and which is new here, so N 3.4's check passes over it and its wait for a held file is on N 3.3's
+list with that reason.

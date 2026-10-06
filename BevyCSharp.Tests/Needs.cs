@@ -46,6 +46,10 @@ internal static class Needs
         Skip.IfNot(Bevy.Shaders.SlangAvailable, "needs slangc, which build/fetch-slang.sh puts in build/tools/slang");
     }
 
+    /// <summary>A system that says which files a process has open, Linux by its descriptors or Windows by its locks.</summary>
+    internal static void OpenFiles() =>
+        Skip.IfNot(OperatingSystem.IsLinux() || OperatingSystem.IsWindows(), "needs Linux's /proc/self/fd or Windows' locks to find a file held open");
+
     /// <summary>A sound device, as a test learned from whether anything played.</summary>
     internal static void SoundDevice(bool present) =>
         Skip.IfNot(present, "needs a sound device");
