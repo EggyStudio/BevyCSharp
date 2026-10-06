@@ -21,7 +21,7 @@ use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
 use bevy::state::state::{NextState, OnEnter, OnExit, OnTransition, State, States};
-use bevy::state::state_scoped::DespawnOnExit;
+use bevy::state::state_scoped::{DespawnOnEnter, DespawnOnExit};
 
 use crate::interop::status;
 use crate::state::{app_mut, loan_world, with_world, BcsApp, SystemReg};
@@ -331,7 +331,45 @@ pub unsafe extern "C" fn bcs_state_add_transition(
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_state_despawn_on_exit(entity: u64, slot: i32, value: i32) -> i32 {
     crate::interop::guard(|| {
-        with_world(|world| scope(world, crate::ecs::entity_from(entity), slot, value))
+        with_world(|world| scope(world, crate::ecs::entity_from(entity), slot, value, false))
+    })
+}
+
+/// Marks an entity to be despawned as a state slot enters a value, Bevy's `DespawnOnEnter`, which
+/// a game puts on what should be gone by the time a state comes back, such as a notice that it
+/// will.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_state_despawn_on_enter(entity: u64, slot: i32, value: i32) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| scope(world, crate::ecs::entity_from(entity), slot, value, true))
+    })
+}
+
+/// One transition a state slot made, the managed side's `NativeStateTransition` field for field.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsStateTransition {
+    /// The slot, in the numbering every state entry point takes.
+    pub slot: i32,
+    /// One where it left a value, `exited` holding it, and two where it entered one.
+    pub flags: u32,
+    pub exited: i32,
+    pub entered: i32,
+}
+
+/// Copies the transitions every state slot has made since the last call into `out`, Bevy's
+/// `StateTransitionEvent` for each, an identity transition among them where a value is set again,
+/// and answers how many. What does not fit stays queued for the next call.
+///
+/// # Safety
+/// `out` must be writable for `capacity` transitions.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_state_transitions(out: *mut BcsStateTransition, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() && capacity > 0 {
+            return status::NULL_ARG;
+        }
+        with_world(|world| drain_transitions(world, out, capacity.max(0) as usize) as i32)
     })
 }
 

@@ -4,9 +4,9 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**280 written, 15 written in part, 0 can be written, 68 missing and 58 do not apply.** Of the 363 that apply, 295 can be written with what is bridged, 15 of them leaving something out.
+**282 written, 16 written in part, 0 can be written, 65 missing and 58 do not apply.** Of the 363 that apply, 298 can be written with what is bridged, 16 of them leaving something out.
 
-**135 of the 142 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**136 of the 143 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -20,7 +20,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |  |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 16 | 0 | 0 | 10 | 9 | 10 of 10 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 17 | 0 | 0 | 9 | 9 | 10 of 10 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 5 | 1 | 0 | 0 | 0 | 5 of 5 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
@@ -34,7 +34,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
 | [Shaders](#shaders) | 17 | 0 | 0 | 3 | 5 | 5 of 6 |
 | [Shaders Advanced](#shaders-advanced) | 1 | 0 | 0 | 0 | 1 | 1 of 1 |
-| [State](#state) | 2 | 0 | 0 | 2 | 0 |  |
+| [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 14 | 6 | 0 | 0 | 1 | 10 of 10 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **280** | **15** | **0** | **68** | **58** | **135 of 142** |
+| **All** | **282** | **16** | **0** | **65** | **58** | **136 of 143** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -303,7 +303,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | [written](../BevyCSharp.Examples/ecs/removal_detection.cs) |
 | [`run_conditions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/run_conditions.rs) | Run systems only when one or multiple conditions are met | [written](../BevyCSharp.Examples/ecs/run_conditions.cs), prints [its output](assets/examples/run_conditions.txt) |
 | [`startup_system`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/startup_system.rs) | Demonstrates a startup system (one that runs once when the app starts up) | [written](../BevyCSharp.Examples/ecs/startup_system.cs), prints [its output](assets/examples/startup_system.txt) |
-| [`state_scoped`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/state_scoped.rs) | Shows how to spawn entities that are automatically despawned either when entering or exiting specific game states. | missing, despawning when a state is entered or by a rule over the transition, and a state holding a value |
+| [`state_scoped`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/state_scoped.rs) | Shows how to spawn entities that are automatically despawned either when entering or exiting specific game states. | [written](../BevyCSharp.Examples/ecs/state_scoped.cs), C(1) a member of the enum, the one value of C the example holds, and an entity a rule takes going a frame after the transition |
 | [`system_closure`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_closure.rs) | Show how to use closures as systems, and how to configure `Local` variables by capturing external state | [written](../BevyCSharp.Examples/ecs/system_closure.cs), prints [its output](assets/examples/system_closure.txt) |
 | [`system_param`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_param.rs) | Illustrates creating custom system parameters with `SystemParam` | does not apply, derives a Rust SystemParam |
 | [`system_piping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ecs/system_piping.rs) | Pipe the output of one system into a second, allowing you to handle any errors gracefully | does not apply, pipes Rust system outputs |
@@ -462,8 +462,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | missing, a state holding values, such as a game that is paused or in turbo |
-| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | missing, transitions to the same state, run as schedules of a game's own |
+| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | [written](../BevyCSharp.Examples/state/computed_states.cs), InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number |
+| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written in part](../BevyCSharp.Examples/state/custom_transitions.cs), schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does |
 | [`states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
 | [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |
 

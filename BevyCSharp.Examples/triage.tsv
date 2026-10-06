@@ -207,7 +207,7 @@ relationships	missing	relationships of a game's own between entities
 removal_detection	can
 run_conditions	can
 startup_system	can
-state_scoped	missing	despawning when a state is entered or by a rule over the transition, and a state holding a value
+state_scoped	can	C(1) a member of the enum, the one value of C the example holds, and an entity a rule takes going a frame after the transition
 system_closure	can
 system_param	n/a	derives a Rust SystemParam
 system_piping	n/a	pipes Rust system outputs
@@ -318,8 +318,8 @@ shader_prepass	can	the prepass shown by a pass over the picture, where Bevy's ma
 specialized_mesh_pipeline	n/a	writes a mesh pipeline in Rust
 storage_buffer	can
 texture_binding_array	can	without Bevy's check that the GPU indexes such an array by a value that differs from pixel to pixel
-computed_states	missing	a state holding values, such as a game that is paused or in turbo
-custom_transitions	missing	transitions to the same state, run as schedules of a game's own
+computed_states	can	InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number
+custom_transitions	part	schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does
 states	can
 sub_states	can
 bevymark_3d	can

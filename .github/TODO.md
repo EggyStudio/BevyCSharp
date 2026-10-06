@@ -40,10 +40,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **States, three examples.** A state that holds values, as `InGame { paused, turbo }` does
-  (`computed_states`, `state_scoped`), despawning as a state is entered or by a rule over the
-  transition (`state_scoped`), and transitions to the same state run as schedules of a game's own
-  (`custom_transitions`).
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
 - **A second window, two examples.**
@@ -70,8 +66,8 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Fifteen examples are written in part, each leaving out a feature named in its row. Six are stress
-tests, which leave out switches and counts that no wrapper reaches, and the other nine each leave
+Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
+tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave
 out one of these.
 
 - **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
@@ -101,6 +97,11 @@ out one of these.
   and `custom_cursor_image` is about. Bevy's `CursorIcon::Custom` is behind its `custom_cursor`
   feature, which the bridge does not compile in, so the component reflects with its system
   cursors alone.
+- **Schedules of a game's own**, which `custom_transitions` runs at a transition in Bevy, its
+  `OnReenter` and `OnReexit` run from a system in Bevy's `StateTransition` schedule. Here the
+  state's own entering and leaving take their place, which Bevy runs on a value set again as on any
+  other move. A schedule is a Rust type, so the bridge would need a label holding a number, and a
+  C# system run inside the transition with the transition it reads.
 - **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
   `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
   against.

@@ -202,6 +202,9 @@ public sealed unsafe partial class App : IDisposable
                 $"adding computed state {typeof(TState).Name} from {computed.Source.Name}");
         }
 
+        // The first answer for a value, as the bridge reads the table, for a joint that reads it.
+        ComputedRules.Know(slot, raw => Array.IndexOf(from, raw) is >= 0 and var at ? to[at] : null);
+
         _addedStates.Add(typeof(TState));
         return this;
     }
@@ -291,6 +294,12 @@ public sealed unsafe partial class App : IDisposable
     /// inside Bevy's transition, so it reads no world, and one that throws is taken as answering
     /// nothing, as a computed state's rule is.
     /// </para>
+    /// <para>
+    /// A source may be a state computed from one state, added before the joint, which is read by
+    /// working it out again from its own source's value, the same answer Bevy reaches from the same
+    /// value. Bevy's <c>computed_states</c> shows its tutorial worked out so, from whether it is on
+    /// and from two states computed from the app's.
+    /// </para>
     /// </remarks>
     /// <typeparam name="TState">The enum being worked out, carrying <see cref="ComputedFromAttribute"/>.</typeparam>
     /// <typeparam name="TFirst">The first state it is worked out from.</typeparam>
@@ -315,10 +324,8 @@ public sealed unsafe partial class App : IDisposable
     {
         ArgumentNullException.ThrowIfNull(rule);
 
-        return AddJoint<TState>([typeof(TFirst), typeof(TSecond)], slots => (values, present) =>
-            Holds(present, slots) && rule(As<TFirst>(values[slots[0]]), As<TSecond>(values[slots[1]])) is { } value
-                ? StateRegistry.ToInt(value)
-                : null);
+        return AddJoint<TState>([typeof(TFirst), typeof(TSecond)], held =>
+            rule(As<TFirst>(held[0]), As<TSecond>(held[1])) is { } value ? StateRegistry.ToInt(value) : null);
     }
 
     /// <summary>Adds a state worked out from three others at once, by a rule of the game's own.</summary>
@@ -339,18 +346,15 @@ public sealed unsafe partial class App : IDisposable
     {
         ArgumentNullException.ThrowIfNull(rule);
 
-        return AddJoint<TState>([typeof(TFirst), typeof(TSecond), typeof(TThird)], slots => (values, present) =>
-            Holds(present, slots)
-            && rule(As<TFirst>(values[slots[0]]), As<TSecond>(values[slots[1]]), As<TThird>(values[slots[2]])) is { } value
-                ? StateRegistry.ToInt(value)
-                : null);
+        return AddJoint<TState>([typeof(TFirst), typeof(TSecond), typeof(TThird)], held =>
+            rule(As<TFirst>(held[0]), As<TSecond>(held[1]), As<TThird>(held[2])) is { } value ? StateRegistry.ToInt(value) : null);
     }
 
     /// <summary>
-    /// Claims a joint for <typeparamref name="TState"/> and gives the bridge its rule, made from
-    /// the slots its sources hold.
+    /// Claims a joint for <typeparamref name="TState"/> and gives the bridge its rule, asked with
+    /// the value of each source in order once every one of them holds a state.
     /// </summary>
-    private App AddJoint<TState>(Type[] sources, Func<int[], Func<int[], uint, int?>> rule)
+    private App AddJoint<TState>(Type[] sources, Func<int[], int?> rule)
         where TState : struct, Enum
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -372,11 +376,24 @@ public sealed unsafe partial class App : IDisposable
                 + $"written in terms of {string.Join(" and ", sources.Select(source => source.Name))}. "
                 + "The two have to name the same states in the same order.");
 
-        // Each source by the slot it holds, which is where the bridge puts its value.
-        var slots = sources.Select(StateRegistry.Claim).ToArray();
+        var reads = sources.Select(source => ReadOf<TState>(source)).ToArray();
         var joint = StateRegistry.Claim<TState>() - StateRegistry.FirstJoint;
 
-        ComputedRules.SetJoint(joint, rule(slots));
+        ComputedRules.SetJoint(joint, (values, present) =>
+        {
+            var held = new int[reads.Length];
+            for (var i = 0; i < reads.Length; i++)
+            {
+                var (slot, derive) = reads[i];
+                if ((present & (1u << slot)) == 0) return null;
+
+                if (derive is null) held[i] = values[slot];
+                else if (derive(values[slot]) is { } derived) held[i] = derived;
+                else return null;
+            }
+
+            return rule(held);
+        });
 
         Native.Check(
             Native.bcs_joint_add(_handle, joint),
@@ -386,8 +403,30 @@ public sealed unsafe partial class App : IDisposable
         return this;
     }
 
-    /// <summary>Whether every one of the slots holds a state, by the bits the bridge sets.</summary>
-    private static bool Holds(uint present, int[] slots) => slots.All(slot => (present & (1u << slot)) != 0);
+    /// <summary>
+    /// Where a joint reads one of its sources, the slot the bridge puts the value of and, for a
+    /// computed state, how it is worked out from that value.
+    /// </summary>
+    /// <remarks>
+    /// A joint is fed the state slots alone, and a computed state is a function of its source's
+    /// value, so a computed source is read as its own source's slot worked out again here. That
+    /// needs how it is worked out, so it is added before the joint, as a joint's other sources are.
+    /// </remarks>
+    private (int Slot, Func<int, int?>? Derive) ReadOf<TState>(Type source)
+    {
+        if (StateRegistry.DescribeComputed(source) is not { } computed) return (StateRegistry.Claim(source), null);
+
+        if (!_addedStates.Contains(source))
+            throw new InvalidOperationException(
+                $"{typeof(TState).Name} is worked out from {source.Name}, which is computed and "
+                + "was not added before it. Add it first, since it is read through how it is "
+                + "worked out.");
+
+        var slot = StateRegistry.Claim(source) - StateRegistry.SlotCount - StateRegistry.SubCount;
+        var derive = ComputedRules.Derivation(slot)
+                     ?? throw new InvalidOperationException($"{source.Name} was added without a table or a rule to read it by.");
+        return (StateRegistry.Claim(computed.Source), derive);
+    }
 
     /// <summary>A raw state value as the enum it is.</summary>
     private static T As<T>(int raw) where T : struct, Enum => (T)Enum.ToObject(typeof(T), raw);

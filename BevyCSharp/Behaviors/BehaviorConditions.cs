@@ -36,8 +36,9 @@ public static class BehaviorConditions
     /// instead, for the state rather than for each system scoped to it, naming the first.
     /// </para>
     /// <para>
-    /// A sub-state reads the same way while its parent holds another value, and that is not worth
-    /// reporting, because it is the whole point of a sub-state rather than a mistake.
+    /// A sub-state reads the same way while its parent holds another value, and a computed state
+    /// while its source holds a value it does not exist under. That is not worth reporting, because
+    /// it is the whole point of either rather than a mistake.
     /// </para>
     /// <para>
     /// The state's slot is claimed here, so a state declared with <see cref="InitialStateAttribute"/>
@@ -57,7 +58,7 @@ public static class BehaviorConditions
         {
             if (StateRegistry.TryCurrentRaw<TState>(out var current)) return current == wanted;
 
-            if (!reported && !StateRegistry.IsSub<TState>() && (StateRegistry.ReportUnentered || !StateRegistry.IsDeclared<TState>()))
+            if (!reported && !StateRegistry.ComesAndGoes<TState>() && (StateRegistry.ReportUnentered || !StateRegistry.IsDeclared<TState>()))
             {
                 reported = true;
                 if (!StateRegistry.FirstReportOf<TState>()) return false;

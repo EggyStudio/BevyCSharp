@@ -56,6 +56,44 @@ public enum Overlay
     Shown,
 }
 
+/// <summary>Whether the run is at the top, computed from the floor by a rule, for a joint to read.</summary>
+[ComputedFrom(typeof(Floor))]
+public enum AtTop
+{
+    /// <summary>At the top.</summary>
+    Present,
+}
+
+/// <summary>Whether play is held, computed from the hold by a table, for a joint to read.</summary>
+[ComputedFrom(typeof(Hold))]
+public enum Holding
+{
+    /// <summary>Held.</summary>
+    Yes,
+}
+
+/// <summary>What the top shows, worked out from a computed state and a state.</summary>
+[ComputedFrom(typeof(AtTop), typeof(Hold))]
+public enum Banner
+{
+    /// <summary>At the top, playing.</summary>
+    Boss,
+
+    /// <summary>At the top, held.</summary>
+    Held,
+}
+
+/// <summary>Where a held run is, worked out from a state and a computed state.</summary>
+[ComputedFrom(typeof(Floor), typeof(Holding))]
+public enum Hint
+{
+    /// <summary>Held below the top.</summary>
+    Below,
+
+    /// <summary>Held at the top.</summary>
+    AtTheTop,
+}
+
 /// <summary>The boss fight, which exists only at the top while play is not held.</summary>
 [SubStateOf(typeof(Floor), Floor.Top)]
 [SubStateOf(typeof(Hold), Hold.Off)]
@@ -182,6 +220,56 @@ public sealed class JointStateTests
         Assert.True(seen[1]);
         Assert.False(seen[3]);
         Assert.True(seen[5]);
+    }
+
+    /// <summary>
+    /// A joint reads a state computed from another through that state's value, by a rule and by a
+    /// table alike, and does not exist while the computed one does not.
+    /// </summary>
+    [Fact]
+    public void AJointReadsAComputedStateThroughItsSource()
+    {
+        var seen = new Dictionary<ulong, (Banner?, Hint?)>();
+
+        using var harness = new EngineHarness(frames: 10);
+
+        harness.App.AddState(Floor.Lower);
+        harness.App.AddState(Hold.Off);
+        harness.App.AddComputedState<AtTop, Floor>(floor => floor == Floor.Top ? AtTop.Present : null);
+        harness.App.AddComputedState((Hold.On, Holding.Yes));
+        harness.App.AddComputedState<Banner, AtTop, Hold>((_, hold) => hold == Hold.On ? Banner.Held : Banner.Boss);
+        harness.App.AddComputedState<Hint, Floor, Holding>((floor, _) => floor == Floor.Top ? Hint.AtTheTop : Hint.Below);
+
+        harness.On(Stage.Update, world =>
+        {
+            var frame = world.Resource<Time>().FrameCount;
+
+            if (frame == 2) App.SetState(Floor.Top);
+            if (frame == 4) App.SetState(Hold.On);
+            if (frame == 6) App.SetState(Floor.Lower);
+
+            seen[frame] = (App.TryState<Banner>(out var banner) ? banner : null, App.TryState<Hint>(out var hint) ? hint : null);
+        });
+
+        harness.Run();
+
+        Assert.Equal((null, null), seen[1]);
+        Assert.Equal((Banner.Boss, null), seen[3]);
+        Assert.Equal((Banner.Held, Hint.AtTheTop), seen[5]);
+        Assert.Equal((null, Hint.Below), seen[7]);
+    }
+
+    /// <summary>A joint reading a computed state not yet added is refused before it runs, since there is nothing to read it through.</summary>
+    [Fact]
+    public void AJointReadingAComputedStateNeedsItAddedFirst()
+    {
+        using var harness = new EngineHarness(frames: 1);
+
+        harness.App.AddState(Floor.Lower);
+        harness.App.AddState(Hold.Off);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            harness.App.AddComputedState<Banner, AtTop, Hold>((_, _) => Banner.Boss));
     }
 
     /// <summary>A rule written over other states than the enum names is refused before it runs.</summary>

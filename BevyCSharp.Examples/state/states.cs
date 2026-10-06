@@ -19,6 +19,9 @@ internal static class StatesExample
     private static readonly Color Pressed = Color.FromSrgb(0.35f, 0.75f, 0.35f);
 
     private static Entity _menu, _button, _logo = Entity.None;
+
+    // The logo, for an example built on this one that takes it down again.
+    internal static Entity Logo => _logo;
     private static UiInteraction _last;
 
     public static void Build(App app)

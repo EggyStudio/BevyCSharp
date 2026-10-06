@@ -220,7 +220,69 @@ public static unsafe class StateRegistry
 
     /// <summary>Claims a slot for <typeparamref name="TState"/>, or returns the one it holds.</summary>
     /// <exception cref="InvalidOperationException">Every slot is taken.</exception>
-    internal static int Claim<TState>() where TState : struct, Enum => Claim(typeof(TState));
+    internal static int Claim<TState>() where TState : struct, Enum
+    {
+        // How this enum's transitions reach the message bus, kept by its type for every app,
+        // since a slot is known only by its number when the bridge reports what it did.
+        lock (Gate)
+        {
+            Posters.TryAdd(typeof(TState), static (bus, ecs, exited, entered) =>
+            {
+                var transition = new StateTransitionEvent<TState>(
+                    exited is { } from ? FromInt<TState>(from) : null,
+                    entered is { } to ? FromInt<TState>(to) : null);
+                bus.Send(transition);
+                StateDespawnRules<TState>.Apply(ecs, transition);
+            });
+        }
+
+        return Claim(typeof(TState));
+    }
+
+    private static readonly Dictionary<Type, Action<MessageBus, EcsWorld, int?, int?>> Posters = new(SameState.Instance);
+
+    /// <summary>Moves the transitions every state made since the last frame onto the message bus.</summary>
+    /// <remarks>
+    /// Bevy reports each as a <c>StateTransitionEvent</c> of the state's type, a slot's here, which
+    /// the bridge drains slot by slot. Each is posted as a <see cref="StateTransitionEvent{TState}"/>
+    /// of the enum that holds the slot, found by its number among this app's slots. A slot no enum
+    /// was claimed for by its type, which no state a game adds is, has nothing to post as. The
+    /// entities <see cref="EcsWorld.DespawnWhen{TState}"/> left waiting on a rule are despawned
+    /// as their rule answers true.
+    /// </remarks>
+    internal static void PostTransitions(MessageBus bus, EcsWorld ecs)
+    {
+        const int Capacity = 32;
+        NativeStateTransition* buffer = stackalloc NativeStateTransition[Capacity];
+
+        int count;
+        do
+        {
+            count = Native.bcs_state_transitions(buffer, Capacity);
+            for (var i = 0; i < count; i++)
+            {
+                var transition = buffer[i];
+                Action<MessageBus, EcsWorld, int?, int?>? post = null;
+                lock (Gate)
+                {
+                    foreach (var (state, slot) in Slots)
+                    {
+                        if (slot == transition.Slot && Posters.TryGetValue(state, out post)) break;
+                    }
+                }
+
+                post?.Invoke(
+                    bus,
+                    ecs,
+                    (transition.Flags & 1) != 0 ? transition.Exited : null,
+                    (transition.Flags & 2) != 0 ? transition.Entered : null);
+            }
+        }
+        while (count == Capacity);
+    }
+
+    /// <summary>The enum value a slot's number stands for.</summary>
+    private static TState FromInt<TState>(int value) where TState : struct, Enum => Unsafe.As<int, TState>(ref value);
 
     /// <summary>
     /// The same, for a type known only at runtime.
@@ -393,9 +455,12 @@ public static unsafe class StateRegistry
     /// What an enum says about being computed from another, or null when it says nothing.
     /// </summary>
     /// <remarks>
-    /// Refuses a source that is not an enum, and one that is itself computed. The first is a
-    /// mistake the compiler cannot catch, because the attribute takes a <see cref="Type"/>; the
-    /// second is a chain, which needs a slot layout this bridge does not have.
+    /// Refuses a source that is not an enum, and one that is itself computed unless a joint reads a
+    /// state computed from one state. The first is a mistake the compiler cannot catch, because the
+    /// attribute takes a <see cref="Type"/>. The second is a chain, whose computed states sit in
+    /// slots set aside for a state, which a computed state does not have. A joint is fed the state
+    /// slots instead, and reads a state computed from one of them by working it out from that
+    /// state's value.
     /// </remarks>
     internal static ComputedFromAttribute? DescribeComputed(Type state)
     {
@@ -411,11 +476,20 @@ public static unsafe class StateRegistry
                     $"{state.Name} names {source.Name} as its source, which is not an enum. "
                     + "A state is an enum, so what one is computed from is one too.");
 
-            if (Attribute.IsDefined(source, typeof(ComputedFromAttribute)))
-                throw new InvalidOperationException(
-                    $"{state.Name} is computed from {source.Name}, which is itself computed. "
-                    + "The bridge sets a computed state's source aside when it is built, so a chain "
-                    + "of them has nowhere to live.");
+            if (Attribute.GetCustomAttribute(source, typeof(ComputedFromAttribute)) is ComputedFromAttribute inner)
+            {
+                if (!computed.IsJoint)
+                    throw new InvalidOperationException(
+                        $"{state.Name} is computed from {source.Name}, which is itself computed. "
+                        + "The bridge sets a computed state's source aside when it is built, so a "
+                        + "chain of them has nowhere to live.");
+
+                if (inner.IsJoint || !IsPlainState(inner.Source))
+                    throw new InvalidOperationException(
+                        $"{state.Name} is worked out from {source.Name}, which is computed from "
+                        + $"{Named(inner)}. A state worked out from several reads a computed one "
+                        + "through the one state it is computed from.");
+            }
 
             // A joint is fed the state slots, and a sub-state lives in a slot of its parent's.
             if (computed.IsJoint && Attribute.IsDefined(source, typeof(SubStateOfAttribute)))
@@ -430,6 +504,14 @@ public static unsafe class StateRegistry
 
         return computed;
     }
+
+    // A state of its own, neither computed nor living inside another, the kind a slot holds.
+    private static bool IsPlainState(Type state) =>
+        state.IsEnum
+        && !Attribute.IsDefined(state, typeof(ComputedFromAttribute))
+        && !Attribute.IsDefined(state, typeof(SubStateOfAttribute));
+
+    private static string Named(ComputedFromAttribute computed) => string.Join(" and ", computed.Sources.Select(source => source.Name));
 
     /// <summary>Drops every assignment when a new app is created.</summary>
     private static void Reset()
@@ -500,9 +582,13 @@ public static unsafe class StateRegistry
         return true;
     }
 
-    /// <summary>Whether this enum is declared as a sub-state of another.</summary>
-    internal static bool IsSub<TState>() where TState : struct, Enum =>
-        Attribute.IsDefined(typeof(TState), typeof(SubStateOfAttribute));
+    /// <summary>
+    /// Whether this enum exists only while other states hold values, as a sub-state or a computed
+    /// state does, so its absence is how it works rather than a state never added.
+    /// </summary>
+    internal static bool ComesAndGoes<TState>() where TState : struct, Enum =>
+        Attribute.IsDefined(typeof(TState), typeof(SubStateOfAttribute))
+        || Attribute.IsDefined(typeof(TState), typeof(ComputedFromAttribute));
 
     /// <summary>
     /// The current value of <typeparamref name="TState"/>, reporting whether it exists at all.

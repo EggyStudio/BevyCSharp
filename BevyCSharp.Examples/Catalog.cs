@@ -193,6 +193,7 @@ internal static class Catalog
         new("entity_disabling", EntityDisabling.Build, EntityDisabling.Configure),
         new("run_conditions", RunConditions.Build, Prints: 160),
         new("startup_system", StartupSystem.Build, Prints: 1),
+        new("state_scoped", StateScoped.Build),
         new("system_closure", SystemClosure.Build, Prints: 3),
 
         // Games
@@ -262,6 +263,8 @@ internal static class Catalog
         new("dragdrop_picking", DragdropPicking.Build, DragdropPicking.Configure),
 
         // State
+        new("computed_states", ComputedStatesExample.Build),
+        new("custom_transitions", CustomTransitions.Build),
         new("states", StatesExample.Build),
         new("sub_states", SubStates.Build),
 

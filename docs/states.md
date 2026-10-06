@@ -67,6 +67,32 @@ public static void BuildLevel(BehaviorContext ctx)
 The despawn is Bevy's own, so it reaches the entity's children as well, and it happens at the
 transition rather than inside `[OnExit]`, which means it covers every way out of the value.
 
+`DespawnOnEnter` is the other edge, for what should be gone by the time a value comes back, such
+as a notice put up on leaving it. Where neither edge says it, a rule over the transition does, and
+the entity goes at the first transition the rule answers true for:
+
+```csharp
+ctx.Ecs.DespawnOnEnter(notice, Screen.Menu);
+ctx.Ecs.DespawnWhen<Screen>(hint, transition => transition.Entered == Screen.Paused);
+```
+
+Bevy cannot call a C# function from inside its transition, so a rule is asked as the transition is
+read, the frame after, and its entity lives a frame longer than one scoped to an edge.
+
+Every transition is also a message of its enum, `StateTransitionEvent<TState>`, with the value left
+and the value entered, either of them null where there was none. It is read like any message, the
+frame after the transition, and the state's first value comes as one from nothing:
+
+```csharp
+foreach (var transition in ctx.Read<StateTransitionEvent<Screen>>())
+    Console.WriteLine($"{transition.Exited} => {transition.Entered}");
+```
+
+Setting the value the state already holds is a transition from it to itself, as Bevy's
+`NextState::set` has it. `[OnExit]` and `[OnEnter]` of the value run again, and so does an
+`[OnTransition]` from the value to itself, which is how a level restarts without a second state to
+pass through.
+
 A mode that only means anything inside another one is a sub-state. A pause outside a run is not
 "off", it is nothing, and saying so keeps a pause from being held when the next run starts:
 
@@ -138,6 +164,21 @@ app.AddComputedState<Music, Level>(level => level > Level.Ten ? Music.Boss : Mus
 Bevy asks it from inside a transition with the source's value alone, so it reads no world, and one
 that throws is taken as answering nothing.
 
+A state carries three computed states, for the same reason it carries two sub-states. A state whose
+value is a `[Flags]` enum holds several facts at once, as Bevy's `computed_states` example holds
+whether a game is paused and whether it runs fast, and each fact read from it is a computed state of
+its own:
+
+```csharp
+[Flags]
+public enum AppState { Menu = 0, InGame = 1, Paused = 2, Turbo = 4 }
+
+[ComputedFrom(typeof(AppState))]
+public enum TurboMode { Present }
+
+app.AddComputedState<TurboMode, AppState>(s => s.HasFlag(AppState.Turbo) ? TurboMode.Present : null);
+```
+
 A fact that follows from two facts together names both, and its rule takes both values:
 
 ```csharp
@@ -152,7 +193,9 @@ Three sources take the same form with a third type. Bevy works it out again when
 changes, and a value worked out again to what it already was runs no `[OnEnter]`. While any source
 holds no state, it does not exist. The bridge keeps a fixed set of these joint states beside the
 slots, each fed every slot, so which states one reads is chosen by the game rather than when the
-bridge is built.
+bridge is built. A source may be a state computed from one state, added before the joint, which
+is read by working it out again from its own source's value, as Bevy's `computed_states` works its
+tutorial out from whether the tutorial is on and two states computed from the game's.
 
 A state can be declared on its enum instead of added by a call, which is how a behavior script
 says what states it has, since a script has no `Program.cs` to call `AddState` from:

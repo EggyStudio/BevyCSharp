@@ -192,7 +192,9 @@ build/build-native.sh --render --target aarch64-apple-darwin
 
 `.github/workflows/build.yml` does this across a runner matrix and packs every RID into one
 package. Locally you get whichever platform you built; `dotnet pack` skips the slots you have
-no binary for rather than failing.
+no binary for rather than failing. Each bridge goes under `runtimes/<rid>/native/`, where .NET
+looks for the platform it runs on, and the source generator under `analyzers/dotnet/cs/`, where
+the compiler finds it.
 
 Three platform notes worth knowing:
 

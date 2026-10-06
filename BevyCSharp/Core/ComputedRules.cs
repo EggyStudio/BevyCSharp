@@ -22,11 +22,18 @@ namespace Bevy;
 /// marks each computed state as worked out by a rule or by a table when it is added, and a joint
 /// is always added with its rule.
 /// </para>
+/// <para>
+/// How each computed state is worked out is kept here as well, its table as a function where it
+/// was given one (<see cref="Know"/>), for a joint that reads it. A joint is fed the state slots,
+/// and a computed state is a function of its source alone, so a joint reads one by working it out
+/// again from its source's value, as Bevy would have it from the same value in the same transition.
+/// </para>
 /// </remarks>
 internal static unsafe class ComputedRules
 {
     private static readonly Dictionary<int, Func<int, int?>> Rules = [];
     private static readonly Dictionary<int, Func<int[], uint, int?>> Joints = [];
+    private static readonly Dictionary<int, Func<int, int?>> Known = [];
     private static readonly Lock Gate = new();
     private static bool _registered;
     private static bool _jointsRegistered;
@@ -37,12 +44,25 @@ internal static unsafe class ComputedRules
         lock (Gate)
         {
             Rules[slot] = rule;
+            Known[slot] = rule;
 
             if (_registered) return;
 
             Native.Check(Native.bcs_computed_rule(&Compute), "giving the bridge the computed state rules");
             _registered = true;
         }
+    }
+
+    /// <summary>Keeps how a computed state worked out by a table is, for a joint that reads it.</summary>
+    internal static void Know(int slot, Func<int, int?> derive)
+    {
+        lock (Gate) Known[slot] = derive;
+    }
+
+    /// <summary>How the computed state in <paramref name="slot"/> is worked out from its source's value, or null before it is added.</summary>
+    internal static Func<int, int?>? Derivation(int slot)
+    {
+        lock (Gate) return Known.GetValueOrDefault(slot);
     }
 
     /// <summary>
@@ -73,6 +93,7 @@ internal static unsafe class ComputedRules
         {
             Rules.Clear();
             Joints.Clear();
+            Known.Clear();
         }
     }
 

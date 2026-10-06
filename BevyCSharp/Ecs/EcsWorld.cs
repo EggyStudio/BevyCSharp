@@ -174,6 +174,45 @@ public sealed unsafe partial class EcsWorld
                 entity.Bits, StateRegistry.SlotOf<TState>(), StateRegistry.ToInt(state)),
             $"scoping {entity} to {typeof(TState).Name}");
 
+    /// <summary>
+    /// Despawns <paramref name="entity"/> as <typeparamref name="TState"/> enters <paramref name="state"/>,
+    /// Bevy's <c>DespawnOnEnter</c>.
+    /// </summary>
+    /// <remarks>
+    /// The other side of <see cref="DespawnOnExit"/>, for what should be gone by the time a state
+    /// comes back, such as a notice spawned on leaving it that says it will, which Bevy's
+    /// <c>state_scoped</c> example puts up. Bevy acts on it at the transition, before
+    /// <c>[OnEnter]</c>'s systems run, so what they spawn is not taken with it.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// No world is loaned, the entity is gone, or the state was never added.
+    /// </exception>
+    public void DespawnOnEnter<TState>(Entity entity, TState state) where TState : struct, Enum =>
+        Native.Check(
+            Native.bcs_state_despawn_on_enter(
+                entity.Bits, StateRegistry.SlotOf<TState>(), StateRegistry.ToInt(state)),
+            $"scoping {entity} to entering {typeof(TState).Name}");
+
+    /// <summary>
+    /// Despawns <paramref name="entity"/> at the first transition of <typeparamref name="TState"/>
+    /// <paramref name="rule"/> answers true for, Bevy's <c>DespawnWhen</c>.
+    /// </summary>
+    /// <remarks>
+    /// For what goes by a rule over the transition rather than with one value, as text that says the
+    /// state holds a variant of a value is taken down as the state leaves any of its variants. The
+    /// rule is asked as each transition is read, the frame after it happens, a frame later than
+    /// Bevy acts on its own, which <see cref="DespawnOnExit"/> and <see cref="DespawnOnEnter"/> keep to.
+    /// </remarks>
+    /// <param name="entity">The entity.</param>
+    /// <param name="rule">Whether a transition takes the entity, asked of each until one does.</param>
+    /// <exception cref="InvalidOperationException">The state was never added.</exception>
+    public void DespawnWhen<TState>(Entity entity, Func<StateTransitionEvent<TState>, bool> rule) where TState : struct, Enum
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+        StateRegistry.SlotOf<TState>();
+        StateDespawnRules<TState>.Add(entity, rule);
+    }
+
     /// <summary>True when the handle still refers to a live entity.</summary>
     public bool IsAlive(Entity entity) =>
         Native.Check(Native.bcs_ecs_alive(entity.Bits), "IsAlive") != 0;

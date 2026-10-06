@@ -10,13 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3397439`. Shapes in the plane give boxes and circles about them as Bevy bounds them,
-rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is written (`cbe9a1f`).
-Verdict 4's mend: the two plays name their logs folder in their own steps, where the runner context
-is allowed, and `WorkflowTests` holds every expression in the workflows to the contexts GitHub
-allows at its place, naming the refused line of `aa55e0d`'s file when run over it, listed under
-N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs. The suite: 1,109
-passed, 9 skipped.
+Reviewed up to `4eb8838`. The state slots moved into a module of their own and the patch delegate
+into a file of its name, and the joint state tests into their area's folder, N 1.2's list at 228,
+N 1.3's at 16 and N 1.4's at 87 to mend (`fee3190`, `4eb8838`). Hermite, cardinal, B-spline and
+Bezier splines are made into cubic curves sampled along as Bevy makes them, and `cubic_splines` is
+written (`9f5537a`), the last of the math gap. Shapes in the plane give boxes and circles about them
+as Bevy bounds them, rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is
+written (`cbe9a1f`). Verdict 4's mend: the two plays name their logs folder in their own steps,
+where the runner context is allowed, and `WorkflowTests` holds every expression in the workflows to
+the contexts GitHub allows at its place, naming the refused line of `aa55e0d`'s file when run over
+it, listed under N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs.
+The suite: 1,109 passed, 9 skipped.
 
 Before them, each change of the keyboard, the mouse, a touch and a pad is read as its Bevy message
 in the order it came, 14 message records drained into the bus each frame (ABI 219), and the four
@@ -204,15 +208,24 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, Bevy's math, cubic curves.** A spline is made from control points into a `CubicCurve`, a
-run of `CubicSegment`s each multiplying its points by the spline's characteristic matrix, as Bevy's
-`cubic_splines` do. `CubicHermite`, `CubicCardinalSpline` with `CatmullRom`, `CubicBSpline` and
-`CubicBezier` each make one open or looping, null where the points are too few, as Bevy gives an
-error, the cardinal one mirroring its ends and starting its loop at the first point as Bevy's does.
-They are generic over `Vec2` and `Vec3`, which declare .NET's addition and scaling interfaces for
-it. `cubic_splines` is written, 280, its keys turning the modes offscreen, and a drag adds a point
-in a window, an offscreen run's pretended pointer moving no cursor. `CubicSplineTests` holds the
-Hermite curve through each point along its tangent, the Catmull-Rom curve through each and leaving
-its first toward its second, the B-spline starting at the mix of its first three, a Bézier's ends
-and midpoint, and even samples from end to end. The math gap is closed. The suite passed, 1,121
-with 9 skipped. The states, three examples, are next.
+**Now 3, the states, three examples.** Each transition of a state reaches C# as Bevy's
+`StateTransitionEvent` of its enum, drained from the bridge into the bus each frame and read the
+frame after (ABI 220). The first value is a move from nothing, and a value set again is a move to
+itself, which runs its `[OnExit]`, its `[OnEnter]` and an `[OnTransition]` from it to itself, as
+Bevy's `NextState::set` does. `EcsWorld.DespawnOnEnter` is Bevy's own, and `DespawnWhen` takes a
+rule over the transition, asked as the transition is read, so its entity goes a frame later than
+Bevy's would. A state carries three computed states rather than two, and a joint reads a state
+computed from one state by working it out again from that state's value, which `computed_states`
+needs for its tutorial. A computed state that is absent is no longer reported as a state never
+added. `state_scoped` and `computed_states` are written, 282, the second's buttons in a
+`MenuButton` behavior as B 4 has it, and `custom_transitions` is written in part, its restart run
+by the state's own entering and leaving where Bevy's runs schedules of its own, which TODO now
+lists among the parts. The menus are clicked in a window alone, so the games were checked
+offscreen started in play, with turbo, the pause, both tutorial texts and the restart.
+`JointStateTests` moved into `Core` first (`4eb8838`). The README's gallery took a row, so the
+package's sentence went to one line and the package's layout to BUILDING.md. The suite passed,
+1,127 with 9 skipped. A second window is next.
+
+Shared: `DespawnOnEnter` and `DespawnWhen`, neither of which 3DEngine has beside its
+`DespawnOnExit`, and a joint state reading a computed one. 3DEngine has the transition as a message
+already, as `StateTransition<TState>`.

@@ -426,12 +426,25 @@ macro_rules! define_slots {
             }
         }
 
-        /// Marks an entity to be despawned when a slot leaves a value.
+        /// Marks an entity to be despawned when a slot leaves a value, or as it enters the value
+        /// where `on_enter` is set, Bevy's `DespawnOnEnter`.
         ///
         /// The component is generic over the state type, so the slot decides which one is
         /// inserted. `insert_state` registers the systems that act on it, so a slot the managed
         /// side added is already watched.
-        pub(super) fn scope(world: &mut World, entity: bevy::ecs::entity::Entity, slot: i32, value: i32)
+        /// Copies the transitions every slot has made since the last call into `out`, slot by
+        /// slot in the numbering the managed side addresses them by, and answers how many.
+        pub(super) fn drain_transitions(world: &mut World, out: *mut BcsStateTransition, capacity: usize) -> usize {
+            let mut written = 0;
+            $(written = drain_one::<$ty>(world, $slot, |s| s.0, out, written, capacity);)+
+            $(written = drain_one::<$sub>(world, SLOT_COUNT + $subslot, |s| s.0, out, written, capacity);)+
+            $(written = drain_one::<$derived>(world, SLOT_COUNT + SUB_COUNT + $cslot, |s| s.0, out, written, capacity);)+
+            $(written = drain_one::<$joint>(world, SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot, |s| s.0, out, written, capacity);)+
+            $(written = drain_one::<$jsub>(world, SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot, |s| s.0, out, written, capacity);)+
+            written
+        }
+
+        pub(super) fn scope(world: &mut World, entity: bevy::ecs::entity::Entity, slot: i32, value: i32, on_enter: bool)
             -> i32
         {
             let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
@@ -440,23 +453,43 @@ macro_rules! define_slots {
 
             match slot {
                 $($slot => {
-                    entity_mut.insert(DespawnOnExit($ty(value)));
+                    if on_enter {
+                        entity_mut.insert(DespawnOnEnter($ty(value)));
+                    } else {
+                        entity_mut.insert(DespawnOnExit($ty(value)));
+                    }
                     status::OK
                 })+
                 $(_ if slot == SLOT_COUNT + $subslot => {
-                    entity_mut.insert(DespawnOnExit($sub(value)));
+                    if on_enter {
+                        entity_mut.insert(DespawnOnEnter($sub(value)));
+                    } else {
+                        entity_mut.insert(DespawnOnExit($sub(value)));
+                    }
                     status::OK
                 })+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + $cslot => {
-                    entity_mut.insert(DespawnOnExit($derived(value)));
+                    if on_enter {
+                        entity_mut.insert(DespawnOnEnter($derived(value)));
+                    } else {
+                        entity_mut.insert(DespawnOnExit($derived(value)));
+                    }
                     status::OK
                 })+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot => {
-                    entity_mut.insert(DespawnOnExit($joint(value)));
+                    if on_enter {
+                        entity_mut.insert(DespawnOnEnter($joint(value)));
+                    } else {
+                        entity_mut.insert(DespawnOnExit($joint(value)));
+                    }
                     status::OK
                 })+
                 $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot => {
-                    entity_mut.insert(DespawnOnExit($jsub(value)));
+                    if on_enter {
+                        entity_mut.insert(DespawnOnEnter($jsub(value)));
+                    } else {
+                        entity_mut.insert(DespawnOnExit($jsub(value)));
+                    }
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -543,20 +576,28 @@ define_slots!(
     computed {
         BcsComputed0_0 from BcsState0 at 0,
         BcsComputed0_1 from BcsState0 at 1,
-        BcsComputed1_0 from BcsState1 at 2,
-        BcsComputed1_1 from BcsState1 at 3,
-        BcsComputed2_0 from BcsState2 at 4,
-        BcsComputed2_1 from BcsState2 at 5,
-        BcsComputed3_0 from BcsState3 at 6,
-        BcsComputed3_1 from BcsState3 at 7,
-        BcsComputed4_0 from BcsState4 at 8,
-        BcsComputed4_1 from BcsState4 at 9,
-        BcsComputed5_0 from BcsState5 at 10,
-        BcsComputed5_1 from BcsState5 at 11,
-        BcsComputed6_0 from BcsState6 at 12,
-        BcsComputed6_1 from BcsState6 at 13,
-        BcsComputed7_0 from BcsState7 at 14,
-        BcsComputed7_1 from BcsState7 at 15,
+        BcsComputed0_2 from BcsState0 at 2,
+        BcsComputed1_0 from BcsState1 at 3,
+        BcsComputed1_1 from BcsState1 at 4,
+        BcsComputed1_2 from BcsState1 at 5,
+        BcsComputed2_0 from BcsState2 at 6,
+        BcsComputed2_1 from BcsState2 at 7,
+        BcsComputed2_2 from BcsState2 at 8,
+        BcsComputed3_0 from BcsState3 at 9,
+        BcsComputed3_1 from BcsState3 at 10,
+        BcsComputed3_2 from BcsState3 at 11,
+        BcsComputed4_0 from BcsState4 at 12,
+        BcsComputed4_1 from BcsState4 at 13,
+        BcsComputed4_2 from BcsState4 at 14,
+        BcsComputed5_0 from BcsState5 at 15,
+        BcsComputed5_1 from BcsState5 at 16,
+        BcsComputed5_2 from BcsState5 at 17,
+        BcsComputed6_0 from BcsState6 at 18,
+        BcsComputed6_1 from BcsState6 at 19,
+        BcsComputed6_2 from BcsState6 at 20,
+        BcsComputed7_0 from BcsState7 at 21,
+        BcsComputed7_1 from BcsState7 at 22,
+        BcsComputed7_2 from BcsState7 at 23,
     }
     joints {
         BcsJoint0 at 0,
@@ -579,3 +620,52 @@ define_slots!(
         BcsJointSub7 at 7,
     }
 );
+
+/// Where the transition drain keeps its place in one slot's queue of Bevy's `StateTransitionEvent`,
+/// a resource of its own for each state type, so a reader in Bevy loses nothing to it.
+#[derive(bevy::ecs::resource::Resource)]
+pub(super) struct TransitionCursor<S: States>(bevy::ecs::message::MessageCursor<bevy::state::state::StateTransitionEvent<S>>);
+
+impl<S: States> Default for TransitionCursor<S> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
+/// Copies one slot's transitions since the last call into `out` from `written` on, stopping at the
+/// buffer's end so what is left stays queued, and answers where the next slot's begin. A slot no
+/// app added has no queue and writes nothing.
+fn drain_one<S: States>(
+    world: &mut World,
+    slot: i32,
+    value: fn(&S) -> i32,
+    out: *mut BcsStateTransition,
+    mut written: usize,
+    capacity: usize,
+) -> usize {
+    use bevy::ecs::message::Messages;
+    use bevy::state::state::StateTransitionEvent;
+
+    if written >= capacity || !world.contains_resource::<Messages<StateTransitionEvent<S>>>() {
+        return written;
+    }
+    world.get_resource_or_insert_with(TransitionCursor::<S>::default);
+    world.resource_scope(|world, mut cursor: bevy::ecs::world::Mut<TransitionCursor<S>>| {
+        let messages = world.resource::<Messages<StateTransitionEvent<S>>>();
+        for transition in cursor.0.read(messages).take(capacity - written) {
+            let mut made = BcsStateTransition { slot, flags: 0, exited: 0, entered: 0 };
+            if let Some(exited) = &transition.exited {
+                made.flags |= 1;
+                made.exited = value(exited);
+            }
+            if let Some(entered) = &transition.entered {
+                made.flags |= 2;
+                made.entered = value(entered);
+            }
+            // SAFETY: `written < capacity`, checked by the take above.
+            unsafe { out.add(written).write(made) };
+            written += 1;
+        }
+    });
+    written
+}

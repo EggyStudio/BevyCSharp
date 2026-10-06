@@ -212,6 +212,8 @@ Entity SpawnScene(AssetHandle scene);                           // Spawns a scen
 Entity Clone(Entity entity);                                    // Spawns a copy of an entity with every component it carries
 bool Despawn(Entity entity);                                    // Destroys an entity and everything on it
 void DespawnOnExit<TState>(Entity entity, TState state);        // Despawns an entity when a state leaves the value it belongs to
+void DespawnOnEnter<TState>(Entity entity, TState state);       // Despawns entity as TState enters state, Bevy's DespawnOnEnter
+void DespawnWhen<TState>(Entity entity, Func<StateTransitionEvent<TState>, bool> rule);  // Despawns entity at the first transition of TState rule answers true for, Bevy's DespawnWhen
 bool IsAlive(Entity entity);                                    // True when the handle still refers to a live entity
 void Add<T>(Entity entity, T component);                        // Adds or replaces a component on an entity
 void Set<T>(Entity entity, T component);                        // Overwrites a component's value
