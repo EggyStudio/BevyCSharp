@@ -1,32 +1,6 @@
 namespace Bevy;
 
 /// <summary>
-/// Per-system on/off state for <see cref="ToggleKeyAttribute"/>, keyed by system name.
-/// </summary>
-/// <remarks>
-/// Stored as a world resource so the state survives across frames and can be inspected or
-/// driven from elsewhere: a debug menu, a save file, or a test.
-/// </remarks>
-public sealed class SystemToggleRegistry
-{
-    private readonly Dictionary<string, bool> _states = [];
-
-    /// <summary>The state for <paramref name="id"/>, or <paramref name="defaultEnabled"/> if unset.</summary>
-    public bool Get(string id, bool defaultEnabled = true) =>
-        _states.TryGetValue(id, out var value) ? value : defaultEnabled;
-
-    /// <summary>Sets the state for <paramref name="id"/>.</summary>
-    public void Set(string id, bool enabled) => _states[id] = enabled;
-
-    /// <summary>Flips the state for <paramref name="id"/>.</summary>
-    public void Flip(string id, bool defaultEnabled = true) =>
-        _states[id] = !Get(id, defaultEnabled);
-
-    /// <summary>Every recorded toggle, for diagnostics.</summary>
-    public IReadOnlyDictionary<string, bool> States => _states;
-}
-
-/// <summary>
 /// Ready-made run conditions for <see cref="SystemDescriptor.RunIf"/> and
 /// <see cref="RunIfAttribute"/>.
 /// </summary>
@@ -184,32 +158,4 @@ public static class BehaviorConditions
         (KeyModifier.Alt, [Key.AltLeft, Key.AltRight]),
         (KeyModifier.Super, [Key.SuperLeft, Key.SuperRight]),
     ];
-}
-
-/// <summary>
-/// Tags every system registered inside the scope with a provenance string.
-/// </summary>
-/// <remarks>
-/// This makes hot-reload swappable. A reloaded generation of behaviors registers under its own tag,
-/// and <see cref="App.RemoveSystemsBySource"/> retires the previous one without touching systems
-/// that came from anywhere else.
-/// </remarks>
-public sealed class SystemRegistrationSourceScope : IDisposable
-{
-    [ThreadStatic] private static string? _current;
-
-    private readonly string? _previous;
-
-    /// <summary>The tag in force on this thread, if any.</summary>
-    public static string? Current => _current;
-
-    /// <summary>Applies <paramref name="source"/> until disposed.</summary>
-    public SystemRegistrationSourceScope(string source)
-    {
-        _previous = _current;
-        _current = source;
-    }
-
-    /// <inheritdoc/>
-    public void Dispose() => _current = _previous;
 }

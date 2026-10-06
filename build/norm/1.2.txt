@@ -70,8 +70,6 @@ BevyCSharp/Behaviors/BehaviorAttributes.cs RunIfAttribute
 BevyCSharp/Behaviors/BehaviorAttributes.cs ToggleKeyAttribute
 BevyCSharp/Behaviors/BehaviorAttributes.cs WithAttribute
 BevyCSharp/Behaviors/BehaviorAttributes.cs WithoutAttribute
-BevyCSharp/Behaviors/BehaviorConditions.cs SystemRegistrationSourceScope
-BevyCSharp/Behaviors/BehaviorConditions.cs SystemToggleRegistry
 BevyCSharp/Behaviors/BehaviorRunner.Others.cs BehaviorRunners
 BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
 BevyCSharp/Cli/CliClient.cs CliAnswer
