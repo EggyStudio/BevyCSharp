@@ -1,11 +1,11 @@
 namespace Bevy;
 
 /// <summary>An entity carrying a component was despawned.</summary>
-/// <typeparam name="T">The component.</typeparam>
+/// <typeparam name="T">The component, a C# one or one of Bevy's through its wrapper.</typeparam>
 /// <param name="Entity">The entity, no longer alive by the time the observer runs.</param>
 /// <param name="Value">The value the component had.</param>
 /// <remarks>Bevy's <c>On&lt;Despawn, T&gt;</c>.</remarks>
-public readonly record struct Despawn<T>(Entity Entity, T Value) : IEntityEvent, IReportedEvent where T : unmanaged
+public readonly record struct Despawn<T>(Entity Entity, T Value) : IEntityEvent, IReportedEvent where T : struct
 {
     void IReportedEvent.Watch(ObserverRegistry registry) => registry.Watch<T, Despawn<T>>(4, (entity, value) => new Despawn<T>(entity, value));
 }

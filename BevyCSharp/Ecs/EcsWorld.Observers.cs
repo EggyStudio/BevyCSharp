@@ -14,9 +14,10 @@ public sealed partial class EcsWorld
     /// <remarks>
     /// <para>
     /// Bevy's <c>add_observer</c>. <typeparamref name="TEvent"/> is either an event a game declares,
-    /// triggered with <see cref="Trigger{TEvent}(TEvent)"/>, or a change Bevy reports to a C#
+    /// triggered with <see cref="Trigger{TEvent}(TEvent)"/>, or a change Bevy reports to a
     /// component, <see cref="Add{T}"/>, <see cref="Insert{T}"/>, <see cref="Discard{T}"/>,
-    /// <see cref="Remove{T}"/> or <see cref="Despawn{T}"/>.
+    /// <see cref="Remove{T}"/> or <see cref="Despawn{T}"/>, of a C# component or of one of Bevy's
+    /// through its wrapper, as <c>Add&lt;PressedRef&gt;</c>.
     /// </para>
     /// <para>
     /// An event of a game's runs its observers at once, from inside the call that triggered it. A

@@ -336,6 +336,7 @@ internal static class Catalog
         new("ui_texture_slice_flip_and_tile", UiTextureSliceFlipAndTile.Build),
         new("vertical_slider", VerticalSliderExample.Build),
         new("standard_widgets", StandardWidgets.Build),
+        new("standard_widgets_observers", StandardWidgetsObservers.Build),
         new("z_index", ZIndex.Build),
 
         // Usage

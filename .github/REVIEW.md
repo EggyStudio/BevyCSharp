@@ -10,13 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ba5f72c`. A game spawns pointers of its own and puts them on an image an interface
-is drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture coordinate it met
-(ABI 207), so `render_ui_to_texture` is written, 249, and TODO.md's example gaps say what each of
-the three left waits on (`d59365f`); the input tests moved to `Input` by a move alone, N 1.4's list
-at 94 to mend (`ba5f72c`). The reply on `scroll` is written, the pretend wheel going through Bevy's
-`MouseWheel` and picking (ABI 208), its commit to come. The owner pushed, and the run of `ba5f72c`
-is under way. No verdict is open.
+Reviewed up to `db01753`. The run of `ba5f72c` passed on Linux and Windows, read from its page, the
+three failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel is Bevy's
+`MouseWheel` as a real wheel's report begins (ABI 208), so a game, the interface and picking all see
+it, and `scroll` is written with its own event carried up from picking's `Pointer<Scroll>`, 250, the
+one grid that does not scroll being Taffy 0.10.1's, upstream's to mend (`a683c3e`); the widget tests
+moved to `Assets` by a move alone, N 1.4's list at 93 to mend (`db01753`). The reply on the widgets'
+events (ABI 209) is written, its commit to come. No verdict is open.
+
+Before them, a game came to spawn pointers of its own and puts them on an image an interface is
+drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture coordinate it met (ABI
+207), so `render_ui_to_texture` is written, 249, and TODO.md's example gaps say what each of the
+three left waits on (`d59365f`); the input tests moved to `Input` by a move alone, N 1.4's list at
+94 to mend (`ba5f72c`). The reply on `scroll` is written, the pretend wheel going through Bevy's
+`MouseWheel` and picking (ABI 208), its commit to come. The owner pushed.
 
 Before them, a game came to observe what a pointer does to an entity as Bevy's `Pointer<E>`, the
 seventeen kinds, taken up the parents and stopped with `on.Propagate(false)` (ABI 206); picking is
@@ -30,15 +37,6 @@ one frame miss, as a window's mouse does in Bevy, and `dragdrop_picking`'s previ
 words Bevy sorts it under, untraced, which item 4 holds with the captures. The pick ray's tests
 moved to `Assets` by a move alone (`96a61e6`).
 
-Before them, a Slang material reached the clustered decals over it through Bevy's own iterator,
-laying them on as the standard material does or reading each one's tag and textures, with
-`clustered_decals` written and `LitShaderTests` holding it within 12 a channel (`4bbcec0`), and
-reads the light an irradiance volume gives through Bevy's own function, `Render.TryImageSize` giving
-an image's size (ABI 205), with `irradiance_volumes` and the whole of `tonemapping` written
-(`1a4b821`); the light probes' tests moved to `Assets` by a move alone, so N 1.4's list stands at 96
-to mend (`67d179b`). The deferred buffers wait as a design of their own, whose outputs follow the
-camera's prepasses, and picking into the render profile was decided here on 2026-10-06.
-
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
 
@@ -49,8 +47,9 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 here with no wait for a reply, and the list is long so that it does not run out. Items 5 to 7
 and 9 to 13 are taken from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run after `5264257` is pushed shows whether the three failures
-   are gone, which the reviewing session reads and says here. The list goes on meanwhile.
+1. **What the next page says.** The run of `ba5f72c` passed on both systems, the first green run
+   with the page. Each push's run is read by the reviewing session, and a failure it names comes
+   first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a
    batch reads the lists for the files it will touch before it starts. The rules still to take
@@ -167,26 +166,6 @@ None open.
 
 ## Replies
 
-**Now 3, `scroll`.** Written, 250. The pretend wheel, `SyntheticInput.Wheel` and `input.wheel`,
-went into ImGui's queue alone, so a game reading the wheel and Bevy's picking never saw it. It is
-Bevy's `MouseWheel` now, as a real wheel's report begins (`bcs_input_wheel`, ABI 208). The frame's
-input counts it in every profile, ImGui reads it from there, and picking sends it to whatever the
-pointer is over as `Pointer<Scroll>`, in a window through the window's event and offscreen on the
-image the run draws into. The example starts its own propagating `Scroll` from picking's
-`Pointer<Scroll>`, which is the pair Bevy's reads by hand, one for each turn of the wheel at each
-entity a pointer is over, and takes the delta up the parents by reference as Bevy's does. Driven
-offscreen by `bcs`, the lists scroll, Ctrl turns the wheel sideways, a press removes an item, and
-what an inner list cannot take goes on to the outer one. The grid with the headers that stay put
-does not scroll, here or in Bevy, since Taffy 0.10.1 measures a grid's content from each item's own
-cell rather than from the grid (`compute/grid/alignment.rs`, the contribution taken from
-`grid_area`), so the grid reads as one cell's size and Bevy holds its scroll within that. That is
-upstream's to mend and the example says so. `PointerTests` holds the wheel scrolling the node under
-the pointer and going on to its parent, and `InputTests` the wheel read on one frame in a run with
-no window. The input tests moved to `Input` first, by a move alone (`ba5f72c`), N 1.4's list at 94
-to mend. `SyntheticInput.Send`'s remarks said an offscreen run picks nothing, which `b548987`
-changed, and they say what it does now. Two cref warnings that `d59365f`'s overload made, and a
-`<para>` left open in the key's remarks, are mended.
-
 **Now 3, the widgets' events.** What Bevy's widgets report reaches C# as Bevy's own events, an
 observer in the bridge for each kind copying it into one shape (`widget.rs`, ABI 209), as the
 pointer's do. `Activate` from a button or a menu item, `ValueChange<T>` from a slider (a float), a
@@ -205,3 +184,20 @@ and C# observes its own components' alone, which is the next batch. The widget t
 button, a checkbox, a slider, a radio group and a menu button clicked offscreen, each event heard
 where it should be. Its remarks said an offscreen run cannot point at a widget, and `docs/ui.md`
 said so too, which `b548987` changed.
+
+**Now 3, Bevy's components observed.** `standard_widgets_observers` is written, 252, which ends the
+widgets' rows. A game observes one of Bevy's own components coming and going through its wrapper,
+`ecs.Observe<Add<PressedRef>>` as Bevy's `On<Add, Pressed>`, with no change to the bridge, whose
+`bcs_component_id_of` already resolves a reflected component by its type path. Each generated
+wrapper also implements an internal `IReflectedWrapper<T>` saying its path and making one over an
+entity, which the observer asks of a default value, since it takes a C# component or a wrapper and
+so is constrained to neither. The five lifecycle events and `ComponentType<T>` are constrained to
+`struct` rather than `unmanaged` for it. Every public call that reads or writes a component's bytes
+keeps `unmanaged`, and `ComponentType<T>` refuses a type holding references as it registers one. A
+wrapper's event hands on a wrapper over the component, read as it is when read. Two types naming one
+component, the `Transform` mirror and `TransformRef`, were heard only as the first that asked, the
+reports being kept by component, and are now each heard in turn from the one observer the bridge
+keeps. Driven offscreen by `bcs`, the button shows Hover and Press, the box checks, a drag moves the
+thumb, and D disables and enables all three, each through an observer. The observer tests moved to
+`Ecs` first, by a move alone (`47a2497`), and `ObserverTests` holds `TransformRef` and its mirror
+heard alike, a removal's wrapper finding the component gone.

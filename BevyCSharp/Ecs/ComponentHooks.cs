@@ -67,7 +67,7 @@ public static unsafe class ComponentHooks
     /// Attaches the hooks declared for <typeparamref name="T"/>, if there are any, to the id it has
     /// been registered under.
     /// </summary>
-    internal static void Attach<T>(int id) where T : unmanaged
+    internal static void Attach<T>(int id) where T : struct
     {
         Action<IntPtr>? removed;
         Action<IntPtr>? cloned;

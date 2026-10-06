@@ -39,12 +39,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **Bevy's own components observed as they come and go, one example.** C# observes its own
-  components added, inserted and removed, and `standard_widgets_observers` observes Bevy's, a
-  widget's `Pressed`, `Hovered`, `Checked`, `InteractionDisabled` and slider value, to restyle it
-  as they change. The bridge's observer watches a component by its id, which for one of Bevy's is
-  found from its type path, and the C# event would name the component by its wrapper rather than
-  carry its bytes.
 - **Input as events, seven examples.** The keyboard, the mouse, touches and pads as Bevy's messages,
   one per change in the order they came, which `keyboard_input_events`, `mouse_input_events`,
   `touch_input_events` and `gamepad_input_events` print, a key observed as it reaches the focused

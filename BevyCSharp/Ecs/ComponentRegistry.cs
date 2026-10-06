@@ -116,10 +116,13 @@ internal static class ComponentRegistry
 /// single fork is all it takes for the whole generic API to reach Bevy's components.
 /// </remarks>
 /// <typeparam name="T">
-/// A blittable struct. The <c>unmanaged</c> constraint makes the layout safe to hand to Bevy
-/// verbatim, with no references, no GC involvement and no marshaling on the hot path.
+/// A blittable struct, with no references, no GC involvement and no marshaling on the hot path, so
+/// its layout is safe to hand to Bevy verbatim. Every public call that reads or writes one is
+/// constrained to <c>unmanaged</c>. This class is constrained to <c>struct</c> alone so that an
+/// observer of <see cref="Add{T}"/> and its kin, which takes a wrapper over one of Bevy's
+/// components as well, reaches it, and it refuses a type holding references as it registers one.
 /// </typeparam>
-public static class ComponentType<T> where T : unmanaged
+public static class ComponentType<T> where T : struct
 {
     /// <summary>
     /// <typeparamref name="T"/>'s engine-side identity, or <see langword="null"/> when it is an
@@ -165,6 +168,12 @@ public static class ComponentType<T> where T : unmanaged
 
             if (NativeHandle is null)
             {
+                if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                    throw new BevyNativeException(
+                        NativeStatus.Unsupported,
+                        $"{typeof(T).Name} holds references, so it cannot be a component, whose bytes "
+                        + "Bevy keeps as they are. A component is a struct of values alone.");
+
                 _id = ComponentRegistry.Register(
                     typeof(T).FullName ?? typeof(T).Name,
                     (uint)Size,

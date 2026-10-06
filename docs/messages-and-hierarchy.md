@@ -147,6 +147,20 @@ work in, so a `Remove<T>` observer finds the component already gone and is hande
 change queued on `ctx.Cmd` runs them when the commands are applied. An exception in one is written
 to the console and goes no further, since it would otherwise have to cross back through Bevy.
 
+Bevy's own components are observed the same way, through their wrappers, as Bevy's `On<Add,
+Pressed>` is `Add<PressedRef>`, which is how an interface restyles a widget as the pointer presses
+it or a key disables it:
+
+```csharp
+ctx.Ecs.Observe<Add<PressedRef>>(on => Restyle(on.Ecs, on.Event.Entity));
+ctx.Ecs.Observe<Remove<InteractionDisabledRef>>(on => Restyle(on.Ecs, on.Event.Entity));
+```
+
+The value handed on is then a wrapper over the component, which reads it as it is when read,
+since Bevy's bytes are Rust's own, so a removal's wrapper finds nothing there. Where Bevy's
+observer of a removal runs while the component is still on the entity, and so asks which event it
+was before reading it, this one runs once it has gone, and reads the entity as it is.
+
 A game's event likewise runs its observers inside `Trigger`, before it returns.
 
 ---

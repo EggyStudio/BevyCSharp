@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -132,6 +133,35 @@ public sealed class ObserverTests
             ctx.Ecs.Add(entity, new Watched { Value = 2 });
             ctx.Ecs.Remove<Watched>(entity);
             Assert.Equal(["add 1", "insert 1", "discard 1", "insert 2", "discard 2", "remove 2 gone"], seen);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>
+    /// One of Bevy's own components is observed through its wrapper as it comes and goes, the
+    /// wrapper handed on reading it as it is, and its mirror is heard beside it rather than in its
+    /// place.
+    /// </summary>
+    [Fact]
+    public void OneOfBevysComponentsIsObservedThroughItsWrapperAndItsMirrorAlike()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var seen = new List<string>();
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            ctx.Ecs.Observe<Add<TransformRef>>(on => seen.Add($"add {on.Event.Value.Translation.X}"));
+            ctx.Ecs.Observe<Add<Transform>>(on => seen.Add($"mirror add {on.Event.Value.Translation.X}"));
+            ctx.Ecs.Observe<Remove<TransformRef>>(on => seen.Add(
+                $"remove {(on.Ecs.Get<TransformRef>(on.Event.Entity) is null ? "gone" : "still there")}"));
+
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, Transform.At(3f, 0f, 0f));
+            Assert.Equal(["add 3", "mirror add 3"], seen);
+
+            ctx.Ecs.Get<TransformRef>(entity)?.Remove();
+            Assert.Equal(["add 3", "mirror add 3", "remove gone"], seen);
         });
 
         harness.Run();

@@ -408,7 +408,7 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
             /// component on <see cref="Entity"/> as it is now, and throws when the entity no longer
             /// carries it. Get one with <c>EcsWorld.Get</c> or <c>EcsWorld.Insert</c>.
             /// </remarks>
-            public readonly struct {{type}} : global::Bevy.IReflectedComponent<{{type}}>
+            public readonly struct {{type}} : global::Bevy.IReflectedComponent<{{type}}>, global::Bevy.IReflectedWrapper<{{type}}>
             {
                 /// <summary>The component's full Rust type path.</summary>
                 public const string TypePath = "{{component.Path}}";
@@ -427,6 +427,11 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                 static string global::Bevy.IReflectedComponent<{{type}}>.TypePath => TypePath;
 
                 static {{type}} global::Bevy.IReflectedComponent<{{type}}>.Create(
+                    global::Bevy.EcsWorld world, global::Bevy.Entity entity) => new(world, entity);
+
+                string global::Bevy.IReflectedWrapper<{{type}}>.ComponentPath => TypePath;
+
+                {{type}} global::Bevy.IReflectedWrapper<{{type}}>.Over(
                     global::Bevy.EcsWorld world, global::Bevy.Entity entity) => new(world, entity);
 
                 /// <summary>Takes the component off the entity, reporting whether it was there.</summary>

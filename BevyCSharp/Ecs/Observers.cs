@@ -35,7 +35,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly World _world;
     private readonly Dictionary<Type, List<Delegate>> _global = [];
     private readonly Dictionary<(Type, Entity), List<Delegate>> _onEntity = [];
-    private readonly HashSet<(int Kind, int Component)> _watched = [];
+    private readonly HashSet<(int Kind, int Component, Type Event)> _watched = [];
     private readonly HashSet<int> _watchedPointers = [];
     private readonly HashSet<int> _watchedWidgets = [];
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
@@ -91,16 +91,39 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     }
 
     /// <summary>Asks the bridge to report one kind of change to <typeparamref name="T"/>, once.</summary>
-    internal void Watch<T, TEvent>(int kind, Func<Entity, T, TEvent> make) where T : unmanaged
+    /// <remarks>
+    /// <para>
+    /// <typeparamref name="T"/> is a C# component, whose bytes as the change left them are handed
+    /// on, or a wrapper over one of Bevy's, found by its type path and handed on as a wrapper over
+    /// the entity, since Bevy's bytes are Rust's own and only its reflection reads them.
+    /// </para>
+    /// <para>
+    /// Two types can name one component, a mirror such as <see cref="Transform"/> and its wrapper
+    /// <c>TransformRef</c>, so each is reported in turn from the one observer the bridge keeps for
+    /// the component, rather than the first to ask being the only one heard.
+    /// </para>
+    /// </remarks>
+    internal void Watch<T, TEvent>(int kind, Func<Entity, T, TEvent> make) where T : struct
     {
-        var component = EcsWorld.ComponentId<T>();
-        if (!_watched.Add((kind, component))) return;
+        var wrapper = (object)default(T) as IReflectedWrapper<T>;
+        var component = wrapper is null ? ComponentType<T>.Id : NativeComponents.Resolve(wrapper.ComponentPath, 0);
+        if (!_watched.Add((kind, component, typeof(TEvent)))) return;
 
-        _reports[(kind, component)] = (entity, bytes) =>
+        Action<Entity, ReadOnlySpan<byte>> report = wrapper is null
+            ? (entity, bytes) =>
+            {
+                var value = bytes.Length >= Unsafe.SizeOf<T>() ? MemoryMarshal.Read<T>(bytes) : default;
+                Trigger(make(entity, value));
+            }
+            : (entity, _) => Trigger(make(entity, wrapper.Over(_world.Resource<EcsWorld>(), entity)));
+
+        if (_reports.TryGetValue((kind, component), out var reports))
         {
-            var value = bytes.Length >= Unsafe.SizeOf<T>() ? MemoryMarshal.Read<T>(bytes) : default;
-            Trigger(make(entity, value));
-        };
+            _reports[(kind, component)] = reports + report;
+            return;
+        }
+
+        _reports[(kind, component)] = report;
 
         ulong observer;
         Native.Check(
