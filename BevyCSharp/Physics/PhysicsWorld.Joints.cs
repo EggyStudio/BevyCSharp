@@ -50,8 +50,8 @@ public sealed partial class PhysicsWorld
             }),
         };
 
-        first.Awake = true;
-        second.Awake = true;
+        Wake(first);
+        Wake(second);
 
         var id = ++_nextJoint;
         var constraints = new List<ConstraintHandle> { constraint };
@@ -121,8 +121,7 @@ public sealed partial class PhysicsWorld
         {
             if (_bodies.TryGetValue(entity, out var body) && body.Kind != BodyKind.Static)
             {
-                var reference = _simulation.Bodies[body.Moving];
-                reference.Awake = true;
+                Wake(_simulation.Bodies[body.Moving]);
             }
         }
 
@@ -161,8 +160,7 @@ public sealed partial class PhysicsWorld
         {
             if (_bodies.TryGetValue(entity, out var body) && body.Kind != BodyKind.Static)
             {
-                var reference = _simulation.Bodies[body.Moving];
-                reference.Awake = true;
+                Wake(_simulation.Bodies[body.Moving]);
             }
         }
 

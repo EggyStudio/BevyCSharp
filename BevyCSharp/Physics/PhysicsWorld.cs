@@ -266,7 +266,7 @@ public sealed partial class PhysicsWorld : IDisposable
         var body = Moving(entity);
         body.Velocity.Linear = ToBepu(linear);
         body.Velocity.Angular = ToBepu(angular);
-        body.Awake = true;
+        Wake(body);
     }
 
     /// <summary>
@@ -279,7 +279,7 @@ public sealed partial class PhysicsWorld : IDisposable
     {
         var body = Moving(entity);
         body.ApplyImpulse(ToBepu(impulse), ToBepu(offset));
-        body.Awake = true;
+        Wake(body);
     }
 
     /// <summary>Whether a dynamic body has come to rest and stopped being simulated.</summary>
@@ -536,6 +536,22 @@ public sealed partial class PhysicsWorld : IDisposable
             throw new KeyNotFoundException($"{entity} has no body that moves.");
 
         return _simulation.Bodies[body.Moving];
+    }
+
+    /// <summary>Wakes a body a game has asked to move, so it moves in the next step.</summary>
+    /// <remarks>
+    /// Bepu decides at the start of a step which bodies sleep, from how fast each went in the step
+    /// before, and a body that has rested long enough is a candidate however it was told to move
+    /// since. Setting <c>Awake</c> on one that is awake changes nothing, so a crate at rest for
+    /// half a second, given a speed of 3, was put to sleep at the start of the next step and never
+    /// moved. Its candidacy is cleared with the wake, and the step after is judged on the speed it
+    /// was given.
+    /// </remarks>
+    private static void Wake(BodyReference body)
+    {
+        body.Awake = true;
+        body.Activity.SleepCandidate = false;
+        body.Activity.TimestepsUnderThresholdCount = 0;
     }
 
     /// <summary>How a moving body collides, with contacts generated up to a tenth of a unit ahead.</summary>

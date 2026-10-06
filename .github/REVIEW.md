@@ -219,3 +219,17 @@ does not move. The second is the next batch here.
 Shared: a kinematic body follows its entity at the entity's speed and rate of turning at every
 frame rate, taken here after 3DEngine's `15fa305a` and `7ae91e7c`, for an entity's own transform
 where 3DEngine follows a parent's.
+
+**The woken body put back to sleep** (SHARED.md). `SetVelocity`, `ApplyImpulse`, `Connect`,
+`SetMotor` and `Disconnect` wake a body through `PhysicsWorld.Wake`, which clears Bepu's candidacy
+for sleep with the wake, so the step after is judged on the speed the body was given. `SleepTests`
+let a body rest 32 steps, by when Bepu counts it ready to sleep, and 128, by when it sleeps, and
+then give a crate a velocity, push one with an impulse, set a resting door's motor going, take
+away the joint a ball hangs still from, and set off the platform a crate rests on. Before the
+change the velocity and the impulse given after 32 steps were lost, the crate staying where it
+was. The other eight already moved, the two after 128 steps since a sleeping body is woken whole,
+and the motor, the joint and the platform after 32 for a reason not looked into, and they keep
+the wake as a test. Characters and kinematic bodies never sleep and were not touched.
+
+Shared: a velocity, an impulse, a motor or a joint changed clears Bepu's candidacy for sleep with
+the wake, so a body at rest that is told to move moves, taken here with `SleepTests`.
