@@ -80,6 +80,45 @@ public sealed class TestScriptTests : IDisposable
         Assert.Contains("500 failed, of 12 causes", File.ReadAllText(_folder.File("summary.md")));
     }
 
+    /// <summary>
+    /// The lines the output repeated most are its warnings, errors and lines with no level, so a
+    /// banner each app logs at its start is passed over for an error a system logs each frame, and
+    /// the section is left out where nothing of those repeats.
+    /// </summary>
+    [SkippableFact]
+    public void TheRepeatedLinesAreItsWarningsAndErrorsAndTheSectionGoesWhereNoneRepeat()
+    {
+        var python = Needs.Python();
+        File.WriteAllText(_folder.File("results-the-suite.trx"),
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?><TestRun xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\"><Results>"
+            + "<UnitTestResult testName=\"Bevy.Tests.AlphaTests.Passes\" outcome=\"Passed\" /></Results></TestRun>");
+
+        // Each app's start logs its adapter at INFO, colored as Bevy colors it, and one system logs
+        // the same error each frame.
+        var output = new StringBuilder();
+        for (var app = 0; app < 300; app++)
+        {
+            output.AppendLine($"\u001b[2m2026-10-06T16:45:{app % 60:00}.176569Z\u001b[0m \u001b[32m INFO\u001b[0m \u001b[2mbevy_render::renderer\u001b[0m\u001b[2m:\u001b[0m AdapterInfo {{ name: \"Test GPU\", device: {app} }}");
+            output.AppendLine($"2026-10-06T16:45:{app % 60:00}.176569Z DEBUG bevy_app: the app took {app} ms to start");
+        }
+        for (var frame = 0; frame < 40; frame++)
+            output.AppendLine($"2026-10-06T16:46:00.000000Z ERROR bevy_csharp: the thrower failed on frame {frame}");
+        File.WriteAllText(_folder.File("output-the-suite.txt"), output.ToString());
+
+        Script(python, new(), "--read", _folder.Path);
+        var page = File.ReadAllText(_folder.File("digest.md"));
+        Assert.Contains("### Repeated most in the output", page);
+        Assert.Contains("40 × `2026-10-06T16:46:00.000000Z ERROR bevy_csharp: the thrower failed on frame 0`", page);
+        Assert.DoesNotContain("AdapterInfo", page);
+        Assert.DoesNotContain("took", page);
+
+        // The banners alone, which repeat and count for nothing.
+        File.WriteAllText(_folder.File("output-the-suite.txt"),
+            string.Concat(Enumerable.Range(0, 300).Select(app => $"2026-10-06T16:45:00.000000Z  INFO bevy_render::renderer: AdapterInfo {{ device: {app} }}\n")));
+        Script(python, new(), "--read", _folder.Path);
+        Assert.DoesNotContain("Repeated most", File.ReadAllText(_folder.File("digest.md")));
+    }
+
     [SkippableTheory]
     [InlineData("hang", "ended at its time limit")]
     [InlineData("grow", "ended at its memory limit")]

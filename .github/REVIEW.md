@@ -10,15 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `194a3b7`. A game reads a key by what it types or by its name as well as by where it
-is, Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended
-key reads as a keyboard's would, named where it types nothing, so Bevy's text fields take a
-pretended Backspace, Enter or arrow, and released as it was pressed, where one that typed a
-character stayed down for good; `keyboard_input` is written, 253 (`b23e532`). Two commits of moves
-alone put the editable text tests in `Assets` and split the bridge's `ui.rs` into its parts, N 1.3's
-list at 18 with 11 in the bridge and N 1.4's at 91 to mend (`915514e`, `194a3b7`). The key observed
-as it reaches a field is next, which Bevy hands out only where there is a primary window, so an
-offscreen run's fields need their own dispatch, then item 14. No verdict is open.
+Reviewed up to `15974f1`. A key reaching the focused entity is observed as Bevy's
+`FocusedInput<KeyboardInput>`, taken up the parents as the pointer's events are (ABI 211), an
+offscreen run's fields take keys from the bridge's own dispatch, the focus is given and moved from
+C# through Bevy's `InputFocus`, and `multiline_text_input` and `multiple_text_inputs` are written,
+255, a field set again having been inserted over itself and drawing nothing, mended on the way
+(`f46edec`); the server tests moved to `Cli` by a move alone, N 1.4's list at 90 to mend
+(`15974f1`). The reply on item 14 is written, its commit to come. The owner pushed, and the run of
+`15974f1` is under way. No verdict is open.
+
+Before them, a game came to read a key by what it types or by its name as well as by where it is,
+Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended key
+reads as a keyboard's would, named where it types nothing, so Bevy's text fields take a pretended
+Backspace, Enter or arrow, and released as it was pressed, where one that typed a character stayed
+down for good; `keyboard_input` is written, 253 (`b23e532`). Two commits of moves alone put the
+editable text tests in `Assets` and split the bridge's `ui.rs` into its parts, N 1.3's list at 18
+with 11 in the bridge and N 1.4's at 91 to mend (`915514e`, `194a3b7`).
 
 Before them, what Bevy's widgets report came to reach C# as their own `Activate`, `ValueChange<T>`
 and `MenuEvent`, the last taken up the parents (ABI 209), and `standard_widgets` is written on them,
@@ -28,13 +35,6 @@ lifecycle events constrained to `struct` while every call reading a component's 
 `unmanaged`, and `standard_widgets_observers` is written, 252, which ends the widgets' rows
 (`569ea59`); the observer tests moved to `Ecs` by a move alone, N 1.4's list at 92 to mend
 (`47a2497`). Item 14 came from 3DEngine's Verdict 24.
-
-Before them, the run of `ba5f72c` passed on Linux and Windows, read from its page, the three
-failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel is Bevy's
-`MouseWheel` as a real wheel's report begins (ABI 208), so a game, the interface and picking all see
-it, and `scroll` is written with its own event carried up from picking's `Pointer<Scroll>`, 250, the
-one grid that does not scroll being Taffy 0.10.1's, upstream's to mend (`a683c3e`); the widget tests
-moved to `Assets` by a move alone, N 1.4's list at 93 to mend (`db01753`).
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -183,23 +183,6 @@ None open.
 
 ## Replies
 
-**Now 3, keys as they reach a field.** A key handed to the focused entity reaches C# as Bevy's
-`FocusedInput<KeyboardInput>`, carrying the key, its logical key, its state, its text and whether
-it repeats, and taken up the parents in C# as the pointer's events are (`focus.rs`, ABI 211). Bevy
-hands keys out only where there is a primary window, so an offscreen run's fields took none. The
-bridge now hands them out itself there, the event built through Bevy's reflection since its window
-field is private, so a test or `bcs` types into an offscreen field, Backspace and Enter included.
-`Ui.Focus` gives the focus through Bevy's `InputFocus::set`, which records the change where writing
-the field did not, and `Ui.Navigate` answers where Tab would move it. `multiline_text_input` and
-`multiple_text_inputs` are written, 255, driven offscreen by `bcs`, Ctrl+Enter printing the text,
-Enter setting the lines and the font size, and Enter submitting a row and moving the focus on.
-Found on the way, a field set again was inserted over itself, which kept its text and drew none of
-it, and it is now changed where it stands, `EditableTextTests` holding its text drawn. The bridge's
-`ui.rs` was split into parts by moves alone first (`194a3b7`), N 1.3's list at 18, and the editable
-text tests moved to `Assets` (`915514e`), N 1.4's at 92. One difference stays, said in
-`FocusedInput`'s remarks. A C# observer of a parent hears a key a Bevy field took, where Bevy's
-own stop at the field. Item 14 is next.
-
 **Item 14, a closed server leaves no thread alive.** `CliServer` keeps the connections open now,
 each leaving the set as its thread ends, so the set does not grow by one per command. `Dispose`
 closes each, which ends its read, ends any wait on a frame with `SESSION_CLOSING`, and joins every
@@ -212,3 +195,13 @@ thread of its own alive and the connection closed, with no wait on the clock.
 
 Shared: the console's connections closed and their threads joined as the app stops, taken here as
 3DEngine's `27f949bf` has it, for its row in SHARED.md.
+
+**Item 15, the repeated lines.** `build/test.py` counts the lines logged at warning or error, or
+with no level, Bevy's level read after the time its log writes and the colors taken off, so each
+app's adapter line at INFO no longer fills the section. The section was already left out when
+nothing repeats. `TestScriptTests` holds a log of three hundred colored INFO banners, DEBUG lines and
+one error logged forty times, which the page lists alone, and the banners by themselves, which give
+no section.
+
+Shared: the run page's repeated lines read as 3DEngine's now do, Bevy's own log format standing in
+for its bracketed levels.

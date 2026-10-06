@@ -16,8 +16,8 @@ classes in order, at least a hundred tests, and the last part takes whatever no 
 test falls between two parts.
 
 The page has the run's counts and a line for each part, the lost processes, the failures by cause,
-the most frequent first, and the lines the output repeated most. It ends the log between two marking
-lines, and is written to TestResults/digest.md and digest.json. Under GitHub Actions it is also the
+the most frequent first, and the warnings, errors and unlogged lines the output repeated most, where
+any repeat. It ends the log between two marking lines, and is written to TestResults/digest.md and digest.json. Under GitHub Actions it is also the
 job's summary, with each cause, whole, an error annotation. What the processes print goes to
 TestResults/output*.txt. It exits 0 when every test passed and no process was lost.
 
@@ -436,8 +436,18 @@ def frame_of(line):
     return f"{match.group(1)} in {os.path.basename(match.group(2).replace(chr(92), '/'))}:{match.group(3)}" if match else text
 
 
+# A line Bevy's log wrote, after the time it was written at, and its level.
+LOGGED = re.compile(r"^(?:\d{4}-\d\d-\d\dT[\d:.]+Z\s+)?(TRACE|DEBUG|INFO|WARN|ERROR)\s")
+
+
 def repeated_lines(texts):
-    """The lines the output repeated most, as one count for lines that differ only in their numbers."""
+    """
+    The lines the output repeated most, as one count for lines that differ only in their numbers.
+    Only a line logged as a warning or an error counts, or one with no level, as an exception's
+    message is, since a line logged below them repeats by design, as each app's start logs the
+    adapter it draws on, and would fill the section where a system that throws in every frame was
+    to be seen.
+    """
     counts, first = Counter(), {}
     for text in texts:
         for line in text.splitlines():
@@ -446,6 +456,9 @@ def repeated_lines(texts):
             if (len(stripped) < 12 or stripped.startswith("at ") or re.match(r"^(Passed|Failed|Skipped) ", stripped)
                     or stripped.startswith("[xUnit.net") or re.match(r"^test \S+ \.\.\. ", stripped)
                     or re.match(r"^(Compiling|Running|running|test result:|Doc-tests|Finished|Executable) ", stripped)):
+                continue
+            logged = LOGGED.match(stripped)
+            if logged and logged.group(1) in ("TRACE", "DEBUG", "INFO"):
                 continue
             key = re.sub(r"\d+", "#", re.sub(r"^\[\s*[\d.]+s\]\s*", "", stripped))
             counts[key] += 1
