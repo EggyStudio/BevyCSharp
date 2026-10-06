@@ -34,8 +34,8 @@ internal static class EasedMotion
             // seconds, and the turn over four, held at its end until the clip starts again.
             var time = ctx.Time.Elapsed % 6f;
             var slide = time <= 3f ? time / 3f : (6f - time) / 3f;
-            var x = -6f + 12f * Ease.CubicInOut(slide);
-            var turn = Ease.ElasticInOut(MathF.Min(time, 4f) / 4f);
+            var x = -6f + 12f * EaseFunction.CubicInOut.Sample(slide);
+            var turn = EaseFunction.ElasticInOut.Sample(MathF.Min(time, 4f) / 4f);
             ctx.Ecs.Set(_cube, new Transform(new Vec3(x, 2f, 0f), Quat.FromRotationY(MathF.PI / 2f * turn), Vec3.One));
         }, "eased_motion.Animate");
     }

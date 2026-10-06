@@ -1367,6 +1367,14 @@ Vec3 TransformPoint(Vec3 point);                                // Maps a point 
 Vec3 TransformDirection(Vec3 direction);                        // Maps a direction in the entity's local space into world space
 ```
 
+### `EaseFunction`
+
+```csharp
+static EaseFunction Steps(int count, JumpAt jump);              // A staircase of count steps rising where jump says, as Bevy's EaseFunction::Steps
+static EaseFunction Elastic(float omega);                       // A spring of angular frequency omega settling at one, as Bevy's EaseFunction::Elastic
+float Sample(float t);                                          // The value at t, from zero at its start to one at its end
+```
+
 ## The tools
 
 The guide's page is [tools.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md).
