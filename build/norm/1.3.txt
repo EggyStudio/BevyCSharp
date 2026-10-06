@@ -19,5 +19,4 @@ native/bevy_csharp/src/render/slang.rs
 native/bevy_csharp/src/render/values.rs
 native/bevy_csharp/src/render/views.rs
 native/bevy_csharp/src/states.rs
-native/bevy_csharp/src/ui.rs
 native/bevy_csharp/src/window.rs
