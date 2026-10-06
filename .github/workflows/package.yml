@@ -245,12 +245,25 @@ jobs:
           SHOTS: ${{ runner.temp }}/courtyard
         run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
 
+      # The same game published as native code from the package, as a player gets it, which keeps
+      # only what the compiler sees used, and played to its win the same way (NORM.md, N 2.5). The
+      # native compiler links with clang, against zlib.
+      - name: Install clang and zlib
+        run: sudo apt-get install -y -qq --no-install-recommends clang zlib1g-dev
+
+      - name: Publish Courtyard native and play it
+        env:
+          SHOTS: ${{ runner.temp }}/courtyard-native
+        run: mkdir -p "$SHOTS" && build/play-native.sh 0.0.0-ci
+
       # What each step looked like and the game's own log, which say where a failed run went wrong.
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: courtyard
-          path: ${{ runner.temp }}/courtyard
+          path: |
+            ${{ runner.temp }}/courtyard
+            ${{ runner.temp }}/courtyard-native
           if-no-files-found: ignore
 
   # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does

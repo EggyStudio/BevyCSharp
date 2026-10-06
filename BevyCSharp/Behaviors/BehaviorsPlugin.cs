@@ -148,6 +148,9 @@ public sealed class BehaviorsPlugin : IPlugin
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
         "Trimming", "IL2075:UnrecognizedReflectionPattern",
         Justification = "See ScanForMissedRegistrations; this path is a best-effort fallback.")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
+        "Trimming", "IL2065:UnrecognizedReflectionPattern",
+        Justification = "The same call as IL2075 names, as the iterator the compiler makes of this method reports it, which a native publish of a game found.")]
     private static IEnumerable<MethodInfo> FindRegistrations(Assembly assembly)
     {
         Type?[] types;

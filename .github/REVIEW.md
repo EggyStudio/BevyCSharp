@@ -10,7 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b78e565`. `render/shaders.rs` and `RenderShaders.cs` are split by moves alone
+Reviewed up to `3b8fa9e`. A test fails for an error the engine logs that it did not say it expects
+(`76cdb9a`), every error said through `EngineLog` and Bevy's own kept by a layer of the bridge's,
+a system that throws every frame logged whole once and counted after, and the number B 1 reads
+at 202. The survey found 40 tests logging an error, 15 of them tests of a failure that say so and
+the rest faults, each mended in its own commit: the editor's behaviors ran inside 17 other tests'
+apps (`ba388ab`), the bridge kept clone callbacks by component id from one app to the next and
+wrote a later app's component through an earlier app's hook, and synthetic input wrote window
+events into a headless app (`20663fd`). The tests run through `build/test.py` (`3b8fa9e`), its
+parts the bridge, the renderer and the suite from the start, each held to a time and a memory,
+a cargo part compiled first with `--no-run` since rustc passes 6 GB, and a digest job joining the
+systems' pages, with `TestScriptTests` and stand-ins for dotnet and cargo. N 3.7, N 6.7 and N 6.8
+are checked, and this engine stands at 24 checked, 4 with places listed, 6 to take and 9
+by review. AGENTS.md still names `dotnet test` and `cargo test`, which change on the owner's word.
+
+Before them, `render/shaders.rs` and `RenderShaders.cs` are split by moves alone
 (`74e5b76`, `b78e565`), off N 1.3's list and, the library's, N 1.2's, and
 `bcs_shader_entity_program` runs under the guard (`333ff9b`), the last entry point B 3 listed,
 so B 3 is checked with its 15 left out. The lists stand at 307 for N 1.2 and 23 for N 1.3.
@@ -19,8 +33,7 @@ Before them, N 2.10 finds every method native code calls and fails for a call no
 catch covers (`869c9fb`), eight of them, and two caught nothing before taking a lock, the
 computed and the joint state's rule, which take it inside the `try`. N 2.9 is `FileHandleTests`
 over fourteen loaders in a folder from `TestFolder`, the one helper N 3.4 names, which is new
-here (`9f74107`), and none holds a file. This engine stands at 22 checked, 4 with places listed,
-8 to take and 9 by review.
+here (`9f74107`), and none holds a file.
 
 Before them, the four costs measuring found were mended, the last with `Gizmos.Lines`
 handing a run to the bridge as lines (`de790e4`), which takes many_gizmos to 8.59 ms beside
@@ -298,38 +311,10 @@ None open.
 
 ## Replies
 
-N 3.7 is `FailOnLoggedErrors` in the tests, taken from 3DEngine's with its ears in an `AsyncLocal`
-from the start. The errors of this engine are named in `EngineLog`'s remarks, the library's one
-place an error is said, which twelve of the library's fourteen writes to the error stream go through
-now, the other two being warnings: a system's exception, an observer's, a component hook's, a state
-rule's, a queued command's, a carried file's, a material file read again, a resource disposed and
-the project file. A panic the guard catches comes back as an exception from its call. Bevy's own
-errors are kept by a layer of the bridge's in Bevy's log plugin and taken once a frame and as a run
-ends and the app goes, which lays them to the app that logged them. The plugin is added by the first
-app of the process alone, since each later one logged that the logger was set already, and a
-headless app has it now, which had no logger and so said none of Bevy's errors. An error is laid to
-a test by the app it made in its flow, or by its flow where there is no app. A system that throws
-every frame is logged whole once, then at each power of ten and in all as the run ends
-(`SystemExceptionTests`). The number B 1 reads is 202 for `bcs_log_take_error`.
-
-A survey of the suite found 40 tests that logged an error, and there is no list: 15 test a failure
-and say so with `[ExpectsError]`, and the rest were faults. The editor's behaviors were registered
-in every app that registered them all once the suite had loaded the editor, so `EditorBoot.Start`
-brought the editor up inside 17 other tests' apps, and `BehaviorsPlugin.Assemblies` names the
-assemblies the harness registers. The bridge kept clone callbacks by component id from one app to
-the next and ran an earlier app's list copy over a later app's component of another layout, which is
-memory written wrong, and both tables are forgotten as an app is made, with a test that failed
-without it. Synthetic input wrote window events into a headless app, which keeps none and logged
-each as an error. Six handle-table tests load the tests' own images in place of files no loader
-reads, so they no longer depend on Bevy's failure arriving within their few frames.
-
-N 6.7 and N 6.8 are `build/test.py`, taken from 3DEngine's with its annotations carrying a cause's
-whole entry. Its parts are the three processes from the start, `bridge` and `renderer` through cargo
-and `suite` through dotnet test, each held to a time and a memory and each a line on the page, and
-the bridge's failures are read from what cargo prints under `failures:`, a panic's message and the
-place it names. A cargo part is compiled first with `--no-run`, held to the time alone, since rustc
-compiling the renderer's crates passes 6 GB and is no test process. The suite's tests share one
-namespace, so a part of a suite run again is a run of its classes of a hundred tests or more. The
-test job runs it, `renderer` on Linux alone as before, and a digest job makes one page of the
-systems' pages. `TestScriptTests` holds it with stand-ins for dotnet and cargo that hang, grow, die,
-fail and do not build.
+N 2.5 is `build/play-native.sh`, which publishes Courtyard from the package as native code and plays
+it from its menu to its win with `games/Courtyard/play.sh`, as the game job now does after playing
+it built, with clang and zlib installed for the native compiler. Published here with gcc, it won
+with three coins and every step's capture drawn. Its one trim warning was IL2065 in the iterator
+of `BehaviorsPlugin.FindRegistrations`, the call its IL2075 suppression already names as the
+compiler's iterator reports it, and it is suppressed with that reason, which leaves the publish
+with none.
