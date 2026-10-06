@@ -115,7 +115,7 @@ def run(process, args, results):
     command = command_of(process, args, results)
     output_path = os.path.join(results, process.output)
     started = time.monotonic()
-    with open(output_path, "w", encoding="utf-8", errors="replace") as output:
+    with open(output_path, "w", encoding="utf-8", errors="replace", newline="\n") as output:
         # A cargo part is compiled first, held to the time alone, since compiling the renderer's
         # crates takes rustc past any memory a test process is held to, and is no test process.
         if process.kind == "cargo":
@@ -618,9 +618,9 @@ def publish(lines, notes, results_dir=None, d=None):
     print("\n".join(lines))
     print(END)
     if results_dir is not None:
-        with open(os.path.join(results_dir, "digest.md"), "w", encoding="utf-8") as f:
+        with open(os.path.join(results_dir, "digest.md"), "w", encoding="utf-8", newline="\n") as f:
             f.write("\n".join(lines) + "\n")
-        with open(os.path.join(results_dir, "digest.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(results_dir, "digest.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump(d, f, indent=1)
     if os.environ.get("GITHUB_ACTIONS") == "true":
         for title, message in errors:
@@ -628,7 +628,7 @@ def publish(lines, notes, results_dir=None, d=None):
         print(f"::notice title=The tests::{escape(chr(10).join(notice))}")
         summary = os.environ.get("GITHUB_STEP_SUMMARY")
         if summary:
-            with open(summary, "a", encoding="utf-8") as f:
+            with open(summary, "a", encoding="utf-8", newline="\n") as f:
                 f.write("\n".join(lines) + "\n\n")
 
 
@@ -672,9 +672,11 @@ def main():
     for name in args.names:
         if name not in PARTS:
             parser.error(f"{name} is no part; the parts are {', '.join(PARTS)}")
-    # A Windows console's code page may lack what the page writes, so the log is UTF-8 everywhere.
+    # A Windows console's code page may lack what the page writes, and Windows ends a line with
+    # \r\n, so the log is UTF-8 with \n alone everywhere, as the files are, and reads the same
+    # wherever it was made.
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace", newline="\n")
 
     if args.digest:
         digests = []

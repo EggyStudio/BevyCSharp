@@ -208,6 +208,9 @@ pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height
 /// by the engine rather than by the managed side. It is not there for a frame or two, and a draw
 /// call naming a picture that has not arrived draws nothing rather than something wrong.
 ///
+/// Returns `0`, and loads nothing, while no interface runs to keep the picture, so a call made
+/// before the interface starts leaves no load behind to fail or be dropped.
+///
 /// # Safety
 /// `path` must be a NUL-terminated UTF-8 string.
 #[unsafe(no_mangle)]
@@ -226,6 +229,13 @@ pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u6
             };
 
             crate::state::with_world_opt(|world| {
+                // Asked first, since a load whose handle has nowhere to be kept is dropped at once,
+                // and Bevy may still say the file failed some frames later, from an app that never
+                // drew it.
+                if !world.contains_resource::<render::Pictures>() {
+                    return None;
+                }
+
                 let handle = world
                     .get_resource::<bevy::asset::AssetServer>()?
                     .load::<bevy::image::Image>(path);

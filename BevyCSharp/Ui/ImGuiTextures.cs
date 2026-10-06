@@ -24,6 +24,11 @@ public static unsafe class ImGuiTextures
     private static readonly Dictionary<int, ulong> Assets = [];
 
     /// <summary>What to call the picture at a path, loading it the first time it is asked for.</summary>
+    /// <remarks>
+    /// Zero, and nothing loaded, while no interface runs to keep the picture, as in a build without
+    /// the editor profile or before <see cref="ImGuiRuntime.Start"/>. A zero is not kept, so the
+    /// same path asked for once the interface runs is loaded then.
+    /// </remarks>
     public static ulong Load(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -31,7 +36,7 @@ public static unsafe class ImGuiTextures
         if (Loaded.TryGetValue(path, out var picture)) return picture;
 
         picture = Native.bcs_imgui_picture(path);
-        Loaded[path] = picture;
+        if (picture != 0) Loaded[path] = picture;
 
         return picture;
     }

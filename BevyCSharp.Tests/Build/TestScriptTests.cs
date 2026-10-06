@@ -72,7 +72,7 @@ public sealed class TestScriptTests : IDisposable
         // As a run on GitHub gives them, where the annotations are all a reader who is not signed in
         // sees, ten errors, each a cause whole, and a notice with the head and the repeated lines.
         var (_, annotated) = Script(python, new() { ["GITHUB_ACTIONS"] = "true", ["GITHUB_STEP_SUMMARY"] = _folder.File("summary.md") }, "--read", _folder.Path);
-        var lines = annotated.Split('\n');
+        var lines = annotated.Split(["\r\n", "\n"], StringSplitOptions.None);
         var errors = lines.Where(line => line.StartsWith("::error ", StringComparison.Ordinal)).ToList();
         Assert.Equal(10, errors.Count);
         Assert.All(errors, line => Assert.True(line.Contains("%0Aat Bevy.", StringComparison.Ordinal) && line.Contains("`Bevy.Tests.Class", StringComparison.Ordinal), line));
@@ -132,7 +132,16 @@ public sealed class TestScriptTests : IDisposable
     /// <summary>Runs build/test.py with the environment and arguments given, and returns its exit code and what it printed.</summary>
     private static (int Exit, string Log) Script(string python, Dictionary<string, string> environment, params string[] arguments)
     {
-        var start = new ProcessStartInfo(python) { WorkingDirectory = Root, RedirectStandardOutput = true, RedirectStandardError = true };
+        // Read as the UTF-8 the script writes, where Windows would read it in the console's code
+        // page and turn the page's × into another character.
+        var start = new ProcessStartInfo(python)
+        {
+            WorkingDirectory = Root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
         start.ArgumentList.Add(Path.Combine("build", "test.py"));
         foreach (var argument in arguments) start.ArgumentList.Add(argument);
         start.Environment.Remove("GITHUB_ACTIONS");

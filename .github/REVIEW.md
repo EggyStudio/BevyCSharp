@@ -388,3 +388,16 @@ the example's class `LoadingScreenExample` beside the behavior. game_menu's butt
 command, with a `MenuButton` in place of Bevy's `Button`, and each screen carries its marker. Their
 methods ask the state themselves rather than by `[InState]`, which would warn in every other
 example that its state was never added.
+
+Verdict 1. `.gitattributes` holds every text file to LF in every checkout, as 3DEngine's `1c1a3cea`
+does, the index already LF throughout, and NormTests reads each file through one helper that ends
+its lines with `\n`, so a rule's pattern does not pass on Windows by finding nothing. The page's
+test split the script's output on `\n` alone, which the run's annotation shows as a `\r` ending
+each line, and read it in the console's code page, where the `×` of the notice it looks for is
+another character, the likelier reason it found none. It reads UTF-8 and splits on either ending,
+and build/test.py writes `\n` alone to its log and its files. The ImGui test expected an error the
+runners could never give. A picture asked for with no interface running answered zero, and on the
+editor's bridge alone was loaded and dropped at once, Bevy saying the file failed some frames
+later, while the headless bridge the suite runs on loads nothing. The bridge now loads nothing
+while no interface keeps pictures, on every profile, `ImGuiTextures.Load` keeps no zero so a path
+asked for early loads once the interface runs, and the test holds that no error comes.

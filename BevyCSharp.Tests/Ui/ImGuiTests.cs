@@ -38,17 +38,18 @@ public sealed class ImGuiTests
     }
 
     [Fact]
-    [ExpectsError("bevy", "nowhere.png")]
-    public void APictureFromNowhereIsNoPicture()
+    public void APictureAskedForWithNoInterfaceIsNoPictureAndLoadsNothing()
     {
-        // Frames enough for Bevy's reader to find no file, which it says as an error.
+        // Frames enough for Bevy's reader to have said a missing file failed, had it been asked to
+        // read one, which the hook of N 3.7 would fail the test for.
         using var harness = new EngineHarness(frames: 30, fps: 240);
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            // The interface is told that zero means "no picture", so a path that names nothing has
-            // to answer it rather than a name pointing at nothing.
-            Assert.Equal(0uL, ImGuiTextures.Load(string.Empty.Length == 0 ? "nowhere.png" : "x"));
+            // Zero is "no picture", and with no interface running there is nothing to keep one
+            // in, in any build, so the path is not read at all and asked again answers the same.
+            Assert.Equal(0uL, ImGuiTextures.Load("nowhere.png"));
+            Assert.Equal(0uL, ImGuiTextures.Load("nowhere.png"));
         });
 
         harness.Run();

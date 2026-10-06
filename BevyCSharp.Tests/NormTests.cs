@@ -54,7 +54,7 @@ public sealed class NormTests
         foreach (var file in Sources("BevyCSharp/", ".cs"))
         {
             var name = Path.GetFileNameWithoutExtension(file);
-            var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(Full(file)));
+            var tree = CSharpSyntaxTree.ParseText(Text(file));
             foreach (var type in tree.GetRoot().DescendantNodes().OfType<MemberDeclarationSyntax>())
             {
                 if (type is not (BaseTypeDeclarationSyntax or DelegateDeclarationSyntax)) continue;
@@ -97,7 +97,7 @@ public sealed class NormTests
         // found here too, and listed with that reason.
         var found = Sources("BevyCSharp.Tests/", ".cs")
             .Where(file => !file.StartsWith("BevyCSharp.Tests/assets/", StringComparison.Ordinal))
-            .Where(file => Regex.IsMatch(File.ReadAllText(Full(file)), @"^\s*\[(Skippable)?(Fact|Theory)\b", RegexOptions.Multiline))
+            .Where(file => Regex.IsMatch(Text(file), @"^\s*\[(Skippable)?(Fact|Theory)\b", RegexOptions.Multiline))
             .Where(file => file.Split('/') is var parts && (parts.Length < 3 || !areas.Contains(parts[1])));
         Hold("1.4", found, "a test outside the folder of the area it tests");
     }
@@ -129,7 +129,7 @@ public sealed class NormTests
     public void N_2_8()
     {
         // The list Annex B names, the rows of BUILDING.md's tables under its section of packages.
-        var building = File.ReadAllText(Full(".github/BUILDING.md"));
+        var building = Text(".github/BUILDING.md");
         var start = building.IndexOf("\n## Packages\n", StringComparison.Ordinal);
         Assert.True(start >= 0, "N 2.8: BUILDING.md has no section of packages, which Annex B names as the list");
         var end = building.IndexOf("\n## ", start + 1, StringComparison.Ordinal);
@@ -140,7 +140,7 @@ public sealed class NormTests
         // What the package carries, the library and its generator, and the bridge's crates, those of
         // a platform's own table among them.
         var referenced = new[] { "BevyCSharp/BevyCSharp.csproj", "BevyCSharp.Generator/BevyCSharp.Generator.csproj" }
-            .SelectMany(project => Regex.Matches(File.ReadAllText(Full(project)), @"<PackageReference Include=""([^""]+)""").Select(match => match.Groups[1].Value))
+            .SelectMany(project => Regex.Matches(Text(project), @"<PackageReference Include=""([^""]+)""").Select(match => match.Groups[1].Value))
             .Concat(Crates("native/bevy_csharp/Cargo.toml"))
             .ToHashSet(StringComparer.Ordinal);
 
@@ -197,14 +197,14 @@ public sealed class NormTests
         string[] prose = [".md", ".cs", ".rs", ".slang", ".py", ".sh", ".yml", ".toml"];
         var found = Sources("", prose)
             .Where(file => !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
-            .Where(file => File.ReadAllText(Full(file)).Any(c => c is '\u2014' or '\u2013'));
+            .Where(file => Text(file).Any(c => c is '\u2014' or '\u2013'));
         Hold("4.1", found, "a file with a dash STYLE.md forbids");
     }
 
     [Fact]
     public void N_4_2()
     {
-        var readme = File.ReadAllText(Full("README.md"));
+        var readme = Text("README.md");
         var found = Sources("docs/", ".md")
             .Where(page => !readme.Contains("/blob/main/" + page, StringComparison.Ordinal));
         if (readme.Split('\n').Length - 1 > 320) found = found.Append("README.md");
@@ -222,7 +222,7 @@ public sealed class NormTests
         }
 
         // Each picture in the README's gallery opens the program that drew it.
-        var readme = File.ReadAllText(Full("README.md"));
+        var readme = Text("README.md");
         foreach (Match picture in Regex.Matches(readme, @"<td>(?:<a href=""([^""]*)"">)?<img src=""[^""]*/examples/([^""/]+)\.webp"""))
         {
             var (link, name) = (picture.Groups[1].Value, picture.Groups[2].Value);
@@ -271,7 +271,7 @@ public sealed class NormTests
         // held on the file the package is packed from, which needs no package to read, and then on
         // the copy in the package where there is one.
         var crates = LockedCrates();
-        NamesEvery(File.ReadAllText(Full("THIRD-PARTY-NOTICES.md")), crates, "THIRD-PARTY-NOTICES.md");
+        NamesEvery(Text("THIRD-PARTY-NOTICES.md"), crates, "THIRD-PARTY-NOTICES.md");
 
         if (Package() is not { } package) return;
         using var zip = ZipFile.OpenRead(package);
@@ -297,7 +297,7 @@ public sealed class NormTests
 
     /// <summary>Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.</summary>
     private static List<string> LockedCrates() =>
-        Regex.Matches(File.ReadAllText(Full("native/Cargo.lock")), @"^\[\[package\]\]\nname = ""([^""]+)""\nversion = ""([^""]+)""", RegexOptions.Multiline)
+        Regex.Matches(Text("native/Cargo.lock"), @"^\[\[package\]\]\nname = ""([^""]+)""\nversion = ""([^""]+)""", RegexOptions.Multiline)
             .Where(match => match.Groups[1].Value != "bevy_csharp")
             .Select(match => $"{match.Groups[1].Value} {match.Groups[2].Value}")
             .ToList();
@@ -341,7 +341,7 @@ public sealed class NormTests
         var found = new List<string>();
         foreach (var file in Sources("native/bevy_csharp/src/", ".rs"))
         {
-            var text = File.ReadAllText(Full(file));
+            var text = Text(file);
             // An entry point is exported by its name, and a test's own callback is not one.
             foreach (Match entry in Regex.Matches(text, @"#\[unsafe\(no_mangle\)\]\s*pub (?:unsafe )?extern ""C"" fn (\w+)"))
             {
@@ -370,7 +370,7 @@ public sealed class NormTests
     [Fact]
     public void NormAndItsTestsAgree()
     {
-        var norm = File.ReadAllText(Full(".github/NORM.md"));
+        var norm = Text(".github/NORM.md");
         var rules = Regex.Matches(norm, @"\*\*(N \d+\.\d+|B \d+) ").Select(match => match.Groups[1].Value).ToHashSet(StringComparer.Ordinal);
         var tests = typeof(NormTests).GetMethods()
             .Where(method => method.GetCustomAttributes(typeof(FactAttribute), inherit: true).Length > 0)
@@ -603,7 +603,7 @@ public sealed class NormTests
             .Where(file => !file.EndsWith("/NormTests.cs", StringComparison.Ordinal))
             .SelectMany(file =>
             {
-                var text = File.ReadAllText(Full(file));
+                var text = Text(file);
                 return words.Where(word => text.Contains(word, StringComparison.Ordinal)).Select(word => $"{file} {word}");
             });
 
@@ -633,6 +633,11 @@ public sealed class NormTests
                 .ToArray();
 
     private static string Full(string relative) => Path.Combine(Root, relative);
+
+    // A file of the checkout with its lines ended by \n alone, whatever the checkout ends them
+    // with, so a rule's pattern finds on Windows what it finds on Linux, and a pattern that finds
+    // nothing on a file with other ends does not pass a rule it never read.
+    private static string Text(string relative) => File.ReadAllText(Full(relative)).ReplaceLineEndings("\n");
 
     /// <summary>What git answers, or nothing where git is not there or this is no checkout.</summary>
     private static string? Git(params string[] arguments)
