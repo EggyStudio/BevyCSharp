@@ -172,6 +172,7 @@ public sealed class EngineTests
     }
 
     [Fact]
+    [ExpectsError("system", "InvalidOperationException")]
     public void SystemExceptionsAreReportedRatherThanUnwindingIntoRust()
     {
         // The point of this test is that the process survives at all. An exception crossing the

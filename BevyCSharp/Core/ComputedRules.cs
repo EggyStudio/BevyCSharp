@@ -94,7 +94,7 @@ internal static unsafe class ComputedRules
         catch (Exception error)
         {
             // Nothing may unwind into Bevy's transition, so a rule that throws answers nothing.
-            Console.Error.WriteLine($"[BevyCSharp] the rule for computed state {slot} threw: {error.Message}");
+            EngineLog.Error(null, "state", $"[BevyCSharp] the rule for computed state {slot} threw: {error.Message}", error);
             return 0;
         }
     }
@@ -123,7 +123,7 @@ internal static unsafe class ComputedRules
         }
         catch (Exception error)
         {
-            Console.Error.WriteLine($"[BevyCSharp] the rule for joint state {slot} threw: {error.Message}");
+            EngineLog.Error(null, "state", $"[BevyCSharp] the rule for joint state {slot} threw: {error.Message}", error);
             return 0;
         }
     }

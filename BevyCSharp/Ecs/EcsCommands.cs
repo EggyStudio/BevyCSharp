@@ -123,7 +123,7 @@ public sealed class EcsCommands
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[BevyCSharp] Queued command failed: {ex.Message}");
+                EngineLog.Error(null, "command", $"[BevyCSharp] Queued command failed: {ex.Message}", ex);
             }
         }
     }

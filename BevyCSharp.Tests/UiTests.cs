@@ -241,6 +241,7 @@ public sealed class UiTests
     }
 
     [SkippableFact]
+    [ExpectsError("bevy", "missing.ttf")]
     public void TextIsSetInBevysOwnFontUntilAnotherIsNamed()
     {
         using var harness = new EngineHarness(frames: 30, fps: 240);

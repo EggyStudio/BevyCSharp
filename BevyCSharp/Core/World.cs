@@ -91,8 +91,7 @@ public sealed class World : IDisposable
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"[BevyCSharp] Failed to dispose resource {pair.Key.Name}: {ex.Message}");
+                EngineLog.Error(null, "resource", $"[BevyCSharp] Failed to dispose resource {pair.Key.Name}: {ex.Message}", ex);
             }
         }
 

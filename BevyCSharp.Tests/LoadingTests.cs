@@ -13,6 +13,7 @@ public sealed class LoadingTests
     /// has been, and an offscreen run has no window entity.
     /// </summary>
     [SkippableFact]
+    [ExpectsError("bevy", "nothing-here.gltf")]
     public void ASceneLoadsWithItsDependenciesAndThePipelinesComeReadyOnceItIsDrawn()
     {
         Needs.Renderer();

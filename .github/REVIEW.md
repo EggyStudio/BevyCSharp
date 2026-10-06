@@ -10,7 +10,12 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9f74107`. N 2.10 finds every method native code calls and fails for a call no
+Reviewed up to `b78e565`. `render/shaders.rs` and `RenderShaders.cs` are split by moves alone
+(`74e5b76`, `b78e565`), off N 1.3's list and, the library's, N 1.2's, and
+`bcs_shader_entity_program` runs under the guard (`333ff9b`), the last entry point B 3 listed,
+so B 3 is checked with its 15 left out. The lists stand at 307 for N 1.2 and 23 for N 1.3.
+
+Before them, N 2.10 finds every method native code calls and fails for a call no
 catch covers (`869c9fb`), eight of them, and two caught nothing before taking a lock, the
 computed and the joint state's rule, which take it inside the `try`. N 2.9 is `FileHandleTests`
 over fourteen loaders in a folder from `TestFolder`, the one helper N 3.4 names, which is new
@@ -78,10 +83,9 @@ the owner makes next carries all of it.
 
 Before it, four commits were settled, the last being the tests of what is no area of the library
 in folders named for what they test (`a714bb8`). The table stands at 239 written, 19 written in
-part, none that can be, 105 missing and 58 that do not apply. The lists stand at 337 places for
-N 1.2, 25 for N 1.3, 113 for N 1.4 and 55
-for N 3.4, with one entry point of B 3 to bring under the guard, `bcs_shader_entity_program`, in
-the batch that splits `render/shaders.rs`.
+part, none that can be, 105 missing and 58 that do not apply. The lists stand at 307 places for
+N 1.2, 23 for N 1.3, 113 for N 1.4 and 55
+for N 3.4, and B 3 has no entry point left to bring under the guard.
 
 The owner took three more rules into the norm on 2026-10-05, N 2.9, N 2.10 and N 6.5, and then
 N 3.7, N 6.7 and N 6.8, and N 6.6 came from 3DEngine with its check. Item 1 has what is left of
@@ -102,8 +106,7 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
    it, and the workflow running `build/examples-table.py` and failing when what it writes differs
    from the table checked in. The lists are paid down as the norm says, a listed file mended
    when a batch next touches it, in a commit of its own, the largest first where there is a
-   choice, `RenderShaders.cs` among the library's and `render/shaders.rs` among the bridge's.
-   The one entry point B 3 still lists is brought under the guard.
+   choice.
 
    The owner took three more rules into the norm on 2026-10-05. A loader keeps no file open
    once a load returns (N 2.9), which one test over every loader finds, on Linux among the
@@ -294,3 +297,28 @@ None open.
    GitHub.
 
 ## Replies
+
+N 3.7 is `FailOnLoggedErrors` in the tests, taken from 3DEngine's with its ears in an `AsyncLocal`
+from the start. The errors of this engine are named in `EngineLog`'s remarks, the library's one
+place an error is said, which twelve of the library's fourteen writes to the error stream go through
+now, the other two being warnings: a system's exception, an observer's, a component hook's, a state
+rule's, a queued command's, a carried file's, a material file read again, a resource disposed and
+the project file. A panic the guard catches comes back as an exception from its call. Bevy's own
+errors are kept by a layer of the bridge's in Bevy's log plugin and taken once a frame and as a run
+ends and the app goes, which lays them to the app that logged them. The plugin is added by the first
+app of the process alone, since each later one logged that the logger was set already, and a
+headless app has it now, which had no logger and so said none of Bevy's errors. An error is laid to
+a test by the app it made in its flow, or by its flow where there is no app. A system that throws
+every frame is logged whole once, then at each power of ten and in all as the run ends
+(`SystemExceptionTests`). The number B 1 reads is 202 for `bcs_log_take_error`.
+
+A survey of the suite found 40 tests that logged an error, and there is no list: 15 test a failure
+and say so with `[ExpectsError]`, and the rest were faults. The editor's behaviors were registered
+in every app that registered them all once the suite had loaded the editor, so `EditorBoot.Start`
+brought the editor up inside 17 other tests' apps, and `BehaviorsPlugin.Assemblies` names the
+assemblies the harness registers. The bridge kept clone callbacks by component id from one app to
+the next and ran an earlier app's list copy over a later app's component of another layout, which is
+memory written wrong, and both tables are forgotten as an app is made, with a test that failed
+without it. Synthetic input wrote window events into a headless app, which keeps none and logged
+each as an error. Six handle-table tests load the tests' own images in place of files no loader
+reads, so they no longer depend on Bevy's failure arriving within their few frames.

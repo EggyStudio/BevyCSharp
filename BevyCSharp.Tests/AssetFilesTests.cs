@@ -57,6 +57,7 @@ public sealed class AssetFilesTests : IDisposable
     }
 
     [SkippableFact]
+    [ExpectsError("bevy", "carried/absent.gltf")]
     public void BevyReadsAModelTheAssemblyCarriesThroughTheSharedBridge()
     {
         // The model is nowhere on disk, under the harness's asset root or this one, so Bevy can

@@ -231,7 +231,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         catch (Exception ex)
         {
             // An exception crossing back into Rust is undefined, so it ends here, said.
-            Console.Error.WriteLine($"[BevyCSharp] An observer threw: {ex}");
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
         }
     }
 

@@ -218,7 +218,7 @@ public static unsafe class AssetFiles
         catch (Exception error)
         {
             // Nothing may unwind into Bevy's loader, so a file that cannot be read is one it lacks.
-            Console.Error.WriteLine($"[BevyCSharp] a carried asset could not be read: {error.Message}");
+            EngineLog.Error(null, "assets", $"[BevyCSharp] a carried asset could not be read: {error.Message}", error);
             return -1;
         }
     }

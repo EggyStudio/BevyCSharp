@@ -42,6 +42,16 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>True once <see cref="Run"/> has been entered.</summary>
     public bool IsRunning { get; private set; }
 
+    /// <summary>The app whose loop is running, or none, one at a time as the bridge runs them.</summary>
+    internal static App? Running { get; private set; }
+
+    /// <summary>Raised as an app is made, before anything it does can log an error.</summary>
+    /// <remarks>
+    /// What lays an error to a test, which learns here which apps its test made, on the test's own
+    /// flow, where an error from the app's loop or Bevy's threads cannot say whose it is.
+    /// </remarks>
+    internal static event Action<App>? Created;
+
     /// <summary>Number of frames completed, mirrored from Bevy.</summary>
     public ulong FrameCount => World.TryGetResource<Time>(out var time) ? time.FrameCount : 0;
 
@@ -123,6 +133,7 @@ public sealed unsafe partial class App : IDisposable
     public App(Config? config = null)
     {
         Config = config ?? Config.Default;
+        Created?.Invoke(this);
 
         // A window asked from outside to be an image instead, as the editor's Play asks when the
         // editor has no window either, so a game's own Main need not take an option for it.
@@ -180,7 +191,7 @@ public sealed unsafe partial class App : IDisposable
         }
         catch (InvalidDataException error)
         {
-            Console.Error.WriteLine($"[BevyCSharp] {ProjectSettings.FileName} was not read: {error.Message}");
+            EngineLog.Error(this, "project", $"[BevyCSharp] {ProjectSettings.FileName} was not read: {error.Message}", error);
         }
 
         var fixedHz = Config.FixedHz > 0 ? Config.FixedHz : Project.FixedHz;
@@ -332,6 +343,10 @@ public sealed unsafe partial class App : IDisposable
             // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
             // find their nodes, and before anything reads that the instance is ready.
             SceneInstances.PostReady(world.Resource<EcsWorld>(), world.Resource<MessageBus>());
+
+            // What Bevy logged as an error since the last frame, heard while the run goes on
+            // rather than only once it ends.
+            if (Running is { } app) EngineLog.TakeBevys(app);
 
             // Swapped here so the whole frame reads one complete, unchanging set.
             world.Resource<MessageBus>().Swap();

@@ -211,11 +211,14 @@ public sealed class ReflectedWrapperTests
     /// handle.
     /// </summary>
     [SkippableFact]
+    [ExpectsError("bevy", "FiraSans-Bold.ttf")]
     public void AVariantHoldingAHandleIsChosenWithTheHandleWritten()
     {
         Needs.Renderer();
 
-        using var harness = new EngineHarness(frames: 2);
+        // No font is among the tests' assets, so the handle names one that is not there, and the run
+        // goes on until Bevy has said so, which it says as an error.
+        using var harness = new EngineHarness(frames: 0, fps: 240);
         FontSource? font = null;
         AssetHandle? texture = AssetHandle.None, cleared = AssetHandle.None;
         var image = AssetHandle.None;
@@ -248,6 +251,10 @@ public sealed class ReflectedWrapperTests
             var faces = ctx.Ecs.Insert<PointLightTextureRef>(point);
             faces.CubemapLayout = PointLightTextureRef.CubemapLayoutVariant.CrossVertical;
             layout = faces.CubemapLayout;
+        });
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (loaded.State != AssetLoadState.Loading || ctx.Time.FrameCount > 2400) ctx.Exit();
         });
 
         harness.Run();

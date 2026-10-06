@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 201;
+    internal const int ExpectedAbiVersion = 202;
 
     static Native() => NativeLoader.Initialize();
 
@@ -67,6 +67,14 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_request_exit();
+
+    /// <summary>
+    /// Takes the oldest line Bevy logged at the error level and answers its length, or 0 when none
+    /// is kept. A buffer too small for the line leaves it kept and answers the length it needs.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_log_take_error(byte* output, int capacity);
 
     /// <summary>Registers a C# system callback into a Bevy schedule.</summary>
     [LibraryImport(Library)]

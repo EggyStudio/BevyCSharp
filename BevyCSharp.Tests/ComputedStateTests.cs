@@ -100,6 +100,7 @@ public sealed class ComputedStateTests
     /// leaves the state absent.
     /// </summary>
     [Fact]
+    [ExpectsError("state", "no interface in a cutscene")]
     public void ARuleWorksItOutWhereATableCannot()
     {
         var seen = new List<(ulong Frame, bool Exists, Hud Value)>();

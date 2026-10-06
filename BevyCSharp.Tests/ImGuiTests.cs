@@ -38,9 +38,11 @@ public sealed class ImGuiTests
     }
 
     [Fact]
+    [ExpectsError("bevy", "nowhere.png")]
     public void APictureFromNowhereIsNoPicture()
     {
-        using var harness = new EngineHarness(frames: 3);
+        // Frames enough for Bevy's reader to find no file, which it says as an error.
+        using var harness = new EngineHarness(frames: 30, fps: 240);
 
         harness.OnContext(Stage.Startup, _ =>
         {

@@ -16,6 +16,7 @@ namespace Bevy.Tests;
 public sealed class AssetFailureTests
 {
     [Fact]
+    [ExpectsError("bevy", "not-here.png")]
     public void AMissingFileIsReportedWithItsPathAndReason()
     {
         var failures = new List<AssetLoadFailed>();

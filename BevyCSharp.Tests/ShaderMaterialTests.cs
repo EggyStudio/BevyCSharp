@@ -449,6 +449,7 @@ public sealed class ShaderMaterialTests
     /// error, and ending cleanly afterwards says it was survived.
     /// </remarks>
     [SkippableFact]
+    [ExpectsError("bevy", "Validation Error")]
     public void AMismatchedShaderIsSurvivedWhenAsked()
     {
         Needs.Shaders();
@@ -557,6 +558,7 @@ public sealed class ShaderMaterialTests
     /// is wrong.
     /// </summary>
     [SkippableFact]
+    [ExpectsError("bevy", "paint.slang")]
     public void AMistakeKeepsTheLastShaderThatCompiled()
     {
         Needs.Shaders();
@@ -593,6 +595,7 @@ public sealed class ShaderMaterialTests
 
     /// <summary>A shader that has never compiled draws magenta rather than nothing.</summary>
     [SkippableFact]
+    [ExpectsError("bevy", "broken.slang")]
     public void AShaderThatNeverCompiledDrawsMagenta()
     {
         Needs.Shaders();
@@ -629,6 +632,7 @@ public sealed class ShaderMaterialTests
     /// wrong.
     /// </summary>
     [SkippableFact]
+    [ExpectsError("bevy", "stray")]
     public void ABindingInAGroupNothingBindsIsAFailedCompile()
     {
         Needs.Shaders();

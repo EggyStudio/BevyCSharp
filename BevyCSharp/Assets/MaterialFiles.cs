@@ -299,7 +299,7 @@ public static class MaterialFiles
             }
             catch (Exception error) when (error is IOException or JsonException or InvalidDataException)
             {
-                Console.Error.WriteLine($"[assets] {relative} could not be read again. {error.Message}");
+                EngineLog.Error(null, "assets", $"[assets] {relative} could not be read again. {error.Message}", error);
             }
         }
     }

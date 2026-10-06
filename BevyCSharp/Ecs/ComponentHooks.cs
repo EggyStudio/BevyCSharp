@@ -126,7 +126,7 @@ public static unsafe class ComponentHooks
         }
         catch (Exception error)
         {
-            Console.Error.WriteLine($"The clone hook of component {component} failed: {error.Message}");
+            EngineLog.Error(null, "hook", $"The clone hook of component {component} failed: {error.Message}", error);
         }
     }
 
@@ -146,8 +146,7 @@ public static unsafe class ComponentHooks
         }
         catch (Exception error)
         {
-            Console.Error.WriteLine(
-                $"The remove hook of component {component} on {new Entity(entity)} failed: {error.Message}");
+            EngineLog.Error(null, "hook", $"The remove hook of component {component} on {new Entity(entity)} failed: {error.Message}", error);
         }
     }
 }

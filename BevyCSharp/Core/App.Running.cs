@@ -76,6 +76,7 @@ public sealed unsafe partial class App : IDisposable
         ApplyOrder();
 
         IsRunning = true;
+        Running = this;
         ComponentRegistry.EnterRunning();
         try
         {
@@ -84,6 +85,9 @@ public sealed unsafe partial class App : IDisposable
         finally
         {
             ComponentRegistry.ExitRunning();
+            ReportThrownTotals();
+            EngineLog.TakeBevys(this);
+            Running = null;
         }
     }
 
@@ -116,11 +120,34 @@ public sealed unsafe partial class App : IDisposable
     }
 
     /// <summary>Handles an exception that escaped a system, per <see cref="Config"/>.</summary>
+    /// <remarks>
+    /// A system that throws in every frame wrote its whole trace sixty times a second, into a
+    /// player's log as into a test's, so the first of each type a system throws is logged whole, and
+    /// after it a line at the 10th, the 100th, the 1,000th and so on, and how many in all as the run
+    /// ends, as 3DEngine's schedule does.
+    /// </remarks>
     internal void OnSystemException(SystemDescriptor descriptor, Exception exception)
     {
-        Console.Error.WriteLine(
-            $"[BevyCSharp] System '{descriptor.Name}' threw {exception.GetType().Name}: "
-            + $"{exception.Message}{Environment.NewLine}{exception.StackTrace}");
+        long count;
+        lock (_thrown)
+        {
+            var key = (descriptor.Name, exception.GetType());
+            _thrown.TryGetValue(key, out count);
+            _thrown[key] = ++count;
+        }
+
+        if (count == 1)
+        {
+            EngineLog.Error(this, "system",
+                $"[BevyCSharp] System '{descriptor.Name}' threw {exception.GetType().Name}: "
+                + $"{exception.Message}{Environment.NewLine}{exception.StackTrace}", exception);
+        }
+        else if (IsPowerOfTen(count))
+        {
+            EngineLog.Error(this, "system",
+                $"[BevyCSharp] System '{descriptor.Name}' has thrown {exception.GetType().Name} {count} times, the last: {exception.Message}",
+                exception);
+        }
 
         if (!Config.FailFastOnSystemException) return;
 
@@ -135,6 +162,25 @@ public sealed unsafe partial class App : IDisposable
         {
             // The app is already tearing down; nothing useful left to do.
         }
+    }
+
+    /// <summary>How often each system has thrown each type of exception, in this app's run.</summary>
+    private readonly Dictionary<(string System, Type Exception), long> _thrown = [];
+
+    private static bool IsPowerOfTen(long count)
+    {
+        while (count >= 10 && count % 10 == 0) count /= 10;
+        return count == 1;
+    }
+
+    /// <summary>Logs, for each system that threw the same type more than once, how many times in all.</summary>
+    private void ReportThrownTotals()
+    {
+        KeyValuePair<(string System, Type Exception), long>[] thrown;
+        lock (_thrown) thrown = [.. _thrown.Where(entry => entry.Value > 1)];
+
+        foreach (var ((system, type), count) in thrown)
+            EngineLog.Error(this, "system", $"[BevyCSharp] System '{system}' threw {type.Name} {count} times in all");
     }
 
     /// <inheritdoc/>
@@ -156,6 +202,9 @@ public sealed unsafe partial class App : IDisposable
         {
             Native.bcs_app_destroy(_handle);
             _handle = IntPtr.Zero;
+
+            // What Bevy said as the app came down, laid to it.
+            EngineLog.TakeBevys(this);
         }
 
         ComponentRegistry.EndApp();
@@ -210,7 +259,7 @@ public sealed unsafe partial class App : IDisposable
                     if (GCHandle.FromIntPtr(user).Target is RegisteredSystem system)
                         system.Owner.OnSystemException(system.Descriptor, ex);
                     else
-                        Console.Error.WriteLine($"[BevyCSharp] System callback failed: {ex}");
+                        EngineLog.Error(null, "system", $"[BevyCSharp] System callback failed: {ex}", ex);
                 }
                 catch (Exception)
                 {

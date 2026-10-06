@@ -22,7 +22,7 @@ public sealed class AssetTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            var handle = AssetServer.Load(AssetKind.Mesh, "models/nothing-here.gltf");
+            var handle = AssetServer.Load(AssetKind.Image, "textures/checker.png");
 
             Assert.True(handle.IsValid);
             Assert.True(AssetServer.IsAlive(handle));
@@ -44,7 +44,7 @@ public sealed class AssetTests
             // loaded first, and nothing about it would look wrong.
             Assert.False(default(AssetHandle).IsValid);
 
-            var first = AssetServer.Load(AssetKind.Mesh, "models/first.gltf");
+            var first = AssetServer.Load(AssetKind.Image, "textures/checker.png");
 
             Assert.True(first.IsValid);
             Assert.NotEqual(default, first);
@@ -60,12 +60,12 @@ public sealed class AssetTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            var handle = AssetServer.Load(AssetKind.Mesh, "models/nothing-here.gltf");
+            var handle = AssetServer.Load(AssetKind.Image, "textures/checker.png");
 
             // The path is the one the handle was asked for, whether or not the file is there,
             // because a tool showing what a field points at has to be able to say so before the
             // load finishes, and has to say something truthful when it never does.
-            Assert.Equal("models/nothing-here.gltf", AssetServer.PathOf(handle));
+            Assert.Equal("textures/checker.png", AssetServer.PathOf(handle));
             Assert.Null(AssetServer.PathOf(AssetHandle.None));
         });
 
@@ -73,6 +73,7 @@ public sealed class AssetTests
     }
 
     [Fact]
+    [ExpectsError("bevy", "does-not-exist.png")]
     public void AMissingFileEndsUpFailedRatherThanStuck()
     {
         // Nothing here loads a real asset, so this is the state transition that can be observed
@@ -112,8 +113,8 @@ public sealed class AssetTests
         {
             var before = AssetServer.LiveHandleCount;
 
-            var first = AssetServer.Load(AssetKind.Mesh, "a.gltf");
-            var second = AssetServer.Load(AssetKind.Mesh, "b.gltf");
+            var first = AssetServer.Load(AssetKind.Image, "textures/checker.png");
+            var second = AssetServer.Load(AssetKind.Image, "textures/cubemap.png");
             Assert.Equal(before + 2, AssetServer.LiveHandleCount);
 
             Assert.True(AssetServer.Release(first));
@@ -138,10 +139,10 @@ public sealed class AssetTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            var stale = AssetServer.Load(AssetKind.Mesh, "first.gltf");
+            var stale = AssetServer.Load(AssetKind.Image, "textures/checker.png");
             AssetServer.Release(stale);
 
-            var reused = AssetServer.Load(AssetKind.Mesh, "second.gltf");
+            var reused = AssetServer.Load(AssetKind.Image, "textures/cubemap.png");
 
             Assert.False(AssetServer.IsAlive(stale));
             Assert.True(AssetServer.IsAlive(reused));
@@ -161,8 +162,8 @@ public sealed class AssetTests
 
         harness.OnContext(Stage.Startup, _ =>
         {
-            var first = AssetServer.Load(AssetKind.Mesh, "shared.gltf");
-            var second = AssetServer.Load(AssetKind.Mesh, "shared.gltf");
+            var first = AssetServer.Load(AssetKind.Image, "textures/checker.png");
+            var second = AssetServer.Load(AssetKind.Image, "textures/checker.png");
 
             Assert.NotEqual(first, second);
             Assert.True(AssetServer.Release(first));

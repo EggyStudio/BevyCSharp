@@ -254,6 +254,14 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 })
                 .set(asset_plugin(&asset_root));
 
+            // Bevy's logger, set by the first app of the process alone, since a second app's
+            // plugin finds it set and says so as an error. See the log module.
+            let plugins = if crate::log::first() {
+                plugins.set(crate::log::plugin())
+            } else {
+                plugins.disable::<bevy::log::LogPlugin>()
+            };
+
             if offscreen {
                 // Winit owns the loop when there is a window, and panics on a machine with no
                 // display server, which is exactly the machine this mode is for. Dropping it
@@ -451,6 +459,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             ScheduleRunnerPlugin::run_loop(Duration::ZERO)
         };
         app.add_plugins(MinimalPlugins.set(runner));
+
+        // Bevy's logger, which a headless app had none of, so its errors went unsaid. The first
+        // app of the process sets it, whichever kind it is, as a windowed app does above.
+        if crate::log::first() {
+            app.add_plugins(crate::log::plugin());
+        }
         app.add_plugins(bevy::input::InputPlugin);
         app.add_plugins(bevy::transform::TransformPlugin);
         app.add_plugins(bevy::state::app::StatesPlugin);

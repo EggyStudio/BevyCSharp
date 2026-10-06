@@ -41,6 +41,7 @@ public sealed class GltfTests
     }
 
     [SkippableFact]
+    [ExpectsError("bevy", "Material0/std")]
     public void AGltfMaterialNeedsTheRendererThatTranslatesIt()
     {
         // The material a file describes is not the one the renderer draws with, and the plugin that
@@ -100,6 +101,7 @@ public sealed class GltfTests
     }
 
     [SkippableFact]
+    [ExpectsError("bevy", "Mesh7/Primitive0")]
     public void AskingForAPartThatIsNotThereFailsRatherThanHangs()
     {
         // A label naming a mesh the file does not define is a load failure, not a load that never
