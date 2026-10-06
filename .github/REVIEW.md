@@ -10,14 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `15974f1`. A key reaching the focused entity is observed as Bevy's
-`FocusedInput<KeyboardInput>`, taken up the parents as the pointer's events are (ABI 211), an
-offscreen run's fields take keys from the bridge's own dispatch, the focus is given and moved from
-C# through Bevy's `InputFocus`, and `multiline_text_input` and `multiple_text_inputs` are written,
-255, a field set again having been inserted over itself and drawing nothing, mended on the way
-(`f46edec`); the server tests moved to `Cli` by a move alone, N 1.4's list at 90 to mend
-(`15974f1`). The reply on item 14 is written, its commit to come. The owner pushed, and the run of
-`15974f1` is under way. No verdict is open.
+Reviewed up to `a80d289`. The console server closes the connections still open as it stops and joins
+their threads, so a closed app leaves none alive, held by a test with a caller connected
+(`b67fb85`), and the page's repeated lines count what is logged at warning or error or with no
+level, leaving the section out when nothing repeats (`a80d289`), which settles items 14 and 15. The
+owner chose on 2026-10-06 that the next package is 0.4, Decision 8. A key reaching the focused
+entity is observed as Bevy's `FocusedInput<KeyboardInput>`, taken up the parents as the pointer's
+events are (ABI 211), an offscreen run's fields take keys from the bridge's own dispatch, the focus
+is given and moved from C# through Bevy's `InputFocus`, and `multiline_text_input` and
+`multiple_text_inputs` are written, 255, a field set again having been inserted over itself and
+drawing nothing, mended on the way (`f46edec`); the server tests moved to `Cli` by a move alone,
+N 1.4's list at 90 to mend (`15974f1`). The owner pushed, and the run of `15974f1` is under way. No
+verdict is open.
 
 Before them, a game came to read a key by what it types or by its name as well as by where it is,
 Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended key
@@ -136,20 +140,6 @@ and 9 to 13 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
-14. **A closed app leaves no thread alive** (SHARED.md). 3DEngine's macOS leak (its Verdict 24)
-   led to `Shutdown` joining the threads an app's parts start and its console closing the
-   connections still open, since a connection's thread otherwise waits on its read for good.
-   `CliServer.cs` here starts a thread for each connection, untracked, and `Dispose` sets a flag the
-   read does not see, so a served app with a caller connected leaves that thread alive. The server
-   closes its open connections as it stops, and a test holds that a disposed server with a caller
-   connected leaves no thread of its own alive, the caller's answered request showing the thread
-   ran, with no wait on the clock.
-15. **The page's repeated lines count warnings and errors alone.** The owner asked on 2026-10-06,
-   the page's "Repeated most in the output" having shown 3DEngine's banner at every app's start,
-   2,190 lines of `====`, where it was meant for the error a system logs every frame.
-   `build/test.py` counts the lines logged at warning or error, or lines of no level at all, and
-   leaves the section out when nothing repeats, with its own test on a log of banners and one
-   repeated error.
 
 ## Verdicts
 
@@ -181,27 +171,22 @@ None open.
    the page of `98f6d8e5` repeated the engine's banner, so the section counts what is logged at
    warning or error or with no level and is left out when nothing repeats.
 
+8. **The next package is 0.4.** The owner chose it on 2026-10-06 for the ABI's moves from 199 and
+   the surface added since 0.3.2, `build/version.txt` holding `0.4` so the patch counts itself,
+   packed when the owner chooses.
+
 ## Replies
 
-**Item 14, a closed server leaves no thread alive.** `CliServer` keeps the connections open now,
-each leaving the set as its thread ends, so the set does not grow by one per command. `Dispose`
-closes each, which ends its read, ends any wait on a frame with `SESSION_CLOSING`, and joins every
-thread it started before it returns. The wait ends because a request that arrived after the app let
-go of its queue was never answered, and its connection would have waited out its patience after
-the app had gone. `CliServerTests` moved to `Tests/Cli` first, by a move alone, with its places on
-N 3.3's and N 3.4's lists renamed (`15974f1`), N 1.4 at 91. It holds a server stopped with a caller
-connected, the caller's request answered by the connection's thread to show it ran, leaving no
-thread of its own alive and the connection closed, with no wait on the clock.
-
-Shared: the console's connections closed and their threads joined as the app stops, taken here as
-3DEngine's `27f949bf` has it, for its row in SHARED.md.
-
-**Item 15, the repeated lines.** `build/test.py` counts the lines logged at warning or error, or
-with no level, Bevy's level read after the time its log writes and the colors taken off, so each
-app's adapter line at INFO no longer fills the section. The section was already left out when
-nothing repeats. `TestScriptTests` holds a log of three hundred colored INFO banners, DEBUG lines and
-one error logged forty times, which the page lists alone, and the banners by themselves, which give
-no section.
-
-Shared: the run page's repeated lines read as 3DEngine's now do, Bevy's own log format standing in
-for its bracketed levels.
+**Now 3, fonts and text styling.** Bevy's `Underline` and `Strikethrough` reflect but not as
+components, so `Ui.SetUnderline` and `Ui.SetStrikethrough` put them on a run, and
+`Ui.SetFontFeatures` and `Ui.SetFontVariations` set a run's OpenType features and a variable font's
+axes as four-letter tags and values, which the `TextFont` wrapper does not type (ABI 212). The rows'
+reasons predated `TextFont`'s weight, width and style being wrapped, and read again, eight are
+written, 263. `text`, `strikethrough_and_underline`, `text_background_colors`, `font_weights`,
+`font_variations` and `font_query` are new, and `text2d` and `letter_spacing` are whole, each driven
+offscreen and seen to draw as Bevy's does. `font_query`'s oblique and italic draw upright, its
+variable font having no slant, though Bevy holds each style as asked. Left in that group are the
+three that need Bevy's system font discovery, which the bridge does not compile in, and
+`font_atlas_debug`'s atlases, and TODO.md says so. `UiTests` holds the lines drawn and taken off by
+the light pixels they add, and the features and axes reaching the run's `TextFont` through Bevy's
+reflection, replacing what it had.

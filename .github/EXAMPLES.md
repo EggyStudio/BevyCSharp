@@ -4,13 +4,13 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**255 written, 18 written in part, 0 can be written, 90 missing and 58 do not apply.** Of the 363 that apply, 273 can be written with what is bridged, 18 of them leaving something out.
+**263 written, 16 written in part, 0 can be written, 84 missing and 58 do not apply.** Of the 363 that apply, 279 can be written with what is bridged, 16 of them leaving something out.
 
-**128 of the 131 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**128 of the 132 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 21 | 1 | 0 | 6 | 1 | 8 of 8 |
+| [2D Rendering](#2d-rendering) | 22 | 0 | 0 | 6 | 1 | 8 of 8 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
 | [Animation](#animation) | 4 | 2 | 0 | 7 | 0 | 4 of 4 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
@@ -39,12 +39,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 40 | 1 | 0 | 19 | 0 | 16 of 17 |
+| [UI (User Interface)](#ui-user-interface) | 47 | 0 | 0 | 13 | 0 | 16 of 18 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
 | [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **255** | **18** | **0** | **90** | **58** | **128 of 131** |
+| **All** | **263** | **16** | **0** | **84** | **58** | **128 of 132** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -75,7 +75,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`sprite_sheet`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_sheet.rs) | Renders an animated sprite | [written](../BevyCSharp.Examples/2d/sprite_sheet.cs) |
 | [`sprite_slice`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_slice.rs) | Showcases slicing sprites into sections that can be scaled independently via the 9-patch technique | [written](../BevyCSharp.Examples/2d/sprite_slice.cs) |
 | [`sprite_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_tile.rs) | Renders a sprite tiled in a grid | [written](../BevyCSharp.Examples/2d/sprite_tile.cs) |
-| [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs) | Generates text in 2D | [written in part](../BevyCSharp.Examples/2d/text2d.cs), the underline under the first box's text |
+| [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs) | Generates text in 2D | [written](../BevyCSharp.Examples/2d/text2d.cs) |
 | [`texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/texture_atlas.rs) | Generates a texture atlas (sprite sheet) from individual sprites | missing, an atlas built from a folder of images as the app runs |
 | [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs) | Renders a tilemap chunk | missing, an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from |
 | [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | missing, an image loaded as an array of layers, a row of tiles to a layer |
@@ -535,17 +535,17 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`feathers_gallery`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/feathers_gallery.rs) | Gallery of Feathers Widgets | missing, Bevy's Feathers widgets |
 | [`flex_layout`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/flex_layout.rs) | Demonstrates how the AlignItems and JustifyContent properties can be composed to layout nodes and position text | [written](../BevyCSharp.Examples/ui/flex_layout.cs) |
 | [`font_atlas_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_atlas_debug.rs) | Illustrates how FontAtlases are populated (used to optimize text rendering internally) | missing, reading the font atlases |
-| [`font_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_query.rs) | Demonstrates font querying | missing, querying fonts |
-| [`font_variations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_variations.rs) | Demonstrates how to use OpenType font variations. | missing, OpenType font variations |
-| [`font_weights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_weights.rs) | Demonstrates how to use font weights. | missing, font weights |
-| [`generic_font_families`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/generic_font_families.rs) | Demonstrates how to use generic font families | missing, generic font families |
+| [`font_query`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_query.rs) | Demonstrates font querying | [written](../BevyCSharp.Examples/ui/font_query.cs) |
+| [`font_variations`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_variations.rs) | Demonstrates how to use OpenType font variations. | [written](../BevyCSharp.Examples/ui/font_variations.cs) |
+| [`font_weights`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/font_weights.rs) | Demonstrates how to use font weights. | [written](../BevyCSharp.Examples/ui/font_weights.cs) |
+| [`generic_font_families`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/generic_font_families.rs) | Demonstrates how to use generic font families | missing, Bevy's system font discovery, which the bridge does not compile in, and the family each generic one stands for, which Bevy's FontCx answers |
 | [`ghost_nodes`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/ghost_nodes.rs) | Demonstrates the use of Ghost Nodes to skip entities in the UI layout hierarchy | missing, ghost nodes (GhostNode) |
 | [`gradients`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/gradients.rs) | An example demonstrating gradients | [written](../BevyCSharp.Examples/ui/gradients.cs), through Bevy's reflected BackgroundGradient and BorderGradient |
 | [`grid`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/grid.rs) | An example for CSS Grid layout | [written](../BevyCSharp.Examples/ui/grid.cs) |
 | [`image_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/image_node.rs) | Demonstrates how to create an image node | [written](../BevyCSharp.Examples/ui/image_node.cs) |
 | [`image_node_resizing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/images/image_node_resizing.rs) | Demonstrates how to resize an image node | missing, Bevy's outlines of interface nodes for debugging, which the bridge does not build |
-| [`ime_support`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/ime_support.rs) | Demonstrates IME (Input Method Editor) support for text input | missing, a system font chosen by its generic family, sans-serif |
-| [`letter_spacing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/letter_spacing.rs) | Demonstrates the letter spacing feature | [written in part](../BevyCSharp.Examples/ui/letter_spacing.cs), the underline under the heading |
+| [`ime_support`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/ime_support.rs) | Demonstrates IME (Input Method Editor) support for text input | missing, a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in |
+| [`letter_spacing`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/letter_spacing.rs) | Demonstrates the letter spacing feature | [written](../BevyCSharp.Examples/ui/letter_spacing.cs) |
 | [`multiline_text_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/multiline_text_input.rs) | Demonstrates a single multiline EditableText widget | [written](../BevyCSharp.Examples/ui/multiline_text_input.cs), Bevy's cursor colors, which no wrapper reaches, so the field draws Bevy's default cursor, and its lines set by setting the field again |
 | [`multiple_text_inputs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/multiple_text_inputs.rs) | Demonstrates multiple text inputs | [written](../BevyCSharp.Examples/ui/multiple_text_inputs.cs) |
 | [`overflow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/scroll_and_overflow/overflow.rs) | Simple example demonstrating overflow behavior | [written](../BevyCSharp.Examples/ui/overflow.cs) |
@@ -559,11 +559,11 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`stacked_gradients`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/stacked_gradients.rs) | An example demonstrating stacked gradients | [written](../BevyCSharp.Examples/ui/stacked_gradients.cs), through Bevy's reflected BackgroundGradient |
 | [`standard_widgets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets.rs) | Demonstrates use of core (headless) widgets in Bevy UI | [written](../BevyCSharp.Examples/ui/standard_widgets.cs), the widgets styled each frame from what they hold, where Bevy's systems run for a widget whose state was added, changed or removed |
 | [`standard_widgets_observers`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/standard_widgets_observers.rs) | Demonstrates use of core (headless) widgets in Bevy UI, with Observers | [written](../BevyCSharp.Examples/ui/standard_widgets_observers.cs), Bevy's components observed through their wrappers, whose observers of a removal run once the component has gone, so Bevy's checks of which event it was are left out |
-| [`strikethrough_and_underline`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/strikethrough_and_underline.rs) | Demonstrates how to display text with strikethrough and underline. | missing, strikethrough and underline on text |
-| [`system_fonts`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/system_fonts.rs) | Demonstrates how to use system fonts | missing, system fonts |
+| [`strikethrough_and_underline`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/strikethrough_and_underline.rs) | Demonstrates how to display text with strikethrough and underline. | [written](../BevyCSharp.Examples/ui/strikethrough_and_underline.cs) |
+| [`system_fonts`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/system_fonts.rs) | Demonstrates how to use system fonts | missing, Bevy's system font discovery, which the bridge does not compile in, and the families Bevy's FontCx lists |
 | [`tab_navigation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/tab_navigation.rs) | Demonstration of Tab Navigation between UI elements | [written](../BevyCSharp.Examples/ui/tab_navigation.cs), the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks |
-| [`text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text.rs) | Illustrates creating and updating text | missing, an underline and OpenType font features |
-| [`text_background_colors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_background_colors.rs) | Demonstrates text background colors | missing, text background colors |
+| [`text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text.rs) | Illustrates creating and updating text | [written](../BevyCSharp.Examples/ui/text.cs), the frames per second smoothed by the managed clock, where Bevy's reads its diagnostics store |
+| [`text_background_colors`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_background_colors.rs) | Demonstrates text background colors | [written](../BevyCSharp.Examples/ui/text_background_colors.cs) |
 | [`text_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_debug.rs) | An example for debugging text layout | [written](../BevyCSharp.Examples/ui/text_debug.cs) |
 | [`text_input`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_input.rs) | Demonstrates a simple, unstyled text input widget | [written](../BevyCSharp.Examples/ui/text_input.cs) |
 | [`text_wrap_debug`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/text/text_wrap_debug.rs) | Demonstrates text wrapping | [written](../BevyCSharp.Examples/ui/text_wrap_debug.cs) |

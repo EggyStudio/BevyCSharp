@@ -331,3 +331,120 @@ pub unsafe extern "C" fn bcs_ui_set_text(entity: u64, text: *const core::ffi::c_
         }
     })
 }
+
+/// Draws a run of text with a line under it or through it, Bevy's `Underline` and
+/// `Strikethrough`, each `1` to draw it, `0` not to, and `-1` to leave it as it is.
+///
+/// On a node's text, a span or a 2D text alike. Bevy reflects both but not as components, so no
+/// wrapper puts one on, and the line takes its color from `UnderlineColor` or `StrikethroughColor`
+/// where the run carries one, which a wrapper does reach, and from the text's own otherwise.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ui_text_lines(entity: u64, underline: i32, strikethrough: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, underline, strikethrough);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::text::{Strikethrough, Underline};
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+
+                match underline {
+                    1 => {
+                        entity_mut.insert(Underline);
+                    }
+                    0 => {
+                        entity_mut.remove::<Underline>();
+                    }
+                    _ => {}
+                }
+                match strikethrough {
+                    1 => {
+                        entity_mut.insert(Strikethrough);
+                    }
+                    0 => {
+                        entity_mut.remove::<Strikethrough>();
+                    }
+                    _ => {}
+                }
+                status::OK
+            })
+        }
+    })
+}
+
+/// One OpenType tag and its value, for [`bcs_ui_font_tags`].
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsFontTag {
+    /// The tag's four ASCII characters, as `liga` or `wght`.
+    pub tag: [u8; 4],
+    /// Its value, a whole number for a feature, one turning it on and zero off.
+    pub value: f32,
+}
+
+/// Sets the OpenType features (`kind` zero) or the variable font's axes (`kind` one) a run of
+/// text is drawn with, replacing those it had, from `count` tags.
+///
+/// Bevy keeps each as a list of tags and values on the run's `TextFont`, which the wrapper over
+/// it does not type, so this builds them as Bevy's own builders do.
+///
+/// # Safety
+/// `tags` must point to `count` readable [`BcsFontTag`]s, or be null with a count of zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_font_tags(entity: u64, kind: i32, tags: *const BcsFontTag, count: i32) -> i32 {
+    crate::interop::guard(|| {
+        if count < 0 || (count > 0 && tags.is_null()) {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, kind);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::text::{FontFeatureTag, FontFeatures, FontVariationTag, FontVariations, TextFont};
+
+            let tags = if count == 0 { &[][..] } else { unsafe { core::slice::from_raw_parts(tags, count as usize) } };
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                if !entity_mut.contains::<TextFont>() {
+                    entity_mut.insert(TextFont::default());
+                }
+                let Some(mut font) = entity_mut.get_mut::<TextFont>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                match kind {
+                    0 => {
+                        font.font_features = tags
+                            .iter()
+                            .fold(FontFeatures::builder(), |built, tag| built.set(FontFeatureTag::new(&tag.tag), tag.value as u32))
+                            .build();
+                    }
+                    1 => {
+                        font.font_variations = tags
+                            .iter()
+                            .fold(FontVariations::builder(), |built, tag| built.set(FontVariationTag::new(&tag.tag), tag.value))
+                            .build();
+                    }
+                    _ => return status::NULL_ARG,
+                }
+                status::OK
+            })
+        }
+    })
+}

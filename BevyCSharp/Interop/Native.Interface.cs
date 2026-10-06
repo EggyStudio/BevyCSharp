@@ -72,6 +72,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_navigate(int action, ulong* next);
 
+    /// <summary>Puts a line under or through a run of text, or takes it off, each 1, 0 or -1 to leave it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_text_lines(ulong entity, int underline, int strikethrough);
+
+    /// <summary>Sets a run's OpenType features (kind 0) or variable axes (kind 1) from tagged values.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_font_tags(ulong entity, int kind, NativeFontTag* tags, int count);
+
     /// <summary>Moves, presses or releases a pointer of the game's own on an image.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -28,9 +28,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   which the bridge does not build, and directional navigation (two), which needs Bevy's map of
   which node is beside which. The core widgets are built and reached through their wrappers, and
   what they report reaches C# as Bevy's `Activate`, `ValueChange` and `MenuEvent`.
-- **Fonts and text styling, ten examples.** Font weights, OpenType variations and features (`text`
-  among them), generic families and system fonts (`ime_support` among them), querying fonts and
-  their atlases, strikethrough and underline, and text background colors.
+- **System fonts and the font atlases, four examples.** Bevy's system font discovery, which the
+  bridge does not compile in, so a generic family such as sans-serif resolves to the system's font
+  (`generic_font_families`, `ime_support`), and the families Bevy's `FontCx` lists and the family
+  each generic one stands for (`system_fonts`). And reading the atlases Bevy lays a font's glyphs
+  out in (`font_atlas_debug`). A run's weight, width, style, OpenType features and axes, its
+  underline and strikethrough and its background color are reached.
 - **Animation built in code, seven examples.** Clips made from curves, events placed on a clip,
   graphs that blend clips by weight and their masks, and skinned meshes built joint by joint.
   `eased_motion` is written in part without them, its curves sampled each frame.
@@ -77,8 +80,8 @@ the most examples, and the largest is taken between groups of examples. The coun
   changed in place by a later system and read the same frame, where a C# message is read the frame
   after it is sent (`message`).
 
-Eighteen examples are written in part, each leaving out a feature named in its row. Six are stress
-tests, which leave out switches and counts that no wrapper reaches, and the other twelve each leave
+Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
+tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave
 out one of these.
 
 - **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
@@ -88,9 +91,6 @@ out one of these.
 - **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
   ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
   which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
-- **An underline under text**, which `text2d` draws its first box's text without and
-  `letter_spacing` its heading. Bevy's `Underline` is not reflected, so no call reaches it, and it
-  is one of the text styles the fonts entry above names.
 - **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
   its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
   added, and the cell count is one of Bevy's render diagnostics that is a number rather than a

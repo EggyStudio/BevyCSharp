@@ -160,6 +160,22 @@ parent itself says, and the whole is broken and aligned as one block by the sett
 given. A span has no node of its own, so it takes its color as an argument where a whole text takes
 the color of the node it sits in.
 
+A run, whole or a span, is drawn with a line under it or through it by `Ui.SetUnderline` and
+`Ui.SetStrikethrough`, in the text's color or the one an `UnderlineColorRef` or
+`StrikethroughColorRef` on the run gives, and over a color of its own with `TextBackgroundColorRef`.
+Its `TextFontRef` sets the weight, the width and the style a font is asked for, and a font's
+OpenType features and a variable font's axes are each a four-letter tag and a value:
+
+```csharp
+Ui.SetUnderline(heading);
+ctx.Ecs.Wrap<TextFontRef>(heading).Weight = 700;                // bold, where the font has it
+Ui.SetFontFeatures(price, ("tnum", 1));                         // figures all one width
+Ui.SetFontVariations(title, ("wght", 650f), ("wdth", 85f));     // a variable font's axes
+```
+
+A generic family such as sans-serif needs Bevy's system font discovery, which the bridge does not
+compile in, so a run names its font as a loaded asset.
+
 **Laying out on a grid.** Flexbox lays a run of children along one axis and takes the other from
 what they are. A grid states both axes up front and drops the children into the cells, so a column
 lines up with the column above it:

@@ -10,8 +10,8 @@ using Justify = Bevy.Reflected.TextLayoutRef.JustifyVariant;
 using Linebreak = Bevy.Reflected.TextLayoutRef.LinebreakVariant;
 
 // Shows text drawn in the world rather than on the interface, moved, turned and scaled, wrapped in
-// boxes two ways, left unsmoothed, and anchored by each of its corners to one point. Bevy's
-// underlines the first box's text, which is not reachable here, so this is written in part.
+// boxes two ways, the first underlined, left unsmoothed, and anchored by each of its corners to one
+// point.
 internal static class Text2dExample
 {
     private static AssetHandle _font, _white;
@@ -40,6 +40,7 @@ internal static class Text2dExample
             var bounds = ecs.Wrap<TextBoundsRef>(text);
             (bounds.Width, bounds.Height) = (300f, 200f);
             ecs.Insert<Text2dShadowRef>(text).Color = shadowColor;
+            if (x == 0f) Ui.SetUnderline(text);
             ecs.Set(text, Transform.At(0f, 0f, 1f));
             ecs.SetParent(text, box);
         }

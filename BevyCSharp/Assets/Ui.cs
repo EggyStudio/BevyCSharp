@@ -441,6 +441,95 @@ public static unsafe partial class Ui
         return status == 1 ? new Entity(next) : null;
     }
 
+    /// <summary>Draws a run of text with a line under it, or takes the line off.</summary>
+    /// <remarks>
+    /// Bevy's <c>Underline</c>, on a node's text, a span or a 2D text alike. Its color is the run's
+    /// <c>UnderlineColorRef</c> where it carries one and the text's own otherwise. Bevy reflects the
+    /// marker but not as a component, so no wrapper puts it on, and this does.
+    /// </remarks>
+    /// <param name="text">The run of text.</param>
+    /// <param name="underlined">Whether to draw the line.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetUnderline(Entity text, bool underlined = true) => TextLines(text, underlined ? 1 : 0, -1);
+
+    /// <summary>Draws a run of text with a line through it, or takes the line off.</summary>
+    /// <remarks>
+    /// Bevy's <c>Strikethrough</c>, colored by <c>StrikethroughColorRef</c> where the run carries
+    /// one, as <see cref="SetUnderline"/> is by its color.
+    /// </remarks>
+    /// <param name="text">The run of text.</param>
+    /// <param name="struck">Whether to draw the line.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetStrikethrough(Entity text, bool struck = true) => TextLines(text, -1, struck ? 1 : 0);
+
+    private static void TextLines(Entity text, int underline, int strikethrough)
+    {
+        var status = Native.bcs_ui_text_lines(text.Bits, underline, strikethrough);
+        if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Drawing a line on text");
+        Native.Check(status, $"drawing a line on {text}");
+    }
+
+    /// <summary>Sets the OpenType features a run of text is drawn with, replacing those it had.</summary>
+    /// <remarks>
+    /// Bevy's <c>FontFeatures</c>, each feature named by its four-letter tag and turned on with one
+    /// and off with zero, or given a higher number where a feature has several forms to choose
+    /// from, as the font defines them:
+    /// <code>
+    /// Ui.SetFontFeatures(price, ("tnum", 1), ("liga", 0));    // even figures, no ligatures
+    /// </code>
+    /// A font that has no such feature draws as it would without it.
+    /// </remarks>
+    /// <param name="text">The run of text.</param>
+    /// <param name="features">Each feature's tag and value.</param>
+    /// <exception cref="ArgumentException">A tag is not four ASCII characters.</exception>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetFontFeatures(Entity text, params ReadOnlySpan<(string Tag, uint Value)> features)
+    {
+        Span<NativeFontTag> tags = features.Length <= 32 ? stackalloc NativeFontTag[features.Length] : new NativeFontTag[features.Length];
+        for (var i = 0; i < features.Length; i++) tags[i] = FontTag(features[i].Tag, features[i].Value);
+        FontTags(text, 0, tags);
+    }
+
+    /// <summary>Sets where a variable font sits on each of its axes for a run of text, replacing what it had.</summary>
+    /// <remarks>
+    /// Bevy's <c>FontVariations</c>, each axis named by its four-letter tag, <c>wght</c> for the
+    /// weight, <c>wdth</c> for the width, <c>slnt</c> for the slant, and the value within the range
+    /// the font gives that axis:
+    /// <code>
+    /// Ui.SetFontVariations(heading, ("wght", 650f));
+    /// </code>
+    /// A font that is not variable, or has no such axis, draws as it would without it.
+    /// </remarks>
+    /// <param name="text">The run of text.</param>
+    /// <param name="variations">Each axis's tag and value.</param>
+    /// <exception cref="ArgumentException">A tag is not four ASCII characters.</exception>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void SetFontVariations(Entity text, params ReadOnlySpan<(string Tag, float Value)> variations)
+    {
+        Span<NativeFontTag> tags = variations.Length <= 32 ? stackalloc NativeFontTag[variations.Length] : new NativeFontTag[variations.Length];
+        for (var i = 0; i < variations.Length; i++) tags[i] = FontTag(variations[i].Tag, variations[i].Value);
+        FontTags(text, 1, tags);
+    }
+
+    private static NativeFontTag FontTag(string tag, float value)
+    {
+        ArgumentNullException.ThrowIfNull(tag);
+        if (tag.Length != 4 || !tag.All(char.IsAscii))
+            throw new ArgumentException($"An OpenType tag is four ASCII characters, as \"liga\" or \"wght\", not \"{tag}\".", nameof(tag));
+
+        var native = new NativeFontTag { Value = value };
+        for (var i = 0; i < 4; i++) native.Tag[i] = (byte)tag[i];
+        return native;
+    }
+
+    private static void FontTags(Entity text, int kind, ReadOnlySpan<NativeFontTag> tags)
+    {
+        int status;
+        fixed (NativeFontTag* at = tags) status = Native.bcs_ui_font_tags(text.Bits, kind, at, tags.Length);
+        if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Setting a font's OpenType tags");
+        Native.Check(status, $"setting the font of {text}");
+    }
+
     private static BevyNativeException NoUi(string operation) =>
         new(NativeStatus.Unsupported,
             $"{operation} failed, because this native build has no renderer, so there is no UI to "

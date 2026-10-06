@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Interop;
+using Bevy.Reflected;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -688,5 +689,106 @@ public sealed class UiTests
 
         Assert.Equal(0, app.Run());
         Assert.True(markedFirst, "the camera was not the interface's on the first frame");
+    }
+
+    /// <summary>
+    /// A line under text and a line through it are drawn where they are put on, and gone where
+    /// they are taken off.
+    /// </summary>
+    [SkippableFact]
+    public void LinesUnderAndThroughTextAreDrawnAndTakenOff()
+    {
+        Needs.Renderer();
+
+        var text = Entity.None;
+        var run = new PictureRun
+        {
+            Width = 320,
+            Height = 96,
+            Scene = _ =>
+            {
+                Render2d.SpawnCamera2d();
+                text = Ui.SpawnText("MMMMMM", new UiSettings { Absolute = true, Left = Length.Px(10f), Top = Length.Px(10f) }, 40f);
+            },
+        };
+
+        run.Wait(ShaderMaterialTests.Settled)
+            .Capture("plain")
+            .Do("lining it", _ =>
+            {
+                Ui.SetUnderline(text);
+                Ui.SetStrikethrough(text);
+            })
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("lined")
+            .Do("taking the lines off", _ =>
+            {
+                Ui.SetUnderline(text, false);
+                Ui.SetStrikethrough(text, false);
+            })
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("taken off")
+            .Go();
+
+        int Light(string name)
+        {
+            var picture = run.Picture(name);
+            var count = 0;
+            for (var y = 0u; y < picture.Height; y++)
+            for (var x = 0u; x < picture.Width; x++)
+            {
+                var (r, g, b, _) = picture.At(x, y);
+                if (r > 180 && g > 180 && b > 180) count++;
+            }
+            return count;
+        }
+
+        var (plain, lined, takenOff) = (Light("plain"), Light("lined"), Light("taken off"));
+        Assert.True(plain > 200, $"the text drew {plain} light pixels");
+        Assert.True(lined > plain + 100, $"the lines added {lined - plain} light pixels to the text's {plain}");
+        Assert.InRange(takenOff, plain - plain / 20, plain + plain / 20);
+    }
+
+    /// <summary>
+    /// A run's OpenType features and its variable axes reach its <c>TextFont</c>, each replacing what
+    /// it had, and a tag that is not four letters or a run that is gone is refused.
+    /// </summary>
+    [SkippableFact]
+    public void FontFeaturesAndVariationsReachTheTextsFont()
+    {
+        Needs.Renderer();
+
+        string? features = null, variations = null, replaced = null;
+        ArgumentException? badTag = null;
+        BevyNativeException? gone = null;
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                var text = Ui.SpawnText("fi 1/2", new UiSettings());
+                Ui.SetFontFeatures(text, ("liga", 0), ("frac", 1));
+                Ui.SetFontVariations(text, ("wght", 650f));
+                features = ecs.GetReflected(text, TextFontRef.TypePath, ".font_features");
+                variations = ecs.GetReflected(text, TextFontRef.TypePath, ".font_variations");
+
+                Ui.SetFontVariations(text, ("wdth", 75f));
+                replaced = ecs.GetReflected(text, TextFontRef.TypePath, ".font_variations");
+
+                badTag = Assert.Throws<ArgumentException>(() => Ui.SetFontFeatures(text, ("ligatures", 1)));
+                var dead = ecs.Spawn();
+                ecs.Despawn(dead);
+                gone = Assert.Throws<BevyNativeException>(() => Ui.SetFontVariations(dead, ("wght", 400f)));
+            },
+        };
+        run.Wait(2).Go();
+
+        // Each tag as its four bytes, liga, frac, wght and wdth, beside its value.
+        Assert.Equal("{\"features\":[[[108,105,103,97],0],[[102,114,97,99],1]]}", features);
+        Assert.Equal("{\"variations\":[[[119,103,104,116],650.0]]}", variations);
+        Assert.Equal("{\"variations\":[[[119,100,116,104],75.0]]}", replaced);
+        Assert.NotNull(badTag);
+        Assert.Equal(NativeStatus.NoEntity, gone!.Status);
     }
 }

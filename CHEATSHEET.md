@@ -1078,6 +1078,10 @@ static void SetImage(Entity entity, UiImageSettings settings);  // Draws an imag
 static void SetScroll(Entity entity, float x, float y);         // Moves a scrolling node's contents inside it
 static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated);  // Gives entity the input focus, so the keys go to it
 static Entity? Navigate(NavAction action);                      // The entity the focus would move to along the tab order, without moving it
+static void SetUnderline(Entity text, bool underlined = true);  // Draws a run of text with a line under it, or takes the line off
+static void SetStrikethrough(Entity text, bool struck = true);  // Draws a run of text with a line through it, or takes the line off
+static void SetFontFeatures(Entity text, ReadOnlySpan<(string, uint)> features);  // Sets the OpenType features a run of text is drawn with, replacing those it had
+static void SetFontVariations(Entity text, ReadOnlySpan<(string, float)> variations);  // Sets where a variable font sits on each of its axes for a run of text, replacing what it had
 static void SetEditableText(Entity node, UiEditableTextSettings settings);  // Makes a node a text field the player types into
 static string EditableTextOf(Entity node);                      // What a text field holds, or null for a node that is no field
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end

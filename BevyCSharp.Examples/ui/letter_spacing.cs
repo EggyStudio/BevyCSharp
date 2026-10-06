@@ -6,9 +6,8 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
-// Shows letter spacing on text justified left, center and right, the arrow keys widening and
-// narrowing it and Space switching between pixels and rem. Bevy's underlines the heading, which is
-// not reachable here, so this is written in part.
+// Shows letter spacing on text justified left, center and right, under an underlined heading, the
+// arrow keys widening and narrowing it and Space switching between pixels and rem.
 internal static class LetterSpacingExample
 {
     // Bevy's RemSize, which this example never changes from its default of twenty pixels.
@@ -29,6 +28,7 @@ internal static class LetterSpacingExample
         ecs.SetParent(column, root);
 
         var hello = Text(ecs, "HELLO", font, 6f);
+        Ui.SetUnderline(hello);
         ecs.Wrap<NodeRef>(hello).PaddingBottom = new Val.Vh(2f);
         ecs.SetParent(hello, column);
 

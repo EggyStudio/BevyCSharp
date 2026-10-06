@@ -96,7 +96,7 @@ sprite_scale	can
 sprite_sheet	can
 sprite_slice	can
 sprite_tile	can
-text2d	part	the underline under the first box's text
+text2d	can
 texture_atlas	missing	an atlas built from a folder of images as the app runs
 tilemap_chunk_orientation	missing	an image loaded as an array of layers, a row of tiles to a layer
 tilemap_chunk	missing	an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from
@@ -366,17 +366,17 @@ feathers_counter	missing	Bevy's Feathers widgets
 feathers_gallery	missing	Bevy's Feathers widgets
 flex_layout	can
 font_atlas_debug	missing	reading the font atlases
-font_query	missing	querying fonts
-font_variations	missing	OpenType font variations
-font_weights	missing	font weights
-generic_font_families	missing	generic font families
+font_query	can
+font_variations	can
+font_weights	can
+generic_font_families	missing	Bevy's system font discovery, which the bridge does not compile in, and the family each generic one stands for, which Bevy's FontCx answers
 ghost_nodes	missing	ghost nodes (GhostNode)
 gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
 grid	can
 image_node	can
 image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
-ime_support	missing	a system font chosen by its generic family, sans-serif
-letter_spacing	part	the underline under the heading
+ime_support	missing	a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in
+letter_spacing	can
 multiline_text_input	can	Bevy's cursor colors, which no wrapper reaches, so the field draws Bevy's default cursor, and its lines set by setting the field again
 multiple_text_inputs	can
 overflow_clip_margin	can
@@ -390,12 +390,12 @@ size_constraints	can
 stacked_gradients	can	through Bevy's reflected BackgroundGradient
 standard_widgets	can	the widgets styled each frame from what they hold, where Bevy's systems run for a widget whose state was added, changed or removed
 standard_widgets_observers	can	Bevy's components observed through their wrappers, whose observers of a removal run once the component has gone, so Bevy's checks of which event it was are left out
-strikethrough_and_underline	missing	strikethrough and underline on text
-system_fonts	missing	system fonts
+strikethrough_and_underline	can
+system_fonts	missing	Bevy's system font discovery, which the bridge does not compile in, and the families Bevy's FontCx lists
 tab_navigation	can	the clicks read from each node's interaction as its press begins, where Bevy observes the pointer's clicks
-text_background_colors	missing	text background colors
+text_background_colors	can
 text_debug	can
-text	missing	an underline and OpenType font features
+text	can	the frames per second smoothed by the managed clock, where Bevy's reads its diagnostics store
 text_input	can
 text_wrap_debug	can
 transparency_ui	can
