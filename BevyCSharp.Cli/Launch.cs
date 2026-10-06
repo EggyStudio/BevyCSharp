@@ -52,6 +52,23 @@ internal static class Launch
             extra.Insert(0, arguments[example + 1]);
         }
 
+        // A clock set a length a frame, handed over in the environment every app reads rather
+        // than as an argument, since each app reads its own arguments and only some would know it.
+        string? frameTime = null;
+        var clock = extra.IndexOf("--frame-time");
+        if (clock >= 0)
+        {
+            if (clock + 1 >= extra.Count
+                || !double.TryParse(extra[clock + 1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var seconds)
+                || !double.IsFinite(seconds) || seconds <= 0)
+            {
+                return Output.Refuse(options, "open", "BAD_ARGUMENTS", "--frame-time takes the seconds a frame lasts, more than zero, as in --frame-time 0.016666.");
+            }
+
+            frameTime = extra[clock + 1];
+            extra.RemoveRange(clock, 2);
+        }
+
         // Always, because an app that is not serving is an app this tool cannot reach.
         if (!extra.Contains("--serve")) extra.Add("--serve");
 
@@ -79,7 +96,7 @@ internal static class Launch
         var log = Repo.LogFor(project);
         var started = DateTimeOffset.UtcNow;
 
-        if (Start(project, extra, log) is { Length: > 0 } failure)
+        if (Start(project, extra, log, frameTime) is { Length: > 0 } failure)
         {
             return Output.Refuse(options, "open", "LAUNCH_FAILED", failure);
         }
@@ -236,8 +253,9 @@ internal static class Launch
     /// <summary>
     /// Starts the app with its output in a file, and lets go of it.
     /// </summary>
+    /// <param name="frameTime">The seconds each frame advances the app's clock by, or nothing for the machine's.</param>
     /// <returns>What went wrong, or an empty string.</returns>
-    private static string Start(string project, IReadOnlyList<string> arguments, string log)
+    private static string Start(string project, IReadOnlyList<string> arguments, string log, string? frameTime)
     {
         var binary = Repo.BinaryFor(project);
         var start = new ProcessStartInfo
@@ -245,6 +263,8 @@ internal static class Launch
             WorkingDirectory = Repo.Root!,
             UseShellExecute = false,
         };
+
+        if (frameTime is not null) start.Environment[Config.FrameTimeVariable] = frameTime;
 
         if (binary is null)
         {

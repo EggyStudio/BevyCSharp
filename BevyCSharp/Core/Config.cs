@@ -178,6 +178,27 @@ public sealed class Config
     public double FixedHz { get; set; }
 
     /// <summary>
+    /// Seconds each frame advances the clock by, in place of the machine's, or zero for the
+    /// machine's clock.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>TimeUpdateStrategy::ManualDuration</c>. Every frame is then that long to the game,
+    /// to <see cref="Time.DeltaSeconds"/> and to the fixed steps a frame runs, however long it took
+    /// the machine, so a test counts frames rather than waiting on the clock and a capture of
+    /// something moving is the same on every machine. Sixty frames of a sixtieth are a second
+    /// exactly, and run as fast as the machine allows where <see cref="HeadlessFps"/> does not pace
+    /// them. The first frame reads no time gone, as Bevy's first frame always does.
+    /// </para>
+    /// <para>
+    /// <see cref="Time.FrameSeconds"/> changes it while the app runs, as for one slow frame made on
+    /// purpose, and <see cref="FrameTimeVariable"/> sets it from outside. <see cref="Time.Step"/> is
+    /// another thing, running frames of the length the machine gives them while the game is paused.
+    /// </para>
+    /// </remarks>
+    public double FrameSeconds { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>
@@ -221,6 +242,21 @@ public sealed class Config
     /// <summary>The frames the environment bounds a run with no window to, or zero.</summary>
     public static uint FramesAsked =>
         uint.TryParse(Environment.GetEnvironmentVariable(FramesVariable), out var frames) ? frames : 0u;
+
+    /// <summary>The environment variable that sets the seconds each frame advances the clock by.</summary>
+    /// <remarks>
+    /// Sets <see cref="FrameSeconds"/> where the config left it at zero, so a script capturing a
+    /// game it did not write, or a session opened with <c>bcs open --frame-time</c>, moves it by
+    /// frames and not by the machine's clock.
+    /// </remarks>
+    public const string FrameTimeVariable = "BCS_FRAME_TIME";
+
+    /// <summary>The seconds a frame the environment sets the clock to, or zero.</summary>
+    public static double FrameSecondsAsked =>
+        double.TryParse(Environment.GetEnvironmentVariable(FrameTimeVariable), System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out var seconds) && double.IsFinite(seconds) && seconds > 0
+            ? seconds
+            : 0;
 
     /// <summary>True when the environment asks for <see cref="Offscreen"/> whatever the config says.</summary>
     public static bool OffscreenAsked =>

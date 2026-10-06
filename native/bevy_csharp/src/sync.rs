@@ -243,6 +243,81 @@ pub extern "C" fn bcs_time_set_virtual(paused: i32, speed: f32) -> i32 {
     })
 }
 
+/// The strategy that advances the clock by `seconds` a frame, or `None` for a number that is no
+/// length of time, which leaves the machine's clock.
+///
+/// Bevy's `TimeUpdateStrategy::ManualDuration`. Each frame the real clock moves on by that much
+/// whatever time the frame took, and the game's clock and the fixed steps spend it as they would
+/// spend a frame of that length, so a run is the same frame for frame on every machine. The first
+/// frame still reads no time gone, as Bevy's first frame always does.
+pub(crate) fn frame_strategy(seconds: f64) -> Option<bevy::time::TimeUpdateStrategy> {
+    (seconds.is_finite() && seconds > 0.0)
+        .then(|| bevy::time::TimeUpdateStrategy::ManualDuration(std::time::Duration::from_secs_f64(seconds)))
+}
+
+/// Sets how many seconds each frame advances the clock by, or the machine's clock again for `0`.
+///
+/// From the next frame, through `frame_strategy`, so anything that is no length of time is the
+/// machine's clock too. The managed side refuses those before they get here.
+///
+/// A clock set to a length a frame runs ahead of the machine's or behind it, by however much the
+/// frames were shorter or longer than the length. Bevy reads the machine's again as the time since
+/// the last frame it counted, so a clock that ran ahead would read no time at all until the
+/// machine caught up, which for a run of short frames is minutes. So the real clock is begun
+/// again from now when the set one is let go, keeping the time it has counted.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_time_set_frame_seconds(seconds: f64) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| {
+            if let Some(strategy) = frame_strategy(seconds) {
+                world.insert_resource(strategy);
+                return status::OK;
+            }
+
+            let was_set = matches!(
+                world.get_resource::<bevy::time::TimeUpdateStrategy>(),
+                Some(bevy::time::TimeUpdateStrategy::ManualDuration(_))
+            );
+            world.insert_resource(bevy::time::TimeUpdateStrategy::Automatic);
+
+            if was_set && let Some(mut real) = world.get_resource_mut::<bevy::time::Time<bevy::time::Real>>() {
+                let mut again = bevy::time::Time::<bevy::time::Real>::new(real.startup());
+                again.update_with_instant(bevy::platform::time::Instant::now());
+                again.advance_to(real.elapsed());
+                *real = again;
+            }
+
+            status::OK
+        })
+    })
+}
+
+/// Writes how many seconds each frame advances the clock by, or `0` where it reads the machine's.
+///
+/// A strategy this bridge did not set, an instant or a count of fixed steps, reads as the
+/// machine's, since neither is a length a frame.
+///
+/// # Safety
+/// `seconds` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_time_frame_seconds(seconds: *mut f64) -> i32 {
+    crate::interop::guard(|| {
+        if seconds.is_null() {
+            return status::NULL_ARG;
+        }
+
+        with_world(|world| {
+            let set = match world.get_resource::<bevy::time::TimeUpdateStrategy>() {
+                Some(bevy::time::TimeUpdateStrategy::ManualDuration(duration)) => duration.as_secs_f64(),
+                _ => 0.0,
+            };
+
+            unsafe { seconds.write(set) };
+            status::OK
+        })
+    })
+}
+
 /// Writes how far the fixed clock has run past its last step, as a share of a step, from zero up
 /// to less than one.
 ///
@@ -294,4 +369,23 @@ pub unsafe extern "C" fn bcs_time_virtual(paused: *mut i32, speed: *mut f32) -> 
             status::OK
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::time::TimeUpdateStrategy;
+    use std::time::Duration;
+
+    #[test]
+    fn a_length_a_frame_sets_the_clock_and_anything_else_leaves_the_machines() {
+        assert!(matches!(
+            frame_strategy(0.25),
+            Some(TimeUpdateStrategy::ManualDuration(duration)) if duration == Duration::from_millis(250)
+        ));
+
+        for nothing in [0.0, -0.5, f64::NAN, f64::INFINITY] {
+            assert!(frame_strategy(nothing).is_none(), "{nothing} set the clock");
+        }
+    }
 }

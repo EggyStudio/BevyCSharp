@@ -155,6 +155,7 @@ and asks it things:
 ```bash
 ./bcs open --editor                    # start one, detached, and wait until it answers
 ./bcs open --editor --offscreen        # the same, on a machine with no display
+./bcs open --example 3d_scene --frame-time 0.016666   # each frame a sixtieth to the game, however long it takes
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them

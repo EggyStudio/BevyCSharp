@@ -83,4 +83,7 @@ public unsafe struct NativeConfig
 
     /// <summary>The window's scale factor in place of the display's, or zero for the display's.</summary>
     public float ScaleFactor;
+
+    /// <summary>Seconds each frame advances the clock by, or zero for the machine's clock.</summary>
+    public double FrameSeconds;
 }

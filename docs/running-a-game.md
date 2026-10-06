@@ -43,6 +43,14 @@ as `BCS_SERVE` makes any app answer `bcs`, so a tool can run a game it did not w
 on the screen. The editor's Play sets it when the editor itself has no window, and
 `games/Courtyard/play.sh` plays its game that way.
 
+A run that has to be the same on every machine, a test of something that moves or a capture of it,
+sets `Config.FrameSeconds`, and every frame is then that many seconds to the game, to
+`Time.DeltaSeconds` and to the fixed steps, however long the machine took over it. It is Bevy's
+`TimeUpdateStrategy::ManualDuration`. `BCS_FRAME_TIME` sets it from outside where the config left it
+at zero, `bcs open --frame-time` puts that in the environment of the app it starts, and
+`Time.FrameSeconds` or the `app.frametime` command changes it while the game runs, zero letting the
+machine's clock run again from where the set one had reached.
+
 The camera is steered the way an editor's scene view is, so the scene can be looked at from
 anywhere while trying something out:
 

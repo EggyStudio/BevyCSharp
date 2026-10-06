@@ -303,6 +303,35 @@ internal static partial class ConsoleWorldCommands
         return $"speed {speed:0.###}";
     }
 
+    /// <summary>Sets the seconds each frame advances the clock by, or lets the machine's clock run.</summary>
+    /// <remarks>
+    /// So a session is driven by frames, as a test is, and <c>frames.wait 60</c> after
+    /// <c>app.frametime 0.016666</c> is a second of the game whatever the machine took.
+    /// </remarks>
+    [Command("app.frametime", "Seconds each frame advances the clock by, or off for the machine's clock: app.frametime [seconds|off]")]
+    internal static string FrameTime(string line)
+    {
+        var time = ConsoleHost.Time;
+        var asked = line.Trim();
+        if (asked.Length == 0) return Clock(time.FrameSeconds);
+
+        var seconds = asked is "off" or "0" ? 0.0 : double.NaN;
+        if (double.IsNaN(seconds)
+            && (!double.TryParse(asked, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out seconds)
+                || !double.IsFinite(seconds) || seconds <= 0.0))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{asked}' is not a length of time more than zero, or off.");
+            return $"'{asked}' is not a length of time";
+        }
+
+        time.FrameSeconds = seconds;
+        return Clock(seconds);
+
+        static string Clock(double seconds) => seconds > 0.0
+            ? string.Create(System.Globalization.CultureInfo.InvariantCulture, $"each frame is {seconds:0.######} seconds")
+            : "the machine's clock";
+    }
+
     /// <summary>Closes the app.</summary>
     [Command("app.quit", "Asks the app to close after this frame")]
     internal static string Quit()

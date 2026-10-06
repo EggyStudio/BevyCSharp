@@ -138,6 +138,37 @@ public sealed unsafe class Time
         }
     }
 
+    /// <summary>
+    /// Seconds each frame advances the clock by, or zero where it reads the machine's.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Starts at <see cref="Config.FrameSeconds"/> and changes from the next frame. A test sets it
+    /// for one frame to make a slow frame on purpose, and sets it back. Zero lets the machine's
+    /// clock run again from where the set clock had reached, so the game's time goes on from there
+    /// whether the frames had run ahead of the machine or behind it.
+    /// </para>
+    /// <para>
+    /// Read from the engine when asked, and zero where there is no engine to ask.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The value set is negative or not a number.</exception>
+    public double FrameSeconds
+    {
+        get
+        {
+            double seconds;
+            return Native.bcs_time_frame_seconds(&seconds) == 0 ? seconds : 0.0;
+        }
+        set
+        {
+            if (!(value >= 0.0) || double.IsInfinity(value))
+                throw new ArgumentOutOfRangeException(nameof(value), value, "A frame lasts zero seconds, for the machine's clock, or a length more than zero.");
+
+            Native.Check(Native.bcs_time_set_frame_seconds(value), "Time.FrameSeconds");
+        }
+    }
+
     /// <summary>Stops the game's clock, from the next frame.</summary>
     public void Pause()
     {

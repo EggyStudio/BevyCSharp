@@ -28,4 +28,31 @@ public sealed class EnvironmentOptionTests
 
         Assert.InRange(frames, 4, 6);
     }
+
+    [Fact]
+    public void TheEnvironmentSetsTheClockWhereTheConfigLeftTheMachines()
+    {
+        var read = 0.0;
+        Environment.SetEnvironmentVariable(Config.FrameTimeVariable, "0.02");
+
+        try
+        {
+            using (var app = new App(new Config { Headless = true, HeadlessFrames = 2 }))
+            {
+                app.AddSystem(Stage.Update, new SystemDescriptor(world => read = world.Resource<Time>().FrameSeconds, "Test.Read"));
+                Assert.Equal(0, app.Run());
+                Assert.Equal(0.02, app.Config.FrameSeconds);
+            }
+
+            // A config that set its own keeps it.
+            using var own = new App(new Config { Headless = true, HeadlessFrames = 1, FrameSeconds = 0.5 });
+            Assert.Equal(0.5, own.Config.FrameSeconds);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(Config.FrameTimeVariable, null);
+        }
+
+        Assert.Equal(0.02, read, 9);
+    }
 }

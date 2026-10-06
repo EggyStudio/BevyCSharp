@@ -91,13 +91,18 @@ public sealed class EngineHarness : IDisposable
     /// the entry assembly, which under the test runner is its host and carries none.
     /// </param>
     /// <param name="pack">A pack to read assets from after the folder, or nothing for none.</param>
+    /// <param name="frameSeconds">
+    /// Seconds each frame advances the clock by, or 0 for the machine's clock. A test of something
+    /// that moves with time sets it, and counts frames rather than pacing them and waiting.
+    /// </param>
     public EngineHarness(
         uint frames = 4,
         bool discoverBehaviors = false,
         uint fps = 0,
         double fixedHz = 0,
         System.Reflection.Assembly? carried = null,
-        string? pack = null)
+        string? pack = null,
+        double frameSeconds = 0)
     {
         _app = new App(new Config
         {
@@ -105,6 +110,7 @@ public sealed class EngineHarness : IDisposable
             HeadlessFrames = frames,
             HeadlessFps = fps,
             FixedHz = fixedHz,
+            FrameSeconds = frameSeconds,
 
             AssetRoot = AssetDirectory,
             AssetAssembly = carried,

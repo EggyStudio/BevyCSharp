@@ -17,6 +17,7 @@ internal static class Help
               open [--editor|--sample]   Start one serving, detached, and wait until it is ready
                 [--example <name>]       One of Bevy's examples written here, by Bevy's name
                 [--offscreen]            Draw into an image instead of a window, with no display
+                [--frame-time <seconds>] Each frame advances the clock by that much, not the machine's
               list                       Every command the connected app offers, with its arguments
               command <name> [args]      Run one against the live world
               shot <path>                Capture the window and wait for the file

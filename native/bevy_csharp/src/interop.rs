@@ -262,6 +262,10 @@ pub struct BcsConfig {
     /// The window's scale factor in place of the display's, or `0` for the display's. Bevy's stress
     /// tests hold it at one, so their window is as many pixels as they say on a display that scales.
     pub scale_factor: f32,
+    /// Seconds each frame advances the clock by, in place of the machine's, or `0` for the
+    /// machine's. Bevy's `TimeUpdateStrategy::ManualDuration`, so a test or a capture runs the same
+    /// on every machine, a frame at a time.
+    pub frame_seconds: f64,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

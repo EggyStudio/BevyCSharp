@@ -146,6 +146,11 @@ public sealed unsafe partial class App : IDisposable
         if ((Config.Offscreen || Config.Headless) && Config.HeadlessFrames == 0 && Config.FramesAsked > 0)
             Config.HeadlessFrames = Config.FramesAsked;
 
+        // A clock set from outside, as a script capturing a game it did not write sets it, where the
+        // game's own config left the machine's.
+        if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)
+            Config.FrameSeconds = Config.FrameSecondsAsked;
+
         var titleBytes = Encoding.UTF8.GetBytes(Config.Title + "\0");
         var assetRootBytes = Config.AssetRoot is null
             ? null
@@ -231,6 +236,7 @@ public sealed unsafe partial class App : IDisposable
                 Wireframes = Config.Wireframes ? 1u : 0u,
                 LogFrameTimes = Config.LogFrameTimes ? 1u : 0u,
                 ScaleFactor = Config.ScaleFactor,
+                FrameSeconds = Config.FrameSeconds,
             };
             _handle = Native.bcs_app_create(&native);
         }

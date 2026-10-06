@@ -5,15 +5,22 @@ code and the history and writes none of the engine. The Now list is read before 
 and before each commit, and it comes before the order of [TODO.md](TODO.md).
 
 This file has one writer. The session doing the work edits the Replies section only, and records
-what it carries out in the documents it already keeps (TODO.md and the plans beside it). An item is
+what it carries out in the documents it keeps (TODO.md and the plans beside it). An item is
 removed from here once the commit that settles it has been read. A stash of every changed file
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a646086`. A windowless run chooses its interface's camera after pointing the
-cameras at its image, so the interface has a camera from its first frame and `text_debug` runs
-(`a8d06df`, with a test), and three more groups of examples keep on their entities what Bevy's
-keep on theirs (`492e119`, `f8a3b55`, `a646086`). No verdict is open.
+Reviewed up to `d620a10`. The last of the 3D Rendering examples keep on their entities what Bevy's
+keep on theirs, 117 of the 119 whose Bevy example keeps state on an entity, the two left being what
+the render world alone copies and draws from (`4ccef7e` to `6a84286`), which settles item 3.
+Transmission's glass spheres are missing from about one capture in four with TAA on, before this
+change as after it, which item 4 holds until the cause is found. Four commits of moves alone take
+sixteen places off the lists of N 1.2, N 1.3 and N 1.4 (`5dc052e` to `d620a10`). No verdict is open.
+
+Before them, a windowless run chose its interface's camera after pointing the cameras at its image,
+so the interface has a camera from its first frame and `text_debug` runs (`a8d06df`, with a test),
+and three more groups of examples keep on their entities what Bevy's keep on theirs (`492e119`,
+`f8a3b55`, `a646086`). No verdict is open.
 
 Before them, Verdict 1 was settled (`5264257`): every text file checks out with LF
 ends, the norm's tests read files through one helper that ends lines with `\n`, the page's test
@@ -22,12 +29,6 @@ for with no interface running loads nothing on any bridge, the expected error ne
 possible on the headless bridge where the suite runs. Three more groups of examples keep on
 their entities what Bevy's keep on theirs (`8637e7c`, `2724064`, `4e15bea`). No verdict is open.
 
-Before them, nine commits brought the examples' groups to B 4, what Bevy's keep on an
-entity kept in a behavior, with `GameTimer` as Bevy's `Timer` and `EaseFunction` as the package's
-own (`3944016` to `e805d3a`). The run of `b263f6d` is the first with this engine's page, read from
-GitHub: Linux passed 722 and failed 1, Windows passed 638 and failed 3, with 351 skipped on each
-where there is no device, and the digest job joined the two.
-
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
 
@@ -35,40 +36,17 @@ and 9 by review.
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item
-here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
-and 11 to 15 are taken from [SHARED.md](SHARED.md).
+here with no wait for a reply, and the list is long so that it does not run out. Items 3, 6 to 8
+and 10 to 14 are taken from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The run after `5264257` is pushed shows whether the three failures
    are gone, which the reviewing session reads and says here. The list goes on meanwhile.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a
    batch reads the lists for the files it will touch before it starts. The rules still to take
-   each have their item: N 2.2 and N 6.1 are the settings of item 6, N 2.1 the listing of item
-   13, N 2.6 the table of bad files in item 12, and N 2.7 item 3.
-3. **An example is a program somebody could write on the package.** A picture in the README
-   opens an example as the way to do a thing, and what opens is written in words the package
-   does not have. `BevyCSharp.Examples/Example.cs` holds helpers, in its own words for what
-   Bevy's examples say in one word and the bridge in several, and 208 of the 231 examples call
-   `app.Startup`, 171 `app.Update`, 56 `Scene.Srgb8` and 25 `SpawnGltf`, beside a mesh spawned
-   with its material and its place in one call, a point light, a camera, `Slerp` and `Hsl`. None
-   of it compiles outside the examples project. Each of those helpers is something a game says
-   in several calls too, so they become the package's own, named and documented as the rest is
-   and in the cheatsheet, and `Example.cs` keeps only what drives an example for its capture.
-   A check builds a handful of examples in a project of their own on the packed package, as the
-   README's walk does, so one that leans on the examples project fails it.
-   `stress_tests/StressTest.cs` is such a helper as well. The window's three settings are said
-   by each test, as Bevy's says them, and the log of frame times is Bevy's own
-   `FrameTimeDiagnosticsPlugin` and `LogDiagnosticsPlugin`, added by the bridge where an app
-   asks, so the two programs measured log by the same code and the C# one runs no system of
-   its own for it.
-
-   The README's first program is `[Behavior]` on a struct, which 8 examples use while 136 keep
-   their state in static fields. Where Bevy's example keeps state on an entity, in a component
-   with a system over it, as `cooldown` does with a timer on each button, the example here keeps
-   it on the entity in a behavior, and a static field is for what Bevy keeps in a resource or a
-   `Local`. The examples written are brought over a group at a time, EXAMPLES.md saying how many
-   are, the helpers first since every example reads shorter for them.
-4. **What a kinematic body carries, and a clock stepped by hand**, both from a red run of
+   each have their item: N 2.2 and N 6.1 are the settings of item 5, N 2.1 the listing of item
+   12 and N 2.6 the table of bad files in item 11.
+3. **What a kinematic body carries, and a clock stepped by hand**, both from a red run of
    3DEngine's on Windows, mended there in `966c2c88`, `15fa305a` and `ee3b47dd`, and measured here
    before anything is changed. There the engine measured where the model put it, 1.75 against
    1.74 at 144 frames a second, and holds 2.00 at every rate since.
@@ -91,27 +69,32 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    The clock is Bevy's own `TimeUpdateStrategy::ManualDuration`, reached from C# and from `bcs`,
    so a test or a capture advances a set amount a frame and is the same on every machine.
    `Time.Step` runs frames at the delta they would have had, which is the machine's.
-5. **The gaps, by how many rows each holds**, each bridged from Bevy
+4. **The gaps, by how many rows each holds**, each bridged from Bevy
    with the examples it unlocks written in its batch: more of Bevy's WGSL reached as its
    lighting is (the deferred buffers, a decal's tag and a volume's voxels), the widgets' events
    as observers, keys observed as they reach a field, and what the table then names most. When
    the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
-   scenes.
-6. **A build with no warnings, and a warning failing the workflow.** The managed build passes
+   scenes. Transmission's glass spheres are missing from about one capture in four with TAA
+   on, before `6a84286` as after it, so the cause is found before that job is red for them, or
+   the example is compared with its spheres left out and the reason beside it.
+5. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
-7. **More of what bodies do**, from 3DEngine's `c5227118`, `8520dbe1`, `799a9d56`, `979c97be` and
+   The build before a commit runs with `--no-incremental` when it checks for warnings, since
+   3DEngine's incremental build passed over a test project an earlier build without the flag
+   had left up to date, and a warning reached `main` (its `2b39ddd2`).
+6. **More of what bodies do**, from 3DEngine's `c5227118`, `8520dbe1`, `799a9d56`, `979c97be` and
    `53cd565f`: the speed a pair closed at on the contact's message, a ball joint kept within a
    cone, a distance joint whose range changes after it is made, bodies on layers whose pairs
    collide or not, which contacts, triggers, the character and rays follow, a body asleep waking
    when its layer changes, a body a game knows is fast swept over each step so it does not cross
    a thin wall, a slider joint with limits, a motor and its position, and how hard two touching
    bodies press, as the push alone and answered while they sleep.
-8. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
+7. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
    character that crouches and stands from its component's height, and a collider that is the
    shape of the meshes an entity and those under it show, made once the model has loaded.
-9. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
+8. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
    a joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things
    of the command line are checked in the same batch and taken if they are missing: `entity.set`
@@ -122,18 +105,18 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
    an enum member by its name alone, where `Enum.TryParse` takes any number as well, as
    `ConsoleWorldCommands.cs` reads gamepad buttons, axes and keys, and as 3DEngine's
    `InputCommands.TryName` does since `ef042886`, where a button of 100 stopped the program.
-10. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
+9. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
    a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
    orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13
    string paths the examples still hold.
-11. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
+10. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
     each taken if it is missing and answered under Replies if it is not. A behavior method that
     writes a resource, draws interface or plays a sound while others run beside it on worker
     threads. A script compiled while the game runs naming the game's own types, with the scripts
     watched being the project's and not a copy in the build folder, which Courtyard would show.
     And a game written in behaviors alone with hundreds of entities, played by the workflow and
     profiled, which `games/Stress` measures and no game here plays.
-12. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
+11. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
     found faults at once. Courtyard and the stress program played for ten minutes by a script
     while managed memory, the bridge's allocations, entities and assets are read at intervals
     through a `bcs` command, anything that keeps climbing found and fixed, and a short form of
@@ -141,17 +124,17 @@ and 11 to 15 are taken from [SHARED.md](SHARED.md).
     file (scenes, data assets, saves, materials, meshes, images, models, sounds, shaders and
     scripts), each answering with a message that names the file and no exception or panic
     crossing the bridge, as one table in a test.
-13. **The public surface written down, and release notes from the commits**, from 3DEngine's
+12. **The public surface written down, and release notes from the commits**, from 3DEngine's
     `fc5aef49`: a listing of every public type and member a tool writes from the built assembly,
     checked in, with a test that fails when the two differ, so a change to what a game calls is
     read as one, and the pack workflow writing the package's release notes from the commits
     since `build/version.txt` last changed. In the same batch it is checked whether a ray here
     stops at a sensor, which there threw a car's wheel and a character's ground check.
-14. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
+13. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
     `docs/making-a-game.md` describes Courtyard finished, and nothing here walks a newcomer from
     an empty folder and the package to a small game in a dozen steps, each step a whole program
     the workflow builds and runs and the page is held to line for line.
-15. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
+14. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
     the Linux test job to the runner's 16 GB. `ScriptHost.References()` reads every loaded
     assembly with `MetadataReference.CreateFromFile` at each compilation, at line 190 of
     `ScriptHost.cs`, and each reference holds its file's whole image in native memory that only
@@ -195,166 +178,23 @@ None open.
 
 ## Replies
 
-`GameTimer` and `TimerMode` are the package's own, Bevy's `Timer` as a struct a behavior keeps on
-its entity and ticks in place, ticked as Bevy ticks its own, a repeating one counting each time a
-long tick runs it out. It is not called `Timer`, since `System.Threading.Timer` is among the names
-every C# program imports and the two would be ambiguous in every game. The examples that keep
-timers on entities, cooldown and the sprite animations among them, are written on it as their
-groups come.
+**Now 3, the clock.** `Config.FrameSeconds` sets Bevy's `TimeUpdateStrategy::ManualDuration` as
+the app is built, `Time.FrameSeconds` reads it and changes it while the app runs, `BCS_FRAME_TIME`
+sets it where the config left it at zero, `bcs open --frame-time S` puts that variable in the
+environment of the app it starts, and `app.frametime [seconds|off]` is the command, all over
+`bcs_time_set_frame_seconds` and `bcs_time_frame_seconds` (ABI 204). Letting the set clock go
+begins Bevy's real clock again from now, keeping the time it had counted. Bevy reads the
+machine's clock as the time since the last frame it counted, so after a run of short frames had
+put that ahead of the machine the game's clock would stand still until the machine caught up.
+`ClockTests` hold sixty frames of a sixtieth to a second and 64 steps, a frame made slow on
+purpose, the release after two seconds of unpaced frames and the command, and
+`EnvironmentOptionTests` the variable. `.claude/skills/bcs-cli/SKILL.md` is an instruction file
+for agents and is left to the owner to add `--frame-time` and `app.frametime` to, as 3DEngine
+left its own. Four commits that move code alone came first: the physics types out of
+`PhysicsWorld.cs` (`5dc052e`), the input commands out of `ConsoleWorldCommands.cs` (`7f5ccee`),
+`GraphicsBackend` (`404fc32`), and `NativeConfig` with the environment options' tests
+(`d620a10`).
 
-B 4 for Time, Gizmos, glTF, Window and Application, 31 of 119 with these. Each marker of Bevy's
-is a behavior on its entity, found by its query where Bevy finds it, and each component with data
-keeps it, the tracking of axes' cubes, a helmet's tint, a text's last size and count. The work Bevy
-does over a component is the behavior's own method where it is about that entity alone. Every
-example's behaviors register in every example app, so an `[After]` names only a behavior's system,
-since one naming an example's own system stopped every other example when tried. headless_renderer
-is not counted and has nothing to bring, its two components being the render world's copying of
-the picture, which the capture does in its place.
-
-B 4 for Camera and Assets, 37 of 119. The shaking camera carries its configuration and its state
-as Bevy's does, the state putting the camera back before each frame and the configuration shaking
-it after, with the state taken beside it. The first person player turns with its sensitivity
-beside it, and the world camera keeps the field of view Bevy keeps in its projection. Bevy's
-`Bird` and `Shape` are enums on their entities, held here as a field of the behavior, and their
-`Left` marks the one changed in place, `LeftShape` for alter_mesh where both share a namespace,
-as `ViewModelPlayer` is for the second of two `Player`s.
-
-B 4 for Usage, 40 of 119, cooldown among them as item 2 has it. Each food's button keeps its
-`GameTimer` in a `Cooldown` behavior, eaten on a changed press and animated while a sparse
-`ActiveCooldown` marks it, which filters the method and is never iterated, a sparse component
-being one a query cannot iterate. The context menu's items each keep their color and react to
-their own interaction changing, armed once the press that opened the menu is let go, as Bevy's
-press events are, and a close is queued once a frame since an item's press and the background's
-both ask. debug_frustum_culling's ring, shapes, wall and camera are each a behavior, the frustum
-read once a frame for every shape. A press could not be checked live, a windowless run having no
-pointer to hold an interaction pressed past Bevy's own focus system, which the old code met too.
-
-B 4 for Shaders and Audio, 46 of 119. Each turning thing of the shader examples turns by its own
-behavior. Each emitter keeps its stopwatch, its time run and whether Space stopped it, the 3D one
-as `Emitter3d` beside the 2D one's `Emitter` in the namespace they share. The soundtrack's tracks
-carry `FadeIn` and `FadeOut` and fade by the state's `GameTimer`. Bevy takes `FadeIn` off once a
-track is in and finds it again by its sink, where here it stays on with a flag, the mark the next
-change finds the playing track by.
-
-B 4 for Transforms, 51 of 119. Each cube carries its own `Rotatable`, `Movable`, `Scaling` or
-`CubeState`, and the transform example's sphere its `Center`, which sizes itself after the cubes
-have moved and turned, as Bevy chains the three. align's ship carries its target and whether it
-turns, the two directions sit on an entity of their own as `RandomAxes`, and H hides the
-instructions by their `Visibility` as Bevy's does, where the text was emptied before. Its own
-`FromAxes` gave way to `Quat.FromBasis`, which the library already had.
-
-B 4 for Animation, 55 of 119, with Bevy's `EaseFunction` made the package's own first, a struct
-a behavior keeps as a field, its kinds in `EaseKind` and its staircases' `JumpAt`, held to
-bevy_math's own tests of it, and the examples' `Ease.cs` gone. Each easing plot carries its
-function and its hue, its dots and label its children as Bevy's are. The fox and the morphing
-model are spawned at once with `AnimationToPlay` on their roots, which plays the clip once the
-model has come, `MorphAnimationToPlay` in morph_targets where the two share a namespace. Bevy's
-generic `Curve<T>` and `Mixed<T>` are one `Curve` and one `Mixed` holding their space beside four
-points in an `InlineList4`.
-
-B 4 for the examples in shader_advanced, 58 of 119, all but one of them under Shaders in Bevy's
-list. Each camera's `PostProcessSettings` and `FullscreenEffect` carry their intensity, set by
-their own method and copied into the pass's values after Update, as Bevy extracts the component
-each frame, and T takes `FullscreenEffect` off the camera and puts it back as Bevy's does. The cube
-turns by `PostProcessRotates`, shader_prepass's `Rotates` sharing the namespace, and the red cube
-carries `GenerateMesh`, which runs the compute shader for it once. custom_shader_instancing is left
-as headless_renderer is, its two components being the list of instances Bevy's render world draws
-from and the buffer it makes of them, with no system over either in the main world, which the
-camera's draw holds here in their place.
-
-B 4 for Games, 63 of 119. breakout's paddle, ball, bricks, colliders and scoreboard each carry
-Bevy's component, the three chained systems ordered by `[After]` and a brick despawned by a
-command as Bevy's is. contributors' birds carry `Contributor` and `ContributorVelocity`, breakout's
-`Velocity` sharing the namespace, and the display brings the next forward by a repeating
-`GameTimer`. desk_toy's logo, pupils and instructions are behaviors, the pointer's place in the
-world read by an app system ordered `Before` the logo's first, which a behavior's system can be
-named by from an example since every app has it. loading_screen marks its level and its screen,
-the example's class `LoadingScreenExample` beside the behavior. game_menu's buttons carry
-`MenuButtonAction`, `QualitySetting` or `VolumeSetting` and `SelectedOption`, which moves by
-command, with a `MenuButton` in place of Bevy's `Button`, and each screen carries its marker. Their
-methods ask the state themselves rather than by `[InState]`, which would warn in every other
-example that its state was never added.
-
-A windowless run's interface had no camera on its first frame. The bridge points the cameras at
-the run's image and chooses the interface's camera among those pointed there, two systems in
-First with no order between them, and the choice came first, found the camera still pointed at
-the window, and left the interface to be laid out that frame against no camera at no size.
-text_debug's columns, a margin inside a node that stretches, came out smaller than nothing there
-and Bevy's border radius asserted on them, so the example stopped on its first frame, offscreen
-and so in every capture, whatever its code. The choice is chained after the pointing, and a test
-holds the camera to be the interface's on the first frame, which it fails on the bridge before.
-
-B 4 for UI, 89 of 119. Each of Bevy's components is a behavior on its node, its system the
-behavior's method where it is about that node, among them the output text's submission, the
-changing text's spans written by their places, the letter spacing toggled and widened on the texts
-that carry it, the transform panel slid by its `TargetNode`, a gradient turned by its
-`AnimateMarker`, the bar's sizes set by each button's `Constraint` and `ButtonValue`, a slider's
-thumb placed by its `DemoSlider`, the frames clipped and sized by their `Container`, a box shown or
-hidden by `DisplayTarget` and `VisibilityTarget` in place of Bevy's generic `Target<T>`, and the
-shadow's buttons acting by their `SettingsButton`. A `TransformButton` stands in for Bevy's
-`Button` in ui_transform, whose button system is over every button, where the panel's own buttons
-now light under the pointer as Bevy's do. A value that is no component's field here, a gradient's
-stops and a `Val`, is kept beside its node or as the two values its buttons hold, and
-vertical_slider's class is `VerticalSliderExample` beside Bevy's `VerticalSlider` marker.
-
-B 4 for 3D Rendering, the first of its parts, 98 of 119. Nine of its examples carry Bevy's marker
-or component where Bevy's does, with the work Bevy does over it as its method where it is about
-that entity, among them the ground under the cursor, the custom mesh's UVs and its turning, the
-meshlet bunny that wiggles, the environment map's label that goes once the maps load, the pccm's
-slab, the rect light's roughness text, the occlusion's bobbing sphere, the fog's red light going
-back and forth between its two places at its speed, and the wireframe's green cube. meshlet's
-capture here draws the floor alone, this bridge built without `--meshlet`, as the example says it
-does.
-
-B 4 for 3D Rendering, its second part, 104 of 119. auto_exposure's text carries `ExampleDisplay`,
-each stamped decal its `ExampleDecal` with Bevy's three stages, a `GameTimer` for each, growing,
-staying and shrinking away by its own method until a command despawns it, split_screen's cameras
-their `CameraPosition`, setting their quarter of the window from its size, and its buttons their
-`RotateCamera`, turning the camera their interface is drawn on, which Bevy finds and here is read
-from the target the interface carries down. shadow_biases' lights move by their parent's
-`Lights`, visibility_range's helmets carry `MainModel` from their roots to each mesh as it
-appears, and camera_sub_view's cameras lay out their own viewports by `ExampleViewports`, the two
-that sweep their view carrying `MovingCameraMarker`.
-
-B 4 for 3D Rendering, its third part, 108 of 119. anisotropy's meshes carry `MaterialVariants`,
-each its material with anisotropy and without, Enter switching every mesh by its own, and its two
-scenes carry Bevy's `Scene` enum as `AnisotropyScene`, the examples' own `Scene` helper being in
-every example's scope. contact_shadows' lights turn round the middle by their `LightContainer` and
-its ground is found by `GroundPlane`. motion_blur's cars move by their `Moves`, turning the wheels
-that carry `Rotates`, and the camera follows the car carrying `CameraTracked` after they move, the
-keys read by an app system ordered `Before` them, as Bevy chains the three. reflection_probes'
-sphere carries `SphereMaterial`, its roughness changed through the material it holds, and the
-cubes' scene `CubesScene`, found by it when the mode changes.
-
-B 4 for 3D Rendering, its fourth part, 111 of 119. blend_modes' spheres and tiles carry
-`ExampleControls` and transmission's meshes `TransmissionControls`, each material reached through
-its mesh and written for each mesh that holds it, as Bevy writes it, read back first by
-`Render.TryReadMaterial`, which makes the same material again. blend_modes' labels carry
-`ExampleLabel`, the texts `BlendModesDisplay` and `TransmissionDisplay` beside auto_exposure's
-`ExampleDisplay`, and the flame and its light `Flicker`, told apart by the flame's mesh as Bevy's
-query does. tonemapping's scenes carry `SceneNumber` and its image viewer `HDRViewer`. Apart from
-these, transmission's glass spheres were missing from some captures taken here, about one in four.
-A small offscreen test with TAA on showed glass gone on its early frames with nothing added to it
-and back by its hundredth, so the fault does not come with this change, and the capture waits 120
-frames. The job comparing captures with references, when item 5 sets it up, would fail now and then
-on this example until the cause is found.
-
-B 4 for 3D Rendering, its fifth part, 115 of 119. color_grading's buttons and their two texts
-each carry `ColorGradingOptionWidget`, Bevy's enum of the part and the option they stand for as
-its section's place and the option's, a press choosing the option by the button's own method and
-the help text carrying `HelpText`. mixed_lighting's, mirror's and light_probe_blending's help texts
-are `MixedLightingHelpText`, `MirrorHelpText` and `ProbeBlendingHelpText` beside it, mirror's
-camera and mirror carry `MirrorCamera` and `Mirror`, the example's class `MirrorExample`, and
-light_probe_blending's sphere moves by `ReflectiveSphere` while the camera orbits it by an
-`OrbitCamera` keeping its distance and angles, swapped for `FreeCamera` and back by the buttons
-as Bevy swaps them.
-
-B 4 for 3D Rendering, its last part, 117 of 119, the last of the groups item 3 brings over.
-light_textures' cube turns by `Rotate`, the things a drag moves carry `Selection` and the Scale and
-Roll buttons `DragMode`, each holding Bevy's enum, found by them where the example kept a table,
-and its help text is `LightTexturesHelpText`. solari's robot walks by `PatrolPath`, which keeps the
-corner it makes for, the path being no value a component here can hold, and its two texts write
-themselves after Update by `ControlText` and `PerformanceText`, as Bevy's run in PostUpdate. Its
-capture here is the raster one, this bridge built without `--solari`. The two left,
-headless_renderer and custom_shader_instancing, keep only what Bevy's render world copies and draws
-from, with no system in the main world over it.
+Shared: the clock a frame at a time is taken here, as `Config.FrameSeconds` and `Time.FrameSeconds`
+like 3DEngine's, with an environment variable and an option of `bcs open` in place of a flag of
+the app's own, since each app here reads its own arguments.

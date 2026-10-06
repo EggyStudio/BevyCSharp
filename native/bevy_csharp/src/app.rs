@@ -548,6 +548,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.insert_resource(bevy::time::Time::<bevy::time::Fixed>::from_hz(config.fixed_hz));
     }
 
+    // A clock that advances a set amount a frame, from the first, so what a test or a capture
+    // measures in frames is the same on every machine. Zero and anything that is not a duration
+    // leave Bevy reading the machine's clock.
+    if let Some(strategy) = crate::sync::frame_strategy(config.frame_seconds) {
+        app.insert_resource(strategy);
+    }
+
     // Pin the orderings that matter between exclusive C# systems.
     //
     // The frame snapshot runs after Bevy has advanced its clocks, or it would report the previous
