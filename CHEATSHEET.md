@@ -1404,6 +1404,126 @@ static float Dot(Vec3 a, Vec3 b);                               // The dot produ
 static Vec3 Cross(Vec3 a, Vec3 b);                              // The cross product, perpendicular to both operands
 ```
 
+### `Vec2`
+
+```csharp
+static float Dot(Vec2 a, Vec2 b);                               // The dot product
+static float PerpDot(Vec2 a, Vec2 b);                           // The dot product of a turned a quarter turn counterclockwise with b, positive where b lies counterclockwise of a
+static Vec2 Min(Vec2 a, Vec2 b);                                // The smaller of each component
+static Vec2 Max(Vec2 a, Vec2 b);                                // The larger of each component
+static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each component held between its bounds
+```
+
+### `Rot2`
+
+```csharp
+static Rot2 Radians(float radians);                             // A rotation by an angle, in radians, counterclockwise
+```
+
+### `Isometry2d`
+
+```csharp
+static Isometry2d FromTransform(Transform transform);           // A placement where the shape is turned by its transform's rotation about Z and moved to its translation's X and Y
+```
+
+### `Aabb2d`
+
+```csharp
+static Aabb2d FromCenter(Vec2 center, Vec2 halfSize);           // The box about a center, reaching half its size each way
+static Aabb2d FromPointCloud(Isometry2d isometry, ReadOnlySpan<Vec2> points);  // The box about points placed by an isometry
+Vec2 ClosestPoint(Vec2 point);                                  // The point of the box nearest a point, the point itself where the box holds it
+bool Intersects(Aabb2d other);                                  // Whether it overlaps another box, touching counting
+bool Intersects(BoundingCircle circle);                         // Whether it overlaps a circle, touching counting
+```
+
+### `BoundingCircle`
+
+```csharp
+Vec2 ClosestPoint(Vec2 point);                                  // The point of the circle nearest a point, the point itself where the circle holds it
+bool Intersects(BoundingCircle other);                          // Whether it overlaps another circle, touching counting
+bool Intersects(Aabb2d box);                                    // Whether it overlaps a box, touching counting
+```
+
+### `Ray2d`
+
+```csharp
+static Ray2d Toward(Vec2 origin, Vec2 direction);               // A ray from a point toward a direction of any length but zero, which is made length one
+Vec2 At(float distance);                                        // The point a distance along it
+```
+
+### `RayCast2d`
+
+```csharp
+float? AabbIntersectionAt(Aabb2d box);                          // How far along the ray it meets a box, or null
+float? CircleIntersectionAt(BoundingCircle circle);             // How far along the ray it meets a circle, or null
+```
+
+### `AabbCast2d`
+
+```csharp
+float? AabbCollisionAt(Aabb2d other);                           // How far along the ray the swept box first touches another, or null
+```
+
+### `BoundingCircleCast`
+
+```csharp
+float? CircleCollisionAt(BoundingCircle other);                 // How far along the ray the swept circle first touches another, or null
+```
+
+### `IBounded2d`
+
+```csharp
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d, which Rectangle, Circle, Triangle2d, Segment2d, Capsule2d and RegularPolygon each give
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle, which each of them gives
+```
+
+### `Rectangle`
+
+```csharp
+static Rectangle FromSize(float width, float height);           // A rectangle of a width and a height
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `Circle`
+
+```csharp
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `Triangle2d`
+
+```csharp
+(Vec2 Center, float Radius) Circumcircle();                     // The circle through its three corners, its center and its radius
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // The smallest circle about it where it is placed
+```
+
+### `Segment2d`
+
+```csharp
+static Segment2d FromDirectionAndLength(Vec2 direction, float length);  // A segment centered on the origin along a direction, a length long
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `Capsule2d`
+
+```csharp
+static Capsule2d FromLength(float radius, float length);        // A capsule of a radius whose straight middle is a length long
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `RegularPolygon`
+
+```csharp
+IEnumerable<Vec2> Vertices(float rotation);                     // Its corners, turned by an angle, the first up before turning
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
 ### `Cuboid`
 
 ```csharp

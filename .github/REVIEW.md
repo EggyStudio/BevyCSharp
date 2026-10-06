@@ -10,15 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `dfa22f2`. A mesh made in code is skinned to joint entities, four joints and weights
-a vertex, inverse bindposes made from transforms and Bevy's `SkinnedMesh` with the bounds that
-follow (ABI 217), `custom_skinned_mesh` written, 271, which closes the animation gap (`3208c70`);
-the input focus moves between interface nodes by direction with edges a game draws before the
-nearest node (ABI 218), `directional_navigation` and its overrides written, 273 (`f127b1f`); and a
-touch and its phase moved into files of their names, N 1.2's list at 229 (`dfa22f2`). Feathers'
-three widget examples need `bevy_feathers`, a crate the lock does not hold, which waits on the
-owner's word; the reply on input as Bevy's messages (ABI 219) is being written, its commit to come.
-Nothing was pushed since `0013c52`, whose run passed on both systems.
+Reviewed up to `a31e3b3`. Each change of the keyboard, the mouse, a touch and a pad is read as its
+Bevy message in the order it came, 14 message records drained into the bus each frame (ABI 219), and
+the four input event examples are written, 277 (`b0f9841`); a box and a ball are shapes as values
+that points are sampled in and on as Bevy samples them, and `random_sampling` is written
+(`a31e3b3`). The owner pushed, and both workflows failed before any job began, which is Verdict 4.
+
+Before them, a mesh made in code came to be skinned to joint entities, four joints and weights a
+vertex, inverse bindposes made from transforms and Bevy's `SkinnedMesh` with the bounds that follow
+(ABI 217), `custom_skinned_mesh` written, 271, which closes the animation gap (`3208c70`); the input
+focus moves between interface nodes by direction with edges a game draws before the nearest node
+(ABI 218), `directional_navigation` and its overrides written, 273 (`f127b1f`); and a touch and its
+phase moved into files of their names, N 1.2's list at 229 (`dfa22f2`). Feathers' three widget
+examples need `bevy_feathers`, a crate the lock does not hold, which waits on the owner's word; the
+reply on input as Bevy's messages (ABI 219) is being written, its commit to come. Nothing was pushed
+since `0013c52`, whose run passed on both systems.
 
 Before them, an app came to be told once for each state it never added rather than once for each
 system scoped to it, the suite's own `Screen` behaviors having been the 45 lines, and the console
@@ -30,16 +36,6 @@ frame overshot past the coin, and `play.sh` sets a sixtieth of a second a frame 
 `build/page.py` are taken from 3DEngine as the default shell of the game, examples, README and pack
 jobs, the test and native jobs keeping their own, and `test.py` reads the page's code from `page.py`
 (`aa55e0d`); Verdicts 2 and 3 settle with a pack run. The run of `0013c52` passed on both systems.
-
-Before them, a warning came to fail the workflow on both sides, the managed build with
-`-warnaserror` and every cargo build with `CARGO_BUILD_WARNINGS=deny`, every public member of the
-library is documented, 297 generated enum variants by the generator and four types whose comments
-had slid onto a neighbor given them back, and `NormTests.N_4_7` reads the README, the cheatsheet and
-`docs/` for anyone named as deciding, with COMMITS.md's rule (`4308619`), which settles items 4 and
-15 and takes N 2.2, N 4.7 and N 6.1; two commits of moves alone came beside it, 43 types into files
-of their names and the compute tests split, N 1.2's list at 231 and N 1.4's at 88 to mend
-(`5b38404`, `ff593c1`). The pack run of `421d4e1` failed in the package tests, Verdict 2's, and in
-the step that plays Courtyard, which is Verdict 3. The run of `5b38404` passed on both systems.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -164,6 +160,17 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
+4. **Both workflows fail at `a31e3b3` before any job begins.** Read from the runs: `build.yml`
+   and `package.yml` each ended in failure within a minute of the push with no job at all, which is
+   the failure of a workflow file GitHub refuses, and both files parse as YAML. What changed in them
+   since `0013c52`'s green run is `aa55e0d`: `build/step.py` as the default shell of four jobs, and
+   the game job's `env` with `BCS_STEP_LOGS: ${{ runner.temp }}/courtyard...`. A job's `env` cannot
+   read the `runner` context, which GitHub gives to steps alone, so the file is refused, and
+   `build.yml` with it, since it calls `package.yml`. The value moves into the steps that need it,
+   or `step.py` reads `RUNNER_TEMP` itself at run time, and a check that every `${{ }}` in the
+   workflows names a context its place allows runs with the norm's tests, so a refused file is seen
+   before a push. Settled when a run of the mend starts its jobs.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -200,36 +207,17 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, input as Bevy's messages.** Each change of the keyboard, the mouse, a touch and a pad is
-read as its message, one for each change in the order it came (`input_messages.rs`, ABI 219). The
-bridge drains every kind into one array a frame through cursors of its own, and the app posts each
-to the message bus as the window's messages are, so `ctx.Read<KeyboardInput>()` reads them as
-Bevy's examples read theirs. `MouseButtonInput`, `MouseMotion`, `CursorMoved`, `MouseWheel`, the
-touchpad's `PinchGesture`, `RotationGesture` and `DoubleTapGesture`, `TouchInput` with its
-`TouchForce`, the pad's `GamepadConnectionEvent`, `GamepadButtonChangedEvent`,
-`GamepadButtonStateChangedEvent` and `GamepadAxisChangedEvent`, and Bevy's ordered `GamepadEvent`
-are new, each in a file of its name, and `KeyboardInput` is posted as it stands. `TouchPhase` gains
-Bevy's `Moved` and `Canceled`, moved first out of `Input.cs` with `Touch` (`dfa22f2`).
-`keyboard_input_events`, `mouse_input_events`, `touch_input_events` and `gamepad_input_events` are
-written, 277, each printing its messages as C# writes the records. The mouse's capture rolls the
-wheel alone, since a capture runs with no window and nothing drawn and a pretended button there is
-refused, and the touch example prints nothing without a touch screen, beside `touch_input` among
-the captures held to saying nothing. `InputMessageTests` holds a pad's connection, its button
-pressed and let go and its stick tilted as messages of their kinds and in one order, a key, a
-button and the wheel offscreen, and the mirror's layout field by field. A stick's message carries
-the value Bevy filters through its dead zone, 0.579 for 0.6, where the frame's `Gamepad` reads 0.6.
-The suite passed, 1,099 with 9 skipped. The fonts' four wait on Bevy's system font discovery, which
-on Linux brings `yeslogic-fontconfig-sys`, a crate the lock does not hold, and links fontconfig,
-asked of the owner beside `bevy_feathers`. Bevy's math, three examples, is next.
-
-**Now 3, Bevy's math, points sampled in a shape.** `Cuboid` and `Sphere` are shapes as values,
-measured as Bevy measures them, each sampling a point inside it or on its surface from a `Random` a
-game seeds, as Bevy's `ShapeSample` does. A box's surface is landed on by each face's area and a
-ball's inside filled evenly, through the cube root of an even draw, as Bevy's are. `random_sampling`
-is written, 278, scattering a hundred points inside its cube and a hundred on its surface for its
-capture, which `capture-example.sh` drives by name, its points other than Bevy's since .NET's
-generator draws its own from the seed. Its light is Bevy's default point light, a million lumens,
-where `LightSettings` starts at ten thousand. `ShapeSamplingTests` holds the box's faces landed on
-as their areas say, a fifth and two fifths, an eighth of the ball within half its radius, and a seed
-drawing the same points again. `docs/math.md` is new, linked from the README, which stands at its
-320 lines. The suite passed, 1,102 with 9 skipped. Bounding volumes and their casts are next.
+**Now 3, Bevy's math, bounding volumes and casts.** A shape in the plane gives its bounds where an
+`Isometry2d` places it, a box along the axes or a circle, as Bevy's `Bounded2d` does, `Rectangle`,
+`Circle`, `Triangle2d`, `Segment2d`, `Capsule2d` and `RegularPolygon` each an `IBounded2d`. `Aabb2d`
+and `BoundingCircle` test their overlaps, `RayCast2d` finds how far along a `Ray2d` it meets either,
+and `AabbCast2d` and `BoundingCircleCast` sweep a volume along one, each Bevy's code written again,
+the slab test with Rust's `min` and `max` passing over a not-a-number as Bevy's do, and the triangle's
+circle the one on its wide angle's side where it has one. `Rot2` and the few operations `Vec2` lacked,
+`Dot`, `PerpDot`, `Min`, `Max`, `Clamp`, a length squared, a unit length and its operators, are
+added. `bounding_2d` is written, 279, and driven offscreen through its tests with Space. Bevy chains
+its three systems after the update, and registered apart here one ran a frame behind, a box touched
+by the swept box drawn as missed, so they run as one in Bevy's order. `BoundingTests` holds known
+distances for a ray against a box and a circle, two sweeps meeting at their edges, overlaps at a
+touch, each shape's bounds turned a quarter and moved, and both of a triangle's circles. The suite
+passed, 1,109 with 9 skipped. Verdict 4 is next, then the cubic curves.

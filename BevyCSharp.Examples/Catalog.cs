@@ -235,6 +235,7 @@ internal static class Catalog
         new("touch_input_events", TouchInputEvents.Build, Prints: 3),
 
         // Math
+        new("bounding_2d", Bounding2d.Build),
         new("random_sampling", RandomSampling.Build),
 
         // Transforms
