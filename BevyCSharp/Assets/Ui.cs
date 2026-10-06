@@ -401,6 +401,46 @@ public static unsafe partial class Ui
         Camera = settings.Camera.Bits,
     };
 
+    /// <summary>Gives <paramref name="entity"/> the input focus, so the keys go to it.</summary>
+    /// <remarks>
+    /// Bevy's <c>InputFocus::set</c>, which also records the change, from which Bevy tells the entity
+    /// that lost the focus and the one that gained it, as a text field selects what it holds on
+    /// gaining it where it carries <c>SelectAllOnFocus</c>. Writing <c>InputFocusRef.CurrentFocus</c>
+    /// moves the focus without that record. Which entity has the focus is read from
+    /// <c>InputFocusRef</c>.
+    /// </remarks>
+    /// <param name="entity">The entity to focus, usually a text field or a button.</param>
+    /// <param name="cause">How it came to have it, navigated to or pressed into.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
+    {
+        var status = Native.bcs_ui_focus(entity.Bits, (int)cause);
+        if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Giving the input focus");
+        Native.Check(status, $"giving {entity} the input focus");
+    }
+
+    /// <summary>The entity the focus would move to along the tab order, without moving it.</summary>
+    /// <remarks>
+    /// Bevy's <c>TabNavigation::navigate</c>, the order Tab moves the focus in, by each entity's
+    /// <c>TabIndex</c> within its <c>TabGroup</c>, from the entity with the focus now. A game that
+    /// moves the focus itself, on to the next field once one is submitted, passes the answer to
+    /// <see cref="Focus"/>:
+    /// <code>
+    /// if (Ui.Navigate(NavAction.Next) is { } next) Ui.Focus(next);
+    /// </code>
+    /// </remarks>
+    /// <param name="action">Which way, to the next, the previous, the first or the last.</param>
+    /// <returns>The entity, or null where there is nowhere to move it, no tab group or nothing in one.</returns>
+    /// <exception cref="BevyNativeException">This build has no renderer, or this was called from outside a system.</exception>
+    public static Entity? Navigate(NavAction action)
+    {
+        ulong next;
+        var status = Native.bcs_ui_navigate((int)action, &next);
+        if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Moving the input focus");
+        Native.Check(status, $"finding where the focus moves {action}");
+        return status == 1 ? new Entity(next) : null;
+    }
+
     private static BevyNativeException NoUi(string operation) =>
         new(NativeStatus.Unsupported,
             $"{operation} failed, because this native build has no renderer, so there is no UI to "

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -38,6 +39,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly HashSet<(int Kind, int Component, Type Event)> _watched = [];
     private readonly HashSet<int> _watchedPointers = [];
     private readonly HashSet<int> _watchedWidgets = [];
+    private bool _watchedFocusedKeys;
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
     private GCHandle _self;
 
@@ -156,6 +158,49 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         ulong observer;
         var status = Native.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &WidgetReported, GCHandle.ToIntPtr(_self), &observer);
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a widget reports");
+    }
+
+    /// <summary>Asks the bridge to report each key that reaches the focused entity, once.</summary>
+    /// <remarks>A bridge without the renderer has no input focus, answers so, and reports nothing.</remarks>
+    internal void WatchFocusedKeys()
+    {
+        if (_watchedFocusedKeys) return;
+        _watchedFocusedKeys = true;
+
+        ulong observer;
+        var status = Native.bcs_observe_focused_keys(ComponentRegistry.AppHandle, &FocusedKeyReported, GCHandle.ToIntPtr(_self), &observer);
+        if (status != NativeStatus.Unsupported) Native.Check(status, "observing keys handed to the focused entity");
+    }
+
+    /// <summary>Where the bridge reports a key that reached the focused entity, with the world on loan.</summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static void FocusedKeyReported(NativeFocusedKey* reported, IntPtr user)
+    {
+        try
+        {
+            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry || reported == null) return;
+
+            var native = *reported;
+            var logical = Encoding.UTF8.GetString(native.Logical, Math.Min((int)native.LogicalLength, NativeFocusedKey.TextCapacity));
+            var key = new KeyboardInput(
+                native.Key >= 0 && native.Key < KeyTable.Count ? (Key)native.Key : null,
+                native.LogicalKind switch
+                {
+                    1 => LogicalKey.Character(logical),
+                    2 => LogicalKey.Dead(logical),
+                    _ => LogicalKey.Named(logical),
+                },
+                native.State == 1 ? ButtonState.Pressed : ButtonState.Released,
+                native.HasText != 0 ? Encoding.UTF8.GetString(native.Text, Math.Min((int)native.TextLength, NativeFocusedKey.TextCapacity)) : null,
+                native.Repeat != 0);
+
+            registry.Trigger(new FocusedInput<KeyboardInput>(new Entity(native.Entity), key));
+        }
+        catch (Exception ex)
+        {
+            // An exception crossing back into Rust is undefined, so it ends here, said.
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
+        }
     }
 
     /// <summary>Where the bridge reports what a widget reported, with the world on loan.</summary>

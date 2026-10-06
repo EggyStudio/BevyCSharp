@@ -100,6 +100,12 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
             .after(bevy::picking::backend::ray::RayMap::repopulate)
             .in_set(bevy::picking::PickingSystems::ProcessInput),
     );
+
+    // Keys handed to the focused entity where Bevy, finding no primary window, hands out none.
+    app.add_systems(
+        bevy::app::PreUpdate,
+        crate::focus::dispatch_offscreen_keys.in_set(bevy::input_focus::InputFocusSystems::Dispatch),
+    );
 }
 
 /// Casts the rays of pointers on the image an offscreen run draws into, which Bevy's ray map leaves

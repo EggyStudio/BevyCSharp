@@ -326,6 +326,8 @@ internal static class Catalog
         new("tab_navigation", TabNavigation.Build),
         new("text_debug", TextDebug.Build),
         new("text_input", TextInput.Build),
+        new("multiline_text_input", MultilineTextInput.Build),
+        new("multiple_text_inputs", MultipleTextInputs.Build),
         new("text_wrap_debug", TextWrapDebug.Build),
         new("transparency_ui", TransparencyUi.Build),
         new("ui_target_camera", UiTargetCamera.Build),

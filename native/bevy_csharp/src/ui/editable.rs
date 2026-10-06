@@ -42,7 +42,7 @@ pub unsafe extern "C" fn bcs_ui_set_editable_text(
 
         #[cfg(feature = "render")]
         {
-            use bevy::text::{EditableText, EditableTextFilter, TextCursorStyle};
+            use bevy::text::{EditableText, EditableTextFilter, TextCursorStyle, TextEdit};
 
             if config.is_null() {
                 return status::NULL_ARG;
@@ -62,13 +62,30 @@ pub unsafe extern "C" fn bcs_ui_set_editable_text(
                     return status::NO_ENTITY;
                 };
 
-                let mut editable = EditableText::new(text);
-                editable.max_characters = (config.max_characters > 0).then_some(config.max_characters as usize);
-                editable.visible_width = (config.visible_width > 0.0).then_some(config.visible_width);
-                editable.visible_lines = Some(if config.visible_lines > 0.0 { config.visible_lines } else { 1.0 });
-                editable.allow_newlines = config.allow_newlines != 0;
+                let max_characters = (config.max_characters > 0).then_some(config.max_characters as usize);
+                let visible_width = (config.visible_width > 0.0).then_some(config.visible_width);
+                let visible_lines = Some(if config.visible_lines > 0.0 { config.visible_lines } else { 1.0 });
+                let allow_newlines = config.allow_newlines != 0;
 
-                entity_mut.insert((editable, TextCursorStyle::default()));
+                // A field set again is changed where it stands, its text replaced as
+                // `bcs_ui_set_editable_value` replaces it. Inserting a new one over it left Bevy's
+                // laid out text behind, so the field held its text and drew none of it.
+                if let Some(mut editable) = entity_mut.get_mut::<EditableText>() {
+                    editable.max_characters = max_characters;
+                    editable.visible_width = visible_width;
+                    editable.visible_lines = visible_lines;
+                    editable.allow_newlines = allow_newlines;
+                    editable.clear();
+                    editable.editor_mut().set_text(&text);
+                    editable.queue_edit(TextEdit::TextEnd(false));
+                } else {
+                    let mut editable = EditableText::new(text);
+                    editable.max_characters = max_characters;
+                    editable.visible_width = visible_width;
+                    editable.visible_lines = visible_lines;
+                    editable.allow_newlines = allow_newlines;
+                    entity_mut.insert((editable, TextCursorStyle::default()));
+                }
                 match allowed {
                     Some(allowed) => {
                         let allowed: Vec<char> = allowed.chars().collect();

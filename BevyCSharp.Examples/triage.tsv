@@ -377,8 +377,8 @@ image_node	can
 image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
 ime_support	missing	a system font chosen by its generic family, sans-serif
 letter_spacing	part	the underline under the heading
-multiline_text_input	missing	keys observed as they reach the focused field, Bevy's FocusedInput, which an offscreen run is not handed either
-multiple_text_inputs	missing	the focus moved on to the next field from C# as Bevy's TabNavigation moves it
+multiline_text_input	can	Bevy's cursor colors, which no wrapper reaches, so the field draws Bevy's default cursor, and its lines set by setting the field again
+multiple_text_inputs	can
 overflow_clip_margin	can
 overflow_debug	can
 overflow	can

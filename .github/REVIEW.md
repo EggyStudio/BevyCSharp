@@ -10,14 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `569ea59`. What Bevy's widgets report reaches C# as their own `Activate`,
-`ValueChange<T>` and `MenuEvent`, the last taken up the parents (ABI 209), and `standard_widgets` is
-written on them, 251 (`2597c12`); a game observes Bevy's own components coming and going through
-their wrappers, as `ecs.Observe<Add<PressedRef>>` for Bevy's `On<Add, Pressed>`, with no change to
-the bridge, the lifecycle events constrained to `struct` while every call reading a component's
-bytes keeps `unmanaged`, and `standard_widgets_observers` is written, 252, which ends the widgets'
-rows (`569ea59`); the observer tests moved to `Ecs` by a move alone, N 1.4's list at 92 to mend
-(`47a2497`). Item 14 is new, from 3DEngine's Verdict 24. No verdict is open.
+Reviewed up to `194a3b7`. A game reads a key by what it types or by its name as well as by where it
+is, Bevy's `ButtonInput<Key>` through the same calls with a `LogicalKey` (ABI 210), and a pretended
+key reads as a keyboard's would, named where it types nothing, so Bevy's text fields take a
+pretended Backspace, Enter or arrow, and released as it was pressed, where one that typed a
+character stayed down for good; `keyboard_input` is written, 253 (`b23e532`). Two commits of moves
+alone put the editable text tests in `Assets` and split the bridge's `ui.rs` into its parts, N 1.3's
+list at 18 with 11 in the bridge and N 1.4's at 91 to mend (`915514e`, `194a3b7`). The key observed
+as it reaches a field is next, which Bevy hands out only where there is a primary window, so an
+offscreen run's fields need their own dispatch, then item 14. No verdict is open.
+
+Before them, what Bevy's widgets report came to reach C# as their own `Activate`, `ValueChange<T>`
+and `MenuEvent`, the last taken up the parents (ABI 209), and `standard_widgets` is written on them,
+251 (`2597c12`); a game observes Bevy's own components coming and going through their wrappers, as
+`ecs.Observe<Add<PressedRef>>` for Bevy's `On<Add, Pressed>`, with no change to the bridge, the
+lifecycle events constrained to `struct` while every call reading a component's bytes keeps
+`unmanaged`, and `standard_widgets_observers` is written, 252, which ends the widgets' rows
+(`569ea59`); the observer tests moved to `Ecs` by a move alone, N 1.4's list at 92 to mend
+(`47a2497`). Item 14 came from 3DEngine's Verdict 24.
 
 Before them, the run of `ba5f72c` passed on Linux and Windows, read from its page, the three
 failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel is Bevy's
@@ -25,13 +35,6 @@ failures of `b263f6d` gone, which settles item 1 as it stood. The pretend wheel 
 it, and `scroll` is written with its own event carried up from picking's `Pointer<Scroll>`, 250, the
 one grid that does not scroll being Taffy 0.10.1's, upstream's to mend (`a683c3e`); the widget tests
 moved to `Assets` by a move alone, N 1.4's list at 93 to mend (`db01753`).
-
-Before them, a game came to spawn pointers of its own and puts them on an image an interface is
-drawn into, as Bevy's `PointerId::Custom`, and a ray cast answers the texture coordinate it met (ABI
-207), so `render_ui_to_texture` is written, 249, and TODO.md's example gaps say what each of the
-three left waits on (`d59365f`); the input tests moved to `Input` by a move alone, N 1.4's list at
-94 to mend (`ba5f72c`). The reply on `scroll` is written, the pretend wheel going through Bevy's
-`MouseWheel` and picking (ABI 208), its commit to come. The owner pushed.
 
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
@@ -170,16 +173,19 @@ None open.
 
 ## Replies
 
-**Now 3, logical keys.** A game reads a key by what it types or by its name as well as by where it
-is, Bevy's `ButtonInput<Key>`, through the same calls with a `LogicalKey`,
-`KeyPressed(LogicalKey.Character("?"))` or `KeyDown(LogicalKey.Control)`, read once a frame beside
-the rest of the input (`bcs_logical_keys`, ABI 210). A pretended key now reads as a keyboard's
-would. One that types nothing is its name, Enter, Backspace, an arrow or Shift, where it was
-`Unidentified`, so Bevy's text fields, which go by those names, took no pretended Backspace, Enter
-or arrow at all. And a release reads as its press did, remembered, where a key that typed a
-character had stayed down among the logical keys for good. `keyboard_input` is written, 253, and
-prints what Bevy's does for the keys it is driven with. `InputTests` holds the mirror's layout and a
-tapped '?' and Enter read by what they type, never left down. Next in this gap is the key observed
-as it reaches a field, `FocusedInput<KeyboardInput>`, which Bevy hands out only where there is a
-primary window, so an offscreen run's fields take no keys, and the focus moved on as tab navigation
-moves it, which the two text input examples wait on. Item 14 after it.
+**Now 3, keys as they reach a field.** A key handed to the focused entity reaches C# as Bevy's
+`FocusedInput<KeyboardInput>`, carrying the key, its logical key, its state, its text and whether
+it repeats, and taken up the parents in C# as the pointer's events are (`focus.rs`, ABI 211). Bevy
+hands keys out only where there is a primary window, so an offscreen run's fields took none. The
+bridge now hands them out itself there, the event built through Bevy's reflection since its window
+field is private, so a test or `bcs` types into an offscreen field, Backspace and Enter included.
+`Ui.Focus` gives the focus through Bevy's `InputFocus::set`, which records the change where writing
+the field did not, and `Ui.Navigate` answers where Tab would move it. `multiline_text_input` and
+`multiple_text_inputs` are written, 255, driven offscreen by `bcs`, Ctrl+Enter printing the text,
+Enter setting the lines and the font size, and Enter submitting a row and moving the focus on.
+Found on the way, a field set again was inserted over itself, which kept its text and drew none of
+it, and it is now changed where it stands, `EditableTextTests` holding its text drawn. The bridge's
+`ui.rs` was split into parts by moves alone first (`194a3b7`), N 1.3's list at 18, and the editable
+text tests moved to `Assets` (`915514e`), N 1.4's at 92. One difference stays, said in
+`FocusedInput`'s remarks. A C# observer of a parent hears a key a Bevy field took, where Bevy's
+own stop at the field. Item 14 is next.

@@ -44,13 +44,15 @@ public static unsafe partial class Ui
     /// copy, cut and paste, and the text laid out in the node's <c>TextFont</c>, with Bevy's cursor
     /// style. Typing reaches the field that has the input focus, which a click on it gives it, as
     /// does Tab within a <c>TabGroup</c> by each field's <c>TabIndex</c>, and Bevy's <c>AutoFocus</c>
-    /// gives it on the frame the field is spawned. Bevy hands each key to the focused field through
-    /// the primary window, so a field in an offscreen run, which has none, takes no keys.
+    /// gives it on the frame the field is spawned, and <see cref="Focus"/> gives it from C#. Bevy
+    /// hands each key to the focused field only where there is a primary window, and the bridge
+    /// hands them out itself in a run with none, so an offscreen run's fields are typed into too.
     /// </para>
     /// <para>
-    /// Setting a node's field again replaces it, its text with the settings' text. What the player
-    /// typed is read with <see cref="EditableTextOf"/>, and replaced with
-    /// <see cref="SetEditableValue"/>, which also clears it.
+    /// Setting a node's field again changes it where it stands, its text replaced with the
+    /// settings' text and the rest of the settings taken. What the player typed is read with
+    /// <see cref="EditableTextOf"/>, and replaced with <see cref="SetEditableValue"/>, which also
+    /// clears it.
     /// </para>
     /// </remarks>
     /// <example>

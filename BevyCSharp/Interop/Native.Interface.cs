@@ -62,6 +62,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_pointer_spawn(ulong* number);
 
+    /// <summary>Gives an entity the input focus, as Bevy's <c>InputFocus::set</c>.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_focus(ulong entity, int cause);
+
+    /// <summary>Writes where the focus would move along the tab order, answering one where there is somewhere.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_navigate(int action, ulong* next);
+
     /// <summary>Moves, presses or releases a pointer of the game's own on an image.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

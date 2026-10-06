@@ -1076,6 +1076,8 @@ static UiInteraction InteractionOf(Entity entity);              // Reports how t
 static void SetImage(Entity entity, AssetHandle image);         // Draws an image inside a node, or replaces the one it draws
 static void SetImage(Entity entity, UiImageSettings settings);  // Draws an image inside a node, tinted, cut down or sliced
 static void SetScroll(Entity entity, float x, float y);         // Moves a scrolling node's contents inside it
+static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated);  // Gives entity the input focus, so the keys go to it
+static Entity? Navigate(NavAction action);                      // The entity the focus would move to along the tab order, without moving it
 static void SetEditableText(Entity node, UiEditableTextSettings settings);  // Makes a node a text field the player types into
 static string EditableTextOf(Entity node);                      // What a text field holds, or null for a node that is no field
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end

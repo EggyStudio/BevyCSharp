@@ -127,6 +127,24 @@ public sealed class InputTests
         Assert.Equal(32, Marshal.SizeOf<NativeLogicalKey>());
     }
 
+    /// <summary>Each field of a key handed to the focused entity sits where the bridge writes it.</summary>
+    [Theory]
+    [InlineData(nameof(NativeFocusedKey.Entity), 0)]
+    [InlineData(nameof(NativeFocusedKey.Key), 8)]
+    [InlineData(nameof(NativeFocusedKey.State), 12)]
+    [InlineData(nameof(NativeFocusedKey.Repeat), 16)]
+    [InlineData(nameof(NativeFocusedKey.LogicalKind), 20)]
+    [InlineData(nameof(NativeFocusedKey.LogicalLength), 21)]
+    [InlineData(nameof(NativeFocusedKey.TextLength), 22)]
+    [InlineData(nameof(NativeFocusedKey.HasText), 23)]
+    [InlineData(nameof(NativeFocusedKey.Logical), 24)]
+    [InlineData(nameof(NativeFocusedKey.Text), 52)]
+    public void EveryFieldOfAFocusedKeySitsWhereTheBridgePutsIt(string field, int offset)
+    {
+        Assert.Equal(offset, Marshal.OffsetOf<NativeFocusedKey>(field).ToInt32());
+        Assert.Equal(80, Marshal.SizeOf<NativeFocusedKey>());
+    }
+
     /// <summary>
     /// A key read by what it types or by its name is pressed and released on one frame each, as the
     /// physical key is, and a held key that types nothing reads as its name while it is held.

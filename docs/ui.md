@@ -278,10 +278,29 @@ Ui.SetEditableValue(name, string.Empty);                    // cleared
 
 Keys reach the field with the input focus, which a click on it gives it, Bevy's `AutoFocus` gives it
 as it is spawned, and Tab moves through a `TabGroup` by each field's or button's `TabIndex`. The
-focus itself is Bevy's `InputFocus` resource, `ctx.Ecs.Resource<InputFocusRef>()`. `Allowed` names
-the only characters a field takes, where Bevy's filter is a function of the game's own, and the
-field's font, size and wrapping are the node's `TextFont` and `TextLayout`. Bevy hands each key to
-the focused field through the primary window, so a field in an offscreen run takes no keys.
+focus itself is Bevy's `InputFocus` resource, `ctx.Ecs.Resource<InputFocusRef>()`, and a game moves
+it with `Ui.Focus`, which Bevy records so the field that lost it and the one that gained it are
+told, and asks where Tab would move it with `Ui.Navigate`. `Allowed` names the only characters a
+field takes, where Bevy's filter is a function of the game's own, and the field's font, size and
+wrapping are the node's `TextFont` and `TextLayout`. A field set again is changed where it stands,
+its text replaced with the settings' text and the rest of them taken.
+
+Each key reaches the focused entity as Bevy's `FocusedInput<KeyboardInput>`, which goes on up its
+parents, so a game observes Enter in a field, or in any field of a row:
+
+```csharp
+ctx.Ecs.Observe<FocusedInput<KeyboardInput>>(row, on =>
+{
+    if (on.Event.Input.State == ButtonState.Pressed && on.Event.Input.LogicalKey == LogicalKey.Enter)
+        Submit(on.Ecs, on.Event.FocusedEntity);
+});
+if (Ui.Navigate(NavAction.Next) is { } next) Ui.Focus(next);      // on to the next field
+```
+
+Bevy hands keys out only where there is a primary window, and the bridge hands them out itself in a
+run with none, so a test or `./bcs command input.key` types into an offscreen run's fields as a hand
+would. Tab moves the focus there only through `Ui.Navigate`, since Bevy's own Tab is heard at the
+window.
 
 Bevy's widgets are its own components, a slider, a checkbox, a radio group, a scrollbar, put on a
 node through their wrappers. A widget reports a change rather than making it, and
