@@ -8,7 +8,6 @@ BevyCSharp.Tests/ViewShaderTests.cs
 BevyCSharp/Diagnostics/ConsoleWorldCommands.cs
 BevyCSharp/Ecs/ComponentSchema.cs
 BevyCSharp/Interop/NativeTypes.Render.cs
-BevyCSharp/Physics/PhysicsWorld.cs
 BevyCSharp/Scenes/SceneFile.cs
 BevyCSharp/Scenes/SceneInstances.cs
 native/bevy_csharp/src/ecs.rs

@@ -270,15 +270,6 @@ BevyCSharp/Physics/PhysicsComponents.cs ColliderFit
 BevyCSharp/Physics/PhysicsComponents.cs ColliderShape
 BevyCSharp/Physics/PhysicsComponents.cs Colliders
 BevyCSharp/Physics/PhysicsComponents.cs RigidBody
-BevyCSharp/Physics/PhysicsWorld.cs BodyKind
-BevyCSharp/Physics/PhysicsWorld.cs ContactEnded
-BevyCSharp/Physics/PhysicsWorld.cs ContactStarted
-BevyCSharp/Physics/PhysicsWorld.cs Joint
-BevyCSharp/Physics/PhysicsWorld.cs JointHandle
-BevyCSharp/Physics/PhysicsWorld.cs PhysicsHit
-BevyCSharp/Physics/PhysicsWorld.cs PhysicsMaterial
-BevyCSharp/Physics/PhysicsWorld.cs PhysicsSettings
-BevyCSharp/Physics/PhysicsWorld.cs PhysicsShape
 BevyCSharp/Scenes/Persistent.cs IPersistentValue
 BevyCSharp/Scenes/Persistent.cs UserData
 BevyCSharp/Scenes/SaveGame.cs PersistAttribute
