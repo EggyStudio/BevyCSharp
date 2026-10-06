@@ -116,5 +116,4 @@ BevyCSharp.Tests/TextConventionTests.cs
 BevyCSharp.Tests/TimingTests.cs
 BevyCSharp.Tests/UiPixelTests.cs
 BevyCSharp.Tests/ViewShaderTests.cs
-BevyCSharp.Tests/WidgetTests.cs
 BevyCSharp.Tests/WindowMemoryTests.cs
