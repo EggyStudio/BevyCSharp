@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.Transforms;
 // exactly and its right wing as near the gray one as it can be.
 internal static class Align
 {
-    private const string Instructions =
+    private const string InstructionsText =
         "The bright red axis is the primary alignment axis, and it will always be\n"
         + "made to coincide with the primary target direction (white) exactly.\n"
         + "The fainter red axis is the secondary alignment axis, and it is made to\n"
@@ -19,111 +19,150 @@ internal static class Align
         + "Click and drag the mouse to rotate the camera.\n"
         + "Press 'H' to hide/show these instructions.";
 
-    private static Random _random = new(19878367);
-    private static Entity _camera, _ship = Entity.None, _text;
-    private static Vec3 _first, _second;
-    private static Quat _target;
-    private static bool _inMotion, _shown;
+    // Bevy's SeededRng resource, seeded so the example runs the same each time.
+    private static Random _seededRng = new(19878367);
+
+    private static Entity _camera;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_random, _inMotion, _shown, _ship) = (new Random(19878367), false, true, Entity.None);
+            _seededRng = new Random(19878367);
 
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 100f, 100f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, -2f, 0f));
             ecs.SpawnPointLight(new Vec3(4f, 7f, -4f), shadows: true);
 
-            (_first, _second) = (RandomDirection(), RandomDirection());
-            _target = Aligned(_first, _second);
-            _text = Ui.SpawnText(Instructions, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+            ecs.Add(ecs.Spawn(), new RandomAxes { First = RandomDirection(), Second = RandomDirection() });
+            ecs.Add(Ui.SpawnText(InstructionsText, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new Instructions());
         }, "align.Setup");
 
-        app.SpawnGltf("models/ship/craft_speederD.gltf", (_, ship) => _ship = ship);
-
-        app.Update(ctx =>
+        // The ship, given its first target once its scene is in the world, from the axes made above.
+        app.SpawnGltf("models/ship/craft_speederD.gltf", (ctx, ship) =>
         {
-            var ecs = ctx.Ecs;
-            var input = ctx.Input;
+            foreach (var axes in ctx.Ecs.Query<RandomAxes>(markChanged: false))
+                ctx.Ecs.Add(ship, new Ship { TargetRotation = axes.Component.TargetAlignment() });
+        });
 
-            Gizmos.Arrow(Vec3.Zero, _first * 1.5f, (1f, 1f, 1f, 1f));
-            Gizmos.Arrow(Vec3.Zero, _second * 1.5f, Color.FromSrgb(0.5f, 0.5f, 0.5f));
-            if (_ship == Entity.None) return;
+        app.Update(HandleMouse, "align.HandleMouse");
+    }
 
-            var ship = ecs.GetOrDefault<Transform>(_ship);
-            Gizmos.Arrow(ship.Translation, ship.Translation + ship.Rotation * -Vec3.UnitZ * 1.5f, (1f, 0f, 0f, 1f));
-            Gizmos.Arrow(ship.Translation, ship.Translation + ship.Rotation * Vec3.UnitX * 1.5f, Color.FromSrgb(0.65f, 0f, 0f));
+    // A drag turns the camera about the middle, a pixel being a seventy-fifth of a radian.
+    private static void HandleMouse(BehaviorContext ctx)
+    {
+        var input = ctx.Input;
+        if (!input.MouseDown(MouseButton.Left) || input.MouseDeltaX == 0f) return;
 
-            if (input.KeyPressed(Key.R))
-            {
-                (_first, _second) = (RandomDirection(), RandomDirection());
-                (_inMotion, _target) = (false, Aligned(_first, _second));
-            }
-
-            if (input.KeyPressed(Key.T)) _inMotion = !_inMotion;
-            if (input.KeyPressed(Key.H)) Ui.SetText(_text, (_shown = !_shown) ? Instructions : string.Empty);
-
-            // A drag turns the camera about the middle, a pixel being a seventy-fifth of a radian.
-            if (input.MouseDown(MouseButton.Left) && input.MouseDeltaX != 0f)
-            {
-                var camera = ecs.GetOrDefault<Transform>(_camera);
-                var turn = Quat.FromRotationY(-input.MouseDeltaX / 75f);
-                ecs.Set(_camera, new Transform(turn * camera.Translation, turn * camera.Rotation, camera.Scale));
-            }
-
-            // Bevy's smooth_nudge, which closes the same share of the gap each second whatever the
-            // frame rate.
-            if (!_inMotion) return;
-            ship.Rotation = Quat.Slerp(ship.Rotation, _target, 1f - MathF.Exp(-3f * ctx.Time.Delta));
-            ecs.Set(_ship, ship);
-            var dot = MathF.Abs(ship.Rotation.X * _target.X + ship.Rotation.Y * _target.Y + ship.Rotation.Z * _target.Z + ship.Rotation.W * _target.W);
-            if (dot >= 1f - 1e-7f) _inMotion = false;
-        }, "align.Update");
+        var camera = ctx.Ecs.GetOrDefault<Transform>(_camera);
+        var turn = Quat.FromRotationY(-input.MouseDeltaX / 75f);
+        ctx.Ecs.Set(_camera, new Transform(turn * camera.Translation, turn * camera.Rotation, camera.Scale));
     }
 
     // A direction picked evenly over the sphere, from three normally spread numbers.
-    private static Vec3 RandomDirection()
+    internal static Vec3 RandomDirection()
     {
-        float Normal() => MathF.Sqrt(-2f * MathF.Log(1f - _random.NextSingle())) * MathF.Cos(MathF.Tau * _random.NextSingle());
+        float Normal() => MathF.Sqrt(-2f * MathF.Log(1f - _seededRng.NextSingle())) * MathF.Cos(MathF.Tau * _seededRng.NextSingle());
         return new Vec3(Normal(), Normal(), Normal()).Normalized;
     }
+}
 
-    // Bevy's Transform::aligned_by, the rotation taking the ship's nose, -Z, to first exactly and
-    // its right, X, as near second as can be, by building the turned axes and reading the rotation
-    // off them.
-    private static Quat Aligned(Vec3 first, Vec3 second)
+/// <summary>A ship turning from where it faces now to its target.</summary>
+[Behavior]
+public partial struct Ship
+{
+    /// <summary>Where the ship ends its turn.</summary>
+    public Quat TargetRotation;
+
+    /// <summary>Whether it is turning, which the turn can be paused by.</summary>
+    public bool InMotion;
+
+    /// <summary>The ship's nose, its -Z, and its right wing, its X, drawn as arrows from where it stands.</summary>
+    [OnUpdate]
+    public void DrawShipAxes(BehaviorContext ctx, in Transform transform)
     {
-        var back = -first;
-        var right = (second - first * Vec3.Dot(second, first)).Normalized;
-        var up = Vec3.Cross(back, right);
-        return FromAxes(right, up, back);
+        Gizmos.Arrow(transform.Translation, transform.Translation + transform.Rotation * -Vec3.UnitZ * 1.5f, (1f, 0f, 0f, 1f));
+        Gizmos.Arrow(transform.Translation, transform.Translation + transform.Rotation * Vec3.UnitX * 1.5f, Color.FromSrgb(0.65f, 0f, 0f));
     }
 
-    // The rotation whose X, Y and Z axes land on the three given, from the matrix they make.
-    private static Quat FromAxes(Vec3 x, Vec3 y, Vec3 z)
+    /// <summary>
+    /// R picks new directions and stops the ship to turn from where it faces to them, T starts or
+    /// pauses the turn, and H hides or shows the instructions.
+    /// </summary>
+    [OnUpdate]
+    public void HandleKeypress(BehaviorContext ctx)
     {
-        var trace = x.X + y.Y + z.Z;
-        if (trace > 0f)
+        var input = ctx.Input;
+        if (input.KeyPressed(Key.R))
         {
-            var s = MathF.Sqrt(trace + 1f) * 2f;
-            return new Quat((y.Z - z.Y) / s, (z.X - x.Z) / s, (x.Y - y.X) / s, 0.25f * s);
+            foreach (var row in ctx.Ecs.Query<RandomAxes>())
+            {
+                ref var axes = ref row.Component;
+                (axes.First, axes.Second) = (Align.RandomDirection(), Align.RandomDirection());
+                (InMotion, TargetRotation) = (false, axes.TargetAlignment());
+            }
         }
 
-        if (x.X > y.Y && x.X > z.Z)
-        {
-            var s = MathF.Sqrt(1f + x.X - y.Y - z.Z) * 2f;
-            return new Quat(0.25f * s, (y.X + x.Y) / s, (z.X + x.Z) / s, (y.Z - z.Y) / s);
-        }
+        if (input.KeyPressed(Key.T)) InMotion = !InMotion;
 
-        if (y.Y > z.Z)
+        if (input.KeyPressed(Key.H))
         {
-            var s = MathF.Sqrt(1f + y.Y - x.X - z.Z) * 2f;
-            return new Quat((y.X + x.Y) / s, 0.25f * s, (z.Y + y.Z) / s, (z.X - x.Z) / s);
+            foreach (var instructions in ctx.Ecs.Query<Instructions>(markChanged: false))
+            {
+                ref var visibility = ref ctx.Ecs.GetRef<Visibility>(instructions.Entity);
+                visibility.Mode = visibility.Mode == VisibilityMode.Hidden ? VisibilityMode.Visible : VisibilityMode.Hidden;
+            }
         }
+    }
 
-        var t = MathF.Sqrt(1f + z.Z - x.X - y.Y) * 2f;
-        return new Quat((z.X + x.Z) / t, (z.Y + y.Z) / t, 0.25f * t, (x.Y - y.X) / t);
+    /// <summary>
+    /// Turned toward its target by Bevy's <c>smooth_nudge</c>, which closes the same share of the
+    /// gap each second whatever the frame rate, and stopped once it is there.
+    /// </summary>
+    [OnUpdate]
+    [After("Ship.HandleKeypress")]
+    public void RotateShip(BehaviorContext ctx, ref Transform transform)
+    {
+        if (!InMotion) return;
+
+        transform.Rotation = Quat.Slerp(transform.Rotation, TargetRotation, 1f - MathF.Exp(-3f * ctx.Time.Delta));
+        var (now, target) = (transform.Rotation, TargetRotation);
+        if (MathF.Abs(now.X * target.X + now.Y * target.Y + now.Z * target.Z + now.W * target.W) >= 1f - 1e-7f) InMotion = false;
     }
 }
+
+/// <summary>The two directions the ship is aligned to, its nose to the first and its right wing toward the second.</summary>
+[Behavior]
+public partial struct RandomAxes
+{
+    /// <summary>The direction the nose is turned to exactly.</summary>
+    public Vec3 First;
+
+    /// <summary>The direction the right wing is turned as near as it can be.</summary>
+    public Vec3 Second;
+
+    /// <summary>The first drawn in white and the second in gray, from the middle.</summary>
+    [OnUpdate]
+    public void DrawRandomAxes(BehaviorContext ctx)
+    {
+        Gizmos.Arrow(Vec3.Zero, First * 1.5f, (1f, 1f, 1f, 1f));
+        Gizmos.Arrow(Vec3.Zero, Second * 1.5f, Color.FromSrgb(0.5f, 0.5f, 0.5f));
+    }
+
+    /// <summary>
+    /// Bevy's <c>Transform::aligned_by</c>, the rotation taking the ship's nose, -Z, to the first
+    /// exactly and its right, X, as near the second as can be, by building the turned axes and
+    /// reading the rotation off them.
+    /// </summary>
+    public readonly Quat TargetAlignment()
+    {
+        var back = -First;
+        var right = (Second - First * Vec3.Dot(Second, First)).Normalized;
+        return Quat.FromBasis(right, Vec3.Cross(back, right), back);
+    }
+}
+
+/// <summary>The instructions, which H hides and shows.</summary>
+[Behavior]
+public partial struct Instructions;

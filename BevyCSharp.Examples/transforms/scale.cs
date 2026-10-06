@@ -9,43 +9,56 @@ namespace BevyCSharp.Examples.Transforms;
 // and back to one before moving on to the next.
 internal static class ScaleExample
 {
-    private const float Speed = 2f;
-    private const float Max = 5f;
-    private const float Min = 1f;
+    public static void Build(App app) => app.Startup(ctx => ctx.Ecs.Add(
+        CubeScene.Spawn(ctx.Ecs, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 4f), Vec3.One)),
+        new Scaling { ScaleDirection = Vec3.UnitX, ScaleSpeed = 2f, MaxElementSize = 5f, MinElementSize = 1f }), "scale.Setup");
+}
 
-    private static Entity _cube;
-    private static Vec3 _direction;
+/// <summary>A thing stretching along one axis at a time, between its smallest and largest size.</summary>
+[Behavior]
+public partial struct Scaling
+{
+    /// <summary>The axis it stretches along now, negative while it shrinks.</summary>
+    public Vec3 ScaleDirection;
 
-    public static void Build(App app)
+    /// <summary>How fast it stretches.</summary>
+    public float ScaleSpeed;
+
+    /// <summary>The largest it grows along any axis.</summary>
+    public float MaxElementSize;
+
+    /// <summary>The smallest it shrinks to along any axis.</summary>
+    public float MinElementSize;
+
+    /// <summary>
+    /// Turned back past its largest, and past its smallest turned back and on to the next axis, Y
+    /// after X and Z after Y, as Bevy's <c>zxy</c> swizzle moves it.
+    /// </summary>
+    /// <remarks>
+    /// The scale is floored or ceiled to whole numbers as it turns, so the same edge is not crossed
+    /// again on the next frame.
+    /// </remarks>
+    [OnUpdate]
+    public void ChangeScaleDirection(BehaviorContext ctx, ref Transform transform)
     {
-        app.Startup(ctx =>
+        var scale = transform.Scale;
+        if (MathF.Max(scale.X, MathF.Max(scale.Y, scale.Z)) > MaxElementSize)
         {
-            _direction = Vec3.UnitX;
-            _cube = CubeScene.Spawn(ctx.Ecs, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 4f), Vec3.One));
-        }, "scale.Setup");
+            ScaleDirection = -ScaleDirection;
+            transform.Scale = new Vec3(MathF.Floor(scale.X), MathF.Floor(scale.Y), MathF.Floor(scale.Z));
+        }
 
-        app.Update(ctx =>
+        scale = transform.Scale;
+        if (MathF.Min(scale.X, MathF.Min(scale.Y, scale.Z)) < MinElementSize)
         {
-            var transform = ctx.Ecs.GetOrDefault<Transform>(_cube);
-            var scale = transform.Scale;
-
-            // Past the largest it turns back, and below the smallest it turns to the next axis,
-            // Y after X and Z after Y, as Bevy's zxy swizzle moves it.
-            if (MathF.Max(scale.X, MathF.Max(scale.Y, scale.Z)) > Max)
-            {
-                _direction = -_direction;
-                scale = new Vec3(MathF.Floor(scale.X), MathF.Floor(scale.Y), MathF.Floor(scale.Z));
-            }
-
-            if (MathF.Min(scale.X, MathF.Min(scale.Y, scale.Z)) < Min)
-            {
-                _direction = -_direction;
-                scale = new Vec3(MathF.Ceiling(scale.X), MathF.Ceiling(scale.Y), MathF.Ceiling(scale.Z));
-                _direction = new Vec3(_direction.Z, _direction.X, _direction.Y);
-            }
-
-            transform.Scale = scale + _direction * Speed * ctx.Time.Delta;
-            ctx.Ecs.Set(_cube, transform);
-        }, "scale.ScaleCube");
+            ScaleDirection = -ScaleDirection;
+            transform.Scale = new Vec3(MathF.Ceiling(scale.X), MathF.Ceiling(scale.Y), MathF.Ceiling(scale.Z));
+            ScaleDirection = new Vec3(ScaleDirection.Z, ScaleDirection.X, ScaleDirection.Y);
+        }
     }
+
+    /// <summary>Stretched along its axis by its speed times the frame's time.</summary>
+    [OnUpdate]
+    public void ScaleCube(BehaviorContext ctx, ref Transform transform) =>
+        transform.Scale += ScaleDirection * ScaleSpeed * ctx.Time.Delta;
 }

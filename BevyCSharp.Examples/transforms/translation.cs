@@ -9,26 +9,35 @@ namespace BevyCSharp.Examples.Transforms;
 // once it is five units from where it started.
 internal static class Translation
 {
-    private const float MaxDistance = 5f;
-    private static Entity _cube;
-    private static float _speed;
-
-    public static void Build(App app)
+    public static void Build(App app) => app.Startup(ctx =>
     {
-        app.Startup(ctx =>
-        {
-            _speed = 2f;
-            _cube = CubeScene.Spawn(ctx.Ecs, Transform.Identity);
-        }, "translation.Setup");
+        // Where the cube starts, which it measures its distance from.
+        var spawn = Vec3.Zero;
+        ctx.Ecs.Add(CubeScene.Spawn(ctx.Ecs, new Transform(spawn)), new Movable { Spawn = spawn, MaxDistance = 5f, Speed = 2f });
+    }, "translation.Setup");
+}
 
-        app.Update(ctx =>
-        {
-            var transform = ctx.Ecs.GetOrDefault<Transform>(_cube);
-            if (transform.Translation.Length > MaxDistance) _speed = -_speed;
+/// <summary>A thing sliding back and forth along its own X, never farther than its distance from where it started.</summary>
+[Behavior]
+public partial struct Movable
+{
+    /// <summary>Where it started.</summary>
+    public Vec3 Spawn;
 
-            // Along the cube's own X, which is the world's while it is not turned.
-            transform.Translation += transform.Rotation * Vec3.UnitX * _speed * ctx.Time.Delta;
-            ctx.Ecs.Set(_cube, transform);
-        }, "translation.MoveCube");
+    /// <summary>How far from where it started it goes before it turns back.</summary>
+    public float MaxDistance;
+
+    /// <summary>How fast it moves, negative while it comes back.</summary>
+    public float Speed;
+
+    /// <summary>
+    /// Moved along its own X, which is the world's while it is not turned, and turned back once it
+    /// is too far from where it started.
+    /// </summary>
+    [OnUpdate]
+    public void MoveCube(BehaviorContext ctx, ref Transform transform)
+    {
+        if ((Spawn - transform.Translation).Length > MaxDistance) Speed = -Speed;
+        transform.Translation += transform.Rotation * Vec3.UnitX * Speed * ctx.Time.Delta;
     }
 }

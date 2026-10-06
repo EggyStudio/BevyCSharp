@@ -9,17 +9,22 @@ namespace BevyCSharp.Examples.Transforms;
 // turn a second.
 internal static class Rotation3d
 {
-    private const float Speed = 0.3f;
-    private static Entity _cube;
+    public static void Build(App app) =>
+        app.Startup(ctx => ctx.Ecs.Add(CubeScene.Spawn(ctx.Ecs, Transform.Identity), new Rotatable { Speed = 0.3f }), "3d_rotation.Setup");
+}
 
-    public static void Build(App app)
-    {
-        app.Startup(ctx => _cube = CubeScene.Spawn(ctx.Ecs, Transform.Identity), "3d_rotation.Setup");
-        app.Update(ctx =>
-        {
-            var transform = ctx.Ecs.GetOrDefault<Transform>(_cube);
-            transform.Rotation = Quat.FromRotationY(Speed * MathF.Tau * ctx.Time.Delta) * transform.Rotation;
-            ctx.Ecs.Set(_cube, transform);
-        }, "3d_rotation.RotateCube");
-    }
+/// <summary>A thing turning about Y at its own speed.</summary>
+[Behavior]
+public partial struct Rotatable
+{
+    /// <summary>How fast it turns, in whole turns a second.</summary>
+    public float Speed;
+
+    /// <summary>
+    /// Turned by its speed times a whole turn in radians times the frame's time, so the speed is
+    /// how many turns it makes in a second at any frame rate.
+    /// </summary>
+    [OnUpdate]
+    public void RotateCube(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationY(Speed * MathF.Tau * ctx.Time.Delta) * transform.Rotation;
 }

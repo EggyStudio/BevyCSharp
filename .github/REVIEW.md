@@ -330,3 +330,10 @@ as `Emitter3d` beside the 2D one's `Emitter` in the namespace they share. The so
 carry `FadeIn` and `FadeOut` and fade by the state's `GameTimer`. Bevy takes `FadeIn` off once a
 track is in and finds it again by its sink, where here it stays on with a flag, the mark the next
 change finds the playing track by.
+
+B 4 for Transforms, 51 of 119. Each cube carries its own `Rotatable`, `Movable`, `Scaling` or
+`CubeState`, and the transform example's sphere its `Center`, which sizes itself after the cubes
+have moved and turned, as Bevy chains the three. align's ship carries its target and whether it
+turns, the two directions sit on an entity of their own as `RandomAxes`, and H hides the
+instructions by their `Visibility` as Bevy's does, where the text was emptied before. Its own
+`FromAxes` gave way to `Quat.FromBasis`, which the library already had.
