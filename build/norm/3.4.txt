@@ -2,12 +2,12 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp.Tests/AssetFilesTests.cs Directory.Delete
-BevyCSharp.Tests/AssetFilesTests.cs Path.GetTempPath
 BevyCSharp.Tests/AssetIdTests.cs Directory.Delete
 BevyCSharp.Tests/AssetIdTests.cs Path.GetTempPath
 BevyCSharp.Tests/AssetPackTests.cs Directory.Delete
 BevyCSharp.Tests/AssetPackTests.cs Path.GetTempPath
+BevyCSharp.Tests/Assets/AssetFilesTests.cs Directory.Delete
+BevyCSharp.Tests/Assets/AssetFilesTests.cs Path.GetTempPath
 BevyCSharp.Tests/ChangingTypeTests.cs Directory.Delete
 BevyCSharp.Tests/ChangingTypeTests.cs Path.GetTempPath
 BevyCSharp.Tests/CliServerTests.cs Directory.Delete
