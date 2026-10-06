@@ -14,27 +14,16 @@ internal static class WindowResizing
 {
     private static readonly (uint Width, uint Height) Small = (640, 360), Medium = (800, 600), Large = (1920, 1080);
 
-    private static Entity _text;
-    private static (uint Width, uint Height)? _last;
-
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
-            _last = null;
             Render2d.SpawnCamera2d();
             var row = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f) });
-            _text = Ui.SpawnText("Resolution", new UiSettings(), 42f);
-            ctx.Ecs.SetParent(_text, row);
+            var text = Ui.SpawnText("Resolution", new UiSettings(), 42f);
+            ctx.Ecs.Add(text, new ResolutionText());
+            ctx.Ecs.SetParent(text, row);
         }, "window_resizing.Setup");
-
-        app.Update(ctx =>
-        {
-            var size = Window.Size();
-            if (size == _last) return;
-            _last = size;
-            Ui.SetText(_text, string.Format(CultureInfo.InvariantCulture, "{0:0.0} x {1:0.0}", (float)size.Width, (float)size.Height));
-        }, "window_resizing.OnResizeSystem");
 
         app.Update(ctx =>
         {
@@ -43,5 +32,30 @@ internal static class WindowResizing
             if (ctx.Input.KeyPressed(Key.Digit2)) Window.SetSize(Medium.Width, Medium.Height);
             if (ctx.Input.KeyPressed(Key.Digit3)) Window.SetSize(Large.Width, Large.Height);
         }, "window_resizing.ToggleResolution");
+    }
+}
+
+/// <summary>The text that says the window's size, and the size it last said.</summary>
+[Behavior]
+public partial struct ResolutionText
+{
+    /// <summary>The width it last said, zero before it has said any.</summary>
+    public uint Width;
+
+    /// <summary>The height it last said.</summary>
+    public uint Height;
+
+    /// <summary>
+    /// Written again when the window's size differs from what it says, as Bevy's
+    /// <c>on_resize_system</c> writes it on each resize. An image drawn offscreen has no window to
+    /// say it was resized, and is the size it was opened at from the first frame.
+    /// </summary>
+    [OnUpdate]
+    public void OnResizeSystem(BehaviorContext ctx)
+    {
+        var size = Window.Size();
+        if ((size.Width, size.Height) == (Width, Height)) return;
+        (Width, Height) = (size.Width, size.Height);
+        Ui.SetText(ctx.Entity, string.Format(CultureInfo.InvariantCulture, "{0:0.0} x {1:0.0}", (float)Width, (float)Height));
     }
 }

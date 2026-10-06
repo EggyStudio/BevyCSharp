@@ -11,8 +11,6 @@ namespace BevyCSharp.Examples.Windowing;
 // panel. Enter turns the override off and on, and the up and down arrows raise and lower it.
 internal static class ScaleFactorOverride
 {
-    private static Entity _text;
-
     public static void Configure(Config config) => (config.Width, config.Height) = (500, 300);
 
     public static void Build(App app)
@@ -27,8 +25,9 @@ internal static class ScaleFactorOverride
             var root = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Justify = UiJustify.SpaceBetween });
             var panel = Ui.SpawnNode(new UiSettings { Width = Length.Px(300f), Height = Length.Percent(100f), Border = Sides.All(Length.Px(2f)), Color = Color.FromSrgb(0.65f, 0.65f, 0.65f) });
             ecs.SetParent(panel, root);
-            _text = Ui.SpawnText("Example text", new UiSettings { AlignSelf = UiAlignSelf.FlexEnd }, 25f);
-            ecs.SetParent(_text, panel);
+            var text = Ui.SpawnText("Example text", new UiSettings { AlignSelf = UiAlignSelf.FlexEnd }, 25f);
+            ecs.Add(text, new CustomText());
+            ecs.SetParent(text, panel);
         }, "scale_factor_override.Setup");
 
         app.Update(ctx =>
@@ -42,17 +41,26 @@ internal static class ScaleFactorOverride
             else if (ctx.Input.KeyPressed(Key.ArrowUp) && overridden is { } up) settings.ResolutionScaleFactorOverride = up + 1f;
             else if (ctx.Input.KeyPressed(Key.ArrowDown) && overridden is { } down) settings.ResolutionScaleFactorOverride = MathF.Max(down - 1f, 1f);
         }, "scale_factor_override.ChangeScaleFactor");
+    }
+}
 
-        // The window's scale factor, in its title and in the panel, and whether it is overridden.
-        app.Update(ctx =>
-        {
-            var window = Window.Entity();
-            if (window == Entity.None) return;
-            var settings = ctx.Ecs.Wrap<WindowRef>(window);
-            var text = string.Format(CultureInfo.InvariantCulture, "Scale factor: {0:0.0} {1}",
-                Window.Scale(), settings.ResolutionScaleFactorOverride is null ? "(default)" : "(overridden)");
-            Window.SetTitle(text);
-            Ui.SetText(_text, text);
-        }, "scale_factor_override.DisplayOverride");
+/// <summary>The text in the panel that says the window's scale factor.</summary>
+[Behavior]
+public partial struct CustomText
+{
+    /// <summary>
+    /// The window's scale factor, in its title and in this text, and whether it is overridden, as
+    /// Bevy's <c>display_override</c> writes both.
+    /// </summary>
+    [OnUpdate]
+    public void DisplayOverride(BehaviorContext ctx)
+    {
+        var window = Window.Entity();
+        if (window == Entity.None) return;
+        var settings = ctx.Ecs.Wrap<WindowRef>(window);
+        var text = string.Format(CultureInfo.InvariantCulture, "Scale factor: {0:0.0} {1}",
+            Window.Scale(), settings.ResolutionScaleFactorOverride is null ? "(default)" : "(overridden)");
+        Window.SetTitle(text);
+        Ui.SetText(ctx.Entity, text);
     }
 }

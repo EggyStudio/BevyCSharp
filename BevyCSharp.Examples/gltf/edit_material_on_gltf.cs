@@ -13,7 +13,9 @@ namespace BevyCSharp.Examples.Gltf;
 // its parts carry the names of their glTF materials and those materials have loaded.
 internal static class EditMaterialOnGltf
 {
-    private static readonly List<(Entity Root, (float R, float G, float B, float A)? Color)> Helmets = [];
+    // The helmets whose scenes have not been looked at yet, which Bevy's observer is told of as
+    // each is ready.
+    private static readonly List<Entity> Helmets = [];
 
     public static void Build(App app)
     {
@@ -26,14 +28,15 @@ internal static class EditMaterialOnGltf
             ecs.Add(sun, Transform.LookingAt(new Vec3(0f, 1f, 0.25f), Vec3.Zero, Vec3.UnitY));
 
             var helmet = AssetServer.LoadGltfScene("models/FlightHelmet/FlightHelmet.gltf");
-            Helmets.Add((ecs.SpawnScene(helmet), null));
+            Helmets.Add(ecs.SpawnScene(helmet));
 
             // Tailwind's red and green, each at 300.
             foreach (var (x, color) in new[] { (-1.25f, Color.FromSrgb8(252, 165, 165)), (1.25f, Color.FromSrgb8(134, 239, 172)) })
             {
                 var root = ecs.SpawnScene(helmet);
                 ecs.Set(root, Transform.At(x, 0f, 0f));
-                Helmets.Add((root, color));
+                ecs.Add(root, new ColorOverride { Color = color });
+                Helmets.Add(root);
             }
         }, "edit_material_on_gltf.SetupScene");
 
@@ -45,7 +48,7 @@ internal static class EditMaterialOnGltf
         var ecs = ctx.Ecs;
         for (var i = Helmets.Count - 1; i >= 0; i--)
         {
-            var (root, color) = Helmets[i];
+            var root = Helmets[i];
 
             // Ready once its parts are there with the names of their materials, and every one of
             // those materials can be read.
@@ -57,11 +60,13 @@ internal static class EditMaterialOnGltf
 
             Helmets.RemoveAt(i);
             Console.WriteLine($"processing Scene Entity: {root}");
-            if (color is not { } tint)
+            if (!ecs.Has<ColorOverride>(root))
             {
                 Console.WriteLine($"{root} does not have a color override");
                 continue;
             }
+
+            var tint = ecs.GetOrDefault<ColorOverride>(root).Color;
 
             foreach (var (entity, name) in named)
             {
@@ -78,4 +83,12 @@ internal static class EditMaterialOnGltf
             }
         }
     }
+}
+
+/// <summary>The tint a helmet's leather is given in place of the color its glTF gave it.</summary>
+[Behavior]
+public partial struct ColorOverride
+{
+    /// <summary>The tint.</summary>
+    public Color Color;
 }

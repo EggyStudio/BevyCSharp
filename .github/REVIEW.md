@@ -296,3 +296,12 @@ long tick runs it out. It is not called `Timer`, since `System.Threading.Timer` 
 every C# program imports and the two would be ambiguous in every game. The examples that keep
 timers on entities, cooldown and the sprite animations among them, are written on it as their
 groups come.
+
+B 4 for Time, Gizmos, glTF, Window and Application, 31 of 119 with these. Each marker of Bevy's
+is a behavior on its entity, found by its query where Bevy finds it, and each component with data
+keeps it, the tracking of axes' cubes, a helmet's tint, a text's last size and count. The work Bevy
+does over a component is the behavior's own method where it is about that entity alone. Every
+example's behaviors register in every example app, so an `[After]` names only a behavior's system,
+since one naming an example's own system stopped every other example when tried. headless_renderer
+is not counted and has nothing to bring, its two components being the render world's copying of
+the picture, which the capture does in its place.

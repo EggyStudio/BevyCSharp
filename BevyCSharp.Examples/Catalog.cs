@@ -266,7 +266,7 @@ internal static class Catalog
 
         // Time
         new("timers", Timers.Build, Prints: 1300),
-        new("virtual_time", VirtualTime.Build),
+        new("virtual_time", VirtualTimeExample.Build),
 
         // Tools
         new("gamepad_viewer", GamepadViewer.Build),

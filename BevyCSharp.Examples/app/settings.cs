@@ -15,17 +15,14 @@ internal static class Settings
     // Bevy keeps this beside the counter in the same group, and it only ever reads it.
     internal sealed record OtherSettings(bool Enabled);
 
-    private static Persistent<Counter>? _counter;
-    private static Persistent<OtherSettings>? _other;
-    private static Entity _display;
+    internal static Persistent<Counter>? CounterSetting;
+    internal static Persistent<OtherSettings>? Other;
     private static float _saveIn = -1f;
-    private static int _shown = int.MinValue;
 
     public static void Build(App app)
     {
-        _counter = new Persistent<Counter>("settings-counter", SettingsJson.Default.Counter, () => new Counter(0));
-        _other = new Persistent<OtherSettings>("settings-counter-other", SettingsJson.Default.OtherSettings, () => new OtherSettings(true));
-        _shown = int.MinValue;
+        CounterSetting = new Persistent<Counter>("settings-counter", SettingsJson.Default.Counter, () => new Counter(0));
+        Other = new Persistent<OtherSettings>("settings-counter-other", SettingsJson.Default.OtherSettings, () => new OtherSettings(true));
 
         app.Startup(ctx =>
         {
@@ -40,8 +37,9 @@ internal static class Settings
             });
 
             var light = Color.FromSrgb(0.9f, 0.9f, 0.9f);
-            _display = Ui.SpawnText("---", new UiSettings { Color = light }, 33f);
-            ctx.Ecs.SetParent(_display, column);
+            var display = Ui.SpawnText("---", new UiSettings { Color = light }, 33f);
+            ctx.Ecs.Add(display, new CounterDisplay());
+            ctx.Ecs.SetParent(display, column);
             ctx.Ecs.SetParent(Ui.SpawnText("Press SPACE to increment, BACKSPACE to decrement.", new UiSettings(), 20f), column);
         }, "settings.Setup");
 
@@ -51,21 +49,48 @@ internal static class Settings
             var change = (input.KeyPressed(Key.Space) ? 1 : 0) - (input.KeyPressed(Key.Backspace) || input.KeyPressed(Key.Delete) ? 1 : 0);
             if (change != 0)
             {
-                _counter!.Update(counter => counter with { Count = counter.Count + change });
+                CounterSetting!.Update(counter => counter with { Count = counter.Count + change });
                 _saveIn = 0.1f;
             }
 
             // Saved a moment after the last change, as Bevy's SaveSettingsDeferred waits, so keys
             // pressed quickly write the file once.
-            if (_saveIn >= 0f && (_saveIn -= ctx.Time.Delta) < 0f) _counter!.Persist();
-
-            if (!_other!.Value.Enabled) Ui.SetText(_display, "Disabled");
-            else if (_counter!.Value.Count != _shown) Ui.SetText(_display, $"Count: {_shown = _counter.Value.Count}");
-        }, "settings.ChangeAndShowCount");
+            if (_saveIn >= 0f && (_saveIn -= ctx.Time.Delta) < 0f) CounterSetting!.Persist();
+        }, "settings.ChangeCount");
 
         // Whatever has not been written yet is written as the app stops, as Bevy's is when its
         // window is asked to close.
-        app.On(Stage.Cleanup, _ => _counter!.Persist(), "settings.SaveOnExit");
+        app.On(Stage.Cleanup, _ => CounterSetting!.Persist(), "settings.SaveOnExit");
+    }
+}
+
+/// <summary>The text that shows the count, and the count it shows.</summary>
+[Behavior]
+public partial struct CounterDisplay
+{
+    /// <summary>The count it shows.</summary>
+    public int Shown;
+
+    /// <summary>Whether it has shown one yet.</summary>
+    public bool Showing;
+
+    /// <summary>
+    /// The count written when it differs from what is shown, as Bevy's <c>show_count</c> writes it
+    /// when the counter has changed, or that the counter is disabled.
+    /// </summary>
+    [OnUpdate]
+    public void ShowCount(BehaviorContext ctx)
+    {
+        if (!Settings.Other!.Value.Enabled)
+        {
+            Ui.SetText(ctx.Entity, "Disabled");
+            return;
+        }
+
+        var count = Settings.CounterSetting!.Value.Count;
+        if (Showing && count == Shown) return;
+        (Shown, Showing) = (count, true);
+        Ui.SetText(ctx.Entity, $"Count: {count}");
     }
 }
 

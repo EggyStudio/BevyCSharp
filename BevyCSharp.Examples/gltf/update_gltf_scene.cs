@@ -9,8 +9,6 @@ namespace BevyCSharp.Examples.Gltf;
 // together, each further than the last.
 internal static class UpdateGltfScene
 {
-    private static Entity _moved;
-
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -29,22 +27,27 @@ internal static class UpdateGltfScene
             var helmet = AssetServer.LoadGltfScene("models/FlightHelmet/FlightHelmet.gltf");
             var still = ecs.SpawnScene(helmet);
             ecs.Set(still, Transform.At(-1f, 0f, 0f));
-            _moved = ecs.SpawnScene(helmet);
+            ecs.Add(ecs.SpawnScene(helmet), new MovedScene());
         }, "update_gltf_scene.Setup");
+    }
+}
 
-        // Every entity under the moved helmet, nearest first, half a step further along X than the
-        // one before.
-        app.Update(ctx =>
+/// <summary>The helmet whose parts are moved apart and together, each further than the last.</summary>
+[Behavior]
+public partial struct MovedScene
+{
+    /// <summary>Every entity under the helmet, nearest first, half a step further along X than the one before.</summary>
+    [OnUpdate]
+    public void MoveSceneEntities(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var t = ctx.Time.Elapsed;
+        var offset = 0f;
+        foreach (var entity in ecs.Descendants(ctx.Entity))
         {
-            var ecs = ctx.Ecs;
-            var t = ctx.Time.Elapsed;
-            var offset = 0f;
-            foreach (var entity in ecs.Descendants(_moved))
-            {
-                if (!ecs.TryGet<Transform>(entity, out var at)) continue;
-                ecs.Set(entity, at with { Translation = new Vec3(offset * MathF.Sin(t) / 20f, 0f, MathF.Cos(t) / 20f) });
-                offset += 0.5f;
-            }
-        }, "update_gltf_scene.MoveSceneEntities");
+            if (!ecs.TryGet<Transform>(entity, out var at)) continue;
+            ecs.Set(entity, at with { Translation = new Vec3(offset * MathF.Sin(t) / 20f, 0f, MathF.Cos(t) / 20f) });
+            offset += 0.5f;
+        }
     }
 }

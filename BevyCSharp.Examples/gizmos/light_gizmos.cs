@@ -11,7 +11,7 @@ namespace BevyCSharp.Examples.Gizmo;
 // width, A hides them, and C cycles how they are colored.
 internal static class LightGizmos
 {
-    private static Entity _camera, _colorText;
+    private static Entity _camera;
     private static LightGizmoColoring _coloring;
     private static float _width;
     private static bool _enabled, _onTop;
@@ -71,7 +71,8 @@ internal static class LightGizmos
 
         Gizmos.ShowLights(all: true, _coloring);
         var mode = Ui.SpawnText("Gizmo color mode: ", new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
-        _colorText = Ui.SpawnTextSpan(mode, ColorText(), new UiTextSettings(), (1f, 1f, 1f, 1f));
+        ecs.Add(mode, new GizmoColorText());
+        Ui.SpawnTextSpan(mode, ColorText(), new UiTextSettings(), (1f, 1f, 1f, 1f));
     }
 
     // What the coloring is, with the colors written as Bevy writes them, in sRGB hex.
@@ -116,7 +117,13 @@ internal static class LightGizmos
             };
             var gray = Color.FromSrgb8(128, 128, 128);
             Gizmos.ShowLights(all: true, _coloring, gray);
-            ctx.Ecs.Wrap<TextSpanRef>(_colorText).Value = ColorText();
+            // The span after the text's own words, as Bevy's TextUiWriter writes span one.
+            foreach (var text in ctx.Ecs.Query<GizmoColorText>(markChanged: false))
+                ctx.Ecs.Wrap<TextSpanRef>(ctx.Ecs.ChildrenOf(text.Entity)[0]).Value = ColorText();
         }
     }
 }
+
+/// <summary>The text that says how the light gizmos are colored, whose span is written as the coloring changes.</summary>
+[Behavior]
+public partial struct GizmoColorText;
