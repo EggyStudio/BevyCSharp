@@ -13,27 +13,27 @@ internal static class MotionBlur
     private const int Trees = 30;
     private const int Cones = 100;
 
-    private sealed record Car(Entity Body, Entity[] Wheels, float Offset);
-
-    private static readonly List<Car> Racers = [];
-    private static Entity _camera, _text;
+    internal static Entity Camera;
+    private static Entity _text;
     private static float _shutterAngle;
     private static uint _samples;
-    private static bool _chase;
+    internal static bool Chase;
 
     public static void Build(App app)
     {
-        app.Startup(Setup);
-        app.Update(Update, "motion_blur.Update");
+        app.Startup(Setup, "motion_blur.Setup");
+
+        // First of Bevy's chain, before the cars move and the camera follows the tracked one.
+        app.AddSystem(Stage.Update, new SystemDescriptor(world => KeyboardInputs(new BehaviorContext(world)), "motion_blur.KeyboardInputs")
+            .Before("Moves.MoveCars"));
     }
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Racers.Clear();
-        (_shutterAngle, _samples, _chase) = (1f, 2, true);
+        (_shutterAngle, _samples, Chase) = (1f, 2, true);
 
-        _camera = ecs.SpawnCamera3d(Transform.Identity);
+        Camera = ecs.SpawnCamera3d(Transform.Identity);
         ApplyBlur();
 
         Render.SetAmbientLight((1f, 1f, 1f), 300f);
@@ -83,15 +83,15 @@ internal static class MotionBlur
             var car = ecs.SpawnMesh(box, color, new Transform(Vec3.Zero, Quat.Identity, new Vec3(0.5f)));
             ecs.SetParent(ecs.SpawnMesh(box, color, new Transform(new Vec3(0f, 0.08f, 0.03f), Quat.Identity, new Vec3(1f, 1f, 0.5f))), car);
 
-            var wheels = new List<Entity>();
             foreach (var (x, z) in new[] { (1f, 1f), (1f, -1f), (-1f, 1f), (-1f, -1f) })
             {
                 var wheel = ecs.SpawnMesh(cylinder, wheelMaterial, new Transform(new Vec3(0.14f * x, -0.045f, 0.15f * z), Quat.FromRotationZ(MathF.PI / 2f), new Vec3(0.15f, 0.04f, 0.15f)));
                 ecs.SetParent(wheel, car);
-                wheels.Add(wheel);
+                ecs.Add(wheel, new Rotates());
             }
 
-            Racers.Add(new Car(car, [.. wheels], i * 2f));
+            ecs.Add(car, new Moves { Offset = i * 2f });
+            if (i == 0) ecs.Add(car, new CameraTracked());
         }
     }
 
@@ -128,7 +128,7 @@ internal static class MotionBlur
         }
     }
 
-    private static void Update(BehaviorContext ctx)
+    private static void KeyboardInputs(BehaviorContext ctx)
     {
         var input = ctx.Input;
         var changed = true;
@@ -136,73 +136,21 @@ internal static class MotionBlur
         else if (input.KeyPressed(Key.Digit2)) _shutterAngle += 0.25f;
         else if (input.KeyPressed(Key.Digit3)) _samples = _samples > 0 ? _samples - 1 : 0;
         else if (input.KeyPressed(Key.Digit4)) _samples++;
-        else if (input.KeyPressed(Key.Space)) _chase = !_chase;
+        else if (input.KeyPressed(Key.Space)) Chase = !Chase;
         else changed = false;
 
         _shutterAngle = Math.Clamp(_shutterAngle, 0f, 1f);
         _samples = Math.Min(_samples, 64u);
-        if (changed)
-        {
-            ApplyBlur();
-            Ui.SetText(_text, Text());
-        }
+        if (!changed) return;
 
-        MoveCars(ctx);
-        MoveCamera(ctx.Ecs);
+        ApplyBlur();
+        Ui.SetText(_text, Text());
     }
 
-    // Round the track, faster on its straights, each wheel turned by how far its car went.
-    private static void MoveCars(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        foreach (var car in Racers)
-        {
-            var t = ctx.Time.Elapsed * 0.25f + 0.5f * car.Offset;
-            var dx = MathF.Cos(t);
-            var dz = -MathF.Sin(3f * t);
-            t += MathF.Sqrt(dx * dx + dz * dz) * 0.15f;
-
-            var transform = ecs.GetOrDefault<Transform>(car.Body);
-            var previous = transform.Translation;
-            var (x, z) = TrackPosition(0f, t);
-            var now = new Vec3(x, -0.59f, z);
-            var delta = now - previous;
-            if (delta.Length > 1e-6f) transform = Transform.LookingAt(now, now + delta, Vec3.UnitY) with { Scale = transform.Scale };
-            transform.Translation = now;
-            ecs.Set(car.Body, transform);
-
-            foreach (var wheel in car.Wheels)
-            {
-                var spin = ecs.GetOrDefault<Transform>(wheel);
-                var circumference = 2f * MathF.PI * spin.Scale.X;
-                spin.Rotation *= Quat.FromRotationY(delta.Length / circumference * MathF.PI * 2f);
-                ecs.Set(wheel, spin);
-            }
-        }
-    }
-
-    private static void MoveCamera(EcsWorld ecs)
-    {
-        var tracked = ecs.GetOrDefault<Transform>(Racers[0].Body);
-        var forward = tracked.Rotation * -Vec3.UnitZ;
-
-        if (_chase)
-        {
-            var at = tracked.Translation + new Vec3(0f, 0.15f, 0f) - forward * 0.6f;
-            ecs.Set(_camera, Transform.LookingAt(at, at + forward, Vec3.UnitY));
-            Render.SetPerspective(_camera, 1f * 180f / MathF.PI, 0.1f, 1000f);
-        }
-        else
-        {
-            ecs.Set(_camera, Transform.LookingAt(new Vec3(15f, -0.5f, 0f), tracked.Translation, Vec3.UnitY));
-            Render.SetPerspective(_camera, 0.05f * 180f / MathF.PI, 0.1f, 1000f);
-        }
-    }
-
-    private static void ApplyBlur() => Render.SetEffects(_camera, new EffectSettings { ShutterAngle = _shutterAngle, MotionBlurSamples = _samples });
+    private static void ApplyBlur() => Render.SetEffects(Camera, new EffectSettings { ShutterAngle = _shutterAngle, MotionBlurSamples = _samples });
 
     // A point on the figure the cars race round, offset to one side of it.
-    private static (float X, float Z) TrackPosition(float offset, float t)
+    internal static (float X, float Z) TrackPosition(float offset, float t)
     {
         const float XTweak = 2f, YTweak = 3f, Scale = 8f;
         var x0 = MathF.Sin(XTweak * t);
@@ -233,4 +181,72 @@ internal static class MotionBlur
     private static string Text() =>
         FormattableString.Invariant($"Shutter angle: {_shutterAngle:0.00}\nSamples: {_samples}\n")
         + "1/2: -/+ shutter angle (blur amount)\n3/4: -/+ sample count (blur quality)\nSpacebar: cycle camera\n";
+}
+
+/// <summary>A car, and how far round the track it starts.</summary>
+[Behavior]
+public partial struct Moves
+{
+    /// <summary>Its start along the track.</summary>
+    public float Offset;
+
+    /// <summary>
+    /// Moved round the track, faster on its straights, facing the way it went, and each of its
+    /// wheels turned by how far it went, second of Bevy's chain.
+    /// </summary>
+    [OnUpdate]
+    public void MoveCars(BehaviorContext ctx, ref Transform transform)
+    {
+        var t = ctx.Time.Elapsed * 0.25f + 0.5f * Offset;
+        var dx = MathF.Cos(t);
+        var dz = -MathF.Sin(3f * t);
+        t += MathF.Sqrt(dx * dx + dz * dz) * 0.15f;
+
+        var previous = transform.Translation;
+        var (x, z) = MotionBlur.TrackPosition(0f, t);
+        var now = new Vec3(x, -0.59f, z);
+        var delta = now - previous;
+        if (delta.Length > 1e-6f) transform = Transform.LookingAt(now, now + delta, Vec3.UnitY) with { Scale = transform.Scale };
+        transform.Translation = now;
+
+        foreach (var wheel in ctx.Ecs.ChildrenOf(ctx.Entity))
+        {
+            if (!ctx.Ecs.Has<Rotates>(wheel)) continue;
+            var spin = ctx.Ecs.GetOrDefault<Transform>(wheel);
+            var circumference = 2f * MathF.PI * spin.Scale.X;
+            spin.Rotation *= Quat.FromRotationY(delta.Length / circumference * MathF.PI * 2f);
+            ctx.Ecs.Set(wheel, spin);
+        }
+    }
+}
+
+/// <summary>A wheel, which turns as its car goes.</summary>
+[Behavior]
+public partial struct Rotates;
+
+/// <summary>The car the camera follows.</summary>
+[Behavior]
+public partial struct CameraTracked
+{
+    /// <summary>
+    /// The camera put behind the car looking where it goes, or far to the side watching it through
+    /// a narrow lens, once the cars have moved, last of Bevy's chain.
+    /// </summary>
+    [OnUpdate]
+    [After("Moves.MoveCars")]
+    public void MoveCamera(BehaviorContext ctx, in Transform tracked)
+    {
+        var forward = tracked.Rotation * -Vec3.UnitZ;
+        if (MotionBlur.Chase)
+        {
+            var at = tracked.Translation + new Vec3(0f, 0.15f, 0f) - forward * 0.6f;
+            ctx.Ecs.Set(MotionBlur.Camera, Transform.LookingAt(at, at + forward, Vec3.UnitY));
+            Render.SetPerspective(MotionBlur.Camera, 1f * 180f / MathF.PI, 0.1f, 1000f);
+        }
+        else
+        {
+            ctx.Ecs.Set(MotionBlur.Camera, Transform.LookingAt(new Vec3(15f, -0.5f, 0f), tracked.Translation, Vec3.UnitY));
+            Render.SetPerspective(MotionBlur.Camera, 0.05f * 180f / MathF.PI, 0.1f, 1000f);
+        }
+    }
 }

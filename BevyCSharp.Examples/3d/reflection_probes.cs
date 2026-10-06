@@ -16,9 +16,8 @@ internal static class ReflectionProbes
 
     private enum ReflectionMode { EnvironmentMap, ReflectionProbe, GeneratedEnvironmentMap }
 
-    private static Entity _camera, _probe, _scene, _text;
-    private static AssetHandle _sphereMaterial, _diffuse, _specular, _probeSpecular, _cubes;
-    private static MaterialSettings _sphere = new();
+    private static Entity _camera, _probe, _text;
+    private static AssetHandle _diffuse, _specular, _probeSpecular, _cubes;
     private static ReflectionMode _mode;
     private static bool _rotating;
     private static float _roughness;
@@ -26,7 +25,7 @@ internal static class ReflectionProbes
     public static void Build(App app)
     {
         (_mode, _rotating, _roughness) = (ReflectionMode.ReflectionProbe, false, 0.2f);
-        (_probe, _scene) = (Entity.None, Entity.None);
+        _probe = Entity.None;
 
         app.Startup(ctx =>
         {
@@ -43,9 +42,8 @@ internal static class ReflectionProbes
             Render.SetEnvironmentMap(_camera, _diffuse, _specular, EnvMapIntensity);
             Render.SetSkybox(_camera, _specular, EnvMapIntensity);
 
-            _sphere = new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Metallic = 1f, Roughness = _roughness };
-            _sphereMaterial = Render.CreateMaterial(_sphere);
-            ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 1f), _sphereMaterial, Transform.Identity);
+            var sphere = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Metallic = 1f, Roughness = _roughness });
+            ecs.Add(ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, 1f), sphere, Transform.Identity), new SphereMaterial());
 
             SpawnReflectionProbe(ecs);
             _text = Ui.SpawnText(Describe(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
@@ -67,9 +65,9 @@ internal static class ReflectionProbes
     // The cubes, spawned once their file has loaded, and again each time the probe returns.
     private static void SpawnScene(BehaviorContext ctx)
     {
-        if (_mode != ReflectionMode.ReflectionProbe || _scene != Entity.None) return;
+        if (_mode != ReflectionMode.ReflectionProbe || ctx.Ecs.EntitiesWith<CubesScene>().Length > 0) return;
         if (AssetServer.StateOf(_cubes) != AssetLoadState.Loaded) return;
-        _scene = ctx.Ecs.SpawnScene(_cubes);
+        ctx.Ecs.Add(ctx.Ecs.SpawnScene(_cubes), new CubesScene());
     }
 
     private static void Controls(BehaviorContext ctx)
@@ -81,9 +79,9 @@ internal static class ReflectionProbes
         if (input.KeyPressed(Key.Space))
         {
             _mode = (ReflectionMode)(((int)_mode + 1) % 3);
-            foreach (var entity in new[] { _probe, _scene })
-                if (entity != Entity.None && ecs.IsAlive(entity)) ecs.Despawn(entity);
-            (_probe, _scene) = (Entity.None, Entity.None);
+            if (_probe != Entity.None && ecs.IsAlive(_probe)) ecs.Despawn(_probe);
+            foreach (var cubes in ecs.EntitiesWith<CubesScene>()) ecs.Despawn(cubes);
+            _probe = Entity.None;
             if (_mode == ReflectionMode.ReflectionProbe) SpawnReflectionProbe(ecs);
 
             // The camera is lit by the sky's map, or by one Bevy filters from the sky's image.
@@ -107,9 +105,17 @@ internal static class ReflectionProbes
         var delta = input.KeyDown(Key.ArrowUp) ? 0.01f : input.KeyDown(Key.ArrowDown) ? -0.01f : 0f;
         if (delta != 0f)
         {
+            // Each sphere's own material made rougher or smoother, as Bevy's change_sphere_roughness
+            // reaches it through the sphere.
             _roughness = Math.Clamp(_roughness + delta, 0f, 1f);
-            _sphere.Roughness = _roughness;
-            Render.WriteMaterial(_sphereMaterial, _sphere);
+            foreach (var sphere in ecs.EntitiesWith<SphereMaterial>())
+            {
+                var material = Render.MaterialOf(ecs, sphere);
+                if (!Render.TryReadMaterial(material, out var settings) || settings is null) continue;
+                settings.Roughness = _roughness;
+                Render.WriteMaterial(material, settings);
+            }
+
             changed = true;
         }
 
@@ -134,3 +140,11 @@ internal static class ReflectionProbes
         Up/Down arrows to change roughness
         """);
 }
+
+/// <summary>The sphere, whose material the arrows make rougher or smoother.</summary>
+[Behavior]
+public partial struct SphereMaterial;
+
+/// <summary>The room of cubes, there while the reflection probe is.</summary>
+[Behavior]
+public partial struct CubesScene;

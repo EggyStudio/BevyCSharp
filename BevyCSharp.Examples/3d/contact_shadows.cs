@@ -13,7 +13,7 @@ using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 // directional, point or spot light and the model spun by dragging it.
 internal static class ContactShadows
 {
-    private const float LightRotationSpeed = 0.002f;
+    internal const float LightRotationSpeed = 0.002f;
 
     private enum LightType
     {
@@ -23,9 +23,10 @@ internal static class ContactShadows
     }
 
     private static readonly Dictionary<LightType, Entity> Lights = [];
-    private static Entity _camera, _container, _ground, _helmet;
+    private static Entity _camera, _helmet;
     private static CursorShape _cursor;
-    private static bool _contactShadows, _shadowMaps, _rotating, _receive, _dragging;
+    private static bool _contactShadows, _shadowMaps, _receive, _dragging;
+    internal static bool Rotating;
     private static LightType _lightType;
     private static RadioButtons<bool>? _contactButtons, _shadowMapButtons, _rotationButtons, _receiveButtons;
     private static RadioButtons<LightType>? _typeButtons;
@@ -33,7 +34,7 @@ internal static class ContactShadows
     public static void Build(App app)
     {
         Lights.Clear();
-        (_contactShadows, _shadowMaps, _rotating, _receive, _dragging) = (true, true, true, true, false);
+        (_contactShadows, _shadowMaps, Rotating, _receive, _dragging) = (true, true, true, true, false);
         (_lightType, _helmet, _cursor) = (LightType.Point, Entity.None, CursorShape.Default);
 
         app.Startup(Setup, "contact_shadows.Setup");
@@ -42,15 +43,6 @@ internal static class ContactShadows
             _helmet = root;
             ctx.Ecs.Set(root, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI), Vec3.One));
         });
-
-        app.Update(ctx =>
-        {
-            // Round the middle, as Bevy's rotate_around.
-            if (!_rotating) return;
-            var turn = Quat.FromRotationY(LightRotationSpeed);
-            var at = ctx.Ecs.GetOrDefault<Transform>(_container);
-            ctx.Ecs.Set(_container, new Transform(turn * at.Translation, turn * at.Rotation, at.Scale));
-        }, "contact_shadows.RotateLight");
 
         app.Update(SpinModel, "contact_shadows.SpinModel");
         app.Update(HandleSettingChange, "contact_shadows.HandleSettingChange");
@@ -80,27 +72,29 @@ internal static class ContactShadows
         Render.SetEnvironmentMap(camera, diffuse, AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"), 1000f);
 
         // The three lights hang from one turning entity, and the one chosen is the one shown.
-        _container = ecs.Spawn();
-        ecs.Add(_container, Transform.LookingAt(new Vec3(-0.8f, 1.5f, 1.2f), Vec3.Zero, Vec3.UnitY));
+        var container = ecs.Spawn();
+        ecs.Add(container, Transform.LookingAt(new Vec3(-0.8f, 1.5f, 1.2f), Vec3.Zero, Vec3.UnitY));
+        ecs.Add(container, new LightContainer());
         Lights[LightType.Directional] = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = true, ContactShadows = true });
         Lights[LightType.Point] = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 400_000f, Shadows = true, ContactShadows = true });
         Lights[LightType.Spot] = Render.SpawnLight(new LightSettings { Kind = LightKind.Spot, Intensity = 400_000f, Shadows = true, ContactShadows = true, InnerAngle = 0f, OuterAngle = MathF.PI / 4f });
         foreach (var (type, light) in Lights)
         {
             ecs.Add(light, Transform.Identity);
-            ecs.SetParent(light, _container);
+            ecs.SetParent(light, container);
             ecs.Wrap<VisibilityRef>(light).Value = type == _lightType ? Visibility.Visible : Visibility.Hidden;
         }
 
-        _ground = ecs.SpawnMesh(
+        var ground = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Circle, 0.5f),
             Render.CreateMaterial(Color.FromSrgb(0.06f, 0.06f, 0.06f)),
             new Transform(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitX, -MathF.PI / 2f), Vec3.One));
+        ecs.Add(ground, new GroundPlane());
 
         var column = RadioButtons<bool>.Column();
         _contactButtons = new RadioButtons<bool>(ecs, column, "Contact Shadows", [(true, "On"), (false, "Off")], _contactShadows);
         _shadowMapButtons = new RadioButtons<bool>(ecs, column, "Shadow Maps", [(true, "On"), (false, "Off")], _shadowMaps);
-        _rotationButtons = new RadioButtons<bool>(ecs, column, "Light Rotation", [(true, "On"), (false, "Off")], _rotating);
+        _rotationButtons = new RadioButtons<bool>(ecs, column, "Light Rotation", [(true, "On"), (false, "Off")], Rotating);
         _typeButtons = new RadioButtons<LightType>(ecs, column, "Light Type",
             [(LightType.Directional, "Directional"), (LightType.Point, "Point"), (LightType.Spot, "Spot")], _lightType);
         _receiveButtons = new RadioButtons<bool>(ecs, column, "Receive Shadows", [(true, "On"), (false, "Off")], _receive);
@@ -157,9 +151,9 @@ internal static class ContactShadows
             _shadowMapButtons.Select(ecs, maps);
         }
 
-        if (_rotationButtons!.Pressed(out var rotating) && rotating != _rotating)
+        if (_rotationButtons!.Pressed(out var rotating) && rotating != Rotating)
         {
-            _rotating = rotating;
+            Rotating = rotating;
             _rotationButtons.Select(ecs, rotating);
         }
 
@@ -174,7 +168,7 @@ internal static class ContactShadows
         if (_receiveButtons!.Pressed(out var receive) && receive != _receive)
         {
             _receive = receive;
-            Render.SetMeshFlags(ecs, _ground, receive ? MeshFlags.None : MeshFlags.NoShadowReceiving);
+            foreach (var ground in ecs.EntitiesWith<GroundPlane>()) Render.SetMeshFlags(ecs, ground, receive ? MeshFlags.None : MeshFlags.NoShadowReceiving);
             _receiveButtons.Select(ecs, receive);
         }
     }
@@ -193,3 +187,21 @@ internal static class ContactShadows
         catch (Bevy.Interop.BevyNativeException) { }
     }
 }
+
+/// <summary>The lights' parent, which carries them round the middle while rotation is on.</summary>
+[Behavior]
+public partial struct LightContainer
+{
+    /// <summary>Turned about the middle by a step each frame while rotation is on, as Bevy's <c>rotate_around</c> turns it.</summary>
+    [OnUpdate]
+    public void RotateLight(BehaviorContext ctx, ref Transform transform)
+    {
+        if (!ContactShadows.Rotating) return;
+        var turn = Quat.FromRotationY(ContactShadows.LightRotationSpeed);
+        transform = new Transform(turn * transform.Translation, turn * transform.Rotation, transform.Scale);
+    }
+}
+
+/// <summary>The ground the helmet stands on, whose shadow receiving the buttons switch.</summary>
+[Behavior]
+public partial struct GroundPlane;

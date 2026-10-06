@@ -10,7 +10,12 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4e15bea`. Verdict 1 is settled (`5264257`): every text file checks out with LF
+Reviewed up to `a646086`. A windowless run chooses its interface's camera after pointing the
+cameras at its image, so the interface has a camera from its first frame and `text_debug` runs
+(`a8d06df`, with a test), and three more groups of examples keep on their entities what Bevy's
+keep on theirs (`492e119`, `f8a3b55`, `a646086`). No verdict is open.
+
+Before them, Verdict 1 was settled (`5264257`): every text file checks out with LF
 ends, the norm's tests read files through one helper that ends lines with `\n`, the page's test
 reads the script in UTF-8 on either ending and the script writes `\n` alone, and a picture asked
 for with no interface running loads nothing on any bridge, the expected error never having been
@@ -23,14 +28,9 @@ own (`3944016` to `e805d3a`). The run of `b263f6d` is the first with this engine
 GitHub: Linux passed 722 and failed 1, Windows passed 638 and failed 3, with 351 skipped on each
 where there is no device, and the digest job joined the two.
 
-Before them, `b263f6d` brings the first three groups of examples to B 4, what Bevy's keep
-on an entity kept in a behavior, and the owner pushed up to it on 2026-10-06. The run of `b091fe3`
-was canceled by that push before its tests ended, and its build printed warnings, a possibly null
-dereference and XML comments that do not match their members among them, which item 6's N 6.1
-clears.
-
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
+
 
 ## Now
 
@@ -315,3 +315,13 @@ from the target the interface carries down. shadow_biases' lights move by their 
 `Lights`, visibility_range's helmets carry `MainModel` from their roots to each mesh as it
 appears, and camera_sub_view's cameras lay out their own viewports by `ExampleViewports`, the two
 that sweep their view carrying `MovingCameraMarker`.
+
+B 4 for 3D Rendering, its third part, 108 of 119. anisotropy's meshes carry `MaterialVariants`,
+each its material with anisotropy and without, Enter switching every mesh by its own, and its two
+scenes carry Bevy's `Scene` enum as `AnisotropyScene`, the examples' own `Scene` helper being in
+every example's scope. contact_shadows' lights turn round the middle by their `LightContainer` and
+its ground is found by `GroundPlane`. motion_blur's cars move by their `Moves`, turning the wheels
+that carry `Rotates`, and the camera follows the car carrying `CameraTracked` after they move, the
+keys read by an app system ordered `Before` them, as Bevy chains the three. reflection_probes'
+sphere carries `SphereMaterial`, its roughness changed through the material it holds, and the
+cubes' scene `CubesScene`, found by it when the mode changes.

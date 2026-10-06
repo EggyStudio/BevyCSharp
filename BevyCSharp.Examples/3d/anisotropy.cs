@@ -22,18 +22,15 @@ internal static class Anisotropy
         EnvironmentMap,
     }
 
-    private static Entity _camera, _light, _lamp, _sphere, _text;
+    private static Entity _camera, _light, _text;
     private static LightMode _mode;
-    private static bool _anisotropic, _sphereShown;
+    private static bool _anisotropic;
+    private static AnisotropySceneKind _visibleScene;
     private static float _turned;
-
-    // Each mesh's material and the same material with no anisotropy, made as the meshes appear.
-    private static readonly Dictionary<Entity, (AssetHandle Anisotropic, AssetHandle Isotropic)> Variants = [];
 
     public static void Build(App app)
     {
-        Variants.Clear();
-        (_mode, _anisotropic, _sphereShown, _turned, _lamp) = (LightMode.Directional, true, false, 0f, Entity.None);
+        (_mode, _anisotropic, _visibleScene, _turned) = (LightMode.Directional, true, AnisotropySceneKind.BarnLamp, 0f);
 
         app.Startup(ctx =>
         {
@@ -43,19 +40,20 @@ internal static class Anisotropy
 
             // A sphere with tangents, which a primitive is made with, in Tailwind's gray-300.
             var gray = Color.FromHex("#d1d5db");
-            _sphere = ecs.SpawnMesh(
+            var sphere = ecs.SpawnMesh(
                 Render.CreateMesh(MeshShape.Sphere, 0.1f),
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (gray.R, gray.G, gray.B, 1f), AnisotropyRotation = 0.5f, AnisotropyStrength = 1f }),
                 Transform.Identity);
-            ecs.Wrap<VisibilityRef>(_sphere).Value = Visibility.Hidden;
+            ecs.Wrap<VisibilityRef>(sphere).Value = Visibility.Hidden;
+            ecs.Add(sphere, new AnisotropyScene { Kind = AnisotropySceneKind.Sphere });
 
             _text = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
         }, "anisotropy.Setup");
 
         app.SpawnGltf("models/AnisotropyBarnLamp/AnisotropyBarnLamp.gltf", (ctx, root) =>
         {
-            _lamp = root;
             ctx.Ecs.Set(root, Transform.At(0f, 0.07f, -0.13f));
+            ctx.Ecs.Add(root, new AnisotropyScene { Kind = AnisotropySceneKind.BarnLamp });
         });
 
         app.Update(CreateMaterialVariants, "anisotropy.CreateMaterialVariants");
@@ -83,22 +81,19 @@ internal static class Anisotropy
     private static void CreateMaterialVariants(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        foreach (var root in new[] { _lamp, _sphere })
-            if (root != Entity.None) Walk(root);
-
-        void Walk(Entity entity)
+        foreach (var root in ecs.EntitiesWith<AnisotropyScene>())
         {
-            if (!Variants.ContainsKey(entity)
-                && Render.MaterialOf(ecs, entity) is var material && material != AssetHandle.None
-                && Render.TryReadMaterial(material, out var settings) && settings is not null)
+            foreach (var entity in ecs.Descendants(root).Prepend(root).ToArray())
             {
+                if (ecs.Has<MaterialVariants>(entity)) continue;
+                var material = Render.MaterialOf(ecs, entity);
+                if (material == AssetHandle.None || !Render.TryReadMaterial(material, out var settings) || settings is null) continue;
+
                 settings.AnisotropyTexture = AssetHandle.None;
                 settings.AnisotropyStrength = 0f;
                 settings.AnisotropyRotation = 0f;
-                Variants[entity] = (material, Render.CreateMaterial(settings));
+                ecs.Add(entity, new MaterialVariants { Anisotropic = material, Isotropic = Render.CreateMaterial(settings) });
             }
-
-            foreach (var child in ecs.ChildrenOf(entity)) Walk(child);
         }
     }
 
@@ -139,16 +134,19 @@ internal static class Anisotropy
         {
             changed = true;
             _anisotropic = !_anisotropic;
-            foreach (var (entity, (anisotropic, isotropic)) in Variants)
-                if (ecs.IsAlive(entity)) Render.SetMaterial(ecs, entity, _anisotropic ? anisotropic : isotropic);
+            foreach (var entity in ecs.EntitiesWith<MaterialVariants>())
+            {
+                var variants = ecs.GetOrDefault<MaterialVariants>(entity);
+                Render.SetMaterial(ecs, entity, _anisotropic ? variants.Anisotropic : variants.Isotropic);
+            }
         }
 
         if (input.KeyPressed(Key.Q))
         {
             changed = true;
-            _sphereShown = !_sphereShown;
-            ecs.Wrap<VisibilityRef>(_sphere).Value = _sphereShown ? Visibility.Inherited : Visibility.Hidden;
-            if (_lamp != Entity.None) ecs.Wrap<VisibilityRef>(_lamp).Value = _sphereShown ? Visibility.Hidden : Visibility.Inherited;
+            _visibleScene = _visibleScene == AnisotropySceneKind.BarnLamp ? AnisotropySceneKind.Sphere : AnisotropySceneKind.BarnLamp;
+            foreach (var scene in ecs.EntitiesWith<AnisotropyScene>())
+                ecs.Wrap<VisibilityRef>(scene).Value = ecs.GetOrDefault<AnisotropyScene>(scene).Kind == _visibleScene ? Visibility.Inherited : Visibility.Hidden;
         }
 
         if (changed) Ui.SetText(_text, HelpText());
@@ -163,6 +161,31 @@ internal static class Anisotropy
             LightMode.Point => "Press Space to switch to an environment map",
             _ => "Press Space to switch to a directional light",
         };
-        return $"{material}\n{light}\nPress Q to change to {(_sphereShown ? "Barn Lamp" : "Sphere")}";
+        return $"{material}\n{light}\nPress Q to change to {(_visibleScene == AnisotropySceneKind.Sphere ? "Barn Lamp" : "Sphere")}";
     }
+}
+
+/// <summary>Which of the two scenes a thing is.</summary>
+public enum AnisotropySceneKind { BarnLamp, Sphere }
+
+/// <summary>
+/// A scene Q shows in turn, the barn lamp or the sphere, Bevy's <c>Scene</c> enum under another
+/// name since the examples' own <c>Scene</c> helper is in every example's scope.
+/// </summary>
+[Behavior]
+public partial struct AnisotropyScene
+{
+    /// <summary>Which scene.</summary>
+    public AnisotropySceneKind Kind;
+}
+
+/// <summary>A mesh's material as the file has it, with anisotropy, and the same with it taken out, for Enter to switch between.</summary>
+[Behavior]
+public partial struct MaterialVariants
+{
+    /// <summary>The material as the file has it.</summary>
+    public AssetHandle Anisotropic;
+
+    /// <summary>The same with no anisotropy.</summary>
+    public AssetHandle Isotropic;
 }
