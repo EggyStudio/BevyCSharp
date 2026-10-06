@@ -325,3 +325,16 @@ that carry `Rotates`, and the camera follows the car carrying `CameraTracked` af
 keys read by an app system ordered `Before` them, as Bevy chains the three. reflection_probes'
 sphere carries `SphereMaterial`, its roughness changed through the material it holds, and the
 cubes' scene `CubesScene`, found by it when the mode changes.
+
+B 4 for 3D Rendering, its fourth part, 111 of 119. blend_modes' spheres and tiles carry
+`ExampleControls` and transmission's meshes `TransmissionControls`, each material reached through
+its mesh and written for each mesh that holds it, as Bevy writes it, read back first by
+`Render.TryReadMaterial`, which makes the same material again. blend_modes' labels carry
+`ExampleLabel`, the texts `BlendModesDisplay` and `TransmissionDisplay` beside auto_exposure's
+`ExampleDisplay`, and the flame and its light `Flicker`, told apart by the flame's mesh as Bevy's
+query does. tonemapping's scenes carry `SceneNumber` and its image viewer `HDRViewer`. Apart from
+these, transmission's glass spheres were missing from some captures taken here, about one in four.
+A small offscreen test with TAA on showed glass gone on its early frames with nothing added to it
+and back by its hundredth, so the fault does not come with this change, and the capture waits 120
+frames. The job comparing captures with references, when item 5 sets it up, would fail now and then
+on this example until the cause is found.

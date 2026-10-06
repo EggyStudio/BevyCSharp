@@ -24,9 +24,7 @@ internal static class TonemappingExample
     ];
 
     private static readonly Dictionary<Tonemapping, Grading> PerMethod = [];
-    private static readonly Dictionary<int, List<Entity>> Scenes = [];
-    private static Entity _camera, _text, _viewer, _dropText;
-    private static AssetHandle _viewerMaterial;
+    private static Entity _camera, _text;
     private static Tonemapping _method;
     private static int _scene, _selected;
     private static bool _hideUi;
@@ -36,16 +34,15 @@ internal static class TonemappingExample
     public static void Build(App app)
     {
         PerMethod.Clear();
-        Scenes.Clear();
         foreach (var method in Methods) PerMethod[method] = Recommended(method);
         (_method, _scene, _selected, _hideUi) = (Tonemapping.TonyMcMapface, 1, 0, false);
 
         app.Startup(Setup, "tonemapping.Setup");
-        app.SpawnGltf("models/TonemappingTest/TonemappingTest.gltf", (_, root) => InScene(1, root));
+        app.SpawnGltf("models/TonemappingTest/TonemappingTest.gltf", (ctx, root) => InScene(ctx.Ecs, 1, root));
         app.SpawnGltf("models/FlightHelmet/FlightHelmet.gltf", (ctx, root) =>
         {
             ctx.Ecs.Set(root, new Transform(new Vec3(0.5f, 0f, -0.5f), Quat.FromRotationY(-0.15f * MathF.PI), Vec3.One));
-            InScene(1, root);
+            InScene(ctx.Ecs, 1, root);
         });
 
         app.Update(DragDropImage, "tonemapping.DragDropImage");
@@ -64,11 +61,7 @@ internal static class TonemappingExample
         _ => new Grading(),
     };
 
-    private static void InScene(int number, Entity entity)
-    {
-        if (!Scenes.TryGetValue(number, out var list)) Scenes[number] = list = [];
-        list.Add(entity);
-    }
+    private static void InScene(EcsWorld ecs, int number, Entity entity) => ecs.Add(entity, new SceneNumber { Number = number });
 
     private static void Setup(BehaviorContext ctx)
     {
@@ -94,7 +87,7 @@ internal static class TonemappingExample
         var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 15_000f, Shadows = true });
         ecs.Add(sun, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI * -0.15f) * Quat.FromRotationX(MathF.PI * -0.15f), Vec3.One));
         Render.SetShadowCascades(sun, maximum: 3f, firstBound: 0.9f);
-        InScene(1, sun);
+        InScene(ecs, 1, sun);
 
         // A square a step in front of the camera, painted by the test pattern shader.
         var inFront = CameraAt with { Translation = CameraAt.Translation + CameraAt.Rotation * -Vec3.UnitZ };
@@ -103,28 +96,32 @@ internal static class TonemappingExample
         Render.SetMesh(ecs, sweep, Render.CreateMesh(MeshShape.Rectangle, 0.7f, 0.7f));
         Render.SetMaterial(ecs, sweep, Shaders.CreateMaterial(Shaders.CreateProgram("shaders/tonemapping_test_patterns.slang")));
         ecs.Insert<VisibilityRef>(sweep).Value = VisibilityRef.ValueVariant.Hidden;
-        InScene(2, sweep);
+        InScene(ecs, 2, sweep);
 
         // An unlit square for an image dropped on the window, and the line asking for one.
-        _viewerMaterial = Render.CreateMaterial(new MaterialSettings { Unlit = true });
-        _viewer = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Rectangle, 1f, 1f), _viewerMaterial, inFront);
-        ecs.Insert<VisibilityRef>(_viewer).Value = VisibilityRef.ValueVariant.Hidden;
-        InScene(3, _viewer);
+        var viewer = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Rectangle, 1f, 1f), Render.CreateMaterial(new MaterialSettings { Unlit = true }), inFront);
+        ecs.Insert<VisibilityRef>(viewer).Value = VisibilityRef.ValueVariant.Hidden;
+        InScene(ecs, 3, viewer);
+        ecs.Add(viewer, new HDRViewer());
 
-        _dropText = Ui.SpawnText("Drag and drop an HDR or EXR file",
+        var dropText = Ui.SpawnText("Drag and drop an HDR or EXR file",
             new UiSettings { AlignSelf = UiAlignSelf.Center, Margin = Sides.All(Length.Auto), Color = (0f, 0f, 0f, 1f) },
             new UiTextSettings { FontSize = 36f, Justify = TextJustify.Center });
-        ecs.Insert<VisibilityRef>(_dropText).Value = VisibilityRef.ValueVariant.Hidden;
-        InScene(3, _dropText);
+        ecs.Insert<VisibilityRef>(dropText).Value = VisibilityRef.ValueVariant.Hidden;
+        InScene(ecs, 3, dropText);
     }
 
     private static void DragDropImage(BehaviorContext ctx)
     {
+        // The image shown on the viewer's own material, and the hint gone, which Bevy finds as the
+        // text that belongs to a scene.
+        var ecs = ctx.Ecs;
         foreach (var dropped in ctx.Read<FileDropped>())
         {
-            Render.WriteMaterial(_viewerMaterial, new MaterialSettings { Unlit = true, BaseColorTexture = AssetServer.Load(AssetKind.Image, dropped.Path) });
-            if (_dropText != Entity.None && ctx.Ecs.IsAlive(_dropText)) ctx.Ecs.Despawn(_dropText);
-            _dropText = Entity.None;
+            foreach (var viewer in ecs.EntitiesWith<HDRViewer>())
+                Render.WriteMaterial(Render.MaterialOf(ecs, viewer), new MaterialSettings { Unlit = true, BaseColorTexture = AssetServer.Load(AssetKind.Image, dropped.Path) });
+            foreach (var entity in ecs.EntitiesWith<SceneNumber>())
+                if (ecs.Get<TextRef>(entity) is not null) ecs.Despawn(entity);
         }
     }
 
@@ -135,10 +132,8 @@ internal static class TonemappingExample
         if (pressed == 0) return;
 
         _scene = pressed;
-        foreach (var (number, entities) in Scenes)
-            foreach (var entity in entities)
-                if (ctx.Ecs.IsAlive(entity))
-                    ctx.Ecs.Wrap<VisibilityRef>(entity).Value = number == pressed ? VisibilityRef.ValueVariant.Visible : VisibilityRef.ValueVariant.Hidden;
+        foreach (var entity in ctx.Ecs.EntitiesWith<SceneNumber>())
+            ctx.Ecs.Wrap<VisibilityRef>(entity).Value = ctx.Ecs.GetOrDefault<SceneNumber>(entity).Number == pressed ? VisibilityRef.ValueVariant.Visible : VisibilityRef.ValueVariant.Hidden;
     }
 
     private static void ToggleTonemappingMethod(BehaviorContext ctx)
@@ -228,3 +223,15 @@ internal static class TonemappingExample
         Ui.SetText(_text, text.ToString());
     }
 }
+
+/// <summary>Which of the three scenes a thing belongs to, which Q, W and E show in turn.</summary>
+[Behavior]
+public partial struct SceneNumber
+{
+    /// <summary>The scene, from one to three.</summary>
+    public int Number;
+}
+
+/// <summary>The rectangle a dropped image is shown on.</summary>
+[Behavior]
+public partial struct HDRViewer;
