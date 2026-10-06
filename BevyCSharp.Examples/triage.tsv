@@ -66,7 +66,7 @@ rotate_environment_map	can
 pcss	can
 mixed_lighting	can	through Bevy's reflected Lightmap
 specular_tint	missing	specular tint and the specular maps on the standard material
-clustered_decals	missing	a shader reading the tag of the clustered decal over it, which Bevy's WGSL reaches and a Slang shader does not
+clustered_decals	can
 light_textures	can
 occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers
 clustered_decal_maps	can

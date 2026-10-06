@@ -365,4 +365,144 @@ public float4 lit(Surface surface, VertexOutput mesh)
     return finish(light(surface, mesh), mesh);
 }
 
+
+// -- Bevy's clustered decals
+//
+// Bevy projects a clustered decal onto whatever lies inside its box, and its standard material
+// lays the decal's textures over its own surface. A material drawn here lays them on with
+// `decals`, or walks the decals over a point itself, as Bevy's `ClusteredDecalIterator` walks
+// them, to do something of its own with each, such as tinting it by its tag. These call WGSL the
+// bridge puts in front of the compiled shader, over Bevy's own iterator and the textures Bevy
+// holds for the decals, and a device that cannot have clustered decals has none over any point.
+
+/// Which of a decal's textures, as Bevy's `ClusteredDecal` names them.
+public enum DecalMap
+{
+    /// Its color, laid over the surface's by its alpha.
+    Color = 0,
+    /// How it bends the surface's normal.
+    Normal = 1,
+    /// How metal it is in blue and how rough in green.
+    MetallicRoughness = 2,
+    /// The light it gives off.
+    Emissive = 3,
+}
+
+uint pbr_decal_count(float4 frag_coord, float4 world_position)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_decal_count($0, $1)";
+    default:
+        return 0;
+    }
+}
+
+uint pbr_decal_tag(float4 frag_coord, float4 world_position, uint index)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_decal_tag($0, $1, $2)";
+    default:
+        return 0;
+    }
+}
+
+bool pbr_decal_has(float4 frag_coord, float4 world_position, uint index, uint map)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_decal_has($0, $1, $2, $3)";
+    default:
+        return false;
+    }
+}
+
+float4 pbr_decal_sample(float4 frag_coord, float4 world_position, uint index, uint map)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_decal_sample($0, $1, $2, $3)";
+    default:
+        return float4(0.0);
+    }
+}
+
+float3 pbr_decal_normal(float4 frag_coord, float4 world_position, uint index, float3 normal)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_decal_normal($0, $1, $2, $3)";
+    default:
+        return normal;
+    }
+}
+
+/// How many clustered decals lie over this point of the mesh.
+public uint decal_count(VertexOutput mesh)
+{
+    return pbr_decal_count(mesh.position, mesh.world_position);
+}
+
+/// The tag of the decal at `index` over this point, a number of the game's own that Bevy hands
+/// over and does nothing with, or zero where there is no such decal.
+public uint decal_tag(VertexOutput mesh, uint index)
+{
+    return pbr_decal_tag(mesh.position, mesh.world_position, index);
+}
+
+/// Whether the decal at `index` over this point has the texture `map`.
+public bool decal_has(VertexOutput mesh, uint index, DecalMap map)
+{
+    return pbr_decal_has(mesh.position, mesh.world_position, index, uint(map));
+}
+
+/// The texture `map` of the decal at `index` over this point, read where the decal's box puts this
+/// point on it, or zero where it has no such texture.
+public float4 decal_sample(VertexOutput mesh, uint index, DecalMap map)
+{
+    return pbr_decal_sample(mesh.position, mesh.world_position, index, uint(map));
+}
+
+/// The surface with every decal over this point laid on, as Bevy's standard material lays them:
+/// each decal's color over the surface's by its alpha, how metal and rough it is mixed in by the
+/// same alpha where it says, its normal map bending the normal on a mesh with tangents, and the
+/// light it gives off added.
+public Surface decals(Surface surface, VertexOutput mesh)
+{
+    var output = surface;
+    let count = decal_count(mesh);
+
+    for (uint index = 0; index < count; index++)
+    {
+        if (decal_has(mesh, index, DecalMap.Color))
+        {
+            let color = decal_sample(mesh, index, DecalMap.Color);
+
+            if (decal_has(mesh, index, DecalMap.MetallicRoughness))
+            {
+                let metallic_roughness = decal_sample(mesh, index, DecalMap.MetallicRoughness);
+                output.metallic = lerp(output.metallic * output.base_color.a, metallic_roughness.b, color.a);
+                output.roughness = lerp(output.roughness * output.base_color.a, metallic_roughness.g, color.a);
+            }
+
+            // Bevy's `porter_duff_over`, the decal over the surface.
+            output.base_color = float4(
+                lerp(output.base_color.rgb * output.base_color.a, color.rgb, color.a),
+                output.base_color.a + color.a * (1.0 - output.base_color.a));
+        }
+
+        output.normal = pbr_decal_normal(mesh.position, mesh.world_position, index, output.normal);
+        output.emissive += float4(decal_sample(mesh, index, DecalMap.Emissive).rgb, 0.0);
+    }
+
+    output.normal = normalize(output.normal);
+    return output;
+}
+
 }

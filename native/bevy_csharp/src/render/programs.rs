@@ -55,8 +55,8 @@ mod tests;
 
 pub use queries::*;
 pub use role::{ROLE_COUNT, Role};
-pub use wgsl::{LIGHTING_CALL, LIGHTING_STAND_IN};
-use wgsl::{fallback_source, with_lighting};
+pub use wgsl::stand_ins;
+use wgsl::{fallback_source, with_bevy};
 
 /// One stage as a pipeline sees it, a shader and the entry point in it.
 #[derive(Clone, Debug)]
@@ -566,7 +566,7 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
     match done.result {
         Ok((compiled, reflected)) => {
             let shader = if reflected.spirv.is_empty() {
-                Shader::from_wgsl(with_lighting(unit.role, reflected.wgsl), name)
+                Shader::from_wgsl(with_bevy(unit.role, reflected.wgsl), name)
             } else {
                 Shader::from_spirv(reflected.spirv, name)
             };

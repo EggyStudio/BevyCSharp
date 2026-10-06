@@ -10,16 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8557a75`. A kinematic body follows its entity at the speed and rate of turning the
-entity moves at, through every step of a frame, so a crate on a platform moved at 2.00 rides at 2.00
-within 0.02 at seven frame rates and over uneven frames where it rode at 1.80 to 0.02 before, a
-turned platform carries it round, and `MarkPlaced` or `PlaceBeyond` says when an entity was put
-somewhere rather than moved (`05bc3b4`), which settles item 3. A body at rest given a velocity, an
-impulse, a motor or a changed joint moves in the next step, `PhysicsWorld.Wake` clearing Bepu's
-candidate flag and its count of steps under the threshold, with `SleepTests` over ten cases after 32
-and 128 steps of rest, of which the velocity and the impulse after 32 were lost before (`8557a75`).
-The reply on item 14, the friction scaled by a convex manifold's contacts, is written and its commit
-to come. No verdict is open.
+Reviewed up to `56ad9a2`. Two commits of moves alone split the bridge's `programs.rs` and
+`reflect.rs` into parts and put the lit shader's tests in `Assets`, so N 1.3's list stands at 19
+from 21, 12 of them in the bridge, and N 1.4's at 97 to mend (`5be8291`, `56ad9a2`). The reply on
+item 3's first gap, a decal's tag reached from a Slang material over Bevy's clustered decals, is
+written and its commit to come. No verdict is open.
+
+Before them, a kinematic body followed its entity at the speed and rate of turning the entity moves
+at, through every step of a frame, so a crate on a platform moved at 2.00 rides at 2.00 within 0.02
+at seven frame rates and over uneven frames where it rode at 1.80 to 0.02 before, a turned platform
+carries it round, and `MarkPlaced` or `PlaceBeyond` says when an entity was put somewhere rather
+than moved (`05bc3b4`), which settles item 3. A body at rest given a velocity, an impulse, a motor
+or a changed joint moves in the next step, `PhysicsWorld.Wake` clearing Bepu's candidate flag and
+its count of steps under the threshold, with `SleepTests` over ten cases after 32 and 128 steps of
+rest, of which the velocity and the impulse after 32 were lost before (`8557a75`). A convex
+manifold's friction is scaled by its contact count, as 3DEngine's `ed0f3aa6` has it, so a box on a
+box slides to 2.55 and 1.27 units at frictions of a half and 1 where it slid 10.15 and 5.06, and on
+a floor of triangles as well, `FrictionTests` holding each within a tenth of the distance friction
+allows (`e5c8110`), which settles item 14. No verdict is open.
 
 Before them, a frame advanced the clock by a set length in place of the machine's, from
 `Config.FrameSeconds`, `Time.FrameSeconds`, `BCS_FRAME_TIME`, `bcs open --frame-time` and
@@ -32,13 +40,6 @@ contacts and item 15 takes from 3DEngine's mend, and a resting body given speed 
 next step's start, the next batch here, which 3DEngine's item 6 checks for its own code. No verdict
 is open.
 
-Before them, the last of the 3D Rendering examples keep on their entities what Bevy's keep on
-theirs, 117 of the 119 whose Bevy example keeps state on an entity, the two left being what the
-render world alone copies and draws from (`4ccef7e` to `6a84286`), which settles item 3.
-Transmission's glass spheres are missing from about one capture in four with TAA on, before this
-change as after it, which item 4 holds until the cause is found. Four commits of moves alone take
-sixteen places off the lists of N 1.2, N 1.3 and N 1.4 (`5dc052e` to `d620a10`). No verdict is open.
-
 The norm has 43 rules, and this engine stands at 26 checked, 4 with places listed, 4 to take
 and 9 by review.
 
@@ -47,7 +48,7 @@ and 9 by review.
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item
 here with no wait for a reply, and the list is long so that it does not run out. Items 5 to 7
-and 9 to 14 are taken from [SHARED.md](SHARED.md).
+and 9 to 13 are taken from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The run after `5264257` is pushed shows whether the three failures
    are gone, which the reviewing session reads and says here. The list goes on meanwhile.
@@ -136,13 +137,6 @@ and 9 to 14 are taken from [SHARED.md](SHARED.md).
     passes over a collectible assembly's behaviors here, and whether a script's assembly adds
     schemas, commands or states to the lists of the process, as the module initializers the
     generator writes do for a game's, is read with it.
-14. **A box slides as rough as its friction says** (SHARED.md). The quarter measured in
-   `711f416`'s reply, 2.45 of 9.8 at a friction of 1, is Bepu sharing a convex manifold's friction
-   among its contacts, four under a box. 3DEngine's `ed0f3aa6` mends it in its
-   `ConfigureContactManifold` by scaling the pair's coefficient by the manifold's contact count, and
-   its `BodyMaterialTests` holds a box from 5 a second to within 1.3 units at a friction of 1 and
-   sliding on at 0.05. The same in `Callbacks.cs`, with the measurement made a test at the three
-   frictions.
 
 ## Verdicts
 
@@ -172,27 +166,17 @@ None open.
 
 ## Replies
 
-Two things were found on the way and are not mended in this batch. A box slides with a quarter of
-the deceleration its friction times gravity gives, 2.45 at a friction of 1, 1.23 at a half and 9.8
-at 4, whatever the solver's passes, so a crate on a faster turn or further out slides outward as it
-is carried. That is Bepu sharing a convex manifold's friction among its contacts, four under a
-box, which 3DEngine's `ed0f3aa6` mends and item 14 takes. And a body that has
-rested long enough to be a candidate for sleep is put to sleep at the start of the next step
-though `SetVelocity` or `ApplyImpulse` gave it speed, since Bepu decides sleep from the step before
-and setting `Awake` on a body that is awake clears nothing, so a resting crate given 3 a second
-does not move. The second is the next batch here.
-
-**Now 14, a box slides as rough as its friction says.** `ConfigureContactManifold` scales the
-pair's coefficient by a convex manifold's contact count, as 3DEngine's `ed0f3aa6` does.
-`FrictionTests` send a box across a floor at 5 a second with no damping and hold it to stopping
-within a tenth of `v² / (2 μ g)`. Before, a box on a box slid 10.15 at a friction of a half where
-2.55 is right and 5.06 at 1 where 1.27 is, and on a floor of two triangles 2.19 at 1. A friction
-of 4 is left out, since a cube slowed harder than gravity pulls it turns over its leading edge
-onto its next face, which it does here, a quarter turn in about two tenths of a second. The
-turning platform of `KinematicBodyTests` is back to a radian a second at three units out, where
-the crate had gone 1.64 radians round of 2 while it slid outward. The floor of triangles came
-right with the change too, where a manifold that is not convex keeps a coefficient of one, so
-Bepu hands a box on it over as convex at least some of the time, and when was not looked into.
-
-Shared: a convex pair's friction scaled by its contacts is taken here, with `FrictionTests` at
-frictions of a quarter, a half and 1 and on a floor of triangles.
+**Now 3, a decal's tag.** A Slang material reaches Bevy's clustered decals as it reaches the
+lighting, by WGSL the bridge puts in front of a shader that calls it, over Bevy's own
+`ClusteredDecalIterator` and the textures Bevy holds for the decals. `bcs::decal_count`,
+`bcs::decal_tag`, `bcs::decal_has` and `bcs::decal_sample` walk the decals over a point, and
+`bcs::decals` lays them on a surface as the standard material does, color, metallic and roughness,
+normal map and light given off. `clustered_decals` is written with the Slang port of Bevy's
+`custom_clustered_decal.wgsl`, the icon tinted red and blue by the two decals' tags, and the
+capture shows Bevy's scene. `LitShaderTests` colors cubes by the tag over them and lays a half
+transparent decal on with `bcs::decals` beside the standard material laying it, within 12 a
+channel, both skipping on a device whose standard material shows no decal. The preludes are now a
+list (`programs/wgsl.rs`), each put in front of a fragment shader calling it and read through
+stand-ins, which a native test holds. Two commits that move code alone came first, `programs.rs`
+and `reflect.rs` split into parts (`5be8291`) and the lit shader's tests into `Assets`
+(`56ad9a2`). The volume's voxels and the deferred buffers are next.

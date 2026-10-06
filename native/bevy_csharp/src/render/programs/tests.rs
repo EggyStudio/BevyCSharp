@@ -27,3 +27,19 @@ fn each_role_puts_its_globals_where_its_pipeline_binds_them() {
     assert_eq!(Role::Pass.family().own_group(), 0);
     assert_eq!(Role::Compute.family().own_group(), 0);
 }
+
+#[test]
+fn a_fragment_shader_is_given_the_preludes_it_calls_and_no_others() {
+    let decals = "fn fragment() { let n = bcs_decal_count(a, b); }".to_string();
+    let both = "fn fragment() { bcs_decal_tag(a, b, 0u); bcs_pbr_light(); }".to_string();
+
+    let given = with_bevy(Role::Fragment, decals.clone());
+    assert!(given.contains("fn bcs_decal_seek(") && !given.contains("fn bcs_pbr_light("));
+    assert!(with_bevy(Role::Fragment, both.clone()).contains("fn bcs_pbr_light("));
+    assert_eq!(with_bevy(Role::Vertex, decals.clone()), decals);
+    assert_eq!(with_bevy(Role::Fragment, "fn fragment() {}".into()), "fn fragment() {}");
+
+    let stand_ins = super::stand_ins(&both).expect("a shader calling both is read with stand-ins");
+    assert!(stand_ins.contains("fn bcs_decal_tag(") && stand_ins.contains("fn bcs_pbr_light("));
+    assert!(super::stand_ins("fn fragment() {}").is_none());
+}

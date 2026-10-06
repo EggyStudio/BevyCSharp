@@ -77,6 +77,7 @@ internal static class Catalog
         new("blend_modes", BlendModes.Build),
         new("camera_sub_view", CameraSubView.Build),
         new("clustered_decal_maps", ClusteredDecalMaps.Build),
+        new("clustered_decals", ClusteredDecals.Build),
         new("color_grading", ColorGrading.Build),
         new("contact_shadows", ContactShadows.Build),
         new("pccm", Pccm.Build),

@@ -161,6 +161,33 @@ puts in front of the compiled shader, over Bevy's own `apply_pbr_lighting` and
 the forward pass, even under a camera rendering deferred, and the surface receives shadows and takes
 fog as a standard material does by default.
 
+### Clustered decals
+
+Bevy projects a clustered decal onto whatever lies inside its box, and its standard material lays
+the decal's textures on. A surface here has them laid on with `bcs::decals` before it is lit, the
+color over the surface's by its alpha, how metal and rough it is, its normal map and the light it
+gives off, as the standard material lays them. A shader that does something of its own with each
+decal walks them itself, by `bcs::decal_count`, the tag a game gave each, which Bevy hands over and
+does nothing with, and each of its textures, as Bevy's clustered_decals example tints its decals by
+their tags:
+
+```slang
+var surface = bcs::decals(bcs::surface(mesh), mesh);
+
+for (uint index = 0; index < bcs::decal_count(mesh); index++)
+{
+    if (bcs::decal_tag(mesh, index) == 1)
+        surface.emissive += bcs::decal_sample(mesh, index, bcs::DecalMap.Color);
+}
+
+return bcs::lit(surface, mesh);
+```
+
+They reach Bevy's own walk through the decals over a point, its `ClusteredDecalIterator`, by WGSL
+the bridge puts in front of a shader that calls them, as it does for the lighting. A device that
+cannot have clustered decals, which Bevy decides by whether it can bind arrays of textures, has none
+over any point.
+
 ### The compiler
 
 `slangc` compiles each stage to WGSL in the background. `./bcs build` and
