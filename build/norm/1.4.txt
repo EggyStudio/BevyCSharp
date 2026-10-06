@@ -56,7 +56,6 @@ BevyCSharp.Tests/GltfContentsTests.cs
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs
 BevyCSharp.Tests/GradingTests.cs
 BevyCSharp.Tests/InlineListTests.cs
-BevyCSharp.Tests/InputTests.cs
 BevyCSharp.Tests/InstanceTests.cs
 BevyCSharp.Tests/IntrospectionTests.cs
 BevyCSharp.Tests/ItemFieldsTests.cs
