@@ -10,10 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b263f6d`, which brings the first three groups of examples to B 4, what Bevy's keep
+Reviewed up to `e805d3a`. Nine commits bring the examples' groups to B 4, what Bevy's keep on an
+entity kept in a behavior, with `GameTimer` as Bevy's `Timer` and `EaseFunction` as the package's
+own (`3944016` to `e805d3a`). The run of `b263f6d` is the first with this engine's page, read from
+GitHub: Linux passed 722 and failed 1, Windows passed 638 and failed 3, with 351 skipped on each
+where there is no device, and the digest job joined the two. The three failures are Verdict 1,
+which comes before the next batch.
+
+Before them, `b263f6d` brings the first three groups of examples to B 4, what Bevy's keep
 on an entity kept in a behavior, and the owner pushed up to it on 2026-10-06. The run of `b091fe3`
 was canceled by that push before its tests ended, and its build printed warnings, a possibly null
-dereference and XML comments that do not match their members among them, which item 5's N 6.1
+dereference and XML comments that do not match their members among them, which item 6's N 6.1
 clears.
 
 Before it, the owner pushed up to `b091fe3` on 2026-10-06. The examples' helpers
@@ -132,15 +139,16 @@ them.
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item
-here with no wait for a reply, and the list is long so that it does not run out. Items 3, 6 to 8
-and 10 to 14 are taken from [SHARED.md](SHARED.md).
+here with no wait for a reply, and the list is long so that it does not run out. Items 4, 7 to 9
+and 11 to 15 are taken from [SHARED.md](SHARED.md).
 
-1. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
+1. **Verdict 1 first**, the page's three failures, then the rest of this list in order.
+2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a
    batch reads the lists for the files it will touch before it starts. The rules still to take
-   each have their item: N 2.2 and N 6.1 are the settings of item 5, N 2.1 the listing of item
-   12, N 2.6 the table of bad files in item 11, and N 2.7 item 2.
-2. **An example is a program somebody could write on the package.** A picture in the README
+   each have their item: N 2.2 and N 6.1 are the settings of item 6, N 2.1 the listing of item
+   13, N 2.6 the table of bad files in item 12, and N 2.7 item 3.
+3. **An example is a program somebody could write on the package.** A picture in the README
    opens an example as the way to do a thing, and what opens is written in words the package
    does not have. `BevyCSharp.Examples/Example.cs` holds helpers, in its own words for what
    Bevy's examples say in one word and the bridge in several, and 208 of the 231 examples call
@@ -163,7 +171,7 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
    it on the entity in a behavior, and a static field is for what Bevy keeps in a resource or a
    `Local`. The examples written are brought over a group at a time, EXAMPLES.md saying how many
    are, the helpers first since every example reads shorter for them.
-3. **What a kinematic body carries, and a clock stepped by hand**, both from a red run of
+4. **What a kinematic body carries, and a clock stepped by hand**, both from a red run of
    3DEngine's on Windows, mended there in `966c2c88`, `15fa305a` and `ee3b47dd`, and measured here
    before anything is changed. There the engine measured where the model put it, 1.75 against
    1.74 at 144 frames a second, and holds 2.00 at every rate since.
@@ -186,27 +194,27 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
    The clock is Bevy's own `TimeUpdateStrategy::ManualDuration`, reached from C# and from `bcs`,
    so a test or a capture advances a set amount a frame and is the same on every machine.
    `Time.Step` runs frames at the delta they would have had, which is the machine's.
-4. **The gaps, by how many rows each holds**, each bridged from Bevy
+5. **The gaps, by how many rows each holds**, each bridged from Bevy
    with the examples it unlocks written in its batch: more of Bevy's WGSL reached as its
    lighting is (the deferred buffers, a decal's tag and a volume's voxels), the widgets' events
    as observers, keys observed as they reach a field, and what the table then names most. When
    the captures have settled, they are compared whole with checked-in references by the
    workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
    scenes.
-5. **A build with no warnings, and a warning failing the workflow.** The managed build passes
+6. **A build with no warnings, and a warning failing the workflow.** The managed build passes
    `-warnaserror` in the workflow once it is clean, with a warning that is right to keep turned
    off where it arises and its reason beside it, and `cargo` builds deny warnings the same way.
-6. **More of what bodies do**, from 3DEngine's `c5227118`, `8520dbe1`, `799a9d56`, `979c97be` and
+7. **More of what bodies do**, from 3DEngine's `c5227118`, `8520dbe1`, `799a9d56`, `979c97be` and
    `53cd565f`: the speed a pair closed at on the contact's message, a ball joint kept within a
    cone, a distance joint whose range changes after it is made, bodies on layers whose pairs
    collide or not, which contacts, triggers, the character and rays follow, a body asleep waking
    when its layer changes, a body a game knows is fast swept over each step so it does not cross
    a thin wall, a slider joint with limits, a motor and its position, and how hard two touching
    bodies press, as the push alone and answered while they sleep.
-7. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
+8. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
    character that crouches and stands from its component's height, and a collider that is the
    shape of the meshes an entity and those under it show, made once the model has loaded.
-8. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
+9. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`:
    a joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things
    of the command line are checked in the same batch and taken if they are missing: `entity.set`
@@ -217,18 +225,18 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
    an enum member by its name alone, where `Enum.TryParse` takes any number as well, as
    `ConsoleWorldCommands.cs` reads gamepad buttons, axes and keys, and as 3DEngine's
    `InputCommands.TryName` does since `ef042886`, where a button of 100 stopped the program.
-9. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
+10. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
    a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
    orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13
    string paths the examples still hold.
-10. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
+11. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
     each taken if it is missing and answered under Replies if it is not. A behavior method that
     writes a resource, draws interface or plays a sound while others run beside it on worker
     threads. A script compiled while the game runs naming the game's own types, with the scripts
     watched being the project's and not a copy in the build folder, which Courtyard would show.
     And a game written in behaviors alone with hundreds of entities, played by the workflow and
     profiled, which `games/Stress` measures and no game here plays.
-11. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
+12. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
     found faults at once. Courtyard and the stress program played for ten minutes by a script
     while managed memory, the bridge's allocations, entities and assets are read at intervals
     through a `bcs` command, anything that keeps climbing found and fixed, and a short form of
@@ -236,17 +244,17 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
     file (scenes, data assets, saves, materials, meshes, images, models, sounds, shaders and
     scripts), each answering with a message that names the file and no exception or panic
     crossing the bridge, as one table in a test.
-12. **The public surface written down, and release notes from the commits**, from 3DEngine's
+13. **The public surface written down, and release notes from the commits**, from 3DEngine's
     `fc5aef49`: a listing of every public type and member a tool writes from the built assembly,
     checked in, with a test that fails when the two differ, so a change to what a game calls is
     read as one, and the pack workflow writing the package's release notes from the commits
     since `build/version.txt` last changed. In the same batch it is checked whether a ray here
     stops at a sensor, which there threw a car's wheel and a character's ground check.
-13. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
+14. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
     `docs/making-a-game.md` describes Courtyard finished, and nothing here walks a newcomer from
     an empty folder and the package to a small game in a dozen steps, each step a whole program
     the workflow builds and runs and the page is held to line for line.
-14. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
+15. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
     the Linux test job to the runner's 16 GB. `ScriptHost.References()` reads every loaded
     assembly with `MetadataReference.CreateFromFile` at each compilation, at line 190 of
     `ScriptHost.cs`, and each reference holds its file's whole image in native memory that only
@@ -264,7 +272,18 @@ and 10 to 14 are taken from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-None open.
+**1. The first page says Windows reads files with other line ends, and one test waits on Bevy**
+(N 6.2, N 3.3). The run of `b263f6d` has three failures. On Windows `N_2_8` finds no section of
+packages in BUILDING.md, and `TestScriptTests` finds the page's lines ending in `\r`. The repository
+has no `.gitattributes`, so git on Windows checks text out with CRLF ends, and Python prints them
+there, which 3DEngine met in its first page and mended with `* text=auto eol=lf` (`1c1a3cea`).
+The same file comes here, and `TestScriptTests` splits lines on either ending or the script
+writes `\n` alone, so the page's tests read the same on every system. On both systems
+`ImGuiTests.APictureFromNowhereIsNoPicture` expects Bevy's error for `nowhere.png`, and on the
+runners none comes within the test's frames. The test waits for the asset's failure as it
+arrives, an event or the handle's state, as six handle-table tests were changed to at `76cdb9a`,
+or loads a file of its own that fails at once (N 3.3). The build's warnings on the page, a
+possibly null dereference and XML comments that do not match their members, are item 6's.
 
 ## Decisions
 
@@ -356,3 +375,16 @@ carries `GenerateMesh`, which runs the compute shader for it once. custom_shader
 as headless_renderer is, its two components being the list of instances Bevy's render world draws
 from and the buffer it makes of them, with no system over either in the main world, which the
 camera's draw holds here in their place.
+
+B 4 for Games, 63 of 119. breakout's paddle, ball, bricks, colliders and scoreboard each carry
+Bevy's component, the three chained systems ordered by `[After]` and a brick despawned by a
+command as Bevy's is. contributors' birds carry `Contributor` and `ContributorVelocity`, breakout's
+`Velocity` sharing the namespace, and the display brings the next forward by a repeating
+`GameTimer`. desk_toy's logo, pupils and instructions are behaviors, the pointer's place in the
+world read by an app system ordered `Before` the logo's first, which a behavior's system can be
+named by from an example since every app has it. loading_screen marks its level and its screen,
+the example's class `LoadingScreenExample` beside the behavior. game_menu's buttons carry
+`MenuButtonAction`, `QualitySetting` or `VolumeSetting` and `SelectedOption`, which moves by
+command, with a `MenuButton` in place of Bevy's `Button`, and each screen carries its marker. Their
+methods ask the state themselves rather than by `[InState]`, which would warn in every other
+example that its state was never added.

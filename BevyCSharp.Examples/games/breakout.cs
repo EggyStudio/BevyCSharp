@@ -11,69 +11,47 @@ namespace BevyCSharp.Examples.Games;
 // the systems one at a time is left out, since stepping is not offered here.
 internal static class Breakout
 {
-    private static readonly (float X, float Y) PaddleSize = (120f, 20f);
-    private const float GapBetweenPaddleAndFloor = 60f, PaddleSpeed = 500f, PaddlePadding = 10f;
+    internal static readonly (float X, float Y) PaddleSize = (120f, 20f);
+    private const float GapBetweenPaddleAndFloor = 60f;
+    internal const float PaddleSpeed = 500f, PaddlePadding = 10f;
 
     private static readonly Vec3 BallStartingPosition = new(0f, -50f, 1f);
-    private const float BallDiameter = 30f, BallSpeed = 400f;
+    internal const float BallDiameter = 30f;
+    private const float BallSpeed = 400f;
 
-    private const float WallThickness = 10f, LeftWall = -450f, RightWall = 450f, BottomWall = -300f, TopWall = 300f;
+    internal const float WallThickness = 10f, LeftWall = -450f, RightWall = 450f, BottomWall = -300f, TopWall = 300f;
 
     private static readonly (float X, float Y) BrickSize = (100f, 30f);
     private const float GapBetweenPaddleAndBricks = 270f, GapBetweenBricks = 5f, GapBetweenBricksAndCeiling = 20f, GapBetweenBricksAndSides = 20f;
 
     private const float ScoreboardFontSize = 33f;
 
-    private static readonly (float R, float G, float B, float A) BackgroundColor = Color.FromSrgb(0.9f, 0.9f, 0.9f);
-    private static readonly (float R, float G, float B, float A) PaddleColor = Color.FromSrgb(0.3f, 0.3f, 0.7f);
-    private static readonly (float R, float G, float B, float A) BallColor = Color.FromSrgb(1f, 0.5f, 0.5f);
-    private static readonly (float R, float G, float B, float A) BrickColor = Color.FromSrgb(0.5f, 0.5f, 1f);
-    private static readonly (float R, float G, float B, float A) WallColor = Color.FromSrgb(0.8f, 0.8f, 0.8f);
-    private static readonly (float R, float G, float B, float A) TextColor = Color.FromSrgb(0.5f, 0.5f, 1f);
-    private static readonly (float R, float G, float B, float A) ScoreColor = Color.FromSrgb(1f, 0.5f, 0.5f);
+    private static readonly Color BackgroundColor = Color.FromSrgb(0.9f, 0.9f, 0.9f);
+    private static readonly Color PaddleColor = Color.FromSrgb(0.3f, 0.3f, 0.7f);
+    private static readonly Color BallColor = Color.FromSrgb(1f, 0.5f, 0.5f);
+    private static readonly Color BrickColor = Color.FromSrgb(0.5f, 0.5f, 1f);
+    private static readonly Color WallColor = Color.FromSrgb(0.8f, 0.8f, 0.8f);
+    private static readonly Color TextColor = Color.FromSrgb(0.5f, 0.5f, 1f);
+    private static readonly Color ScoreColor = Color.FromSrgb(1f, 0.5f, 0.5f);
 
-    internal struct Paddle;
+    // Bevy's Score and CollisionSound resources.
+    internal static int Score;
+    internal static AssetHandle CollisionSound;
 
-    internal struct Ball;
-
-    internal struct Velocity
-    {
-        public float X, Y;
-    }
-
-    internal struct Brick;
-
-    internal struct Collider;
-
-    private enum Collision { Left, Right, Top, Bottom }
-
-    private static int _score;
-    private static Entity _scoreSpan;
-    private static AssetHandle _collisionSound;
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "breakout.Setup");
-
-        // Bevy chains these three, so the ball has moved before the collisions are looked for.
-        app.Update(ApplyVelocity, "breakout.ApplyVelocity");
-        app.Update(MovePaddle, "breakout.MovePaddle");
-        app.Update(CheckForCollisions, "breakout.CheckForCollisions");
-        app.Update(ctx => ctx.Ecs.Wrap<TextSpanRef>(_scoreSpan).Value = _score.ToString(), "breakout.UpdateScoreboard");
-    }
+    public static void Build(App app) => app.Startup(Setup, "breakout.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        _score = 0;
+        Score = 0;
         Render.SetClearColor(BackgroundColor);
         Render2d.SpawnCamera2d();
-        _collisionSound = AssetServer.Load(AssetKind.Audio, "sounds/breakout_collision.ogg");
+        CollisionSound = AssetServer.Load(AssetKind.Audio, "sounds/breakout_collision.ogg");
 
         // Bevy's Sprite::from_color is a white pixel tinted, here stretched by the transform's
         // scale, which the collisions read as the size.
         var white = Render.CreateImage([255, 255, 255, 255], 1, 1);
-        Entity Block(float x, float y, (float X, float Y) size, (float R, float G, float B, float A) color)
+        Entity Block(float x, float y, (float X, float Y) size, Color color)
         {
             var entity = ecs.Spawn();
             ecs.Add(entity, new Transform(new Vec3(x, y, 0f), Quat.Identity, new Vec3(size.X, size.Y, 1f)));
@@ -91,13 +69,14 @@ internal static class Breakout
         Render2d.SetMaterial(ecs, ball, Render2d.CreateMaterial(new ColorMaterialSettings { Color = BallColor }));
         ecs.Add(ball, new Ball());
         var start = new Vec2(0.5f, -0.5f);
-        var direction = start * (BallSpeed / start.Length);
-        ecs.Add(ball, new Velocity { X = direction.X, Y = direction.Y });
+        ecs.Add(ball, new Velocity { Value = start * (BallSpeed / start.Length) });
 
+        // "Score: " in the text's own color, and the score as its span, which the scoreboard writes.
         var style = new UiTextSettings { FontSize = ScoreboardFontSize };
-        var scoreboard = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(5f), Left = Length.Px(5f) }, style);
-        Ui.SpawnTextSpan(scoreboard, "Score: ", style, TextColor);
-        _scoreSpan = Ui.SpawnTextSpan(scoreboard, string.Empty, style, ScoreColor);
+        var scoreboard = Ui.SpawnText("Score: ", new UiSettings { Absolute = true, Top = Length.Px(5f), Left = Length.Px(5f) }, style);
+        ecs.Wrap<TextColorRef>(scoreboard).Value = TextColor;
+        Ui.SpawnTextSpan(scoreboard, string.Empty, style, ScoreColor);
+        ecs.Add(scoreboard, new ScoreboardUi());
 
         // The four walls, each as long as its side of the arena and a wall's thickness more, so
         // the corners close.
@@ -126,69 +105,85 @@ internal static class Breakout
             }
         }
     }
+}
 
-    // Held arrows move the paddle, kept off the walls by a little padding.
-    private static void MovePaddle(BehaviorContext ctx)
+/// <summary>A side of a box a ball struck.</summary>
+internal enum Collision { Left, Right, Top, Bottom }
+
+/// <summary>How fast a thing moves, in units a second.</summary>
+[Behavior]
+public partial struct Velocity
+{
+    /// <summary>The speed along X and Y.</summary>
+    public Vec2 Value;
+
+    /// <summary>Moved by its speed over the frame, first of the three Bevy chains.</summary>
+    [OnUpdate]
+    public void ApplyVelocity(BehaviorContext ctx, ref Transform transform)
     {
-        var ecs = ctx.Ecs;
+        transform.Translation.X += Value.X * ctx.Time.Delta;
+        transform.Translation.Y += Value.Y * ctx.Time.Delta;
+    }
+}
+
+/// <summary>The paddle, which the arrow keys move.</summary>
+[Behavior]
+public partial struct Paddle
+{
+    /// <summary>Moved by the held arrows, kept off the walls by a little padding, once the ball has moved.</summary>
+    [OnUpdate]
+    [After("Velocity.ApplyVelocity")]
+    public void MovePaddle(BehaviorContext ctx, ref Transform transform)
+    {
         var direction = (ctx.Input.KeyDown(Key.ArrowLeft) ? -1f : 0f) + (ctx.Input.KeyDown(Key.ArrowRight) ? 1f : 0f);
-        var leftBound = LeftWall + WallThickness / 2f + PaddleSize.X / 2f + PaddlePadding;
-        var rightBound = RightWall - WallThickness / 2f - PaddleSize.X / 2f - PaddlePadding;
-        foreach (var paddle in ecs.EntitiesWith<Paddle>())
-        {
-            var transform = ecs.GetOrDefault<Transform>(paddle);
-            transform.Translation.X = Math.Clamp(transform.Translation.X + direction * PaddleSpeed * ctx.Time.Delta, leftBound, rightBound);
-            ecs.Set(paddle, transform);
-        }
+        var leftBound = Breakout.LeftWall + Breakout.WallThickness / 2f + Breakout.PaddleSize.X / 2f + Breakout.PaddlePadding;
+        var rightBound = Breakout.RightWall - Breakout.WallThickness / 2f - Breakout.PaddleSize.X / 2f - Breakout.PaddlePadding;
+        transform.Translation.X = Math.Clamp(transform.Translation.X + direction * Breakout.PaddleSpeed * ctx.Time.Delta, leftBound, rightBound);
     }
+}
 
-    private static void ApplyVelocity(BehaviorContext ctx)
+/// <summary>The ball.</summary>
+[Behavior]
+public partial struct Ball
+{
+    /// <summary>
+    /// Each collider it touches sounds, is broken if it is a brick, and turns the ball back from the
+    /// side it struck unless the ball is already moving away from that side, once the paddle has
+    /// moved, last of the three Bevy chains.
+    /// </summary>
+    /// <remarks>
+    /// A brick is despawned by a command, as Bevy's is, since the colliders are being walked. Bevy
+    /// triggers an event that an observer plays the sound for, and here the sound is played where
+    /// the event is triggered.
+    /// </remarks>
+    [OnUpdate]
+    [After("Paddle.MovePaddle")]
+    public void CheckForCollisions(BehaviorContext ctx, in Transform transform, ref Velocity velocity)
     {
-        var ecs = ctx.Ecs;
-        foreach (var entity in ecs.EntitiesWith<Velocity>())
+        var center = transform.Translation;
+        foreach (var collider in ctx.Ecs.Query<Collider>(markChanged: false))
         {
-            var (transform, velocity) = (ecs.GetOrDefault<Transform>(entity), ecs.GetOrDefault<Velocity>(entity));
-            transform.Translation.X += velocity.X * ctx.Time.Delta;
-            transform.Translation.Y += velocity.Y * ctx.Time.Delta;
-            ecs.Set(entity, transform);
-        }
-    }
+            var box = ctx.Ecs.GetOrDefault<Transform>(collider.Entity);
+            if (BallCollision(center.X, center.Y, Breakout.BallDiameter / 2f, box.Translation.X, box.Translation.Y, box.Scale.X / 2f, box.Scale.Y / 2f) is not { } collision) continue;
 
-    // A ball touching a collider sounds, breaks it if it is a brick, and turns back from the side
-    // it struck unless it is already moving away from that side.
-    private static void CheckForCollisions(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        foreach (var ball in ecs.EntitiesWith<Ball>())
-        {
-            var center = ecs.GetOrDefault<Transform>(ball).Translation;
-            var velocity = ecs.GetOrDefault<Velocity>(ball);
-            foreach (var collider in ecs.EntitiesWith<Collider>())
+            Audio.Play(Breakout.CollisionSound, new AudioSettings { Mode = PlaybackMode.Despawn });
+            if (ctx.Ecs.Has<Brick>(collider.Entity))
             {
-                var box = ecs.GetOrDefault<Transform>(collider);
-                if (BallCollision(center.X, center.Y, BallDiameter / 2f, box.Translation.X, box.Translation.Y, box.Scale.X / 2f, box.Scale.Y / 2f) is not { } collision) continue;
-
-                Audio.Play(_collisionSound, new AudioSettings { Mode = PlaybackMode.Despawn });
-                if (ecs.Has<Brick>(collider))
-                {
-                    ecs.Despawn(collider);
-                    _score++;
-                }
-
-                switch (collision)
-                {
-                    case Collision.Left when velocity.X > 0f:
-                    case Collision.Right when velocity.X < 0f:
-                        velocity.X = -velocity.X;
-                        break;
-                    case Collision.Top when velocity.Y < 0f:
-                    case Collision.Bottom when velocity.Y > 0f:
-                        velocity.Y = -velocity.Y;
-                        break;
-                }
+                ctx.Cmd.Despawn(collider.Entity);
+                Breakout.Score++;
             }
 
-            ecs.Set(ball, velocity);
+            switch (collision)
+            {
+                case Collision.Left when velocity.Value.X > 0f:
+                case Collision.Right when velocity.Value.X < 0f:
+                    velocity.Value.X = -velocity.Value.X;
+                    break;
+                case Collision.Top when velocity.Value.Y < 0f:
+                case Collision.Bottom when velocity.Value.Y > 0f:
+                    velocity.Value.Y = -velocity.Value.Y;
+                    break;
+            }
         }
     }
 
@@ -204,4 +199,22 @@ internal static class Breakout
         if (MathF.Abs(offsetX) > MathF.Abs(offsetY)) return offsetX < 0f ? Collision.Left : Collision.Right;
         return offsetY > 0f ? Collision.Top : Collision.Bottom;
     }
+}
+
+/// <summary>A thing the ball bounces off, the walls, the paddle and the bricks.</summary>
+[Behavior]
+public partial struct Collider;
+
+/// <summary>A brick, which the ball breaks for a point.</summary>
+[Behavior]
+public partial struct Brick;
+
+/// <summary>The scoreboard's text, whose span shows the score.</summary>
+[Behavior]
+public partial struct ScoreboardUi
+{
+    /// <summary>The score written into the text's span, as Bevy writes its text's second section.</summary>
+    [OnUpdate]
+    public void UpdateScoreboard(BehaviorContext ctx) =>
+        ctx.Ecs.Wrap<TextSpanRef>(ctx.Ecs.ChildrenOf(ctx.Entity)[0]).Value = Breakout.Score.ToString();
 }

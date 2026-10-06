@@ -190,7 +190,7 @@ internal static class Catalog
         new("contributors", Contributors.Build),
         new("desk_toy", DeskToy.Build, DeskToy.Configure),
         new("game_menu", GameMenu.Build),
-        new("loading_screen", LoadingScreen.Build),
+        new("loading_screen", LoadingScreenExample.Build),
 
         // glTF
         new("edit_material_on_gltf", EditMaterialOnGltf.Build),

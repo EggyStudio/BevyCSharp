@@ -12,15 +12,7 @@ namespace BevyCSharp.Examples.Games;
 // click on the logo quits.
 internal static class DeskToy
 {
-    // The moving part of a googly eye, the radius of the eye it moves in and its own.
-    internal struct Pupil
-    {
-        public float EyeRadius;
-        public float PupilRadius;
-        public Vec2 Velocity;
-    }
-
-    private const float BevyLogoRadius = 128f;
+    internal const float BevyLogoRadius = 128f;
 
     // Where each bird's eye is on branding/icon.png, from the middle, and its radius, measured by
     // hand from the picture.
@@ -31,11 +23,14 @@ internal static class DeskToy
         (222f - 128f, -(140f - 128f), 8f),
     ];
 
-    private static readonly (float R, float G, float B, float A) WindowClearColor = Color.FromSrgb(0.2f, 0.2f, 0.2f);
+    internal static readonly Color WindowClearColor = Color.FromSrgb(0.2f, 0.2f, 0.2f);
 
-    private static Entity _camera, _logo, _instructions;
-    private static Vec2? _cursorWorldPos, _dragOffset;
-    private static bool _windowTransparency;
+    // Bevy's resources, where the pointer is in the world, where on the logo a drag took hold,
+    // and whether the window is see-through.
+    internal static Vec2? CursorWorldPos, DragOperation;
+    internal static bool WindowTransparency;
+
+    private static Entity _camera;
 
     public static void Configure(Config config)
     {
@@ -47,34 +42,25 @@ internal static class DeskToy
     {
         app.Startup(Setup, "desk_toy.Setup");
 
-        // One system for the lot, since Bevy chains them in this order.
-        app.Update(ctx =>
-        {
-            GetCursorWorldPos(ctx);
-            UpdateCursorHitTest(ctx);
-            var input = ctx.Input;
-            if (input.MousePressed(MouseButton.Left)) StartDrag(ctx);
-            if (input.MouseReleased(MouseButton.Left)) _dragOffset = null;
-            if (_dragOffset is not null) Drag(ctx);
-            if (input.MousePressed(MouseButton.Right) && OverLogo(ctx)) ctx.Exit();
-            if (input.KeyPressed(Key.Space)) ToggleTransparency(ctx);
-            MovePupils(ctx);
-        }, "desk_toy.Update");
+        // First of the chain, before the logo's own systems read where the pointer is.
+        app.AddSystem(Stage.Update, new SystemDescriptor(world => GetCursorWorldPos(new BehaviorContext(world)), "desk_toy.GetCursorWorldPos")
+            .Before("BevyLogo.UpdateCursorHitTest"));
     }
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        (_cursorWorldPos, _dragOffset, _windowTransparency) = (null, null, false);
+        (CursorWorldPos, DragOperation, WindowTransparency) = (null, null, false);
         Render.SetClearColor(WindowClearColor);
         _camera = Render2d.SpawnCamera2d();
 
-        _instructions = ecs.Spawn();
-        ecs.Add(_instructions, Transform.At(0f, -300f, 100f));
-        ecs.Insert<Text2dRef>(_instructions).Value = "Press Space to play on your desktop! Press it again to return.\nRight click Bevy logo to exit.";
-        var font = ecs.Insert<TextFontRef>(_instructions);
+        var instructions = ecs.Spawn();
+        ecs.Add(instructions, Transform.At(0f, -300f, 100f));
+        ecs.Insert<Text2dRef>(instructions).Value = "Press Space to play on your desktop! Press it again to return.\nRight click Bevy logo to exit.";
+        var font = ecs.Insert<TextFontRef>(instructions);
         font.Font = new FontSource.Handle(AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf"));
         font.FontSize = new FontSize.Px(25f);
+        ecs.Add(instructions, new InstructionsText());
 
         // One circle of radius one, scaled to each part of each eye.
         var circle = Render.CreateMesh(MeshShape.Circle, 1f);
@@ -83,9 +69,10 @@ internal static class DeskToy
         var pupil = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(0.2f, 0.2f, 0.2f) });
         var highlight = Render2d.CreateMaterial(new ColorMaterialSettings { Color = Color.FromSrgb(1f, 1f, 1f, 0.2f) });
 
-        _logo = ecs.Spawn();
-        ecs.Add(_logo, Transform.Identity);
-        Render2d.SetSprite(ecs, _logo, AssetServer.Load(AssetKind.Image, "branding/icon.png"));
+        var logo = ecs.Spawn();
+        ecs.Add(logo, Transform.Identity);
+        Render2d.SetSprite(ecs, logo, AssetServer.Load(AssetKind.Image, "branding/icon.png"));
+        ecs.Add(logo, new BevyLogo());
 
         Entity Part(Entity parent, Transform at, AssetHandle? material = null)
         {
@@ -105,9 +92,9 @@ internal static class DeskToy
         foreach (var (x, y, radius) in BirdsEyes)
         {
             var (pupilRadius, highlightRadius, highlightOffset) = (radius * 0.6f, radius * 0.3f, radius * 0.3f);
-            Part(_logo, new Transform(new Vec3(x, y - 1f, 1f), Quat.Identity, new Vec3(radius + 2f, radius + 2f, 1f)), outline);
+            Part(logo, new Transform(new Vec3(x, y - 1f, 1f), Quat.Identity, new Vec3(radius + 2f, radius + 2f, 1f)), outline);
 
-            var eye = Part(_logo, Transform.At(x, y, 2f));
+            var eye = Part(logo, Transform.At(x, y, 2f));
             Part(eye, new Transform(Vec3.Zero, Quat.Identity, new Vec3(radius, radius, 0f)), sclera);
 
             var moving = Part(eye, Transform.At(0f, 0f, 1f));
@@ -120,20 +107,24 @@ internal static class DeskToy
     private static void GetCursorWorldPos(BehaviorContext ctx)
     {
         var (x, y) = ctx.Input.MousePosition;
-        _cursorWorldPos = Render.TryRay(_camera, x, y, out var world, out _) ? new Vec2(world.X, world.Y) : null;
+        CursorWorldPos = Render.TryRay(_camera, x, y, out var world, out _) ? new Vec2(world.X, world.Y) : null;
     }
 
-    private static Vec2 LogoAt(BehaviorContext ctx)
-    {
-        var at = ctx.Ecs.GetOrDefault<Transform>(_logo).Translation;
-        return new Vec2(at.X, at.Y);
-    }
+    // Whether the pointer is on a logo standing where the transform says.
+    internal static bool Over(in Transform logo) =>
+        CursorWorldPos is { } cursor && (new Vec2(logo.Translation.X, logo.Translation.Y) - cursor).Length < BevyLogoRadius;
+}
 
-    private static bool OverLogo(BehaviorContext ctx) => _cursorWorldPos is { } cursor && (LogoAt(ctx) - cursor).Length < BevyLogoRadius;
-
-    // A window with its border takes every click, and one without takes only those on the logo,
-    // letting the rest through to whatever is behind it. An offscreen run has no window to change.
-    private static void UpdateCursorHitTest(BehaviorContext ctx)
+/// <summary>The Bevy logo, which a drag moves about and a right click on quits.</summary>
+[Behavior]
+public partial struct BevyLogo
+{
+    /// <summary>
+    /// A window with its border takes every click, and one without takes only those on the logo,
+    /// letting the rest through to whatever is behind it. An offscreen run has no window to change.
+    /// </summary>
+    [OnUpdate]
+    public void UpdateCursorHitTest(BehaviorContext ctx, in Transform transform)
     {
         var window = Window.Entity();
         if (window == Entity.None) return;
@@ -144,67 +135,106 @@ internal static class DeskToy
             return;
         }
 
-        if (_cursorWorldPos is not null) cursor.HitTest = OverLogo(ctx);
+        if (DeskToy.CursorWorldPos is not null) cursor.HitTest = DeskToy.Over(transform);
     }
 
-    // A drag starts on the logo and keeps where on it the pointer took hold.
-    private static void StartDrag(BehaviorContext ctx)
+    /// <summary>A drag started by a press on the logo, keeping where on it the pointer took hold.</summary>
+    [OnUpdate]
+    [After("BevyLogo.UpdateCursorHitTest")]
+    public void StartDrag(BehaviorContext ctx, in Transform transform)
     {
-        if (_cursorWorldPos is not { } cursor) return;
-        var offset = LogoAt(ctx) - cursor;
-        if (offset.Length < BevyLogoRadius) _dragOffset = offset;
+        if (!ctx.Input.MousePressed(MouseButton.Left) || DeskToy.CursorWorldPos is not { } cursor) return;
+        var offset = new Vec2(transform.Translation.X, transform.Translation.Y) - cursor;
+        if (offset.Length < DeskToy.BevyLogoRadius) DeskToy.DragOperation = offset;
     }
 
-    // The logo follows the pointer, and each pupil is pushed the other way by how fast it went,
-    // since a pupil moves within its eye and would otherwise be carried along fixed.
-    private static void Drag(BehaviorContext ctx)
+    /// <summary>The drag let go with the button.</summary>
+    [OnUpdate]
+    [After("BevyLogo.UpdateCursorHitTest")]
+    public void EndDrag(BehaviorContext ctx)
     {
-        if (_cursorWorldPos is not { } cursor || _dragOffset is not { } offset || ctx.Time.Delta <= 0f) return;
-        var ecs = ctx.Ecs;
+        if (ctx.Input.MouseReleased(MouseButton.Left)) DeskToy.DragOperation = null;
+    }
+
+    /// <summary>
+    /// The logo following the pointer while it is dragged, and each pupil pushed the other way by
+    /// how fast it went, since a pupil moves within its eye and would otherwise be carried along
+    /// fixed.
+    /// </summary>
+    [OnUpdate]
+    [After("BevyLogo.UpdateCursorHitTest")]
+    public void Drag(BehaviorContext ctx, ref Transform transform)
+    {
+        if (DeskToy.CursorWorldPos is not { } cursor || DeskToy.DragOperation is not { } offset || ctx.Time.Delta <= 0f) return;
+
         var moved = cursor + offset;
-        var velocity = (moved - LogoAt(ctx)) * (1f / ctx.Time.Delta);
-
-        var at = ecs.GetOrDefault<Transform>(_logo);
-        ecs.Set(_logo, at with { Translation = new Vec3(moved.X, moved.Y, at.Translation.Z) });
-        foreach (var entity in ecs.EntitiesWith<Pupil>())
-        {
-            var pupil = ecs.GetOrDefault<Pupil>(entity);
-            pupil.Velocity -= velocity;
-            ecs.Set(entity, pupil);
-        }
+        var velocity = (moved - new Vec2(transform.Translation.X, transform.Translation.Y)) * (1f / ctx.Time.Delta);
+        transform.Translation = new Vec3(moved.X, moved.Y, transform.Translation.Z);
+        foreach (var pupil in ctx.Ecs.Query<Pupil>()) pupil.Component.Velocity -= velocity;
     }
 
-    // The window loses its border and background and stays above the rest, with the instructions
-    // hidden, or is given them all back.
-    private static void ToggleTransparency(BehaviorContext ctx)
+    /// <summary>A right click on the logo quits.</summary>
+    [OnUpdate]
+    [After("BevyLogo.UpdateCursorHitTest")]
+    public void Quit(BehaviorContext ctx, in Transform transform)
     {
-        _windowTransparency = !_windowTransparency;
-        ctx.Ecs.Wrap<VisibilityRef>(_instructions).Value = _windowTransparency ? VisibilityRef.ValueVariant.Hidden : VisibilityRef.ValueVariant.Visible;
-        if (Window.Entity() != Entity.None) Window.SetStyle(decorations: !_windowTransparency, alwaysOnTop: _windowTransparency);
-        Render.SetClearColor(_windowTransparency ? (0f, 0f, 0f, 0f) : WindowClearColor);
+        if (ctx.Input.MousePressed(MouseButton.Right) && DeskToy.Over(transform)) ctx.Exit();
     }
+}
 
-    // Each pupil slows, moves, and bounces back off the edge of its eye with three quarters of its
-    // speed, which is not how anything moves but looks right for a googly eye.
-    private static void MovePupils(BehaviorContext ctx)
+/// <summary>The instructions, hidden while the logo sits on the desktop.</summary>
+[Behavior]
+public partial struct InstructionsText
+{
+    /// <summary>
+    /// Space takes the window's border and background away and keeps it above the rest, with the
+    /// instructions hidden, or gives them all back.
+    /// </summary>
+    [OnUpdate]
+    [After("BevyLogo.UpdateCursorHitTest")]
+    public void ToggleTransparency(BehaviorContext ctx)
     {
-        var ecs = ctx.Ecs;
+        if (!ctx.Input.KeyPressed(Key.Space)) return;
+
+        DeskToy.WindowTransparency = !DeskToy.WindowTransparency;
+        ctx.Ecs.Wrap<VisibilityRef>(ctx.Entity).Value = DeskToy.WindowTransparency ? VisibilityRef.ValueVariant.Hidden : VisibilityRef.ValueVariant.Visible;
+        if (Window.Entity() != Entity.None) Window.SetStyle(decorations: !DeskToy.WindowTransparency, alwaysOnTop: DeskToy.WindowTransparency);
+        Render.SetClearColor(DeskToy.WindowTransparency ? (0f, 0f, 0f, 0f) : DeskToy.WindowClearColor);
+    }
+}
+
+/// <summary>The moving part of a googly eye.</summary>
+[Behavior]
+public partial struct Pupil
+{
+    /// <summary>The radius of the eye it moves in.</summary>
+    public float EyeRadius;
+
+    /// <summary>Its own radius.</summary>
+    public float PupilRadius;
+
+    /// <summary>How fast it moves within its eye.</summary>
+    public Vec2 Velocity;
+
+    /// <summary>
+    /// Slowed, moved, and bounced back off the edge of its eye with three quarters of its speed,
+    /// which is not how anything moves but looks right for a googly eye, after the logo's drag.
+    /// </summary>
+    [OnUpdate]
+    [After("BevyLogo.Drag")]
+    public void MovePupils(BehaviorContext ctx, ref Transform transform)
+    {
         var delta = ctx.Time.Delta;
-        foreach (var entity in ecs.EntitiesWith<Pupil>())
+        var wiggleRadius = EyeRadius - PupilRadius;
+        var translation = new Vec2(transform.Translation.X, transform.Translation.Y);
+        Velocity *= MathF.Pow(0.04f, delta);
+        translation += Velocity * delta;
+        if (translation.Length > wiggleRadius)
         {
-            var (pupil, at) = (ecs.GetOrDefault<Pupil>(entity), ecs.GetOrDefault<Transform>(entity));
-            var wiggleRadius = pupil.EyeRadius - pupil.PupilRadius;
-            var translation = new Vec2(at.Translation.X, at.Translation.Y);
-            pupil.Velocity *= MathF.Pow(0.04f, delta);
-            translation += pupil.Velocity * delta;
-            if (translation.Length > wiggleRadius)
-            {
-                translation *= wiggleRadius / translation.Length;
-                pupil.Velocity *= -0.75f;
-            }
-
-            ecs.Set(entity, pupil);
-            ecs.Set(entity, at with { Translation = new Vec3(translation.X, translation.Y, at.Translation.Z) });
+            translation *= wiggleRadius / translation.Length;
+            Velocity *= -0.75f;
         }
+
+        transform.Translation = new Vec3(translation.X, translation.Y, transform.Translation.Z);
     }
 }

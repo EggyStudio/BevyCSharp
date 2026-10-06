@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.Games;
 // Shows a loading screen that waits for a level's assets to load and for the renderer to compile
 // what it needs to draw them. Pressing 1 loads a fox and 2 a flight helmet, with the screen up
 // until each can be seen.
-internal static class LoadingScreen
+internal static class LoadingScreenExample
 {
     private enum LoadingState { LevelReady, LevelLoading }
 
@@ -17,22 +17,21 @@ internal static class LoadingScreen
     // a pipeline can be asked for some frames after the last asset arrived.
     private const int ConfirmationFramesTarget = 5;
 
+    // Bevy's LoadingState and LoadingData resources.
     private static LoadingState _loadingState;
     private static readonly List<AssetHandle> LoadingAssets = [];
-    private static readonly List<Entity> LevelComponents = [];
     private static int _confirmationFrames;
-    private static Entity _loadingScreen;
+
+    internal static bool Loading => _loadingState == LoadingState.LevelLoading;
 
     public static void Build(App app)
     {
         (_loadingState, _confirmationFrames) = (LoadingState.LevelReady, 0);
         LoadingAssets.Clear();
-        LevelComponents.Clear();
         app.Startup(Setup, "loading_screen.Setup");
         app.Startup(LoadLoadingScreen, "loading_screen.LoadLoadingScreen");
         app.Update(UpdateLoadingData, "loading_screen.UpdateLoadingData");
         app.Update(LevelSelection, "loading_screen.LevelSelection");
-        app.Update(ctx => ctx.Ecs.Wrap<VisibilityRef>(_loadingScreen).Value = _loadingState == LoadingState.LevelLoading ? VisibilityRef.ValueVariant.Visible : VisibilityRef.ValueVariant.Hidden, "loading_screen.DisplayLoadingScreen");
     }
 
     // The prompt along the bottom.
@@ -63,29 +62,30 @@ internal static class LoadingScreen
     private static void UnloadCurrentLevel(BehaviorContext ctx)
     {
         _loadingState = LoadingState.LevelLoading;
-        foreach (var entity in LevelComponents) ctx.Ecs.Despawn(entity);
-        LevelComponents.Clear();
+        foreach (var entity in ctx.Ecs.EntitiesWith<LevelComponents>()) ctx.Cmd.Despawn(entity);
     }
 
     private static void LoadLevel1(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        LevelComponents.Add(ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(155f, 155f, 155f), new Vec3(0f, 40f, 0f), Vec3.UnitY)));
         var fox = AssetServer.LoadGltfScene("models/animated/Fox.glb");
         LoadingAssets.Add(fox);
-        LevelComponents.Add(ecs.SpawnScene(fox));
-        LevelComponents.Add(Light(ecs));
+        Level(ecs, ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(155f, 155f, 155f), new Vec3(0f, 40f, 0f), Vec3.UnitY)));
+        Level(ecs, ecs.SpawnScene(fox));
+        Level(ecs, Light(ecs));
     }
 
     private static void LoadLevel2(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        LevelComponents.Add(ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 1f, 1f), new Vec3(0f, 0.2f, 0f), Vec3.UnitY)));
         var helmet = AssetServer.LoadGltfScene("models/FlightHelmet/FlightHelmet.gltf");
         LoadingAssets.Add(helmet);
-        LevelComponents.Add(ecs.SpawnScene(helmet));
-        LevelComponents.Add(Light(ecs));
+        Level(ecs, ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 1f, 1f), new Vec3(0f, 0.2f, 0f), Vec3.UnitY)));
+        Level(ecs, ecs.SpawnScene(helmet));
+        Level(ecs, Light(ecs));
     }
+
+    private static void Level(EcsWorld ecs, Entity entity) => ecs.Add(entity, new LevelComponents());
 
     private static Entity Light(EcsWorld ecs)
     {
@@ -110,11 +110,33 @@ internal static class LoadingScreen
     }
 
     // A black screen saying it is loading, over the level, with a camera of its own drawn after
-    // the level's.
+    // the level's, both marked as the loading screen's.
     private static void LoadLoadingScreen(BehaviorContext ctx)
     {
-        Render2d.SpawnCamera2d(order: 1);
-        _loadingScreen = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = (0f, 0f, 0f, 1f) });
-        ctx.Ecs.SetParent(Ui.SpawnText("Loading...", new UiSettings(), 67f), _loadingScreen);
+        var ecs = ctx.Ecs;
+        ecs.Add(Render2d.SpawnCamera2d(order: 1), new LoadingScreen());
+        var screen = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = (0f, 0f, 0f, 1f) });
+        ecs.Add(screen, new LoadingScreen());
+        ecs.SetParent(Ui.SpawnText("Loading...", new UiSettings(), 67f), screen);
+    }
+}
+
+/// <summary>A part of the level loaded, all of which goes when another is chosen.</summary>
+[Behavior]
+public partial struct LevelComponents;
+
+/// <summary>A part of the loading screen, its camera and the node that covers the level.</summary>
+[Behavior]
+public partial struct LoadingScreen
+{
+    /// <summary>
+    /// The node shown while a level loads and hidden once it is ready. The camera carries the mark
+    /// as well and has no node, which Bevy's query leaves out by asking for one.
+    /// </summary>
+    [OnUpdate]
+    public void DisplayLoadingScreen(BehaviorContext ctx)
+    {
+        if (ctx.Ecs.Get<NodeRef>(ctx.Entity) is null) return;
+        ctx.Ecs.Wrap<VisibilityRef>(ctx.Entity).Value = LoadingScreenExample.Loading ? VisibilityRef.ValueVariant.Visible : VisibilityRef.ValueVariant.Hidden;
     }
 }

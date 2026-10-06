@@ -13,60 +13,46 @@ namespace BevyCSharp.Examples.Games;
 // log of the checkout the example runs in, or a list of two names where there is none.
 internal static class Contributors
 {
-    // A contributor's name and commits, kept beside the entity, since a component here holds no
-    // string.
-    internal struct Contributor
-    {
-        public int Index;
-        public float Hue;
-    }
-
-    internal struct Velocity
-    {
-        public Vec3 Translation;
-        public float Rotation;
-    }
-
-    private const float Gravity = 9.821f * 100f, SpriteSize = 75f, SelectedZOffset = 100f, ShowcaseTimerSecs = 3f;
+    internal const float Gravity = 9.821f * 100f, SpriteSize = 75f;
+    private const float SelectedZOffset = 100f, ShowcaseTimerSecs = 3f;
     private static readonly string[] ContributorsList = ["Carter Anderson", "And Many More"];
 
-    private static List<(string Name, int Commits)> _contributors = [];
+    // The names and commits, which a contributor's entity points into, since a component here
+    // holds no string.
+    internal static List<(string Name, int Commits)> Names = [];
+
+    // Bevy's ContributorSelection and SelectionTimer resources, the birds in the order they are
+    // shown, the one shown now, and the three seconds each is shown for.
     private static List<Entity> _order = [];
     private static int _index;
-    private static float _timer;
-    private static Entity _display, _commits;
+    internal static GameTimer SelectionTimer;
 
-    // Seeded, so the birds fall the same way every run, as Bevy's shared generator makes them.
+    // Bevy's SharedRng, seeded so the birds fall the same way every run.
     private static Random _random = new(1022316311);
 
     public static void Build(App app)
     {
         app.Startup(SetupContributorSelection, "contributors.SetupContributorSelection");
         app.Startup(Setup, "contributors.Setup");
-
-        // Bevy chains these for determinism alone.
-        app.Update(ApplyGravity, "contributors.Gravity");
-        app.Update(Movement, "contributors.Movement");
-        app.Update(Collisions, "contributors.Collisions");
-        app.Update(Selection, "contributors.Selection");
     }
 
     private static void SetupContributorSelection(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        (_random, _index, _timer, _order) = (new Random(1022316311), 0, 0f, []);
-        _contributors = ContributorsOrFallback();
+        (_random, _index, _order) = (new Random(1022316311), 0, []);
+        SelectionTimer = GameTimer.FromSeconds(ShowcaseTimerSecs, TimerMode.Repeating);
+        Names = ContributorsOrFallback();
         var texture = AssetServer.Load(AssetKind.Image, "branding/icon.png");
-        for (var i = 0; i < _contributors.Count; i++)
+        for (var i = 0; i < Names.Count; i++)
         {
             var at = Transform.At(Range(-400f, 400f), Range(0f, 400f), (float)_random.NextDouble());
             var direction = Range(-1f, 1f);
-            var hue = NameToHue(_contributors[i].Name);
+            var hue = NameToHue(Names[i].Name);
 
             var entity = ecs.Spawn();
             ecs.Add(entity, at);
             ecs.Add(entity, new Contributor { Index = i, Hue = hue });
-            ecs.Add(entity, new Velocity { Translation = new Vec3(direction * 500f, 0f, 0f), Rotation = -direction * 5f });
+            ecs.Add(entity, new ContributorVelocity { Translation = new Vec3(direction * 500f, 0f, 0f), Rotation = -direction * 5f });
 
             // Some birds face the other way, for variety.
             Render2d.SetSprite(ecs, entity, texture, new SpriteSettings { Size = (SpriteSize, SpriteSize), Color = Deselected(hue), FlipX = _random.Next(2) == 1 });
@@ -78,28 +64,25 @@ internal static class Contributors
     {
         Render2d.SpawnCamera2d();
         var font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
-        _display = Ui.SpawnText("Contributor showcase", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }, new UiTextSettings { Font = font, FontSize = 60f });
-        _commits = Ui.SpawnTextSpan(_display, string.Empty, new UiTextSettings { Font = font, FontSize = 30f }, (1f, 1f, 1f, 1f));
+        var display = Ui.SpawnText("Contributor showcase", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }, new UiTextSettings { Font = font, FontSize = 60f });
+        Ui.SpawnTextSpan(display, string.Empty, new UiTextSettings { Font = font, FontSize = 30f }, (1f, 1f, 1f, 1f));
+        ctx.Ecs.Add(display, new ContributorDisplay());
     }
 
-    // Every three seconds the bird shown steps back and the next comes forward, its name and
-    // commits written in its own color.
-    private static void Selection(BehaviorContext ctx)
+    // The bird shown now let go, and the next brought forward and written on the display in its
+    // own color.
+    internal static void Select(BehaviorContext ctx, Entity display)
     {
-        _timer += ctx.Time.Delta;
-        if (_timer < ShowcaseTimerSecs) return;
-        _timer -= ShowcaseTimerSecs;
-
         var ecs = ctx.Ecs;
         Paint(ecs, _order[_index], selected: false);
         _index = (_index + 1) % _order.Count;
 
         var entity = _order[_index];
         var color = Paint(ecs, entity, selected: true);
-        var (name, commits) = _contributors[ecs.GetOrDefault<Contributor>(entity).Index];
-        Ui.SetText(_display, name);
-        ecs.Wrap<TextSpanRef>(_commits).Value = $"\n{commits} commit{(commits > 1 ? "s" : "")}";
-        ecs.Wrap<TextColorRef>(_display).Value = color;
+        var (name, commits) = Names[ecs.GetOrDefault<Contributor>(entity).Index];
+        Ui.SetText(display, name);
+        ecs.Wrap<TextSpanRef>(ecs.ChildrenOf(display)[0]).Value = $"\n{commits} commit{(commits > 1 ? "s" : "")}";
+        ecs.Wrap<TextColorRef>(display).Value = color;
     }
 
     // A selected bird is bright and a hundred in front of the rest, and one let go is dim and
@@ -107,8 +90,7 @@ internal static class Contributors
     private static Color Paint(EcsWorld ecs, Entity entity, bool selected)
     {
         var hue = ecs.GetOrDefault<Contributor>(entity).Hue;
-        var (r, g, b, a) = selected ? Color.FromHsl(hue, 0.9f, 0.7f) : Deselected(hue);
-        var color = new Color(r, g, b, a);
+        var color = selected ? Color.FromHsl(hue, 0.9f, 0.7f) : Deselected(hue);
         ecs.Wrap<SpriteRef>(entity).Color = color;
 
         var at = ecs.GetOrDefault<Transform>(entity);
@@ -117,71 +99,9 @@ internal static class Contributors
         return color;
     }
 
-    private static (float R, float G, float B, float A) Deselected(float hue) => Color.FromHsl(hue, 0.3f, 0.2f) with { A = 0.92f };
+    private static Color Deselected(float hue) => Color.FromHsl(hue, 0.3f, 0.2f).WithAlpha(0.92f);
 
-    private static void ApplyGravity(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        foreach (var entity in ecs.EntitiesWith<Velocity>())
-        {
-            var velocity = ecs.GetOrDefault<Velocity>(entity);
-            velocity.Translation.Y -= Gravity * ctx.Time.Delta;
-            ecs.Set(entity, velocity);
-        }
-    }
-
-    // A bird that reaches the floor is sent up again toward a height somewhere between two fifths
-    // of the window and a bird below its top, and one at a side or the ceiling turns back.
-    private static void Collisions(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        var (width, height) = Window.Size();
-        if (width == 0 || height == 0) return;
-        var (maxX, maxY) = ((width - SpriteSize) / 2f, (height - SpriteSize) / 2f);
-        var maxBounceHeight = MathF.Max(height - SpriteSize * 2f, 0f);
-        var minBounceHeight = maxBounceHeight * 0.4f;
-
-        foreach (var entity in ecs.EntitiesWith<Contributor>())
-        {
-            var (at, velocity) = (ecs.GetOrDefault<Transform>(entity), ecs.GetOrDefault<Velocity>(entity));
-            if (at.Translation.Y < -maxY)
-            {
-                at.Translation.Y = -maxY;
-                velocity.Translation.Y = MathF.Sqrt(Range(minBounceHeight, maxBounceHeight) * Gravity * 2f);
-            }
-
-            if (at.Translation.Y > maxY)
-            {
-                at.Translation.Y = maxY;
-                velocity.Translation.Y = -velocity.Translation.Y;
-            }
-
-            if (at.Translation.X < -maxX || at.Translation.X > maxX)
-            {
-                at.Translation.X = Math.Clamp(at.Translation.X, -maxX, maxX);
-                velocity.Translation.X = -velocity.Translation.X;
-                velocity.Rotation = -velocity.Rotation;
-            }
-
-            ecs.Set(entity, at);
-            ecs.Set(entity, velocity);
-        }
-    }
-
-    private static void Movement(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
-        var delta = ctx.Time.Delta;
-        foreach (var entity in ecs.EntitiesWith<Velocity>())
-        {
-            var (at, velocity) = (ecs.GetOrDefault<Transform>(entity), ecs.GetOrDefault<Velocity>(entity));
-            at.Translation += velocity.Translation * delta;
-            at.Rotation = Quat.FromRotationZ(velocity.Rotation * delta) * at.Rotation;
-            ecs.Set(entity, at);
-        }
-    }
-
-    private static float Range(float low, float high) => low + (float)_random.NextDouble() * (high - low);
+    internal static float Range(float low, float high) => low + (float)_random.NextDouble() * (high - low);
 
     // The authors of every commit in the checkout and how many each made, or the two names a
     // thousand times over where git is not there to ask or the workflow takes the picture.
@@ -216,5 +136,93 @@ internal static class Contributors
         var hash = 14695981039346656037UL;
         foreach (var b in Encoding.UTF8.GetBytes(name)) hash = (hash ^ b) * 1099511628211UL;
         return hash / (float)ulong.MaxValue * 360f;
+    }
+}
+
+/// <summary>The text showing the contributor brought forward.</summary>
+[Behavior]
+public partial struct ContributorDisplay
+{
+    /// <summary>
+    /// Every three seconds the next contributor brought forward, last of the four Bevy chains,
+    /// for determinism alone.
+    /// </summary>
+    [OnUpdate]
+    [After("Contributor.Collisions")]
+    public void Selection(BehaviorContext ctx)
+    {
+        if (Contributors.SelectionTimer.Tick(ctx.Time.Delta).JustFinished) Contributors.Select(ctx, ctx.Entity);
+    }
+}
+
+/// <summary>A contributor's bird, which bounces about the window.</summary>
+[Behavior]
+public partial struct Contributor
+{
+    /// <summary>The contributor's place among the names.</summary>
+    public int Index;
+
+    /// <summary>The hue the bird is drawn in, the same for a name from run to run.</summary>
+    public float Hue;
+
+    /// <summary>
+    /// Sent up again from the floor toward a height somewhere between two fifths of the window and
+    /// a bird below its top, and turned back at a side or the ceiling.
+    /// </summary>
+    [OnUpdate]
+    [After("ContributorVelocity.Movement")]
+    public void Collisions(BehaviorContext ctx, ref Transform transform, ref ContributorVelocity velocity)
+    {
+        var (width, height) = Window.Size();
+        if (width == 0 || height == 0) return;
+        var (maxX, maxY) = ((width - Contributors.SpriteSize) / 2f, (height - Contributors.SpriteSize) / 2f);
+        var maxBounceHeight = MathF.Max(height - Contributors.SpriteSize * 2f, 0f);
+        var minBounceHeight = maxBounceHeight * 0.4f;
+
+        if (transform.Translation.Y < -maxY)
+        {
+            transform.Translation.Y = -maxY;
+            velocity.Translation.Y = MathF.Sqrt(Contributors.Range(minBounceHeight, maxBounceHeight) * Contributors.Gravity * 2f);
+        }
+
+        if (transform.Translation.Y > maxY)
+        {
+            transform.Translation.Y = maxY;
+            velocity.Translation.Y = -velocity.Translation.Y;
+        }
+
+        if (transform.Translation.X < -maxX || transform.Translation.X > maxX)
+        {
+            transform.Translation.X = Math.Clamp(transform.Translation.X, -maxX, maxX);
+            velocity.Translation.X = -velocity.Translation.X;
+            velocity.Rotation = -velocity.Rotation;
+        }
+    }
+}
+
+/// <summary>
+/// How fast a bird moves and turns, Bevy's <c>Velocity</c> under another name since breakout's
+/// shares the namespace.
+/// </summary>
+[Behavior]
+public partial struct ContributorVelocity
+{
+    /// <summary>How fast it moves, in units a second.</summary>
+    public Vec3 Translation;
+
+    /// <summary>How fast it turns about Z, in radians a second.</summary>
+    public float Rotation;
+
+    /// <summary>Pulled down by gravity, first of the four Bevy chains.</summary>
+    [OnUpdate]
+    public void Gravity(BehaviorContext ctx) => Translation.Y -= Contributors.Gravity * ctx.Time.Delta;
+
+    /// <summary>Moved and turned by its speeds over the frame.</summary>
+    [OnUpdate]
+    [After("ContributorVelocity.Gravity")]
+    public void Movement(BehaviorContext ctx, ref Transform transform)
+    {
+        transform.Translation += Translation * ctx.Time.Delta;
+        transform.Rotation = Quat.FromRotationZ(Rotation * ctx.Time.Delta) * transform.Rotation;
     }
 }
