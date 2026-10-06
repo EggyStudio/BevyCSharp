@@ -14,7 +14,7 @@ using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 // and Roll buttons to change what dragging does.
 internal static class LightTextures
 {
-    private const float CubeRotationSpeed = 0.02f;
+    internal const float CubeRotationSpeed = 0.02f;
     private const float MoveSpeed = 0.008f;
     private const float ScaleSpeed = 0.05f;
     private const float RollSpeed = 0.01f;
@@ -22,28 +22,19 @@ internal static class LightTextures
     // Bevy's light_consts::lux::AMBIENT_DAYLIGHT and CLEAR_SUNRISE.
     private const float AmbientDaylight = 10_000f, ClearSunrise = 400f;
 
-    private enum Selection { Camera, SpotLight, PointLight, DirectionalLight }
+    private static Entity _innerCube, _directional, _spot, _bottomRight;
 
-    private enum DragMode { Move, Scale, Roll }
-
-    private static readonly Dictionary<Selection, Entity> Selectable = [];
-    private static Entity _cube, _innerCube, _directional, _spot, _help, _bottomRight, _scale, _roll;
-    private static Selection _selection;
-    private static DragMode _dragMode;
-    private static RadioButtons<Selection>? _selections;
+    // Bevy's AppStatus resource, what dragging moves and how.
+    private static SelectionKind _selection;
+    private static DragModeKind _dragMode;
+    private static RadioButtons<SelectionKind>? _selections;
     private static RadioButtons<bool>? _shown;
 
     public static void Build(App app)
     {
-        Selectable.Clear();
-        (_selection, _dragMode) = (Selection.Camera, DragMode.Move);
+        (_selection, _dragMode) = (SelectionKind.Camera, DragModeKind.Move);
 
         app.Startup(Setup, "light_textures.Setup");
-        app.Update(ctx =>
-        {
-            var cube = ctx.Ecs.GetOrDefault<Transform>(_cube);
-            ctx.Ecs.Set(_cube, cube with { Rotation = Quat.FromRotationY(CubeRotationSpeed) * cube.Rotation });
-        }, "light_textures.RotateCube");
         app.Update(DrawGizmos, "light_textures.DrawGizmos");
         app.Update(HideShadows, "light_textures.HideShadows");
         app.Update(HandleButtons, "light_textures.HandleButtons");
@@ -58,7 +49,7 @@ internal static class LightTextures
 
         // A cube turning in the middle of a larger one seen from inside, which the lights fall on.
         var turned = new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 3f), Vec3.One);
-        _cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 3f, 3f, 3f), silver, turned);
+        ecs.Add(ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 3f, 3f, 3f), silver, turned), new Rotate());
         _innerCube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, -13f, -13f, -13f), silver, turned);
 
         // The directional light hangs hidden from an entity the selection moves, with caustics tiled
@@ -71,10 +62,10 @@ internal static class LightTextures
         ecs.SetParent(_directional, directionalParent);
         Caustics(ecs, _directional);
         ecs.Wrap<VisibilityRef>(_directional).Value = Visibility.Visible;
-        Selectable[Selection.DirectionalLight] = directionalParent;
+        ecs.Add(directionalParent, new Selection { Kind = SelectionKind.DirectionalLight });
 
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 2.5f, 9f), Vec3.Zero, Vec3.UnitY));
-        Selectable[Selection.Camera] = camera;
+        ecs.Add(camera, new Selection { Kind = SelectionKind.Camera });
 
         // A torch's beam on a narrow spotlight.
         var torch = Color.FromSrgb(1f, 1f, 0.8f);
@@ -89,14 +80,14 @@ internal static class LightTextures
         });
         ecs.Add(_spot, Transform.LookingAt(new Vec3(6f, 1f, 2f), Vec3.Zero, Vec3.UnitY));
         ecs.Insert<SpotLightTextureRef>(_spot).Image = AssetServer.Load(AssetKind.Image, "lightmaps/torch_spotlight_texture.png");
-        Selectable[Selection.SpotLight] = _spot;
+        ecs.Add(_spot, new Selection { Kind = SelectionKind.SpotLight });
 
         // A blue point light inside a box of faces, which throws them on the walls, with a glowing
         // ball to see it by.
         var pointParent = ecs.Spawn();
         ecs.Add(pointParent, new Transform(new Vec3(0f, 1.8f, 0.01f), Quat.Identity, new Vec3(0.1f)));
         ecs.Insert<VisibilityRef>(pointParent).Value = Visibility.Hidden;
-        Selectable[Selection.PointLight] = pointParent;
+        ecs.Add(pointParent, new Selection { Kind = SelectionKind.PointLight });
 
         var ball = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Sphere, 1f),
@@ -115,8 +106,8 @@ internal static class LightTextures
         var facesScene = AssetServer.LoadGltfScene("models/Faces/faces.glb", 0);
         _pending = (facesScene, pointParent);
 
-        _selections = new RadioButtons<Selection>(ecs, RadioButtons<Selection>.Column(), "Drag to Move",
-            [(Selection.Camera, "Camera"), (Selection.SpotLight, "Spotlight"), (Selection.PointLight, "Point Light"), (Selection.DirectionalLight, "Directional Light")],
+        _selections = new RadioButtons<SelectionKind>(ecs, RadioButtons<SelectionKind>.Column(), "Drag to Move",
+            [(SelectionKind.Camera, "Camera"), (SelectionKind.SpotLight, "Spotlight"), (SelectionKind.PointLight, "Point Light"), (SelectionKind.DirectionalLight, "Directional Light")],
             _selection);
 
         _bottomRight = Ui.SpawnNode(new UiSettings
@@ -128,14 +119,22 @@ internal static class LightTextures
             ColumnGap = Length.Px(6f),
         });
         _shown = new RadioButtons<bool>(ecs, _bottomRight, "", [(true, "Show"), (false, "Hide")], true);
-        _scale = DragButton(ecs, "Scale");
-        _roll = DragButton(ecs, "Roll");
+        ecs.Add(DragButton(ecs, "Scale"), new DragMode { Kind = DragModeKind.Scale });
+        ecs.Add(DragButton(ecs, "Roll"), new DragMode { Kind = DragModeKind.Roll });
 
-        _help = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+        ecs.Add(Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new LightTexturesHelpText());
         ShowButtons(ecs);
     }
 
     private static (AssetHandle Scene, Entity Parent) _pending;
+
+    // The thing of a kind, found by its Selection as Bevy's queries find it.
+    private static Entity Selected(EcsWorld ecs, SelectionKind kind)
+    {
+        foreach (var entity in ecs.EntitiesWith<Selection>())
+            if (ecs.GetOrDefault<Selection>(entity).Kind == kind) return entity;
+        return Entity.None;
+    }
 
     private static void Caustics(EcsWorld ecs, Entity light)
     {
@@ -184,7 +183,7 @@ internal static class LightTextures
             _pending = (AssetHandle.None, Entity.None);
         }
 
-        foreach (var root in new[] { _innerCube, Selectable[Selection.PointLight] })
+        foreach (var root in new[] { _innerCube, Selected(ecs, SelectionKind.PointLight) })
             Walk(root);
 
         void Walk(Entity entity)
@@ -208,9 +207,9 @@ internal static class LightTextures
             changed = true;
         }
 
-        if (_shown!.Pressed(out var shown) && _selection != Selection.Camera)
+        if (_shown!.Pressed(out var shown) && _selection != SelectionKind.Camera)
         {
-            ecs.Wrap<VisibilityRef>(Selectable[_selection]).Value = shown ? Visibility.Inherited : Visibility.Hidden;
+            ecs.Wrap<VisibilityRef>(Selected(ecs, _selection)).Value = shown ? Visibility.Inherited : Visibility.Hidden;
             _shown.Select(ecs, shown);
         }
 
@@ -218,26 +217,27 @@ internal static class LightTextures
         // under way.
         if (!ctx.Input.MouseDown(MouseButton.Left))
         {
-            var mode = Ui.InteractionOf(_scale) == UiInteraction.Hovered ? DragMode.Scale
-                : Ui.InteractionOf(_roll) == UiInteraction.Hovered ? DragMode.Roll
-                : DragMode.Move;
+            var mode = DragModeKind.Move;
+            foreach (var button in ecs.EntitiesWith<DragMode>())
+                if (Ui.InteractionOf(button) == UiInteraction.Hovered) mode = ecs.GetOrDefault<DragMode>(button).Kind;
+
             if (mode != _dragMode)
             {
                 _dragMode = mode;
-                TrySetCursor(mode == DragMode.Move ? CursorShape.Default : CursorShape.ResizeHorizontal);
+                TrySetCursor(mode == DragModeKind.Move ? CursorShape.Default : CursorShape.ResizeHorizontal);
                 changed = true;
             }
         }
 
-        if (changed) Ui.SetText(_help, HelpText());
+        if (changed) foreach (var help in ecs.EntitiesWith<LightTexturesHelpText>()) Ui.SetText(help, HelpText());
     }
 
     // The Show and Hide buttons, and Scale and Roll, are for a light, and hidden for the camera,
     // with Show or Hide lit as the chosen light is.
     private static void ShowButtons(EcsWorld ecs)
     {
-        ecs.Wrap<VisibilityRef>(_bottomRight).Value = _selection == Selection.Camera ? Visibility.Hidden : Visibility.Visible;
-        _shown!.Select(ecs, ecs.Wrap<VisibilityRef>(Selectable[_selection]).Value != Visibility.Hidden);
+        ecs.Wrap<VisibilityRef>(_bottomRight).Value = _selection == SelectionKind.Camera ? Visibility.Hidden : Visibility.Visible;
+        _shown!.Select(ecs, ecs.Wrap<VisibilityRef>(Selected(ecs, _selection)).Value != Visibility.Hidden);
     }
 
     // The directional light shines with its caustics while it is shown, dims to a sunrise while
@@ -245,18 +245,18 @@ internal static class LightTextures
     private static void UpdateDirectionalLight(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        bool Shown(Selection which) => ecs.Wrap<VisibilityRef>(Selectable[which]).Value != Visibility.Hidden;
+        bool Shown(SelectionKind which) => ecs.Wrap<VisibilityRef>(Selected(ecs, which)).Value != Visibility.Hidden;
 
         var light = ecs.Wrap<DirectionalLightRef>(_directional);
         var texture = ecs.Get<DirectionalLightTextureRef>(_directional);
-        if (Shown(Selection.DirectionalLight))
+        if (Shown(SelectionKind.DirectionalLight))
         {
             light.Illuminance = AmbientDaylight;
             if (texture is null) Caustics(ecs, _directional);
         }
         else
         {
-            light.Illuminance = Shown(Selection.PointLight) || Shown(Selection.SpotLight) ? ClearSunrise : AmbientDaylight;
+            light.Illuminance = Shown(SelectionKind.PointLight) || Shown(SelectionKind.SpotLight) ? ClearSunrise : AmbientDaylight;
             texture?.Remove();
         }
     }
@@ -267,23 +267,23 @@ internal static class LightTextures
         if (!input.MouseDown(MouseButton.Left)) return;
 
         var ecs = ctx.Ecs;
-        var entity = Selectable[_selection];
+        var entity = Selected(ecs, _selection);
         var (dx, dy) = input.MouseDelta;
         var transform = ecs.GetOrDefault<Transform>(entity);
 
         switch (_dragMode)
         {
-            case DragMode.Move when _selection == Selection.PointLight:
+            case DragModeKind.Move when _selection == SelectionKind.PointLight:
                 transform.Translation += new Vec3(dx, -dy, 0f) * MoveSpeed;
                 break;
 
-            case DragMode.Move:
+            case DragModeKind.Move:
                 // Round the middle at the same distance, keeping the roll it had.
                 var position = transform.Translation;
                 var radius = position.Length;
                 var theta = MathF.Acos(position.Y / radius);
                 var phi = MathF.Sign(position.Z) * MathF.Acos(position.X / MathF.Sqrt(position.X * position.X + position.Z * position.Z));
-                var (phiFactor, thetaFactor) = _selection == Selection.Camera ? (1f, -1f) : (-1f, 1f);
+                var (phiFactor, thetaFactor) = _selection == SelectionKind.Camera ? (1f, -1f) : (-1f, 1f);
                 phi += phiFactor * dx * MoveSpeed;
                 theta = Math.Clamp(theta + thetaFactor * dy * MoveSpeed, 0.001f, MathF.PI - 0.001f);
 
@@ -293,11 +293,11 @@ internal static class LightTextures
                 transform = transform with { Translation = at, Rotation = Quat.FromEuler(looking.X, looking.Y, roll) };
                 break;
 
-            case DragMode.Scale:
+            case DragModeKind.Scale:
                 var factor = 1f + dx * ScaleSpeed;
                 var scale = transform.Scale * factor;
                 transform.Scale = new Vec3(Math.Clamp(scale.X, 0.01f, 5f), Math.Clamp(scale.Y, 0.01f, 5f), Math.Clamp(scale.Z, 0.01f, 5f));
-                if (_selection == Selection.SpotLight)
+                if (_selection == SelectionKind.SpotLight)
                 {
                     var spot = ecs.Wrap<SpotLightRef>(_spot);
                     spot.OuterAngle = Math.Clamp(spot.OuterAngle * factor, 0.01f, MathF.PI / 4f);
@@ -305,7 +305,7 @@ internal static class LightTextures
                 }
                 break;
 
-            case DragMode.Roll:
+            case DragModeKind.Roll:
                 var euler = transform.Rotation.ToEuler();
                 transform.Rotation = Quat.FromEuler(euler.X, euler.Y, euler.Z + dx * RollSpeed);
                 break;
@@ -319,9 +319,9 @@ internal static class LightTextures
         var mode = _dragMode.ToString().ToLowerInvariant();
         var selection = _selection switch
         {
-            Selection.Camera => "camera",
-            Selection.SpotLight => "spotlight",
-            Selection.PointLight => "point light",
+            SelectionKind.Camera => "camera",
+            SelectionKind.SpotLight => "spotlight",
+            SelectionKind.PointLight => "point light",
             _ => "directional light",
         };
         return $"Click and drag to {mode} {selection}";
@@ -334,3 +334,42 @@ internal static class LightTextures
         catch (Bevy.Interop.BevyNativeException) { }
     }
 }
+
+/// <summary>What dragging moves, as Bevy's <c>Selection</c> enum names them.</summary>
+public enum SelectionKind { Camera, SpotLight, PointLight, DirectionalLight }
+
+/// <summary>What dragging does, as Bevy's <c>DragMode</c> enum names it.</summary>
+public enum DragModeKind { Move, Scale, Roll }
+
+/// <summary>A thing dragging can move, and which of them it is.</summary>
+[Behavior]
+public partial struct Selection
+{
+    /// <summary>Which.</summary>
+    public SelectionKind Kind;
+}
+
+/// <summary>A button that, under the pointer, makes dragging scale or roll.</summary>
+[Behavior]
+public partial struct DragMode
+{
+    /// <summary>What dragging does while it is under the pointer.</summary>
+    public DragModeKind Kind;
+}
+
+/// <summary>The cube in the middle, which turns.</summary>
+[Behavior]
+public partial struct Rotate
+{
+    /// <summary>Turned about Y by a fiftieth of a radian each frame, as Bevy's <c>rotate_cube</c> turns it.</summary>
+    [OnUpdate]
+    public void RotateCube(BehaviorContext ctx, ref Transform transform) =>
+        transform.Rotation = Quat.FromRotationY(LightTextures.CubeRotationSpeed) * transform.Rotation;
+}
+
+/// <summary>
+/// The help text, Bevy's <c>HelpText</c> under another name since color_grading's shares the
+/// namespace.
+/// </summary>
+[Behavior]
+public partial struct LightTexturesHelpText;

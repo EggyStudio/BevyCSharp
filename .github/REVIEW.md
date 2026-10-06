@@ -348,3 +348,13 @@ camera and mirror carry `MirrorCamera` and `Mirror`, the example's class `Mirror
 light_probe_blending's sphere moves by `ReflectiveSphere` while the camera orbits it by an
 `OrbitCamera` keeping its distance and angles, swapped for `FreeCamera` and back by the buttons
 as Bevy swaps them.
+
+B 4 for 3D Rendering, its last part, 117 of 119, the last of the groups item 3 brings over.
+light_textures' cube turns by `Rotate`, the things a drag moves carry `Selection` and the Scale and
+Roll buttons `DragMode`, each holding Bevy's enum, found by them where the example kept a table,
+and its help text is `LightTexturesHelpText`. solari's robot walks by `PatrolPath`, which keeps the
+corner it makes for, the path being no value a component here can hold, and its two texts write
+themselves after Update by `ControlText` and `PerformanceText`, as Bevy's run in PostUpdate. Its
+capture here is the raster one, this bridge built without `--solari`. The two left,
+headless_renderer and custom_shader_instancing, keep only what Bevy's render world copies and draws
+from, with no system in the main world over it.

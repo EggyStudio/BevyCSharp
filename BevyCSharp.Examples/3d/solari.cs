@@ -23,7 +23,7 @@ internal static class Solari
     private static readonly (float R, float G, float B, float A) RobotLight = Scaled(Color.FromSrgb(0.941f, 0.714f, 0.043f), 1_000_000f);
 
     // Where the robot walks, a corner at a time, and which way it faces there.
-    private static readonly (Vec3 At, Quat Facing)[] Path =
+    internal static readonly (Vec3 At, Quat Facing)[] Path =
     [
         (new Vec3(-2f, 0.05f, -2.1f), Quat.FromRotationY(MathF.PI / 2f)),
         (new Vec3(2.2f, 0.05f, -2.1f), Quat.FromRotationY(0f)),
@@ -33,9 +33,8 @@ internal static class Solari
 
     private static readonly List<Entity> Roots = [];
     private static readonly HashSet<Entity> Traced = [];
-    private static Entity _sun, _robot, _controls, _performance;
+    private static Entity _sun;
     private static AssetHandle _robotLight;
-    private static int _corner;
 
     public static void Configure(Config config)
     {
@@ -47,7 +46,7 @@ internal static class Solari
     {
         Roots.Clear();
         Traced.Clear();
-        (_sun, _robot, _robotLight, _corner) = (Entity.None, Entity.None, AssetHandle.None, 0);
+        (_sun, _robotLight) = (Entity.None, AssetHandle.None);
 
         app.Startup(Setup, "solari.Setup");
         app.SpawnGltf("pica_pica/mini_diorama_01.glb", (ctx, root) =>
@@ -58,14 +57,13 @@ internal static class Solari
         app.SpawnGltf("pica_pica/robot_01.glb", (ctx, root) =>
         {
             ctx.Ecs.Set(root, new Transform(Path[0].At, Path[0].Facing, new Vec3(2f)));
-            (_robot, _corner) = (root, 0);
+            ctx.Ecs.Add(root, new PatrolPath());
             Roots.Add(root);
         });
         app.Update(AddRaytracingMeshes, "solari.AddRaytracingMeshes");
         app.Update(PauseScene, "solari.PauseScene");
         app.Update(ToggleLights, "solari.ToggleLights");
-        app.Update(PatrolPath, "solari.PatrolPath");
-        app.Update(UpdateText, "solari.UpdateText");
+
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -79,7 +77,7 @@ internal static class Solari
         ecs.Add(camera, new FreeCamera { Speed = 3f });
         if (Render.RayTracingActive) Render.SetRayTracedLighting(camera, true);
 
-        _controls = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
+        ecs.Add(Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) }), new ControlText());
 
         var panel = Ui.SpawnNode(new UiSettings
         {
@@ -89,8 +87,9 @@ internal static class Solari
             Corners = new Corners(Length.Zero, Length.Zero, Length.Zero, Length.Px(4f)),
             Color = Color.FromSrgb(0.1f, 0.1f, 0.1f, 0.8f),
         });
-        _performance = Ui.SpawnText(string.Empty, new UiSettings(), new UiTextSettings { FontSize = 8f });
-        ecs.SetParent(_performance, panel);
+        var performance = Ui.SpawnText(string.Empty, new UiSettings(), new UiTextSettings { FontSize = 8f });
+        ecs.SetParent(performance, panel);
+        ecs.Add(performance, new PerformanceText());
     }
 
     // Solari replaces shadow maps, so the sun casts none of its own.
@@ -174,33 +173,8 @@ internal static class Solari
         }
     }
 
-    // The robot walks a meter a second to the next corner, turning to face along the next side
-    // when it gets there.
-    private static void PatrolPath(BehaviorContext ctx)
-    {
-        if (_robot == Entity.None) return;
-        var ecs = ctx.Ecs;
-        var at = ecs.GetOrDefault<Transform>(_robot);
-
-        var (target, facing) = Path[_corner];
-        var distance = (target - at.Translation).Length;
-        if (distance < 0.01f)
-        {
-            (at.Translation, at.Rotation) = (target, facing);
-            _corner = (_corner + 1) % Path.Length;
-            (target, facing) = Path[_corner];
-            distance = (target - at.Translation).Length;
-        }
-
-        var step = ctx.Time.Delta;
-        if (step > distance)
-            (at.Translation, at.Rotation) = (target, facing);
-        else
-            at.Translation += (target - at.Translation) * (step / distance);
-        ecs.Set(_robot, at);
-    }
-
-    private static void UpdateText(BehaviorContext ctx)
+    // The controls as they stand, the pause, the sun and the robot's lamp.
+    internal static string Controls(BehaviorContext ctx)
     {
         var controls = new StringBuilder(ctx.Time.Paused ? "(Space): Resume" : "(Space): Pause");
         controls.Append(_sun != Entity.None ? "\n(1): Disable directional light" : "\n(1): Enable directional light");
@@ -208,9 +182,12 @@ internal static class Solari
             ? "\n(2): Disable robot emissive light"
             : "\n(2): Enable robot emissive light");
         controls.Append("\nDenoising: App not compiled with DLSS support");
-        Ui.SetText(_controls, controls.ToString());
+        return controls.ToString();
+    }
 
-        // Each of Solari's passes as the GPU timed it, smoothed over the last frames.
+    // Each of Solari's passes as the GPU timed it, smoothed over the last frames.
+    internal static string Performance()
+    {
         var timings = Render.Timings();
         var performance = new StringBuilder();
         var total = 0.0;
@@ -227,12 +204,63 @@ internal static class Solari
             performance.Append(FormattableString.Invariant($"{label,-17}  {milliseconds:0.00} ms\n"));
             total += milliseconds;
         }
+
         performance.Append(FormattableString.Invariant($"{"Total",-17}  {total:0.00} ms\n"));
-        Ui.SetText(_performance, performance.ToString());
+        return performance.ToString();
     }
 
     private static bool RobotLightOn(MaterialSettings settings) => settings.Emissive is not (0f, 0f, 0f, _);
 
     private static (float R, float G, float B, float A) Scaled(Color color, float by) => (color.R * by, color.G * by, color.B * by, 1f);
+}
 
+/// <summary>
+/// The robot's walk, which corner of the example's path it is making for. Bevy's holds the path
+/// too, which is no value a component here can keep, so the path is the example's.
+/// </summary>
+[Behavior]
+public partial struct PatrolPath
+{
+    /// <summary>The corner it is making for.</summary>
+    public int I;
+
+    /// <summary>
+    /// Walked a meter a second to the corner, turning to face along the next side when it gets
+    /// there, by the virtual clock, so it stops while the scene is paused.
+    /// </summary>
+    [OnUpdate]
+    public void Patrol(BehaviorContext ctx, ref Transform transform)
+    {
+        var (target, facing) = Solari.Path[I];
+        var distance = (target - transform.Translation).Length;
+        if (distance < 0.01f)
+        {
+            (transform.Translation, transform.Rotation) = (target, facing);
+            I = (I + 1) % Solari.Path.Length;
+            (target, facing) = Solari.Path[I];
+            distance = (target - transform.Translation).Length;
+        }
+
+        var step = ctx.Time.Delta;
+        if (step > distance) (transform.Translation, transform.Rotation) = (target, facing);
+        else transform.Translation += (target - transform.Translation) * (step / distance);
+    }
+}
+
+/// <summary>The text that says the controls.</summary>
+[Behavior]
+public partial struct ControlText
+{
+    /// <summary>The controls written as they stand, after Update, as Bevy writes them in PostUpdate.</summary>
+    [OnPostUpdate]
+    public void UpdateControlText(BehaviorContext ctx) => Ui.SetText(ctx.Entity, Solari.Controls(ctx));
+}
+
+/// <summary>The text that says how long each pass took.</summary>
+[Behavior]
+public partial struct PerformanceText
+{
+    /// <summary>The passes' times written, after Update, as Bevy writes them in PostUpdate.</summary>
+    [OnPostUpdate]
+    public void UpdatePerformanceText(BehaviorContext ctx) => Ui.SetText(ctx.Entity, Solari.Performance());
 }
