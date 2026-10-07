@@ -88,8 +88,6 @@ BevyCSharp/Core/WindowMessages.cs WindowScaleFactorChanged
 BevyCSharp/Diagnostics/ConsoleCommands.cs CommandAttribute
 BevyCSharp/Diagnostics/ConsoleCommands.cs CommandParameter
 BevyCSharp/Diagnostics/ConsoleCommands.cs ConsoleCommand
-BevyCSharp/Diagnostics/ConsoleLog.cs LogLevel
-BevyCSharp/Diagnostics/ConsoleLog.cs LogLine
 BevyCSharp/Diagnostics/FrameProfile.cs FrameCosts
 BevyCSharp/Ecs/ChunkSet.cs ComponentQuery
 BevyCSharp/Ecs/ChunkSet.cs ComponentRow
@@ -142,7 +140,6 @@ BevyCSharp/Input/Gamepad.cs GamepadDisconnected
 BevyCSharp/Input/Key.cs KeyModifier
 BevyCSharp/Input/Key.cs KeyTable
 BevyCSharp/Input/Key.cs MouseButton
-BevyCSharp/Interop/NativeStatus.cs BevyNativeException
 BevyCSharp/Interop/NativeTypes.Audio.cs NativeAudioConfig
 BevyCSharp/Interop/NativeTypes.Ecs.cs NativeChunk
 BevyCSharp/Interop/NativeTypes.Frame.cs NativeFrameState
