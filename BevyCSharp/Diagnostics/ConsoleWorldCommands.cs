@@ -233,7 +233,7 @@ internal static partial class ConsoleWorldCommands
             ConsoleHost.Fail(
                 "NO_WINDOW",
                 "This app is running headless, so it draws nothing to capture. Start one with a "
-                + "window (bcs open --editor), or one that draws offscreen (bcs open --sample "
+                + "window (bcs open --editor), or one that draws offscreen (bcs open --feature-test "
                 + "--offscreen), which works on a machine with no display.");
 
             return "headless, so nothing is being drawn to capture";

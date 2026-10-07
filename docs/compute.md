@@ -333,7 +333,7 @@ rather than adding to it. [.github/RENDERING.md](../.github/RENDERING.md) has wh
 Bevy's lighting would add.
 
 The sample carries a small screen-space GI written this way, as a reference for how the pieces
-fit rather than a technique to ship: `BevyCSharp.Sample/Behaviors/ScreenSpaceLight.cs` and the three
+fit rather than a technique to ship: `BevyCSharp.FeatureTest/Behaviors/ScreenSpaceLight.cs` and the three
 `gi_*.slang` files beside the sample's other shaders. F5 turns it on in a window, and
 `./bcs command sample.gi "on 4"` on a running sample turns it on with the bounce exaggerated four
 times, which is how its share of the picture is told apart from the rest.

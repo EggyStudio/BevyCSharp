@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// A behavior that is its own component, per-entity state plus the logic that drives it.

@@ -14,7 +14,9 @@ internal static class Help
 
             Live session
               status                     What is running, and whether it is answering
-              open [--editor|--sample]   Start one serving, detached, and wait until it is ready
+              open [--editor|--feature-test]
+                                         Start one serving, detached, and wait until it is ready,
+                                         --sample opening the feature test as well
                 [--example <name>]       One of Bevy's examples written here, by Bevy's name
                 [--offscreen]            Draw into an image instead of a window, with no display
                 [--frame-time <seconds>] Each frame advances the clock by that much, not the machine's
@@ -28,7 +30,7 @@ internal static class Help
               build [--render|--editor] [--meshlet] [--solari]
                                          The native bridge, then the managed side, in that order
               test [--filter F]          The test suite; exit 8 means tests failed, 6 means it never ran
-              run [-- args]              One headless run of the sample
+              run [-- args]              One headless run of the feature test
               doctor                     Why nothing works: the bridge, the ABI, stale sessions
 
             Anywhere

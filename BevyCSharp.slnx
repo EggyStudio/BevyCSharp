@@ -9,7 +9,7 @@
   <Project Path="BevyCSharp.Scripting/BevyCSharp.Scripting.csproj" />
   <Project Path="BevyCSharp.Editor/BevyCSharp.Editor.csproj" />
   <Project Path="BevyCSharp.Player/BevyCSharp.Player.csproj" />
-  <Project Path="BevyCSharp.Sample/BevyCSharp.Sample.csproj" />
+  <Project Path="BevyCSharp.FeatureTest/BevyCSharp.FeatureTest.csproj" />
   <Project Path="BevyCSharp.Examples/BevyCSharp.Examples.csproj" />
   <Project Path="BevyCSharp.Tests/BevyCSharp.Tests.csproj" />
 </Solution>

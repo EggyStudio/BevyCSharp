@@ -12,7 +12,7 @@ public sealed class SampleLightTests
 {
     /// <summary>The sample's assets, which the sample's shaders are compiled from.</summary>
     private static readonly string SampleAssets = Path.GetFullPath(
-        Path.Combine(EngineHarness.AssetDirectory, "..", "..", "..", "..", "..", "BevyCSharp.Sample", "assets"));
+        Path.Combine(EngineHarness.AssetDirectory, "..", "..", "..", "..", "..", "BevyCSharp.FeatureTest", "assets"));
 
     /// <summary>
     /// A sunlit red wall beside a white floor tints the floor near it red once the bounce is

@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// Ray-traced ambient occlusion on F6: short rays from every surface on screen through a scene of

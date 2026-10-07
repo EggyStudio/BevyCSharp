@@ -240,8 +240,8 @@ internal static partial class Tools
                 options, "run", "NO_CHECKOUT", "This is not inside a BevyCSharp checkout.");
         }
 
-        var project = arguments.Contains("--editor") ? "BevyCSharp.Editor" : "BevyCSharp.Sample";
-        var rest = arguments.Where(argument => argument is not ("--editor" or "--sample")).ToList();
+        var project = arguments.Contains("--editor") ? "BevyCSharp.Editor" : "BevyCSharp.FeatureTest";
+        var rest = arguments.Where(argument => argument is not ("--editor" or "--feature-test" or "--sample")).ToList();
 
         if (rest.Count == 0) rest = ["--headless", "--frames", "120"];
 

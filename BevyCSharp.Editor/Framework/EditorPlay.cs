@@ -588,12 +588,12 @@ public static class EditorPlay
     }
 
     /// <summary>
-    /// The sample's project file, found by walking up from where the editor runs to the checkout
-    /// that holds the solution, or nothing when the editor was not run from one.
+    /// The feature test's project file, found by walking up from where the editor runs to the
+    /// checkout that holds the solution, or nothing when the editor was not run from one.
     /// </summary>
-    private static string? Sample() => Checkout("BevyCSharp.Sample", "BevyCSharp.Sample.csproj");
+    private static string? Sample() => Checkout("BevyCSharp.FeatureTest", "BevyCSharp.FeatureTest.csproj");
 
-    /// <summary>The player's project file, found the way the sample's is.</summary>
+    /// <summary>The player's project file, found the way the feature test's is.</summary>
     private static string? Player() => Checkout("BevyCSharp.Player", "BevyCSharp.Player.csproj");
 
     /// <summary>A file in the checkout the editor runs from, or nothing outside one.</summary>

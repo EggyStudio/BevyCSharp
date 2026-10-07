@@ -287,15 +287,15 @@ public sealed class TestScriptTests : IDisposable
         ]);
         var answer = $$"""
             {"command":"open","success":false,"data":{"log":{{System.Text.Json.JsonSerializer.Serialize(_folder.File("sample.log"))}}},
-             "errors":[{"code":"NOT_READY","message":"BevyCSharp.Sample did not start serving within 90 seconds."}]}
+             "errors":[{"code":"NOT_READY","message":"BevyCSharp.FeatureTest did not start serving within 90 seconds."}]}
             """;
 
-        var (exit, log) = Answer(python, answer, "./bcs open --sample", "6");
+        var (exit, log) = Answer(python, answer, "./bcs open --feature-test", "6");
 
         Assert.Equal(6, exit);
         var error = Assert.Single(log.Split('\n'), line => line.StartsWith("::error", StringComparison.Ordinal));
-        Assert.StartsWith("::error title=./bcs open --sample on Windows::", error);
-        Assert.Contains("ended with exit code 6, and bcs said NOT_READY, BevyCSharp.Sample did not start serving within 90 seconds.", error);
+        Assert.StartsWith("::error title=./bcs open --feature-test on Windows::", error);
+        Assert.Contains("ended with exit code 6, and bcs said NOT_READY, BevyCSharp.FeatureTest did not start serving within 90 seconds.", error);
         Assert.Contains("%0A    INFO bevy_render::renderer: AdapterInfo", error);
         Assert.Contains("%0A    Unhandled exception. System.DllNotFoundException: bevy_csharp", error);
         Assert.DoesNotContain("\u001b", error, StringComparison.Ordinal);

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Says what a ./bcs command that failed answered, where a reader of the workflow's run sees it.
 
-    answer=$(./bcs open --sample --json) || code=$?
-    printf '%s' "$answer" | build/bcs-answer.py "./bcs open --sample" "$code" BevyCSharp.Sample
+    answer=$(./bcs open --feature-test --json) || code=$?
+    printf '%s' "$answer" | build/bcs-answer.py "./bcs open --feature-test" "$code" BevyCSharp.FeatureTest
 
 A step that runs ./bcs bare ends with bcs's exit code and nothing else on the page, its answer,
 the JSON envelope with the code and the sentence that exit code stands for, going to a log nobody

@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// Steps a sprite through the frames of a sheet.

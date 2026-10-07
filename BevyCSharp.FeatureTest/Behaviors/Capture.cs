@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// Writes the window to a PNG on a chosen frame, when asked for by the environment.

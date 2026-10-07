@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// Sets up the window and reports which graphics adapter the renderer actually picked.

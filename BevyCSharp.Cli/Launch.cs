@@ -35,7 +35,7 @@ internal static class Launch
 
         var project = Project(arguments);
         var extra = arguments.Where(argument => !argument.StartsWith("--project=", StringComparison.Ordinal)
-                                                && argument is not ("--editor" or "--sample" or "--example"))
+                                                && argument is not ("--editor" or "--feature-test" or "--sample" or "--example"))
             .ToList();
 
         // An example is named by the word after --example, which the examples program reads as
@@ -236,7 +236,8 @@ internal static class Launch
     {
         foreach (var argument in arguments)
         {
-            if (argument is "--sample") return "BevyCSharp.Sample";
+            // The feature test, which was the sample and is still opened by that name.
+            if (argument is "--feature-test" or "--sample") return "BevyCSharp.FeatureTest";
             if (argument is "--editor") return "BevyCSharp.Editor";
             if (argument is "--example") return "BevyCSharp.Examples";
 

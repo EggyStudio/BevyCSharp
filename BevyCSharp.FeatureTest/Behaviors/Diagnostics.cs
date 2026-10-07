@@ -1,6 +1,6 @@
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>Counts of the things the sample cares about, reported at shutdown.</summary>
 public sealed class SampleReport

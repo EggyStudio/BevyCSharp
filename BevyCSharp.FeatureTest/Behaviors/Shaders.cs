@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Bevy;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// A swarm of fireflies simulated by a compute shader and drawn from the same buffer, and an old

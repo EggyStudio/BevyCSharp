@@ -3,7 +3,7 @@
 Meshes and materials can be built without an asset file, and attached to an entity to make it
 drawable. This needs a render build; on a headless one every call here refuses and says which build
 would support it, rather than silently doing nothing. Guard with `App.HasRenderer` to write one
-behavior that runs either way, as `BevyCSharp.Sample/Behaviors/Scene.cs` does.
+behavior that runs either way, as `BevyCSharp.FeatureTest/Behaviors/Scene.cs` does.
 
 ```csharp
 var camera = Render.SpawnCamera3d();

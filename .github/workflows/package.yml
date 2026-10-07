@@ -159,19 +159,19 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev pkg-config
 
       # The suite covers the library; this covers everything else in the solution. Neither the
-      # sample nor the editor is reached by `dotnet test`, so without it a runnable project can
+      # feature test nor the editor is reached by `dotnet test`, so without it a runnable project can
       # stop compiling without CI noticing. A warning anywhere in it fails the step (NORM.md, N 6.1),
       # and one that is right to keep is turned off where it arises, with its reason beside it.
       - name: Build the solution
         run: dotnet build BevyCSharp.slnx -c Release -warnaserror
 
       # bcs opens a program through cmd.exe on Windows, which nothing else in the workflow does, so
-      # the sample is opened through it and asked how it is, as a person or an agent opens one, and
-      # stopped. Headless, with no count of frames so it runs until stopped, since the job's bridge
-      # has no renderer and the sample refuses a window without one. Each answer is kept, and one
-      # that fails is said on the page with bcs's code and sentence and the end of the sample's
-      # log, where the step said an exit code alone (NORM.md, N 6.7).
-      - name: Open the sample through bcs
+      # the feature test is opened through it and asked how it is, as a person or an agent opens
+      # one, and stopped. Headless, with no count of frames so it runs until stopped, since the
+      # job's bridge has no renderer and the program refuses a window without one. Each answer is
+      # kept, and one that fails is said on the page with bcs's code and sentence and the end of
+      # the program's log, where the step said an exit code alone (NORM.md, N 6.7).
+      - name: Open the feature test through bcs
         if: runner.os == 'Windows'
         shell: bash
         run: |
@@ -179,11 +179,11 @@ jobs:
             local answer code=0
             answer=$(./bcs "$@" --json) || code=$?
             if [ "$code" -ne 0 ]; then
-              printf '%s' "$answer" | python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.Sample
+              printf '%s' "$answer" | python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.FeatureTest
               exit "$code"
             fi
           }
-          ask open --sample --headless --frames 0
+          ask open --feature-test --headless --frames 0
           ask command app.status
           ask stop
 

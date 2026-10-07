@@ -341,7 +341,7 @@ bounding box groups among them, which `ShowLights` and `ShowBounds` turn on.
 anchored off its center, cut down to one rectangle of a sheet or one frame of an atlas layout, and
 drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
 
-- **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.Sample` steps a sheet
+- **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.FeatureTest` steps a sheet
   and is there to be copied. A game adds frame events, a queue of clips and animation driven by the
   state machine, and each would be the wrong shape shipped in the library while still costing a
   query a frame.

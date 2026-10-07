@@ -1,4 +1,4 @@
-using BevyCSharp.Sample.Behaviors;
+using BevyCSharp.FeatureTest.Behaviors;
 using Bevy;
 
 // Opens a window showing a rotating cube. Set this to false, or pass --headless, to run the

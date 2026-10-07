@@ -2,7 +2,7 @@ using System.Numerics;
 using Bevy;
 using ImGuiNET;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// The game's own interface.

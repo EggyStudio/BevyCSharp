@@ -91,7 +91,7 @@ Stop any serving session before running the suite.
 | `BevyCSharp/build` | The props and targets the package adds to a game's build |
 | `BevyCSharp.Cli` | `./bcs`, the command line that drives a running app |
 | `BevyCSharp.Examples` | Bevy's examples written in C#, opened by name, and `triage.tsv` for the rest |
-| `BevyCSharp.Sample` | A rotating cube from behavior scripts, run with a window or headless |
+| `BevyCSharp.FeatureTest` | Every feature on one map, with an admin panel, an overlay and a console, run with a window, offscreen or headless |
 | `BevyCSharp.Tests` | The test suite, run on real engines through `EngineHarness` |
 | `build/cheatsheet` | Writes CHEATSHEET.md from the built library |
 | `docs` | The guide for somebody using the engine, a page an area, which the README links |

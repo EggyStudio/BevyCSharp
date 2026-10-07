@@ -119,7 +119,7 @@ compute and not ray queries.
 
 The sample carries ray-traced ambient occlusion built this way, with no Solari: a plane, a box and
 a sphere standing in for its ground, cube and lamp in a ray scene, a compute shader tracing four
-short rays from every surface on screen (`BevyCSharp.Sample/assets/shaders/rtao.slang`), and the
+short rays from every surface on screen (`BevyCSharp.FeatureTest/assets/shaders/rtao.slang`), and the
 answer written into the occlusion Bevy's own lighting reads. F6 turns it on in a window, and
 `./bcs command sample.rtao show` on a running sample paints the occlusion in place of the picture.
 

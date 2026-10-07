@@ -1,7 +1,7 @@
 using Bevy;
 using Bevy.Physics;
 
-namespace BevyCSharp.Sample.Behaviors;
+namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// Crates dropped onto the ground on F7, falling, tumbling and stacking under the physics package.

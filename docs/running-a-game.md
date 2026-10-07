@@ -16,10 +16,10 @@ or from the command line, which wins over the constants:
 ```bash
 build/build-native.sh --render                  # once: build a bridge with the renderer
 
-dotnet run --project BevyCSharp.Sample          # a rotating cube
-dotnet run --project BevyCSharp.Sample -- --backend vulkan
-dotnet run --project BevyCSharp.Sample -- --headless --frames 120
-dotnet run --project BevyCSharp.Sample -- --offscreen --frames 120
+dotnet run --project BevyCSharp.FeatureTest          # every feature on one map
+dotnet run --project BevyCSharp.FeatureTest -- --backend vulkan
+dotnet run --project BevyCSharp.FeatureTest -- --headless --frames 120
+dotnet run --project BevyCSharp.FeatureTest -- --offscreen --frames 120
 ```
 
 The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
@@ -62,7 +62,7 @@ anywhere while trying something out:
 | Alt and left button | swing around a point in front of the camera |
 | F | frame the origin from wherever the camera is looking |
 
-`BevyCSharp.Sample/Behaviors/FlyCamera.cs` is the whole of it, and it is an ordinary behavior. It
+`BevyCSharp.FeatureTest/Behaviors/FlyCamera.cs` is the whole of it, and it is an ordinary behavior. It
 keeps its own yaw, pitch and speed as component fields, reads `ctx.Input`, and writes Bevy's
 `Transform`.
 

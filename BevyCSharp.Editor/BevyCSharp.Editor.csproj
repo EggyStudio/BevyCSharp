@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <!--
-      The same wiring BevyCSharp.Sample uses: the library as a reference and the generator as an
+      The same wiring BevyCSharp.FeatureTest uses: the library as a reference and the generator as an
       analyzer. The analyzer line is required rather than tidy, because analyzers are per
       compilation: without it the panels in this project generate nothing and bind to nothing.
     -->
@@ -25,7 +25,7 @@
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
         <!--
-          Referenced as well as loaded as an analyzer, which the sample does not do. The editor
+          Referenced as well as loaded as an analyzer, which the feature test does not do. The editor
           needs both: the analyzer half generates this project's own panels and behaviors, and
           the reference half lets the script host run the same generator over a script it
           compiles while the editor is running. A script has to become a behavior the same way

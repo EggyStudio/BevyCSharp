@@ -35,8 +35,9 @@ public partial struct Interface
 }
 ```
 
-`BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs`. It needs a bridge with the
-interface compiled in (`build/build-native.sh --editor`) and `Config.Gui` asked for.
+`BevyCSharp.FeatureTest` draws its admin panel, its overlay and its console that way, in
+`Behaviors/Interface.cs`. It needs a bridge with the interface compiled in
+(`build/build-native.sh --editor`) and `Config.Gui` asked for.
 
 **A console is one call.** `ImGuiConsole.Draw` between `Begin` and `End` gives a game the editor's
 console, opened and closed by the key under Escape along the top of the window. It shows the log,

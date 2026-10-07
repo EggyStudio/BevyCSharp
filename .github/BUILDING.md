@@ -10,7 +10,7 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
 build/build-native.sh          # build the native bridge (headless profile)
 dotnet build                   # build the managed side
 build/test.py                  # run the bridge's tests and the suite, with a page of what failed
-dotnet run --project BevyCSharp.Sample -- --frames 120 --verbose
+dotnet run --project BevyCSharp.FeatureTest -- --headless --frames 120 --verbose
 ```
 
 Most of what the bridge does is only observable from managed code, so the suite is where nearly
@@ -34,7 +34,7 @@ and the packed `.nupkg`. The repository root stays clean.
 BevyCSharp/            managed runtime library
 BevyCSharp.Generator/  Roslyn source generator
 BevyCSharp.Editor/     the editor, and the framework its panels are built on
-BevyCSharp.Sample/     runnable example behaviors
+BevyCSharp.FeatureTest/ every feature on one map, for a tester
 BevyCSharp.Examples/   Bevy's examples in C#, by Bevy's names (.github/EXAMPLES.md)
 docs/                  the guide, a page an area, which the README's Guide lists
 BevyCSharp.Tests/      test suite, run against a real Bevy app
@@ -139,8 +139,8 @@ the folder and before its assembly (`AssetPack`, [SCENES.md](SCENES.md) §1).
 They can be compiled into the bridge instead, which then serves one game:
 
 ```bash
-build/build-native.sh --render --embed BevyCSharp.Sample/assets    # bash
-build/build-native.ps1 -Render -Embed BevyCSharp.Sample/assets      # PowerShell
+build/build-native.sh --render --embed BevyCSharp.FeatureTest/assets    # bash
+build/build-native.ps1 -Render -Embed BevyCSharp.FeatureTest/assets      # PowerShell
 ```
 
 `bevy_embedded_assets` reads the folder as the library compiles and serves it in place of the asset

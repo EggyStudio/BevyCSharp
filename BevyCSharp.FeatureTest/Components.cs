@@ -1,4 +1,4 @@
-namespace BevyCSharp.Sample;
+namespace BevyCSharp.FeatureTest;
 
 /// <summary>Where something is.</summary>
 /// <remarks>
