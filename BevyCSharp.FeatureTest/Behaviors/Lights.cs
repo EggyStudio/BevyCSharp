@@ -23,7 +23,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// Every picture the bays use is drawn here a pixel at a time, the cookie, the decals and the
 /// volume, so the hall needs nothing from a download and a run on the workflow draws it whole.
-/// Each bay is named over its opening in the gizmos' stroke font.
+/// Each bay is named over its opening in the gizmos' stroke font. The panel's effects page turns
+/// on ambient occlusion and the rest across the whole map, and the bays are where they show.
 /// </para>
 /// </remarks>
 [Behavior]

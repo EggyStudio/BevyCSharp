@@ -14,6 +14,7 @@ internal static class Pages
     [
         new PageRow("Player", Player),
         new PageRow("Graphics", Graphics),
+        new PageRow("Effects", Effects),
         new PageRow("Audio", Audio),
         new PageRow("Controls", Controls),
         new PageRow("Debug", Debug),
@@ -44,6 +45,20 @@ internal static class Pages
         new ToggleRow("Old screen", () => ShaderShowcase.OldScreen, value => ShaderShowcase.OldScreen = value),
         new ToggleRow("Screen-space light", () => ScreenSpaceLight.On, value => ScreenSpaceLight.On = value),
         new ToggleRow("Ray-traced occlusion", () => RayTracedOcclusion.On, value => RayTracedOcclusion.On = value),
+    ]);
+
+    private static Page Effects() => new("Effects",
+    [
+        new ChoiceRow<Tonemapper>("Tonemapper", () => S.Tonemapper, value => Settings.Change(s => s with { Tonemapper = value })),
+        new ToggleRow("Ambient occlusion", () => S.AmbientOcclusion, value => Settings.Change(s => s with { AmbientOcclusion = value })),
+        new ToggleRow("Screen-space reflections", () => S.Reflections, value => Settings.Change(s => s with { Reflections = value })),
+        new ChoiceRow<DepthOfFieldMode>("Depth of field", () => S.DepthOfField, value => Settings.Change(s => s with { DepthOfField = value })),
+        new ToggleRow("Motion blur", () => S.MotionBlur, value => Settings.Change(s => s with { MotionBlur = value })),
+        new ToggleRow("Chromatic aberration", () => S.Aberration, value => Settings.Change(s => s with { Aberration = value })),
+        new ToggleRow("Vignette", () => S.Vignette, value => Settings.Change(s => s with { Vignette = value })),
+        new ToggleRow("Auto exposure", () => S.AutoExposure, value => Settings.Change(s => s with { AutoExposure = value })),
+        new SliderRow("Sharpening", () => S.Sharpen, value => Settings.Change(s => s with { Sharpen = value }), 0f, 1f, 0.1f),
+        new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
     ]);
 
     private static Page Audio() => new("Audio",

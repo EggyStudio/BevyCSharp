@@ -42,8 +42,12 @@ lit by a point light's shadow map, or by Solari's rays from the next start once 
 ray-traced lighting is on, where the bridge and the GPU have them. North of the hub the light hall
 has a bay each for point lights in red, green and blue, a spot light through a cookie, a light the
 size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
-captured once, an irradiance volume made in code, clustered decals and emission for the bloom. In
-spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
+captured once, an irradiance volume made in code, clustered decals and emission for the bloom. The
+panel's effects page switches the tonemapper and turns on ambient occlusion, screen-space
+reflections, a depth of field focused on whatever the view rests on, motion blur, chromatic
+aberration, auto exposure, sharpening and a dusk sky drawn in code, and
+`./bcs command setting AmbientOcclusion true` changes a setting as the panel does. In spectator mode
+`./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
 `build/drive-feature-test.sh` walks the player through each of them through `bcs`, as the pack
 workflow does.
 

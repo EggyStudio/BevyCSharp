@@ -254,3 +254,41 @@ from [SHARED.md](SHARED.md).
     as meshlets, to test them, where the GPU can.
 
 ## Replies
+
+**Item 3, the light hall and the effects page, and Verdicts 10 and 11.** The light hall stands north
+of the hub, a bay each for point lights in red, green and blue whose shadows cross in their
+mixtures, a spot light through a cookie drawn in code, a light the size of a panel with soft
+shadows, a spot through slats into a fog volume drawn by the camera's volumetric fog, a reflection
+probe captured once, an irradiance volume made in code, clustered decals over a wall, the floor and
+a corner, and tubes glowing past white for the bloom (`8cf909f`). Bevy 0.19 has no rect or area
+light, so the panel's is a point light of the panel's size with soft shadows, and under Solari an
+emissive mesh is one. The effects page switches the tonemapper and turns on SSAO, SSR, a depth of
+field focused by a ray on what the view rests on, motion blur, chromatic aberration, the vignette,
+auto exposure, sharpening and a dusk skybox drawn in code, and a `setting` command changes any of
+the panel's settings as the panel does, which the drive script's captures will use (the commit after
+`8cf909f`). Vegetation and the captures are left in the item.
+
+The gallery and the hall found five faults of the library, each mended with a test that failed
+first. A primitive had no tangents for anisotropy or a normal map, `Render.GenerateTangents` giving
+them (`3461e2c`). An image made from pixels stayed flat until the next frame after `MakeCubemap`,
+`MakeVolume` or `MakeTextureArray`, so an irradiance volume refused it and a skybox warned, and it
+now takes its shape in the call (`a5b35b1`). Solari lost prepasses it requires when an effect,
+occlusion, reflections or a prepass request taken off after it took them away, so the whole map drew
+unlit under rays, and auto exposure taken off went on adjusting the picture, Bevy forgetting its
+buffer by the camera's own entity where it keeps it by the render world's, mended by a new
+render-world entity for the camera as the effect goes (`62e0a4a`). `Persistent<T>` read a field a
+file left out as its type's zero rather than its default, a settings record that gains a field
+reading it as nothing from every older file (`0f0f461`). One more is found and not traced, the
+gallery's anisotropic spheres drawing blown white with SSAO on and forward rendering, though they
+have tangents and draw right without it and under deferred, Bevy's prepass normal for an anisotropic
+material being the suspect.
+
+Verdict 10's sentence was not stale but unplaced, being about a body added in code with a
+`PhysicsShape`, which keeps its size as `PhysicsShape.cs` says, and the page now says which it means
+(`5d60532`). Verdict 11 is mended, the crash log's tests reading every file through one helper that
+shares writing, latest.log being the only file the engine holds open that a test reads (`540343d`).
+Two test files moved into their areas first (`a765aad`, `156d2ce`). On a bridge with Solari the
+suite passes 1,242 and skips 5, the meshlet cases.
+
+Shared: `Persistent<T>` reads a file over the default's own JSON, so a field a later version adds
+keeps its default from an older file (`0f0f461`), for the row of a saved game laid over its scenes.

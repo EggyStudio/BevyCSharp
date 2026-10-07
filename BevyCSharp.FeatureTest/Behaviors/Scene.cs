@@ -81,9 +81,9 @@ public partial struct Scene
         // to scatter.
         Render.SetPostProcessing(camera, Applied.Picture(Settings.Current));
 
-        // The vignette pulls the eye in from the corners. No depth of field, which over a map the
-        // size of this one would blur every zone but the one in focus.
-        Render.SetEffects(camera, new EffectSettings { Vignette = 0.45f, VignetteRadius = 0.7f });
+        // The lens, the vignette pulling the eye in from the corners unless the effects page took
+        // it off, and the rest of that page.
+        Render.SetEffects(camera, Applied.Lens(Settings.Current));
 
         _sun = Entity.None;
         _shadows = null;

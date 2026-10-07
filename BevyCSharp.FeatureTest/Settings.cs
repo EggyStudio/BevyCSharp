@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Bevy;
 
@@ -22,6 +24,16 @@ public enum Smoothing
 
     /// <summary>Four samples a pixel, on the geometry's edges alone.</summary>
     Msaa,
+}
+
+/// <summary>What is drawn behind the scene, as the effects page offers it.</summary>
+public enum Backdrop
+{
+    /// <summary>The sky the air scatters from the sun, which tints the distance.</summary>
+    Atmosphere,
+
+    /// <summary>A cubemap of a dusk sky with stars, drawn in code, behind everything.</summary>
+    Dusk,
 }
 
 /// <summary>A tier the graphics page sets several settings from at once.</summary>
@@ -74,6 +86,48 @@ public sealed record FeatureSettings
 
     /// <summary>The tier last chosen, which set the four above.</summary>
     public Quality Quality { get; init; } = Quality.High;
+
+    /// <summary>How the picture's light is brought into what a screen can show.</summary>
+    public Tonemapper Tonemapper { get; init; } = Tonemapper.TonyMcMapface;
+
+    /// <summary>
+    /// Whether corners and creases are darkened where ambient light reaches less, which needs the
+    /// picture drawn once a pixel, so MSAA gives way to it.
+    /// </summary>
+    public bool AmbientOcclusion { get; init; }
+
+    /// <summary>
+    /// Whether smooth surfaces reflect what is on screen, which draws every material deferred and
+    /// once a pixel, so MSAA gives way to it.
+    /// </summary>
+    public bool Reflections { get; init; }
+
+    /// <summary>
+    /// How what is out of focus is blurred, the focus on whatever the middle of the view rests on.
+    /// </summary>
+    public DepthOfFieldMode DepthOfField { get; init; } = DepthOfFieldMode.None;
+
+    /// <summary>Whether what moves across the view is smeared along its way.</summary>
+    public bool MotionBlur { get; init; }
+
+    /// <summary>
+    /// Whether the colors split toward the picture's edges, as a cheap lens splits them.
+    /// </summary>
+    public bool Aberration { get; init; }
+
+    /// <summary>Whether the picture darkens toward its corners.</summary>
+    public bool Vignette { get; init; } = true;
+
+    /// <summary>Whether the exposure follows how bright the view is, as an eye adjusts.</summary>
+    public bool AutoExposure { get; init; }
+
+    /// <summary>
+    /// How much the finished picture is sharpened, from none at zero to the most at one.
+    /// </summary>
+    public float Sharpen { get; init; }
+
+    /// <summary>What is drawn behind the scene.</summary>
+    public Backdrop Backdrop { get; init; } = Backdrop.Atmosphere;
 
     /// <summary>Every sound's loudness, from silent at zero to as recorded at one.</summary>
     public float Master { get; init; } = 1f;
@@ -165,5 +219,60 @@ public static class Settings
 
         Store.Persist();
         Changed?.Invoke(was);
+    }
+
+    /// <summary>
+    /// Reads one setting, or changes it as the panel would, for a tester at the console and for
+    /// the drive script.
+    /// </summary>
+    /// <remarks>
+    /// The settings go to JSON and back through the same generated context the file is kept with,
+    /// so a setting is named as the file names it, in any case, and a value is given as the file
+    /// holds it, a number, true or false, or an option's name, which is taken as a string when it
+    /// is not JSON of its own.
+    /// </remarks>
+    [Command("setting", "Reads or changes one of the panel's settings, kept as the panel keeps it: setting <name> [value]")]
+    internal static string Setting(string words)
+    {
+        const string Usage = "setting <name> [value]";
+        var parts = words.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var fields = JsonSerializer.SerializeToNode(Current, SettingsJson.Default.FeatureSettings)!.AsObject();
+        if (parts.Length == 0) return string.Join(", ", fields.Select(field => field.Key));
+
+        var name = fields.Select(field => field.Key).FirstOrDefault(key => key.Equals(parts[0], StringComparison.OrdinalIgnoreCase));
+        if (name is null)
+        {
+            ConsoleHost.Fail("NO_SUCH_SETTING", $"There is no setting called {parts[0]}. The settings are {string.Join(", ", fields.Select(field => field.Key))}.");
+            return Usage;
+        }
+
+        if (parts.Length == 1) return $"{name} = {fields[name]?.ToJsonString()}";
+
+        JsonNode? value;
+        try
+        {
+            value = JsonNode.Parse(parts[1]);
+        }
+        catch (JsonException)
+        {
+            value = JsonValue.Create(parts[1]);
+        }
+
+        fields[name] = value;
+        FeatureSettings? changed;
+        try
+        {
+            changed = fields.Deserialize(SettingsJson.Default.FeatureSettings);
+        }
+        catch (JsonException error)
+        {
+            ConsoleHost.Fail("BAD_VALUE", $"{parts[1]} is not a value {name} can take. {error.Message}");
+            return Usage;
+        }
+
+        if (changed is null) return Usage;
+
+        Change(_ => changed);
+        return $"{name} = {JsonSerializer.SerializeToNode(Current, SettingsJson.Default.FeatureSettings)![name]?.ToJsonString()}";
     }
 }

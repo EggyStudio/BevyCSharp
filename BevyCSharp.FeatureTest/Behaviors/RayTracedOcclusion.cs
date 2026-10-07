@@ -44,6 +44,12 @@ public partial struct RayTracedOcclusion
     /// <summary>Whether it is to be on, as the panel's graphics page sets it.</summary>
     internal static bool On { get; set; }
 
+    /// <summary>
+    /// Whether it is tracing, and so writing the occlusion texture the effects page's own ambient
+    /// occlusion would otherwise make.
+    /// </summary>
+    internal static bool Tracing => _on;
+
     /// <summary>Puts it on or off where the panel changed it.</summary>
     /// <remarks>
     /// The panel shows what it came to after, so one this GPU cannot trace goes back to off rather
@@ -83,6 +89,9 @@ public partial struct RayTracedOcclusion
             Shaders.SetViewDispatches(camera);
             Shaders.SetPasses(camera);
             Render.SetAmbientOcclusion(camera, null);
+
+            // The effects page's own occlusion comes back, where it is on.
+            Applied.Due();
             return "ray-traced ambient occlusion is off";
         }
 
