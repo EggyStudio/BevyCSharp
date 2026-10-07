@@ -10,7 +10,6 @@ BevyCSharp/Scenes/SceneFile.cs
 BevyCSharp/Scenes/SceneInstances.cs
 native/bevy_csharp/src/ecs.rs
 native/bevy_csharp/src/reflected.rs
-native/bevy_csharp/src/render/assets.rs
 native/bevy_csharp/src/render/compute.rs
 native/bevy_csharp/src/render/post.rs
 native/bevy_csharp/src/render/scene.rs

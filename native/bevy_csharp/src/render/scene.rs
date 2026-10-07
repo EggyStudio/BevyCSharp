@@ -546,7 +546,7 @@ pub extern "C" fn bcs_render_capture_release(id: i32) -> i32 {
 /// Points a camera at an image instead of at the window.
 ///
 /// A negative `image` puts it back on the window, which is where a camera starts. The image comes
-/// from [`crate::render::assets::bcs_render_create_target`], and a material given the same handle
+/// from [`crate::render::images::bcs_render_create_target`], and a material given the same handle
 /// samples what this camera drew, which is the whole of a portal or a security monitor.
 ///
 /// The camera keeps everything else it was given. Its projection, its layers, its order and its

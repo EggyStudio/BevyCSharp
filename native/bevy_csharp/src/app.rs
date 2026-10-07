@@ -358,10 +358,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 bevy::app::PreUpdate,
                 crate::render::probes::drop_flat_volumes,
             );
-            app.init_resource::<crate::render::assets::PendingReshapes>();
+            app.init_resource::<crate::render::images::PendingReshapes>();
             app.add_systems(
                 bevy::app::PreUpdate,
-                crate::render::assets::reshape_images,
+                crate::render::images::reshape_images,
             );
 
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by an

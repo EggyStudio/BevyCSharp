@@ -408,7 +408,7 @@ pub fn watch(
 ) -> i32 {
     use bevy::render::render_resource::TextureUsages;
 
-    let mut image = super::assets::target_image(width, height);
+    let mut image = super::images::target_image(width, height);
     image.texture_descriptor.format = WATCH_FORMAT;
     image.texture_descriptor.usage =
         TextureUsages::TEXTURE_BINDING | TextureUsages::RENDER_ATTACHMENT | TextureUsages::COPY_SRC;

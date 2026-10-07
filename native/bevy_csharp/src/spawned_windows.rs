@@ -57,7 +57,7 @@ pub(crate) fn draw_windows_offscreen(
     drawn.0.retain(|entity, _| windows.contains(*entity));
     for (entity, window) in &windows {
         drawn.0.entry(entity).or_insert_with(|| ImageRenderTarget {
-            handle: images.add(crate::render::assets::target_image(
+            handle: images.add(crate::render::images::target_image(
                 window.physical_width().max(1),
                 window.physical_height().max(1),
             )),

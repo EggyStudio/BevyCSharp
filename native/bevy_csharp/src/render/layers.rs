@@ -62,7 +62,7 @@ pub fn set(world: &mut World, camera: Entity, image: Handle<Image>, layer: u32) 
     let companion = match world.get::<LayerTarget>(camera) {
         Some(existing) if existing.image == image => existing.companion.clone(),
         _ => {
-            let made = super::assets::target_image_in(size.width, size.height, float);
+            let made = super::images::target_image_in(size.width, size.height, float);
             world.resource_mut::<Assets<Image>>().add(made)
         }
     };

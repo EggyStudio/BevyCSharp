@@ -47,7 +47,7 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
         move |mut commands: Commands, mut images: ResMut<Assets<Image>>| {
             // The same image a camera is given one of when a portal or a minimap asks for one.
             // What makes this one the run's is that every camera is pointed at it below.
-            let image = crate::render::assets::target_image(width, height);
+            let image = crate::render::images::target_image(width, height);
 
             commands.insert_resource(OffscreenTarget {
                 image: images.add(image),
