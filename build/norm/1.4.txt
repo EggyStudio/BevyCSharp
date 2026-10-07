@@ -63,7 +63,6 @@ BevyCSharp.Tests/MaterialTests.cs
 BevyCSharp.Tests/Mesh2dTests.cs
 BevyCSharp.Tests/MeshFileTests.cs
 BevyCSharp.Tests/MeshTagTests.cs
-BevyCSharp.Tests/MeshletTests.cs
 BevyCSharp.Tests/MessageTests.cs
 BevyCSharp.Tests/NativeComponentTests.cs
 BevyCSharp.Tests/NativeInputLayoutTests.cs
