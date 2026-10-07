@@ -10,11 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9ba00a4`. Verdict 9 is mended: the leak test reads the heap after every tenth app
-and judges how far its floor rose, the least reading from the twentieth app to the fiftieth against
-the least from the seventieth to the hundredth, and where `BCS_GCDUMP` names `dotnet-gcdump`, which
-the macOS job installs at a pinned version, `HeapCensus` counts the heap's types after the twentieth
-app and the hundredth so a failure names what grew, as 3DEngine's `596535ce` has it (`070e5e0`). The
+Reviewed up to `c8509aa`. The course is in, which settles item 3, the list renumbered: east of the
+hub, three rows of stations, the north row climbing by ramps at 15, 30, 45 and 60 degrees with a
+landing each, the last too steep for the character's 46, stairs of 0.15, 0.25 and 0.4, the last over
+its step height, a beam a third of a unit wide and a tunnel crawled through crouched; the middle row
+trying the ground, ice, a bounce pad under a ledge too high to jump to and a pit whose sensor puts
+the player back at the zone's start; the south row moving, a platform to and fro between ledges, an
+elevator, a turning disc, a conveyor and five gaps a little wider each time, every piece a static or
+kinematic body sized by its transform's scale over one unit cube; beside it the playground, six
+crates and five balls light enough to push, a door on a hinge, a lift on a slider driven up and
+down, a rope of ten distance joints with a weight, a pressure plate whose lamp lights while
+`ContactImpulse` over its pressers passes a crate's weight, and a heightmap terrain of two waves
+fading to the ground at its edges, under a `Mesh` collider where the program draws, with four balls
+dropped on it; the player applies what is underfoot from a ray down, a belt carrying it, ice keeping
+its speed and the pad throwing it; `teleport`, `player` and `player.put` are commands;
+`build/drive-feature-test.sh` starts the program offscreen at a sixtieth of a second a frame, tries
+the hub's walk and jump, creative flight and spectator mode, then each station from `player.put` and
+judges it by where `player` says it ends, with an error annotation and captures, three runs passing
+on the working machine, and the pack workflow's game job builds the feature test from the checkout
+with the native job's bridge and runs it (`c8509aa`). The guide and BUILDING.md say so. The suite:
+1,232 passed, 9 skipped. The run of `cec88ad` ended at 18:33 with its Windows job cancelled at the
+job's hour in the step that opens the feature test, nothing said, as Verdict 7 reads it; nothing has
+run since, nothing being pushed.
+
+Before them, Verdict 9 came to be mended: the leak test reads the heap after every tenth app and
+judges how far its floor rose, the least reading from the twentieth app to the fiftieth against the
+least from the seventieth to the hundredth, and where `BCS_GCDUMP` names `dotnet-gcdump`, which the
+macOS job installs at a pinned version, `HeapCensus` counts the heap's types after the twentieth app
+and the hundredth so a failure names what grew, as 3DEngine's `596535ce` has it (`070e5e0`). The
 same commit mends Verdict 7's third half: the step that opens the feature test has `timeout-minutes`
 of four, prints each `bcs` answer and writes it to a file of its own rather than reading it through
 `$(...)`, whose pipe the program `bcs` starts may inherit on Windows and hold open as long as it
@@ -22,7 +45,7 @@ runs, which fits the wait the run of `cec88ad` sits in and is told by the next W
 character controller flies with `Fly` set, at `Move` in every direction with gravity held off and
 walls, floors and ceilings still stopping it, and `PhysicsWorld.Place` puts a dynamic body at a
 point at rest and writes its transform, each with a test, in the listing, the cheat sheet and the
-physics page (`aa5c9e0`). The feature test has its player, item 3's character: a capsule on
+physics page (`aa5c9e0`). The feature test has its player, the course's character: a capsule on
 `CharacterController` with a figure and a visor, walking, running, sprinting on Shift, crouching on
 C and jumping on Space with coyote time and jump buffering of a little over a tenth of a second
 each, the mouse turning the view while Tab locks the cursor or the right button is held and the
@@ -32,8 +55,7 @@ mode, the free camera kept for spectator mode, F5 stepping the view from the eye
 from in front with the camera brought in where a wall stands between, a fall below the map putting
 it back at the start of the zone it was last in, a teleport putting it at a zone's start facing its
 middle, the panel's Player page, the `mode` and `player` commands and the guide's paragraph
-(`9ba00a4`); the zones and the drive script are under way in the working tree. No suite count was
-reported with the three.
+(`9ba00a4`).
 
 Before them, the feature test's program came in: a hub of signposts to its six zones written on
 their boards in gizmo text, the admin panel on F1 or a pad's start button, a list of pages steered
@@ -43,22 +65,10 @@ window opens, the F3 overlay of the frame time, the place and facing, the entiti
 command's pairs, F3 toggling as it is let go so F3 held with another key is free for the modes, the
 console, and the sample's F-key effects moved onto the panel with `feature.gi`, `feature.rtao` and
 `feature.crates` as commands (`ca13f97`), which settled its item; the owner typed their word in the
-working session for AGENTS.md's row and for `bevy_weather` at item 8. Verdict 8 is mended, the
+working session for AGENTS.md's row and for `bevy_weather`'s item. Verdict 8 is mended, the
 fixed-step cases and the physics tests stepping their clocks a frame at a time (`a915784`), after a
 move of two test files into their folders, N 1.4's list at 79 and N 3.4's at 41 (`19433d1`). The
 suite: 1,230 passed, 9 skipped.
-
-Before them, the Windows step came to open the program headless and running until stopped, since the
-job's bridge has no renderer (`08ac049`), Verdict 7's second mend; a game gets the editor's console
-in one call, `ImGuiConsole` drawn over the window on the key under Escape with the log, its filters,
-its history and completion, `ConsoleView` moved into the library and an ImGui frame that draws
-nothing clearing what the last one drew (`0cef072`); and the sample is `BevyCSharp.FeatureTest`,
-opened by `bcs open --feature-test` with `--sample` kept, in the solution, the workflow, the docs
-and AGENTS.md's table on the owner's word (`cec88ad`), the program itself under way. The run of
-`e58d4bc` on macOS built the bridge and passed the attribute test, which settles Verdicts 5 and 6,
-and failed one test, `FixedUpdateTests`' overstep case, the second to measure the machine's clock,
-which is Verdict 8; the run of `cec88ad` was in progress at 17:37. The suite: 1,227 passed, 9
-skipped, as last reported.
 
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
@@ -67,38 +77,27 @@ by review.
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 10 to 15 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 9 to 14 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `cec88ad` passed on Linux, failed on macOS in the
-   overstep case before its mend and in the leak test's two readings, Verdict 9, mended since, and
-   its Windows step opening the feature test through `bcs` was still waiting at 18:21, Verdict 7's
-   third half, mended since, so the first run with `070e5e0` tells of the three; the pack run of
-   `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each push's run is read
-   by the reviewing session, and a failure it names comes first here.
+1. **What the next page says.** The run of `cec88ad` ended at 18:33: Linux green, macOS failed in
+   the overstep case and the leak test's two readings, Verdicts 8 and 9, and its Windows job
+   cancelled at the job's hour in the step that opens the feature test with nothing said, Verdict
+   7's third half, each mended since, so the first run with `070e5e0` and `a915784` tells of the
+   three; the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run.
+   Each push's run is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
    their item: N 6.2 is the macOS job's first green run.
-3. **The course, its character in.** The player is in (`9ba00a4`), a capsule on
-   `CharacterController`: walk, run, sprint, crouch, jump with coyote time and jump buffering, the
-   three modes stepped by F3 held with F4 with an overlay naming them, F5 stepping the view, the
-   panel's page, the `mode` command and respawn at the zone's start; air control, riding a moving
-   platform and pushing crates are the controller's and are shown on the zones. The zones: ramps at
-   15, 30, 45 and 60 degrees, stairs of several step heights, a narrow beam and a crouch tunnel; a
-   moving platform, an elevator, a rotating disc and a conveyor; gaps of growing width, an ice patch
-   of low friction, a bounce pad and a pit that respawns; pushable crates, balls, a hinge door, a
-   slider lift, a rope of distance joints and a pressure plate reading `ContactImpulse`; a terrain
-   of a heightmap mesh with a Mesh collider under it all. A drive script walks each zone through
-   `bcs` and asserts it, played by the pack workflow as Courtyard is.
-4. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
+3. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
    and anisotropy; a Cornell box lit by shadow maps and by Solari where the GPU has it, a panel
    switch; a lights gallery of directional, point, spot, rect and area lights with shadows, a
    reflection probe, an irradiance volume, light probes, decals, a fog volume, SSAO and a skybox;
    the post effects as panel switches, bloom, tonemapping, MSAA, FXAA, TAA, SMAA and what else the
    camera has; and vegetation as instanced grass and trees moved by a Slang wind shader, each drawn
    from the examples that exist and each zone captured by the drive script.
-5. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
+4. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
    demand and is never checked in. `scenes/<name>.json` holds the scene's source, its license and
    attribution, the pack's URL among this repository's release assets, its size and its SHA-256;
    `build/make-scene-pack.py` makes a pack from the official download, Intel Sponza first from its
@@ -121,23 +120,23 @@ from [SHARED.md](SHARED.md).
    meshlets run; the feature test's bridge and the published one are built with the meshlet and
    Solari additions. The owner publishes the pack the script makes as a release asset, and Bistro,
    the classic Sponza and San Miguel wait.
-6. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
+5. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
    through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
    the latitude on a panel page and in the settings file, the lights' colors and intensities on
    curves by the hour, and a console command setting the hour.
-7. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
+6. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
    into the working session, `WeatherPlugin` and `WeatherCamera`, its `WeatherTime`, `Weather`,
    `ProceduralWeather` and `WeatherConfig` reached from C# through the wrappers where they reflect
    and through bridge calls where they do not, the panel's weather page (kind, cloud coverage, the
-   tier, procedural on or off), item 6's time of day handing the sun to it, clouds at the lowest
+   tier, procedural on or off), item 5's time of day handing the sun to it, clouds at the lowest
    tier in CI's captures, and its cost measured on a real GPU and in the workflow's image and
    written into the comparison page's costs. The crate draws around Bevy's atmosphere, which stays.
-8. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
+7. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
    code for `win-x64` and `linux-x64` as `build/play-native.sh` does, the native library and the
    assets beside it and a `README.txt` for testers naming the keys, the panel, the console and where
    the logs are; a workflow started by hand makes the two zips as artifacts; the pack workflow plays
    the feature test from the package as it plays Courtyard, and the soak takes it.
-9. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
+8. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
    written in its batch: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
    decal's tag and a volume's voxels), the widgets' events as observers, keys observed as they reach
    a field, and what the table then names most. When the captures have settled, they are compared
@@ -150,24 +149,24 @@ from [SHARED.md](SHARED.md).
    examples and the two camera controllers follow the other gaps, their crates allowed (Decisions 11
    and 12) on the owner's word in the working session, and the four font examples stay missing
    (Decision 13).
-10. **Every method native code calls catches every exception**, from 3DEngine's
-    `NormTests.N_2_10` (`48fbb663`): a test finds a callback the bridge calls that lets an exception
-    through, by how it is handed over, and each is mended to report it instead, so no exception
-    crosses the bridge from a system, an observer or a loader's callback.
-11. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+9. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+   (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
+   is handed over, and each is mended to report it instead, so no exception crosses the bridge from
+   a system, an observer or a loader's callback.
+10. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
     (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
     workflow, as the first game's first step would have a newcomer do.
-12. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+11. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
     (`ab052859`): a query's filter or a world call answering the entities a component was removed
     from since the system's last run, beside the added and changed ones a behavior reads.
-13. **Every example compiles on the package alone**, from 3DEngine's
+12. **Every example compiles on the package alone**, from 3DEngine's
     `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
     project, so what they share to say a thing in one word becomes the package's own calls or stays
     in the example, and the workflow builds every example on the packed package.
-14. **A script that more than one system runs is read for the forms only GNU's tools or a later
+13. **A script that more than one system runs is read for the forms only GNU's tools or a later
     bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
     and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
-15. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+14. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
     generators report, so an editor offers the mend.
 
@@ -223,8 +222,9 @@ from [SHARED.md](SHARED.md).
    `timeout-minutes` of four, each answer printed and written to a file of its own rather than read
    through `$(...)`, whose pipe a program `bcs` starts may inherit on Windows and hold open as long
    as it runs, which would keep the step waiting on the opening's answer until the program ended, as
-   the run of `cec88ad` waits; the next Windows job tells whether that was the wait. Settled when a
-   Windows job's step opens the feature test through `bcs` and ends with its three answers printed.
+   the run of `cec88ad` waited, its Windows job cancelled at the job's hour with nothing said; the
+   next Windows job tells whether that was the wait. Settled when a Windows job's step opens the
+   feature test through `bcs` and ends with its three answers printed.
 
 8. **The macOS job of `e58d4bc` fails the overstep case of `FixedUpdateTests`, the second test to
    measure the machine's clock.** Read from the page: 894 passed, 1 failed, 405 skipped, the bridge
@@ -251,6 +251,16 @@ from [SHARED.md](SHARED.md).
    read after every tenth app, the floor judged, and `HeapCensus` counting the heap's types where
    `BCS_GCDUMP` names `dotnet-gcdump`, which the macOS job installs at a pinned version. Settled
    when a macOS job passes the test.
+
+10. **`docs/physics.md` says a collider is not scaled with its entity, and says it is.** Read
+    from the page: its paragraph on bodies says the box, sphere, capsule and cylinder shapes are
+    sized in world units and not scaled with the entity, and its paragraph on colliders below says a
+    collider is sized in the entity's own units and scaled with it, so a cube stretched into a wall
+    collides as one. The code does the second, `Colliders.cs` sizing every shape by the transform's
+    scale, and the course leans on it, every piece a unit cube scaled to its size (`c8509aa`), so
+    the first sentence is the stale one, kept through its paragraph's rewrap at `aa5c9e0`. The
+    sentence goes, or says what the second says, and the page is read once through for another
+    sentence the scaling made false. Settled when the page says one thing.
 
 ## Decisions
 
@@ -288,7 +298,7 @@ from [SHARED.md](SHARED.md).
 
 10. **The tests run on macOS as well.** The owner chose it on 2026-10-07, the package being
     built for osx-arm64 and osx-x64 while the suite ran on Linux and Windows alone; N 6.2 asks for
-    every desktop system the package ships for, and `macos-latest` joining the matrix is item 5.
+    every desktop system the package ships for, and `macos-latest` joined the matrix at `6528ea2`.
 
 11. **Feathers' crate may be enabled, after the other gaps.** The owner allowed it on 2026-10-07
     for `feathers_counter`, `feathers_gallery` and `virtual_keyboard`, Bevy's `bevy_feathers`

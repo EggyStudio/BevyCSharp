@@ -35,9 +35,10 @@ level begun again puts its platforms back, is said to be with `physics.MarkPlace
 goes further in a frame than `PhysicsSettings.PlaceBeyond`, and its body is put there at rest
 rather than swept through what lies between. A dynamic body is put somewhere new the same way with
 `physics.Place(ecs, entity, position)`, as a character's respawn is. A static one never moves.
-Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled with the
-entity, and a level's floors and walls are a mesh shape made from triangles, such as a
-mesh `Render.TryReadMesh` reads back once it has loaded:
+A body added this way takes a `PhysicsShape`, a box, a sphere, a capsule or a cylinder sized in
+world units and kept at that size however its entity is scaled, as a collider below is not, and a
+level's floors and walls are a mesh shape made from triangles, such as a mesh `Render.TryReadMesh`
+reads back once it has loaded:
 
 <!-- compiled with:
 PhysicsWorld physics = ctx.Res<PhysicsWorld>();
