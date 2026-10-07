@@ -12,7 +12,6 @@ BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no 
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
 BevyCSharp.Tests/CaptureTests.cs
 BevyCSharp.Tests/ChangingTypeTests.cs
-BevyCSharp.Tests/CharacterControllerTests.cs
 BevyCSharp.Tests/CliCommandSchemaTests.cs
 BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/CliEnvelopeTests.cs
