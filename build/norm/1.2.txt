@@ -201,8 +201,4 @@ BevyCSharp/Scenes/SaveGame.cs SaveId
 BevyCSharp/Scenes/SaveGame.cs SaveLoaded
 BevyCSharp/Scenes/SceneAttributes.cs DataVersionAttribute
 BevyCSharp/Scenes/SceneAttributes.cs FormerNameAttribute
-BevyCSharp/Scenes/SceneInstances.cs InstanceOverride
-BevyCSharp/Scenes/SceneInstances.cs OverrideKind
-BevyCSharp/Scenes/SceneInstances.cs SceneInstance
-BevyCSharp/Scenes/SceneInstances.cs WorldInstanceReady
 BevyCSharp/Scenes/SceneValue.cs SceneReferences
