@@ -209,3 +209,17 @@ it. A click there lands on the window entity, since Bevy picks a sprite only whe
 `Pickable`, so an offscreen run, which has no window entity, clicks nothing, and the ripple was
 checked by calling its handler from a system. `DelayedCommandTests` holds the order the queues land
 in by frame. The suite passed, 1,156 with 9 skipped. Item 4 is next, as agreed.
+
+**Now 4, the first of 3DEngine's `c5227118`.** A contact that starts carries where and how hard its
+pair met, `ContactStarted.Point`, `Normal` and `Speed`, the speed read from the bodies' velocities
+at the deepest contact as they approach as well as as they touch, since the solver slows a pair in
+the step before it touches, as 3DEngine reads it. A ball joint can be kept within a cone,
+`Joint.Ball(...).WithCone(axis, swing, twist)`, measured from how the bodies are turned when joined
+as a hinge's limits are, and a distance joint's range changes while it holds,
+`PhysicsWorld.SetDistance`. The six physics component types moved into files of their names first,
+N 1.2's list at 211 (`20268b8`). `BodyContactTests` and `JointTests` hold 3DEngine's cases, the
+thrown pair undamped, since this world damps by 0.03 a second where 3DEngine's test world does
+not. The suite passed, 1,159 with 9 skipped. Collision layers are next.
+
+Shared: a contact's point, normal and closing speed, a ball joint's cone and a distance joint's
+range, taken from 3DEngine's `c5227118`.

@@ -127,6 +127,17 @@ A pair counts as separated once it has gone a few steps without touching, so a b
 another, which hops clear of it by a millimeter as it lands, is not reported as leaving and landing
 again.
 
+A contact that starts says where and how hard the two met. `Point` is their deepest contact in the
+world, `Normal` the way `A` is pushed, and `Speed` how fast they closed along it, for a sound as loud
+as the hit or the damage it does. The speed is read as the two approach as well as as they touch,
+since the solver slows a pair in the step before it touches, so a crate dropped onto the floor meets
+it at the speed its fall gave it, and one placed on the floor meets it at nothing:
+
+```csharp
+foreach (var contact in ctx.Read<ContactStarted>())
+    if (contact.Speed > 2f) Audio.Play(thud, new AudioSettings { Volume = MathF.Min(1f, contact.Speed / 10f) });
+```
+
 Joints hold two moving bodies together: a ball joint for a shoulder or a pendulum, a hinge for a
 door or a wheel, a weld for a part bolted on, and a distance range for a rope or a rod.
 
@@ -154,6 +165,19 @@ physics.Connect(frame, door, Joint.Hinge(hingeOnFrame, Vec3.UnitY, hingeOnDoor, 
 
 A limit is measured from how the two are turned when they are joined, so a door joined closed opens
 from closed.
+
+A ball joint can be kept within a cone, as a shoulder or a link of a chain is, swinging no further
+than an angle from an axis on the first body and twisting about it no further than another, each
+measured from how the two are turned when joined. A distance joint's range changes while it holds,
+as a winch reels a rope in a little each frame:
+
+```csharp
+physics.Connect(torso, arm, Joint.Ball(shoulder, Vec3.Zero)
+    .WithCone(axisA: -Vec3.UnitY, swingDegrees: 60f, twistDegrees: 20f));
+
+var rope = physics.Connect(hook, crate, Joint.Distance(Vec3.Zero, Vec3.Zero, 0f, 3f));
+physics.SetDistance(rope, 0f, length -= 0.5f * ctx.Time.Delta);
+```
 
 ---
 

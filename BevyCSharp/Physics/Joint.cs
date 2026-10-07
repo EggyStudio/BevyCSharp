@@ -16,6 +16,8 @@ public readonly record struct Joint
     internal (float Speed, float Torque)? Motor { get; private init; }
     internal (float Lowest, float Highest)? Limits { get; private init; }
 
+    internal (Vec3 Axis, float Swing, float Twist)? Cone { get; private init; }
+
     /// <summary>
     /// A point on one body held to a point on the other, free to turn any way about it: a
     /// shoulder, a pendulum's pivot, a chain's links.
@@ -76,5 +78,26 @@ public readonly record struct Joint
         if (lowestDegrees > highestDegrees) throw new ArgumentException("The lowest angle is above the highest.", nameof(lowestDegrees));
 
         return this with { Limits = (lowestDegrees, highestDegrees) };
+    }
+
+    /// <summary>
+    /// A ball joint kept within a cone, the second body swung no further than
+    /// <paramref name="swingDegrees"/> from the first's <paramref name="axisA"/> and twisted about it
+    /// no further than <paramref name="twistDegrees"/> either way, as a shoulder or a link of a chain.
+    /// </summary>
+    /// <param name="axisA">The cone's middle, in the first body's own space, as a hinge's axis is.</param>
+    /// <param name="swingDegrees">How far it swings from the axis, 180 or more leaving it free to swing.</param>
+    /// <param name="twistDegrees">How far it twists about the axis either way, 180 or more leaving it free to twist.</param>
+    /// <remarks>
+    /// Measured from how the two bodies are turned to each other when they are joined, which is the
+    /// middle of the cone and of the twist, as a hinge's limits are.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The joint is not a ball joint.</exception>
+    /// <exception cref="ArgumentException">An angle is negative.</exception>
+    public Joint WithCone(Vec3 axisA, float swingDegrees, float twistDegrees)
+    {
+        if (Kind != 0) throw new InvalidOperationException("A cone keeps a ball joint, which turns any way about its point.");
+        if (swingDegrees < 0f || twistDegrees < 0f) throw new ArgumentException("A ball joint's cone is angles of zero or more.");
+        return this with { Cone = (axisA, swingDegrees, twistDegrees) };
     }
 }

@@ -90,6 +90,40 @@ public sealed partial class PhysicsWorld
             }));
         }
 
+        if (joint.Cone is { } cone)
+        {
+            // The cone's middle as each body sees it now, and frames with their Z along it that agree
+            // as the bodies are turned now, as the hinge's limit has.
+            var axisA = Vector3.Normalize(ToBepu(cone.Axis));
+            var world = Vector3.Transform(axisA, first.Pose.Orientation);
+            var axisB = Vector3.Transform(world, Quaternion.Conjugate(second.Pose.Orientation));
+
+            if (cone.Swing < 180f)
+            {
+                constraints.Add(_simulation.Solver.Add(first.Handle, second.Handle, new SwingLimit
+                {
+                    AxisLocalA = axisA,
+                    AxisLocalB = axisB,
+                    MaximumSwingAngle = cone.Swing * MathF.PI / 180f,
+                    SpringSettings = spring,
+                }));
+            }
+
+            if (cone.Twist < 180f)
+            {
+                var basisA = Toward(axisA);
+                var basisB = Quaternion.Concatenate(Quaternion.Concatenate(basisA, first.Pose.Orientation), Quaternion.Conjugate(second.Pose.Orientation));
+                constraints.Add(_simulation.Solver.Add(first.Handle, second.Handle, new TwistLimit
+                {
+                    LocalBasisA = basisA,
+                    LocalBasisB = Quaternion.Normalize(basisB),
+                    MinimumAngle = -cone.Twist * MathF.PI / 180f,
+                    MaximumAngle = cone.Twist * MathF.PI / 180f,
+                    SpringSettings = spring,
+                }));
+            }
+        }
+
         _joints[id] = ([.. constraints], a, b);
 
         var pair = ContactLog.Pair(Packed(_bodies[a]), Packed(_bodies[b]));
@@ -125,6 +159,32 @@ public sealed partial class PhysicsWorld
             }
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Changes how far apart a distance joint keeps its points, as a winch reeling a rope in does when
+    /// it is set a little shorter each frame.
+    /// </summary>
+    /// <param name="joint">A joint made with <see cref="Joint.Distance"/>.</param>
+    /// <param name="minimum">The nearest the points come, from the next step.</param>
+    /// <param name="maximum">The furthest they go apart.</param>
+    /// <returns>Whether the joint is a distance joint to change.</returns>
+    /// <exception cref="ArgumentException">The minimum is negative or above the maximum.</exception>
+    public bool SetDistance(JointHandle joint, float minimum, float maximum)
+    {
+        if (minimum < 0f || maximum < minimum) throw new ArgumentException("A distance joint's minimum is zero or more and no more than its maximum.");
+        if (_disposed || !_joints.TryGetValue(joint.Id, out var held)) return false;
+
+        var handle = held.Constraints[0];
+        if (_simulation.Solver.GetConstraintReference(handle).TypeBatch.TypeId != DistanceLimit.ConstraintTypeId) return false;
+
+        _simulation.Solver.GetDescription(handle, out DistanceLimit limit);
+        (limit.MinimumDistance, limit.MaximumDistance) = (minimum, maximum);
+        _simulation.Solver.ApplyDescription(handle, limit);
+
+        // A sleeping pair is woken, so it holds to the new range.
+        _simulation.Awakener.AwakenConstraint(handle);
         return true;
     }
 

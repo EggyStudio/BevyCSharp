@@ -57,6 +57,12 @@ public sealed partial class PhysicsWorld : IDisposable
     /// <summary>The pairs of entities touching at the end of the last step.</summary>
     private HashSet<(Entity A, Entity B)> _touching = [];
 
+    /// <summary>
+    /// The fastest each pair near but not yet touching has closed at, which its contact reports as it
+    /// starts, forgotten once it starts or moves off.
+    /// </summary>
+    private readonly Dictionary<(uint A, uint B), float> _approached = [];
+
     /// <summary>Every joint, by its handle's number, with the two entities it holds.</summary>
     /// <remarks>
     /// A joint can be several of Bepu's constraints between the same two bodies, a hinge with its
@@ -372,6 +378,7 @@ public sealed partial class PhysicsWorld : IDisposable
         MoveCharacters(ecs, seconds);
 
         _contacts.Touching.Clear();
+        _contacts.Near.Clear();
         _contacts.Struck.Clear();
         _simulation.Timestep(seconds, _threads);
         Report(messages);
@@ -448,14 +455,26 @@ public sealed partial class PhysicsWorld : IDisposable
     /// </remarks>
     private void Report(MessageBus? messages)
     {
-        var now = new HashSet<(Entity A, Entity B)>();
-
-        foreach (var (a, b) in _contacts.Touching)
+        foreach (var (key, speed) in _contacts.Near) _approached[key] = MathF.Max(speed, _approached.GetValueOrDefault(key));
+        if (_approached.Count > _contacts.Near.Count)
         {
-            if (Entity(a) is { } first && Entity(b) is { } second)
-            {
-                now.Add(first.Bits < second.Bits ? (first, second) : (second, first));
-            }
+            foreach (var key in _approached.Keys.Where(key => !_contacts.Near.ContainsKey(key) && !_contacts.Touching.ContainsKey(key)).ToArray())
+                _approached.Remove(key);
+        }
+
+        var now = new HashSet<(Entity A, Entity B)>();
+        var met = new Dictionary<(Entity A, Entity B), (Vector3 Point, Vector3 Normal, float Speed)>();
+
+        foreach (var (key, touch) in _contacts.Touching)
+        {
+            if (Entity(key.A) is not { } first || Entity(key.B) is not { } second) continue;
+
+            // Named in the order of the entities' bits, the normal turned to point from the second
+            // toward the first, and the speed the faster of now and the approach.
+            var (pair, normal) = first.Bits < second.Bits ? ((first, second), touch.Normal) : ((second, first), -touch.Normal);
+            var speed = MathF.Max(touch.Speed, _approached.Remove(key, out var approached) ? approached : 0f);
+            now.Add(pair);
+            met[pair] = (touch.Point, normal, speed);
         }
 
         foreach (var pair in _touching)
@@ -485,17 +504,14 @@ public sealed partial class PhysicsWorld : IDisposable
 
         foreach (var pair in now)
         {
-            if (!_touching.Contains(pair)) messages?.Send(new ContactStarted(pair.A, pair.B));
+            if (_touching.Contains(pair)) continue;
+
+            var (point, normal, speed) = met.GetValueOrDefault(pair);
+            messages?.Send(new ContactStarted(pair.A, pair.B, FromBepu(point), FromBepu(normal), speed));
         }
 
         // A pair reported this step starts counting again from nothing.
-        foreach (var (a, b) in _contacts.Touching)
-        {
-            if (Entity(a) is { } first && Entity(b) is { } second)
-            {
-                _missing.Remove(first.Bits < second.Bits ? (first, second) : (second, first));
-            }
-        }
+        foreach (var pair in met.Keys) _missing.Remove(pair);
 
         _touching = now;
     }

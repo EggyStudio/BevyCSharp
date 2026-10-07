@@ -17,7 +17,20 @@ namespace Bevy.Physics;
 /// </remarks>
 internal sealed class ContactLog
 {
-    public readonly HashSet<(uint A, uint B)> Touching = [];
+    /// <summary>
+    /// The pairs touching this step, each in one order, with the point of their deepest contact in
+    /// the world, its normal from the second toward the first of the pair as named here, and the
+    /// speed they closed at along it.
+    /// </summary>
+    public readonly Dictionary<(uint A, uint B), (Vector3 Point, Vector3 Normal, float Speed)> Touching = [];
+
+    /// <summary>
+    /// The pairs near enough this step to meet within it and not yet touching, each with the
+    /// fastest it closed at, since the solver slows a pair in the steps before it touches, so the
+    /// speed it met at is read while it approaches.
+    /// </summary>
+    public readonly Dictionary<(uint A, uint B), float> Near = [];
+
     public readonly HashSet<uint> Sensors = [];
 
     /// <summary>
@@ -43,11 +56,23 @@ internal sealed class ContactLog
         lock (Struck) Struck[body.Packed] = outward;
     }
 
-    public void Add(CollidableReference a, CollidableReference b)
+    /// <summary>
+    /// Records a pair at its deepest contact, the normal from <paramref name="b"/> toward
+    /// <paramref name="a"/> as Bepu gives it, touching or only near.
+    /// </summary>
+    public void Add(CollidableReference a, CollidableReference b, Vector3 point, Vector3 normal, float speed, bool touching)
     {
-        // In one order, so a pair is the same pair whichever way Bepu names it.
-        var pair = a.Packed < b.Packed ? (a.Packed, b.Packed) : (b.Packed, a.Packed);
-        lock (Touching) Touching.Add(pair);
+        // In one order, so a pair is the same pair whichever way Bepu names it, the normal turned
+        // with it.
+        var (pair, facing) = a.Packed < b.Packed ? ((a.Packed, b.Packed), normal) : ((b.Packed, a.Packed), -normal);
+
+        if (touching)
+        {
+            lock (Touching) Touching[pair] = (point, facing, speed);
+            return;
+        }
+
+        lock (Near) Near[pair] = MathF.Max(speed, Near.GetValueOrDefault(pair));
     }
 }
 
@@ -65,10 +90,9 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
     public float Friction;
     public float MaxRecoveryVelocity;
     public ContactLog Log;
+    private Simulation? _simulation;
 
-    public void Initialize(Simulation simulation)
-    {
-    }
+    public void Initialize(Simulation simulation) => _simulation = simulation;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin) =>
@@ -99,20 +123,29 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
         material.SpringSettings = Spring;
 
         // Bepu also reports contacts that are only about to happen, with a negative depth, so a
-        // pair counts as touching only where some contact is within a centimeter of it.
-        for (var i = 0; i < manifold.Count; i++)
+        // pair counts as touching only where some contact is within a centimeter of it. The
+        // deepest contact gives the pair's point and normal, and a pair only near is recorded too,
+        // for the speed it closes at before the solver slows it.
+        if (manifold.Count > 0)
         {
-            if (manifold.GetDepth(i) < -0.01f) continue;
+            var deepest = 0;
+            for (var i = 1; i < manifold.Count; i++)
+                if (manifold.GetDepth(i) > manifold.GetDepth(deepest)) deepest = i;
 
-            Log.Add(pair.A, pair.B);
+            manifold.GetContact(deepest, out var offset, out var normal, out var depth, out _);
+            var point = PositionOf(pair.A) + offset;
+
+            // The narrow phase runs before the solver, so these are the velocities the bodies
+            // came into the step with. Bepu's normal points from the second collidable to the
+            // first, so the pair closes where the second moves toward the first along it.
+            var closing = Vector3.Dot(VelocityAt(pair.B, point) - VelocityAt(pair.A, point), normal);
+            var touching = depth >= -0.01f;
+            Log.Add(pair.A, pair.B, point, normal, MathF.Max(0f, closing), touching);
 
             // Which way the surface faces, for the bounce the world gives a bouncy body after the
-            // step. Bepu's normal points from the second collidable to the first, so out of the
-            // second's surface toward the first.
-            var normal = manifold.GetNormal(i);
-            if (first.Bounce > 0f && pair.A.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.A, normal);
-            if (second.Bounce > 0f && pair.B.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.B, -normal);
-            break;
+            // step, out of the second's surface toward the first.
+            if (touching && first.Bounce > 0f && pair.A.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.A, normal);
+            if (touching && second.Bounce > 0f && pair.B.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.B, -normal);
         }
 
         // A sensor reports what it touches and pushes nothing, so no constraint is made for it.
@@ -121,6 +154,22 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold) => true;
+
+    // Where a collidable is in the world, the point its contacts are offsets from.
+    private readonly Vector3 PositionOf(CollidableReference collidable) =>
+        collidable.Mobility == CollidableMobility.Static
+            ? _simulation!.Statics[collidable.StaticHandle].Pose.Position
+            : _simulation!.Bodies[collidable.BodyHandle].Pose.Position;
+
+    // How fast a collidable's surface moves at a point in the world, its turn included. A static
+    // never moves.
+    private readonly Vector3 VelocityAt(CollidableReference collidable, Vector3 point)
+    {
+        if (collidable.Mobility == CollidableMobility.Static) return Vector3.Zero;
+        var body = _simulation!.Bodies[collidable.BodyHandle];
+        var velocity = body.Velocity;
+        return velocity.Linear + Vector3.Cross(velocity.Angular, point - body.Pose.Position);
+    }
 
     public void Dispose()
     {
