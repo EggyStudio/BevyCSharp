@@ -44,7 +44,7 @@ public partial struct Lights
     /// <summary>The middle of each bay along the hall, from the door.</summary>
     private static readonly float[] Bays = [-60f, -68f, -76f, -84f];
 
-    /// <summary>Whether the camera has been given volumetric fog.</summary>
+    /// <summary>Whether the camera has volumetric fog, which it has inside the hall.</summary>
     private static bool _fogged;
 
     /// <summary>Builds the hall and its bays.</summary>
@@ -69,22 +69,36 @@ public partial struct Lights
     }
 
     /// <summary>
-    /// Gives the camera volumetric fog once it is made, which the fog bay's shafts are drawn by.
+    /// Gives the camera volumetric fog while it is inside the hall, which the fog bay's shafts are
+    /// drawn by, and takes it off outside.
     /// </summary>
     /// <remarks>
-    /// Bevy marches only through fog volumes, so a camera with the fog and none in view costs
-    /// next to nothing. The fog's own ambient light is off, or the bay's volume would glow evenly
-    /// rather than where the light crosses it.
+    /// Bevy marches only through fog volumes, so the fog costs little where none is in view, but
+    /// with a depth prepass on the camera, as ambient occlusion brings, Bevy 0.19 hazes the whole
+    /// picture with it, the sky too, so the fog is the hall's alone. Its own ambient light is off,
+    /// or the bay's volume would glow evenly rather than where the light crosses it.
     /// </remarks>
     [OnUpdate]
     public static void Fogged(BehaviorContext ctx)
     {
-        if (_fogged || !App.HasRenderer || ctx.Res<Config>().Headless) return;
+        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
         if (Scene.Camera is not { } camera || !ctx.Ecs.IsAlive(camera)) return;
 
-        var fog = ctx.Ecs.Insert<VolumetricFogRef>(camera);
-        (fog.StepCount, fog.AmbientIntensity) = (64u, 0f);
-        _fogged = true;
+        var at = ctx.Ecs.GetOrDefault<Transform>(camera).Translation;
+        var inside = at.X is > -12.5f and < 12.5f && at.Z is > Back - 0.5f and < Front + 0.5f && at.Y < Ground + Height + 1f;
+        if (inside == _fogged) return;
+
+        if (inside)
+        {
+            var fog = ctx.Ecs.Insert<VolumetricFogRef>(camera);
+            (fog.StepCount, fog.AmbientIntensity) = (64u, 0f);
+        }
+        else
+        {
+            ctx.Ecs.RemoveReflected(camera, VolumetricFogRef.TypePath);
+        }
+
+        _fogged = inside;
     }
 
     /// <summary>Names each bay over its opening, every frame, as gizmos do.</summary>

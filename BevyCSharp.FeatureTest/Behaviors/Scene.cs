@@ -58,6 +58,7 @@ public partial struct Scene
         var eye = Zones.All[0].Eye;
         var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
         Camera = camera;
+        ctx.Ecs.SetName(camera, "Scene camera");
 
         // Lit by rays where the program asked for Solari and the bridge and the GPU have it.
         if (Render.RayTracingActive) Render.SetRayTracedLighting(camera, true);

@@ -10,33 +10,44 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `540343d`. Verdict 11 is mended: the crash log tests read the run's files through one
+Reviewed up to `edd577c`. The light hall stands north of the hub, a roofed building of eight bays
+off an aisle, shut but for its doorway so each bay is lit by what it holds: point lights in red,
+green and blue whose shadows cross, a spot light through a cookie drawn in code, a light the size of
+a panel with soft shadows, since Bevy 0.19 has no rect or area light, a spot through slats into a
+fog volume drawn by the camera's volumetric fog, a reflection probe captured once with a chrome and
+a gold sphere, an irradiance volume made in code, clustered decals over a wall, the floor and a
+corner, and tubes glowing past white for the bloom, every picture drawn a pixel at a time so the
+workflow draws the hall whole (`8cf909f`); the panel's effects page switches the tonemapper and
+turns on ambient occlusion, screen-space reflections, a depth of field focused by a ray on what the
+view rests on, motion blur, chromatic aberration, the vignette, auto exposure, sharpening and a dusk
+sky drawn in code, MSAA giving way where a pass needs the picture once a pixel, and a `setting`
+command changes any of the panel's settings for the drive script (`edd577c`). The gallery and the
+hall found four more faults of the library, each mended with a test that failed first: an image made
+from pixels took its shape as a cube, a volume or an array only at the next frame, so an irradiance
+volume refused it and a skybox warned, and it takes it in the call where its pixels are here
+(`a5b35b1`); Solari lost the prepasses it reads when an effect, the occlusion, the reflections or a
+prepass request taken off after it took them away, so the whole map drew unlit under rays, and auto
+exposure taken off went on adjusting the picture, Bevy 0.19 forgetting its buffer by the camera's
+own entity where it keeps it by the render world's, mended by a new render-world entity for the
+camera as the effect goes (`62e0a4a`); and `Persistent<T>` read a field a file left out as its
+type's zero rather than its default, so it reads the file over the default's own JSON, an object
+laid over field by field and anything else the file's own, with the page saying so (`0f0f461`). The
+gallery's anisotropic spheres draw blown white under SSAO with forward rendering, found and not
+traced, which item 8 carries. On a bridge with Solari the suite passes 1,242 and skips 5, the
+meshlet cases. The run of `540343d` passed on Linux, macOS and Windows at 20:37, the first green on
+all three systems, which settles Verdict 11 and is the run the pack run for 0.4 follows.
+
+Before them, Verdict 11 came to be mended: the crash log tests read the run's files through one
 helper that shares reading, writing and deletion, as a tester's tail does, every file of the class
 read that way (`540343d`). The run of `156d2ce` passed on macOS, 18:03, which settles Verdicts 8 and
 9 and checks N 6.2, the suite running on every desktop system the package ships for, so the norm has
 none left to take; its Windows job opened the feature test in 24 seconds, which settled Verdict 7,
 and failed the three crash log cases Verdict 11 mends, and Linux was green, so the first run with
-`540343d` can be the one the pack run for 0.4 waits for. The gallery's lights, post switches,
-vegetation and captures are under way in the working tree.
+`540343d` can be the one the pack run for 0.4 waits for.
 
 Before them, two files of N 1.4's list moved into their folders, `PersistentTests` to the scenes'
 and `RayTracingTests` to the assets', nothing in them changed, the list at 77 with 28 left out
 (`a765aad`, `156d2ce`), and N 3.4's list stands at 39.
-
-Before them, a mesh made without tangents came to be given them by `Render.GenerateTangents`, worked
-out by mikktspace in the bridge from its normals and texture coordinates, refused for a mesh without
-them and in a headless bridge, kept where a mesh has them, at ABI 229, with a test, the cheat
-sheet's line, the listing and the materials page, so a primitive under an anisotropic material or a
-normal map is not drawn as a blaze of white, the anisotropy example's sphere given them (`3461e2c`);
-and the render gallery west of the hub has its wall and its box, item 3's first half: seven columns
-from a dielectric to a metal by five rows from polished to rough, a red clearcoated row from a
-polished coat to a rough one and a brushed row from no anisotropy to full, named in gizmo text, a
-matte backing, and the Cornell box open to the road, a red wall, a green one, two blocks and a
-glowing panel over a point light, lit by the light's shadow map, or by Solari's rays where the
-graphics page's switch asked for it at the last start and the bridge and the GPU have them, the
-room's meshes handed to the rays and the sun's and the lamp's shadow maps left off; every sphere and
-block a static body the player walks round; a `look` command places the spectator camera for the
-drive script's pictures, and the guide says so (`e1f6ece`).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -48,26 +59,21 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 9 to 14 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `156d2ce`: Linux and macOS green, which settled
-   Verdicts 8 and 9 and checked N 6.2; Windows opened the feature test in 24 seconds, which settled
-   Verdict 7, and failed the three crash log cases, Verdict 11, mended at `540343d`; so the first
-   run with `540343d`, green on all three, is the one the owner's pack run for 0.4 waits for, and
-   Verdicts 2 and 3 wait for that run. Each push's run is read by the reviewing session, and a
-   failure it names comes first here.
+1. **What the next page says.** The run of `540343d` passed on Linux, macOS and Windows at 20:37,
+   the first green on all three systems, which settled Verdict 11; the owner's pack run for 0.4
+   follows it, and Verdicts 2 and 3 settle on that run's page. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
-3. **The render gallery, its wall and box in.** The wall of spheres by metallic and roughness
-   with a clearcoat row and a brushed one, and the Cornell box lit by a shadow map or by Solari from
-   the next start on the panel's switch, are in (`e1f6ece`). Left: a lights gallery of directional,
-   point, spot, rect and area lights with shadows, a reflection probe, an irradiance volume, light
-   probes, decals, a fog volume, SSAO and a skybox; the post effects as panel switches, bloom,
-   tonemapping, MSAA, FXAA, TAA, SMAA and what else the camera has; vegetation as instanced grass
-   and trees moved by a Slang wind shader, each drawn from the examples that exist; and each zone
-   captured by the drive script, the gallery's wall and box among them.
+3. **The render gallery, its vegetation and captures left.** The wall of spheres and the Cornell
+   box (`e1f6ece`), the light hall of eight bays (`8cf909f`) and the effects page with the `setting`
+   command (`edd577c`) are in. Left: vegetation as instanced grass and trees moved by a Slang wind
+   shader, drawn from the examples that exist; and each zone captured by the drive script with the
+   panel's settings set through `setting`, the gallery, the hall and the effects among them.
 4. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
    demand and is never checked in. `scenes/<name>.json` holds the scene's source, its license and
    attribution, the pack's URL among this repository's release assets, its size and its SHA-256;
@@ -116,10 +122,12 @@ from [SHARED.md](SHARED.md).
    about one capture in four with TAA on, before `6a84286` as after it, so the cause is found before
    that job is red for them, or the example is compared with its spheres left out and the reason
    beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under
-   (`b548987`'s reply), untraced, and is traced before those captures are compared. Feathers' three
-   examples and the two camera controllers follow the other gaps, their crates allowed (Decisions 11
-   and 12) on the owner's word in the working session, and the four font examples stay missing
-   (Decision 13).
+   (`b548987`'s reply), untraced, and is traced before those captures are compared, as is the
+   gallery's anisotropic spheres drawing blown white under SSAO with forward rendering though they
+   have tangents and draw right under deferred, Bevy's prepass normal for an anisotropic material
+   the suspect (`edd577c`'s reply). Feathers' three examples and the two camera controllers follow
+   the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the working
+   session, and the four font examples stay missing (Decision 13).
 9. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -168,19 +176,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-11. **The Windows job of `156d2ce` fails the three `CrashLogTests` cases that read `latest.log`
-    while the app writes it.** Read from the page: 902 passed, 3 failed, 400 skipped, each failure
-    an `IOException`, the file being used by another process, at the test's `File.ReadAllLines`.
-    `CrashLog` opens the log for writing with `FileShare.ReadWrite`, so a reader may open it, but
-    the tests read it with `File.ReadAllText` and `File.ReadAllLines`, whose share is reading alone,
-    and on Windows a reader that does not share writing cannot open a file another handle writes,
-    where Linux and macOS let it. The step is the first on Windows to reach these tests, the jobs
-    before it having stopped at the step that opens the feature test. The tests read the log through
-    one helper of the class that opens it sharing reading and writing, as a tester's tail does, and
-    the suite is read once for another test that reads a file the engine keeps open. Mended at
-    `540343d`, one helper reading every file of the class with reading, writing and deletion shared.
-    Settled when a Windows job passes the three.
 
 ## Decisions
 
@@ -255,40 +250,19 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3, the light hall and the effects page, and Verdicts 10 and 11.** The light hall stands north
-of the hub, a bay each for point lights in red, green and blue whose shadows cross in their
-mixtures, a spot light through a cookie drawn in code, a light the size of a panel with soft
-shadows, a spot through slats into a fog volume drawn by the camera's volumetric fog, a reflection
-probe captured once, an irradiance volume made in code, clustered decals over a wall, the floor and
-a corner, and tubes glowing past white for the bloom (`8cf909f`). Bevy 0.19 has no rect or area
-light, so the panel's is a point light of the panel's size with soft shadows, and under Solari an
-emissive mesh is one. The effects page switches the tonemapper and turns on SSAO, SSR, a depth of
-field focused by a ray on what the view rests on, motion blur, chromatic aberration, the vignette,
-auto exposure, sharpening and a dusk skybox drawn in code, and a `setting` command changes any of
-the panel's settings as the panel does, which the drive script's captures will use (the commit after
-`8cf909f`). Vegetation and the captures are left in the item.
-
-The gallery and the hall found five faults of the library, each mended with a test that failed
-first. A primitive had no tangents for anisotropy or a normal map, `Render.GenerateTangents` giving
-them (`3461e2c`). An image made from pixels stayed flat until the next frame after `MakeCubemap`,
-`MakeVolume` or `MakeTextureArray`, so an irradiance volume refused it and a skybox warned, and it
-now takes its shape in the call (`a5b35b1`). Solari lost prepasses it requires when an effect,
-occlusion, reflections or a prepass request taken off after it took them away, so the whole map drew
-unlit under rays, and auto exposure taken off went on adjusting the picture, Bevy forgetting its
-buffer by the camera's own entity where it keeps it by the render world's, mended by a new
-render-world entity for the camera as the effect goes (`62e0a4a`). `Persistent<T>` read a field a
-file left out as its type's zero rather than its default, a settings record that gains a field
-reading it as nothing from every older file (`0f0f461`). One more is found and not traced, the
-gallery's anisotropic spheres drawing blown white with SSAO on and forward rendering, though they
-have tangents and draw right without it and under deferred, Bevy's prepass normal for an anisotropic
-material being the suspect.
-
-Verdict 10's sentence was not stale but unplaced, being about a body added in code with a
-`PhysicsShape`, which keeps its size as `PhysicsShape.cs` says, and the page now says which it means
-(`5d60532`). Verdict 11 is mended, the crash log's tests reading every file through one helper that
-shares writing, latest.log being the only file the engine holds open that a test reads (`540343d`).
-Two test files moved into their areas first (`a765aad`, `156d2ce`). On a bridge with Solari the
-suite passes 1,242 and skips 5, the meshlet cases.
-
-Shared: `Persistent<T>` reads a file over the default's own JSON, so a field a later version adds
-keeps its default from an older file (`0f0f461`), for the row of a saved game laid over its scenes.
+**Item 3, its vegetation and captures.** South of the hub a meadow of fourteen thousand blades, each
+an entity sharing one mesh and one material that Bevy draws as one instanced batch, and a ring of
+trees whose crowns share the program, bend in a wind a Slang vertex shader blows, its gusts phased
+by where each blade stands and its prepass bent the same way, the blades lit by a normal leaning
+toward up as a sheet light passes through is (the commit after `28a1eaf`).
+`build/drive-feature-test.sh` captures each zone after the course from the spectator camera through
+a `look` command, the gallery's wall and box, each bay of the hall from its aisle, the meadow and
+the gallery again under ambient occlusion and the dusk sky set through `setting` and put back as
+they were, after asking `entity.get` for a piece of each zone. Writing the wind found the guide's
+example of a stage moving with the time reading `bcs::globals` in its prepass, which the prepass
+does not bind, so the example ended the app at the first shadow; it reads `bcs::prepass_globals` and
+a test draws a ball whose prepass does, failing with the guide's line (`28a1eaf`). One more is found
+and not traced, the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+prepass is on the camera, so the hall puts the fog on the camera only while the camera is inside it.
+Item 3 is done unless the captures say otherwise. The suite passes 1,243 and skips 5, the meshlet
+cases.

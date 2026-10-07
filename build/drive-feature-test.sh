@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Drives the feature test's player through the hub and each station of the course through bcs,
-# offscreen, and fails at the first station that does not do what it is for.
+# offscreen, and fails at the first station that does not do what it is for, then captures each
+# zone drawn rather than played, the render gallery, the light hall and the meadow.
 #
 #   dotnet build BevyCSharp.FeatureTest
 #   build/drive-feature-test.sh [folder the feature test was built to]
@@ -199,5 +200,35 @@ at 100 "$(up 8)" 24
 quiet frames.wait 120
 read -r _ hill _ < <(where)
 holds "$hill" ">" "$ground + 0.3" || fail "the player fell through the terrain to y $hill"
+
+# The zones drawn rather than played, from the spectator camera, the gallery's wall and box, each
+# bay of the light hall from its aisle, and the meadow. A zone that failed to build ends the program
+# or leaves its pieces out, which the first entity asked of each says.
+quiet mode spectator
+quiet frames.wait 5
+view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "${8:-40}"; shot "$1"; }
+for piece in "Gallery wall" "Cornell lamp" "Reflection probe" "Irradiance volume" "Fog volume" "Tree 1, crown"; do
+  ./bcs command entity.get "$piece" > /dev/null 2>&1 || fail "the zones were not built, $piece is missing"
+done
+view 5-gallery -55 4 -3 -63.5 3 -1 60
+view 6-cornell -62 2.8 -13 -72 1.8 -13
+bay=7
+for z in -60 -68 -76 -84; do
+  view "$bay-hall-west" 0 1.3 "$z" -10 0.2 "$z"
+  view "$((bay + 1))-hall-east" 0 1.3 "$z" 10 0.2 "$z"
+  bay=$((bay + 2))
+done
+view 15-meadow 12 1.5 80 0 0.5 70
+
+# The effects page's ambient occlusion and dusk sky through the setting command, each put back as
+# it was after, so a run on the working machine leaves its settings as it found them.
+setting() { ./bcs command setting "$1" | sed -n 's/^[A-Za-z]* = "\{0,1\}\([^"]*\)"\{0,1\}$/\1/p'; }
+occlusion=$(setting AmbientOcclusion)
+backdrop=$(setting Backdrop)
+quiet setting "AmbientOcclusion true"
+quiet setting "Backdrop Dusk"
+view 16-effects -55 4 -3 -63.5 3 -1 60
+quiet setting "AmbientOcclusion $occlusion"
+quiet setting "Backdrop $backdrop"
 
 echo "drove the feature test, captures in $shots"
