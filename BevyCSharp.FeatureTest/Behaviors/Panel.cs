@@ -14,6 +14,9 @@ internal abstract record Row(string Label)
     /// <summary>What it is set to, said at the right of the row.</summary>
     public virtual string Value => string.Empty;
 
+    /// <summary>How far something it started has come, drawn as a bar under it, or nothing.</summary>
+    public virtual float? Progress => null;
+
     /// <summary>
     /// Steps it, one forward for Enter, the right arrow or the pad's south button, and one back for
     /// the left arrow.
@@ -74,6 +77,14 @@ internal sealed record ActionRow(string Label, Action<BehaviorContext> Do) : Row
     public override void Step(BehaviorContext ctx, int direction)
     {
         if (direction > 0) Do(ctx);
+    }
+}
+
+/// <summary>A line of text, such as a scene's attribution, which stepping does nothing to.</summary>
+internal sealed record TextRow(string Label) : Row(Label)
+{
+    public override void Step(BehaviorContext ctx, int direction)
+    {
     }
 }
 
@@ -163,6 +174,8 @@ public static class Panel
                     ImGui.SameLine(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(row.Value).X + ImGui.GetCursorPosX() - 8f);
                     ImGui.TextUnformatted(row.Value);
                 }
+
+                if (row.Progress is { } progress) ImGui.ProgressBar(progress, new Vector2(-1f, 6f), string.Empty);
 
                 ImGui.PopID();
             }

@@ -19,6 +19,7 @@ internal static class Pages
         new PageRow("Controls", Controls),
         new PageRow("Debug", Debug),
         new PageRow("Teleport", Teleport),
+        new PageRow("Scenes", Scenes),
         new PageRow("Spawn", Spawn),
         new PageRow("Time", Time),
         new ActionRow("Console", _ => ImGuiConsole.IsOpen = true),
@@ -85,6 +86,11 @@ internal static class Pages
 
     private static Page Teleport() => new("Teleport",
         [.. Zones.All.Select(zone => (Row)new ActionRow(zone.Name, ctx => Zones.Go(ctx, zone)))]);
+
+    private static Page Scenes() => new("Scenes",
+        Packs.Known.Count == 0
+            ? [new TextRow("No scene packs are named beside the program.")]
+            : [.. Packs.Known.Select(pack => (Row)new PageRow(pack.Title, () => Packs.PageOf(pack)))]);
 
     private static Page Spawn() => new("Spawn",
     [

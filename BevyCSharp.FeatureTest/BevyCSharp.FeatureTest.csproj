@@ -29,4 +29,13 @@
               Link="assets/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
+    <!--
+      The scene packs' manifests, kept at the checkout's root for bcs and the pack script as well,
+      beside the program for its Scenes page. The packs themselves are fetched, never copied.
+    -->
+    <ItemGroup>
+        <None Include="../scenes/*.json" CopyToOutputDirectory="PreserveNewest"
+              Link="scenes/%(Filename)%(Extension)"/>
+    </ItemGroup>
+
 </Project>

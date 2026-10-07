@@ -255,3 +255,43 @@ from [SHARED.md](SHARED.md).
     as meshlets, to test them, where the GPU can.
 
 ## Replies
+
+**Scene packs, item 3, under way.** A pack mounts under a folder of the asset root while an app runs
+and both sides read it, the bridge's default source reading the list of carried files at each read
+rather than the one it was built with, and `ScenePacks` reads the manifests of well-known graphics
+scenes in `scenes/`, fetches a pack over HTTPS or from a file into a folder every game on the
+machine shares, `BCS_SCENE_PACKS` naming another, telling its progress and keeping it only where its
+SHA-256 is the manifest's, and mounts it under `packs/` and its name, with `bcs scenes`,
+`bcs scenes fetch <name>` and `bcs scenes pack <folder> <pack>` (`c27fad0`).
+`build/make-scene-pack.py` makes a pack from a glTF scene, every texture its materials use resized
+to a power of two, mipmapped and written as KTX2 with BC7 for colors, BC5 for normal maps and BC1
+for the rest, each level supercompressed with zstd from Python's own library, by encoders written in
+the script, BC7 in its mode 6 refined once by least squares, the glTF pointed at them and its
+cameras left out, and it makes the same pack byte for byte from the same input; Intel Sponza's
+manifest names the pack it made, 208,923,293 bytes with its lights left out, all of them at an
+intensity of nothing, credited in the notices (`9d1154a`). The feature test's Scenes page fetches a
+pack with a bar and loads it into the scenes zone, Sponza standing with its main door swung open and
+its floors, walls, columns and arches as mesh colliders, its attribution over the doorway,
+`scene.load` and `scene.unload` are commands, and the drive script captures Sponza where it is
+fetched (the commit after `9d1154a`). Walking in found that a static body on an entity under others
+stood at its own transform taken as the world's, so a spawned scene's walls stopped nothing; it is
+put where its parents put it (`28a54cd`). Left in the item are the meshlets for Sponza's heaviest
+meshes with their switch, and the workflow started by hand.
+
+For the owner, the pack is made and not published. The manifest names
+`https://github.com/EggyStudio/BevyCSharp/releases/download/scene-packs/intel-sponza.pack`, a
+release tagged `scene-packs`, and its SHA-256 is
+`af156ab4e23374a329caab6bb58bdb49f9d892667145b55f210e75dbd04bc420`;
+`python3 build/make-scene-pack.py` with the arguments in the manifest's commit makes the file again
+from Intel's download, or the working machine's copy can be uploaded. Sponza's own
+`credits_license.txt`, which the pack carries, holds the CC BY 4.0 text and a line before it reading
+"For personal use and educational use. Limited commercial use for marketing and print purposes.",
+which the owner may weigh before publishing.
+
+Rule: N 1.2's list named `Persistent.cs` when `0f0f461` changed it, and the move came only now
+(`2b5c353`), before this batch touched it again; the lists were read for the files of each batch
+from then on.
+
+Shared: a static body under a parent placed by its parents' transforms (`28a54cd`), for the row of
+bodies held as components, and scene packs fetched on demand (`c27fad0`, `9d1154a`) for Decision
+15's row.

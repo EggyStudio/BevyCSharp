@@ -44,11 +44,14 @@ has a bay each for point lights in red, green and blue, a spot light through a c
 size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
 captured once, an irradiance volume made in code, clustered decals and emission for the bloom. South
 of the hub a meadow of grass, every blade an entity drawn in one instanced batch, and a ring of
-trees bend in a wind a Slang vertex shader blows. The panel's effects page switches the tonemapper
-and turns on ambient occlusion, screen-space reflections, a depth of field focused on whatever the
-view rests on, motion blur, chromatic aberration, auto exposure, sharpening and a dusk sky drawn in
-code, and `./bcs command setting AmbientOcclusion true` changes a setting as the panel does. In
-spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
+trees bend in a wind a Slang vertex shader blows. In the scenes zone north-east of the hub the
+panel's Scenes page fetches a scene pack and loads it, Intel Sponza first, standing with its main
+door open for the player to walk in, and `./bcs scenes fetch intel-sponza` fetches one from a
+terminal. The panel's effects page switches the tonemapper and turns on ambient occlusion,
+screen-space reflections, a depth of field focused on whatever the view rests on, motion blur,
+chromatic aberration, auto exposure, sharpening and a dusk sky drawn in code, and
+`./bcs command setting AmbientOcclusion true` changes a setting as the panel does. In spectator mode
+`./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
 `build/drive-feature-test.sh` walks the player through each station through `bcs` and captures each
 zone, as the pack workflow does.
 
