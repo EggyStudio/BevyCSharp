@@ -158,6 +158,15 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev pkg-config
 
+      # dotnet-gcdump, at the version tried, with which the leak test counts the heap's objects by
+      # type after its twentieth app and its hundredth, since the heap grew on macOS's runner and
+      # nowhere else, so a failure there names the types that grew (REVIEW.md, Verdict 9).
+      - name: Install dotnet-gcdump for the leak test
+        if: runner.os == 'macOS'
+        run: |
+          dotnet tool install dotnet-gcdump --version 10.0.745401 --tool-path "$RUNNER_TEMP/gcdump"
+          echo "BCS_GCDUMP=$RUNNER_TEMP/gcdump/dotnet-gcdump" >> "$GITHUB_ENV"
+
       # The suite covers the library; this covers everything else in the solution. Neither the
       # feature test nor the editor is reached by `dotnet test`, so without it a runnable project can
       # stop compiling without CI noticing. A warning anywhere in it fails the step (NORM.md, N 6.1),
@@ -171,15 +180,24 @@ jobs:
       # job's bridge has no renderer and the program refuses a window without one. Each answer is
       # kept, and one that fails is said on the page with bcs's code and sentence and the end of
       # the program's log, where the step said an exit code alone (NORM.md, N 6.7).
+      # A few minutes, where the three answers take seconds, so one that waits fails here with the
+      # answers before it printed, rather than at the job's limit with nothing said. Each answer
+      # goes to a file of its own rather than through $(...), whose pipe a program bcs starts may
+      # inherit on Windows and hold open for as long as it runs, which would keep the step waiting
+      # on the opening's answer until the program ended.
       - name: Open the feature test through bcs
         if: runner.os == 'Windows'
+        timeout-minutes: 4
         shell: bash
         run: |
+          asked=0
           ask() {
-            local answer code=0
-            answer=$(./bcs "$@" --json) || code=$?
+            local code=0 answer="$RUNNER_TEMP/bcs-answer-$((asked += 1)).json"
+            echo "./bcs $*"
+            ./bcs "$@" --json > "$answer" || code=$?
+            head -n 12 "$answer"
             if [ "$code" -ne 0 ]; then
-              printf '%s' "$answer" | python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.FeatureTest
+              python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.FeatureTest < "$answer"
               exit "$code"
             fi
           }
