@@ -276,6 +276,22 @@ internal static class ReflectedValue
     internal static void Resize(EcsWorld world, Entity entity, string type, string path, int length) =>
         world.ResizeReflected(entity, type, path, length);
 
+    /// <summary>Reads the items of a list of plain values a wrapper names, each as its kind is read.</summary>
+    internal static T[] Items<T>(EcsWorld world, Entity entity, string type, string path, FieldKind kind)
+    {
+        var items = new T[Count(world, entity, type, path)];
+        for (var i = 0; i < items.Length; i++) items[i] = Get<T>(world, entity, type, Item(path, i), kind);
+        return items;
+    }
+
+    /// <summary>Writes a list of plain values a wrapper names, as long as it is given.</summary>
+    internal static void SetItems<T>(EcsWorld world, Entity entity, string type, string path, FieldKind kind, IReadOnlyList<T> value)
+        where T : notnull
+    {
+        Resize(world, entity, type, path, value.Count);
+        for (var i = 0; i < value.Count; i++) Set(world, entity, type, Item(path, i), kind, value[i]);
+    }
+
     /// <summary>An item's path in a list a wrapper names, its index in brackets after the list's.</summary>
     internal static string Item(string list, int index) =>
         list + "[" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + "]";

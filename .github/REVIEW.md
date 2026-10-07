@@ -10,7 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `174ee19`. An enum inside a variant is a record of its own in the wrappers, as an
+Reviewed up to `b2fc2f7`. A list of values with fields of their own, as a node's box shadows and its
+gradients are, is a list of the records its items are in the wrappers, read whole and written whole
+through two new exports of the bridge, a list's length and its resizing, at ABI 226, each item's
+values at an indexed path as a field's are; the bridge makes a default for what Bevy registers none
+of wherever one is needed, a struct from its fields', an enum whose every variant holds a value as
+its first and a list as the empty one; five examples write their shadows, gradients and popovers
+through their wrappers with no JSON left, `many_gradients` keeping the wrapper at 21.6 ms a frame
+where the JSON took 18.1; and `reflected.rs` stands at 798 lines, its defaults to move out before it
+grows (`b2fc2f7`). That is the last of item 4's three shapes, and the item is settled. 3DEngine's
+Verdict 33 found that its `e3d` gave `cmd.exe /c start` its line through `ArgumentList` on Windows,
+where .NET escapes each inner quote with a backslash cmd.exe keeps, and `bcs` does the same in
+`Launch.cs`, which is item 4 by the new count. The suite: 1,181 passed, 9 skipped.
+
+Before them, an enum inside a variant came to be a record of its own in the wrappers, as an
 orthographic projection's `ScalingMode` and a sprite slicer's two `SliceScaleMode`s are, a plain C#
 enum where none of its variants holds a value, and a nullable for an `Option` there, written by
 choosing its variant after the outer one's and read by switching on it; the bridge makes a struct
@@ -39,22 +52,6 @@ was running at 09:40. The suite: 1,179 passed, 9 skipped. The owner decided on 2
 suite runs on macOS too, that Feathers' and the camera controllers' crates may be enabled after the
 other gaps, and that system font discovery stays off (Decisions 10 to 13), so N 6.2 is raised and
 item 5 takes the matrix.
-
-Before them, a level came to describe a joint as an entity of its own with a `JointBetween` naming
-its two bodies' entities, placed where they join and turned so that its up direction is a hinge's
-axis, a slider's line or a ball joint's cone, made once both bodies are and again when the component
-or a body changes, refused once in the log for a static body, taken away with its entity, and
-answered by `JointOf` for a game to drive (`c98010a`). A command's parameter with a default can be
-left off, in brackets in its usage and `optional` in the schema; a key, a button, an axis and an
-enum field are read by their names alone, `TryName`, so a button of 100 is refused; `entity.set`
-writes a list from items split by semicolons and a color, a `Vec2` or a `Vec4` from its numbers; and
-`input.drop` sends a `FileDropped` for each path (`678d860`). A placed scene file written while the
-level runs is spawned again under its root where the asset root is watched, the old copy despawned,
-the overrides applied again, what the level added under the old nodes put back under the new ones
-and `WorldInstanceReady` posted again (`3270d9e`). Item 4 is settled but for the pad's sensors,
-which gilrs 0.11.2 reads none of, the touchpad's click reaching `bevy_gilrs` as a button it drops,
-so a second reader of the pads beside gilrs, SDL's or hidapi's, is a dependency that waits for the
-owner's word. The suite: 1,178 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 28 checked, 4 with places listed, 3 to take and 9
 by review.
@@ -87,10 +84,13 @@ from [SHARED.md](SHARED.md).
    examples and the two camera controllers follow the other gaps, their crates allowed (Decisions 11
    and 12) on the owner's word in the working session, and the four font examples stay missing
    (Decision 13).
-4. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
-   a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
-   orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13 string
-   paths the examples still hold.
+4. **`bcs` opens a program on Windows as 3DEngine's `e3d` did not.** `Launch.cs` gives `cmd.exe
+   /c start` its line through `ArgumentList`, where .NET escapes each inner quote with a backslash
+   that cmd.exe keeps, so `start` takes the escaped title for the program and the log's path is
+   none; 3DEngine's Verdict 33 found it when every game failed to open on Windows, and its
+   `1c848a20` gives the line as written through `Arguments`. The same here, held by a Windows job
+   that opens Courtyard through `bcs` and reads its answer, since the Courtyard play runs on Linux
+   alone and nothing has opened a program through `bcs` on Windows.
 5. **The suite on macOS too.** `macos-latest` joins `package.yml`'s `test_os` default and
    whatever `build.yml` passes it, so every push runs the suite on the three systems the package
    ships for, as the owner chose (Decision 10); whatever fails there is read from the page and
@@ -226,23 +226,13 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 4, a list inside a component.** The bridge answers how many items a list a component holds has
-and makes it a given length, taking items off its end or adding them at their default, two new
-exports at ABI 226, and it now makes a default for what Bevy registers none of where one is needed,
-a struct from its fields', an enum whose every variant holds a value as its first, and a list as the
-empty one. A list of values with fields of their own names its items' type in its row, the dump
-describes each such type once in an `item` scope of its own rows, and the generator makes the items
-records with static `ReadList` and `WriteList` methods taking the component's type path, so one
-record serves every component holding such a list and each item's values are read and written at an
-indexed path as a field's are. A box shadow is a list of `ShadowStyle`s, a gradient a union whose
-variants hold their stops as lists of their own, and a popover a list of placements. `box_shadow`,
-`standard_widgets`, `gradients`, `stacked_gradients` and `many_gradients` write through
-`BoxShadowRef`, `BackgroundGradientRef`, `BorderGradientRef` and `PopoverRef`, with no JSON left.
-Written every frame, `many_gradients --animate` spends 21.6 ms a frame in its system where the JSON
-took 18.1 ms, its 89,319 crossings cheap ones, so the stress example keeps the wrapper. Before the
-batch, `af8e870` moves the six types of `ComponentSchema.cs` into files of their names, taking it
-off N 1.2's and N 1.3's lists, and `174ee19` moves the generator's records into a part of their own.
-`ExampleStringPathTests` follows a list into its item type. `ReflectedWrapperTests` writes box
-shadows growing and shrinking and all three gradients and reads them back. The suite passed, 1,181
-with 9 skipped. `reflected.rs` is at 798 lines, so its defaults move into a module of their own
-before it next grows.
+**The three shapes, a list of plain values, which the last batch left.** The dump names a plain
+list's kind, and the generator types it as a list of that kind, read and written an item at a time
+at its indexed path, as a mesh's morph weights, a node's children and a cascade's bounds are. A
+variant called what a value of another variant is, as `MeshMorphWeights` has a `Value` beside a
+value called `Value`, takes `Variant` after its name, since a record nested in a union is a member
+each variant's record inherits. `many_morph_targets` writes its weights through `MorphWeightsRef`.
+Of the examples' string paths, one is left, `many_animated_sprite_meshes` writing a sprite mesh's
+atlas layout, a handle whose asset kind the bridge cannot load, which texture_atlas's row reaches.
+`ReflectedWrapperTests` writes a list of numbers growing and shrinking. The suite passed, 1,182 with
+9 skipped. Item 4, `bcs` opening a program on Windows, is next.

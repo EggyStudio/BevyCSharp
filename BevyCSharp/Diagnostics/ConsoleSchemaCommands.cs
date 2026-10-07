@@ -123,6 +123,8 @@ internal static class ConsoleSchemaCommands
             {
                 FieldKind.Enum => string.Join(',', field.Options),
                 FieldKind.Asset => field.Hints.Asset ?? string.Empty,
+                // A list of plain values names their kind, which the generator types each item by.
+                FieldKind.List => field.ElementKind.ToString(),
                 _ => string.Empty,
             };
 

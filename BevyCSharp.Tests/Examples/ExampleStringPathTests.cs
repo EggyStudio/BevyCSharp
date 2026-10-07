@@ -197,11 +197,16 @@ public sealed class ExampleStringPathTests
             || kinds.All(held => Types(component, held.Kind, held.Row, held.Extra));
 
         /// <summary>
-        /// Whether a wrapper types a list whose items are of a type, one the description describes by
-        /// rows a wrapper types throughout, as the generator makes the record its items are.
+        /// Whether a wrapper types a list whose items are of a type, plain values of a kind a field
+        /// holds or a type the description describes by rows a wrapper types throughout, as the
+        /// generator makes the record its items are.
         /// </summary>
         private bool Lists(string item) =>
-            _items.TryGetValue(item, out var rows) && rows.Count > 0 && rows.All(row => Types(item, row.Kind, row.Name, row.Extra));
+            Plain.Contains(item)
+            || (_items.TryGetValue(item, out var rows) && rows.Count > 0 && rows.All(row => Types(item, row.Kind, row.Name, row.Extra)));
+
+        // The kinds of plain values a list of them is typed as, as the generator types them.
+        private static readonly HashSet<string> Plain = ["Float", "Double", "Bool", "Int", "String", "Vec2", "Vec3", "Vec4", "Quat", "Entity"];
 
         /// <summary>Whether a wrapper types a value of a kind, an enum by its variants and a list by its items.</summary>
         private bool Types(string scope, string kind, string row, string extra) => kind switch

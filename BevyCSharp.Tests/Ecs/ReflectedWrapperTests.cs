@@ -233,6 +233,30 @@ public sealed class ReflectedWrapperTests
         Assert.Equal(angles, conic.Stops);
     }
 
+    /// <summary>A list of plain values, as a mesh's morph weights are, is written whole, growing and shrinking, and read back.</summary>
+    [SkippableFact]
+    public void AListOfNumbersIsWrittenAndReadWhole()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var (three, one) = ((IReadOnlyList<float>?)null, (IReadOnlyList<float>?)null);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var weights = ctx.Ecs.Insert<MorphWeightsRef>(ctx.Ecs.Spawn());
+            weights.Weights = [0.25f, 0.5f, 1f];
+            three = weights.Weights;
+            weights.Weights = [0.75f];
+            one = weights.Weights;
+        });
+
+        harness.Run();
+
+        Assert.Equal([0.25f, 0.5f, 1f], three);
+        Assert.Equal([0.75f], one);
+    }
+
     /// <summary>
     /// An enum whose variants hold values is a record a variant, written whole and read back as the
     /// variant and the values it was given.

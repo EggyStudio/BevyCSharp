@@ -17,6 +17,7 @@ public sealed partial class ReflectedGenerator
     /// <param name="Cases">For such an enum, its variants with their own values and paths.</param>
     /// <param name="Some">For an <c>Option</c> inside the variant, the one value its <c>Some</c> holds, the part a nullable.</param>
     /// <param name="List">For a list of records, the record its items are, which reads and writes them.</param>
+    /// <param name="Element">For a list of plain values, what one item is, read and written as its kind is.</param>
     private sealed record Part(
         string Name,
         string Type,
@@ -24,7 +25,8 @@ public sealed partial class ReflectedGenerator
         UnionModel? Union = null,
         List<Case>? Cases = null,
         Part? Some = null,
-        UnionModel? List = null);
+        UnionModel? List = null,
+        FieldModel? Element = null);
 
     /// <summary>One variant of a union, the record it is and what that record holds.</summary>
     private sealed record Case(string Variant, string Record, List<Part> Parts);
@@ -125,6 +127,16 @@ public sealed partial class ReflectedGenerator
             }
             cases.Add(new Case(variant, record, held));
         }
+
+        // A variant called what a value is, as a mesh's morph weights have a variant Value beside a
+        // value called Value, takes another name, since a record nested in the union is a member
+        // every variant's record inherits.
+        var names = new HashSet<string>(cases.SelectMany(c => c.Parts).Select(p => p.Name), StringComparer.Ordinal);
+        for (var i = 0; i < cases.Count; i++)
+        {
+            if (names.Contains(cases[i].Record)) cases[i] = cases[i] with { Record = cases[i].Record + "Variant" };
+        }
+
         return cases;
     }
 
@@ -159,9 +171,25 @@ public sealed partial class ReflectedGenerator
         return new Part(name, "global::Bevy.Reflected." + union.Name, field, union, inner);
     }
 
+    /// <summary>The kinds of the plain values a list of them is typed as, which a wrapper reads and writes one at a time.</summary>
+    private static readonly HashSet<string> Plain = new(StringComparer.Ordinal)
+    {
+        "Float", "Double", "Bool", "Int", "String", "Vec2", "Vec3", "Vec4", "Quat", "Entity",
+    };
+
     /// <summary>A list of records, its items those its item type's rows describe, or nothing where a wrapper cannot type them.</summary>
     private static Part? ListOf(FieldModel field, string name, Scope scope)
     {
+        // A list of plain values, as a mesh's morph weights are, names their kind, and is read and
+        // written an item at a time as a field of that kind is.
+        if (Plain.Contains(field.Extra))
+        {
+            var open = field.Rust.IndexOf('<');
+            var inner = open < 0 ? string.Empty : field.Rust.Substring(open + 1).TrimStart('[').Split(';', '>')[0].Trim();
+            var element = new FieldModel(string.Empty, string.Empty, field.Extra, inner, string.Empty);
+            return new Part(name, $"global::System.Collections.Generic.IReadOnlyList<{TypeOf(element)}>", field, Element: element);
+        }
+
         // An item type with no rows, as a type id or a range of indices, has nothing a record holds.
         if (!scope.Items.TryGetValue(field.Extra, out var item) || item.Fields.Items.Count == 0) return null;
 
@@ -205,6 +233,8 @@ public sealed partial class ReflectedGenerator
         var path = PathOf(prefix, part.Field.Reflect);
         var variant = $"global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path})";
         if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.ReadList(_world, Entity, TypePath, {path})";
+        if (part.Element is { } element)
+            return $"global::Bevy.ReflectedValue.Items<{TypeOf(element)}>(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{element.Kind})";
         if (part.Some is { } some) return $"({variant} == \"None\" ? null : ({part.Type}){Read(some, prefix)})";
         if (part.Union is not { } union) return Reading(part.Field, path);
         if (union.Plain) return $"global::System.Enum.Parse<global::Bevy.Reflected.{union.Name}>({variant})";
@@ -228,6 +258,8 @@ public sealed partial class ReflectedGenerator
     {
         var path = PathOf(prefix, part.Field.Reflect);
         if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.WriteList(_world, Entity, TypePath, {path}, {value});";
+        if (part.Element is { } element)
+            return $"global::Bevy.ReflectedValue.SetItems(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{element.Kind}, {value});";
         if (part.Some is { } some)
         {
             // Switched to Some only from None, since switching makes the variant again at its default.

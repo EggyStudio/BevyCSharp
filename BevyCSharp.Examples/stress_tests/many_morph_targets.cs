@@ -15,7 +15,6 @@ namespace BevyCSharp.Examples.StressTests;
 internal static class ManyMorphTargets
 {
     private const string Path = "models/animated/MorphStressTest.gltf";
-    private const string MorphWeightsType = "bevy_mesh::morph::MorphWeights";
 
     // The model's three animations, by their place in the file.
     internal static readonly string[] Animations = ["Individuals", "Pulse", "TheWave"];
@@ -183,10 +182,9 @@ internal static class ManyMorphTargets
         var any = false;
         foreach (var child in ecs.Descendants(root))
         {
-            if (ecs.GetReflected(child, MorphWeightsType, ".weights") is not { } weights) continue;
+            if (ecs.Get<MorphWeightsRef>(child) is not { } weights) continue;
 
-            var count = System.Text.Json.JsonDocument.Parse(weights).RootElement.GetArrayLength();
-            ecs.SetReflected(child, MorphWeightsType, ".weights", "[" + string.Join(",", Enumerable.Repeat(value.ToString("R", System.Globalization.CultureInfo.InvariantCulture), count)) + "]");
+            weights.Weights = Enumerable.Repeat(value, weights.Weights.Count).ToArray();
             any = true;
         }
 

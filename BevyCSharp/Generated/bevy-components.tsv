@@ -168,7 +168,7 @@ field	bevy_camera::visibility::range::VisibilityRange	start_margin	.start_margin
 field	bevy_camera::visibility::range::VisibilityRange	end_margin	.end_margin	Vec2	Range<f32>	
 field	bevy_camera::visibility::range::VisibilityRange	use_aabb	.use_aabb	Bool	bool	
 component	bevy_camera::visibility::render_layers::RenderLayers	RenderLayers
-field	bevy_camera::visibility::render_layers::RenderLayers	0	.0	List	SmallVec<[u64; 1]>	
+field	bevy_camera::visibility::render_layers::RenderLayers	0	.0	List	SmallVec<[u64; 1]>	Int
 component	bevy_core_pipeline::prepass::DeferredPrepass	DeferredPrepass
 component	bevy_core_pipeline::prepass::DeferredPrepassDoubleBuffer	DeferredPrepassDoubleBuffer
 component	bevy_core_pipeline::prepass::DepthPrepass	DepthPrepass
@@ -187,10 +187,10 @@ component	bevy_ecs::entity_disabling::Disabled	Disabled
 component	bevy_ecs::hierarchy::ChildOf	ChildOf
 field	bevy_ecs::hierarchy::ChildOf	0	.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_ecs::hierarchy::Children	Children
-field	bevy_ecs::hierarchy::Children	0	.0	List	Vec<Entity>	
+field	bevy_ecs::hierarchy::Children	0	.0	List	Vec<Entity>	Entity
 component	bevy_ecs::name::Name	Name
 component	bevy_ecs::observer::distributed_storage::ObservedBy	ObservedBy
-field	bevy_ecs::observer::distributed_storage::ObservedBy	0	.0	List	Vec<Entity>	
+field	bevy_ecs::observer::distributed_storage::ObservedBy	0	.0	List	Vec<Entity>	Entity
 component	bevy_ecs::resource::IsResource	IsResource
 field	bevy_ecs::resource::IsResource	0	.0.0	Int	usize	
 component	bevy_gizmos::aabb::ShowAabbGizmo	ShowAabbGizmo
@@ -315,7 +315,7 @@ field	bevy_light::ambient_light::GlobalAmbientLight	color	.color	Color	Color
 field	bevy_light::ambient_light::GlobalAmbientLight	brightness	.brightness	Float	f32	
 field	bevy_light::ambient_light::GlobalAmbientLight	affects_lightmapped_meshes	.affects_lightmapped_meshes	Bool	bool	
 component	bevy_light::cascade::CascadeShadowConfig	CascadeShadowConfig
-field	bevy_light::cascade::CascadeShadowConfig	bounds	.bounds	List	Vec<f32>	
+field	bevy_light::cascade::CascadeShadowConfig	bounds	.bounds	List	Vec<f32>	Float
 field	bevy_light::cascade::CascadeShadowConfig	overlap_proportion	.overlap_proportion	Float	f32	
 field	bevy_light::cascade::CascadeShadowConfig	minimum_distance	.minimum_distance	Float	f32	
 component	bevy_light::cascade::Cascades	Cascades
@@ -452,14 +452,14 @@ component	bevy_mesh::components::MeshTag	MeshTag
 field	bevy_mesh::components::MeshTag	0	.0	Int	u32	
 component	bevy_mesh::morph::MeshMorphWeights	MeshMorphWeights
 field	bevy_mesh::morph::MeshMorphWeights	value		Enum	MeshMorphWeights	Value,Reference
-variant	bevy_mesh::morph::MeshMorphWeights	value	Value	weights	.weights	List	Vec<f32>	
+variant	bevy_mesh::morph::MeshMorphWeights	value	Value	weights	.weights	List	Vec<f32>	Float
 variant	bevy_mesh::morph::MeshMorphWeights	value	Reference		.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_mesh::morph::MorphWeights	MorphWeights
-field	bevy_mesh::morph::MorphWeights	weights	.weights	List	Vec<f32>	
+field	bevy_mesh::morph::MorphWeights	weights	.weights	List	Vec<f32>	Float
 field	bevy_mesh::morph::MorphWeights	first_mesh	.first_mesh	Enum	Option<Handle<Mesh>>	None,Some
 variant	bevy_mesh::morph::MorphWeights	first_mesh	Some		.first_mesh.0	Asset	Handle<Mesh>	Mesh
 component	bevy_mesh::skinning::SkinnedMesh	SkinnedMesh
-field	bevy_mesh::skinning::SkinnedMesh	joints	.joints	List	Vec<Entity>	
+field	bevy_mesh::skinning::SkinnedMesh	joints	.joints	List	Vec<Entity>	Entity
 component	bevy_pbr::contact_shadows::ContactShadows	ContactShadows
 field	bevy_pbr::contact_shadows::ContactShadows	linear_steps	.linear_steps	Int	u32	
 field	bevy_pbr::contact_shadows::ContactShadows	thickness	.thickness	Float	f32	
@@ -857,7 +857,7 @@ component	bevy_ui::stack::ComputedStackIndex	ComputedStackIndex
 field	bevy_ui::stack::ComputedStackIndex	0	.0	Int	u32	
 component	bevy_ui::stack::UiStack	UiStack
 field	bevy_ui::stack::UiStack	partition	.partition	List	Vec<Range<usize>>	core::ops::Range<usize>
-field	bevy_ui::stack::UiStack	uinodes	.uinodes	List	Vec<Entity>	
+field	bevy_ui::stack::UiStack	uinodes	.uinodes	List	Vec<Entity>	Entity
 component	bevy_ui::ui_node::BackgroundColor	BackgroundColor
 field	bevy_ui::ui_node::BackgroundColor	0	.0	Color	Color	
 component	bevy_ui::ui_node::BorderColor	BorderColor

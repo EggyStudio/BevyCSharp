@@ -121,7 +121,8 @@ ctx.Ecs.Wrap<TextFontRef>(label).Style = new FontStyle.Oblique(null);
 
 A list of values with fields of their own, as a node's box shadows and its gradients are, is a list
 of the records its items are, read whole and written whole, the list made as long as what is
-written. A gradient is a record a variant, holding its stops as a list of its own:
+written, and a list of plain values, as a mesh's morph weights are, is a list of them. A gradient is
+a record a variant, holding its stops as a list of its own:
 
 ```csharp
 ctx.Ecs.Insert<BoxShadowRef>(panel).Value =
