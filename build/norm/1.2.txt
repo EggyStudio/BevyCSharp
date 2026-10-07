@@ -2,8 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Assets/Audio.cs AudioSettings
-BevyCSharp/Assets/Audio.cs PlaybackMode
 BevyCSharp/Assets/DataAssets.cs DataAssetAttribute
 BevyCSharp/Assets/DataAssets.cs DataAssetChanged
 BevyCSharp/Assets/DataAssets.cs DataBox
