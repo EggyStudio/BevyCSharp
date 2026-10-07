@@ -85,8 +85,8 @@ table also answers whether the two agree.
 | A body and a collider are components a scene file holds | has (`99ec076`) | has (`606cb3bf`) |
 | A character that walls stop, that slides, steps and holds slopes | taken at `f2ac0cd` | has (`b9f280b2`) |
 | Contacts with their point and normal, and triggers | has | has (`5fb77861`) |
-| A character crouches and stands from its component's height, and its step height is set there | to take | has (`52579d98`) |
-| A collider that is the shape of the meshes an entity and those under it show, made once they are loaded | to take, where triangles are given by hand | has (`Collider.Mesh`, `454e9276`) |
+| A character crouches and stands from its component's height, and its step height is set there | taken at `d5e68ad` | has (`52579d98`) |
+| A collider that is the shape of the meshes an entity and those under it show, made once they are loaded | taken at `d5e68ad`, `ColliderShape.Hull` and `Mesh` | has (`Collider.Mesh`, `454e9276`) |
 | Friction and bounce for each body, mixed for a pair | has | has (`9aa94324`) |
 | A joint described in a scene file as an entity naming its two bodies, at its own place and axis | to take | has (`Joint`, `e46058fc`) |
 | Two bodies a joint holds do not collide with each other | has (`1f10323`) | has (`ed0f3aa6`) |
@@ -100,7 +100,7 @@ table also answers whether the two agree.
 | A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | taken at `ee3b47dd`, the frame's clamp of a quarter second the one kept |
 | Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow, a sleeping body woken when its layer or trigger changes | taken at `795762b`, 32 layers | has (`8520dbe1`, `ac897afa`) |
 | A body a game knows is fast swept over each step, so it does not cross a thin wall within one, chosen for each body | taken at `795762b` | has (`SetPhysicsBodyContinuous`, `799a9d56`) |
-| A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | taken at `36362ce` from code, the scene file's joint to take (REVIEW.md, item 5) | has (`979c97be`) |
+| A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | taken at `36362ce` from code, the scene file's joint to take (REVIEW.md, item 4) | has (`979c97be`) |
 | A game asks how hard two touching bodies press, answered while they sleep too | taken at `36362ce`, the push alone | has (`GetPhysicsContactImpulse`, `53cd565f`), the push alone since `c774a379` |
 
 ### Scenes, saves and files

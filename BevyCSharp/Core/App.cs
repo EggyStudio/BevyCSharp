@@ -352,6 +352,10 @@ public sealed unsafe partial class App : IDisposable
             MaterialFiles.ReloadTouched();
             WindowMemory.Tick();
 
+            // A placed scene file written since the last frame is spawned again before the
+            // instances ready are posted, as one of them.
+            SceneReloads.ReloadTouched(world.Resource<EcsWorld>(), world.Resource<MessageBus>());
+
             // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
             // find their nodes, and before anything reads that the instance is ready.
             SceneInstances.PostReady(world.Resource<EcsWorld>(), world.Resource<MessageBus>());

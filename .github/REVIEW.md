@@ -10,12 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `36362ce`. A slider joint holds one body to a line along another's axis, neither
-turning against the other, stopped between two distances of its travel and driven at a speed with no
-more than a force, which `SetDrive` changes while it runs and `SliderPosition` reads; and a game
-asks how hard two touching bodies press, `ContactImpulse`, the push along their contacts' normals
-alone as 3DEngine counts it since its `c774a379`, a pair asleep since it was asked answered with
-what it pressed then. That is the last batch of item 4 from 3DEngine's `979c97be` and `53cd565f`
+Reviewed up to `d5e68ad`. A character stands as tall as its controller's `Height`, crouching and
+standing with its feet where they are, its capsule, cylinder or box made again at that height and no
+shorter than it is wide, and a height there is no room for overhead is asked for again at each step,
+so one crouched under a ledge stands as it walks out; and a `Hull` or `Mesh` collider is the meshes
+of its entity and of those under it, each placed by the transforms between, waiting until there is
+one and every one has loaded, so a collider on the entity that places a model takes the model's
+shape once it has spawned. That is item 4 from 3DEngine's `52579d98` and `454e9276` (`d5e68ad`),
+settled. The suite: 1,170 passed, 9 skipped.
+
+Before them, a slider joint came to hold one body to a line along another's axis, neither turning
+against the other, stopped between two distances of its travel and driven at a speed with no more
+than a force, which `SetDrive` changes while it runs and `SliderPosition` reads; and a game asks how
+hard two touching bodies press, `ContactImpulse`, the push along their contacts' normals alone as
+3DEngine counts it since its `c774a379`, a pair asleep since it was asked answered with what it
+pressed then. That is the last batch of item 4 from 3DEngine's `979c97be` and `53cd565f`
 (`36362ce`), and the item is settled. The suite: 1,166 passed, 9 skipped.
 
 Before them, bodies came to go on one of 32 collision layers whose pairs collide or not, which
@@ -24,22 +33,15 @@ pass through a thin wall, the second batch of item 4 from 3DEngine's `8520dbe1` 
 (`795762b`); the character controller tests moved into the physics folder, N 1.4's list at 86 to
 mend (`c0d836c`). The suite: 1,152 passed, 9 skipped.
 
-Before them, commands came to be queued to land after a delay as Bevy's delayed commands do, and
-`delayed_commands` is written, an offscreen run having no empty space to click (`7f92ed0`); the six
-physics component types moved into files of their names, N 1.2's list at 211 (`20268b8`); and the
-first of item 4's batches from 3DEngine's `c5227118`: a contact carries where and how hard its pair
-met, a ball joint can be kept within a cone, and a distance joint's range changes while it stands
-(`5f836cb`). The suite: 1,152 passed, 9 skipped.
-
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
 
 
 ## Now
 
-The owner asked that the work does not stop. A batch that ends is followed by the next item
-here with no wait for a reply, and the list is long so that it does not run out. Items 4, 5
-and 7 to 11 are taken from [SHARED.md](SHARED.md).
+The owner asked that the work does not stop. A batch that ends is followed by the next item here
+with no wait for a reply, and the list is long so that it does not run out. Items 4 and 6 to 10 are
+taken from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The run of `ba5f72c` passed on both systems, the first green run
    with the page. Each push's run is read by the reviewing session, and a failure it names comes
@@ -47,8 +49,8 @@ and 7 to 11 are taken from [SHARED.md](SHARED.md).
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a
    batch reads the lists for the files it will touch before it starts. The rules still to take
-   each have their item: N 2.1 is the listing of item 9 and N 2.6 the table of bad files in
-   item 8.
+   each have their item: N 2.1 is the listing of item 8 and N 2.6 the table of bad files in
+   item 7.
 3. **The gaps, by how many rows each holds**, each bridged from Bevy
    with the examples it unlocks written in its batch: more of Bevy's WGSL reached as its
    lighting is (the deferred buffers, a decal's tag and a volume's voxels), the widgets' events
@@ -60,10 +62,7 @@ and 7 to 11 are taken from [SHARED.md](SHARED.md).
    the example is compared with its spheres left out and the reason beside it.
    `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
    untraced, and is traced before those captures are compared.
-4. **Two more of a character and a collider**, from 3DEngine's `52579d98` and `454e9276`: a
-   character that crouches and stands from its component's height, and a collider that is the shape
-   of the meshes an entity and those under it show, made once the model has loaded.
-5. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`: a
+4. **A joint in a scene file, and a pad's sensors**, from 3DEngine's `e46058fc` and `73ce6326`: a
    joint as an entity naming its two bodies, so a level hangs a door where it stands, and a
    gamepad's gyro, accelerometer, touchpad and light where gilrs offers them. Two small things of
    the command line are checked in the same batch and taken if they are missing: `entity.set`
@@ -74,18 +73,18 @@ and 7 to 11 are taken from [SHARED.md](SHARED.md).
    name alone, where `Enum.TryParse` takes any number as well, as `ConsoleWorldCommands.cs` reads
    gamepad buttons, axes and keys, and as 3DEngine's `InputCommands.TryName` does since `ef042886`,
    where a button of 100 stopped the program.
-6. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
+5. **The three shapes no wrapper types**, when a batch next touches the generator: a list inside
    a component (box shadows, gradients), an enum inside a variant (a sprite's slicer, an
    orthographic projection), and a range of numbers (`VisibilityRange`), which are the 13 string
    paths the examples still hold.
-7. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
+6. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
    each taken if it is missing and answered under Replies if it is not. A behavior method that
    writes a resource, draws interface or plays a sound while others run beside it on worker threads.
    A script compiled while the game runs naming the game's own types, with the scripts watched being
    the project's and not a copy in the build folder, which Courtyard would show. And a game written
    in behaviors alone with hundreds of entities, played by the workflow and profiled, which
    `games/Stress` measures and no game here plays.
-8. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
+7. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
    found faults at once. Courtyard and the stress program played for ten minutes by a script while
    managed memory, the bridge's allocations, entities and assets are read at intervals through a
    `bcs` command, anything that keeps climbing found and fixed, and a short form of the run in the
@@ -93,17 +92,17 @@ and 7 to 11 are taken from [SHARED.md](SHARED.md).
    assets, saves, materials, meshes, images, models, sounds, shaders and scripts), each answering
    with a message that names the file and no exception or panic crossing the bridge, as one table in
    a test.
-9. **The public surface written down, and release notes from the commits**, from 3DEngine's
+8. **The public surface written down, and release notes from the commits**, from 3DEngine's
    `fc5aef49`: a listing of every public type and member a tool writes from the built assembly,
    checked in, with a test that fails when the two differ, so a change to what a game calls is read
    as one, and the pack workflow writing the package's release notes from the commits since
    `build/version.txt` last changed. In the same batch it is checked whether a ray here stops at a
    sensor, which there threw a car's wheel and a character's ground check.
-10. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
-    `docs/making-a-game.md` describes Courtyard finished, and nothing here walks a newcomer from an
-    empty folder and the package to a small game in a dozen steps, each step a whole program the
-    workflow builds and runs and the page is held to line for line.
-11. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
+9. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
+   `docs/making-a-game.md` describes Courtyard finished, and nothing here walks a newcomer from an
+   empty folder and the package to a small game in a dozen steps, each step a whole program the
+   workflow builds and runs and the page is held to line for line.
+10. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
     the Linux test job to the runner's 16 GB. `ScriptHost.References()` reads every loaded assembly
     with `MetadataReference.CreateFromFile` at each compilation, at line 190 of `ScriptHost.cs`, and
     each reference holds its file's whole image in native memory that only its finalizer gives back,
@@ -193,17 +192,34 @@ and 7 to 11 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 4, 3DEngine's `52579d98` and `454e9276`.** A character stands as tall as its controller's new
-`Height`, crouching and standing with its feet where they are, zero being its collider's height. Its
-capsule, cylinder or box is made again at that height, no shorter than it is wide, and a height
-there is no room for overhead is asked for again at each step, so one crouched under a ledge stands
-as it walks out, room being looked for across the head as 3DEngine looks for it. A `Hull` or `Mesh`
-collider is the meshes of its entity and of those under it, placed as they are under it, and waits
-until there is one and each has loaded, so a collider on the entity that places a model takes the
-model's shape once it has spawned. `CharacterControllerTests` crouches and stands a character and
-keeps one under a ledge until it walks out, and `PhysicsTests` finds a level's mesh collider waiting
-for the room spawned under it, then the room's floor where the room is placed and stretched by the
-level's scale. The suite passed, 1,170 with 9 skipped. The fourth verdict is next, then item 5.
+**Now 4, 3DEngine's `e46058fc` and `73ce6326`, and the command line.** A level describes a joint as
+an entity with a `JointBetween` naming its two bodies' entities, the entity's place being where they
+are joined and its up direction the axis of a hinge, the line of a slider and the middle of a ball
+joint's cone, with each kind's limits, motor or drive as fields shown for that kind. The physics
+sync makes it once both bodies are, again when the component changes or a body is made again, and
+takes it away with its entity. One naming a static body is written to the log once and left until
+its component changes, and `PhysicsWorld.JointOf` answers the joint made, for a game to drive.
+`SceneJointTests` hangs a door on a hinge read from a scene file, which swings to its limit and
+falls once the hinge's entity goes, and drives a slider turned to run along X.
 
-Shared: a character's height for crouching and a collider from the meshes under an entity, from
-3DEngine's `52579d98` and `454e9276`.
+The pad's sensors are blocked. gilrs 0.11.2, which `bevy_gilrs` reads pads through, reads no gyro,
+no accelerometer and no light, and maps a touchpad's click to `Button::Unknown`, which `bevy_gilrs`
+drops (its `converter.rs`, line 24). They would take a second reader of the pads beside gilrs, SDL's
+as 3DEngine has or hidapi's, a dependency for the owner to decide on.
+
+Of the five checked with them, all were missing and are taken. A command's parameter with a default
+can be left off, the generator writing the default in, and the schema and `bcs list` say which can.
+A key, a button, an axis and an enum field of `entity.set` are read by their names alone, as
+3DEngine's `TryName` reads them, so `input.button 0 100 5` is refused. `entity.set` writes a list
+from items split by semicolons, and a color, a `Vec2` or a `Vec4` from its numbers, which it took
+none of before. `input.drop` sends a `FileDropped` for each path split by semicolons. With the asset
+root watched, a placed scene file written while the level runs is spawned again under its root, the
+old copy despawned, the overrides applied again, what the level added under the old nodes put back
+under the new ones and `WorldInstanceReady` posted again. `CommandArgumentTests` and
+`SubsceneReloadTests` hold them. The suite passed, 1,178 with 9 skipped. The fourth verdict had
+been mended at `3397439` before it was written, which the last reply missed, and waits for a run.
+Item 5 is next.
+
+Shared: a joint in a scene file and a placed scene file spawned again when written, from 3DEngine's
+`e46058fc` and `5b2234d2`, and a command's parameter left off and an enum read by its name alone, as
+its generator and `TryName` have them.
