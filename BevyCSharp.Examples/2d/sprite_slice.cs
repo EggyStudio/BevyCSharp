@@ -1,7 +1,6 @@
 // Bevy's sprite_slice example, examples/2d/sprite_slice.rs at v0.19.1, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
-using System.Text.Json.Nodes;
 using Bevy;
 using Bevy.Reflected;
 
@@ -12,10 +11,6 @@ namespace BevyCSharp.Examples.TwoD;
 // held small.
 internal static class SpriteSlice
 {
-    // A sprite's image mode holds its slicer's scale modes, enums inside a variant, which a
-    // wrapper does not type, so the slicer is read and written as JSON.
-    private const string SpriteType = "bevy_sprite::sprite::Sprite";
-
     // A label, a size, whether it is sliced, and the stretch of its middle and sides where they
     // tile, zero for stretched, and how far its corners may grow.
     private static readonly (string Label, (float W, float H) Size, bool Sliced, float Center, float Sides, float Corners)[] Cases =
@@ -70,14 +65,11 @@ internal static class SpriteSlice
     // holds apart and the sprite's settings give as one, so the two are written into it here.
     private static void ScaleModes(EcsWorld ecs, Entity sprite, float center, float sides)
     {
-        if (ecs.GetReflected(sprite, SpriteType, ".image_mode") is not { } json || JsonNode.Parse(json)?["Sliced"] is not JsonObject slicer) return;
+        var wrapper = ecs.Wrap<SpriteRef>(sprite);
+        if (wrapper.ImageMode is not SpriteImageModeValue.Sliced slicer) return;
 
-        slicer["center_scale_mode"] = Mode(center);
-        slicer["sides_scale_mode"] = Mode(sides);
-        ecs.SetReflected(sprite, SpriteType, ".image_mode", new JsonObject { ["Sliced"] = slicer.DeepClone() }.ToJsonString());
+        wrapper.ImageMode = slicer with { CenterScaleMode = Mode(center), SidesScaleMode = Mode(sides) };
 
-        static JsonNode Mode(float stretch) => stretch > 0f
-            ? new JsonObject { ["Tile"] = new JsonObject { ["stretch_value"] = stretch } }
-            : JsonValue.Create("Stretch");
+        static SliceScaleMode Mode(float stretch) => stretch > 0f ? new SliceScaleMode.Tile(stretch) : new SliceScaleMode.Stretch();
     }
 }

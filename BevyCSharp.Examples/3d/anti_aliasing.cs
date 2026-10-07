@@ -17,8 +17,6 @@ using SmaaPreset = Bevy.Reflected.SmaaRef.PresetVariant;
 // not built with by default, and is left out here as there.
 internal static class AntiAliasing
 {
-    private const string Projection = "bevy_camera::projection::Projection";
-
     private enum Method { None, Msaa, Fxaa, Smaa, Taa }
 
     private static Entity _camera, _text;
@@ -157,16 +155,15 @@ internal static class AntiAliasing
         if (_sharpening != before) Sharpen(ctx.Ecs);
     }
 
-    // An orthographic projection holds its scaling mode, an enum inside a variant, which a wrapper
-    // does not type, so it is written as JSON, Bevy's default_3d at a scale of 0.002.
+    // An orthographic projection, Bevy's default_3d at a scale of 0.002.
     private static void ModifyProjection(BehaviorContext ctx)
     {
         if (!ctx.Input.KeyPressed(Key.O)) return;
         _orthographic = !_orthographic;
         if (_orthographic)
         {
-            ctx.Ecs.SetReflected(_camera, Projection, string.Empty,
-                """{"Orthographic":{"near":0.0,"far":1000.0,"viewport_origin":[0.5,0.5],"scaling_mode":"WindowSize","scale":0.002,"area":{"min":[-1.0,-1.0],"max":[1.0,1.0]}}}""");
+            ctx.Ecs.Wrap<ProjectionRef>(_camera).Value = new Projection.Orthographic(
+                0f, 1000f, new Vec2(0.5f, 0.5f), new ScalingMode.WindowSize(), 0.002f, new Vec2(-1f, -1f), new Vec2(1f, 1f));
         }
         else
         {

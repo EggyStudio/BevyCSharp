@@ -75,9 +75,9 @@ internal static class FontQuery
 
         // Right column, styles.
         var styles = Column();
-        foreach (var style in new[] { TextFontRef.StyleVariant.Normal, TextFontRef.StyleVariant.Oblique, TextFontRef.StyleVariant.Italic })
+        foreach (var (style, name) in new (FontStyle, string)[] { (new FontStyle.Normal(), "Normal"), (new FontStyle.Oblique(null), "Oblique"), (new FontStyle.Italic(), "Italic") })
         {
-            ecs.Wrap<TextFontRef>(Line(styles, $"FontStyle::{style}")).Style = style;
+            ecs.Wrap<TextFontRef>(Line(styles, $"FontStyle::{name}")).Style = style;
         }
     }
 }

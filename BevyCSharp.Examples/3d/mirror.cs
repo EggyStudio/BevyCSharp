@@ -11,8 +11,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // the camera around the scene or the running fox across the ground, as the buttons choose.
 internal static class MirrorExample
 {
-    private const string Projection = "bevy_camera::projection::Projection";
-
     private static readonly Vec3 CameraTarget = new(-25f, 20f, 0f);
     private const float CameraOrbitDistance = 500f;
     private const float CameraPitchSpeed = 0.003f, CameraYawSpeed = 0.004f;
@@ -111,12 +109,9 @@ internal static class MirrorExample
         var facing = mirror.Rotation * -Vec3.UnitY;
         var inView = new Vec3(Vec3.Dot(x, facing), Vec3.Dot(y, facing), Vec3.Dot(z, facing)).Normalized;
 
-        // Bevy's default perspective, which the main camera has, with the mirror's near plane. The
-        // projection holds it in a variant beside the orthographic one's scaling mode, which no
-        // wrapper types, so it is written as JSON.
-        var projection = FormattableString.Invariant(
-            $$$"""{"Perspective":{"fov":0.7853982,"aspect_ratio":1.0,"near":0.1,"far":1000.0,"near_clip_plane":[{{{inView.X}}},{{{inView.Y}}},{{{inView.Z}}},{{{distance}}}]}}""");
-        foreach (var mirrorCamera in mirrorCameras) ecs.SetReflected(mirrorCamera, Projection, string.Empty, projection);
+        // Bevy's default perspective, which the main camera has, with the mirror's near plane.
+        var projection = new Projection.Perspective(MathF.PI / 4f, 1f, 0.1f, 1000f, new Vec4(inView.X, inView.Y, inView.Z, distance));
+        foreach (var mirrorCamera in mirrorCameras) ecs.Wrap<ProjectionRef>(mirrorCamera).Value = projection;
     }
 
     // The image is as large as the window, so it is made again when the window is resized.

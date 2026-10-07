@@ -10,12 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3270d9e`. A level describes a joint as an entity of its own with a `JointBetween`
-naming its two bodies' entities, placed where they join and turned so that its up direction is a
-hinge's axis, a slider's line or a ball joint's cone, made once both bodies are and again when the
-component or a body changes, refused once in the log for a static body, taken away with its entity,
-and answered by `JointOf` for a game to drive (`c98010a`). A command's parameter with a default can
-be left off, in brackets in its usage and `optional` in the schema; a key, a button, an axis and an
+Reviewed up to `75e8953`. A range of numbers, Rust's `Range<f32>`, is a `FloatRange` of its two ends
+in a wrapper, read and written whole through Bevy's JSON since a reflect path stops at the range,
+drawn by the inspector as two numbers, and given the empty range at zero by the bridge where Rust
+registers no default, so a component holding one is inserted through its wrapper; the description
+dumped again adds the six ranges Bevy's components hold, a viewport's depth among them, and
+`visibility_range` writes its margins through `VisibilityRangeRef` with no string path, the first of
+item 4's three shapes (`75e8953`), after the bridge's reflection module was split into modules of
+its own, N 1.3's list at 14 with 8 in the bridge (`5262beb`). The owner pushed `75e8953` at 09:26,
+and its run started its jobs, which settles Verdict 4; the docs and Linux jobs passed, and Windows
+was running at 09:40. The suite: 1,179 passed, 9 skipped.
+
+Before them, a level came to describe a joint as an entity of its own with a `JointBetween` naming
+its two bodies' entities, placed where they join and turned so that its up direction is a hinge's
+axis, a slider's line or a ball joint's cone, made once both bodies are and again when the component
+or a body changes, refused once in the log for a static body, taken away with its entity, and
+answered by `JointOf` for a game to drive (`c98010a`). A command's parameter with a default can be
+left off, in brackets in its usage and `optional` in the schema; a key, a button, an axis and an
 enum field are read by their names alone, `TryName`, so a button of 100 is refused; `entity.set`
 writes a list from items split by semicolons and a color, a `Vec2` or a `Vec4` from its numbers; and
 `input.drop` sends a `FileDropped` for each path (`678d860`). A placed scene file written while the
@@ -34,14 +45,6 @@ entity and of those under it, each placed by the transforms between, waiting unt
 every one has loaded, so a collider on the entity that places a model takes the model's shape once
 it has spawned. That is item 4 from 3DEngine's `52579d98` and `454e9276` (`d5e68ad`), settled. The
 suite: 1,170 passed, 9 skipped.
-
-Before them, a slider joint came to hold one body to a line along another's axis, neither turning
-against the other, stopped between two distances of its travel and driven at a speed with no more
-than a force, which `SetDrive` changes while it runs and `SliderPosition` reads; and a game asks how
-hard two touching bodies press, `ContactImpulse`, the push along their contacts' normals alone as
-3DEngine counts it since its `c774a379`, a pair asleep since it was asked answered with what it
-pressed then. That is the last batch of item 4 from 3DEngine's `979c97be` and `53cd565f`
-(`36362ce`), and the item is settled. The suite: 1,166 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -144,17 +147,6 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-4. **Both workflows fail at `a31e3b3` before any job begins.** Read from the runs: `build.yml`
-   and `package.yml` each ended in failure within a minute of the push with no job at all, which is
-   the failure of a workflow file GitHub refuses, and both files parse as YAML. What changed in them
-   since `0013c52`'s green run is `aa55e0d`: `build/step.py` as the default shell of four jobs, and
-   the game job's `env` with `BCS_STEP_LOGS: ${{ runner.temp }}/courtyard...`. A job's `env` cannot
-   read the `runner` context, which GitHub gives to steps alone, so the file is refused, and
-   `build.yml` with it, since it calls `package.yml`. The value moves into the steps that need it,
-   or `step.py` reads `RUNNER_TEMP` itself at run time, and a check that every `${{ }}` in the
-   workflows names a context its place allows runs with the norm's tests, so a refused file is seen
-   before a push. Settled when a run of the mend starts its jobs.
-
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -191,15 +183,20 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 4, the range of numbers.** A wrapper types Rust's `Range<f32>` as a `FloatRange` of its two
-ends, read and written whole through Bevy's JSON, since a reflect path stops at the range, and the
-inspector draws one as its two numbers. The bridge gives a range the empty default at zero, which
-it registers none of, so a component holding one, as `VisibilityRange` does, is inserted through its
-wrapper. That took the bridge's reflection module past N 1.3's cap, so `5262beb` first moves its
-description of types, its handles, colors and numbers, and its tests into modules of their own, and
-the module comes off the list. The description was dumped again and adds the six ranges Bevy's
-components hold, a camera viewport's depth among them, which the four examples making a viewport now
-give, and the sprite picking components the last dump predates. `visibility_range` writes its
-margins through `VisibilityRangeRef` and holds no string path. `ReflectedWrapperTests` writes and
-reads a visibility range's margins and its row. The suite passed, 1,179 with 9 skipped. An enum
-inside a variant is next.
+**Now 4, an enum inside a variant.** The dump writes the rows of a variant at any depth, each named
+by the enum it is innermost under, and the generator makes an enum inside a variant a record of its
+own there, as an orthographic projection's `ScalingMode` and a sprite slicer's two `SliceScaleMode`s
+are, a plain C# enum where none of its variants holds a value, as a sprite's `SpriteScalingMode` is,
+and an `Option` there a nullable, as a font's oblique angle is. Writing one chooses its variant after
+the outer one's and writes its values, and reading switches on it. The wrappers' own names are taken
+when the records are named, since Bevy's `WindowRef` would have been one. The bridge makes a struct
+Bevy registers no default for from its fields' defaults wherever a default is needed, as inserting a
+component did, so the sliced variant can be chosen, and `reflected.rs` stays under the cap at 793
+lines with the insert sharing that code. `sprite_slice`, `mirror`, `projection_zoom` and
+`anti_aliasing` write through `SpriteRef` and `ProjectionRef`, and `font_query` and
+`window_settings`, which used the plain enums those fields were before, use the typed ones, the
+second with no string path left. `ExampleStringPathTests` follows the generator into enums inside
+variants and reads `string.Empty` as the whole component, which is how it found the three
+projections. `ReflectedWrapperTests` writes and reads each shape. The suite passed, 1,180 with 9
+skipped. A list inside a component is next, which takes two exports of the bridge, a list's length
+and its resizing, so items are read and written by indexed paths as fields are.

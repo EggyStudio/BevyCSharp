@@ -54,6 +54,25 @@ struct Textured {
     image: bevy::asset::Handle<bevy::image::Image>,
 }
 
+#[derive(Reflect, Clone, Copy, PartialEq, Debug)]
+struct Plain {
+    depth: i32,
+}
+
+#[derive(Reflect, Default, Clone, Copy, PartialEq, Debug)]
+#[reflect(Default)]
+enum Slot {
+    #[default]
+    Empty,
+    Holding(Plain),
+}
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Held {
+    slot: Slot,
+}
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 struct Spanned {
@@ -315,4 +334,19 @@ fn a_struct_holding_a_range_with_no_default_is_inserted_with_an_empty_one() {
         assert_eq!(status::OK, code, "{}", last_error());
     });
     assert_eq!(0.0..0.0, app.world().get::<Spanned>(entity).unwrap().margin);
+}
+
+#[test]
+fn a_variant_holding_a_struct_with_no_default_is_made_from_its_fields() {
+    // A sprite's slicer registers no default, so choosing the sliced variant makes one from its
+    // fields' defaults, as inserting a component with none does.
+    let mut app = App::new();
+    app.register_type::<Held>();
+    let entity = app.world_mut().spawn(Held::default()).id();
+    let (type_path, path, variant) = (c("bevy_csharp::reflected::tests::Held"), c("slot"), c("Holding"));
+    loan_world(app.world_mut(), || {
+        let code = unsafe { bcs_reflect_set_variant(entity.to_bits(), type_path.as_ptr(), path.as_ptr(), variant.as_ptr()) };
+        assert_eq!(status::OK, code, "{}", last_error());
+    });
+    assert_eq!(Slot::Holding(Plain { depth: 0 }), app.world().get::<Held>(entity).unwrap().slot);
 }

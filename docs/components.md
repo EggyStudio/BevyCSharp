@@ -109,6 +109,16 @@ range.StartMargin = new FloatRange(3f, 4f);              // fades in from 3 to 4
 range.EndMargin = new FloatRange(8f, 9f);                // and out from 8 to 9
 ```
 
+An enum inside a variant is a record of its own there, as an orthographic projection holds its
+`ScalingMode` and a sprite's slicer its two `SliceScaleMode`s, or a plain C# enum where none of its
+variants holds a value, and an `Option` there is a nullable, as a font's oblique angle is:
+
+```csharp
+ctx.Ecs.Wrap<ProjectionRef>(camera).Value = new Projection.Orthographic(
+    0f, 1000f, new Vec2(0.5f, 0.5f), new ScalingMode.FixedVertical(10f), 1f, new Vec2(-1f, -1f), new Vec2(1f, 1f));
+ctx.Ecs.Wrap<TextFontRef>(label).Style = new FontStyle.Oblique(null);
+```
+
 Bevy's resources are reached the same way, since in this Bevy a resource is a component on an
 entity of its own. `Resource<T>` finds that entity and gives the wrapper over it, or null when the
 world has none, and `InsertResource<T>` puts one in or replaces the one there:
@@ -128,10 +138,9 @@ What a wrapper adds over a string path is the compiler, because a field Bevy ren
 compiling once the description is regenerated after an upgrade, rather than failing on the day the
 line runs. It goes through the same reflection, so it costs what a string path costs.
 
-Under the wrappers is the string API they are written over, which reaches what no wrapper types: a
-list, such as a node's box shadows, or an enum inside a variant, such as an orthographic
-projection's scaling mode. A component is named by its full Rust type path, a field by Bevy's
-reflect path, and a value is JSON:
+Under the wrappers is the string API they are written over, which reaches what no wrapper types,
+such as the list of a node's box shadows. A component is named by its full Rust type path, a field
+by Bevy's reflect path, and a value is JSON:
 
 ```csharp
 const string Shadow = "bevy_ui::ui_node::BoxShadow";

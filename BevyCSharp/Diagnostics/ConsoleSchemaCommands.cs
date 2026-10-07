@@ -60,9 +60,11 @@ internal static class ConsoleSchemaCommands
     /// which leaves out the JSON rows. A field of an enum's variant, there only while that variant
     /// is held, is a <c>variant</c> line naming the enum field and the variant, for the generator
     /// to make the variant a record, and its name is the part of its row's name after the
-    /// variant's, empty for a variant wrapping one value. One inside a variant of a variant is left
-    /// out, as a union inside a union is more than a wrapper types. The bridge's own components are
-    /// left out too, being its business rather than a game's.
+    /// variant's, empty for a variant wrapping one value. One inside a variant of an enum that is
+    /// itself inside a variant names the inner enum's row and its variant, as an orthographic
+    /// projection's fixed scaling mode holds its width, for the generator to make that enum a record
+    /// of its own inside the outer one. The bridge's own components are left out, being its
+    /// business rather than a game's.
     /// </remarks>
     internal static List<string> Describe(string description)
     {
@@ -93,8 +95,11 @@ internal static class ConsoleSchemaCommands
                         "field", schema.QualifiedName, field.Name, field.ReflectPath, field.Kind,
                         field.Type, extra));
                 }
-                else if (conditions.Count == 1 && conditions[0] is { Value: { } variant, Not: false } condition)
+                else if (conditions.All(shown => shown is { Value: not null, Not: false }) && conditions[^1] is { Value: { } variant } condition)
                 {
+                    // Named by the innermost variant it is under, so a field of a variant of an enum
+                    // inside another variant names that inner enum's row, which the generator finds
+                    // under the outer variant's value.
                     var prefix = condition.Field.Length == 0 ? variant : condition.Field + "." + variant;
                     if (!field.Name.StartsWith(prefix, StringComparison.Ordinal)) continue;
                     var name = field.Name.Length == prefix.Length ? string.Empty : field.Name[(prefix.Length + 1)..];

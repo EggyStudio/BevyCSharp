@@ -1,8 +1,8 @@
 // Bevy's projection_zoom example, examples/camera/projection_zoom.rs at v0.19.1, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
-using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Cameras;
 
@@ -10,9 +10,6 @@ namespace BevyCSharp.Examples.Cameras;
 // or narrowing the other, and Space switching between them.
 internal static class ProjectionZoom
 {
-    // An orthographic projection holds its scaling mode, an enum inside a variant, which a wrapper
-    // does not type, so the projection is read and written as JSON.
-    private const string Projection = "bevy_camera::projection::Projection";
     private const float OrthographicHeight = 5f;
     private const float OrthographicZoomSpeed = 0.2f;
     private const float PerspectiveZoomSpeed = 0.05f;
@@ -23,15 +20,15 @@ internal static class ProjectionZoom
     private static bool _orthographic;
     private static float _scale, _fieldOfView;
 
-    // The orthographic projection as Bevy writes it, kept to switch back to with its scale changed.
-    private static JsonNode? _orthographicJson;
+    // The orthographic projection the camera was made with, kept to switch back to with its scale changed.
+    private static Projection.Orthographic? _orthographicProjection;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_orthographic, _scale, _fieldOfView, _orthographicJson) = (true, 1f, PerspectiveZoom.Min, null);
+            (_orthographic, _scale, _fieldOfView, _orthographicProjection) = (true, 1f, PerspectiveZoom.Min, null);
 
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(5f, 5f, 5f), Vec3.Zero, Vec3.UnitY),
                 new CameraSettings { Projection = CameraProjection.Orthographic, Height = OrthographicHeight });
@@ -47,7 +44,7 @@ internal static class ProjectionZoom
         app.Update(ctx =>
         {
             var ecs = ctx.Ecs;
-            _orthographicJson ??= ecs.GetReflected(_camera, Projection) is { } json ? JsonNode.Parse(json) : null;
+            _orthographicProjection ??= ecs.Get<ProjectionRef>(_camera)?.Value as Projection.Orthographic;
 
             if (ctx.Input.KeyPressed(Key.Space))
             {
@@ -74,8 +71,7 @@ internal static class ProjectionZoom
             return;
         }
 
-        if (_orthographicJson?["Orthographic"] is not JsonObject orthographic) return;
-        orthographic["scale"] = _scale;
-        ecs.SetReflected(_camera, Projection, string.Empty, _orthographicJson.ToJsonString());
+        if (_orthographicProjection is not { } orthographic) return;
+        ecs.Wrap<ProjectionRef>(_camera).Value = orthographic with { Scale = _scale };
     }
 }

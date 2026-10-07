@@ -142,7 +142,8 @@ fn from_json(
 ///
 /// A handle registers no default, though it has one, the handle to its type's default asset, so
 /// one is made from its `ReflectHandle` instead, and an enum with none is its first variant that
-/// holds nothing. Without it a variant holding a handle, as a
+/// holds nothing, and a struct with none is made from its fields'. Without it a variant holding a
+/// handle, as a
 /// text's font source or a fog volume's optional density texture does, could not be chosen, and a
 /// caller choosing that variant writes the handle it means right after.
 fn default_of(
@@ -186,10 +187,46 @@ fn default_of(
         return Ok(Box::new(made));
     }
 
+    if let Some(built) = registry.get_type_info(type_id).and_then(|info| from_fields(registry, info)) {
+        return built;
+    }
+
     Err(fail(
         status::UNSUPPORTED,
         format!("'{path}' has no reflected default, so a variant holding one cannot be made."),
     ))
+}
+
+/// A struct with no default of its own made from each field's default, a handle's included, for
+/// the caller to write over, as a component holding a handle is inserted and a sprite's slicer is
+/// made for its variant, or nothing for a type that is no struct.
+fn from_fields(registry: &TypeRegistry, info: &'static TypeInfo) -> Option<Result<Box<dyn PartialReflect>, i32>> {
+    let built = match info {
+        TypeInfo::Struct(named) => named
+            .iter()
+            .try_fold(DynamicStruct::default(), |mut made, field| {
+                made.insert_boxed(field.name(), default_of(registry, field.type_id(), field.type_path())?);
+                Ok(made)
+            })
+            .map(|mut made| {
+                made.set_represented_type(Some(info));
+                Box::new(made) as Box<dyn PartialReflect>
+            }),
+        // The same for a struct of unnamed fields, as a slider's value is.
+        TypeInfo::TupleStruct(unnamed) => unnamed
+            .iter()
+            .try_fold(bevy::reflect::tuple_struct::DynamicTupleStruct::default(), |mut made, field| {
+                made.insert_boxed(default_of(registry, field.type_id(), field.type_path())?);
+                Ok(made)
+            })
+            .map(|mut made| {
+                made.set_represented_type(Some(info));
+                Box::new(made) as Box<dyn PartialReflect>
+            }),
+        _ => return None,
+    };
+
+    Some(built)
 }
 
 /// Reads UTF-8 bytes the caller passed with their length.
@@ -637,29 +674,11 @@ pub unsafe extern "C" fn bcs_reflect_insert(
                 default.default().into_partial_reflect()
             } else if let Some(from_world) = registration.data::<ReflectFromWorld>() {
                 from_world.from_world(world).into_partial_reflect()
-            } else if let TypeInfo::Struct(info) = registration.type_info() {
-                // A struct with no default of its own, as one holding a handle is, made from each
-                // field's default, a handle's included, for the caller to write over.
-                let mut fields = DynamicStruct::default();
-                for field in info.iter() {
-                    match default_of(&registry, field.type_id(), field.type_path()) {
-                        Ok(value) => fields.insert_boxed(field.name(), value),
-                        Err(code) => return code,
-                    }
+            } else if let Some(built) = from_fields(&registry, registration.type_info()) {
+                match built {
+                    Ok(value) => value,
+                    Err(code) => return code,
                 }
-                fields.set_represented_type(Some(registration.type_info()));
-                Box::new(fields)
-            } else if let TypeInfo::TupleStruct(info) = registration.type_info() {
-                // The same for a struct of unnamed fields, as a slider's value is.
-                let mut fields = bevy::reflect::tuple_struct::DynamicTupleStruct::default();
-                for field in info.iter() {
-                    match default_of(&registry, field.type_id(), field.type_path()) {
-                        Ok(value) => fields.insert_boxed(value),
-                        Err(code) => return code,
-                    }
-                }
-                fields.set_represented_type(Some(registration.type_info()));
-                Box::new(fields)
             } else {
                 return fail(
                     status::UNSUPPORTED,

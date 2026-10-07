@@ -79,6 +79,7 @@ variant	bevy_camera::camera::Camera	computed.old_sub_camera_view	Some	size.y	.co
 field	bevy_camera::camera::Camera	output_mode	.output_mode	Enum	CameraOutputMode	Write,Skip
 variant	bevy_camera::camera::Camera	output_mode	Write	blend_state	.output_mode.blend_state	Enum	Option<BlendState>	None,Some
 variant	bevy_camera::camera::Camera	output_mode	Write	clear_color	.output_mode.clear_color	Enum	ClearColorConfig	Default,Custom,None
+variant	bevy_camera::camera::Camera	output_mode.Write.clear_color	Custom		.output_mode.clear_color.0	Color	Color	
 field	bevy_camera::camera::Camera	msaa_writeback	.msaa_writeback	Enum	MsaaWriteback	Off,Auto,Always
 field	bevy_camera::camera::Camera	clear_color	.clear_color	Enum	ClearColorConfig	Default,Custom,None
 variant	bevy_camera::camera::Camera	clear_color	Custom		.clear_color.0	Color	Color	
@@ -99,6 +100,7 @@ field	bevy_camera::camera::ManualTextureViewHandle	0	.0	Int	u32
 component	bevy_camera::camera::RenderTarget	RenderTarget
 field	bevy_camera::camera::RenderTarget	value		Enum	RenderTarget	Window,Image,TextureView,None
 variant	bevy_camera::camera::RenderTarget	value	Window		.0	Enum	WindowRef	Primary,Entity
+variant	bevy_camera::camera::RenderTarget	value.Window	Entity		.0.0	Entity	bevy_ecs::entity::Entity	
 variant	bevy_camera::camera::RenderTarget	value	Image	handle	.0.handle	Asset	Handle<Image>	Image
 variant	bevy_camera::camera::RenderTarget	value	Image	scale_factor	.0.scale_factor	Float	f32	
 variant	bevy_camera::camera::RenderTarget	value	TextureView		.0.0	Int	u32	
@@ -135,6 +137,14 @@ variant	bevy_camera::projection::Projection	value	Orthographic	near	.0.near	Floa
 variant	bevy_camera::projection::Projection	value	Orthographic	far	.0.far	Float	f32	
 variant	bevy_camera::projection::Projection	value	Orthographic	viewport_origin	.0.viewport_origin	Vec2	glam::Vec2	
 variant	bevy_camera::projection::Projection	value	Orthographic	scaling_mode	.0.scaling_mode	Enum	ScalingMode	WindowSize,Fixed,AutoMin,AutoMax,FixedVertical,FixedHorizontal
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	Fixed	width	.0.scaling_mode.width	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	Fixed	height	.0.scaling_mode.height	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	AutoMin	min_width	.0.scaling_mode.min_width	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	AutoMin	min_height	.0.scaling_mode.min_height	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	AutoMax	max_width	.0.scaling_mode.max_width	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	AutoMax	max_height	.0.scaling_mode.max_height	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	FixedVertical	viewport_height	.0.scaling_mode.viewport_height	Float	f32	
+variant	bevy_camera::projection::Projection	value.Orthographic.scaling_mode	FixedHorizontal	viewport_width	.0.scaling_mode.viewport_width	Float	f32	
 variant	bevy_camera::projection::Projection	value	Orthographic	scale	.0.scale	Float	f32	
 variant	bevy_camera::projection::Projection	value	Orthographic	area.min	.0.area.min	Vec2	glam::Vec2	
 variant	bevy_camera::projection::Projection	value	Orthographic	area.max	.0.area.max	Vec2	glam::Vec2	
@@ -312,11 +322,13 @@ variant	bevy_light::cluster::ClusterConfig	value	XYZ	dimensions.y	.dimensions.y	
 variant	bevy_light::cluster::ClusterConfig	value	XYZ	dimensions.z	.dimensions.z	Int	u32	
 variant	bevy_light::cluster::ClusterConfig	value	XYZ	z_config.first_slice_depth	.z_config.first_slice_depth	Float	f32	
 variant	bevy_light::cluster::ClusterConfig	value	XYZ	z_config.far_z_mode	.z_config.far_z_mode	Enum	ClusterFarZMode	MaxClusterableObjectRange,Constant
+variant	bevy_light::cluster::ClusterConfig	value.XYZ.z_config.far_z_mode	Constant		.z_config.far_z_mode.0	Float	f32	
 variant	bevy_light::cluster::ClusterConfig	value	XYZ	dynamic_resizing	.dynamic_resizing	Bool	bool	
 variant	bevy_light::cluster::ClusterConfig	value	FixedZ	total	.total	Int	u32	
 variant	bevy_light::cluster::ClusterConfig	value	FixedZ	z_slices	.z_slices	Int	u32	
 variant	bevy_light::cluster::ClusterConfig	value	FixedZ	z_config.first_slice_depth	.z_config.first_slice_depth	Float	f32	
 variant	bevy_light::cluster::ClusterConfig	value	FixedZ	z_config.far_z_mode	.z_config.far_z_mode	Enum	ClusterFarZMode	MaxClusterableObjectRange,Constant
+variant	bevy_light::cluster::ClusterConfig	value.FixedZ.z_config.far_z_mode	Constant		.z_config.far_z_mode.0	Float	f32	
 variant	bevy_light::cluster::ClusterConfig	value	FixedZ	dynamic_resizing	.dynamic_resizing	Bool	bool	
 component	bevy_light::cluster::ClusteredDecal	ClusteredDecal
 field	bevy_light::cluster::ClusteredDecal	base_color_texture	.base_color_texture	Enum	Option<Handle<Image>>	None,Some
@@ -346,6 +358,7 @@ field	bevy_light::directional_light::DirectionalLightTexture	tiled	.tiled	Bool	b
 component	bevy_light::gizmos::ShowLightGizmo	ShowLightGizmo
 field	bevy_light::gizmos::ShowLightGizmo	color	.color	Enum	Option<LightGizmoColor>	None,Some
 variant	bevy_light::gizmos::ShowLightGizmo	color	Some		.color.0	Enum	LightGizmoColor	Manual,Varied,MatchLightColor,ByLightType
+variant	bevy_light::gizmos::ShowLightGizmo	color.Some	Manual		.color.0.0	Color	Color	
 component	bevy_light::point_light::PointLight	PointLight
 field	bevy_light::point_light::PointLight	color	.color	Color	Color	
 field	bevy_light::point_light::PointLight	intensity	.intensity	Float	f32	
@@ -614,6 +627,7 @@ component	bevy_render::view::visibility::RenderShadowMapVisibleEntities	RenderSh
 component	bevy_render::view::window::screenshot::Screenshot	Screenshot
 field	bevy_render::view::window::screenshot::Screenshot	0	.0	Enum	RenderTarget	Window,Image,TextureView,None
 variant	bevy_render::view::window::screenshot::Screenshot	0	Window		.0.0	Enum	WindowRef	Primary,Entity
+variant	bevy_render::view::window::screenshot::Screenshot	0.Window	Entity		.0.0.0	Entity	bevy_ecs::entity::Entity	
 variant	bevy_render::view::window::screenshot::Screenshot	0	Image	handle	.0.0.handle	Asset	Handle<Image>	Image
 variant	bevy_render::view::window::screenshot::Screenshot	0	Image	scale_factor	.0.0.scale_factor	Float	f32	
 variant	bevy_render::view::window::screenshot::Screenshot	0	TextureView		.0.0.0	Int	u32	
@@ -645,7 +659,9 @@ variant	bevy_sprite::sprite::Sprite	image_mode	Scale		.image_mode.0	Enum	SpriteS
 variant	bevy_sprite::sprite::Sprite	image_mode	Sliced	border.min_inset	.image_mode.0.border.min_inset	Vec2	glam::Vec2	
 variant	bevy_sprite::sprite::Sprite	image_mode	Sliced	border.max_inset	.image_mode.0.border.max_inset	Vec2	glam::Vec2	
 variant	bevy_sprite::sprite::Sprite	image_mode	Sliced	center_scale_mode	.image_mode.0.center_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_sprite::sprite::Sprite	image_mode.Sliced.center_scale_mode	Tile	stretch_value	.image_mode.0.center_scale_mode.stretch_value	Float	f32	
 variant	bevy_sprite::sprite::Sprite	image_mode	Sliced	sides_scale_mode	.image_mode.0.sides_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_sprite::sprite::Sprite	image_mode.Sliced.sides_scale_mode	Tile	stretch_value	.image_mode.0.sides_scale_mode.stretch_value	Float	f32	
 variant	bevy_sprite::sprite::Sprite	image_mode	Sliced	max_corner_scale	.image_mode.0.max_corner_scale	Float	f32	
 variant	bevy_sprite::sprite::Sprite	image_mode	Tiled	tile_x	.image_mode.tile_x	Bool	bool	
 variant	bevy_sprite::sprite::Sprite	image_mode	Tiled	tile_y	.image_mode.tile_y	Bool	bool	
@@ -667,7 +683,9 @@ variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Scale		.image_mode.0	Enu
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Sliced	border.min_inset	.image_mode.0.border.min_inset	Vec2	glam::Vec2	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Sliced	border.max_inset	.image_mode.0.border.max_inset	Vec2	glam::Vec2	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Sliced	center_scale_mode	.image_mode.0.center_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode.Sliced.center_scale_mode	Tile	stretch_value	.image_mode.0.center_scale_mode.stretch_value	Float	f32	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Sliced	sides_scale_mode	.image_mode.0.sides_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode.Sliced.sides_scale_mode	Tile	stretch_value	.image_mode.0.sides_scale_mode.stretch_value	Float	f32	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Sliced	max_corner_scale	.image_mode.0.max_corner_scale	Float	f32	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Tiled	tile_x	.image_mode.tile_x	Bool	bool	
 variant	bevy_sprite::sprite_mesh::SpriteMesh	image_mode	Tiled	tile_y	.image_mode.tile_y	Bool	bool	
@@ -743,6 +761,7 @@ field	bevy_text::text::TextFont	weight	.weight.0	Int	u16
 field	bevy_text::text::TextFont	width	.width.0	Float	f32	
 field	bevy_text::text::TextFont	style	.style	Enum	FontStyle	Normal,Italic,Oblique
 variant	bevy_text::text::TextFont	style	Oblique		.style.0	Enum	Option<f32>	None,Some
+variant	bevy_text::text::TextFont	style.Oblique	Some		.style.0.0	Float	f32	
 field	bevy_text::text::TextFont	font_smoothing	.font_smoothing	Enum	FontSmoothing	None,AntiAliased
 component	bevy_text::text::TextLayout	TextLayout
 field	bevy_text::text::TextLayout	justify	.justify	Enum	Justify	Left,Center,Right,Justified,Start,End
@@ -1159,7 +1178,9 @@ field	bevy_ui::widget::image::ImageNode	image_mode	.image_mode	Enum	NodeImageMod
 variant	bevy_ui::widget::image::ImageNode	image_mode	Sliced	border.min_inset	.image_mode.0.border.min_inset	Vec2	glam::Vec2	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Sliced	border.max_inset	.image_mode.0.border.max_inset	Vec2	glam::Vec2	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Sliced	center_scale_mode	.image_mode.0.center_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_ui::widget::image::ImageNode	image_mode.Sliced.center_scale_mode	Tile	stretch_value	.image_mode.0.center_scale_mode.stretch_value	Float	f32	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Sliced	sides_scale_mode	.image_mode.0.sides_scale_mode	Enum	SliceScaleMode	Stretch,Tile
+variant	bevy_ui::widget::image::ImageNode	image_mode.Sliced.sides_scale_mode	Tile	stretch_value	.image_mode.0.sides_scale_mode.stretch_value	Float	f32	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Sliced	max_corner_scale	.image_mode.0.max_corner_scale	Float	f32	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Tiled	tile_x	.image_mode.tile_x	Bool	bool	
 variant	bevy_ui::widget::image::ImageNode	image_mode	Tiled	tile_y	.image_mode.tile_y	Bool	bool	
@@ -1342,10 +1363,20 @@ component	bevy_window::window::Window	Window
 field	bevy_window::window::Window	present_mode	.present_mode	Enum	PresentMode	AutoVsync,AutoNoVsync,Fifo,FifoRelaxed,Immediate,Mailbox
 field	bevy_window::window::Window	mode	.mode	Enum	WindowMode	Windowed,BorderlessFullscreen,Fullscreen
 variant	bevy_window::window::Window	mode	BorderlessFullscreen		.mode.0	Enum	MonitorSelection	Current,Primary,Index,Entity
+variant	bevy_window::window::Window	mode.BorderlessFullscreen	Index		.mode.0.0	Int	usize	
+variant	bevy_window::window::Window	mode.BorderlessFullscreen	Entity		.mode.0.0	Entity	bevy_ecs::entity::Entity	
 variant	bevy_window::window::Window	mode	Fullscreen	0	.mode.0	Enum	MonitorSelection	Current,Primary,Index,Entity
+variant	bevy_window::window::Window	mode.Fullscreen.0	Index		.mode.0.0	Int	usize	
+variant	bevy_window::window::Window	mode.Fullscreen.0	Entity		.mode.0.0	Entity	bevy_ecs::entity::Entity	
 variant	bevy_window::window::Window	mode	Fullscreen	1	.mode.1	Enum	VideoModeSelection	Current,Specific
+variant	bevy_window::window::Window	mode.Fullscreen.1	Specific	physical_size.x	.mode.1.0.physical_size.x	Int	u32	
+variant	bevy_window::window::Window	mode.Fullscreen.1	Specific	physical_size.y	.mode.1.0.physical_size.y	Int	u32	
+variant	bevy_window::window::Window	mode.Fullscreen.1	Specific	bit_depth	.mode.1.0.bit_depth	Int	u16	
+variant	bevy_window::window::Window	mode.Fullscreen.1	Specific	refresh_rate_millihertz	.mode.1.0.refresh_rate_millihertz	Int	u32	
 field	bevy_window::window::Window	position	.position	Enum	WindowPosition	Automatic,Centered,At
 variant	bevy_window::window::Window	position	Centered		.position.0	Enum	MonitorSelection	Current,Primary,Index,Entity
+variant	bevy_window::window::Window	position.Centered	Index		.position.0.0	Int	usize	
+variant	bevy_window::window::Window	position.Centered	Entity		.position.0.0	Entity	bevy_ecs::entity::Entity	
 variant	bevy_window::window::Window	position	At	x	.position.0.x	Int	i32	
 variant	bevy_window::window::Window	position	At	y	.position.0.y	Int	i32	
 field	bevy_window::window::Window	resolution.physical_width	.resolution.physical_width	Int	u32	

@@ -17,9 +17,6 @@ namespace BevyCSharp.Examples.Windowing;
 // feature in.
 internal static class WindowSettings
 {
-    // Bevy's window, named for the paths inside its theme, which no wrapper types.
-    private const string BevyWindow = "bevy_window::window::Window";
-
     private static readonly CursorShape[] Cursors = [CursorShape.Default, CursorShape.Pointer, CursorShape.Wait, CursorShape.Text];
 
     private static int _cursor;
@@ -44,20 +41,13 @@ internal static class WindowSettings
             settings.PresentMode = WindowRef.PresentModeVariant.AutoVsync;
             settings.EnabledButtonsMaximize = false;
             settings.Visible = false;
-            SetTheme(ctx.Ecs, window, "Dark");
+            settings.WindowTheme = WindowTheme.Dark;
             Window.SetCursorShape(Cursors[0]);
         }, "window_settings.InitCursorIcons");
 
         app.Update(Settings, "window_settings.Settings");
     }
 
-    // The theme is an option of a choice, set to some through the wrapper and then to which by
-    // the path inside it, which no wrapper types.
-    private static void SetTheme(EcsWorld ecs, Entity window, string theme)
-    {
-        ecs.Wrap<WindowRef>(window).WindowTheme = WindowRef.WindowThemeVariant.Some;
-        ecs.SetVariant(window, BevyWindow, ".window_theme.0", theme);
-    }
 
     private static void Settings(BehaviorContext ctx)
     {
@@ -98,8 +88,8 @@ internal static class WindowSettings
             Window.SetCursor(_cursorFree ? CursorGrab.None : CursorGrab.Locked, visible: _cursorFree);
         }
 
-        if (input.KeyPressed(Key.F) && settings.WindowTheme == WindowRef.WindowThemeVariant.Some)
-            SetTheme(ecs, window, ecs.GetVariant(window, BevyWindow, ".window_theme.0") == "Light" ? "Dark" : "Light");
+        if (input.KeyPressed(Key.F) && settings.WindowTheme is { } theme)
+            settings.WindowTheme = theme == WindowTheme.Light ? WindowTheme.Dark : WindowTheme.Light;
 
         if (input.MousePressed(MouseButton.Left)) _cursor = (_cursor + 1) % Cursors.Length;
         else if (input.MousePressed(MouseButton.Right)) _cursor = (_cursor + Cursors.Length - 1) % Cursors.Length;

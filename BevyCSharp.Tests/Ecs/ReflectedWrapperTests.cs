@@ -131,6 +131,49 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// An enum inside a variant is a record of its own inside the variant's, chosen and written with
+    /// it and read back as it was given, an enum whose variants hold nothing is a plain enum there,
+    /// and an <c>Option</c> there is a nullable.
+    /// </summary>
+    [SkippableFact]
+    public void AnEnumInsideAVariantIsWrittenAndReadWithTheVariant()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var (projection, slicer, scaled) = ((Projection?)null, (SpriteImageModeValue?)null, (SpriteImageModeValue?)null);
+        var styles = new List<FontStyle>();
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var camera = ctx.Ecs.Insert<ProjectionRef>(ctx.Ecs.Spawn());
+            camera.Value = new Projection.Orthographic(0f, 100f, new Vec2(0.5f, 0.5f), new ScalingMode.Fixed(16f, 9f), 2f, new Vec2(-1f, -1f), new Vec2(1f, 1f));
+            projection = camera.Value;
+
+            // A slicer, which Bevy registers no default for, made for its variant from its fields'.
+            var sprite = ctx.Ecs.Insert<SpriteRef>(ctx.Ecs.Spawn());
+            sprite.ImageMode = new SpriteImageModeValue.Sliced(new Vec2(4f, 5f), new Vec2(6f, 7f), new SliceScaleMode.Tile(0.5f), new SliceScaleMode.Stretch(), 0.25f);
+            slicer = sprite.ImageMode;
+            sprite.ImageMode = new SpriteImageModeValue.Scale(SpriteScalingMode.FitStart);
+            scaled = sprite.ImageMode;
+
+            var font = ctx.Ecs.Insert<TextFontRef>(ctx.Ecs.Spawn());
+            foreach (var style in new FontStyle[] { new FontStyle.Oblique(0.25f), new FontStyle.Oblique(null), new FontStyle.Italic() })
+            {
+                font.Style = style;
+                styles.Add(font.Style);
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(new Projection.Orthographic(0f, 100f, new Vec2(0.5f, 0.5f), new ScalingMode.Fixed(16f, 9f), 2f, new Vec2(-1f, -1f), new Vec2(1f, 1f)), projection);
+        Assert.Equal(new SpriteImageModeValue.Sliced(new Vec2(4f, 5f), new Vec2(6f, 7f), new SliceScaleMode.Tile(0.5f), new SliceScaleMode.Stretch(), 0.25f), slicer);
+        Assert.Equal(new SpriteImageModeValue.Scale(SpriteScalingMode.FitStart), scaled);
+        Assert.Equal([new FontStyle.Oblique(0.25f), new FontStyle.Oblique(null), new FontStyle.Italic()], styles);
+    }
+
+    /// <summary>
     /// An enum whose variants hold values is a record a variant, written whole and read back as the
     /// variant and the values it was given.
     /// </summary>

@@ -117,6 +117,8 @@ public sealed class ExampleStringPathTests
     private static string? Resolve(ExpressionSyntax expression, Dictionary<string, string> constants) => expression switch
     {
         LiteralExpressionSyntax literal when literal.IsKind(SyntaxKind.StringLiteralExpression) => literal.Token.ValueText,
+        // The whole component, as an empty path names it.
+        MemberAccessExpressionSyntax { Expression: PredefinedTypeSyntax, Name.Identifier.Text: "Empty" } => string.Empty,
         IdentifierNameSyntax identifier => constants.GetValueOrDefault(identifier.Identifier.Text),
         // A wrapper's own TypePath, which says the wrapper was there to be used.
         MemberAccessExpressionSyntax { Name.Identifier.Text: "TypePath" } => "wrapper",
@@ -129,7 +131,7 @@ public sealed class ExampleStringPathTests
         public HashSet<string> Components { get; } = ["wrapper"];
 
         private readonly Dictionary<(string Component, string Path), (string Kind, string Name)> _fields = [];
-        private readonly Dictionary<(string Component, string Enum), List<string>> _variantKinds = [];
+        private readonly Dictionary<(string Component, string Enum), List<(string Kind, string Row)>> _variantKinds = [];
         private readonly Dictionary<(string Component, string Path), string> _variantPaths = [];
 
         public static Description Read(string path)
@@ -150,7 +152,8 @@ public sealed class ExampleStringPathTests
                         var key = (words[1], words[2]);
                         if (!description._variantKinds.TryGetValue(key, out var kinds))
                             description._variantKinds[key] = kinds = [];
-                        kinds.Add(words[6]);
+                        // The row an enum inside the variant is named by, as the generator finds it.
+                        kinds.Add((words[6], words[4].Length == 0 ? words[2] + "." + words[3] : words[2] + "." + words[3] + "." + words[4]));
                         description._variantPaths.TryAdd((words[1], words[5]), words[2]);
                         break;
                 }
@@ -176,10 +179,13 @@ public sealed class ExampleStringPathTests
             return _variantPaths.TryGetValue((component, path), out var owner) && Holds(component, owner);
         }
 
-        /// <summary>Whether every value an enum's variants hold is one a wrapper types, or there are none.</summary>
+        /// <summary>
+        /// Whether every value an enum's variants hold is one a wrapper types, an enum inside a
+        /// variant being typed where its own variants' values are, or there are none.
+        /// </summary>
         private bool Holds(string component, string owner) =>
             !_variantKinds.TryGetValue((component, owner), out var kinds)
-            || kinds.All(kind => kind != "Enum" && Typed.Contains(kind));
+            || kinds.All(held => held.Kind == "Enum" ? Holds(component, held.Row) : Typed.Contains(held.Kind));
     }
 
     private static string FindRoot()

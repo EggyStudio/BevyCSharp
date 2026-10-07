@@ -284,7 +284,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 |---|---|---|
 | N 1.1 | checked, `NormTests` | checked, `NormTests` |
 | N 1.2 | checked, `NormTests` | listed 211, `NormTests` |
-| N 1.3 | checked, `NormTests` | listed 15, `NormTests`, 9 of them in the bridge |
+| N 1.3 | checked, `NormTests` | listed 14, `NormTests`, 8 of them in the bridge |
 | N 1.4 | checked, `NormTests`, 12 left out | listed 86, `NormTests`, 23 left out |
 | N 1.5 | checked, `NormTests` | checked, `NormTests` |
 | N 2.1 | checked, `PublicSurfaceTests` and `PublicApi.txt` | to take |
