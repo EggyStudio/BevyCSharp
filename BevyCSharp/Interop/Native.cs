@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 221;
+    internal const int ExpectedAbiVersion = 222;
 
     static Native() => NativeLoader.Initialize();
 

@@ -22,6 +22,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_scene_spawn(int asset);
 
+    /// <summary>Makes an entity a tilemap chunk with its tiles.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_tilemap_insert(ulong entity, NativeTilemapChunk* chunk, NativeTile* tiles, int count);
+
+    /// <summary>Writes over a run of a chunk's tiles.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_tilemap_write(ulong entity, int start, NativeTile* tiles, int count);
+
+    /// <summary>Reads a run of a chunk's tiles.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_tilemap_read(ulong entity, int start, NativeTile* tiles, int count);
+
     /// <summary>Builds a 2D mesh's color material and returns an asset key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

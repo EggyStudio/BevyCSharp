@@ -49,6 +49,7 @@ pub mod shaders;
 pub mod slang;
 pub mod solari;
 pub mod sprite_frames;
+pub mod tilemaps;
 pub mod timings;
 pub mod values;
 pub mod views;

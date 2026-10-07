@@ -903,6 +903,22 @@ static AssetHandle CreateMaterial(ColorMaterialSettings settings);  // Makes a 2
 static void WriteMaterial(AssetHandle material, ColorMaterialSettings settings);  // Writes settings over a 2D mesh's material in place, so every mesh drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh for a 2D camera to draw
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a 2D material, from CreateMaterial, to draw its mesh with
+static void SetTilemap(EcsWorld world, Entity entity, TilemapChunk chunk, ReadOnlySpan<TileData?> tiles);  // Makes an entity a tilemap chunk with its tiles, Bevy's TilemapChunk and TilemapChunkTileData
+static void SetTiles(EcsWorld world, Entity entity, int start, ReadOnlySpan<TileData?> tiles);  // Writes tiles over a chunk's from start on, which Bevy draws from the next frame
+static TileData? TileAt(EcsWorld world, Entity entity, int index);  // A chunk's tile at index, or null for an empty cell
+```
+
+### `TilemapChunk`
+
+```csharp
+int IndexOf(uint x, uint y);                                    // The place in the chunk's tiles of the tile x across and y up
+Transform TileTransform(uint x, uint y);                        // Where the tile x across and y up sits, its middle, in the chunk's own space, Bevy's calculate_tile_transform
+```
+
+### `TileData`
+
+```csharp
+static TileData FromTilesetIndex(ushort tilesetIndex);          // A tile drawn from a layer of the tileset, white, shown and upright, Bevy's from_tileset_index
 ```
 
 ### `CapturedImage`

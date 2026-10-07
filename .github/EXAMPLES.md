@@ -4,13 +4,13 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**285 written, 16 written in part, 0 can be written, 62 missing and 58 do not apply.** Of the 363 that apply, 301 can be written with what is bridged, 16 of them leaving something out.
+**287 written, 16 written in part, 0 can be written, 60 missing and 58 do not apply.** Of the 363 that apply, 303 can be written with what is bridged, 16 of them leaving something out.
 
-**137 of the 144 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**138 of the 145 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 24 | 0 | 0 | 4 | 1 | 9 of 9 |
+| [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 10 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **285** | **16** | **0** | **62** | **58** | **137 of 144** |
+| **All** | **287** | **16** | **0** | **60** | **58** | **138 of 145** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -77,8 +77,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`sprite_tile`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/sprite_tile.rs) | Renders a sprite tiled in a grid | [written](../BevyCSharp.Examples/2d/sprite_tile.cs) |
 | [`text2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/text2d.rs) | Generates text in 2D | [written](../BevyCSharp.Examples/2d/text2d.cs) |
 | [`texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/texture_atlas.rs) | Generates a texture atlas (sprite sheet) from individual sprites | missing, an atlas built from a folder of images as the app runs |
-| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs) | Renders a tilemap chunk | missing, an image loaded as an array of layers, which Bevy's TilemapChunk draws its tiles from |
-| [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | missing, an image loaded as an array of layers, a row of tiles to a layer |
+| [`tilemap_chunk`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk.rs) | Renders a tilemap chunk | [written](../BevyCSharp.Examples/2d/tilemap_chunk.cs), its random tiles from .NET's generator seeded with 42, as Bevy seeds ChaCha, so other tiles than Bevy's |
+| [`tilemap_chunk_orientation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/tilemap_chunk_orientation.rs) | Renders a tilemap chunk using tile orientations (mirrored, rotated) | [written](../BevyCSharp.Examples/2d/tilemap_chunk_orientation.cs), the pale blue behind the chunk its camera's clear color rather than Bevy's ClearColor resource |
 | [`transparency_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/transparency_2d.rs) | Demonstrates transparency in 2d | [written](../BevyCSharp.Examples/2d/transparency_2d.cs) |
 | [`wireframe_2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/wireframe_2d.rs) | Showcases wireframes for 2d meshes | [written](../BevyCSharp.Examples/2d/wireframe_2d.cs) |
 

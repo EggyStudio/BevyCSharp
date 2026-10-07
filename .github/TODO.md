@@ -45,9 +45,6 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **A 2D mesh drawn by a shader, one example.** A `Mesh2d` is drawn with Bevy's `ColorMaterial`,
   and `shader_material_2d` needs a Slang material that draws on one as `Material` does on a 3D
   mesh.
-- **An image loaded as an array of layers, two examples.** `tilemap_chunk` and
-  `tilemap_chunk_orientation` draw Bevy's `TilemapChunk`, whose tiles are the layers of one image
-  cut as it loads.
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.

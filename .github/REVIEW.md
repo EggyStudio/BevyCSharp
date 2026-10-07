@@ -10,12 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ea00b97`. A state's transitions reach C# as Bevy's messages (ABI 220), a value set
-again moving to itself and running its exit, enter and self-transition as Bevy's `NextState::set`
-does, an entity goes as a state is entered or by a rule over the transition, a state carries three
-computed states and a joint reads one computed from another, and `state_scoped` and
-`computed_states` are written, 282, `custom_transitions` in part with its reason in TODO.md
-(`ea00b97`). The suite: 1,127 passed, 9 skipped.
+Reviewed up to `2f46ad5`. A camera is aimed at a window the game spawned, an offscreen run draws
+each such window into an image of its own at its scale, `window.shot` and `window.list` read them,
+and a Bevy capture keyed by handle and scale, which at scale 2 wrote a blank picture back over the
+window, keeps its scale with the image, so `multiple_windows` and `multi_window_text` are written,
+284, `monitor_info` waiting on a window made fullscreen by entity (ABI 221, `0c50c04`); Bevy's arc,
+sector and segment are in the math with their bounds and a sector or segment mesh maps its image at
+an angle, `mesh2d_arcs` written, 285 (`ad9cc84`); three commits of moves take N 1.2's list to 219
+and N 1.3's to 15 with 9 in the bridge (`0a056f5`, `9038256`), and `NormTests.N_4_2` counts the
+README's prose outside its tables' rows as the amended rule reads, 222 of 320 (`2f46ad5`). The
+suite: 1,145 passed, 9 skipped.
+
+Before them, a state's transitions came to reach C# as Bevy's messages (ABI 220), a value set again
+moving to itself and running its exit, enter and self-transition as Bevy's `NextState::set` does, an
+entity goes as a state is entered or by a rule over the transition, a state carries three computed
+states and a joint reads one computed from another, and `state_scoped` and `computed_states` are
+written, 282, `custom_transitions` in part with its reason in TODO.md (`ea00b97`). The suite: 1,127
+passed, 9 skipped.
 
 Before them, the state slots moved into a module of their own and the patch delegate into a file of
 its name, and the joint state tests into their area's folder, N 1.2's list at 228, N 1.3's at 16 and
@@ -28,12 +39,6 @@ is allowed, and `WorkflowTests` holds every expression in the workflows to the c
 allows at its place, naming the refused line of `aa55e0d`'s file when run over it, listed under
 N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs. The suite: 1,109
 passed, 9 skipped.
-
-Before them, each change of the keyboard, the mouse, a touch and a pad is read as its Bevy message
-in the order it came, 14 message records drained into the bus each frame (ABI 219), and the four
-input event examples are written, 277 (`b0f9841`); a box and a ball are shapes as values that points
-are sampled in and on as Bevy samples them, and `random_sampling` is written (`a31e3b3`). The owner
-pushed, and both workflows failed before any job began, which is Verdict 4.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -205,34 +210,19 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, a second window, two examples.** A window past the first is Bevy's `Window` spawned
-through reflection, as it could be already, and the bridge adds what reflection cannot name, a
-camera aimed at the window's entity, `Render.SetCameraTarget(camera, window)` (ABI 221). An
-offscreen run opens no window, so each window a game spawns draws into an image of its own at the
-window's size and scale, which `Render.Screenshot(path, window)` and a new `window.shot` read, and
-`window.list` names each window by its index and title. Bevy tells pictures drawn into an image
-apart by their scale as well, so a capture asked at a scale of one, of a window at two, was given a
-blank picture of its own and wrote it over the window's. The scale is now kept with the image and
-named by the capture, and `SpawnedWindowTests` holds both scales. `multiple_windows` and
-`multi_window_text` are written, 284, both windows of each checked offscreen, the second's text
-twice as large. `monitor_info` waits on a window made fullscreen on a monitor named by its entity,
-which reflection cannot name either, and joins the single rows in TODO. The suite passed, 1,130
-with 9 skipped. Next is `mesh2d_arcs`, Bevy's circular sector and segment with their bounds and
-the angle their meshes map an image at, and then `shader_material_2d`, a Slang material drawn on a
-2D mesh.
+**Now 3, the tilemap chunks, two examples.** An image already loaded as an array of layers
+(`TextureSettings.Layers`), so what the two waited on was Bevy's `TilemapChunk` and its tiles, a
+list of optional structs reflection lists no field of. `Render2d.SetTilemap` puts the chunk and its
+tiles on together, as Bevy's hook reads the tiles as the chunk goes in, and `SetTiles` and `TileAt`
+write and read a run of them afterwards, a tile's layer, tint, visibility and orientation crossing
+as one struct (ABI 222). `TilemapChunk.TileTransform` is Bevy's `calculate_tile_transform`. A run
+that draws nothing refuses a chunk, where Bevy's hook would have panicked asking for the chunk's
+mesh cache, and `TilemapTests` holds the round trip, the refusals and the headless one.
+`tilemap_chunk` and `tilemap_chunk_orientation` are written, 287, the first's timer and runner in
+behaviors as B 4 has it, with `textures/arrow.png` added to the assets fetched. `NormTests.N_4_2`
+counts the README's prose as the amended rule reads (`2f46ad5`). The suite passed, 1,148 with 9
+skipped.
 
-**Now 3, `mesh2d_arcs`, and two files mended.** Bevy's `Arc2d`, `CircularSector` and
-`CircularSegment` are in the math with their bounds, ported from Bevy's, a sector's box taking in
-the disc's center and its circle the one about its point and ends below a half disc, and
-`ArcBoundsTests` holds Bevy's own cases for both at v0.19.1. `MeshShape.UvAngle` builds a sector or
-a segment mapped onto its image at an angle, Bevy's `CircularMeshUvMode::Mask`, and
-`mesh2d_arcs` is written, 285, its behaviors drawing each shape's bounds as Bevy's `DrawBounds`
-does. The bridge's render assets were split first into primitives, meshes, images and materials,
-N 1.3's list at 15 (`0a056f5`), and the nine mesh and material types of `RenderMaterials.cs` moved
-into files of their names, N 1.2's at 219 (`9038256`). The README's gallery took another row, so
-its walk's sentence went to one line and BUILDING.md names the script. The gallery takes a row
-every four examples written, so the README meets N 4.2's cap again each time, and a line of prose
-goes each time. A gallery of five a row, or a cap that counts the gallery apart, would end that,
-and the choice belongs to the norm. `shader_material_2d` needs Bevy's 2D material pipeline
-built again for a material whose layout its program gives, since `Material2d` is generic to its
-Rust type all the way down, so the two-row gaps come first, the tilemap chunks next.
+The camera controllers, the next two-row gap, need `bevy_camera_controller`, which Bevy's
+`free_camera` and `pan_camera` features bring and the lock does not hold, so they wait on the
+owner's word as Feathers does. The single rows come next, Bevy's log written from C# first.

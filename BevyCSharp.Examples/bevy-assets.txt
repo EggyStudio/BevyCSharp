@@ -154,3 +154,4 @@ models/SimpleSkin/SimpleSkin.gltf
 models/GltfPrimitives/gltf_primitives.glb
 irradiance_volumes/Example.vxgi.ktx2
 models/IrradianceVolumeExample/IrradianceVolumeExample.glb
+textures/arrow.png
