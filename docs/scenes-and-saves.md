@@ -154,8 +154,11 @@ settings.Update(value => value with { Volume = 0.5f });
 settings.Persist();
 ```
 
-A `Persistent<T>` given to `SaveGame.Carry` belongs to the save slot instead, copied into each save
-and put back on a load, for a playthrough's own state such as its quests.
+The file is read over the default, so a field a later version of the game adds keeps its own
+default when a player's older file leaves it out, rather than the zero of its type. A
+`Persistent<T>` given to `SaveGame.Carry` belongs to the save slot instead, copied into each save
+and put back on a load, for a playthrough's own state such as its quests, and read over the
+default the same way.
 
 ## Changing a type without breaking its files
 

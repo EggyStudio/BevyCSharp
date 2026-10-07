@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
 
 namespace Bevy;
@@ -119,7 +120,9 @@ public interface IPersistentValue
 /// settings.Persist();
 /// </code>
 /// <para>
-/// A file that is missing or cannot be read gives the default instead, with the reason in
+/// What the file holds is read over the default, so a field the file does not name, as one a
+/// later version of the game added, keeps the default's value rather than its type's zero. A
+/// file that is missing or cannot be read gives the default instead, with the reason in
 /// <see cref="Problem"/>, so a settings file broken by hand or by an older build starts the game
 /// rather than stopping it. The file is not written until asked, so a default is not saved over a
 /// file that only failed to read. Writes go through a temporary file renamed over the old one
@@ -202,7 +205,7 @@ public sealed class Persistent<T> : IPersistentValue
     {
         try
         {
-            if (json.Deserialize(_info) is not { } value) return false;
+            if (Over(JsonNode.Parse(json.GetRawText())) is not { } value) return false;
 
             Set(value);
             return true;
@@ -242,7 +245,7 @@ public sealed class Persistent<T> : IPersistentValue
         try
         {
             using var stream = File.OpenRead(FullPath);
-            if (JsonSerializer.Deserialize(stream, _info) is { } value) return value;
+            if (Over(JsonNode.Parse(stream)) is { } value) return value;
 
             Problem = $"{FullPath} holds null.";
         }
@@ -252,5 +255,44 @@ public sealed class Persistent<T> : IPersistentValue
         }
 
         return _fallback();
+    }
+
+    /// <summary>
+    /// Reads a value from JSON laid over the default's own, so a field the JSON leaves out keeps
+    /// the default's value.
+    /// </summary>
+    /// <remarks>
+    /// A source-generated reader gives an init-only property the JSON leaves out the zero of its
+    /// type rather than the value its initializer gives it, so a settings record that gained a
+    /// field would read it as zero from every file written before. An object in both is laid over
+    /// field by field the same way, and anything else the JSON holds takes the default's place
+    /// whole, so a list is the file's own.
+    /// </remarks>
+    private T? Over(JsonNode? given)
+    {
+        if (given is not JsonObject fields || JsonSerializer.SerializeToNode(_fallback(), _info) is not JsonObject defaults)
+            return given.Deserialize(_info);
+
+        Lay(defaults, fields, _info.Options.PropertyNameCaseInsensitive);
+        return defaults.Deserialize(_info);
+    }
+
+    /// <summary>Lays each field of <paramref name="over"/> on <paramref name="under"/>.</summary>
+    private static void Lay(JsonObject under, JsonObject over, bool anyCase)
+    {
+        foreach (var (name, value) in over)
+        {
+            var key = anyCase
+                ? under.Select(field => field.Key).FirstOrDefault(field => string.Equals(field, name, StringComparison.OrdinalIgnoreCase)) ?? name
+                : name;
+
+            if (value is JsonObject inner && under[key] is JsonObject beneath)
+            {
+                Lay(beneath, inner, anyCase);
+                continue;
+            }
+
+            under[key] = value?.DeepClone();
+        }
     }
 }

@@ -31,8 +31,6 @@ BevyCSharp.Tests/MeshFileTests.cs Directory.Delete
 BevyCSharp.Tests/MeshFileTests.cs Path.GetTempPath
 BevyCSharp.Tests/OffscreenTests.cs Directory.Delete
 BevyCSharp.Tests/OffscreenTests.cs Path.GetTempPath
-BevyCSharp.Tests/Scenes/PersistentTests.cs Directory.Delete
-BevyCSharp.Tests/Scenes/PersistentTests.cs Path.GetTempPath
 BevyCSharp.Tests/PictureRun.cs Directory.Delete
 BevyCSharp.Tests/PictureRun.cs Path.GetTempPath
 BevyCSharp.Tests/RenderTargetTests.cs Directory.Delete

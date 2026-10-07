@@ -7,8 +7,25 @@ namespace Bevy.Tests;
 /// <summary>A game's settings, as a record a settings screen changes one field of at a time.</summary>
 public sealed record Settings(float Volume = 1f, bool Fullscreen = false, string Language = "en");
 
+/// <summary>
+/// A game's settings as a record of properties with defaults of their own, the shape a settings
+/// screen's <c>with</c> changes, which gains a field from one version of a game to the next.
+/// </summary>
+public sealed record GrownSettings
+{
+    /// <summary>A field every version had.</summary>
+    public float Volume { get; init; } = 1f;
+
+    /// <summary>A field a later version added.</summary>
+    public float Brightness { get; init; } = 0.75f;
+
+    /// <summary>Another, of another type.</summary>
+    public string Language { get; init; } = "en";
+}
+
 /// <summary>How the settings are read and written, without reflection.</summary>
 [JsonSerializable(typeof(Settings))]
+[JsonSerializable(typeof(GrownSettings))]
 internal sealed partial class SettingsJson : JsonSerializerContext;
 
 /// <summary>
@@ -22,14 +39,19 @@ internal sealed partial class SettingsJson : JsonSerializerContext;
 [Collection("engine")]
 public sealed class PersistentTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-user-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-user-");
+    private readonly string _root;
 
-    public PersistentTests() => UserData.Root = _root;
+    public PersistentTests()
+    {
+        _root = _folder.Path;
+        UserData.Root = _root;
+    }
 
     public void Dispose()
     {
         UserData.Root = EngineHarness.UserDirectory;
-        if (Directory.Exists(_root)) Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -73,6 +95,33 @@ public sealed class PersistentTests : IDisposable
         Assert.Equal(0.5f, settings.Value.Volume);
         Assert.NotNull(settings.Problem);
         Assert.Equal("{ not json", File.ReadAllText(file));
+    }
+
+    /// <summary>
+    /// A file written before a field was added keeps the field's own default rather than its
+    /// type's zero, with what the file holds read over it, and so does a save carrying the value.
+    /// </summary>
+    /// <remarks>
+    /// A source-generated reader gives an init-only property a file leaves out the zero of its
+    /// type, so settings that gained a field read it as nothing from every file a player already
+    /// had. The feature test's effects page found it, its tonemapper coming back as none.
+    /// </remarks>
+    [Fact]
+    public void AFieldAFileWasWrittenWithoutKeepsItsDefault()
+    {
+        File.WriteAllText(_folder.File("grown.json"), """{ "Volume": 0.25 }""");
+
+        var settings = new Persistent<GrownSettings>("grown", SettingsJson.Default.GrownSettings, () => new GrownSettings());
+
+        Assert.Null(settings.Problem);
+        Assert.Equal(0.25f, settings.Value.Volume);
+        Assert.Equal(0.75f, settings.Value.Brightness);
+        Assert.Equal("en", settings.Value.Language);
+
+        // As a save game hands the value back what it carried.
+        using var carried = System.Text.Json.JsonDocument.Parse("""{ "Language": "de" }""");
+        Assert.True(((IPersistentValue)settings).Read(carried.RootElement));
+        Assert.Equal(("de", 1f, 0.75f), (settings.Value.Language, settings.Value.Volume, settings.Value.Brightness));
     }
 
     [Fact]
