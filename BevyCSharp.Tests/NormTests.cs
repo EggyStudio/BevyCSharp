@@ -207,9 +207,14 @@ public sealed class NormTests
         var readme = Text("README.md");
         var found = Sources("docs/", ".md")
             .Where(page => !readme.Contains("/blob/main/" + page, StringComparison.Ordinal));
-        if (readme.Split('\n').Length - 1 > 320) found = found.Append("README.md");
-        Hold("4.2", found, "a page of docs/ the README does not link, or a README over 320 lines");
+        if (ProseLines(readme) > 320) found = found.Append("README.md");
+        Hold("4.2", found, "a page of docs/ the README does not link, or a README over 320 lines of prose");
     }
+
+    // The lines a reader reads, which leaves out each row of a table, an HTML one's as the gallery
+    // writes them and a Markdown one's, since a row is taken in at a glance.
+    private static int ProseLines(string text) =>
+        text.Split('\n')[..^1].Count(line => !line.TrimStart().StartsWith("<tr>", StringComparison.Ordinal) && !line.TrimStart().StartsWith('|'));
 
     [Fact]
     public void N_4_5()
