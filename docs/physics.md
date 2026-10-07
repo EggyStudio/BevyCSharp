@@ -33,8 +33,10 @@ carries what stands on it at its own pace, turning or not, whether the game move
 or once a fixed step and at any frame rate. An entity put somewhere rather than moved there, as a
 level begun again puts its platforms back, is said to be with `physics.MarkPlaced(platform)`, or
 goes further in a frame than `PhysicsSettings.PlaceBeyond`, and its body is put there at rest
-rather than swept through what lies between. A static one never moves. Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled
-with the entity, and a level's floors and walls are a mesh shape made from triangles, such as a
+rather than swept through what lies between. A dynamic body is put somewhere new the same way with
+`physics.Place(ecs, entity, position)`, as a character's respawn is. A static one never moves.
+Boxes, spheres, capsules and cylinders are the shapes, sized in world units and not scaled with the
+entity, and a level's floors and walls are a mesh shape made from triangles, such as a
 mesh `Render.TryReadMesh` reads back once it has loaded:
 
 <!-- compiled with:
@@ -92,9 +94,10 @@ stands on. It slides along a wall it meets, rides over a low edge and climbs a s
 ground at `Jump` where it stands on any. It stands as tall as `Height`, with its feet where they
 are, so a game crouches it by lowering the height and stands it by raising it again, or by setting
 zero, its collider's height. A character has the height once there is room overhead for it, so one
-crouched under a ledge stands as it walks out. Each step writes back whether it stands on ground and
-which way that faces. The body stays upright whatever its entity's rotation, so the game turns the
-entity to face the way it walks:
+crouched under a ledge stands as it walks out. With `Fly` set it flies at `Move`, up and down as
+well, held against gravity, and walls, floors and ceilings still stop it, as a game's creative mode
+needs. Each step writes back whether it stands on ground and which way that faces. The body stays
+upright whatever its entity's rotation, so the game turns the entity to face the way it walks:
 
 <!-- compiled with:
 Entity player = default;

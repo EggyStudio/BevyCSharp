@@ -1292,6 +1292,7 @@ void SetMaterial(Entity entity, PhysicsMaterial material);      // Changes how a
 bool Remove(Entity entity);                                     // Takes an entity's body away, leaving the entity where it is
 (Vec3 Linear, Vec3 Angular) Velocity(Entity entity);            // A body's velocity: how fast it moves, and how fast it turns about each axis
 void SetVelocity(Entity entity, Vec3 linear, Vec3 angular = default);  // Sets a dynamic body's velocity, waking it if it had come to rest
+void Place(EcsWorld ecs, Entity entity, Vec3 position);         // Puts a dynamic body's entity at a place at once and at rest, as a character's respawn or a teleport does, rather than carrying it there through what lies between
 void ApplyImpulse(Entity entity, Vec3 impulse, Vec3 offset = default);  // Pushes a dynamic body with an impulse, a change in momentum, at a point offset from its center, which turns it as well where the point is off center
 bool IsAsleep(Entity entity);                                   // Whether a dynamic body has come to rest and stopped being simulated
 PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance);  // The nearest body a ray meets within distance, or null for none

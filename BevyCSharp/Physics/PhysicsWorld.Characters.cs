@@ -95,7 +95,8 @@ public sealed partial class PhysicsWorld
     /// <para>
     /// In the air, or against ground too steep to stand on, it steers toward the velocity asked
     /// for at a limited rate, and asked for nothing it keeps its own motion, so a steep slope
-    /// slides it down and a jump carries on.
+    /// slides it down and a jump carries on. Flying, it goes at the velocity asked for in every
+    /// direction and is held against gravity, and what it meets stops it as a wall does a walk.
     /// </para>
     /// <para>
     /// What it found is written back to the component only where it differs, so a character
@@ -157,7 +158,13 @@ public sealed partial class PhysicsWorld
             }
 
             var velocity = reference.Velocity.Linear;
-            if (grounded)
+            if (controller.Fly)
+            {
+                // The velocity asked for in every direction, less the step's gravity, which the
+                // integrator adds during the step, so it hovers where asked for nothing.
+                velocity = ToBepu(controller.Move) - (_gravity * seconds);
+            }
+            else if (grounded)
             {
                 var stepHeight = controller.StepHeight > 0f ? controller.StepHeight : character.Radius;
                 ClimbStep(ref reference, character, self, asked, stepHeight, flatEnough);

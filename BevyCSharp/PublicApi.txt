@@ -3822,6 +3822,7 @@ enum Bevy.Physics.BodyKind : int
 struct Bevy.Physics.CharacterController
   Vec3 GroundNormal
   Vec3 Move
+  bool Fly
   bool Grounded
   float Height
   float Jump
@@ -4005,6 +4006,7 @@ sealed class Bevy.Physics.PhysicsWorld : IDisposable
   void ApplyImpulse(Entity entity, Vec3 impulse, Vec3 offset = default)
   void Dispose()
   void MarkPlaced(Entity entity)
+  void Place(EcsWorld ecs, Entity entity, Vec3 position)
   void SetContinuous(Entity entity, bool continuous)
   void SetLayer(Entity entity, int layer)
   void SetLayersCollide(int a, int b, bool collide)

@@ -76,6 +76,18 @@ public partial struct CharacterController
     [Range(0, 3), Tooltip("How tall it stands, lower to crouch. Zero is its collider's height.")]
     public float Height;
 
+    /// <summary>
+    /// Whether it flies, at <see cref="Move"/> up and down as well as along, with gravity held off,
+    /// where walls, floors and ceilings stop it still.
+    /// </summary>
+    /// <remarks>
+    /// A game's creative mode, or a ghost that does not pass through the level. It hovers where
+    /// asked for nothing, a jump does nothing, and <see cref="Grounded"/> still says whether it is
+    /// over ground close enough to stand on, which a game reads to land it.
+    /// </remarks>
+    [Tooltip("Flies at Move, up and down included, with gravity held off. Walls still stop it.")]
+    public bool Fly;
+
     /// <summary>Whether it stood on ground no steeper than <see cref="MaxSlope"/> at the last step.</summary>
     [ReadOnly]
     public bool Grounded;

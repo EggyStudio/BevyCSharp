@@ -48,7 +48,8 @@ public sealed class CharacterControllerTests
         Func<EcsWorld, Entity[]> level,
         float seconds,
         Func<EcsWorld, PhysicsWorld, Entity[], T> read,
-        Action<EcsWorld, Entity[], int>? each = null)
+        Action<EcsWorld, Entity[], int>? each = null,
+        Action<PhysicsWorld>? made = null)
     {
         using var harness = new EngineHarness(frames: 3);
         T? result = default;
@@ -60,6 +61,7 @@ public sealed class CharacterControllerTests
             ran = true;
 
             using var physics = new PhysicsWorld();
+            made?.Invoke(physics);
             Block(ctx.Ecs, new Vec3(0f, -0.5f, 0f), new Vec3(100f, 1f, 100f));
             var entities = level(ctx.Ecs);
 
@@ -272,6 +274,68 @@ public sealed class CharacterControllerTests
         Assert.True(MathF.Abs(rotation.Y - turned.Y) < 1e-3f && MathF.Abs(rotation.W - turned.W) < 1e-3f, $"turned to {rotation}");
         Assert.True(wasCharacter);
         Assert.False(isCharacter);
+    }
+
+    [Fact]
+    public void AFlyingCharacterRisesHoversAndIsStoppedByACeiling()
+    {
+        // A ceiling whose underside is at y 6, over the second character alone.
+        var (risen, hovering, held, grounded) = Simulate(
+            ecs =>
+            {
+                Block(ecs, new Vec3(10f, 6.5f, 0f), new Vec3(4f, 1f, 4f));
+                return
+                [
+                    Character(ecs, Vec3.Zero, new CharacterController { Fly = true }),
+                    Character(ecs, new Vec3(10f, 0f, 0f), new CharacterController { Fly = true }),
+                ];
+            },
+            3f,
+            (ecs, _, e) => (Feet(ecs, e[0]).Y, ecs.GetOrDefault<Transform>(e[0]).Translation, Feet(ecs, e[1]).Y, ecs.GetOrDefault<CharacterController>(e[0]).Grounded),
+            (ecs, e, step) =>
+            {
+                // Up at two units a second for a second, then asked for nothing.
+                var up = step < 60 ? new Vec3(0f, 2f, 0f) : Vec3.Zero;
+                Walk(ecs, e[0], up);
+                Walk(ecs, e[1], new Vec3(0f, 4f, 0f));
+            });
+
+        // Two units up and held there for two seconds against gravity, with no ground under it.
+        Assert.InRange(risen, 1.8f, 2.2f);
+        Assert.InRange(hovering.X, -0.05f, 0.05f);
+        Assert.False(grounded, "a character two units up is not over ground it stands on");
+
+        // Stopped under the ceiling, its head at the ceiling's underside.
+        Assert.InRange(held, 6f - Height - 0.1f, 6f - Height + 0.02f);
+    }
+
+    [Fact]
+    public void ACharacterPlacedElsewhereStandsThereAtRest()
+    {
+        PhysicsWorld? world = null;
+        var (feet, speed) = Simulate(
+            ecs => [Character(ecs, Vec3.Zero)],
+            2f,
+            (ecs, physics, e) => (Feet(ecs, e[0]), physics.Velocity(e[0]).Linear.Length),
+            (ecs, e, step) =>
+            {
+                // Walking east for half a second, then put twenty units away, high above the floor,
+                // and asked for nothing more.
+                if (step == 0) Walk(ecs, e[0], new Vec3(4f, 0f, 0f));
+                if (step == 30)
+                {
+                    Walk(ecs, e[0], Vec3.Zero);
+                    world!.Place(ecs, e[0], new Vec3(-20f, 3f, 5f));
+                    Assert.Equal(new Vec3(-20f, 3f, 5f), Feet(ecs, e[0]));
+                }
+            },
+            physics => world = physics);
+
+        // Fallen from where it was put to the floor under it, not walked or carried back east.
+        Assert.InRange(feet.X, -20.05f, -19.95f);
+        Assert.InRange(feet.Z, 4.95f, 5.05f);
+        Assert.InRange(feet.Y, -0.05f, 0.05f);
+        Assert.InRange(speed, 0f, 0.1f);
     }
 
     [Fact]

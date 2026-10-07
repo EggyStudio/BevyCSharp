@@ -280,6 +280,39 @@ public sealed partial class PhysicsWorld : IDisposable
     }
 
     /// <summary>
+    /// Puts a dynamic body's entity at a place at once and at rest, as a character's respawn or a
+    /// teleport does, rather than carrying it there through what lies between.
+    /// </summary>
+    /// <param name="ecs">The world the entity is in, whose transform is written too.</param>
+    /// <param name="entity">The entity whose body moves.</param>
+    /// <param name="position">Where its origin goes, as its transform's translation would say.</param>
+    /// <remarks>
+    /// The body keeps its orientation, and a character's stays upright as it always does. The
+    /// entity's transform is written here too, so the frame that asked sees it there, and the step
+    /// after writes back from the place. A kinematic body follows its entity and is put with
+    /// <see cref="MarkPlaced"/> instead.
+    /// </remarks>
+    /// <exception cref="KeyNotFoundException">The entity has no body that moves.</exception>
+    public void Place(EcsWorld ecs, Entity entity, Vec3 position)
+    {
+        ArgumentNullException.ThrowIfNull(ecs);
+
+        var body = Moving(entity);
+        var center = _bodies[entity].Center;
+        body.Pose.Position = ToBepu(position) + Vector3.Transform(center, body.Pose.Orientation);
+        body.Velocity.Linear = Vector3.Zero;
+        body.Velocity.Angular = Vector3.Zero;
+        body.UpdateBounds();
+        Wake(body);
+
+        if (ecs.TryGet<Transform>(entity, out var transform))
+        {
+            transform.Translation = position;
+            ecs.Set(entity, transform);
+        }
+    }
+
+    /// <summary>
     /// Pushes a dynamic body with an impulse, a change in momentum, at a point
     /// <paramref name="offset"/> from its center, which turns it as well where the point is off
     /// center. A jump, a shot, an explosion.
