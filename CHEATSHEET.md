@@ -25,6 +25,7 @@ App AddPlugins(IPluginGroup group);                             // Adds every pl
 bool HasPlugin<T>();                                            // True when a plugin of type T is registered
 int Run();                                                      // Runs the engine
 static void RequestExit();                                      // Asks the engine to shut down after the current frame
+static void RequestExit(int code);                              // Asks the engine to shut down after the current frame, the run ending with code
 static string DescribeAdapter();                                // Describes the graphics adapter the renderer actually chose, or null in a headless run
 void Dispose();                                                 // Releases what it holds
 App AddState<TState>(TState initial);                           // Adds a state machine over TState, starting at initial
@@ -137,6 +138,7 @@ void SetState<TState>(TState value);                            // Asks Bevy to 
 void Send<TMessage>(TMessage message);                          // Broadcasts a message for every reader to see next frame
 ReadOnlySpan<TMessage> Read<TMessage>();                        // The messages of type TMessage sent during the previous frame
 void Exit();                                                    // Asks the engine to shut down after this frame
+void Exit(int code);                                            // Asks the engine to shut down after this frame, the run ending with code, as App.RequestExit(int) does
 ```
 
 ### `BehaviorConditions`
@@ -1723,6 +1725,22 @@ static ConsoleHost.Scope Lend(World world);                     // Lends the wor
 
 ```csharp
 void Dispose();                                                 // Ends it, putting back whatever was lent before
+```
+
+### `Log`
+
+```csharp
+static void Trace(string message);                              // Writes a line at the trace level, which Bevy leaves out unless asked for
+static void Debug(string message);                              // Writes a line at the debug level, which Bevy leaves out unless asked for
+static void Info(string message);                               // Writes a line at the info level, the quietest Bevy shows by default
+static void Warn(string message);                               // Writes a line at the warn level, for something wrong that is not a failure
+static void Error(string message);                              // Writes a line at the error level, for something that failed
+static void TraceOnce(string message, string file = "", int line = 0);  // Writes a line at the trace level the first time this line of code runs, Bevy's trace_once!
+static void DebugOnce(string message, string file = "", int line = 0);  // Writes a line at the debug level the first time this line of code runs, Bevy's debug_once!
+static void InfoOnce(string message, string file = "", int line = 0);  // Writes a line at the info level the first time this line of code runs, Bevy's info_once!
+static void WarnOnce(string message, string file = "", int line = 0);  // Writes a line at the warn level the first time this line of code runs, Bevy's warn_once!
+static void ErrorOnce(string message, string file = "", int line = 0);  // Writes a line at the error level the first time this line of code runs, Bevy's error_once!
+static void Once(Action work, string file = "", int line = 0);  // Runs work the first time this line of code runs and never again, Bevy's once!
 ```
 
 ### `ConsoleLog`

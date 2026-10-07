@@ -43,7 +43,7 @@ public sealed class Config
 
     /// <summary>
     /// Number of frames to run before exiting, for headless runs. Zero runs until something
-    /// calls <see cref="App.RequestExit"/>. Tests use this to drive a fixed number of ticks.
+    /// calls <see cref="App.RequestExit()"/>. Tests use this to drive a fixed number of ticks.
     /// </summary>
     public uint HeadlessFrames { get; set; }
 

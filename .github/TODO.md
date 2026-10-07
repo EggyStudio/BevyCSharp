@@ -48,18 +48,17 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Thirteen more, one example each.** A resource's change ticks and when a component was added
+- **Twelve more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
-  picking's events), Bevy's log written from C# at its levels (`logs`), a playing sound's speed
-  changed as it plays (`audio_control`), an atlas built from a folder of images as the app runs
-  (`texture_atlas`), gizmos of Bevy's primitive shapes (`render_primitives`), Bevy's outlines of
-  interface nodes for debugging, a feature the bridge does not build (`image_node_resizing`), the
-  pointer passing through the window to what is behind it (`window_fallthrough`), a window made
-  fullscreen on a monitor named by its entity, in a run that opens no first window
-  (`monitor_info`), the schedule reporting systems whose order is ambiguous
-  (`nondeterministic_system_order`), and a message changed in place by a later system and read
-  the same frame, where a C# message is read the frame after it is sent (`message`).
+  picking's events), a playing sound's speed changed as it plays (`audio_control`), an atlas built
+  from a folder of images as the app runs (`texture_atlas`), gizmos of Bevy's primitive shapes
+  (`render_primitives`), Bevy's outlines of interface nodes for debugging, a feature the bridge does
+  not build (`image_node_resizing`), the pointer passing through the window to what is behind it
+  (`window_fallthrough`), a window made fullscreen on a monitor named by its entity, in a run that
+  opens no first window (`monitor_info`), the schedule reporting systems whose order is ambiguous
+  (`nondeterministic_system_order`), and a message changed in place by a later system and read the
+  same frame, where a C# message is read the frame after it is sent (`message`).
 
 Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
 tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave

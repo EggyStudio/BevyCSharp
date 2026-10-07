@@ -84,6 +84,27 @@ rather than quietly picking something else.
 Cameras, lights, meshes and materials are reachable from C# through `Render`, which draws the scene
 in the screenshot above. See [Drawing](drawing.md) for the calls.
 
+## Bevy's log, and a run that fails
+
+`Log` writes into Bevy's log at its five levels, beside the lines Bevy's own systems write, under
+the target `csharp`. Bevy's filter shows the info level and louder by default, and `RUST_LOG` chooses
+otherwise, `RUST_LOG=csharp=debug` showing a game's debug lines without Bevy's:
+
+```csharp
+Log.Info("helpful information that is worth printing by default");
+Log.Debug("helpful for debugging");                 // left out by default
+Log.WarnOnce("some warning we wish to call out only once");
+Log.Once(() => table = Build());                    // once in the process, from a system run each frame
+```
+
+A `Once` form writes the first time its line of code runs and never again, as Bevy's `info_once!`
+does, so a loop writes its first pass alone. A line at the error level is one of the engine's
+errors, as Bevy's own are.
+
+A system that throws is logged and the app runs on, where a Rust system's panic ends Bevy's app. A
+game that cannot go on ends the run with a code instead, `ctx.Exit(1)`, which `App.Run` answers, as
+Bevy's `AppExit::Error` is answered.
+
 ## Hot reload
 
 The editor profile watches the asset directory, so a running app picks up what changed on disk.

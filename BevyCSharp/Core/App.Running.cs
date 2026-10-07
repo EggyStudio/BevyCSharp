@@ -43,7 +43,7 @@ public sealed unsafe partial class App : IDisposable
     // -- Execution
 
     /// <summary>
-    /// Runs the engine. Blocks until the window closes or <see cref="RequestExit"/> is called,
+    /// Runs the engine. Blocks until the window closes or <see cref="RequestExit()"/> is called,
     /// then runs the <see cref="Stage.Cleanup"/> systems.
     /// </summary>
     /// <returns>The process exit code Bevy reported; 0 for a clean shutdown.</returns>
@@ -94,6 +94,22 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>Asks the engine to shut down after the current frame.</summary>
     public static void RequestExit() =>
         Native.Check(Native.bcs_app_request_exit(), "bcs_app_request_exit");
+
+    /// <summary>Asks the engine to shut down after the current frame, the run ending with <paramref name="code"/>.</summary>
+    /// <remarks>
+    /// Bevy's <c>AppExit::Error</c>, which <see cref="Run"/> answers, for a run that ends because
+    /// something failed, as a Rust system's panic ends Bevy's app. A C# system that throws is logged
+    /// and the app runs on, so a game that cannot go on says so this way. Zero is a clean shutdown,
+    /// as <see cref="RequestExit()"/> asks for.
+    /// </remarks>
+    /// <param name="code">The exit code, zero to 255.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The code is not one a process can end with.</exception>
+    public static void RequestExit(int code)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(code);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(code, 255);
+        Native.Check(Native.bcs_app_request_exit_code(code), "bcs_app_request_exit_code");
+    }
 
     /// <summary>
     /// Describes the graphics adapter the renderer actually chose, or <see langword="null"/> in

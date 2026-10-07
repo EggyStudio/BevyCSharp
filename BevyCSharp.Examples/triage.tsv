@@ -124,7 +124,7 @@ headless	can	the second app stopped after three seconds, where Bevy's counts unt
 headless_renderer	can	the offscreen picture captured, where Bevy copies the image out of the render world itself
 log_layers_ecs	n/a	adds a tracing layer, written in Rust
 log_layers	n/a	adds a tracing layer, written in Rust
-logs	missing	Bevy's log written from C# at its levels, and a message logged once
+logs	can	its lines under the target csharp rather than the example's module, and P ending the run with Rust's panic code where Bevy's panics
 no_renderer	n/a	builds Bevy's renderer with no graphics backend, which the bridge sets up
 persisting_window_settings	can	through Config.RememberWindow, which keeps the window's place, size and fullscreen in the game's persistent settings as Bevy's settings plugin keeps them
 plugin	can

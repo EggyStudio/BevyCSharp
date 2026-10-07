@@ -110,6 +110,37 @@ pub unsafe extern "C" fn bcs_log_take_error(out: *mut u8, capacity: i32) -> i32 
     })
 }
 
+/// Writes a line from C# into Bevy's log at `level`, `0` trace, `1` debug, `2` info, `3` warn and
+/// `4` error, under the target `csharp`.
+///
+/// Bevy's log is a `tracing` subscriber whose filter is set when the app is made, at the info level
+/// by default and by `RUST_LOG` where it is set, so a line from C# is shown or left out as Bevy's
+/// own are, and `RUST_LOG=csharp=debug` shows the debug lines of C# alone. The target is one name
+/// for every line, since a target is fixed where a line is written in Rust and these are written in
+/// one place. A line at the error level is kept for the managed side as Bevy's own are.
+///
+/// # Safety
+/// `message` must be a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_log_write(level: i32, message: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        let Some(message) = (unsafe { crate::interop::cstr_to_string(message) }) else {
+            return crate::interop::status::NULL_ARG;
+        };
+
+        match level {
+            0 => bevy::log::trace!(target: "csharp", "{message}"),
+            1 => bevy::log::debug!(target: "csharp", "{message}"),
+            2 => bevy::log::info!(target: "csharp", "{message}"),
+            3 => bevy::log::warn!(target: "csharp", "{message}"),
+            4 => bevy::log::error!(target: "csharp", "{message}"),
+            _ => return crate::interop::status::INVALID_STATE,
+        }
+
+        crate::interop::status::OK
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -154,6 +185,23 @@ mod tests {
         let needed = unsafe { bcs_log_take_error(small.as_mut_ptr(), small.len() as i32) };
         assert_eq!(needed as usize, "bcs_test: a line longer than four bytes".len());
         assert_eq!(take().as_deref(), Some("bcs_test: a line longer than four bytes"));
+    }
+
+    #[test]
+    fn a_line_from_csharp_at_the_error_level_is_kept_under_its_target() {
+        let _alone = ALONE.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        while take().is_some() {}
+
+        let subscriber = bevy::log::tracing_subscriber::registry().with(Kept);
+        bevy::log::tracing::subscriber::with_default(subscriber, || {
+            let line = std::ffi::CString::new("something failed").unwrap();
+            assert_eq!(crate::interop::status::OK, unsafe { bcs_log_write(3, line.as_ptr()) });
+            assert_eq!(crate::interop::status::OK, unsafe { bcs_log_write(4, line.as_ptr()) });
+            assert_eq!(crate::interop::status::INVALID_STATE, unsafe { bcs_log_write(5, line.as_ptr()) });
+        });
+
+        assert_eq!(take().as_deref(), Some("csharp: something failed"));
+        assert_eq!(take(), None);
     }
 
     #[test]

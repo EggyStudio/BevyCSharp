@@ -735,6 +735,29 @@ pub extern "C" fn bcs_app_request_exit() -> i32 {
     })
 }
 
+/// Requests a shutdown that ends the run with `code`, Bevy's `AppExit::Error`, or a clean one for
+/// zero, from inside a system callback.
+///
+/// For a run that has to end and say it failed, as a Rust system's panic ends Bevy's app, where a
+/// C# system that throws is logged and the app runs on. The run answers the code, a value from one
+/// to 255 as a process's exit code is, and anything past 255 is refused.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_app_request_exit_code(code: i32) -> i32 {
+    crate::interop::guard(|| {
+        let Ok(code) = u8::try_from(code) else {
+            return status::INVALID_STATE;
+        };
+
+        with_world(|world| {
+            world.write_message(match core::num::NonZeroU8::new(code) {
+                Some(code) => AppExit::Error(code),
+                None => AppExit::Success,
+            });
+            status::OK
+        })
+    })
+}
+
 /// Opens the window through XWayland on GNOME under Wayland, so the desktop draws its title bar in
 /// its own style rather than the window drawing an imitation of an older one.
 ///

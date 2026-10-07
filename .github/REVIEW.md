@@ -10,11 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2f46ad5`. A camera is aimed at a window the game spawned, an offscreen run draws
-each such window into an image of its own at its scale, `window.shot` and `window.list` read them,
-and a Bevy capture keyed by handle and scale, which at scale 2 wrote a blank picture back over the
-window, keeps its scale with the image, so `multiple_windows` and `multi_window_text` are written,
-284, `monitor_info` waiting on a window made fullscreen by entity (ABI 221, `0c50c04`); Bevy's arc,
+Reviewed up to `6bdfd85`. A tilemap chunk is made with its tiles and has them written and read from
+C#, images loaded as arrays of layers serving as before, a headless run refusing a chunk where
+Bevy's hook panicked, and both tilemap chunk examples are written, 287 (ABI 222, `6bdfd85`). The
+camera controllers wait on the owner's word on `bevy_camera_controller`, as Feathers' three do on
+`bevy_feathers`. The suite: 1,148 passed, 9 skipped.
+
+Before them, a camera came to be aimed at a window the game spawned, an offscreen run draws each
+such window into an image of its own at its scale, `window.shot` and `window.list` read them, and a
+Bevy capture keyed by handle and scale, which at scale 2 wrote a blank picture back over the window,
+keeps its scale with the image, so `multiple_windows` and `multi_window_text` are written, 284,
+`monitor_info` waiting on a window made fullscreen by entity (ABI 221, `0c50c04`); Bevy's arc,
 sector and segment are in the math with their bounds and a sector or segment mesh maps its image at
 an angle, `mesh2d_arcs` written, 285 (`ad9cc84`); three commits of moves take N 1.2's list to 219
 and N 1.3's to 15 with 9 in the bridge (`0a056f5`, `9038256`), and `NormTests.N_4_2` counts the
@@ -26,18 +32,6 @@ moving to itself and running its exit, enter and self-transition as Bevy's `Next
 entity goes as a state is entered or by a rule over the transition, a state carries three computed
 states and a joint reads one computed from another, and `state_scoped` and `computed_states` are
 written, 282, `custom_transitions` in part with its reason in TODO.md (`ea00b97`). The suite: 1,127
-passed, 9 skipped.
-
-Before them, the state slots moved into a module of their own and the patch delegate into a file of
-its name, and the joint state tests into their area's folder, N 1.2's list at 228, N 1.3's at 16 and
-N 1.4's at 87 to mend (`fee3190`, `4eb8838`). Hermite, cardinal, B-spline and Bezier splines are
-made into cubic curves sampled along as Bevy makes them, and `cubic_splines` is written (`9f5537a`),
-the last of the math gap. Shapes in the plane give boxes and circles about them as Bevy bounds them,
-rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is written (`cbe9a1f`).
-Verdict 4's mend: the two plays name their logs folder in their own steps, where the runner context
-is allowed, and `WorkflowTests` holds every expression in the workflows to the contexts GitHub
-allows at its place, naming the refused line of `aa55e0d`'s file when run over it, listed under
-N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs. The suite: 1,109
 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
@@ -210,19 +204,12 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, the tilemap chunks, two examples.** An image already loaded as an array of layers
-(`TextureSettings.Layers`), so what the two waited on was Bevy's `TilemapChunk` and its tiles, a
-list of optional structs reflection lists no field of. `Render2d.SetTilemap` puts the chunk and its
-tiles on together, as Bevy's hook reads the tiles as the chunk goes in, and `SetTiles` and `TileAt`
-write and read a run of them afterwards, a tile's layer, tint, visibility and orientation crossing
-as one struct (ABI 222). `TilemapChunk.TileTransform` is Bevy's `calculate_tile_transform`. A run
-that draws nothing refuses a chunk, where Bevy's hook would have panicked asking for the chunk's
-mesh cache, and `TilemapTests` holds the round trip, the refusals and the headless one.
-`tilemap_chunk` and `tilemap_chunk_orientation` are written, 287, the first's timer and runner in
-behaviors as B 4 has it, with `textures/arrow.png` added to the assets fetched. `NormTests.N_4_2`
-counts the README's prose as the amended rule reads (`2f46ad5`). The suite passed, 1,148 with 9
-skipped.
-
-The camera controllers, the next two-row gap, need `bevy_camera_controller`, which Bevy's
-`free_camera` and `pan_camera` features bring and the lock does not hold, so they wait on the
-owner's word as Feathers does. The single rows come next, Bevy's log written from C# first.
+**Now 3, `logs`.** `Log` writes into Bevy's log at its five levels under the target `csharp`, shown
+or left out by Bevy's filter and `RUST_LOG` as Bevy's own lines are, an error line kept as one of
+the engine's errors, and its `Once` forms write the first time their line of code runs, as Bevy's
+`info_once!` does, with `Log.Once` for any work (ABI 223). A C# system that throws is logged and the
+app runs on, where Bevy's panics, so `App.RequestExit(code)` and `ctx.Exit(code)` end a run with
+Bevy's `AppExit::Error`, which `App.Run` answers. `logs` is written, 288, P ending the run with
+Rust's panic code. `LogTests` holds an error from C# among the engine's, the once forms by line of
+code, and a run's code. The suite passed, 1,151 with 9 skipped. `audio_control` is next, after
+`Audio.cs`'s two other types move into files of their names.

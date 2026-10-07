@@ -146,6 +146,7 @@ internal static class Catalog
         new("drag_and_drop", DragAndDrop.Build),
         new("empty_defaults", EmptyDefaults.Build),
         new("hello_world", HelloWorld.Build, Prints: 1),
+        new("logs", Logs.Build),
         new("headless", Headless.Build, Prints: 1, Returned: Headless.Returned),
         new("headless_renderer", HeadlessRenderer.Build, HeadlessRenderer.Configure),
         new("plugin", PluginExample.Build, Prints: 130),

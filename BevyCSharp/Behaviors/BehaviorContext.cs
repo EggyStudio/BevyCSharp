@@ -114,4 +114,7 @@ public sealed class BehaviorContext
 
     /// <summary>Asks the engine to shut down after this frame.</summary>
     public void Exit() => App.RequestExit();
+
+    /// <summary>Asks the engine to shut down after this frame, the run ending with <paramref name="code"/>, as <see cref="App.RequestExit(int)"/> does.</summary>
+    public void Exit(int code) => App.RequestExit(code);
 }
