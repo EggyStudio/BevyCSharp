@@ -59,7 +59,6 @@ BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
 BevyCSharp/Cli/CliClient.cs CliAnswer
 BevyCSharp/Cli/CliJson.cs CliError
 BevyCSharp/Cli/CliSession.cs CliSessionFile
-BevyCSharp/Core/Messages.cs MessageBus
 BevyCSharp/Core/Plugin.cs DefaultPlugins
 BevyCSharp/Core/Plugin.cs IPlugin
 BevyCSharp/Core/Plugin.cs IPluginGroup
