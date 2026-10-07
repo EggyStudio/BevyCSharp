@@ -100,11 +100,6 @@ BevyCSharp/Diagnostics/FrameProfile.cs FrameCosts
 BevyCSharp/Ecs/ChunkSet.cs ComponentQuery
 BevyCSharp/Ecs/ChunkSet.cs ComponentRow
 BevyCSharp/Ecs/ComponentRegistry.cs ComponentType
-BevyCSharp/Ecs/ComponentSchema.cs ComponentField
-BevyCSharp/Ecs/ComponentSchema.cs ComponentMethod
-BevyCSharp/Ecs/ComponentSchema.cs ComponentSchemas
-BevyCSharp/Ecs/ComponentSchema.cs FieldKind
-BevyCSharp/Ecs/ComponentSchema.cs SchemaOrigin
 BevyCSharp/Ecs/EcsMap.cs MapValue
 BevyCSharp/Ecs/FieldHints.cs FieldCondition
 BevyCSharp/Ecs/FieldHints.cs MethodHints
