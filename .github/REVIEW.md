@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3e6293d`. The console tests moved into the diagnostics folder, N 1.4's list at 81
+Reviewed up to `e58d4bc`. The three verdicts are mended: the bridge allows `linker_messages` in the
+workspace's lints with the macOS linker's note as the reason (`470fec7`); the fixed-update case
+steps its clock a 240th of a second a frame and asserts twenty fixed steps within one (`128cecd`);
+and the Windows step keeps each `bcs` answer and hands a failing one to `build/bcs-answer.py`, which
+says the command, its exit code, the code and sentence `bcs` answered and the end of the log the
+answer names, on the page and the summary, with a test (`6a2c4b2`). The crash log is in as an engine
+feature, the feature test's first commit: `CrashLog` writes `logs/latest.log` beside the executable
+from the first app of a process, C#'s lines and Bevy's, which the bridge's log layer collects for
+the console's ring, five runs kept, and a crash to `logs/crash-<time>.txt` with the system, .NET,
+the ABI, the adapter, the backend, the last panic the bridge caught and the log's last 200 lines,
+for an exception nothing caught, a task's exception nobody looked at and a panic on one of Bevy's
+threads, which the bridge's hook hands over as it happens, the next start saying where the last
+crash's file is, at ABI 228 (`e58d4bc`). Two offscreen runs of the sample in about thirty on the
+working session's machine lost the device as they ended and died by a signal, untraced, which
+becomes a verdict if a run shows it. The runs: `3e6293d` failed on macOS and Windows as foreseen;
+`470fec7`'s run carries Verdict 5's mend alone and `e58d4bc`'s all three, both in progress at 17:00,
+and the pack run of `75e8953` stays cancelled. The suite: 1,227 passed, 9 skipped.
+
+Before them, the console tests had moved into the diagnostics folder, N 1.4's list at 81
 (`3e6293d`). The runs: the first three with a macOS job, `360669ef`, `e3295b5` and `6f4d8590`,
 failed there twice over, the bridge's tests not building under denied warnings for a linker message
 of macOS, which is Verdict 5, and the fixed-update case of `GeneratorAttributeTests` counting 106
@@ -32,36 +50,6 @@ graphics test scenes come as packs fetched on demand, Intel Sponza first at 1K f
 repository's releases (Decision 15), which is item 6 among the feature test's. The suite: 1,221
 passed, 9 skipped.
 
-Before them, fifteen commits settled items 4 to 11. A list of plain values is typed an item at a
-time, the last of the three shapes (`7c74118`); `bcs` gives cmd.exe its line as written and the
-Windows job opens the sample through it (`a753c57`); every push runs the suite on macOS as well,
-with `python3` on a Mac (`6528ea2`); `[MainThread]` keeps an instance behavior method on the main
-thread for every entity, and a script is compiled against the game's own types with the project's
-scripts watched (`5a96ce0`); `games/Swarm` holds an arena against waves of creatures in their
-hundreds in behaviors alone, played into its third wave and profiled by the pack workflow
-(`109711a`); a `memory` command, `build/soak.sh` and `soak-check.py` play Courtyard, Swarm and the
-stress program for ten minutes and hold every count level, which found four leaks, a scene load's
-meshes and materials under handles nothing released, a placed model's keys, Swarm's player made at
-each game, and an offscreen run growing a gigabyte a minute since nothing maintained the device,
-each offscreen frame waiting for the GPU to finish the one before (`cdbce22`); `BadFileTests` gives
-every loader four bad files and found the JSON loaders naming no file and a sound that was no sound
-panicking Bevy's audio as it played, checked by Bevy's own decoder as it arrives (`ff1ebcf`);
-`PublicApi.txt` lists the surface, 10,681 lines of 1,163 types, held by `PublicSurfaceTests`, the
-pack writes the commits since the version was raised into its release notes, and a ray passes
-through sensors (`1f10d6f`); `docs/first-game.md` makes a game in twelve steps, each a program the
-pack workflow builds and runs and the page is held to (`7072511`); and a script's references are
-read once for the process and a generation unloads when its script is compiled again, five keepers
-let go (`360669e`), with four commits of moves alone taking N 1.2's list to 191 and N 1.3's to 11.
-The run of `360669ef`, the first with a macOS job, was in progress at 15:36; the pack run of
-`75e8953` was cancelled, so Verdicts 2 and 3 wait for the next. Every C# block of the guide builds
-on the packed package in the pack's game job, 3DEngine's script with this library's usings and a
-fragment's statements run with `ctx` and `app` in reach, 192 blocks of 193 on its first run, one
-stale gizmo batch and six blocks not C# as written mended (`bc90a7a`). The loaders a game calls
-answer a bad file with an exception naming the file, which N 2.6 does not allow, so item 4 takes
-that. The suite: 1,219 passed, 9 skipped. The owner decided on 2026-10-07 that the sample becomes a
-feature test with an admin panel, a console, a crash log and a portable build, `bevy_weather` once
-the map stands (Decision 14), which is items 4 to 9, before the gaps.
-
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
 
@@ -73,9 +61,12 @@ with no wait for a reply, and the list is long so that it does not run out. Item
 from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The runs of `360669ef`, `e3295b5` and `6f4d8590` failed on macOS
-   and Windows, Verdicts 5 to 7, and passed on Linux; the run of `3e6293d` was in progress at 16:40,
-   and the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each
-   push's run is read by the reviewing session, and a failure it names comes first here.
+   and Windows, Verdicts 5 to 7, and passed on Linux; the run of `3e6293d` failed the same way, the
+   run of `470fec7` was cancelled by the push after it, and the run of `e58d4bc`, with all three
+   mends, passed on Linux, failed on Windows with the cause on the page at last, Verdict 7's second
+   half, and was in its macOS suite at 17:19, and the pack run of `75e8953` was cancelled, so
+   Verdicts 2 and 3 wait for the next pack run. Each push's run is read by the reviewing session,
+   and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
@@ -228,8 +219,8 @@ from [SHARED.md](SHARED.md).
    never linked. The message is about the speed of exception handling in a debug test binary of that
    size and nothing the bridge does wrong. Two things: the lint is allowed for the bridge with that
    reason beside it, in `Cargo.toml`'s lints or the job's flags, or the section is brought under the
-   limit where that is cheap; and the suite then runs there. Settled when a macOS job's bridge
-   builds.
+   limit where that is cheap; and the suite then runs there. Mended at `470fec7`, the lint allowed
+   in the workspace's lints with that reason beside it. Settled when a macOS job's bridge builds.
 
 6. **The first macOS jobs fail one test, the fixed-update case of `GeneratorAttributeTests`.**
    Read from the page: an `Assert.InRange()` failure, the value 106 outside the range of 10 to 30,
@@ -241,7 +232,8 @@ from [SHARED.md](SHARED.md).
    taken at `711f416` has it, so forty frames at 240 are a sixth of a second whatever they took; and
    the test asserts the count that gives, twenty within one. The 116 repeated warnings on the same
    page, a system scoped to `Screen.Playing` with no such state added, come from a bare app of a
-   test and say nothing of the failure. Settled when a macOS job passes the test.
+   test and say nothing of the failure. Mended at `128cecd`, the clock stepped a 240th of a second a
+   frame and twenty asserted within one. Settled when a macOS job passes the test.
 
 7. **The Windows jobs fail the step that opens the sample through `bcs`, and the page says only
    `exit code 6`.** Read from the pages of `360669ef`, `e3295b5` and `6f4d8590`: `Open the sample
@@ -252,7 +244,13 @@ from [SHARED.md](SHARED.md).
    Windows, so whether the sample opened at all is unread. Two things: the step keeps each `bcs`
    answer and, where one fails, prints its code and sentence and the last lines of the sample's log
    at the path `bcs` names, as 3DEngine's `drive-game.sh` does since its `1c848a20`; and the cause
-   is found with that on the next run. Settled when the Windows job opens the sample through `bcs`.
+   is found with that on the next run. Mended at `6a2c4b2`, each answer kept and a failing one said
+   by `build/bcs-answer.py` with a test. The run of `e58d4bc` said the cause: `bcs` answered
+   `NOT_READY`, the sample did not start serving within 90 seconds, and its log ends with the
+   sample's own refusal, that the bridge was built without Bevy's renderer so it opens no window,
+   with `--headless` offered. The job's bridge is headless by design, so the step opens the sample
+   headless, as the sample's own line says, and the start line on Windows is proved by that opening.
+   Settled when the Windows job opens the sample through `bcs`.
 
 ## Decisions
 
@@ -326,25 +324,3 @@ from [SHARED.md](SHARED.md).
     as meshlets, to test them, where the GPU can.
 
 ## Replies
-
-**Verdicts 5 to 7, and item 3's crash log.** The bridge allows `linker_messages` in its manifest's
-lints, with the macOS linker's note on the test binary's unwind table as the reason (`470fec7`). The
-fixed-update case steps its clock a 240th of a second a frame and asserts twenty fixed steps within
-one (`128cecd`). The Windows step keeps each `bcs` answer and hands one that fails to
-`build/bcs-answer.py`, which says the command, its exit code, the code and sentence `bcs` answered
-and the end of the log the answer names, or the one under `build/sessions`, on the page and the
-summary, with a test under `TestScriptTests` (`6a2c4b2`). The crash log is the feature test's first
-commit and an engine feature: `CrashLog` writes `logs/latest.log` beside the executable from the
-first app of a process, C#'s lines and Bevy's, which the bridge's log layer now collects for the
-console's ring, five runs kept; a crash goes to `logs/crash-<time>.txt` with the system, .NET, the
-ABI, the adapter, the backend, the last panic the bridge caught and the log's last 200 lines, for an
-exception nothing caught, a task's exception nobody looked at, and a panic on one of Bevy's threads,
-which the bridge's hook hands over as it happens; the next start says where the last crash's file
-is. A panic caught at the boundary now carries its thread, place and words in the
-`BevyNativeException` rather than a pointer to stderr. The suite's apps leave the log off, and
-`CrashLogTests` start it in a folder of their own. `ConsoleLog.Start` teed the tee each time it was
-called, since the console wraps what it is given, and now keeps its tees. ABI 228. The suite passed,
-1,227 with 9 skipped. Two offscreen runs of the sample in about thirty, each the first after a
-pause or a build, lost the device as they ended ("DeviceLost, driver implementation is at fault")
-and died by a signal, which no managed code reaches, and that is not traced yet. `ImGuiConsole` is
-next, then the program.

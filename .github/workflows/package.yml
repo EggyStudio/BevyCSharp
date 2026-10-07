@@ -167,7 +167,8 @@ jobs:
 
       # bcs opens a program through cmd.exe on Windows, which nothing else in the workflow does, so
       # the sample is opened through it and asked how it is, as a person or an agent opens one, and
-      # stopped. Headless here, the job's bridge having no renderer. Each answer is kept, and one
+      # stopped. Headless, with no count of frames so it runs until stopped, since the job's bridge
+      # has no renderer and the sample refuses a window without one. Each answer is kept, and one
       # that fails is said on the page with bcs's code and sentence and the end of the sample's
       # log, where the step said an exit code alone (NORM.md, N 6.7).
       - name: Open the sample through bcs
@@ -182,7 +183,7 @@ jobs:
               exit "$code"
             fi
           }
-          ask open --sample
+          ask open --sample --headless --frames 0
           ask command app.status
           ask stop
 
