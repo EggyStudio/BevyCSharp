@@ -125,8 +125,11 @@ internal static partial class ConsoleWorldCommands
     /// <remarks>
     /// <para>
     /// The value is read into whatever the field already holds, so a number goes in as a number and
-    /// a name of an enum goes in as that enum. Three numbers separated by commas make a vector, and a
-    /// rotation is the three angles in degrees the inspector shows or a quaternion's four numbers.
+    /// a name of an enum goes in as that enum, by its name alone and never its number, names joined
+    /// by commas for flags. Three numbers separated by commas make a vector, a rotation is the three
+    /// angles in degrees the inspector shows or a quaternion's four numbers, and a color is four
+    /// linear numbers. A field holding a list takes its items split by semicolons
+    /// (<c>Route.Speeds "1;2.5;4"</c>), the whole list at once.
     /// </para>
     /// <para>
     /// The component is the longest name on the entity that the argument starts with, and the rest
@@ -172,8 +175,9 @@ internal static partial class ConsoleWorldCommands
         if (found is not null)
         {
             var was = found.Read(world, entity);
+            var parsed = found.Kind == FieldKind.List ? Items(world, value, found) : Parse(value, was, found.Kind == FieldKind.Flags);
 
-            if (Parse(value, was) is not { } parsed)
+            if (parsed is null)
             {
                 ConsoleHost.Fail(
                     "BAD_ARGUMENT", $"'{value}' cannot be read as {was?.GetType().Name ?? "that"}.");
@@ -625,7 +629,7 @@ internal static partial class ConsoleWorldCommands
     /// The current value says what the field is, because nothing else on this side knows. The
     /// schema describes a field's kind for an inspector to draw, and a kind is not a type.
     /// </remarks>
-    private static object? Parse(string value, object? current) => current switch
+    private static object? Parse(string value, object? current, bool flags = false) => current switch
     {
         bool => value.ToLowerInvariant() switch
         {
@@ -635,15 +639,16 @@ internal static partial class ConsoleWorldCommands
         },
         Vec3 => Vector(value),
         Quat => Rotation(value),
+        Vec2 => Numbers(value, 2) is { } two ? new Vec2(two[0], two[1]) : null,
+        Vec4 => Numbers(value, 4) is { } four ? new Vec4(four[0], four[1], four[2], four[3]) : null,
+        Color => Numbers(value, 4) is { } rgba ? new Color(rgba[0], rgba[1], rgba[2], rgba[3]) : null,
         float => float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var f)
             ? f
             : null,
         double => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var d)
             ? d
             : null,
-        Enum existing => Enum.TryParse(existing.GetType(), value, ignoreCase: true, out var parsed)
-            ? parsed
-            : null,
+        Enum existing => Named(existing.GetType(), value, flags),
         string => value,
         IConvertible convertible => Convert(value, convertible),
         _ => null,

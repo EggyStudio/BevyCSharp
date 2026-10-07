@@ -66,7 +66,11 @@ public sealed class CommandGenerator : IIncrementalGenerator
     /// <summary>One argument, as the method declared it and as a word is read into it.</summary>
     /// <param name="Name">The parameter's own name.</param>
     /// <param name="Kind">Which reader turns a word into it.</param>
-    private readonly record struct ParameterModel(string Name, string Kind);
+    /// <param name="Default">
+    /// The value the method gives it when it is left off, as C# source, or nothing for one that has
+    /// to be given.
+    /// </param>
+    private readonly record struct ParameterModel(string Name, string Kind, string? Default = null);
 
     /// <summary>One command, or what is wrong with the method that asked to be one.</summary>
     private sealed record CommandModel(
@@ -131,7 +135,8 @@ public sealed class CommandGenerator : IIncrementalGenerator
                     parameter.Type.ToDisplayString());
             }
 
-            parameters.Add(new ParameterModel(parameter.Name, reader));
+            parameters.Add(new ParameterModel(
+                parameter.Name, reader, parameter.HasExplicitDefaultValue ? Literal(parameter.ExplicitDefaultValue, parameter.Type) : null));
         }
 
         // One string parameter takes the whole of what was typed after the name, spaces and all,
@@ -141,7 +146,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
         return new CommandModel(
             name,
             help,
-            Usage(method),
+            Usage(parameters),
             method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 + "." + method.Name,
             new EquatableArray<ParameterModel>([.. parameters]),
@@ -174,10 +179,31 @@ public sealed class CommandGenerator : IIncrementalGenerator
         _ => null,
     };
 
-    /// <summary>What the arguments look like, as a person would write them.</summary>
-    private static string Usage(IMethodSymbol method) => string.Join(
+    /// <summary>What the arguments look like, as a person would write them, one that can be left off in brackets.</summary>
+    private static string Usage(List<ParameterModel> parameters) => string.Join(
         " ",
-        method.Parameters.Select(parameter => "<" + parameter.Name + ">"));
+        parameters.Select(parameter => parameter.Default is null ? "<" + parameter.Name + ">" : "[" + parameter.Name + "]"));
+
+    /// <summary>A default value as C# source, in the invariant culture, so a command reads the same everywhere.</summary>
+    /// <remarks>
+    /// NaN and the infinities have no literal, and printed as numbers they are names nothing
+    /// declares, so they are written as the constants that hold them.
+    /// </remarks>
+    private static string Literal(object? value, ITypeSymbol type) => value switch
+    {
+        // Typed, since the argument it starts is declared with var.
+        null => "default(" + type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ")",
+        string text => Quote(text),
+        bool flag => flag ? "true" : "false",
+        float single when float.IsNaN(single) => "float.NaN",
+        float single when float.IsInfinity(single) => single > 0 ? "float.PositiveInfinity" : "float.NegativeInfinity",
+        double number when double.IsNaN(number) => "double.NaN",
+        double number when double.IsInfinity(number) => number > 0 ? "double.PositiveInfinity" : "double.NegativeInfinity",
+        float single => single.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "f",
+        double number => number.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "d",
+        long whole => whole.ToString(System.Globalization.CultureInfo.InvariantCulture) + "L",
+        _ => System.Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture)!,
+    };
 
     /// <summary>Writes the registration for every command in the assembly.</summary>
     private static string Emit(List<CommandModel> models)
@@ -239,6 +265,9 @@ public sealed class CommandGenerator : IIncrementalGenerator
         if (model.TakesLine)
         {
             source.Append("                var line = string.Join(\" \", words);\n");
+
+            // A line left empty is the default where the method gives one, rather than nothing.
+            if (parameters[0].Default is { } fallback) source.Append("                if (line.Length == 0) line = ").Append(fallback).Append(";\n");
             source.Append("                ");
             if (model.ReturnsText) source.Append("return ");
             source.Append(model.Call).Append("(line);\n");
@@ -246,16 +275,30 @@ public sealed class CommandGenerator : IIncrementalGenerator
             return;
         }
 
-        if (parameters.Count > 0)
+        // The ones with defaults come last, as C# has them, so the words needed are those before.
+        var required = parameters.Count(parameter => parameter.Default is null);
+        if (required > 0)
         {
-            source.Append("                if (words.Length < ").Append(parameters.Count)
-                .Append(") return \"needs ").Append(parameters.Count)
-                .Append(parameters.Count == 1 ? " argument\";\n" : " arguments\";\n\n");
+            source.Append("                if (words.Length < ").Append(required)
+                .Append(") return \"needs ").Append(required)
+                .Append(required == 1 ? " argument\";\n\n" : " arguments\";\n\n");
         }
 
         for (var i = 0; i < parameters.Count; i++)
         {
-            source.Append("                if (!Read").Append(Title(parameters[i].Kind))
+            var reader = "Read" + Title(parameters[i].Kind);
+            if (parameters[i].Default is { } fallback)
+            {
+                // Its default where the words stop before it.
+                source.Append("                var argument").Append(i).Append(" = ").Append(fallback).Append(";\n")
+                    .Append("                if (words.Length > ").Append(i).Append(" && !").Append(reader)
+                    .Append("(words[").Append(i).Append("], out argument").Append(i)
+                    .Append(")) return $\"not a ").Append(parameters[i].Kind)
+                    .Append(": {words[").Append(i).Append("]}\";\n");
+                continue;
+            }
+
+            source.Append("                if (!").Append(reader)
                 .Append("(words[").Append(i).Append("], out var argument").Append(i)
                 .Append(")) return $\"not a ").Append(parameters[i].Kind)
                 .Append(": {words[").Append(i).Append("]}\";\n");
@@ -298,7 +341,8 @@ public sealed class CommandGenerator : IIncrementalGenerator
             source.Append("                    new global::Bevy.CommandParameter(")
                 .Append(Quote(parameter.Name)).Append(", ")
                 .Append(Quote(parameter.Kind)).Append(", ")
-                .Append(model.TakesLine ? "true" : "false")
+                .Append(model.TakesLine ? "true" : "false").Append(", ")
+                .Append(parameter.Default is null ? "false" : "true")
                 .Append("),\n");
         }
 

@@ -138,9 +138,11 @@ internal static string Select(string name) { … }
 
 A generator finds them at compile time and a module initializer registers them, so nothing reflects
 at runtime and a command survives trimming. Parameters are read from the words after the name and
-may be strings, numbers or flags; a single string parameter takes the whole of what was typed after
-it. Returning a string writes that line back, and anything a person can get wrong is answered with
-a sentence rather than an exception.
+may be strings, numbers or flags, and one the method gives a default can be left off, the last ones
+first. A single string parameter takes the whole of what was typed after it. Returning a string
+writes that line back, and anything a person can get wrong is answered with a sentence rather than
+an exception. An enum's member is read by its name alone, so a number that names no member is
+refused rather than handed to code that was never written for it.
 
 `ConsoleCommands.Run(line)` is the whole of the runtime surface, so a game gets a console by
 drawing one. The editor's is the tab along the bottom, which the key under Escape raises and puts
@@ -159,9 +161,11 @@ and asks it things:
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them
+./bcs command entity.set Path Route.Speeds '1;2.5;4'         # a list, its items split by semicolons
 ./bcs command input.click 1450 700
 ./bcs command input.hold W,D 12        # held for twelve frames exactly, for a game walking while they are
 ./bcs command input.drag 400 300 120 0 10   # pressed, moved 12 pixels a frame for ten frames, released
+./bcs command input.drop 'levels/yard.scene.json;notes.txt'   # files dropped on the window, for a game to read
 ./bcs command frames.wait 5
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file

@@ -121,7 +121,7 @@ internal static partial class ConsoleWorldCommands
         if (!int.TryParse(words[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames) || frames < 1) return false;
 
         var button = MouseButton.Left;
-        if (words.Length == 6 && (!Enum.TryParse(words[5], ignoreCase: true, out button) || button is not (MouseButton.Left or MouseButton.Right or MouseButton.Middle)))
+        if (words.Length == 6 && (!TryName(words[5], out button) || button is not (MouseButton.Left or MouseButton.Right or MouseButton.Middle)))
         {
             problem = $"'{words[5]}' is not a button a drag holds. They are Left, Right and Middle.";
             return false;
@@ -163,7 +163,7 @@ internal static partial class ConsoleWorldCommands
         var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (words.Length != 3
             || !int.TryParse(words[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
-            || !Enum.TryParse<GamepadButton>(words[1], ignoreCase: true, out var button)
+            || !TryName<GamepadButton>(words[1], out var button)
             || !int.TryParse(words[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
         {
             ConsoleHost.Fail("BAD_ARGUMENTS", "input.button takes a pad's number, a button and a number of frames, as in input.button 0 South 10.");
@@ -215,7 +215,7 @@ internal static partial class ConsoleWorldCommands
         var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (words.Length != 3
             || !int.TryParse(words[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
-            || !Enum.TryParse<GamepadAxis>(words[1], ignoreCase: true, out var axis)
+            || !TryName<GamepadAxis>(words[1], out var axis)
             || !float.TryParse(words[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
         {
             ConsoleHost.Fail("BAD_ARGUMENTS", "input.axis takes a pad's number, an axis and a value, as in input.axis 0 LeftX 0.6.");
@@ -300,11 +300,38 @@ internal static partial class ConsoleWorldCommands
         return $"typed {text}";
     }
 
+    /// <summary>Pretends files were dropped on the window.</summary>
+    /// <remarks>
+    /// Each path is a <see cref="FileDropped"/> on the message bus, as a file dragged onto the window
+    /// is, which a game reads from the next frame, so the way it takes files dropped on it is tried
+    /// by a script with nothing dragged. Paths are split by semicolons, since a path holds spaces,
+    /// and are not looked for on disk, a drop saying what was dropped and not that it is there.
+    /// </remarks>
+    [Command("input.drop", "Pretends files were dropped on the window: input.drop <path>[;<path>...]")]
+    internal static string Drop(string paths)
+    {
+        var dropped = paths.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (dropped.Length == 0)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", "input.drop takes the paths of the files dropped, split by semicolons.");
+            return "input.drop <path>[;<path>...]";
+        }
+
+        if (ConsoleHost.World?.Resource<MessageBus>() is not { } bus)
+        {
+            ConsoleHost.Fail("NO_WORLD", "There is no world running to drop files on.");
+            return "no world to drop files on";
+        }
+
+        foreach (var path in dropped) bus.Send(new FileDropped(path));
+        return dropped.Length == 1 ? $"dropped {dropped[0]}" : $"dropped {dropped.Length} files";
+    }
+
     /// <summary>Taps one named key.</summary>
     [Command("input.key", "Taps a key by name: input.key <Escape|Enter|A|Digit1|...>")]
     internal static string Tap(string name)
     {
-        if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+        if (!TryName<Key>(name, out var key))
         {
             ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
             return $"'{name}' is not a key name";
@@ -323,7 +350,7 @@ internal static partial class ConsoleWorldCommands
     [Command("input.keydown", "Holds a key down: input.keydown <W|Space|...>")]
     internal static string KeyDown(string name)
     {
-        if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+        if (!TryName<Key>(name, out var key))
         {
             ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
             return $"'{name}' is not a key name";
@@ -360,7 +387,7 @@ internal static partial class ConsoleWorldCommands
         var keys = new List<Key>();
         foreach (var name in words[0].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+            if (!TryName<Key>(name, out var key))
             {
                 ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
                 return $"'{name}' is not a key name";
@@ -389,7 +416,7 @@ internal static partial class ConsoleWorldCommands
     [Command("input.keyup", "Lets a held key go: input.keyup <W|Space|...>")]
     internal static string KeyUp(string name)
     {
-        if (!Enum.TryParse<Key>(name, ignoreCase: true, out var key))
+        if (!TryName<Key>(name, out var key))
         {
             ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not a key name.");
             return $"'{name}' is not a key name";
@@ -411,7 +438,7 @@ internal static partial class ConsoleWorldCommands
     [Command("input.uikey", "Taps a key in the interface: input.uikey <Enter|Escape|UpArrow|Tab>")]
     internal static string UiKey(string name)
     {
-        if (!Enum.TryParse<ImGuiKey>(name, ignoreCase: true, out var key))
+        if (!TryName<ImGuiKey>(name, out var key))
         {
             ConsoleHost.Fail("BAD_ARGUMENT", $"'{name}' is not an interface key name.");
             return $"'{name}' is not an interface key name";

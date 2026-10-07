@@ -49,7 +49,10 @@ public sealed class CommandAttribute(string name = "", string help = "") : Attri
 /// Whether this parameter takes everything typed after the name, spaces and all, rather than one
 /// word. True only for a command whose single parameter is a string.
 /// </param>
-public readonly record struct CommandParameter(string Name, string Kind, bool TakesLine = false);
+/// <param name="Optional">
+/// Whether it can be left off, the method giving it a default, which only the last parameters can.
+/// </param>
+public readonly record struct CommandParameter(string Name, string Kind, bool TakesLine = false, bool Optional = false);
 
 /// <summary>
 /// One thing that can be typed into the console.

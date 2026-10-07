@@ -80,6 +80,7 @@ internal static class CliDispatch
                 writer.WriteString("name", parameter.Name);
                 writer.WriteString("kind", parameter.Kind);
                 writer.WriteBoolean("line", parameter.TakesLine);
+                writer.WriteBoolean("optional", parameter.Optional);
                 writer.WriteEndObject();
             }
 
