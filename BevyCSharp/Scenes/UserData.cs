@@ -67,7 +67,7 @@ public static class UserData
     }
 
     /// <summary>The platform's directory for an application's own data.</summary>
-    private static string PlatformDirectory() =>
+    internal static string PlatformDirectory() =>
         Environment.GetFolderPath(
             OperatingSystem.IsWindows()
                 ? Environment.SpecialFolder.ApplicationData

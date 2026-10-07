@@ -51,6 +51,21 @@ folder and before the assembly, on both sides of the bridge. A pack that is miss
 not a pack is logged as an error naming it, and the app runs without it, each load of a file it
 held failing by name.
 
+A pack can also be mounted under a folder of the asset root while an app runs, and both sides read
+it from that call on, until it is unmounted or the next app starts:
+
+```csharp
+AssetFiles.Mount("packs/hall", AssetPack.Open("hall.pack"));
+var hall = AssetServer.LoadGltfScene("packs/hall/hall.gltf", 0);
+```
+
+`ScenePacks` does that for a well-known graphics scene kept as a pack fetched on demand rather than
+checked in. A manifest, read by `ScenePacks.TryRead` or a folder of them by `ScenePacks.List`,
+names the pack's address, size, SHA-256 and model. `ScenePacks.FetchAsync` downloads it into a
+folder every game on the machine shares, telling its progress and keeping it only where its hash is
+the manifest's, and `ScenePacks.TryMount` mounts it under `packs/` and its name and answers the
+model's path. `BCS_SCENE_PACKS` names another folder, as a workflow caching packs between runs does.
+
 Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
 runs, and texture and geometry streaming read their tiles and clusters with it.
 

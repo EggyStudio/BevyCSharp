@@ -29,6 +29,11 @@ namespace Bevy;
 /// <see cref="Config.AssetPack"/>.
 /// </para>
 /// <para>
+/// A pack can also be mounted under a folder of the asset root while an app runs
+/// (<see cref="Mount"/>), as a scene pack fetched for the player is, and Bevy reads it from then
+/// on as the managed side does, since the bridge asks for the list of carried files at each read.
+/// </para>
+/// <para>
 /// Only reads come here. Writing a scene or a data asset writes the folder, since what a game
 /// carries cannot be written, and only a project being edited is written at all.
 /// </para>
@@ -39,7 +44,11 @@ public static unsafe class AssetFiles
     public const string ResourcePrefix = "assets/";
 
     private static readonly object Gate = new();
+    private static Assembly? _assembly;
     private static AssetPack? _pack;
+
+    /// <summary>The packs mounted while an app runs, by the folder each appears under.</summary>
+    private static readonly Dictionary<string, AssetPack> Mounts = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Every carried file by its path under the asset root, with how to open it, the pack's copy
@@ -70,13 +79,94 @@ public static unsafe class AssetFiles
     /// </param>
     /// <remarks>
     /// Names are kept with forward slashes whatever the build wrote, since a resource made from a
-    /// folder on Windows is named with the separator that platform uses.
+    /// folder on Windows is named with the separator that platform uses. The packs mounted for the
+    /// app before are closed, since what they held belonged to it.
     /// </remarks>
     public static void Use(Assembly? assembly, AssetPack? pack)
     {
+        AssetPack? replaced;
+        AssetPack[] unmounted;
+        lock (Gate)
+        {
+            replaced = _pack == pack ? null : _pack;
+            unmounted = [.. Mounts.Values];
+            Mounts.Clear();
+            _assembly = assembly is { IsDynamic: false } ? assembly : null;
+            _pack = pack;
+            _carried = Gather();
+        }
+
+        replaced?.Dispose();
+        foreach (var gone in unmounted) gone.Dispose();
+    }
+
+    /// <summary>
+    /// Reads a pack's files under a folder of the asset root while an app runs, on both sides of
+    /// the bridge, until <see cref="Unmount"/> or the next app, as a scene pack fetched for the
+    /// player is read.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A pack holds its files by their paths under its own root, so a scene's model at
+    /// <c>sponza.gltf</c> in a pack mounted under <c>packs/sponza</c> is loaded as
+    /// <c>packs/sponza/sponza.gltf</c>, and the textures it names beside it are found beside it.
+    /// The folder keeps one pack's files from another's and from the game's own, and a file on
+    /// disk under it still wins, as everywhere.
+    /// </para>
+    /// <para>
+    /// The pack is kept from here on and closed when it is unmounted, when another is mounted under
+    /// the same folder, or when the next app starts. Bevy is told the new list at once, so a load
+    /// asked for in the same frame finds the files.
+    /// </para>
+    /// </remarks>
+    /// <param name="folder">Where under the asset root the pack's files appear, with forward slashes.</param>
+    /// <param name="pack">The pack, from <see cref="AssetPack.Open"/>.</param>
+    public static void Mount(string folder, AssetPack pack)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+        ArgumentNullException.ThrowIfNull(pack);
+
+        var under = folder.Replace('\\', '/').Trim('/');
+        AssetPack? replaced;
+        lock (Gate)
+        {
+            replaced = Mounts.GetValueOrDefault(under);
+            Mounts[under] = pack;
+            _carried = Gather();
+        }
+
+        if (replaced != pack) replaced?.Dispose();
+        Serve();
+    }
+
+    /// <summary>Stops reading the pack mounted under a folder, and closes it.</summary>
+    /// <returns>Whether a pack was mounted there.</returns>
+    public static bool Unmount(string folder)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+
+        var under = folder.Replace('\\', '/').Trim('/');
+        AssetPack? pack;
+        lock (Gate)
+        {
+            if (!Mounts.Remove(under, out pack)) return false;
+            _carried = Gather();
+        }
+
+        pack.Dispose();
+        Serve();
+        return true;
+    }
+
+    /// <summary>
+    /// Every carried file with how to open it, the assembly's under the app's pack under the packs
+    /// mounted while it runs. Called holding the gate.
+    /// </summary>
+    private static Dictionary<string, Func<Stream?>> Gather()
+    {
         var found = new Dictionary<string, Func<Stream?>>(StringComparer.Ordinal);
 
-        if (assembly is not null && !assembly.IsDynamic)
+        if (_assembly is { } assembly)
         {
             foreach (var name in assembly.GetManifestResourceNames())
             {
@@ -86,20 +176,17 @@ public static unsafe class AssetFiles
             }
         }
 
-        if (pack is not null)
+        if (_pack is { } pack)
         {
             foreach (var file in pack.Files) found[file] = () => pack.OpenFile(file);
         }
 
-        AssetPack? replaced;
-        lock (Gate)
+        foreach (var (under, mounted) in Mounts)
         {
-            replaced = _pack == pack ? null : _pack;
-            _pack = pack;
-            _carried = found;
+            foreach (var file in mounted.Files) found[$"{under}/{file}"] = () => mounted.OpenFile(file);
         }
 
-        replaced?.Dispose();
+        return found;
     }
 
     /// <summary>Whether a file is there, on disk or among what the game carries.</summary>
@@ -220,11 +307,11 @@ public static unsafe class AssetFiles
     /// through Bevy as well, or takes it back when the game carries none.
     /// </summary>
     /// <remarks>
-    /// Called as an app is created, before the native app is, since Bevy builds its asset sources as
-    /// the app is built and never again. The bridge is given the list of paths along with the
-    /// reader, so whether a file or a folder is there is answered on its side, and only reading a
-    /// file's bytes crosses over. A bridge built with <c>--embed</c> carries the assets itself and
-    /// ignores this.
+    /// Called as an app is created, before the native app is, and again as a pack is mounted or
+    /// unmounted while it runs, since the bridge's source reads the list it was last given at each
+    /// read. The bridge is given the list of paths along with the reader, so whether a file or a
+    /// folder is there is answered on its side, and only reading a file's bytes crosses over. A
+    /// bridge built with <c>--embed</c> carries the assets itself and ignores this.
     /// </remarks>
     internal static void Serve()
     {

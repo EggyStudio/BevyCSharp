@@ -89,6 +89,57 @@ public sealed class AssetFilesTests : IDisposable
         Assert.Equal(AssetLoadState.Failed, states.Absent);
     }
 
+    /// <summary>
+    /// A pack mounted under a folder while an app runs is read by the managed side at once and by
+    /// Bevy from then on, the bridge having carried nothing of it when the app was built, and is
+    /// gone from both once unmounted.
+    /// </summary>
+    [SkippableFact]
+    public void APackMountedWhileTheAppRunsIsReadOnBothSidesUntilUnmounted()
+    {
+        // A picture and a note in a pack, as a scene pack fetched for the player holds its files.
+        var source = _folder.File("source");
+        Directory.CreateDirectory(Path.Combine(source, "textures"));
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "assets", "textures", "checker.png"), Path.Combine(source, "textures", "checker.png"));
+        File.WriteAllText(Path.Combine(source, "note.txt"), "from the pack");
+        var packed = _folder.File("scene.pack");
+        AssetPack.Write(source, packed);
+
+        using var harness = new EngineHarness(frames: 240, fps: 240);
+        Needs.Renderer();
+
+        var image = AssetHandle.None;
+        var state = AssetLoadState.Unknown;
+        string? note = null;
+        var gone = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (!image.IsValid)
+            {
+                // A few frames in, so the app has long been built when the pack arrives.
+                if (ctx.Time.FrameCount < 5) return;
+
+                AssetFiles.Mount("packs/scene", AssetPack.Open(packed));
+                note = AssetFiles.ReadAllText("packs/scene/note.txt");
+                image = AssetServer.Load(AssetKind.Image, "packs/scene/textures/checker.png");
+                return;
+            }
+
+            state = image.State;
+            if (state is AssetLoadState.Loading) return;
+
+            gone = AssetFiles.Unmount("packs/scene") && !AssetFiles.Exists("packs/scene/note.txt") && !AssetFiles.Unmount("packs/scene");
+            ctx.Exit();
+        });
+
+        harness.Run();
+
+        Assert.Equal("from the pack", note);
+        Assert.Equal(AssetLoadState.Loaded, state);
+        Assert.True(gone, "the pack was still read after it was unmounted");
+    }
+
     [Fact]
     public void AStreamedReadTakesItsPartOfACarriedFile()
     {

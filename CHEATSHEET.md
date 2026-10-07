@@ -673,6 +673,8 @@ static bool ReleaseWhenUnused(AssetHandle handle);              // Releases a ha
 ```csharp
 static void Use(Assembly assembly);                             // Looks for the asset files in an assembly's resources, or in none, and in no pack
 static void Use(Assembly assembly, AssetPack pack);             // Looks for the asset files in a pack and an assembly's resources, either of which may be nothing
+static void Mount(string folder, AssetPack pack);               // Reads a pack's files under a folder of the asset root while an app runs, on both sides of the bridge, until Unmount or the next app, as a scene pack fetched for the player is read
+static bool Unmount(string folder);                             // Stops reading the pack mounted under a folder, and closes it
 static bool Exists(string path);                                // Whether a file is there, on disk or among what the game carries
 static bool IsCarried(string path);                             // Whether a file is read from what the game carries, there being none on disk
 static string ReadAllText(string path);                         // A file's text, from disk or from what the game carries
@@ -1569,6 +1571,18 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 (Vec2 Center, float Radius) Circumcircle();                     // The circle through its three corners, its center and its radius
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // The smallest circle about it where it is placed
+```
+
+### `ScenePacks`
+
+```csharp
+static IReadOnlyList<ScenePack> List(string folder, out IReadOnlyList<string> problems);  // Reads every manifest in a folder, in the order of their names
+static bool TryRead(string file, out ScenePack pack, out string problem);  // Reads one manifest, or says why it cannot, naming the file
+static string PathOf(ScenePack pack);                           // Where a pack is kept once fetched
+static bool IsFetched(ScenePack pack);                          // Whether a pack has been fetched, by its file being there at the manifest's size, the hash having been checked as it arrived
+static Task<string> FetchAsync(ScenePack pack, IProgress<double> progress = null, CancellationToken cancel = default);  // Fetches a pack into Folder, telling how far it has come, and keeps it where its SHA-256 is the manifest's
+static bool TryMount(ScenePack pack, out string model, out string problem);  // Mounts a fetched pack under packs/ and its name while an app runs, and answers the path its model is loaded by, or says why it cannot
+static bool Unmount(ScenePack pack);                            // Stops reading a mounted pack
 ```
 
 ### `Segment2d`

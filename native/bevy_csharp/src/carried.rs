@@ -11,6 +11,11 @@
 //! or a folder is there is answered here without a call across, and only reading a file's bytes
 //! crosses. A file on disk is read first, as `AssetFiles` reads first from disk on the managed
 //! side, so a file beside a shipped game replaces the one it carries.
+//!
+//! The default source reads the list as it stands at each read rather than as it stood when the app
+//! was built, so a pack the managed side opens while the app runs, as a scene pack fetched for the
+//! player is, is read by Bevy from then on, and an app that carried nothing at its start can carry
+//! files later.
 
 use std::collections::{BTreeSet, HashSet};
 use std::path::{Path, PathBuf};
@@ -40,15 +45,15 @@ struct Carried {
 }
 
 /// What [`bcs_assets_carried`] was last given, process-wide since the asset source is built once
-/// as an app is, before any handle to it exists.
+/// as an app is, before any handle to it exists, and read by the source at every read.
 static CARRIED: Mutex<Option<Carried>> = Mutex::new(None);
 
 /// Hands over the managed side's reader and the paths it carries, or takes them back with a null
 /// reader.
 ///
-/// `paths` is every file the assembly carries, relative to the asset root, as UTF-8 joined by
-/// newlines. Read by the next app built, which reads its assets through the reader from then on,
-/// so this is called before `bcs_app_create`.
+/// `paths` is every file the assembly and the open packs carry, relative to the asset root, as
+/// UTF-8 joined by newlines. Read by the running app from its next read and by every app built
+/// after, so it is called before `bcs_app_create` and again whenever the list changes.
 ///
 /// # Safety
 /// `paths` must point to `paths_len` readable bytes when the reader is not null, and the reader
@@ -97,8 +102,9 @@ pub unsafe extern "C" fn bcs_assets_carried(
 }
 
 /// Replaces the default asset source with one that reads disk first and the managed side's
-/// resources after, when the managed side handed a reader over. Called before the asset plugin is
-/// added, which builds the default source only where none was registered.
+/// resources after, whatever the managed side has handed over at the time of each read, nothing
+/// meaning disk alone. Called before the asset plugin is added, which builds the default source
+/// only where none was registered.
 ///
 /// The writer and the watcher are the disk's, so an app that asked to watch its assets still sees
 /// a file changed beside it.
@@ -107,14 +113,6 @@ pub fn install(app: &mut bevy::app::App, root: &str) {
     use bevy::asset::AssetApp;
     use bevy::asset::io::{AssetSource, AssetSourceBuilder, AssetSourceId};
 
-    let Some(carried) = CARRIED
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner())
-        .clone()
-    else {
-        return;
-    };
-
     let mut disk = AssetSource::get_default_reader(root.to_string());
 
     app.register_asset_source(
@@ -122,7 +120,7 @@ pub fn install(app: &mut bevy::app::App, root: &str) {
         AssetSourceBuilder::platform_default(root, None).with_reader(move || {
             Box::new(CarriedReader {
                 disk: disk(),
-                carried: carried.clone(),
+                fixed: None,
             })
         }),
     );
@@ -131,21 +129,34 @@ pub fn install(app: &mut bevy::app::App, root: &str) {
 /// Reads a file from disk, or from what the managed side carries when the disk has none.
 struct CarriedReader {
     disk: Box<dyn ErasedAssetReader>,
-    carried: Carried,
+    /// What is carried for a reader given its own list, as a test's is, or nothing to read what
+    /// the managed side has handed over at each read.
+    fixed: Option<Carried>,
 }
 
 impl CarriedReader {
+    /// What is carried now, read at each use, an `Arc` and a function pointer copied.
+    fn carried(&self) -> Option<Carried> {
+        self.fixed
+            .clone()
+            .or_else(|| CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone())
+    }
+
     /// A carried file's bytes, asked of the managed side, or `NotFound` when it carries none.
     fn bytes(&self, path: &Path) -> Result<Vec<u8>, AssetReaderError> {
         let not_found = || AssetReaderError::NotFound(path.to_path_buf());
-        if !self.carried.files.contains(path) {
+        let Some(carried) = self.carried() else {
+            return Err(not_found());
+        };
+
+        if !carried.files.contains(path) {
             return Err(not_found());
         }
 
         let name = path.to_string_lossy().replace('\\', "/");
 
         // SAFETY: the name is valid for its length, and the reader was promised to stay callable.
-        let length = unsafe { (self.carried.read)(name.as_ptr(), name.len(), std::ptr::null_mut(), 0) };
+        let length = unsafe { (carried.read)(name.as_ptr(), name.len(), std::ptr::null_mut(), 0) };
         if length < 0 {
             return Err(not_found());
         }
@@ -154,7 +165,7 @@ impl CarriedReader {
 
         // SAFETY: as above, with room for exactly the length just answered.
         let copied =
-            unsafe { (self.carried.read)(name.as_ptr(), name.len(), bytes.as_mut_ptr(), bytes.len()) };
+            unsafe { (carried.read)(name.as_ptr(), name.len(), bytes.as_mut_ptr(), bytes.len()) };
 
         // A length that changed between the two calls means the file is not the one measured,
         // which a resource compiled into an assembly never does, so it is taken as an error
@@ -171,7 +182,11 @@ impl CarriedReader {
 
     /// The files and folders directly inside `path` among those carried.
     fn children(&self, path: &Path) -> BTreeSet<PathBuf> {
-        self.carried
+        let Some(carried) = self.carried() else {
+            return BTreeSet::new();
+        };
+
+        carried
             .files
             .iter()
             .filter_map(|file| file.strip_prefix(path).ok())
@@ -231,7 +246,7 @@ impl AssetReader for CarriedReader {
 
     async fn is_directory<'a>(&'a self, path: &'a Path) -> Result<bool, AssetReaderError> {
         // A carried file is answered here, since the disk would answer that it has no such path.
-        if self.carried.files.contains(path) {
+        if self.carried().is_some_and(|carried| carried.files.contains(path)) {
             return Ok(false);
         }
 
@@ -266,7 +281,7 @@ mod tests {
     fn reader(disk: &Path) -> CarriedReader {
         CarriedReader {
             disk: bevy::asset::io::AssetSource::get_default_reader(disk.to_string_lossy().into())(),
-            carried: Carried {
+            fixed: Some(Carried {
                 read: serve,
                 files: Arc::new(
                     ["top.txt", "folder/inner.txt"]
@@ -274,7 +289,7 @@ mod tests {
                         .map(PathBuf::from)
                         .collect(),
                 ),
-            },
+            }),
         }
     }
 
@@ -314,6 +329,32 @@ mod tests {
         assert!(listed.contains(&PathBuf::from("folder")));
         assert!(listed.contains(&PathBuf::from("top.txt")));
         assert!(!listed.contains(&PathBuf::from("folder/inner.txt")));
+
+        std::fs::remove_dir_all(&disk).unwrap();
+    }
+
+    /// The only test that touches the process's list, so no other reads it while this one runs.
+    #[test]
+    fn a_list_handed_over_while_the_app_runs_is_read_from_then_on() {
+        let disk = std::env::temp_dir().join(format!("bcs-carried-live-{}", std::process::id()));
+        std::fs::create_dir_all(&disk).unwrap();
+        let live = CarriedReader {
+            disk: bevy::asset::io::AssetSource::get_default_reader(disk.to_string_lossy().into())(),
+            fixed: None,
+        };
+        let set = |carried: Option<Carried>| {
+            *CARRIED.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = carried;
+        };
+
+        set(None);
+        assert!(matches!(read(&live, "top.txt"), Err(AssetReaderError::NotFound(_))));
+
+        // As a pack opened after the app was built hands its files over.
+        set(reader(&disk).fixed);
+        assert_eq!(read(&live, "top.txt").unwrap(), b"top");
+
+        set(None);
+        assert!(matches!(read(&live, "top.txt"), Err(AssetReaderError::NotFound(_))));
 
         std::fs::remove_dir_all(&disk).unwrap();
     }

@@ -32,6 +32,9 @@ internal static class Help
               test [--filter F]          The test suite; exit 8 means tests failed, 6 means it never ran
               run [-- args]              One headless run of the feature test
               doctor                     Why nothing works: the bridge, the ABI, stale sessions
+              scenes                     The scene packs the checkout's manifests name, and which are fetched
+                [fetch <name>]           Fetch one into the folder every game shares, checking its hash
+                [pack <folder> <pack>]   Write a folder as a pack, as build/make-scene-pack.py does
 
             Anywhere
               --json                     Print the envelope instead of a sentence

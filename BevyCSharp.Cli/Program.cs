@@ -24,6 +24,7 @@ return verb switch
     "test" => Tools.Test(options, remainder),
     "run" => Tools.Run(options, remainder),
     "doctor" => Tools.Doctor(options),
+    "scenes" => Scenes.Run(options, remainder),
     "help" or "--help" or "-h" => Help.Print(),
     "version" or "--version" or "-V" => Help.Version(options),
     _ => Help.Unknown(options, verb),

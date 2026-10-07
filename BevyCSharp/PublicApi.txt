@@ -261,8 +261,10 @@ static class Bevy.AssetFiles
   static bool CarriesFiles { get; }
   static bool Exists(string path)
   static bool IsCarried(string path)
+  static bool Unmount(string folder)
   static byte[] ReadAllBytes(string path)
   static string ReadAllText(string path)
+  static void Mount(string folder, AssetPack pack)
   static void Use(Assembly? assembly)
   static void Use(Assembly? assembly, AssetPack? pack)
 readonly struct Bevy.AssetHandle : IEquatable<AssetHandle>
@@ -9550,6 +9552,33 @@ sealed class Bevy.SceneLoad : IEquatable<SceneLoad>
   static bool op_Inequality(SceneLoad? left, SceneLoad? right)
   string? Problem { get; init; }
   void Deconstruct(out IReadOnlyList<Entity> Entities, out IReadOnlyList<string> Unknown, out IReadOnlyList<string> Refused, out string? Problem)
+sealed class Bevy.ScenePack : IEquatable<ScenePack>
+  ScenePack()
+  bool Equals(ScenePack? other)
+  long Size { get; set; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(ScenePack? left, ScenePack? right)
+  static bool op_Inequality(ScenePack? left, ScenePack? right)
+  string Attribution { get; set; }
+  string License { get; set; }
+  string Model { get; set; }
+  string Name { get; set; }
+  string Sha256 { get; set; }
+  string Source { get; set; }
+  string Title { get; set; }
+  string Url { get; set; }
+static class Bevy.ScenePacks
+  const string MountFolder = "packs"
+  static IReadOnlyList<ScenePack> List(string folder, out IReadOnlyList<string> problems)
+  static Task<string?> FetchAsync(ScenePack pack, IProgress<double>? progress = null, CancellationToken cancel = default)
+  static bool IsFetched(ScenePack pack)
+  static bool TryMount(ScenePack pack, out string? model, out string? problem)
+  static bool TryRead(string file, out ScenePack? pack, out string? problem)
+  static bool Unmount(ScenePack pack)
+  static string Folder { get; set; }
+  static string PathOf(ScenePack pack)
 class Bevy.SceneReferences
   SceneReferences()
   bool GiveIds { get; init; }
