@@ -39,9 +39,13 @@ jump, beside a playground of crates, a door on a hinge, a lift, a rope and a pre
 heightmap terrain. West of the hub the render gallery holds a wall of spheres from a dielectric to a
 metal and from polished to rough, with a row under a clearcoat and a brushed row, and a Cornell box
 lit by a point light's shadow map, or by Solari's rays from the next start once the graphics page's
-ray-traced lighting is on, where the bridge and the GPU have them. In spectator mode `./bcs command
-look 6 3 8 0 0 0` puts the camera at a point looking at another. `build/drive-feature-test.sh` walks
-the player through each of them through `bcs`, as the pack workflow does.
+ray-traced lighting is on, where the bridge and the GPU have them. North of the hub the light hall
+has a bay each for point lights in red, green and blue, a spot light through a cookie, a light the
+size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
+captured once, an irradiance volume made in code, clustered decals and emission for the bloom. In
+spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
+`build/drive-feature-test.sh` walks the player through each of them through `bcs`, as the pack
+workflow does.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

@@ -112,7 +112,9 @@ public partial struct Gallery
     private static void Cornell(EcsWorld ecs)
     {
         const float Size = 5f;
-        var middle = new Vec3(-70.5f, Ground, -13f);
+        // A little over the ground, so the box's floor and the ground do not fight for the same
+        // depth.
+        var middle = new Vec3(-70.5f, Ground + 0.02f, -13f);
         var white = Render.CreateMaterial(0.73f, 0.73f, 0.73f, roughness: 0.9f);
         var red = Render.CreateMaterial(0.65f, 0.05f, 0.05f, roughness: 0.9f);
         var green = Render.CreateMaterial(0.12f, 0.45f, 0.15f, roughness: 0.9f);

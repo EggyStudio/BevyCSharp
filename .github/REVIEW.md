@@ -10,14 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `156d2ce`. Two files of N 1.4's list moved into their folders, `PersistentTests` to
-the scenes' and `RayTracingTests` to the assets', nothing in them changed, the list at 77 with 28
-left out (`a765aad`, `156d2ce`), and N 3.4's list stands at 39. The owner pushed, and the run of
-`156d2ce` was in progress at 19:45, the first with the mends of Verdicts 7, 8 and 9 and the bridge
-at ABI 229. Its Windows job opened the feature test through `bcs` and closed it in 24 seconds with
-the answers printed, which settles Verdict 7, and its tests failed in the three `CrashLogTests`
-cases that read the log while the app writes it, Verdict 11. The gallery's lights, post switches,
+Reviewed up to `540343d`. Verdict 11 is mended: the crash log tests read the run's files through one
+helper that shares reading, writing and deletion, as a tester's tail does, every file of the class
+read that way (`540343d`). The run of `156d2ce` passed on macOS, 18:03, which settles Verdicts 8 and
+9 and checks N 6.2, the suite running on every desktop system the package ships for, so the norm has
+none left to take; its Windows job opened the feature test in 24 seconds, which settled Verdict 7,
+and failed the three crash log cases Verdict 11 mends, and Linux was green, so the first run with
+`540343d` can be the one the pack run for 0.4 waits for. The gallery's lights, post switches,
 vegetation and captures are under way in the working tree.
+
+Before them, two files of N 1.4's list moved into their folders, `PersistentTests` to the scenes'
+and `RayTracingTests` to the assets', nothing in them changed, the list at 77 with 28 left out
+(`a765aad`, `156d2ce`), and N 3.4's list stands at 39.
 
 Before them, a mesh made without tangents came to be given them by `Render.GenerateTangents`, worked
 out by mikktspace in the bridge from its normals and texture coordinates, refused for a mesh without
@@ -34,14 +38,8 @@ room's meshes handed to the rays and the sun's and the lamp's shadow maps left o
 block a static body the player walks round; a `look` command places the spectator camera for the
 drive script's pictures, and the guide says so (`e1f6ece`).
 
-Before them, Verdict 10 came to be settled: the physics page's sentence was about a body added in
-code with a `PhysicsShape`, which keeps its size however its entity is scaled, as `PhysicsShape.cs`
-says of itself, where a `Collider` component is scaled with the entity, and the page says so in as
-many words, the shape kept and the collider below not (`5d60532`), so its two paragraphs agree with
-the code.
-
-The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
-by review.
+The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
+9 by review.
 
 
 ## Now
@@ -50,18 +48,18 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 9 to 14 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `156d2ce`: Linux green; Windows opened the feature
-   test in 24 seconds, which settled Verdict 7, and failed the three `CrashLogTests` cases that read
-   the log while it is written, Verdict 11, which comes before the gallery's next commit; macOS was
-   building at 19:58, with Verdicts 8 and 9 to prove and N 6.2 to check; the pack run of `75e8953`
-   was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
+1. **What the next page says.** The run of `156d2ce`: Linux and macOS green, which settled
+   Verdicts 8 and 9 and checked N 6.2; Windows opened the feature test in 24 seconds, which settled
+   Verdict 7, and failed the three crash log cases, Verdict 11, mended at `540343d`; so the first
+   run with `540343d`, green on all three, is the one the owner's pack run for 0.4 waits for, and
+   Verdicts 2 and 3 wait for that run. Each push's run is read by the reviewing session, and a
+   failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
-   reads the lists for the files it will touch before it starts. The rules still to take each have
-   their item: N 6.2 is the macOS job's first green run. N 1.3's test counts the Slang shaders of
-   the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since its
-   `09419080`, none of them over 800 today, so the list stays as it is.
+   reads the lists for the files it will touch before it starts. Every rule is checked or by review
+   since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
+   shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
+   its `09419080`, none of them over 800 today, so the list stays as it is.
 3. **The render gallery, its wall and box in.** The wall of spheres by metallic and roughness
    with a clearcoat row and a brushed one, and the Cornell box lit by a shadow map or by Solari from
    the next start on the panel's switch, are in (`e1f6ece`). Left: a lights gallery of directional,
@@ -171,32 +169,6 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-8. **The macOS job of `e58d4bc` fails the overstep case of `FixedUpdateTests`, the second test to
-   measure the machine's clock.** Read from the page: 894 passed, 1 failed, 405 skipped, the bridge
-   built and the attribute test passed, and `TheOverstepGrowsBetweenStepsAndStaysUnderOne` found the
-   overstep fall from 0.97 to 0.12 between two readings, which on a runner whose frame outlasted the
-   fixed step is a fixed step run between them, where the test expects every frame shorter than a
-   step. The same mend as Verdict 6's: the harness steps its clock a frame at a time, a frame
-   shorter than the fixed step, so the overstep grows by the same fraction each frame whatever the
-   machine took, and the suite's other fixed step cases are read for the same assumption in the same
-   batch. Mended at `a915784`, the fixed-step cases and the physics tests stepping their clocks a
-   frame at a time. Settled when a macOS job passes it.
-
-9. **The macOS job of `cec88ad` fails `AppLeakTests`, which judges the heap by two readings.**
-   Read from the page: the heap held 75.6 MB after twenty apps and 80.8 MB after a hundred, against
-   the test's 5, beside the overstep case whose mend was not in that run. The test takes the heap
-   after the twentieth app and the hundredth alone, which 3DEngine's own hundred showed falls on a
-   trough and a crest of a heap that rises and falls back on macOS by several megabytes every few
-   dozen apps, its census finding nothing of a closed app kept (its Verdict 32). The mend 3DEngine
-   took at its `596535ce`: the heap read after every tenth app, the floor judged, the least reading
-   from the twentieth to the fiftieth against the least from the seventieth to the hundredth, and
-   where the macOS job installs `dotnet-gcdump` a census of the heap's types after the twentieth app
-   and the hundredth, a failure naming the types that grew, so a leak is told from the runtime's own
-   tide. The SHARED.md row on an app's whole life carries the floor. Mended at `070e5e0`, the heap
-   read after every tenth app, the floor judged, and `HeapCensus` counting the heap's types where
-   `BCS_GCDUMP` names `dotnet-gcdump`, which the macOS job installs at a pinned version. Settled
-   when a macOS job passes the test.
-
 11. **The Windows job of `156d2ce` fails the three `CrashLogTests` cases that read `latest.log`
     while the app writes it.** Read from the page: 902 passed, 3 failed, 400 skipped, each failure
     an `IOException`, the file being used by another process, at the test's `File.ReadAllLines`.
@@ -206,8 +178,9 @@ from [SHARED.md](SHARED.md).
     where Linux and macOS let it. The step is the first on Windows to reach these tests, the jobs
     before it having stopped at the step that opens the feature test. The tests read the log through
     one helper of the class that opens it sharing reading and writing, as a tester's tail does, and
-    the suite is read once for another test that reads a file the engine keeps open. Settled when a
-    Windows job passes the three.
+    the suite is read once for another test that reads a file the engine keeps open. Mended at
+    `540343d`, one helper reading every file of the class with reading, writing and deletion shared.
+    Settled when a Windows job passes the three.
 
 ## Decisions
 
