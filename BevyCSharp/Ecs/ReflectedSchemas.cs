@@ -103,6 +103,24 @@ internal static class ReflectedSchemas
     }
 
     /// <summary>
+    /// The rows of a type a list holds as its items, its fields' or, for an enum, the row choosing its
+    /// variant and its variants' rows, each with its reflect path from the item.
+    /// </summary>
+    /// <param name="json">The description <see cref="EcsWorld.DescribeReflected"/> returns.</param>
+    /// <param name="type">The items' type path, as a list's <see cref="ComponentField.ItemType"/> names it.</param>
+    /// <remarks>
+    /// For the description of Bevy's components the generator turns into typed wrappers, which
+    /// reads the names, kinds and paths of the rows and never reads or writes through them.
+    /// </remarks>
+    internal static List<ComponentField> ItemRows(string json, string type)
+    {
+        using var document = JsonDocument.Parse(json);
+        var fields = new List<ComponentField>();
+        new Walk(type, document.RootElement.GetProperty("types"), fields).Members(type);
+        return fields;
+    }
+
+    /// <summary>
     /// Turns one component's description into rows.
     /// </summary>
     /// <param name="component">The component's type path, which every field reads through.</param>
@@ -209,6 +227,16 @@ internal static class ReflectedSchemas
                 fields.Add(held is { Length: > 0 }
                     ? Handle(at, label, Short(type), held)
                     : Opaque(at, label, Short(type)));
+                return;
+            }
+
+            // A list of values with fields of their own stays JSON here, and names its items' type,
+            // which the description the wrappers are generated from describes by its own rows.
+            if (described.ValueKind == JsonValueKind.Object
+                && described.TryGetProperty("item", out var items)
+                && described.GetProperty("kind").GetString() == "list")
+            {
+                fields.Add(Opaque(at, label, Short(type), items.GetString()));
                 return;
             }
 
@@ -499,7 +527,7 @@ internal static class ReflectedSchemas
         }
 
         /// <summary>A row showing a value the inspector has no editor for, as its JSON.</summary>
-        private ComponentField Opaque(At at, string label, string type)
+        private ComponentField Opaque(At at, string label, string type, string? item = null)
         {
             var (owner, path, within) = (component, at.Reflect, at.Within);
             return new ComponentField(
@@ -518,7 +546,12 @@ internal static class ReflectedSchemas
                             : null)
                         ?? type
                     : null,
-                hints: Hints(at, label));
+                hints: Hints(at, label))
+            {
+                // Only a list's, whose items the description of Bevy's components describes.
+                ReflectPath = item is null ? null : path,
+                ItemType = item,
+            };
         }
     }
 

@@ -368,11 +368,6 @@ internal static class StandardWidgets
         }
     }
 
-    // Bevy's Popover, below its owner and else above it, and its BoxShadow, which are lists no
-    // wrapper types, so they are written as JSON.
-    private const string Popover = "bevy_ui_widgets::popover::Popover";
-    private const string Shadow = "bevy_ui::ui_node::BoxShadow";
-
     private static void SpawnMenu(EcsWorld ecs, Entity anchor)
     {
         var menu = Ui.SpawnNode(new UiSettings
@@ -387,9 +382,12 @@ internal static class StandardWidgets
             Color = Gray,
         });
         ecs.Insert<MenuPopupRef>(menu);
-        ecs.InsertReflected(menu, Shadow, """[{"color":{"Srgba":{"red":0.0,"green":0.0,"blue":0.0,"alpha":0.9}},"x_offset":{"Px":0.0},"y_offset":{"Px":0.0},"spread_radius":{"Px":1.0},"blur_radius":{"Px":4.0}}]""");
+        ecs.Insert<BoxShadowRef>(menu).Value = [new ShadowStyle(Color.FromSrgb(0f, 0f, 0f, 0.9f), new Val.Px(0f), new Val.Px(0f), new Val.Px(1f), new Val.Px(4f))];
         ecs.Insert<GlobalZIndexRef>(menu).Value = 100;
-        ecs.InsertReflected(menu, Popover, """{"positions":[{"side":"Bottom","align":"Start","gap":2.0},{"side":"Top","align":"Start","gap":2.0}],"window_margin":10.0}""");
+        // Below its owner, and else above it.
+        var popover = ecs.Insert<PopoverRef>(menu);
+        popover.Positions = [new PopoverPlacement(PopoverSide.Bottom, PopoverAlign.Start, 2f), new PopoverPlacement(PopoverSide.Top, PopoverAlign.Start, 2f)];
+        popover.WindowMargin = 10f;
         ecs.Insert<OverrideClipRef>(menu);
 
         for (var i = 0; i < 4; i++) ecs.SetParent(MenuItem(ecs), menu);

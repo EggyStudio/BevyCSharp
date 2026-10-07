@@ -355,7 +355,7 @@ fn reintegered(held: &dyn PartialReflect, whole: i64) -> Option<Box<dyn PartialR
 
 /// Reads one field of a component on an entity through `read`, which turns it into what the
 /// caller is handed or reports that it is not that kind of value.
-fn read_field<R>(
+pub(super) fn read_field<R>(
     entity: u64,
     type_path: &str,
     path: &str,

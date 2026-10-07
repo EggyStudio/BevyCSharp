@@ -16,8 +16,15 @@ public sealed partial class ReflectedGenerator
     /// <param name="Union">For an enum inside the variant, the record or enum it is held as.</param>
     /// <param name="Cases">For such an enum, its variants with their own values and paths.</param>
     /// <param name="Some">For an <c>Option</c> inside the variant, the one value its <c>Some</c> holds, the part a nullable.</param>
+    /// <param name="List">For a list of records, the record its items are, which reads and writes them.</param>
     private sealed record Part(
-        string Name, string Type, FieldModel Field, UnionModel? Union = null, List<Case>? Cases = null, Part? Some = null);
+        string Name,
+        string Type,
+        FieldModel Field,
+        UnionModel? Union = null,
+        List<Case>? Cases = null,
+        Part? Some = null,
+        UnionModel? List = null);
 
     /// <summary>One variant of a union, the record it is and what that record holds.</summary>
     private sealed record Case(string Variant, string Record, List<Part> Parts);
@@ -33,9 +40,21 @@ public sealed partial class ReflectedGenerator
     /// <param name="Plain">Whether it is an enum none of whose variants holds a value, written as a C# enum.</param>
     private sealed record UnionModel(string Name, string Rust, List<Case> Cases, bool Struct, bool Plain = false)
     {
-        /// <summary>What two uses of the same Rust type have to agree on to share one record.</summary>
+        /// <summary>
+        /// Whether a list holds these as its items, which gives the record the methods reading and
+        /// writing such a list.
+        /// </summary>
+        public bool Listed { get; set; }
+
+        /// <summary>For a union a list holds, the value its items are read as, the union's row.</summary>
+        public Part? Item { get; set; }
+
+        /// <summary>
+        /// What two uses of the same Rust type have to agree on to share one record, a struct's
+        /// values whether it came as an option's or a list's.
+        /// </summary>
         public string Signature => (Plain ? "enum:" : string.Empty)
-            + string.Join(";", Cases.Select(c => c.Variant + "(" + string.Join(",", c.Parts.Select(p => p.Name + ":" + p.Type)) + ")"));
+            + string.Join(";", Cases.Select(c => (Struct ? string.Empty : c.Variant) + "(" + string.Join(",", c.Parts.Select(p => p.Name + ":" + p.Type)) + ")"));
     }
 
     /// <summary>
@@ -67,6 +86,13 @@ public sealed partial class ReflectedGenerator
         }
     }
 
+    /// <summary>What a component's or an item type's rows are read against.</summary>
+    /// <param name="Variants">Its variant rows, among which an enum's are found by its row's name.</param>
+    /// <param name="Items">Every item type's rows, by its type path, which a list names.</param>
+    /// <param name="Unions">The records made so far.</param>
+    private sealed record Scope(
+        IReadOnlyList<VariantFieldModel> Variants, IReadOnlyDictionary<string, ComponentModel> Items, Unions Unions);
+
     /// <summary>A record's parameter name for a variant's field, which is never its own type's name.</summary>
     private static string PartName(string field, string record)
     {
@@ -81,10 +107,9 @@ public sealed partial class ReflectedGenerator
     /// <remarks>
     /// An enum inside a variant, as an orthographic projection's scaling mode or a sprite slicer's
     /// scale modes, is a record of its own inside the variant's, its variants found by its row's
-    /// name among <paramref name="all"/>, or a plain C# enum where none of its variants holds a value.
+    /// name among the scope's, or a plain C# enum where none of its variants holds a value.
     /// </remarks>
-    private static List<Case>? CasesOf(
-        FieldModel field, IEnumerable<VariantFieldModel> parts, IReadOnlyList<VariantFieldModel> all, Unions unions)
+    private static List<Case>? CasesOf(FieldModel field, IEnumerable<VariantFieldModel> parts, Scope scope)
     {
         var cases = new List<Case>();
         foreach (var variant in field.Extra.Split(',').Where(v => v.Length > 0))
@@ -93,82 +118,135 @@ public sealed partial class ReflectedGenerator
             var held = new List<Part>();
             foreach (var part in parts.Where(p => p.Variant == variant))
             {
-                var name = PartName(part.Field, record);
-                if (Typed(part.AsField) is { } type)
-                {
-                    held.Add(new Part(name, type, part.AsField));
-                    continue;
-                }
-
-                if (part.Kind != "Enum") return null;
-
-                // The inner enum's row is named under the variant, as its values' rows are.
+                // An enum's row inside the variant is named under it, as its values' rows are.
                 var row = part.Field.Length == 0 ? field.Name + "." + variant : field.Name + "." + variant + "." + part.Field;
-                var inner = CasesOf(part.AsField with { Name = row }, all.Where(p => p.Enum == row), all, unions);
-                if (inner is null) return null;
-
-                // An Option holding one value is a nullable, as one a component holds is.
-                if (inner.Count == 2
-                    && inner[0] is { Variant: "None", Parts.Count: 0 }
-                    && inner[1] is { Variant: "Some", Parts.Count: 1 } some
-                    && some.Parts[0].Field.Name.Length == 0)
-                {
-                    held.Add(new Part(name, some.Parts[0].Type + "?", part.AsField, Some: some.Parts[0]));
-                    continue;
-                }
-
-                var union = unions.Add(part.Rust, inner, isStruct: false, plain: inner.All(c => c.Parts.Count == 0));
-                held.Add(new Part(name, "global::Bevy.Reflected." + union.Name, part.AsField, union, inner));
+                if (PartOf(part.AsField, row, PartName(part.Field, record), scope) is not { } made) return null;
+                held.Add(made);
             }
             cases.Add(new Case(variant, record, held));
         }
         return cases;
     }
 
-    /// <summary>The expression reading one value of a record, an enum inside it by its variant.</summary>
-    private static string Read(Part part)
+    /// <summary>
+    /// One value of a record, from the row it is read from, or nothing where a wrapper cannot type
+    /// it. A value is held as its kind has it, an enum as a record, a plain enum or a nullable, and a
+    /// list as the records its items are.
+    /// </summary>
+    /// <param name="field">The row, its name the part of the row's name a variant gives it.</param>
+    /// <param name="row">The row's whole name, which an enum's variant rows and their own enums name.</param>
+    /// <param name="name">The record's parameter name for it.</param>
+    /// <param name="scope">The rows it is among.</param>
+    private static Part? PartOf(FieldModel field, string row, string name, Scope scope)
     {
-        var path = Quoted(part.Field.Reflect);
-        var variant = $"global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, \"{path}\")";
-        if (part.Some is { } some) return $"({variant} == \"None\" ? null : ({part.Type}){Read(some)})";
+        if (field.Kind == "List") return ListOf(field, name, scope);
+        if (Typed(field) is { } type) return new Part(name, type, field);
+        if (field.Kind != "Enum") return null;
+
+        var inner = CasesOf(field with { Name = row }, scope.Variants.Where(p => p.Enum == row), scope);
+        if (inner is null) return null;
+
+        // An Option holding one value is a nullable, as one a component holds is.
+        if (inner.Count == 2
+            && inner[0] is { Variant: "None", Parts.Count: 0 }
+            && inner[1] is { Variant: "Some", Parts.Count: 1 } some
+            && some.Parts[0].Field.Name.Length == 0)
+        {
+            return new Part(name, some.Parts[0].Type + "?", field, Some: some.Parts[0]);
+        }
+
+        var union = scope.Unions.Add(field.Rust, inner, isStruct: false, plain: inner.All(c => c.Parts.Count == 0));
+        return new Part(name, "global::Bevy.Reflected." + union.Name, field, union, inner);
+    }
+
+    /// <summary>A list of records, its items those its item type's rows describe, or nothing where a wrapper cannot type them.</summary>
+    private static Part? ListOf(FieldModel field, string name, Scope scope)
+    {
+        // An item type with no rows, as a type id or a range of indices, has nothing a record holds.
+        if (!scope.Items.TryGetValue(field.Extra, out var item) || item.Fields.Items.Count == 0) return null;
+
+        var rows = new Scope(item.Variants.Items, scope.Items, scope.Unions);
+        UnionModel record;
+        if (item.Fields.Items.Count == 1 && item.Fields.Items[0] is { Name: "value", Kind: "Enum" } value)
+        {
+            // An enum's items, as a gradient's are, read and written as the union its row is.
+            if (PartOf(value, value.Name, "Value", rows) is not { Union: { Plain: false } union } part) return null;
+            record = union;
+            record.Item = part;
+        }
+        else
+        {
+            var recordName = Identifier(Last(item.Path));
+            var parts = new List<Part>();
+            foreach (var row in item.Fields.Items)
+            {
+                if (PartOf(row, row.Name, PartName(row.Name, recordName), rows) is not { } made) return null;
+                parts.Add(made);
+            }
+            record = scope.Unions.Add(item.Path, [new Case(string.Empty, recordName, parts)], isStruct: true);
+        }
+
+        record.Listed = true;
+        return new Part(name, $"global::System.Collections.Generic.IReadOnlyList<global::Bevy.Reflected.{record.Name}>", field, List: record);
+    }
+
+    /// <summary>
+    /// A path as a C# expression, a literal for a component's own and the item's path before it for
+    /// one inside a list's item, which is known only as the list is read.
+    /// </summary>
+    private static string PathOf(string? prefix, string reflect) =>
+        prefix is null ? $"\"{Quoted(reflect)}\"" : reflect.Length == 0 ? prefix : $"{prefix} + \"{Quoted(reflect)}\"";
+
+    /// <summary>The expression reading one value of a record, an enum inside it by its variant.</summary>
+    /// <param name="part">The value.</param>
+    /// <param name="prefix">The variable holding the path of the list item it is in, or nothing for a component's own.</param>
+    private static string Read(Part part, string? prefix)
+    {
+        var path = PathOf(prefix, part.Field.Reflect);
+        var variant = $"global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path})";
+        if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.ReadList(_world, Entity, TypePath, {path})";
+        if (part.Some is { } some) return $"({variant} == \"None\" ? null : ({part.Type}){Read(some, prefix)})";
         if (part.Union is not { } union) return Reading(part.Field, path);
         if (union.Plain) return $"global::System.Enum.Parse<global::Bevy.Reflected.{union.Name}>({variant})";
 
         var arms = part.Cases!.Select(c =>
-            $"\"{c.Variant}\" => new global::Bevy.Reflected.{union.Name}.{c.Record}({string.Join(", ", c.Parts.Select(Read))}),");
+            $"\"{c.Variant}\" => new global::Bevy.Reflected.{union.Name}.{c.Record}({string.Join(", ", c.Parts.Select(p => Read(p, prefix)))}),");
         return $"({variant} switch {{ {string.Join(" ", arms)} var other => throw new global::System.InvalidOperationException("
-            + "$\"'" + path + "' of {TypePath} holds {other}, which this wrapper was not generated with.\") })";
+            + "$\"'{" + path + "}' of {TypePath} holds {other}, which this wrapper was not generated with.\") })";
     }
 
     /// <summary>
     /// The statements writing one value of a record, an enum inside it by choosing its variant and
-    /// then writing that variant's values.
+    /// then writing that variant's values, and a list by making it as long as the value and writing
+    /// each item.
     /// </summary>
     /// <param name="part">The value.</param>
     /// <param name="value">The expression holding it.</param>
     /// <param name="depth">How many enums deep it is, which names the variable each level matches.</param>
-    private static string Write(Part part, string value, int depth)
+    /// <param name="prefix">The variable holding the path of the list item it is in, or nothing for a component's own.</param>
+    private static string Write(Part part, string value, int depth, string? prefix)
     {
-        var path = Quoted(part.Field.Reflect);
+        var path = PathOf(prefix, part.Field.Reflect);
+        if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.WriteList(_world, Entity, TypePath, {path}, {value});";
         if (part.Some is { } some)
         {
             // Switched to Some only from None, since switching makes the variant again at its default.
             var present = "some" + depth;
-            return $"if ({value} is not {{ }} {present}) _world.SetVariant(Entity, TypePath, \"{path}\", \"None\"); "
-                + $"else {{ if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, \"{path}\") != \"Some\") _world.SetVariant(Entity, TypePath, \"{path}\", \"Some\"); "
-                + Write(some, present, depth + 1) + " }";
+            return $"if ({value} is not {{ }} {present}) _world.SetVariant(Entity, TypePath, {path}, \"None\"); "
+                + $"else {{ if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path}) != \"Some\") _world.SetVariant(Entity, TypePath, {path}, \"Some\"); "
+                + Write(some, present, depth + 1, prefix) + " }";
         }
 
         if (part.Union is not { } union) return Writing(part.Field, path, value);
-        if (union.Plain) return $"_world.SetVariant(Entity, TypePath, \"{path}\", {value}.ToString());";
+        if (union.Plain) return $"_world.SetVariant(Entity, TypePath, {path}, {value}.ToString());";
 
         var held = "inner" + depth;
         var text = new StringBuilder($"switch ({value}) {{ ");
         foreach (var c in part.Cases!)
         {
             text.Append($"case global::Bevy.Reflected.{union.Name}.{c.Record} {held}: ");
-            text.Append($"_world.SetVariant(Entity, TypePath, \"{path}\", \"{c.Variant}\"); ");
-            foreach (var p in c.Parts) text.Append(Write(p, held + "." + p.Name, depth + 1)).Append(' ');
+            text.Append($"_world.SetVariant(Entity, TypePath, {path}, \"{c.Variant}\"); ");
+            foreach (var p in c.Parts) text.Append(Write(p, held + "." + p.Name, depth + 1, prefix)).Append(' ');
             text.Append("break; ");
         }
 
@@ -210,10 +288,14 @@ public sealed partial class ReflectedGenerator
             var only = union.Cases[0];
             text.Append($$"""
                 /// <summary>Bevy's <c>{{Xml(union.Rust)}}</c>, as a value a typed wrapper reads and writes whole.</summary>
-                public sealed record {{union.Name}}({{Parameters(only)}});
-
+                public sealed record {{union.Name}}({{Parameters(only)}})
                 """);
-            return text.ToString();
+
+            if (!union.Listed) return text.Append(";\n").ToString();
+
+            var made = $"new global::Bevy.Reflected.{union.Name}({string.Join(", ", only.Parts.Select(p => Read(p, "item")))})";
+            var written = string.Join("\n            ", only.Parts.Select(p => Write(p, "value[i]." + p.Name, 1, "item")));
+            return text.Append("\n{\n").Append(Lists(union, made, written)).Append("}\n").ToString();
         }
 
         text.Append($$"""
@@ -241,8 +323,60 @@ public sealed partial class ReflectedGenerator
                 """);
         }
 
+        if (union.Listed && union.Item is { } item)
+            text.Append('\n').Append(Lists(union, Read(item, "item"), Write(item, "value[i]", 1, "item")));
+
         text.Append("}\n");
         return text.ToString();
+    }
+
+    /// <summary>
+    /// The methods reading and writing a list of a record's values, which a wrapper's property and
+    /// a record holding such a list call, the item's path made from the list's and its index.
+    /// </summary>
+    /// <remarks>
+    /// Static, with the component's world, entity and type path as parameters named as a wrapper's
+    /// members are, so a value's read and write read here as they do in a wrapper, and one record
+    /// serves every component holding a list of the type.
+    /// </remarks>
+    /// <param name="union">The record the items are.</param>
+    /// <param name="made">The expression reading one item at the path <c>item</c>.</param>
+    /// <param name="written">The statements writing <c>value[i]</c> at the path <c>item</c>.</param>
+    private static string Lists(UnionModel union, string made, string written)
+    {
+        var type = "global::Bevy.Reflected." + union.Name;
+        return $$"""
+                /// <summary>Reads the items of a list of these a component holds at <paramref name="at"/>.</summary>
+                internal static {{type}}[] ReadList(
+                    global::Bevy.EcsWorld _world, global::Bevy.Entity Entity, string TypePath, string at)
+                {
+                    var items = new {{type}}[global::Bevy.ReflectedValue.Count(_world, Entity, TypePath, at)];
+                    for (var i = 0; i < items.Length; i++)
+                    {
+                        var item = global::Bevy.ReflectedValue.Item(at, i);
+                        items[i] = {{made}};
+                    }
+
+                    return items;
+                }
+
+                /// <summary>Writes a list of these a component holds at <paramref name="at"/>, as long as it is given.</summary>
+                internal static void WriteList(
+                    global::Bevy.EcsWorld _world,
+                    global::Bevy.Entity Entity,
+                    string TypePath,
+                    string at,
+                    global::System.Collections.Generic.IReadOnlyList<{{type}}> value)
+                {
+                    global::Bevy.ReflectedValue.Resize(_world, Entity, TypePath, at, value.Count);
+                    for (var i = 0; i < value.Count; i++)
+                    {
+                        var item = global::Bevy.ReflectedValue.Item(at, i);
+                        {{written}}
+                    }
+                }
+
+            """;
     }
 
     /// <summary>
@@ -255,10 +389,9 @@ public sealed partial class ReflectedGenerator
         string path,
         string unique,
         List<VariantFieldModel> parts,
-        IReadOnlyList<VariantFieldModel> all,
-        Unions unions)
+        Scope scope)
     {
-        var cases = CasesOf(field, parts, all, unions);
+        var cases = CasesOf(field, parts, scope);
         if (cases is null) return false;
 
         // Rust's Option is a value that may be absent, which C# writes as a nullable. Only a field
@@ -279,7 +412,7 @@ public sealed partial class ReflectedGenerator
                         {
                             get => global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") == "None"
                                 ? null
-                                : {{Read(part)}};
+                                : {{Read(part, null)}};
                             set
                             {
                                 if (value is not { } held)
@@ -290,7 +423,7 @@ public sealed partial class ReflectedGenerator
 
                                 if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
                                     _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
-                                {{Write(part, "held", 1)}}
+                                {{Write(part, "held", 1, null)}}
                             }
                         }
 
@@ -301,13 +434,13 @@ public sealed partial class ReflectedGenerator
             var inner = field.Rust.IndexOf('<') is var open and >= 0 && field.Rust.EndsWith(">", StringComparison.Ordinal)
                 ? field.Rust.Substring(open + 1, field.Rust.Length - open - 2)
                 : field.Rust;
-            var record = unions.Add(inner, [some], isStruct: true);
+            var record = scope.Unions.Add(inner, [some], isStruct: true);
             text.Append($$"""
                     public {{record.Name}}? {{unique}}
                     {
                         get => global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") == "None"
                             ? null
-                            : new {{record.Name}}({{string.Join(", ", some.Parts.Select(Read))}});
+                            : new {{record.Name}}({{string.Join(", ", some.Parts.Select(p => Read(p, null)))}});
                         set
                         {
                             if (value is null)
@@ -318,7 +451,7 @@ public sealed partial class ReflectedGenerator
 
                             if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
                                 _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
-                            {{string.Join("\n                ", some.Parts.Select(p => Write(p, "value." + p.Name, 1)))}}
+                            {{string.Join("\n                ", some.Parts.Select(p => Write(p, "value." + p.Name, 1, null)))}}
                         }
                     }
 
@@ -328,16 +461,16 @@ public sealed partial class ReflectedGenerator
 
         // The record is shared with every other field of the same Rust type, so its paths are this
         // field's own cases' rather than the record's.
-        var union = unions.Add(field.Rust, cases, isStruct: false);
+        var union = scope.Unions.Add(field.Rust, cases, isStruct: false);
         var reads = string.Join("\n", cases.Select(c =>
-            $"            \"{c.Variant}\" => new global::Bevy.Reflected.{union.Name}.{c.Record}({string.Join(", ", c.Parts.Select(Read))}),"));
+            $"            \"{c.Variant}\" => new global::Bevy.Reflected.{union.Name}.{c.Record}({string.Join(", ", c.Parts.Select(p => Read(p, null)))}),"));
         var writes = string.Join("\n", cases.Select(c =>
         {
             var body = new StringBuilder();
             body.Append($"                case global::Bevy.Reflected.{union.Name}.{c.Record} held:\n");
             body.Append($"                    _world.SetVariant(Entity, TypePath, \"{path}\", \"{c.Variant}\");\n");
             foreach (var p in c.Parts)
-                body.Append($"                    {Write(p, "held." + p.Name, 1)}\n");
+                body.Append($"                    {Write(p, "held." + p.Name, 1, null)}\n");
             body.Append("                    break;");
             return body.ToString();
         }));

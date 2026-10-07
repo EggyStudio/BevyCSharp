@@ -130,8 +130,11 @@ public sealed class ExampleStringPathTests
     {
         public HashSet<string> Components { get; } = ["wrapper"];
 
-        private readonly Dictionary<(string Component, string Path), (string Kind, string Name)> _fields = [];
-        private readonly Dictionary<(string Component, string Enum), List<(string Kind, string Row)>> _variantKinds = [];
+        private readonly Dictionary<(string Component, string Path), (string Kind, string Name, string Extra)> _fields = [];
+        private readonly Dictionary<(string Component, string Enum), List<(string Kind, string Row, string Extra)>> _variantKinds = [];
+
+        // Each type a list holds as its items, with the kinds of its rows and what each names.
+        private readonly Dictionary<string, List<(string Kind, string Name, string Extra)>> _items = [];
         private readonly Dictionary<(string Component, string Path), string> _variantPaths = [];
 
         public static Description Read(string path)
@@ -145,15 +148,21 @@ public sealed class ExampleStringPathTests
                     case "component":
                         description.Components.Add(words[1]);
                         break;
-                    case "field" when Typed.Contains(words[4]):
-                        description._fields[(words[1], words[3])] = (words[4], words[2]);
+                    case "item":
+                        description._items[words[1]] = [];
+                        break;
+                    case "field" when description._items.TryGetValue(words[1], out var rows):
+                        rows.Add((words[4], words[2], words[6]));
+                        break;
+                    case "field" when Typed.Contains(words[4]) || words[4] == "List":
+                        description._fields[(words[1], words[3])] = (words[4], words[2], words[6]);
                         break;
                     case "variant":
                         var key = (words[1], words[2]);
                         if (!description._variantKinds.TryGetValue(key, out var kinds))
                             description._variantKinds[key] = kinds = [];
                         // The row an enum inside the variant is named by, as the generator finds it.
-                        kinds.Add((words[6], words[4].Length == 0 ? words[2] + "." + words[3] : words[2] + "." + words[3] + "." + words[4]));
+                        kinds.Add((words[6], words[4].Length == 0 ? words[2] + "." + words[3] : words[2] + "." + words[3] + "." + words[4], words[8]));
                         description._variantPaths.TryAdd((words[1], words[5]), words[2]);
                         break;
                 }
@@ -174,7 +183,7 @@ public sealed class ExampleStringPathTests
         {
             if (component == "wrapper") return true;
             if (_fields.TryGetValue((component, path), out var field))
-                return field.Kind != "Enum" || !json || Holds(component, field.Name);
+                return field.Kind == "List" ? Lists(field.Extra) : field.Kind != "Enum" || !json || Holds(component, field.Name);
 
             return _variantPaths.TryGetValue((component, path), out var owner) && Holds(component, owner);
         }
@@ -185,7 +194,22 @@ public sealed class ExampleStringPathTests
         /// </summary>
         private bool Holds(string component, string owner) =>
             !_variantKinds.TryGetValue((component, owner), out var kinds)
-            || kinds.All(held => held.Kind == "Enum" ? Holds(component, held.Row) : Typed.Contains(held.Kind));
+            || kinds.All(held => Types(component, held.Kind, held.Row, held.Extra));
+
+        /// <summary>
+        /// Whether a wrapper types a list whose items are of a type, one the description describes by
+        /// rows a wrapper types throughout, as the generator makes the record its items are.
+        /// </summary>
+        private bool Lists(string item) =>
+            _items.TryGetValue(item, out var rows) && rows.Count > 0 && rows.All(row => Types(item, row.Kind, row.Name, row.Extra));
+
+        /// <summary>Whether a wrapper types a value of a kind, an enum by its variants and a list by its items.</summary>
+        private bool Types(string scope, string kind, string row, string extra) => kind switch
+        {
+            "Enum" => Holds(scope, row),
+            "List" => Lists(extra),
+            _ => Typed.Contains(kind),
+        };
     }
 
     private static string FindRoot()

@@ -119,6 +119,25 @@ ctx.Ecs.Wrap<ProjectionRef>(camera).Value = new Projection.Orthographic(
 ctx.Ecs.Wrap<TextFontRef>(label).Style = new FontStyle.Oblique(null);
 ```
 
+A list of values with fields of their own, as a node's box shadows and its gradients are, is a list
+of the records its items are, read whole and written whole, the list made as long as what is
+written. A gradient is a record a variant, holding its stops as a list of its own:
+
+```csharp
+ctx.Ecs.Insert<BoxShadowRef>(panel).Value =
+[
+    new ShadowStyle(Color.Black, new Val.Px(4f), new Val.Px(4f), new Val.Px(0f), new Val.Px(8f)),
+];
+ctx.Ecs.Insert<BackgroundGradientRef>(panel).Value =
+[
+    new Gradient.Linear(InterpolationColorSpace.Oklaba, 0f,
+        [new ColorStop(Color.Black, new Val.Auto(), 0.5f), new ColorStop(Color.White, new Val.Auto(), 0.5f)]),
+];
+```
+
+Each value of each item is a call into the bridge, as a field is, each far cheaper than reading the
+JSON a string carries, so a list written whole costs a little more than writing its JSON does.
+
 Bevy's resources are reached the same way, since in this Bevy a resource is a component on an
 entity of its own. `Resource<T>` finds that entity and gives the wrapper over it, or null when the
 world has none, and `InsertResource<T>` puts one in or replaces the one there:
@@ -139,8 +158,8 @@ compiling once the description is regenerated after an upgrade, rather than fail
 line runs. It goes through the same reflection, so it costs what a string path costs.
 
 Under the wrappers is the string API they are written over, which reaches what no wrapper types,
-such as the list of a node's box shadows. A component is named by its full Rust type path, a field
-by Bevy's reflect path, and a value is JSON:
+such as a list of pairs, and writes a whole component in one call. A component is named by its full
+Rust type path, a field by Bevy's reflect path, and a value is JSON:
 
 ```csharp
 const string Shadow = "bevy_ui::ui_node::BoxShadow";

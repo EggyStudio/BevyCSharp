@@ -109,6 +109,17 @@ public sealed class ComponentField
     internal string? ReflectPath { get; init; }
 
     /// <summary>
+    /// For a list of values with fields of their own, which the inspector shows as its JSON, the
+    /// Rust type path of its items, and <see langword="null"/> for every other field.
+    /// </summary>
+    /// <remarks>
+    /// The description of Bevy's components the generator turns into typed wrappers describes the
+    /// items by their own rows, under this name, so a wrapper reads and writes such a list as
+    /// records.
+    /// </remarks>
+    internal string? ItemType { get; init; }
+
+    /// <summary>
     /// The component this field belongs to, once one has claimed it.
     /// </summary>
     /// <remarks>

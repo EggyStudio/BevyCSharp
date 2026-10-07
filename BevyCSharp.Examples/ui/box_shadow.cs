@@ -1,7 +1,6 @@
 // Bevy's box_shadow example, examples/ui/styling/box_shadow.rs at v0.19.1, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
-using System.Text.Json.Nodes;
 using Bevy;
 using Bevy.Reflected;
 
@@ -11,9 +10,6 @@ namespace BevyCSharp.Examples.Interface;
 // shadow's offset, blur, spread, count and samples, a button held down repeating.
 internal static class BoxShadowExample
 {
-    // Bevy's BoxShadow is a list of shadows, which a wrapper does not type, so it is written as JSON.
-    private const string Shadow = "bevy_ui::ui_node::BoxShadow";
-
     internal static readonly Color Normal = Color.FromSrgb(0.15f, 0.15f, 0.15f);
     internal static readonly Color Hovered = Color.FromSrgb(0.25f, 0.25f, 0.25f);
     internal static readonly Color Pressed = Color.FromSrgb(0.35f, 0.75f, 0.35f);
@@ -53,7 +49,7 @@ internal static class BoxShadowExample
 
             var middle = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = Color.FromSrgb8(128, 128, 128) });
             var node = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(1f)), Align = UiAlign.Center, Justify = UiJustify.Center, BorderColor = (1f, 1f, 1f, 1f), Color = Color.FromSrgb(0.21f, 0.21f, 0.21f) });
-            ecs.InsertReflected(node, Shadow, "[]");
+            ecs.Insert<BoxShadowRef>(node);
             ecs.SetParent(node, middle);
             ecs.Add(node, new ShadowNode());
 
@@ -135,7 +131,7 @@ internal static class BoxShadowExample
         var (name, w, h, radius) = Shapes[s.Shape];
 
         // One black shadow, or blue and yellow on opposite sides, and a red one turned a quarter.
-        var shadows = new JsonArray();
+        var shadows = new List<ShadowStyle>();
         if (s.Count == 1) shadows.Add(Style((0f, 0f, 0f), s.X, s.Y));
         if (s.Count >= 2)
         {
@@ -150,7 +146,7 @@ internal static class BoxShadowExample
             var node = ecs.Wrap<NodeRef>(shadowNode);
             (node.Width, node.Height) = (new Val.Px(w), new Val.Px(h));
             node.BorderRadiusTopLeft = node.BorderRadiusTopRight = node.BorderRadiusBottomRight = node.BorderRadiusBottomLeft = new Val.Px(radius);
-            ecs.SetReflected(shadowNode, Shadow, string.Empty, shadows.ToJsonString());
+            ecs.Wrap<BoxShadowRef>(shadowNode).Value = shadows;
         }
 
         ecs.Wrap<BoxShadowSamplesRef>(_camera).Value = s.Samples;
@@ -169,14 +165,8 @@ internal static class BoxShadowExample
             });
         }
 
-        JsonObject Style((float R, float G, float B) color, float x, float y) => new()
-        {
-            ["color"] = new JsonObject { ["Srgba"] = new JsonObject { ["red"] = color.R, ["green"] = color.G, ["blue"] = color.B, ["alpha"] = 0.8f } },
-            ["x_offset"] = new JsonObject { ["Px"] = x },
-            ["y_offset"] = new JsonObject { ["Px"] = y },
-            ["spread_radius"] = new JsonObject { ["Px"] = s.Spread },
-            ["blur_radius"] = new JsonObject { ["Px"] = s.Blur },
-        };
+        ShadowStyle Style((float R, float G, float B) color, float x, float y) =>
+            new(Color.FromSrgb(color.R, color.G, color.B, 0.8f), new Val.Px(x), new Val.Px(y), new Val.Px(s.Spread), new Val.Px(s.Blur));
     }
 
     // A labeled row with a button either side of its value.

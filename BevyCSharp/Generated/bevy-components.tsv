@@ -14,6 +14,7 @@ component	bevy_animation::AnimationTargetId	AnimationTargetId
 component	bevy_animation::graph::AnimationGraphHandle	AnimationGraphHandle
 component	bevy_animation::transition::AnimationTransitions	AnimationTransitions
 field	bevy_animation::transition::AnimationTransitions	main_animation	.main_animation	Enum	Option<NodeIndex>	None,Some
+field	bevy_animation::transition::AnimationTransitions	transitions	.transitions	List	Vec<AnimationTransition>	bevy_animation::transition::AnimationTransition
 component	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	ContrastAdaptiveSharpening
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	enabled	.enabled	Bool	bool	
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	sharpening_strength	.sharpening_strength	Float	f32	
@@ -159,6 +160,7 @@ field	bevy_camera::visibility::ViewVisibility	0	.0	Int	u8
 component	bevy_camera::visibility::Visibility	Visibility
 field	bevy_camera::visibility::Visibility	value		Enum	Visibility	Inherited,Hidden,Visible
 component	bevy_camera::visibility::VisibilityClass	VisibilityClass
+field	bevy_camera::visibility::VisibilityClass	0	.0	List	SmallVec<[TypeId; 1]>	core::any::TypeId
 component	bevy_camera::visibility::VisibleEntities	VisibleEntities
 component	bevy_camera::visibility::VisibleMeshEntities	VisibleMeshEntities
 component	bevy_camera::visibility::range::VisibilityRange	VisibilityRange
@@ -180,6 +182,7 @@ field	bevy_core_pipeline::tonemapping::DebandDither	value		Enum	DebandDither	Dis
 component	bevy_core_pipeline::tonemapping::Tonemapping	Tonemapping
 field	bevy_core_pipeline::tonemapping::Tonemapping	value		Enum	Tonemapping	None,Reinhard,ReinhardLuminance,AcesFitted,AgX,SomewhatBoringDisplayTransform,TonyMcMapface,BlenderFilmic,KhronosPbrNeutral
 component	bevy_ecs::entity_disabling::DefaultQueryFilters	DefaultQueryFilters
+field	bevy_ecs::entity_disabling::DefaultQueryFilters	disabling	.disabling	List	SmallVec<[ComponentId; 4]>	bevy_ecs::component::info::ComponentId
 component	bevy_ecs::entity_disabling::Disabled	Disabled
 component	bevy_ecs::hierarchy::ChildOf	ChildOf
 field	bevy_ecs::hierarchy::ChildOf	0	.0	Entity	bevy_ecs::entity::Entity	
@@ -281,6 +284,7 @@ field	bevy_input::mouse::AccumulatedMouseScroll	delta	.delta	Vec2	glam::Vec2
 component	bevy_input_focus::InputFocus	InputFocus
 field	bevy_input_focus::InputFocus	current_focus	.current_focus	Enum	Option<Entity>	None,Some
 variant	bevy_input_focus::InputFocus	current_focus	Some		.current_focus.0	Entity	bevy_ecs::entity::Entity	
+field	bevy_input_focus::InputFocus	recorded_changes	.recorded_changes	List	Vec<Option<(Entity, FocusCause)>>	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>
 field	bevy_input_focus::InputFocus	original_focus	.original_focus	Enum	Option<Entity>	None,Some
 variant	bevy_input_focus::InputFocus	original_focus	Some		.original_focus.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_input_focus::InputFocusVisible	InputFocusVisible
@@ -540,6 +544,7 @@ component	bevy_picking::pointer::PointerId	PointerId
 field	bevy_picking::pointer::PointerId	value		Enum	PointerId	Mouse,Touch,Custom
 variant	bevy_picking::pointer::PointerId	value	Touch		.0	Int	u64	
 component	bevy_picking::pointer::PointerInteraction	PointerInteraction
+field	bevy_picking::pointer::PointerInteraction	sorted_entities	.sorted_entities	List	Vec<(Entity, HitData)>	(bevy_ecs::entity::Entity, bevy_picking::backend::HitData)
 component	bevy_picking::pointer::PointerLocation	PointerLocation
 component	bevy_picking::pointer::PointerPress	PointerPress
 field	bevy_picking::pointer::PointerPress	primary	.primary	Bool	bool	
@@ -718,6 +723,7 @@ field	bevy_sprite_render::tilemap_chunk::TilemapChunk	alpha_mode	.alpha_mode	Enu
 variant	bevy_sprite_render::tilemap_chunk::TilemapChunk	alpha_mode	Mask		.alpha_mode.0	Float	f32	
 component	bevy_sprite_render::tilemap_chunk::TilemapChunkMeshCache	TilemapChunkMeshCache
 component	bevy_sprite_render::tilemap_chunk::TilemapChunkTileData	TilemapChunkTileData
+field	bevy_sprite_render::tilemap_chunk::TilemapChunkTileData	0	.0	List	Vec<Option<TileData>>	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>
 component	bevy_text::bounds::TextBounds	TextBounds
 field	bevy_text::bounds::TextBounds	width	.width	Enum	Option<f32>	None,Some
 variant	bevy_text::bounds::TextBounds	width	Some		.width.0	Float	f32	
@@ -725,9 +731,14 @@ field	bevy_text::bounds::TextBounds	height	.height	Enum	Option<f32>	None,Some
 variant	bevy_text::bounds::TextBounds	height	Some		.height.0	Float	f32	
 component	bevy_text::pipeline::TextLayoutInfo	TextLayoutInfo
 field	bevy_text::pipeline::TextLayoutInfo	scale_factor	.scale_factor	Float	f32	
+field	bevy_text::pipeline::TextLayoutInfo	glyphs	.glyphs	List	Vec<PositionedGlyph>	bevy_text::glyph::PositionedGlyph
+field	bevy_text::pipeline::TextLayoutInfo	run_geometry	.run_geometry	List	Vec<RunGeometry>	bevy_text::pipeline::RunGeometry
 field	bevy_text::pipeline::TextLayoutInfo	size	.size	Vec2	glam::Vec2	
 field	bevy_text::pipeline::TextLayoutInfo	cursor	.cursor	Enum	Option<(bool, Rect)>	None,Some
+field	bevy_text::pipeline::TextLayoutInfo	selection_rects	.selection_rects	List	Vec<Rect>	bevy_math::rects::rect::Rect
+field	bevy_text::pipeline::TextLayoutInfo	preedit_underline_rects	.preedit_underline_rects	List	Vec<Rect>	bevy_math::rects::rect::Rect
 component	bevy_text::text::ComputedTextBlock	ComputedTextBlock
+field	bevy_text::text::ComputedTextBlock	entities	.entities	List	SmallVec<[TextEntity; 1]>	bevy_text::text::TextEntity
 field	bevy_text::text::ComputedTextBlock	needs_rerender	.needs_rerender	Bool	bool	
 field	bevy_text::text::ComputedTextBlock	uses_viewport_sizes	.uses_viewport_sizes	Bool	bool	
 field	bevy_text::text::ComputedTextBlock	uses_rem_sizes	.uses_rem_sizes	Bool	bool	
@@ -763,6 +774,8 @@ field	bevy_text::text::TextFont	style	.style	Enum	FontStyle	Normal,Italic,Obliqu
 variant	bevy_text::text::TextFont	style	Oblique		.style.0	Enum	Option<f32>	None,Some
 variant	bevy_text::text::TextFont	style.Oblique	Some		.style.0.0	Float	f32	
 field	bevy_text::text::TextFont	font_smoothing	.font_smoothing	Enum	FontSmoothing	None,AntiAliased
+field	bevy_text::text::TextFont	font_features.features	.font_features.features	List	Vec<(FontFeatureTag, u32)>	(bevy_text::text::FontFeatureTag, u32)
+field	bevy_text::text::TextFont	font_variations.variations	.font_variations.variations	List	Vec<(FontVariationTag, f32)>	(bevy_text::text::FontVariationTag, f32)
 component	bevy_text::text::TextLayout	TextLayout
 field	bevy_text::text::TextLayout	justify	.justify	Enum	Justify	Left,Center,Right,Justified,Start,End
 field	bevy_text::text::TextLayout	linebreak	.linebreak	Enum	LineBreak	WordBoundary,AnyCharacter,WordOrCharacter,NoWrap
@@ -829,7 +842,9 @@ field	bevy_ui::focus::RelativeCursorPosition	cursor_over	.cursor_over	Bool	bool
 field	bevy_ui::focus::RelativeCursorPosition	normalized	.normalized	Enum	Option<Vec2>	None,Some
 variant	bevy_ui::focus::RelativeCursorPosition	normalized	Some		.normalized.0	Vec2	glam::Vec2	
 component	bevy_ui::gradients::BackgroundGradient	BackgroundGradient
+field	bevy_ui::gradients::BackgroundGradient	0	.0	List	Vec<Gradient>	bevy_ui::gradients::Gradient
 component	bevy_ui::gradients::BorderGradient	BorderGradient
+field	bevy_ui::gradients::BorderGradient	0	.0	List	Vec<Gradient>	bevy_ui::gradients::Gradient
 component	bevy_ui::interaction_states::Checkable	Checkable
 component	bevy_ui::interaction_states::Checked	Checked
 component	bevy_ui::interaction_states::InteractionDisabled	InteractionDisabled
@@ -841,6 +856,7 @@ field	bevy_ui::picking_backend::UiPickingSettings	require_markers	.require_marke
 component	bevy_ui::stack::ComputedStackIndex	ComputedStackIndex
 field	bevy_ui::stack::ComputedStackIndex	0	.0	Int	u32	
 component	bevy_ui::stack::UiStack	UiStack
+field	bevy_ui::stack::UiStack	partition	.partition	List	Vec<Range<usize>>	core::ops::Range<usize>
 field	bevy_ui::stack::UiStack	uinodes	.uinodes	List	Vec<Entity>	
 component	bevy_ui::ui_node::BackgroundColor	BackgroundColor
 field	bevy_ui::ui_node::BackgroundColor	0	.0	Color	Color	
@@ -850,6 +866,7 @@ field	bevy_ui::ui_node::BorderColor	right	.right	Color	Color
 field	bevy_ui::ui_node::BorderColor	bottom	.bottom	Color	Color	
 field	bevy_ui::ui_node::BorderColor	left	.left	Color	Color	
 component	bevy_ui::ui_node::BoxShadow	BoxShadow
+field	bevy_ui::ui_node::BoxShadow	0	.0	List	Vec<ShadowStyle>	bevy_ui::ui_node::ShadowStyle
 component	bevy_ui::ui_node::CalculatedClip	CalculatedClip
 field	bevy_ui::ui_node::CalculatedClip	clip.min	.clip.min	Vec2	glam::Vec2	
 field	bevy_ui::ui_node::CalculatedClip	clip.max	.clip.max	Vec2	glam::Vec2	
@@ -1110,6 +1127,10 @@ variant	bevy_ui::ui_node::Node	column_gap	Vh		.column_gap.0	Float	f32
 variant	bevy_ui::ui_node::Node	column_gap	VMin		.column_gap.0	Float	f32	
 variant	bevy_ui::ui_node::Node	column_gap	VMax		.column_gap.0	Float	f32	
 field	bevy_ui::ui_node::Node	grid_auto_flow	.grid_auto_flow	Enum	GridAutoFlow	Row,Column,RowDense,ColumnDense
+field	bevy_ui::ui_node::Node	grid_template_rows	.grid_template_rows	List	Vec<RepeatedGridTrack>	bevy_ui::ui_node::RepeatedGridTrack
+field	bevy_ui::ui_node::Node	grid_template_columns	.grid_template_columns	List	Vec<RepeatedGridTrack>	bevy_ui::ui_node::RepeatedGridTrack
+field	bevy_ui::ui_node::Node	grid_auto_rows	.grid_auto_rows	List	Vec<GridTrack>	bevy_ui::ui_node::GridTrack
+field	bevy_ui::ui_node::Node	grid_auto_columns	.grid_auto_columns	List	Vec<GridTrack>	bevy_ui::ui_node::GridTrack
 field	bevy_ui::ui_node::Node	grid_row.start	.grid_row.start	Enum	Option<NonZeroI16>	None,Some
 field	bevy_ui::ui_node::Node	grid_row.span	.grid_row.span	Enum	Option<NonZeroU16>	None,Some
 field	bevy_ui::ui_node::Node	grid_row.end	.grid_row.end	Enum	Option<NonZeroI16>	None,Some
@@ -1252,6 +1273,7 @@ component	bevy_ui_widgets::menu::MenuItem	MenuItem
 component	bevy_ui_widgets::menu::MenuPopup	MenuPopup
 field	bevy_ui_widgets::menu::MenuPopup	layout	.layout	Enum	MenuLayout	Column,Row,Grid
 component	bevy_ui_widgets::popover::Popover	Popover
+field	bevy_ui_widgets::popover::Popover	positions	.positions	List	Vec<PopoverPlacement>	bevy_ui_widgets::popover::PopoverPlacement
 field	bevy_ui_widgets::popover::Popover	window_margin	.window_margin	Float	f32	
 component	bevy_ui_widgets::radio::RadioButton	RadioButton
 component	bevy_ui_widgets::radio::RadioGroup	RadioGroup
@@ -1353,6 +1375,7 @@ field	bevy_window::monitor::Monitor	physical_position.y	.physical_position.y	Int
 field	bevy_window::monitor::Monitor	refresh_rate_millihertz	.refresh_rate_millihertz	Enum	Option<u32>	None,Some
 variant	bevy_window::monitor::Monitor	refresh_rate_millihertz	Some		.refresh_rate_millihertz.0	Int	u32	
 field	bevy_window::monitor::Monitor	scale_factor	.scale_factor	Double	f64	
+field	bevy_window::monitor::Monitor	video_modes	.video_modes	List	Vec<VideoMode>	bevy_window::monitor::VideoMode
 component	bevy_window::monitor::PrimaryMonitor	PrimaryMonitor
 component	bevy_window::window::CursorOptions	CursorOptions
 field	bevy_window::window::CursorOptions	visible	.visible	Bool	bool	
@@ -1440,3 +1463,182 @@ field	bevy_window::window::Window	preferred_screen_edges_deferring_system_gestur
 component	bevy_world_serialization::components::DynamicWorldRoot	DynamicWorldRoot
 component	bevy_world_serialization::components::WorldAssetRoot	WorldAssetRoot
 field	bevy_world_serialization::components::WorldAssetRoot	0	.0	Asset	Handle<WorldAsset>	Scene
+item	bevy_animation::transition::AnimationTransition	AnimationTransition
+field	bevy_animation::transition::AnimationTransition	current_weight	.current_weight	Float	f32	
+field	bevy_animation::transition::AnimationTransition	weight_decline_per_sec	.weight_decline_per_sec	Float	f32	
+item	bevy_ecs::component::info::ComponentId	ComponentId
+field	bevy_ecs::component::info::ComponentId	0	.0	Int	usize	
+item	bevy_math::rects::rect::Rect	Rect
+field	bevy_math::rects::rect::Rect	min	.min	Vec2	glam::Vec2	
+field	bevy_math::rects::rect::Rect	max	.max	Vec2	glam::Vec2	
+item	bevy_text::glyph::PositionedGlyph	PositionedGlyph
+field	bevy_text::glyph::PositionedGlyph	position	.position	Vec2	glam::Vec2	
+field	bevy_text::glyph::PositionedGlyph	atlas_info.texture	.atlas_info.texture	Enum	AssetId<Image>	Index,Uuid
+variant	bevy_text::glyph::PositionedGlyph	atlas_info.texture	Index	index.generation	.atlas_info.texture.index.generation	Int	u32	
+variant	bevy_text::glyph::PositionedGlyph	atlas_info.texture	Index	index.index	.atlas_info.texture.index.index	Int	u32	
+field	bevy_text::glyph::PositionedGlyph	atlas_info.rect.min	.atlas_info.rect.min	Vec2	glam::Vec2	
+field	bevy_text::glyph::PositionedGlyph	atlas_info.rect.max	.atlas_info.rect.max	Vec2	glam::Vec2	
+field	bevy_text::glyph::PositionedGlyph	atlas_info.offset	.atlas_info.offset	Vec2	glam::Vec2	
+field	bevy_text::glyph::PositionedGlyph	atlas_info.is_alpha_mask	.atlas_info.is_alpha_mask	Bool	bool	
+field	bevy_text::glyph::PositionedGlyph	section_index	.section_index	Int	usize	
+field	bevy_text::glyph::PositionedGlyph	line_index	.line_index	Int	usize	
+item	bevy_text::pipeline::RunGeometry	RunGeometry
+field	bevy_text::pipeline::RunGeometry	section_index	.section_index	Int	usize	
+field	bevy_text::pipeline::RunGeometry	bounds.min	.bounds.min	Vec2	glam::Vec2	
+field	bevy_text::pipeline::RunGeometry	bounds.max	.bounds.max	Vec2	glam::Vec2	
+field	bevy_text::pipeline::RunGeometry	strikethrough_y	.strikethrough_y	Float	f32	
+field	bevy_text::pipeline::RunGeometry	strikethrough_thickness	.strikethrough_thickness	Float	f32	
+field	bevy_text::pipeline::RunGeometry	underline_y	.underline_y	Float	f32	
+field	bevy_text::pipeline::RunGeometry	underline_thickness	.underline_thickness	Float	f32	
+item	bevy_text::text::TextEntity	TextEntity
+field	bevy_text::text::TextEntity	entity	.entity	Entity	bevy_ecs::entity::Entity	
+field	bevy_text::text::TextEntity	depth	.depth	Int	usize	
+field	bevy_text::text::TextEntity	font_smoothing	.font_smoothing	Enum	FontSmoothing	None,AntiAliased
+item	bevy_ui::gradients::AngularColorStop	AngularColorStop
+field	bevy_ui::gradients::AngularColorStop	color	.color	Color	Color	
+field	bevy_ui::gradients::AngularColorStop	angle	.angle	Enum	Option<f32>	None,Some
+variant	bevy_ui::gradients::AngularColorStop	angle	Some		.angle.0	Float	f32	
+field	bevy_ui::gradients::AngularColorStop	hint	.hint	Float	f32	
+item	bevy_ui::gradients::ColorStop	ColorStop
+field	bevy_ui::gradients::ColorStop	color	.color	Color	Color	
+field	bevy_ui::gradients::ColorStop	point	.point	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::ColorStop	point	Px		.point.0	Float	f32	
+variant	bevy_ui::gradients::ColorStop	point	Percent		.point.0	Float	f32	
+variant	bevy_ui::gradients::ColorStop	point	Vw		.point.0	Float	f32	
+variant	bevy_ui::gradients::ColorStop	point	Vh		.point.0	Float	f32	
+variant	bevy_ui::gradients::ColorStop	point	VMin		.point.0	Float	f32	
+variant	bevy_ui::gradients::ColorStop	point	VMax		.point.0	Float	f32	
+field	bevy_ui::gradients::ColorStop	hint	.hint	Float	f32	
+item	bevy_ui::gradients::Gradient	Gradient
+field	bevy_ui::gradients::Gradient	value		Enum	Gradient	Linear,Radial,Conic
+variant	bevy_ui::gradients::Gradient	value	Linear	color_space	.0.color_space	Enum	InterpolationColorSpace	Oklaba,Oklcha,OklchaLong,Srgba,LinearRgba,Hsla,HslaLong,Hsva,HsvaLong
+variant	bevy_ui::gradients::Gradient	value	Linear	angle	.0.angle	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Linear	stops	.0.stops	List	Vec<ColorStop>	bevy_ui::gradients::ColorStop
+variant	bevy_ui::gradients::Gradient	value	Radial	color_space	.0.color_space	Enum	InterpolationColorSpace	Oklaba,Oklcha,OklchaLong,Srgba,LinearRgba,Hsla,HslaLong,Hsva,HsvaLong
+variant	bevy_ui::gradients::Gradient	value	Radial	position.anchor	.0.position.anchor	Vec2	glam::Vec2	
+variant	bevy_ui::gradients::Gradient	value	Radial	position.x	.0.position.x	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	Px		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	Percent		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	Vw		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	Vh		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	VMin		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.x	VMax		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Radial	position.y	.0.position.y	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	Px		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	Percent		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	Vw		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	Vh		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	VMin		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.position.y	VMax		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Radial	shape	.0.shape	Enum	RadialGradientShape	ClosestSide,FarthestSide,ClosestCorner,FarthestCorner,Circle,Ellipse
+variant	bevy_ui::gradients::Gradient	value.Radial.shape	Circle		.0.shape.0	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	Px		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	Percent		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	Vw		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	Vh		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	VMin		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Circle	VMax		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape	Ellipse	0	.0.shape.0	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	Px		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	Percent		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	Vw		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	Vh		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	VMin		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.0	VMax		.0.shape.0.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape	Ellipse	1	.0.shape.1	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	Px		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	Percent		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	Vw		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	Vh		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	VMin		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Radial.shape.Ellipse.1	VMax		.0.shape.1.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Radial	stops	.0.stops	List	Vec<ColorStop>	bevy_ui::gradients::ColorStop
+variant	bevy_ui::gradients::Gradient	value	Conic	color_space	.0.color_space	Enum	InterpolationColorSpace	Oklaba,Oklcha,OklchaLong,Srgba,LinearRgba,Hsla,HslaLong,Hsva,HsvaLong
+variant	bevy_ui::gradients::Gradient	value	Conic	start	.0.start	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Conic	position.anchor	.0.position.anchor	Vec2	glam::Vec2	
+variant	bevy_ui::gradients::Gradient	value	Conic	position.x	.0.position.x	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	Px		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	Percent		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	Vw		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	Vh		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	VMin		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.x	VMax		.0.position.x.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Conic	position.y	.0.position.y	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	Px		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	Percent		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	Vw		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	Vh		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	VMin		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value.Conic.position.y	VMax		.0.position.y.0	Float	f32	
+variant	bevy_ui::gradients::Gradient	value	Conic	stops	.0.stops	List	Vec<AngularColorStop>	bevy_ui::gradients::AngularColorStop
+item	bevy_ui::ui_node::GridTrack	GridTrack
+field	bevy_ui::ui_node::GridTrack	min_sizing_function	.min_sizing_function	Enum	MinTrackSizingFunction	Px,Percent,MinContent,MaxContent,Auto,VMin,VMax,Vh,Vw
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	Px		.min_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	Percent		.min_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	VMin		.min_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	VMax		.min_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	Vh		.min_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	min_sizing_function	Vw		.min_sizing_function.0	Float	f32	
+field	bevy_ui::ui_node::GridTrack	max_sizing_function	.max_sizing_function	Enum	MaxTrackSizingFunction	Px,Percent,MinContent,MaxContent,FitContentPx,FitContentPercent,Auto,Fraction,VMin,VMax,Vh,Vw
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	Px		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	Percent		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	FitContentPx		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	FitContentPercent		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	Fraction		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	VMin		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	VMax		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	Vh		.max_sizing_function.0	Float	f32	
+variant	bevy_ui::ui_node::GridTrack	max_sizing_function	Vw		.max_sizing_function.0	Float	f32	
+item	bevy_ui::ui_node::RepeatedGridTrack	RepeatedGridTrack
+field	bevy_ui::ui_node::RepeatedGridTrack	repetition	.repetition	Enum	GridTrackRepetition	Count,AutoFill,AutoFit
+variant	bevy_ui::ui_node::RepeatedGridTrack	repetition	Count		.repetition.0	Int	u16	
+field	bevy_ui::ui_node::RepeatedGridTrack	tracks	.tracks	List	SmallVec<[GridTrack; 1]>	bevy_ui::ui_node::GridTrack
+item	bevy_ui::ui_node::ShadowStyle	ShadowStyle
+field	bevy_ui::ui_node::ShadowStyle	color	.color	Color	Color	
+field	bevy_ui::ui_node::ShadowStyle	x_offset	.x_offset	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	Px		.x_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	Percent		.x_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	Vw		.x_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	Vh		.x_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	VMin		.x_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	x_offset	VMax		.x_offset.0	Float	f32	
+field	bevy_ui::ui_node::ShadowStyle	y_offset	.y_offset	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	Px		.y_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	Percent		.y_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	Vw		.y_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	Vh		.y_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	VMin		.y_offset.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	y_offset	VMax		.y_offset.0	Float	f32	
+field	bevy_ui::ui_node::ShadowStyle	spread_radius	.spread_radius	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	Px		.spread_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	Percent		.spread_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	Vw		.spread_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	Vh		.spread_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	VMin		.spread_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	spread_radius	VMax		.spread_radius.0	Float	f32	
+field	bevy_ui::ui_node::ShadowStyle	blur_radius	.blur_radius	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	Px		.blur_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	Percent		.blur_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	Vw		.blur_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	Vh		.blur_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	VMin		.blur_radius.0	Float	f32	
+variant	bevy_ui::ui_node::ShadowStyle	blur_radius	VMax		.blur_radius.0	Float	f32	
+item	bevy_ui_widgets::popover::PopoverPlacement	PopoverPlacement
+field	bevy_ui_widgets::popover::PopoverPlacement	side	.side	Enum	PopoverSide	Top,Bottom,Left,Right
+field	bevy_ui_widgets::popover::PopoverPlacement	align	.align	Enum	PopoverAlign	Start,Center,End
+field	bevy_ui_widgets::popover::PopoverPlacement	gap	.gap	Float	f32	
+item	bevy_window::monitor::VideoMode	VideoMode
+field	bevy_window::monitor::VideoMode	physical_size.x	.physical_size.x	Int	u32	
+field	bevy_window::monitor::VideoMode	physical_size.y	.physical_size.y	Int	u32	
+field	bevy_window::monitor::VideoMode	bit_depth	.bit_depth	Int	u16	
+field	bevy_window::monitor::VideoMode	refresh_rate_millihertz	.refresh_rate_millihertz	Int	u32	
+item	core::any::TypeId	TypeId
+item	core::ops::Range<usize>	Range<usize>
+item	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>
+field	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	value		Enum	Option<(Entity, FocusCause)>	None,Some
+item	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	Option<bevy_sprite_render::tilemap_chunk::TileData>
+field	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value		Enum	Option<TileData>	None,Some
+variant	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value	Some	tileset_index	.0.tileset_index	Int	u16	
+variant	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value	Some	color	.0.color	Color	Color	
+variant	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value	Some	visible	.0.visible	Bool	bool	
+variant	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value	Some	orientation	.0.orientation	Enum	TileOrientation	Default,Rotate90,Rotate180,Rotate270,MirrorH,MirrorHRotate90,MirrorHRotate180,MirrorHRotate270

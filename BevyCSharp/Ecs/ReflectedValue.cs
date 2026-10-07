@@ -268,6 +268,18 @@ internal static class ReflectedValue
         return Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
 
+    /// <summary>Reads how many items a list a wrapper names has.</summary>
+    internal static int Count(EcsWorld world, Entity entity, string type, string path) =>
+        world.ReflectedLength(entity, type, path) ?? throw Absent(type, entity);
+
+    /// <summary>Makes a list a wrapper names a length, its new items at their default for the wrapper to write over.</summary>
+    internal static void Resize(EcsWorld world, Entity entity, string type, string path, int length) =>
+        world.ResizeReflected(entity, type, path, length);
+
+    /// <summary>An item's path in a list a wrapper names, its index in brackets after the list's.</summary>
+    internal static string Item(string list, int index) =>
+        list + "[" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + "]";
+
     /// <summary>The failure for a wrapper over a component the entity no longer carries.</summary>
     private static BevyNativeException Absent(string type, Entity entity) =>
         new(NativeStatus.NotPresent, $"{entity} does not carry {type}.");

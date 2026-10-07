@@ -105,6 +105,19 @@ internal static unsafe partial class Native
     internal static partial int bcs_reflect_set_color(
         ulong entity, string typePath, string path, float red, float green, float blue, float alpha);
 
+    /// <summary>Reads how many items a list or an array a component holds has, or a negative status.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_list_len(ulong entity, string typePath, string path);
+
+    /// <summary>
+    /// Makes a list a component holds a length, taking items off its end or adding them at their
+    /// default.
+    /// </summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_list_resize(ulong entity, string typePath, string path, int length);
+
     /// <summary>Reads a float field, of either width, as a number.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

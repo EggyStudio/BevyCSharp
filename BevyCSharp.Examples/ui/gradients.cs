@@ -1,7 +1,6 @@
 // Bevy's gradients example, examples/ui/styling/gradients.rs at v0.19.1, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
-using System.Text.Json.Nodes;
 using Bevy;
 using Bevy.Reflected;
 
@@ -12,15 +11,10 @@ namespace BevyCSharp.Examples.Interface;
 // gradient through the color spaces it can be blended in.
 internal static class Gradients
 {
-    // A gradient is a list of gradients, each holding a list of stops, which a wrapper does not
-    // type, so both are written as JSON.
-    private const string Background = "bevy_ui::gradients::BackgroundGradient";
-    private const string Border = "bevy_ui::gradients::BorderGradient";
-
-    private static readonly string[] Spaces = ["Oklaba", "Oklcha", "OklchaLong", "Srgba", "LinearRgba", "Hsla", "HslaLong", "Hsva", "HsvaLong"];
+    private static readonly InterpolationColorSpace[] Spaces = Enum.GetValues<InterpolationColorSpace>();
 
     // A node's gradient, kept beside it to be written again when its color space or its angle
-    // changes, since what Bevy's BackgroundGradient holds is no value a component here can keep.
+    // changes.
     internal sealed class Painted(Entity node, string kind, float angle, (Color Color, float? Percent)[] stops)
     {
         public Entity Node { get; } = node;
@@ -77,7 +71,7 @@ internal static class Gradients
 
             var footer = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, RowGap = Length.Px(10f), Align = UiAlign.Center });
             ecs.SetParent(footer, root);
-            var label = Ui.SpawnText(Spaces[0], new UiSettings(), 25f);
+            var label = Ui.SpawnText(Spaces[0].ToString(), new UiSettings(), 25f);
             ecs.SetParent(label, footer);
             ecs.Add(label, new CurrentColorSpaceLabel());
 
@@ -113,7 +107,7 @@ internal static class Gradients
                 if (_last == UiInteraction.Pressed && interaction == UiInteraction.Hovered)
                 {
                     _space = (_space + 1) % Spaces.Length;
-                    foreach (var label in ecs.EntitiesWith<CurrentColorSpaceLabel>()) Ui.SetText(label, Spaces[_space]);
+                    foreach (var label in ecs.EntitiesWith<CurrentColorSpaceLabel>()) Ui.SetText(label, Spaces[_space].ToString());
                     foreach (var painted in Nodes.Values) Repaint(ecs, painted);
                 }
 
@@ -124,7 +118,7 @@ internal static class Gradients
 
     // The node's gradient written again, as it is now.
     internal static void Repaint(EcsWorld ecs, Painted painted) =>
-        ecs.SetReflected(painted.Node, Background, string.Empty, Gradient(painted).ToJsonString());
+        ecs.Wrap<BackgroundGradientRef>(painted.Node).Value = [Single(painted, Spaces[_space])];
 
     private static void Paint(EcsWorld ecs, Entity parent, UiSettings settings, string kind, float angle, (Color, float?)[] stops, bool animated)
     {
@@ -133,46 +127,23 @@ internal static class Gradients
         var painted = new Painted(node, kind, angle, stops);
         Nodes[node] = painted;
         if (animated) ecs.Add(node, new AnimateMarker());
-        ecs.InsertReflected(node, Background, Gradient(painted).ToJsonString());
+        ecs.Insert<BackgroundGradientRef>(node).Value = [Single(painted, Spaces[_space])];
 
         // Every border the same gradient, yellow to white to orange at three eighths of a turn.
         var border = new Painted(node, "Linear", 3f * MathF.Tau / 8f, [(C(255, 255, 0), null), (Color.White, null), (C(255, 165, 0), null)]);
-        ecs.InsertReflected(node, Border, new JsonArray(Single(border, "Oklaba")).ToJsonString());
+        ecs.Insert<BorderGradientRef>(node).Value = [Single(border, InterpolationColorSpace.Oklaba)];
     }
 
-    // The node's gradient as the list Bevy's BackgroundGradient holds, in the current color space.
-    private static JsonArray Gradient(Painted painted) => new(Single(painted, Spaces[_space]));
-
-    private static JsonObject Single(Painted painted, string space) => painted.Kind switch
+    // The node's gradient, in a color space, its middle at the node's for the radial and conic ones.
+    private static Gradient Single(Painted painted, InterpolationColorSpace space) => painted.Kind switch
     {
-        "Linear" => new JsonObject { ["Linear"] = new JsonObject { ["color_space"] = space, ["angle"] = painted.Angle, ["stops"] = Stops(painted.Stops) } },
-        "Radial" => new JsonObject { ["Radial"] = new JsonObject { ["color_space"] = space, ["position"] = Center(), ["shape"] = "ClosestSide", ["stops"] = Stops(painted.Stops) } },
-        _ => new JsonObject
-        {
-            ["Conic"] = new JsonObject
-            {
-                ["color_space"] = space,
-                ["start"] = 0f,
-                ["position"] = Center(),
-                ["stops"] = new JsonArray([.. painted.Stops.Select(stop => (JsonNode)new JsonObject { ["color"] = Srgba(stop.Color), ["angle"] = null, ["hint"] = 0.5f })]),
-            },
-        },
+        "Linear" => new Gradient.Linear(space, painted.Angle, Stops(painted.Stops)),
+        "Radial" => new Gradient.Radial(space, Vec2.Zero, new Val.Px(0f), new Val.Px(0f), new RadialGradientShape.ClosestSide(), Stops(painted.Stops)),
+        _ => new Gradient.Conic(space, 0f, Vec2.Zero, new Val.Px(0f), new Val.Px(0f), [.. painted.Stops.Select(stop => new AngularColorStop(stop.Color, null, 0.5f))]),
     };
 
-    private static JsonArray Stops((Color Color, float? Percent)[] stops) => new([.. stops.Select(stop => (JsonNode)new JsonObject
-    {
-        ["color"] = Srgba(stop.Color),
-        ["point"] = stop.Percent is { } percent ? new JsonObject { ["Percent"] = percent } : "Auto",
-        ["hint"] = 0.5f,
-    })]);
-
-    private static JsonObject Center() => new() { ["anchor"] = new JsonArray(0f, 0f), ["x"] = new JsonObject { ["Px"] = 0f }, ["y"] = new JsonObject { ["Px"] = 0f } };
-
-    // Bevy's palette colors are sRGB, made linear by C and given as its LinearRgba, the same color.
-    private static JsonObject Srgba(Color linear) => new()
-    {
-        ["LinearRgba"] = new JsonObject { ["red"] = linear.R, ["green"] = linear.G, ["blue"] = linear.B, ["alpha"] = linear.A },
-    };
+    private static ColorStop[] Stops((Color Color, float? Percent)[] stops) =>
+        [.. stops.Select(stop => new ColorStop(stop.Color, stop.Percent is { } percent ? new Val.Percent(percent) : new Val.Auto(), 0.5f))];
 
     private static Color C(byte r, byte g, byte b) => Color.FromSrgb(r / 255f, g / 255f, b / 255f);
 }

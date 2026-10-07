@@ -49,6 +49,7 @@ use crate::interop::{cstr_to_string, status, write_text};
 use crate::state::with_world;
 
 mod describe;
+mod lists;
 mod values;
 
 #[cfg(test)]
@@ -170,6 +171,13 @@ fn default_of(
         return Ok(Box::new(bevy::ecs::entity::Entity::PLACEHOLDER));
     }
 
+    // A list registers no default, though Rust's is the empty one, as a gradient's stops are.
+    if let Some(info @ TypeInfo::List(_)) = registry.get_type_info(type_id) {
+        let mut made = bevy::reflect::list::DynamicList::default();
+        made.set_represented_type(Some(info));
+        return Ok(Box::new(made));
+    }
+
     // A range of numbers registers no default, though Rust's is the empty range at zero, which a
     // struct holding one, as a visibility range holds its margins, is made with for the caller to
     // write the real ones over.
@@ -178,11 +186,12 @@ fn default_of(
     }
 
     // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
-    // holds nothing, which a caller choosing it then writes over.
+    // holds nothing, or where every variant holds something, as a gradient's, its first made from
+    // its values' defaults, which a caller choosing a variant then writes over.
     if let Some(TypeInfo::Enum(info)) = registry.get_type_info(type_id)
-        && let Some(unit) = info.iter().find(|variant| matches!(variant, VariantInfo::Unit(_)))
+        && let Some(chosen) = info.iter().find(|variant| matches!(variant, VariantInfo::Unit(_))).or_else(|| info.iter().next())
     {
-        let mut made = DynamicEnum::new(unit.name(), DynamicVariant::Unit);
+        let mut made = DynamicEnum::new(chosen.name(), values_of(registry, chosen)?);
         made.set_represented_type(Some(registry.get_type_info(type_id).unwrap()));
         return Ok(Box::new(made));
     }
@@ -195,6 +204,27 @@ fn default_of(
         status::UNSUPPORTED,
         format!("'{path}' has no reflected default, so a variant holding one cannot be made."),
     ))
+}
+
+/// A variant's values, each at its default, for a variant chosen or made as an enum's default.
+fn values_of(registry: &TypeRegistry, chosen: &VariantInfo) -> Result<DynamicVariant, i32> {
+    match chosen {
+        VariantInfo::Unit(_) => Ok(DynamicVariant::Unit),
+        VariantInfo::Tuple(tuple) => tuple
+            .iter()
+            .try_fold(DynamicTuple::default(), |mut values, f| {
+                values.insert_boxed(default_of(registry, f.type_id(), f.type_path())?);
+                Ok(values)
+            })
+            .map(DynamicVariant::Tuple),
+        VariantInfo::Struct(named) => named
+            .iter()
+            .try_fold(DynamicStruct::default(), |mut values, f| {
+                values.insert_boxed(f.name(), default_of(registry, f.type_id(), f.type_path())?);
+                Ok(values)
+            })
+            .map(DynamicVariant::Struct),
+    }
 }
 
 /// A struct with no default of its own made from each field's default, a handle's included, for
@@ -593,32 +623,7 @@ pub unsafe extern "C" fn bcs_reflect_set_variant(
                     );
                 };
 
-                let fields = match chosen {
-                    VariantInfo::Unit(_) => Ok(DynamicVariant::Unit),
-                    VariantInfo::Tuple(tuple) => {
-                        let mut fields = DynamicTuple::default();
-                        tuple
-                            .iter()
-                            .try_for_each(|f| {
-                                let value = default_of(&registry, f.type_id(), f.type_path())?;
-                                fields.insert_boxed(value);
-                                Ok(())
-                            })
-                            .map(|()| DynamicVariant::Tuple(fields))
-                    }
-                    VariantInfo::Struct(named) => {
-                        let mut fields = DynamicStruct::default();
-                        named
-                            .iter()
-                            .try_for_each(|f| {
-                                let value = default_of(&registry, f.type_id(), f.type_path())?;
-                                fields.insert_boxed(f.name(), value);
-                                Ok(())
-                            })
-                            .map(|()| DynamicVariant::Struct(fields))
-                    }
-                };
-                let fields = match fields {
+                let fields = match values_of(&registry, chosen) {
                     Ok(fields) => fields,
                     Err(code) => return code,
                 };

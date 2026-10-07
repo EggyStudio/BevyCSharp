@@ -53,10 +53,11 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
         {
             // The wrappers' names are taken as well, since an enum inside a variant can be called
             // what a wrapper is, as Bevy's WindowRef and the wrapper of its Window are.
-            var named = Named(pair.Left.Items).ToList();
+            var named = Named(pair.Left.Items.Where(c => !c.Item).ToList()).ToList();
+            var items = pair.Left.Items.Where(c => c.Item).ToDictionary(c => c.Path, StringComparer.Ordinal);
             var unions = new Unions(new HashSet<string>(pair.Right.Items.Concat(named.Select(c => c.Type)), StringComparer.Ordinal));
             foreach (var component in named)
-                spc.AddSource($"Reflected.{component.Type}.g.cs", Emit(component, unions));
+                spc.AddSource($"Reflected.{component.Type}.g.cs", Emit(component, items, unions));
             foreach (var union in unions.All)
                 spc.AddSource($"Reflected.Union.{union.Name}.g.cs", EmitUnion(union));
         });
@@ -85,9 +86,14 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
         public FieldModel AsField => new(Field, Reflect, Kind, Rust, Extra);
     }
 
-    /// <summary>One component, as the description lists it.</summary>
+    /// <summary>One component, or one type a list holds as its items, as the description lists it.</summary>
+    /// <param name="Path">Its Rust type path.</param>
+    /// <param name="Short">Its short name.</param>
+    /// <param name="Fields">Its rows.</param>
+    /// <param name="Variants">The rows of its enums' variants.</param>
+    /// <param name="Item">Whether it is a type a list holds as its items, which has no wrapper of its own.</param>
     private sealed record ComponentModel(
-        string Path, string Short, EquatableArray<FieldModel> Fields, EquatableArray<VariantFieldModel> Variants)
+        string Path, string Short, EquatableArray<FieldModel> Fields, EquatableArray<VariantFieldModel> Variants, bool Item = false)
     {
         /// <summary>The wrapper's type name, settled once every component is known.</summary>
         public string Type { get; init; } = string.Empty;
@@ -99,6 +105,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
         var components = new List<ComponentModel>();
         string? path = null;
         string? shortName = null;
+        var item = false;
         var fields = new List<FieldModel>();
         var variants = new List<VariantFieldModel>();
 
@@ -108,7 +115,8 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             {
                 components.Add(new ComponentModel(path, shortName!,
                     new EquatableArray<FieldModel>(fields.ToArray()),
-                    new EquatableArray<VariantFieldModel>(variants.ToArray())));
+                    new EquatableArray<VariantFieldModel>(variants.ToArray()),
+                    item));
             }
             fields.Clear();
             variants.Clear();
@@ -120,11 +128,13 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             if (line.Length == 0 || line[0] == '#') continue;
 
             var words = line.Split('\t');
-            if (words[0] == "component" && words.Length >= 3)
+            // A type a list holds as its items is described as a component is, after them.
+            if (words[0] is "component" or "item" && words.Length >= 3)
             {
                 Close();
                 path = words[1];
                 shortName = words[2];
+                item = words[0] == "item";
             }
             else if (words[0] == "field" && words.Length >= 7 && words[1] == path)
             {
@@ -247,29 +257,29 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
         _ => TypeOf(field),
     };
 
-    /// <summary>The expression reading a field a wrapper or a variant names.</summary>
+    /// <summary>The expression reading a field a wrapper or a variant names, at a path given as a C# expression.</summary>
     private static string Reading(FieldModel field, string path) => field.Kind switch
     {
-        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.Range(_world, Entity, TypePath, \"{path}\")",
-        "Color" => $"global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, \"{path}\")",
-        "Asset" => $"global::Bevy.ReflectedValue.Asset(_world, Entity, TypePath, \"{path}\")",
-        _ => $"global::Bevy.ReflectedValue.Get<{TypeOf(field)}>(_world, Entity, TypePath, \"{path}\", global::Bevy.FieldKind.{field.Kind})",
+        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.Range(_world, Entity, TypePath, {path})",
+        "Color" => $"global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, {path})",
+        "Asset" => $"global::Bevy.ReflectedValue.Asset(_world, Entity, TypePath, {path})",
+        _ => $"global::Bevy.ReflectedValue.Get<{TypeOf(field)}>(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind})",
     };
 
-    /// <summary>The statement writing a field a wrapper or a variant names.</summary>
+    /// <summary>The statement writing a field a wrapper or a variant names, at a path given as a C# expression.</summary>
     private static string Writing(FieldModel field, string path, string value) => field.Kind switch
     {
-        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.SetRange(_world, Entity, TypePath, \"{path}\", {value});",
-        "Color" => $"_world.SetReflectedColor(Entity, TypePath, \"{path}\", {value});",
-        "Asset" => $"_world.SetReflectedAsset(Entity, TypePath, \"{path}\", {value});",
-        _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, \"{path}\", global::Bevy.FieldKind.{field.Kind}, {value});",
+        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.SetRange(_world, Entity, TypePath, {path}, {value});",
+        "Color" => $"_world.SetReflectedColor(Entity, TypePath, {path}, {value});",
+        "Asset" => $"_world.SetReflectedAsset(Entity, TypePath, {path}, {value});",
+        _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind}, {value});",
     };
 
     /// <summary>A reflect path as it stands inside a C# string.</summary>
     private static string Quoted(string path) => path.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
     /// <summary>Writes one wrapper.</summary>
-    private static string Emit(ComponentModel component, Unions unions)
+    private static string Emit(ComponentModel component, IReadOnlyDictionary<string, ComponentModel> items, Unions unions)
     {
         var type = component.Type;
         var text = new StringBuilder();
@@ -320,11 +330,15 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             """);
 
         var used = new HashSet<string>(StringComparer.Ordinal) { type, "Entity", "Remove", "TypePath" };
+        var scope = new Scope(component.Variants.Items, items, unions);
 
         foreach (var field in component.Fields.Items)
         {
             var property = TypeOf(field);
-            if (property is null && field.Kind != "Enum") continue;
+
+            // A list of records is read and written by the methods of the record its items are.
+            var list = field.Kind == "List" ? ListOf(field, "Value", scope) : null;
+            if (property is null && field.Kind != "Enum" && list is null) continue;
 
             // A newtype's one field is called 0 by Rust, which says nothing as a property name.
             var name = field.Name == "0" ? "Value" : Identifier(field.Name);
@@ -338,8 +352,21 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
 
                 """);
 
+            if (list is not null)
+            {
+                text.Append($$"""
+                        public {{list.Type}} {{unique}}
+                        {
+                            get => {{Read(list, null)}};
+                            set => {{Write(list, "value", 1, null)}}
+                        }
+
+                    """);
+                continue;
+            }
+
             var parts = component.Variants.Items.Where(p => p.Enum == field.Name).ToList();
-            if (field.Kind == "Enum" && parts.Count > 0 && EmitHolding(text, field, path, unique, parts, component.Variants.Items, unions))
+            if (field.Kind == "Enum" && parts.Count > 0 && EmitHolding(text, field, path, unique, parts, scope))
                 continue;
 
             switch (field.Kind)
@@ -372,8 +399,8 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
                     text.Append($$"""
                             public global::Bevy.FloatRange {{unique}}
                             {
-                                get => {{Reading(field, path)}};
-                                set => {{Writing(field, path, "value")}}
+                                get => {{Reading(field, $"\"{path}\"")}};
+                                set => {{Writing(field, $"\"{path}\"", "value")}}
                             }
 
                         """);

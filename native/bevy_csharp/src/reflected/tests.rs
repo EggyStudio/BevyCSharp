@@ -1,5 +1,6 @@
 use super::*;
 use super::describe::*;
+use super::lists::*;
 use super::values::*;
 use std::ffi::CString;
 
@@ -71,6 +72,20 @@ enum Slot {
 #[reflect(Component, Default)]
 struct Held {
     slot: Slot,
+}
+
+#[derive(Reflect, Clone, PartialEq, Debug)]
+enum Filled {
+    One(i32),
+    Two { depth: i32 },
+    Many(Vec<Plain>),
+}
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Listed {
+    items: Vec<Plain>,
+    fills: Vec<Filled>,
 }
 
 #[derive(Component, Reflect)]
@@ -349,4 +364,54 @@ fn a_variant_holding_a_struct_with_no_default_is_made_from_its_fields() {
         assert_eq!(status::OK, code, "{}", last_error());
     });
     assert_eq!(Slot::Holding(Plain { depth: 0 }), app.world().get::<Held>(entity).unwrap().slot);
+}
+
+#[test]
+fn a_list_is_counted_and_resized_with_items_made_from_their_fields() {
+    // Items the list has no default for are made from their fields', and a resize down drops the
+    // items past the new end, which applying a shorter list would not.
+    let mut app = App::new();
+    app.register_type::<Listed>();
+    let entity = app.world_mut().spawn(Listed { items: vec![Plain { depth: 7 }], fills: vec![] }).id();
+    let (type_path, path) = (c("bevy_csharp::reflected::tests::Listed"), c(".items"));
+    loan_world(app.world_mut(), || {
+        let len = || unsafe { bcs_reflect_list_len(entity.to_bits(), type_path.as_ptr(), path.as_ptr()) };
+        let resize = |to| unsafe { bcs_reflect_list_resize(entity.to_bits(), type_path.as_ptr(), path.as_ptr(), to) };
+        assert_eq!(1, len());
+        assert_eq!(status::OK, resize(3), "{}", last_error());
+        assert_eq!(3, len());
+        assert_eq!(status::OK, resize(2), "{}", last_error());
+        assert_eq!(status::INVALID_STATE, resize(-1));
+    });
+    assert_eq!(vec![Plain { depth: 7 }, Plain { depth: 0 }], app.world().get::<Listed>(entity).unwrap().items);
+}
+
+#[test]
+fn an_enum_whose_every_variant_holds_a_value_defaults_to_its_first() {
+    // A gradient has no default and no variant holding nothing, so a list of them grows by its first
+    // variant made from its values' defaults.
+    let mut app = App::new();
+    app.register_type::<Listed>();
+    let entity = app.world_mut().spawn(Listed::default()).id();
+    let (type_path, path) = (c("bevy_csharp::reflected::tests::Listed"), c(".fills"));
+    loan_world(app.world_mut(), || {
+        let code = unsafe { bcs_reflect_list_resize(entity.to_bits(), type_path.as_ptr(), path.as_ptr(), 1) };
+        assert_eq!(status::OK, code, "{}", last_error());
+    });
+    assert_eq!(vec![Filled::One(0)], app.world().get::<Listed>(entity).unwrap().fills);
+}
+
+#[test]
+fn a_variant_holding_a_list_is_chosen_with_the_list_empty() {
+    // A Vec registers no default, so a variant holding one, as a gradient holds its stops, is made
+    // with it empty.
+    let mut app = App::new();
+    app.register_type::<Listed>();
+    let entity = app.world_mut().spawn(Listed { items: vec![], fills: vec![Filled::One(3)] }).id();
+    let (type_path, path, variant) = (c("bevy_csharp::reflected::tests::Listed"), c(".fills[0]"), c("Many"));
+    loan_world(app.world_mut(), || {
+        let code = unsafe { bcs_reflect_set_variant(entity.to_bits(), type_path.as_ptr(), path.as_ptr(), variant.as_ptr()) };
+        assert_eq!(status::OK, code, "{}", last_error());
+    });
+    assert_eq!(vec![Filled::Many(vec![])], app.world().get::<Listed>(entity).unwrap().fills);
 }

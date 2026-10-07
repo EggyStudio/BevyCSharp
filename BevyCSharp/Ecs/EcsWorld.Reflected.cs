@@ -210,6 +210,28 @@ public sealed unsafe partial class EcsWorld
         return value;
     }
 
+    /// <summary>
+    /// Reads how many items a list inside one of Bevy's components has, or nothing when the
+    /// component is absent.
+    /// </summary>
+    internal int? ReflectedLength(Entity entity, string typePath, string path)
+    {
+        var count = Native.bcs_reflect_list_len(entity.Bits, typePath, path ?? string.Empty);
+        if (count == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(count, $"Counting the items of {Described(typePath, path)} on {entity}");
+        return count;
+    }
+
+    /// <summary>
+    /// Makes a list inside one of Bevy's components a length, taking items off its end or adding
+    /// them at their default for the caller to write over.
+    /// </summary>
+    internal void ResizeReflected(Entity entity, string typePath, string path, int length) =>
+        ReflectedCheck(
+            Native.bcs_reflect_list_resize(entity.Bits, typePath, path ?? string.Empty, length),
+            $"Making {Described(typePath, path)} on {entity} {length} long");
+
     /// <summary>Writes a float inside one of Bevy's components at the width it holds.</summary>
     internal void SetReflectedFloat(Entity entity, string typePath, string path, double value) =>
         ReflectedCheck(

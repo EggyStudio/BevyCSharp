@@ -63,8 +63,11 @@ internal static class ConsoleSchemaCommands
     /// variant's, empty for a variant wrapping one value. One inside a variant of an enum that is
     /// itself inside a variant names the inner enum's row and its variant, as an orthographic
     /// projection's fixed scaling mode holds its width, for the generator to make that enum a record
-    /// of its own inside the outer one. The bridge's own components are left out, being its
-    /// business rather than a game's.
+    /// of its own inside the outer one. A list of values with fields of their own is a line of the
+    /// kind <c>List</c> naming its items' type, which an <c>item</c> line after the components
+    /// describes with its own rows, their paths from the item, as a box shadow's list names its
+    /// shadow style. The bridge's own components are left out, being its business rather than a
+    /// game's.
     /// </remarks>
     internal static List<string> Describe(string description)
     {
@@ -73,44 +76,72 @@ internal static class ConsoleSchemaCommands
             .OrderBy(schema => schema.QualifiedName, StringComparer.Ordinal);
 
         var lines = new List<string>();
+        var items = new SortedDictionary<string, List<ComponentField>?>(StringComparer.Ordinal);
         foreach (var schema in schemas)
         {
             lines.Add($"component\t{schema.QualifiedName}\t{schema.Name}");
+            Rows(lines, schema.QualifiedName, schema.Fields, items);
+        }
 
-            foreach (var field in schema.Fields)
+        // The types lists hold as their items, each described once by its own rows after the
+        // components, and the types the lists inside those hold in turn.
+        while (items.FirstOrDefault(item => item.Value is null).Key is { } next)
+        {
+            var rows = ReflectedSchemas.ItemRows(description, next);
+            items[next] = rows;
+            foreach (var row in rows)
             {
-                if (field.ReflectPath is null) continue;
-
-                var extra = field.Kind switch
-                {
-                    FieldKind.Enum => string.Join(',', field.Options),
-                    FieldKind.Asset => field.Hints.Asset ?? string.Empty,
-                    _ => string.Empty,
-                };
-
-                var conditions = field.Hints.Conditions;
-                if (conditions.Count == 0)
-                {
-                    lines.Add(string.Join('\t',
-                        "field", schema.QualifiedName, field.Name, field.ReflectPath, field.Kind,
-                        field.Type, extra));
-                }
-                else if (conditions.All(shown => shown is { Value: not null, Not: false }) && conditions[^1] is { Value: { } variant } condition)
-                {
-                    // Named by the innermost variant it is under, so a field of a variant of an enum
-                    // inside another variant names that inner enum's row, which the generator finds
-                    // under the outer variant's value.
-                    var prefix = condition.Field.Length == 0 ? variant : condition.Field + "." + variant;
-                    if (!field.Name.StartsWith(prefix, StringComparison.Ordinal)) continue;
-                    var name = field.Name.Length == prefix.Length ? string.Empty : field.Name[(prefix.Length + 1)..];
-
-                    lines.Add(string.Join('\t',
-                        "variant", schema.QualifiedName, condition.Field, variant, name, field.ReflectPath,
-                        field.Kind, field.Type, extra));
-                }
+                if (row.ItemType is { } inner) items.TryAdd(inner, null);
             }
         }
 
+        foreach (var (item, rows) in items)
+        {
+            var cut = item.Split('<')[0].LastIndexOf("::", StringComparison.Ordinal);
+            lines.Add($"item\t{item}\t{(cut < 0 ? item : item[(cut + 2)..])}");
+            Rows(lines, item, rows!, items);
+        }
+
         return lines;
+    }
+
+    /// <summary>
+    /// The lines of one component's rows, or one item type's, and the item types the lists among
+    /// them hold, added to <paramref name="items"/> for describing.
+    /// </summary>
+    private static void Rows(List<string> lines, string scope, IEnumerable<ComponentField> fields, IDictionary<string, List<ComponentField>?> items)
+    {
+        foreach (var field in fields)
+        {
+            if (field.ReflectPath is null) continue;
+
+            // A list of records is written as one, its items' type in place of the options, and the
+            // type described where it has a name, a tuple having no fields a record could name.
+            if (field.ItemType is { } listed && !listed.StartsWith('(')) items.TryAdd(listed, null);
+            var kind = field.ItemType is null ? field.Kind.ToString() : "List";
+            var extra = field.ItemType ?? field.Kind switch
+            {
+                FieldKind.Enum => string.Join(',', field.Options),
+                FieldKind.Asset => field.Hints.Asset ?? string.Empty,
+                _ => string.Empty,
+            };
+
+            var conditions = field.Hints.Conditions;
+            if (conditions.Count == 0)
+            {
+                lines.Add(string.Join('\t', "field", scope, field.Name, field.ReflectPath, kind, field.Type, extra));
+            }
+            else if (conditions.All(shown => shown is { Value: not null, Not: false }) && conditions[^1] is { Value: { } variant } condition)
+            {
+                // Named by the innermost variant it is under, so a field of a variant of an enum
+                // inside another variant names that inner enum's row, which the generator finds
+                // under the outer variant's value.
+                var prefix = condition.Field.Length == 0 ? variant : condition.Field + "." + variant;
+                if (!field.Name.StartsWith(prefix, StringComparison.Ordinal)) continue;
+                var name = field.Name.Length == prefix.Length ? string.Empty : field.Name[(prefix.Length + 1)..];
+
+                lines.Add(string.Join('\t', "variant", scope, condition.Field, variant, name, field.ReflectPath, kind, field.Type, extra));
+            }
+        }
     }
 }

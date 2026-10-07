@@ -1,8 +1,8 @@
 // Bevy's many_gradients example, examples/stress_tests/many_gradients.rs at v0.19.1, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
-using System.Text.Json.Nodes;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.StressTests;
 
@@ -12,12 +12,11 @@ namespace BevyCSharp.Examples.StressTests;
 internal static class ManyGradients
 {
     private const int Cols = 30;
-    internal const string Background = "bevy_ui::gradients::BackgroundGradient";
 
     // Bevy's Args, read from the command line.
     private static int _gradientCount;
     internal static bool Animate;
-    internal static string ColorSpace = "Oklaba";
+    internal static InterpolationColorSpace ColorSpace = InterpolationColorSpace.Oklaba;
 
     // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
     // sync, drawn as fast as it can, and its frame times logged once a second by Bevy's plugins.
@@ -35,10 +34,10 @@ internal static class ManyGradients
         var count = Array.IndexOf(arguments, "--gradient-count");
         _gradientCount = count >= 0 && count + 1 < arguments.Length && int.TryParse(arguments[count + 1], out var given) ? given : 900;
         Animate = arguments.Contains("--animate");
-        ColorSpace = arguments.Contains("--srgb") ? "Srgba" : arguments.Contains("--hsl") ? "Hsla" : "Oklaba";
+        ColorSpace = arguments.Contains("--srgb") ? InterpolationColorSpace.Srgba : arguments.Contains("--hsl") ? InterpolationColorSpace.Hsla : InterpolationColorSpace.Oklaba;
 
         Console.WriteLine($"Gradient stress test with {_gradientCount} gradients");
-        Console.WriteLine($"Color space: {(ColorSpace == "Srgba" ? "sRGB" : ColorSpace == "Hsla" ? "HSL" : "OkLab (default)")}");
+        Console.WriteLine($"Color space: {(ColorSpace == InterpolationColorSpace.Srgba ? "sRGB" : ColorSpace == InterpolationColorSpace.Hsla ? "HSL" : "OkLab (default)")}");
 
         app.Startup(Setup, "many_gradients.Setup");
     }
@@ -65,30 +64,15 @@ internal static class ManyGradients
             // In degrees, as Bevy's example gives the angle, where the gradient reads radians.
             var angle = i * 10f % 360f;
             var node = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f) });
-            ecs.InsertReflected(node, Background, Linear(angle, colors, points).ToJsonString());
+            ecs.Insert<BackgroundGradientRef>(node).Value = [Linear(angle, colors, points)];
             ecs.Add(node, new GradientNode { Index = i, Angle = angle });
             ecs.SetParent(node, grid);
         }
     }
 
     // One linear gradient, its stops each given a point along it.
-    internal static JsonArray Linear(float angle, Color[] colors, float[] points) =>
-    [
-        new JsonObject
-        {
-            ["Linear"] = new JsonObject
-            {
-                ["color_space"] = ColorSpace,
-                ["angle"] = angle,
-                ["stops"] = new JsonArray([.. colors.Select((color, i) => (JsonNode)new JsonObject
-                {
-                    ["color"] = new JsonObject { ["LinearRgba"] = new JsonObject { ["red"] = color.R, ["green"] = color.G, ["blue"] = color.B, ["alpha"] = color.A } },
-                    ["point"] = new JsonObject { ["Percent"] = points[i] },
-                    ["hint"] = 0.5f,
-                })]),
-            },
-        },
-    ];
+    internal static Gradient Linear(float angle, Color[] colors, float[] points) =>
+        new Gradient.Linear(ColorSpace, angle, [.. colors.Select((color, i) => new ColorStop(color, new Val.Percent(points[i]), 0.5f))]);
 }
 
 /// <summary>A node of the grid, which knows its place in it to move its colors by.</summary>
@@ -115,6 +99,6 @@ public partial struct GradientNode
 
         var hueShift = MathF.Sin(ctx.Time.Elapsed + Index * 0.01f) * 0.5f + 0.5f;
         var colors = Shifts.Select(shift => Color.FromHsl((hueShift + shift) * 360f % 360f, 1f, 0.5f)).ToArray();
-        ctx.Ecs.SetReflected(ctx.Entity, ManyGradients.Background, string.Empty, ManyGradients.Linear(Angle, colors, Points).ToJsonString());
+        ctx.Ecs.Wrap<BackgroundGradientRef>(ctx.Entity).Value = [ManyGradients.Linear(Angle, colors, Points)];
     }
 }

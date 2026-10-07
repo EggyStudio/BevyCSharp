@@ -174,6 +174,66 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// A list of records inside a component, as a node's box shadows and its gradients are, is
+    /// written whole, growing and shrinking to what it is given, and read back as it was given, a
+    /// list inside a variant of an item too.
+    /// </summary>
+    [SkippableFact]
+    public void ListsOfRecordsAreWrittenAndReadWhole()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        IReadOnlyList<ShadowStyle>? two = null, one = null;
+        IReadOnlyList<Gradient>? gradients = null;
+
+        ShadowStyle[] shadows =
+        [
+            new(Color.Black, new Val.Px(4f), new Val.Px(6f), new Val.Percent(10f), new Val.Px(8f)),
+            new(Color.White, new Val.Auto(), new Val.Vw(1f), new Val.Px(0f), new Val.Px(2f)),
+        ];
+        ColorStop[] stops = [new(Color.Black, new Val.Percent(0f), 0.5f), new(Color.White, new Val.Percent(100f), 0.25f)];
+        AngularColorStop[] angles = [new(Color.Black, null, 0.5f), new(Color.White, 3f, 0.5f)];
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var node = ctx.Ecs.Spawn();
+            var shadow = ctx.Ecs.Insert<BoxShadowRef>(node);
+            shadow.Value = shadows;
+            two = shadow.Value;
+            shadow.Value = [shadows[1]];
+            one = shadow.Value;
+
+            var background = ctx.Ecs.Insert<BackgroundGradientRef>(node);
+            background.Value =
+            [
+                new Gradient.Linear(InterpolationColorSpace.Oklaba, 0.5f, stops),
+                new Gradient.Radial(InterpolationColorSpace.Srgba, new Vec2(0.5f, 0.25f), new Val.Percent(50f), new Val.Px(3f), new RadialGradientShape.Ellipse(new Val.Px(10f), new Val.Px(20f)), [stops[1]]),
+                new Gradient.Conic(InterpolationColorSpace.Hsla, 0.25f, Vec2.Zero, new Val.Px(1f), new Val.Px(2f), angles),
+            ];
+            gradients = background.Value;
+        });
+
+        harness.Run();
+
+        Assert.Equal(shadows, two);
+        Assert.Equal([shadows[1]], one);
+
+        Assert.NotNull(gradients);
+        Assert.Equal(3, gradients.Count);
+        var linear = Assert.IsType<Gradient.Linear>(gradients[0]);
+        Assert.Equal((InterpolationColorSpace.Oklaba, 0.5f), (linear.ColorSpace, linear.Angle));
+        Assert.Equal(stops, linear.Stops);
+        var radial = Assert.IsType<Gradient.Radial>(gradients[1]);
+        Assert.Equal(new RadialGradientShape.Ellipse(new Val.Px(10f), new Val.Px(20f)), radial.Shape);
+        Assert.Equal((new Vec2(0.5f, 0.25f), (Val)new Val.Percent(50f), (Val)new Val.Px(3f)), (radial.PositionAnchor, radial.PositionX, radial.PositionY));
+        Assert.Equal([stops[1]], radial.Stops);
+        var conic = Assert.IsType<Gradient.Conic>(gradients[2]);
+        Assert.Equal((InterpolationColorSpace.Hsla, 0.25f), (conic.ColorSpace, conic.Start));
+        Assert.Equal(angles, conic.Stops);
+    }
+
+    /// <summary>
     /// An enum whose variants hold values is a record a variant, written whole and read back as the
     /// variant and the values it was given.
     /// </summary>
