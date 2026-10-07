@@ -127,6 +127,29 @@ A pair counts as separated once it has gone a few steps without touching, so a b
 another, which hops clear of it by a millimeter as it lands, is not reported as leaving and landing
 again.
 
+A body is on one of 32 layers, layer 0 to begin with, and which layers collide with which is a table
+the game sets, every one with every other to begin with. Bodies on layers that do not collide pass
+through each other and report nothing, a sensor included, so a trigger on a layer only the player's
+collides with reports the player alone, and the player's shots pass through the player:
+
+```csharp
+physics.SetLayersCollide(Player, Shots, false);
+physics.SetLayer(bullet, Shots);                 // or RigidBody.Layer, for a body made from components
+if (physics.Raycast(muzzle, aim, 100f, from: gun) is { } hit) Damage(hit.Entity);
+```
+
+A character stands only on what its layer collides with, and a ray cast from a body passes through
+that body and sees what its layer collides with, where a ray from nowhere sees every layer. A pair
+asleep is tested again once either changes, so a crate resting on a floor falls through once the
+floor's layer stops colliding with its own.
+
+A body meets what is within a tenth of a unit of it as a step starts, so one fast enough crosses a
+thin wall within a step, a ball of 40 units a second through a wall a fifth of a unit thick. One a
+game knows is fast is swept over each step instead, `physics.SetContinuous(ball, true)` or
+`RigidBody.Continuous`, at the cost of a sweep for each pair it nears. A contact still stops it over a
+step rather than at once, so a wall has to be a fifth of a unit thick at 100 units a second and half a
+unit at 300, and a shot faster than that is a ray cast each frame rather than a body.
+
 A contact that starts says where and how hard the two met. `Point` is their deepest contact in the
 world, `Normal` the way `A` is pushed, and `Speed` how fast they closed along it, for a sound as loud
 as the hit or the damage it does. The speed is read as the two approach as well as as they touch,

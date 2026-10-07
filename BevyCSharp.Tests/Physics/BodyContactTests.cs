@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>Covers where and how hard two bodies meet, carried on the contact's message.</summary>
+/// <summary>Covers where and how hard two bodies meet, carried on the contact's message, and a fast body swept so it meets a thin wall.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
 /// gathering the contacts each step sends, as 3DEngine's own test of the speed a pair closed at does
@@ -59,6 +59,31 @@ public sealed class BodyContactTests
         Assert.Equal(6f, Assert.Single(thrown).Speed, 1);
     }
 
+    /// <summary>A ball at 40 units a second crosses a wall a fifth of a unit thick within a step, and one swept over each step meets it.</summary>
+    [Fact]
+    public void AFastBallCrossesAThinWallUnlessItIsSwept()
+    {
+        var (plainZ, sweptZ, sweeping) = (0f, 0f, false);
+
+        InAWorld(new PhysicsSettings { Gravity = Vec3.Zero, LinearDamping = 0f, AngularDamping = 0f }, (ecs, physics) =>
+        {
+            Body(ecs, physics, new Vec3(0f, 0f, -5f), PhysicsShape.Box(new Vec3(20f, 20f, 0.2f)), BodyKind.Static);
+            var plain = Body(ecs, physics, new Vec3(-2f, 0f, 0f), PhysicsShape.Sphere(0.05f), BodyKind.Dynamic, mass: 0.01f);
+            var swept = Body(ecs, physics, new Vec3(2f, 0f, 0f), PhysicsShape.Sphere(0.05f), BodyKind.Dynamic, mass: 0.01f);
+            physics.SetContinuous(swept, true);
+            sweeping = physics.IsContinuous(swept);
+            physics.SetVelocity(plain, new Vec3(0f, 0f, -40f));
+            physics.SetVelocity(swept, new Vec3(0f, 0f, -40f));
+
+            Steps(ecs, physics, 30);
+            (plainZ, sweptZ) = (ecs.GetOrDefault<Transform>(plain).Translation.Z, ecs.GetOrDefault<Transform>(swept).Translation.Z);
+        });
+
+        Assert.True(sweeping);
+        Assert.True(plainZ < -8f, $"the plain ball stopped at {plainZ}, where at 40 units a second it crosses the wall within a step");
+        Assert.True(sweptZ > -5f, $"the swept ball reached {sweptZ}, through the wall");
+    }
+
     private static List<ContactStarted> Steps(EcsWorld ecs, PhysicsWorld physics, int count)
     {
         var bus = new MessageBus();
@@ -73,12 +98,12 @@ public sealed class BodyContactTests
         return started;
     }
 
-    private static Entity Body(EcsWorld ecs, PhysicsWorld physics, Vec3 at, PhysicsShape shape, BodyKind kind)
+    private static Entity Body(EcsWorld ecs, PhysicsWorld physics, Vec3 at, PhysicsShape shape, BodyKind kind, float mass = 1f)
     {
         var entity = ecs.Spawn();
         var transform = Transform.At(at.X, at.Y, at.Z);
         ecs.Add(entity, transform);
-        physics.Add(entity, shape, kind, transform);
+        physics.Add(entity, shape, kind, transform, mass);
         return entity;
     }
 

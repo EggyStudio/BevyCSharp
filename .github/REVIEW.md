@@ -10,12 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `aab71d0`. A game gives a component Bevy's add, insert, discard and remove hooks,
-which reach the managed side while Bevy holds the world, so no second world is made beside Bevy's
-while a hook runs, the generator's remove hook covered with it, and `component_hooks` is written
-(ABI 225, `aab71d0`). `delayed_commands` follows, and then item 4, the bodies from 3DEngine, the
-single rows left each needing more than a batch and texture_atlas first among them after. The suite:
-1,152 passed, 9 skipped.
+Reviewed up to `5f836cb`. Commands can be queued to land after a delay as Bevy's delayed commands
+do, and `delayed_commands` is written, an offscreen run having no empty space to click (`7f92ed0`);
+the six physics component types moved into files of their names, N 1.2's list at 211 (`20268b8`);
+and the first of item 4's batches from 3DEngine's `c5227118`: a contact carries where and how hard
+its pair met, a ball joint can be kept within a cone, and a distance joint's range changes while it
+stands (`5f836cb`). The suite: 1,152 passed, 9 skipped.
+
+Before them, a game came to give a component Bevy's add, insert, discard and remove hooks, which
+reach the managed side while Bevy holds the world, so no second world is made beside Bevy's while a
+hook runs, the generator's remove hook covered with it, and `component_hooks` is written (ABI 225,
+`aab71d0`). `delayed_commands` follows, and then item 4, the bodies from 3DEngine, the single rows
+left each needing more than a batch and texture_atlas first among them after. The suite: 1,152
+passed, 9 skipped.
 
 Before them, C# came to write into Bevy's log at its five levels under the target `csharp`, once a
 line of code where asked, a run ends with a failure code through `App.RequestExit` and `ctx.Exit`, a
@@ -24,12 +31,6 @@ playing sound's speed and mute are bridged with a way to ask whether its sink ha
 `audio_control` and `window_fallthrough` are written, 290, the second having been reachable all
 along under a stale row (ABI 224, `1b8b282`); the audio settings moved into files of their names,
 N 1.2's list at 217 (`f35d03a`). The suite: 1,152 passed, 9 skipped.
-
-Before them, a tilemap chunk came to be made with its tiles and has them written and read from C#,
-images loaded as arrays of layers serving as before, a headless run refusing a chunk where Bevy's
-hook panicked, and both tilemap chunk examples are written, 287 (ABI 222, `6bdfd85`). The camera
-controllers wait on the owner's word on `bevy_camera_controller`, as Feathers' three do on
-`bevy_feathers`. The suite: 1,148 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -201,25 +202,17 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, `delayed_commands`.** `EcsCommands.Delayed(seconds)` is a queue of its own whose commands
-land once that long has passed after the frame's queue is applied, as Bevy's `commands.delayed()`
-does, counted by the app's clock, a delay of nothing landing the next frame and a delay a landed
-queue makes kept after it. `delayed_commands` is written, 292, its squares in behaviors as B 4 has
-it. A click there lands on the window entity, since Bevy picks a sprite only where it carries
-`Pickable`, so an offscreen run, which has no window entity, clicks nothing, and the ripple was
-checked by calling its handler from a system. `DelayedCommandTests` holds the order the queues land
-in by frame. The suite passed, 1,156 with 9 skipped. Item 4 is next, as agreed.
+**Now 4, 3DEngine's `8520dbe1` and `799a9d56`.** A body is on one of 32 collision layers,
+`PhysicsWorld.SetLayer` or `RigidBody.Layer`, and `SetLayersCollide` says which pairs of layers
+collide, every one with every other to begin with. Bodies on layers that do not collide make no
+contacts, so a sensor reports only the layers it collides with, a character stands only on what its
+layer collides with, and a ray cast from a body, the new `Raycast(..., from)`, passes through that
+body and sees what its layer collides with. A body whose layer changes is woken, a static wakes what
+sleeps in its bounds, and a change between two layers wakes the bodies on them, as 3DEngine wakes
+them. A body a game knows is fast is swept over each step, `SetContinuous` or
+`RigidBody.Continuous`, so a ball at 40 units a second meets a wall a fifth of a unit thick that an
+unswept one crosses. `LayerTests` and `BodyContactTests` hold 3DEngine's cases with a crate asleep on
+a floor that falls once the floor's layer stops colliding with its own. The suite passed, 1,164 with
+9 skipped. The slider is next.
 
-**Now 4, the first of 3DEngine's `c5227118`.** A contact that starts carries where and how hard its
-pair met, `ContactStarted.Point`, `Normal` and `Speed`, the speed read from the bodies' velocities
-at the deepest contact as they approach as well as as they touch, since the solver slows a pair in
-the step before it touches, as 3DEngine reads it. A ball joint can be kept within a cone,
-`Joint.Ball(...).WithCone(axis, swing, twist)`, measured from how the bodies are turned when joined
-as a hinge's limits are, and a distance joint's range changes while it holds,
-`PhysicsWorld.SetDistance`. The six physics component types moved into files of their names first,
-N 1.2's list at 211 (`20268b8`). `BodyContactTests` and `JointTests` hold 3DEngine's cases, the
-thrown pair undamped, since this world damps by 0.03 a second where 3DEngine's test world does
-not. The suite passed, 1,159 with 9 skipped. Collision layers are next.
-
-Shared: a contact's point, normal and closing speed, a ball joint's cone and a distance joint's
-range, taken from 3DEngine's `c5227118`.
+Shared: collision layers and the sweep of a fast body, from 3DEngine's `8520dbe1` and `799a9d56`.

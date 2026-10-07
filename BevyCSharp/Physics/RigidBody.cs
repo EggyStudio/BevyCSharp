@@ -32,6 +32,21 @@ public partial struct RigidBody
     [Tooltip("Reports what touches it in ContactStarted and ContactEnded, and stops nothing.")]
     public bool Sensor;
 
+    /// <summary>
+    /// Which of the 32 layers its body is on, 0 unless set, which decides what it collides with, as
+    /// <see cref="PhysicsWorld.SetLayersCollide"/> says.
+    /// </summary>
+    [Range(0, 31), Tooltip("Bodies on layers that do not collide pass through each other and report nothing.")]
+    public int Layer;
+
+    /// <summary>
+    /// Whether a dynamic body is swept over each step, as a ball struck hard is, so it meets a thin
+    /// wall it would otherwise cross within a step. <see cref="PhysicsWorld.SetContinuous"/> says what
+    /// it costs and how fast it holds.
+    /// </summary>
+    [Tooltip("Sweeps a fast body over each step, so it does not cross a thin wall within one."), ShowIf(nameof(Kind), BodyKind.Dynamic)]
+    public bool Continuous;
+
     /// <summary>How much it grips what it slides on, or zero for the settings' own.</summary>
     [Range(0, 2), Foldout("Surface", Open = false)]
     public float Friction;

@@ -217,11 +217,12 @@ public sealed partial class PhysicsWorld
 
     /// <summary>
     /// The nearest solid thing a ray meets, other than the body <paramref name="self"/> names,
-    /// passing through sensors, which a character neither stands on nor walks into.
+    /// passing through sensors and what its layer does not collide with, which a character neither
+    /// stands on nor walks into.
     /// </summary>
     private bool Cast(Vector3 origin, Vector3 direction, float distance, uint self, out NearestHit hit)
     {
-        hit = new NearestHit { T = float.MaxValue, Skipping = true, Skip = self, Sensors = _contacts.Sensors };
+        hit = new NearestHit { T = float.MaxValue, Skipping = true, Skip = self, Sensors = _contacts.Sensors, Layers = _contacts.Layers, From = _contacts.Layers.Of(self) };
         _simulation.RayCast(origin, direction, distance, _pool, ref hit);
         if (hit.T == float.MaxValue) return false;
 

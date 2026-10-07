@@ -33,6 +33,9 @@ internal sealed class ContactLog
 
     public readonly HashSet<uint> Sensors = [];
 
+    /// <summary>Each collidable's layer, and which layers collide with which.</summary>
+    public readonly CollisionLayers Layers = new();
+
     /// <summary>
     /// The pairs of collidables held by a joint, by how many joints hold each, which do not collide
     /// with each other.
@@ -98,8 +101,10 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
     public readonly bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin) =>
         // Two things that cannot move have nothing to say to each other, and two a joint holds
         // are held as the joint says, which a hinge's pin passing through its wheel would fight.
+        // Bodies on layers that do not collide pass through each other and report nothing.
         (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic)
-        && (Log.Joined.Count == 0 || !Log.Joined.ContainsKey(ContactLog.Pair(a.Packed, b.Packed)));
+        && (Log.Joined.Count == 0 || !Log.Joined.ContainsKey(ContactLog.Pair(a.Packed, b.Packed)))
+        && Log.Layers.Collide(a.Packed, b.Packed);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

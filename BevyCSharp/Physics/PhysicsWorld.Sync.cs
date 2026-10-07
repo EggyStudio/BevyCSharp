@@ -155,6 +155,8 @@ public sealed partial class PhysicsWorld
             : (PhysicsMaterial?)null;
 
         Add(entity, fit.Shape, body.Kind, at, body.Mass > 0f ? body.Mass : 1f, body.Sensor, material);
+        if (body.Layer is > 0 and < CollisionLayers.Count) SetLayer(entity, body.Layer);
+        if (body.Continuous) SetContinuous(entity, true);
         if (character) MakeCharacter(entity, fit, at);
         if (moving is { } velocity) SetVelocity(entity, velocity.Linear, character ? default : velocity.Angular);
         _fromComponents[entity] = made;

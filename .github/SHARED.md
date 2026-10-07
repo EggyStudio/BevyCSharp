@@ -93,8 +93,8 @@ table also answers whether the two agree.
 | A ray passes through a trigger, so a sensor never holds up a wheel or a character's ground check | to check | has (`b5eb3642`) |
 | A raycast vehicle made by one call beside the character controller, tuned by one record | to consider | has (`CreatePhysicsVehicle`, `ee641437`) |
 | The physics step on several workers past a count of awake bodies, repeating to the bit on every machine | to check | has (`319832dc`) |
-| A contact says how hard its pair hit, as the speed they closed at | to take | has (`ContactStarted.Speed`, `c5227118`) |
-| A ball joint kept within a cone it swings and twists in, and a distance joint whose range changes after it is made | to take | has (`c5227118`) |
+| A contact says how hard its pair hit, as the speed they closed at | taken at `5f836cb`, with the point and the normal | has (`ContactStarted.Speed`, `c5227118`) |
+| A ball joint kept within a cone it swings and twists in, and a distance joint whose range changes after it is made | taken at `5f836cb` | has (`c5227118`) |
 | The sync reads only bodies that changed and writes only bodies that moved | has (`ba5cff4`) | has (`e612ac63` and after) |
 | What rests on a kinematic body that a transform moves keeps the mover's pace at any frame rate, the body moving at the mover's speed through every step and not a frame's distance in one | taken at `05bc3b4`, a crate at 2.00 within 0.02 at seven frame rates and uneven frames, carried round by a turned platform, `MarkPlaced` and `PlaceBeyond` for a jump | taken at `15fa305a`, a crate at 2.00 within a hundredth at seven frame rates and uneven frames, a parent's placing said with `MarkPlaced` or past a set distance (`7ae91e7c`) |
 | A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | taken at `ee3b47dd`, the frame's clamp of a quarter second the one kept |

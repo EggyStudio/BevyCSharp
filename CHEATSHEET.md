@@ -1284,6 +1284,13 @@ void SetVelocity(Entity entity, Vec3 linear, Vec3 angular = default);  // Sets a
 void ApplyImpulse(Entity entity, Vec3 impulse, Vec3 offset = default);  // Pushes a dynamic body with an impulse, a change in momentum, at a point offset from its center, which turns it as well where the point is off center
 bool IsAsleep(Entity entity);                                   // Whether a dynamic body has come to rest and stopped being simulated
 PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance);  // The nearest body a ray meets within distance, or null for none
+PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance, Entity from);  // The nearest body a ray cast from from's body meets within distance, passing through that body and what its layer does not collide with, or null for none
+void SetLayer(Entity entity, int layer);                        // Puts an entity's body on one of 32 layers, 0 to 31, which decides what it collides with, as SetLayersCollide says
+int LayerOf(Entity entity);                                     // The layer an entity's body is on
+void SetLayersCollide(int a, int b, bool collide);              // Whether bodies on layer a collide with bodies on layer b, both ways, as the player's shots pass through the player and the enemies through each other
+bool LayersCollide(int a, int b);                               // Whether bodies on two layers collide
+void SetContinuous(Entity entity, bool continuous);            // Sweeps an entity's body over each step to find what it would meet within it, for a body fast enough to cross a thin wall in one step, as a shot or a ball struck hard is, or stops sweeping it
+bool IsContinuous(Entity entity);                               // Whether an entity's body is swept over each step
 void Step(EcsWorld ecs, float seconds, MessageBus messages = null);  // Advances the simulation by seconds: kinematic bodies follow their entities, everything is stepped, and dynamic bodies are written back
 void Dispose();                                                 // Tears the simulation down, returning its memory
 JointHandle Connect(Entity a, Entity b, Joint joint);           // Joins two bodies with a joint, which holds from the next step on

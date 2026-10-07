@@ -235,6 +235,9 @@ public sealed partial class PhysicsWorld : IDisposable
 
         _bodies.Remove(entity, out var body);
         _contacts.Materials.Remove(Packed(body));
+
+        // Bepu gives the collidable out again, and the next body to have it is on layer 0 unless set.
+        _contacts.Layers.Set(Packed(body), 0);
         _characters.Remove(entity);
 
         if (body.Kind == BodyKind.Static)
@@ -297,7 +300,26 @@ public sealed partial class PhysicsWorld : IDisposable
     /// <param name="origin">Where the ray starts.</param>
     /// <param name="direction">Which way it goes. Need not be of length one.</param>
     /// <param name="distance">How far it looks, in world units.</param>
-    public PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance)
+    public PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance) => Cast(origin, direction, distance, null);
+
+    /// <summary>
+    /// The nearest body a ray cast from <paramref name="from"/>'s body meets within
+    /// <paramref name="distance"/>, passing through that body and what its layer does not collide
+    /// with, or null for none.
+    /// </summary>
+    /// <remarks>
+    /// For a ray a body casts, a shot from a gun or a look from a character's eyes, which starts
+    /// inside the body and would meet it first, and which sees what that body would hit, so the
+    /// player's shots on a layer that passes through the player pass through the player here too.
+    /// </remarks>
+    /// <param name="origin">Where the ray starts.</param>
+    /// <param name="direction">Which way it goes. Need not be of length one.</param>
+    /// <param name="distance">How far it looks, in world units.</param>
+    /// <param name="from">The entity whose body casts it.</param>
+    /// <exception cref="KeyNotFoundException">The entity has no body.</exception>
+    public PhysicsHit? Raycast(Vec3 origin, Vec3 direction, float distance, Entity from) => Cast(origin, direction, distance, Packed(_bodies[from]));
+
+    private PhysicsHit? Cast(Vec3 origin, Vec3 direction, float distance, uint? from)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -305,7 +327,8 @@ public sealed partial class PhysicsWorld : IDisposable
         var length = along.Length();
         if (length <= 0f) return null;
 
-        var handler = new NearestHit { T = float.MaxValue };
+        var handler = new NearestHit { T = float.MaxValue, Layers = _contacts.Layers, From = -1 };
+        if (from is { } skip) (handler.Skipping, handler.Skip, handler.From) = (true, skip, _contacts.Layers.Of(skip));
         _simulation.RayCast(ToBepu(origin), along / length, distance, _pool, ref handler);
 
         if (handler.T == float.MaxValue) return null;
@@ -571,7 +594,10 @@ public sealed partial class PhysicsWorld : IDisposable
     }
 
     /// <summary>How a moving body collides, with contacts generated up to a tenth of a unit ahead.</summary>
-    private static CollidableDescription Collidable(TypedIndex shape) => new(shape, 0.1f);
+    /// <summary>How far from a body, in units, contacts are made ahead of its meeting what it nears, unless it is swept (<see cref="SetContinuous"/>).</summary>
+    private const float SpeculativeMargin = 0.1f;
+
+    private static CollidableDescription Collidable(TypedIndex shape) => new(shape, SpeculativeMargin);
 
     private (TypedIndex Index, BodyInertia Inertia, Vector3 Center) AddShape(PhysicsShape shape, float mass)
     {
@@ -650,8 +676,16 @@ public sealed partial class PhysicsWorld : IDisposable
         /// <summary>The sensors, which the ray passes through where given.</summary>
         public HashSet<uint>? Sensors;
 
+        /// <summary>
+        /// The layer the ray is cast from, whose layer table says what it passes through, or below
+        /// zero for a ray that sees every layer.
+        /// </summary>
+        public int From;
+        public CollisionLayers? Layers;
+
         public readonly bool AllowTest(CollidableReference collidable) =>
-            !(Skipping && collidable.Packed == Skip) && (Sensors is null || !Sensors.Contains(collidable.Packed));
+            !(Skipping && collidable.Packed == Skip) && (Sensors is null || !Sensors.Contains(collidable.Packed))
+            && (From < 0 || Layers is null || Layers.Collide(From, Layers.Of(collidable.Packed)));
 
         public readonly bool AllowTest(CollidableReference collidable, int childIndex) => true;
 
