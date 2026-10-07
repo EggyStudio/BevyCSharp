@@ -1291,11 +1291,14 @@ void SetLayersCollide(int a, int b, bool collide);              // Whether bodie
 bool LayersCollide(int a, int b);                               // Whether bodies on two layers collide
 void SetContinuous(Entity entity, bool continuous);            // Sweeps an entity's body over each step to find what it would meet within it, for a body fast enough to cross a thin wall in one step, as a shot or a ball struck hard is, or stops sweeping it
 bool IsContinuous(Entity entity);                               // Whether an entity's body is swept over each step
+float ContactImpulse(Entity a, Entity b);                       // The push the last step gave two touching bodies along the normals of their contacts, in mass times units a second, or zero for a pair not touching
 void Step(EcsWorld ecs, float seconds, MessageBus messages = null);  // Advances the simulation by seconds: kinematic bodies follow their entities, everything is stepped, and dynamic bodies are written back
 void Dispose();                                                 // Tears the simulation down, returning its memory
 JointHandle Connect(Entity a, Entity b, Joint joint);           // Joins two bodies with a joint, which holds from the next step on
 bool SetMotor(JointHandle joint, float degreesPerSecond, float torque);  // Changes a hinge's motor while it runs, to open a door on command or stop a fan
 bool SetDistance(JointHandle joint, float minimum, float maximum);  // Changes how far apart a distance joint keeps its points, as a winch reeling a rope in does when it is set a little shorter each frame
+bool SetDrive(JointHandle joint, float unitsPerSecond, float force);  // Changes a slider's drive while it runs, to send a lift up or hold it where it is
+float? SliderPosition(JointHandle joint);                        // How far a slider's second body is along its axis from where it was joined, or null for a joint that is no slider
 bool Disconnect(JointHandle joint);                             // Takes a joint away, leaving both bodies free
 void MarkPlaced(Entity entity);                                 // Says that entity was put where it is rather than moved there, as when a level starts again, so its kinematic body is put at the new place, at rest, and not carried there through whatever is between
 void Sync(EcsWorld ecs);                                        // Makes, remakes and takes away the bodies of entities carrying a RigidBody and a Collider, so the simulation holds what the world says
@@ -1328,9 +1331,12 @@ static Joint Ball(Vec3 anchorA, Vec3 anchorB);                  // A point on on
 static Joint Hinge(Vec3 anchorA, Vec3 axisA, Vec3 anchorB, Vec3 axisB);  // The same, and turning only about one axis: a door, a wheel, an elbow
 static Joint Weld();                                            // The two held exactly as they are to each other when joined, as though glued: a sword in a hand, a part bolted onto a vehicle
 static Joint Distance(Vec3 anchorA, Vec3 anchorB, float minimum, float maximum);  // A point on each kept between minimum and maximum apart, a rope where the minimum is zero and a rod where the two are equal
+static Joint Slider(Vec3 axisA);                                // The second body sliding along an axis against the first, neither turning against the other, starting as they are placed, as a drawer, a sliding door or a lift on its frame does
 Joint WithMotor(float degreesPerSecond, float torque);          // A hinge that turns itself, a fan or a wheel driven at a speed, pushing with no more than a torque
 Joint WithLimits(float lowestDegrees, float highestDegrees);    // A hinge that stops at an angle each way, a door that opens to ninety degrees and no further
 Joint WithCone(Vec3 axisA, float swingDegrees, float twistDegrees);  // A ball joint kept within a cone, the second body swung no further than swingDegrees from the first's axisA and twisted about it no further than twistDegrees either way, as a shoulder or a link of a chain
+Joint WithTravel(float minimum, float maximum);                 // A slider that stops between minimum and maximum units along its axis from where it was joined, a drawer that stops out and in
+Joint WithDrive(float unitsPerSecond, float force);             // A slider that drives itself at unitsPerSecond along its axis, toward the axis's tip for a positive speed, pushing with no more than force, as a lift's winch does
 ```
 
 ### `Physics.Colliders`

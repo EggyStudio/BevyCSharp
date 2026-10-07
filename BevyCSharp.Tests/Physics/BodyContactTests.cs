@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>Covers where and how hard two bodies meet, carried on the contact's message, and a fast body swept so it meets a thin wall.</summary>
+/// <summary>Covers where and how hard two bodies meet, carried on the contact's message, how hard two touching bodies press, the push alone, and a fast body swept so it meets a thin wall.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
 /// gathering the contacts each step sends, as 3DEngine's own test of the speed a pair closed at does
@@ -82,6 +82,71 @@ public sealed class BodyContactTests
         Assert.True(sweeping);
         Assert.True(plainZ < -8f, $"the plain ball stopped at {plainZ}, where at 40 units a second it crosses the wall within a step");
         Assert.True(sweptZ > -5f, $"the swept ball reached {sweptZ}, through the wall");
+    }
+
+    /// <summary>
+    /// A box at rest presses its floor by its weight times the step, either way round, ten times the
+    /// mass ten times the push, answered still once asleep, and a pair not touching presses by nothing.
+    /// </summary>
+    [Fact]
+    public void ARestingBoxPressesItsFloorByItsWeightTimesTheStep()
+    {
+        var (asleep, light, heavy, apart, away) = (false, 0f, 0f, 1f, 1f);
+
+        InAWorld(new PhysicsSettings(), (ecs, physics) =>
+        {
+            var floor = Body(ecs, physics, new Vec3(0f, -0.5f, 0f), PhysicsShape.Box(new Vec3(40f, 1f, 40f)), BodyKind.Static);
+            var small = Body(ecs, physics, new Vec3(-3f, 0.5f, 0f), PhysicsShape.Box(Vec3.One), BodyKind.Dynamic, mass: 1f);
+            var large = Body(ecs, physics, new Vec3(3f, 0.5f, 0f), PhysicsShape.Box(Vec3.One), BodyKind.Dynamic, mass: 10f);
+            var falling = Body(ecs, physics, new Vec3(0f, 5f, 30f), PhysicsShape.Box(Vec3.One), BodyKind.Dynamic);
+
+            // Asked about every step while they settle and fall asleep, as a pressure plate is, so
+            // each pair goes on being answered with what it pressed as it slept.
+            for (var i = 0; i < 128; i++)
+            {
+                physics.Step(ecs, StepSeconds);
+                physics.ContactImpulse(small, floor);
+                physics.ContactImpulse(floor, large);
+            }
+
+            asleep = physics.IsAsleep(small);
+            (light, heavy) = (physics.ContactImpulse(small, floor), physics.ContactImpulse(floor, large));
+            (apart, away) = (physics.ContactImpulse(small, large), physics.ContactImpulse(falling, floor));
+        });
+
+        Assert.True(asleep, "two seconds at rest did not put the box to sleep");
+        Assert.Equal(9.81f * StepSeconds, light, 0.03f);
+        Assert.Equal(98.1f * StepSeconds, heavy, 0.3f);
+        Assert.Equal(0f, apart);
+        Assert.Equal(0f, away);
+    }
+
+    /// <summary>
+    /// A crate dragged and turned across a floor presses it by its weight times the step, as one at
+    /// rest does, the friction along the floor and the twist about its normal not being pushes.
+    /// </summary>
+    [Fact]
+    public void ACrateDraggedAndTurnedAcrossAFloorPressesItByItsWeightAlone()
+    {
+        var pressed = new List<float>();
+
+        InAWorld(new PhysicsSettings(), (ecs, physics) =>
+        {
+            var floor = Body(ecs, physics, new Vec3(0f, -0.5f, 0f), PhysicsShape.Box(new Vec3(40f, 1f, 40f)), BodyKind.Static);
+            var crate = Body(ecs, physics, new Vec3(-5f, 0.5f, 0f), PhysicsShape.Box(Vec3.One), BodyKind.Dynamic, mass: 2f);
+            for (var i = 0; i < 30; i++) physics.Step(ecs, StepSeconds);
+
+            // Dragged at a steady 3 units a second and turned about the floor's normal, so friction
+            // along the floor and the twist about its normal both work against it.
+            for (var i = 0; i < 60; i++)
+            {
+                physics.SetVelocity(crate, new Vec3(3f, physics.Velocity(crate).Linear.Y, 0f), new Vec3(0f, 2f, 0f));
+                physics.Step(ecs, StepSeconds);
+                pressed.Add(physics.ContactImpulse(crate, floor));
+            }
+        });
+
+        Assert.Equal(2f * 9.81f * StepSeconds, pressed.Skip(10).Average(), 0.03f);
     }
 
     private static List<ContactStarted> Steps(EcsWorld ecs, PhysicsWorld physics, int count)

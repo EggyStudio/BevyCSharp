@@ -7,6 +7,12 @@ namespace Bevy.Physics;
 public sealed partial class PhysicsWorld
 {
     /// <summary>
+    /// Each slider's line, the second body's middle as a point fixed to the first and the axis in
+    /// the first's space, and its drive where it has one, by the joint's number.
+    /// </summary>
+    private readonly Dictionary<int, (Vector3 OffsetA, Vector3 AxisA, ConstraintHandle? Drive)> _sliders = [];
+
+    /// <summary>
     /// Joins two bodies with a joint, which holds from the next step on.
     /// </summary>
     /// <remarks>
@@ -22,6 +28,8 @@ public sealed partial class PhysicsWorld
         var first = Moving(a);
         var second = Moving(b);
         var spring = new SpringSettings(30f, 1f);
+
+        if (joint.Kind == 4) return ConnectSlider(a, b, first, second, joint, spring);
 
         var constraint = joint.Kind switch
         {
@@ -188,6 +196,103 @@ public sealed partial class PhysicsWorld
         return true;
     }
 
+    /// <summary>
+    /// Joins two bodies as a slider, kept on a line through the second's middle and kept from turning
+    /// against each other, with its travel and drive where given.
+    /// </summary>
+    private JointHandle ConnectSlider(Entity a, Entity b, BodyReference first, BodyReference second, Joint joint, SpringSettings spring)
+    {
+        var axisA = Vector3.Normalize(ToBepu(joint.AxisA));
+        var offsetA = Vector3.Transform(second.Pose.Position - first.Pose.Position, Quaternion.Conjugate(first.Pose.Orientation));
+
+        var constraints = new List<ConstraintHandle>
+        {
+            _simulation.Solver.Add(first.Handle, second.Handle, new PointOnLineServo
+            {
+                LocalOffsetA = offsetA,
+                LocalOffsetB = Vector3.Zero,
+                LocalDirection = axisA,
+                ServoSettings = ServoSettings.Default,
+                SpringSettings = spring,
+            }),
+            _simulation.Solver.Add(first.Handle, second.Handle, new AngularServo
+            {
+                TargetRelativeRotationLocalA = Quaternion.Normalize(Quaternion.Conjugate(first.Pose.Orientation) * second.Pose.Orientation),
+                ServoSettings = ServoSettings.Default,
+                SpringSettings = spring,
+            }),
+        };
+
+        if (joint.Travel is { } travel)
+        {
+            constraints.Add(_simulation.Solver.Add(first.Handle, second.Handle, new LinearAxisLimit
+            {
+                LocalOffsetA = offsetA,
+                LocalOffsetB = Vector3.Zero,
+                LocalAxis = axisA,
+                MinimumOffset = travel.Minimum,
+                MaximumOffset = travel.Maximum,
+                SpringSettings = spring,
+            }));
+        }
+
+        ConstraintHandle? drive = null;
+        if (joint.Drive is { } driven)
+        {
+            drive = _simulation.Solver.Add(first.Handle, second.Handle, Drive(offsetA, axisA, driven.Speed, driven.Force));
+            constraints.Add(drive.Value);
+        }
+
+        Wake(first);
+        Wake(second);
+
+        var id = ++_nextJoint;
+        _joints[id] = ([.. constraints], a, b);
+        _sliders[id] = (offsetA, axisA, drive);
+
+        var pair = ContactLog.Pair(Packed(_bodies[a]), Packed(_bodies[b]));
+        _contacts.Joined[pair] = _contacts.Joined.GetValueOrDefault(pair) + 1;
+        return new JointHandle(id);
+    }
+
+    private static LinearAxisMotor Drive(Vector3 offsetA, Vector3 axisA, float speed, float force) => new()
+    {
+        LocalOffsetA = offsetA,
+        LocalOffsetB = Vector3.Zero,
+        LocalAxis = axisA,
+        TargetVelocity = speed,
+        Settings = new MotorSettings(Math.Max(0f, force), 1e-4f),
+    };
+
+    /// <summary>Changes a slider's drive while it runs, to send a lift up or hold it where it is.</summary>
+    /// <param name="joint">A slider made with <see cref="Joint.WithDrive"/>.</param>
+    /// <param name="unitsPerSecond">How fast it slides from the next step, toward the axis's tip for a positive speed, zero holding it.</param>
+    /// <param name="force">The most it pushes with.</param>
+    /// <returns>Whether the joint is a slider with a drive to change.</returns>
+    public bool SetDrive(JointHandle joint, float unitsPerSecond, float force)
+    {
+        if (_disposed || !_sliders.TryGetValue(joint.Id, out var slider) || slider.Drive is not { } drive || !_joints.TryGetValue(joint.Id, out var held)) return false;
+
+        _simulation.Solver.ApplyDescription(drive, Drive(slider.OffsetA, slider.AxisA, unitsPerSecond, force));
+        foreach (var entity in new[] { held.A, held.B })
+        {
+            if (_bodies.TryGetValue(entity, out var body) && body.Kind != BodyKind.Static) Wake(_simulation.Bodies[body.Moving]);
+        }
+
+        return true;
+    }
+
+    /// <summary>How far a slider's second body is along its axis from where it was joined, or null for a joint that is no slider.</summary>
+    public float? SliderPosition(JointHandle joint)
+    {
+        if (_disposed || !_sliders.TryGetValue(joint.Id, out var slider) || !_joints.TryGetValue(joint.Id, out var held)) return null;
+
+        var first = _simulation.Bodies[_bodies[held.A].Moving].Pose;
+        var second = _simulation.Bodies[_bodies[held.B].Moving].Pose;
+        var anchor = first.Position + Vector3.Transform(slider.OffsetA, first.Orientation);
+        return Vector3.Dot(second.Position - anchor, Vector3.Transform(slider.AxisA, first.Orientation));
+    }
+
     /// <summary>The turn that takes Z onto a direction, the shortest one.</summary>
     private static Quaternion Toward(Vector3 direction)
     {
@@ -207,6 +312,7 @@ public sealed partial class PhysicsWorld
 
         foreach (var constraint in held.Constraints) _simulation.Solver.Remove(constraint);
         _motors.Remove(joint.Id);
+        _sliders.Remove(joint.Id);
 
         // Colliding again once nothing holds them, the bodies still being there.
         if (_bodies.TryGetValue(held.A, out var first) && _bodies.TryGetValue(held.B, out var second))

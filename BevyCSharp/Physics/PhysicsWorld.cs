@@ -238,6 +238,7 @@ public sealed partial class PhysicsWorld : IDisposable
 
         // Bepu gives the collidable out again, and the next body to have it is on layer 0 unless set.
         _contacts.Layers.Set(Packed(body), 0);
+        ForgetImpulses(Packed(body));
         _characters.Remove(entity);
 
         if (body.Kind == BodyKind.Static)

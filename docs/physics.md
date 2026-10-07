@@ -161,8 +161,15 @@ foreach (var contact in ctx.Read<ContactStarted>())
     if (contact.Speed > 2f) Audio.Play(thud, new AudioSettings { Volume = MathF.Min(1f, contact.Speed / 10f) });
 ```
 
+How hard two touching bodies press is asked of the pair, as a pressure plate asks of what stands on
+it. `physics.ContactImpulse(plate, crate)` is the push the last step gave them along the normals of
+their contacts, which divided by the step is the force between them, a crate's weight whether it
+rests or is dragged across, since the friction is not counted. A pair asleep goes on being answered
+with what it pressed as it fell asleep, since nothing between them changes while it sleeps.
+
 Joints hold two moving bodies together: a ball joint for a shoulder or a pendulum, a hinge for a
-door or a wheel, a weld for a part bolted on, and a distance range for a rope or a rod.
+door or a wheel, a weld for a part bolted on, a distance range for a rope or a rod, and a slider
+for a drawer or a lift.
 
 ```csharp
 var hinge = physics.Connect(frame, door, Joint.Hinge(
@@ -200,6 +207,19 @@ physics.Connect(torso, arm, Joint.Ball(shoulder, Vec3.Zero)
 
 var rope = physics.Connect(hook, crate, Joint.Distance(Vec3.Zero, Vec3.Zero, 0f, 3f));
 physics.SetDistance(rope, 0f, length -= 0.5f * ctx.Time.Delta);
+```
+
+A slider keeps the second body on a line through its middle and from turning against the first, a
+drawer, a sliding door or a lift on its frame. It stops at the ends of its travel, measured from
+where it was joined, and drives itself along the line where it has a drive, which pushes with no
+more than its force and holds it still at a speed of nothing:
+
+```csharp
+var lift = physics.Connect(frame, car, Joint.Slider(Vec3.UnitY)
+    .WithTravel(minimum: 0f, maximum: 3f)
+    .WithDrive(unitsPerSecond: 2f, force: 2000f));
+physics.SetDrive(lift, -2f, 2000f);              // back down
+var floor = physics.SliderPosition(lift);        // how far up it is
 ```
 
 ---

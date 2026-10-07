@@ -98,8 +98,8 @@ table also answers whether the two agree.
 | The sync reads only bodies that changed and writes only bodies that moved | has (`ba5cff4`) | has (`e612ac63` and after) |
 | What rests on a kinematic body that a transform moves keeps the mover's pace at any frame rate, the body moving at the mover's speed through every step and not a frame's distance in one | taken at `05bc3b4`, a crate at 2.00 within 0.02 at seven frame rates and uneven frames, carried round by a turned platform, `MarkPlaced` and `PlaceBeyond` for a jump | taken at `15fa305a`, a crate at 2.00 within a hundredth at seven frame rates and uneven frames, a parent's placing said with `MarkPlaced` or past a set distance (`7ae91e7c`) |
 | A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | taken at `ee3b47dd`, the frame's clamp of a quarter second the one kept |
-| Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow, a sleeping body woken when its layer or trigger changes | to take | has (`8520dbe1`, `ac897afa`) |
-| A body a game knows is fast swept over each step, so it does not cross a thin wall within one, chosen for each body | to take | has (`SetPhysicsBodyContinuous`, `799a9d56`) |
+| Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow, a sleeping body woken when its layer or trigger changes | taken at `795762b`, 32 layers | has (`8520dbe1`, `ac897afa`) |
+| A body a game knows is fast swept over each step, so it does not cross a thin wall within one, chosen for each body | taken at `795762b` | has (`SetPhysicsBodyContinuous`, `799a9d56`) |
 | A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | to take | has (`979c97be`) |
 | A game asks how hard two touching bodies press, answered while they sleep too | to take, as the push alone | has (`GetPhysicsContactImpulse`, `53cd565f`), the push alone since `c774a379` |
 

@@ -4,10 +4,10 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>Covers a ball joint kept within a cone, and a distance joint whose range changes after it is made.</summary>
+/// <summary>Covers a ball joint kept within a cone, a distance joint whose range changes after it is made, and a slider driven along its travel.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
-/// with 3DEngine's own cases for the two (its <c>c5227118</c>).
+/// with 3DEngine's own cases for them (its <c>c5227118</c> and <c>979c97be</c>).
 /// </remarks>
 [Collection("engine")]
 public sealed class JointTests
@@ -80,17 +80,65 @@ public sealed class JointTests
         Assert.True(reversed);
     }
 
+    /// <summary>
+    /// A lift's car on a slider is driven up to the end of its travel and held there, keeps its line
+    /// and its turn when pushed sideways and twisted, and is driven back down to the other end.
+    /// </summary>
+    [Fact]
+    public void ASliderIsDrivenAlongItsAxisToItsTravelAndKeepsItsLineAndItsTurn()
+    {
+        var (rose, held, off, turned, fell, lowest) = (false, 0f, 0f, 0f, false, 0f);
+
+        InAWorld(new PhysicsSettings(), (ecs, physics) =>
+        {
+            // A lift's car on a frame that does not move, sliding up its axis and nothing else.
+            var frame = Body(ecs, physics, Vec3.Zero, PhysicsShape.Box(new Vec3(2f, 0.2f, 2f)), BodyKind.Kinematic);
+            var car = Body(ecs, physics, new Vec3(0f, 1f, 0f), PhysicsShape.Box(Vec3.One), BodyKind.Dynamic, mass: 10f);
+            var lift = physics.Connect(frame, car, Joint.Slider(Vec3.UnitY).WithTravel(0f, 3f).WithDrive(2f, 2000f));
+            physics.ApplyImpulse(car, new Vec3(30f, 0f, 10f), new Vec3(0.5f, 0.5f, 0.5f));
+
+            for (var i = 0; i < 300 && !rose; i++)
+            {
+                physics.Step(ecs, StepSeconds);
+                rose = physics.SliderPosition(lift) > 2.95f;
+            }
+
+            Steps(ecs, physics, 32);
+            held = physics.SliderPosition(lift) ?? 0f;
+            var at = ecs.GetOrDefault<Transform>(car);
+            off = new Vec2(at.Translation.X, at.Translation.Z).Length;
+            turned = MathF.Abs(at.Rotation.W);
+
+            physics.SetDrive(lift, -2f, 2000f);
+            for (var i = 0; i < 300 && !fell; i++)
+            {
+                physics.Step(ecs, StepSeconds);
+                fell = physics.SliderPosition(lift) < 0.05f;
+            }
+
+            Steps(ecs, physics, 32);
+            lowest = ecs.GetOrDefault<Transform>(car).Translation.Y;
+        });
+
+        Assert.True(rose, "a positive speed did not drive it toward the axis's tip");
+        Assert.InRange(held, 2.95f, 3.05f);
+        Assert.True(off < 0.02f, $"pushed sideways it left its line by {off}");
+        Assert.True(turned > 0.999f, $"twisted, it turned, its rotation's W at {turned}");
+        Assert.True(fell, "a negative speed did not drive it back down");
+        Assert.True(lowest > 0.9f, $"it went below the end of its travel, to {lowest}");
+    }
+
     private static void Steps(EcsWorld ecs, PhysicsWorld physics, int count)
     {
         for (var i = 0; i < count; i++) physics.Step(ecs, StepSeconds);
     }
 
-    private static Entity Body(EcsWorld ecs, PhysicsWorld physics, Vec3 at, PhysicsShape shape, BodyKind kind)
+    private static Entity Body(EcsWorld ecs, PhysicsWorld physics, Vec3 at, PhysicsShape shape, BodyKind kind, float mass = 1f)
     {
         var entity = ecs.Spawn();
         var transform = Transform.At(at.X, at.Y, at.Z);
         ecs.Add(entity, transform);
-        physics.Add(entity, shape, kind, transform);
+        physics.Add(entity, shape, kind, transform, mass);
         return entity;
     }
 

@@ -10,12 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5f836cb`. Commands can be queued to land after a delay as Bevy's delayed commands
-do, and `delayed_commands` is written, an offscreen run having no empty space to click (`7f92ed0`);
-the six physics component types moved into files of their names, N 1.2's list at 211 (`20268b8`);
-and the first of item 4's batches from 3DEngine's `c5227118`: a contact carries where and how hard
-its pair met, a ball joint can be kept within a cone, and a distance joint's range changes while it
-stands (`5f836cb`). The suite: 1,152 passed, 9 skipped.
+Reviewed up to `c0d836c`. Bodies go on one of 32 collision layers whose pairs collide or not, which
+contacts, sensors, characters and rays from a body follow, and a fast body is swept so it does not
+pass through a thin wall, the second batch of item 4 from 3DEngine's `8520dbe1` and `799a9d56`
+(`795762b`); the character controller tests moved into the physics folder, N 1.4's list at 86 to
+mend (`c0d836c`). The suite: 1,152 passed, 9 skipped.
+
+Before them, commands came to be queued to land after a delay as Bevy's delayed commands do, and
+`delayed_commands` is written, an offscreen run having no empty space to click (`7f92ed0`); the six
+physics component types moved into files of their names, N 1.2's list at 211 (`20268b8`); and the
+first of item 4's batches from 3DEngine's `c5227118`: a contact carries where and how hard its pair
+met, a ball joint can be kept within a cone, and a distance joint's range changes while it stands
+(`5f836cb`). The suite: 1,152 passed, 9 skipped.
 
 Before them, a game came to give a component Bevy's add, insert, discard and remove hooks, which
 reach the managed side while Bevy holds the world, so no second world is made beside Bevy's while a
@@ -23,14 +29,6 @@ hook runs, the generator's remove hook covered with it, and `component_hooks` is
 `aab71d0`). `delayed_commands` follows, and then item 4, the bodies from 3DEngine, the single rows
 left each needing more than a batch and texture_atlas first among them after. The suite: 1,152
 passed, 9 skipped.
-
-Before them, C# came to write into Bevy's log at its five levels under the target `csharp`, once a
-line of code where asked, a run ends with a failure code through `App.RequestExit` and `ctx.Exit`, a
-system that throws is logged and the app runs on, and `logs` is written (ABI 223, `ee22927`); a
-playing sound's speed and mute are bridged with a way to ask whether its sink has come, and
-`audio_control` and `window_fallthrough` are written, 290, the second having been reachable all
-along under a stale row (ABI 224, `1b8b282`); the audio settings moved into files of their names,
-N 1.2's list at 217 (`f35d03a`). The suite: 1,152 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -202,17 +200,18 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 4, 3DEngine's `8520dbe1` and `799a9d56`.** A body is on one of 32 collision layers,
-`PhysicsWorld.SetLayer` or `RigidBody.Layer`, and `SetLayersCollide` says which pairs of layers
-collide, every one with every other to begin with. Bodies on layers that do not collide make no
-contacts, so a sensor reports only the layers it collides with, a character stands only on what its
-layer collides with, and a ray cast from a body, the new `Raycast(..., from)`, passes through that
-body and sees what its layer collides with. A body whose layer changes is woken, a static wakes what
-sleeps in its bounds, and a change between two layers wakes the bodies on them, as 3DEngine wakes
-them. A body a game knows is fast is swept over each step, `SetContinuous` or
-`RigidBody.Continuous`, so a ball at 40 units a second meets a wall a fifth of a unit thick that an
-unswept one crosses. `LayerTests` and `BodyContactTests` hold 3DEngine's cases with a crate asleep on
-a floor that falls once the floor's layer stops colliding with its own. The suite passed, 1,164 with
-9 skipped. The slider is next.
+**Now 4, 3DEngine's `979c97be` and `53cd565f`.** `Joint.Slider(axis)` holds the second body to a
+line through its middle along the first's axis, neither turning against the other, `WithTravel`
+stops it between two distances along that line, and `WithDrive` pushes it at a speed with no more
+than a force, a speed of zero holding it where it is. `PhysicsWorld.SetDrive` changes the drive of a
+slider already made, as a lift's button does, and `SliderPosition` reads how far along its line it
+is. `ContactImpulse(a, b)` answers how hard two touching bodies pressed at the last step, the push
+along their contacts' normals alone as 3DEngine counts it since `c774a379`, read through
+`TryExtractSolverContactData`, and a pair asleep since it was last asked goes on being answered
+with what it was then. `JointTests` drives a block to the end of its travel and finds it stopped
+there, on its line and unturned, and `BodyContactTests` finds a box at rest pressing its floor by
+its mass times gravity times the step, and a crate dragged and turned across it pressing it by the
+same. The suite passed, 1,166 with 9 skipped, with friction still counted, and the contact and
+joint tests after the push was taken alone. Item 5 is next.
 
-Shared: collision layers and the sweep of a fast body, from 3DEngine's `8520dbe1` and `799a9d56`.
+Shared: a slider joint and how hard two bodies press, from 3DEngine's `979c97be` and `53cd565f`.
