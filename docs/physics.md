@@ -229,6 +229,21 @@ physics.SetDrive(lift, -2f, 2000f);              // back down
 var floor = physics.SliderPosition(lift);        // how far up it is
 ```
 
+A level describes a joint as an entity of its own with a `JointBetween` naming the two bodies'
+entities, so the editor places a door's hinge where it stands and a scene file carries it. The
+entity's place is where the two are joined and its up direction is a hinge's axis, a slider's line
+and the middle of a ball joint's cone, and the limits, the motor and the drive are fields of the
+component. The joint is made once both bodies are, again when the component changes or a body is
+made again, and taken away with the entity. One naming a static body is written to the log once and
+left until its component changes. `physics.JointOf` answers the joint made, for a game to drive:
+
+```csharp
+ctx.Ecs.Add(hinge, Transform.At(0.05f, 1f, 0f));
+ctx.Ecs.Add(hinge, new JointBetween { Kind = JointKind.Hinge, A = post, B = door, MinAngle = 0f, MaxAngle = 100f });
+
+if (physics.JointOf(fanMount) is { } fan) physics.SetMotor(fan, 0f, 50f);
+```
+
 ---
 
 Before this, [Audio](audio.md).

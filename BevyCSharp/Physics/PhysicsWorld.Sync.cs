@@ -41,7 +41,9 @@ public sealed partial class PhysicsWorld
     /// again as a character when a <see cref="CharacterController"/> is put beside it or as a plain
     /// body when the controller is taken away. A collider
     /// fitted to a mesh that has not loaded waits for it, and the body comes when the mesh does.
-    /// An entity that has a body from <see cref="Add"/> already keeps that one.
+    /// An entity that has a body from <see cref="Add"/> already keeps that one. The joints entities
+    /// describe with a <see cref="JointBetween"/> are made after the bodies, as
+    /// <see cref="JointOf"/> says.
     /// </para>
     /// <para>
     /// Only what changed is read. The world lists the bodies and colliders added or changed since
@@ -113,6 +115,7 @@ public sealed partial class PhysicsWorld
         }
 
         foreach (var entity in candidates) Make(ecs, entity);
+        SyncJoints(ecs, since);
     }
 
     /// <summary>Makes an entity's body from its components, again where they changed what it is.</summary>

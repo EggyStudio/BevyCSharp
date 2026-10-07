@@ -1300,6 +1300,7 @@ bool SetDistance(JointHandle joint, float minimum, float maximum);  // Changes h
 bool SetDrive(JointHandle joint, float unitsPerSecond, float force);  // Changes a slider's drive while it runs, to send a lift up or hold it where it is
 float? SliderPosition(JointHandle joint);                        // How far a slider's second body is along its axis from where it was joined, or null for a joint that is no slider
 bool Disconnect(JointHandle joint);                             // Takes a joint away, leaving both bodies free
+JointHandle? JointOf(Entity entity);                            // The joint an entity's JointBetween made, for a game to drive its motor with SetMotor or SetDrive, or null while its bodies are still to come or where it could not be made
 void MarkPlaced(Entity entity);                                 // Says that entity was put where it is rather than moved there, as when a level starts again, so its kinematic body is put at the new place, at rest, and not carried there through whatever is between
 void Sync(EcsWorld ecs);                                        // Makes, remakes and takes away the bodies of entities carrying a RigidBody and a Collider, so the simulation holds what the world says
 ```
