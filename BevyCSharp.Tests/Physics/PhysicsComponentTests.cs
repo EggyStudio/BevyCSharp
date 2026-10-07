@@ -117,6 +117,54 @@ public sealed class PhysicsComponentTests : IDisposable
         Assert.False(hasBodyAfterRemoving);
     }
 
+    /// <summary>
+    /// A static body on an entity under another is where its parent puts it, moved, turned and
+    /// scaled, as its collider is drawn, rather than at its own transform taken as the world's.
+    /// </summary>
+    /// <remarks>
+    /// The feature test's Sponza is a scene whose walls are children of the entity that places it,
+    /// and the player walked through them, the bodies standing near the hub.
+    /// </remarks>
+    [Fact]
+    public void AStaticBodyUnderAParentIsWhereItsParentPutsIt()
+    {
+        using var harness = new EngineHarness(frames: 40, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        var frame = 0;
+        float? placed = null, own = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // Ten along X, turned a quarter so its Z is the world's X, and twice the size.
+            var parent = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(parent, new Transform(new Vec3(10f, 0f, 0f), Quat.FromRotationY(MathF.PI / 2f), new Vec3(2f)));
+
+            // Two along the parent's Z, which is four along the world's X, so at fourteen.
+            var wall = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(wall, Transform.At(0f, 0f, 2f));
+            ctx.Ecs.Add(wall, new RigidBody { Kind = BodyKind.Static });
+            ctx.Ecs.Add(wall, new Collider { Shape = ColliderShape.Box, Size = new Vec3(1f) });
+            ctx.Ecs.SetParent(wall, parent);
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (++frame != 20) return;
+
+            var physics = ctx.Res<PhysicsWorld>();
+            placed = physics.Raycast(new Vec3(14f, 10f, 0f), new Vec3(0f, -1f, 0f), 50f)?.Point.Y;
+            own = physics.Raycast(new Vec3(0f, 10f, 2f), new Vec3(0f, -1f, 0f), 50f)?.Point.Y;
+        });
+
+        harness.Run();
+
+        // The top of a box two across, its middle at the parent's height.
+        Assert.NotNull(placed);
+        Assert.InRange(placed!.Value, 0.99f, 1.01f);
+        Assert.Null(own);
+    }
+
     [Fact]
     public void ASceneCarriesItsBodies()
     {

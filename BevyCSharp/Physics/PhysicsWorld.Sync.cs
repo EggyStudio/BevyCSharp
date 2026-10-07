@@ -123,7 +123,10 @@ public sealed partial class PhysicsWorld
     {
         if (!ecs.TryGet<RigidBody>(entity, out var body) || !ecs.TryGet<Collider>(entity, out var collider)) return;
 
-        var at = ecs.GetOrDefault<Transform>(entity);
+        // A static body is put where the entity is in the world, under whatever parents it has, as
+        // a level's walls are under the entity that places the level. One that moves writes its
+        // place back to its own transform, and is taken to have no parent.
+        var at = body.Kind == BodyKind.Static ? Colliders.WorldOf(ecs, entity) : ecs.GetOrDefault<Transform>(entity);
         var character = body.Kind == BodyKind.Dynamic && ecs.Has<CharacterController>(entity);
         var made = new MadeFrom(body, collider, at.Scale, body.Kind == BodyKind.Static ? at : null, character);
 

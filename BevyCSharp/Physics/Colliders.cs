@@ -14,6 +14,30 @@ public static class Colliders
     private static readonly Dictionary<AssetHandle, MeshData> Meshes = [];
 
     /// <summary>
+    /// Where an entity is in the world, its transform carried up through those of the entities
+    /// above it.
+    /// </summary>
+    /// <remarks>
+    /// Carried up rather than read from its global transform, which an entity spawned this frame,
+    /// as a level's parts are, has not had worked out yet. A scale that is not the same on every
+    /// axis under a turned parent is taken axis by axis, as a box holds it.
+    /// </remarks>
+    internal static Transform WorldOf(EcsWorld world, Entity entity)
+    {
+        var placed = world.GetOrDefault<Transform>(entity);
+        for (var above = world.ParentOf(entity); !above.IsNone; above = world.ParentOf(above))
+        {
+            var parent = world.TryGet<Transform>(above, out var held) ? held : Transform.Identity;
+            placed = new Transform(
+                parent.Translation + parent.Rotation * Times(placed.Translation, parent.Scale),
+                parent.Rotation * placed.Rotation,
+                Times(placed.Scale, parent.Scale));
+        }
+
+        return placed;
+    }
+
+    /// <summary>
     /// What an entity's collider comes to, or false while a mesh it fits has not loaded or a hull or a
     /// mesh has none to fit.
     /// </summary>
@@ -27,7 +51,8 @@ public static class Colliders
 
         if (!world.TryGet<Collider>(entity, out var collider)) return false;
 
-        var scale = world.TryGet<Transform>(entity, out var transform) ? Abs(transform.Scale) : Vec3.One;
+        // The scale it has in the world, its parents' with its own, as the body is placed.
+        var scale = Abs(WorldOf(world, entity).Scale);
 
         if (collider.Shape is ColliderShape.Hull or ColliderShape.Mesh)
         {
