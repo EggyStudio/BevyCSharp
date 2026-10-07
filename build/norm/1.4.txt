@@ -73,7 +73,6 @@ BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
-BevyCSharp.Tests/RayTracingTests.cs
 BevyCSharp.Tests/ReflectedComponentTests.cs
 BevyCSharp.Tests/ReflectionTests.cs
 BevyCSharp.Tests/RenderControlTests.cs
