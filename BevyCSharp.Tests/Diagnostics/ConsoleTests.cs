@@ -1,6 +1,5 @@
 using Bevy;
 using Xunit;
-using BevyCSharp.Editor.Framework;
 
 namespace Bevy.Tests;
 

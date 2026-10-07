@@ -38,6 +38,18 @@ public partial struct Interface
 `BevyCSharp.Sample` does exactly that, in `Behaviors/Interface.cs`. It needs a bridge with the
 interface compiled in (`build/build-native.sh --editor`) and `Config.Gui` asked for.
 
+**A console is one call.** `ImGuiConsole.Draw` between `Begin` and `End` gives a game the editor's
+console, opened and closed by the key under Escape along the top of the window. It shows the log,
+Bevy's lines and the program's, filtered by level and searched, over a line that runs any
+`[Command]` the game or the engine declares, with the arrows walking back through what was typed and
+the tab key completing a name. It draws nothing while it is closed, so a game calls it every frame.
+
+```csharp
+ImGuiRuntime.Begin(ctx);
+ImGuiConsole.Draw(ctx);
+ImGuiRuntime.End();
+```
+
 **The engine only rasterizes.** ImGui hands over vertices, indices and a list of draw calls, each
 with a clip rectangle and a picture; `bcs_imgui_frame` takes them and a pass in Bevy's renderer
 draws them straight onto the window, over whatever the cameras drew. Nothing on the Rust side knows

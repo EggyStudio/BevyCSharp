@@ -264,6 +264,7 @@ public sealed unsafe partial class App : IDisposable
         MaterialFiles.Forget();
         MeshFiles.Forget();
         AssetServer.ForgetFailed();
+        ImGuiRuntime.Forget();
         Bevy.Physics.Colliders.Forget();
 
         // A game in progress is one app's, and its entities would name others in the next.

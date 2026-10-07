@@ -1231,6 +1231,12 @@ static void Forget(Entity node);                                // Takes a node'
 static void Clear();                                            // Takes every edge out, leaving the nearest nodes on the screen
 ```
 
+### `ImGuiConsole`
+
+```csharp
+static void Draw(BehaviorContext ctx);                          // Opens or closes it on its key, and draws it while it is open
+```
+
 ### `ImGuiTextures`
 
 ```csharp
@@ -1789,6 +1795,19 @@ static void Write(LogLevel level, string text);                 // Adds a line
 static void Write(string text);                                 // Adds a line at the ordinary level
 static LogLine[] All();                                         // The lines kept, oldest first
 static void Clear();                                            // Forgets everything
+```
+
+### `ConsoleView`
+
+```csharp
+LogLine[] Lines();                                              // The lines worth showing, oldest first
+void Run(string line, World world = null);                      // Runs a line, and writes both it and its answer into the log
+static void AnswerLater(World world);                           // Asks each command waiting on an answer for it, and writes any that arrive into the log
+string Back(string current);                                    // What was typed before this, or what is already there at the end of the list
+string Forward(string current);                                 // The other way, and back to nothing once the end is reached
+string Completion(string typed);                                // The command a half-typed name would become, or nothing
+string Hint(string typed);                                      // What it would complete to, or what it takes, said under the input
+static string Written(LogLine line);                            // How a line reads on screen, with its repeat count when it has one
 ```
 
 ### `CrashLog`

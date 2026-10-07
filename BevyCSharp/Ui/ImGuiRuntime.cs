@@ -149,6 +149,26 @@ public static unsafe class ImGuiRuntime
         IsRunning = true;
     }
 
+    /// <summary>
+    /// Takes the context down, for an app starting, whose engine holds none of the last one's
+    /// atlas.
+    /// </summary>
+    /// <remarks>
+    /// The atlas is handed to the engine of the app that started the interface, so an app after it
+    /// in the same process, as a test suite makes, starts the interface again rather than drawing
+    /// with a texture its engine never had.
+    /// </remarks>
+    internal static void Forget()
+    {
+        if (!IsRunning) return;
+
+        ImGui.DestroyContext();
+        IsRunning = false;
+        _atlas = 0;
+        Faces.Clear();
+        _cursor = ImGuiMouseCursor.Arrow;
+    }
+
     /// <summary>Builds the font atlas and gives the engine its pixels.</summary>
     private static void Atlas(ImGuiIOPtr io)
     {
@@ -258,7 +278,23 @@ public static unsafe class ImGuiRuntime
         Cursor();
 
         var data = ImGui.GetDrawData();
-        if (data.NativePtr is null || data.CmdListsCount == 0) return;
+        if (data.NativePtr is null) return;
+
+        // A frame that drew nothing is handed over all the same, as an empty one, since the engine
+        // keeps drawing the last frame it was given, and a console closed or a panel put away would
+        // stay on the screen.
+        if (data.CmdListsCount == 0)
+        {
+            var empty = new NativeImGuiFrame
+            {
+                DisplayWidth = data.DisplaySize.X,
+                DisplayHeight = data.DisplaySize.Y,
+                ScaleX = data.FramebufferScale.X,
+                ScaleY = data.FramebufferScale.Y,
+            };
+            Native.Check(Native.bcs_imgui_frame(&empty), nameof(Native.bcs_imgui_frame));
+            return;
+        }
 
         Room(ref _vertices, ref _vertexRoom, data.TotalVtxCount, sizeof(NativeImGuiVertex));
         Room(ref _indices, ref _indexRoom, data.TotalIdxCount, sizeof(ushort));

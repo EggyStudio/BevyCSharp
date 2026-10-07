@@ -539,6 +539,8 @@ drawer already draws as one thing.
 **The console reads and writes.** The tab along the bottom is where a log is read, and the key under
 Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it shows,
 which is a search, a switch per level, and what was typed before, reached with the arrows.
+`ConsoleView` is the library's, and `ImGuiConsole` draws it over a game in one call, so a game's
+console and the editor's are the same console.
 Everything either of them shows lives outside both. `ConsoleLog` is a ring of leveled lines that the
 output and error streams are teed into, and `ConsoleCommands` is the list of what can be typed.
 

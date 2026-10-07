@@ -1,6 +1,4 @@
-using Bevy;
-
-namespace BevyCSharp.Editor.Framework;
+namespace Bevy;
 
 /// <summary>
 /// What a console does, apart from where it is drawn.
@@ -8,9 +6,9 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// Everything a console does that is not drawing, which is which lines are worth showing, what was
-/// typed before, what a half-typed name would complete to, and what to say about it. Where it is
-/// drawn is <see cref="ConsoleTab"/>, and a game with its own console draws it differently against
-/// this same class.
+/// typed before, what a half-typed name would complete to, and what to say about it. The editor
+/// draws it as a tab along the bottom and <see cref="ImGuiConsole"/> as a game's console over the
+/// scene, and a game with a console of its own draws it differently against this same class.
 /// </para>
 /// <para>
 /// It keeps what was typed, what was typed before, and what is being looked for. Everything it
@@ -82,13 +80,20 @@ public sealed class ConsoleView
     /// <summary>
     /// Runs a line, and writes both it and its answer into the log.
     /// </summary>
+    /// <param name="line">What was typed.</param>
+    /// <param name="world">
+    /// The world to lend the command, which a command that reads or changes an entity needs, or
+    /// nothing outside a frame.
+    /// </param>
     /// <remarks>
     /// What was typed is written back first. A console that shows only answers is one where you
     /// cannot tell which question a line is answering, which matters most exactly when several
     /// commands are run quickly.
     /// </remarks>
-    public void Run(string line)
+    public void Run(string line, World? world = null)
     {
+        ArgumentNullException.ThrowIfNull(line);
+
         var typed = line.Trim();
         if (typed.Length == 0) return;
 
@@ -102,14 +107,14 @@ public sealed class ConsoleView
         Scroll = 0;
 
         // The world is lent for the length of the call, because a command that reads or changes an
-        // entity can only do it from inside a frame and has no other way to be handed one. This is
-        // drawn from a system, so the frame is already here; without the loan every command about
-        // the world would answer that it was called from outside one.
+        // entity can only do it from inside a frame and has no other way to be handed one. A
+        // console is drawn from a system, so the frame is already here; without the loan every
+        // command about the world would answer that it was called from outside one.
         string? answer;
 
-        if (EditorShell.Context is { } context)
+        if (world is not null)
         {
-            using (ConsoleHost.Lend(context.World)) answer = ConsoleCommands.Run(typed);
+            using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run(typed);
         }
         else
         {
@@ -121,7 +126,7 @@ public sealed class ConsoleView
         if (ConsoleHost.Pending is { } poll)
         {
             var name = typed.Split(' ', 2)[0];
-            Waiting.Add((name, poll, EditorShell.Frame + ConsoleHost.LaterFrames));
+            Waiting.Add((name, poll, ConsoleLog.Frame + ConsoleHost.LaterFrames));
         }
     }
 
@@ -135,11 +140,16 @@ public sealed class ConsoleView
     /// Asks each command waiting on an answer for it, and writes any that arrive into the log.
     /// </summary>
     /// <remarks>
-    /// Called once a frame by <see cref="EditorShell.Tick"/>, with the world lent, since what a
-    /// command waits on is usually the GPU and the answer is read inside a frame.
+    /// Called once a frame by whatever draws a console, the editor's tab or
+    /// <see cref="ImGuiConsole"/>, with the world lent, since what a command waits on is usually the
+    /// GPU and the answer is read inside a frame. A second call in the same frame asks again and
+    /// changes nothing.
     /// </remarks>
-    internal static void AnswerLater(World world, ulong frame)
+    public static void AnswerLater(World world)
     {
+        ArgumentNullException.ThrowIfNull(world);
+        var frame = ConsoleLog.Frame;
+
         for (var index = Waiting.Count - 1; index >= 0; index--)
         {
             var (name, poll, giveUp) = Waiting[index];

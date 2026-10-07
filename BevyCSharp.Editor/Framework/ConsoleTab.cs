@@ -175,7 +175,7 @@ public static class ConsoleTab
                 512,
                 ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            View.Run(_typed);
+            View.Run(_typed, EditorShell.Context?.World);
             _typed = string.Empty;
 
             // Back where it was, so a run of commands is a run of commands rather than a click

@@ -962,6 +962,21 @@ static class Bevy.ConsoleLog
   static void Start()
   static void Write(LogLevel level, string text)
   static void Write(string text)
+sealed class Bevy.ConsoleView
+  ConsoleView()
+  LogLine[] Lines()
+  bool ShowErrors { get; set; }
+  bool ShowInfo { get; set; }
+  bool ShowWarnings { get; set; }
+  int Scroll { get; set; }
+  static string Written(LogLine line)
+  static void AnswerLater(World world)
+  string Back(string current)
+  string Forward(string current)
+  string Hint(string typed)
+  string Search { get; set; }
+  string? Completion(string typed)
+  void Run(string line, World? world = null)
 sealed class Bevy.ContactShadowSettings : IEquatable<ContactShadowSettings>
   ContactShadowSettings(uint Steps = 16u, float Thickness = 0.1f, float Length = 0.3f)
   bool Equals(ContactShadowSettings? other)
@@ -2059,6 +2074,12 @@ interface Bevy.IReflectedComponent<TSelf> where TSelf : struct, IReflectedCompon
   static string TypePath { get; }
 interface Bevy.IShaderValues
 interface Bevy.ISparseComponent
+static class Bevy.ImGuiConsole
+  static ConsoleView View { get; }
+  static Key Toggle { get; set; }
+  static bool IsOpen { get; set; }
+  static float Height { get; set; }
+  static void Draw(BehaviorContext ctx)
 static class Bevy.ImGuiRuntime
   static ImFontPtr Face(string face)
   static Vector2 Size { get; }

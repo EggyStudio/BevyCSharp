@@ -190,7 +190,7 @@ public static class EditorShell
 
         // Before anything is drawn, and whether or not the console is open, so an answer that
         // arrives while it is shut is there when it opens.
-        ConsoleView.AnswerLater(ctx.World, Frame);
+        ConsoleView.AnswerLater(ctx.World);
 
         if (!ImGuiRuntime.IsRunning) return;
 
