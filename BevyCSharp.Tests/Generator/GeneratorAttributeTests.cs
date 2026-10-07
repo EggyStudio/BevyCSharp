@@ -307,9 +307,12 @@ public sealed class GeneratorAttributeTests
         [RecognizedAttributes.OnLast] = () => EveryFrame("OnLast"),
         [RecognizedAttributes.OnFixedUpdate] = () =>
         {
-            // Twice the frames a second the fixed step is, so it runs in about half of them.
-            Run(new EngineHarness(frames: 40, fps: 240, fixedHz: 120), null);
-            Assert.InRange(FramesOf("OnFixedUpdate").Count, 10, 30);
+            // Twice the frames a second the fixed step is, so it runs in half of them. The clock
+            // is stepped a 240th of a second a frame, so forty frames are a sixth of a second and
+            // twenty fixed steps however long the machine took to run them, where on its own clock
+            // a slow runner's frames let the fixed step catch up a hundred times.
+            Run(new EngineHarness(frames: 40, fixedHz: 120, frameSeconds: 1.0 / 240), null);
+            Assert.InRange(FramesOf("OnFixedUpdate").Count, 19, 21);
         },
         [RecognizedAttributes.OnCleanup] = () =>
         {
