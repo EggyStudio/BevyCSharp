@@ -10,13 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `bc90a7a`. Fifteen commits settle items 4 to 11. A list of plain values is typed an
-item at a time, the last of the three shapes (`7c74118`); `bcs` gives cmd.exe its line as written
-and the Windows job opens the sample through it (`a753c57`); every push runs the suite on macOS as
-well, with `python3` on a Mac (`6528ea2`); `[MainThread]` keeps an instance behavior method on the
-main thread for every entity, and a script is compiled against the game's own types with the
-project's scripts watched (`5a96ce0`); `games/Swarm` holds an arena against waves of creatures in
-their hundreds in behaviors alone, played into its third wave and profiled by the pack workflow
+Reviewed up to `3e6293d`. The console tests moved into the diagnostics folder, N 1.4's list at 81
+(`3e6293d`). The runs: the first three with a macOS job, `360669ef`, `e3295b5` and `6f4d8590`,
+failed there twice over, the bridge's tests not building under denied warnings for a linker message
+of macOS, which is Verdict 5, and the fixed-update case of `GeneratorAttributeTests` counting 106
+and 111 steps where it expects 10 to 30, which is Verdict 6; on Windows the step opening the sample
+through `bcs` ended with exit code 6 and nothing else on the page, which is Verdict 7; and Linux
+passed each. The run of `3e6293d` was in progress at 16:40, and the pack run of `75e8953` stays
+cancelled. The suite: 1,221 passed, 9 skipped.
+
+Before them, the loaders a game calls came to answer a bad file with a problem naming it and no
+exception, as N 2.6 asks: a scene and a save in the `SceneLoad` they return, whose `Problem` names
+the file with nothing spawned and the game left as it was, a mesh or material file as
+`AssetHandle.None` with `AssetLoadFailed` posted once, a data asset as its type's defaults with
+`DataAssets.TryGet` saying why beside `Get`, project settings carrying a `Problem`, and a pack that
+does not open logged and run without, each with a `Try` form, `BadFileTests` judging each loader's
+first form (`97df8fd`), which settles item 3 and checks N 2.6; `SceneLoad` gained its `Problem`, a
+line of `PublicApi.txt` reshaped. Three commits of moves alone took N 1.2's list to 188, N 1.4's to
+82 and N 3.4's to 43 (`e3295b5`, `6f4d859`, `d8c6c0d`). The owner decided on 2026-10-07 that
+graphics test scenes come as packs fetched on demand, Intel Sponza first at 1K from this
+repository's releases (Decision 15), which is item 6 among the feature test's. The suite: 1,221
+passed, 9 skipped.
+
+Before them, fifteen commits settled items 4 to 11. A list of plain values is typed an item at a
+time, the last of the three shapes (`7c74118`); `bcs` gives cmd.exe its line as written and the
+Windows job opens the sample through it (`a753c57`); every push runs the suite on macOS as well,
+with `python3` on a Mac (`6528ea2`); `[MainThread]` keeps an instance behavior method on the main
+thread for every entity, and a script is compiled against the game's own types with the project's
+scripts watched (`5a96ce0`); `games/Swarm` holds an arena against waves of creatures in their
+hundreds in behaviors alone, played into its third wave and profiled by the pack workflow
 (`109711a`); a `memory` command, `build/soak.sh` and `soak-check.py` play Courtyard, Swarm and the
 stress program for ten minutes and hold every count level, which found four leaks, a scene load's
 meshes and materials under handles nothing released, a placed model's keys, Swarm's player made at
@@ -40,36 +62,7 @@ that. The suite: 1,219 passed, 9 skipped. The owner decided on 2026-10-07 that t
 feature test with an admin panel, a console, a crash log and a portable build, `bevy_weather` once
 the map stands (Decision 14), which is items 4 to 9, before the gaps.
 
-Before them, a list of values with fields of their own, as a node's box shadows and its gradients
-are, came to be a list of the records its items are in the wrappers, read whole and written whole
-through two new exports of the bridge, a list's length and its resizing, at ABI 226, each item's
-values at an indexed path as a field's are; the bridge makes a default for what Bevy registers none
-of wherever one is needed, a struct from its fields', an enum whose every variant holds a value as
-its first and a list as the empty one; five examples write their shadows, gradients and popovers
-through their wrappers with no JSON left, `many_gradients` keeping the wrapper at 21.6 ms a frame
-where the JSON took 18.1; and `reflected.rs` stands at 798 lines, its defaults to move out before it
-grows (`b2fc2f7`). That is the last of item 4's three shapes, and the item is settled. 3DEngine's
-Verdict 33 found that its `e3d` gave `cmd.exe /c start` its line through `ArgumentList` on Windows,
-where .NET escapes each inner quote with a backslash cmd.exe keeps, and `bcs` does the same in
-`Launch.cs`, which is item 4 by the new count. The suite: 1,181 passed, 9 skipped.
-
-Before them, an enum inside a variant came to be a record of its own in the wrappers, as an
-orthographic projection's `ScalingMode` and a sprite slicer's two `SliceScaleMode`s are, a plain C#
-enum where none of its variants holds a value, and a nullable for an `Option` there, written by
-choosing its variant after the outer one's and read by switching on it; the bridge makes a struct
-Bevy registers no default for from its fields' defaults wherever one is needed, so the sliced
-variant can be chosen; and six examples write through `SpriteRef`, `ProjectionRef`, `TextFontRef`
-and `WindowRef` where they wrote JSON or a plain enum, `ExampleStringPathTests` following the
-generator into those enums (`5f2d3d0`), the second of item 4's three shapes, with the list inside a
-component left to come. Two commits of moves alone split `ComponentSchema.cs` into six files and the
-generator's records into a part of their own, N 1.2's list at 206 and N 1.3's at 13 with 8 in the
-bridge (`af8e870`, `174ee19`). The run of `75e8953` passed on both systems, Windows at 09:39, which
-settles item 1's wait; the owner pushed `af8e870` at 09:54 and `174ee19` at 09:57, and the run of
-`174ee19` passed on both systems at 10:11, the run of `af8e870` cancelled by the push after it. The
-owner started the pack run of `75e8953` at 09:46, Verdicts 2 and 3's, in progress at 10:17. The
-suite: 1,180 passed, 9 skipped.
-
-The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take and 9
+The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
 
 
@@ -79,22 +72,15 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 11 to 16 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `360669ef`, the first with a macOS job, was in
-   progress at 15:36, and the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the
-   next pack run. Each push's run is read by the reviewing session, and a failure it names comes
-   first here.
+1. **What the next page says.** The runs of `360669ef`, `e3295b5` and `6f4d8590` failed on macOS
+   and Windows, Verdicts 5 to 7, and passed on Linux; the run of `3e6293d` was in progress at 16:40,
+   and the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each
+   push's run is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
-   their item: N 2.6 is the loaders of item 3, and N 6.2 the macOS job's first green run.
-3. **Loaders answer a bad file with a message and no exception (N 2.6).** Scenes, saves, mesh and
-   material files, data assets, project settings, persistent values and packs answer a missing, an
-   empty or an unreadable file with their result carrying what went wrong and the file's name, as
-   the asset server answers with `AssetLoadFailed`, a `Try` form where a result has no room for it,
-   so a game's level with a bad save does not end at the call; a throwing form may stay beside it
-   for a game that asks. `BadFileTests` holds the forms a game reaches first, and N 2.6's row says
-   checked when they do.
-4. **The feature test, first the program (Decision 14).** `BevyCSharp.Sample` is renamed
+   their item: N 6.2 is the macOS job's first green run.
+3. **The feature test, first the program (Decision 14).** `BevyCSharp.Sample` is renamed
    `BevyCSharp.FeatureTest`, in the solution, the README's first line, `bcs open --sample` and the
    Windows job, and AGENTS.md's table row on the owner's word, keeping the window, offscreen,
    headless and `--serve` modes so CI runs it. A hub map with signposts to the zones and a free
@@ -102,31 +88,60 @@ from [SHARED.md](SHARED.md).
    list menu steered by keyboard and pad as a mod menu is, with pages for graphics (window, vsync,
    anti-aliasing, shadows, a quality tier), audio volumes, controls, debug draws (colliders, gizmos,
    wireframe), teleports to the zones, things to spawn, noclip, fly and the time scale, each setting
-   kept through `Persistent` and read at start. The console as a library piece a game gets by one
-   call, `ImGuiConsole`, the `ConsoleLog` ring with its levels and an input with history and
-   completion over the commands, opened by the key under Escape as the editor's is. And the crash
-   log as an engine feature: `AppDomain.UnhandledException` and unobserved task exceptions written
-   to `logs/crash-<time>.txt` beside the executable with the exception, `ConsoleLog`'s last 200
-   lines, the OS, .NET, the ABI, the adapter and the backend, the bridge's panic hook writing the
-   same file for a panic inside Bevy, `logs/latest.log` of every run rotated, and the next start
-   saying where the last crash's file is. The headless run and the Windows job's `bcs open` hold the
-   program in CI.
-5. **The character and the course.** The capsule on `CharacterController`: walk, run, sprint,
+   kept through `Persistent` and read at start. A debug overlay toggled by F3 shows the frame time,
+   the position and the facing, the entities alive and what the `memory` command answers. The
+   console as a library piece a game gets by one call, `ImGuiConsole`, the `ConsoleLog` ring with
+   its levels and an input with history and completion over the commands, opened by the key under
+   Escape as the editor's is. And the crash log as an engine feature: `AppDomain.UnhandledException`
+   and unobserved task exceptions written to `logs/crash-<time>.txt` beside the executable with the
+   exception, `ConsoleLog`'s last 200 lines, the OS, .NET, the ABI, the adapter and the backend, the
+   bridge's panic hook writing the same file for a panic inside Bevy, `logs/latest.log` of every run
+   rotated, and the next start saying where the last crash's file is. The headless run and the
+   Windows job's `bcs open` hold the program in CI.
+4. **The character and the course.** The capsule on `CharacterController`: walk, run, sprint,
    crouch, jump with coyote time and jump buffering, air control, riding a moving platform, pushing
-   crates, first and third person, noclip and fly from the panel, respawn at the zone's start. The
-   zones: ramps at 15, 30, 45 and 60 degrees, stairs of several step heights, a narrow beam and a
-   crouch tunnel; a moving platform, an elevator, a rotating disc and a conveyor; gaps of growing
-   width, an ice patch of low friction, a bounce pad and a pit that respawns; pushable crates,
-   balls, a hinge door, a slider lift, a rope of distance joints and a pressure plate reading
-   `ContactImpulse`; a terrain of a heightmap mesh with a Mesh collider under it all. A drive script
-   walks each zone through `bcs` and asserts it, played by the pack workflow as Courtyard is.
-6. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
+   crates, respawn at the zone's start. The zones: ramps at 15, 30, 45 and 60 degrees, stairs of
+   several step heights, a narrow beam and a crouch tunnel; a moving platform, an elevator, a
+   rotating disc and a conveyor; gaps of growing width, an ice patch of low friction, a bounce pad
+   and a pit that respawns; pushable crates, balls, a hinge door, a slider lift, a rope of distance
+   joints and a pressure plate reading `ContactImpulse`; a terrain of a heightmap mesh with a Mesh
+   collider under it all. Three modes are cycled as Minecraft cycles them, F3 held with F4 stepping
+   to the next with an overlay naming it: walking, the character under gravity with collisions;
+   creative, flying with collisions, a double tap of jump taking off and landing; and spectator, a
+   free camera through everything with no collisions; F5 cycles the view, first person, third person
+   behind and third person in front; the panel's entries and a `mode` console command set the same.
+   A drive script walks each zone through `bcs` and asserts it, played by the pack workflow as
+   Courtyard is.
+5. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
    and anisotropy; a Cornell box lit by shadow maps and by Solari where the GPU has it, a panel
    switch; a lights gallery of directional, point, spot, rect and area lights with shadows, a
    reflection probe, an irradiance volume, light probes, decals, a fog volume, SSAO and a skybox;
    the post effects as panel switches, bloom, tonemapping, MSAA, FXAA, TAA, SMAA and what else the
    camera has; and vegetation as instanced grass and trees moved by a Slang wind shader, each drawn
    from the examples that exist and each zone captured by the drive script.
+6. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
+   demand and is never checked in. `scenes/<name>.json` holds the scene's source, its license and
+   attribution, the pack's URL among this repository's release assets, its size and its SHA-256;
+   `build/make-scene-pack.py` makes a pack from the official download, Intel Sponza first from its
+   glTF, the textures resized to 1K and written as KTX2 with BC7, BC5 and BC1 blocks, mipmapped and
+   zstd-compressed, which the bridge's `ktx2` and `zstd_rust` read with no new crate, the meshes as
+   they are, `AssetPack.Write` packing the folder and the attribution written into
+   THIRD-PARTY-NOTICES.md; the panel's Scenes page lists the manifests, fetches a pack into the
+   user's cache under `Persistent`'s data directory with a progress bar, checks the hash, shows the
+   attribution and loads the scene, the pack opened while the app runs on both sides of the bridge,
+   or chosen before a start where the bridge cannot swap one; `bcs scenes fetch <name>` does the
+   same from a terminal; a workflow started by hand loads each pack and captures reference views
+   with a frame time, the packs cached between runs, and the push workflows never fetch one. Sponza
+   stands on the map at ground level beside the course with its main wooden door open, so the
+   character walks in, its floors and walls under Mesh colliders. Its heaviest meshes, the
+   photogrammetry pieces of hundreds of thousands of triangles, are drawn as meshlets where the
+   bridge is built with `--meshlet` and the GPU has 64-bit texture atomics, through
+   `Render.CreateMeshletMesh` with the cut kept in the user's cache or cut at pack time where the
+   bridge can write a meshlet mesh, the plain meshes the fallback `Render.MeshletsActive` chooses,
+   and a panel switch comparing the frame time of the two, the picture drawn once a pixel while
+   meshlets run; the feature test's bridge and the published one are built with the meshlet and
+   Solari additions. The owner publishes the pack the script makes as a release asset, and Bistro,
+   the classic Sponza and San Miguel wait.
 7. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
    through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
    the latitude on a panel page and in the settings file, the lights' colors and intensities on
@@ -205,6 +220,40 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
+5. **The first macOS jobs fail before the suite: the bridge's own tests do not build.** Read from
+   the pages of `e3295b5` and `6f4d8590`: `the bridge: 0 passed, 0 failed, 0 skipped, did not build
+   after 3 m 23 s, exit code 101`, cargo denying every warning as the workflow asks and the macOS
+   linker warning that `__eh_frame section too large (max 16MB) to encode dwarf unwind offsets in
+   compact unwind table`, which rustc reports under its `linker_messages` lint, so the test binary
+   never linked. The message is about the speed of exception handling in a debug test binary of that
+   size and nothing the bridge does wrong. Two things: the lint is allowed for the bridge with that
+   reason beside it, in `Cargo.toml`'s lints or the job's flags, or the section is brought under the
+   limit where that is cheap; and the suite then runs there. Settled when a macOS job's bridge
+   builds.
+
+6. **The first macOS jobs fail one test, the fixed-update case of `GeneratorAttributeTests`.**
+   Read from the page: an `Assert.InRange()` failure, the value 106 outside the range of 10 to 30,
+   and 111 the second time, for `EachAttributeDoesWhatItSays` with `OnFixedUpdateAttribute`, which
+   runs a harness of 40 frames at 240 frames a second with a fixed step of 120 a second and expects
+   about twenty fixed runs. The harness's clock follows wall time, so on a runner where those frames
+   took most of a second the fixed step caught up a hundred times, and the test measures the machine
+   and not the attribute. Two things: the harness steps its clock a frame at a time, as the row
+   taken at `711f416` has it, so forty frames at 240 are a sixth of a second whatever they took; and
+   the test asserts the count that gives, twenty within one. The 116 repeated warnings on the same
+   page, a system scoped to `Screen.Playing` with no such state added, come from a bare app of a
+   test and say nothing of the failure. Settled when a macOS job passes the test.
+
+7. **The Windows jobs fail the step that opens the sample through `bcs`, and the page says only
+   `exit code 6`.** Read from the pages of `360669ef`, `e3295b5` and `6f4d8590`: `Open the sample
+   through bcs` ended with `Process completed with exit code 6`, nothing else, in all three. The
+   step runs `bcs open --sample`, `bcs command app.status` and `bcs stop` bare, so `bcs`'s answer, a
+   JSON envelope with the code and the sentence the exit code stands for, went to a log nobody
+   reads, which N 6.7 does not allow, and the step is the first proof of `a753c57`'s start line on
+   Windows, so whether the sample opened at all is unread. Two things: the step keeps each `bcs`
+   answer and, where one fails, prints its code and sentence and the last lines of the sample's log
+   at the path `bcs` names, as 3DEngine's `drive-game.sh` does since its `1c848a20`; and the cause
+   is found with that on the next run. Settled when the Windows job opens the sample through `bcs`.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -268,22 +317,12 @@ from [SHARED.md](SHARED.md).
     fog, rain and snow drawn around Bevy's atmosphere, its crate added on the owner's word in the
     working session, and volumetric clouds are not written by hand.
 
+15. **Graphics test scenes come as packs fetched on demand, never checked in.** The owner
+    decided on 2026-10-07: Intel Sponza first, its textures at 1K, the pack a release asset of this
+    repository, fetched by the feature test's panel and by `bcs` on demand and cached for the user,
+    with Bistro, the classic Sponza and San Miguel left for later; the repository holds the
+    manifests and the script that makes a pack. Sponza stands on the feature test's map at ground
+    level with its main door open, for the character to walk in, and its heaviest meshes are drawn
+    as meshlets, to test them, where the GPU can.
+
 ## Replies
-
-**Item 3, the loaders under N 2.6.** A scene and a save answer a bad file in the `SceneLoad` they
-return, whose new `Problem` names it, with nothing spawned and the game in progress left as it was,
-and a scene that places itself, directly or through another, is answered by the outermost read
-with what the reads under it spawned taken back. A mesh or material file gives `AssetHandle.None`
-and posts `AssetLoadFailed` naming the file, once a path, with `TryLoad` beside each. A data asset
-read through `DataRef.Value` is its type's defaults, posted once until its file is read again, with
-`DataAssets.TryGet` saying why beside `Get`, which throws. Project settings carry a `Problem`, and
-`Parse` throws for a tool. A pack that does not open is logged as an error and the app runs without
-it, where `Config.AssetPack` had it refuse to start, and `AssetPack.TryOpen` is beside `Open`. The
-editor spawns a scene before taking the open one away, so a bad file leaves it. `BadFileTests`
-judges each loader's first form, no exception and a problem naming the file, and an app whose pack
-is cut short runs; N 2.6's row is yours to turn to checked. Four test files moved into their areas
-first (`6f4d859`), and five came off N 3.4's list. The suite passed, 1,221 with 9 skipped.
-Item 4, the feature test's program, is next.
-
-Shared: SHARED.md's row of every loader given four bad files, whose loaders a game calls here now
-answer rather than throw.

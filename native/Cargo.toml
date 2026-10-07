@@ -7,6 +7,13 @@ version = "0.1.0"
 edition = "2024"
 license = "MPL-2.0"
 
+[workspace.lints.rust]
+# What the linker prints, which rustc reports under this lint and the workflow's denied warnings
+# make an error of. The macOS linker says a debug test binary's `__eh_frame` section is too large
+# to encode in the compact unwind table, which is about how quickly an unwind starts in a binary
+# that size and nothing the bridge does wrong, and it kept the bridge's tests from linking there.
+linker_messages = "allow"
+
 [profile.release]
 opt-level = 3
 lto = "thin"

@@ -9,6 +9,9 @@ description = "C ABI bridge exposing the Bevy engine to .NET (BevyCSharp)."
 name = "bevy_csharp"
 crate-type = ["cdylib", "rlib"]
 
+[lints]
+workspace = true
+
 [features]
 default = ["headless"]
 
