@@ -33,8 +33,8 @@ BevyCSharp.Tests/OffscreenTests.cs Directory.Delete
 BevyCSharp.Tests/OffscreenTests.cs Path.GetTempPath
 BevyCSharp.Tests/PersistentTests.cs Directory.Delete
 BevyCSharp.Tests/PersistentTests.cs Path.GetTempPath
-BevyCSharp.Tests/PhysicsComponentTests.cs Directory.Delete
-BevyCSharp.Tests/PhysicsComponentTests.cs Path.GetTempPath
+BevyCSharp.Tests/Physics/PhysicsComponentTests.cs Directory.Delete
+BevyCSharp.Tests/Physics/PhysicsComponentTests.cs Path.GetTempPath
 BevyCSharp.Tests/PictureRun.cs Directory.Delete
 BevyCSharp.Tests/PictureRun.cs Path.GetTempPath
 BevyCSharp.Tests/RenderTargetTests.cs Directory.Delete
