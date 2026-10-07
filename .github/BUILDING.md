@@ -281,13 +281,13 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 
 ## Publishing
 
-A push or a pull request runs the test suite on Linux and Windows and stops there. On Windows it
-also opens the sample through `bcs` and asks how it is, since that is the one system where `bcs`
-starts a program through `cmd.exe`. It builds no
+A push or a pull request runs the test suite on Linux, Windows and macOS, the three systems the
+package ships for, and stops there. On Windows it also opens the sample through `bcs` and asks how
+it is, since that is the one system where `bcs` starts a program through `cmd.exe`. It builds no
 per-platform bridge and packs nothing, and nothing a commit message says changes that.
 
 A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
-builds the bridge for all six platforms, runs the tests on Linux and Windows, plays Courtyard and
+builds the bridge for all six platforms, runs the tests on the three systems, plays Courtyard and
 walks the README's install in a container (`build/readme-walk.sh`), and packs only once all of
 them pass. The package is kept as the run's artifact, to download and upload to nuget.org by hand.
 Ticking its **publish** box pushes it to nuget.org from the run instead, which needs the

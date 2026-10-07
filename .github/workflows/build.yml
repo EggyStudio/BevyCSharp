@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/package.yml
     with:
       pack: false
-      test_os: '["ubuntu-24.04", "windows-latest"]'
+      test_os: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
 
   # The README and the guide under docs/, every link followed, so a page moved or a heading renamed
   # without the links to it fails here rather than on a reader.

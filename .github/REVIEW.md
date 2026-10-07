@@ -243,3 +243,11 @@ with a backslash that `cmd.exe` kept. The Windows test job opens the sample thro
 `app.status` and stops it, since that job builds a headless bridge and no package, which Courtyard
 needs, and the sample goes through the same `cmd.exe` line. No machine here runs Windows, so the
 next Windows job is the proof. The suite passed, 1,182 with 9 skipped.
+
+**Now 5, the suite on macOS.** `macos-latest` joins `package.yml`'s `test_os` default and the
+arrays `build.yml` and `pack.yml` pass it, so every push runs the suite on the three systems the
+package ships for, and the test step runs `build/test.py` with `python3` on a Mac, which has no
+`python`. `BUILDING.md` says so. What the first macOS job finds is read from its page and mended,
+and N 6.2's row in the Conformance table is yours to change once a macOS job is green. The suite
+passed, 1,182 with 9 skipped, which reads nothing these files change but the workflows themselves.
+Item 6 is next.

@@ -44,7 +44,7 @@ on:
         description: 'JSON array of runner labels to run the test suite on.'
         type: string
         required: false
-        default: '["ubuntu-24.04", "windows-latest"]'
+        default: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
 
 env:
   DOTNET_NOLOGO: true
@@ -183,11 +183,14 @@ jobs:
       # a page of what failed, which is the job's summary and its annotations. The renderer's part
       # runs on Linux alone, since it is the longer build and its tests read saved compiler output
       # that is the same on every system.
+      # A Mac has python3 and no python, and Windows the other way round.
       - name: Test
         shell: bash
         run: |
           if [ "$RUNNER_OS" = Linux ]; then
             python3 build/test.py --no-build --configuration Release --timeout-minutes 30
+          elif [ "$RUNNER_OS" = macOS ]; then
+            python3 build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
           else
             python build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
           fi

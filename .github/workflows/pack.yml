@@ -41,7 +41,7 @@ jobs:
     with:
       version: ${{ needs.version.outputs.version }}
       pack: true
-      test_os: '["ubuntu-24.04", "windows-latest"]'
+      test_os: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
 
   publish:
     name: publish
