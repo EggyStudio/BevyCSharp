@@ -826,6 +826,7 @@ static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle
 static MeshData DataOf(AssetHandle mesh);                       // The geometry a mesh was built from, or null for one that was not made by CreateMesh
 static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of: its counts, its attributes and its bounds, read without copying its vertices
+static bool GenerateTangents(AssetHandle mesh);                 // Works out tangents for a mesh that has none, from its normals and texture coordinates, as a normal map and anisotropy read them, which Bevy's primitives are made without
 static bool TryReadMaterial(AssetHandle material, out MaterialSettings settings);  // A standard material's settings, read back from the engine, whether code made the material or a glTF file brought it
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
 static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes

@@ -10,28 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c8509aa`. The course is in, which settles item 3, the list renumbered: east of the
-hub, three rows of stations, the north row climbing by ramps at 15, 30, 45 and 60 degrees with a
-landing each, the last too steep for the character's 46, stairs of 0.15, 0.25 and 0.4, the last over
-its step height, a beam a third of a unit wide and a tunnel crawled through crouched; the middle row
-trying the ground, ice, a bounce pad under a ledge too high to jump to and a pit whose sensor puts
-the player back at the zone's start; the south row moving, a platform to and fro between ledges, an
-elevator, a turning disc, a conveyor and five gaps a little wider each time, every piece a static or
-kinematic body sized by its transform's scale over one unit cube; beside it the playground, six
-crates and five balls light enough to push, a door on a hinge, a lift on a slider driven up and
-down, a rope of ten distance joints with a weight, a pressure plate whose lamp lights while
-`ContactImpulse` over its pressers passes a crate's weight, and a heightmap terrain of two waves
-fading to the ground at its edges, under a `Mesh` collider where the program draws, with four balls
-dropped on it; the player applies what is underfoot from a ray down, a belt carrying it, ice keeping
-its speed and the pad throwing it; `teleport`, `player` and `player.put` are commands;
-`build/drive-feature-test.sh` starts the program offscreen at a sixtieth of a second a frame, tries
-the hub's walk and jump, creative flight and spectator mode, then each station from `player.put` and
-judges it by where `player` says it ends, with an error annotation and captures, three runs passing
-on the working machine, and the pack workflow's game job builds the feature test from the checkout
-with the native job's bridge and runs it (`c8509aa`). The guide and BUILDING.md say so. The suite:
-1,232 passed, 9 skipped. The run of `cec88ad` ended at 18:33 with its Windows job cancelled at the
-job's hour in the step that opens the feature test, nothing said, as Verdict 7 reads it; nothing has
-run since, nothing being pushed.
+Reviewed up to `5d60532`. Verdict 10 is settled: the physics page's sentence was about a body added
+in code with a `PhysicsShape`, which keeps its size however its entity is scaled, as
+`PhysicsShape.cs` says of itself, where a `Collider` component is scaled with the entity, and the
+page says so in as many words, the shape kept and the collider below not (`5d60532`), so its two
+paragraphs agree with the code. The render gallery, item 3, is under way in the working tree.
+
+Before them, the course came in, settling its item, the list renumbered: east of the hub, three rows
+of stations, the north row climbing by ramps at 15, 30, 45 and 60 degrees with a landing each, the
+last too steep for the character's 46, stairs of 0.15, 0.25 and 0.4, the last over its step height,
+a beam a third of a unit wide and a tunnel crawled through crouched; the middle row trying the
+ground, ice, a bounce pad under a ledge too high to jump to and a pit whose sensor puts the player
+back at the zone's start; the south row moving, a platform to and fro between ledges, an elevator, a
+turning disc, a conveyor and five gaps a little wider each time, every piece a static or kinematic
+body sized by its transform's scale over one unit cube; beside it the playground, six crates and
+five balls light enough to push, a door on a hinge, a lift on a slider driven up and down, a rope of
+ten distance joints with a weight, a pressure plate whose lamp lights while `ContactImpulse` over
+its pressers passes a crate's weight, and a heightmap terrain of two waves fading to the ground at
+its edges, under a `Mesh` collider where the program draws, with four balls dropped on it; the
+player applies what is underfoot from a ray down, a belt carrying it, ice keeping its speed and the
+pad throwing it; `teleport`, `player` and `player.put` are commands; `build/drive-feature-test.sh`
+starts the program offscreen at a sixtieth of a second a frame, tries the hub's walk and jump,
+creative flight and spectator mode, then each station from `player.put` and judges it by where
+`player` says it ends, with an error annotation and captures, three runs passing on the working
+machine, and the pack workflow's game job builds the feature test from the checkout with the native
+job's bridge and runs it (`c8509aa`). The guide and BUILDING.md say so. The suite: 1,232 passed, 9
+skipped. The run of `cec88ad` ended at 18:33 with its Windows job cancelled at the job's hour in the
+step that opens the feature test, nothing said, as Verdict 7 reads it; nothing has run since,
+nothing being pushed.
 
 Before them, Verdict 9 came to be mended: the leak test reads the heap after every tenth app and
 judges how far its floor rose, the least reading from the twentieth app to the fiftieth against the
@@ -56,19 +62,6 @@ from in front with the camera brought in where a wall stands between, a fall bel
 it back at the start of the zone it was last in, a teleport putting it at a zone's start facing its
 middle, the panel's Player page, the `mode` and `player` commands and the guide's paragraph
 (`9ba00a4`).
-
-Before them, the feature test's program came in: a hub of signposts to its six zones written on
-their boards in gizmo text, the admin panel on F1 or a pad's start button, a list of pages steered
-by the arrows or the pad's cross with each row stepped left and right, graphics, audio, controls,
-debug draws, teleports, spawns and the time scale, its settings read through `Persistent` before the
-window opens, the F3 overlay of the frame time, the place and facing, the entities and the `memory`
-command's pairs, F3 toggling as it is let go so F3 held with another key is free for the modes, the
-console, and the sample's F-key effects moved onto the panel with `feature.gi`, `feature.rtao` and
-`feature.crates` as commands (`ca13f97`), which settled its item; the owner typed their word in the
-working session for AGENTS.md's row and for `bevy_weather`'s item. Verdict 8 is mended, the
-fixed-step cases and the physics tests stepping their clocks a frame at a time (`a915784`), after a
-move of two test files into their folders, N 1.4's list at 79 and N 3.4's at 41 (`19433d1`). The
-suite: 1,230 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
@@ -251,16 +244,6 @@ from [SHARED.md](SHARED.md).
    read after every tenth app, the floor judged, and `HeapCensus` counting the heap's types where
    `BCS_GCDUMP` names `dotnet-gcdump`, which the macOS job installs at a pinned version. Settled
    when a macOS job passes the test.
-
-10. **`docs/physics.md` says a collider is not scaled with its entity, and says it is.** Read
-    from the page: its paragraph on bodies says the box, sphere, capsule and cylinder shapes are
-    sized in world units and not scaled with the entity, and its paragraph on colliders below says a
-    collider is sized in the entity's own units and scaled with it, so a cube stretched into a wall
-    collides as one. The code does the second, `Colliders.cs` sizing every shape by the transform's
-    scale, and the course leans on it, every piece a unit cube scaled to its size (`c8509aa`), so
-    the first sentence is the stale one, kept through its paragraph's rewrap at `aa5c9e0`. The
-    sentence goes, or says what the second says, and the page is read once through for another
-    sentence the scaling made false. Settled when the page says one thing.
 
 ## Decisions
 

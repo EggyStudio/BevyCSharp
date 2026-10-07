@@ -38,10 +38,14 @@ internal static class Anisotropy
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(CameraStart, Vec3.Zero, Vec3.UnitY));
             _light = SpawnDirectional();
 
-            // A sphere with tangents, which a primitive is made with, in Tailwind's gray-300.
+            // A sphere given tangents, which a primitive is made without and anisotropy reads the
+            // brushing's direction from, as Bevy's with_generated_tangents gives them, in
+            // Tailwind's gray-300.
             var gray = Color.FromHex("#d1d5db");
+            var round = Render.CreateMesh(MeshShape.Sphere, 0.1f);
+            Render.GenerateTangents(round);
             var sphere = ecs.SpawnMesh(
-                Render.CreateMesh(MeshShape.Sphere, 0.1f),
+                round,
                 Render.CreateMaterial(new MaterialSettings { BaseColor = (gray.R, gray.G, gray.B, 1f), AnisotropyRotation = 0.5f, AnisotropyStrength = 1f }),
                 Transform.Identity);
             ecs.Wrap<VisibilityRef>(sphere).Value = Visibility.Hidden;

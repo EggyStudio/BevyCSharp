@@ -182,6 +182,32 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Works out tangents for a mesh that has none, from its normals and texture coordinates, as a
+    /// normal map and anisotropy read them, which Bevy's primitives are made without.
+    /// </summary>
+    /// <param name="mesh">A mesh that has loaded, such as one <see cref="CreateMesh(string, float, float, float)"/> made.</param>
+    /// <returns>
+    /// Whether it has tangents now, which a mesh with no normals, no texture coordinates or no
+    /// indexed triangles cannot be given, and a headless build gives none, drawing nothing they are
+    /// read by.
+    /// </returns>
+    /// <remarks>
+    /// A sphere with an anisotropic material and no tangents is drawn as a blaze of white, since the
+    /// direction the surface is brushed in is read from them, as Bevy's <c>anisotropy</c> example
+    /// makes its sphere with <c>with_generated_tangents</c>. A mesh with tangents keeps them.
+    /// </remarks>
+    public static bool GenerateTangents(AssetHandle mesh)
+    {
+        if (!mesh.IsValid) return false;
+
+        var answer = Native.bcs_render_mesh_generate_tangents(mesh.Key);
+        if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState or NativeStatus.Unsupported) return false;
+
+        Native.Check(answer, $"working out the tangents of {mesh}");
+        return true;
+    }
+
+    /// <summary>
     /// A standard material's settings, read back from the engine, whether code made the material or
     /// a glTF file brought it.
     /// </summary>

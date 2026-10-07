@@ -57,6 +57,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_mesh_info(int handle, NativeMeshInfo* info);
 
+    /// <summary>Works out tangents for a mesh that has none, from its normals and texture coordinates.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_mesh_generate_tangents(int handle);
+
     /// <summary>Reads a standard material's settings back.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

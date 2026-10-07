@@ -61,8 +61,11 @@ var water = Render.CreateMaterial(new MaterialSettings
 
 `AttenuationDistance` and `AttenuationColor` tint light on its way through, so thick glass is
 greener at its edge than its face. `AnisotropyStrength` and `AnisotropyRotation` stretch the
-highlight along the mesh's tangents, as brushed metal's is stretched. Each of these has a map
-beside it (`ClearcoatTexture`, `ClearcoatRoughnessTexture`, `ClearcoatNormalTexture`,
+highlight along the mesh's tangents, as brushed metal's is stretched. A glTF file's meshes usually
+carry tangents and Bevy's primitives are made without them, so a sphere from `Render.CreateMesh`
+under an anisotropic material or a normal map is given them first with
+`Render.GenerateTangents(sphere)`, or anisotropy draws it as a blaze of white. Each of these has a
+map beside it (`ClearcoatTexture`, `ClearcoatRoughnessTexture`, `ClearcoatNormalTexture`,
 `TransmissionTexture`, `DiffuseTransmissionTexture`, `ThicknessTexture`, `AnisotropyTexture`), and a
 glTF file's clearcoat, transmission and anisotropy extensions fill them as it loads.
 

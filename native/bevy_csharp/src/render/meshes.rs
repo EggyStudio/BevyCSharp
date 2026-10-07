@@ -114,6 +114,58 @@ pub unsafe extern "C" fn bcs_render_mesh_info(handle: i32, out: *mut BcsMeshInfo
     })
 }
 
+/// Works out tangents for a mesh that has none, from its normals and texture coordinates, which
+/// a normal map and anisotropy read, as Bevy's `with_generated_tangents` does for a primitive.
+///
+/// Answers `OK`, a mesh with tangents already keeping them, `INVALID_STATE` where it lacks what
+/// they are worked out from, normals, texture coordinates or indexed triangles, or `UNSUPPORTED`
+/// in a headless bridge.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_mesh_generate_tangents(handle: i32) -> i32 {
+    crate::interop::guard(|| {
+        // Every profile has meshes, as `bcs_render_mesh_info` says.
+        crate::state::with_world(|world| {
+            use bevy::asset::Assets;
+            use bevy::mesh::Mesh;
+
+            let Some(handle) = crate::assets::clone_handle(world, handle) else {
+                return status::NOT_PRESENT;
+            };
+            let Ok(handle) = handle.try_typed::<Mesh>() else {
+                return status::INVALID_STATE;
+            };
+            let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
+                return status::UNSUPPORTED;
+            };
+            let Some(mesh) = meshes.get_mut(&handle) else {
+                return status::NOT_PRESENT;
+            };
+
+            // Through the whole asset, which marks it changed, so the renderer takes the tangents
+            // where a mutable borrow that writes nothing would leave it as it was.
+            let mesh = mesh.into_inner();
+            if mesh.attribute(Mesh::ATTRIBUTE_TANGENT).is_some() {
+                return status::OK;
+            }
+
+            // Worked out by mikktspace, which comes with the renderer, so a headless bridge, which
+            // draws nothing a tangent is read by, answers that it has none.
+            #[cfg(feature = "render")]
+            {
+                match mesh.generate_tangents() {
+                    Ok(()) => status::OK,
+                    Err(_) => status::INVALID_STATE,
+                }
+            }
+
+            #[cfg(not(feature = "render"))]
+            {
+                status::UNSUPPORTED
+            }
+        })
+    })
+}
+
 /// A mesh described vertex by vertex.
 ///
 /// Every array but `positions` may be null. Positions and normals are three floats a vertex, UVs

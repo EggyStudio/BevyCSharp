@@ -9325,6 +9325,7 @@ static class Bevy.Render
   static IReadOnlyList<PassTiming> Timings()
   static MeshData? DataOf(AssetHandle mesh)
   static MeshRecipe? RecipeOf(AssetHandle mesh)
+  static bool GenerateTangents(AssetHandle mesh)
   static bool IsDrawn(Entity entity)
   static bool MeshletsActive { get; }
   static bool PipelinesReady()
