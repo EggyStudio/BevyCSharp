@@ -71,7 +71,6 @@ BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
 BevyCSharp.Tests/OffscreenTests.cs
 BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
-BevyCSharp.Tests/PersistentTests.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
 BevyCSharp.Tests/RayTracingTests.cs
