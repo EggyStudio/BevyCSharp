@@ -72,6 +72,23 @@ public partial struct Zones
         ctx.Ecs.Set(camera, FlyCamera.LookingAt(zone.Eye, look));
     }
 
+    /// <summary>Teleports from the console, as the panel's teleport page does.</summary>
+    [Command("teleport", "Puts the player, or in spectator mode the camera, at a zone: teleport <hub|course|render gallery|lights|vegetation|scenes>")]
+    internal static string Teleport(string name)
+    {
+        var zone = All.FirstOrDefault(zone => zone.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (zone.Name is null)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"There is no zone called {name.Trim()}. The zones are {string.Join(", ", All.Select(z => z.Name.ToLowerInvariant()))}.");
+            return "teleport <zone>";
+        }
+
+        if (ConsoleHost.World is not { } world) return "there is no world to teleport in";
+
+        Go(new BehaviorContext(world), zone);
+        return $"at {zone.Name}";
+    }
+
     /// <summary>Where a zone's signpost stands, at the hub's edge on the road to it.</summary>
     internal static Vec3 SignOf(Zone zone)
     {

@@ -10,18 +10,43 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ca13f97`. The feature test's program is in: a hub of signposts to its six zones
-written on their boards in gizmo text, the admin panel on F1 or a pad's start button, a list of
-pages steered by the arrows or the pad's cross with each row stepped left and right, graphics,
-audio, controls, debug draws, teleports, spawns and the time scale, its settings read through
-`Persistent` before the window opens, the F3 overlay of the frame time, the place and facing, the
-entities and the `memory` command's pairs, F3 toggling as it is let go so F3 held with another key
-is free for the modes, the console, and the sample's F-key effects moved onto the panel with
-`feature.gi`, `feature.rtao` and `feature.crates` as commands (`ca13f97`), which settles item 3; the
-owner typed their word in the working session for AGENTS.md's row and for `bevy_weather` at item 8.
-Verdict 8 is mended, the fixed-step cases and the physics tests stepping their clocks a frame at a
-time (`a915784`), after a move of two test files into their folders, N 1.4's list at 79 and N 3.4's
-at 41 (`19433d1`). The suite: 1,230 passed, 9 skipped.
+Reviewed up to `9ba00a4`. Verdict 9 is mended: the leak test reads the heap after every tenth app
+and judges how far its floor rose, the least reading from the twentieth app to the fiftieth against
+the least from the seventieth to the hundredth, and where `BCS_GCDUMP` names `dotnet-gcdump`, which
+the macOS job installs at a pinned version, `HeapCensus` counts the heap's types after the twentieth
+app and the hundredth so a failure names what grew, as 3DEngine's `596535ce` has it (`070e5e0`). The
+same commit mends Verdict 7's third half: the step that opens the feature test has `timeout-minutes`
+of four, prints each `bcs` answer and writes it to a file of its own rather than reading it through
+`$(...)`, whose pipe the program `bcs` starts may inherit on Windows and hold open as long as it
+runs, which fits the wait the run of `cec88ad` sits in and is told by the next Windows job. The
+character controller flies with `Fly` set, at `Move` in every direction with gravity held off and
+walls, floors and ceilings still stopping it, and `PhysicsWorld.Place` puts a dynamic body at a
+point at rest and writes its transform, each with a test, in the listing, the cheat sheet and the
+physics page (`aa5c9e0`). The feature test has its player, item 3's character: a capsule on
+`CharacterController` with a figure and a visor, walking, running, sprinting on Shift, crouching on
+C and jumping on Space with coyote time and jump buffering of a little over a tenth of a second
+each, the mouse turning the view while Tab locks the cursor or the right button is held and the
+right stick at any time, the modes walking, creative and spectator stepped by F3 held with F4 and
+named at the top of the screen for a moment, a double tap of jump taking off and landing in creative
+mode, the free camera kept for spectator mode, F5 stepping the view from the eyes, from behind and
+from in front with the camera brought in where a wall stands between, a fall below the map putting
+it back at the start of the zone it was last in, a teleport putting it at a zone's start facing its
+middle, the panel's Player page, the `mode` and `player` commands and the guide's paragraph
+(`9ba00a4`); the zones and the drive script are under way in the working tree. No suite count was
+reported with the three.
+
+Before them, the feature test's program came in: a hub of signposts to its six zones written on
+their boards in gizmo text, the admin panel on F1 or a pad's start button, a list of pages steered
+by the arrows or the pad's cross with each row stepped left and right, graphics, audio, controls,
+debug draws, teleports, spawns and the time scale, its settings read through `Persistent` before the
+window opens, the F3 overlay of the frame time, the place and facing, the entities and the `memory`
+command's pairs, F3 toggling as it is let go so F3 held with another key is free for the modes, the
+console, and the sample's F-key effects moved onto the panel with `feature.gi`, `feature.rtao` and
+`feature.crates` as commands (`ca13f97`), which settled its item; the owner typed their word in the
+working session for AGENTS.md's row and for `bevy_weather` at item 8. Verdict 8 is mended, the
+fixed-step cases and the physics tests stepping their clocks a frame at a time (`a915784`), after a
+move of two test files into their folders, N 1.4's list at 79 and N 3.4's at 41 (`19433d1`). The
+suite: 1,230 passed, 9 skipped.
 
 Before them, the Windows step came to open the program headless and running until stopped, since the
 job's bridge has no renderer (`08ac049`), Verdict 7's second mend; a game gets the editor's console
@@ -35,23 +60,6 @@ and failed one test, `FixedUpdateTests`' overstep case, the second to measure th
 which is Verdict 8; the run of `cec88ad` was in progress at 17:37. The suite: 1,227 passed, 9
 skipped, as last reported.
 
-Before them, the three verdicts came to be mended: the bridge allows `linker_messages` in the
-workspace's lints with the macOS linker's note as the reason (`470fec7`); the fixed-update case
-steps its clock a 240th of a second a frame and asserts twenty fixed steps within one (`128cecd`);
-and the Windows step keeps each `bcs` answer and hands a failing one to `build/bcs-answer.py`, which
-says the command, its exit code, the code and sentence `bcs` answered and the end of the log the
-answer names, on the page and the summary, with a test (`6a2c4b2`). The crash log is in as an engine
-feature, the feature test's first commit: `CrashLog` writes `logs/latest.log` beside the executable
-from the first app of a process, C#'s lines and Bevy's, which the bridge's log layer collects for
-the console's ring, five runs kept, and a crash to `logs/crash-<time>.txt` with the system, .NET,
-the ABI, the adapter, the backend, the last panic the bridge caught and the log's last 200 lines,
-for an exception nothing caught, a task's exception nobody looked at and a panic on one of Bevy's
-threads, which the bridge's hook hands over as it happens, the next start saying where the last
-crash's file is, at ABI 228 (`e58d4bc`). Two offscreen runs of the sample in about thirty on the
-working session's machine lost the device as they ended and died by a signal, untraced, which
-becomes a verdict if a run shows it. The pack run of `75e8953` stays cancelled. The suite: 1,227
-passed, 9 skipped.
-
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
 
@@ -63,29 +71,26 @@ with no wait for a reply, and the list is long so that it does not run out. Item
 from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The run of `cec88ad` passed on Linux, failed on macOS in the
-   overstep case before its mend and in the leak test's two readings, Verdict 9, and its Windows
-   step opening the feature test through `bcs` was still running at 17:56, thirteen minutes in,
-   Verdict 7's third half; the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the
-   next pack run. Each push's run is read by the reviewing session, and a failure it names comes
-   first here.
+   overstep case before its mend and in the leak test's two readings, Verdict 9, mended since, and
+   its Windows step opening the feature test through `bcs` was still waiting at 18:21, Verdict 7's
+   third half, mended since, so the first run with `070e5e0` tells of the three; the pack run of
+   `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each push's run is read
+   by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
    their item: N 6.2 is the macOS job's first green run.
-3. **The character and the course.** The capsule on `CharacterController`: walk, run, sprint,
-   crouch, jump with coyote time and jump buffering, air control, riding a moving platform, pushing
-   crates, respawn at the zone's start. The zones: ramps at 15, 30, 45 and 60 degrees, stairs of
-   several step heights, a narrow beam and a crouch tunnel; a moving platform, an elevator, a
-   rotating disc and a conveyor; gaps of growing width, an ice patch of low friction, a bounce pad
-   and a pit that respawns; pushable crates, balls, a hinge door, a slider lift, a rope of distance
-   joints and a pressure plate reading `ContactImpulse`; a terrain of a heightmap mesh with a Mesh
-   collider under it all. Three modes are cycled as Minecraft cycles them, F3 held with F4 stepping
-   to the next with an overlay naming it: walking, the character under gravity with collisions;
-   creative, flying with collisions, a double tap of jump taking off and landing; and spectator, a
-   free camera through everything with no collisions; F5 cycles the view, first person, third person
-   behind and third person in front; the panel's entries and a `mode` console command set the same.
-   A drive script walks each zone through `bcs` and asserts it, played by the pack workflow as
-   Courtyard is.
+3. **The course, its character in.** The player is in (`9ba00a4`), a capsule on
+   `CharacterController`: walk, run, sprint, crouch, jump with coyote time and jump buffering, the
+   three modes stepped by F3 held with F4 with an overlay naming them, F5 stepping the view, the
+   panel's page, the `mode` command and respawn at the zone's start; air control, riding a moving
+   platform and pushing crates are the controller's and are shown on the zones. The zones: ramps at
+   15, 30, 45 and 60 degrees, stairs of several step heights, a narrow beam and a crouch tunnel; a
+   moving platform, an elevator, a rotating disc and a conveyor; gaps of growing width, an ice patch
+   of low friction, a bounce pad and a pit that respawns; pushable crates, balls, a hinge door, a
+   slider lift, a rope of distance joints and a pressure plate reading `ContactImpulse`; a terrain
+   of a heightmap mesh with a Mesh collider under it all. A drive script walks each zone through
+   `bcs` and asserts it, played by the pack workflow as Courtyard is.
 4. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
    and anisotropy; a Cornell box lit by shadow maps and by Solari where the GPU has it, a panel
    switch; a lights gallery of directional, point, spot, rect and area lights with shadows, a
@@ -214,8 +219,12 @@ from [SHARED.md](SHARED.md).
    17:56, thirteen minutes in, where the opening, the status and the stop take seconds, so one of
    the three waits, the program run with `--frames 0` or the stop; the step takes a
    `timeout-minutes` of a few minutes, so a wait fails there with its last answer and not at the
-   job's sixty, and what waited is read from that. Settled when the Windows job opens the sample
-   through `bcs`.
+   job's sixty, and what waited is read from that. Mended at `070e5e0`, the step given
+   `timeout-minutes` of four, each answer printed and written to a file of its own rather than read
+   through `$(...)`, whose pipe a program `bcs` starts may inherit on Windows and hold open as long
+   as it runs, which would keep the step waiting on the opening's answer until the program ended, as
+   the run of `cec88ad` waits; the next Windows job tells whether that was the wait. Settled when a
+   Windows job's step opens the feature test through `bcs` and ends with its three answers printed.
 
 8. **The macOS job of `e58d4bc` fails the overstep case of `FixedUpdateTests`, the second test to
    measure the machine's clock.** Read from the page: 894 passed, 1 failed, 405 skipped, the bridge
@@ -238,8 +247,10 @@ from [SHARED.md](SHARED.md).
    from the twentieth to the fiftieth against the least from the seventieth to the hundredth, and
    where the macOS job installs `dotnet-gcdump` a census of the heap's types after the twentieth app
    and the hundredth, a failure naming the types that grew, so a leak is told from the runtime's own
-   tide. The SHARED.md row on an app's whole life carries the floor. Settled when a macOS job passes
-   the test.
+   tide. The SHARED.md row on an app's whole life carries the floor. Mended at `070e5e0`, the heap
+   read after every tenth app, the floor judged, and `HeapCensus` counting the heap's types where
+   `BCS_GCDUMP` names `dotnet-gcdump`, which the macOS job installs at a pinned version. Settled
+   when a macOS job passes the test.
 
 ## Decisions
 

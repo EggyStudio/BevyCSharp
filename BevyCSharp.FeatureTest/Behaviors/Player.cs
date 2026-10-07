@@ -97,6 +97,7 @@ public partial struct Player
     private const float CrouchSpeed = 1.8f;
     private const float FlySpeed = 8f;
     private const float JumpSpeed = 5.5f;
+    private const float BounceSpeed = 13f;
     private const double Coyote = 0.12;
     private const double Buffer = 0.12;
     private const double DoubleTap = 0.3;
@@ -248,6 +249,33 @@ public partial struct Player
             var speed = crouch ? CrouchSpeed : sprint ? SprintSpeed : walk ? WalkSpeed : RunSpeed;
             body.Move = wish * speed;
             body.Height = crouch ? Crouched : 0f;
+
+            // What the course underfoot does, which a character's frictionless contacts and a belt
+            // that does not move leave to the game. A belt carries it, ice keeps the speed it had
+            // and gives it little grip to change it, and the pad throws it in the air.
+            if (body.Grounded && ctx.World.TryGetResource<PhysicsWorld>(out var world) && world.Has(ctx.Entity))
+            {
+                var feet = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity).Translation;
+                var under = world.Raycast(feet + new Vec3(0f, 0.3f, 0f), new Vec3(0f, -1f, 0f), 0.6f, ctx.Entity) is { } hit
+                    ? Course.Under(hit.Entity)
+                    : Surface.Plain;
+
+                switch (under)
+                {
+                    case Surface.Conveyor:
+                        body.Move += Course.Belt;
+                        break;
+                    case Surface.Ice:
+                        var (going, _) = world.Velocity(ctx.Entity);
+                        var kept = going with { Y = 0f };
+                        body.Move = kept + ((body.Move - kept) * MathF.Min(1f, 0.8f * ctx.Time.Delta));
+                        break;
+                    case Surface.Bounce:
+                        body.Jump = BounceSpeed;
+                        Jumped = true;
+                        break;
+                }
+            }
 
             if (jump) Asked = now;
 
@@ -425,6 +453,18 @@ public partial struct Player
         return string.Create(CultureInfo.InvariantCulture,
             $"at {feet.X:0.00} {feet.Y:0.00} {feet.Z:0.00}, {Mode.ToString().ToLowerInvariant()}, {View}, "
             + $"{(body.Fly ? "flying" : body.Grounded ? "grounded" : "in the air")}");
+    }
+
+    /// <summary>
+    /// Puts the player at a point, facing as it was, for the drive script to try a station.
+    /// </summary>
+    [Command("player.put", "Puts the player's feet at a point, at rest: player.put <x> <y> <z>")]
+    internal static string PutCommand(float x, float y, float z)
+    {
+        if (ConsoleHost.World is not { } world) return "there is no world to put the player in";
+
+        Put(new BehaviorContext(world), new Vec3(x, y, z), "put");
+        return Where();
     }
 
     private static float Held(Input input, Key key) => input.KeyDown(key) ? 1f : 0f;

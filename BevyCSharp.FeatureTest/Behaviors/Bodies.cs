@@ -66,9 +66,13 @@ public partial struct Bodies
         {
             if (!ctx.Ecs.TryGet<GlobalTransform>(row.Entity, out var placed)) continue;
 
+            // Sized in the entity's own units, so scaled with it, as a level's pieces are sized.
             var collider = row.Component;
+            var scale = placed.Scale;
             var size = collider.Size == Vec3.Zero ? Vec3.One : collider.Size;
-            var center = placed.Translation + (placed.Rotation * collider.Offset);
+            size = new Vec3(size.X * scale.X, size.Y * scale.Y, size.Z * scale.Z);
+            var offset = new Vec3(collider.Offset.X * scale.X, collider.Offset.Y * scale.Y, collider.Offset.Z * scale.Z);
+            var center = placed.Translation + (placed.Rotation * offset);
             var kind = collider.Shape switch
             {
                 ColliderShape.Sphere => 1,
