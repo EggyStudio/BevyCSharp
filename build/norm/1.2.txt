@@ -185,8 +185,6 @@ BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiTextConfig
 BevyCSharp/Interop/NativeTypes.Window.cs NativeMonitor
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowEvent
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowPlace
-BevyCSharp/Scenes/Persistent.cs IPersistentValue
-BevyCSharp/Scenes/Persistent.cs UserData
 BevyCSharp/Scenes/SceneAttributes.cs DataVersionAttribute
 BevyCSharp/Scenes/SceneAttributes.cs FormerNameAttribute
 BevyCSharp/Scenes/SceneValue.cs SceneReferences
