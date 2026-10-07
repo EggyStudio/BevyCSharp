@@ -50,7 +50,10 @@ ctx.Ecs.Add(coin, new Collider { Shape = ColliderShape.Sphere });
 
 A collider is sized in the entity's own units and scaled with it, so a cube stretched into a wall
 collides as one. One left at a size of zero takes the bounds of the mesh the entity is drawn with,
-and `Hull` and `Mesh` are the drawn mesh itself, the second for a static floor or wall.
+and `Hull` and `Mesh` are the drawn meshes themselves, the second for a static floor or wall. Those
+two take the meshes of the entities under it as well, placed as they are under it, so a `Mesh`
+collider on the entity that places a level's model is the shape of its floors and walls once the
+model has spawned and loaded.
 `Colliders.TryFit` says what one comes to and `Colliders.Draw` draws it as a gizmo, which is how the
 editor shows them. A body added in code on an entity carrying the two is the game's and is left
 alone.
@@ -68,9 +71,12 @@ A `CharacterController` beside a dynamic body makes it a character, walked at th
 asks for rather than pushed about. Before every step it is walked toward `Move` along the ground it
 stands on. It slides along a wall it meets, rides over a low edge and climbs a step up to
 `StepHeight`, stands still on a slope up to `MaxSlope` and slides off a steeper one, and leaves the
-ground at `Jump` where it stands on any. Each step writes back whether it stands on ground and which
-way that faces. The body stays upright whatever its entity's rotation, so the game turns the entity
-to face the way it walks:
+ground at `Jump` where it stands on any. It stands as tall as `Height`, with its feet where they
+are, so a game crouches it by lowering the height and stands it by raising it again, or by setting
+zero, its collider's height. A character has the height once there is room overhead for it, so one
+crouched under a ledge stands as it walks out. Each step writes back whether it stands on ground and
+which way that faces. The body stays upright whatever its entity's rotation, so the game turns the
+entity to face the way it walks:
 
 ```csharp
 ctx.Ecs.Add(player, new RigidBody { Kind = BodyKind.Dynamic, Mass = 70f });
@@ -82,6 +88,7 @@ public void Walk(BehaviorContext ctx, ref CharacterController body)
 {
     body.Move = new Vec3(ctx.Input.KeyDown(Key.D) ? 4f : 0f, 0f, 0f);
     if (body.Grounded && ctx.Input.KeyPressed(Key.Space)) body.Jump = 5f;
+    body.Height = ctx.Input.KeyDown(Key.ControlLeft) ? 1f : 0f;
 }
 ```
 

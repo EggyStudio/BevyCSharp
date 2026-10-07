@@ -21,9 +21,9 @@ namespace Bevy.Physics;
 /// which no step undoes.
 /// </para>
 /// <para>
-/// A game writes <see cref="Move"/> and <see cref="Jump"/>, and reads <see cref="Grounded"/> and
-/// <see cref="GroundNormal"/>, which each step writes back. Asked of a body that is not dynamic,
-/// none of it does anything.
+/// A game writes <see cref="Move"/>, <see cref="Jump"/> and <see cref="Height"/>, and reads
+/// <see cref="Grounded"/> and <see cref="GroundNormal"/>, which each step writes back. Asked of a
+/// body that is not dynamic, none of it does anything.
 /// </para>
 /// </remarks>
 /// <example>
@@ -66,6 +66,15 @@ public partial struct CharacterController
     /// <summary>The highest step it climbs onto walking into it, or zero for its radius.</summary>
     [Range(0, 2), Tooltip("The highest ledge it steps up onto. Zero is its radius.")]
     public float StepHeight;
+
+    /// <summary>
+    /// How tall it stands, with its feet where they are, as crouching and standing set it, or zero
+    /// for the height its collider made it. A height it has no room for overhead is taken once there
+    /// is, so a character crouched under a ledge stands as it walks out. It is no shorter than it is
+    /// wide, and a ball made a character keeps its size.
+    /// </summary>
+    [Range(0, 3), Tooltip("How tall it stands, lower to crouch. Zero is its collider's height.")]
+    public float Height;
 
     /// <summary>Whether it stood on ground no steeper than <see cref="MaxSlope"/> at the last step.</summary>
     [ReadOnly]

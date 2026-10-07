@@ -9,10 +9,17 @@ public sealed partial class PhysicsWorld
     /// <summary>What the step needs of a character's body that its components do not say.</summary>
     /// <param name="Radius">How far its side is from its middle.</param>
     /// <param name="HalfHeight">How far its foot is below its middle.</param>
-    private sealed record Character(float Radius, float HalfHeight);
+    /// <param name="Fitted">
+    /// How far its foot was below its middle as its collider made it, which a controller asking for
+    /// no height in particular returns it to.
+    /// </param>
+    private sealed record Character(float Radius, float HalfHeight, float Fitted);
 
     /// <summary>The bodies that are characters, made so from a <see cref="CharacterController"/>.</summary>
     private readonly Dictionary<Entity, Character> _characters = [];
+
+    /// <summary>The characters asked for a height this step, gathered before any is resized.</summary>
+    private readonly List<(Entity Entity, float Height)> _heights = [];
 
     /// <summary>The settings' gravity, which a character on a slope has taken out of its velocity.</summary>
     private Vector3 _gravity;
@@ -70,7 +77,7 @@ public sealed partial class PhysicsWorld
         reference.Activity.SleepThreshold = -1f;
 
         _contacts.Materials[Packed(body)] = new PhysicsMaterial(0f, 0f);
-        _characters[entity] = new Character(MathF.Max(fit.Size.X, fit.Size.Z) * 0.5f, fit.Size.Y * 0.5f);
+        _characters[entity] = new Character(MathF.Max(fit.Size.X, fit.Size.Z) * 0.5f, fit.Size.Y * 0.5f, fit.Size.Y * 0.5f);
     }
 
     /// <summary>
@@ -98,6 +105,20 @@ public sealed partial class PhysicsWorld
     private void MoveCharacters(EcsWorld ecs, float seconds)
     {
         if (_characters.Count == 0) return;
+
+        // Each as tall as its controller asks, crouching or standing, or as its collider made it
+        // where it asks for no height, before it walks. Gathered first, since a resize writes the
+        // character's entry, and a height already reached costs a comparison.
+        _heights.Clear();
+        foreach (var (entity, character) in _characters)
+        {
+            if (!ecs.TryGet<CharacterController>(entity, out var asked)) continue;
+
+            var height = asked.Height > 0f ? asked.Height : 2f * character.Fitted;
+            if (MathF.Abs(height - (2f * character.HalfHeight)) > 1e-4f) _heights.Add((entity, height));
+        }
+
+        foreach (var (entity, height) in _heights) Resize(entity, height);
 
         foreach (var (entity, character) in _characters)
         {
@@ -204,6 +225,69 @@ public sealed partial class PhysicsWorld
         if (Cast(center, Vector3.UnitY, character.HalfHeight + rise, self, out _)) return;
 
         reference.Pose.Position = center + new Vector3(0f, rise + 0.01f, 0f);
+    }
+
+    /// <summary>
+    /// Makes a character <paramref name="height"/> tall, at least as tall as it is wide, with its feet
+    /// where they are, as crouching and standing do, and not into a ceiling.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The shape is made again as the kind it was and as wide, a capsule, a cylinder or a box, and
+    /// its middle moves up or down by as much as half the height changes, so its feet and its
+    /// entity's transform stay where they are. A ball does not stretch and keeps its size.
+    /// </para>
+    /// <para>
+    /// Room overhead across the head is looked for from inside the body before it grows, as
+    /// 3DEngine looks for it, and a height there is no room for is asked for again at the next
+    /// step, which is how a character crouched under a ledge stands once it is out.
+    /// </para>
+    /// </remarks>
+    private void Resize(Entity entity, float height)
+    {
+        if (!_characters.TryGetValue(entity, out var character) || !_bodies.TryGetValue(entity, out var body)) return;
+
+        height = MathF.Max(height, 2f * character.Radius);
+        var half = height / 2f;
+        if (MathF.Abs(half - character.HalfHeight) < 1e-4f) return;
+
+        var reference = _simulation.Bodies[body.Moving];
+        var feet = reference.Pose.Position - new Vector3(0f, character.HalfHeight, 0f);
+        if (half > character.HalfHeight)
+        {
+            var top = feet.Y + (2f * character.HalfHeight);
+            foreach (var around in ProbeDirections)
+            {
+                var from = new Vector3(reference.Pose.Position.X, top - character.Radius, reference.Pose.Position.Z) + (around * character.Radius * 0.7f);
+                if (Cast(from, Vector3.UnitY, character.Radius + ((half - character.HalfHeight) * 2f), Packed(body), out _)) return;
+            }
+        }
+
+        TypedIndex shape;
+        if (body.Shape.Type == Capsule.Id)
+        {
+            shape = _simulation.Shapes.Add(new Capsule(character.Radius, height - (2f * character.Radius)));
+        }
+        else if (body.Shape.Type == Cylinder.Id)
+        {
+            shape = _simulation.Shapes.Add(new Cylinder(character.Radius, height));
+        }
+        else if (body.Shape.Type == Box.Id)
+        {
+            var box = _simulation.Shapes.GetShape<Box>(body.Shape.Index);
+            shape = _simulation.Shapes.Add(new Box(box.Width, height, box.Length));
+        }
+        else
+        {
+            return;
+        }
+
+        reference.SetShape(shape);
+        _simulation.Shapes.RemoveAndDispose(body.Shape, _pool);
+        reference.Pose.Position = feet + new Vector3(0f, half, 0f);
+
+        _bodies[entity] = body with { Shape = shape, Center = body.Center + new Vector3(0f, half - character.HalfHeight, 0f) };
+        _characters[entity] = character with { HalfHeight = half };
     }
 
     /// <summary>How fast a point of what a ray met moves, from its linear and angular velocity, or nothing for a static.</summary>

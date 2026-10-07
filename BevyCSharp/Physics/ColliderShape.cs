@@ -15,12 +15,13 @@ public enum ColliderShape
     /// <summary>A cylinder standing along Y.</summary>
     Cylinder,
 
-    /// <summary>The tightest convex shape around the mesh the entity is drawn with.</summary>
+    /// <summary>The tightest convex shape around the meshes the entity and those under it are drawn with.</summary>
     Hull,
 
     /// <summary>
-    /// The triangles of the mesh the entity is drawn with, for a static body such as a level's
-    /// floor, since Bepu collides a moving body with a mesh only from outside.
+    /// The triangles of the meshes the entity and those under it are drawn with, for a static body
+    /// such as a level's floors and walls, since Bepu collides a moving body with a mesh only from
+    /// outside.
     /// </summary>
     Mesh,
 }

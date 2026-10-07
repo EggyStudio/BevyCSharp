@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Bevy.Physics;
 
 /// <summary>Works out what a <see cref="Collider"/> collides as, and draws it.</summary>
@@ -12,7 +14,8 @@ public static class Colliders
     private static readonly Dictionary<AssetHandle, MeshData> Meshes = [];
 
     /// <summary>
-    /// What an entity's collider comes to, or false while the mesh it fits has not loaded.
+    /// What an entity's collider comes to, or false while a mesh it fits has not loaded or a hull or a
+    /// mesh has none to fit.
     /// </summary>
     /// <param name="world">The world the entity is in. Only valid inside a system.</param>
     /// <param name="entity">An entity carrying a <see cref="Collider"/>.</param>
@@ -26,27 +29,24 @@ public static class Colliders
 
         var scale = world.TryGet<Transform>(entity, out var transform) ? Abs(transform.Scale) : Vec3.One;
 
-        // The mesh it is drawn with, or nothing for an entity drawn with none or a build with no
-        // renderer, which a size given outright does not need.
-        MeshData? mesh = null;
-        var needsMesh = collider.Shape is ColliderShape.Hull or ColliderShape.Mesh || collider.Size == Vec3.Zero;
-        if (needsMesh && App.HasRenderer && Render.MeshOf(world, entity) is { IsValid: true } handle)
-        {
-            if (!TryMesh(handle, out mesh)) return false;
-        }
-
         if (collider.Shape is ColliderShape.Hull or ColliderShape.Mesh)
         {
-            if (mesh is null || mesh.Positions.Length < 4) return false;
+            if (!App.HasRenderer || !TryDrawnUnder(world, entity, out var drawn) || drawn.Positions.Length < 4) return false;
 
-            var positions = mesh.Positions.Select(point => Times(point + collider.Offset, scale)).ToArray();
+            var positions = drawn.Positions.Select(point => Times(point + collider.Offset, scale)).ToArray();
             var (low, high) = Bounds(positions);
-            var shape = collider.Shape == ColliderShape.Hull
-                ? PhysicsShape.Hull(positions)
-                : PhysicsShape.Mesh(positions, mesh.Indices ?? [.. Enumerable.Range(0, positions.Length).Select(i => (uint)i)]);
+            var shape = collider.Shape == ColliderShape.Hull ? PhysicsShape.Hull(positions) : PhysicsShape.Mesh(positions, drawn.Indices!);
 
             fit = new ColliderFit(shape, collider.Shape, high - low, (low + high) * 0.5f);
             return true;
+        }
+
+        // The mesh it is drawn with, or nothing for an entity drawn with none or a build with no
+        // renderer, which a size given outright does not need.
+        MeshData? mesh = null;
+        if (collider.Size == Vec3.Zero && App.HasRenderer && Render.MeshOf(world, entity) is { IsValid: true } handle)
+        {
+            if (!TryMesh(handle, out mesh)) return false;
         }
 
         // The box the shape fits in, given or taken from the mesh, and where its middle is.
@@ -141,6 +141,67 @@ public static class Colliders
     internal static void Forget()
     {
         lock (Gate) Meshes.Clear();
+    }
+
+    /// <summary>
+    /// The meshes an entity and those under it are drawn with, as one, each placed in the entity's
+    /// own space by the transforms between them, or false while one of them is loading or none of
+    /// them is drawn with any.
+    /// </summary>
+    /// <remarks>
+    /// A model is spawned under the entity that places it, its parts each a child drawn with a mesh
+    /// of its own and the entity with none, so a hull or a mesh taken from the entity alone would
+    /// wait forever. A mesh of lines or points is passed over, having no triangles. Each point is
+    /// carried up through the transforms of the entities between it and the entity, which together
+    /// place a part in its model, and the entity's own scale is put on afterwards with the
+    /// collider's. Walked from the entity downward each time it is asked, since a body is made once
+    /// and the walk is only repeated while it waits.
+    /// </remarks>
+    private static bool TryDrawnUnder(EcsWorld world, Entity entity, [NotNullWhen(true)] out MeshData? drawn)
+    {
+        drawn = null;
+        var positions = new List<Vec3>();
+        var indices = new List<uint>();
+
+        // Each entity with the transforms that place it under the entity, its own first.
+        var pending = new Stack<(Entity Entity, Transform[] Up)>();
+        pending.Push((entity, []));
+        while (pending.Count > 0)
+        {
+            var (next, up) = pending.Pop();
+            foreach (var child in world.ChildrenOf(next))
+            {
+                pending.Push((child, [world.TryGet<Transform>(child, out var placed) ? placed : Transform.Identity, .. up]));
+            }
+
+            if (Render.MeshOf(world, next) is not { IsValid: true } handle) continue;
+            if (!TryMesh(handle, out var mesh) || mesh is null) return false;
+            if (mesh.Topology != MeshTopology.Triangles) continue;
+
+            var first = (uint)positions.Count;
+            foreach (var point in mesh.Positions) positions.Add(Placed(point, up));
+
+            if (mesh.Indices is { } own)
+            {
+                foreach (var index in own) indices.Add(first + index);
+            }
+            else
+            {
+                for (var index = 0u; index < mesh.Positions.Length; index++) indices.Add(first + index);
+            }
+        }
+
+        if (positions.Count == 0) return false;
+
+        drawn = new MeshData { Positions = [.. positions], Indices = [.. indices] };
+        return true;
+    }
+
+    // A point carried up through transforms, the nearest first, each scaling, turning and moving it.
+    private static Vec3 Placed(Vec3 point, Transform[] up)
+    {
+        foreach (var transform in up) point = transform.Translation + transform.Rotation * Times(point, transform.Scale);
+        return point;
     }
 
     private static bool TryMesh(AssetHandle handle, out MeshData? mesh)

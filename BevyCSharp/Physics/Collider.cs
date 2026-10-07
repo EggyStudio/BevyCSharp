@@ -9,8 +9,11 @@ namespace Bevy.Physics;
 /// spawned fits it without a number typed. <see cref="Colliders.TryFit"/> says what it comes to.
 /// </para>
 /// <para>
-/// <see cref="ColliderShape.Hull"/> and <see cref="ColliderShape.Mesh"/> are the drawn mesh itself,
-/// and wait for it to have loaded.
+/// <see cref="ColliderShape.Hull"/> and <see cref="ColliderShape.Mesh"/> are the drawn meshes
+/// themselves, the entity's and those of the entities under it, placed as they are under it, so a
+/// collider on the entity that places a model takes the model's shape. They wait until there is
+/// one and every one has loaded, which for a model is once its parts have been spawned, and what
+/// is spawned under the entity after its body is made does not change the body.
 /// </para>
 /// </remarks>
 [Behavior]

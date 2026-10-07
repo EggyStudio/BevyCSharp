@@ -87,6 +87,25 @@ public sealed class CharacterControllerTests
         ecs.Set(entity, controller);
     }
 
+    private static void Stand(EcsWorld ecs, Entity entity, float height)
+    {
+        var controller = ecs.GetOrDefault<CharacterController>(entity);
+        controller.Height = height;
+        ecs.Set(entity, controller);
+    }
+
+    /// <summary>
+    /// How tall a character stands, read by a ray cast straight down onto its head from
+    /// <paramref name="above"/> over its feet, or NaN where the ray meets something else first.
+    /// </summary>
+    private static float Tall(EcsWorld ecs, PhysicsWorld physics, Entity entity, float above)
+    {
+        var feet = Feet(ecs, entity);
+        return physics.Raycast(feet + new Vec3(0f, above, 0f), new Vec3(0f, -1f, 0f), above) is { } hit && hit.Entity == entity
+            ? hit.Point.Y - feet.Y
+            : float.NaN;
+    }
+
     [Fact]
     public void ACharacterStandsOnTheFloorAndReportsGround()
     {
@@ -253,5 +272,69 @@ public sealed class CharacterControllerTests
         Assert.True(MathF.Abs(rotation.Y - turned.Y) < 1e-3f && MathF.Abs(rotation.W - turned.W) < 1e-3f, $"turned to {rotation}");
         Assert.True(wasCharacter);
         Assert.False(isCharacter);
+    }
+
+    [Fact]
+    public void ACharacterCrouchesAndStandsWithItsFeetWhereTheyWere()
+    {
+        // Settled standing, then asked to crouch to a unit, and the other way round.
+        var (crouched, feet) = Simulate(
+            ecs => [Character(ecs, Vec3.Zero)],
+            1f,
+            (ecs, physics, e) => (Tall(ecs, physics, e[0], 5f), Feet(ecs, e[0])),
+            (ecs, e, step) =>
+            {
+                if (step == 20) Stand(ecs, e[0], 1f);
+            });
+
+        var stood = Simulate(
+            ecs => [Character(ecs, Vec3.Zero, new CharacterController { Height = 1f })],
+            1f,
+            (ecs, physics, e) => Tall(ecs, physics, e[0], 5f),
+            (ecs, e, step) =>
+            {
+                if (step == 20) Stand(ecs, e[0], Height);
+            });
+
+        Assert.InRange(crouched, 0.95f, 1.05f);
+        Assert.InRange(feet.Y, -0.05f, 0.05f);
+        Assert.InRange(MathF.Abs(feet.X) + MathF.Abs(feet.Z), 0f, 0.05f);
+        Assert.InRange(stood, Height - 0.05f, Height + 0.05f);
+    }
+
+    [Fact]
+    public void ACharacterCrouchedUnderALedgeStandsOnceItWalksOutFromUnderIt()
+    {
+        // A ledge whose underside is 1.5 up, two wide over where it crouches, which it fits under
+        // crouched and not standing.
+        static Entity[] Level(EcsWorld ecs)
+        {
+            Block(ecs, new Vec3(0f, 1.75f, 0f), new Vec3(2f, 0.5f, 2f));
+            return [Character(ecs, Vec3.Zero, new CharacterController { Height = 1f })];
+        }
+
+        var under = Simulate(
+            Level,
+            1f,
+            (ecs, physics, e) => Tall(ecs, physics, e[0], 1.45f),
+            (ecs, e, step) =>
+            {
+                if (step == 10) Stand(ecs, e[0], Height);
+            });
+
+        var (outside, feet) = Simulate(
+            Level,
+            2f,
+            (ecs, physics, e) => (Tall(ecs, physics, e[0], 5f), Feet(ecs, e[0])),
+            (ecs, e, step) =>
+            {
+                if (step != 10) return;
+                Stand(ecs, e[0], Height);
+                Walk(ecs, e[0], new Vec3(3f, 0f, 0f));
+            });
+
+        Assert.InRange(under, 0.95f, 1.05f);
+        Assert.True(feet.X > 2f, $"stopped at {feet.X}");
+        Assert.InRange(outside, Height - 0.05f, Height + 0.05f);
     }
 }

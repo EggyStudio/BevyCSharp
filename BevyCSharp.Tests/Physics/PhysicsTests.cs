@@ -366,6 +366,73 @@ public sealed class PhysicsTests
         Assert.InRange(final, 0.2f, 0.3f);
     }
 
+    /// <summary>
+    /// A mesh collider on an entity drawn with nothing waits for a mesh under it, as a model's parts
+    /// are spawned under the entity that places it, and is then that mesh where it is placed, at the
+    /// entity's scale.
+    /// </summary>
+    [SkippableFact]
+    public void AMeshColliderIsTheMeshesUnderItsEntityOnceThereAreAny()
+    {
+        Needs.Renderer();
+
+        using var physics = new PhysicsWorld();
+        using var app = new App(Config.OffscreenFor(64, 64, frames: 60));
+        app.AddPlugin(new EnginePlugin());
+
+        var plane = AssetHandle.None;
+        var level = Entity.None;
+        var frame = 0;
+        bool? waited = null;
+        PhysicsHit? inside = null, outside = null;
+        var made = false;
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            world =>
+            {
+                // Two units square, facing up, and stretched to four by the level's scale.
+                plane = Render.CreateMesh(MeshShape.Plane, 2f, 2f);
+                var ecs = world.Resource<EcsWorld>();
+                level = ecs.Spawn();
+                ecs.Add(level, new Transform(new Vec3(1f, 0f, 0f), Quat.Identity, new Vec3(2f, 1f, 2f)));
+                ecs.Add(level, new RigidBody { Kind = BodyKind.Static });
+                ecs.Add(level, new Collider { Shape = ColliderShape.Mesh });
+            },
+            "Test.Level"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                physics.Sync(ecs);
+
+                if (++frame == 2)
+                {
+                    waited = !physics.Has(level);
+
+                    // A part of a model, a room two units up under the level.
+                    var room = ecs.Spawn();
+                    ecs.Add(room, Transform.At(0f, 2f, 0f));
+                    Render.SetMesh(ecs, room, plane);
+                    ecs.SetParent(room, level);
+                }
+
+                if (made || !physics.Has(level)) return;
+                made = true;
+                inside = physics.Raycast(new Vec3(2.5f, 5f, 1.5f), new Vec3(0f, -1f, 0f), 10f);
+                outside = physics.Raycast(new Vec3(3.5f, 5f, 0f), new Vec3(0f, -1f, 0f), 10f);
+            },
+            "Test.Sync"));
+
+        app.Run();
+
+        Assert.True(waited);
+        Assert.True(made, "no body was made for the level");
+        Assert.Equal(level, inside?.Entity);
+        Assert.InRange(inside!.Value.Point.Y, 1.99f, 2.01f);
+        Assert.Null(outside);
+    }
+
     /// <summary>A body is the entity's once, and asking for a second is refused.</summary>
     [Fact]
     public void AnEntityHasOneBody()

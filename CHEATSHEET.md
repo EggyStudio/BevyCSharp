@@ -1342,7 +1342,7 @@ Joint WithDrive(float unitsPerSecond, float force);             // A slider that
 ### `Physics.Colliders`
 
 ```csharp
-static bool TryFit(EcsWorld world, Entity entity, out ColliderFit fit);  // What an entity's collider comes to, or false while the mesh it fits has not loaded
+static bool TryFit(EcsWorld world, Entity entity, out ColliderFit fit);  // What an entity's collider comes to, or false while a mesh it fits has not loaded or a hull or a mesh has none to fit
 static bool Draw(EcsWorld world, Entity entity, (float R, float G, float B, float A) color);  // Draws an entity's collider as a gizmo, where it collides
 ```
 
