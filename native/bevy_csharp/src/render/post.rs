@@ -40,6 +40,8 @@ fn drop_temporal(entity: &mut bevy::ecs::world::EntityWorldMut) {
     if !entity.contains::<MotionBlur>() && !asked_for_motion(entity) {
         entity.remove::<MotionVectorPrepass>();
     }
+
+    keep_traced(entity);
 }
 
 /// Whether the game asked for motion vectors itself, which a pass or a compute shader reading them
@@ -49,6 +51,34 @@ pub fn asked_for_motion(entity: &bevy::ecs::world::EntityWorldMut) -> bool {
     entity
         .get::<RequestedPrepass>()
         .is_some_and(|requested| requested.0 & 4 != 0)
+}
+
+/// Puts back what ray-traced lighting reads, where a camera has it and something else took one of
+/// its prepasses off as it went.
+///
+/// Solari requires its prepasses as it is inserted and is not asked again, so an effect taken off
+/// after it, as motion blur takes the motion vectors it brought, left it reading nothing and the
+/// picture unlit, the feature test's Cornell box among it.
+#[cfg(feature = "render")]
+pub fn keep_traced(entity: &mut bevy::ecs::world::EntityWorldMut) {
+    #[cfg(feature = "solari")]
+    if entity.contains::<bevy::solari::realtime::SolariLighting>() {
+        use bevy::core_pipeline::prepass::{
+            DeferredPrepass, DeferredPrepassDoubleBuffer, DepthPrepass, DepthPrepassDoubleBuffer,
+            MotionVectorPrepass,
+        };
+
+        entity.insert((
+            DeferredPrepass,
+            DepthPrepass,
+            MotionVectorPrepass,
+            DeferredPrepassDoubleBuffer,
+            DepthPrepassDoubleBuffer,
+        ));
+    }
+
+    #[cfg(not(feature = "solari"))]
+    let _ = entity;
 }
 
 /// Which prepasses a game asked a camera for, as the flags it gave.
@@ -159,6 +189,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                     camera.remove::<MotionVectorPrepass>();
                 }
 
+                keep_traced(&mut camera);
                 status::OK
             })
         }
@@ -1185,6 +1216,8 @@ pub unsafe extern "C" fn bcs_render_set_screen_space_reflections(
                         {
                             camera.remove::<DepthPrepass>();
                         }
+
+                        keep_traced(&mut camera);
                     }
 
                     return status::OK;
@@ -1321,6 +1354,8 @@ pub extern "C" fn bcs_render_set_ambient_occlusion(camera: u64, quality: i32, th
                         if asked & 2 == 0 {
                             camera.remove::<NormalPrepass>();
                         }
+
+                        keep_traced(&mut camera);
                     }
 
                     return status::OK;
@@ -1574,6 +1609,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                     entity_mut.remove::<MotionBlur>();
                     if !entity_mut.contains::<TemporalAntiAliasing>() && !asked_for_motion(&entity_mut) {
                         entity_mut.remove::<MotionVectorPrepass>();
+                        keep_traced(&mut entity_mut);
                     }
                 }
 
@@ -1647,8 +1683,19 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                         metering_mask,
                         compensation_curve: compensation,
                     });
-                } else {
-                    entity_mut.remove::<AutoExposure>();
+                } else if entity_mut.take::<AutoExposure>().is_some() {
+                    // Bevy 0.19 forgets the effect's buffer by the camera's own entity where it
+                    // keeps it by the render world's, so its pass went on adjusting the picture
+                    // after the component was gone, brighter and brighter in a dark room. The
+                    // camera is given a new entity in the render world, which starts without it,
+                    // at the cost of the history the old one kept for temporal effects, a frame's
+                    // worth of which a settings screen turning the effect off can afford. The old
+                    // one's small buffer is left behind in Bevy's map. Bevy's removal despawns the
+                    // old entity at the next sync and leaves the link to it, which the new one
+                    // would find and refuse, so the link goes too.
+                    use bevy::render::sync_world::{RenderEntity, SyncToRenderWorld};
+                    entity_mut.remove::<(SyncToRenderWorld, RenderEntity)>();
+                    entity_mut.insert(SyncToRenderWorld);
                 }
 
                 status::OK

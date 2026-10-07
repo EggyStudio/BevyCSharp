@@ -51,7 +51,27 @@ public sealed class RayTracingTests
     /// The floor's color beside the wall, or null where ray tracing is not running. A bare wall is
     /// a single face built point by point, with normals and no texture coordinates.
     /// </summary>
-    private static (byte R, byte G, byte B, byte A)? Floor(bool traced, bool bareWall = false)
+    /// <summary>
+    /// A lens and occlusion set after the rays are turned on leave the rays lighting the floor,
+    /// though taking motion blur and occlusion off takes away prepasses of their own.
+    /// </summary>
+    /// <remarks>
+    /// The feature test turned the rays on and then set its lens, which took the motion vectors
+    /// away with a motion blur that was never on, and its whole map was drawn unlit.
+    /// </remarks>
+    [SkippableFact]
+    public void EffectsSetAfterTheRaysLeaveThemLighting()
+    {
+        Needs.Renderer();
+
+        var traced = Floor(traced: true, effectsAfter: true);
+        Needs.RayTracing(traced is not null);
+        var lit = traced!.Value;
+
+        Assert.True(lit.R > 40 && lit.R > lit.G + 20, $"the floor by the wall was {lit} with effects set after the rays");
+    }
+
+    private static (byte R, byte G, byte B, byte A)? Floor(bool traced, bool bareWall = false, bool effectsAfter = false)
     {
         var active = false;
 
@@ -67,6 +87,15 @@ public sealed class RayTracingTests
                 Render.SetAmbientLight(camera, (0f, 0f, 0f), 0f);
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
                 if (traced) Render.SetRayTracedLighting(camera, true);
+
+                // A lens with no motion blur and occlusion put on and taken off, each of which
+                // takes off prepasses of its own as it goes.
+                if (effectsAfter)
+                {
+                    Render.SetEffects(camera, new EffectSettings { Vignette = 0.3f });
+                    Render.SetAmbientOcclusion(camera, AmbientOcclusionQuality.Low);
+                    Render.SetAmbientOcclusion(camera, null);
+                }
 
                 var floorMesh = Render.CreateMesh(MeshShape.Cuboid, 8f, 0.1f, 8f);
                 var floor = ecs.Spawn();
