@@ -33,7 +33,7 @@ public sealed unsafe partial class App : IDisposable
             Native.bcs_state_add(_handle, StateRegistry.Claim<TState>(), StateRegistry.ToInt(initial)),
             $"adding state {typeof(TState).Name}");
 
-        _addedStates.Add(typeof(TState));
+        _addedStates.Add(SameState.NameOf(typeof(TState)));
         return this;
     }
 
@@ -89,7 +89,7 @@ public sealed unsafe partial class App : IDisposable
                     $"adding sub-state {typeof(TState).Name} under {string.Join(" and ", parents.Select(parent => parent.Parent.Name))}");
             }
 
-            _addedStates.Add(typeof(TState));
+            _addedStates.Add(SameState.NameOf(typeof(TState)));
             return this;
         }
 
@@ -112,7 +112,7 @@ public sealed unsafe partial class App : IDisposable
                 StateRegistry.ToInt(initial)),
             $"adding sub-state {typeof(TState).Name} under {sub.Parent.Name}");
 
-        _addedStates.Add(typeof(TState));
+        _addedStates.Add(SameState.NameOf(typeof(TState)));
         return this;
     }
 
@@ -205,7 +205,7 @@ public sealed unsafe partial class App : IDisposable
         // The first answer for a value, as the bridge reads the table, for a joint that reads it.
         ComputedRules.Know(slot, raw => Array.IndexOf(from, raw) is >= 0 and var at ? to[at] : null);
 
-        _addedStates.Add(typeof(TState));
+        _addedStates.Add(SameState.NameOf(typeof(TState)));
         return this;
     }
 
@@ -272,7 +272,7 @@ public sealed unsafe partial class App : IDisposable
             Native.bcs_computed_add_rule(_handle, slot),
             $"adding computed state {typeof(TState).Name} from {computed.Source.Name} by a rule");
 
-        _addedStates.Add(typeof(TState));
+        _addedStates.Add(SameState.NameOf(typeof(TState)));
         return this;
     }
 
@@ -399,7 +399,7 @@ public sealed unsafe partial class App : IDisposable
             Native.bcs_joint_add(_handle, joint),
             $"adding computed state {typeof(TState).Name} from {Named(computed)}");
 
-        _addedStates.Add(typeof(TState));
+        _addedStates.Add(SameState.NameOf(typeof(TState)));
         return this;
     }
 
@@ -416,7 +416,7 @@ public sealed unsafe partial class App : IDisposable
     {
         if (StateRegistry.DescribeComputed(source) is not { } computed) return (StateRegistry.Claim(source), null);
 
-        if (!_addedStates.Contains(source))
+        if (!_addedStates.Contains(SameState.NameOf(source)))
             throw new InvalidOperationException(
                 $"{typeof(TState).Name} is worked out from {source.Name}, which is computed and "
                 + "was not added before it. Add it first, since it is read through how it is "

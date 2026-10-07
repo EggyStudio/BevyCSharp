@@ -435,11 +435,28 @@ public sealed unsafe partial class App : IDisposable
         foreach (var system in _systems)
         {
             if (system.Descriptor.Source != source || system.IsRemoved) continue;
-            system.IsRemoved = true;
+            system.Remove();
             removed++;
         }
 
         return removed;
+    }
+
+    /// <summary>
+    /// Lets go of what an assembly left in the app, its messages' channels and its resources, as
+    /// a script's host retires the generation the assembly is.
+    /// </summary>
+    /// <remarks>
+    /// Its systems are removed by their source (<see cref="RemoveSystemsBySource"/>), and the
+    /// process's tables pass over or replace what a generation registers. Left are the tables the
+    /// app keeps by type, which would hold the generation for as long as the app lives.
+    /// </remarks>
+    internal void ForgetAssembly(System.Reflection.Assembly assembly)
+    {
+        ArgumentNullException.ThrowIfNull(assembly);
+
+        World.Forget(assembly);
+        if (World.TryGetResource<MessageBus>(out var bus)) bus.Forget(assembly);
     }
 
     /// <summary>The descriptors registered for <paramref name="stage"/>, in registration order.</summary>

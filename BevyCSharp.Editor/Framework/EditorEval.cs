@@ -137,13 +137,11 @@ public static class EditorEval
     private static int _generation;
 
     /// <summary>What a fragment is compiled against, everything this process already loaded.</summary>
-    private static MetadataReference[] References() => _references ??=
-    [
-        .. AppDomain.CurrentDomain
-            .GetAssemblies()
-            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
-            .Select(assembly => MetadataReference.CreateFromFile(assembly.Location)),
-    ];
+    /// <remarks>
+    /// The script host's, read once for the process and shared, so the editor holds one image of
+    /// each file however many fragments it runs and scripts it compiles.
+    /// </remarks>
+    private static MetadataReference[] References() => _references ??= Bevy.Scripting.ScriptHost.References();
 
     /// <summary>An answer as one line, with a collection shown by its contents.</summary>
     private static string Describe(object? answer) => answer switch

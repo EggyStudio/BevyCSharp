@@ -122,7 +122,7 @@ public static unsafe class StateRegistry
     /// The declared states an app has to add, those a system of its claimed a slot for and it has
     /// not added, parents before the sub-states that live in them.
     /// </summary>
-    internal static List<(Type State, Action<App> Add)> DeclaredFor(IReadOnlySet<Type> added)
+    internal static List<(Type State, Action<App> Add)> DeclaredFor(IReadOnlySet<string> added)
     {
         lock (Gate)
         {
@@ -130,7 +130,7 @@ public static unsafe class StateRegistry
             return
             [
                 .. Declared
-                    .Where(declared => Slots.ContainsKey(declared.State) && !added.Contains(declared.State))
+                    .Where(declared => Slots.ContainsKey(declared.State) && !added.Contains(SameState.NameOf(declared.State)))
                     .OrderBy(declared => declared.Sub)
                     .Select(declared => (declared.State, declared.Add)),
             ];
@@ -241,6 +241,11 @@ public static unsafe class StateRegistry
         // since a slot is known only by its number when the bridge reports what it did.
         lock (Gate)
         {
+            // A script's new generation posts as its own enum, which its systems read, rather than
+            // as the last generation's, which nothing reads any more and which the poster would keep.
+            if (Posters.Keys.FirstOrDefault(key => SameState.Instance.Equals(key, typeof(TState))) is { } kept && kept != typeof(TState))
+                Posters.Remove(kept);
+
             Posters.TryAdd(typeof(TState), static (bus, ecs, exited, entered) =>
             {
                 var transition = new StateTransitionEvent<TState>(
@@ -311,7 +316,11 @@ public static unsafe class StateRegistry
         lock (Gate)
         {
             Reset();
-            if (Slots.TryGetValue(state, out var existing)) return existing;
+            if (Slots.TryGetValue(state, out var existing))
+            {
+                Rekey(state, existing);
+                return existing;
+            }
 
             // A sub-state of several states takes one of the slots set aside for those, whichever
             // states they are, since each is fed every state slot and checks the ones it names.
@@ -414,6 +423,25 @@ public static unsafe class StateRegistry
             Slots[state] = next;
             return next;
         }
+    }
+
+    /// <summary>
+    /// Keeps <paramref name="state"/> as the key of the slot an enum of its name holds, where the
+    /// key was an earlier generation's of a script, compiled again since.
+    /// </summary>
+    /// <remarks>
+    /// The tables find a state by its enum's full name, so a script's new generation finds the slot
+    /// its last one claimed. The key is the type the slot was claimed with, though, and kept for the
+    /// process it would keep that generation from unloading, and every generation after it.
+    /// </remarks>
+    private static void Rekey(Type state, int slot)
+    {
+        var kept = Slots.Keys.First(key => SameState.Instance.Equals(key, state));
+        if (ReferenceEquals(kept, state)) return;
+
+        Slots.Remove(kept);
+        Slots[state] = slot;
+        if (Reported.Remove(state)) Reported.Add(state);
     }
 
     /// <summary>
@@ -678,5 +706,8 @@ internal sealed class SameState : IEqualityComparer<Type>
         ReferenceEquals(x, y) || (x is not null && y is not null && string.Equals(x.FullName, y.FullName, StringComparison.Ordinal));
 
     /// <inheritdoc/>
-    public int GetHashCode(Type obj) => StringComparer.Ordinal.GetHashCode(obj.FullName ?? obj.Name);
+    public int GetHashCode(Type obj) => StringComparer.Ordinal.GetHashCode(NameOf(obj));
+
+    /// <summary>The name a state is known by, its enum's full name.</summary>
+    public static string NameOf(Type state) => state.FullName ?? state.Name;
 }

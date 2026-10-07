@@ -124,8 +124,12 @@ public sealed unsafe partial class App : IDisposable
     /// </remarks>
     public ProjectSettings Project { get; } = new();
 
-    /// <summary>The states, sub-states and computed states this app added, by their enum.</summary>
-    private readonly HashSet<Type> _addedStates = new(SameState.Instance);
+    /// <summary>The states, sub-states and computed states this app added, by their enum's name.</summary>
+    /// <remarks>
+    /// By name rather than by type, as the state tables find a state, so a script's enum compiled
+    /// again is the state added before, and the app holds none of a generation's types.
+    /// </remarks>
+    private readonly HashSet<string> _addedStates = new(StringComparer.Ordinal);
 
     /// <summary>Creates the engine and its native Bevy app.</summary>
     /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>

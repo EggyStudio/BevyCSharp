@@ -93,6 +93,8 @@ BevyCSharp.Tests/SaveGameTests.cs
 BevyCSharp.Tests/ScaleTests.cs
 BevyCSharp.Tests/SceneFileTests.cs
 BevyCSharp.Tests/SceneValueTests.cs
+BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
+BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/ShaderLayoutTests.cs
 BevyCSharp.Tests/ShaderPassTests.cs

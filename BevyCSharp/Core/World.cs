@@ -29,6 +29,19 @@ public sealed class World : IDisposable
     /// <summary>The types of every registered resource.</summary>
     public IReadOnlyCollection<Type> ResourceTypes => _resources.Keys.ToArray();
 
+    /// <summary>Drops every resource whose type an assembly declares or is named in.</summary>
+    /// <remarks>
+    /// For a script's generation as its host retires it, whose resources nothing can read any
+    /// more, and which kept would keep the generation from unloading.
+    /// </remarks>
+    internal void Forget(System.Reflection.Assembly assembly)
+    {
+        foreach (var type in _resources.Keys)
+        {
+            if (Retired.Names(type, assembly)) _resources.TryRemove(type, out _);
+        }
+    }
+
     /// <summary>Adds or replaces the resource of type <typeparamref name="T"/>.</summary>
     public void InsertResource<T>(T value) where T : notnull => _resources[typeof(T)] = value;
 

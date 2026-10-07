@@ -37,10 +37,18 @@ public static class BehaviorRegistry
     /// <summary>
     /// Records a generated registration. Called from a module initializer; safe to call twice.
     /// </summary>
+    /// <remarks>
+    /// A script compiled while an app runs loads into a context that can be unloaded, and its host
+    /// registers its behaviors into that app alone. Its module initializer calls this as well, and
+    /// kept here the delegate would hold the script's generation for the life of the process, every
+    /// generation compiled after it beside it, so a registration from such an assembly is passed
+    /// over, as <see cref="BehaviorsPlugin"/> passes over one in building an app.
+    /// </remarks>
     /// <param name="register">Adds one assembly's behaviors to an app.</param>
     public static void Add(Action<App> register)
     {
         ArgumentNullException.ThrowIfNull(register);
+        if (register.Method.Module.Assembly.IsCollectible) return;
 
         lock (Gate)
         {

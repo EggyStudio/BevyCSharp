@@ -120,6 +120,10 @@ public sealed class ScriptHost(App app, string directory)
     {
         if (_tag is not null) app.RemoveSystemsBySource(_tag);
 
+        // What the generation left in the app by type, its messages' channels and its resources,
+        // which kept would hold it after it is unloaded.
+        foreach (var assembly in _loaded?.Assemblies ?? []) app.ForgetAssembly(assembly);
+
         _loaded?.Unload();
         _loaded = null;
         _tag = null;
@@ -183,11 +187,26 @@ public sealed class ScriptHost(App app, string directory)
         return true;
     }
 
-    /// <summary>Everything a script is compiled against: this app, and what it already loaded.</summary>
-    private static MetadataReference[] References() => [.. AppDomain.CurrentDomain
+    /// <summary>
+    /// What a script is compiled against, every assembly the process has loaded from a file, the
+    /// app's own among them, each read once for the process.
+    /// </summary>
+    /// <remarks>
+    /// A reference holds its file's whole image in native memory that only its finalizer gives back,
+    /// while the GC's heap stays small and a full collection comes late. Read again at every
+    /// compilation, a host compiling on each save gathered them, a hundred compilations taking the
+    /// test host from 495 MB to 841 MB, as 3DEngine's test job reached the runner's 16 GB that way.
+    /// Each file is read the first time a compilation needs it and shared by every compilation
+    /// after, an assembly loaded since the last being read at the next, and the editor's evaluation
+    /// compiles against the same.
+    /// </remarks>
+    public static MetadataReference[] References() => [.. AppDomain.CurrentDomain
         .GetAssemblies()
         .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
-        .Select(a => MetadataReference.CreateFromFile(a.Location))];
+        .Select(a => Read.GetOrAdd(a.Location, static location => MetadataReference.CreateFromFile(location)))];
+
+    /// <summary>The references read for the process, by the file each was read from.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, MetadataReference> Read = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Invokes the generated registration in a freshly loaded assembly.

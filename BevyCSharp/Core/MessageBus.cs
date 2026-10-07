@@ -44,6 +44,19 @@ public sealed class MessageBus
 {
     private readonly ConcurrentDictionary<Type, object> _channels = new();
 
+    /// <summary>Drops the channels of every message type an assembly declares or is named in.</summary>
+    /// <remarks>
+    /// For a script's generation as its host retires it, whose messages nothing can send or read
+    /// any more, and whose channels kept for the app would keep the generation from unloading.
+    /// </remarks>
+    internal void Forget(System.Reflection.Assembly assembly)
+    {
+        foreach (var type in _channels.Keys)
+        {
+            if (Retired.Names(type, assembly)) _channels.TryRemove(type, out _);
+        }
+    }
+
     /// <summary>Sends a message, for every reader to see next frame.</summary>
     public void Send<T>(T message) where T : notnull
     {

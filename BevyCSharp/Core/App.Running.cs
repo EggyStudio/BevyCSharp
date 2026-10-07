@@ -70,7 +70,7 @@ public sealed unsafe partial class App : IDisposable
         // last thing before running, once every system that could use one has registered.
         foreach (var (state, add) in StateRegistry.DeclaredFor(_addedStates))
         {
-            if (!_addedStates.Contains(state)) add(this);
+            if (!_addedStates.Contains(SameState.NameOf(state))) add(this);
         }
 
         ApplyOrder();
@@ -239,9 +239,9 @@ public sealed unsafe partial class App : IDisposable
         private GCHandle _handle;
 
         internal App Owner { get; }
-        internal SystemDescriptor Descriptor { get; }
+        internal SystemDescriptor Descriptor { get; private set; }
         internal Stage Stage { get; }
-        internal bool IsRemoved { get; set; }
+        internal bool IsRemoved { get; private set; }
         internal IntPtr UserData => GCHandle.ToIntPtr(_handle);
 
         /// <summary>The number the bridge gave it, which orders it, or -1 for one Bevy does not schedule as a stage's.</summary>
@@ -253,6 +253,20 @@ public sealed unsafe partial class App : IDisposable
             Descriptor = descriptor;
             Stage = stage;
             _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+        }
+
+        /// <summary>Stops it running, and lets go of what it ran.</summary>
+        /// <remarks>
+        /// Bevy calls a system it was given for as long as the app lives, so the record stays,
+        /// pinned, and answers each call with nothing. What it ran goes, its delegate and its run
+        /// condition among them, for a descriptor of the same name and source that does nothing,
+        /// since a script's generation lives as long as anything holds one of its methods, and a
+        /// record kept for the life of the app would hold every generation compiled into it.
+        /// </remarks>
+        internal void Remove()
+        {
+            IsRemoved = true;
+            Descriptor = new SystemDescriptor(static _ => { }, Descriptor.Name) { Source = Descriptor.Source };
         }
 
         /// <summary>

@@ -389,3 +389,38 @@ and Behaviors follows it. The suite passed, 1,208 with 9 skipped. Item 10 is nex
 
 Shared: a first game told from an empty folder a step at a time, each step a program the workflow
 builds and runs and the page is held to, as 3DEngine's `d5d2578d` does.
+
+**Now 10, what a script host reads and keeps.** `ScriptHost.References()` reads each assembly the
+process loaded from a file once, the first time a compilation needs it, and shares it with every
+compilation after and with the editor's evaluation, where every compilation read them all again.
+`ScriptCompilationMemoryTests` compiles a script a hundred times and reads the process before any
+collection, 495 MB after ten and 841 MB after a hundred before, 298 MB and 318 MB now, and holds
+the growth under 48 MB. `AppLeakTests` takes SHARED.md's row on an app's whole life, a hundred apps
+made, run and closed holding 191 MB after twenty and 205 MB after a hundred, the heap 12.0 MB and
+12.3 MB, which nothing here had read, so that row is yours to change.
+
+A generation did not unload when its script was compiled again, kept in five ways, which
+`ScriptGenerationTests` finds with a row for each kind of thing a game's module initializers and
+systems put in the tables, the first generation looked for while the app still lives, as an
+editor's would be.
+
+- `BehaviorRegistry` kept a script's registration, as 3DEngine's list did, and passes over one from
+  a collectible assembly now, as `BehaviorsPlugin` already passed over it in building an app.
+- The app kept every system it was given for Bevy to call, the removed ones with what they ran. A
+  removed one keeps its name and source and lets go of its delegate and its run condition.
+- A state's slot, its report and its poster were kept by the type that claimed them. A newer
+  generation's enum takes them over, and the poster it replaces had posted the last generation's
+  transitions, which the new generation's systems never read.
+- The app kept the states it added by type, and keeps their names now.
+- The bus kept a channel for each message type and the world each resource, a generation's state
+  transitions among them. `App.ForgetAssembly`, which the host calls as it retires a generation,
+  drops what an assembly's types name, reached through `InternalsVisibleTo` rather than made public.
+
+A script's assembly adds its registration and its states to the process's lists through its module
+initializers, as a game's do, and its schemas, which already let go, and no commands, since the
+command generator runs as a game is built and the host runs the behavior and state generators
+alone, which the guide now says. The suite passed, 1,218 with 9 skipped, and `Messages.cs` came off
+N 1.2's list first, renamed for the one public type it holds. Item 11 is next.
+
+Shared: a script compiled a hundred times and an app made a hundred times holding level, and a
+script's generation unloading as it is compiled again, as 3DEngine's `c06ec659` and `d7e370ed`.
