@@ -14,7 +14,8 @@ from the crates that do carry one.
 
 Every crate of the lock is named, so a crate no shipped profile compiles is named too, and N 6.5's
 test holds the file to the lock. The library's NuGet packages, Bevy's default font, the examples and
-the assets they load are written from what this script knows of them, below.
+the assets they load are written from what this script knows of them, below, and the scene packs
+from their manifests in `scenes/`.
 """
 
 import collections
@@ -242,6 +243,16 @@ def build(packages):
         out.append(f"> {line}".rstrip())
     out.append("")
 
+    packs = scene_packs()
+    if packs:
+        out.append("## The scene packs\n")
+        out.append("The scenes the manifests in `scenes/` name are fetched as packs when they are asked for, and are")
+        out.append("kept in neither this repository nor the package. Each pack holds its makers' own license file")
+        out.append("beside its model.\n")
+        for pack in packs:
+            out.append(f"- **{pack['title']}** ({pack['source']}), under {pack['license']}. {pack['attribution']}")
+        out.append("")
+
     out.append("## Texts\n")
     for key in order:
         entry = texts[key]
@@ -264,6 +275,19 @@ def describe(entry):
     if entry["taken"]:
         parts.append(f"{'and ' if parts else ''}the text taken for {', '.join(entry['taken'])}, whose packages hold none")
     return f"{entry['kind'] or 'A notice'}, {', '.join(parts)}."
+
+
+def scene_packs():
+    """The manifests of the scene packs, in the order of their names."""
+    folder = os.path.join(ROOT, "scenes")
+    if not os.path.isdir(folder):
+        return []
+    packs = []
+    for name in sorted(os.listdir(folder)):
+        if name.endswith(".json"):
+            with open(os.path.join(folder, name), encoding="utf-8") as file:
+                packs.append(json.load(file))
+    return packs
 
 
 def bevy_version():

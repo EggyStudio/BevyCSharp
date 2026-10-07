@@ -637,6 +637,14 @@ by `build/fetch-bevy-assets.sh` and are not kept in this one. Bevy credits them 
 > [by @tomkranis on Sketchfab]: https://sketchfab.com/models/371dea88d7e04a76af5763f2a36866bc
 > [CC-BY 4.0]: https://creativecommons.org/licenses/by/4.0/
 
+## The scene packs
+
+The scenes the manifests in `scenes/` name are fetched as packs when they are asked for, and are
+kept in neither this repository nor the package. Each pack holds its makers' own license file
+beside its model.
+
+- **Intel Sponza** (https://www.intel.com/content/www/us/en/developer/topic-technology/graphics-research/samples.html), under CC BY 4.0. Intel Sponza (2022) by Frank Meinl and Anton Kaplanyan, from Intel's Sample Library, under CC BY 4.0. Its textures are resized to 1K and compressed for the GPU here, and its lights and cameras left out.
+
 ## Texts
 
 ### Text 1

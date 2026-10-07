@@ -97,6 +97,7 @@ Stop any serving session before running the suite.
 | `docs` | The guide for somebody using the engine, a page an area, which the README links |
 | `games/Courtyard` | A game built from the packed package, which the workflow plays |
 | `games/Stress` | The engine under load, for the measurements of PERFORMANCE.md |
+| `scenes` | The manifests of the scene packs, well-known graphics scenes fetched as packs on demand |
 
 ## Conventions
 
