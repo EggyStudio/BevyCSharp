@@ -304,6 +304,11 @@ lines at a warning or worse of each log written while it ran, those `bcs open` k
 not signed in to GitHub sees, where the log needs signing in. `build/page.py` holds what it and
 `build/test.py` share in saying so.
 
+The test job's Windows step that opens the sample through `bcs` runs in Git's bash rather than
+through `build/step.py`, and keeps each of `bcs`'s answers. One that fails is handed to
+`build/bcs-answer.py`, which says the command, its exit code, the code and the sentence `bcs`
+answered, and the last lines of the log the answer names, in the same annotation and summary.
+
 Courtyard's play and Swarm's hold each frame to a sixtieth of a second of the game with
 `app.frametime`, since the play plans each walk in frames and the runner draws with Mesa's software
 Vulkan, a few frames a second, which on the machine's clock carried the runner past its coins.

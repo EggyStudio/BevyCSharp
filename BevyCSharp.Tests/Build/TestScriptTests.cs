@@ -9,7 +9,8 @@ namespace Bevy.Tests;
 /// page within its limits whatever the run held, says a process that is lost and runs the suite
 /// again in parts after it, and reads the bridge's failures from what cargo prints, as N 6.7 and
 /// N 6.8 of NORM.md have it. <c>build/step.py</c>, which runs each step of the pack workflow's jobs
-/// on Linux, says what failed in a step that fails having said nothing.
+/// on Linux, says what failed in a step that fails having said nothing, and
+/// <c>build/bcs-answer.py</c> what a <c>bcs</c> command that failed answered.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -272,6 +273,67 @@ public sealed class TestScriptTests : IDisposable
         File.WriteAllText(_folder.File("elsewhere.sh"), "echo first\nexit 5\n");
         (_, log, _) = Step(python, _folder.File("elsewhere.sh"));
         Assert.Contains("::error title=The step beginning `echo first`%3A exit code 5::The step ended with exit code 5 by its own exit, no command failing.", log);
+    }
+
+    [SkippableFact]
+    public void ABcsAnswerThatFailedIsSaidWithItsCodeItsSentenceAndTheEndOfTheLogItNames()
+    {
+        var python = Needs.Python();
+
+        File.WriteAllLines(_folder.File("sample.log"),
+        [
+            "\u001b[2m2026-10-07T15:02:11.000000Z\u001b[0m \u001b[32m INFO\u001b[0m bevy_render::renderer: AdapterInfo { name: \"WARP\" }",
+            "Unhandled exception. System.DllNotFoundException: bevy_csharp",
+        ]);
+        var answer = $$"""
+            {"command":"open","success":false,"data":{"log":{{System.Text.Json.JsonSerializer.Serialize(_folder.File("sample.log"))}}},
+             "errors":[{"code":"NOT_READY","message":"BevyCSharp.Sample did not start serving within 90 seconds."}]}
+            """;
+
+        var (exit, log) = Answer(python, answer, "./bcs open --sample", "6");
+
+        Assert.Equal(6, exit);
+        var error = Assert.Single(log.Split('\n'), line => line.StartsWith("::error", StringComparison.Ordinal));
+        Assert.StartsWith("::error title=./bcs open --sample on Windows::", error);
+        Assert.Contains("ended with exit code 6, and bcs said NOT_READY, BevyCSharp.Sample did not start serving within 90 seconds.", error);
+        Assert.Contains("%0A    INFO bevy_render::renderer: AdapterInfo", error);
+        Assert.Contains("%0A    Unhandled exception. System.DllNotFoundException: bevy_csharp", error);
+        Assert.DoesNotContain("\u001b", error, StringComparison.Ordinal);
+
+        // An answer that is not JSON, as a bcs that ended in an exception of its own gives, is said
+        // as it was, and the log bcs keeps for the program named is read where the answer names none.
+        (exit, log) = Answer(python, "Unhandled exception in bcs", "./bcs stop", "1", "NoSuchProgram");
+        Assert.Equal(1, exit);
+        Assert.Contains("and bcs said an answer that is not JSON, Unhandled exception in bcs.", log);
+        Assert.Contains(Path.Combine("build", "sessions", "NoSuchProgram.log"), log);
+    }
+
+    /// <summary>Runs build/bcs-answer.py over an answer, as the workflow's step pipes one in.</summary>
+    private static (int Exit, string Log) Answer(string python, string answer, params string[] arguments)
+    {
+        var start = new ProcessStartInfo(python)
+        {
+            WorkingDirectory = Root,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        start.ArgumentList.Add(Path.Combine(Root, "build", "bcs-answer.py"));
+        foreach (var argument in arguments) start.ArgumentList.Add(argument);
+        start.Environment["GITHUB_ACTIONS"] = "true";
+        start.Environment["RUNNER_OS"] = "Windows";
+        start.Environment.Remove("GITHUB_STEP_SUMMARY");
+        start.Environment["PYTHONDONTWRITEBYTECODE"] = "1";
+
+        using var run = Process.Start(start)!;
+        run.StandardInput.Write(answer);
+        run.StandardInput.Close();
+        var log = run.StandardOutput.ReadToEndAsync();
+        var errors = run.StandardError.ReadToEndAsync();
+        Assert.True(run.WaitForExit(60_000), "the script ends");
+        return (run.ExitCode, log.Result.Replace("\r", "") + errors.Result);
     }
 
     /// <summary>Python and bash, which build/step.py runs a step in, on a system whose jobs it runs.</summary>

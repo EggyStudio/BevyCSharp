@@ -167,14 +167,24 @@ jobs:
 
       # bcs opens a program through cmd.exe on Windows, which nothing else in the workflow does, so
       # the sample is opened through it and asked how it is, as a person or an agent opens one, and
-      # stopped. Headless here, the job's bridge having no renderer.
+      # stopped. Headless here, the job's bridge having no renderer. Each answer is kept, and one
+      # that fails is said on the page with bcs's code and sentence and the end of the sample's
+      # log, where the step said an exit code alone (NORM.md, N 6.7).
       - name: Open the sample through bcs
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          ./bcs open --sample
-          ./bcs command app.status
-          ./bcs stop
+          ask() {
+            local answer code=0
+            answer=$(./bcs "$@" --json) || code=$?
+            if [ "$code" -ne 0 ]; then
+              printf '%s' "$answer" | python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.Sample
+              exit "$code"
+            fi
+          }
+          ask open --sample
+          ask command app.status
+          ask stop
 
       # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
       # managed test can reach, the bridge's again with the renderer's crates, where shader
