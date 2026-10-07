@@ -85,7 +85,7 @@ mesh2d	can
 mesh2d_repeated_texture	can
 mesh2d_vertex_color_texture	can
 move_sprite	can
-multi_window_text	missing	a second window
+multi_window_text	can
 pixel_grid_snap	can	the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types
 rotate_to_cursor	can
 rotation	can
@@ -419,8 +419,8 @@ debug_frustum_culling	can	each shape's box tested against the small camera's fru
 clear_color	can
 custom_cursor_image	missing	custom cursor images, Bevy's custom_cursor feature, which the bridge does not compile in
 low_power	missing	Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default
-monitor_info	missing	a window on each monitor, which is a second window
-multiple_windows	missing	a second window
+monitor_info	missing	a window made fullscreen on a monitor named by its entity, which reflection cannot name, and a run that opens no first window
+multiple_windows	can
 scale_factor_override	can	through the resolution of Bevy's reflected Window
 screenshot	can	the pictures saved beside the program
 transparent_window	can

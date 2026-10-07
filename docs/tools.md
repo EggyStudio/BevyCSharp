@@ -165,6 +165,8 @@ and asks it things:
 ./bcs command frames.wait 5
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
+./bcs command window.list              # the windows past the first a game spawned, by #index
+./bcs command window.shot '#402 /tmp/second.png'   # one of them, offscreen as well
 ```
 
 Each of those is answered inside the next frame of the app that is already running, which is the

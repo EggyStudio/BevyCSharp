@@ -57,6 +57,27 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Writes what a window the game spawned shows to a PNG file.
+    /// </summary>
+    /// <remarks>
+    /// The window's own picture, or in an offscreen run the image standing for it, which it is
+    /// given the frame after it is spawned (<see cref="SetCameraTarget(Entity, Entity)"/>). The
+    /// file appears a frame or two later, as with any capture.
+    /// </remarks>
+    /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
+    /// <param name="window">An entity carrying Bevy's <c>Window</c>.</param>
+    /// <exception cref="BevyNativeException">
+    /// The entity is not a window, an offscreen run has not given it its image yet, or there is no
+    /// renderer.
+    /// </exception>
+    public static void Screenshot(string path, Entity window)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        Native.Check(Native.bcs_window_screenshot(path, window.Bits), $"capturing window {window} to {path}");
+    }
+
+    /// <summary>
     /// Lights the scene from a cubemap, filtered on the GPU.
     /// </summary>
     /// <remarks>

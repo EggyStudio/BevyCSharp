@@ -827,6 +827,7 @@ static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives 
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a material to draw its mesh with
 static void Screenshot(string path);                            // Writes what is being drawn to a PNG file
 static void Screenshot(string path, AssetHandle target);        // Writes what a camera drew into an image to a PNG file
+static void Screenshot(string path, Entity window);             // Writes what a window the game spawned shows to a PNG file
 static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null);  // Lights the scene from a cubemap, filtered on the GPU
 static void SetEnvironmentMap(Entity camera, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Quat? rotation = null);  // Lights the scene from a pair of cubemaps somebody baked earlier
 static void SetReflectionProbe(Entity probe, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Vec3? falloff = null);  // Makes an entity a reflection probe: a box inside which surfaces reflect a pair of baked cubemaps rather than the camera's environment
@@ -860,6 +861,7 @@ static AssetHandle CubemapFromFaces(AssetHandle positiveX, AssetHandle negativeX
 static void MakeTextureArray(AssetHandle image, int layers);    // Has an image of layers equal pictures stacked from top to bottom treated as an array of them
 static void MakeVolume(AssetHandle image, int slices);          // Has an image of slices equal pictures stacked from top to bottom treated as a 3D texture that many deep
 static void SetCameraTarget(Entity camera, AssetHandle target);  // Points a camera at an image instead of at the window
+static void SetCameraTarget(Entity camera, Entity window);      // Points a camera at a window the game spawned, Bevy's RenderTarget::Window naming it
 static void SetCameraTarget(Entity camera, AssetHandle target, int layer);  // Points a camera at one layer of an image with several, such as a face of a cube
 static bool TryProject(Entity camera, Vec3 point, out float x, out float y);  // Where a world point lands on a camera's viewport, in logical pixels
 static bool TryRay(Entity camera, float x, float y, out Vec3 origin, out Vec3 direction);  // The ray through a point on a camera's viewport

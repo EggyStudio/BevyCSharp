@@ -229,3 +229,19 @@ package's sentence went to one line and the package's layout to BUILDING.md. The
 Shared: `DespawnOnEnter` and `DespawnWhen`, neither of which 3DEngine has beside its
 `DespawnOnExit`, and a joint state reading a computed one. 3DEngine has the transition as a message
 already, as `StateTransition<TState>`.
+
+**Now 3, a second window, two examples.** A window past the first is Bevy's `Window` spawned
+through reflection, as it could be already, and the bridge adds what reflection cannot name, a
+camera aimed at the window's entity, `Render.SetCameraTarget(camera, window)` (ABI 221). An
+offscreen run opens no window, so each window a game spawns draws into an image of its own at the
+window's size and scale, which `Render.Screenshot(path, window)` and a new `window.shot` read, and
+`window.list` names each window by its index and title. Bevy tells pictures drawn into an image
+apart by their scale as well, so a capture asked at a scale of one, of a window at two, was given a
+blank picture of its own and wrote it over the window's. The scale is now kept with the image and
+named by the capture, and `SpawnedWindowTests` holds both scales. `multiple_windows` and
+`multi_window_text` are written, 284, both windows of each checked offscreen, the second's text
+twice as large. `monitor_info` waits on a window made fullscreen on a monitor named by its entity,
+which reflection cannot name either, and joins the single rows in TODO. The suite passed, 1,130
+with 9 skipped. Next is `mesh2d_arcs`, Bevy's circular sector and segment with their bounds and
+the angle their meshes map an image at, and then `shader_material_2d`, a Slang material drawn on a
+2D mesh.

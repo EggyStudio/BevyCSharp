@@ -377,6 +377,8 @@ internal static class Catalog
 
         // Window
         new("clear_color", ClearColor.Build),
+        new("multi_window_text", MultiWindowText.Build, MultiWindowText.Configure),
+        new("multiple_windows", MultipleWindows.Build),
         new("persisting_window_settings", PersistingWindowSettings.Build, PersistingWindowSettings.Configure),
         new("scale_factor_override", ScaleFactorOverride.Build, ScaleFactorOverride.Configure),
         new("screenshot", Screenshot.Build),

@@ -408,6 +408,41 @@ public static unsafe partial class Render
     public static void SetCameraTarget(Entity camera, AssetHandle target) => SetCameraTarget(camera, target, -1);
 
     /// <summary>
+    /// Points a camera at a window the game spawned, Bevy's <c>RenderTarget::Window</c> naming it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A second window is Bevy's <c>Window</c> on an entity of its own, added through reflection as
+    /// Bevy's other components are, and opened by Bevy once it is. A camera aimed at it draws there
+    /// rather than in the first window. Each window shows what its own cameras draw, so an
+    /// interface meant for one names one of them (<see cref="UiSettings.Camera"/>), and what only
+    /// one window shows is kept to its camera's layers (<see cref="SetLayers"/>). Closing the
+    /// window despawns its entity.
+    /// </para>
+    /// <para>
+    /// An offscreen run opens no window, and draws each window the game spawns into an image of
+    /// its own instead, at the window's size and scale, from the frame after the window is spawned.
+    /// <see cref="Screenshot(string, Entity)"/> reads it, as it reads a real window.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var window = ctx.Ecs.Spawn();
+    /// ctx.Ecs.Insert&lt;WindowRef&gt;(window).Title = "Second window";
+    /// Render.SetCameraTarget(Render.SpawnCamera3d(), window);
+    /// </code>
+    /// </example>
+    /// <param name="camera">The camera.</param>
+    /// <param name="window">An entity carrying Bevy's <c>Window</c>, the first window's included.</param>
+    /// <exception cref="BevyNativeException">
+    /// The first entity is not a camera, the second is not a window, or there is no renderer.
+    /// </exception>
+    public static void SetCameraTarget(Entity camera, Entity window) =>
+        Native.Check(
+            Native.bcs_render_set_camera_window(camera.Bits, window.Bits),
+            $"pointing {camera} at window {window}");
+
+    /// <summary>
     /// Points a camera at one layer of an image with several, such as a face of a cube.
     /// </summary>
     /// <remarks>

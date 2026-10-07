@@ -52,6 +52,9 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
             commands.insert_resource(OffscreenTarget {
                 image: images.add(image),
             });
+
+            // Each window a game spawns beside it is given an image of its own the same way.
+            commands.init_resource::<crate::spawned_windows::OffscreenWindows>();
         },
     );
 
@@ -91,7 +94,12 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
         // would be laid out that frame against no camera, at no size, where a node with a margin
         // inside one that stretches comes out smaller than nothing and Bevy's border radius asserts
         // on it.
-        (point_cameras_at_image, choose_offscreen_ui_camera).chain(),
+        (
+            point_cameras_at_image,
+            crate::spawned_windows::draw_windows_offscreen,
+            choose_offscreen_ui_camera,
+        )
+            .chain(),
     );
 
     app.add_systems(

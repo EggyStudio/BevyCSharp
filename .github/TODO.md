@@ -42,7 +42,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   whose outputs follow the camera's prepasses.
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
-- **A second window, two examples.**
 - **A 2D mesh drawn by a shader, and the angle a round one maps its image at, two examples.** A
   `Mesh2d` is drawn with Bevy's `ColorMaterial`, and `shader_material_2d` needs a Slang material
   that draws on one as `Material` does on a 3D mesh. `mesh2d_arcs` needs the angle at which a
@@ -54,17 +53,18 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Twelve more, one example each.** A resource's change ticks and when a component was added
+- **Thirteen more, one example each.** A resource's change ticks and when a component was added
   (`change_detection`), a component's add and insert hooks (`component_hooks`), relationships of a
   game's own (`relationships`), commands run after a delay (`delayed_commands`, which also waits on
   picking's events), Bevy's log written from C# at its levels (`logs`), a playing sound's speed
   changed as it plays (`audio_control`), an atlas built from a folder of images as the app runs
   (`texture_atlas`), gizmos of Bevy's primitive shapes (`render_primitives`), Bevy's outlines of
   interface nodes for debugging, a feature the bridge does not build (`image_node_resizing`), the
-  pointer passing through the window to what is behind it (`window_fallthrough`), the schedule
-  reporting systems whose order is ambiguous (`nondeterministic_system_order`), and a message
-  changed in place by a later system and read the same frame, where a C# message is read the frame
-  after it is sent (`message`).
+  pointer passing through the window to what is behind it (`window_fallthrough`), a window made
+  fullscreen on a monitor named by its entity, in a run that opens no first window
+  (`monitor_info`), the schedule reporting systems whose order is ambiguous
+  (`nondeterministic_system_order`), and a message changed in place by a later system and read
+  the same frame, where a C# message is read the frame after it is sent (`message`).
 
 Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
 tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave
@@ -311,12 +311,15 @@ code already in the binary.
   that searches the right distance depends on the cascade, and the example's ten suits a scene
   the size of its palm tree. What is left is reading the cascade a slab like this one falls in
   and the depth range it covers, which decide both the search and the blur.
-- **One window.** Position, decorations, resizability, always-on-top and exclusive fullscreen are
-  bridged, the monitors are readable by size, name and video mode, `Window.SetVideoMode` takes
-  the screen over at one of them, and `Config.RememberWindow` reopens the window where it was
-  left, at its size and maximized if it was. What is left is more than one window, since every
-  entry point addresses the primary one, and the monitor a window was on, which on Wayland is the
-  one part of its place an app could still be told.
+- **Windows past the first, set through reflection.** Position, decorations, resizability,
+  always-on-top and exclusive fullscreen are bridged for the first window, the monitors are
+  readable by size, name and video mode, `Window.SetVideoMode` takes the screen over at one of
+  them, and `Config.RememberWindow` reopens the window where it was left, at its size and
+  maximized if it was. A further window is Bevy's `Window` spawned through reflection, a camera is
+  aimed at it with `Render.SetCameraTarget`, and an offscreen run draws it into an image of its
+  own. What is left is `Window`'s calls for a window past the first, which address the first
+  alone, and the monitor a window was on, which on Wayland is the one part of its place an app
+  could still be told.
 - **A capture reads back only what a shader image can be.** `Render.TryReadCaptureAsItIs` hands a
   picture over in the format it was drawn in, a half-float target as half floats, where
   `TryReadCapture` clamps it to eight-bit sRGB. An image in a format no shader image is made in,

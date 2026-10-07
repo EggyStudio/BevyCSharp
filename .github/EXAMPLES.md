@@ -4,13 +4,13 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**282 written, 16 written in part, 0 can be written, 65 missing and 58 do not apply.** Of the 363 that apply, 298 can be written with what is bridged, 16 of them leaving something out.
+**284 written, 16 written in part, 0 can be written, 63 missing and 58 do not apply.** Of the 363 that apply, 300 can be written with what is bridged, 16 of them leaving something out.
 
 **136 of the 143 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 22 | 0 | 0 | 6 | 1 | 8 of 8 |
+| [2D Rendering](#2d-rendering) | 23 | 0 | 0 | 5 | 1 | 8 of 8 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
@@ -41,10 +41,10 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
 | [UI (User Interface)](#ui-user-interface) | 49 | 0 | 0 | 11 | 0 | 17 of 20 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
-| [Window](#window) | 6 | 1 | 0 | 4 | 0 | 2 of 2 |
+| [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **282** | **16** | **0** | **65** | **58** | **136 of 143** |
+| **All** | **284** | **16** | **0** | **63** | **58** | **136 of 143** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -64,7 +64,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mesh2d_repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_repeated_texture.rs) | Showcase of using `uv_transform` on the `ColorMaterial` of a `Mesh2d` | [written](../BevyCSharp.Examples/2d/mesh2d_repeated_texture.cs) |
 | [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs) | Renders a 2d mesh with vertex color attributes | [written](../BevyCSharp.Examples/2d/mesh2d_vertex_color_texture.cs) |
 | [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/move_sprite.rs) | Changes the transform of a sprite | [written](../BevyCSharp.Examples/2d/move_sprite.cs) |
-| [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multi_window_text.rs) | Renders text to multiple windows with different scale factors using both Text and Text2d | missing, a second window |
+| [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multi_window_text.rs) | Renders text to multiple windows with different scale factors using both Text and Text2d | [written](../BevyCSharp.Examples/window/multi_window_text.cs) |
 | [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | [written](../BevyCSharp.Examples/2d/pixel_grid_snap.cs), the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types |
 | [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotate_to_cursor.rs) | Demonstrates rotating entities in 2D to follow the cursor | [written](../BevyCSharp.Examples/2d/rotate_to_cursor.cs) |
 | [`rotation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/rotation.rs) | Demonstrates rotating entities in 2D with quaternions | [written](../BevyCSharp.Examples/2d/rotation.cs) |
@@ -598,8 +598,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`clear_color`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/clear_color.rs) | Creates a solid color window | [written](../BevyCSharp.Examples/window/clear_color.cs) |
 | [`custom_cursor_image`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/custom_cursor_image.rs) | Demonstrates creating an animated custom cursor from an image | missing, custom cursor images, Bevy's custom_cursor feature, which the bridge does not compile in |
 | [`low_power`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/low_power.rs) | Demonstrates settings to reduce power use for bevy applications | missing, Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default |
-| [`monitor_info`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/monitor_info.rs) | Displays information about available monitors (displays). | missing, a window on each monitor, which is a second window |
-| [`multiple_windows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multiple_windows.rs) | Demonstrates creating multiple windows, and rendering to them | missing, a second window |
+| [`monitor_info`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/monitor_info.rs) | Displays information about available monitors (displays). | missing, a window made fullscreen on a monitor named by its entity, which reflection cannot name, and a run that opens no first window |
+| [`multiple_windows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/multiple_windows.rs) | Demonstrates creating multiple windows, and rendering to them | [written](../BevyCSharp.Examples/window/multiple_windows.cs) |
 | [`scale_factor_override`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/scale_factor_override.rs) | Illustrates how to customize the default window settings | [written](../BevyCSharp.Examples/window/scale_factor_override.cs), through the resolution of Bevy's reflected Window |
 | [`screenshot`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/screenshot.rs) | Shows how to save screenshots to disk | [written](../BevyCSharp.Examples/window/screenshot.cs), the pictures saved beside the program |
 | [`transparent_window`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/window/transparent_window.rs) | Illustrates making the window transparent and hiding the window decoration | [written](../BevyCSharp.Examples/window/transparent_window.cs) |

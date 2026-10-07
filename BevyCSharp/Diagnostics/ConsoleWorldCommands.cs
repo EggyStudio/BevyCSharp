@@ -239,6 +239,65 @@ internal static partial class ConsoleWorldCommands
         return $"capturing to {path}";
     }
 
+    /// <summary>Lists the app's windows, each by its index and title, the first marked.</summary>
+    /// <remarks>
+    /// What names a window to <c>window.shot</c>, since a window a game spawns is seldom named. An
+    /// offscreen run opens no first window, so it lists the windows the game spawned alone.
+    /// </remarks>
+    [Command("window.list", "Lists the windows by #index and title, for window.shot")]
+    internal static string WindowList()
+    {
+        if (!App.HasRenderer)
+        {
+            ConsoleHost.Fail("NO_RENDERER", "This native bridge was built without Bevy's renderer, so it has no windows.");
+            return "no renderer, so no windows";
+        }
+
+        var world = ConsoleHost.Ecs;
+        var first = Window.Entity();
+        var windows = new List<string>();
+        foreach (var entity in world.All())
+        {
+            if (world.Get<Reflected.WindowRef>(entity) is { } window)
+                windows.Add($"#{entity.Index} {window.Title}{(entity == first ? " (first)" : "")}");
+        }
+
+        return windows.Count == 0 ? "no windows" : string.Join("\n", windows);
+    }
+
+    /// <summary>Writes a window the app spawned beside its first to a PNG.</summary>
+    /// <remarks>
+    /// The window is named as an entity is, by its name or by <c>#index</c>, which <c>window.list</c>
+    /// gives. In an offscreen run it is the image the window is drawn into in its place, which it
+    /// has from the frame after it is spawned. The file appears a frame or two later, as
+    /// <c>shot</c>'s does.
+    /// </remarks>
+    [Command("window.shot", "Captures a window the app spawned to a PNG: window.shot <window> <path>")]
+    internal static string WindowShot(string line)
+    {
+        var world = ConsoleHost.Ecs;
+        var split = FirstAndRest(line);
+        if (split.Length < 2)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", "window.shot needs a window and a path to write to.");
+            return "window.shot <window> <path>";
+        }
+
+        if (Find(world, split[0]) is not { } window) return Missing(split[0]);
+
+        try
+        {
+            Render.Screenshot(split[1], window);
+        }
+        catch (Interop.BevyNativeException error)
+        {
+            ConsoleHost.Fail("NOT_A_WINDOW", $"{split[0]} cannot be captured as a window: {error.Message}");
+            return $"{split[0]} was not captured";
+        }
+
+        return $"capturing {split[0]} to {split[1]}";
+    }
+
     /// <summary>Answers once the frame counter has moved on.</summary>
     /// <remarks>
     /// What makes "do this, let it settle, then look" one call. An interface reacts over several

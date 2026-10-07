@@ -155,6 +155,28 @@ for, and it does nothing on another desktop or platform.
 config.DesktopTitleBar = true;                    // before the app is built
 ```
 
+A second window is Bevy's `Window` on an entity of its own, spawned through reflection as Bevy's
+other components are, and Bevy opens it once it is. A camera aimed at it draws there rather than in
+the first window, and an interface for it names that camera, since a node is drawn by one camera:
+
+```csharp
+var second = ecs.Spawn();
+var window = ecs.Insert<WindowRef>(second);
+window.Title = "Second window";
+window.ResolutionScaleFactorOverride = 2f;        // text there drawn twice as large
+
+var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(6f, 0f, 0f), Vec3.Zero, Vec3.UnitY));
+Render.SetCameraTarget(camera, second);
+Ui.SpawnText("Second window", new UiSettings { Camera = camera });
+```
+
+What one window alone shows goes on a render layer its camera alone sees (`Render.SetLayers`), as
+Bevy's `multi_window_text` keeps a line of text to each window. Closing the window despawns its
+entity. The calls on `Window` above address the first window alone, and a further one is changed
+through its `WindowRef`. An offscreen run opens no window, and draws each window the game spawns
+into an image of its own, at the window's size and scale, so the game runs the same with no display
+and `Render.Screenshot(path, second)` reads the picture each window would show.
+
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
 `WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The
