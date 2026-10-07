@@ -367,7 +367,8 @@ public sealed unsafe partial class App : IDisposable
         // Apply everything queued during the frame, after all user PostUpdate work.
         AddSystem(Stage.CommandFlush, new SystemDescriptor(static world =>
         {
-            world.Resource<EcsCommands>().Apply(world.Resource<EcsWorld>());
+            var elapsed = world.TryGetResource<Time>(out var time) ? time.ElapsedSeconds : 0d;
+            world.Resource<EcsCommands>().Apply(world.Resource<EcsWorld>(), elapsed);
         }, "Engine.CommandFlush"));
     }
 

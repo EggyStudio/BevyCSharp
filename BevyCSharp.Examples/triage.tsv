@@ -184,7 +184,7 @@ contiguous_query	n/a	about a Rust query's memory layout
 custom_executor	n/a	replaces Bevy's system executor, which is Rust
 custom_query_param	n/a	derives a Rust query type
 custom_schedule	missing	schedules a game adds of its own
-delayed_commands	missing	commands queued to run after a delay
+delayed_commands	can	the delays counted by the app's own clock, as Bevy's default clock counts them
 dynamic	n/a	builds components from raw layouts in Rust
 ecs_guide	can
 entity_disabling	can

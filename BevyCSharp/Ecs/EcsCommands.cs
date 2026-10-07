@@ -33,6 +33,13 @@ public sealed class EcsCommands
 {
     private readonly ConcurrentQueue<Action<EcsWorld>> _queue = new();
 
+    // Queues given a delay, waiting for this queue to be applied, which starts their delays.
+    private readonly ConcurrentQueue<(double Delay, EcsCommands Queue)> _delaying = new();
+
+    // Queues whose delays have started, with the elapsed time each is due at, in the order queued.
+    private readonly List<(double Due, EcsCommands Queue)> _delayed = [];
+
+
     /// <summary>Number of commands waiting to be applied.</summary>
     public int PendingCount => _queue.Count;
 
@@ -102,6 +109,81 @@ public sealed class EcsCommands
     }
 
     /// <summary>
+    /// A queue whose commands land once <paramref name="seconds"/> have passed after this queue is
+    /// applied, Bevy's <c>commands.delayed().secs</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The delay starts as this queue is applied, at the end of the frame's systems, and counts the
+    /// app's own time (<see cref="Time.ElapsedSeconds"/>), so a game paused by time pauses its
+    /// delays. A queue whose time has come lands where this one does, ahead of what this frame
+    /// queued, so a delay of nothing lands the next frame, as Bevy's does. Queues of one delay land
+    /// in the order they were made.
+    /// </para>
+    /// <para>
+    /// For something to happen a while after a cause without a timer to keep, a ripple across a
+    /// grid from where it was clicked, a light switched off a moment after it went on.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// ctx.Cmd.Delayed(0.5f).Despawn(spark);
+    /// </code>
+    /// </example>
+    /// <exception cref="ArgumentOutOfRangeException">The delay is negative or not a number.</exception>
+    public EcsCommands Delayed(float seconds)
+    {
+        if (!(seconds >= 0f)) throw new ArgumentOutOfRangeException(nameof(seconds), seconds, "A delay is zero or more seconds.");
+
+        var queue = new EcsCommands();
+        _delaying.Enqueue((seconds, queue));
+        return queue;
+    }
+
+    /// <summary>
+    /// Drains the queue against <paramref name="world"/> at the app's time, landing the delayed
+    /// queues whose time has come first and starting the delays queued since.
+    /// </summary>
+    /// <remarks>What the app does at <see cref="Stage.CommandFlush"/>, with the time its clock has reached.</remarks>
+    /// <param name="world">The world the commands change.</param>
+    /// <param name="elapsedSeconds">The app's elapsed time, which delays are counted in.</param>
+    public void Apply(EcsWorld world, double elapsedSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+
+        // Due ones first, taken out before they run, since a landed queue may queue further delays.
+        List<EcsCommands>? due = null;
+        lock (_delayed)
+        {
+            for (var i = 0; i < _delayed.Count; i++)
+            {
+                if (_delayed[i].Due > elapsedSeconds) continue;
+                (due ??= []).Add(_delayed[i].Queue);
+                _delayed.RemoveAt(i--);
+            }
+        }
+
+        foreach (var queue in due ?? [])
+        {
+            // What a landed queue delays in turn is kept here, since the landed queue is dropped.
+            queue.Apply(world, elapsedSeconds);
+            lock (queue._delayed)
+            lock (_delayed)
+            {
+                _delayed.AddRange(queue._delayed);
+                queue._delayed.Clear();
+            }
+        }
+
+        Apply(world);
+
+        lock (_delayed)
+        {
+            while (_delaying.TryDequeue(out var waiting)) _delayed.Add((elapsedSeconds + waiting.Delay, waiting.Queue));
+        }
+    }
+
+    /// <summary>
     /// Drains the queue against <paramref name="world"/>.
     /// </summary>
     /// <remarks>
@@ -128,9 +210,11 @@ public sealed class EcsCommands
         }
     }
 
-    /// <summary>Discards every queued command without applying it.</summary>
+    /// <summary>Discards every queued command without applying it, delayed ones included.</summary>
     public void Clear()
     {
         while (_queue.TryDequeue(out _)) { }
+        while (_delaying.TryDequeue(out _)) { }
+        lock (_delayed) _delayed.Clear();
     }
 }

@@ -286,6 +286,8 @@ EcsCommands Despawn(Entity entity);                             // Queues a desp
 EcsCommands Add<T>(Entity entity, T component);                 // Queues adding or replacing a component
 EcsCommands Remove<T>(Entity entity);                           // Queues removing a component
 EcsCommands Run(Action<EcsWorld> action);                       // Queues an arbitrary action against the world
+EcsCommands Delayed(float seconds);                             // A queue whose commands land once seconds have passed after this queue is applied, Bevy's commands.delayed().secs
+void Apply(EcsWorld world, double elapsedSeconds);              // Drains the queue against world at the app's time, landing the delayed queues whose time has come first and starting the delays queued since
 void Apply(EcsWorld world);                                     // Drains the queue against world
 void Clear();                                                   // Discards every queued command without applying it
 ```

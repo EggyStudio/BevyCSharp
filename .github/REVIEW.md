@@ -10,30 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1b8b282`. C# writes into Bevy's log at its five levels under the target `csharp`,
-once a line of code where asked, a run ends with a failure code through `App.RequestExit` and
-`ctx.Exit`, a system that throws is logged and the app runs on, and `logs` is written (ABI 223,
-`ee22927`); a playing sound's speed and mute are bridged with a way to ask whether its sink has
-come, and `audio_control` and `window_fallthrough` are written, 290, the second having been
-reachable all along under a stale row (ABI 224, `1b8b282`); the audio settings moved into files of
-their names, N 1.2's list at 217 (`f35d03a`). The suite: 1,152 passed, 9 skipped.
+Reviewed up to `aab71d0`. A game gives a component Bevy's add, insert, discard and remove hooks,
+which reach the managed side while Bevy holds the world, so no second world is made beside Bevy's
+while a hook runs, the generator's remove hook covered with it, and `component_hooks` is written
+(ABI 225, `aab71d0`). `delayed_commands` follows, and then item 4, the bodies from 3DEngine, the
+single rows left each needing more than a batch and texture_atlas first among them after. The suite:
+1,152 passed, 9 skipped.
+
+Before them, C# came to write into Bevy's log at its five levels under the target `csharp`, once a
+line of code where asked, a run ends with a failure code through `App.RequestExit` and `ctx.Exit`, a
+system that throws is logged and the app runs on, and `logs` is written (ABI 223, `ee22927`); a
+playing sound's speed and mute are bridged with a way to ask whether its sink has come, and
+`audio_control` and `window_fallthrough` are written, 290, the second having been reachable all
+along under a stale row (ABI 224, `1b8b282`); the audio settings moved into files of their names,
+N 1.2's list at 217 (`f35d03a`). The suite: 1,152 passed, 9 skipped.
 
 Before them, a tilemap chunk came to be made with its tiles and has them written and read from C#,
 images loaded as arrays of layers serving as before, a headless run refusing a chunk where Bevy's
 hook panicked, and both tilemap chunk examples are written, 287 (ABI 222, `6bdfd85`). The camera
 controllers wait on the owner's word on `bevy_camera_controller`, as Feathers' three do on
 `bevy_feathers`. The suite: 1,148 passed, 9 skipped.
-
-Before them, a camera came to be aimed at a window the game spawned, an offscreen run draws each
-such window into an image of its own at its scale, `window.shot` and `window.list` read them, and a
-Bevy capture keyed by handle and scale, which at scale 2 wrote a blank picture back over the window,
-keeps its scale with the image, so `multiple_windows` and `multi_window_text` are written, 284,
-`monitor_info` waiting on a window made fullscreen by entity (ABI 221, `0c50c04`); Bevy's arc,
-sector and segment are in the math with their bounds and a sector or segment mesh maps its image at
-an angle, `mesh2d_arcs` written, 285 (`ad9cc84`); three commits of moves take N 1.2's list to 219
-and N 1.3's to 15 with 9 in the bridge (`0a056f5`, `9038256`), and `NormTests.N_4_2` counts the
-README's prose outside its tables' rows as the amended rule reads, 222 of 320 (`2f46ad5`). The
-suite: 1,145 passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -205,13 +201,11 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, `component_hooks`.** A game gives a component Bevy's hooks while its app is made,
-`App.OnAdd`, `OnInsert`, `OnDiscard` and `OnRemove`, each run inside Bevy with the entity and the
-component's value as it goes on or comes off (ABI 225). Bevy holds the world while a hook runs, and
-a C# hook reaching into it from inside a C# system's own call would have made a second `&mut World`
-beside Bevy's, so the bridge parks no world for the hook's call and such a call answers `NoWorld`,
-the generator's remove hook included. A hook reaches the app's managed side through `HookContext`,
-its resources, messages and command queue. `component_hooks` is written, 291, printing as Bevy's
-does when driven by two keys. `ComponentHookTests` holds Bevy's order with each value, a queued
-despawn landing, the refused call into the world and a hook given too late, and the bridge's test
-the three kinds Bevy runs. The suite passed, 1,154 with 9 skipped.
+**Now 3, `delayed_commands`.** `EcsCommands.Delayed(seconds)` is a queue of its own whose commands
+land once that long has passed after the frame's queue is applied, as Bevy's `commands.delayed()`
+does, counted by the app's clock, a delay of nothing landing the next frame and a delay a landed
+queue makes kept after it. `delayed_commands` is written, 292, its squares in behaviors as B 4 has
+it. A click there lands on the window entity, since Bevy picks a sprite only where it carries
+`Pickable`, so an offscreen run, which has no window entity, clicks nothing, and the ripple was
+checked by calling its handler from a system. `DelayedCommandTests` holds the order the queues land
+in by frame. The suite passed, 1,156 with 9 skipped. Item 4 is next, as agreed.

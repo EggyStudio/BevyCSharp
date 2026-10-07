@@ -267,6 +267,17 @@ public void Tick(BehaviorContext ctx)
 }
 ```
 
+A change can wait, too. `ctx.Cmd.Delayed(seconds)` is a queue of its own whose commands land once
+that long has passed after the frame's queue is applied, Bevy's `commands.delayed()`, so something
+happens a while after its cause with no timer to keep:
+
+```csharp
+ctx.Cmd.Delayed(0.5f).Despawn(spark);              // gone half a second from now
+```
+
+The delay counts the app's own time, so a game paused by its clock pauses its delays as well, and
+a delay of nothing lands the next frame.
+
 ---
 
 Next, [States](states.md).
