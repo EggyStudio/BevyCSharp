@@ -199,12 +199,6 @@ BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiTextConfig
 BevyCSharp/Interop/NativeTypes.Window.cs NativeMonitor
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowEvent
 BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowPlace
-BevyCSharp/Physics/PhysicsComponents.cs CharacterController
-BevyCSharp/Physics/PhysicsComponents.cs Collider
-BevyCSharp/Physics/PhysicsComponents.cs ColliderFit
-BevyCSharp/Physics/PhysicsComponents.cs ColliderShape
-BevyCSharp/Physics/PhysicsComponents.cs Colliders
-BevyCSharp/Physics/PhysicsComponents.cs RigidBody
 BevyCSharp/Scenes/Persistent.cs IPersistentValue
 BevyCSharp/Scenes/Persistent.cs UserData
 BevyCSharp/Scenes/SaveGame.cs PersistAttribute
