@@ -22,6 +22,7 @@ BevyCSharp.Tests/DataAssetTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
 BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
+BevyCSharp.Tests/Docs/FirstGameTests.cs	tests a document and the game it makes, which are no area of the library
 BevyCSharp.Tests/Docs/PublicSurfaceTests.cs	tests a listing of the whole library, which is no one area of it
 BevyCSharp.Tests/DrawnTests.cs
 BevyCSharp.Tests/DynamicSystemTests.cs

@@ -373,3 +373,19 @@ the listing's test was listed beside the cheatsheet's as a test of no one area. 
 
 Shared: the public surface listed from the built library and held by a test, release notes from
 the commits, and rays that pass through sensors, as 3DEngine's `fc5aef49` and its rays have them.
+
+**Now 9, a first game from an empty folder.** `docs/first-game.md` makes a small game in twelve
+steps from a console project and the package. A field, a sun and a camera, a player that walks and
+a camera that follows it, coins that float and are taken and counted, crates and a character with
+physics, a chime, a state that is won and R to play again, each step a few lines explained and a
+picture of what the window shows after them. `games/FirstGame` holds every step as a whole program
+under `steps/`, its last the game's `Program.cs`, and `build/first-game.sh` builds each on the
+package in a copy of the project and runs it offscreen for sixty frames, failing one that does not
+build, does not run or logs an error, which the pack workflow's game job runs on the package it
+packed. With `--shots` it plays each through `bcs` and draws the page's pictures again.
+`FirstGameTests` holds every block the page marks with a step to that step's program line for line,
+the last step to the game, and every step to its picture. The README's guide lists the page first,
+and Behaviors follows it. The suite passed, 1,208 with 9 skipped. Item 10 is next.
+
+Shared: a first game told from an empty folder a step at a time, each step a program the workflow
+builds and runs and the page is held to, as 3DEngine's `d5d2578d` does.

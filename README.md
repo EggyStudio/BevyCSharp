@@ -195,6 +195,7 @@ transform the renderer reads and a sound played from C# is an entity in the same
 | | |
 |---|---|
 | [CHEATSHEET.md](https://github.com/EggyStudio/BevyCSharp/blob/main/CHEATSHEET.md) | Every public method of the library on one line, grouped as the pages are |
+| [A first game](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/first-game.md) | A small game made from an empty folder, a step at a time |
 | [Behaviors](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/behaviors.md) | Systems and components, stages, the fixed timestep, filters, conditions and threads |
 | [States](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/states.md) | A game's modes, systems scoped to them, and code run as they change |
 | [Messages and the hierarchy](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/messages-and-hierarchy.md) | One system telling another, code run the moment something happens, and entities parented |

@@ -275,6 +275,11 @@ jobs:
       - name: Build the stress program
         run: dotnet build games/Stress -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
+      # Every step of the game docs/first-game.md makes, each a whole program, built on the same
+      # package and run offscreen, so no step the page shows stops compiling or starting.
+      - name: Build and run every step of the first game
+        run: build/first-game.sh 0.0.0-ci
+
       # Every example built in a project of its own on the package alone, as a reader copying one
       # into a game of their own builds it (NORM.md, N 2.7).
       - name: Build the examples on the package alone

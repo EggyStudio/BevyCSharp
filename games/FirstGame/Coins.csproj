@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The game docs/first-game.md makes from an empty folder, a step at a time, from the BevyCSharp
+      package alone. Program.cs is the finished game, and steps/ holds every step of it as a whole
+      program, which build/first-game.sh builds and runs one at a time in a copy of this project.
+    -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!--
+          The version packed into build/package, which a build can name instead, as continuous
+          integration does with the package it packs for the run.
+        -->
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.0.38-game</BevyCSharpVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BevyCSharp" Version="$(BevyCSharpVersion)" />
+
+        <!-- Each step is a program of its own, built alone in place of Program.cs. -->
+        <Compile Remove="steps/**" />
+    </ItemGroup>
+
+</Project>
