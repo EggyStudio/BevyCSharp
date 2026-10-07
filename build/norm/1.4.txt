@@ -18,7 +18,6 @@ BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/CliEnvelopeTests.cs
 BevyCSharp.Tests/CliSessionTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
-BevyCSharp.Tests/ConsoleTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
 BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
