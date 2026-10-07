@@ -73,16 +73,12 @@ public static partial class SceneFile
     /// of them draws with them any more.
     /// </summary>
     /// <remarks>
-    /// <para>
     /// Off by default, so what a load made goes with the last entity using it
     /// (<see cref="AssetServer.ReleaseWhenUnused"/>), as Bevy lets go of a scene's assets.
     /// Otherwise a level loaded again, or a save loaded over it, would make its look again each
-    /// time while every earlier load's stayed held, which a game left running climbs by.
-    /// </para>
-    /// <para>
-    /// Set by the editor, whose undo puts a deleted entity back with the handles it was drawn with,
-    /// which would name nothing once the entity had been gone a frame or two.
-    /// </para>
+    /// time while every earlier load's stayed held, which a game left running climbs by. The editor
+    /// sets it, since its undo puts a deleted entity back with the handles it was drawn with, which
+    /// would name nothing once the entity had been gone a frame or two.
     /// </remarks>
     public static bool KeepsAssets { get; set; }
 
@@ -408,7 +404,9 @@ public static partial class SceneFile
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(Resolve(path)));
+        using var document = AssetFiles.ReadJson(Resolve(path), "a scene");
+        if (!document.RootElement.TryGetProperty("format", out var format) || format.GetString() != Format)
+            throw new InvalidDataException($"{path} is not a scene in the {Format} format.");
         return Read(world, document.RootElement, parent);
     }
 
@@ -421,7 +419,7 @@ public static partial class SceneFile
         if (!scene.TryGetProperty("format", out var format) || format.GetString() != Format)
             throw new InvalidDataException($"Not a scene in the {Format} format.");
 
-        var entries = scene.GetProperty("entities").EnumerateArray().ToArray();
+        var entries = scene.TryGetProperty("entities", out var listed) && listed.ValueKind == JsonValueKind.Array ? listed.EnumerateArray().ToArray() : [];
 
         // The meshes and materials made in memory, each made once and shared by what refers to it,
         // as it was when the scene was written.

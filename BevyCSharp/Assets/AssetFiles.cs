@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -113,6 +114,38 @@ public static unsafe class AssetFiles
     /// <param name="path">A full path, or one relative to the asset root.</param>
     /// <exception cref="FileNotFoundException">Neither has it.</exception>
     public static string ReadAllText(string path) => Encoding.UTF8.GetString(ReadAllBytes(path));
+
+    /// <summary>
+    /// A JSON file's document, from disk or from what the game carries, answering one that is not
+    /// JSON or holds no object with its path and what it was to hold.
+    /// </summary>
+    /// <remarks>
+    /// What the managed side's files go through, scenes, saves, data assets and material and mesh
+    /// files, so a file a player or an artist cut short or saved as something else is answered by
+    /// name, where the parser's own error gives a line and a byte and no file.
+    /// </remarks>
+    /// <param name="path">A full path, or one relative to the asset root.</param>
+    /// <param name="holds">What the file was to hold, as a phrase such as "a scene".</param>
+    /// <exception cref="FileNotFoundException">Neither has it.</exception>
+    /// <exception cref="InvalidDataException">It is not JSON, or holds no object.</exception>
+    internal static JsonDocument ReadJson(string path, string holds)
+    {
+        var text = ReadAllText(path);
+        JsonDocument document;
+        try
+        {
+            document = JsonDocument.Parse(text);
+        }
+        catch (JsonException error)
+        {
+            throw new InvalidDataException($"{path} is not {holds}, since it is not JSON: {error.Message}", error);
+        }
+
+        if (document.RootElement.ValueKind == JsonValueKind.Object) return document;
+
+        document.Dispose();
+        throw new InvalidDataException($"{path} is not {holds}, since it holds no JSON object.");
+    }
 
     /// <summary>A file's bytes, from disk or from what the game carries.</summary>
     /// <param name="path">A full path, or one relative to the asset root.</param>

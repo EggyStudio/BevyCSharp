@@ -424,6 +424,16 @@ pub extern "C" fn bcs_asset_failures_drain() -> i32 {
                     failures.kinds.push(kind_named(failure.id.type_id(), registry.as_ref()));
                 }
 
+                // The sounds refused after they loaded, which Bevy's audio could not have played.
+                #[cfg(feature = "render")]
+                if let Some(mut sounds) = world.get_resource_mut::<crate::audio::checked::CheckedSounds>() {
+                    for (path, reason) in sounds.reported.drain(..) {
+                        failures.paths.push(path);
+                        failures.reasons.push(reason);
+                        failures.kinds.push("Audio".to_string());
+                    }
+                }
+
                 failures.paths.len() as i32
             })
         })

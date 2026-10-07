@@ -552,6 +552,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // Where the typed-text reader keeps its place between frames.
     app.init_resource::<crate::sync::TextCursor>();
 
+    // A sound checked before Bevy plays it, once Bevy's audio is added on either path.
+    #[cfg(feature = "render")]
+    crate::audio::checked::install(&mut app);
+
     // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
     // meaningless rather than merely unusual, so it is ignored the same way.
     if config.fixed_hz.is_finite() && config.fixed_hz > 0.0 {

@@ -11,7 +11,10 @@ Audio.SetVolume(music, 0.2f);
 Audio.Stop(music);
 ```
 
-Ogg Vorbis, WAV, FLAC and MP3. A sound that is playing is an entity, so it can be despawned,
+Ogg Vorbis, WAV, FLAC and MP3. A file that is none of them, empty or holding something else, is
+refused once it has loaded, before anything plays it, so its handle reports `Failed` and an
+`AssetLoadFailed` message names the file, where Bevy alone would panic as it played. A sound that is
+playing is an entity, so it can be despawned,
 parented, tagged with your own components and found by a query, and `Play` hands that entity back.
 `PlaybackMode.Despawn` suits a one-shot effect, because nothing has to remember to clean it up.
 

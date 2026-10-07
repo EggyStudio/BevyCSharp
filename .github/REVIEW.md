@@ -321,3 +321,38 @@ The bad files are next.
 
 Shared: a game played for minutes while what it holds is read, failing a count that keeps
 climbing, with a short form in the workflow, as 3DEngine's `build/soak.sh` does.
+
+**Now 7, the second of two, every loader given bad files.** `BadFileTests` gives each loader a
+missing file, an empty one, the first third of a good one and 4,096 random bytes, one table of
+scene files, saves, mesh and material files, data assets, project settings, persistent values and
+packs on this side, images, models and sounds through the asset server, Slang programs and
+scripts. It found three faults.
+
+- Scenes, saves, mesh and material files and data assets let the parser's `JsonException` out,
+  which gives a line and a byte and no file, and a data asset's `TryGet` let it through as well.
+  They read through `AssetFiles.ReadJson` now, which answers a file that is not JSON or holds no
+  object with an `InvalidDataException` naming it, and a scene's format is checked by name too.
+- Project settings answered with an `InvalidDataException` that named no file, and name it now.
+- Bevy's sound loader keeps a file's bytes and decodes them only as the sound first plays, where its
+  decoder unwraps, so an empty or random file loaded as a sound and panicked Bevy's audio system
+  when it played, which ended the game. The bridge builds Bevy's own decoder, where its panic is
+  caught, as a sound arrives and before a player plays one it has not checked, rodio's own builder
+  being a package the bridge does not reference (N 2.8). A sound that gives none is taken out of the
+  sounds Bevy holds, its handle answers `Failed` and `AssetLoadFailed` names the file. A second
+  loader for the same extensions would have refused it at load, and Bevy warns at every start that
+  two loaders claim one extension, so it is checked after. The decoders' format probe logs an error
+  of its own that names no file, which the bridge's log filter leaves out.
+
+Images, models, Slang programs, scripts, packs and persistent values answered as they should. A
+file cut short that is still a shorter file of its kind, a third of a WAV, loads, as 3DEngine's
+table allows. `DataAssets.cs` and `SaveGame.cs` came off N 1.2's list first, in a commit that
+moves code alone. The suite passed, 1,202 with 9 skipped. Item 8 is next.
+
+Rule: N 2.6 says no exception leaves the engine for a bad file. Here a loader on the managed side
+answers one with the exception it documents, `FileNotFoundException` or `InvalidDataException`,
+whose message names the file, for a game to catch, and nothing crosses the bridge, a system that
+lets one through having it reported by the callback that ran it. If the rule means such a loader
+returns an empty result instead, that is the next change.
+
+Shared: every loader given a missing, an empty, a cut short and a random file as one table, as
+3DEngine's `BadFileTests` does, which here found a sound that panicked as it played.

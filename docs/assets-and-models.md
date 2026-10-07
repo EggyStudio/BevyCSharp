@@ -13,7 +13,11 @@ AssetServer.Release(mesh);
 ```
 
 Loading is asynchronous, so `Load` returns as soon as the request is queued and the handle
-reports `Loading` until the file has been read.
+reports `Loading` until the file has been read. A file that is missing, empty or not what its name
+says reports `Failed`, and an `AssetLoadFailed` message names it, as does one cut short where what
+is left is not a shorter file of its kind. The files read on this side, scenes, saves, data assets
+and material and mesh files, answer the same files with a `FileNotFoundException` or an
+`InvalidDataException` whose message names the file.
 
 Paths resolve against `Config.AssetRoot`, and it is worth setting. Left unset, Bevy looks for an
 `assets` directory beside the running executable, which for a .NET app is whichever host launched

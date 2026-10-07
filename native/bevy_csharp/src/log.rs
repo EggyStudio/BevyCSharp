@@ -33,8 +33,13 @@ pub fn first() -> bool {
 }
 
 /// Bevy's log plugin with the layer that keeps errors, for the first app of the process.
+///
+/// Bevy's own filter, less the error the audio decoders' format probe logs when a file is none of
+/// the formats it knows. The bridge reports that file itself, with its path, as it refuses it
+/// (`audio/checked.rs`), where the probe's line names no file.
 pub fn plugin() -> bevy::log::LogPlugin {
     bevy::log::LogPlugin {
+        filter: format!("{},symphonia_core::probe=off", bevy::log::DEFAULT_FILTER),
         custom_layer: |_| Some(Box::new(Kept)),
         ..Default::default()
     }

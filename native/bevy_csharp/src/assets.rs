@@ -433,6 +433,9 @@ pub extern "C" fn bcs_asset_load_state(handle: i32) -> i32 {
             let Some(server) = world.get_resource::<AssetServer>() else {
                 return load_state::UNKNOWN;
             };
+            if refused(world, id) {
+                return load_state::FAILED;
+            }
 
             match server.get_load_state(id) {
                 Some(LoadState::NotLoaded) => load_state::NOT_LOADED,
@@ -465,6 +468,9 @@ pub extern "C" fn bcs_asset_load_state_with_dependencies(handle: i32) -> i32 {
             let Some(server) = world.get_resource::<AssetServer>() else {
                 return load_state::UNKNOWN;
             };
+            if refused(world, id) {
+                return load_state::FAILED;
+            }
 
             match server.get_recursive_dependency_load_state(id) {
                 Some(State::NotLoaded) => load_state::NOT_LOADED,
@@ -477,6 +483,23 @@ pub extern "C" fn bcs_asset_load_state_with_dependencies(handle: i32) -> i32 {
         })
         .unwrap_or(load_state::UNKNOWN)
     })
+}
+
+/// Whether an asset the asset server loaded was refused afterward, as a sound Bevy's decoder cannot
+/// read is ([`crate::audio::checked`]), which its load answers as failed.
+fn refused(world: &World, id: bevy::asset::UntypedAssetId) -> bool {
+    #[cfg(feature = "render")]
+    {
+        world
+            .get_resource::<crate::audio::checked::CheckedSounds>()
+            .is_some_and(|sounds| sounds.refuses(id))
+    }
+
+    #[cfg(not(feature = "render"))]
+    {
+        let _ = (world, id);
+        false
+    }
 }
 
 /// Reports whether a handle still names something this app is holding.

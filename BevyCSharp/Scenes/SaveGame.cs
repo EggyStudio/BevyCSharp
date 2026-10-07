@@ -238,10 +238,10 @@ public static class SaveGame
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(SceneFile.Resolve(path)));
+        using var document = AssetFiles.ReadJson(SceneFile.Resolve(path), "a save");
         var root = document.RootElement;
         if (!root.TryGetProperty("format", out var format) || format.GetString() != Format)
-            throw new InvalidDataException($"Not a save in the {Format} format.");
+            throw new InvalidDataException($"{path} is not a save in the {Format} format.");
 
         End(world);
 

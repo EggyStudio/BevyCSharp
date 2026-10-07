@@ -8,6 +8,9 @@
 //! into, which is the one that takes a system library.
 
 use crate::interop::{status, BcsAudioConfig};
+
+#[cfg(feature = "render")]
+pub mod checked;
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 

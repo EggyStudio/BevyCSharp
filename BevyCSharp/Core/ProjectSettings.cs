@@ -47,7 +47,7 @@ public sealed class ProjectSettings
     /// <summary>The settings in the assets an app reads, or every one at its default when there is no file.</summary>
     /// <exception cref="InvalidDataException">The file is there and is not a project file.</exception>
     public static ProjectSettings Read() =>
-        AssetFiles.Exists(FileName) ? Parse(AssetFiles.ReadAllText(FileName)) : new ProjectSettings();
+        AssetFiles.Exists(FileName) ? Parse(AssetFiles.ReadAllText(FileName), FileName) : new ProjectSettings();
 
     /// <summary>The settings in a folder of assets on disk, for a tool reading them before any app exists.</summary>
     /// <param name="assets">The folder.</param>
@@ -55,22 +55,27 @@ public sealed class ProjectSettings
     public static ProjectSettings ReadFrom(string assets)
     {
         var path = Path.Combine(assets, FileName);
-        return File.Exists(path) ? Parse(File.ReadAllText(path)) : new ProjectSettings();
+        return File.Exists(path) ? Parse(File.ReadAllText(path), path) : new ProjectSettings();
     }
 
     /// <summary>Reads settings from the text of a project file.</summary>
     /// <exception cref="InvalidDataException">The text is not a project file.</exception>
-    public static ProjectSettings Parse(string text)
+    public static ProjectSettings Parse(string text) => Parse(text, "The text");
+
+    /// <summary>Reads settings from the text of a project file, naming where it came from in what it throws.</summary>
+    private static ProjectSettings Parse(string text, string from)
     {
         try
         {
             using var document = JsonDocument.Parse(text);
             var root = document.RootElement;
 
-            if (!root.TryGetProperty("format", out var format)
+            if (root.ValueKind != JsonValueKind.Object
+                || !root.TryGetProperty("format", out var format)
+                || format.ValueKind != JsonValueKind.String
                 || format.GetString() is not { } named
                 || !named.StartsWith("bevycsharp.project.", StringComparison.Ordinal))
-                throw new InvalidDataException($"Not a project file in the {Format} format.");
+                throw new InvalidDataException($"{from} is not a project file in the {Format} format.");
 
             return new ProjectSettings
             {
@@ -83,7 +88,7 @@ public sealed class ProjectSettings
         }
         catch (JsonException error)
         {
-            throw new InvalidDataException($"The project file is not JSON: {error.Message}", error);
+            throw new InvalidDataException($"{from} is not a project file, since it is not JSON: {error.Message}", error);
         }
     }
 

@@ -400,7 +400,7 @@ public static class DataAssets
 
         var path = AssetIds.PathOf(id) ?? throw new FileNotFoundException($"No data asset has the id {id:x16}.");
 
-        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(path));
+        using var document = AssetFiles.ReadJson(path, "a data asset");
         var root = document.RootElement;
 
         var name = root.TryGetProperty("type", out var type) ? type.GetString() : null;

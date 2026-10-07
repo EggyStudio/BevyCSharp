@@ -319,7 +319,7 @@ public static class MaterialFiles
         var full = Full(path);
         if (!AssetFiles.Exists(full)) throw new FileNotFoundException($"No material file at {path}.", full);
 
-        using var document = JsonDocument.Parse(AssetFiles.ReadAllText(full));
+        using var document = AssetFiles.ReadJson(full, "a material file");
         var root = document.RootElement;
         if (!root.TryGetProperty("format", out var format) || format.GetString() != Format
             || !root.TryGetProperty("material", out var material))
