@@ -27,6 +27,7 @@ runs is one assembly and its files, and the editor reads the same scripts as the
 program is a window, physics, and a behavior that starts the game from the level `project.json`
 names:
 
+<!-- not compiled: the game's own Program.cs, which the pack workflow builds with the game -->
 ```csharp
 var config = Config.Windowed("Courtyard", 1280, 720);
 config.GameName = "Courtyard";

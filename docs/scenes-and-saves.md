@@ -115,6 +115,10 @@ an id, its camera and its interface, is left for it, since only the game knows w
 belongs. A load enters no state, so what a game builds on entering one is not built for what came
 back, and `SaveLoaded` is sent the frame after for the game to build it there, once:
 
+<!-- compiled with:
+public enum Mode { Menu, Playing }
+private static void MakeBall(BehaviorContext ctx) { }
+-->
 ```csharp
 [OnUpdate, InState(Mode.Playing)]
 public void Loaded(BehaviorContext ctx)
@@ -131,6 +135,11 @@ there lays itself over the same scenes a game's would.
 Settings that outlive a run go in a `Persistent<T>`, read from `user://` when made and written
 when asked, through a `System.Text.Json` source-generated context so nothing reflects:
 
+<!-- compiled with:
+using System.Text.Json.Serialization;
+public sealed record Settings { public float Volume { get; init; } = 1f; }
+[JsonSerializable(typeof(Settings))] public sealed partial class GameJson : JsonSerializerContext;
+-->
 ```csharp
 var settings = new Persistent<Settings>("settings", GameJson.Default.Settings, () => new Settings());
 settings.Update(value => value with { Volume = 0.5f });
@@ -142,6 +151,9 @@ and put back on a load, for a playthrough's own state such as its quests.
 
 ## Changing a type without breaking its files
 
+<!-- compiled with:
+using System.Text.Json.Nodes;
+-->
 ```csharp
 [Behavior, FormerName("Hitpoints"), DataVersion(2)]
 public partial struct Health

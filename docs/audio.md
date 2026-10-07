@@ -2,6 +2,9 @@
 
 Sounds and music played, placed in the world and mixed.
 
+<!-- compiled with:
+AssetHandle theme = default;
+-->
 ```csharp
 var clip = AssetServer.Load(AssetKind.Audio, "sounds/hit.ogg");
 
@@ -25,6 +28,9 @@ device to play on, which never attaches one. `Audio.HasStarted` asks first. So d
 slower with its pitch, and `SetMuted`, which silences it and keeps its volume for when it is heard
 again:
 
+<!-- compiled with:
+Entity music = default;
+-->
 ```csharp
 if (!Audio.HasStarted(music)) return;
 var at = Audio.PositionOf(music);       // seconds into the clip
@@ -41,6 +47,9 @@ off is played once and restarted rather than looped.
 A sound can play on a bus, which is a name and a volume, so a settings screen's music and effects
 sliders are one call each rather than a walk over every sound playing:
 
+<!-- compiled with:
+AssetHandle theme = default, hit = default;
+-->
 ```csharp
 Audio.Play(theme, new AudioSettings { Mode = PlaybackMode.Loop, Bus = "music" });
 Audio.Play(hit, new AudioSettings { Mode = PlaybackMode.Despawn, Bus = "effects" });
@@ -55,6 +64,9 @@ mixer, so the buses are kept on the managed side over each sound's volume. `Audi
 
 `Start` and `Play` cut a window out of a clip, which is how one file holds several effects:
 
+<!-- compiled with:
+AssetHandle footsteps = default;
+-->
 ```csharp
 Audio.Play(footsteps, new AudioSettings { Start = 1.2f, Play = 0.35f, Mode = PlaybackMode.Despawn });
 ```
@@ -65,6 +77,9 @@ runs to the end of the clip.
 A sound can be placed in the world instead of played into both ears equally. That takes two
 things: the sound saying so, and an entity to hear from.
 
+<!-- compiled with:
+AssetHandle hum = default;
+-->
 ```csharp
 Audio.SetListener(Render.SpawnCamera3d());      // usually the camera
 

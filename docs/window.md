@@ -7,6 +7,9 @@ Drawing into an image a game reads or shows elsewhere, and the window the game r
 A camera can draw into a texture instead of into the window, for a portal, a security monitor, a
 mirror or a second viewport:
 
+<!-- compiled with:
+Entity screen = default;
+-->
 ```csharp
 var target = Render.CreateTarget(512, 512);
 var watcher = Render.SpawnCamera3d(new CameraSettings { Order = 1 });
@@ -32,6 +35,10 @@ or a shader reading the picture on needs. A capture of it reads as eight-bit sRG
 A target can have layers, and a camera can draw into one of them, which is how a cube map of the
 game's own is captured:
 
+<!-- compiled with:
+Vec3 center = default;
+(Vec3 Forward, Vec3 Up)[] Faces = new (Vec3 Forward, Vec3 Up)[6];
+-->
 ```csharp
 var cube = Render.CreateTarget(256, 256, TargetFormat.Rgba16Float, layers: 6);
 
@@ -50,6 +57,9 @@ once the cameras have drawn, since Bevy draws a camera into a whole image.
 A picture can also come back into memory rather than into a file, so a test can assert on what was
 drawn:
 
+<!-- compiled with:
+AssetHandle target = default;
+-->
 ```csharp
 var ticket = Render.BeginCapture(target);       // or BeginCapture() for what the run is drawing
 
@@ -68,6 +78,9 @@ Eight-bit color is the picture as a person sees it, so a half-float target's lig
 white reads as white. `TryReadCaptureAsItIs` reads the same capture in the format it was drawn in,
 for a program measuring light rather than looking at it:
 
+<!-- compiled with:
+Capture ticket = default;
+-->
 ```csharp
 if (Render.TryReadCaptureAsItIs(ticket, out var drawn))
 {
@@ -151,6 +164,9 @@ the libadwaita one the desktop's other windows have, because GNOME leaves drawin
 own. An XWayland window is softer on a display at a fractional scale, so it is off unless asked
 for, and it does nothing on another desktop or platform.
 
+<!-- compiled with:
+Config config = new();
+-->
 ```csharp
 config.DesktopTitleBar = true;                    // before the app is built
 ```
@@ -159,6 +175,9 @@ A second window is Bevy's `Window` on an entity of its own, spawned through refl
 other components are, and Bevy opens it once it is. A camera aimed at it draws there rather than in
 the first window, and an interface for it names that camera, since a node is drawn by one camera:
 
+<!-- compiled with:
+EcsWorld ecs = ctx.Ecs;
+-->
 ```csharp
 var second = ecs.Spawn();
 var window = ecs.Insert<WindowRef>(second);

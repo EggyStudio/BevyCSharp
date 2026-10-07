@@ -62,6 +62,9 @@ them.
 it, and `ComponentSchemas` maps a live component id to it. So an entity's components can be listed
 and edited without naming a single type:
 
+<!-- compiled with:
+Entity entity = default;
+-->
 ```csharp
 foreach (var id in ctx.Ecs.ComponentsOf(entity))
 {
@@ -82,6 +85,11 @@ which.
 **A field says how it is drawn**, in attributes the generator reads at compile time, so nothing
 reflects at runtime:
 
+<!-- compiled with:
+public enum Mode { Idle, Running }
+public Mode Mode;
+private void Rebuild() { }
+-->
 ```csharp
 [Range(0, 1, Readout = SliderReadout.Number)] public float Weight;   // a bar, and the number
 [Separator]                                                          // under a line
@@ -133,7 +141,7 @@ a console exists. What can be typed into one is a static method with `[Command]`
 
 ```csharp
 [Command("select", "Selects the first entity with a name: select <name>")]
-internal static string Select(string name) { … }
+internal static string Select(string name) => $"selected {name}";
 ```
 
 A generator finds them at compile time and a module initializer registers them, so nothing reflects

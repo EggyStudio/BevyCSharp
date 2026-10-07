@@ -32,6 +32,13 @@ A shape in the plane, a `Rectangle`, `Circle`, `Triangle2d`, `Segment2d`, `Capsu
 alike. A box is cheap and tight on a shape that stays square to the axes, and a circle stays the
 same as its shape turns:
 
+<!-- compiled with:
+private static void Check(Entity entity) { }
+Transform transform = Transform.Identity;
+IBounded2d shape = new Circle(1f);
+Aabb2d otherBox = default;
+Entity entity = default;
+-->
 ```csharp
 var placed = Isometry2d.FromTransform(transform);          // turned about Z, moved in X and Y
 Aabb2d box = shape.AabbAt(placed);
@@ -42,6 +49,13 @@ if (box.Intersects(otherBox) || circle.Intersects(otherBox)) Check(entity);
 A ray is tested against a volume as far as a distance, and a box or a circle is swept along one,
 each answering how far along it first meets the volume, zero from inside, or null where it misses:
 
+<!-- compiled with:
+private static void Hit(Vec2 point) { }
+Vec2 origin = default, direction = new(1f, 0f);
+float maxDistance = 100f;
+Aabb2d box = default;
+BoundingCircle circle = new(Vec2.Zero, 1f);
+-->
 ```csharp
 var cast = new RayCast2d(Ray2d.Toward(origin, direction), maxDistance);
 if (cast.AabbIntersectionAt(box) is { } distance) Hit(cast.Ray.At(distance));
@@ -65,6 +79,12 @@ A spline is made from control points into a `CubicCurve`, a run of cubic segment
 end, sampled at `t` from zero to its number of segments, as Bevy's `cubic_splines` are. Each is
 generic over `Vec2` and `Vec3`, and each says differently how the curve meets its points:
 
+<!-- compiled with:
+private static void Draw(Vec2 point) { }
+Vec2[] points = [], tangents = [];
+Vec3[] waypoints = [];
+Vec3 start = default, pull1 = default, pull2 = default, end = default;
+-->
 ```csharp
 var path = new CubicHermite<Vec2>(points, tangents).ToCurve();        // through each, along its tangent
 var smooth = CubicCardinalSpline<Vec3>.CatmullRom(waypoints).ToCurveCyclic();   // through each, round and back

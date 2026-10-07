@@ -29,6 +29,12 @@ float4 fragment(bcs::VertexOutput mesh) : SV_Target
 }
 ```
 
+<!-- compiled with:
+using System.Numerics;
+float[] weights = [1f, 0.5f];
+AssetHandle rock = default, dusk = default;
+Entity pond = default;
+-->
 ```csharp
 var layered = Shaders.CreateProgram("shaders/layered.slang");     // the fragment shader alone
 
@@ -114,6 +120,10 @@ graph produced it or a player typed it. It may `import bcs;` and any module unde
 Different text is a different program, so there is nothing to reload, and a change is a new program
 put on the material:
 
+<!-- compiled with:
+ShaderMaterial material = default;
+string generated = "";
+-->
 ```csharp
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
@@ -226,6 +236,10 @@ once per pixel, reading the picture so far and writing the next one. A pass is a
 program with a pass stage, and an instance holds values by name the way a material does, so one
 program can run twice with different values:
 
+<!-- compiled with:
+Entity camera = default;
+float strength = 0.5f;
+-->
 ```csharp
 var crt = Shaders.CreateInstance(Shaders.CreateProgram(
     new ShaderProgramSettings { Pass = "shaders/crt.slang" }));

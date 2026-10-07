@@ -90,6 +90,10 @@ in the screenshot above. See [Drawing](drawing.md) for the calls.
 the target `csharp`. Bevy's filter shows the info level and louder by default, and `RUST_LOG` chooses
 otherwise, `RUST_LOG=csharp=debug` showing a game's debug lines without Bevy's:
 
+<!-- compiled with:
+private static object Build() => new();
+object? table = null;
+-->
 ```csharp
 Log.Info("helpful information that is worth printing by default");
 Log.Debug("helpful for debugging");                 // left out by default

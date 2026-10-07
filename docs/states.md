@@ -18,6 +18,9 @@ public void Tick(BehaviorContext ctx) { }
 
 Read and change it from a system:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 var screen = ctx.State<Screen>();
 ctx.SetState(Screen.Paused);
@@ -28,6 +31,9 @@ never runs, and the app says so once on the error stream for the state, naming t
 value, however many methods are scoped to it, since they share the one missing `AddState`. To run
 one *as* the state changes, on the edge rather than throughout, use `[OnEnter]` and `[OnExit]`:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 [OnEnter(Screen.Playing)]
 public static void BuildLevel(BehaviorContext ctx) { }
@@ -44,6 +50,9 @@ What depends on where the state came from as well as where it went is `[OnTransi
 on a move from one value to a particular other and on no other move. Play resumed from the pause
 keeps the level it had, and play entered from the menu builds one:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 [OnTransition(Screen.Menu, Screen.Playing)]
 public static void BuildLevel(BehaviorContext ctx) { }
@@ -55,6 +64,9 @@ them. Both values are of the same enum, and naming two is an error when the code
 A teardown method that lists everything the screen spawned goes stale the first time something
 new is added to the screen. Tie the entity to the state instead and leaving takes it with you:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 [OnEnter(Screen.Playing)]
 public static void BuildLevel(BehaviorContext ctx)
@@ -71,6 +83,10 @@ transition rather than inside `[OnExit]`, which means it covers every way out of
 as a notice put up on leaving it. Where neither edge says it, a rule over the transition does, and
 the entity goes at the first transition the rule answers true for:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+Entity notice = default, hint = default;
+-->
 ```csharp
 ctx.Ecs.DespawnOnEnter(notice, Screen.Menu);
 ctx.Ecs.DespawnWhen<Screen>(hint, transition => transition.Entered == Screen.Paused);
@@ -83,6 +99,9 @@ Every transition is also a message of its enum, `StateTransitionEvent<TState>`, 
 and the value entered, either of them null where there was none. It is read like any message, the
 frame after the transition, and the state's first value comes as one from nothing:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 foreach (var transition in ctx.Read<StateTransitionEvent<Screen>>())
     Console.WriteLine($"{transition.Exited} => {transition.Entered}");
@@ -122,6 +141,10 @@ longer list in the same place as the state slots below.
 A mode that means something only inside two others names both, and exists only while each holds
 its value:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+public enum Mode { Offline, Online }
+-->
 ```csharp
 [SubStateOf(typeof(Screen), Screen.Playing)]
 [SubStateOf(typeof(Mode), Mode.Online)]
@@ -140,6 +163,9 @@ A state whose value follows from another's is a computed state. Whether the inte
 true on some screens and false on the rest, and writing that as a plain state leaves two facts to
 keep in step until one of them lies:
 
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
 ```csharp
 [ComputedFrom(typeof(Screen))]
 public enum Hud { Shown, Dimmed }
@@ -157,6 +183,10 @@ tidy.
 Where a table cannot say it, a rule can, as a function of the source's value answering what the
 state is or nothing:
 
+<!-- compiled with:
+public enum Level { One, Ten }
+[ComputedFrom(typeof(Level))] public enum Music { Calm, Boss }
+-->
 ```csharp
 app.AddComputedState<Music, Level>(level => level > Level.Ten ? Music.Boss : Music.Calm);
 ```
@@ -181,6 +211,10 @@ app.AddComputedState<TurboMode, AppState>(s => s.HasFlag(AppState.Turbo) ? Turbo
 
 A fact that follows from two facts together names both, and its rule takes both values:
 
+<!-- compiled with:
+public enum Level { First, Last }
+public enum Pause { Off, On }
+-->
 ```csharp
 [ComputedFrom(typeof(Level), typeof(Pause))]
 public enum Music { Calm, Boss, Quiet }

@@ -424,3 +424,23 @@ N 1.2's list first, renamed for the one public type it holds. Item 11 is next.
 
 Shared: a script compiled a hundred times and an app made a hundred times holding level, and a
 script's generation unloading as it is compiled again, as 3DEngine's `c06ec659` and `d7e370ed`.
+
+**Now 11, every code block of `docs/` built on the package.** `build/docs-on-package.py`, 3DEngine's
+script with this library's usings, builds each C# block of the guide into a project on the packed
+package, a fragment after the lines a `<!-- compiled with: -->` comment before its fence gives and
+a block marked `<!-- not compiled: reason -->` left out, and says an error at its page and line, an
+annotation in the workflow, where the pack workflow's game job runs it beside the examples' own
+build. A fragment's statements run where a behavior's context, `ctx`, and an app being built,
+`app`, are in reach, as nearly every one of the guide's is written, which the script's header and
+BUILDING.md say. `DocsScriptTests` feeds it a page of a good block, a stale one and a skipped one.
+The first run built 192 blocks of 193, the first game's left to `build/first-game.sh` and
+Courtyard's program to its own build. One was stale, a gizmo batch reading a position and a radius
+off a query of `Collider`, whose row has neither, which draws at each transform now. Six were not
+C# as written, two initializers' members given alone, attributes with nothing to mark, a command
+whose body was an ellipsis and two lists of bare expressions, and are whole now. The rest each
+take a comment declaring the entities, assets and types the page around them made. The suite
+passed, 1,219 with 9 skipped. The Now list is done to its end, and item 3's gaps are next, the
+deferred buffers first, decals' tags and volumes' voxels being reached already.
+
+Shared: every code block of the guide built on the package, a fragment after the lines a comment
+gives it, as 3DEngine's `a4f31573` does.

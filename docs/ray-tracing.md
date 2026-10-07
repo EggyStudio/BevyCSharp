@@ -6,6 +6,11 @@ Bevy's ray-traced lighting, and rays a game traces through its scene itself.
 
 On a GPU with ray tracing hardware, Bevy's Solari lights the scene by tracing rays instead:
 
+<!-- compiled with:
+Config config = new();
+Entity camera = default, floor = default, wall = default;
+AssetHandle floorMesh = default, wallMesh = default;
+-->
 ```csharp
 config.RayTracedLighting = true;                  // when the app is made
 
@@ -32,6 +37,10 @@ A compute shader can trace rays against the same scene, for shadows, reflections
 illumination of a package's own. It imports `bcs_ray` and compiles to SPIR-V, since Slang writes
 ray queries for SPIR-V and not for WGSL:
 
+<!-- compiled with:
+using System.Numerics;
+Entity camera = default;
+-->
 ```csharp
 var shadows = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
 {
@@ -79,6 +88,11 @@ stays off unless `SetRayTracedLighting` turns it on, so the rays can be the pack
 A ray scene of the game's own needs no Solari. It is built over a [geometry pool](compute.md#compute), each
 pool mesh once, with entities in numbered slots placed where their transforms are every frame:
 
+<!-- compiled with:
+AssetHandle rockProxyMesh = default;
+Entity boulder = default;
+ShaderInstance occlusion = default;
+-->
 ```csharp
 var pool = Shaders.CreateGeometryPool();
 var rock = Shaders.AddToGeometryPool(pool, rockProxyMesh);    // what the rays meet, not what is drawn

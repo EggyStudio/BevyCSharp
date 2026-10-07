@@ -381,6 +381,22 @@ somebody deciding whether to, so it links to each page by its full URL, since it
 package's page on nuget.org. `build/check-docs.py` follows every link in the README and the guide,
 `--external` the ones off this repository too, and the workflow run on every push runs it.
 
+`build/docs-on-package.py` builds every C# block of the guide against the packed package, as a
+reader copying one into a game would, and the pack workflow runs it beside the examples' own build.
+A fragment is built after the lines a comment before its fence gives, which declare what it takes
+from the page around it, the entity or the asset a sentence above it made, and its statements run
+where a behavior's context, `ctx`, and an app being built, `app`, are in reach. A block that is not
+C# to build, a sketch in another language or a whole program built elsewhere, says so instead:
+
+```markdown
+<!-- compiled with:
+Entity door = default;
+-->
+<!-- not compiled: the game's own Program.cs, which the pack workflow builds with the game -->
+```
+
+An error is said at the page's line, as an annotation in the workflow.
+
 `CHEATSHEET.md` at the root lists every public method a line each, and is written from the library
 and its XML documentation by `build/cheatsheet`, after a build of the library:
 

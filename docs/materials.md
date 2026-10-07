@@ -72,6 +72,10 @@ a lit scene is metered in hundreds of nits, so the exposure raises one to the ot
 [lightmaps example](https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/3d/lightmaps.cs)
 does for a material that came with a glTF file:
 
+<!-- compiled with:
+EcsWorld ecs = ctx.Ecs;
+Entity wall = default;
+-->
 ```csharp
 var material = Render.MaterialOf(ecs, wall);
 if (Render.TryReadMaterial(material, out var settings))

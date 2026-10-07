@@ -50,6 +50,10 @@ A mesh of millions of triangles can be drawn as Bevy's meshlets instead, which c
 clusters that the GPU culls and picks a level of detail for, so it costs what the triangles
 covering the screen cost rather than what the mesh holds:
 
+<!-- compiled with:
+Entity entity = default;
+AssetHandle marble = default;
+-->
 ```csharp
 var config = Config.Default;
 config.MeshletClusters = 1 << 22;                   // room for this many clusters at once
@@ -73,6 +77,9 @@ a mesh was cut and which level of detail is drawn where.
 Converting is the slow part, so a game does it once. `saveTo:` writes the finished mesh as a file
 under the asset root, and that file loads as fast as it reads:
 
+<!-- compiled with:
+AssetHandle statueMesh = default;
+-->
 ```csharp
 Render.CreateMeshletMesh(statueMesh, saveTo: "baked/statue.meshlet_mesh");   // once, in a tool
 

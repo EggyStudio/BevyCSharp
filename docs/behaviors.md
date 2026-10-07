@@ -10,6 +10,9 @@ Which one a method is depends on whether it is static.
 
 **Static methods are plain systems.** They run once per frame. Use them for global logic that queries other components.
 
+<!-- compiled with:
+[Behavior] public partial struct Velocity { public float Y; }
+-->
 ```csharp
 [Behavior]
 public partial struct Gravity
@@ -45,6 +48,9 @@ public partial struct Spinner
 An instance method can also take up to two of the entity's other components after its context, as
 `ref` to write one or `in` to read it, and runs only for entities carrying them:
 
+<!-- compiled with:
+[Behavior] public partial struct Velocity { public Vec3 Value; }
+-->
 ```csharp
 [OnUpdate]
 public void Tick(BehaviorContext ctx, ref Transform transform, in Velocity velocity) =>
@@ -82,6 +88,9 @@ component a query iterates, because Bevy exposes no way to reach a sparse set's 
 `Query<Colliding>()` is refused rather than quietly returning nothing. Everything else works,
 including the thing it is for:
 
+<!-- compiled with:
+public struct Colliding : ISparseComponent;
+-->
 ```csharp
 [OnUpdate]
 [Without(typeof(Colliding))]
@@ -108,6 +117,12 @@ is answered per entity. The same rows come back, split into the contiguous runs 
 A system with no component of its own, which sets a scene up or reads what every frame brings,
 is said in one call, as Bevy's `add_systems` says it, each handed the frame's context:
 
+<!-- compiled with:
+public sealed class Score { public void Tick(float seconds) { } }
+private static void Setup(BehaviorContext ctx) { }
+private static void Step(BehaviorContext ctx) { }
+var score = new Score();
+-->
 ```csharp
 app.Startup(Setup, "Setup");
 app.Update(ctx => score.Tick(ctx.Time.Delta), "Score");
@@ -129,6 +144,10 @@ public void Land(BehaviorContext ctx, ref Transform transform) { }
 A system added by hand says the same on its descriptor, and `App.Chain` adds several, each after
 the one before:
 
+<!-- compiled with:
+private static void CheckForWinner(World world) { }
+SystemDescriptor newRound = null!, score = null!, gameOver = null!;
+-->
 ```csharp
 app.AddSystem(Stage.Update, new SystemDescriptor(CheckForWinner, "CheckForWinner").After("Score"));
 app.Chain(Stage.Update, newRound, score, gameOver);
@@ -149,6 +168,9 @@ floor.
 time allows: twice after a slow frame, not at all after a fast one. Each run covers the same
 slice of time, so the simulation is reproducible.
 
+<!-- compiled with:
+public Vec3 Velocity;
+-->
 ```csharp
 [OnFixedUpdate]
 public void Step(BehaviorContext ctx)
@@ -175,6 +197,10 @@ differ, and `physics_in_fixed_timestep` in the examples does it.
 `[With]` and `[Without]` restrict an instance method to a subset of entities. They are resolved
 per archetype, not per entity, so they cost nothing in the loop.
 
+<!-- compiled with:
+[Behavior] public partial struct Alive { }
+[Behavior] public partial struct Frozen { }
+-->
 ```csharp
 [OnUpdate]
 [With(typeof(Alive))]
@@ -191,6 +217,9 @@ test against Bevy's change ticks, so a method carrying it runs sequentially.
 method taking a `World`. The generator checks the member exists at compile time, so a rename
 cannot silently disable your system.
 
+<!-- compiled with:
+public sealed class GameState { public bool Playing; }
+-->
 ```csharp
 [OnUpdate]
 [RunIf(nameof(IsPlaying))]
@@ -211,8 +240,11 @@ public static void DrawHud(BehaviorContext ctx) { }
 `KeyModifier` is a flags enum, so a shortcut can require any number of modifiers at once:
 
 ```csharp
-[ToggleKey(Key.F3, KeyModifier.Ctrl)]                     // Ctrl + F3
-[ToggleKey(Key.F3, KeyModifier.Ctrl | KeyModifier.Shift)] // Ctrl + Shift + F3
+[OnRender, ToggleKey(Key.F3, KeyModifier.Ctrl)]                     // Ctrl + F3
+public static void DrawHud(BehaviorContext ctx) { }
+
+[OnRender, ToggleKey(Key.F3, KeyModifier.Ctrl | KeyModifier.Shift)] // Ctrl + Shift + F3
+public static void DrawStats(BehaviorContext ctx) { }
 ```
 
 Each flag is side-agnostic, so `Ctrl` is satisfied by either Ctrl key, as a shortcut normally means,
@@ -234,6 +266,9 @@ public static bool ChordHeld(World world) =>
 
 ## Copying an entity
 
+<!-- compiled with:
+Entity crate = default;
+-->
 ```csharp
 var copy = ctx.Ecs.Clone(crate);
 ```
@@ -259,6 +294,10 @@ A method that reaches what one thread at a time may touch, a resource's fields, 
 drawn, a sound or `ctx.Ecs`, is marked `[MainThread]` and runs on the main thread for every entity
 however many there are, slower for thousands and safe. A static method runs there already:
 
+<!-- compiled with:
+public float Health;
+private static AssetHandle cheer;
+-->
 ```csharp
 [OnUpdate, MainThread]
 public void Cheer(BehaviorContext ctx)
@@ -270,6 +309,9 @@ public void Cheer(BehaviorContext ctx)
 Queue structural changes rather than applying them mid-loop. Spawning, despawning, adding and
 removing all move entities between archetypes, which invalidates every reference the loop holds:
 
+<!-- compiled with:
+public float Fuse;
+-->
 ```csharp
 [OnUpdate]
 public void Tick(BehaviorContext ctx)
@@ -283,6 +325,9 @@ A change can wait, too. `ctx.Cmd.Delayed(seconds)` is a queue of its own whose c
 that long has passed after the frame's queue is applied, Bevy's `commands.delayed()`, so something
 happens a while after its cause with no timer to keep:
 
+<!-- compiled with:
+Entity spark = default;
+-->
 ```csharp
 ctx.Cmd.Delayed(0.5f).Despawn(spark);              // gone half a second from now
 ```

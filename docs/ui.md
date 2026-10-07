@@ -7,6 +7,9 @@ per frame, no document to load, no binding to declare, and nothing to keep in st
 It is part of the library rather than part of the editor, so a game gets one by referencing
 `BevyCSharp` and nothing else.
 
+<!-- compiled with:
+using ImGuiNET;
+-->
 ```csharp
 [Behavior]
 public partial struct Interface
@@ -54,6 +57,9 @@ way a hand does.
 
 Panels and text, on a render build:
 
+<!-- compiled with:
+int score = 0;
+-->
 ```csharp
 var panel = Ui.SpawnNode(new UiSettings
 {
@@ -97,9 +103,12 @@ margin on each of them.
 them means the same distance on every side:
 
 ```csharp
-Padding = Length.Px(16f),                                   // all four
-Border = Sides.Vertical(Length.Px(2f)),                     // a rule above and below
-Margin = new Sides(Length.Px(8f), Length.Zero, Length.Auto, Length.Zero),
+var panel = new UiSettings
+{
+    Padding = Length.Px(16f),                                   // all four
+    Border = Sides.Vertical(Length.Px(2f)),                     // a rule above and below
+    Margin = new Sides(Length.Px(8f), Length.Zero, Length.Auto, Length.Zero),
+};
 ```
 
 A border draws only where `BorderColor` is not transparent. `Length.Auto` in a margin is not zero.
@@ -128,6 +137,9 @@ Linux, and the bridge builds with nothing but a C compiler.
 
 A label fits on one line; a paragraph has to be told how to break:
 
+<!-- compiled with:
+string paragraph = "";
+-->
 ```csharp
 Ui.SpawnText(paragraph, new UiSettings { Color = (1f, 1f, 1f, 1f) }, new UiTextSettings
 {
@@ -166,6 +178,9 @@ A run, whole or a span, is drawn with a line under it or through it by `Ui.SetUn
 Its `TextFontRef` sets the weight, the width and the style a font is asked for, and a font's
 OpenType features and a variable font's axes are each a four-letter tag and a value:
 
+<!-- compiled with:
+Entity heading = default, price = default, title = default;
+-->
 ```csharp
 Ui.SetUnderline(heading);
 ctx.Ecs.Wrap<TextFontRef>(heading).Weight = 700;                // bold, where the font has it
@@ -180,6 +195,9 @@ compile in, so a run names its font as a loaded asset.
 what they are. A grid states both axes up front and drops the children into the cells, so a column
 lines up with the column above it:
 
+<!-- compiled with:
+Entity panel = default;
+-->
 ```csharp
 UiGrid.Set(panel, new GridSettings
 {
@@ -304,6 +322,10 @@ its text replaced with the settings' text and the rest of them taken.
 Each key reaches the focused entity as Bevy's `FocusedInput<KeyboardInput>`, which goes on up its
 parents, so a game observes Enter in a field, or in any field of a row:
 
+<!-- compiled with:
+private static void Submit(EcsWorld ecs, Entity entity) { }
+Entity row = default;
+-->
 ```csharp
 ctx.Ecs.Observe<FocusedInput<KeyboardInput>>(row, on =>
 {
@@ -324,6 +346,10 @@ way, eight ways round, and a game calls it on whichever keys or buttons it choos
 with `Navigation.AddEdge` goes before the search, so a row wraps to the next, a far node is joined
 to the others, or a way is blocked with `Navigation.BlockEdge`:
 
+<!-- compiled with:
+Entity button = default, endOfRow = default, startOfNextRow = default;
+Vec2 stick = default;
+-->
 ```csharp
 ctx.Ecs.Insert<AutoDirectionalNavigationRef>(button);
 Navigation.AddEdge(endOfRow, startOfNextRow, CompassOctant.East, bothWays: true);
@@ -353,6 +379,13 @@ group a `ValueChange<Entity>` naming the button chosen. A menu reports `MenuEven
 or close, which goes up from the item to the menu's owner, where the game spawns the menu's popup
 or despawns it:
 
+<!-- compiled with:
+public sealed class Settings { public float Volume; }
+private static void Save(EcsWorld ecs) { }
+private static void ToggleMenu(EcsWorld ecs, Entity entity, MenuAction action) { }
+Entity save = default, volume = default, owner = default;
+var settings = new Settings();
+-->
 ```csharp
 ctx.Ecs.Observe<Activate>(save, on => Save(on.Ecs));
 ctx.Ecs.Observe<ValueChange<float>>(volume, on => settings.Volume = on.Event.Value);

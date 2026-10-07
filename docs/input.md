@@ -8,6 +8,9 @@ Keys tell you what the hardware did, and `Input.Text` tells you what the user me
 frame's typed characters, after the keyboard layout and any dead keys have been applied, for a name
 field:
 
+<!-- compiled with:
+string name = "";
+-->
 ```csharp
 name += ctx.Input.Text;
 if (ctx.Input.KeyPressed(Key.Backspace) && name.Length > 0)
@@ -23,6 +26,10 @@ A `LogicalKey` names what that place means in the layout, the character it types
 which suits a key named by what it types, as '?' for help or '+' for zoom, wherever the layout puts
 it. Both are read through the same calls:
 
+<!-- compiled with:
+private static void ShowHelp() { }
+private static void Submit() { }
+-->
 ```csharp
 if (ctx.Input.KeyPressed(LogicalKey.Character("?"))) ShowHelp();
 if (ctx.Input.KeyPressed(LogicalKey.Enter) && ctx.Input.KeyDown(LogicalKey.Control)) Submit();
@@ -36,6 +43,10 @@ Japanese, Chinese and Korean are typed through the platform's input method, whic
 candidate before it becomes text. A field turns it on while it has the focus, and shows what is
 being composed until it is committed:
 
+<!-- compiled with:
+float caretX = 0f, caretY = 0f, lineHeight = 20f;
+string name = "", preview = "";
+-->
 ```csharp
 Window.SetIme(true, caretX, caretY + lineHeight);   // the candidate list sits under the caret
 
@@ -48,6 +59,9 @@ input method would through `SyntheticInput.Compose` and `Commit`.
 
 Touches arrive the same way, as this frame's list:
 
+<!-- compiled with:
+private static void Aim(float x, float y) { }
+-->
 ```csharp
 foreach (var touch in ctx.Input.Touches)
     if (touch.Phase == TouchPhase.Started) Aim(touch.X, touch.Y);
@@ -58,6 +72,12 @@ A touch that ends is reported once, on the frame it ends, and is gone after that
 Gamepads are this frame's list too, each with its buttons as a key is read and its sticks and
 triggers as numbers, in the order Bevy found them:
 
+<!-- compiled with:
+private static void Jump() { }
+private static void Accelerate() { }
+private static void AddPlayer(object pad) { }
+Vec3 move = default;
+-->
 ```csharp
 if (ctx.Input.Gamepads is [var pad, ..])
 {
@@ -82,6 +102,13 @@ presses a button on a machine with none attached.
 what order, nor how often the mouse moved between frames. Bevy reports each change as a message as
 well, and they are read as any message is, each kind in the order it came:
 
+<!-- compiled with:
+private static void Log(params object?[] parts) { }
+private static void Trace(params object?[] parts) { }
+private static void Paint(params object?[] parts) { }
+private static void Record(object part) { }
+Vec2 look = default;
+-->
 ```csharp
 foreach (var key in ctx.Read<KeyboardInput>()) Log(key.KeyCode, key.LogicalKey, key.State, key.Text);
 foreach (var motion in ctx.Read<MouseMotion>()) look += motion.Delta;      // the hand's travel, past the screen's edge
@@ -104,6 +131,12 @@ Bevy's picking finds what is under the mouse or a finger, an interface node, a s
 and says what the pointer does to it: comes over it, presses it, clicks it, drags it or drops
 something on it. A game observes that at the entity, as Bevy's `Pointer<E>` events are observed:
 
+<!-- compiled with:
+private static void Spawn(EcsWorld ecs) { }
+private static void Highlight(EcsWorld ecs, Entity entity) { }
+private static void Turn(EcsWorld ecs, Entity entity, Vec2 delta) { }
+Entity button = default, card = default, cube = default, bin = default;
+-->
 ```csharp
 ctx.Ecs.Observe<Pointer<Click>>(button, on => Spawn(on.Ecs));
 ctx.Ecs.Observe<Pointer<Over>>(card, on => Highlight(on.Ecs, on.Entity));
@@ -133,6 +166,12 @@ nodes hear it as they would the mouse, its events saying which pointer it was. W
 image is the game's to say, usually where a ray from the mouse meets the mesh, which
 `Picking.TryCast` answers with the texture coordinate there:
 
+<!-- compiled with:
+Entity camera = default;
+float x = 0f, y = 0f;
+PointerId screenPointer = default;
+AssetHandle screenImage = default;
+-->
 ```csharp
 if (Render.TryRay(camera, x, y, out var origin, out var direction)
     && Picking.TryCast(origin, direction, out var hit, out _, out _, out var uv)

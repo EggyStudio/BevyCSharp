@@ -40,6 +40,9 @@ negative Z, which `Transform.LookingAt` produces.
 `Viewport` gives a camera part of the window instead of all of it, for splitscreen, and `Layers`
 decides what a camera can see at all, for a minimap:
 
+<!-- compiled with:
+Entity marker = default, player = default;
+-->
 ```csharp
 const uint Minimap = 1u << 1;
 
@@ -69,6 +72,10 @@ viewport's where it has one and the whole picture's where it does not. Both reac
 on a window made with `Config.Transparent`, which is see-through wherever what is drawn has no
 alpha:
 
+<!-- compiled with:
+Config config = new();
+Entity camera = default, fullWindowCamera = default;
+-->
 ```csharp
 config.Transparent = true;                        // before the app is built
 
@@ -115,6 +122,9 @@ channel is read, so the picture says how much light gets through rather than wha
 its border should be black or the light leaks past the edge of it. A point light takes a cube of six
 such pictures and a directional light one tiled across the ground, through their wrappers:
 
+<!-- compiled with:
+Entity lamp = default, sun = default;
+-->
 ```csharp
 using Bevy.Reflected;
 
@@ -133,6 +143,9 @@ A shadow map is drawn at a resolution of its own, so the shadow right where a fo
 is lost in a texel or two. Contact shadows fill that in, traced from each pixel toward the light a
 short way through the depth buffer:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, ContactShadows = true });
 Render.SetContactShadows(camera, new ContactShadowSettings(Steps: 16, Thickness: 0.1f, Length: 0.3f));
@@ -152,6 +165,9 @@ it. It is noisy on its own, so it suits a camera given
 The picture the camera makes is one call, describing the whole pipeline rather than one change
 to it:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetPostProcessing(camera, new PostSettings
 {
@@ -189,6 +205,9 @@ EV-100, the photographer's number, around 15 for sunlight, 12 for an overcast da
 `SetColorGrading` is the look applied after tonemapping, in the three tonal ranges a colorist works
 in:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetExposure(camera, 12f);
 
@@ -222,6 +241,9 @@ to the engine's own grading.
 The lens is a second call, because it is decided at a different time. A settings screen owns the
 pipeline above, and a scene sets these for a moment.
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetEffects(camera, new EffectSettings
 {

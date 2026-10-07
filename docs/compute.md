@@ -7,6 +7,11 @@ A program with a compute stage runs on the GPU outside of any picture, over buff
 and images that stay on the GPU between frames, so what one dispatch writes the next reads, and a
 material bound to the same buffer draws it:
 
+<!-- compiled with:
+public struct Boid { public Vec2 Position, Velocity; }
+Boid[] boids = new Boid[256];
+ShaderProgram look = default;
+-->
 ```csharp
 // Once.
 var flock = Shaders.CreateBuffer<Boid>(boids);                   // a C# struct, as it is
@@ -95,6 +100,10 @@ material multiplies them by.
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:
 
+<!-- compiled with:
+AssetHandle rockMesh = default;
+ShaderInstance trace = default;
+-->
 ```csharp
 var pool = Shaders.CreateGeometryPool();
 var rock = Shaders.AddToGeometryPool(pool, rockMesh);            // 0, its number in the pool
@@ -116,6 +125,9 @@ Screen-space techniques are a chain of compute and passes over one camera's fram
 what the camera drew and what the chain left behind last frame. A camera takes that chain as data:
 images it owns, and compute shaders it runs at a point in its frame.
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 ShaderInstance Compute(string file) => Shaders.CreateInstance(Shaders.CreateProgram(
     new ShaderProgramSettings { Compute = file }));
@@ -168,6 +180,9 @@ read and write the same image, which the GPU refuses, and history exists to avoi
 
 An image can also be filled from the picture itself, at a point of the frame:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Shaders.SetViewImages(camera, new ViewImage("lit", ShaderImageFormat.Rgba16Float, Scale: 0.5f,
     History: true, CopyAt: FramePoint.BeforeTonemapping));
@@ -226,6 +241,11 @@ Its vertex shader is handed no vertices, only `SV_VertexID` and `SV_InstanceID`,
 drawn from what it declares, which is how particles a compute shader moves, clusters a culling pass
 chose, or any number of instances whose count a buffer holds are drawn:
 
+<!-- compiled with:
+Entity camera = default;
+AssetHandle positions = default, counts = default;
+ShaderInstance clusters = default;
+-->
 ```csharp
 var sparks = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
 {
@@ -247,6 +267,11 @@ A draw can go into one of the camera's images instead of the picture. A visibili
 that way, as geometry drawn into an unsigned integer image, each pixel keeping which cluster and
 triangle is nearest, for a later pass to shade.
 
+<!-- compiled with:
+Entity camera = default;
+AssetHandle counts = default;
+ShaderInstance clusters = default;
+-->
 ```csharp
 Shaders.SetViewImages(camera, new ViewImage("visibility", ShaderImageFormat.R32UInt, ClearEachFrame: true));
 Shaders.SetViewDraws(camera, ViewDraw.Indirect(clusters, FramePoint.AfterPrepass, counts) with { Into = "visibility" });

@@ -10,6 +10,9 @@ happened, which is why a collision or a button press otherwise becomes a compone
 carry it. A message is sent by one system and read by any number of others, none of which need
 know about each other.
 
+<!-- compiled with:
+Entity a = default, b = default;
+-->
 ```csharp
 public readonly record struct Collided(Entity A, Entity B);
 
@@ -32,6 +35,10 @@ reading is main-thread only.
 What the window reports arrives on the same bus, so an engine message is read exactly like one
 another system sent:
 
+<!-- compiled with:
+private static void Layout(float width, float height) { }
+private static void Pause() { }
+-->
 ```csharp
 foreach (var resized in ctx.Read<WindowResized>())
     Layout(resized.Width, resized.Height);
@@ -47,6 +54,11 @@ is still open, which is the chance to save or to ask whether the player meant it
 
 Files dragged onto the window arrive the same way:
 
+<!-- compiled with:
+private static void ShowDropTarget(string path) { }
+private static void HideDropTarget() { }
+private static void LoadLevel(string path) { }
+-->
 ```csharp
 foreach (var hovered in ctx.Read<FileHovered>())
     ShowDropTarget(hovered.Path);
@@ -77,6 +89,9 @@ and harder to notice there.
 
 ## The hierarchy
 
+<!-- compiled with:
+Entity moon = default, planet = default;
+-->
 ```csharp
 ctx.Ecs.SetParent(moon, planet);
 
@@ -91,13 +106,16 @@ rather than a raw component write, which keeps the reverse child list correct.
 
 `GlobalTransform` is the result of that propagation: where the entity sits in world space.
 
+<!-- compiled with:
+Entity moon = default;
+-->
 ```csharp
 ref var world = ref ctx.Ecs.GetRef<GlobalTransform>(moon);
 
-world.Translation;                           // world-space position
-world.Forward;                               // the direction it faces
-world.TransformPoint(new Vec3(0f, 0f, -1f)); // a local point, in world space
-world.ToTransform();                         // position, rotation and scale
+var at = world.Translation;                            // world-space position
+var facing = world.Forward;                            // the direction it faces
+var ahead = world.TransformPoint(new Vec3(0f, 0f, -1f)); // a local point, in world space
+var whole = world.ToTransform();                       // position, rotation and scale
 ```
 
 Read it and write `Transform`. Propagation overwrites `GlobalTransform` every frame, and it is a
@@ -114,6 +132,9 @@ A message waits for a system to read it the next frame. An observer runs the mom
 triggered, which suits what has to happen before anything else looks at the world, an index kept in
 step with a component, or an attack that armor softens before the body behind it takes it.
 
+<!-- compiled with:
+Entity mine = default;
+-->
 ```csharp
 public readonly record struct Explode(Entity Entity) : IEntityEvent;
 
@@ -133,6 +154,11 @@ before the app runs. The handle `Observe` returns stops the observer when dispos
 
 Bevy reports what happens to a component, to C# observers as to its own, as five events over it.
 
+<!-- compiled with:
+[Behavior] public partial struct Mine { public int Key; }
+public sealed class MineIndex { public void Add(Entity entity, Mine mine) { } public void Forget(Entity entity, Mine mine) { } }
+MineIndex index = new();
+-->
 ```csharp
 ctx.Ecs.Observe<Add<Mine>>(on => index.Add(on.Event.Entity, on.Event.Value));
 ctx.Ecs.Observe<Remove<Mine>>(on => index.Forget(on.Event.Entity, on.Event.Value));
@@ -151,6 +177,9 @@ Bevy's own components are observed the same way, through their wrappers, as Bevy
 Pressed>` is `Add<PressedRef>`, which is how an interface restyles a widget as the pointer presses
 it or a key disables it:
 
+<!-- compiled with:
+private static void Restyle(EcsWorld ecs, Entity entity) { }
+-->
 ```csharp
 ctx.Ecs.Observe<Add<PressedRef>>(on => Restyle(on.Ecs, on.Event.Entity));
 ctx.Ecs.Observe<Remove<InteractionDisabledRef>>(on => Restyle(on.Ecs, on.Event.Entity));
@@ -166,6 +195,10 @@ A game's event likewise runs its observers inside `Trigger`, before it returns.
 A component's hooks are its own, one of each kind, given to the app while it is made, and run inside
 Bevy as the component goes on and comes off, before any observer:
 
+<!-- compiled with:
+[Behavior] public partial struct Mine { public int Key; }
+public sealed class Index { public void Add(int key, Entity entity) { } public void Remove(int key) { } }
+-->
 ```csharp
 app.OnAdd((HookContext ctx, in Mine mine) => ctx.Res<Index>().Add(mine.Key, ctx.Entity))
    .OnDiscard((HookContext ctx, in Mine mine) => ctx.Res<Index>().Remove(mine.Key))

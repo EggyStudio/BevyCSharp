@@ -4,6 +4,10 @@ Lines and shapes drawn for a frame, for debugging and for tools.
 
 Debug drawing, for watching what a program is doing:
 
+<!-- compiled with:
+Vec3 from = default, to = default, position = default, velocity = default;
+Transform transform = Transform.Identity;
+-->
 ```csharp
 Gizmos.Line(from, to, (0.3f, 0.8f, 1f, 1f));
 Gizmos.Arrow(position, position + velocity, (1f, 0.4f, 0.2f, 1f));
@@ -17,6 +21,11 @@ or a floor, `Box`, `RoundedCuboid`, `Capsule`, `Cone`, `Cylinder`, `Torus` and `
 a collider or a radius of effect usually is, and `Axes` an orientation. Everything but a line takes
 a `Quat`, because a shape with a flat side has to be told which way it faces.
 
+<!-- compiled with:
+Vec3 joint = default;
+Quat facing = Quat.Identity;
+(Vec3 Center, Vec3 Size) bounds = (Vec3.Zero, Vec3.One);
+-->
 ```csharp
 Gizmos.Arc(joint, facing, radius: 1.2f, angle: MathF.PI / 3f, (0.9f, 0.9f, 0.2f, 1f));
 Gizmos.Box(bounds.Center, Quat.Identity, bounds.Size, (0.2f, 1f, 0.4f, 1f));
@@ -38,6 +47,10 @@ Lines that do not change are kept instead. `Gizmos.Record` keeps every shape ask
 an asset, and `Gizmos.Attach` has an entity draw that asset every frame, placed by the entity's
 transform, with nothing asked for again:
 
+<!-- compiled with:
+EcsWorld ecs = ctx.Ecs;
+Entity entity = default;
+-->
 ```csharp
 var outline = Gizmos.Record(() => Gizmos.Sphere(Vec3.Zero, 1f, (1f, 0.2f, 0.2f, 1f), resolution: 512));
 Gizmos.Attach(ecs, entity, outline);
@@ -87,8 +100,8 @@ Inside a batch they are gathered and handed over together:
 ```csharp
 using (Gizmos.Batch())
 {
-    foreach (var row in ctx.Ecs.Query<Collider>())
-        Gizmos.Sphere(row.Position, row.Radius, (0f, 1f, 0f, 1f));
+    foreach (var row in ctx.Ecs.Query<Transform>())
+        Gizmos.Sphere(row.Component.Translation, 0.5f, (0f, 1f, 0f, 1f));
 }
 ```
 
@@ -100,6 +113,10 @@ zero depth, which differ once a line has width.
 `Gizmos.Text` writes a label in the world, and `Text2d` the same for a 2D camera, drawn as lines in
 Bevy's stroke font, so it costs no font asset and no entity and lasts the frame it was asked for:
 
+<!-- compiled with:
+float speed = 0f;
+Vec3 position = default;
+-->
 ```csharp
 Gizmos.Text($"{speed:0.0} m/s", position + Vec3.UnitY, Quat.Identity, 0.3f, (0f, -0.5f), (1f, 1f, 1f, 1f));
 Gizmos.Text2d("spawn", (120f, -40f), 0f, 16f, (0f, 0f), (1f, 0.8f, 0f, 1f));

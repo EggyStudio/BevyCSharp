@@ -7,6 +7,12 @@ managed side, in `Bevy.Physics`, which comes with the library in the way the int
 game has physics by referencing BevyCSharp and nothing else. Nothing new crosses to the engine for
 it, since a body's pose reaches Bevy as the `Transform` write any system makes.
 
+<!-- compiled with:
+private static void Select(Entity entity) { }
+Entity floor = default, crate = default;
+Transform floorTransform = Transform.Identity, crateTransform = Transform.Identity;
+Vec3 eye = default, forward = -Vec3.UnitZ;
+-->
 ```csharp
 app.AddPlugin(new PhysicsPlugin());
 
@@ -31,6 +37,12 @@ rather than swept through what lies between. A static one never moves. Boxes, sp
 with the entity, and a level's floors and walls are a mesh shape made from triangles, such as a
 mesh `Render.TryReadMesh` reads back once it has loaded:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+AssetHandle levelMesh = default;
+Entity level = default;
+Transform levelTransform = Transform.Identity;
+-->
 ```csharp
 if (Render.TryReadMesh(levelMesh, out var triangles))
     physics.Add(level, PhysicsShape.Mesh(triangles!), BodyKind.Static, levelTransform);
@@ -41,6 +53,9 @@ what it collides as, which the editor's inspector edits, its viewport draws, and
 carries. The plugin makes the body once an entity has both, makes it again when either changes, or
 when a static body's entity is moved or rescaled, and takes it away with them:
 
+<!-- compiled with:
+Entity wall = default, coin = default;
+-->
 ```csharp
 ctx.Ecs.Add(wall, new RigidBody { Kind = BodyKind.Static });
 ctx.Ecs.Add(wall, new Collider { Shape = ColliderShape.Box });     // fitted to the mesh it is drawn with
@@ -62,6 +77,9 @@ A game's pause is a state the simulation knows nothing of, so `PhysicsWorld.Paus
 still. Every body keeps its pose and its velocity and goes on from them when the pause is lifted,
 and no contact starts or ends meanwhile:
 
+<!-- compiled with:
+public enum Pause { Off, On }
+-->
 ```csharp
 [OnEnter(Pause.On)] public static void Hold(BehaviorContext ctx) => ctx.Res<PhysicsWorld>().Paused = true;
 [OnExit(Pause.On)]  public static void Go(BehaviorContext ctx)   => ctx.Res<PhysicsWorld>().Paused = false;
@@ -78,6 +96,9 @@ crouched under a ledge stands as it walks out. Each step writes back whether it 
 which way that faces. The body stays upright whatever its entity's rotation, so the game turns the
 entity to face the way it walks:
 
+<!-- compiled with:
+Entity player = default;
+-->
 ```csharp
 ctx.Ecs.Add(player, new RigidBody { Kind = BodyKind.Dynamic, Mass = 70f });
 ctx.Ecs.Add(player, new Collider { Shape = ColliderShape.Capsule, Size = new Vec3(0.7f, 1.8f, 0.7f), Offset = new Vec3(0f, 0.9f, 0f) });
@@ -96,6 +117,12 @@ A triangle collides from the side Bevy draws its face on. A rock or an odd crate
 is a convex hull of its points instead, such as a model's own vertices, solid where a mesh shape is
 a surface:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+AssetHandle rockMesh = default;
+Entity boulder = default;
+Transform boulderTransform = Transform.Identity;
+-->
 ```csharp
 if (Render.TryReadMesh(rockMesh, out var rock))
     physics.Add(boulder, PhysicsShape.Hull(rock!), BodyKind.Dynamic, boulderTransform, mass: 40f);
@@ -110,6 +137,11 @@ same on a running sample.
 Each body can have a material of its own, how hard it is to slide and how much it bounces, given as
 it is added or changed later:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity ball = default, floor = default;
+Transform ballTransform = Transform.Identity;
+-->
 ```csharp
 physics.Add(ball, PhysicsShape.Sphere(0.5f), BodyKind.Dynamic, ballTransform, material: new PhysicsMaterial(Friction: 0.6f, Bounce: 0.8f));
 physics.SetMaterial(floor, new PhysicsMaterial(Friction: 0.05f));   // ice
@@ -123,6 +155,12 @@ a second.
 Bodies that start or stop touching are reported on the message bus, and a body added as a sensor
 reports what enters it without pushing it, which is a trigger volume:
 
+<!-- compiled with:
+private static void Open() { }
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity door = default;
+Transform doorway = Transform.Identity;
+-->
 ```csharp
 physics.Add(door, PhysicsShape.Box(new Vec3(2f, 3f, 1f)), BodyKind.Static, doorway, sensor: true);
 
@@ -139,6 +177,13 @@ the game sets, every one with every other to begin with. Bodies on layers that d
 through each other and report nothing, a sensor included, so a trigger on a layer only the player's
 collides with reports the player alone, and the player's shots pass through the player:
 
+<!-- compiled with:
+private static void Damage(Entity entity) { }
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+const int Player = 1, Shots = 2;
+Entity bullet = default, gun = default;
+Vec3 muzzle = default, aim = -Vec3.UnitZ;
+-->
 ```csharp
 physics.SetLayersCollide(Player, Shots, false);
 physics.SetLayer(bullet, Shots);                 // or RigidBody.Layer, for a body made from components
@@ -164,6 +209,9 @@ as the hit or the damage it does. The speed is read as the two approach as well 
 since the solver slows a pair in the step before it touches, so a crate dropped onto the floor meets
 it at the speed its fall gave it, and one placed on the floor meets it at nothing:
 
+<!-- compiled with:
+AssetHandle thud = default;
+-->
 ```csharp
 foreach (var contact in ctx.Read<ContactStarted>())
     if (contact.Speed > 2f) Audio.Play(thud, new AudioSettings { Volume = MathF.Min(1f, contact.Speed / 10f) });
@@ -179,6 +227,10 @@ Joints hold two moving bodies together: a ball joint for a shoulder or a pendulu
 door or a wheel, a weld for a part bolted on, a distance range for a rope or a rod, and a slider
 for a drawer or a lift.
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity frame = default, door = default;
+-->
 ```csharp
 var hinge = physics.Connect(frame, door, Joint.Hinge(
     anchorA: new Vec3(0.5f, 0f, 0f), axisA: Vec3.UnitY,
@@ -192,6 +244,11 @@ joined to a kinematic one that stays put. Two bodies a joint holds do not collid
 so a hinge's pin can pass through its wheel. A hinge can turn itself, as a fan or a driven wheel
 does, and stop at an angle each way, as a door does:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity mount = default, blades = default, frame = default, door = default;
+Vec3 hingeOnFrame = default, hingeOnDoor = default;
+-->
 ```csharp
 var fan = physics.Connect(mount, blades, Joint.Hinge(Vec3.Zero, Vec3.UnitY, Vec3.Zero, Vec3.UnitY)
     .WithMotor(degreesPerSecond: 360f, torque: 50f));
@@ -209,6 +266,12 @@ than an angle from an axis on the first body and twisting about it no further th
 measured from how the two are turned when joined. A distance joint's range changes while it holds,
 as a winch reels a rope in a little each frame:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity torso = default, arm = default, hook = default, crate = default;
+Vec3 shoulder = default;
+float length = 3f;
+-->
 ```csharp
 physics.Connect(torso, arm, Joint.Ball(shoulder, Vec3.Zero)
     .WithCone(axisA: -Vec3.UnitY, swingDegrees: 60f, twistDegrees: 20f));
@@ -222,6 +285,10 @@ drawer, a sliding door or a lift on its frame. It stops at the ends of its trave
 where it was joined, and drives itself along the line where it has a drive, which pushes with no
 more than its force and holds it still at a speed of nothing:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity frame = default, car = default;
+-->
 ```csharp
 var lift = physics.Connect(frame, car, Joint.Slider(Vec3.UnitY)
     .WithTravel(minimum: 0f, maximum: 3f)
@@ -238,6 +305,10 @@ component. The joint is made once both bodies are, again when the component chan
 made again, and taken away with the entity. One naming a static body is written to the log once and
 left until its component changes. `physics.JointOf` answers the joint made, for a game to drive:
 
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+Entity hinge = default, post = default, door = default, fanMount = default;
+-->
 ```csharp
 ctx.Ecs.Add(hinge, Transform.At(0.05f, 1f, 0f));
 ctx.Ecs.Add(hinge, new JointBetween { Kind = JointKind.Hinge, A = post, B = door, MinAngle = 0f, MaxAngle = 100f });

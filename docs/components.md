@@ -62,6 +62,9 @@ A component with no mirror is reached through Bevy's reflection, which describes
 runtime, and each one has a typed wrapper in `Bevy.Reflected`, generated from a description of
 Bevy's components checked in beside the library, with a property per field:
 
+<!-- compiled with:
+Entity lamp = default, label = default;
+-->
 ```csharp
 using Bevy.Reflected;
 
@@ -82,6 +85,9 @@ variants hold nothing is a C# enum named after its property, `NodeRef.DisplayVar
 `Display`. One whose variants hold values is a record, with a record for each variant, so writing
 one sets the variant and its values together and reading one is a `switch` on its type:
 
+<!-- compiled with:
+Entity camera = default, panel = default;
+-->
 ```csharp
 var fog = ctx.Ecs.Insert<DistanceFogRef>(camera);
 fog.Falloff = new FogFalloff.Linear(5f, 20f);
@@ -103,6 +109,9 @@ for a camera's sub view, and null writes `None`. A component that is itself an e
 `Visibility`, has the one property `Value`. A range of numbers, such as the margins a
 `VisibilityRange` fades a mesh over, is a `FloatRange` of its two ends, read and written whole:
 
+<!-- compiled with:
+Entity mesh = default;
+-->
 ```csharp
 var range = ctx.Ecs.Insert<VisibilityRangeRef>(mesh);
 range.StartMargin = new FloatRange(3f, 4f);              // fades in from 3 to 4 units away
@@ -113,6 +122,9 @@ An enum inside a variant is a record of its own there, as an orthographic projec
 `ScalingMode` and a sprite's slicer its two `SliceScaleMode`s, or a plain C# enum where none of its
 variants holds a value, and an `Option` there is a nullable, as a font's oblique angle is:
 
+<!-- compiled with:
+Entity camera = default, label = default;
+-->
 ```csharp
 ctx.Ecs.Wrap<ProjectionRef>(camera).Value = new Projection.Orthographic(
     0f, 1000f, new Vec2(0.5f, 0.5f), new ScalingMode.FixedVertical(10f), 1f, new Vec2(-1f, -1f), new Vec2(1f, 1f));
@@ -124,6 +136,9 @@ of the records its items are, read whole and written whole, the list made as lon
 written, and a list of plain values, as a mesh's morph weights are, is a list of them. A gradient is
 a record a variant, holding its stops as a list of its own:
 
+<!-- compiled with:
+Entity panel = default;
+-->
 ```csharp
 ctx.Ecs.Insert<BoxShadowRef>(panel).Value =
 [
@@ -162,6 +177,11 @@ Under the wrappers is the string API they are written over, which reaches what n
 such as a list of pairs, and writes a whole component in one call. A component is named by its full
 Rust type path, a field by Bevy's reflect path, and a value is JSON:
 
+<!-- compiled with:
+using System.Text.Json.Nodes;
+Entity panel = default;
+JsonArray shadows = [];
+-->
 ```csharp
 const string Shadow = "bevy_ui::ui_node::BoxShadow";
 
@@ -230,12 +250,15 @@ and written as an object.
 Whether an entity is drawn. Render builds only, since a headless bridge has no such component and
 says so when the id is resolved.
 
+<!-- compiled with:
+Entity entity = default;
+-->
 ```csharp
 ctx.Ecs.Add(entity, Visibility.Hidden);                 // and everything below it
 ctx.Ecs.GetRef<Visibility>(entity).Mode = VisibilityMode.Inherited;
 
-ctx.Ecs.GetRef<InheritedVisibility>(entity).IsVisible;  // after the hierarchy is walked
-ctx.Ecs.GetRef<ViewVisibility>(entity).IsVisible;       // after culling: did a camera see it
+var shown = ctx.Ecs.GetRef<InheritedVisibility>(entity).IsVisible;  // after the hierarchy is walked
+var seen = ctx.Ecs.GetRef<ViewVisibility>(entity).IsVisible;        // after culling: did a camera see it
 ```
 
 `Visibility` is the request and the other two are Bevy's answers, computed during `PostUpdate`

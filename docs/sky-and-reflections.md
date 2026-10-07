@@ -7,6 +7,9 @@ probes that light a scene from around it.
 
 A camera can reflect what it sees in the surfaces it draws:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetScreenSpaceReflections(camera, new ReflectionSettings());
 ```
@@ -34,6 +37,9 @@ until it is asked off, since other cameras may be reading it.
 
 The sky can be scattered rather than painted:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetAtmosphere(camera, new AtmosphereSettings());
 Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
@@ -64,6 +70,9 @@ be a power of two. `ClearSkyLighting` takes it off.
 
 A painted sky is a cubemap instead:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightness: 1500f);
 ```
@@ -78,6 +87,9 @@ night sky and comes out black. A skybox is seen behind the scene and does not li
 
 The same file can light it, though, for a scene lit from a photograph of a real place:
 
+<!-- compiled with:
+Entity camera = default;
+-->
 ```csharp
 Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), intensity: 3000f);
 ```
@@ -91,6 +103,10 @@ applied, so a handle asked for in the same frame the camera is spawned works.
 `Render.SetEnvironmentMap` is the other end of that, taking the two maps a baking tool already
 produced rather than filtering one at startup:
 
+<!-- compiled with:
+Entity camera = default;
+AssetHandle diffuse = default, specular = default;
+-->
 ```csharp
 Render.SetEnvironmentMap(camera, diffuse, specular, intensity: 3000f);
 ```
@@ -107,6 +123,10 @@ has a room in it. A hall should reflect its own walls rather than the sky outsid
 red carpet should be warmer than the ceiling. A light probe is a box in the scene that lights what
 is inside it instead.
 
+<!-- compiled with:
+EcsWorld ecs = ctx.Ecs;
+AssetHandle diffuse = default, specular = default;
+-->
 ```csharp
 var hall = ecs.Spawn();
 ecs.Add(hall, new Transform { Translation = new Vec3(0f, 2f, 0f), Rotation = Quat.Identity, Scale = new Vec3(12f, 4f, 20f) });
@@ -122,6 +142,9 @@ blend into each other as something walks from one room to the next.
 
 An irradiance volume is the other kind, and the one global illumination is built on:
 
+<!-- compiled with:
+Entity hall = default;
+-->
 ```csharp
 const uint grid = 16;
 var light = Shaders.CreateImage(grid, grid * 2, ShaderImageFormat.Rgba16Float, depth: grid * 3);
@@ -174,6 +197,9 @@ off.
 
 A reflection probe can also render its own maps rather than being given them:
 
+<!-- compiled with:
+Entity hall = default;
+-->
 ```csharp
 Render.SetProbeCapture(hall, new ProbeCaptureSettings { Size = 256, Live = true });
 ```

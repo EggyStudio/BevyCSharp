@@ -25,7 +25,7 @@ it, so under `dotnet test` or `dotnet exec` that is the host rather than the ass
 copied next to the DLL are not found. Naming the directory outright is the only way to be sure:
 
 ```csharp
-AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets")
+var config = new Config { AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets") };
 ```
 
 A game can carry its assets inside its own assembly instead, built with
@@ -47,6 +47,13 @@ folder and before the assembly, on both sides of the bridge.
 Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
 runs, and texture and geometry streaming read their tiles and clusters with it.
 
+<!-- compiled with:
+const int PageBytes = 128 * 128;
+int page = 0;
+bool onScreen = true;
+AssetHandle cache = default;
+uint x = 0, y = 0;
+-->
 ```csharp
 var tile = Streaming.Read("world.pages", offset: page * PageBytes, length: PageBytes, priority: onScreen ? 1 : 0);
 
@@ -65,6 +72,9 @@ changes too. `Render.TryReadMesh` and `Render.WriteMesh` read a mesh's triangles
 over the same handle, and `Render.TryReadImage` and `Render.WriteImagePixels` read an image's
 texels, row after row, and write them back:
 
+<!-- compiled with:
+AssetHandle portrait = default;
+-->
 ```csharp
 if (Render.TryReadImage(portrait, out var pixels))
     Render.WriteImagePixels(portrait, pixels!.Data.Select(b => (byte)(255 - b)).ToArray());   // inverted
@@ -78,6 +88,9 @@ with `Render.CreateImage` do, and a compressed one is refused, since its texels 
 A glTF file holds many assets, so one is named with a label after the path. `LoadGltfMesh` builds
 that label, and what comes back is an ordinary mesh handle:
 
+<!-- compiled with:
+Entity entity = default;
+-->
 ```csharp
 var hull = AssetServer.LoadGltfMesh("models/ship.gltf");        // mesh 0, primitive 0
 Render.SetMesh(ctx.Ecs, entity, hull);
@@ -103,6 +116,9 @@ spawn as done but can appear a frame before the entities are visible.
 `App.SpawnGltf` does all of that for a scene spawned as the app starts, and hands the root over
 once the scene is in, where `EcsWorld.Descendants` walks it nearer entities first:
 
+<!-- compiled with:
+AssetHandle canvas = default;
+-->
 ```csharp
 app.SpawnGltf("models/ship.gltf", (ctx, root) =>
 {
@@ -120,6 +136,10 @@ ctx.Ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial(Col
 Compose on top of what a file describes by patching it after it spawns. Bevy's own `bsn!` does the
 same at compile time in Rust, and the ECS surface here does it at runtime:
 
+<!-- compiled with:
+[Behavior] public partial struct Selectable { }
+Entity root = default;
+-->
 ```csharp
 foreach (var child in ctx.Ecs.ChildrenOf(root))
 {
@@ -132,6 +152,9 @@ foreach (var child in ctx.Ecs.ChildrenOf(root))
 part-filled in. `Patch` changes the fields it names and leaves the rest, and `PatchTree` does it to
 an entity and everything under it, which usually suits a model:
 
+<!-- compiled with:
+Entity root = default;
+-->
 ```csharp
 // Keep where the artist put each part, and halve how large the whole model is.
 ctx.Ecs.PatchTree<Transform>(root, (ref Transform t) => t.Scale = Vec3.One * 0.5f);
@@ -177,6 +200,9 @@ values eased between by one of Bevy's easing functions, and moves a transform's 
 rotation or scale, an interface node's scale or rotation, or a text's color. A player plays a graph
 made from the clip, and each entity a curve is aimed at carries its target and the player:
 
+<!-- compiled with:
+Entity doorEntity = default;
+-->
 ```csharp
 var clip = Animation.CreateClip();
 var door = AnimationTarget.FromNames("door");
@@ -193,6 +219,10 @@ An event a game declares, implementing `IAnimationEvent`, is placed on a clip at
 code or one of a model's loaded by its label with `Animation.LoadClip`, and is heard as the clip
 reaches it, at the player or at the entity a target names:
 
+<!-- compiled with:
+private static void Dust(EcsWorld ecs, Entity entity) { }
+AnimationTarget leftFoot = default;
+-->
 ```csharp
 record struct Step : IAnimationEvent;
 
@@ -205,6 +235,11 @@ A graph is built node by node too, clips at its leaves and blends above them, ea
 A player given it plays several of its clips at once, mixed by their weights, which change as
 they play. A clip's node leaves out the parts of a body whose bones were put in a mask group:
 
+<!-- compiled with:
+AssetHandle walkClip = default, waveClip = default;
+AnimationTarget leftLeg = default;
+Entity player = default;
+-->
 ```csharp
 var (graph, root) = Animation.CreateGraph();
 var walk = Animation.AddClip(graph, walkClip, 1f, root);
@@ -220,6 +255,13 @@ A mesh made in code is skinned as a model's is. Each vertex names four joints an
 moves it, a skin holds the inverse of where each joint stood when the mesh was bound to it, and
 the joints are entities whose transforms bend the mesh as they move:
 
+<!-- compiled with:
+MeshData strip = new();
+ushort[] joints = [];
+float[] weights = [];
+AssetHandle material = default;
+Entity hip = default, knee = default;
+-->
 ```csharp
 var mesh = Render.CreateMesh(strip);
 Render.SetMeshJoints(mesh, joints, weights);              // four of each a vertex
@@ -230,6 +272,9 @@ Render.SetSkin(drawn, skin, [hip, knee]);                 // the knee's transfor
 
 A file's own materials load too, in a windowed run:
 
+<!-- compiled with:
+Entity entity = default;
+-->
 ```csharp
 Render.SetMaterial(ctx.Ecs, entity, AssetServer.LoadGltfMaterial("models/ship.gltf"));
 ```
