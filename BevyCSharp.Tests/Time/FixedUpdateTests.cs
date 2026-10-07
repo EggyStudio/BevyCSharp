@@ -26,9 +26,10 @@ public partial struct FixedStepper
 /// </summary>
 /// <remarks>
 /// The assertions are about the relationship between fixed steps and frames rather than about
-/// exact counts, because how many steps a run produces depends on how long the run really took.
-/// The rates are chosen far enough from the frame rate that the relationship holds with room to
-/// spare on a slow machine.
+/// exact counts. A test of that relationship steps its clock a frame at a time
+/// (<c>frameSeconds</c>), so the frames are the length they are paced at however long the machine
+/// took to run them, where on the machine's clock a slow runner's frame outlasted a fixed step and
+/// the fixed step caught up between two readings. The test of the clock itself keeps the machine's.
 /// </remarks>
 [Collection("engine")]
 public sealed class FixedUpdateTests
@@ -54,7 +55,7 @@ public sealed class FixedUpdateTests
     [Fact]
     public void TheOverstepGrowsBetweenStepsAndStaysUnderOne()
     {
-        using var harness = new EngineHarness(frames: 12, fps: 60, fixedHz: 1);
+        using var harness = new EngineHarness(frames: 12, fps: 60, fixedHz: 1, frameSeconds: 1.0 / 60);
         var oversteps = new List<float>();
 
         harness.OnContext(Stage.Update, ctx => oversteps.Add(ctx.Time.FixedOverstep));
@@ -68,7 +69,7 @@ public sealed class FixedUpdateTests
     [Fact]
     public void FixedUpdateRunsMoreOftenThanTheFrameWhenTheRateIsHigh()
     {
-        using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 500);
+        using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 500, frameSeconds: 1.0 / 60);
         var steps = 0;
         var frames = 0;
 
@@ -84,7 +85,7 @@ public sealed class FixedUpdateTests
     {
         // With the test above, this is the whole claim. The two are independent in both
         // directions, not merely at different rates.
-        using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 2);
+        using var harness = new EngineHarness(frames: 6, fps: 60, fixedHz: 2, frameSeconds: 1.0 / 60);
         var steps = 0;
         var frames = 0;
 

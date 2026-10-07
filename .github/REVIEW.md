@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e58d4bc`. The three verdicts are mended: the bridge allows `linker_messages` in the
+Reviewed up to `cec88ad`. The Windows step opens the program headless and running until stopped,
+since the job's bridge has no renderer (`08ac049`), Verdict 7's second mend; a game gets the
+editor's console in one call, `ImGuiConsole` drawn over the window on the key under Escape with the
+log, its filters, its history and completion, `ConsoleView` moved into the library and an ImGui
+frame that draws nothing clearing what the last one drew (`0cef072`); and the sample is
+`BevyCSharp.FeatureTest`, opened by `bcs open --feature-test` with `--sample` kept, in the solution,
+the workflow, the docs and AGENTS.md's table on the owner's word (`cec88ad`), the program itself
+under way. The run of `e58d4bc` on macOS built the bridge and passed the attribute test, which
+settles Verdicts 5 and 6, and failed one test, `FixedUpdateTests`' overstep case, the second to
+measure the machine's clock, which is Verdict 8; the run of `cec88ad` was in progress at 17:37. The
+suite: 1,227 passed, 9 skipped, as last reported.
+
+Before them, the three verdicts came to be mended: the bridge allows `linker_messages` in the
 workspace's lints with the macOS linker's note as the reason (`470fec7`); the fixed-update case
 steps its clock a 240th of a second a frame and asserts twenty fixed steps within one (`128cecd`);
 and the Windows step keeps each `bcs` answer and hands a failing one to `build/bcs-answer.py`, which
@@ -24,9 +36,8 @@ for an exception nothing caught, a task's exception nobody looked at and a panic
 threads, which the bridge's hook hands over as it happens, the next start saying where the last
 crash's file is, at ABI 228 (`e58d4bc`). Two offscreen runs of the sample in about thirty on the
 working session's machine lost the device as they ended and died by a signal, untraced, which
-becomes a verdict if a run shows it. The runs: `3e6293d` failed on macOS and Windows as foreseen;
-`470fec7`'s run carries Verdict 5's mend alone and `e58d4bc`'s all three, both in progress at 17:00,
-and the pack run of `75e8953` stays cancelled. The suite: 1,227 passed, 9 skipped.
+becomes a verdict if a run shows it. The pack run of `75e8953` stays cancelled. The suite: 1,227
+passed, 9 skipped.
 
 Before them, the console tests had moved into the diagnostics folder, N 1.4's list at 81
 (`3e6293d`). The runs: the first three with a macOS job, `360669ef`, `e3295b5` and `6f4d8590`,
@@ -36,19 +47,6 @@ and 111 steps where it expects 10 to 30, which is Verdict 6; on Windows the step
 through `bcs` ended with exit code 6 and nothing else on the page, which is Verdict 7; and Linux
 passed each. The run of `3e6293d` was in progress at 16:40, and the pack run of `75e8953` stays
 cancelled. The suite: 1,221 passed, 9 skipped.
-
-Before them, the loaders a game calls came to answer a bad file with a problem naming it and no
-exception, as N 2.6 asks: a scene and a save in the `SceneLoad` they return, whose `Problem` names
-the file with nothing spawned and the game left as it was, a mesh or material file as
-`AssetHandle.None` with `AssetLoadFailed` posted once, a data asset as its type's defaults with
-`DataAssets.TryGet` saying why beside `Get`, project settings carrying a `Problem`, and a pack that
-does not open logged and run without, each with a `Try` form, `BadFileTests` judging each loader's
-first form (`97df8fd`), which settles item 3 and checks N 2.6; `SceneLoad` gained its `Problem`, a
-line of `PublicApi.txt` reshaped. Three commits of moves alone took N 1.2's list to 188, N 1.4's to
-82 and N 3.4's to 43 (`e3295b5`, `6f4d859`, `d8c6c0d`). The owner decided on 2026-10-07 that
-graphics test scenes come as packs fetched on demand, Intel Sponza first at 1K from this
-repository's releases (Decision 15), which is item 6 among the feature test's. The suite: 1,221
-passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
@@ -60,13 +58,11 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 11 to 16 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The runs of `360669ef`, `e3295b5` and `6f4d8590` failed on macOS
-   and Windows, Verdicts 5 to 7, and passed on Linux; the run of `3e6293d` failed the same way, the
-   run of `470fec7` was cancelled by the push after it, and the run of `e58d4bc`, with all three
-   mends, passed on Linux, failed on Windows with the cause on the page at last, Verdict 7's second
-   half, and was in its macOS suite at 17:19, and the pack run of `75e8953` was cancelled, so
-   Verdicts 2 and 3 wait for the next pack run. Each push's run is read by the reviewing session,
-   and a failure it names comes first here.
+1. **What the next page says.** The run of `e58d4bc` passed on Linux, built the bridge on macOS
+   and failed one test there, Verdict 8, and failed the Windows step with its cause on the page,
+   mended at `08ac049`; the run of `cec88ad` was in progress at 17:37, and the pack run of `75e8953`
+   was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
@@ -211,30 +207,6 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-5. **The first macOS jobs fail before the suite: the bridge's own tests do not build.** Read from
-   the pages of `e3295b5` and `6f4d8590`: `the bridge: 0 passed, 0 failed, 0 skipped, did not build
-   after 3 m 23 s, exit code 101`, cargo denying every warning as the workflow asks and the macOS
-   linker warning that `__eh_frame section too large (max 16MB) to encode dwarf unwind offsets in
-   compact unwind table`, which rustc reports under its `linker_messages` lint, so the test binary
-   never linked. The message is about the speed of exception handling in a debug test binary of that
-   size and nothing the bridge does wrong. Two things: the lint is allowed for the bridge with that
-   reason beside it, in `Cargo.toml`'s lints or the job's flags, or the section is brought under the
-   limit where that is cheap; and the suite then runs there. Mended at `470fec7`, the lint allowed
-   in the workspace's lints with that reason beside it. Settled when a macOS job's bridge builds.
-
-6. **The first macOS jobs fail one test, the fixed-update case of `GeneratorAttributeTests`.**
-   Read from the page: an `Assert.InRange()` failure, the value 106 outside the range of 10 to 30,
-   and 111 the second time, for `EachAttributeDoesWhatItSays` with `OnFixedUpdateAttribute`, which
-   runs a harness of 40 frames at 240 frames a second with a fixed step of 120 a second and expects
-   about twenty fixed runs. The harness's clock follows wall time, so on a runner where those frames
-   took most of a second the fixed step caught up a hundred times, and the test measures the machine
-   and not the attribute. Two things: the harness steps its clock a frame at a time, as the row
-   taken at `711f416` has it, so forty frames at 240 are a sixth of a second whatever they took; and
-   the test asserts the count that gives, twenty within one. The 116 repeated warnings on the same
-   page, a system scoped to `Screen.Playing` with no such state added, come from a bare app of a
-   test and say nothing of the failure. Mended at `128cecd`, the clock stepped a 240th of a second a
-   frame and twenty asserted within one. Settled when a macOS job passes the test.
-
 7. **The Windows jobs fail the step that opens the sample through `bcs`, and the page says only
    `exit code 6`.** Read from the pages of `360669ef`, `e3295b5` and `6f4d8590`: `Open the sample
    through bcs` ended with `Process completed with exit code 6`, nothing else, in all three. The
@@ -250,7 +222,18 @@ from [SHARED.md](SHARED.md).
    sample's own refusal, that the bridge was built without Bevy's renderer so it opens no window,
    with `--headless` offered. The job's bridge is headless by design, so the step opens the sample
    headless, as the sample's own line says, and the start line on Windows is proved by that opening.
-   Settled when the Windows job opens the sample through `bcs`.
+   Mended at `08ac049`, the step opening the program headless and running until stopped. Settled
+   when the Windows job opens the sample through `bcs`.
+
+8. **The macOS job of `e58d4bc` fails the overstep case of `FixedUpdateTests`, the second test to
+   measure the machine's clock.** Read from the page: 894 passed, 1 failed, 405 skipped, the bridge
+   built and the attribute test passed, and `TheOverstepGrowsBetweenStepsAndStaysUnderOne` found the
+   overstep fall from 0.97 to 0.12 between two readings, which on a runner whose frame outlasted the
+   fixed step is a fixed step run between them, where the test expects every frame shorter than a
+   step. The same mend as Verdict 6's: the harness steps its clock a frame at a time, a frame
+   shorter than the fixed step, so the overstep grows by the same fraction each frame whatever the
+   machine took, and the suite's other fixed step cases are read for the same assumption in the same
+   batch. Settled when a macOS job passes it.
 
 ## Decisions
 

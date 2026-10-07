@@ -23,7 +23,7 @@ public sealed class PhysicsTests
     [Fact]
     public void ABoxFallsOntoTheFloorAndRestsThere()
     {
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var box = Entity.None;
@@ -66,7 +66,7 @@ public sealed class PhysicsTests
     [Fact]
     public void APausedSimulationHoldsABodyAndLetsItGoOnAfter()
     {
-        using var harness = new EngineHarness(frames: 120, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 120, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin(new PhysicsSettings { Gravity = Vec3.Zero, LinearDamping = 0f }));
 
         var box = Entity.None;
@@ -184,7 +184,7 @@ public sealed class PhysicsTests
     [Fact]
     public void AnImpulseMovesABodyAndADespawnRemovesIt()
     {
-        using var harness = new EngineHarness(frames: 40, fps: 120, fixedHz: 60);
+        using var harness = new EngineHarness(frames: 40, fps: 120, fixedHz: 60, frameSeconds: 1.0 / 120);
         harness.App.AddPlugin(new PhysicsPlugin(new PhysicsSettings { Gravity = Vec3.Zero }));
 
         var ball = Entity.None;
@@ -233,7 +233,7 @@ public sealed class PhysicsTests
     [Fact]
     public void ASensorReportsWhatPassesThroughWithoutStoppingIt()
     {
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var ball = Entity.None;
@@ -282,7 +282,7 @@ public sealed class PhysicsTests
     [Fact]
     public void APendulumSwingsOnItsJointAndTheJointGoesWithTheBall()
     {
-        using var harness = new EngineHarness(frames: 240, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 240, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var pivot = Entity.None;
@@ -489,7 +489,7 @@ public sealed class PhysicsTests
     [Fact]
     public void EachBodysMaterialDecidesHowItBouncesAndSlides()
     {
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         Entity bouncy = default, dull = default, icy = default, rough = default;
@@ -560,7 +560,7 @@ public sealed class PhysicsTests
     [Fact]
     public void AHullRestsOnItsPointsAndKeepsItsEntitysOrigin()
     {
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var crate = Entity.None;
@@ -608,7 +608,7 @@ public sealed class PhysicsTests
     public void AMotorTurnsItsHingeAndALimitStopsOne()
     {
         // Two seconds of steps, the motor turned off after the first.
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin(new PhysicsSettings { Gravity = Vec3.Zero }));
 
         Entity wheel = default, door = default;

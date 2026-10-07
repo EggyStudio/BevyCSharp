@@ -15,11 +15,9 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class PhysicsComponentTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-bodies-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-bodies-");
 
-    public PhysicsComponentTests() => Directory.CreateDirectory(_root);
-
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     /// <summary>A floor and a crate as components, the floor a cube stretched flat and fitted to it.</summary>
     private static (Entity Floor, Entity Crate) Level(EcsWorld world)
@@ -42,7 +40,7 @@ public sealed class PhysicsComponentTests : IDisposable
     [Fact]
     public void ABodyHeldAsComponentsFallsOntoAFloorHeldTheSameWay()
     {
-        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var crate = Entity.None;
@@ -61,7 +59,7 @@ public sealed class PhysicsComponentTests : IDisposable
     [Fact]
     public void AnEditedColliderIsMadeAgainAndARemovedOneTakesItsBody()
     {
-        using var harness = new EngineHarness(frames: 120, fps: 240, fixedHz: 120);
+        using var harness = new EngineHarness(frames: 120, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         harness.App.AddPlugin(new PhysicsPlugin());
 
         var floor = Entity.None;
@@ -122,7 +120,7 @@ public sealed class PhysicsComponentTests : IDisposable
     [Fact]
     public void ASceneCarriesItsBodies()
     {
-        var level = Path.Combine(_root, "bodies.scene.json");
+        var level = _folder.File("bodies.scene.json");
 
         using (var making = new EngineHarness(frames: 2))
         {
@@ -139,7 +137,7 @@ public sealed class PhysicsComponentTests : IDisposable
         Assert.Contains("Bevy.Physics.RigidBody", text);
         Assert.Contains("Bevy.Physics.Collider", text);
 
-        using var playing = new EngineHarness(frames: 480, fps: 240, fixedHz: 120);
+        using var playing = new EngineHarness(frames: 480, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
         playing.App.AddPlugin(new PhysicsPlugin());
 
         var crate = Entity.None;
