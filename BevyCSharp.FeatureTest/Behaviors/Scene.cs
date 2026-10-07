@@ -64,7 +64,7 @@ public partial struct Scene
         ctx.Ecs.Add(camera, FlyCamera.LookingAt(eye, Vec3.Zero));
 
         Console.WriteLine(
-            "[Scene] camera: hold the right button to look and fly with WASD, Q and E; "
+            "[Scene] in spectator mode, hold the right button to look and fly with WASD, Q and E; "
             + "middle button to slide; wheel to move along the view; Alt and the left button to "
             + "orbit; F to frame the origin");
 

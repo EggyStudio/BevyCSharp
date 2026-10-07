@@ -122,7 +122,8 @@ public partial struct FlyCamera
     [OnUpdate]
     public void Steer(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+        // The free camera of spectator mode, the player's view placing the camera otherwise.
+        if (!App.HasRenderer || ctx.Res<Config>().Headless || Player.Mode != PlayerMode.Spectator) return;
 
         var input = ctx.Input;
         var alt = input.AnyKeyDown([Key.AltLeft, Key.AltRight]);

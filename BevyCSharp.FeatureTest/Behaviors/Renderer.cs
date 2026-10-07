@@ -43,6 +43,9 @@ public partial struct Renderer
     /// <summary>Whether the cursor is currently locked to the window.</summary>
     private static bool _cursorLocked;
 
+    /// <summary>Whether Tab has locked the cursor, which the player's view turns with.</summary>
+    internal static bool CursorLocked => _cursorLocked;
+
     /// <summary>Reports what the window says about itself.</summary>
     /// <remarks>
     /// These come from Bevy rather than from another script, and arrive on the same bus, so this

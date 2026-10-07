@@ -40,6 +40,7 @@ public partial struct Interface
         ImGuiRuntime.Begin(ctx);
         Panel.Draw(ctx);
         Overlay.Draw(ctx);
+        Player.DrawMode(ctx);
         ImGuiConsole.Draw(ctx);
         ImGuiRuntime.End();
     }

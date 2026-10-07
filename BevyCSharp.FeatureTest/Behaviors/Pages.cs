@@ -12,6 +12,7 @@ internal static class Pages
     /// <summary>The first page, of the others.</summary>
     public static Page First() => new("Feature test",
     [
+        new PageRow("Player", Player),
         new PageRow("Graphics", Graphics),
         new PageRow("Audio", Audio),
         new PageRow("Controls", Controls),
@@ -21,6 +22,13 @@ internal static class Pages
         new PageRow("Time", Time),
         new ActionRow("Console", _ => ImGuiConsole.IsOpen = true),
         new ActionRow("Quit", ctx => ctx.Exit()),
+    ]);
+
+    private static Page Player() => new("Player",
+    [
+        new ChoiceRow<PlayerMode>("Mode (F3 and F4)", () => Behaviors.Player.Mode, Behaviors.Player.Ask),
+        new ChoiceRow<PlayerView>("View (F5)", () => Behaviors.Player.View, value => Behaviors.Player.View = value),
+        new ActionRow("Back to the zone's start", ctx => Behaviors.Player.Put(ctx, Behaviors.Player.Respawn, "put back")),
     ]);
 
     private static Page Graphics() => new("Graphics",

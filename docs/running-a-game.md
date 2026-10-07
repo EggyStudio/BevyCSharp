@@ -27,7 +27,13 @@ lit cube turning in the middle. F1 opens its admin panel, a list steered by the 
 with pages for the graphics, the audio, the controls, the debug draws, teleports to the zones,
 things to spawn and the time scale, each setting kept in the player's folder for the next run. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
-holds, and the key under Escape opens the console.
+holds, and the key under Escape opens the console. The player is a capsule on a
+`CharacterController`, walked with WASD or a pad's stick, jumping with Space, sprinting with Shift
+and crouching with C, its view turned by the mouse while Tab locks the cursor. F3 held with F4 steps
+it through walking, creative mode, where a double tap of jump flies, and spectator mode, a free
+camera through everything, and F5 steps the view from its eyes, from behind and from in front.
+`./bcs command player` says where it is and how it moves, and `./bcs command mode creative` sets
+the mode.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs
