@@ -13,6 +13,9 @@ internal static class Example2dViewportToWorld
 {
     private static Entity _camera;
 
+    // The whole of the depth a viewport draws into, as Bevy's viewport has it by default.
+    private static readonly FloatRange FullDepth = new(0f, 1f);
+
     public static void Build(App app)
     {
         app.Startup(Setup, "2d_viewport_to_world.Setup");
@@ -27,7 +30,7 @@ internal static class Example2dViewportToWorld
 
         // A viewport three quarters of the window's size, in its middle.
         _camera = Render2d.SpawnCamera2d();
-        ecs.Wrap<CameraRef>(_camera).Viewport = new Viewport((uint)(width * 0.125f), (uint)(height * 0.125f), (uint)(width * 0.75f), (uint)(height * 0.75f));
+        ecs.Wrap<CameraRef>(_camera).Viewport = new Viewport((uint)(width * 0.125f), (uint)(height * 0.125f), (uint)(width * 0.75f), (uint)(height * 0.75f), FullDepth);
 
         Ui.SpawnText(
             "Move the mouse to see the circle follow your cursor.\nUse the arrow keys to move the camera.\n"
@@ -94,7 +97,7 @@ internal static class Example2dViewportToWorld
         if (input.KeyDown(Key.L)) w += uspeed;
         (w, h) = (Math.Max(Math.Min(w, windowWidth - x), 20u), Math.Max(Math.Min(h, windowHeight - y), 20u));
 
-        var resized = new Viewport(x, y, w, h);
+        var resized = new Viewport(x, y, w, h, FullDepth);
         if (resized != viewport) camera.Viewport = resized;
     }
 

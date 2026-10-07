@@ -56,6 +56,7 @@ variant	bevy_camera::camera::Camera	viewport	Some	physical_position.x	.viewport.
 variant	bevy_camera::camera::Camera	viewport	Some	physical_position.y	.viewport.0.physical_position.y	Int	u32	
 variant	bevy_camera::camera::Camera	viewport	Some	physical_size.x	.viewport.0.physical_size.x	Int	u32	
 variant	bevy_camera::camera::Camera	viewport	Some	physical_size.y	.viewport.0.physical_size.y	Int	u32	
+variant	bevy_camera::camera::Camera	viewport	Some	depth	.viewport.0.depth	Vec2	Range<f32>	
 field	bevy_camera::camera::Camera	order	.order	Int	isize	
 field	bevy_camera::camera::Camera	is_active	.is_active	Bool	bool	
 field	bevy_camera::camera::Camera	computed.clip_from_view.x_axis	.computed.clip_from_view.x_axis	Vec4	glam::Vec4	
@@ -151,6 +152,8 @@ component	bevy_camera::visibility::VisibilityClass	VisibilityClass
 component	bevy_camera::visibility::VisibleEntities	VisibleEntities
 component	bevy_camera::visibility::VisibleMeshEntities	VisibleMeshEntities
 component	bevy_camera::visibility::range::VisibilityRange	VisibilityRange
+field	bevy_camera::visibility::range::VisibilityRange	start_margin	.start_margin	Vec2	Range<f32>	
+field	bevy_camera::visibility::range::VisibilityRange	end_margin	.end_margin	Vec2	Range<f32>	
 field	bevy_camera::visibility::range::VisibilityRange	use_aabb	.use_aabb	Bool	bool	
 component	bevy_camera::visibility::render_layers::RenderLayers	RenderLayers
 field	bevy_camera::visibility::render_layers::RenderLayers	0	.0	List	SmallVec<[u64; 1]>	
@@ -471,9 +474,12 @@ variant	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	quality_level	Custom	slice_c
 variant	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	quality_level	Custom	samples_per_slice_side	.quality_level.samples_per_slice_side	Int	u32	
 field	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	constant_object_thickness	.constant_object_thickness	Float	f32	
 component	bevy_pbr::ssr::ScreenSpaceReflections	ScreenSpaceReflections
+field	bevy_pbr::ssr::ScreenSpaceReflections	min_perceptual_roughness	.min_perceptual_roughness	Vec2	Range<f32>	
+field	bevy_pbr::ssr::ScreenSpaceReflections	max_perceptual_roughness	.max_perceptual_roughness	Vec2	Range<f32>	
 field	bevy_pbr::ssr::ScreenSpaceReflections	thickness	.thickness	Float	f32	
 field	bevy_pbr::ssr::ScreenSpaceReflections	linear_steps	.linear_steps	Int	u32	
 field	bevy_pbr::ssr::ScreenSpaceReflections	linear_march_exponent	.linear_march_exponent	Float	f32	
+field	bevy_pbr::ssr::ScreenSpaceReflections	edge_fadeout	.edge_fadeout	Vec2	Range<f32>	
 field	bevy_pbr::ssr::ScreenSpaceReflections	bisection_steps	.bisection_steps	Int	u32	
 field	bevy_pbr::ssr::ScreenSpaceReflections	use_secant	.use_secant	Bool	bool	
 component	bevy_pbr::transmission::ScreenSpaceTransmission	ScreenSpaceTransmission
@@ -586,6 +592,7 @@ field	bevy_render::view::ColorGrading	global.temperature	.global.temperature	Flo
 field	bevy_render::view::ColorGrading	global.tint	.global.tint	Float	f32	
 field	bevy_render::view::ColorGrading	global.hue	.global.hue	Float	f32	
 field	bevy_render::view::ColorGrading	global.post_saturation	.global.post_saturation	Float	f32	
+field	bevy_render::view::ColorGrading	global.midtones_range	.global.midtones_range	Vec2	Range<f32>	
 field	bevy_render::view::ColorGrading	shadows.saturation	.shadows.saturation	Float	f32	
 field	bevy_render::view::ColorGrading	shadows.contrast	.shadows.contrast	Float	f32	
 field	bevy_render::view::ColorGrading	shadows.gamma	.shadows.gamma	Float	f32	
@@ -614,6 +621,11 @@ variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.x	.0.size.
 variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.y	.0.size.y	Int	u32	
 component	bevy_scene::scene_component::SceneComponentInfo	SceneComponentInfo
 field	bevy_scene::scene_component::SceneComponentInfo	spawned_from_scene	.spawned_from_scene	Bool	bool	
+component	bevy_sprite::picking_backend::SpritePickingCamera	SpritePickingCamera
+component	bevy_sprite::picking_backend::SpritePickingSettings	SpritePickingSettings
+field	bevy_sprite::picking_backend::SpritePickingSettings	require_markers	.require_markers	Bool	bool	
+field	bevy_sprite::picking_backend::SpritePickingSettings	picking_mode	.picking_mode	Enum	SpritePickingMode	BoundingBox,AlphaThreshold
+variant	bevy_sprite::picking_backend::SpritePickingSettings	picking_mode	AlphaThreshold		.picking_mode.0	Float	f32	
 component	bevy_sprite::sprite::Anchor	Anchor
 field	bevy_sprite::sprite::Anchor	0	.0	Vec2	glam::Vec2	
 component	bevy_sprite::sprite::Sprite	Sprite

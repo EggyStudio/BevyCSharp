@@ -96,6 +96,41 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// A range of numbers, which Bevy reflects as a value of its own with no fields to reach, is read
+    /// and written whole by its wrapper, and its row is its two ends.
+    /// </summary>
+    [SkippableFact]
+    public void AVisibilityRangesMarginsAreRangesReadAndWrittenWhole()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var (start, end, json, row, written) = (default(FloatRange), default(FloatRange), (string?)null, (object?)null, false);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            var range = ctx.Ecs.Insert<VisibilityRangeRef>(entity);
+            range.StartMargin = new FloatRange(3f, 4f);
+            range.EndMargin = new FloatRange(8f, 9.5f);
+            (start, end) = (range.StartMargin, range.EndMargin);
+            json = ctx.Ecs.GetReflected(entity, VisibilityRangeRef.TypePath, ".end_margin");
+
+            var margin = ComponentSchemas.For(VisibilityRangeRef.TypePath)!.Field("start_margin")!;
+            written = margin.Write(ctx.Ecs, entity, new Vec2(1f, 2f));
+            row = margin.Read(ctx.Ecs, entity);
+        });
+
+        harness.Run();
+
+        Assert.Equal(new FloatRange(3f, 4f), start);
+        Assert.Equal(new FloatRange(8f, 9.5f), end);
+        Assert.Equal("""{"start":8.0,"end":9.5}""", json?.Replace(" ", string.Empty));
+        Assert.True(written);
+        Assert.Equal(new Vec2(1f, 2f), row);
+    }
+
+    /// <summary>
     /// An enum whose variants hold values is a record a variant, written whole and read back as the
     /// variant and the values it was given.
     /// </summary>

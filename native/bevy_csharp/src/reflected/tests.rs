@@ -54,6 +54,12 @@ struct Textured {
     image: bevy::asset::Handle<bevy::image::Image>,
 }
 
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+struct Spanned {
+    margin: core::ops::Range<f32>,
+}
+
 const PROBE: &str = "bevy_csharp::reflected::tests::Probe";
 const TEXTURED: &str = "bevy_csharp::reflected::tests::Textured";
 const TINTED: &str = "bevy_csharp::reflected::tests::Tinted";
@@ -294,4 +300,19 @@ fn an_immutable_component_is_written_by_inserting_a_written_copy() {
         assert_eq!(status::OK, set(entity, FROZEN, "0", "3.0"));
     });
     assert_eq!(3.0, app.world().get::<Frozen>(entity).unwrap().0);
+}
+
+#[test]
+fn a_struct_holding_a_range_with_no_default_is_inserted_with_an_empty_one() {
+    // A range registers no default, so the struct is made from its fields' defaults, the range's
+    // the empty one at zero.
+    let mut app = App::new();
+    app.register_type::<Spanned>();
+    let entity = app.world_mut().spawn_empty().id();
+    let type_path = c("bevy_csharp::reflected::tests::Spanned");
+    loan_world(app.world_mut(), || {
+        let code = unsafe { bcs_reflect_insert(entity.to_bits(), type_path.as_ptr(), core::ptr::null(), 0) };
+        assert_eq!(status::OK, code, "{}", last_error());
+    });
+    assert_eq!(0.0..0.0, app.world().get::<Spanned>(entity).unwrap().margin);
 }

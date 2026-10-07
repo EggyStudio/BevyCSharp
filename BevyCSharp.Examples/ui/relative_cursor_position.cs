@@ -20,7 +20,7 @@ internal static class RelativeCursorPosition
         {
             var ecs = ctx.Ecs;
             var camera = Render2d.SpawnCamera2d();
-            ecs.Wrap<CameraRef>(camera).Viewport = new Viewport(200, 100, 600, 600);
+            ecs.Wrap<CameraRef>(camera).Viewport = new Viewport(200, 100, 600, 600, new FloatRange(0f, 1f));
 
             var column = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Align = UiAlign.Center, Justify = UiJustify.Center, Direction = UiDirection.Column });
             _square = Ui.SpawnNode(new UiSettings { Width = Length.Px(250f), Height = Length.Px(250f), Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(15f)), Color = Color.FromSrgb(0.92f, 0.14f, 0.05f) });

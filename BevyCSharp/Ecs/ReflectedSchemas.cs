@@ -212,6 +212,14 @@ internal static class ReflectedSchemas
                 return;
             }
 
+            // A range of numbers is its two ends, which Bevy reflects as one value with no fields
+            // a path reaches, so it is read and written whole and drawn as two numbers.
+            if (type == "core::ops::Range<f32>")
+            {
+                fields.Add(Spanning(at, label));
+                return;
+            }
+
             var registered = described.ValueKind == JsonValueKind.Object
                 && described.GetProperty("registered").GetBoolean();
             var kind = registered ? described.GetProperty("kind").GetString() : null;
@@ -425,6 +433,28 @@ internal static class ReflectedSchemas
             {
                 ReflectPath = path,
                 ElementKind = item,
+            };
+        }
+
+        /// <summary>A row holding a range of numbers, drawn as its start and its end.</summary>
+        private ComponentField Spanning(At at, string label)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.Vec2,
+                "Range<f32>",
+                (world, entity) => Holds(world, entity, owner, within)
+                    && Guarded(() => world.GetReflected(entity, owner, path)) is { } json
+                    && ReflectedValue.DecodeRange(json) is var range
+                    ? new Vec2(range.Start, range.End)
+                    : null,
+                (world, entity, value) => value is Vec2 ends
+                    && Holds(world, entity, owner, within)
+                    && Sent(() => world.SetReflected(entity, owner, path, ReflectedValue.EncodeRange(new FloatRange(ends.X, ends.Y)))),
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
             };
         }
 

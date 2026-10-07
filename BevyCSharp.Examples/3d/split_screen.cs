@@ -101,7 +101,7 @@ public partial struct CameraPosition
     {
         var (width, height) = Window.Size();
         var (halfWidth, halfHeight) = (width / 2, height / 2);
-        var wanted = new Viewport(X * halfWidth, Y * halfHeight, halfWidth, halfHeight);
+        var wanted = new Viewport(X * halfWidth, Y * halfHeight, halfWidth, halfHeight, new FloatRange(0f, 1f));
         if (ctx.Ecs.Wrap<CameraRef>(ctx.Entity).Viewport != wanted) Render.SetViewport(ctx.Entity, wanted.PhysicalPositionX, wanted.PhysicalPositionY, wanted.PhysicalSizeX, wanted.PhysicalSizeY);
     }
 }

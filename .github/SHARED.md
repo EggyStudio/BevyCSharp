@@ -88,7 +88,7 @@ table also answers whether the two agree.
 | A character crouches and stands from its component's height, and its step height is set there | taken at `d5e68ad` | has (`52579d98`) |
 | A collider that is the shape of the meshes an entity and those under it show, made once they are loaded | taken at `d5e68ad`, `ColliderShape.Hull` and `Mesh` | has (`Collider.Mesh`, `454e9276`) |
 | Friction and bounce for each body, mixed for a pair | has | has (`9aa94324`) |
-| A joint described in a scene file as an entity naming its two bodies, at its own place and axis | to take | has (`Joint`, `e46058fc`) |
+| A joint described in a scene file as an entity naming its two bodies, at its own place and axis | taken at `c98010a`, `JointBetween` | has (`Joint`, `e46058fc`) |
 | Two bodies a joint holds do not collide with each other | has (`1f10323`) | has (`ed0f3aa6`) |
 | A ray passes through a trigger, so a sensor never holds up a wheel or a character's ground check | to check | has (`b5eb3642`) |
 | A raycast vehicle made by one call beside the character controller, tuned by one record | to consider | has (`CreatePhysicsVehicle`, `ee641437`) |
@@ -100,7 +100,7 @@ table also answers whether the two agree.
 | A frame's time and the fixed steps that spend it under one clamp, so what a program moved by frame time and what was simulated agree | has, as Bevy's clock and fixed schedule do | taken at `ee3b47dd`, the frame's clamp of a quarter second the one kept |
 | Bodies on collision layers whose pairs collide or not, which contacts, triggers, characters and rays follow, a sleeping body woken when its layer or trigger changes | taken at `795762b`, 32 layers | has (`8520dbe1`, `ac897afa`) |
 | A body a game knows is fast swept over each step, so it does not cross a thin wall within one, chosen for each body | taken at `795762b` | has (`SetPhysicsBodyContinuous`, `799a9d56`) |
-| A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | taken at `36362ce` from code, the scene file's joint to take (REVIEW.md, item 4) | has (`979c97be`) |
+| A slider joint, one body along an axis against another without turning, with limits, a motor and its position, from code and from a scene file | taken at `36362ce` from code and `c98010a` from a scene file | has (`979c97be`) |
 | A game asks how hard two touching bodies press, answered while they sleep too | taken at `36362ce`, the push alone | has (`GetPhysicsContactImpulse`, `53cd565f`), the push alone since `c774a379` |
 
 ### Scenes, saves and files
@@ -109,7 +109,7 @@ table also answers whether the two agree.
 |---|---|---|
 | A scene file placed inside another, its entities left out of the outer file's save | has (`SceneInstances`) | has (`SceneRef`, `0502362d`) |
 | A scene file holds arrays, so a mesh made in code is saved with its level | has | has (`8567bea6`) |
-| A placed scene file written while the level runs is spawned again in place of its copies, under the entity that placed it and giving back what the old copy held | to check against `SceneInstances` | has (`6059b57a`, `5b2234d2`) |
+| A placed scene file written while the level runs is spawned again in place of its copies, under the entity that placed it and giving back what the old copy held | taken at `3270d9e`, `SceneReloads` | has (`6059b57a`, `5b2234d2`) |
 | A model's sibling files, an OBJ's `.mtl` and a glTF's `.bin`, come from the reader the model came from, whatever reader that is, and no native code opens a file | has for glTF, the loader being Bevy's | has (`AssimpFiles`, `abc24192`), read from the model's own stream with no copy and a reader's exception answered as the load's (`1fac9eff`) |
 | A model file with animation clips placed in a level plays, where its meshes would stand at rest | to check | has (`ba328b18`) |
 | What a level loaded through its references is let go once nothing uses it | has, Bevy counting its handles | has (`4e765797`) |
@@ -125,15 +125,15 @@ table also answers whether the two agree.
 | A key held for an exact number of frames by one command | has (`324f919`) | has (`input.key`) |
 | Every menu played with a gamepad alone, settings and key bindings kept in a file | to check, with Courtyard | has (`games/Manor`, `4161a8c5`) |
 | Gamepads | taken at `7f87a47`, with a pretended pad a script drives | has |
-| A gamepad's gyro, accelerometer, touchpad and light | to take | has (`73ce6326`) |
+| A gamepad's gyro, accelerometer, touchpad and light | blocked at gilrs 0.11.2, which reads none of them, the touchpad's click reaching `bevy_gilrs` as a button it drops; a second reader of the pads, SDL's or hidapi's, waits for the owner's word | has (`73ce6326`) |
 | A pointer dragged a step a frame by one command, so a swipe or a window drag registers | taken at `ce27e73` | has (`input.drag`, `048c072c`) |
 | The listing of running sessions taken twice and joined, since one taken while a session file is replaced can leave it out | has (`CliSession.cs`) | has (`048c072c`) |
-| A field holding an array written from the terminal, its items split by semicolons | to check against `entity.set` | has (`3cab9d9d`) |
-| Files dropped on the window reach the program, and a command pretends a drop | has the messages, the command to check | has (`input.drop`, `eca234f9`) |
-| A command's parameter with a default may be left off, shown in brackets in its usage | to check against the command generator | has (`a3d56597`) |
+| A field holding an array written from the terminal, its items split by semicolons | taken at `678d860` | has (`3cab9d9d`) |
+| Files dropped on the window reach the program, and a command pretends a drop | has the messages, `input.drop` taken at `678d860` | has (`input.drop`, `eca234f9`) |
+| A command's parameter with a default may be left off, shown in brackets in its usage | taken at `678d860`, `[name]` in the usage and `optional` in the schema | has (`a3d56597`) |
 | C# typed at a running app | has in the editor (`eval`) | has (`e3d eval`, `075c5b3c`), compiled against the running program and run between frames |
 | The frame's cost by part, from one command | has (`frame.profile`, `d6a03d2`) | has (`profile`, `fffc5060`) |
-| A command takes an enum member by its name alone, since `Enum.TryParse` takes any number as well and an undefined value reaches the engine | to check (`ConsoleWorldCommands.cs` reads gamepad buttons, axes and keys with `Enum.TryParse`) | has (`InputCommands.TryName`, `ef042886`), where a button of 100 stopped the program in ImGui |
+| A command takes an enum member by its name alone, since `Enum.TryParse` takes any number as well and an undefined value reaches the engine | taken at `678d860`, `ConsoleWorldCommands.TryName` | has (`InputCommands.TryName`, `ef042886`), where a button of 100 stopped the program in ImGui |
 
 ### Tests, CI and packaging
 

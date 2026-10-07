@@ -10,23 +10,15 @@ namespace BevyCSharp.Examples.ThreeD;
 // low-poly one further away, faded one into the other as the camera crosses between them.
 internal static class VisibilityRange
 {
-    // A visibility range's margins are ranges of numbers, which a wrapper does not type, so the
-    // component is written as JSON.
-    private const string RangeType = "bevy_camera::visibility::range::VisibilityRange";
-
     private static readonly Vec3 FocalPoint = new(0f, 0.3f, 0f);
     private const float KeyboardZoomSpeed = 0.05f, KeyboardPanSpeed = 0.01f, MouseMovementSpeed = 0.25f;
     private const float MinZoomDistance = 0.5f;
 
-    // Bevy's four ranges, as JSON of its VisibilityRange, each a start margin and an end margin.
-    private static string Range(float startFrom, float startTo, float endFrom, float endTo) =>
-        FormattableString.Invariant(
-            $$"""{"start_margin":{"start":{{startFrom}},"end":{{startTo}}},"end_margin":{"start":{{endFrom}},"end":{{endTo}}},"use_aabb":false}""");
-
-    private static readonly string HighPolyRange = Range(0f, 0f, 3f, 4f);
-    private static readonly string LowPolyRange = Range(3f, 4f, 8f, 9f);
-    private static readonly string SingleModelRange = Range(0f, 0f, 8f, 9f);
-    private static readonly string InvisibleRange = Range(0f, 0f, 0f, 0f);
+    // Bevy's four ranges, each a start margin and an end margin.
+    private static readonly (FloatRange Start, FloatRange End) HighPolyRange = (new(0f, 0f), new(3f, 4f));
+    private static readonly (FloatRange Start, FloatRange End) LowPolyRange = (new(3f, 4f), new(8f, 9f));
+    private static readonly (FloatRange Start, FloatRange End) SingleModelRange = (new(0f, 0f), new(8f, 9f));
+    private static readonly (FloatRange Start, FloatRange End) InvisibleRange = (new(0f, 0f), new(0f, 0f));
 
     private static Entity _camera, _text;
 
@@ -80,19 +72,28 @@ internal static class VisibilityRange
             foreach (var entity in ecs.Descendants(model).ToArray())
             {
                 if (ecs.Has<MainModel>(entity) || ecs.Get<Mesh3dRef>(entity) is null) continue;
-                ecs.InsertReflected(entity, RangeType, RangeFor(kind == MainModelKind.HighPoly));
+                SetRange(ecs, entity, kind == MainModelKind.HighPoly);
                 ecs.Add(entity, new MainModel { Kind = kind });
             }
         }
     }
 
-    private static string RangeFor(bool highPoly) => (highPoly, _showOnly) switch
+    // Puts the range an entity of one of the two models is drawn over, as the mode shows it.
+    private static void SetRange(EcsWorld ecs, Entity entity, bool highPoly)
     {
-        (true, false) or (false, true) => InvisibleRange,
-        (_, not null) => SingleModelRange,
-        (true, null) => HighPolyRange,
-        (false, null) => LowPolyRange,
-    };
+        var (start, end) = (highPoly, _showOnly) switch
+        {
+            (true, false) or (false, true) => InvisibleRange,
+            (_, not null) => SingleModelRange,
+            (true, null) => HighPolyRange,
+            (false, null) => LowPolyRange,
+        };
+
+        var range = ecs.Insert<VisibilityRangeRef>(entity);
+        range.StartMargin = start;
+        range.EndMargin = end;
+        range.UseAabb = false;
+    }
 
     private static void MoveCamera(BehaviorContext ctx)
     {
@@ -127,7 +128,7 @@ internal static class VisibilityRange
         foreach (var entity in ecs.EntitiesWith<MainModel>())
         {
             if (ecs.Get<Mesh3dRef>(entity) is not null)
-                ecs.InsertReflected(entity, RangeType, RangeFor(ecs.GetOrDefault<MainModel>(entity).Kind == MainModelKind.HighPoly));
+                SetRange(ecs, entity, ecs.GetOrDefault<MainModel>(entity).Kind == MainModelKind.HighPoly);
         }
         Ui.SetText(_text, Describe());
     }

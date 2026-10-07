@@ -100,7 +100,14 @@ var described = fog.Falloff switch
 
 Rust's `Option` is a nullable, `float?` for a text box's width or a record such as `SubCameraView`
 for a camera's sub view, and null writes `None`. A component that is itself an enum, such as
-`Visibility`, has the one property `Value`.
+`Visibility`, has the one property `Value`. A range of numbers, such as the margins a
+`VisibilityRange` fades a mesh over, is a `FloatRange` of its two ends, read and written whole:
+
+```csharp
+var range = ctx.Ecs.Insert<VisibilityRangeRef>(mesh);
+range.StartMargin = new FloatRange(3f, 4f);              // fades in from 3 to 4 units away
+range.EndMargin = new FloatRange(8f, 9f);                // and out from 8 to 9
+```
 
 Bevy's resources are reached the same way, since in this Bevy a resource is a component on an
 entity of its own. `Resource<T>` finds that entity and gives the wrapper over it, or null when the
@@ -135,9 +142,7 @@ string? json = ctx.Ecs.GetReflected(panel, Shadow);    // or null if absent
 ```
 
 `SetVariant`, `SetReflectedColor` and `SetReflectedAsset` are the same calls for a variant, a color
-and a handle. A range of numbers, such as the margins of a `VisibilityRange`, is JSON of its two
-ends, `{"start":3,"end":4}`, and is written whole, since a path stops at the range rather than going
-into one of its ends.
+and a handle.
 
 That reaches nearly everything Bevy has (cameras, lights, projections, the hierarchy), and a
 component a later Bevy or a plugin adds is reachable the day it exists, with nothing written on

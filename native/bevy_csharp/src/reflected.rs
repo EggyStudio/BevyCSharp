@@ -169,6 +169,13 @@ fn default_of(
         return Ok(Box::new(bevy::ecs::entity::Entity::PLACEHOLDER));
     }
 
+    // A range of numbers registers no default, though Rust's is the empty range at zero, which a
+    // struct holding one, as a visibility range holds its margins, is made with for the caller to
+    // write the real ones over.
+    if type_id == TypeId::of::<core::ops::Range<f32>>() {
+        return Ok(Box::new(0.0f32..0.0));
+    }
+
     // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
     // holds nothing, which a caller choosing it then writes over.
     if let Some(TypeInfo::Enum(info)) = registry.get_type_info(type_id)

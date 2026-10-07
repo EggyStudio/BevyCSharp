@@ -198,8 +198,11 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
         return text.ToString();
     }
 
+    /// <summary>The Rust type Bevy reflects as one value with no fields, read and written whole as its two ends.</summary>
+    private const string Range = "Range<f32>";
+
     /// <summary>The C# type a field's property has, or nothing for a kind a wrapper does not type.</summary>
-    private static string? TypeOf(FieldModel field) => field.Kind switch
+    private static string? TypeOf(FieldModel field) => field.Rust == Range ? "global::Bevy.FloatRange" : field.Kind switch
     {
         "Float" => "float",
         "Double" => "double",
@@ -244,6 +247,7 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
     /// <summary>The expression reading a field a wrapper or a variant names.</summary>
     private static string Reading(FieldModel field, string path) => field.Kind switch
     {
+        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.Range(_world, Entity, TypePath, \"{path}\")",
         "Color" => $"global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, \"{path}\")",
         "Asset" => $"global::Bevy.ReflectedValue.Asset(_world, Entity, TypePath, \"{path}\")",
         _ => $"global::Bevy.ReflectedValue.Get<{TypeOf(field)}>(_world, Entity, TypePath, \"{path}\", global::Bevy.FieldKind.{field.Kind})",
@@ -252,6 +256,7 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
     /// <summary>The statement writing a field a wrapper or a variant names.</summary>
     private static string Writing(FieldModel field, string path, string value) => field.Kind switch
     {
+        _ when field.Rust == Range => $"global::Bevy.ReflectedValue.SetRange(_world, Entity, TypePath, \"{path}\", {value});",
         "Color" => $"_world.SetReflectedColor(Entity, TypePath, \"{path}\", {value});",
         "Asset" => $"_world.SetReflectedAsset(Entity, TypePath, \"{path}\", {value});",
         _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, \"{path}\", global::Bevy.FieldKind.{field.Kind}, {value});",
@@ -487,6 +492,17 @@ public sealed class ReflectedGenerator : IIncrementalGenerator
                             public enum {{named}}
                             {
                                 {{string.Join("\n\n        ", variants)}}
+                            }
+
+                        """);
+                    break;
+
+                case "Vec2" when field.Rust == Range:
+                    text.Append($$"""
+                            public global::Bevy.FloatRange {{unique}}
+                            {
+                                get => {{Reading(field, path)}};
+                                set => {{Writing(field, path, "value")}}
                             }
 
                         """);

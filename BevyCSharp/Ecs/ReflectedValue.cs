@@ -234,6 +234,40 @@ internal static class ReflectedValue
     internal static Color Color(EcsWorld world, Entity entity, string type, string path) =>
         world.GetReflectedColor(entity, type, path) ?? throw Absent(type, entity);
 
+    /// <summary>Reads a range of numbers a wrapper names, which Bevy reflects whole as its two ends.</summary>
+    internal static FloatRange Range(EcsWorld world, Entity entity, string type, string path) =>
+        DecodeRange(world.GetReflected(entity, type, path) ?? throw Absent(type, entity));
+
+    /// <summary>Writes a range of numbers a wrapper names, whole.</summary>
+    internal static void SetRange(EcsWorld world, Entity entity, string type, string path, FloatRange value) =>
+        world.SetReflected(entity, type, path, EncodeRange(value));
+
+    /// <summary>A range from the object of its two ends Bevy writes, a non-finite end written as null.</summary>
+    internal static FloatRange DecodeRange(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        var value = document.RootElement;
+        return new FloatRange(End(value, "start"), End(value, "end"));
+
+        static float End(JsonElement value, string name) =>
+            value.TryGetProperty(name, out var end) && end.ValueKind == JsonValueKind.Number ? end.GetSingle() : float.NaN;
+    }
+
+    /// <summary>A range as the object of its two ends Bevy reads.</summary>
+    internal static string EncodeRange(FloatRange range)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        using (var json = new Utf8JsonWriter(buffer))
+        {
+            json.WriteStartObject();
+            json.WriteNumber("start", range.Start);
+            json.WriteNumber("end", range.End);
+            json.WriteEndObject();
+        }
+
+        return Encoding.UTF8.GetString(buffer.WrittenSpan);
+    }
+
     /// <summary>The failure for a wrapper over a component the entity no longer carries.</summary>
     private static BevyNativeException Absent(string type, Entity entity) =>
         new(NativeStatus.NotPresent, $"{entity} does not carry {type}.");
