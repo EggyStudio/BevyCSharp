@@ -23,15 +23,6 @@ BevyCSharp/Assets/RenderLights.cs ContactShadowSettings
 BevyCSharp/Assets/RenderLights.cs LightKind
 BevyCSharp/Assets/RenderLights.cs LightSettings
 BevyCSharp/Assets/RenderLights.cs ShadowFiltering
-BevyCSharp/Assets/RenderMaterials.cs AlphaMode
-BevyCSharp/Assets/RenderMaterials.cs MaterialSettings
-BevyCSharp/Assets/RenderMaterials.cs MeshAttributes
-BevyCSharp/Assets/RenderMaterials.cs MeshData
-BevyCSharp/Assets/RenderMaterials.cs MeshFlags
-BevyCSharp/Assets/RenderMaterials.cs MeshInfo
-BevyCSharp/Assets/RenderMaterials.cs MeshRecipe
-BevyCSharp/Assets/RenderMaterials.cs MeshShape
-BevyCSharp/Assets/RenderMaterials.cs MeshTopology
 BevyCSharp/Assets/Streaming.cs StreamRead
 BevyCSharp/Assets/UiEditableText.cs Ui
 BevyCSharp/Assets/UiEditableText.cs UiEditableTextSettings
