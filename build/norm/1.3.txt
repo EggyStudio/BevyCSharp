@@ -5,7 +5,6 @@
 BevyCSharp.Tests/RenderControlTests.cs
 BevyCSharp.Tests/ViewShaderTests.cs
 BevyCSharp/Interop/NativeTypes.Render.cs
-BevyCSharp/Scenes/SceneFile.cs
 BevyCSharp/Scenes/SceneInstances.cs
 native/bevy_csharp/src/ecs.rs
 native/bevy_csharp/src/render/compute.rs
