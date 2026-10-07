@@ -2,7 +2,7 @@ using Bevy;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
-/// <summary>Counts of the things the sample cares about, reported at shutdown.</summary>
+/// <summary>Counts of the things the program cares about, reported at shutdown.</summary>
 public sealed class SampleReport
 {
     /// <summary>Frames observed.</summary>
@@ -19,20 +19,20 @@ public sealed class SampleReport
 }
 
 /// <summary>
-/// Reports what the world looks like, on a key the user can toggle.
+/// Reports what the world looks like as the run ends, the counting stopped and started on F8.
 /// </summary>
 /// <remarks>
-/// <c>[ToggleKey]</c> is the whole implementation of "press F3 to show the overlay": no
-/// resource to declare, no key handler to write, no condition to wire up. The state lives in
+/// <c>[ToggleKey]</c> is the whole implementation of "press F8 to stop the counts": no resource
+/// to declare, no key handler to write, no condition to wire up. The state lives in
 /// <see cref="SystemToggleRegistry"/>, so it survives across frames and can be driven from a
 /// menu or a test as well as from the keyboard.
 /// </remarks>
 [Behavior]
 public partial struct Hud
 {
-    /// <summary>Samples the world each frame while the overlay is enabled.</summary>
+    /// <summary>Samples the world each frame while the counting is on.</summary>
     [OnRender]
-    [ToggleKey(Key.F3)]
+    [ToggleKey(Key.F8)]
     public static void Sample(BehaviorContext ctx)
     {
         var report = ctx.World.GetOrInsertResource(static () => new SampleReport());

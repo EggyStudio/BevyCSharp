@@ -130,9 +130,9 @@ if (Render.TryReadMesh(rockMesh, out var rock))
 
 The hull turns about its own center while its entity keeps its origin, so a model exported standing
 on its base rests with its base on the ground. A body belongs to its entity, so despawning the entity removes it, and the
-simulation's memory and threads are released with the app. F7 in the sample drops crates onto its
-ground, around the turning cube as a kinematic body, and `./bcs command sample.crates 12` does the
-same on a running sample.
+simulation's memory and threads are released with the app. The feature test's panel drops crates and
+balls onto its hub's ground from its spawn page, around the turning cube as a kinematic body, and
+`./bcs command feature.crates 12` does the same on a running one.
 
 Each body can have a material of its own, how hard it is to slide and how much it bounces, given as
 it is added or changed later:

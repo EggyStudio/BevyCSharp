@@ -4,7 +4,7 @@ Three ways to run the same behaviors, and one way to change them without stoppin
 
 ## In a window, headless, or offscreen
 
-The sample has a switch at the top of `Program.cs`:
+The feature test has a switch at the top of `Program.cs`:
 
 ```csharp
 const bool RunInWindow = false;
@@ -22,7 +22,12 @@ dotnet run --project BevyCSharp.FeatureTest -- --headless --frames 120
 dotnet run --project BevyCSharp.FeatureTest -- --offscreen --frames 120
 ```
 
-The sample opens a window by default and draws a lit cube turning in place. Escape closes it.
+The feature test opens a window by default on a hub with a signpost to each zone of its map, and a
+lit cube turning in the middle. F1 opens its admin panel, a list steered by the arrows or a pad,
+with pages for the graphics, the audio, the controls, the debug draws, teleports to the zones,
+things to spawn and the time scale, each setting kept in the player's folder for the next run. F3
+shows an overlay of the frame time, the view's place and facing, the entities and what the program
+holds, and the key under Escape opens the console.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

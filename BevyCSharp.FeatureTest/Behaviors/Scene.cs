@@ -3,10 +3,19 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// The default scene, a cube turning in place, lit, above a ground plane.
+/// The hub, the middle of the map, a cube turning in place over a ground that runs out to every
+/// zone, under a sky and a sun.
 /// </summary>
 /// <remarks>
-/// Skipped on a build without a renderer, so the rest of the sample runs unchanged either way.
+/// <para>
+/// Skipped on a build without a renderer, so the rest of the program runs unchanged either way.
+/// The camera and the sun are kept for the panel's settings, which put the picture's settings on
+/// the camera and make the sun again with or without shadows (<see cref="Applied"/>).
+/// </para>
+/// <para>
+/// The ground is wide enough for every zone round the hub, with a slab under it for what falls,
+/// and the signposts at the hub's edge are <see cref="Zones"/>'.
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct Scene
@@ -23,16 +32,32 @@ public partial struct Scene
     /// <summary>Current pitch in radians.</summary>
     public float Pitch;
 
+    /// <summary>How high the ground is, below the cube's middle.</summary>
+    public const float GroundHeight = -1.2f;
+
+    /// <summary>How far the ground runs, each side, from one edge to the other.</summary>
+    public const float GroundSize = 240f;
+
     /// <summary>The ground, the cube and the lamp, for a behavior that builds on the scene.</summary>
     internal static (Entity Ground, Entity Cube, Entity Lamp) Parts { get; private set; }
+
+    /// <summary>
+    /// The camera the view is drawn with, or nothing before it is made or in a run with no
+    /// renderer.
+    /// </summary>
+    internal static Entity? Camera { get; private set; }
+
+    private static Entity _sun = Entity.None;
+    private static bool? _shadows;
 
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        var eye = new Vec3(3.5f, 3f, 6f);
+        var eye = Zones.All[0].Eye;
         var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
+        Camera = camera;
         ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
 
         // Steerable from the mouse and keyboard, starting from the direction set above.
@@ -47,39 +72,19 @@ public partial struct Scene
         // scene does not cover, and it tints everything in the distance.
         Render.SetAtmosphere(camera, new AtmosphereSettings());
 
-        // What the camera does with the picture once the scene is drawn. The high dynamic range
-        // target makes the rest worth having. Without it nothing is brighter than white, so the
-        // tonemapper has nothing to bring down and bloom has nothing to scatter.
-        Render.SetPostProcessing(camera, new PostSettings
-        {
-            Hdr = true,
-            Tonemapper = Tonemapper.TonyMcMapface,
-            Bloom = true,
-            BloomIntensity = 0.3f,
-            AntiAlias = AntiAliasPass.Fxaa,
-            Msaa = 1,
-        });
+        // What the camera does with the picture once the scene is drawn, from the panel's
+        // settings. The high dynamic range target makes the rest worth having. Without it nothing
+        // is brighter than white, so the tonemapper has nothing to bring down and bloom has nothing
+        // to scatter.
+        Render.SetPostProcessing(camera, Applied.Picture(Settings.Current));
 
-        // The lens it is drawn through. Focus is on the cube at the origin, so the checker runs
-        // soft toward the horizon, and the vignette pulls the eye in from the corners. Judge
-        // either against a run with this call removed, which is the only way to tell an effect
-        // from an imagined one.
-        Render.SetEffects(camera, new EffectSettings
-        {
-            DepthOfField = DepthOfFieldMode.Bokeh,
-            FocalDistance = 7.4f,
-            MaxDepth = 60f,
-            Vignette = 0.45f,
-            VignetteRadius = 0.7f,
-        });
+        // The vignette pulls the eye in from the corners. No depth of field, which over a map the
+        // size of this one would blur every zone but the one in focus.
+        Render.SetEffects(camera, new EffectSettings { Vignette = 0.45f, VignetteRadius = 0.7f });
 
-        var sun = Render.SpawnLight(new LightSettings
-        {
-            Kind = LightKind.Directional,
-            Intensity = 12_000f,
-            Color = (1f, 0.95f, 0.85f),
-        });
-        ctx.Ecs.Add(sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
+        _sun = Entity.None;
+        _shadows = null;
+        Light(ctx.Ecs, Settings.Current.Shadows);
 
         // A cool rim from the other side, so the cube reads as a solid rather than a silhouette
         // against the dark clear color.
@@ -111,17 +116,18 @@ public partial struct Scene
         ctx.Ecs.Add(lamp, Transform.At(-2.5f, 1.2f, 1.5f));
 
         var ground = ctx.Ecs.Spawn();
-        Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, 24f, 24f));
+        Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, GroundSize, GroundSize));
         // Tiling takes both halves: a repeating sampler, and UVs that run past one. The plane's
         // own UVs stop at one however large it is, so without the scale this shows a single
-        // stretched copy.
+        // stretched copy, a square of the checker two units across.
         Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(new MaterialSettings
         {
             BaseColorTexture = AssetServer.LoadImage("textures/checker.png", TextureSettings.Tiling),
-            UvScale = (12f, 12f),
+            UvScale = (GroundSize / 2f, GroundSize / 2f),
             Roughness = 0.9f,
         }));
-        ctx.Ecs.Add(ground, Transform.At(0f, -1.2f, 0f));
+        ctx.Ecs.Add(ground, Transform.At(0f, GroundHeight, 0f));
+        ctx.Ecs.SetName(ground, "Ground");
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));
@@ -135,13 +141,14 @@ public partial struct Scene
 
         Parts = (ground, cube, lamp);
 
-        // A HUD: a panel pinned to a corner with a line of text inside it. Nesting is ordinary
-        // parenting, so the text moves with the panel.
+        // A HUD: a panel pinned to a corner with a line of text inside it, below, where the admin
+        // panel and the overlay leave room. Nesting is ordinary parenting, so the text moves with
+        // the panel.
         var panel = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
             Left = Length.Px(16f),
-            Top = Length.Px(16f),
+            Bottom = Length.Px(16f),
             Padding = Length.Px(10f),
             Color = (0f, 0f, 0f, 0.45f),
         });
@@ -151,8 +158,28 @@ public partial struct Scene
         ctx.Ecs.Add(readout, new Hud());
 
         Console.WriteLine(
-            "[Scene] a rotating cube. Escape closes the window, F11 toggles fullscreen, "
-            + "Tab locks the cursor, F2 draws the orbits, F3 plays a chime, Enter types a line.");
+            "[Scene] the hub, with a signpost to each zone. F11 toggles fullscreen and Tab locks the cursor.");
+    }
+
+    /// <summary>
+    /// The sun, made again where its shadows are to change, since a light's settings are given as
+    /// it is made.
+    /// </summary>
+    internal static void Light(EcsWorld ecs, bool shadows)
+    {
+        if (_shadows == shadows && ecs.IsAlive(_sun)) return;
+
+        if (ecs.IsAlive(_sun)) ecs.Despawn(_sun);
+        _sun = Render.SpawnLight(new LightSettings
+        {
+            Kind = LightKind.Directional,
+            Intensity = 12_000f,
+            Color = (1f, 0.95f, 0.85f),
+            Shadows = shadows,
+        });
+        ecs.Add(_sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
+        ecs.SetName(_sun, "Sun");
+        _shadows = shadows;
     }
 
     /// <summary>Keeps the HUD's readout current.</summary>

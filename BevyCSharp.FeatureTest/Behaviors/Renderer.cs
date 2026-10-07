@@ -7,7 +7,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Every method here is inert in a headless run, so the sample's behavior scripts are identical
+/// Every method here is inert in a headless run, so the program's behavior scripts are identical
 /// in both modes, which is the point. The engine decides whether there is a renderer; the
 /// scripts do not branch on it.
 /// </para>
@@ -40,26 +40,13 @@ public partial struct Renderer
         }
     }
 
-    /// <summary>Closes the window on Escape.</summary>
-    [OnUpdate]
-    public static void QuitOnEscape(BehaviorContext ctx)
-    {
-        if (ctx.Input.KeyPressed(Key.Escape)) ctx.Exit();
-    }
-
-    /// <summary>The line being typed, or null while nothing is being typed.</summary>
-    private static string? _typed;
-
-    /// <summary>Whether the window is currently borderless fullscreen.</summary>
-    private static bool _fullscreen;
-
     /// <summary>Whether the cursor is currently locked to the window.</summary>
     private static bool _cursorLocked;
 
     /// <summary>Reports what the window says about itself.</summary>
     /// <remarks>
     /// These come from Bevy rather than from another script, and arrive on the same bus, so this
-    /// reads them exactly as it would read a message the sample sent itself.
+    /// reads them exactly as it would read a message the program sent itself.
     /// </remarks>
     [OnUpdate]
     public static void ReportWindow(BehaviorContext ctx)
@@ -83,49 +70,6 @@ public partial struct Renderer
             Console.WriteLine($"[Renderer] dropped {dropped.Path}");
     }
 
-    /// <summary>
-    /// Enter starts a line and Enter again prints it, to show that text arrives as characters.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Type with a non-US layout or use a dead key and this shows the character the user meant,
-    /// which a name field needs and a key bitset cannot give.
-    /// </para>
-    /// <para>
-    /// Only between the two presses, because every key that makes a character makes it whether
-    /// or not anything is listening. The WASD that flies the camera is text too, and a held key
-    /// repeats it, so a demo that always listened would fill the console with the flying.
-    /// A game does the same with a chat box or a name field, which takes text only while it has
-    /// focus.
-    /// </para>
-    /// </remarks>
-    [OnUpdate]
-    public static void EchoTyping(BehaviorContext ctx)
-    {
-        var enter = ctx.Input.KeyPressed(Key.Enter) || ctx.Input.KeyPressed(Key.NumpadEnter);
-
-        if (_typed is null)
-        {
-            if (!enter) return;
-
-            _typed = string.Empty;
-            enter = false;
-            Console.WriteLine("[Renderer] typing a line; Enter prints it");
-        }
-
-        // The frame's text is kept even when Enter came in the same frame, since a fast typist or
-        // a paste can land both at once, and dropping it would lose the first or last characters.
-        _typed += ctx.Input.Text;
-
-        if (ctx.Input.KeyPressed(Key.Backspace) && _typed.Length > 0) _typed = _typed[..^1];
-
-        if (enter)
-        {
-            Console.WriteLine($"[Renderer] typed: {_typed}");
-            _typed = null;
-        }
-    }
-
     /// <summary>Drives the window from the keyboard: F11 fullscreen, Tab cursor lock.</summary>
     /// <remarks>
     /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
@@ -136,31 +80,21 @@ public partial struct Renderer
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
+        // Through the settings, so the panel's window row and the next start agree with the key.
         if (ctx.Input.KeyPressed(Key.F11))
         {
-            _fullscreen = !_fullscreen;
-            Window.SetMode(_fullscreen ? WindowMode.BorderlessFullscreen : WindowMode.Windowed);
+            Settings.Change(settings => settings with
+            {
+                Window = settings.Window == WindowMode.Windowed ? WindowMode.BorderlessFullscreen : WindowMode.Windowed,
+            });
         }
 
-        if (ctx.Input.KeyPressed(Key.Tab))
+        // Not while a line is being typed, where the key completes a command.
+        if (ctx.Input.KeyPressed(Key.Tab) && !ImGuiRuntime.Typing)
         {
             _cursorLocked = !_cursorLocked;
             Window.SetCursor(_cursorLocked ? CursorGrab.Locked : CursorGrab.None, !_cursorLocked);
             Console.WriteLine($"[Renderer] cursor {(_cursorLocked ? "locked" : "free")}");
         }
-    }
-
-    /// <summary>Prints the frame rate every second while the window is open.</summary>
-    [OnLast]
-    [ToggleKey(Key.F1, DefaultEnabled = false)]
-    public static void PrintFps(BehaviorContext ctx)
-    {
-        if (ctx.Res<Config>().Headless) return;
-        if (ctx.Time.FrameCount == 0 || ctx.Time.FrameCount % 60 != 0) return;
-
-        Console.WriteLine(
-            $"[Renderer] {ctx.Time.SmoothedFps,6:F1} fps   "
-            + $"frame {ctx.Time.FrameCount,6}   "
-            + $"spinners {ctx.Ecs.Count<Spinner>()}");
     }
 }

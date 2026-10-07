@@ -127,9 +127,12 @@ public partial struct FlyCamera
         var input = ctx.Input;
         var alt = input.AnyKeyDown([Key.AltLeft, Key.AltRight]);
 
-        var flying = input.MouseDown(MouseButton.Right);
-        var panning = input.MouseDown(MouseButton.Middle);
-        var orbiting = alt && input.MouseDown(MouseButton.Left);
+        // Not while the pointer is over the panel, the overlay or the console, whose clicks and
+        // drags are theirs.
+        var free = !ImGuiRuntime.WantsMouse;
+        var flying = free && input.MouseDown(MouseButton.Right);
+        var panning = free && input.MouseDown(MouseButton.Middle);
+        var orbiting = free && alt && input.MouseDown(MouseButton.Left);
 
         HoldCursor(flying || panning || orbiting);
 
@@ -182,7 +185,7 @@ public partial struct FlyCamera
             moved = true;
         }
 
-        if (input.KeyPressed(Key.F))
+        if (input.KeyPressed(Key.F) && !ImGuiRuntime.Typing)
         {
             // Does what F does in an editor, with the world origin standing in for a selection,
             // which keeps looking the way the camera already is and backs off far enough to see it.
@@ -204,8 +207,11 @@ public partial struct FlyCamera
     {
         if (dx == 0f && dy == 0f) return false;
 
-        Yaw -= dx * LookSensitivity;
-        Pitch = Math.Clamp(Pitch - (dy * LookSensitivity), -PitchLimit, PitchLimit);
+        // As fast as the panel's controls page sets, and the other way up where it says.
+        var settings = Settings.Current;
+        var turn = LookSensitivity * settings.LookSpeed;
+        Yaw -= dx * turn;
+        Pitch = Math.Clamp(Pitch - ((settings.InvertY ? -dy : dy) * turn), -PitchLimit, PitchLimit);
         return true;
     }
 

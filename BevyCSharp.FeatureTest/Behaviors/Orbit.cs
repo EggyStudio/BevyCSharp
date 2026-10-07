@@ -62,16 +62,17 @@ public partial struct Orbit
         transform.Rotation = Quat.FromRotationY(Angle);
     }
 
-    /// <summary>Draws each orbiting body's position and facing, on F2.</summary>
+    /// <summary>
+    /// Draws each orbiting body's position and facing, while the panel's gizmos are on.
+    /// </summary>
     /// <remarks>
     /// What gizmos are for. The numbers printed at the end say where things finished, and this
     /// shows where they are while they move. Re-issued every frame, because a gizmo lasts one.
     /// </remarks>
     [OnUpdate]
-    [ToggleKey(Key.F2, DefaultEnabled = false)]
     public static void ShowOrbits(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+        if (!App.HasRenderer || ctx.Res<Config>().Headless || !Settings.Current.Gizmos) return;
 
         foreach (var row in ctx.Ecs.Query<Orbit>(markChanged: false))
         {

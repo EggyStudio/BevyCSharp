@@ -5,12 +5,12 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// A swarm of fireflies simulated by a compute shader and drawn from the same buffer, and an old
-/// screen's look over the whole picture on F4.
+/// screen's look over the whole picture from the panel's graphics page.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Everything here is a Slang file under <c>assets/shaders</c>, and every one of them reloads when
-/// it is saved while the sample runs, so a change to the path in <c>fireflies_step.slang</c>
+/// it is saved while the program runs, so a change to the path in <c>fireflies_step.slang</c>
 /// changes how the swarm flies, and a change to <c>fireflies.slang</c> how it glows. What each
 /// shader declares is set from here by name: the glow's color and size, how far a firefly strays,
 /// and how strong the old screen is.
@@ -103,10 +103,15 @@ public partial struct ShaderShowcase
             break;
         }
 
-        Console.WriteLine($"[Shaders] {Count} fireflies moved by a compute shader; F4 toggles the old screen");
+        Console.WriteLine($"[Shaders] {Count} fireflies moved by a compute shader; the panel's graphics page puts on the old screen");
     }
 
-    /// <summary>Moves the swarm, and puts the old screen on and off.</summary>
+    /// <summary>Whether the old screen is to be on, as the panel's graphics page sets it.</summary>
+    internal static bool OldScreen { get; set; }
+
+    /// <summary>
+    /// Moves the swarm, and puts the old screen on or off where the panel changed it.
+    /// </summary>
     [OnUpdate]
     public static void Step(BehaviorContext ctx)
     {
@@ -114,9 +119,9 @@ public partial struct ShaderShowcase
 
         Shaders.Dispatch(_step, (Count + PerWorkgroup - 1) / PerWorkgroup);
 
-        if (!ctx.Input.KeyPressed(Key.F4) || _camera == Entity.None) return;
+        if (OldScreen == _screenOn || _camera == Entity.None) return;
 
-        _screenOn = !_screenOn;
+        _screenOn = OldScreen;
 
         if (_screenOn)
         {

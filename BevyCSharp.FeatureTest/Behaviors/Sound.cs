@@ -3,11 +3,11 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Plays a chime on F3, to show that a sound is an entity like anything else.
+/// Plays a chime from the panel's audio page, to show that a sound is an entity like anything else.
 /// </summary>
 /// <remarks>
-/// Inert in a headless run, like the rest of the sample's presentation, so the same scripts run
-/// in both modes.
+/// Inert in a headless run, like the rest of the program's presentation, so the same scripts run
+/// in both modes. Played on the effects bus, whose volume the audio page sets.
 /// </remarks>
 [Behavior]
 public partial struct Sound
@@ -24,17 +24,17 @@ public partial struct Sound
         _chime = AssetServer.Load(AssetKind.Audio, "sounds/chime.wav");
     }
 
-    /// <summary>Plays it on F3.</summary>
+    /// <summary>Plays it.</summary>
     /// <remarks>
-    /// <see cref="AudioSettings.Effect"/> despawns the entity when the sound ends, so pressing
-    /// this a hundred times leaves nothing behind to clean up.
+    /// <see cref="AudioSettings.Effect"/> despawns the entity when the sound ends, so playing it
+    /// many times over leaves nothing behind to clean up.
     /// </remarks>
-    [OnUpdate]
-    public static void PlayOnKey(BehaviorContext ctx)
+    internal static void Chime(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
-        if (!ctx.Input.KeyPressed(Key.F3)) return;
+        if (!App.HasRenderer || ctx.Res<Config>().Headless || !_chime.IsValid) return;
 
-        Audio.Play(_chime, AudioSettings.Effect);
+        var effect = AudioSettings.Effect;
+        effect.Bus = "effects";
+        Audio.Play(_chime, effect);
     }
 }

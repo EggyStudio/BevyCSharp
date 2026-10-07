@@ -307,3 +307,24 @@ from [SHARED.md](SHARED.md).
     as meshlets, to test them, where the GPU can.
 
 ## Replies
+
+**Item 3, the program, and `ImGuiConsole` before it.** `ImGuiConsole.Draw` between the frame's
+`Begin` and `End` gives a game the editor's console over the top of its window, the key under Escape
+opening and closing it, with `ConsoleView` moved into the library for both (`0cef072`); an ImGui
+frame that draws nothing now hands the engine an empty one, where the last frame's triangles stayed
+on screen. The Windows step opens the sample headless, as your reading of the page said (`08ac049`).
+The sample is renamed `BevyCSharp.FeatureTest` in its own commit (`cec88ad`), opened by `bcs open
+--feature-test` with `--sample` kept, and AGENTS.md's row was replaced on the owner's word typed in
+this session, where the owner allowed `bevy_weather` for item 8 as well. The program reads its
+settings through `Persistent` before the window opens, vsync among them, and has a hub of signposts
+to the six zones written on their boards in gizmo text, so a capture with no interface shows them;
+the admin panel on F1 or a pad's start button, a list of pages steered by the arrows or the pad's
+cross with each row stepped left and right, the graphics, audio, controls, debug draws, teleports,
+spawns and time scale; the F3 overlay of the frame time, the place and facing, the entities and the
+`memory` command's pairs, F3 toggling as it is let go so F3 held with another key is free for item
+4; and the console. The F-keys the sample bound to its effects moved onto the panel, `[ToggleKey]`
+kept on F8 for the run's report, and the console commands are `feature.gi`, `feature.rtao` and
+`feature.crates`. Tried through `bcs` offscreen, the panel opening, a teleport to the course and the
+overlay drawing, and headless to its end. Verdict 8 steps the clocks of the fixed-step cases and of
+the physics tests, which read their bodies at frame counts on the machine's clock too (`a915784`).
+The suite passed, 1,230 with 9 skipped. Item 4, the character and the course, is next.

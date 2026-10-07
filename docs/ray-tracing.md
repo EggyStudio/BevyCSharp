@@ -117,11 +117,12 @@ values are still set by name. The target works for any compute shader, whether o
 rays, and on a backend other than Vulkan the SPIR-V is translated by naga, which reads ordinary
 compute and not ray queries.
 
-The sample carries ray-traced ambient occlusion built this way, with no Solari: a plane, a box and
-a sphere standing in for its ground, cube and lamp in a ray scene, a compute shader tracing four
+The feature test carries ray-traced ambient occlusion built this way, with no Solari. A plane, a box
+and a sphere stand in for its ground, cube and lamp in a ray scene, a compute shader traces four
 short rays from every surface on screen (`BevyCSharp.FeatureTest/assets/shaders/rtao.slang`), and the
-answer written into the occlusion Bevy's own lighting reads. F6 turns it on in a window, and
-`./bcs command sample.rtao show` on a running sample paints the occlusion in place of the picture.
+answer is written into the occlusion Bevy's own lighting reads. Its panel's graphics page turns it
+on, and `./bcs command feature.rtao show` on a running one paints the occlusion in place of the
+picture.
 
 ---
 

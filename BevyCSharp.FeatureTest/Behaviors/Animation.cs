@@ -97,7 +97,7 @@ public partial struct SpriteAnimation
 /// Puts an animated sprite on screen, over the 3D scene.
 /// </summary>
 /// <remarks>
-/// The sheet is drawn here rather than loaded, so the sample carries no picture file for it and
+/// The sheet is drawn here rather than loaded, so the program carries no picture file for it and
 /// <see cref="Render.CreateImage"/> is shown doing what it is for. A real game loads a PNG an
 /// artist made and the rest of this is unchanged.
 /// </remarks>

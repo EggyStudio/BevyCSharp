@@ -3,13 +3,14 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Ray-traced ambient occlusion on F6: short rays from every surface on screen through a scene of
-/// stand-in meshes, darkening what the sky cannot reach, fed to Bevy's own lighting.
+/// Ray-traced ambient occlusion, from the panel's graphics page, short rays from every surface on
+/// screen through a scene of stand-in meshes, darkening what the sky cannot reach, fed to Bevy's
+/// own lighting.
 /// </summary>
 /// <remarks>
 /// <para>
 /// A small version of the technique, to show the pieces a package of this kind is built from. The
-/// rays are traced by a compute shader of the sample's own (<c>assets/shaders/rtao.slang</c>),
+/// rays are traced by a compute shader of the program's own (<c>assets/shaders/rtao.slang</c>),
 /// compiled to SPIR-V for its ray queries, against a ray scene: the ground, the cube and the lamp as
 /// a plane, a box and a sphere in a geometry pool, placed where the scene's entities are every
 /// frame. The answer is written into the ambient occlusion texture Bevy's materials read, in place
@@ -17,7 +18,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// over it.
 /// </para>
 /// <para>
-/// It needs a GPU that traces rays and says so otherwise. Screen-space global illumination (F5)
+/// It needs a GPU that traces rays and says so otherwise. Screen-space global illumination
 /// sets the same camera's dispatches, so turning either on turns the other off.
 /// </para>
 /// </remarks>
@@ -36,23 +37,37 @@ public partial struct RayTracedOcclusion
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
         Console.WriteLine(Shaders.SupportsRayQueries
-            ? "[RayTracedOcclusion] F6 toggles ray-traced ambient occlusion; sample.rtao show paints it"
-            : "[RayTracedOcclusion] this GPU cannot trace rays, so F6 does nothing");
+            ? "[RayTracedOcclusion] the panel's graphics page turns on ray-traced ambient occlusion; feature.rtao show paints it"
+            : "[RayTracedOcclusion] this GPU cannot trace rays, so there is no ray-traced ambient occlusion");
     }
 
-    /// <summary>Puts it on and off.</summary>
+    /// <summary>Whether it is to be on, as the panel's graphics page sets it.</summary>
+    internal static bool On { get; set; }
+
+    /// <summary>Puts it on or off where the panel changed it.</summary>
+    /// <remarks>
+    /// The panel shows what it came to after, so one this GPU cannot trace goes back to off rather
+    /// than being asked for again every frame.
+    /// </remarks>
     [OnUpdate]
     public static void Toggle(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless || !ctx.Input.KeyPressed(Key.F6)) return;
+        if (!App.HasRenderer || ctx.Res<Config>().Headless || On == _on) return;
 
-        Console.WriteLine($"[RayTracedOcclusion] {Apply(ctx.Ecs, _on ? "off" : "on")}");
+        Console.WriteLine($"[RayTracedOcclusion] {Apply(ctx.Ecs, On ? "on" : "off")}");
+        On = _on;
     }
 
     /// <summary>Sets the camera up to trace it, or takes it off.</summary>
-    [Command("sample.rtao", "Ray-traced ambient occlusion on the sample's camera: sample.rtao <on|off|show> [radius]")]
-    internal static string Command(string state) =>
-        App.HasRenderer ? Apply(ConsoleHost.Ecs, state) : "there is no renderer to trace with";
+    [Command("feature.rtao", "Ray-traced ambient occlusion on the feature test's camera: feature.rtao <on|off|show> [radius]")]
+    internal static string Command(string state)
+    {
+        if (!App.HasRenderer) return "there is no renderer to trace with";
+
+        var said = Apply(ConsoleHost.Ecs, state);
+        On = _on;
+        return said;
+    }
 
     private static string Apply(EcsWorld ecs, string state)
     {
@@ -135,7 +150,7 @@ public partial struct RayTracedOcclusion
         return null;
     }
 
-    /// <summary>The sample's camera, found the first time it is asked for.</summary>
+    /// <summary>The program's camera, found the first time it is asked for.</summary>
     private static Entity? Camera(EcsWorld ecs)
     {
         if (_camera == Entity.None)

@@ -6,7 +6,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// Writes the window to a PNG on a chosen frame, when asked for by the environment.
 /// </summary>
 /// <remarks>
-/// The sample is checked without somebody looking at it. A run with <c>BCS_SHOT</c> set leaves a
+/// The program is checked without somebody looking at it. A run with <c>BCS_SHOT</c> set leaves a
 /// picture behind, and a picture is the only thing that says whether an interface laid itself out.
 /// Nothing happens without the variable, so an ordinary run pays a comparison a frame.
 /// </remarks>
@@ -38,6 +38,6 @@ public partial struct Capture
 
         _taken = true;
         Render.Screenshot(path);
-        Console.WriteLine($"[sample] wrote {path} on frame {ctx.Time.FrameCount}");
+        Console.WriteLine($"[feature-test] wrote {path} on frame {ctx.Time.FrameCount}");
     }
 }

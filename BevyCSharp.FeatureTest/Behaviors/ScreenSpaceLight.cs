@@ -3,8 +3,9 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Screen-space global illumination on F5: light bounced off what is on screen onto what is near
-/// it, so the lamp-lit cube warms the ground around it and a colored surface tints its neighbors.
+/// Screen-space global illumination, from the panel's graphics page, light bounced off what is on
+/// screen onto what is near it, so the lamp-lit cube warms the ground around it and a colored
+/// surface tints its neighbors.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -18,7 +19,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// All of it is the camera's: images it owns and keeps from frame to frame, compute it runs after
 /// opaque geometry, a draw it makes, and the G-buffer, depth, motion, blue noise and environment
-/// that shaders on a camera read. Each file reloads when saved, like every shader in the sample.
+/// that shaders on a camera read. Each file reloads when saved, like every shader in the program.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -53,22 +54,25 @@ public partial struct ScreenSpaceLight
             }))
             .Set("strength", 1f);
 
-        Console.WriteLine("[ScreenSpaceLight] F5 toggles screen-space global illumination");
+        Console.WriteLine("[ScreenSpaceLight] the panel's graphics page turns on screen-space global illumination");
     }
 
-    /// <summary>Puts it on and off.</summary>
+    /// <summary>Whether it is to be on, as the panel's graphics page sets it.</summary>
+    internal static bool On { get; set; }
+
+    /// <summary>Puts it on or off where the panel changed it.</summary>
     [OnUpdate]
     public static void Toggle(BehaviorContext ctx)
     {
-        if (!_trace.IsValid || !ctx.Input.KeyPressed(Key.F5) || Camera(ctx.Ecs) is not { } camera) return;
+        if (!_trace.IsValid || On == _on || Camera(ctx.Ecs) is not { } camera) return;
 
-        _on = !_on;
+        _on = On;
         Apply(camera, _on);
         Console.WriteLine($"[ScreenSpaceLight] {(_on ? "on" : "off")}");
     }
 
     /// <summary>Sets the camera up to run the three steps, or takes them off it.</summary>
-    [Command("sample.gi", "Screen-space global illumination on the sample's camera: sample.gi <on|off> [strength]")]
+    [Command("feature.gi", "Screen-space global illumination on the feature test's camera: feature.gi <on|off> [strength]")]
     internal static string Command(string state)
     {
         if (!_trace.IsValid || Camera(ConsoleHost.Ecs) is not { } camera) return "there is no camera to light";
@@ -84,11 +88,12 @@ public partial struct ScreenSpaceLight
 
         _composite.Set("strength", strength);
         Apply(camera, _on);
+        On = _on;
         return $"screen-space global illumination is {(_on ? $"on at {strength}" : "off")}";
     }
 
     /// <summary>
-    /// The sample's camera, found the first time it is asked for, since the scene that spawns it
+    /// The program's camera, found the first time it is asked for, since the scene that spawns it
     /// may start after this does.
     /// </summary>
     private static Entity? Camera(EcsWorld ecs)

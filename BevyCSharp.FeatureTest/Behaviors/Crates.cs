@@ -4,47 +4,48 @@ using Bevy.Physics;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Crates dropped onto the ground on F7, falling, tumbling and stacking under the physics package.
+/// Crates and balls dropped onto the ground from the panel's spawn page, falling, tumbling and
+/// stacking under the physics package.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Everything here is ordinary engine calls apart from <see cref="PhysicsWorld"/>: a crate is a mesh
 /// and a material on an entity, and the simulation moves it by writing its <see cref="Transform"/>
 /// once a fixed step. The ground is a static box under the scene's own plane, and the turning cube
-/// is a kinematic one, so a crate landing on it is knocked aside by it.
+/// is a kinematic one, so a crate landing on it is knocked aside by it. Each body goes through
+/// <see cref="Bodies"/>, which keeps its shape for the panel's collider draw.
 /// </para>
 /// <para>
-/// A crate that falls off the edge is despawned once it is far below, which takes its body with it.
+/// One that falls off the edge is despawned once it is far below, which takes its body with it.
 /// </para>
 /// </remarks>
 [Behavior]
 public partial struct Crates
 {
-    private static AssetHandle _mesh;
-    private static AssetHandle _material;
+    private static AssetHandle _box;
+    private static AssetHandle _ball;
+    private static AssetHandle _wood;
+    private static AssetHandle _rubber;
     private static bool _grounded;
     private static int _dropped;
 
-    /// <summary>Says how to drop them.</summary>
+    /// <summary>Starts each app with the ground not yet made a body and nothing dropped.</summary>
     [OnStartup]
-    public static void Announce(BehaviorContext ctx)
+    public static void Reset(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
-        Console.WriteLine("[Crates] F7 drops a handful of crates onto the ground");
+        _grounded = false;
+        _box = _ball = _wood = _rubber = AssetHandle.None;
     }
 
-    /// <summary>Drops a handful on F7, and clears away the ones that fell off.</summary>
+    /// <summary>
+    /// Makes the ground a body once the scene has made it, and clears away what fell off.
+    /// </summary>
     [OnUpdate]
-    public static void Drop(BehaviorContext ctx)
+    public static void Keep(BehaviorContext ctx)
     {
         if (!App.HasRenderer || ctx.Res<Config>().Headless || !ctx.World.TryGetResource<PhysicsWorld>(out var physics)) return;
 
         if (!_grounded && Ground(ctx.Ecs, physics)) _grounded = true;
-
-        if (ctx.Input.KeyPressed(Key.F7))
-        {
-            Console.WriteLine($"[Crates] {Drop(ctx.Ecs, physics, 5)}");
-        }
 
         foreach (var row in ctx.Ecs.Query<Crates>(markChanged: false))
         {
@@ -52,24 +53,44 @@ public partial struct Crates
         }
     }
 
-    /// <summary>Drops crates from above the scene.</summary>
-    [Command("sample.crates", "Drops crates onto the sample's ground: sample.crates [count]")]
+    /// <summary>Drops crates, or balls, onto the hub's ground above the cube.</summary>
+    internal static string Drop(BehaviorContext ctx, int count, bool balls = false)
+    {
+        if (!App.HasRenderer || ctx.Res<Config>().Headless) return "there is no renderer to draw them with";
+        if (!ctx.World.TryGetResource<PhysicsWorld>(out var physics)) return "this app has no physics";
+
+        return Drop(ctx.Ecs, physics, count, balls);
+    }
+
+    /// <summary>Takes away everything dropped.</summary>
+    internal static string Clear(BehaviorContext ctx)
+    {
+        var dropped = new List<Entity>();
+        foreach (var row in ctx.Ecs.Query<Crates>(markChanged: false)) dropped.Add(row.Entity);
+        foreach (var entity in dropped) ctx.Ecs.Despawn(entity);
+        return $"took away {dropped.Count}";
+    }
+
+    /// <summary>Drops crates from the console.</summary>
+    [Command("feature.crates", "Drops crates onto the hub's ground: feature.crates [count]")]
     internal static string Command(string count)
     {
         if (!App.HasRenderer) return "there is no renderer to draw crates with";
         if (ConsoleHost.World?.TryGetResource<PhysicsWorld>(out var physics) != true) return "this app has no physics";
 
-        return Drop(ConsoleHost.Ecs, physics!, int.TryParse(count, out var asked) ? asked : 5);
+        return Drop(ConsoleHost.Ecs, physics!, int.TryParse(count, out var asked) ? asked : 5, balls: false);
     }
 
-    private static string Drop(EcsWorld ecs, PhysicsWorld physics, int count)
+    private static string Drop(EcsWorld ecs, PhysicsWorld physics, int count, bool balls)
     {
         var many = Math.Clamp(count, 1, 200);
 
-        if (!_mesh.IsValid)
+        if (!_box.IsValid)
         {
-            _mesh = Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f);
-            _material = Render.CreateMaterial(0.72f, 0.48f, 0.25f, roughness: 0.8f);
+            _box = Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f);
+            _ball = Render.CreateMesh(MeshShape.Sphere, 0.3f);
+            _wood = Render.CreateMaterial(0.72f, 0.48f, 0.25f, roughness: 0.8f);
+            _rubber = Render.CreateMaterial(0.85f, 0.2f, 0.25f, roughness: 0.45f);
         }
 
         var random = new Random(_dropped);
@@ -81,35 +102,36 @@ public partial struct Crates
                 Quat.FromAxisAngle(Vec3.UnitY, random.NextSingle() * MathF.Tau),
                 Vec3.One);
 
-            var crate = ecs.Spawn();
-            Render.SetMesh(ecs, crate, _mesh);
-            Render.SetMaterial(ecs, crate, _material);
-            ecs.Add(crate, at);
-            ecs.Add(crate, new Crates());
+            var dropped = ecs.Spawn();
+            Render.SetMesh(ecs, dropped, balls ? _ball : _box);
+            Render.SetMaterial(ecs, dropped, balls ? _rubber : _wood);
+            ecs.Add(dropped, at);
+            ecs.Add(dropped, new Crates());
+            ecs.SetName(dropped, balls ? "Ball" : "Crate");
 
-            physics.Add(crate, PhysicsShape.Box(new Vec3(0.5f)), BodyKind.Dynamic, at, mass: 1f);
+            Bodies.Add(physics, dropped, balls ? BodyShape.Sphere(0.3f) : BodyShape.Box(new Vec3(0.5f)), BodyKind.Dynamic, at);
             _dropped++;
         }
 
-        return $"dropped {many}, {physics.Count} bodies in all";
+        return $"dropped {many} {(balls ? "balls" : "crates")}, {physics.Count} bodies in all";
     }
 
-    /// <summary>
-    /// The ground as a static box, and the scene's cube as a kinematic one, once the scene exists.
-    /// </summary>
+    /// <summary>The ground and the cube as bodies, once the scene has made them.</summary>
     private static bool Ground(EcsWorld ecs, PhysicsWorld physics)
     {
         var (ground, cube, _) = Scene.Parts;
-        if (ground == Entity.None) return false;
+        if (ground == Entity.None || !ecs.IsAlive(ground)) return false;
 
         // The plane is drawn at its entity's height with no thickness, so the box is sunk half its
         // depth under it and its top is where the plane is drawn.
         var plane = ecs.GetOrDefault<Transform>(ground).Translation;
         var slab = ecs.Spawn();
-        ecs.Add(slab, Transform.At(plane.X, plane.Y - 0.5f, plane.Z));
-        physics.Add(slab, PhysicsShape.Box(new Vec3(24f, 1f, 24f)), BodyKind.Static, Transform.At(plane.X, plane.Y - 0.5f, plane.Z));
+        var under = Transform.At(plane.X, plane.Y - 0.5f, plane.Z);
+        ecs.Add(slab, under);
+        ecs.SetName(slab, "Ground's body");
+        Bodies.Add(physics, slab, BodyShape.Box(new Vec3(Scene.GroundSize, 1f, Scene.GroundSize)), BodyKind.Static, under);
 
-        physics.Add(cube, PhysicsShape.Box(new Vec3(1.6f)), BodyKind.Kinematic, ecs.GetOrDefault<Transform>(cube));
+        Bodies.Add(physics, cube, BodyShape.Box(new Vec3(1.6f)), BodyKind.Kinematic, ecs.GetOrDefault<Transform>(cube));
         return true;
     }
 }
