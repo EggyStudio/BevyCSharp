@@ -269,6 +269,9 @@ jobs:
       - name: Build Courtyard
         run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
+      - name: Build Swarm
+        run: dotnet build games/Swarm -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
       # Every example built in a project of its own on the package alone, as a reader copying one
       # into a game of their own builds it (NORM.md, N 2.7).
       - name: Build the examples on the package alone
@@ -279,6 +282,14 @@ jobs:
           SHOTS: ${{ runner.temp }}/courtyard
           BCS_STEP_LOGS: ${{ runner.temp }}/courtyard
         run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
+
+      # A game in behaviors alone with creatures in their hundreds, played into its third wave, with
+      # the frame profiled while the most of them are alive, which the run keeps beside the captures.
+      - name: Play Swarm
+        env:
+          SHOTS: ${{ runner.temp }}/swarm
+          BCS_STEP_LOGS: ${{ runner.temp }}/swarm
+        run: mkdir -p "$SHOTS" && games/Swarm/play.sh
 
       # The same game published as native code from the package, as a player gets it, which keeps
       # only what the compiler sees used, and played to its win the same way (NORM.md, N 2.5). The
@@ -300,6 +311,7 @@ jobs:
           path: |
             ${{ runner.temp }}/courtyard
             ${{ runner.temp }}/courtyard-native
+            ${{ runner.temp }}/swarm
           if-no-files-found: ignore
 
   # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does

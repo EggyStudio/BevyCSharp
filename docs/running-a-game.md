@@ -41,7 +41,7 @@ be captured where there is no screen to draw it on.
 A game that opens a window draws offscreen instead when `BCS_OFFSCREEN` is set in its environment,
 as `BCS_SERVE` makes any app answer `bcs`, so a tool can run a game it did not write with nothing
 on the screen. The editor's Play sets it when the editor itself has no window, and
-`games/Courtyard/play.sh` plays its game that way.
+`games/Courtyard/play.sh` and `games/Swarm/play.sh` play their games that way.
 
 A run that has to be the same on every machine, a test of something that moves or a capture of it,
 sets `Config.FrameSeconds`, and every frame is then that many seconds to the game, to

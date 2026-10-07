@@ -266,3 +266,22 @@ not a copy in `bin` (`EditorPaths.Assets` is the project's), and a script is com
 assembly the program loaded, the game's own among them. The suite passed, 1,183 with 9 skipped, and
 the norm's tests after the attribute moved into a file of its name. The game in behaviors with
 hundreds of creatures, played by the workflow and profiled, is next.
+
+**Now 6, the third, a game in behaviors with creatures in their hundreds.** `games/Swarm` is an
+arena held against waves, every behavior of it a script in `assets/scripts` and the program only a
+window and physics, built on the package as Courtyard is. Each wave brings sixty more creatures than
+the last, crawlers and a brute in every five, each a character a behavior walks at the player,
+which fires at the nearest by itself with kinematic sensors whose contacts fell them, and a fall
+plays a sound no more often than a listener tells two apart. Its states are a menu, play with a
+wave or a rest as its sub-state, and the end, what play spawned despawned on leaving it, and the
+creatures add their harm to the player from a `[MainThread]` method. `play.sh` plays it through
+`bcs` into its third wave, walking the player round a square, and fails where a wave does not come,
+fewer than 200 creatures are alive at once or none falls, and the pack workflow's game job plays it
+after Courtyard and keeps its `frame.profile` with the captures. Played here offscreen, 215
+creatures were alive at once and 335 had fallen by the third wave, and the profile gave 2.8 ms of a
+frame to physics and 2.0 ms to Bevy's schedule, where 3DEngine's Swarm gives 2.6 to 3.2 ms of
+physics to its 290. `make-sounds.py` makes its one sound, as 3DEngine's does. The suite passed,
+1,184 with 9 skipped. Item 7 is next.
+
+Shared: a fourth game written in behaviors, with creatures in their hundreds, played and profiled
+by the workflow, as 3DEngine's Swarm is.

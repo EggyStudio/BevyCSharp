@@ -288,10 +288,10 @@ per-platform bridge and packs nothing, and nothing a commit message says changes
 
 A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
 builds the bridge for all six platforms, runs the tests on the three systems, plays Courtyard and
-walks the README's install in a container (`build/readme-walk.sh`), and packs only once all of
-them pass. The package is kept as the run's artifact, to download and upload to nuget.org by hand.
-Ticking its **publish** box pushes it to nuget.org from the run instead, which needs the
-`NUGET_API_KEY` secret.
+Swarm, keeping Swarm's frame profile with the run's captures, and walks the README's install in a
+container (`build/readme-walk.sh`), and packs only once all of them pass. The package is kept as the
+run's artifact, to download and upload to nuget.org by hand. Ticking its **publish** box pushes it
+to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
 
 The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
 GitHub runs the step's script in. A step that fails having said nothing is given an error naming
@@ -302,9 +302,9 @@ lines at a warning or worse of each log written while it ran, those `bcs open` k
 not signed in to GitHub sees, where the log needs signing in. `build/page.py` holds what it and
 `build/test.py` share in saying so.
 
-Courtyard's play holds each frame to a sixtieth of a second of the game with `app.frametime`,
-since the play plans each walk in frames and the runner draws with Mesa's software Vulkan, a few
-frames a second, which on the machine's clock carried the runner past its coins.
+Courtyard's play and Swarm's hold each frame to a sixtieth of a second of the game with
+`app.frametime`, since the play plans each walk in frames and the runner draws with Mesa's software
+Vulkan, a few frames a second, which on the machine's clock carried the runner past its coins.
 
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by
