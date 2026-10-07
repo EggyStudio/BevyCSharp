@@ -10,58 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5d60532`. Verdict 10 is settled: the physics page's sentence was about a body added
-in code with a `PhysicsShape`, which keeps its size however its entity is scaled, as
-`PhysicsShape.cs` says of itself, where a `Collider` component is scaled with the entity, and the
-page says so in as many words, the shape kept and the collider below not (`5d60532`), so its two
-paragraphs agree with the code. The render gallery, item 3, is under way in the working tree.
+Reviewed up to `156d2ce`. Two files of N 1.4's list moved into their folders, `PersistentTests` to
+the scenes' and `RayTracingTests` to the assets', nothing in them changed, the list at 77 with 28
+left out (`a765aad`, `156d2ce`), and N 3.4's list stands at 39. The owner pushed, and the run of
+`156d2ce` was in progress at 19:45, the first with the mends of Verdicts 7, 8 and 9 and the bridge
+at ABI 229. Its Windows job opened the feature test through `bcs` and closed it in 24 seconds with
+the answers printed, which settles Verdict 7, and its tests failed in the three `CrashLogTests`
+cases that read the log while the app writes it, Verdict 11. The gallery's lights, post switches,
+vegetation and captures are under way in the working tree.
 
-Before them, the course came in, settling its item, the list renumbered: east of the hub, three rows
-of stations, the north row climbing by ramps at 15, 30, 45 and 60 degrees with a landing each, the
-last too steep for the character's 46, stairs of 0.15, 0.25 and 0.4, the last over its step height,
-a beam a third of a unit wide and a tunnel crawled through crouched; the middle row trying the
-ground, ice, a bounce pad under a ledge too high to jump to and a pit whose sensor puts the player
-back at the zone's start; the south row moving, a platform to and fro between ledges, an elevator, a
-turning disc, a conveyor and five gaps a little wider each time, every piece a static or kinematic
-body sized by its transform's scale over one unit cube; beside it the playground, six crates and
-five balls light enough to push, a door on a hinge, a lift on a slider driven up and down, a rope of
-ten distance joints with a weight, a pressure plate whose lamp lights while `ContactImpulse` over
-its pressers passes a crate's weight, and a heightmap terrain of two waves fading to the ground at
-its edges, under a `Mesh` collider where the program draws, with four balls dropped on it; the
-player applies what is underfoot from a ray down, a belt carrying it, ice keeping its speed and the
-pad throwing it; `teleport`, `player` and `player.put` are commands; `build/drive-feature-test.sh`
-starts the program offscreen at a sixtieth of a second a frame, tries the hub's walk and jump,
-creative flight and spectator mode, then each station from `player.put` and judges it by where
-`player` says it ends, with an error annotation and captures, three runs passing on the working
-machine, and the pack workflow's game job builds the feature test from the checkout with the native
-job's bridge and runs it (`c8509aa`). The guide and BUILDING.md say so. The suite: 1,232 passed, 9
-skipped. The run of `cec88ad` ended at 18:33 with its Windows job cancelled at the job's hour in the
-step that opens the feature test, nothing said, as Verdict 7 reads it; nothing has run since,
-nothing being pushed.
+Before them, a mesh made without tangents came to be given them by `Render.GenerateTangents`, worked
+out by mikktspace in the bridge from its normals and texture coordinates, refused for a mesh without
+them and in a headless bridge, kept where a mesh has them, at ABI 229, with a test, the cheat
+sheet's line, the listing and the materials page, so a primitive under an anisotropic material or a
+normal map is not drawn as a blaze of white, the anisotropy example's sphere given them (`3461e2c`);
+and the render gallery west of the hub has its wall and its box, item 3's first half: seven columns
+from a dielectric to a metal by five rows from polished to rough, a red clearcoated row from a
+polished coat to a rough one and a brushed row from no anisotropy to full, named in gizmo text, a
+matte backing, and the Cornell box open to the road, a red wall, a green one, two blocks and a
+glowing panel over a point light, lit by the light's shadow map, or by Solari's rays where the
+graphics page's switch asked for it at the last start and the bridge and the GPU have them, the
+room's meshes handed to the rays and the sun's and the lamp's shadow maps left off; every sphere and
+block a static body the player walks round; a `look` command places the spectator camera for the
+drive script's pictures, and the guide says so (`e1f6ece`).
 
-Before them, Verdict 9 came to be mended: the leak test reads the heap after every tenth app and
-judges how far its floor rose, the least reading from the twentieth app to the fiftieth against the
-least from the seventieth to the hundredth, and where `BCS_GCDUMP` names `dotnet-gcdump`, which the
-macOS job installs at a pinned version, `HeapCensus` counts the heap's types after the twentieth app
-and the hundredth so a failure names what grew, as 3DEngine's `596535ce` has it (`070e5e0`). The
-same commit mends Verdict 7's third half: the step that opens the feature test has `timeout-minutes`
-of four, prints each `bcs` answer and writes it to a file of its own rather than reading it through
-`$(...)`, whose pipe the program `bcs` starts may inherit on Windows and hold open as long as it
-runs, which fits the wait the run of `cec88ad` sits in and is told by the next Windows job. The
-character controller flies with `Fly` set, at `Move` in every direction with gravity held off and
-walls, floors and ceilings still stopping it, and `PhysicsWorld.Place` puts a dynamic body at a
-point at rest and writes its transform, each with a test, in the listing, the cheat sheet and the
-physics page (`aa5c9e0`). The feature test has its player, the course's character: a capsule on
-`CharacterController` with a figure and a visor, walking, running, sprinting on Shift, crouching on
-C and jumping on Space with coyote time and jump buffering of a little over a tenth of a second
-each, the mouse turning the view while Tab locks the cursor or the right button is held and the
-right stick at any time, the modes walking, creative and spectator stepped by F3 held with F4 and
-named at the top of the screen for a moment, a double tap of jump taking off and landing in creative
-mode, the free camera kept for spectator mode, F5 stepping the view from the eyes, from behind and
-from in front with the camera brought in where a wall stands between, a fall below the map putting
-it back at the start of the zone it was last in, a teleport putting it at a zone's start facing its
-middle, the panel's Player page, the `mode` and `player` commands and the guide's paragraph
-(`9ba00a4`).
+Before them, Verdict 10 came to be settled: the physics page's sentence was about a body added in
+code with a `PhysicsShape`, which keeps its size however its entity is scaled, as `PhysicsShape.cs`
+says of itself, where a `Collider` component is scaled with the entity, and the page says so in as
+many words, the shape kept and the collider below not (`5d60532`), so its two paragraphs agree with
+the code.
 
 The norm has 44 rules, and this engine stands at 30 checked, 4 with places listed, 1 to take and 9
 by review.
@@ -73,23 +50,26 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 9 to 14 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `cec88ad` ended at 18:33: Linux green, macOS failed in
-   the overstep case and the leak test's two readings, Verdicts 8 and 9, and its Windows job
-   cancelled at the job's hour in the step that opens the feature test with nothing said, Verdict
-   7's third half, each mended since, so the first run with `070e5e0` and `a915784` tells of the
-   three; the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the next pack run.
-   Each push's run is read by the reviewing session, and a failure it names comes first here.
+1. **What the next page says.** The run of `156d2ce`: Linux green; Windows opened the feature
+   test in 24 seconds, which settled Verdict 7, and failed the three `CrashLogTests` cases that read
+   the log while it is written, Verdict 11, which comes before the gallery's next commit; macOS was
+   building at 19:58, with Verdicts 8 and 9 to prove and N 6.2 to check; the pack run of `75e8953`
+   was cancelled, so Verdicts 2 and 3 wait for the next pack run. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. The rules still to take each have
-   their item: N 6.2 is the macOS job's first green run.
-3. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
-   and anisotropy; a Cornell box lit by shadow maps and by Solari where the GPU has it, a panel
-   switch; a lights gallery of directional, point, spot, rect and area lights with shadows, a
-   reflection probe, an irradiance volume, light probes, decals, a fog volume, SSAO and a skybox;
-   the post effects as panel switches, bloom, tonemapping, MSAA, FXAA, TAA, SMAA and what else the
-   camera has; and vegetation as instanced grass and trees moved by a Slang wind shader, each drawn
-   from the examples that exist and each zone captured by the drive script.
+   their item: N 6.2 is the macOS job's first green run. N 1.3's test counts the Slang shaders of
+   the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since its
+   `09419080`, none of them over 800 today, so the list stays as it is.
+3. **The render gallery, its wall and box in.** The wall of spheres by metallic and roughness
+   with a clearcoat row and a brushed one, and the Cornell box lit by a shadow map or by Solari from
+   the next start on the panel's switch, are in (`e1f6ece`). Left: a lights gallery of directional,
+   point, spot, rect and area lights with shadows, a reflection probe, an irradiance volume, light
+   probes, decals, a fog volume, SSAO and a skybox; the post effects as panel switches, bloom,
+   tonemapping, MSAA, FXAA, TAA, SMAA and what else the camera has; vegetation as instanced grass
+   and trees moved by a Slang wind shader, each drawn from the examples that exist; and each zone
+   captured by the drive script, the gallery's wall and box among them.
 4. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
    demand and is never checked in. `scenes/<name>.json` holds the scene's source, its license and
    attribution, the pack's URL among this repository's release assets, its size and its SHA-256;
@@ -191,34 +171,6 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-7. **The Windows jobs fail the step that opens the sample through `bcs`, and the page says only
-   `exit code 6`.** Read from the pages of `360669ef`, `e3295b5` and `6f4d8590`: `Open the sample
-   through bcs` ended with `Process completed with exit code 6`, nothing else, in all three. The
-   step runs `bcs open --sample`, `bcs command app.status` and `bcs stop` bare, so `bcs`'s answer, a
-   JSON envelope with the code and the sentence the exit code stands for, went to a log nobody
-   reads, which N 6.7 does not allow, and the step is the first proof of `a753c57`'s start line on
-   Windows, so whether the sample opened at all is unread. Two things: the step keeps each `bcs`
-   answer and, where one fails, prints its code and sentence and the last lines of the sample's log
-   at the path `bcs` names, as 3DEngine's `drive-game.sh` does since its `1c848a20`; and the cause
-   is found with that on the next run. Mended at `6a2c4b2`, each answer kept and a failing one said
-   by `build/bcs-answer.py` with a test. The run of `e58d4bc` said the cause: `bcs` answered
-   `NOT_READY`, the sample did not start serving within 90 seconds, and its log ends with the
-   sample's own refusal, that the bridge was built without Bevy's renderer so it opens no window,
-   with `--headless` offered. The job's bridge is headless by design, so the step opens the sample
-   headless, as the sample's own line says, and the start line on Windows is proved by that opening.
-   Mended at `08ac049`, the step opening the program headless and running until stopped. With that
-   mend, the run of `cec88ad` opened the feature test headless and the step was still running at
-   17:56, thirteen minutes in, where the opening, the status and the stop take seconds, so one of
-   the three waits, the program run with `--frames 0` or the stop; the step takes a
-   `timeout-minutes` of a few minutes, so a wait fails there with its last answer and not at the
-   job's sixty, and what waited is read from that. Mended at `070e5e0`, the step given
-   `timeout-minutes` of four, each answer printed and written to a file of its own rather than read
-   through `$(...)`, whose pipe a program `bcs` starts may inherit on Windows and hold open as long
-   as it runs, which would keep the step waiting on the opening's answer until the program ended, as
-   the run of `cec88ad` waited, its Windows job cancelled at the job's hour with nothing said; the
-   next Windows job tells whether that was the wait. Settled when a Windows job's step opens the
-   feature test through `bcs` and ends with its three answers printed.
-
 8. **The macOS job of `e58d4bc` fails the overstep case of `FixedUpdateTests`, the second test to
    measure the machine's clock.** Read from the page: 894 passed, 1 failed, 405 skipped, the bridge
    built and the attribute test passed, and `TheOverstepGrowsBetweenStepsAndStaysUnderOne` found the
@@ -244,6 +196,18 @@ from [SHARED.md](SHARED.md).
    read after every tenth app, the floor judged, and `HeapCensus` counting the heap's types where
    `BCS_GCDUMP` names `dotnet-gcdump`, which the macOS job installs at a pinned version. Settled
    when a macOS job passes the test.
+
+11. **The Windows job of `156d2ce` fails the three `CrashLogTests` cases that read `latest.log`
+    while the app writes it.** Read from the page: 902 passed, 3 failed, 400 skipped, each failure
+    an `IOException`, the file being used by another process, at the test's `File.ReadAllLines`.
+    `CrashLog` opens the log for writing with `FileShare.ReadWrite`, so a reader may open it, but
+    the tests read it with `File.ReadAllText` and `File.ReadAllLines`, whose share is reading alone,
+    and on Windows a reader that does not share writing cannot open a file another handle writes,
+    where Linux and macOS let it. The step is the first on Windows to reach these tests, the jobs
+    before it having stopped at the step that opens the feature test. The tests read the log through
+    one helper of the class that opens it sharing reading and writing, as a tester's tail does, and
+    the suite is read once for another test that reads a file the engine keeps open. Settled when a
+    Windows job passes the three.
 
 ## Decisions
 

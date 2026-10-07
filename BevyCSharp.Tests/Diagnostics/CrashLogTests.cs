@@ -34,7 +34,21 @@ public sealed class CrashLogTests : IDisposable
         _folder.Dispose();
     }
 
-    private string Latest => File.ReadAllText(_folder.File("latest.log"));
+    private string Latest => Read(_folder.File("latest.log"));
+
+    /// <summary>A file of the run's, read whole while the log may still be open for writing.</summary>
+    /// <remarks>
+    /// The log is open for the whole run, and Windows lets a reader open a file another handle
+    /// writes only where the reader shares writing as well, which <c>File.ReadAllText</c> does
+    /// not, so the three tests reading the log failed there alone. This reads as a tester's tail
+    /// does, and every file here is read through it so none is read the other way.
+    /// </remarks>
+    private static string Read(string path)
+    {
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
 
     [Fact]
     public void ACrashIsWrittenWithWhatHappenedTheLogAndTheMachine()
@@ -45,7 +59,7 @@ public sealed class CrashLogTests : IDisposable
 
         Assert.NotNull(path);
         Assert.StartsWith(_folder.File("crash-"), path);
-        var text = File.ReadAllText(path);
+        var text = Read(path);
         Assert.Contains("== Something went wrong", text);
         Assert.Contains("System.Exception: the reason", text);
         Assert.Contains("a line before the crash", text);
@@ -55,7 +69,7 @@ public sealed class CrashLogTests : IDisposable
 
         // A second crash in the same run goes in the same file, after the first.
         Assert.Equal(path, CrashLog.Write("Then something else", "the second reason"));
-        Assert.True(File.ReadAllText(path).IndexOf("the second reason", StringComparison.Ordinal) > text.Length - 1);
+        Assert.True(Read(path).IndexOf("the second reason", StringComparison.Ordinal) > text.Length - 1);
     }
 
     [Fact]
@@ -64,7 +78,7 @@ public sealed class CrashLogTests : IDisposable
         Native.Check(Native.bcs_panic_on_purpose(0), "panicking on purpose");
 
         Assert.NotNull(CrashLog.Crash);
-        var text = File.ReadAllText(CrashLog.Crash);
+        var text = Read(CrashLog.Crash);
         Assert.Contains("A panic inside Bevy", text);
         Assert.Contains("thread 'panic on purpose' panicked at", text);
         Assert.Contains("stack:", text);
@@ -92,7 +106,7 @@ public sealed class CrashLogTests : IDisposable
         CrashLog.Start(_folder.Path, GraphicsBackend.Vulkan);
 
         Assert.Equal(crash, CrashLog.LastCrash);
-        Assert.Contains("said in the first run", File.ReadAllText(_folder.File("latest.1.log")));
+        Assert.Contains("said in the first run", Read(_folder.File("latest.1.log")));
         Assert.Contains("The last run crashed", Latest);
         Assert.DoesNotContain("said in the first run", Latest);
         Assert.False(File.Exists(_folder.File("crashed.txt")), "the marker is read once");
@@ -104,7 +118,7 @@ public sealed class CrashLogTests : IDisposable
         for (var i = 0; i < 5; i++) Console.WriteLine("again and again");
         Console.WriteLine("something else");
 
-        var lines = File.ReadAllLines(_folder.File("latest.log"));
+        var lines = Read(_folder.File("latest.log")).ReplaceLineEndings("\n").Split('\n');
         Assert.Single(lines, line => line.EndsWith("again and again", StringComparison.Ordinal));
         Assert.Contains(lines, line => line.Trim() == "said 4 more times");
     }
