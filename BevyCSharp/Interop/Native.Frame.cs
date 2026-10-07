@@ -66,6 +66,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_live_count();
 
+    /// <summary>Marks a handle to be released once nothing but the table holds its asset.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_release_when_unused(int handle);
+
+    /// <summary>Releases the marked handles whose assets went unused, answering how many wait to be taken.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_sweep();
+
+    /// <summary>Writes the handles a sweep released that have not been taken, answering how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_take_released(int* keys, int capacity);
+
+    /// <summary>Writes what the bridge holds, as name and number pairs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_memory_describe(byte* buffer, int capacity);
+
 
     // -- Frame state
 

@@ -69,6 +69,24 @@ public static partial class SceneFile
     public static Func<EcsWorld, Entity, bool>? Excluded { get; set; }
 
     /// <summary>
+    /// Whether the meshes and materials a load makes and loads for its entities are kept after none
+    /// of them draws with them any more.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Off by default, so what a load made goes with the last entity using it
+    /// (<see cref="AssetServer.ReleaseWhenUnused"/>), as Bevy lets go of a scene's assets.
+    /// Otherwise a level loaded again, or a save loaded over it, would make its look again each
+    /// time while every earlier load's stayed held, which a game left running climbs by.
+    /// </para>
+    /// <para>
+    /// Set by the editor, whose undo puts a deleted entity back with the handles it was drawn with,
+    /// which would name nothing once the entity had been gone a frame or two.
+    /// </para>
+    /// </remarks>
+    public static bool KeepsAssets { get; set; }
+
+    /// <summary>
     /// Bevy's components a scene does not write, by short name, because the engine works them out
     /// for itself or the file says them another way.
     /// </summary>
@@ -410,6 +428,10 @@ public static partial class SceneFile
         var made = App.HasRenderer && scene.TryGetProperty("resources", out var resources)
             ? Resources.Make(resources)
             : [];
+        if (!KeepsAssets)
+        {
+            foreach (var handle in made.Values) AssetServer.ReleaseWhenUnused(handle);
+        }
         var references = new SceneReferences();
         var spawned = new List<Entity>(entries.Length);
         var byId = new Dictionary<int, Entity>();
@@ -566,7 +588,11 @@ public static partial class SceneFile
         // A material or mesh file is read on this side into one asset shared by every scene using it.
         if (MaterialFiles.IsMaterialFile(path)) return MaterialFiles.Load(path);
         if (MeshFiles.IsMeshFile(path)) return MeshFiles.Load(path);
-        return AssetServer.Load(kind, path);
+
+        // Any other file takes a handle at each load, for the entity it is put on alone.
+        var loaded = AssetServer.Load(kind, path);
+        if (!KeepsAssets) AssetServer.ReleaseWhenUnused(loaded);
+        return loaded;
     }
 
     /// <summary>

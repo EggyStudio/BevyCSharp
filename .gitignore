@@ -45,6 +45,9 @@ msbuild.log
 # What an app launched by `bcs open` writes, so its output can be read after it is gone.
 /build/sessions/
 
+# What build/soak.sh reads from a game it plays, and the game's log.
+/build/soak/
+
 # A bare `cargo build` in native/ bypasses the script and defaults to here.
 /native/target/
 

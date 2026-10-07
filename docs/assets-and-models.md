@@ -242,6 +242,14 @@ as a slot index, so a released handle does not start naming whatever later took 
 names nothing instead, and every call that takes one refuses it rather than carrying on without
 whatever it pointed at.
 
+So a mesh or a material made each time something spawns stays held by a handle nothing releases,
+which a game left running climbs by. A game makes such a thing once and spawns with it every time,
+or gives one made for the entities it is put on alone to `AssetServer.ReleaseWhenUnused`, which
+releases it a frame or two after the last of them has gone. A scene load does that for the meshes
+and materials it makes, so a level loaded again holds one load's and not every load's, and the
+editor, whose undo puts an entity back with the handles it had, keeps them
+(`SceneFile.KeepsAssets`).
+
 `Mesh` and `Image` load in any build. `StandardMaterial`, `Gltf`, `Audio` and `Font` need a render
 build, and asking for one without it reports which build would support it. Scenes load too. `Scene`
 is a trait in 0.19 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes is

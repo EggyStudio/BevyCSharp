@@ -285,3 +285,39 @@ physics to its 290. `make-sounds.py` makes its one sound, as 3DEngine's does. Th
 
 Shared: a fourth game written in behaviors, with creatures in their hundreds, played and profiled
 by the workflow, as 3DEngine's Swarm is.
+
+**Now 7, the first of two, the games played for ten minutes.** `memory` and `memory.collect` answer
+with what a program holds as name and number pairs, the managed heap, the process's resident size,
+the asset handles held, the bytes and blocks the bridge has allocated, counted by an allocator
+wrapped round the system's, the entities with the indices handed out, and the assets of each kind
+Bevy holds. `state.set` and `state.get` move and read a game's states by name, which a script ends a
+round with. `build/soak.sh` plays Courtyard, Swarm or the stress program a round at a time and reads
+`memory.collect` after its rounds, and `build/soak-check.py` fails a value whose most in the second
+half of a run passes its most in the first by more than its slack. The pack workflow's game job
+plays the three at once for two and a half minutes. Its first run found four leaks.
+
+- Every scene load made its meshes and materials again under handles nothing released, seven more
+  of each for every save Courtyard loaded. What a load makes, or loads for its entities to be drawn
+  with, is now given to `AssetServer.ReleaseWhenUnused`, and the bridge releases such a handle a
+  frame or two after the last entity drawing with it has gone, as Bevy lets go of a scene's assets,
+  and the managed side forgets the recipe and collider mesh it kept for it. The editor keeps them
+  (`SceneFile.KeepsAssets`), since its undo puts an entity back with the handles it had.
+- A model placed by a load took another key to the same asset each time, which the model the next
+  load placed kept in use. A marked key beside the first key to its asset now goes at once.
+- Swarm made its player's mesh and material at each game, and makes them once now.
+- An offscreen run drawing as fast as it can grew by a gigabyte a minute, the stress program
+  holding 3.8 GB after four, while the bridge's own allocations stayed flat. Nothing maintained the
+  device, as a window's present does, so wgpu held what every frame used. Each offscreen frame now
+  waits at its end for the GPU to finish the one before, which a thousand and five thousand drawn
+  cubes measure within a few tenths of a millisecond of the frames without it, either way.
+
+Ten minutes of the three at once then held every count level, the handles and the assets of each
+kind exactly, the managed heap within half a megabyte, the bridge's allocations within 1.2 MB and
+the processes within 10 MB of where they were in the first half. `MemoryCommandTests`,
+`StateCommandTests` and `SceneAssetsReleaseTests` hold the commands and a scene loaded over another,
+and the bridge's tests the allocator and the sweep. `SceneFile.cs` and `SceneInstances.cs` came off
+the norm's lists first, in commits that move code alone. The suite passed, 1,189 with 9 skipped.
+The bad files are next.
+
+Shared: a game played for minutes while what it holds is read, failing a count that keeps
+climbing, with a short form in the workflow, as 3DEngine's `build/soak.sh` does.

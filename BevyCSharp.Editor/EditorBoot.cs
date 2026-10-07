@@ -52,6 +52,10 @@ public partial struct EditorBoot
         // previews, whatever saves it.
         SceneFile.Excluded = EditorScene.IsEditors;
 
+        // A deleted entity put back by an undo is drawn with the handles it had, which a scene's
+        // would no longer name had they gone with it.
+        SceneFile.KeepsAssets = true;
+
         EditorProject.RestoreLayout();
 
         Console.WriteLine("[editor] the interface is up");

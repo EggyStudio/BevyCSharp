@@ -18,6 +18,8 @@ use bevy::ecs::world::World;
 use crate::interop::status;
 use crate::state::{with_world, with_world_opt};
 
+pub mod unused;
+
 /// Registers an asset type unless the app already has one, and reports whether it did.
 ///
 /// `App::init_asset` is destructive rather than idempotent. It builds a fresh `Assets<A>`, gives
@@ -61,12 +63,21 @@ pub mod load_state {
 pub struct AssetHandles {
     slots: Vec<Slot>,
     free: Vec<u32>,
+
+    /// The keys a sweep released that C# has not taken yet ([`unused`]).
+    released: Vec<i32>,
 }
 
 #[derive(Default)]
 struct Slot {
     handle: Option<UntypedHandle>,
     generation: u32,
+
+    /// Whether the key is released once nothing outside the table holds its asset ([`unused`]).
+    goes: bool,
+
+    /// How many sweeps in a row have found only the table holding the asset of a key that goes.
+    idle: u8,
 }
 
 /// Packs a slot index and generation into the single integer C# holds.
@@ -108,6 +119,8 @@ impl AssetHandles {
         if let Some(index) = self.free.pop() {
             let slot = &mut self.slots[index as usize];
             slot.handle = Some(handle);
+            slot.goes = false;
+            slot.idle = 0;
             return pack(index, slot.generation);
         }
 
@@ -119,6 +132,7 @@ impl AssetHandles {
         self.slots.push(Slot {
             handle: Some(handle),
             generation: FIRST,
+            ..Slot::default()
         });
         pack(index, FIRST)
     }
@@ -147,6 +161,8 @@ impl AssetHandles {
 
         slot.handle = None;
         slot.generation = next(slot.generation);
+        slot.goes = false;
+        slot.idle = 0;
         self.free.push(index as u32);
         true
     }

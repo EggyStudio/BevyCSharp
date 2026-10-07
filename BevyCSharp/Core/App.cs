@@ -346,6 +346,10 @@ public sealed unsafe partial class App : IDisposable
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
+
+            // The handles a scene made for its entities that none of them draws with any more.
+            AssetServer.Sweep();
+
             if (HasRenderer) Animation.PostFinished(world.Resource<MessageBus>());
             DataAssets.PostChanges(world.Resource<MessageBus>());
             SaveGame.PostLoaded(world.Resource<MessageBus>());

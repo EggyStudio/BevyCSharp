@@ -215,8 +215,69 @@ public static unsafe class AssetServer
     /// component on an entity. Releasing only gives up this reference.
     /// </remarks>
     /// <returns><see langword="false"/> if the handle was already released.</returns>
-    public static bool Release(AssetHandle handle) =>
-        handle.IsValid && Native.bcs_asset_release(handle.Key) > 0;
+    public static bool Release(AssetHandle handle)
+    {
+        if (!handle.IsValid || Native.bcs_asset_release(handle.Key) <= 0) return false;
+
+        Forget(handle);
+        return true;
+    }
+
+    /// <summary>
+    /// Releases a handle once nothing else holds its asset, as a component drawing with it does
+    /// until its entity is despawned.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A handle holds its asset until it is released, which suits a mesh a game makes once and
+    /// spawns with again and again. It does not suit an asset made for the entities using it and
+    /// for nothing else, as a scene file's meshes and materials are, which a level loaded again
+    /// makes again while the ones the last load made stay held. A handle given here is released a
+    /// frame or two after the last component drawing with its asset has gone, as Bevy lets go of
+    /// an asset when its last handle does, and the asset goes with it.
+    /// </para>
+    /// <para>
+    /// So it is given here by what puts it on its entities at once and keeps it nowhere else. A
+    /// handle kept in a field and spawned with later names nothing once the entities it was put on
+    /// are gone, and the same handle read back off one of them (<see cref="Render.MeshOf"/>) goes
+    /// with it too.
+    /// </para>
+    /// </remarks>
+    /// <returns><see langword="false"/> if the handle names nothing.</returns>
+    public static bool ReleaseWhenUnused(AssetHandle handle) =>
+        handle.IsValid
+        && Native.Check(Native.bcs_asset_release_when_unused(handle.Key), "marking an asset handle to go once unused") > 0;
+
+    /// <summary>Forgets what was kept for a handle released.</summary>
+    /// <remarks>
+    /// A released key is given again to the next asset made, with another generation, so what is
+    /// kept by key is forgotten rather than left to describe an asset that is gone.
+    /// </remarks>
+    private static void Forget(AssetHandle handle)
+    {
+        Render.Forget(handle);
+        Physics.Colliders.Forget(handle);
+    }
+
+    /// <summary>
+    /// Releases the handles given to <see cref="ReleaseWhenUnused"/> whose assets nothing uses any
+    /// more, and forgets what was kept for each.
+    /// </summary>
+    /// <remarks>Once a frame, at its top, since a handle goes only after two sweeps find it unused.</remarks>
+    internal static unsafe void Sweep()
+    {
+        if (Native.Check(Native.bcs_asset_sweep(), "releasing unused asset handles") == 0) return;
+
+        const int Batch = 64;
+        var keys = stackalloc int[Batch];
+        int taken;
+        do
+        {
+            taken = Native.Check(Native.bcs_asset_take_released(keys, Batch), "taking the released asset handles");
+            for (var i = 0; i < taken; i++) Forget(new AssetHandle(keys[i]));
+        }
+        while (taken == Batch);
+    }
 
     /// <summary>
     /// How many handles the engine is holding on C#'s behalf.

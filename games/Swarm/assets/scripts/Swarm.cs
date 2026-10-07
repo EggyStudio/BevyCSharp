@@ -233,7 +233,7 @@ public partial struct Arena
     private const float Size = 36f;
     private const int LastWave = 5;
 
-    private static AssetHandle _crawler, _brute, _crawlerLook, _bruteLook;
+    private static AssetHandle _crawler, _brute, _crawlerLook, _bruteLook, _player, _playerLook;
 
     /// <summary>The waves' entity, made with the arena.</summary>
     internal static ref Waves Current(BehaviorContext ctx)
@@ -277,6 +277,11 @@ public partial struct Arena
         _brute = Render.CreateMesh(MeshShape.Cuboid, 1f, 1.6f, 1f);
         _crawlerLook = Render.CreateMaterial((0.8f, 0.25f, 0.2f, 1f));
         _bruteLook = Render.CreateMaterial((0.45f, 0.2f, 0.6f, 1f));
+
+        // Made here once, as the creatures' are, since a mesh or a material made as each game
+        // starts would be held for good by a handle nothing releases, one more of each a game.
+        _player = Render.CreateMesh(MeshShape.Capsule, 0.35f, 1.1f);
+        _playerLook = Render.CreateMaterial((0.3f, 0.7f, 1f, 1f));
     }
 
     /// <summary>The player, in the middle, and the count started over, as play starts.</summary>
@@ -287,8 +292,8 @@ public partial struct Arena
 
         var player = ctx.Ecs.Spawn();
         ctx.Ecs.Add(player, Transform.At(0f, 0f, 0f));
-        Render.SetMesh(ctx.Ecs, player, Render.CreateMesh(MeshShape.Capsule, 0.35f, 1.1f));
-        Render.SetMaterial(ctx.Ecs, player, Render.CreateMaterial((0.3f, 0.7f, 1f, 1f)));
+        Render.SetMesh(ctx.Ecs, player, _player);
+        Render.SetMaterial(ctx.Ecs, player, _playerLook);
         ctx.Ecs.Add(player, new RigidBody { Kind = BodyKind.Dynamic, Mass = 70f });
         ctx.Ecs.Add(player, new Collider { Shape = ColliderShape.Capsule, Size = new Vec3(0.7f, 1.8f, 0.7f), Offset = new Vec3(0f, 0.9f, 0f) });
         ctx.Ecs.Add(player, new CharacterController());

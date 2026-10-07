@@ -272,6 +272,9 @@ jobs:
       - name: Build Swarm
         run: dotnet build games/Swarm -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
+      - name: Build the stress program
+        run: dotnet build games/Stress -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
       # Every example built in a project of its own on the package alone, as a reader copying one
       # into a game of their own builds it (NORM.md, N 2.7).
       - name: Build the examples on the package alone
@@ -290,6 +293,25 @@ jobs:
           SHOTS: ${{ runner.temp }}/swarm
           BCS_STEP_LOGS: ${{ runner.temp }}/swarm
         run: mkdir -p "$SHOTS" && games/Swarm/play.sh
+
+      # Courtyard, the stress program and Swarm played at once a round at a time, while what each
+      # holds is read after its rounds (build/soak.sh), failing when any of it climbs without
+      # leveling off (build/soak-check.py), as a leak does. The readings and the games' logs are
+      # kept with the captures.
+      - name: Play the games a while and check nothing they hold grows
+        env:
+          BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
+        run: |
+          pids=()
+          for game in courtyard stress swarm; do
+            build/soak.sh "$game" 150 &
+            pids+=($!)
+          done
+          failed=0
+          for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
+          mkdir -p "${{ runner.temp }}/soak" && cp build/soak/* "${{ runner.temp }}/soak/"
+          python3 build/soak-check.py build/soak/*.txt || failed=1
+          if [ "$failed" = 1 ]; then echo "::error::a game grew, or could not be played, over two and a half minutes"; exit 1; fi
 
       # The same game published as native code from the package, as a player gets it, which keeps
       # only what the compiler sees used, and played to its win the same way (NORM.md, N 2.5). The
@@ -312,6 +334,7 @@ jobs:
             ${{ runner.temp }}/courtyard
             ${{ runner.temp }}/courtyard-native
             ${{ runner.temp }}/swarm
+            ${{ runner.temp }}/soak
           if-no-files-found: ignore
 
   # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does

@@ -113,7 +113,11 @@ public static partial class SceneInstances
 
         if (!subscene)
         {
-            var placed = world.SpawnScene(AssetServer.Load(AssetKind.Scene, path));
+            // The root holds the scene as long as it is there, so the key taken to spawn it goes
+            // with the root rather than one more being held for good at every placing.
+            var scene = AssetServer.Load(AssetKind.Scene, path);
+            var placed = world.SpawnScene(scene);
+            AssetServer.ReleaseWhenUnused(scene);
             world.Add(placed, Transform.Identity);
             world.Add(placed, SceneInstance.Of(data));
             return placed;

@@ -664,6 +664,7 @@ static AssetLoadState StateOf(AssetHandle handle);              // How far along
 static AssetLoadState StateWithDependenciesOf(AssetHandle handle);  // How far along an asset's load is, counting everything it depends on
 static bool IsAlive(AssetHandle handle);                        // True when the engine is still holding this handle
 static bool Release(AssetHandle handle);                        // Releases a handle
+static bool ReleaseWhenUnused(AssetHandle handle);              // Releases a handle once nothing else holds its asset, as a component drawing with it does until its entity is despawned
 ```
 
 ### `AssetFiles`

@@ -143,6 +143,12 @@ public static class Colliders
         lock (Gate) Meshes.Clear();
     }
 
+    /// <summary>Forgets a mesh read whose handle was released, so its key given again reads afresh.</summary>
+    internal static void Forget(AssetHandle mesh)
+    {
+        lock (Gate) Meshes.Remove(mesh);
+    }
+
     /// <summary>
     /// The meshes an entity and those under it are drawn with, as one, each placed in the entity's
     /// own space by the transforms between them, or false while one of them is loading or none of

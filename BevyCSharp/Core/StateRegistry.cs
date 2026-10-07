@@ -176,6 +176,21 @@ public static unsafe class StateRegistry
         return names;
     }
 
+    /// <summary>The states that have a slot in the running app, each with its slot.</summary>
+    /// <remarks>
+    /// For the console, where a state is named by its enum's name as a person types it and so is
+    /// not a type parameter. A state that claimed a slot for a system and was never added is among
+    /// them, and its value cannot be read.
+    /// </remarks>
+    internal static List<(Type State, int Slot)> Claimed()
+    {
+        lock (Gate)
+        {
+            Reset();
+            return [.. Slots.Select(pair => (pair.Key, pair.Value))];
+        }
+    }
+
     /// <summary>
     /// Whether the running app is yet to be told that <typeparamref name="TState"/> was never added,
     /// counting this as the telling.

@@ -93,6 +93,17 @@ public static unsafe partial class Render
         lock (Built) Built.Clear();
     }
 
+    /// <summary>Forgets how a mesh was made, once its handle has been released.</summary>
+    /// <remarks>
+    /// A released key is given to the next asset made, with another generation, so a recipe kept
+    /// for it would describe nothing and only take room.
+    /// </remarks>
+    internal static void Forget(AssetHandle mesh)
+    {
+        lock (Recipes) Recipes.Remove(mesh.Key);
+        lock (Built) Built.Remove(mesh.Key);
+    }
+
     /// <summary>The geometry each mesh built vertex by vertex was made from, by its key.</summary>
     private static readonly Dictionary<int, MeshData> Built = [];
 

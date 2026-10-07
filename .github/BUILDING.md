@@ -306,6 +306,16 @@ Courtyard's play and Swarm's hold each frame to a sixtieth of a second of the ga
 `app.frametime`, since the play plans each walk in frames and the runner draws with Mesa's software
 Vulkan, a few frames a second, which on the machine's clock carried the runner past its coins.
 
+`build/soak.sh <courtyard|stress|swarm> <seconds>` plays a game through `bcs` a round at a time, as a
+player left at it would, and reads `memory.collect` after its rounds, no more often than every five
+seconds, into `build/soak/<game>.txt`. `build/soak-check.py` fails when anything it holds (managed
+memory, the process's resident size, the bridge's allocations, the entities, the asset handles and
+the assets of each kind) climbs past what it reached earlier in the run by more than a little. A
+round ends where the game is the same each time, Courtyard back on its menu after a save, a walk
+and a load, Swarm at its end after a fight with its first wave, and the stress program after a
+number of frames, so two readings of a game that leaks nothing match. The pack workflow plays the
+three at once for two and a half minutes this way, and a ten-minute run of each holds level here.
+
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by
 one and a new minor starts it again at 0. To move to `0.4.x`, change `build/version.txt` and
