@@ -96,6 +96,9 @@ public static class RecognizedAttributes
     /// <summary>Only for entities whose component changed this frame.</summary>
     public const string Changed = "ChangedAttribute";
 
+    /// <summary>For every entity on the main thread, never split across worker threads.</summary>
+    public const string MainThread = "MainThreadAttribute";
+
     /// <summary>Only while a state holds a value.</summary>
     public const string InState = "InStateAttribute";
 
@@ -184,7 +187,7 @@ public static class RecognizedAttributes
     [
         Behavior, DataAsset, DataVersion, FormerName, Persist, InitialState, Command,
         OnStartup, OnFirst, OnPreUpdate, OnFixedUpdate, OnUpdate, OnPostUpdate, OnRender, OnLast, OnCleanup, OnEnter, OnExit, OnTransition,
-        With, Without, Changed, InState, RunIf, ToggleKey, After, Before,
+        With, Without, Changed, MainThread, InState, RunIf, ToggleKey, After, Before,
         Label, Tooltip, Header, Unit, Range, Step, ReadOnly, Hidden, Space, Separator, Color, Wide, Inline,
         Foldout, Info, Order, Asset, ShowIf, HideIf, OnValueChanged, Button, Flags,
     ];

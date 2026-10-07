@@ -160,7 +160,8 @@ internal static class BehaviorEmitter
                 .Append("                __behavior.").Append(method.Name).Append("(__context),\n")
                 .Append("            __with,\n")
                 .Append("            __without,\n")
-                .Append("            __changed);\n")
+                .Append("            __changed")
+                .Append(method.MainThread ? ",\n            parallelThreshold: 0);\n" : ");\n")
                 .Append("    }\n");
             return;
         }
@@ -188,6 +189,9 @@ internal static class BehaviorEmitter
             .Append("            __changed");
 
         foreach (var other in others) source.Append(",\n            ").Append(other.Writes ? "true" : "false");
+
+        // On the main thread for every entity where the method reaches what one thread may touch.
+        if (method.MainThread) source.Append(",\n            parallelThreshold: 0");
 
         source.Append(");\n")
             .Append("    }\n");

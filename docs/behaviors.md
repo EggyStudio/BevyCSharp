@@ -255,6 +255,18 @@ reference they were handed, the partitions are disjoint, but they cannot touch t
 - `ctx.Cmd` a thread-safe queue, applied at the end of `PostUpdate`.
 - `ctx.Time`, `ctx.Input` plain snapshots, safe to read anywhere.
 
+A method that reaches what one thread at a time may touch, a resource's fields, the interface being
+drawn, a sound or `ctx.Ecs`, is marked `[MainThread]` and runs on the main thread for every entity
+however many there are, slower for thousands and safe. A static method runs there already:
+
+```csharp
+[OnUpdate, MainThread]
+public void Cheer(BehaviorContext ctx)
+{
+    if (Health <= 0f) Audio.Play(cheer, new AudioSettings());
+}
+```
+
 Queue structural changes rather than applying them mid-loop. Spawning, despawning, adding and
 removing all move entities between archetypes, which invalidates every reference the loop holds:
 

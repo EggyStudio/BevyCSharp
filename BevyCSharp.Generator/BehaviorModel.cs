@@ -114,6 +114,9 @@ internal sealed record StageMethod
     /// <summary>Component filters; only meaningful for instance methods.</summary>
     public BehaviorFilters Filters { get; init; } = BehaviorFilters.None;
 
+    /// <summary>Whether an instance method runs on the main thread for every entity, never split across threads.</summary>
+    public bool MainThread { get; init; }
+
     /// <summary>An optional run condition.</summary>
     public ConditionInfo? Condition { get; init; }
 

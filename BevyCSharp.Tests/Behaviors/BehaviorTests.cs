@@ -24,6 +24,24 @@ public partial struct Counter
     }
 }
 
+/// <summary>A behavior whose instance method keeps to the main thread, as one playing a sound would.</summary>
+[Behavior]
+public partial struct OneThreaded
+{
+    /// <summary>The threads its method ran on, every entity's every call.</summary>
+    internal static readonly System.Collections.Concurrent.ConcurrentBag<int> Threads = [];
+
+    /// <summary>How many times this entity's method has run.</summary>
+    public int Ticks;
+
+    [OnUpdate, MainThread]
+    public void Tick(BehaviorContext ctx)
+    {
+        Ticks++;
+        Threads.Add(Environment.CurrentManagedThreadId);
+    }
+}
+
 /// <summary>A behavior whose instance method is filtered to a subset of entities.</summary>
 [Behavior]
 public partial struct FilteredCounter
@@ -307,5 +325,26 @@ public sealed class BehaviorTests
         app.AddPlugin(EngineHarness.Behaviors());
         Assert.Contains(app.SystemsIn(Stage.Update), s => s.Name == "Counter.Tick");
         Assert.DoesNotContain(app.SystemsIn(Stage.Startup), s => s.Name == "EditorBoot.Start");
+    }
+
+    /// <summary>
+    /// A method marked for the main thread runs on one thread for every entity, over enough of them
+    /// that an unmarked one is split across the thread pool.
+    /// </summary>
+    [Fact]
+    public void AMainThreadMethodRunsOnOneThreadHoweverManyEntities()
+    {
+        OneThreaded.Threads.Clear();
+
+        using var harness = new EngineHarness(frames: 3, discoverBehaviors: true);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            for (var i = 0; i < BehaviorRunners.DefaultParallelThreshold + 1000; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new OneThreaded());
+        });
+
+        harness.Run();
+
+        Assert.True(OneThreaded.Threads.Count > BehaviorRunners.DefaultParallelThreshold, $"ran {OneThreaded.Threads.Count} times");
+        Assert.Single(OneThreaded.Threads.Distinct());
     }
 }

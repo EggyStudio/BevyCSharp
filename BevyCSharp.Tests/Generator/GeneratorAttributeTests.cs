@@ -369,6 +369,21 @@ public sealed class GeneratorAttributeTests
             Assert.All(FramesOf("Changed:plain"), frame => Assert.True(frame <= 1, $"ran on frame {frame}"));
         },
 
+        // The runner is told to keep the method to one thread, which BehaviorTests finds it does.
+        [RecognizedAttributes.MainThread] = () => Assert.Contains("parallelThreshold: 0", Generated("""
+            using Bevy;
+
+            namespace Threaded;
+
+            [Behavior]
+            public partial struct Loud
+            {
+                public int Count;
+
+                [OnUpdate, MainThread] public void Play(BehaviorContext ctx) => Count++;
+            }
+            """), StringComparison.Ordinal),
+
         [RecognizedAttributes.RunIf] = () =>
         {
             Run(6);
@@ -525,6 +540,20 @@ public sealed class GeneratorAttributeTests
         var reported = Assert.Single(diagnostics, diagnostic => diagnostic.Id == "BCS009");
         Assert.Contains("Screen", reported.GetMessage(), StringComparison.Ordinal);
         Assert.Contains("Weather", reported.GetMessage(), StringComparison.Ordinal);
+    }
+
+    /// <summary>What the behavior generator writes for a source, every file of it together.</summary>
+    private static string Generated(string source)
+    {
+        var references = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+            .Select(assembly => MetadataReference.CreateFromFile(assembly.Location));
+
+        var compilation = CSharpCompilation.Create(
+            "Generated", [CSharpSyntaxTree.ParseText(source)], references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var run = CSharpGeneratorDriver.Create(new BehaviorGenerator().AsSourceGenerator()).RunGenerators(compilation).GetRunResult();
+        return string.Join("\n", run.GeneratedTrees.Select(tree => tree.ToString()));
     }
 
     public static TheoryData<string> Recognized() => [.. RecognizedAttributes.All];

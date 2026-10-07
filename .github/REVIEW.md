@@ -251,3 +251,18 @@ package ships for, and the test step runs `build/test.py` with `python3` on a Ma
 and N 6.2's row in the Conformance table is yours to change once a macOS job is green. The suite
 passed, 1,182 with 9 skipped, which reads nothing these files change but the workflows themselves.
 Item 6 is next.
+
+**Now 6, the first two of 3DEngine's three.** Here every behavior method is a system of its own,
+an exclusive one Bevy runs alone with the world loaned to it, so no two methods run beside each
+other, and a static method runs on the main thread. An instance method over 4,096 entities of a
+chunk or more is split across the thread pool, and one that writes a resource, draws interface or
+plays a sound there touches what one thread at a time may, so `[MainThread]` keeps such a method on
+the main thread for every entity, as 3DEngine's attribute of that name does. The generator passes
+the runner a threshold of zero for it. `BehaviorTests` runs a marked method over 5,096 entities and
+finds every call on one thread, `GeneratorAttributeTests` holds its case, and the behaviors guide
+says when to mark one. The second is in place, answered here. A game compiles its `assets/scripts`
+into itself, the editor opened on its project compiles and watches that folder in the project and
+not a copy in `bin` (`EditorPaths.Assets` is the project's), and a script is compiled against every
+assembly the program loaded, the game's own among them. The suite passed, 1,183 with 9 skipped, and
+the norm's tests after the attribute moved into a file of its name. The game in behaviors with
+hundreds of creatures, played by the workflow and profiled, is next.

@@ -921,6 +921,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 Name = member.Name,
                 IsStatic = member.IsStatic,
                 Filters = GetFilters(member, diagnostics),
+                MainThread = member.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == $"{AttributeNamespace}.{RecognizedAttributes.MainThread}"),
                 Condition = GetCondition(member, type, diagnostics),
                 Toggle = GetToggle(member),
                 InState = GetInState(member),
