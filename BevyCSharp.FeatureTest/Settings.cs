@@ -66,6 +66,12 @@ public sealed record FeatureSettings
     /// <summary>Whether bright things bleed light around them.</summary>
     public bool Bloom { get; init; } = true;
 
+    /// <summary>
+    /// Whether the app asks for Bevy's ray-traced lighting, Solari, which takes effect at the next
+    /// start, since it makes every material deferred for the whole app.
+    /// </summary>
+    public bool RayTraced { get; init; }
+
     /// <summary>The tier last chosen, which set the four above.</summary>
     public Quality Quality { get; init; } = Quality.High;
 

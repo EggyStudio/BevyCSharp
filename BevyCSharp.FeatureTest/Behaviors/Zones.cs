@@ -89,6 +89,39 @@ public partial struct Zones
         return $"at {zone.Name}";
     }
 
+    /// <summary>
+    /// Puts the spectator camera at a point looking at another, for a picture of one thing in a
+    /// zone, as the drive script takes them.
+    /// </summary>
+    /// <remarks>
+    /// Refused outside spectator mode, where the camera is the player's and would be put back at
+    /// its eye on the next frame.
+    /// </remarks>
+    [Command("look", "Puts the spectator camera at a point looking at another: look <x> <y> <z> <toward x> <toward y> <toward z>")]
+    internal static string Look(float x, float y, float z, float towardX, float towardY, float towardZ)
+    {
+        const string Usage = "look <x> <y> <z> <toward x> <toward y> <toward z>";
+        if (Player.Mode != PlayerMode.Spectator)
+        {
+            ConsoleHost.Fail("NOT_SPECTATING", "The camera follows the player outside spectator mode. Run mode spectator first.");
+            return Usage;
+        }
+
+        var ecs = ConsoleHost.Ecs;
+        if (Scene.Camera is not { } camera || !ecs.IsAlive(camera)) return "there is no camera to move";
+
+        var (eye, look) = (new Vec3(x, y, z), new Vec3(towardX, towardY, towardZ));
+        if ((look - eye).Length < 1e-3f)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", "The camera cannot look at the point it stands on.");
+            return Usage;
+        }
+
+        ecs.Set(camera, Transform.LookingAt(eye, look, Vec3.UnitY));
+        ecs.Set(camera, FlyCamera.LookingAt(eye, look));
+        return $"looking from ({x:0.##}, {y:0.##}, {z:0.##}) toward ({towardX:0.##}, {towardY:0.##}, {towardZ:0.##})";
+    }
+
     /// <summary>Where a zone's signpost stands, at the hub's edge on the road to it.</summary>
     internal static Vec3 SignOf(Zone zone)
     {
@@ -137,7 +170,7 @@ public partial struct Zones
             var at = SignOf(zone);
             var facing = Quat.FromAxisAngle(Vec3.UnitY, MathF.Atan2(-at.X, -at.Z));
             var front = facing * new Vec3(0f, 0f, 0.15f);
-            Gizmos.Text(zone.Name, at + front + new Vec3(0f, Scene.GroundHeight + 2.05f, 0f), facing, 0.2f, (0.5f, 0.5f), (0.12f, 0.08f, 0.05f, 1f), inFront: false);
+            Gizmos.Text(zone.Name, at + front + new Vec3(0f, Scene.GroundHeight + 2.05f, 0f), facing, 0.2f, (0f, 0f), (0.12f, 0.08f, 0.05f, 1f), inFront: false);
         }
     }
 }

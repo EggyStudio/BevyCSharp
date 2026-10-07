@@ -39,6 +39,8 @@ internal static class Pages
         new ChoiceRow<Smoothing>("Anti-aliasing", () => S.Smoothing, value => Settings.Change(s => s with { Smoothing = value })),
         new ToggleRow("Shadows", () => S.Shadows, value => Settings.Change(s => s with { Shadows = value })),
         new ToggleRow("Bloom", () => S.Bloom, value => Settings.Change(s => s with { Bloom = value })),
+        new ToggleRow(Render.RayTracingActive ? "Ray-traced lighting, running" : "Ray-traced lighting, from the next start",
+            () => S.RayTraced, value => Settings.Change(s => s with { RayTraced = value })),
         new ToggleRow("Old screen", () => ShaderShowcase.OldScreen, value => ShaderShowcase.OldScreen = value),
         new ToggleRow("Screen-space light", () => ScreenSpaceLight.On, value => ScreenSpaceLight.On = value),
         new ToggleRow("Ray-traced occlusion", () => RayTracedOcclusion.On, value => RayTracedOcclusion.On = value),

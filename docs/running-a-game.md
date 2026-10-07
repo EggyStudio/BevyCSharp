@@ -32,12 +32,16 @@ holds, and the key under Escape opens the console. The player is a capsule on a
 and crouching with C, its view turned by the mouse while Tab locks the cursor. F3 held with F4 steps
 it through walking, creative mode, where a double tap of jump flies, and spectator mode, a free
 camera through everything, and F5 steps the view from its eyes, from behind and from in front.
-`./bcs command player` says where it is and how it moves, and `./bcs command mode creative` sets
-the mode. East of the hub the course tries it on ramps and stairs, a beam, a tunnel to crawl
-through, ice, a bounce pad, a pit, a moving platform, an elevator, a turning disc, a conveyor and
-gaps to jump, beside a playground of crates, a door on a hinge, a lift, a rope and a pressure plate,
-and a heightmap terrain. `build/drive-feature-test.sh` walks the player through each of them
-through `bcs`, as the pack workflow does.
+`./bcs command player` says where it is and how it moves, and `./bcs command mode creative` sets the
+mode. East of the hub the course tries it on ramps and stairs, a beam, a tunnel to crawl through,
+ice, a bounce pad, a pit, a moving platform, an elevator, a turning disc, a conveyor and gaps to
+jump, beside a playground of crates, a door on a hinge, a lift, a rope and a pressure plate, and a
+heightmap terrain. West of the hub the render gallery holds a wall of spheres from a dielectric to a
+metal and from polished to rough, with a row under a clearcoat and a brushed row, and a Cornell box
+lit by a point light's shadow map, or by Solari's rays from the next start once the graphics page's
+ray-traced lighting is on, where the bridge and the GPU have them. In spectator mode `./bcs command
+look 6 3 8 0 0 0` puts the camera at a point looking at another. `build/drive-feature-test.sh` walks
+the player through each of them through `bcs`, as the pack workflow does.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

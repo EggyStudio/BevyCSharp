@@ -52,6 +52,10 @@ config.AssetRoot = Path.Combine(AppContext.BaseDirectory, "assets");
 config.GameName = Settings.GameName;
 config.Vsync = saved.Vsync;
 
+// Bevy's ray-traced lighting where the panel asked for it, which a bridge built without Solari or
+// a GPU that traces no rays leaves off.
+config.RayTracedLighting = saved.RayTraced && (windowed || offscreen);
+
 // Asks for the interface the panel, the overlay and the console are drawn with, offscreen as well,
 // where bcs drives them with the keys it sends and a capture shows them. A bridge without it
 // compiled in ignores this and they are not drawn.

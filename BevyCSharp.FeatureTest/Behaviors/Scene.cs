@@ -58,6 +58,9 @@ public partial struct Scene
         var eye = Zones.All[0].Eye;
         var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 55f });
         Camera = camera;
+
+        // Lit by rays where the program asked for Solari and the bridge and the GPU have it.
+        if (Render.RayTracingActive) Render.SetRayTracedLighting(camera, true);
         ctx.Ecs.Add(camera, Transform.LookingAt(eye, Vec3.Zero, Vec3.UnitY));
 
         // Steerable from the mouse and keyboard, starting from the direction set above.
@@ -175,7 +178,8 @@ public partial struct Scene
             Kind = LightKind.Directional,
             Intensity = 12_000f,
             Color = (1f, 0.95f, 0.85f),
-            Shadows = shadows,
+            // Solari traces the shadows itself, so the sun casts none of its own where it runs.
+            Shadows = shadows && !Render.RayTracingActive,
         });
         ecs.Add(_sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
         ecs.SetName(_sun, "Sun");
