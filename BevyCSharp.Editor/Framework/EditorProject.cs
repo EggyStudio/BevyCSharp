@@ -61,6 +61,7 @@ public static class EditorProject
             var loaded = EditorScene.Load(world, EditorPaths.Scene);
             RestoreLayout();
 
+            if (loaded.Problem is { } problem) Console.WriteLine($"[editor] The scene being edited is left as it was. {problem}");
             Console.WriteLine($"[editor] loaded {loaded.Entities.Count} entities");
             foreach (var type in loaded.Unknown) Console.WriteLine($"[editor] kept {type} as written, since this build has no schema for it");
             foreach (var reason in loaded.Refused) Console.WriteLine($"[editor] Bevy refused {reason}");

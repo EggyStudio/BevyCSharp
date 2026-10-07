@@ -194,14 +194,9 @@ public sealed unsafe partial class App : IDisposable
         // What the project says about itself, whose fixed step stands where the config left it
         // to Bevy. A project file that does not read is a broken install, which is said once and
         // run without rather than refused, since every setting in it has a default.
-        try
-        {
-            Project = ProjectSettings.Read();
-        }
-        catch (InvalidDataException error)
-        {
-            EngineLog.Error(this, "project", $"[BevyCSharp] {ProjectSettings.FileName} was not read: {error.Message}", error);
-        }
+        Project = ProjectSettings.Read();
+        if (Project.Problem is { } problem)
+            EngineLog.Error(this, "project", $"[BevyCSharp] {ProjectSettings.FileName} was not read, so every setting is at its default. {problem}");
 
         var fixedHz = Config.FixedHz > 0 ? Config.FixedHz : Project.FixedHz;
 
@@ -263,6 +258,7 @@ public sealed unsafe partial class App : IDisposable
         Render.Wireframes = Config.Wireframes;
         MaterialFiles.Forget();
         MeshFiles.Forget();
+        AssetServer.ForgetFailed();
         Bevy.Physics.Colliders.Forget();
 
         // A game in progress is one app's, and its entities would name others in the next.
@@ -280,26 +276,30 @@ public sealed unsafe partial class App : IDisposable
     }
 
     /// <summary>
-    /// The pack <see cref="Config.AssetPack"/> names, or the one beside the executable, or nothing.
+    /// The pack <see cref="Config.AssetPack"/> names, or the one beside the executable, or nothing
+    /// where there is none or it does not open, the second said as an error.
     /// </summary>
-    /// <exception cref="InvalidDataException">The pack named cannot be read as one.</exception>
-    /// <exception cref="FileNotFoundException">The pack named is not there.</exception>
-    private static AssetPack? OpenPack(Config config)
+    /// <remarks>
+    /// A pack missing, cut short by a copy that stopped or not a pack at all is a broken install,
+    /// said once and run without, as a project file that does not read is, since N 2.6 of NORM.md
+    /// has a bad file answered rather than thrown. A game whose scenes were in it starts into
+    /// nothing with each load saying the file it missed, which the error ahead of them explains.
+    /// </remarks>
+    private AssetPack? OpenPack(Config config)
     {
         if (config.AssetPack is { Length: 0 }) return null;
 
-        if (config.AssetPack is { } named)
-        {
-            var full = Path.GetFullPath(named);
-            if (!File.Exists(full)) throw new FileNotFoundException($"No asset pack at {full}.", full);
+        // Beside the executable where none is named, which is where an export puts it. One there
+        // that does not open is as much a broken install as one named outright.
+        var path = config.AssetPack is { } named
+            ? Path.GetFullPath(named)
+            : Path.Combine(AppContext.BaseDirectory, AssetPack.DefaultName);
+        if (config.AssetPack is null && !File.Exists(path)) return null;
 
-            return AssetPack.Open(full);
-        }
+        if (AssetPack.TryOpen(path, out var pack, out var problem)) return pack;
 
-        // Beside the executable, which is where an export puts it. One there that does not open is
-        // as much a broken install as one named outright, so it fails the same way.
-        var beside = Path.Combine(AppContext.BaseDirectory, AssetPack.DefaultName);
-        return File.Exists(beside) ? AssetPack.Open(beside) : null;
+        EngineLog.Error(this, "assets", $"[BevyCSharp] The game's assets are read without their pack. {problem}");
+        return null;
     }
 
     /// <summary>Explains, as specifically as possible, why the engine would not start.</summary>
@@ -522,6 +522,9 @@ public sealed unsafe partial class App : IDisposable
     /// </remarks>
     private static void PostAssetFailures(MessageBus bus)
     {
+        // The files this side reads, mesh and material files and data assets, first.
+        while (AssetServer.TakeFailed(out var failure)) bus.Send(failure);
+
         var count = Native.bcs_asset_failures_drain();
         if (count <= 0) return;
 

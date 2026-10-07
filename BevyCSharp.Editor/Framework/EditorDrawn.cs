@@ -538,6 +538,10 @@ internal static class EditorDrawn
     /// <summary>Points the entity at a mesh or a material, as one step to undo.</summary>
     private static void Give(EcsWorld world, Entity entity, string title, AssetHandle handle)
     {
+        // A file that does not read gives none, which its load said on the log, and is no step to
+        // undo.
+        if (!handle.IsValid) return;
+
         var mesh = title == "Mesh";
         var was = mesh ? Render.MeshOf(world, entity) : Render.MaterialOf(world, entity);
 

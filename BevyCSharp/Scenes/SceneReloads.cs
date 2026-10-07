@@ -89,14 +89,9 @@ internal static class SceneReloads
         data.Originals.Clear();
         data.Tagged = false;
 
-        try
-        {
-            SceneFile.Load(world, data.Path, root);
-        }
-        catch (Exception error) when (error is IOException or JsonException or InvalidDataException)
-        {
-            EngineLog.Error(null, "scene", $"[scene] {data.Path} could not be spawned again. {error.Message}", error);
-        }
+        // A file saved half way through is said on the log by the load, and the instance holds
+        // nothing until it is saved whole and read again.
+        SceneFile.Load(world, data.Path, root);
 
         SceneInstances.Apply(world, root);
 

@@ -62,6 +62,7 @@ public partial struct PlayerBoot
         // What did not come back is said by name, since a component a script stopped declaring is
         // the usual reason a played scene looks different from the edited one.
         var load = SceneFile.Load(ctx.Ecs, Scene);
+        if (load.Problem is { } problem) Console.WriteLine($"[player] {problem}");
         Console.WriteLine($"[player] playing {Path.GetFileName(Scene)}, {load.Entities.Count} entities");
 
         foreach (var unknown in load.Unknown) Console.WriteLine($"[player] no type this run knows is called {unknown}");

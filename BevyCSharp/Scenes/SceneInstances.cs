@@ -136,6 +136,15 @@ public static partial class SceneInstances
             world.Add(root, SceneInstance.Of(data));
             SceneFile.Load(world, path, root);
         }
+        catch (InvalidDataException)
+        {
+            // A scene placed inside itself further down, which the outermost read answers, and
+            // this placing goes with the rest of what that read spawned. A placing a game asks for
+            // never comes here, since the read under it is the outermost and answers, leaving the
+            // instance holding nothing, as one whose file is missing does.
+            world.Despawn(root);
+            throw;
+        }
         finally
         {
             Loading.Remove(full);

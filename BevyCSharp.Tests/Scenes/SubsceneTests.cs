@@ -16,17 +16,15 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class SubsceneTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-subscene-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-subscene-");
 
-    public SubsceneTests() => Directory.CreateDirectory(_root);
-
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     [Fact]
     public void ASubsceneIsReadUnderItsRootAndItsOverridesAppliedAtOnce()
     {
-        var room = Path.Combine(_root, "room.scene.json");
-        var level = Path.Combine(_root, "level.scene.json");
+        var room = _folder.File("room.scene.json");
+        var level = _folder.File("level.scene.json");
 
         using (var making = new EngineHarness(frames: 2))
         {
@@ -100,13 +98,13 @@ public sealed class SubsceneTests : IDisposable
     [Fact]
     public void ASceneThatWouldContainItselfIsRefused()
     {
-        var loop = Path.Combine(_root, "loop.scene.json");
+        var loop = _folder.File("loop.scene.json");
         File.WriteAllText(loop, $$"""
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Again", "instance": { "path": {{JsonSerializer.Serialize(loop)}} } } ] }
             """);
 
-        var room = Path.Combine(_root, "room.scene.json");
+        var room = _folder.File("room.scene.json");
         File.WriteAllText(room, """
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Chair", "components": { "Bevy.Transform": { "Translation": [0, 0, 0] } } } ] }
@@ -116,7 +114,17 @@ public sealed class SubsceneTests : IDisposable
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            Assert.Throws<InvalidDataException>(() => SceneFile.Load(ctx.Ecs, loop));
+            // Answered by the outermost read, with nothing of it left, the instances it placed
+            // before it found itself taken back with it.
+            var loaded = SceneFile.Load(ctx.Ecs, loop);
+            Assert.Empty(loaded.Entities);
+            Assert.Contains("contains an instance of itself", loaded.Problem);
+            Assert.DoesNotContain(ctx.Ecs.All(), entity => ctx.Ecs.NameOf(entity) == "Again");
+
+            // Placed by the game, the instance is left holding nothing, as one whose file is
+            // missing.
+            var placed = SceneInstances.Spawn(ctx.Ecs, loop);
+            Assert.Empty(ctx.Ecs.ChildrenOf(placed));
 
             // A room placed in the world cannot be saved as the room, which would place itself.
             SceneInstances.Spawn(ctx.Ecs, room);
@@ -129,14 +137,14 @@ public sealed class SubsceneTests : IDisposable
     [SkippableFact]
     public void AnOverrideReachesIntoAModelNestedInASubscene()
     {
-        var dock = Path.Combine(_root, "dock.scene.json");
+        var dock = _folder.File("dock.scene.json");
         File.WriteAllText(dock, """
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Ship", "instance": { "path": "models/rig.gltf" },
                               "components": { "Bevy.Transform": { "Translation": [0, 0, 0] } } } ] }
             """);
 
-        var harbor = Path.Combine(_root, "harbor.scene.json");
+        var harbor = _folder.File("harbor.scene.json");
         File.WriteAllText(harbor, $$"""
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Dock", "instance": { "path": {{JsonSerializer.Serialize(dock)}} },
@@ -174,12 +182,12 @@ public sealed class SubsceneTests : IDisposable
     [Fact]
     public void AChildAddedUnderANodeIsWrittenWithTheSceneAndPutBackUnderIt()
     {
-        var room = Path.Combine(_root, "room.scene.json");
+        var room = _folder.File("room.scene.json");
         File.WriteAllText(room, """
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Table", "components": { "Bevy.Transform": { "Translation": [1, 0, 0] } } } ] }
             """);
-        var level = Path.Combine(_root, "furnished.scene.json");
+        var level = _folder.File("furnished.scene.json");
 
         using (var placing = new EngineHarness(frames: 2))
         {

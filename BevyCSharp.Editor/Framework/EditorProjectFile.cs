@@ -50,14 +50,10 @@ internal static class EditorProjectFile
 
     private static ProjectSettings Read()
     {
-        try
-        {
-            return ProjectSettings.ReadFrom(EditorPaths.Assets);
-        }
-        catch (Exception error) when (error is InvalidDataException or IOException)
-        {
-            Console.WriteLine($"[editor] {ProjectSettings.FileName} was not read, so the project starts from defaults: {error.Message}");
-            return new ProjectSettings();
-        }
+        var read = ProjectSettings.ReadFrom(EditorPaths.Assets);
+        if (read.Problem is { } problem)
+            Console.WriteLine($"[editor] {ProjectSettings.FileName} was not read, so the project starts from defaults. {problem}");
+
+        return read;
     }
 }

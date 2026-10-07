@@ -124,17 +124,31 @@ public static class EditorAssets
     /// The mesh a path names: a mesh file read on this side, a part of a model by its label, or a
     /// model's first mesh.
     /// </summary>
-    internal static AssetHandle LoadMesh(string path) =>
-        MeshFiles.IsMeshFile(path) ? MeshFiles.Load(path) : Held(AssetKind.Mesh, Labeled(path, "Mesh0/Primitive0"));
+    /// <remarks>
+    /// A mesh file is read through <see cref="MeshFiles.TryLoad"/>, which says nothing on the log,
+    /// since a panel showing a file asks every frame, and one that does not read throws for the
+    /// panel to show why in its place.
+    /// </remarks>
+    /// <exception cref="InvalidDataException">The mesh file does not read.</exception>
+    internal static AssetHandle LoadMesh(string path)
+    {
+        if (!MeshFiles.IsMeshFile(path)) return Held(AssetKind.Mesh, Labeled(path, "Mesh0/Primitive0"));
+
+        return MeshFiles.TryLoad(path, out var mesh, out var problem) ? mesh : throw new InvalidDataException(problem);
+    }
 
     /// <summary>
     /// The material a path names: a material file read on this side, a part of a model by its
     /// label, or a model's first material.
     /// </summary>
-    internal static AssetHandle LoadMaterial(string path) =>
-        MaterialFiles.IsMaterialFile(path)
-            ? MaterialFiles.Load(path)
-            : Held(AssetKind.StandardMaterial, Labeled(path, "Material0/std"));
+    /// <remarks>Read as <see cref="LoadMesh"/> reads a mesh file.</remarks>
+    /// <exception cref="InvalidDataException">The material file does not read.</exception>
+    internal static AssetHandle LoadMaterial(string path)
+    {
+        if (!MaterialFiles.IsMaterialFile(path)) return Held(AssetKind.StandardMaterial, Labeled(path, "Material0/std"));
+
+        return MaterialFiles.TryLoad(path, out var material, out var problem) ? material : throw new InvalidDataException(problem);
+    }
 
     private static string Labeled(string path, string first) => path.Contains('#', StringComparison.Ordinal) ? path : path + "#" + first;
 

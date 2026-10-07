@@ -319,6 +319,7 @@ sealed class Bevy.AssetPack : IDisposable
   bool Contains(string path)
   const string DefaultName = "assets.pack"
   static AssetPack Open(string path)
+  static bool TryOpen(string path, out AssetPack? pack, out string? problem)
   static int Write(string folder, string pack, Func<string, bool>? include = null)
   string Path { get; }
   void Dispose()
@@ -1117,6 +1118,7 @@ static class Bevy.DataAssets
   static IReadOnlyList<string> Files(string? type = null)
   static IReadOnlyList<string> Types { get; }
   static T? Get<T>(DataRef<T?> reference)
+  static bool TryGet<T>(DataRef<T> reference, out T value, out string? problem)
   static bool TryGet<T>(DataRef<T?> reference, out T? value)
   static bool Watching { get; set; }
   static int SaveChanged()
@@ -3398,6 +3400,7 @@ static class Bevy.MaterialFiles
   static AssetHandle Load(string path)
   static bool IsMaterialFile(string path)
   static bool Save(AssetHandle material)
+  static bool TryLoad(string path, out AssetHandle material, out string? problem)
   static string? PathOf(AssetHandle material)
   static void SaveAs(AssetHandle material, string path)
 sealed class Bevy.MaterialSettings
@@ -3477,6 +3480,7 @@ static class Bevy.MeshFiles
   static AssetHandle Load(string path)
   static bool IsMeshFile(string path)
   static bool Save(AssetHandle mesh)
+  static bool TryLoad(string path, out AssetHandle mesh, out string? problem)
   static string? PathOf(AssetHandle mesh)
   static void SaveAs(AssetHandle mesh, string path)
 enum Bevy.MeshFlags : uint
@@ -4106,6 +4110,7 @@ sealed class Bevy.ProjectSettings
   static ProjectSettings ReadFrom(string assets)
   string? ExportAssets { get; set; }
   string? ExportTarget { get; set; }
+  string? Problem { get; }
   string? StartupScene { get; set; }
   string? Theme { get; set; }
   void Write(string path)
@@ -9504,14 +9509,15 @@ sealed class Bevy.SceneLoad : IEquatable<SceneLoad>
   IReadOnlyList<Entity> Entities { get; init; }
   IReadOnlyList<string> Refused { get; init; }
   IReadOnlyList<string> Unknown { get; init; }
-  SceneLoad(IReadOnlyList<Entity> Entities, IReadOnlyList<string> Unknown, IReadOnlyList<string> Refused)
+  SceneLoad(IReadOnlyList<Entity> Entities, IReadOnlyList<string> Unknown, IReadOnlyList<string> Refused, string? Problem = null)
   bool Equals(SceneLoad? other)
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   static bool op_Equality(SceneLoad? left, SceneLoad? right)
   static bool op_Inequality(SceneLoad? left, SceneLoad? right)
-  void Deconstruct(out IReadOnlyList<Entity> Entities, out IReadOnlyList<string> Unknown, out IReadOnlyList<string> Refused)
+  string? Problem { get; init; }
+  void Deconstruct(out IReadOnlyList<Entity> Entities, out IReadOnlyList<string> Unknown, out IReadOnlyList<string> Refused, out string? Problem)
 class Bevy.SceneReferences
   SceneReferences()
   bool GiveIds { get; init; }

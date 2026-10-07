@@ -94,6 +94,7 @@ public partial struct EditorBoot
         if (File.Exists(EditorPaths.Scene))
         {
             var loaded = SceneFile.Load(ctx.Ecs, EditorPaths.Scene);
+            if (loaded.Problem is { } problem) Console.WriteLine($"[editor] {problem}");
             Console.WriteLine($"[editor] opened {loaded.Entities.Count} entities from {EditorPaths.Scene}");
             foreach (var reason in loaded.Refused) Console.WriteLine($"[editor] Bevy refused {reason}");
             return camera;

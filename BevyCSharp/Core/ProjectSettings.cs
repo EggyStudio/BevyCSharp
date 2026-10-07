@@ -44,18 +44,53 @@ public sealed class ProjectSettings
     /// <summary>The editor's theme as its lines of text, when it was asked to ship with the project.</summary>
     public string? Theme { get; set; }
 
-    /// <summary>The settings in the assets an app reads, or every one at its default when there is no file.</summary>
-    /// <exception cref="InvalidDataException">The file is there and is not a project file.</exception>
-    public static ProjectSettings Read() =>
-        AssetFiles.Exists(FileName) ? Parse(AssetFiles.ReadAllText(FileName), FileName) : new ProjectSettings();
+    /// <summary>
+    /// Why the file was not read, naming it, with every setting at its default, or nothing for a
+    /// file that was read or no file at all.
+    /// </summary>
+    /// <remarks>
+    /// A project file that does not read is answered here rather than thrown, so a game whose file
+    /// was cut short starts with the defaults, as N 2.6 of NORM.md has it, and the app says it on
+    /// the log. <see cref="Parse(string)"/> throws, for a tool that asks.
+    /// </remarks>
+    public string? Problem { get; private init; }
 
-    /// <summary>The settings in a folder of assets on disk, for a tool reading them before any app exists.</summary>
+    /// <summary>
+    /// The settings in the assets an app reads, or every one at its default when there is no file
+    /// or it does not read, which <see cref="Problem"/> says.
+    /// </summary>
+    public static ProjectSettings Read() =>
+        AssetFiles.Exists(FileName) ? Answer(() => AssetFiles.ReadAllText(FileName), FileName) : new ProjectSettings();
+
+    /// <summary>
+    /// The settings in a folder of assets on disk, for a tool reading them before any app exists,
+    /// or every one at its default when there is no file or it does not read, which <see
+    /// cref="Problem"/> says.
+    /// </summary>
     /// <param name="assets">The folder.</param>
-    /// <exception cref="InvalidDataException">The file is there and is not a project file.</exception>
     public static ProjectSettings ReadFrom(string assets)
     {
         var path = Path.Combine(assets, FileName);
-        return File.Exists(path) ? Parse(File.ReadAllText(path), path) : new ProjectSettings();
+        return File.Exists(path) ? Answer(() => File.ReadAllText(path), path) : new ProjectSettings();
+    }
+
+    /// <summary>
+    /// The settings a file holds, or the defaults with why they are not, naming the file.
+    /// </summary>
+    private static ProjectSettings Answer(Func<string> read, string from)
+    {
+        try
+        {
+            return Parse(read(), from);
+        }
+        catch (InvalidDataException error)
+        {
+            return new ProjectSettings { Problem = error.Message };
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            return new ProjectSettings { Problem = $"{from} could not be read. {error.Message}" };
+        }
     }
 
     /// <summary>Reads settings from the text of a project file.</summary>

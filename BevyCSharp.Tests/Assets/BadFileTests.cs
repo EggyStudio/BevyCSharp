@@ -7,18 +7,21 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// Every loader given a file that is missing, empty, cut short or random bytes, answering with a
-/// message that names the file and with nothing else, as N 2.6 of NORM.md has it. A loader added
-/// later is a row here.
+/// message that names the file and no exception, as N 2.6 of NORM.md has it. A loader added later
+/// is a row here.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A loader on this side answers a bad file with the exception it documents, a missing file or
-/// data that is not what it should be, and its message names the file. One whose file is a
-/// player's own, a persistent value, falls back to its default and says why in
-/// <see cref="Persistent{T}.Problem"/>. A load through Bevy's asset server fails, which its state
-/// says, and <see cref="AssetLoadFailed"/> names the file. Any other exception, a load that never
-/// ends, or a message that leaves the file out fails the row, and a panic in the bridge would end
-/// the run.
+/// Each row judges the form a game reaches first. A scene or a save is answered in the
+/// <see cref="SceneLoad"/> it returns, with nothing spawned and the game in progress left as it
+/// was. A mesh or material file gives no handle and says why as <see cref="AssetLoadFailed"/>, and
+/// its <c>TryLoad</c> says why as it returns. A data asset read through its reference is its
+/// type's defaults with the same message, and its <c>TryGet</c> says why. Project settings and a
+/// player's persistent value are their defaults with the reason in <c>Problem</c>, and a pack's
+/// <see cref="AssetPack.TryOpen"/> says why as it returns. A load through Bevy's asset server
+/// fails, which its state says, and <see cref="AssetLoadFailed"/> names the file. Any exception,
+/// a load that never ends, or a message that leaves the file out fails the row, and a panic in the
+/// bridge would end the run.
 /// </para>
 /// <para>
 /// The file cut short is the first third of a good one, which the test makes or copies, and the
@@ -89,26 +92,37 @@ public sealed class BadFileTests : IDisposable
     }
 
     /// <summary>
-    /// What is wrong with how a loader answered a bad file, or nothing, which is an exception of a
-    /// type it documents whose message names the file, or none where it read the file as what it is.
+    /// What is wrong with how a loader answered a bad file, or nothing, which is no exception and a
+    /// problem naming the file, or no problem where it read the file as what it is.
     /// </summary>
-    private static string? Judge(string kind, string named, Action load, bool refuses = true)
+    /// <param name="load">
+    /// The load, answering with the problem it says, or nothing for none.
+    /// </param>
+    private static string? Judge(string kind, string named, Func<string?> load, bool refuses = true)
     {
         try
         {
-            load();
-            return refuses ? $"{kind}: answered as if the file were good" : null;
-        }
-        catch (Exception error) when (error is FileNotFoundException or InvalidDataException)
-        {
-            return error.Message.Contains(named, StringComparison.Ordinal)
-                ? null
-                : $"{kind}: '{error.Message}' does not name {named}";
+            return load() switch
+            {
+                null => refuses ? $"{kind}: answered as if the file were good" : null,
+                var problem when problem.Contains(named, StringComparison.Ordinal) => null,
+                var problem => $"{kind}: '{problem}' does not name {named}",
+            };
         }
         catch (Exception error)
         {
             return $"{kind}: {error.GetType().Name}, {error.Message}";
         }
+    }
+
+    /// <summary>
+    /// What a load answering with a handle said of a bad file, as the <see cref="AssetLoadFailed"/>
+    /// it posts, or nothing where it gave a handle.
+    /// </summary>
+    private static string? Said(AssetHandle handle)
+    {
+        var said = AssetServer.TakeFailed(out var failed) ? failed.Reason : "gave no handle and said nothing";
+        return handle.IsValid ? null : said;
     }
 
     [SkippableTheory]
@@ -121,23 +135,36 @@ public sealed class BadFileTests : IDisposable
             {
                 ctx.Ecs.Add(ctx.Ecs.Spawn(), Transform.At(1f, 2f, 3f));
                 SceneFile.Save(ctx.Ecs, _folder.File("good.scene.json"));
-                return Each(".scene.json", File.ReadAllBytes(_folder.File("good.scene.json")), path => SceneFile.Load(ctx.Ecs, path));
+                return Each(".scene.json", File.ReadAllBytes(_folder.File("good.scene.json")), path => Unread(SceneFile.Load(ctx.Ecs, path)));
             }),
             "save" => InSystem(ctx =>
             {
-                ctx.Ecs.Add(ctx.Ecs.Spawn(), new SaveId());
+                var playing = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(playing, new SaveId());
                 SaveGame.Save(ctx.Ecs, _folder.File("good.save.json"));
-                return Each(".save.json", File.ReadAllBytes(_folder.File("good.save.json")), path => SaveGame.Load(ctx.Ecs, path));
+                var wrong = Each(".save.json", File.ReadAllBytes(_folder.File("good.save.json")), path => Unread(SaveGame.Load(ctx.Ecs, path)));
+                if (!ctx.Ecs.IsAlive(playing)) wrong.Add("a bad save ended the game in progress");
+                return wrong;
             }),
-            "mesh file" => Rendered(() => InSystem(_ =>
+            "mesh file" => Rendered(() => InSystem(ctx =>
             {
                 MeshFiles.SaveAs(Render.CreateMesh(MeshShape.Cylinder, 0.1f, 2f), $"{Name}/good{MeshFiles.Extension}");
-                return Each(MeshFiles.Extension, File.ReadAllBytes(_folder.File($"good{MeshFiles.Extension}")), path => MeshFiles.Load($"{Name}/{Path.GetFileName(path)}"));
+                var good = File.ReadAllBytes(_folder.File($"good{MeshFiles.Extension}"));
+                return
+                [
+                    .. Each(MeshFiles.Extension, good, path => Said(MeshFiles.Load(Under(path)))),
+                    .. Each(MeshFiles.Extension, good, path => MeshFiles.TryLoad(Under(path), out _, out var problem) ? null : problem),
+                ];
             })),
-            "material file" => Rendered(() => InSystem(_ =>
+            "material file" => Rendered(() => InSystem(ctx =>
             {
                 MaterialFiles.SaveAs(Render.CreateMaterial(new MaterialSettings()), $"{Name}/good{MaterialFiles.Extension}");
-                return Each(MaterialFiles.Extension, File.ReadAllBytes(_folder.File($"good{MaterialFiles.Extension}")), path => MaterialFiles.Load($"{Name}/{Path.GetFileName(path)}"));
+                var good = File.ReadAllBytes(_folder.File($"good{MaterialFiles.Extension}"));
+                return
+                [
+                    .. Each(MaterialFiles.Extension, good, path => Said(MaterialFiles.Load(Under(path)))),
+                    .. Each(MaterialFiles.Extension, good, path => MaterialFiles.TryLoad(Under(path), out _, out var problem) ? null : problem),
+                ];
             })),
             "data asset" => DataAsset(),
             "project settings" => ProjectFiles(),
@@ -150,8 +177,19 @@ public sealed class BadFileTests : IDisposable
     }
 
     /// <summary>A loader run over each bad file of a kind, and what was wrong with its answers.</summary>
-    private List<string> Each(string extension, byte[] good, Action<string> load) =>
+    private List<string> Each(string extension, byte[] good, Func<string, string?> load) =>
         [.. BadFiles(extension, good).Select(bad => Judge(bad.Kind, Path.GetFileName(bad.Path), () => load(bad.Path))).OfType<string>()];
+
+    /// <summary>
+    /// A file's path under the asset root, as the mesh and material files take it.
+    /// </summary>
+    private string Under(string path) => $"{Name}/{Path.GetFileName(path)}";
+
+    /// <summary>
+    /// Why a scene or a save was not read, or a line saying it spawned along with the problem.
+    /// </summary>
+    private static string? Unread(SceneLoad load) =>
+        load.Problem is not null && load.Entities.Count > 0 ? $"spawned {load.Entities.Count} entities of a file it said was bad" : load.Problem;
 
     /// <summary>A load that needs a world, run in a system.</summary>
     private static List<string> InSystem(Func<BehaviorContext, List<string>> load)
@@ -188,7 +226,7 @@ public sealed class BadFileTests : IDisposable
             if (File.Exists(path)) File.Move(path, Path.Combine(folder, ProjectSettings.FileName));
 
             var named = Path.Combine(Path.GetFileName(folder), ProjectSettings.FileName);
-            if (Judge(kind, named, () => ProjectSettings.ReadFrom(folder), refuses: kind != "missing") is { } answer) wrong.Add(answer);
+            if (Judge(kind, named, () => ProjectSettings.ReadFrom(folder).Problem, refuses: kind != "missing") is { } answer) wrong.Add(answer);
         }
 
         return wrong;
@@ -196,12 +234,14 @@ public sealed class BadFileTests : IDisposable
 
     /// <summary>
     /// A data asset whose file is replaced by each bad one in turn, read through its reference, as a
-    /// component holding one reads it.
+    /// component holding one reads it, and through <c>TryGet</c>.
     /// </summary>
     private List<string> DataAsset()
     {
         var sword = DataAssets.Create<WeaponStats>($"{Name}/sword.data.json");
+        DataAssets.Save(sword, new WeaponStats { Damage = 55f });
         var good = File.ReadAllBytes(_folder.File("sword.data.json"));
+        while (AssetServer.TakeFailed(out _)) { }
 
         var wrong = new List<string>();
         foreach (var (kind, path) in BadFiles(".bytes", good))
@@ -212,8 +252,11 @@ public sealed class BadFileTests : IDisposable
 
             // A reference whose file is gone has its id alone to be named by.
             var named = kind == "missing" ? sword.Id.ToString("x16") : "sword.data.json";
-            if (Judge(kind, named, () => DataAssets.Get(sword)) is { } answer) wrong.Add(answer);
-            if (DataAssets.TryGet(sword, out _)) wrong.Add($"{kind}: TryGet read it");
+            if (Judge(kind, named, () => DataAssets.TryGet(sword, out _, out var problem) ? null : problem) is { } tried) wrong.Add(tried);
+
+            // The type's defaults, and the message said as a handle's load says it.
+            if (Judge(kind, named, () => sword.Value.Damage == new WeaponStats().Damage && AssetServer.TakeFailed(out var failed) ? failed.Reason : null) is { } read)
+                wrong.Add($"through the reference, {read}");
         }
 
         return wrong;
@@ -259,8 +302,28 @@ public sealed class BadFileTests : IDisposable
 
         return Each(".pak", File.ReadAllBytes(_folder.File(AssetPack.DefaultName)), path =>
         {
-            using var pack = AssetPack.Open(path);
+            if (!AssetPack.TryOpen(path, out var pack, out var problem)) return problem;
+
+            pack.Dispose();
+            return null;
         });
+    }
+
+    [Fact]
+    [ExpectsError("assets", "cut.pack")]
+    public void AnAppWhosePackDoesNotOpenRunsWithoutItAndSaysWhy()
+    {
+        // The pack's first bytes and nothing after, as a copy that stopped leaves one.
+        var pack = _folder.File("cut.pack");
+        File.WriteAllBytes(pack, "BCSPACK\0"u8.ToArray());
+
+        var frames = 0;
+        using var harness = new EngineHarness(frames: 2, pack: pack);
+        harness.On(Stage.Update, _ => frames++);
+        harness.Run();
+
+        Assert.True(frames > 0, "the app did not run");
+        Assert.False(AssetFiles.CarriesFiles, "the app reads from a pack that did not open");
     }
 
     [SkippableTheory]

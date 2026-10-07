@@ -13,15 +13,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class ProjectSettingsTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-project-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-project-");
 
-    public ProjectSettingsTests() => Directory.CreateDirectory(_root);
-
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     private string File(string text)
     {
-        var path = Path.Combine(_root, ProjectSettings.FileName);
+        var path = Path.Combine(_folder.Path, ProjectSettings.FileName);
         System.IO.File.WriteAllText(path, text);
         return path;
     }
@@ -29,7 +27,7 @@ public sealed class ProjectSettingsTests : IDisposable
     [Fact]
     public void SettingsWrittenAreReadBackAndDefaultsAreLeftOut()
     {
-        var path = Path.Combine(_root, ProjectSettings.FileName);
+        var path = Path.Combine(_folder.Path, ProjectSettings.FileName);
 
         new ProjectSettings
         {
@@ -40,7 +38,7 @@ public sealed class ProjectSettingsTests : IDisposable
             Theme = "name\tShipped",
         }.Write(path);
 
-        var read = ProjectSettings.ReadFrom(_root);
+        var read = ProjectSettings.ReadFrom(_folder.Path);
         Assert.Equal("levels/first.scene.json", read.StartupScene);
         Assert.Equal(30d, read.FixedHz);
         Assert.Equal("linux-x64", read.ExportTarget);
@@ -53,17 +51,23 @@ public sealed class ProjectSettingsTests : IDisposable
     }
 
     [Fact]
-    public void NoFileIsEveryDefaultAndAnotherFileIsRefused()
+    public void NoFileIsEveryDefaultAndAnotherFileIsTheDefaultsWithWhy()
     {
-        var none = ProjectSettings.ReadFrom(_root);
+        var none = ProjectSettings.ReadFrom(_folder.Path);
         Assert.Null(none.StartupScene);
         Assert.Equal(0d, none.FixedHz);
+        Assert.Null(none.Problem);
 
-        File("""{ "format": "bevycsharp.scene.1" }""");
-        Assert.Throws<InvalidDataException>(() => ProjectSettings.ReadFrom(_root));
+        File("""{ "format": "bevycsharp.scene.1", "fixedHz": 30 }""");
+        var other = ProjectSettings.ReadFrom(_folder.Path);
+        Assert.Equal(0d, other.FixedHz);
+        Assert.Contains(ProjectSettings.FileName, other.Problem);
 
         File("not json at all");
-        Assert.Throws<InvalidDataException>(() => ProjectSettings.ReadFrom(_root));
+        Assert.Contains(ProjectSettings.FileName, ProjectSettings.ReadFrom(_folder.Path).Problem);
+
+        // The text alone throws, for a tool that asks.
+        Assert.Throws<InvalidDataException>(() => ProjectSettings.Parse("not json at all"));
     }
 
     [Fact]
@@ -71,7 +75,7 @@ public sealed class ProjectSettingsTests : IDisposable
     {
         File("""{ "format": "bevycsharp.project.2", "startupScene": "intro.scene.json", "somethingNew": [1, 2] }""");
 
-        Assert.Equal("intro.scene.json", ProjectSettings.ReadFrom(_root).StartupScene);
+        Assert.Equal("intro.scene.json", ProjectSettings.ReadFrom(_folder.Path).StartupScene);
     }
 
     [Fact]
@@ -82,7 +86,7 @@ public sealed class ProjectSettingsTests : IDisposable
         var fixedDelta = 0f;
         string? startup = null;
 
-        using (var app = new App(new Config { Headless = true, HeadlessFrames = 3, AssetRoot = _root }))
+        using (var app = new App(new Config { Headless = true, HeadlessFrames = 3, AssetRoot = _folder.Path }))
         {
             startup = app.Project.StartupScene;
             app.AddSystem(Stage.Update, new SystemDescriptor(world => fixedDelta = world.Resource<Time>().FixedDelta, "Test.FixedDelta"));

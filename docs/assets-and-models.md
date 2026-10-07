@@ -15,9 +15,14 @@ AssetServer.Release(mesh);
 Loading is asynchronous, so `Load` returns as soon as the request is queued and the handle
 reports `Loading` until the file has been read. A file that is missing, empty or not what its name
 says reports `Failed`, and an `AssetLoadFailed` message names it, as does one cut short where what
-is left is not a shorter file of its kind. The files read on this side, scenes, saves, data assets
-and material and mesh files, answer the same files with a `FileNotFoundException` or an
-`InvalidDataException` whose message names the file.
+is left is not a shorter file of its kind. The files read on this side answer the same files with
+no exception and a message naming the file, so a game goes on past one a player or an artist
+broke. A scene or a save spawns nothing and says why in its `SceneLoad`'s `Problem`. A material or
+mesh file gives `AssetHandle.None` and posts the same `AssetLoadFailed`, and a data asset read
+through its `DataRef` is its type's defaults with the message posted once. Project settings say why
+in their `Problem`, and so does a `Persistent<T>`. Each that answers with a handle or a value has a
+`Try` form beside it that says why as it returns (`MeshFiles.TryLoad`, `DataAssets.TryGet`,
+`AssetPack.TryOpen`), and `DataAssets.Get` throws, for a game that asks.
 
 Paths resolve against `Config.AssetRoot`, and it is worth setting. Left unset, Bevy looks for an
 `assets` directory beside the running executable, which for a .NET app is whichever host launched
@@ -42,7 +47,9 @@ AssetPack.Write("assets", "bin/Export/linux-x64/assets.pack", file => !file.Ends
 ```
 
 An app reads `assets.pack` beside its executable, or the one `Config.AssetPack` names, after the
-folder and before the assembly, on both sides of the bridge.
+folder and before the assembly, on both sides of the bridge. A pack that is missing, cut short or
+not a pack is logged as an error naming it, and the app runs without it, each load of a file it
+held failing by name.
 
 Streaming is the other way to read. It reads parts of large files, a piece at a time, while the game
 runs, and texture and geometry streaming read their tiles and clusters with it.

@@ -56,13 +56,12 @@ public partial struct Armed
 [Collection("engine")]
 public sealed class DataAssetTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-data-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-data-");
     private readonly string _was = Streaming.AssetRoot;
 
     public DataAssetTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Streaming.AssetRoot = _folder.Path;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
     }
@@ -74,7 +73,7 @@ public sealed class DataAssetTests : IDisposable
         Streaming.AssetRoot = _was;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -83,7 +82,7 @@ public sealed class DataAssetTests : IDisposable
         var sword = DataAssets.Create<WeaponStats>("weapons/sword.data.json");
 
         Assert.True(sword.IsSet);
-        Assert.True(File.Exists(Path.Combine(_root, "weapons/sword.data.json.uid")));
+        Assert.True(File.Exists(_folder.File("weapons/sword.data.json.uid")));
         Assert.Equal(10f, sword.Value.Damage);
         Assert.Equal("Bevy.Tests.WeaponStats", DataAssets.TypeOf("weapons/sword.data.json"));
         Assert.Contains("Bevy.Tests.WeaponStats", DataAssets.Types);
@@ -155,9 +154,9 @@ public sealed class DataAssetTests : IDisposable
         Assert.Equal("kept/blade.data.json", AssetIds.PathOf(sword.Id));
 
         // And outside it, with the sidecar moved along, found again by reading the root.
-        Directory.CreateDirectory(Path.Combine(_root, "elsewhere"));
-        File.Move(Path.Combine(_root, "kept/blade.data.json"), Path.Combine(_root, "elsewhere/edge.data.json"));
-        File.Move(Path.Combine(_root, "kept/blade.data.json.uid"), Path.Combine(_root, "elsewhere/edge.data.json.uid"));
+        Directory.CreateDirectory(_folder.File("elsewhere"));
+        File.Move(_folder.File("kept/blade.data.json"), _folder.File("elsewhere/edge.data.json"));
+        File.Move(_folder.File("kept/blade.data.json.uid"), _folder.File("elsewhere/edge.data.json.uid"));
         DataAssets.ReloadAll();
         Assert.Equal(99f, sword.Value.Damage);
     }
@@ -168,8 +167,19 @@ public sealed class DataAssetTests : IDisposable
         var shade = DataAssets.Create<Shade>("shade.data.json");
         var wrong = new DataRef<WeaponStats>(shade.Id);
 
-        Assert.Throws<InvalidDataException>(() => wrong.Value);
-        Assert.False(DataAssets.TryGet(wrong, out _));
+        // Read through the reference, as a component's is, it is the type's defaults, and the
+        // problem is said once however often it is read.
+        while (AssetServer.TakeFailed(out _)) { }
+        Assert.Equal(10f, wrong.Value.Damage);
+        Assert.Same(wrong.Value, wrong.Value);
+        Assert.True(AssetServer.TakeFailed(out var failed));
+        Assert.Contains("shade.data.json", failed.Reason);
+        Assert.Equal(typeof(WeaponStats).FullName, failed.Kind);
+        Assert.False(AssetServer.TakeFailed(out _));
+
+        Assert.Throws<InvalidDataException>(() => DataAssets.Get(wrong));
+        Assert.False(DataAssets.TryGet(wrong, out _, out var problem));
+        Assert.Contains("shade.data.json", problem);
         Assert.False(DataAssets.TryGet(new DataRef<WeaponStats>(12345), out _));
     }
 
@@ -181,7 +191,7 @@ public sealed class DataAssetTests : IDisposable
         harness.OnContext(Stage.Startup, ctx =>
         {
             // The app sets the asset root as it starts, so it is pointed back here.
-            Streaming.AssetRoot = _root;
+            Streaming.AssetRoot = _folder.Path;
             AssetIds.Reindex();
 
             var sword = DataAssets.Create<WeaponStats>("sword.data.json");
@@ -236,7 +246,7 @@ public sealed class DataAssetTests : IDisposable
         Assert.Same(before, DataAssets.Get(sword));
 
         // Edited outside, as a text editor or a pull would.
-        var file = Path.Combine(_root, "watched.data.json");
+        var file = _folder.File("watched.data.json");
         File.WriteAllText(file, File.ReadAllText(file).Replace("\"Damage\": 10", "\"Damage\": 77"));
 
         var seen = 0f;

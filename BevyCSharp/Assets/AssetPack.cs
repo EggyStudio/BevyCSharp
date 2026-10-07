@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
@@ -55,9 +56,46 @@ public sealed class AssetPack : IDisposable
     /// <summary>The path of every file the pack holds, under the asset root, with forward slashes.</summary>
     public IReadOnlyCollection<string> Files => _files.Keys;
 
+    /// <summary>Opens a pack and reads its index, or says why it cannot, naming the file.</summary>
+    /// <param name="path">The pack.</param>
+    /// <param name="pack">The pack, open, or nothing.</param>
+    /// <param name="problem">Why it did not open, or nothing where it did.</param>
+    /// <returns>Whether it opened.</returns>
+    /// <remarks>
+    /// The form the app opens its pack with, so a pack that is missing, cut short or not a pack is
+    /// answered rather than thrown, as N 2.6 of NORM.md has it. No file is held open for one that
+    /// does not open.
+    /// </remarks>
+    public static bool TryOpen(string path, [NotNullWhen(true)] out AssetPack? pack, [NotNullWhen(false)] out string? problem)
+    {
+        try
+        {
+            pack = Open(path);
+            problem = null;
+            return true;
+        }
+        catch (Exception error) when (error is InvalidDataException or FileNotFoundException)
+        {
+            problem = error.Message;
+        }
+        catch (EndOfStreamException)
+        {
+            problem = $"{path} is cut short, since its index runs past its end.";
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            problem = $"{path} could not be opened. {error.Message}";
+        }
+
+        pack = null;
+        return false;
+    }
+
     /// <summary>Opens a pack and reads its index.</summary>
     /// <param name="path">The pack.</param>
+    /// <exception cref="FileNotFoundException">No file is there.</exception>
     /// <exception cref="InvalidDataException">The file is not a pack, or not one this build reads.</exception>
+    /// <exception cref="EndOfStreamException">The file ends inside its index.</exception>
     public static AssetPack Open(string path)
     {
         // The index through a stream of its own, since a stream made over the handle would close

@@ -10,26 +10,73 @@ public static partial class SceneFile
     /// <param name="world">The world to spawn into.</param>
     /// <param name="path">Where, as <see cref="Save"/> takes it.</param>
     /// <param name="parent">An entity to put the scene's top level under, or none.</param>
-    /// <exception cref="InvalidDataException">The file is not a scene in this format.</exception>
+    /// <returns>
+    /// What was spawned, or, for a file that is missing, empty, cut short or not a scene in this
+    /// format, nothing and why, naming the file (<see cref="SceneLoad.Problem"/>).
+    /// </returns>
     public static SceneLoad Load(EcsWorld world, string path, Entity parent = default)
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        using var document = AssetFiles.ReadJson(Resolve(path), "a scene");
-        if (!document.RootElement.TryGetProperty("format", out var format) || format.GetString() != Format)
-            throw new InvalidDataException($"{path} is not a scene in the {Format} format.");
-        return Read(world, document.RootElement, parent);
+        using var document = AssetFiles.TryReadJson(Resolve(path), "a scene", out var problem);
+        return document is null ? SceneLoad.Unread(problem!) : Read(world, document.RootElement, parent, path);
     }
 
     /// <summary>Spawns everything a scene document holds.</summary>
-    /// <exception cref="InvalidDataException">The document is not a scene in this format.</exception>
-    public static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default)
+    /// <returns>
+    /// What was spawned, or nothing and why for a document that is not a scene in this format
+    /// (<see cref="SceneLoad.Problem"/>).
+    /// </returns>
+    public static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default) => Read(world, scene, parent, "The document");
+
+    /// <summary>
+    /// Spawns everything a scene document holds, naming where it came from in a problem.
+    /// </summary>
+    private static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent, string from)
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        if (!scene.TryGetProperty("format", out var format) || format.GetString() != Format)
-            throw new InvalidDataException($"Not a scene in the {Format} format.");
+        if (scene.ValueKind != JsonValueKind.Object
+            || !scene.TryGetProperty("format", out var format)
+            || format.ValueKind != JsonValueKind.String
+            || format.GetString() != Format)
+            return SceneLoad.Unread($"{from} is not a scene in the {Format} format.");
 
+        var spawned = new List<Entity>();
+        Depth++;
+        try
+        {
+            return Spawn(world, scene, parent, spawned);
+        }
+        catch (InvalidDataException error)
+        {
+            // A scene placed inside itself, directly or through another, is found as the placing
+            // that repeats it is read, and throws through every read it is nested in. Each takes
+            // back what it spawned and the outermost answers, so the whole scene is said to be the
+            // bad file it is rather than spawned in part.
+            foreach (var entity in spawned)
+                if (world.IsAlive(entity)) world.Despawn(entity);
+
+            if (Depth > 1) throw;
+            return SceneLoad.Unread(error.Message);
+        }
+        finally
+        {
+            Depth--;
+        }
+    }
+
+    /// <summary>
+    /// How many scene reads this thread is inside, the scenes placed in a scene each one more.
+    /// </summary>
+    [ThreadStatic]
+    private static int Depth;
+
+    /// <summary>
+    /// Spawns everything a scene document holds, adding each entity to a list as it is spawned.
+    /// </summary>
+    private static SceneLoad Spawn(EcsWorld world, JsonElement scene, Entity parent, List<Entity> spawned)
+    {
         var entries = scene.TryGetProperty("entities", out var listed) && listed.ValueKind == JsonValueKind.Array ? listed.EnumerateArray().ToArray() : [];
 
         // The meshes and materials made in memory, each made once and shared by what refers to it,
@@ -42,7 +89,6 @@ public static partial class SceneFile
             foreach (var handle in made.Values) AssetServer.ReleaseWhenUnused(handle);
         }
         var references = new SceneReferences();
-        var spawned = new List<Entity>(entries.Length);
         var byId = new Dictionary<int, Entity>();
 
         // Every entity first, so a component referring to one listed later finds it.

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Bevy.Interop;
 
 namespace Bevy;
@@ -278,6 +279,36 @@ public static unsafe class AssetServer
         }
         while (taken == Batch);
     }
+
+    /// <summary>
+    /// The files read on this side that failed since the last frame, for the bus.
+    /// </summary>
+    private static readonly ConcurrentQueue<AssetLoadFailed> FailedHere = new();
+
+    /// <summary>
+    /// Says that a file read on this side failed, on the log at once and as
+    /// <see cref="AssetLoadFailed"/> the next frame, as the bridge says one Bevy read did.
+    /// </summary>
+    /// <param name="path">The file, as the loader was given it.</param>
+    /// <param name="reason">Why, naming the file.</param>
+    /// <param name="kind">What it was to be, named as <see cref="AssetKind"/> names it.</param>
+    /// <remarks>
+    /// A warning rather than an error, since the loader answers with nothing or a default and the
+    /// game goes on, where Bevy's own failures are its errors.
+    /// </remarks>
+    internal static void Failed(string path, string reason, string kind)
+    {
+        Log.Warn(reason);
+        FailedHere.Enqueue(new AssetLoadFailed(path, reason, kind));
+    }
+
+    /// <summary>Takes the next failure said by <see cref="Failed"/>, for the app to post.</summary>
+    internal static bool TakeFailed(out AssetLoadFailed failure) => FailedHere.TryDequeue(out failure);
+
+    /// <summary>
+    /// Forgets the failures not yet posted, for an app starting, which did not ask for them.
+    /// </summary>
+    internal static void ForgetFailed() => FailedHere.Clear();
 
     /// <summary>
     /// How many handles the engine is holding on C#'s behalf.

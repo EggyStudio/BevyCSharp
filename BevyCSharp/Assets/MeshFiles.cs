@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Bevy;
@@ -30,14 +31,22 @@ public static class MeshFiles
     private static readonly object Gate = new();
     private static readonly Dictionary<string, AssetHandle> ByPath = new(StringComparer.Ordinal);
     private static readonly Dictionary<AssetHandle, string> PathByHandle = [];
+    private static readonly HashSet<string> Refused = new(StringComparer.Ordinal);
 
     /// <summary>Whether a path names a mesh file.</summary>
     public static bool IsMeshFile(string path) => path.EndsWith(Extension, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>The mesh a file holds, loaded the first time it is asked for and shared from then on.</summary>
     /// <param name="path">The file, relative to the asset root, with forward slashes.</param>
-    /// <exception cref="FileNotFoundException">No file is there.</exception>
-    /// <exception cref="InvalidDataException">The file is not a mesh in this format.</exception>
+    /// <returns>
+    /// The mesh, or <see cref="AssetHandle.None"/> for a file that is missing or is not a mesh in
+    /// this format, which is said on the log and as <see cref="AssetLoadFailed"/>, naming the file.
+    /// </returns>
+    /// <remarks>
+    /// A file that failed is remembered until the next app, so a scene drawing many entities with
+    /// it says so once rather than once an entity. <see cref="TryLoad"/> reads the file again each
+    /// time it is asked, and says nothing but what it returns.
+    /// </remarks>
     public static AssetHandle Load(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -46,23 +55,70 @@ public static class MeshFiles
         lock (Gate)
         {
             if (ByPath.TryGetValue(path, out var known)) return known;
+            if (Refused.Contains(path)) return AssetHandle.None;
+        }
+
+        if (TryLoad(path, out var mesh, out var problem)) return mesh;
+
+        lock (Gate) Refused.Add(path);
+        AssetServer.Failed(path, problem, AssetKind.Mesh);
+        return AssetHandle.None;
+    }
+
+    /// <summary>The mesh a file holds, or why it holds none, naming the file.</summary>
+    /// <param name="path">The file, relative to the asset root, with forward slashes.</param>
+    /// <param name="mesh">The mesh, shared as <see cref="Load"/> shares it, or none.</param>
+    /// <param name="problem">Why the file gave no mesh, or nothing where it gave one.</param>
+    /// <returns>Whether the file gave a mesh.</returns>
+    public static bool TryLoad(string path, out AssetHandle mesh, [NotNullWhen(false)] out string? problem)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        path = path.Replace('\\', '/');
+        problem = null;
+
+        lock (Gate)
+        {
+            if (ByPath.TryGetValue(path, out mesh)) return true;
         }
 
         var full = Path.Combine(AssetIds.Root, path);
-        if (!AssetFiles.Exists(full)) throw new FileNotFoundException($"No mesh file at {path}.", full);
+        if (!AssetFiles.Exists(full))
+        {
+            problem = $"No mesh file at {path}.";
+            return false;
+        }
 
-        using var document = AssetFiles.ReadJson(full, "a mesh file");
+        using var document = AssetFiles.TryReadJson(full, "a mesh file", out var unread);
+        if (document is null)
+        {
+            problem = unread!;
+            return false;
+        }
+
         var root = document.RootElement;
-        if (!root.TryGetProperty("format", out var format) || format.GetString() != Format)
-            throw new InvalidDataException($"{path} is not a mesh in the {Format} format.");
+        if (!root.TryGetProperty("format", out var format) || format.ValueKind != JsonValueKind.String || format.GetString() != Format)
+        {
+            problem = $"{path} is not a mesh in the {Format} format.";
+            return false;
+        }
 
-        AssetHandle mesh;
-        if (root.TryGetProperty("mesh", out var shape) && MeshJson.ReadRecipe(shape) is { } recipe)
-            mesh = Render.CreateMesh(recipe.Shape, recipe.A, recipe.B, recipe.C);
-        else if (root.TryGetProperty("geometry", out var geometry) && MeshJson.ReadGeometry(geometry) is { } data)
-            mesh = Render.CreateMesh(data);
-        else
-            throw new InvalidDataException($"{path} holds neither a shape nor geometry.");
+        try
+        {
+            if (root.TryGetProperty("mesh", out var shape) && MeshJson.ReadRecipe(shape) is { } recipe)
+                mesh = Render.CreateMesh(recipe.Shape, recipe.A, recipe.B, recipe.C);
+            else if (root.TryGetProperty("geometry", out var geometry) && MeshJson.ReadGeometry(geometry) is { } data)
+                mesh = Render.CreateMesh(data);
+            else
+                problem = $"{path} holds neither a shape nor geometry.";
+        }
+        catch (Exception error) when (error is ArgumentException or Interop.BevyNativeException)
+        {
+            // A shape this build does not know, or geometry Bevy refuses, such as an index past the
+            // last vertex, is a file that is not a mesh it can make.
+            problem = $"{path} holds a mesh that could not be made. {error.Message}";
+        }
+
+        if (problem is not null) return false;
 
         lock (Gate)
         {
@@ -70,7 +126,7 @@ public static class MeshFiles
             PathByHandle[mesh] = path;
         }
 
-        return mesh;
+        return true;
     }
 
     /// <summary>The file a mesh was loaded from or saved to, or nothing for one that has none.</summary>
@@ -157,6 +213,7 @@ public static class MeshFiles
         {
             ByPath.Clear();
             PathByHandle.Clear();
+            Refused.Clear();
         }
     }
 }

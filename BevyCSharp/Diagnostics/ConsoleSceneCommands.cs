@@ -28,6 +28,12 @@ internal static class ConsoleSceneCommands
         }
 
         var loaded = SceneFile.Load(ConsoleHost.Ecs, path);
+        if (loaded.Problem is { } problem)
+        {
+            ConsoleHost.Fail("BAD_FILE", problem);
+            return problem;
+        }
+
         var kept = loaded.Unknown.Count == 0
             ? string.Empty
             : $", keeping {string.Join(", ", loaded.Unknown)} as written, since this build has no schema for them";

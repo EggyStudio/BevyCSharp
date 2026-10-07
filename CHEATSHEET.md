@@ -519,6 +519,7 @@ The guide's page is [scenes-and-saves.md](https://github.com/EggyStudio/BevyCSha
 static void Register<T>(string name, Func<T> create, Func<DataBox<T>, IReadOnlyList<ComponentField>> fields, IReadOnlyList<string> formerNames = null, int version = 0, Func<int, JsonObject, JsonObject> migrate = null);  // Registers a data asset type
 static T Get<T>(DataRef<T> reference);                          // The value of the data asset a reference names, loaded once and shared
 static bool TryGet<T>(DataRef<T> reference, out T value);       // Reads the data asset a reference names, reporting whether there is one to read
+static bool TryGet<T>(DataRef<T> reference, out T value, out string problem);  // Reads the data asset a reference names, or says why there is none to read
 static DataRef<T> Create<T>(string path);                       // Writes a new data asset at its type's defaults, gives it an id, and returns a reference
 static ulong Create(string type, string path);                  // Makes a new data asset of a type named at runtime, for a menu offering every type
 static ulong Copy(ulong id, string path);                       // Writes a copy of a data asset to a new file with an id of its own, for the one thing that should differ from the rest sharing it
@@ -634,8 +635,8 @@ bool Read(JsonElement json);                                    // Replaces the 
 ### `ProjectSettings`
 
 ```csharp
-static ProjectSettings Read();                                  // The settings in the assets an app reads, or every one at its default when there is no file
-static ProjectSettings ReadFrom(string assets);                 // The settings in a folder of assets on disk, for a tool reading them before any app exists
+static ProjectSettings Read();                                  // The settings in the assets an app reads, or every one at its default when there is no file or it does not read, which Problem says
+static ProjectSettings ReadFrom(string assets);                 // The settings in a folder of assets on disk, for a tool reading them before any app exists, or every one at its default when there is no file or it does not read, which Problem says
 static ProjectSettings Parse(string text);                      // Reads settings from the text of a project file
 void Write(string path);                                        // Writes the settings to a project file, leaving out the ones at their default
 ```
@@ -694,6 +695,7 @@ static int IndexForShipping(string root);                       // Turns the sid
 ### `AssetPack`
 
 ```csharp
+static bool TryOpen(string path, out AssetPack pack, out string problem);  // Opens a pack and reads its index, or says why it cannot, naming the file
 static AssetPack Open(string path);                             // Opens a pack and reads its index
 bool Contains(string path);                                     // Whether the pack holds a file
 Stream OpenFile(string path);                                   // A file in the pack, opened for reading and seeking, or nothing when the pack lacks it
@@ -779,6 +781,7 @@ static AnimationTarget FromNames(ReadOnlySpan<string> names);   // The target at
 ```csharp
 static bool IsMeshFile(string path);                            // Whether a path names a mesh file
 static AssetHandle Load(string path);                           // The mesh a file holds, loaded the first time it is asked for and shared from then on
+static bool TryLoad(string path, out AssetHandle mesh, out string problem);  // The mesh a file holds, or why it holds none, naming the file
 static string PathOf(AssetHandle mesh);                         // The file a mesh was loaded from or saved to, or nothing for one that has none
 static void SaveAs(AssetHandle mesh, string path);              // Writes a mesh made in memory to a new file and makes the mesh that file's, so a scene refers to the file from then on
 static bool Save(AssetHandle mesh);                             // Writes a mesh loaded from a file back to that file, as it is now
@@ -789,6 +792,7 @@ static bool Save(AssetHandle mesh);                             // Writes a mesh
 ```csharp
 static bool IsMaterialFile(string path);                        // Whether a path names a material file
 static AssetHandle Load(string path);                           // The material a file holds, loaded the first time it is asked for and shared from then on
+static bool TryLoad(string path, out AssetHandle material, out string problem);  // The material a file holds, or why it holds none, naming the file
 static string PathOf(AssetHandle material);                     // The file a material was loaded from, or nothing for one made in memory
 static void SaveAs(AssetHandle material, string path);          // Writes a material's settings to a new file and makes the material that file's, so saving it again writes there and a scene refers to the file
 static bool Save(AssetHandle material);                         // Writes a material loaded from a file back to that file, as it is now

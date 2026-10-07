@@ -147,6 +147,33 @@ public static unsafe class AssetFiles
         throw new InvalidDataException($"{path} is not {holds}, since it holds no JSON object.");
     }
 
+    /// <summary>
+    /// A JSON file's document as <see cref="ReadJson"/> reads it, or nothing and why, naming the
+    /// file, for a loader that answers a bad file in what it returns.
+    /// </summary>
+    /// <remarks>
+    /// One that cannot be read at all, a folder in its place or one the user may not open, is said
+    /// with its path ahead of the system's reason, which may leave the path out.
+    /// </remarks>
+    internal static JsonDocument? TryReadJson(string path, string holds, out string? problem)
+    {
+        problem = null;
+        try
+        {
+            return ReadJson(path, holds);
+        }
+        catch (Exception error) when (error is FileNotFoundException or InvalidDataException)
+        {
+            problem = error.Message;
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            problem = $"{path} could not be read. {error.Message}";
+        }
+
+        return null;
+    }
+
     /// <summary>A file's bytes, from disk or from what the game carries.</summary>
     /// <param name="path">A full path, or one relative to the asset root.</param>
     /// <exception cref="FileNotFoundException">Neither has it.</exception>

@@ -227,21 +227,27 @@ public static class SaveGame
     /// </summary>
     /// <param name="world">The world to spawn into, with the game in progress in it or none.</param>
     /// <param name="path">Where the save is, as <see cref="Save"/> takes it.</param>
-    /// <returns>What loading the scenes and the save could not read.</returns>
-    /// <exception cref="InvalidDataException">The file is not a save in this format.</exception>
+    /// <returns>
+    /// What loading the scenes and the save could not read, or, for a file that is missing, empty,
+    /// cut short or not a save in this format, nothing and why, naming the file
+    /// (<see cref="SceneLoad.Problem"/>).
+    /// </returns>
     /// <remarks>
     /// The game in progress is ended only once the file has been read as a save, so a missing or
-    /// broken one leaves the game being played as it was. <see cref="SaveLoaded"/> is sent the frame
-    /// after, for what the game builds itself.
+    /// broken one leaves the game being played as it was, and is said on the log as well for a game
+    /// that does not look at what is returned. <see cref="SaveLoaded"/> is sent the frame after a
+    /// save is laid, for what the game builds itself.
     /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path = "user://saves/slot.save.json")
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        using var document = AssetFiles.ReadJson(SceneFile.Resolve(path), "a save");
+        using var document = AssetFiles.TryReadJson(SceneFile.Resolve(path), "a save", out var problem);
+        if (document is null) return SceneLoad.Unread(problem!);
+
         var root = document.RootElement;
-        if (!root.TryGetProperty("format", out var format) || format.GetString() != Format)
-            throw new InvalidDataException($"{path} is not a save in the {Format} format.");
+        if (!root.TryGetProperty("format", out var format) || format.ValueKind != JsonValueKind.String || format.GetString() != Format)
+            return SceneLoad.Unread($"{path} is not a save in the {Format} format.");
 
         End(world);
 

@@ -51,19 +51,28 @@ public static class EditorScene
     }
 
     /// <summary>Takes away the scene that is there and spawns the one in a file.</summary>
+    /// <remarks>
+    /// The file is spawned first and the scene that was there taken away after, so one that does
+    /// not read leaves the scene being edited as it was, with why in <see
+    /// cref="SceneLoad.Problem"/>.
+    /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path)
     {
         ArgumentNullException.ThrowIfNull(world);
 
+        var was = world.All().Where(entity => InScene(world, entity)).ToArray();
+        var loaded = SceneFile.Load(world, path);
+        if (loaded.Problem is not null) return loaded;
+
         // Children before their parents would be despawned with them, so only the top of each tree
         // is despawned, which takes what is under it along.
-        foreach (var entity in world.All().Where(entity => InScene(world, entity)).ToArray())
+        foreach (var entity in was)
         {
             if (world.IsAlive(entity) && !InScene(world, world.ParentOf(entity))) world.Despawn(entity);
         }
 
         EditorSelection.Clear();
-        return SceneFile.Load(world, path);
+        return loaded;
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Bevy;
@@ -182,6 +183,7 @@ public static class MaterialFiles
     private static readonly object Gate = new();
     private static readonly Dictionary<string, AssetHandle> ByPath = new(StringComparer.Ordinal);
     private static readonly Dictionary<AssetHandle, string> PathByHandle = [];
+    private static readonly HashSet<string> Refused = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, DateTime> Wrote = new(StringComparer.Ordinal);
     private static readonly ConcurrentQueue<string> Touched = new();
     private static FileSystemWatcher? _watcher;
@@ -194,8 +196,17 @@ public static class MaterialFiles
     /// The material a file holds, loaded the first time it is asked for and shared from then on.
     /// </summary>
     /// <param name="path">The file, relative to the asset root, with forward slashes.</param>
-    /// <exception cref="FileNotFoundException">No file is there.</exception>
-    /// <exception cref="InvalidDataException">The file is not a material in this format.</exception>
+    /// <returns>
+    /// The material, or <see cref="AssetHandle.None"/> for a file that is missing or is not a
+    /// material in this format, which is said on the log and as <see cref="AssetLoadFailed"/>,
+    /// naming the file.
+    /// </returns>
+    /// <remarks>
+    /// A file that failed is remembered until it changes on disk where files are watched, as the
+    /// editor watches them, or the next app starts, so a scene drawing many entities with it says
+    /// so once rather than once an entity. <see cref="TryLoad"/> reads the file again each time it
+    /// is asked, and says nothing but what it returns.
+    /// </remarks>
     public static AssetHandle Load(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -204,16 +215,62 @@ public static class MaterialFiles
         lock (Gate)
         {
             if (ByPath.TryGetValue(path, out var known)) return known;
+            if (Refused.Contains(path)) return AssetHandle.None;
         }
 
-        var material = Render.CreateMaterial(Read(path));
+        if (TryLoad(path, out var material, out var problem)) return material;
+
+        lock (Gate) Refused.Add(path);
+        AssetServer.Failed(path, problem, AssetKind.StandardMaterial);
+        return AssetHandle.None;
+    }
+
+    /// <summary>The material a file holds, or why it holds none, naming the file.</summary>
+    /// <param name="path">The file, relative to the asset root, with forward slashes.</param>
+    /// <param name="material">
+    /// The material, shared as <see cref="Load"/> shares it, or none.
+    /// </param>
+    /// <param name="problem">Why the file gave no material, or nothing where it gave one.</param>
+    /// <returns>Whether the file gave a material.</returns>
+    public static bool TryLoad(string path, out AssetHandle material, [NotNullWhen(false)] out string? problem)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        path = path.Replace('\\', '/');
+
+        lock (Gate)
+        {
+            if (ByPath.TryGetValue(path, out material))
+            {
+                problem = null;
+                return true;
+            }
+        }
+
+        try
+        {
+            material = Render.CreateMaterial(Read(path));
+        }
+        catch (Exception error) when (error is FileNotFoundException or InvalidDataException)
+        {
+            problem = error.Message;
+            return false;
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException or FormatException)
+        {
+            // Unreadable, or JSON of the wrong shape where a number or a list belongs, which throws
+            // as the value is read.
+            problem = $"{path} is not a material that reads. {error.Message}";
+            return false;
+        }
+
         lock (Gate)
         {
             ByPath[path] = material;
             PathByHandle[material] = path;
         }
 
-        return material;
+        problem = null;
+        return true;
     }
 
     /// <summary>The file a material was loaded from, or nothing for one made in memory.</summary>
@@ -289,6 +346,8 @@ public static class MaterialFiles
             AssetHandle material;
             lock (Gate)
             {
+                // One that failed is read again at its next load, which may find it mended.
+                if (Refused.Remove(relative)) continue;
                 if (!ByPath.TryGetValue(relative, out material)) continue;
                 if (Wrote.TryGetValue(full, out var ours) && ours == File.GetLastWriteTimeUtc(full)) continue;
             }
@@ -311,6 +370,7 @@ public static class MaterialFiles
         {
             ByPath.Clear();
             PathByHandle.Clear();
+            Refused.Clear();
         }
     }
 

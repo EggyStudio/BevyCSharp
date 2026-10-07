@@ -38,6 +38,8 @@ component cannot. Its file is JSON naming its type, and a `.uid` sidecar beside 
 `DataRef` holds that id, so renaming or moving the file keeps every reference to it. It is
 loaded once and shared, and the editor makes one (`Project/New data asset`), edits one when its
 file is selected in the asset browser, and offers the files of the right type to a `DataRef` field.
+A file that is missing or does not read is its type's defaults through `Value`, said once on the
+log and as an `AssetLoadFailed`, and `DataAssets.TryGet` says why where a game asks.
 
 ## Scene files
 
@@ -58,6 +60,10 @@ the scene refers to is written as its id and its path, and the editor gives ever
 in a `.uid` sidecar as it saves, so renaming a model in the asset browser, which carries the
 sidecar along, leaves the scene pointing at it.
 `scene.save` and `scene.load` do the same from the console and from `./bcs`.
+
+A file that is missing, cut short or not a scene spawns nothing, and `loaded.Problem` says why,
+naming it, as the log does for a game that does not look. So does one that places an instance of
+itself, directly or through another scene, which would never finish.
 
 ## Placing a model as an instance
 
@@ -110,7 +116,9 @@ despawned is written as deleted. `user://` is the platform's data directory unde
 one.
 
 A load ends the game in progress first, despawning what its scenes spawned and every entity with a
-`SaveId`, so a pause menu loads as a title screen does. What the game spawned for itself without
+`SaveId`, so a pause menu loads as a title screen does. It does so only once the file has read as a
+save, so a slot that is empty or was cut short leaves the game being played as it was, with why in
+the `Problem` of what `Load` returns. What the game spawned for itself without
 an id, its camera and its interface, is left for it, since only the game knows whether that still
 belongs. A load enters no state, so what a game builds on entering one is not built for what came
 back, and `SaveLoaded` is sent the frame after for the game to build it there, once:

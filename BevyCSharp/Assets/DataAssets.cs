@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -43,6 +44,12 @@ public static class DataAssets
     // a type that has since taken one of those names still wins.
     private static readonly Dictionary<string, Kind> Former = [];
     private static readonly Dictionary<ulong, Loaded> Cache = [];
+
+    /// <summary>
+    /// The defaults a reference whose file could not be read answers with, by its id and the type
+    /// it was read as, until the file is read again.
+    /// </summary>
+    private static readonly Dictionary<(ulong Id, Type Type), object> Fallbacks = [];
 
     /// <summary>
     /// Ids written or reloaded since the bus was last told, because a save can happen with no world
@@ -142,18 +149,67 @@ public static class DataAssets
     }
 
     /// <summary>Reads the data asset a reference names, reporting whether there is one to read.</summary>
-    public static bool TryGet<T>(DataRef<T> reference, out T value)
+    public static bool TryGet<T>(DataRef<T> reference, out T value) => TryGet(reference, out value, out _);
+
+    /// <summary>
+    /// Reads the data asset a reference names, or says why there is none to read.
+    /// </summary>
+    /// <param name="reference">The asset.</param>
+    /// <param name="value">
+    /// Its value, shared as <see cref="Get{T}"/> shares it, or the type's default.
+    /// </param>
+    /// <param name="problem">
+    /// Why it was not read, naming its file, or its id where no file has it, or nothing where it
+    /// was.
+    /// </param>
+    public static bool TryGet<T>(DataRef<T> reference, out T value, [NotNullWhen(false)] out string? problem)
     {
         try
         {
             value = Get(reference);
+            problem = null;
             return true;
         }
-        catch (Exception error) when (error is FileNotFoundException or InvalidDataException or ArgumentException)
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException)
         {
             value = default!;
+            problem = error.Message;
             return false;
         }
+    }
+
+    /// <summary>
+    /// The value of the data asset a reference names, or, where it cannot be read, its type's
+    /// defaults, with why said once on the log and as <see cref="AssetLoadFailed"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// What <see cref="DataRef{T}.Value"/> answers, so a component's reference to a file a player
+    /// or an artist broke reads as the type's defaults and the game goes on, as N 2.6 of NORM.md
+    /// has it. <see cref="Get{T}"/> stays the form that throws, for a game that asks.
+    /// </para>
+    /// <para>
+    /// The defaults are kept for the reference until its file is read again, by
+    /// <see cref="Reload"/> or the watcher, so a system reading it every frame is answered from
+    /// memory and the problem is said the once. A reference that names nothing is a mistake in the
+    /// code rather than a file, and throws as <see cref="Get{T}"/> does.
+    /// </para>
+    /// </remarks>
+    internal static T ValueOf<T>(DataRef<T> reference)
+    {
+        if (!reference.IsSet) throw new ArgumentException("The reference names no data asset.", nameof(reference));
+
+        lock (Gate)
+        {
+            if (Fallbacks.TryGetValue((reference.Id, typeof(T)), out var kept)) return ((DataBox<T>)kept).Value;
+        }
+
+        if (TryGet(reference, out var value, out var problem)) return value;
+
+        var box = KindOf(typeof(T)).Create();
+        lock (Gate) Fallbacks[(reference.Id, typeof(T))] = box;
+        AssetServer.Failed(reference.ToString(), problem, typeof(T).FullName ?? typeof(T).Name);
+        return ((DataBox<T>)box).Value;
     }
 
     /// <summary>
@@ -299,14 +355,23 @@ public static class DataAssets
     /// <summary>Forgets a loaded data asset, so the next read loads its file again.</summary>
     public static void Reload(ulong id)
     {
-        lock (Gate) Cache.Remove(id);
+        lock (Gate)
+        {
+            Cache.Remove(id);
+            foreach (var key in Fallbacks.Keys.Where(key => key.Id == id).ToArray()) Fallbacks.Remove(key);
+        }
+
         Changed.Enqueue(id);
     }
 
     /// <summary>Forgets every loaded data asset.</summary>
     public static void ReloadAll()
     {
-        lock (Gate) Cache.Clear();
+        lock (Gate)
+        {
+            Cache.Clear();
+            Fallbacks.Clear();
+        }
     }
 
     /// <summary>
@@ -527,8 +592,9 @@ public static class DataAssets
             var relative = Path.GetRelativePath(AssetIds.Root, full).Replace('\\', '/');
             if (AssetIds.IdOf(relative) is not (var id and not 0)) continue;
 
+            // One answered with its defaults is read again too, since the change may mend it.
             bool loaded;
-            lock (Gate) loaded = Cache.ContainsKey(id);
+            lock (Gate) loaded = Cache.ContainsKey(id) || Fallbacks.Keys.Any(key => key.Id == id);
             if (loaded) Reload(id);
         }
     }

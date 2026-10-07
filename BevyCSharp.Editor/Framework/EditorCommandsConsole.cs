@@ -317,6 +317,12 @@ internal static class EditorConsoleCommands
         }
 
         var loaded = EditorScene.Load(EditorShell.Ecs, path);
+        if (loaded.Problem is { } problem)
+        {
+            ConsoleHost.Fail("BAD_FILE", problem);
+            return problem;
+        }
+
         EditorPaths.Scene = SceneFile.Resolve(path);
         return $"loaded {loaded.Entities.Count} entities from {path}";
     }

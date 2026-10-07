@@ -115,8 +115,9 @@ public sealed class Config
     /// </para>
     /// <para>
     /// An empty string reads no pack, which a test or a tool reading only the folder sets. A pack
-    /// named here that cannot be opened stops the app from starting, since a game missing its
-    /// assets would start into a scene with nothing in it.
+    /// that cannot be opened, named here or beside the executable, is said as an error and the app
+    /// runs without it, as N 2.6 of NORM.md has a bad file answered rather than thrown, so each
+    /// load of a file it held fails naming the file.
     /// </para>
     /// </remarks>
     public string? AssetPack { get; set; }

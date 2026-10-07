@@ -14,16 +14,14 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class SceneFileTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-scene-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-scene-");
 
-    public SceneFileTests() => Directory.CreateDirectory(_root);
-
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     [Fact]
     public void ASceneSavedFromOneWorldIsTheSameSceneInAnother()
     {
-        var file = Path.Combine(_root, "level.scene.json");
+        var file = _folder.File("level.scene.json");
 
         using (var saving = new EngineHarness(frames: 2))
         {
@@ -87,7 +85,7 @@ public sealed class SceneFileTests : IDisposable
     [Fact]
     public void AnEntityKeepsItsIdAcrossSaves()
     {
-        var file = Path.Combine(_root, "ids.scene.json");
+        var file = _folder.File("ids.scene.json");
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -147,11 +145,10 @@ public sealed class SceneFileTests : IDisposable
             var odd = Assert.Single(loaded.Entities);
             Assert.Equal(new Vec3(4f, 5f, 6f), ctx.Ecs.GetRef<Transform>(odd).Translation);
 
-            Assert.Throws<InvalidDataException>(() =>
-            {
-                using var wrong = JsonDocument.Parse("""{ "format": "bevycsharp.world.1", "entities": [] }""");
-                SceneFile.Read(ctx.Ecs, wrong.RootElement);
-            });
+            using var wrong = JsonDocument.Parse("""{ "format": "bevycsharp.world.1", "entities": [{ "id": 1 }] }""");
+            var refused = SceneFile.Read(ctx.Ecs, wrong.RootElement);
+            Assert.Empty(refused.Entities);
+            Assert.Contains(SceneFile.Format, refused.Problem);
         });
 
         harness.Run();
@@ -163,7 +160,7 @@ public sealed class SceneFileTests : IDisposable
         Needs.Renderer();
 
         const string Light = "bevy_light::point_light::PointLight";
-        var file = Path.Combine(_root, "lit.scene.json");
+        var file = _folder.File("lit.scene.json");
         var ran = false;
 
         using (var saving = new EngineHarness(frames: 2))
@@ -212,7 +209,7 @@ public sealed class SceneFileTests : IDisposable
     {
         Needs.Renderer();
 
-        var file = Path.Combine(_root, "made.scene.json");
+        var file = _folder.File("made.scene.json");
         var ran = false;
 
         using (var saving = new EngineHarness(frames: 2))
@@ -273,7 +270,7 @@ public sealed class SceneFileTests : IDisposable
     {
         Needs.Renderer();
 
-        var file = Path.Combine(_root, "built.scene.json");
+        var file = _folder.File("built.scene.json");
         var ran = false;
 
         var quad = new MeshData

@@ -24,8 +24,16 @@ public readonly struct DataRef<T> : IDataRef, IEquatable<DataRef<T>>
     /// <summary>Whether it refers to anything.</summary>
     public bool IsSet => Id != 0;
 
-    /// <summary>The asset's value, loaded once and shared, as <see cref="DataAssets.Get{T}"/>.</summary>
-    public T Value => DataAssets.Get(this);
+    /// <summary>
+    /// The asset's value, loaded once and shared, or the type's defaults where its file cannot be
+    /// read, which is said once on the log and as <see cref="AssetLoadFailed"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="DataAssets.TryGet{T}(DataRef{T}, out T, out string?)"/> says why, and
+    /// <see cref="DataAssets.Get{T}"/> throws, for a game that asks.
+    /// </remarks>
+    /// <exception cref="ArgumentException">The reference names nothing.</exception>
+    public T Value => DataAssets.ValueOf(this);
 
     /// <inheritdoc/>
     public bool Equals(DataRef<T> other) => Id == other.Id;

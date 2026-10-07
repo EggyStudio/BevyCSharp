@@ -10,8 +10,38 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b2fc2f7`. A list of values with fields of their own, as a node's box shadows and its
-gradients are, is a list of the records its items are in the wrappers, read whole and written whole
+Reviewed up to `bc90a7a`. Fifteen commits settle items 4 to 11. A list of plain values is typed an
+item at a time, the last of the three shapes (`7c74118`); `bcs` gives cmd.exe its line as written
+and the Windows job opens the sample through it (`a753c57`); every push runs the suite on macOS as
+well, with `python3` on a Mac (`6528ea2`); `[MainThread]` keeps an instance behavior method on the
+main thread for every entity, and a script is compiled against the game's own types with the
+project's scripts watched (`5a96ce0`); `games/Swarm` holds an arena against waves of creatures in
+their hundreds in behaviors alone, played into its third wave and profiled by the pack workflow
+(`109711a`); a `memory` command, `build/soak.sh` and `soak-check.py` play Courtyard, Swarm and the
+stress program for ten minutes and hold every count level, which found four leaks, a scene load's
+meshes and materials under handles nothing released, a placed model's keys, Swarm's player made at
+each game, and an offscreen run growing a gigabyte a minute since nothing maintained the device,
+each offscreen frame waiting for the GPU to finish the one before (`cdbce22`); `BadFileTests` gives
+every loader four bad files and found the JSON loaders naming no file and a sound that was no sound
+panicking Bevy's audio as it played, checked by Bevy's own decoder as it arrives (`ff1ebcf`);
+`PublicApi.txt` lists the surface, 10,681 lines of 1,163 types, held by `PublicSurfaceTests`, the
+pack writes the commits since the version was raised into its release notes, and a ray passes
+through sensors (`1f10d6f`); `docs/first-game.md` makes a game in twelve steps, each a program the
+pack workflow builds and runs and the page is held to (`7072511`); and a script's references are
+read once for the process and a generation unloads when its script is compiled again, five keepers
+let go (`360669e`), with four commits of moves alone taking N 1.2's list to 191 and N 1.3's to 11.
+The run of `360669ef`, the first with a macOS job, was in progress at 15:36; the pack run of
+`75e8953` was cancelled, so Verdicts 2 and 3 wait for the next. Every C# block of the guide builds
+on the packed package in the pack's game job, 3DEngine's script with this library's usings and a
+fragment's statements run with `ctx` and `app` in reach, 192 blocks of 193 on its first run, one
+stale gizmo batch and six blocks not C# as written mended (`bc90a7a`). The loaders a game calls
+answer a bad file with an exception naming the file, which N 2.6 does not allow, so item 4 takes
+that. The suite: 1,219 passed, 9 skipped. The owner decided on 2026-10-07 that the sample becomes a
+feature test with an admin panel, a console, a crash log and a portable build, `bevy_weather` once
+the map stands (Decision 14), which is items 4 to 9, before the gaps.
+
+Before them, a list of values with fields of their own, as a node's box shadows and its gradients
+are, came to be a list of the records its items are in the wrappers, read whole and written whole
 through two new exports of the bridge, a list's length and its resizing, at ABI 226, each item's
 values at an indexed path as a field's are; the bridge makes a default for what Bevy registers none
 of wherever one is needed, a struct from its fields', an enum whose every variant holds a value as
@@ -39,109 +69,113 @@ settles item 1's wait; the owner pushed `af8e870` at 09:54 and `174ee19` at 09:5
 owner started the pack run of `75e8953` at 09:46, Verdicts 2 and 3's, in progress at 10:17. The
 suite: 1,180 passed, 9 skipped.
 
-Before them, a range of numbers, Rust's `Range<f32>`, came to be a `FloatRange` of its two ends in a
-wrapper, read and written whole through Bevy's JSON since a reflect path stops at the range, drawn
-by the inspector as two numbers, and given the empty range at zero by the bridge where Rust
-registers no default, so a component holding one is inserted through its wrapper; the description
-dumped again adds the six ranges Bevy's components hold, a viewport's depth among them, and
-`visibility_range` writes its margins through `VisibilityRangeRef` with no string path, the first of
-item 4's three shapes (`75e8953`), after the bridge's reflection module was split into modules of
-its own, N 1.3's list at 14 with 8 in the bridge (`5262beb`). The owner pushed `75e8953` at 09:26,
-and its run started its jobs, which settles Verdict 4; the docs and Linux jobs passed, and Windows
-was running at 09:40. The suite: 1,179 passed, 9 skipped. The owner decided on 2026-10-07 that the
-suite runs on macOS too, that Feathers' and the camera controllers' crates may be enabled after the
-other gaps, and that system font discovery stays off (Decisions 10 to 13), so N 6.2 is raised and
-item 5 takes the matrix.
-
-The norm has 44 rules, and this engine stands at 28 checked, 4 with places listed, 3 to take and 9
+The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take and 9
 by review.
 
 
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 6 to 11 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 11 to 16 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The run of `174ee19` passed on both systems, and the pack run of
-   `75e8953` was in progress at 10:17. Each push's run is read by the reviewing session, and a
-   failure it names comes first here.
+1. **What the next page says.** The run of `360669ef`, the first with a macOS job, was in
+   progress at 15:36, and the pack run of `75e8953` was cancelled, so Verdicts 2 and 3 wait for the
+   next pack run. Each push's run is read by the reviewing session, and a failure it names comes
+   first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
-   commit of its own that moves code alone, the largest first where there is a choice, and a
-   batch reads the lists for the files it will touch before it starts. The rules still to take
-   each have their item: N 2.1 is the listing of item 8 and N 2.6 the table of bad files in
-   item 7.
-3. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
-   written in its batch: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
-   decal's tag and a volume's voxels), the widgets' events as observers, keys observed as they reach
-   a field, and what the table then names most. When the captures have settled, they are compared
-   whole with checked-in references by the workflow, a small share of pixels allowed to differ
-   between devices, as 3DEngine does for its scenes. Transmission's glass spheres are missing from
-   about one capture in four with TAA on, before `6a84286` as after it, so the cause is found before
-   that job is red for them, or the example is compared with its spheres left out and the reason
-   beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under
-   (`b548987`'s reply), untraced, and is traced before those captures are compared. Feathers' three
-   examples and the two camera controllers follow the other gaps, their crates allowed (Decisions 11
-   and 12) on the owner's word in the working session, and the four font examples stay missing
-   (Decision 13).
-4. **`bcs` opens a program on Windows as 3DEngine's `e3d` did not.** `Launch.cs` gives `cmd.exe
-   /c start` its line through `ArgumentList`, where .NET escapes each inner quote with a backslash
-   that cmd.exe keeps, so `start` takes the escaped title for the program and the log's path is
-   none; 3DEngine's Verdict 33 found it when every game failed to open on Windows, and its
-   `1c848a20` gives the line as written through `Arguments`. The same here, held by a Windows job
-   that opens Courtyard through `bcs` and reads its answer, since the Courtyard play runs on Linux
-   alone and nothing has opened a program through `bcs` on Windows.
-5. **The suite on macOS too.** `macos-latest` joins `package.yml`'s `test_os` default and
-   whatever `build.yml` passes it, so every push runs the suite on the three systems the package
-   ships for, as the owner chose (Decision 10); whatever fails there is read from the page and
-   mended, and N 6.2 is then checked, which the Conformance table holds to take until the first
-   green macOS job.
-6. **Three things 3DEngine's fourth game turned up, checked here** (`3c9c7ac8` in its checkout),
-   each taken if it is missing and answered under Replies if it is not. A behavior method that
-   writes a resource, draws interface or plays a sound while others run beside it on worker threads.
-   A script compiled while the game runs naming the game's own types, with the scripts watched being
-   the project's and not a copy in the build folder, which Courtyard would show. And a game written
-   in behaviors alone with hundreds of entities, played by the workflow and profiled, which
-   `games/Stress` measures and no game here plays.
-7. **Two things nothing here has tried**, from 3DEngine's `044d2396` and `3442e2cd`, where each
-   found faults at once. Courtyard and the stress program played for ten minutes by a script while
-   managed memory, the bridge's allocations, entities and assets are read at intervals through a
-   `bcs` command, anything that keeps climbing found and fixed, and a short form of the run in the
-   workflow. And every loader given a missing, an empty, a cut short and a random file (scenes, data
-   assets, saves, materials, meshes, images, models, sounds, shaders and scripts), each answering
-   with a message that names the file and no exception or panic crossing the bridge, as one table in
-   a test.
-8. **The public surface written down, and release notes from the commits**, from 3DEngine's
-   `fc5aef49`: a listing of every public type and member a tool writes from the built assembly,
-   checked in, with a test that fails when the two differ, so a change to what a game calls is read
-   as one, and the pack workflow writing the package's release notes from the commits since
-   `build/version.txt` last changed. In the same batch it is checked whether a ray here stops at a
-   sensor, which there threw a car's wheel and a character's ground check.
-9. **A first game told from an empty folder, a step at a time**, from 3DEngine's `d5d2578d`.
-   `docs/making-a-game.md` describes Courtyard finished, and nothing here walks a newcomer from an
-   empty folder and the package to a small game in a dozen steps, each step a whole program the
-   workflow builds and runs and the page is held to line for line.
-10. **What a script host reads at each compilation**, from 3DEngine's `c06ec659`, where it took
-    the Linux test job to the runner's 16 GB. `ScriptHost.References()` reads every loaded assembly
-    with `MetadataReference.CreateFromFile` at each compilation, at line 190 of `ScriptHost.cs`, and
-    each reference holds its file's whole image in native memory that only its finalizer gives back,
-    while the GC's heap stays small and a full collection comes late. A host that compiles on each
-    save gathers them. They are read once for the process and shared, as `EditorEval` keeps its own,
-    and a test compiles a hundred times and finds the process holding within a few megabytes of what
-    it held after ten, read before any collection. The row on an app's whole life in SHARED.md is
-    checked in the same batch. So is whether a script's generation unloads when it is compiled
-    again, as 3DEngine's `ScriptGenerationTests` holds since `d7e370ed` there, where a registration
-    kept by the process held every generation and ran a stale script in every later app.
-    `BehaviorsPlugin` passes over a collectible assembly's behaviors here, and whether a script's
-    assembly adds schemas, commands or states to the lists of the process, as the module
-    initializers the generator writes do for a game's, is read with it.
-11. **Every code block of `docs/` compiles against the package**, from 3DEngine's `a4f31573`: a
-    script writes each C# block of the guides into a project on the packed package, a fragment after
-    the lines a `<!-- compiled with: -->` comment before its fence gives, a block marked `<!-- not
-    compiled: reason -->` left out, and says an error at the page and line as an annotation, run in
-    the workflow beside the examples' own build on the package, with a test that feeds it a page
-    holding a good block, a stale one and a skipped one. There it found three faults in 138 blocks
-    on its first run, a method a guide taught that had gone internal among them.
+   commit of its own that moves code alone, the largest first where there is a choice, and a batch
+   reads the lists for the files it will touch before it starts. The rules still to take each have
+   their item: N 2.6 is the loaders of item 3, and N 6.2 the macOS job's first green run.
+3. **Loaders answer a bad file with a message and no exception (N 2.6).** Scenes, saves, mesh and
+   material files, data assets, project settings, persistent values and packs answer a missing, an
+   empty or an unreadable file with their result carrying what went wrong and the file's name, as
+   the asset server answers with `AssetLoadFailed`, a `Try` form where a result has no room for it,
+   so a game's level with a bad save does not end at the call; a throwing form may stay beside it
+   for a game that asks. `BadFileTests` holds the forms a game reaches first, and N 2.6's row says
+   checked when they do.
+4. **The feature test, first the program (Decision 14).** `BevyCSharp.Sample` is renamed
+   `BevyCSharp.FeatureTest`, in the solution, the README's first line, `bcs open --sample` and the
+   Windows job, and AGENTS.md's table row on the owner's word, keeping the window, offscreen,
+   headless and `--serve` modes so CI runs it. A hub map with signposts to the zones and a free
+   camera. The admin panel in Dear ImGui through `ImGuiRuntime`, opened by F1 or a pad button, a
+   list menu steered by keyboard and pad as a mod menu is, with pages for graphics (window, vsync,
+   anti-aliasing, shadows, a quality tier), audio volumes, controls, debug draws (colliders, gizmos,
+   wireframe), teleports to the zones, things to spawn, noclip, fly and the time scale, each setting
+   kept through `Persistent` and read at start. The console as a library piece a game gets by one
+   call, `ImGuiConsole`, the `ConsoleLog` ring with its levels and an input with history and
+   completion over the commands, opened by the key under Escape as the editor's is. And the crash
+   log as an engine feature: `AppDomain.UnhandledException` and unobserved task exceptions written
+   to `logs/crash-<time>.txt` beside the executable with the exception, `ConsoleLog`'s last 200
+   lines, the OS, .NET, the ABI, the adapter and the backend, the bridge's panic hook writing the
+   same file for a panic inside Bevy, `logs/latest.log` of every run rotated, and the next start
+   saying where the last crash's file is. The headless run and the Windows job's `bcs open` hold the
+   program in CI.
+5. **The character and the course.** The capsule on `CharacterController`: walk, run, sprint,
+   crouch, jump with coyote time and jump buffering, air control, riding a moving platform, pushing
+   crates, first and third person, noclip and fly from the panel, respawn at the zone's start. The
+   zones: ramps at 15, 30, 45 and 60 degrees, stairs of several step heights, a narrow beam and a
+   crouch tunnel; a moving platform, an elevator, a rotating disc and a conveyor; gaps of growing
+   width, an ice patch of low friction, a bounce pad and a pit that respawns; pushable crates,
+   balls, a hinge door, a slider lift, a rope of distance joints and a pressure plate reading
+   `ContactImpulse`; a terrain of a heightmap mesh with a Mesh collider under it all. A drive script
+   walks each zone through `bcs` and asserts it, played by the pack workflow as Courtyard is.
+6. **The render gallery.** A PBR sphere grid by metallic and roughness with rows for clearcoat
+   and anisotropy; a Cornell box lit by shadow maps and by Solari where the GPU has it, a panel
+   switch; a lights gallery of directional, point, spot, rect and area lights with shadows, a
+   reflection probe, an irradiance volume, light probes, decals, a fog volume, SSAO and a skybox;
+   the post effects as panel switches, bloom, tonemapping, MSAA, FXAA, TAA, SMAA and what else the
+   camera has; and vegetation as instanced grass and trees moved by a Slang wind shader, each drawn
+   from the examples that exist and each zone captured by the drive script.
+7. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
+   through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
+   the latitude on a panel page and in the settings file, the lights' colors and intensities on
+   curves by the hour, and a console command setting the hour.
+8. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
+   into the working session, `WeatherPlugin` and `WeatherCamera`, its `WeatherTime`, `Weather`,
+   `ProceduralWeather` and `WeatherConfig` reached from C# through the wrappers where they reflect
+   and through bridge calls where they do not, the panel's weather page (kind, cloud coverage, the
+   tier, procedural on or off), item 7's time of day handing the sun to it, clouds at the lowest
+   tier in CI's captures, and its cost measured on a real GPU and in the workflow's image and
+   written into the comparison page's costs. The crate draws around Bevy's atmosphere, which stays.
+9. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
+   code for `win-x64` and `linux-x64` as `build/play-native.sh` does, the native library and the
+   assets beside it and a `README.txt` for testers naming the keys, the panel, the console and where
+   the logs are; a workflow started by hand makes the two zips as artifacts; the pack workflow plays
+   the feature test from the package as it plays Courtyard, and the soak takes it.
+10. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it
+    unlocks written in its batch: more of Bevy's WGSL reached as its lighting is (the deferred
+    buffers, a decal's tag and a volume's voxels), the widgets' events as observers, keys observed
+    as they reach a field, and what the table then names most. When the captures have settled, they
+    are compared whole with checked-in references by the workflow, a small share of pixels allowed
+    to differ between devices, as 3DEngine does for its scenes. Transmission's glass spheres are
+    missing from about one capture in four with TAA on, before `6a84286` as after it, so the cause
+    is found before that job is red for them, or the example is compared with its spheres left out
+    and the reason beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it
+    under (`b548987`'s reply), untraced, and is traced before those captures are compared. Feathers'
+    three examples and the two camera controllers follow the other gaps, their crates allowed
+    (Decisions 11 and 12) on the owner's word in the working session, and the four font examples
+    stay missing (Decision 13).
+11. **Every method native code calls catches every exception**, from 3DEngine's
+    `NormTests.N_2_10` (`48fbb663`): a test finds a callback the bridge calls that lets an exception
+    through, by how it is handed over, and each is mended to report it instead, so no exception
+    crosses the bridge from a system, an observer or a loader's callback.
+12. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
+    workflow, as the first game's first step would have a newcomer do.
+13. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+    (`ab052859`): a query's filter or a world call answering the entities a component was removed
+    from since the system's last run, beside the added and changed ones a behavior reads.
+14. **Every example compiles on the package alone**, from 3DEngine's
+    `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
+    project, so what they share to say a thing in one word becomes the package's own calls or stays
+    in the example, and the workflow builds every example on the packed package.
+15. **A script that more than one system runs is read for the forms only GNU's tools or a later
+    bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
+    and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
+16. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+    `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
+    generators report, so an editor offers the mend.
 
 ## Verdicts
 
@@ -224,223 +258,32 @@ from [SHARED.md](SHARED.md).
     by family name is not offered, the four font examples stay missing with that reason, and
     `docs/ui.md` says why without naming anyone (N 4.7).
 
+14. **The sample becomes a feature test.** The owner decided on 2026-10-07 that
+    `BevyCSharp.Sample` is renamed `BevyCSharp.FeatureTest` and stays in the solution, puts every
+    feature on one map with a capsule character on four course zones, a PBR sphere grid, a Cornell
+    box, vegetation, a lights gallery and Bevy's atmosphere with a C# time of day, has an admin
+    panel and a Source-style console in Dear ImGui with settings kept in a file, logs a crash to a
+    file beside the executable, and is published native for Windows x64 and Linux x64 as a zip for
+    testers. `bevy_weather` comes as its own batch once the map stands, for stars, the moon, clouds,
+    fog, rain and snow drawn around Bevy's atmosphere, its crate added on the owner's word in the
+    working session, and volumetric clouds are not written by hand.
+
 ## Replies
 
-**The three shapes, a list of plain values, which the last batch left.** The dump names a plain
-list's kind, and the generator types it as a list of that kind, read and written an item at a time
-at its indexed path, as a mesh's morph weights, a node's children and a cascade's bounds are. A
-variant called what a value of another variant is, as `MeshMorphWeights` has a `Value` beside a
-value called `Value`, takes `Variant` after its name, since a record nested in a union is a member
-each variant's record inherits. `many_morph_targets` writes its weights through `MorphWeightsRef`.
-Of the examples' string paths, one is left, `many_animated_sprite_meshes` writing a sprite mesh's
-atlas layout, a handle whose asset kind the bridge cannot load, which texture_atlas's row reaches.
-`ReflectedWrapperTests` writes a list of numbers growing and shrinking. The suite passed, 1,182 with
-9 skipped. Item 4, `bcs` opening a program on Windows, is next.
+**Item 3, the loaders under N 2.6.** A scene and a save answer a bad file in the `SceneLoad` they
+return, whose new `Problem` names it, with nothing spawned and the game in progress left as it was,
+and a scene that places itself, directly or through another, is answered by the outermost read
+with what the reads under it spawned taken back. A mesh or material file gives `AssetHandle.None`
+and posts `AssetLoadFailed` naming the file, once a path, with `TryLoad` beside each. A data asset
+read through `DataRef.Value` is its type's defaults, posted once until its file is read again, with
+`DataAssets.TryGet` saying why beside `Get`, which throws. Project settings carry a `Problem`, and
+`Parse` throws for a tool. A pack that does not open is logged as an error and the app runs without
+it, where `Config.AssetPack` had it refuse to start, and `AssetPack.TryOpen` is beside `Open`. The
+editor spawns a scene before taking the open one away, so a bad file leaves it. `BadFileTests`
+judges each loader's first form, no exception and a problem naming the file, and an app whose pack
+is cut short runs; N 2.6's row is yours to turn to checked. Four test files moved into their areas
+first (`6f4d859`), and five came off N 3.4's list. The suite passed, 1,221 with 9 skipped.
+Item 4, the feature test's program, is next.
 
-**Now 4, `bcs` opening a program on Windows.** `Launch.cs` gives `cmd.exe` its line as written,
-through `Arguments`, as 3DEngine's `1c848a20` does, where `ArgumentList` escaped each inner quote
-with a backslash that `cmd.exe` kept. The Windows test job opens the sample through `bcs`, asks it
-`app.status` and stops it, since that job builds a headless bridge and no package, which Courtyard
-needs, and the sample goes through the same `cmd.exe` line. No machine here runs Windows, so the
-next Windows job is the proof. The suite passed, 1,182 with 9 skipped.
-
-**Now 5, the suite on macOS.** `macos-latest` joins `package.yml`'s `test_os` default and the
-arrays `build.yml` and `pack.yml` pass it, so every push runs the suite on the three systems the
-package ships for, and the test step runs `build/test.py` with `python3` on a Mac, which has no
-`python`. `BUILDING.md` says so. What the first macOS job finds is read from its page and mended,
-and N 6.2's row in the Conformance table is yours to change once a macOS job is green. The suite
-passed, 1,182 with 9 skipped, which reads nothing these files change but the workflows themselves.
-Item 6 is next.
-
-**Now 6, the first two of 3DEngine's three.** Here every behavior method is a system of its own,
-an exclusive one Bevy runs alone with the world loaned to it, so no two methods run beside each
-other, and a static method runs on the main thread. An instance method over 4,096 entities of a
-chunk or more is split across the thread pool, and one that writes a resource, draws interface or
-plays a sound there touches what one thread at a time may, so `[MainThread]` keeps such a method on
-the main thread for every entity, as 3DEngine's attribute of that name does. The generator passes
-the runner a threshold of zero for it. `BehaviorTests` runs a marked method over 5,096 entities and
-finds every call on one thread, `GeneratorAttributeTests` holds its case, and the behaviors guide
-says when to mark one. The second is in place, answered here. A game compiles its `assets/scripts`
-into itself, the editor opened on its project compiles and watches that folder in the project and
-not a copy in `bin` (`EditorPaths.Assets` is the project's), and a script is compiled against every
-assembly the program loaded, the game's own among them. The suite passed, 1,183 with 9 skipped, and
-the norm's tests after the attribute moved into a file of its name. The game in behaviors with
-hundreds of creatures, played by the workflow and profiled, is next.
-
-**Now 6, the third, a game in behaviors with creatures in their hundreds.** `games/Swarm` is an
-arena held against waves, every behavior of it a script in `assets/scripts` and the program only a
-window and physics, built on the package as Courtyard is. Each wave brings sixty more creatures than
-the last, crawlers and a brute in every five, each a character a behavior walks at the player,
-which fires at the nearest by itself with kinematic sensors whose contacts fell them, and a fall
-plays a sound no more often than a listener tells two apart. Its states are a menu, play with a
-wave or a rest as its sub-state, and the end, what play spawned despawned on leaving it, and the
-creatures add their harm to the player from a `[MainThread]` method. `play.sh` plays it through
-`bcs` into its third wave, walking the player round a square, and fails where a wave does not come,
-fewer than 200 creatures are alive at once or none falls, and the pack workflow's game job plays it
-after Courtyard and keeps its `frame.profile` with the captures. Played here offscreen, 215
-creatures were alive at once and 335 had fallen by the third wave, and the profile gave 2.8 ms of a
-frame to physics and 2.0 ms to Bevy's schedule, where 3DEngine's Swarm gives 2.6 to 3.2 ms of
-physics to its 290. `make-sounds.py` makes its one sound, as 3DEngine's does. The suite passed,
-1,184 with 9 skipped. Item 7 is next.
-
-Shared: a fourth game written in behaviors, with creatures in their hundreds, played and profiled
-by the workflow, as 3DEngine's Swarm is.
-
-**Now 7, the first of two, the games played for ten minutes.** `memory` and `memory.collect` answer
-with what a program holds as name and number pairs, the managed heap, the process's resident size,
-the asset handles held, the bytes and blocks the bridge has allocated, counted by an allocator
-wrapped round the system's, the entities with the indices handed out, and the assets of each kind
-Bevy holds. `state.set` and `state.get` move and read a game's states by name, which a script ends a
-round with. `build/soak.sh` plays Courtyard, Swarm or the stress program a round at a time and reads
-`memory.collect` after its rounds, and `build/soak-check.py` fails a value whose most in the second
-half of a run passes its most in the first by more than its slack. The pack workflow's game job
-plays the three at once for two and a half minutes. Its first run found four leaks.
-
-- Every scene load made its meshes and materials again under handles nothing released, seven more
-  of each for every save Courtyard loaded. What a load makes, or loads for its entities to be drawn
-  with, is now given to `AssetServer.ReleaseWhenUnused`, and the bridge releases such a handle a
-  frame or two after the last entity drawing with it has gone, as Bevy lets go of a scene's assets,
-  and the managed side forgets the recipe and collider mesh it kept for it. The editor keeps them
-  (`SceneFile.KeepsAssets`), since its undo puts an entity back with the handles it had.
-- A model placed by a load took another key to the same asset each time, which the model the next
-  load placed kept in use. A marked key beside the first key to its asset now goes at once.
-- Swarm made its player's mesh and material at each game, and makes them once now.
-- An offscreen run drawing as fast as it can grew by a gigabyte a minute, the stress program
-  holding 3.8 GB after four, while the bridge's own allocations stayed flat. Nothing maintained the
-  device, as a window's present does, so wgpu held what every frame used. Each offscreen frame now
-  waits at its end for the GPU to finish the one before, which a thousand and five thousand drawn
-  cubes measure within a few tenths of a millisecond of the frames without it, either way.
-
-Ten minutes of the three at once then held every count level, the handles and the assets of each
-kind exactly, the managed heap within half a megabyte, the bridge's allocations within 1.2 MB and
-the processes within 10 MB of where they were in the first half. `MemoryCommandTests`,
-`StateCommandTests` and `SceneAssetsReleaseTests` hold the commands and a scene loaded over another,
-and the bridge's tests the allocator and the sweep. `SceneFile.cs` and `SceneInstances.cs` came off
-the norm's lists first, in commits that move code alone. The suite passed, 1,189 with 9 skipped.
-The bad files are next.
-
-Shared: a game played for minutes while what it holds is read, failing a count that keeps
-climbing, with a short form in the workflow, as 3DEngine's `build/soak.sh` does.
-
-**Now 7, the second of two, every loader given bad files.** `BadFileTests` gives each loader a
-missing file, an empty one, the first third of a good one and 4,096 random bytes, one table of
-scene files, saves, mesh and material files, data assets, project settings, persistent values and
-packs on this side, images, models and sounds through the asset server, Slang programs and
-scripts. It found three faults.
-
-- Scenes, saves, mesh and material files and data assets let the parser's `JsonException` out,
-  which gives a line and a byte and no file, and a data asset's `TryGet` let it through as well.
-  They read through `AssetFiles.ReadJson` now, which answers a file that is not JSON or holds no
-  object with an `InvalidDataException` naming it, and a scene's format is checked by name too.
-- Project settings answered with an `InvalidDataException` that named no file, and name it now.
-- Bevy's sound loader keeps a file's bytes and decodes them only as the sound first plays, where its
-  decoder unwraps, so an empty or random file loaded as a sound and panicked Bevy's audio system
-  when it played, which ended the game. The bridge builds Bevy's own decoder, where its panic is
-  caught, as a sound arrives and before a player plays one it has not checked, rodio's own builder
-  being a package the bridge does not reference (N 2.8). A sound that gives none is taken out of the
-  sounds Bevy holds, its handle answers `Failed` and `AssetLoadFailed` names the file. A second
-  loader for the same extensions would have refused it at load, and Bevy warns at every start that
-  two loaders claim one extension, so it is checked after. The decoders' format probe logs an error
-  of its own that names no file, which the bridge's log filter leaves out.
-
-Images, models, Slang programs, scripts, packs and persistent values answered as they should. A
-file cut short that is still a shorter file of its kind, a third of a WAV, loads, as 3DEngine's
-table allows. `DataAssets.cs` and `SaveGame.cs` came off N 1.2's list first, in a commit that
-moves code alone. The suite passed, 1,202 with 9 skipped. Item 8 is next.
-
-Rule: N 2.6 says no exception leaves the engine for a bad file. Here a loader on the managed side
-answers one with the exception it documents, `FileNotFoundException` or `InvalidDataException`,
-whose message names the file, for a game to catch, and nothing crosses the bridge, a system that
-lets one through having it reported by the callback that ran it. If the rule means such a loader
-returns an empty result instead, that is the next change.
-
-Shared: every loader given a missing, an empty, a cut short and a random file as one table, as
-3DEngine's `BadFileTests` does, which here found a sound that panicked as it played.
-
-**Now 8, the public surface written down, release notes, and a ray at a sensor.**
-`BevyCSharp/PublicApi.txt` lists every public type of the library and every member a game reaches,
-a line each, 10,681 lines of 1,163 types, 609 of them the wrappers generated from Bevy's
-components, written from the built library by the writer 3DEngine's `fc5aef49` made, and
-`PublicSurfaceTests` fails while the two differ, naming the lines added and removed. `build/api.sh`
-writes it again once a change is meant, and BUILDING.md and COMMITS.md say so. The pack job fetches
-the whole history, and `build/release-notes.sh` writes the commits since `build/version.txt` last
-changed into the package's release notes, newest first, which a local pack showed in its nuspec,
-143 lines today. A ray here stopped at a sensor, as 3DEngine's did, since `Raycast` gave Bepu's ray
-no sensors to pass through where a character's ground check did. Every ray passes through sensors
-now, which `ARayPassesThroughASensorToTheFloorBelow` holds, and the physics guide says so. N 2.1's
-row in the Conformance table is yours to change. The suite passed, 1,205 with 9 skipped, N 1.4 once
-the listing's test was listed beside the cheatsheet's as a test of no one area. Item 9 is next.
-
-Shared: the public surface listed from the built library and held by a test, release notes from
-the commits, and rays that pass through sensors, as 3DEngine's `fc5aef49` and its rays have them.
-
-**Now 9, a first game from an empty folder.** `docs/first-game.md` makes a small game in twelve
-steps from a console project and the package. A field, a sun and a camera, a player that walks and
-a camera that follows it, coins that float and are taken and counted, crates and a character with
-physics, a chime, a state that is won and R to play again, each step a few lines explained and a
-picture of what the window shows after them. `games/FirstGame` holds every step as a whole program
-under `steps/`, its last the game's `Program.cs`, and `build/first-game.sh` builds each on the
-package in a copy of the project and runs it offscreen for sixty frames, failing one that does not
-build, does not run or logs an error, which the pack workflow's game job runs on the package it
-packed. With `--shots` it plays each through `bcs` and draws the page's pictures again.
-`FirstGameTests` holds every block the page marks with a step to that step's program line for line,
-the last step to the game, and every step to its picture. The README's guide lists the page first,
-and Behaviors follows it. The suite passed, 1,208 with 9 skipped. Item 10 is next.
-
-Shared: a first game told from an empty folder a step at a time, each step a program the workflow
-builds and runs and the page is held to, as 3DEngine's `d5d2578d` does.
-
-**Now 10, what a script host reads and keeps.** `ScriptHost.References()` reads each assembly the
-process loaded from a file once, the first time a compilation needs it, and shares it with every
-compilation after and with the editor's evaluation, where every compilation read them all again.
-`ScriptCompilationMemoryTests` compiles a script a hundred times and reads the process before any
-collection, 495 MB after ten and 841 MB after a hundred before, 298 MB and 318 MB now, and holds
-the growth under 48 MB. `AppLeakTests` takes SHARED.md's row on an app's whole life, a hundred apps
-made, run and closed holding 191 MB after twenty and 205 MB after a hundred, the heap 12.0 MB and
-12.3 MB, which nothing here had read, so that row is yours to change.
-
-A generation did not unload when its script was compiled again, kept in five ways, which
-`ScriptGenerationTests` finds with a row for each kind of thing a game's module initializers and
-systems put in the tables, the first generation looked for while the app still lives, as an
-editor's would be.
-
-- `BehaviorRegistry` kept a script's registration, as 3DEngine's list did, and passes over one from
-  a collectible assembly now, as `BehaviorsPlugin` already passed over it in building an app.
-- The app kept every system it was given for Bevy to call, the removed ones with what they ran. A
-  removed one keeps its name and source and lets go of its delegate and its run condition.
-- A state's slot, its report and its poster were kept by the type that claimed them. A newer
-  generation's enum takes them over, and the poster it replaces had posted the last generation's
-  transitions, which the new generation's systems never read.
-- The app kept the states it added by type, and keeps their names now.
-- The bus kept a channel for each message type and the world each resource, a generation's state
-  transitions among them. `App.ForgetAssembly`, which the host calls as it retires a generation,
-  drops what an assembly's types name, reached through `InternalsVisibleTo` rather than made public.
-
-A script's assembly adds its registration and its states to the process's lists through its module
-initializers, as a game's do, and its schemas, which already let go, and no commands, since the
-command generator runs as a game is built and the host runs the behavior and state generators
-alone, which the guide now says. The suite passed, 1,218 with 9 skipped, and `Messages.cs` came off
-N 1.2's list first, renamed for the one public type it holds. Item 11 is next.
-
-Shared: a script compiled a hundred times and an app made a hundred times holding level, and a
-script's generation unloading as it is compiled again, as 3DEngine's `c06ec659` and `d7e370ed`.
-
-**Now 11, every code block of `docs/` built on the package.** `build/docs-on-package.py`, 3DEngine's
-script with this library's usings, builds each C# block of the guide into a project on the packed
-package, a fragment after the lines a `<!-- compiled with: -->` comment before its fence gives and
-a block marked `<!-- not compiled: reason -->` left out, and says an error at its page and line, an
-annotation in the workflow, where the pack workflow's game job runs it beside the examples' own
-build. A fragment's statements run where a behavior's context, `ctx`, and an app being built,
-`app`, are in reach, as nearly every one of the guide's is written, which the script's header and
-BUILDING.md say. `DocsScriptTests` feeds it a page of a good block, a stale one and a skipped one.
-The first run built 192 blocks of 193, the first game's left to `build/first-game.sh` and
-Courtyard's program to its own build. One was stale, a gizmo batch reading a position and a radius
-off a query of `Collider`, whose row has neither, which draws at each transform now. Six were not
-C# as written, two initializers' members given alone, attributes with nothing to mark, a command
-whose body was an ellipsis and two lists of bare expressions, and are whole now. The rest each
-take a comment declaring the entities, assets and types the page around them made. The suite
-passed, 1,219 with 9 skipped. The Now list is done to its end, and item 3's gaps are next, the
-deferred buffers first, decals' tags and volumes' voxels being reached already.
-
-Shared: every code block of the guide built on the package, a fragment after the lines a comment
-gives it, as 3DEngine's `a4f31573` does.
+Shared: SHARED.md's row of every loader given four bad files, whose loaders a game calls here now
+answer rather than throw.
