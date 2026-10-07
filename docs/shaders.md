@@ -103,12 +103,14 @@ bcs::VertexOutput vertex(bcs::Vertex v)
 [shader("vertex")]
 bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex v)
 {
-    v.position.y += sin(bcs::globals.time * 3.0 + v.position.x * 4.0) * height;
+    v.position.y += sin(bcs::prepass_globals.time * 3.0 + v.position.x * 4.0) * height;
     return bcs::prepass_output(v.instance_index, v.position, v.normal, v.uv);
 }
 ```
 
-The prepass draws depth for shadows, and normals and motion for the effects that read them. A
+The prepass draws depth for shadows, and normals and motion for the effects that read them. It binds
+less than the main pass and its time elsewhere, so a prepass stage reads `bcs::prepass_globals`
+where the main pass reads `bcs::globals`, and a pipeline given the other refuses to build. A
 material that moves its vertices needs a prepass vertex shader moving them the same way, or it casts
 the shadow of the mesh it started from, and one that discards pixels needs a prepass fragment shader
 discarding the same ones. Both read the material's values like the main stages do. A vertex stage
