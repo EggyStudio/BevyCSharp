@@ -274,10 +274,12 @@ internal static class Launch
 
         if (OperatingSystem.IsWindows())
         {
+            // The line is given to cmd.exe as written. Given as one argument it was quoted as a
+            // program's argument is, each quote inside escaped with a backslash, which cmd.exe
+            // keeps, so start took the escaped title for the program and the log's path was none,
+            // as 3DEngine's e3d found when no game of its opened on Windows.
             start.FileName = "cmd.exe";
-            start.ArgumentList.Add("/c");
-            start.ArgumentList.Add(
-                $"start \"{project}\" /b \"{binary}\" {string.Join(' ', arguments)} > \"{log}\" 2>&1");
+            start.Arguments = $"/c start \"{project}\" /b \"{binary}\" {string.Join(' ', arguments)} > \"{log}\" 2>&1";
         }
         else
         {

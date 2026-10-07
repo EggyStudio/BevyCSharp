@@ -236,3 +236,10 @@ Of the examples' string paths, one is left, `many_animated_sprite_meshes` writin
 atlas layout, a handle whose asset kind the bridge cannot load, which texture_atlas's row reaches.
 `ReflectedWrapperTests` writes a list of numbers growing and shrinking. The suite passed, 1,182 with
 9 skipped. Item 4, `bcs` opening a program on Windows, is next.
+
+**Now 4, `bcs` opening a program on Windows.** `Launch.cs` gives `cmd.exe` its line as written,
+through `Arguments`, as 3DEngine's `1c848a20` does, where `ArgumentList` escaped each inner quote
+with a backslash that `cmd.exe` kept. The Windows test job opens the sample through `bcs`, asks it
+`app.status` and stops it, since that job builds a headless bridge and no package, which Courtyard
+needs, and the sample goes through the same `cmd.exe` line. No machine here runs Windows, so the
+next Windows job is the proof. The suite passed, 1,182 with 9 skipped.

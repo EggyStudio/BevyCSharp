@@ -165,6 +165,17 @@ jobs:
       - name: Build the solution
         run: dotnet build BevyCSharp.slnx -c Release -warnaserror
 
+      # bcs opens a program through cmd.exe on Windows, which nothing else in the workflow does, so
+      # the sample is opened through it and asked how it is, as a person or an agent opens one, and
+      # stopped. Headless here, the job's bridge having no renderer.
+      - name: Open the sample through bcs
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          ./bcs open --sample
+          ./bcs command app.status
+          ./bcs stop
+
       # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
       # managed test can reach, the bridge's again with the renderer's crates, where shader
       # reflection and the packing of values by name live, and the managed suite, each a process

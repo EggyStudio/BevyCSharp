@@ -281,7 +281,9 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 
 ## Publishing
 
-A push or a pull request runs the test suite on Linux and Windows and stops there. It builds no
+A push or a pull request runs the test suite on Linux and Windows and stops there. On Windows it
+also opens the sample through `bcs` and asks how it is, since that is the one system where `bcs`
+starts a program through `cmd.exe`. It builds no
 per-platform bridge and packs nothing, and nothing a commit message says changes that.
 
 A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
