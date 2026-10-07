@@ -62,6 +62,135 @@ pub(crate) fn forget() {
     if let Ok(mut table) = CLONERS.lock() {
         *table = None;
     }
+    if let Ok(mut table) = HOOKS.lock() {
+        *table = None;
+    }
+}
+
+/// What C# is called with for a game's hook as a component is added to an entity, inserted on it or
+/// about to be overwritten or taken off it, with the kind, [`ADD`], [`INSERT`] or [`DISCARD`], the
+/// entity's bits, the component id, and a pointer to the component's bytes, valid only for the call.
+pub type HookCallback = unsafe extern "C" fn(kind: i32, entity: u64, component: i32, data: *const u8);
+
+/// Bevy's `on_add`, run the first time a component is put on an entity.
+pub const ADD: i32 = 0;
+/// Bevy's `on_insert`, run each time one is put on, after `on_add` the first time.
+pub const INSERT: i32 = 1;
+/// Bevy's `on_discard`, run before a value is overwritten or taken off, with the value going.
+pub const DISCARD: i32 = 2;
+
+/// The callback for each kind of hook and component id that has one, kept and forgotten as
+/// [`CALLBACKS`] is.
+static HOOKS: Mutex<Option<HashMap<(i32, usize), HookCallback>>> = Mutex::new(None);
+
+fn added(world: DeferredWorld, context: HookContext) {
+    hooked(ADD, world, context);
+}
+
+fn inserted(world: DeferredWorld, context: HookContext) {
+    hooked(INSERT, world, context);
+}
+
+fn discarded(world: DeferredWorld, context: HookContext) {
+    hooked(DISCARD, world, context);
+}
+
+/// Calls C#'s callback for a kind of hook with the component's bytes as they are at the hook.
+fn hooked(kind: i32, world: DeferredWorld, context: HookContext) {
+    let callback = HOOKS
+        .lock()
+        .ok()
+        .and_then(|table| table.as_ref()?.get(&(kind, context.component_id.index())).copied());
+    let Some(callback) = callback else {
+        return;
+    };
+
+    let Ok(entity) = world.get_entity(context.entity) else {
+        return;
+    };
+    let Ok(data) = entity.get_by_id(context.component_id) else {
+        return;
+    };
+
+    // SAFETY: the pointer is the component's bytes, which Bevy keeps alive for the hook's duration,
+    // and with no world loaned the callback reaches nothing else of the world, which Bevy holds.
+    crate::state::without_world(|| unsafe {
+        callback(
+            kind,
+            context.entity.to_bits(),
+            context.component_id.index() as i32,
+            data.as_ptr() as *const u8,
+        )
+    });
+}
+
+/// Attaches a kind of hook to one component in one world.
+fn attach_hook(world: &mut World, component: i32, kind: i32, callback: HookCallback) -> i32 {
+    if component < 0 {
+        return status::NO_COMPONENT;
+    }
+    let id = ComponentId::new(component as usize);
+    if world.components().get_info(id).is_none() {
+        return status::NO_COMPONENT;
+    }
+
+    // As for the remove hook, Bevy panics at a hook changed after an entity carries the component.
+    if world.archetypes().iter().any(|archetype| archetype.contains(id)) {
+        return status::INVALID_STATE;
+    }
+
+    let Some(hooks) = world.register_component_hooks_by_id(id) else {
+        return status::NO_COMPONENT;
+    };
+
+    // Refused when attached already, which a second hook of a kind finds, and the callback is
+    // replaced below either way, as for the remove hook.
+    let _ = match kind {
+        ADD => hooks.try_on_add(added).is_some(),
+        INSERT => hooks.try_on_insert(inserted).is_some(),
+        DISCARD => hooks.try_on_discard(discarded).is_some(),
+        _ => return status::INVALID_STATE,
+    };
+
+    match HOOKS.lock() {
+        Ok(mut table) => {
+            table.get_or_insert_with(HashMap::new).insert((kind, id.index()), callback);
+            status::OK
+        }
+        Err(_) => status::INVALID_STATE,
+    }
+}
+
+/// Calls `callback` as `component` is added to an entity, inserted on it, or about to be overwritten
+/// or taken off it, by `kind`, [`ADD`], [`INSERT`] or [`DISCARD`], Bevy's component hooks.
+///
+/// The remove hook is [`bcs_component_on_remove`], which a game's remove hook shares with what the
+/// generator frees. Through the app handle before the run and the loaned world during it, and
+/// before any entity carries the component, as that one is.
+///
+/// # Safety
+/// `app` must be null or a live app, and `callback` must stay callable for the app's life.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_component_on_hook(
+    app: *mut crate::state::BcsApp,
+    component: i32,
+    kind: i32,
+    callback: Option<HookCallback>,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(callback) = callback else {
+            return status::NULL_ARG;
+        };
+
+        if app.is_null() {
+            return with_world(|world| attach_hook(world, component, kind, callback));
+        }
+
+        match unsafe { crate::state::app_mut(app) } {
+            Some(app) => attach_hook(app.app.world_mut(), component, kind, callback),
+            None => status::NULL_ARG,
+        }
+    })
 }
 
 /// How every C# component is cloned, its bytes copied after C# has rewritten the handles in them.
@@ -126,14 +255,14 @@ fn removed(world: DeferredWorld, context: HookContext) {
     };
 
     // SAFETY: the pointer is the component's bytes, which Bevy keeps alive for the hook's duration,
-    // and the callback reads them and nothing else, since the world is borrowed by Bevy here.
-    unsafe {
+    // and with no world loaned the callback reaches nothing else of the world, which Bevy holds.
+    crate::state::without_world(|| unsafe {
         callback(
             context.entity.to_bits(),
             context.component_id.index() as i32,
             data.as_ptr() as *const u8,
         )
-    };
+    });
 }
 
 /// Attaches the remove hook to one component in one world.
@@ -306,6 +435,39 @@ mod tests {
 
         assert_eq!(42, read(copy));
         assert_eq!(21, read(source));
+    }
+
+    static HEARD: Mutex<Vec<(i32, u32)>> = Mutex::new(Vec::new());
+
+    unsafe extern "C" fn heard(kind: i32, _entity: u64, _component: i32, data: *const u8) {
+        let value = unsafe { *(data as *const u32) };
+        HEARD.lock().unwrap().push((kind, value));
+    }
+
+    #[test]
+    fn add_insert_and_discard_are_heard_with_the_value_each_sees() {
+        let mut app = App::new();
+        let id = registered(&mut app);
+        for kind in [ADD, INSERT, DISCARD] {
+            assert_eq!(status::OK, attach_hook(app.world_mut(), id.index() as i32, kind, heard));
+        }
+        assert_eq!(status::INVALID_STATE, attach_hook(app.world_mut(), id.index() as i32, 9, heard));
+
+        let entity = app.world_mut().spawn_empty().id();
+        let put = |app: &mut App, mut value: u32| unsafe {
+            let ptr = bevy::ptr::OwningPtr::new(core::ptr::NonNull::from(&mut value).cast());
+            app.world_mut().entity_mut(entity).insert_by_id(id, ptr);
+        };
+
+        HEARD.lock().unwrap().clear();
+        put(&mut app, 3);
+        put(&mut app, 5);
+        app.world_mut().entity_mut(entity).remove_by_id(id);
+
+        // Added once, inserted twice, and the value going discarded as the second comes and as
+        // it is taken off.
+        let heard = HEARD.lock().unwrap().clone();
+        assert_eq!(vec![(ADD, 3), (INSERT, 3), (DISCARD, 3), (INSERT, 5), (DISCARD, 5)], heard);
     }
 
     #[test]

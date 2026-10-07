@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 224;
+    internal const int ExpectedAbiVersion = 225;
 
     static Native() => NativeLoader.Initialize();
 
@@ -122,6 +122,15 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_on_remove(
         IntPtr app, int component, delegate* unmanaged[Cdecl]<ulong, int, byte*, void> callback);
+
+    /// <summary>
+    /// Calls back as a component is added to an entity, inserted on it, or about to be overwritten or
+    /// taken off it, by kind, through the app handle before the run or the loaned world during it.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_component_on_hook(
+        IntPtr app, int component, int kind, delegate* unmanaged[Cdecl]<int, ulong, int, byte*, void> callback);
 
     /// <summary>Asks Bevy to report one kind of thing a pointer does, through an observer it spawns.</summary>
     [LibraryImport(Library)]

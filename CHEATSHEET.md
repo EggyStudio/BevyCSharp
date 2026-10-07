@@ -28,6 +28,10 @@ static void RequestExit();                                      // Asks the engi
 static void RequestExit(int code);                              // Asks the engine to shut down after the current frame, the run ending with code
 static string DescribeAdapter();                                // Describes the graphics adapter the renderer actually chose, or null in a headless run
 void Dispose();                                                 // Releases what it holds
+App OnAdd<T>(ComponentHook<T> hook);                            // Runs hook the first time a T is put on an entity, Bevy's on_add
+App OnInsert<T>(ComponentHook<T> hook);                         // Runs hook each time a T is put on an entity, after OnAdd the first time, Bevy's on_insert
+App OnDiscard<T>(ComponentHook<T> hook);                        // Runs hook with a T's value before it is overwritten or taken off, Bevy's on_discard
+App OnRemove<T>(ComponentHook<T> hook);                         // Runs hook as a T comes off an entity, by removal or by despawn, Bevy's on_remove
 App AddState<TState>(TState initial);                           // Adds a state machine over TState, starting at initial
 App AddSubState<TState>(TState initial);                        // Adds a sub-state over TState, which exists only while its parent holds the value its SubStateOfAttribute names
 App AddComputedState<TState, TSource>(params (TSource, TState)[] table);  // Adds a state worked out from another rather than set
@@ -317,6 +321,12 @@ static void Set<TState>(TState value);                          // Asks Bevy to 
 ## Messages
 
 The guide's page is [messages-and-hierarchy.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/messages-and-hierarchy.md).
+
+### `HookContext`
+
+```csharp
+T Res<T>();                                                     // One of the app's managed resources
+```
 
 ### `MessageBus`
 

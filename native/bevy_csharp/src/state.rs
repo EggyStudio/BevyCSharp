@@ -40,6 +40,24 @@ pub fn loan_world<R>(world: &mut World, f: impl FnOnce() -> R) -> R {
     f()
 }
 
+/// Runs `f` with no world loaned, and the loan as it was after.
+///
+/// For a callback into C# from inside Bevy, a component hook's, where Bevy holds the world and the
+/// loan higher in the stack, a C# system's, points at the same world. An entry point C# called from
+/// there would make a second `&mut World` beside Bevy's, so it answers [`status::NO_WORLD`] instead.
+pub fn without_world<R>(f: impl FnOnce() -> R) -> R {
+    struct Restore(*mut World);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            CURRENT_WORLD.with(|c| c.set(self.0));
+        }
+    }
+
+    let previous = CURRENT_WORLD.with(|c| c.replace(ptr::null_mut()));
+    let _restore = Restore(previous);
+    f()
+}
+
 /// Runs `f` against the loaned world, or returns [`status::NO_WORLD`] if there is none.
 ///
 /// This is the single choke point through which the ECS entry points touch Bevy.

@@ -163,6 +163,23 @@ was before reading it, this one runs once it has gone, and reads the entity as i
 
 A game's event likewise runs its observers inside `Trigger`, before it returns.
 
+A component's hooks are its own, one of each kind, given to the app while it is made, and run inside
+Bevy as the component goes on and comes off, before any observer:
+
+```csharp
+app.OnAdd((HookContext ctx, in Mine mine) => ctx.Res<Index>().Add(mine.Key, ctx.Entity))
+   .OnDiscard((HookContext ctx, in Mine mine) => ctx.Res<Index>().Remove(mine.Key))
+   .OnRemove((HookContext ctx, in Mine _) => ctx.Cmd.Despawn(ctx.Entity));
+```
+
+`OnAdd` runs when an entity gains one, `OnInsert` each time one is put on, `OnDiscard` with each
+value given up, and `OnRemove` as it leaves, as Bevy's `on_add` to `on_remove` do. Bevy holds the
+world while a hook runs, so where an observer has the whole world to work in, a hook reaches the
+app's managed side alone, its resources, its messages and `ctx.Cmd`, and a call into the world from
+one is refused. That suits what has to stay in step with the component wherever it goes, an index
+kept beside it, and leaves the world's work to an observer. Bevy takes a component's hooks before
+any entity carries it, so a hook given once one does is refused.
+
 ---
 
 Before this, [States](states.md).

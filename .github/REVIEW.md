@@ -10,10 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6bdfd85`. A tilemap chunk is made with its tiles and has them written and read from
-C#, images loaded as arrays of layers serving as before, a headless run refusing a chunk where
-Bevy's hook panicked, and both tilemap chunk examples are written, 287 (ABI 222, `6bdfd85`). The
-camera controllers wait on the owner's word on `bevy_camera_controller`, as Feathers' three do on
+Reviewed up to `1b8b282`. C# writes into Bevy's log at its five levels under the target `csharp`,
+once a line of code where asked, a run ends with a failure code through `App.RequestExit` and
+`ctx.Exit`, a system that throws is logged and the app runs on, and `logs` is written (ABI 223,
+`ee22927`); a playing sound's speed and mute are bridged with a way to ask whether its sink has
+come, and `audio_control` and `window_fallthrough` are written, 290, the second having been
+reachable all along under a stale row (ABI 224, `1b8b282`); the audio settings moved into files of
+their names, N 1.2's list at 217 (`f35d03a`). The suite: 1,152 passed, 9 skipped.
+
+Before them, a tilemap chunk came to be made with its tiles and has them written and read from C#,
+images loaded as arrays of layers serving as before, a headless run refusing a chunk where Bevy's
+hook panicked, and both tilemap chunk examples are written, 287 (ABI 222, `6bdfd85`). The camera
+controllers wait on the owner's word on `bevy_camera_controller`, as Feathers' three do on
 `bevy_feathers`. The suite: 1,148 passed, 9 skipped.
 
 Before them, a camera came to be aimed at a window the game spawned, an offscreen run draws each
@@ -26,13 +34,6 @@ an angle, `mesh2d_arcs` written, 285 (`ad9cc84`); three commits of moves take N 
 and N 1.3's to 15 with 9 in the bridge (`0a056f5`, `9038256`), and `NormTests.N_4_2` counts the
 README's prose outside its tables' rows as the amended rule reads, 222 of 320 (`2f46ad5`). The
 suite: 1,145 passed, 9 skipped.
-
-Before them, a state's transitions came to reach C# as Bevy's messages (ABI 220), a value set again
-moving to itself and running its exit, enter and self-transition as Bevy's `NextState::set` does, an
-entity goes as a state is entered or by a rule over the transition, a state carries three computed
-states and a joint reads one computed from another, and `state_scoped` and `computed_states` are
-written, 282, `custom_transitions` in part with its reason in TODO.md (`ea00b97`). The suite: 1,127
-passed, 9 skipped.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -204,24 +205,13 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, `logs`.** `Log` writes into Bevy's log at its five levels under the target `csharp`, shown
-or left out by Bevy's filter and `RUST_LOG` as Bevy's own lines are, an error line kept as one of
-the engine's errors, and its `Once` forms write the first time their line of code runs, as Bevy's
-`info_once!` does, with `Log.Once` for any work (ABI 223). A C# system that throws is logged and the
-app runs on, where Bevy's panics, so `App.RequestExit(code)` and `ctx.Exit(code)` end a run with
-Bevy's `AppExit::Error`, which `App.Run` answers. `logs` is written, 288, P ending the run with
-Rust's panic code. `LogTests` holds an error from C# among the engine's, the once forms by line of
-code, and a run's code. The suite passed, 1,151 with 9 skipped. `audio_control` is next, after
-`Audio.cs`'s two other types move into files of their names.
-
-**Now 3, `audio_control` and `window_fallthrough`.** A playing sound's speed and mute are bridged,
-`Audio.SetSpeed`, `SpeedOf`, `SetMuted` and `IsMuted` over Bevy's `AudioSink` and its spatial one
-(ABI 224), and `Audio.HasStarted` says whether Bevy has attached the sink the other calls need,
-which it never does on a machine with no device to play on. `audio_control` is written, its music
-and text in behaviors as B 4 has it, checked with ALSA pointed at its null device and captured with
-none, as the package workflow's container has none, so no run here played through the speakers.
-`window_fallthrough` was reachable already, the window's hit test through Bevy's reflected
-`CursorOptions`, and is written, 290. `Audio.cs`'s settings and playback mode moved into files of
-their names first, N 1.2's list at 217 (`f35d03a`). `AudioPlaybackTests` holds the wait for the sink
-and the refused speed. The suite passed, 1,152 with 9 skipped, before `window_fallthrough`, whose
-example and norm tests passed after it.
+**Now 3, `component_hooks`.** A game gives a component Bevy's hooks while its app is made,
+`App.OnAdd`, `OnInsert`, `OnDiscard` and `OnRemove`, each run inside Bevy with the entity and the
+component's value as it goes on or comes off (ABI 225). Bevy holds the world while a hook runs, and
+a C# hook reaching into it from inside a C# system's own call would have made a second `&mut World`
+beside Bevy's, so the bridge parks no world for the hook's call and such a call answers `NoWorld`,
+the generator's remove hook included. A hook reaches the app's managed side through `HookContext`,
+its resources, messages and command queue. `component_hooks` is written, 291, printing as Bevy's
+does when driven by two keys. `ComponentHookTests` holds Bevy's order with each value, a queued
+despawn landing, the refused call into the world and a hook given too late, and the bridge's test
+the three kinds Bevy runs. The suite passed, 1,154 with 9 skipped.
