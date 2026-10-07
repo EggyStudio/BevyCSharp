@@ -353,15 +353,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 )
                     .chain(),
             );
-            // An irradiance volume's image is only known to be 3D once it has loaded.
-            app.add_systems(
-                bevy::app::PreUpdate,
-                crate::render::probes::drop_flat_volumes,
-            );
+            // An irradiance volume's image is only known to be 3D once it has loaded, and once
+            // `MakeVolume` has reshaped it, so the check comes after the reshape.
             app.init_resource::<crate::render::images::PendingReshapes>();
             app.add_systems(
                 bevy::app::PreUpdate,
-                crate::render::images::reshape_images,
+                (
+                    crate::render::images::reshape_images,
+                    crate::render::probes::drop_flat_volumes,
+                )
+                    .chain(),
             );
 
             // Debug drawing goes through a queue, because a `Gizmos` parameter cannot be held by an

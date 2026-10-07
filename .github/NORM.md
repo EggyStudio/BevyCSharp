@@ -285,7 +285,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 1.1 | checked, `NormTests` | checked, `NormTests` |
 | N 1.2 | checked, `NormTests` | listed 188, `NormTests` |
 | N 1.3 | checked, `NormTests` | listed 11, `NormTests`, 8 of them in the bridge |
-| N 1.4 | checked, `NormTests`, 14 left out | listed 79, `NormTests`, 28 left out |
+| N 1.4 | checked, `NormTests`, 14 left out | listed 77, `NormTests`, 28 left out |
 | N 1.5 | checked, `NormTests` | checked, `NormTests` |
 | N 2.1 | checked, `PublicSurfaceTests` and `PublicApi.txt` | checked, `PublicSurfaceTests` and `PublicApi.txt` |
 | N 2.2 | checked, CS1591 an error in `3DEngine.csproj` | checked, CS1591 and the doc faults errors in `BevyCSharp.csproj` |
@@ -300,7 +300,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 3.1 | by review | by review |
 | N 3.2 | by review | by review |
 | N 3.3 | checked, `NormTests`, 7 left out | checked, `NormTests`, 6 left out |
-| N 3.4 | checked, `NormTests` | listed 41, `NormTests` |
+| N 3.4 | checked, `NormTests` | listed 39, `NormTests` |
 | N 3.5 | by review | by review |
 | N 3.6 | by review | by review |
 | N 3.7 | checked, `FailOnLoggedErrors` | checked, `FailOnLoggedErrors` |
@@ -315,7 +315,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 5.2 | checked, `build/examples-table.py --check` in the workflow | checked, `build/examples-table.py --check` in the workflow |
 | N 5.3 | checked, the workflow's games | checked, the workflow's Courtyard |
 | N 6.1 | checked, `-warnaserror` in the workflow | checked, `-warnaserror` and `CARGO_BUILD_WARNINGS=deny` in the workflow |
-| N 6.2 | checked, `test.yml` | to take, `macos-latest` in the matrix at `6528ea2`, checked at its first green job |
+| N 6.2 | checked, `test.yml` | checked, `test.yml`, the macOS job green at `156d2ce` |
 | N 6.3 | checked, `pack.yml` and `build/version.sh` | checked, `pack.yml` and `build/version.sh` |
 | N 6.4 | checked, `PackageContentsTests` | checked, `NormTests` on the packed package |
 | N 6.5 | checked, `PackageContentsTests` | checked, `NormTests` |

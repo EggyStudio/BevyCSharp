@@ -312,9 +312,10 @@ public static unsafe partial class Render
     /// image is taken as a column only.
     /// </para>
     /// <para>
-    /// Applied when the pixels arrive, since the shape of a picture is not known until it has been
-    /// decoded, so the handle can be passed on at once. An image of any other shape is left as it
-    /// is, with a warning in the log.
+    /// Applied at once to an image whose pixels are here, as one from <see cref="CreateImage"/>
+    /// is, and to a file's when its pixels arrive, since the shape of a picture is not known until
+    /// it has been decoded, so the handle can be passed on at once either way. An image of any
+    /// other shape is left as it is, with a warning in the log.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
@@ -359,8 +360,8 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// For a shader's <c>Texture2DArray</c>, which holds many pictures of one size behind one
-    /// binding, such as a terrain's ground types or a sprite's frames. Applied when the pixels
-    /// arrive, like <see cref="MakeCubemap"/>.
+    /// binding, such as a terrain's ground types or a sprite's frames. Applied as
+    /// <see cref="MakeCubemap"/> is, at once where the pixels are here.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="layers"/> is less than one.</exception>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
@@ -378,8 +379,8 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// For a shader's <c>Texture3D</c>, such as fog, clouds, a color grading table or anything else
-    /// sampled at a point in space. The first slice is the front. Applied when the pixels arrive,
-    /// like <see cref="MakeCubemap"/>.
+    /// sampled at a point in space. The first slice is the front. Applied as
+    /// <see cref="MakeCubemap"/> is, at once where the pixels are here.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="slices"/> is less than one.</exception>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>

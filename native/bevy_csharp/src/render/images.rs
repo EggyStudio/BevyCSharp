@@ -173,6 +173,15 @@ pub extern "C" fn bcs_render_create_target(width: u32, height: u32, format: i32,
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct PendingReshapes(Vec<PendingReshape>);
 
+#[cfg(feature = "render")]
+impl PendingReshapes {
+    /// Whether an image is waiting to be made a 3D texture, which an irradiance volume given it
+    /// in the same frame as `MakeVolume` counts on.
+    pub fn waits_as_volume(&self, image: &bevy::asset::Handle<bevy::image::Image>) -> bool {
+        self.0.iter().any(|waiting| waiting.volume && waiting.image.id() == image.id())
+    }
+}
+
 /// One image waiting to be reshaped.
 #[cfg(feature = "render")]
 pub struct PendingReshape {
@@ -274,9 +283,25 @@ pub extern "C" fn bcs_render_make_cubemap(image: i32) -> i32 {
                     Err(refusal) => return refusal,
                 };
 
+                let id = handle.id();
                 world
                     .get_resource_or_init::<crate::render::post::PendingCubemaps>()
                     .push(handle);
+
+                // An image already here, as one made from pixels is, becomes a cube now rather than
+                // at the next frame's reshaping, so a skybox or a probe given it in the same system
+                // never sees it flat. One still loading waits for the reshaping as before.
+                if world.resource::<bevy::asset::Assets<bevy::image::Image>>().contains(id) {
+                    use bevy::ecs::system::RunSystemOnce;
+
+                    // Made here where the app has not, as a windowless one with images has not.
+                    world.init_resource::<crate::render::post::PendingEnvironments>();
+                    world.init_resource::<crate::render::post::PendingFaces>();
+
+                    if let Err(error) = world.run_system_once(crate::render::post::reinterpret_cubemaps) {
+                        bevy::log::warn!("An image could not be made a cubemap at once, so it waits for the next frame. {error}");
+                    }
+                }
 
                 status::OK
             })
@@ -378,6 +403,7 @@ pub extern "C" fn bcs_render_reshape_image(image: i32, count: i32, volume: i32) 
                     Err(refusal) => return refusal,
                 };
 
+                let id = handle.id();
                 world
                     .get_resource_or_init::<PendingReshapes>()
                     .0
@@ -386,6 +412,14 @@ pub extern "C" fn bcs_render_reshape_image(image: i32, count: i32, volume: i32) 
                         count: count as u32,
                         volume: volume != 0,
                     });
+
+                // Reshaped now where the pixels are already here, as a cubemap is.
+                if world.resource::<bevy::asset::Assets<bevy::image::Image>>().contains(id) {
+                    use bevy::ecs::system::RunSystemOnce;
+                    if let Err(error) = world.run_system_once(reshape_images) {
+                        bevy::log::warn!("An image could not be reshaped at once, so it waits for the next frame. {error}");
+                    }
+                }
 
                 status::OK
             })

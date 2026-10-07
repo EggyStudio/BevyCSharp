@@ -34,6 +34,28 @@ public sealed class LightProbeTests
         Assert.True(front.R > 60 && front.R > front.G + 40 && front.R > front.B + 40, $"the front was {front}");
     }
 
+    /// <summary>
+    /// A volume made from pixels and reshaped by <see cref="Render.MakeVolume"/> lights the cube as
+    /// the computed one does, given to the probe in the system that made it, before the reshape
+    /// has been applied, as the reshape's documentation allows.
+    /// </summary>
+    /// <remarks>
+    /// The image was flat until the next frame, so the probe refused it, and the feature test's
+    /// light hall stopped building at its irradiance volume.
+    /// </remarks>
+    [SkippableFact]
+    public void AVolumeMadeFromPixelsIsTakenAtOnceAndLightsEachFaceFromItsOwnDirection()
+    {
+        Needs.Renderer();
+
+        var picture = VolumeScene(filled: true, fromPixels: true);
+        var top = picture.At(48, 30);
+        var front = picture.At(48, 62);
+
+        Assert.True(top.G > 60 && top.G > top.R + 40 && top.G > top.B + 40, $"the top was {top}");
+        Assert.True(front.R > 60 && front.R > front.G + 40 && front.R > front.B + 40, $"the front was {front}");
+    }
+
     // The light the volume gives each point, shown as it is, unlit by anything else.
     private const string ShowsIrradiance = """
         import bcs;
@@ -285,7 +307,7 @@ public sealed class LightProbeTests
     /// A white cube in a volume lit green from above, red from the front and blue from behind,
     /// with nothing else lighting the scene, or the same cube drawn by a shader of its own.
     /// </summary>
-    private static CapturedImage VolumeScene(bool filled, string? shader = null)
+    private static CapturedImage VolumeScene(bool filled, string? shader = null, bool fromPixels = false)
     {
         ShaderInstance writer = default;
         AssetHandle volume = AssetHandle.None;
@@ -306,8 +328,15 @@ public sealed class LightProbeTests
 
                 const uint size = 4;
 
-                volume = Shaders.CreateImage(size, size * 2, ShaderImageFormat.Rgba16Float, depth: size * 3);
-                _volumeSize = Render.TryImageSize(volume, out var across, out var down, out var deep) ? (across, down, deep) : default;
+                if (fromPixels)
+                {
+                    volume = PixelVolume((int)size);
+                }
+                else
+                {
+                    volume = Shaders.CreateImage(size, size * 2, ShaderImageFormat.Rgba16Float, depth: size * 3);
+                    _volumeSize = Render.TryImageSize(volume, out var across, out var down, out var deep) ? (across, down, deep) : default;
+                }
 
                 var probe = ecs.Spawn();
                 ecs.Add(probe, new Transform
@@ -318,21 +347,24 @@ public sealed class LightProbeTests
                 });
                 Render.SetIrradianceVolume(probe, volume, intensity: 1000f);
 
-                writer = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+                if (!fromPixels)
                 {
-                    Compute = "shaders/write_irradiance.slang",
-                }))
-                    .Set("size", size)
-                    .Set("light", new[]
+                    writer = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
                     {
-                        new Vector4(0f, 0f, 0f, 1f),   // +X
-                        new Vector4(0f, 0f, 0f, 1f),   // -X
-                        new Vector4(0f, 1f, 0f, 1f),   // +Y, the top
-                        new Vector4(0f, 0f, 0f, 1f),   // -Y
-                        new Vector4(1f, 0f, 0f, 1f),   // +Z, the front
-                        new Vector4(0f, 0f, 1f, 1f),   // -Z, the back
-                    })
-                    .SetTexture("volume", volume);
+                        Compute = "shaders/write_irradiance.slang",
+                    }))
+                        .Set("size", size)
+                        .Set("light", new[]
+                        {
+                            new Vector4(0f, 0f, 0f, 1f),   // +X
+                            new Vector4(0f, 0f, 0f, 1f),   // -X
+                            new Vector4(0f, 1f, 0f, 1f),   // +Y, the top
+                            new Vector4(0f, 0f, 0f, 1f),   // -Y
+                            new Vector4(1f, 0f, 0f, 1f),   // +Z, the front
+                            new Vector4(0f, 0f, 1f, 1f),   // -Z, the back
+                        })
+                        .SetTexture("volume", volume);
+                }
 
                 var cube = ecs.Spawn();
                 Render.SetMesh(ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.5f, 1.5f, 1.5f));
@@ -352,6 +384,35 @@ public sealed class LightProbeTests
 
         run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady()).Wait(ShaderMaterialTests.Settled).Capture("picture").Go();
         return run.Picture("picture");
+    }
+
+    /// <summary>
+    /// The light the compute shader writes, as pixels of an image made a volume, green for a
+    /// surface facing up, red for one facing the front and blue for one facing the back, at every
+    /// point of a grid <paramref name="size"/> across.
+    /// </summary>
+    private static AssetHandle PixelVolume(int size)
+    {
+        var pixels = new byte[size * size * 2 * size * 3 * 4];
+        (int Side, byte R, byte G, byte B)[] lit = [(2, 0, 255, 0), (4, 255, 0, 0), (5, 0, 0, 255)];
+        foreach (var (side, r, g, b) in lit)
+        {
+            for (var point = 0; point < size * size * size; point++)
+            {
+                // The packing bcs_scene's irradiance_texel writes, the two signs of an axis down
+                // each slice and the three axes along the depth.
+                var (x, y, z) = (point % size, point / size % size, point / (size * size));
+                var row = ((z + (side / 2 * size)) * 2 * size) + y + (side % 2 * size);
+                var at = ((row * size) + x) * 4;
+                (pixels[at], pixels[at + 1], pixels[at + 2]) = (r, g, b);
+            }
+        }
+
+        for (var at = 3; at < pixels.Length; at += 4) pixels[at] = 255;
+
+        var image = Render.CreateImage(pixels, (uint)size, (uint)(size * 2 * size * 3), srgb: false);
+        Render.MakeVolume(image, size * 3);
+        return image;
     }
 
     /// <summary>The summed channels of the columns from <paramref name="from"/> up to <paramref name="to"/>.</summary>

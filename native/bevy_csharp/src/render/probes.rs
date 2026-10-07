@@ -238,13 +238,20 @@ pub unsafe extern "C" fn bcs_render_set_irradiance_volume(
 /// Whether an image can be an irradiance volume, as far as can be told yet.
 ///
 /// One still loading is given the benefit of the doubt, and [`drop_flat_volumes`] takes it off
-/// again if it arrives flat.
+/// again if it arrives flat. So is one waiting to be made 3D, as an image made from pixels and
+/// given to `MakeVolume` is until the next frame, since its docs let the handle be passed on at
+/// once.
 #[cfg(feature = "render")]
 fn may_be_a_volume(world: &bevy::ecs::world::World, image: &bevy::asset::Handle<bevy::image::Image>) -> bool {
-    world
-        .resource::<bevy::asset::Assets<bevy::image::Image>>()
-        .get(image)
-        .is_none_or(|image| image.texture_descriptor.dimension == bevy::render::render_resource::TextureDimension::D3)
+    let waiting = world
+        .get_resource::<crate::render::images::PendingReshapes>()
+        .is_some_and(|pending| pending.waits_as_volume(image));
+
+    waiting
+        || world
+            .resource::<bevy::asset::Assets<bevy::image::Image>>()
+            .get(image)
+            .is_none_or(|image| image.texture_descriptor.dimension == bevy::render::render_resource::TextureDimension::D3)
 }
 
 /// Takes an irradiance volume off an entity whose image turned out not to be 3D.
@@ -257,10 +264,16 @@ pub fn drop_flat_volumes(
     mut commands: bevy::ecs::system::Commands,
     volumes: bevy::ecs::system::Query<(bevy::ecs::entity::Entity, &bevy::light::IrradianceVolume)>,
     images: bevy::ecs::system::Res<bevy::asset::Assets<bevy::image::Image>>,
+    pending: Option<bevy::ecs::system::Res<crate::render::images::PendingReshapes>>,
 ) {
     use bevy::render::render_resource::TextureDimension;
 
     for (entity, volume) in &volumes {
+        // Flat until `reshape_images` gets to it, which may wait for the image to load.
+        if pending.as_ref().is_some_and(|pending| pending.waits_as_volume(&volume.voxels)) {
+            continue;
+        }
+
         let Some(image) = images.get(&volume.voxels) else { continue };
 
         if image.texture_descriptor.dimension != TextureDimension::D3 {
