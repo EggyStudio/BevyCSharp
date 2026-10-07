@@ -19,7 +19,6 @@ BevyCSharp.Tests/CliEnvelopeTests.cs
 BevyCSharp.Tests/CliSessionTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/ConsoleTests.cs
-BevyCSharp.Tests/DataAssetTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
 BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
@@ -78,7 +77,6 @@ BevyCSharp.Tests/PersistentTests.cs
 BevyCSharp.Tests/PhysicsComponentTests.cs
 BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
-BevyCSharp.Tests/ProjectSettingsTests.cs
 BevyCSharp.Tests/RayTracingTests.cs
 BevyCSharp.Tests/ReflectedComponentTests.cs
 BevyCSharp.Tests/ReflectionTests.cs
@@ -92,7 +90,6 @@ BevyCSharp.Tests/RotationTests.cs
 BevyCSharp.Tests/SampleLightTests.cs
 BevyCSharp.Tests/SaveGameTests.cs
 BevyCSharp.Tests/ScaleTests.cs
-BevyCSharp.Tests/SceneFileTests.cs
 BevyCSharp.Tests/SceneValueTests.cs
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
@@ -109,7 +106,6 @@ BevyCSharp.Tests/SpriteTests.cs
 BevyCSharp.Tests/StateTests.cs
 BevyCSharp.Tests/StreamingTests.cs
 BevyCSharp.Tests/SubStateTests.cs
-BevyCSharp.Tests/SubsceneTests.cs
 BevyCSharp.Tests/SystemOrderTests.cs
 BevyCSharp.Tests/TextConventionTests.cs
 BevyCSharp.Tests/TimingTests.cs
