@@ -46,6 +46,12 @@ public struct Vec2 : IEquatable<Vec2>, System.Numerics.IAdditionOperators<Vec2, 
         }
     }
 
+    /// <summary>The vector of length one at <paramref name="radians"/> counterclockwise from X, Bevy's <c>from_angle</c>.</summary>
+    public static Vec2 FromAngle(float radians) => new(MathF.Cos(radians), MathF.Sin(radians));
+
+    /// <summary>The angle from X to this vector in radians, between minus and plus a half turn, Bevy's <c>to_angle</c>.</summary>
+    public readonly float ToAngle() => MathF.Atan2(Y, X);
+
     /// <summary>The dot product.</summary>
     public static float Dot(Vec2 a, Vec2 b) => a.X * b.X + a.Y * b.Y;
 

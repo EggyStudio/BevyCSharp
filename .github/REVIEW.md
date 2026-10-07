@@ -10,33 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4eb8838`. The state slots moved into a module of their own and the patch delegate
-into a file of its name, and the joint state tests into their area's folder, N 1.2's list at 228,
-N 1.3's at 16 and N 1.4's at 87 to mend (`fee3190`, `4eb8838`). Hermite, cardinal, B-spline and
-Bezier splines are made into cubic curves sampled along as Bevy makes them, and `cubic_splines` is
-written (`9f5537a`), the last of the math gap. Shapes in the plane give boxes and circles about them
-as Bevy bounds them, rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is
-written (`cbe9a1f`). Verdict 4's mend: the two plays name their logs folder in their own steps,
-where the runner context is allowed, and `WorkflowTests` holds every expression in the workflows to
-the contexts GitHub allows at its place, naming the refused line of `aa55e0d`'s file when run over
-it, listed under N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs.
-The suite: 1,109 passed, 9 skipped.
+Reviewed up to `ea00b97`. A state's transitions reach C# as Bevy's messages (ABI 220), a value set
+again moving to itself and running its exit, enter and self-transition as Bevy's `NextState::set`
+does, an entity goes as a state is entered or by a rule over the transition, a state carries three
+computed states and a joint reads one computed from another, and `state_scoped` and
+`computed_states` are written, 282, `custom_transitions` in part with its reason in TODO.md
+(`ea00b97`). The suite: 1,127 passed, 9 skipped.
+
+Before them, the state slots moved into a module of their own and the patch delegate into a file of
+its name, and the joint state tests into their area's folder, N 1.2's list at 228, N 1.3's at 16 and
+N 1.4's at 87 to mend (`fee3190`, `4eb8838`). Hermite, cardinal, B-spline and Bezier splines are
+made into cubic curves sampled along as Bevy makes them, and `cubic_splines` is written (`9f5537a`),
+the last of the math gap. Shapes in the plane give boxes and circles about them as Bevy bounds them,
+rays and swept volumes meet those as Bevy casts them, and `bounding_2d` is written (`cbe9a1f`).
+Verdict 4's mend: the two plays name their logs folder in their own steps, where the runner context
+is allowed, and `WorkflowTests` holds every expression in the workflows to the contexts GitHub
+allows at its place, naming the refused line of `aa55e0d`'s file when run over it, listed under
+N 1.4 with its reason (`3397439`); the verdict settles when a run starts its jobs. The suite: 1,109
+passed, 9 skipped.
 
 Before them, each change of the keyboard, the mouse, a touch and a pad is read as its Bevy message
 in the order it came, 14 message records drained into the bus each frame (ABI 219), and the four
 input event examples are written, 277 (`b0f9841`); a box and a ball are shapes as values that points
 are sampled in and on as Bevy samples them, and `random_sampling` is written (`a31e3b3`). The owner
 pushed, and both workflows failed before any job began, which is Verdict 4.
-
-Before them, a mesh made in code came to be skinned to joint entities, four joints and weights a
-vertex, inverse bindposes made from transforms and Bevy's `SkinnedMesh` with the bounds that follow
-(ABI 217), `custom_skinned_mesh` written, 271, which closes the animation gap (`3208c70`); the input
-focus moves between interface nodes by direction with edges a game draws before the nearest node
-(ABI 218), `directional_navigation` and its overrides written, 273 (`f127b1f`); and a touch and its
-phase moved into files of their names, N 1.2's list at 229 (`dfa22f2`). Feathers' three widget
-examples need `bevy_feathers`, a crate the lock does not hold, which waits on the owner's word; the
-reply on input as Bevy's messages (ABI 219) is being written, its commit to come. Nothing was pushed
-since `0013c52`, whose run passed on both systems.
 
 The norm has 44 rules, and this engine stands at 29 checked, 4 with places listed, 2 to take
 and 9 by review.
@@ -208,28 +205,6 @@ and 8 to 12 are taken from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Now 3, the states, three examples.** Each transition of a state reaches C# as Bevy's
-`StateTransitionEvent` of its enum, drained from the bridge into the bus each frame and read the
-frame after (ABI 220). The first value is a move from nothing, and a value set again is a move to
-itself, which runs its `[OnExit]`, its `[OnEnter]` and an `[OnTransition]` from it to itself, as
-Bevy's `NextState::set` does. `EcsWorld.DespawnOnEnter` is Bevy's own, and `DespawnWhen` takes a
-rule over the transition, asked as the transition is read, so its entity goes a frame later than
-Bevy's would. A state carries three computed states rather than two, and a joint reads a state
-computed from one state by working it out again from that state's value, which `computed_states`
-needs for its tutorial. A computed state that is absent is no longer reported as a state never
-added. `state_scoped` and `computed_states` are written, 282, the second's buttons in a
-`MenuButton` behavior as B 4 has it, and `custom_transitions` is written in part, its restart run
-by the state's own entering and leaving where Bevy's runs schedules of its own, which TODO now
-lists among the parts. The menus are clicked in a window alone, so the games were checked
-offscreen started in play, with turbo, the pause, both tutorial texts and the restart.
-`JointStateTests` moved into `Core` first (`4eb8838`). The README's gallery took a row, so the
-package's sentence went to one line and the package's layout to BUILDING.md. The suite passed,
-1,127 with 9 skipped. A second window is next.
-
-Shared: `DespawnOnEnter` and `DespawnWhen`, neither of which 3DEngine has beside its
-`DespawnOnExit`, and a joint state reading a computed one. 3DEngine has the transition as a message
-already, as `StateTransition<TState>`.
-
 **Now 3, a second window, two examples.** A window past the first is Bevy's `Window` spawned
 through reflection, as it could be already, and the bridge adds what reflection cannot name, a
 camera aimed at the window's entity, `Render.SetCameraTarget(camera, window)` (ABI 221). An
@@ -245,3 +220,19 @@ which reflection cannot name either, and joins the single rows in TODO. The suit
 with 9 skipped. Next is `mesh2d_arcs`, Bevy's circular sector and segment with their bounds and
 the angle their meshes map an image at, and then `shader_material_2d`, a Slang material drawn on a
 2D mesh.
+
+**Now 3, `mesh2d_arcs`, and two files mended.** Bevy's `Arc2d`, `CircularSector` and
+`CircularSegment` are in the math with their bounds, ported from Bevy's, a sector's box taking in
+the disc's center and its circle the one about its point and ends below a half disc, and
+`ArcBoundsTests` holds Bevy's own cases for both at v0.19.1. `MeshShape.UvAngle` builds a sector or
+a segment mapped onto its image at an angle, Bevy's `CircularMeshUvMode::Mask`, and
+`mesh2d_arcs` is written, 285, its behaviors drawing each shape's bounds as Bevy's `DrawBounds`
+does. The bridge's render assets were split first into primitives, meshes, images and materials,
+N 1.3's list at 15 (`0a056f5`), and the nine mesh and material types of `RenderMaterials.cs` moved
+into files of their names, N 1.2's at 219 (`9038256`). The README's gallery took another row, so
+its walk's sentence went to one line and BUILDING.md names the script. The gallery takes a row
+every four examples written, so the README meets N 4.2's cap again each time, and a line of prose
+goes each time. A gallery of five a row, or a cap that counts the gallery apart, would end that,
+and the choice belongs to the norm. `shader_material_2d` needs Bevy's 2D material pipeline
+built again for a material whose layout its program gives, since `Material2d` is generic to its
+Rust type all the way down, so the two-row gaps come first, the tilemap chunks next.

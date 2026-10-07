@@ -42,11 +42,9 @@ the most examples, and the largest is taken between groups of examples. The coun
   whose outputs follow the camera's prepasses.
 - **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
   the protocol is worth carrying beside it.
-- **A 2D mesh drawn by a shader, and the angle a round one maps its image at, two examples.** A
-  `Mesh2d` is drawn with Bevy's `ColorMaterial`, and `shader_material_2d` needs a Slang material
-  that draws on one as `Material` does on a 3D mesh. `mesh2d_arcs` needs the angle at which a
-  sector's or a segment's mesh maps its image, which Bevy's mesh builder takes and `MeshShape` does
-  not.
+- **A 2D mesh drawn by a shader, one example.** A `Mesh2d` is drawn with Bevy's `ColorMaterial`,
+  and `shader_material_2d` needs a Slang material that draws on one as `Material` does on a 3D
+  mesh.
 - **An image loaded as an array of layers, two examples.** `tilemap_chunk` and
   `tilemap_chunk_orientation` draw Bevy's `TilemapChunk`, whose tiles are the layers of one image
   cut as it loads.

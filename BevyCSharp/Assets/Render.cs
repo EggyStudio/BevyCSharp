@@ -26,7 +26,8 @@ public static unsafe partial class Render
     /// </summary>
     /// <param name="shape">
     /// One of the constants on <see cref="MeshShape"/>, a band around a flat one from
-    /// <see cref="MeshShape.Ring"/>, or a flat one made solid by <see cref="MeshShape.Extrusion"/>.
+    /// <see cref="MeshShape.Ring"/>, a flat one made solid by <see cref="MeshShape.Extrusion"/>, or a
+    /// sector or a segment with its image turned by <see cref="MeshShape.UvAngle"/>.
     /// </param>
     /// <param name="a">
     /// Width for a cuboid, plane or rectangle, radius for a sphere, capsule, cylinder, cone or
@@ -40,8 +41,8 @@ public static unsafe partial class Render
     /// </param>
     /// <param name="c">
     /// Depth for a cuboid, height for a conical frustum, the rings of a UV sphere from pole to pole,
-    /// the band's width for a ring and the depth of an extrusion, whose first two numbers measure
-    /// the flat shape they are made from.
+    /// the band's width for a ring, the depth of an extrusion and the angle an image is turned by,
+    /// whose first two numbers measure the flat shape they are made from.
     /// </param>
     /// <remarks>
     /// The shape and its measures are kept beside the handle (<see cref="RecipeOf"/>), so the mesh

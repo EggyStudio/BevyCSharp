@@ -105,4 +105,18 @@ public static class MeshShape
     /// between their edges.
     /// </remarks>
     public static string Extrusion(string outline) => $"Extrusion({outline})";
+
+    /// <summary>
+    /// A sector or a segment whose image is mapped at an angle, sized by its radius, the half angle
+    /// it spans and, third, the angle in radians.
+    /// </summary>
+    /// <param name="arc"><see cref="CircularSector"/> or <see cref="CircularSegment"/>.</param>
+    /// <remarks>
+    /// Bevy's <c>CircularMeshUvMode::Mask</c>. A sector or a segment is mapped onto its image as a
+    /// mask over the circle it is cut from, the circle's center at the image's center, and the angle
+    /// turns the vertices as they are mapped rather than the image. A shape turned by its transform
+    /// shows its image upright when the angle is that turn the other way, which is how Bevy's
+    /// <c>mesh2d_arcs</c> keeps its logo upright in every slice.
+    /// </remarks>
+    public static string UvAngle(string arc) => $"UvAngle({arc})";
 }

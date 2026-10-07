@@ -3,8 +3,9 @@ namespace Bevy;
 /// <summary>A 2D shape whose bounds can be taken where an isometry places it, Bevy's <c>Bounded2d</c>.</summary>
 /// <remarks>
 /// <see cref="Rectangle"/>, <see cref="Circle"/>, <see cref="Triangle2d"/>, <see cref="Segment2d"/>,
-/// <see cref="Capsule2d"/> and <see cref="RegularPolygon"/>, each centered on the origin as Bevy's are,
-/// so a game holds a mix of them and asks each for its bounds alike.
+/// <see cref="Capsule2d"/>, <see cref="RegularPolygon"/>, <see cref="Arc2d"/>,
+/// <see cref="CircularSector"/> and <see cref="CircularSegment"/>, each centered on the origin as
+/// Bevy's are, so a game holds a mix of them and asks each for its bounds alike.
 /// </remarks>
 public interface IBounded2d
 {

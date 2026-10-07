@@ -79,7 +79,7 @@ bloom_2d	can	through Bevy's reflected Bloom
 cpu_draw	can
 dynamic_mip_generation	missing	generating an image's mipmaps on the GPU
 mesh2d_alpha_mode	can
-mesh2d_arcs	missing	the angle a sector's or a segment's mesh maps its image at
+mesh2d_arcs	can
 mesh2d_manual	n/a	writes a render pipeline in Rust with the mid-level render API
 mesh2d	can
 mesh2d_repeated_texture	can

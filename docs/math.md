@@ -26,9 +26,9 @@ Drawing a shape is `Render.CreateMesh` with the shape's name and measures, its f
 
 ## Bounding volumes and casts
 
-A shape in the plane, a `Rectangle`, `Circle`, `Triangle2d`, `Segment2d`, `Capsule2d` or
-`RegularPolygon`, gives its bounds where an `Isometry2d` places it, a box along the axes or a circle
-about it, as Bevy's `Bounded2d` does. Each is an `IBounded2d`, so a game holding a mix asks each
+A shape in the plane, a `Rectangle`, `Circle`, `Triangle2d`, `Segment2d`, `Capsule2d`,
+`RegularPolygon`, `Arc2d`, `CircularSector` or `CircularSegment`, gives its bounds where an
+`Isometry2d` places it, a box along the axes or a circle about it, as Bevy's `Bounded2d` does. Each is an `IBounded2d`, so a game holding a mix asks each
 alike. A box is cheap and tight on a shape that stays square to the axes, and a circle stays the
 same as its shape turns:
 
@@ -53,6 +53,11 @@ float? wall = sweep.CircleCollisionAt(circle);             // how far the ball r
 The tests are Bevy's own, the slab test for a box and the closest approach for a circle, and a
 triangle with a wide angle is held by the circle on the side across that angle rather than the
 larger one through its corners, as Bevy's is.
+
+An arc, and the sector and the segment cut along one, open down from their midpoint at the top of
+the circle, as Bevy's do. `CircularSector.FromTurns(40f, 0.25f)` is a quarter of a disc about the
+top, turned by minus its half angle to start there and run clockwise. Its box takes in those of the
+circle's extremes the turned arc passes through, and a sector's takes in the disc's center as well.
 
 ## Cubic curves
 

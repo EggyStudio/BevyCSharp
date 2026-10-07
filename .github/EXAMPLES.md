@@ -4,13 +4,13 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**284 written, 16 written in part, 0 can be written, 63 missing and 58 do not apply.** Of the 363 that apply, 300 can be written with what is bridged, 16 of them leaving something out.
+**285 written, 16 written in part, 0 can be written, 62 missing and 58 do not apply.** Of the 363 that apply, 301 can be written with what is bridged, 16 of them leaving something out.
 
-**136 of the 143 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**137 of the 144 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 23 | 0 | 0 | 5 | 1 | 8 of 8 |
+| [2D Rendering](#2d-rendering) | 24 | 0 | 0 | 4 | 1 | 9 of 9 |
 | [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 10 | 0 | 0 | 2 | 7 | 1 of 2 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **284** | **16** | **0** | **63** | **58** | **136 of 143** |
+| **All** | **285** | **16** | **0** | **62** | **58** | **137 of 144** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -59,7 +59,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`dynamic_mip_generation`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/dynamic_mip_generation.rs) | Demonstrates use of the mipmap generation plugin to generate mipmaps for a texture | missing, generating an image's mipmaps on the GPU |
 | [`mesh2d`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d.rs) | Renders a 2d mesh | [written](../BevyCSharp.Examples/2d/mesh2d.cs) |
 | [`mesh2d_alpha_mode`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_alpha_mode.rs) | Used to test alpha modes with mesh2d | [written](../BevyCSharp.Examples/2d/mesh2d_alpha_mode.cs) |
-| [`mesh2d_arcs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_arcs.rs) | Demonstrates UV-mapping of the circular segment and sector primitives | missing, the angle a sector's or a segment's mesh maps its image at |
+| [`mesh2d_arcs`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_arcs.rs) | Demonstrates UV-mapping of the circular segment and sector primitives | [written](../BevyCSharp.Examples/2d/mesh2d_arcs.cs) |
 | [`mesh2d_manual`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_manual.rs) | Renders a custom mesh "manually" with "mid-level" renderer apis | does not apply, writes a render pipeline in Rust with the mid-level render API |
 | [`mesh2d_repeated_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_repeated_texture.rs) | Showcase of using `uv_transform` on the `ColorMaterial` of a `Mesh2d` | [written](../BevyCSharp.Examples/2d/mesh2d_repeated_texture.cs) |
 | [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/mesh2d_vertex_color_texture.rs) | Renders a 2d mesh with vertex color attributes | [written](../BevyCSharp.Examples/2d/mesh2d_vertex_color_texture.cs) |

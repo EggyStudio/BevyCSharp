@@ -286,9 +286,10 @@ per-platform bridge and packs nothing, and nothing a commit message says changes
 
 A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
 builds the bridge for all six platforms, runs the tests on Linux and Windows, plays Courtyard and
-walks the README's install in a container, and packs only once all of them pass. The package is
-kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its **publish**
-box pushes it to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
+walks the README's install in a container (`build/readme-walk.sh`), and packs only once all of
+them pass. The package is kept as the run's artifact, to download and upload to nuget.org by hand.
+Ticking its **publish** box pushes it to nuget.org from the run instead, which needs the
+`NUGET_API_KEY` secret.
 
 The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
 GitHub runs the step's script in. A step that fails having said nothing is given an error naming

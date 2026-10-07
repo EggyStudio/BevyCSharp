@@ -44,6 +44,7 @@ internal static class Catalog
         new("cpu_draw", CpuDraw.Build, CpuDraw.Configure),
         new("mesh2d", Mesh2dExample.Build),
         new("mesh2d_alpha_mode", Mesh2dAlphaMode.Build),
+        new("mesh2d_arcs", Mesh2dArcs.Build),
         new("mesh2d_repeated_texture", Mesh2dRepeatedTexture.Build),
         new("mesh2d_vertex_color_texture", Mesh2dVertexColorTexture.Build),
         new("move_sprite", MoveSprite.Build),

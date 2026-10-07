@@ -72,6 +72,10 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
         return ring(outline, a, b, c);
     }
 
+    if let Some(arc) = kind.strip_prefix("UvAngle(").and_then(|rest| rest.strip_suffix(')')) {
+        return turned_image(arc, a, b, c);
+    }
+
     if let Some(outline) = kind.strip_prefix("Extrusion(").and_then(|rest| rest.strip_suffix(')')) {
         return extrusion(outline, a, b, c);
     }
@@ -135,6 +139,26 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
     };
 
     Some(mesh)
+}
+
+/// A sector or a segment whose texture coordinates are turned by `angle`, in radians, Bevy's
+/// `CircularMeshUvMode::Mask { angle }`, by the sector's or the segment's radius and half angle.
+///
+/// Bevy maps a sector or a segment onto its image as a mask over the circle it is cut from, the
+/// circle's center at the image's, and the angle turns the vertices as they are mapped rather than
+/// the image, so a shape turned one way by its transform shows its image upright when the angle is
+/// the turn the other way. Nothing for a name that is neither.
+#[cfg(feature = "render")]
+fn turned_image(arc: &str, radius: f32, half_angle: f32, angle: f32) -> Option<bevy::mesh::Mesh> {
+    use bevy::math::primitives::{CircularSector, CircularSegment};
+    use bevy::mesh::{CircularMeshUvMode, Meshable};
+
+    let uv_mode = CircularMeshUvMode::Mask { angle };
+    match arc {
+        "CircularSector" => Some(CircularSector::new(radius, half_angle).mesh().uv_mode(uv_mode).into()),
+        "CircularSegment" => Some(CircularSegment::new(radius, half_angle).mesh().uv_mode(uv_mode).into()),
+        _ => None,
+    }
 }
 
 /// The band a flat shape's outline makes, `thickness` wide on the inside of the shape `a` and `b`

@@ -888,6 +888,7 @@ static bool IsDrawn(Entity entity);                             // Whether an en
 ```csharp
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
 static string Extrusion(string outline);                        // A flat shape pushed out into a solid along Z, sized by that shape's measures and, third, how deep it is, centered on its middle
+static string UvAngle(string arc);                              // A sector or a segment whose image is mapped at an angle, sized by its radius, the half angle it spans and, third, the angle in radians
 ```
 
 ### `Render2d`
@@ -1413,6 +1414,8 @@ static Vec3 Cross(Vec3 a, Vec3 b);                              // The cross pro
 ```csharp
 static float Dot(Vec2 a, Vec2 b);                               // The dot product
 static float PerpDot(Vec2 a, Vec2 b);                           // The dot product of a turned a quarter turn counterclockwise with b, positive where b lies counterclockwise of a
+static Vec2 FromAngle(float radians);                           // The vector of length one at radians counterclockwise from X, Bevy's from_angle
+float ToAngle();                                                // The angle from X to this vector in radians, between minus and plus a half turn, Bevy's to_angle
 static Vec2 Min(Vec2 a, Vec2 b);                                // The smaller of each component
 static Vec2 Max(Vec2 a, Vec2 b);                                // The larger of each component
 static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each component held between its bounds
@@ -1477,7 +1480,7 @@ float? CircleCollisionAt(BoundingCircle other);                 // How far along
 ### `IBounded2d`
 
 ```csharp
-Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d, which Rectangle, Circle, Triangle2d, Segment2d, Capsule2d and RegularPolygon each give
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d, which Rectangle, Circle, Triangle2d, Segment2d, Capsule2d, RegularPolygon, Arc2d, CircularSector and CircularSegment each give
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle, which each of them gives
 ```
 
@@ -1524,6 +1527,36 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 
 ```csharp
 IEnumerable<Vec2> Vertices(float rotation);                     // Its corners, turned by an angle, the first up before turning
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `Arc2d`
+
+```csharp
+static Arc2d FromRadians(float radius, float angle);            // An arc spanning angle radians in all
+static Arc2d FromDegrees(float radius, float angle);            // An arc spanning angle degrees in all
+static Arc2d FromTurns(float radius, float fraction);           // An arc spanning fraction of a whole turn, half a turn a semicircle
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `CircularSector`
+
+```csharp
+static CircularSector FromRadians(float radius, float angle);   // A sector spanning angle radians in all
+static CircularSector FromDegrees(float radius, float angle);   // A sector spanning angle degrees in all
+static CircularSector FromTurns(float radius, float fraction);  // A sector spanning fraction of a whole turn, half a turn a half disc
+Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
+BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
+```
+
+### `CircularSegment`
+
+```csharp
+static CircularSegment FromRadians(float radius, float angle);  // A segment whose arc spanning angle radians in all
+static CircularSegment FromDegrees(float radius, float angle);  // A segment whose arc spanning angle degrees in all
+static CircularSegment FromTurns(float radius, float fraction); // A segment whose arc spanning fraction of a whole turn, half a turn a half disc
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about it where it is placed
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about it where it is placed
 ```
