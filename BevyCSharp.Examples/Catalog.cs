@@ -168,6 +168,7 @@ internal static class Catalog
 
         // Audio
         new("audio", AudioExample.Build),
+        new("audio_control", AudioControl.Build),
         new("play_sound_effect", PlaySoundEffect.Build),
         new("soundtrack", Soundtrack.Build),
         new("spatial_audio_2d", SpatialAudio2d.Build, SpatialAudio2d.Configure),
@@ -338,6 +339,7 @@ internal static class Catalog
         new("drag_to_scroll", DragToScroll.Build),
         new("scroll", ScrollExample.Build),
         new("viewport_node", ViewportNode.Build, ViewportNode.Configure),
+        new("window_fallthrough", WindowFallthrough.Build, WindowFallthrough.Configure),
         new("render_ui_to_texture", RenderUiToTexture.Build),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),

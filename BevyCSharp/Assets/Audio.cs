@@ -172,6 +172,21 @@ public static unsafe class Audio
         return volume;
     }
 
+    /// <summary>Whether Bevy has attached the sink that plays a sound, which the calls that reach the sink need.</summary>
+    /// <remarks>
+    /// A sound is given its sink the frame after it is started, once its clip has loaded, and never
+    /// where the machine has no device to play on, as a container often has not. A system that
+    /// controls a sound asks this first, as Bevy's own skip a query for a sink that is not there.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no audio.</exception>
+    public static bool HasStarted(Entity playing)
+    {
+        var status = Native.bcs_audio_state(playing.Bits, null, null);
+        if (status == NativeStatus.NotPresent) return false;
+        Native.Check(status, $"asking whether {playing} has started");
+        return true;
+    }
+
     /// <summary>Whether a sound is paused.</summary>
     /// <exception cref="BevyNativeException">
     /// The entity is gone, is not playing yet, or this build has no audio.
@@ -309,6 +324,45 @@ public static unsafe class Audio
     public static void Seek(Entity playing, float seconds) =>
         Native.Check(
             Native.bcs_audio_seek(playing.Bits, seconds), $"seeking {playing} to {seconds}s");
+
+    /// <summary>Sets how fast a playing sound plays, one as recorded, Bevy's <c>AudioSink::set_speed</c>.</summary>
+    /// <remarks>
+    /// The pitch goes with the speed, as a record played fast is higher, which Bevy's
+    /// <c>audio_control</c> sweeps between a tenth and twice as fast. Reaches the sink Bevy attaches
+    /// once playback has started, so a sound started this frame carries none yet.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The speed is zero or less, the entity is gone or not playing yet, or this build has no audio.
+    /// </exception>
+    public static void SetSpeed(Entity playing, float speed) =>
+        Native.Check(Native.bcs_audio_speed(playing.Bits, speed), $"setting {playing}'s speed to {speed}");
+
+    /// <summary>How fast a playing sound plays, one as recorded.</summary>
+    /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
+    public static float SpeedOf(Entity playing)
+    {
+        float speed;
+        Native.Check(Native.bcs_audio_playback(playing.Bits, &speed, null), $"reading {playing}'s speed");
+        return speed;
+    }
+
+    /// <summary>Mutes a playing sound or lets it be heard again, Bevy's <c>AudioSink::mute</c> and <c>unmute</c>.</summary>
+    /// <remarks>
+    /// Apart from the volume, which muting keeps, so the sound comes back as loud as it was, and a
+    /// volume set while it is muted is the one heard once it is not.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
+    public static void SetMuted(Entity playing, bool muted) =>
+        Native.Check(Native.bcs_audio_mute(playing.Bits, muted ? 1 : 0), $"{(muted ? "muting" : "unmuting")} {playing}");
+
+    /// <summary>Whether a playing sound is muted.</summary>
+    /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
+    public static bool IsMuted(Entity playing)
+    {
+        int muted;
+        Native.Check(Native.bcs_audio_playback(playing.Bits, null, &muted), $"reading whether {playing} is muted");
+        return muted != 0;
+    }
 
     /// <summary>
     /// Scales every sound at once, as a settings screen does.

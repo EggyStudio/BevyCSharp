@@ -381,6 +381,111 @@ pub unsafe extern "C" fn bcs_audio_state(entity: u64, volume: *mut f32, paused: 
     })
 }
 
+/// Runs `f` over a playing sound's sink, a plain one or a spatial one, which carry the same trait.
+///
+/// Answers [`status::NO_ENTITY`] for an entity that is gone and [`status::NOT_PRESENT`] before the
+/// sink exists, which is the frame the sound was started in.
+#[cfg(feature = "render")]
+fn with_sink(entity: u64, f: impl FnOnce(&mut dyn bevy::audio::AudioSinkPlayback) -> i32) -> i32 {
+    use bevy::audio::{AudioSink, SpatialAudioSink};
+
+    with_world(|world| {
+        let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+            return status::NO_ENTITY;
+        };
+
+        if let Some(mut sink) = entity_mut.get_mut::<AudioSink>() {
+            f(&mut *sink)
+        } else if let Some(mut sink) = entity_mut.get_mut::<SpatialAudioSink>() {
+            f(&mut *sink)
+        } else {
+            status::NOT_PRESENT
+        }
+    })
+}
+
+/// Sets how fast a playing sound plays, one as recorded, Bevy's `AudioSink::set_speed`.
+///
+/// A speed changes the pitch with it, as a record played fast does. Zero or less is refused, since
+/// a sound held still is a paused one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_audio_speed(entity: u64, speed: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, speed);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if !(speed > 0.0) || !speed.is_finite() {
+                return status::INVALID_STATE;
+            }
+
+            with_sink(entity, |sink| {
+                sink.set_speed(speed);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Mutes a playing sound or lets it be heard again, Bevy's `AudioSink::mute` and `unmute`.
+///
+/// Muting keeps the sound's volume, so unmuting brings it back as loud as it was, and a volume set
+/// while muted is the one heard once unmuted.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_audio_mute(entity: u64, muted: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, muted);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_sink(entity, |sink| {
+                if muted != 0 {
+                    sink.mute();
+                } else {
+                    sink.unmute();
+                }
+                status::OK
+            })
+        }
+    })
+}
+
+/// Writes how fast a playing sound plays and whether it is muted.
+///
+/// # Safety
+/// `speed` and `muted` must each be writable or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_audio_playback(entity: u64, speed: *mut f32, muted: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, speed, muted);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_sink(entity, |sink| {
+                if !speed.is_null() {
+                    unsafe { *speed = sink.speed() };
+                }
+                if !muted.is_null() {
+                    unsafe { *muted = sink.is_muted() as i32 };
+                }
+                status::OK
+            })
+        }
+    })
+}
+
 /// Moves playback to a point in the clip, in seconds from its start.
 ///
 /// A looping sound cannot be sought and reports [`status::INVALID_STATE`], because looping is

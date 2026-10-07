@@ -1239,6 +1239,7 @@ static void SetVolume(Entity playing, float volume);            // Sets a playin
 static void Pause(Entity playing, float volume = 1f);           // Pauses a playing sound, keeping its place
 static void Resume(Entity playing, float volume = 1f);          // Resumes a paused sound
 static float VolumeOf(Entity playing);                          // A sound's volume, its own times its bus's, before the global volume
+static bool HasStarted(Entity playing);                         // Whether Bevy has attached the sink that plays a sound, which the calls that reach the sink need
 static bool IsPaused(Entity playing);                           // Whether a sound is paused
 static void Stop(Entity playing);                               // Stops a sound and despawns the entity playing it
 static void SetListener(Entity entity, float earGap = 0f);      // Makes an entity the ear spatial sound is heard from
@@ -1247,6 +1248,10 @@ static float DecibelsFromVolume(float volume);                  // The decibels 
 static void SetListener(Entity entity, Vec3 left, Vec3 right);  // Makes an entity the ear, with each ear placed exactly
 static float PositionOf(Entity playing);                        // How far into its clip a sound has played, in seconds
 static void Seek(Entity playing, float seconds);                // Moves playback to a point in the clip, in seconds from its start
+static void SetSpeed(Entity playing, float speed);              // Sets how fast a playing sound plays, one as recorded, Bevy's AudioSink::set_speed
+static float SpeedOf(Entity playing);                           // How fast a playing sound plays, one as recorded
+static void SetMuted(Entity playing, bool muted);               // Mutes a playing sound or lets it be heard again, Bevy's AudioSink::mute and unmute
+static bool IsMuted(Entity playing);                            // Whether a playing sound is muted
 static void SetGlobalVolume(float volume);                      // Scales every sound at once, as a settings screen does
 ```
 

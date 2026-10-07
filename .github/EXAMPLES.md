@@ -4,9 +4,9 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**288 written, 16 written in part, 0 can be written, 59 missing and 58 do not apply.** Of the 363 that apply, 304 can be written with what is bridged, 16 of them leaving something out.
+**290 written, 16 written in part, 0 can be written, 57 missing and 58 do not apply.** Of the 363 that apply, 306 can be written with what is bridged, 16 of them leaving something out.
 
-**138 of the 145 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**139 of the 146 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Audio](#audio) | 5 | 0 | 0 | 3 | 0 | 3 of 3 |
+| [Audio](#audio) | 6 | 0 | 0 | 2 | 0 | 4 of 4 |
 | [Camera](#camera) | 6 | 0 | 0 | 3 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |  |
@@ -39,12 +39,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 49 | 0 | 0 | 11 | 0 | 17 of 20 |
+| [UI (User Interface)](#ui-user-interface) | 50 | 0 | 0 | 10 | 0 | 17 of 20 |
 | [Usage](#usage) | 3 | 0 | 0 | 0 | 0 | 3 of 3 |
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **288** | **16** | **0** | **59** | **58** | **138 of 145** |
+| **All** | **290** | **16** | **0** | **57** | **58** | **139 of 146** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -231,7 +231,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`audio`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio.rs) | Shows how to load and play an audio file | [written](../BevyCSharp.Examples/audio/audio.cs) |
-| [`audio_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio_control.rs) | Shows how to load and play an audio file, and control how it's played | missing, a playing sound's speed changed as it plays |
+| [`audio_control`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/audio_control.rs) | Shows how to load and play an audio file, and control how it's played | [written](../BevyCSharp.Examples/audio/audio_control.cs) |
 | [`decodable`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/decodable.rs) | Shows how to create and register a custom audio source by implementing the `Decodable` type. | missing, audio sources a game generates (Decodable) |
 | [`pitch`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/pitch.rs) | Shows how to directly play a simple pitch | missing, a generated tone (Pitch) |
 | [`play_sound_effect`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/audio/play_sound_effect.rs) | Shows how to play a sound effect in response to an event | [written](../BevyCSharp.Examples/audio/play_sound_effect.cs) |
@@ -580,7 +580,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`vertical_slider`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/vertical_slider.rs) | Simple example showing vertical and horizontal slider widgets with snap behavior and value labels | [written](../BevyCSharp.Examples/ui/vertical_slider.cs), the slider kept up to date by Bevy's own observer, which Ui.SelfUpdate attaches |
 | [`viewport_node`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/viewport_node.rs) | Demonstrates how to create a viewport node with picking support | [written](../BevyCSharp.Examples/ui/viewport_node.cs), the point the pointer meets marked from the cube's own pointer events, where Bevy reads every hit its pointers keep |
 | [`virtual_keyboard`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/widgets/virtual_keyboard.rs) | Example demonstrating a virtual keyboard widget | missing, Bevy's Feathers widgets |
-| [`window_fallthrough`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/window_fallthrough.rs) | Illustrates how to access `winit::window::Window`'s `hittest` functionality. | missing, letting the pointer pass through the window to what is behind it |
+| [`window_fallthrough`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/window_fallthrough.rs) | Illustrates how to access `winit::window::Window`'s `hittest` functionality. | [written](../BevyCSharp.Examples/ui/window_fallthrough.cs), the window's hit test through Bevy's reflected CursorOptions |
 | [`z_index`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/z_index.rs) | Demonstrates how to control the relative depth (z-position) of UI elements | [written](../BevyCSharp.Examples/ui/z_index.cs), through Bevy's reflected ZIndex and GlobalZIndex |
 
 ## Usage

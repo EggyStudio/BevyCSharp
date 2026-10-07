@@ -16,12 +16,18 @@ parented, tagged with your own components and found by a query, and `Play` hands
 `PlaybackMode.Despawn` suits a one-shot effect, because nothing has to remember to clean it up.
 
 `SetVolume`, `Pause` and `Resume` reach the sink Bevy attaches once playback has started, so they
-report `NotPresent` if called in the same frame the sound was started in. So do `PositionOf` and
-`Seek`, which read and move the point a clip has reached:
+report `NotPresent` if called in the same frame the sound was started in, and on a machine with no
+device to play on, which never attaches one. `Audio.HasStarted` asks first. So do `PositionOf` and
+`Seek`, which read and move the point a clip has reached, `SetSpeed`, which plays it faster or
+slower with its pitch, and `SetMuted`, which silences it and keeps its volume for when it is heard
+again:
 
 ```csharp
+if (!Audio.HasStarted(music)) return;
 var at = Audio.PositionOf(music);       // seconds into the clip
 Audio.Seek(music, at - 5f);             // back five seconds
+Audio.SetSpeed(music, 1.5f);            // half again as fast, and higher
+Audio.SetMuted(music, true);
 Audio.SetGlobalVolume(0.4f);            // the master slider, over everything at once
 ```
 

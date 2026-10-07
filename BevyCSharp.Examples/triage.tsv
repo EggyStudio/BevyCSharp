@@ -154,7 +154,7 @@ web_asset	missing	loading assets over HTTP
 async_channel_pattern	can	with .NET's tasks and channels
 async_compute	can	with .NET's tasks
 external_source_external_thread	can	with a .NET thread and channel
-audio_control	missing	a playing sound's speed changed as it plays
+audio_control	can
 audio	can
 decodable	missing	audio sources a game generates (Decodable)
 pitch	missing	a generated tone (Pitch)
@@ -411,7 +411,7 @@ ui_transform	can	through Bevy's reflected UiTransform
 vertical_slider	can	the slider kept up to date by Bevy's own observer, which Ui.SelfUpdate attaches
 viewport_node	can	the point the pointer meets marked from the cube's own pointer events, where Bevy reads every hit its pointers keep
 virtual_keyboard	missing	Bevy's Feathers widgets
-window_fallthrough	missing	letting the pointer pass through the window to what is behind it
+window_fallthrough	can	the window's hit test through Bevy's reflected CursorOptions
 z_index	can	through Bevy's reflected ZIndex and GlobalZIndex
 context_menu	can	its nodes' interactions read as they change, where Bevy observes its pointer events
 cooldown	can

@@ -521,6 +521,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_audio_position(ulong entity, float* seconds);
 
+    /// <summary>Sets how fast a playing sound plays.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_speed(ulong entity, float speed);
+
+    /// <summary>Mutes a playing sound or lets it be heard again.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_mute(ulong entity, int muted);
+
+    /// <summary>Reads how fast a playing sound plays and whether it is muted.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_playback(ulong entity, float* speed, int* muted);
+
     /// <summary>Moves playback to a point in the clip.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -213,3 +213,15 @@ Bevy's `AppExit::Error`, which `App.Run` answers. `logs` is written, 288, P endi
 Rust's panic code. `LogTests` holds an error from C# among the engine's, the once forms by line of
 code, and a run's code. The suite passed, 1,151 with 9 skipped. `audio_control` is next, after
 `Audio.cs`'s two other types move into files of their names.
+
+**Now 3, `audio_control` and `window_fallthrough`.** A playing sound's speed and mute are bridged,
+`Audio.SetSpeed`, `SpeedOf`, `SetMuted` and `IsMuted` over Bevy's `AudioSink` and its spatial one
+(ABI 224), and `Audio.HasStarted` says whether Bevy has attached the sink the other calls need,
+which it never does on a machine with no device to play on. `audio_control` is written, its music
+and text in behaviors as B 4 has it, checked with ALSA pointed at its null device and captured with
+none, as the package workflow's container has none, so no run here played through the speakers.
+`window_fallthrough` was reachable already, the window's hit test through Bevy's reflected
+`CursorOptions`, and is written, 290. `Audio.cs`'s settings and playback mode moved into files of
+their names first, N 1.2's list at 217 (`f35d03a`). `AudioPlaybackTests` holds the wait for the sink
+and the refused speed. The suite passed, 1,152 with 9 skipped, before `window_fallthrough`, whose
+example and norm tests passed after it.
