@@ -49,6 +49,10 @@ reason for a change and names no one who asked for it or decided it, since the r
 made from the messages (NORM.md, N 4.7). It is short, and it follows [STYLE.md](STYLE.md) like the
 rest of the prose here.
 
+A commit that changes the library's public surface carries `BevyCSharp/PublicApi.txt` written again
+by `build/api.sh`, which the suite holds the library to, so the change is in the diff where it is
+read.
+
 Written from a shell, so the marks are exact rather than pasted:
 
 ```bash

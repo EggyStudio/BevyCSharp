@@ -325,6 +325,23 @@ commit. The script counts commits, so it needs the whole history, which the work
 build/version.sh            # 0.3.12, say
 ```
 
+The package's release notes are those same commits, the sentence of each a line and the newest
+first, which `build/release-notes.sh` reads from the history and the pack job puts in the package.
+A version raised in `build/version.txt` starts them again.
+
+### The public surface
+
+`BevyCSharp/PublicApi.txt` lists every public type of the library and every member a game can
+reach, a line each, read from the built library. The suite fails while the two differ
+(`PublicSurfaceTests`), naming the lines added and removed, so a commit that adds, removes or
+reshapes anything a game calls carries the change to that file and is read as one, which the patch
+number alone does not say. Once a change to the surface is meant, `build/api.sh` writes the file
+again:
+
+```bash
+build/api.sh                # BevyCSharp/PublicApi.txt from the built library, and what changed in it
+```
+
 ---
 
 ## Examples

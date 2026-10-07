@@ -146,7 +146,8 @@ if (physics.Raycast(muzzle, aim, 100f, from: gun) is { } hit) Damage(hit.Entity)
 ```
 
 A character stands only on what its layer collides with, and a ray cast from a body passes through
-that body and sees what its layer collides with, where a ray from nowhere sees every layer. A pair
+that body and sees what its layer collides with, where a ray from nowhere sees every layer. Every
+ray passes through sensors, so a wheel's ray finds the road under a trigger volume. A pair
 asleep is tested again once either changes, so a crate resting on a floor falls through once the
 floor's layer stops colliding with its own.
 

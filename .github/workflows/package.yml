@@ -428,7 +428,10 @@ jobs:
         shell: python3 build/step.py {0}
 
     steps:
+      # The whole history, which the release notes are read from.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -458,9 +461,12 @@ jobs:
       # The staleness guard in the csproj compares timestamps against the Rust sources, and a
       # fresh checkout writes those after the downloaded artifacts. The binaries came from this
       # very commit, so the check has nothing useful to say here.
+      # The release notes are the commits since build/version.txt last changed, newest first, each
+      # commit's sentence a line (build/release-notes.sh).
       - name: Pack
         run: |
-          args=(-c Release -p:BevyCSharpSkipNativeFreshnessCheck=true)
+          build/release-notes.sh "$PWD/build/artifacts/release-notes.txt"
+          args=(-c Release -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/artifacts/release-notes.txt")
           if [ -n "${{ inputs.version }}" ]; then
             args+=(-p:Version=${{ inputs.version }})
           fi

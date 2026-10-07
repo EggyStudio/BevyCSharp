@@ -298,6 +298,11 @@ public sealed partial class PhysicsWorld : IDisposable
     /// <summary>
     /// The nearest body a ray meets within <paramref name="distance"/>, or null for none.
     /// </summary>
+    /// <remarks>
+    /// A sensor is passed through, as every body passes through one, so a wheel's ray or a ground
+    /// check finds the road under a trigger volume rather than the volume. What a sensor holds is
+    /// read from its contacts.
+    /// </remarks>
     /// <param name="origin">Where the ray starts.</param>
     /// <param name="direction">Which way it goes. Need not be of length one.</param>
     /// <param name="distance">How far it looks, in world units.</param>
@@ -312,6 +317,7 @@ public sealed partial class PhysicsWorld : IDisposable
     /// For a ray a body casts, a shot from a gun or a look from a character's eyes, which starts
     /// inside the body and would meet it first, and which sees what that body would hit, so the
     /// player's shots on a layer that passes through the player pass through the player here too.
+    /// It passes through sensors as the other does.
     /// </remarks>
     /// <param name="origin">Where the ray starts.</param>
     /// <param name="direction">Which way it goes. Need not be of length one.</param>
@@ -328,7 +334,7 @@ public sealed partial class PhysicsWorld : IDisposable
         var length = along.Length();
         if (length <= 0f) return null;
 
-        var handler = new NearestHit { T = float.MaxValue, Layers = _contacts.Layers, From = -1 };
+        var handler = new NearestHit { T = float.MaxValue, Sensors = _contacts.Sensors, Layers = _contacts.Layers, From = -1 };
         if (from is { } skip) (handler.Skipping, handler.Skip, handler.From) = (true, skip, _contacts.Layers.Of(skip));
         _simulation.RayCast(ToBepu(origin), along / length, distance, _pool, ref handler);
 

@@ -30,6 +30,11 @@
             through a native bridge.
         </Description>
         <PackageTags>bevy;ecs;gamedev;engine;source-generator;behavior</PackageTags>
+        <!--
+          The commits since the version was last raised, which build/release-notes.sh writes to the
+          file a pack names.
+        -->
+        <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != '' And Exists('$(ReleaseNotesFile)')">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
         <!-- The generator and the native binaries are carried inside this package. -->
         <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>false</DevelopmentDependency>

@@ -356,3 +356,20 @@ returns an empty result instead, that is the next change.
 
 Shared: every loader given a missing, an empty, a cut short and a random file as one table, as
 3DEngine's `BadFileTests` does, which here found a sound that panicked as it played.
+
+**Now 8, the public surface written down, release notes, and a ray at a sensor.**
+`BevyCSharp/PublicApi.txt` lists every public type of the library and every member a game reaches,
+a line each, 10,681 lines of 1,163 types, 609 of them the wrappers generated from Bevy's
+components, written from the built library by the writer 3DEngine's `fc5aef49` made, and
+`PublicSurfaceTests` fails while the two differ, naming the lines added and removed. `build/api.sh`
+writes it again once a change is meant, and BUILDING.md and COMMITS.md say so. The pack job fetches
+the whole history, and `build/release-notes.sh` writes the commits since `build/version.txt` last
+changed into the package's release notes, newest first, which a local pack showed in its nuspec,
+143 lines today. A ray here stopped at a sensor, as 3DEngine's did, since `Raycast` gave Bepu's ray
+no sensors to pass through where a character's ground check did. Every ray passes through sensors
+now, which `ARayPassesThroughASensorToTheFloorBelow` holds, and the physics guide says so. N 2.1's
+row in the Conformance table is yours to change. The suite passed, 1,205 with 9 skipped, N 1.4 once
+the listing's test was listed beside the cheatsheet's as a test of no one area. Item 9 is next.
+
+Shared: the public surface listed from the built library and held by a test, release notes from
+the commits, and rays that pass through sensors, as 3DEngine's `fc5aef49` and its rays have them.

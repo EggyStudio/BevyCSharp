@@ -139,7 +139,7 @@ public sealed partial class CheatsheetTests
     [GeneratedRegex(@"^(?:static )?\S.*?\s+(?<name>[A-Z]\w*)(?:<[^>]*>)?\((?<parameters>.*)\);\s*(?://.*)?$")]
     private static partial Regex Declaration();
 
-    private static string RepositoryRoot()
+    internal static string RepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BevyCSharp.slnx"))) directory = directory.Parent;

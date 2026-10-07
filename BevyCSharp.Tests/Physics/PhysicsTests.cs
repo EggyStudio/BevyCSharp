@@ -147,6 +147,38 @@ public sealed class PhysicsTests
     }
 
     /// <summary>
+    /// A ray down through a sensor meets the floor under it, as a wheel's ray or a ground check
+    /// under a trigger volume has to, which 3DEngine found its rays did not.
+    /// </summary>
+    [Fact]
+    public void ARayPassesThroughASensorToTheFloorBelow()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        harness.App.AddPlugin(new PhysicsPlugin());
+
+        PhysicsHit? hit = null;
+        var floor = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var physics = ctx.Res<PhysicsWorld>();
+
+            floor = ctx.Ecs.Spawn();
+            physics.Add(floor, PhysicsShape.Box(new Vec3(4f, 1f, 4f)), BodyKind.Static, Transform.At(0f, -0.5f, 0f));
+
+            var trigger = ctx.Ecs.Spawn();
+            physics.Add(trigger, PhysicsShape.Box(new Vec3(2f, 2f, 2f)), BodyKind.Static, Transform.At(0f, 3f, 0f), sensor: true);
+
+            hit = physics.Raycast(new Vec3(0f, 10f, 0f), new Vec3(0f, -1f, 0f), 100f);
+        });
+
+        harness.Run();
+
+        Assert.Equal(floor, hit?.Entity);
+        Assert.Equal(10f, hit!.Value.Distance, 3);
+    }
+
+    /// <summary>
     /// An impulse sets a body moving, and despawning its entity takes the body with it.
     /// </summary>
     [Fact]
