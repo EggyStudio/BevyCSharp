@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 227;
+    internal const int ExpectedAbiVersion = 228;
 
     static Native() => NativeLoader.Initialize();
 
@@ -85,6 +85,43 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_log_take_error(byte* output, int capacity);
+
+    /// <summary>
+    /// Starts or stops keeping every line Bevy logs for <see cref="bcs_log_take_line"/>.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_log_collect(int on);
+
+    /// <summary>
+    /// Takes the oldest line kept since <see cref="bcs_log_collect"/> with its level, from trace at
+    /// zero to error at four, and answers its length, or 0 when none is kept.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_log_take_line(byte* output, int capacity, int* level);
+
+    /// <summary>
+    /// Gives the bridge the writer for a panic on a thread outside the guard, or none.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_crash_writer(delegate* unmanaged[Cdecl]<byte*, int, void> writer);
+
+    /// <summary>
+    /// Writes what the most recent panic in the bridge said, or nothing where none has happened.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_last_panic(byte* output, int capacity);
+
+    /// <summary>
+    /// Panics on purpose, inside the guard where <paramref name="guarded"/> is not zero and on a
+    /// thread of its own otherwise, for a crash log to be tried.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_panic_on_purpose(int guarded);
 
     /// <summary>Registers a C# system callback into a Bevy schedule.</summary>
     [LibraryImport(Library)]

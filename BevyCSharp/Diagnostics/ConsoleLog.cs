@@ -43,34 +43,81 @@ public static class ConsoleLog
     /// </remarks>
     public static void Start()
     {
-        if (Console.Out is not Tee) Console.SetOut(new Tee(Console.Out, LogLevel.Info));
-        if (Console.Error is not Tee) Console.SetError(new Tee(Console.Error, LogLevel.Error));
+        // Kept here rather than found by asking what the console writes to, which is the tee in a
+        // synchronized wrapper the console puts round whatever it is given, so a second start
+        // that asked would tee the tee and write every line twice.
+        lock (Gate)
+        {
+            if (_output is not null) return;
+
+            _output = new Tee(Console.Out, LogLevel.Info);
+            _error = new Tee(Console.Error, LogLevel.Error);
+        }
+
+        Console.SetOut(_output);
+        Console.SetError(_error);
     }
+
+    private static Tee? _output;
+    private static Tee? _error;
+
+    /// <summary>Whether the streams are teed into the ring.</summary>
+    internal static bool Teeing
+    {
+        get { lock (Gate) return _output is not null; }
+    }
+
+    /// <summary>
+    /// Puts the streams back as they were before <see cref="Start"/>, for a test that teed them.
+    /// </summary>
+    internal static void Stop()
+    {
+        Tee? output, error;
+        lock (Gate)
+        {
+            (output, error) = (_output, _error);
+            (_output, _error) = (null, null);
+        }
+
+        if (output is not null) Console.SetOut(output.Inner);
+        if (error is not null) Console.SetError(error.Inner);
+    }
+
+    /// <summary>
+    /// Told of each line as it is added, with whether it repeats the one before, as the run's log
+    /// file is (<see cref="CrashLog"/>).
+    /// </summary>
+    /// <remarks>Told outside the ring's lock, on whichever thread wrote the line.</remarks>
+    internal static event Action<LogLine, bool>? Added;
 
     /// <summary>Adds a line.</summary>
     public static void Write(LogLevel level, string text)
     {
         if (string.IsNullOrEmpty(text)) return;
 
+        LogLine added;
+        bool repeat;
         lock (Gate)
         {
             // A repeat of the last line is counted rather than added. What produces one is a
             // warning inside something that runs every frame, and sixty copies of it a second is
             // a log that holds nothing else.
-            if (Lines.Count > 0 && Lines[^1] is { } last
-                && last.Level == level
-                && last.Text == text)
+            repeat = Lines.Count > 0 && Lines[^1] is { } last && last.Level == level && last.Text == text;
+            if (repeat)
             {
-                Lines[^1] = last with { Count = last.Count + 1, Frame = Frame };
-                Written++;
-                return;
+                added = Lines[^1] = Lines[^1] with { Count = Lines[^1].Count + 1, Frame = Frame };
+            }
+            else
+            {
+                added = new LogLine(Written, Frame, level, text);
+                Lines.Add(added);
+                if (Lines.Count > Depth) Lines.RemoveRange(0, Lines.Count - Depth);
             }
 
-            Lines.Add(new LogLine(Written, Frame, level, text));
             Written++;
-
-            if (Lines.Count > Depth) Lines.RemoveRange(0, Lines.Count - Depth);
         }
+
+        Added?.Invoke(added, repeat);
     }
 
     /// <summary>Adds a line at the ordinary level.</summary>
@@ -98,6 +145,9 @@ public static class ConsoleLog
     private sealed class Tee(TextWriter inner, LogLevel level) : TextWriter
     {
         private readonly StringBuilder _pending = new();
+
+        /// <summary>The stream it writes through to.</summary>
+        public TextWriter Inner => inner;
 
         /// <inheritdoc/>
         public override Encoding Encoding => inner.Encoding;

@@ -326,3 +326,25 @@ from [SHARED.md](SHARED.md).
     as meshlets, to test them, where the GPU can.
 
 ## Replies
+
+**Verdicts 5 to 7, and item 3's crash log.** The bridge allows `linker_messages` in its manifest's
+lints, with the macOS linker's note on the test binary's unwind table as the reason (`470fec7`). The
+fixed-update case steps its clock a 240th of a second a frame and asserts twenty fixed steps within
+one (`128cecd`). The Windows step keeps each `bcs` answer and hands one that fails to
+`build/bcs-answer.py`, which says the command, its exit code, the code and sentence `bcs` answered
+and the end of the log the answer names, or the one under `build/sessions`, on the page and the
+summary, with a test under `TestScriptTests` (`6a2c4b2`). The crash log is the feature test's first
+commit and an engine feature: `CrashLog` writes `logs/latest.log` beside the executable from the
+first app of a process, C#'s lines and Bevy's, which the bridge's log layer now collects for the
+console's ring, five runs kept; a crash goes to `logs/crash-<time>.txt` with the system, .NET, the
+ABI, the adapter, the backend, the last panic the bridge caught and the log's last 200 lines, for an
+exception nothing caught, a task's exception nobody looked at, and a panic on one of Bevy's threads,
+which the bridge's hook hands over as it happens; the next start says where the last crash's file
+is. A panic caught at the boundary now carries its thread, place and words in the
+`BevyNativeException` rather than a pointer to stderr. The suite's apps leave the log off, and
+`CrashLogTests` start it in a folder of their own. `ConsoleLog.Start` teed the tee each time it was
+called, since the console wraps what it is given, and now keeps its tees. ABI 228. The suite passed,
+1,227 with 9 skipped. Two offscreen runs of the sample in about thirty, each the first after a
+pause or a build, lost the device as they ended ("DeviceLost, driver implementation is at fault")
+and died by a signal, which no managed code reaches, and that is not traced yet. `ImGuiConsole` is
+next, then the program.

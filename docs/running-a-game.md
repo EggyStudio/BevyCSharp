@@ -109,6 +109,15 @@ A system that throws is logged and the app runs on, where a Rust system's panic 
 game that cannot go on ends the run with a code instead, `ctx.Exit(1)`, which `App.Run` answers, as
 Bevy's `AppExit::Error` is answered.
 
+A game on a player's machine has no console anybody reads, so the run writes what it says to
+`logs/latest.log` beside the executable, C#'s lines and Bevy's, with the last five runs' logs kept
+beside it. An exception nothing caught, a task's exception nobody looked at, or a panic inside
+Bevy on one of its own threads is written to `logs/crash-<time>.txt` there, with the last
+200 lines of the log, the system, .NET, the bridge's version, the graphics adapter and the backend,
+the things a report from somebody else's machine is read for. The next run says where the last
+crash's file is as it starts, and `CrashLog.LastCrash` holds it for a game that offers to open it.
+`Config.Logs` names another folder, or an empty string for none.
+
 ## Hot reload
 
 The editor profile watches the asset directory, so a running app picks up what changed on disk.

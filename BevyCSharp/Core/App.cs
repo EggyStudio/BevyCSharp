@@ -150,6 +150,11 @@ public sealed unsafe partial class App : IDisposable
         if ((Config.Offscreen || Config.Headless) && Config.HeadlessFrames == 0 && Config.FramesAsked > 0)
             Config.HeadlessFrames = Config.FramesAsked;
 
+        // The run's log and the crash hooks, before Bevy starts, so a panic as it builds the app is
+        // written too.
+        if (Config.Logs is not { Length: 0 } && CrashLog.StartedByApps)
+            CrashLog.Start(Config.Logs ?? Path.Combine(AppContext.BaseDirectory, "logs"), Config.Backend);
+
         // A clock set from outside, as a script capturing a game it did not write sets it, where the
         // game's own config left the machine's.
         if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)
@@ -335,6 +340,7 @@ public sealed unsafe partial class App : IDisposable
             NativeFrameState state;
             Native.Check(Native.bcs_frame_state(&state), "bcs_frame_state");
             world.Resource<Time>().Update(state.Time);
+            ConsoleLog.Frame = world.Resource<Time>().FrameCount;
             world.Resource<Input>().Update(state.Input);
             world.Resource<Input>().UpdateGamepads(world.Resource<MessageBus>());
             world.Resource<Input>().UpdateLogicalKeys();
@@ -350,6 +356,12 @@ public sealed unsafe partial class App : IDisposable
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
             PostAssetFailures(world.Resource<MessageBus>());
+
+            // Bevy's lines into the console's log and the run's, and what the adapter is for a
+            // crash's report, once the renderer can say it.
+            CrashLog.TakeBevys();
+            if (CrashLog.Folder is not null && !CrashLog.Described && HasRenderer && !world.Resource<Config>().Headless)
+                CrashLog.Describe(DescribeAdapter());
 
             // The handles a scene made for its entities that none of them draws with any more.
             AssetServer.Sweep();

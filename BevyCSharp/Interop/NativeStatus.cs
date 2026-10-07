@@ -58,5 +58,29 @@ public static class NativeStatus
 
     /// <summary>Throws a <see cref="BevyNativeException"/> describing a failure code.</summary>
     public static void Throw(int status, string operation) =>
-        throw new BevyNativeException(status, $"{operation} failed: {Describe(status)}.");
+        throw new BevyNativeException(status, $"{operation} failed: {Said(status)}.");
+
+    /// <summary>
+    /// What a status says, with what the panic said for a panic, so the exception carries where
+    /// the bridge failed rather than sending its reader to a stream a player's run never shows.
+    /// </summary>
+    private static string Said(int status)
+    {
+        if (status != Panic) return Describe(status);
+
+        string panic;
+        try
+        {
+            panic = CrashLog.LastPanic();
+        }
+        catch (Exception error) when (error is BevyNativeException or DllNotFoundException or EntryPointNotFoundException)
+        {
+            panic = string.Empty;
+        }
+
+        // The first line is the thread and the place, and the second what it said, and the stack
+        // after them is the crash log's to write.
+        var said = string.Join(' ', panic.Split('\n', 3).Take(2)).Trim();
+        return said.Length == 0 ? Describe(status) : $"the native bridge panicked, {said}";
+    }
 }

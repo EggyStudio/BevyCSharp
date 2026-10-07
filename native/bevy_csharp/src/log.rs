@@ -10,6 +10,12 @@
 //! does. The managed side takes them with [`bcs_log_take_error`] as a run ends and as the app is
 //! disposed, so they are laid to the app that logged them. The most recent [`KEPT`] are kept, which a
 //! run that logs more than that between two takes loses the oldest of.
+//!
+//! While the managed side asks for them ([`bcs_log_collect`]), the layer keeps every line it is
+//! shown as well, at each level Bevy's filter lets through, for the managed side to take each frame
+//! with [`bcs_log_take_line`] into the console's log and the run's log file, since Bevy prints its
+//! lines to the process's output itself and C#'s console never sees them. The most recent
+//! [`COLLECTED`] are kept between two takes.
 
 use std::collections::VecDeque;
 use std::fmt::Write as _;
@@ -23,8 +29,15 @@ use bevy::log::tracing_subscriber::layer::{Context, Layer};
 /// How many error lines are kept between two takes.
 pub const KEPT: usize = 256;
 
+/// How many lines of every level are kept between two takes, while they are collected.
+pub const COLLECTED: usize = 4096;
+
 static ERRORS: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
 static INSTALLED: AtomicBool = AtomicBool::new(false);
+
+/// Every line shown to the layer since the last take, with its level, `0` trace up to `4` error.
+static LINES: Mutex<VecDeque<(i32, String)>> = Mutex::new(VecDeque::new());
+static COLLECTING: AtomicBool = AtomicBool::new(false);
 
 /// Whether this app is the first of the process, whose log plugin becomes the process's logger.
 /// Answers yes once and no from then on.
@@ -50,7 +63,12 @@ struct Kept;
 
 impl<S: Subscriber> Layer<S> for Kept {
     fn on_event(&self, event: &Event<'_>, _: Context<'_, S>) {
-        if *event.metadata().level() != Level::ERROR {
+        let level = *event.metadata().level();
+        if COLLECTING.load(Ordering::Relaxed) {
+            collect(level, event);
+        }
+
+        if level != Level::ERROR {
             return;
         }
 
@@ -65,6 +83,29 @@ impl<S: Subscriber> Layer<S> for Kept {
             }
             errors.push_back(line);
         }
+    }
+}
+
+/// Keeps a line of any level for the managed side, a line C# wrote without its target, which the
+/// managed side's log says by where it is.
+fn collect(level: Level, event: &Event<'_>) {
+    let target = event.metadata().target();
+    let mut line = if target == "csharp" { String::new() } else { format!("{target}: ") };
+    event.record(&mut Message(&mut line));
+
+    let level = match level {
+        Level::ERROR => 4,
+        Level::WARN => 3,
+        Level::INFO => 2,
+        Level::DEBUG => 1,
+        Level::TRACE => 0,
+    };
+
+    if let Ok(mut lines) = LINES.lock() {
+        if lines.len() == COLLECTED {
+            lines.pop_front();
+        }
+        lines.push_back((level, line));
     }
 }
 
@@ -109,6 +150,54 @@ pub unsafe extern "C" fn bcs_log_take_error(out: *mut u8, capacity: i32) -> i32 
         let needed = unsafe { crate::interop::write_text(line, out, capacity) };
         if needed <= capacity && !out.is_null() {
             errors.pop_front();
+        }
+
+        needed
+    })
+}
+
+/// Starts keeping every line the layer is shown for [`bcs_log_take_line`] when `on` is not zero,
+/// and stops and forgets what was kept when it is.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_log_collect(on: i32) -> i32 {
+    crate::interop::guard(|| {
+        COLLECTING.store(on != 0, Ordering::Relaxed);
+        if on == 0 {
+            if let Ok(mut lines) = LINES.lock() {
+                lines.clear();
+            }
+        }
+
+        crate::interop::status::OK
+    })
+}
+
+/// Takes the oldest line kept by [`bcs_log_collect`], writing it as UTF-8 into `out` and its level
+/// into `level`, `0` trace up to `4` error.
+///
+/// Answers the line's length in bytes, or `0` when none is kept. A buffer too small for the line
+/// leaves it kept and answers the length it needs, as [`bcs_log_take_error`] does.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero, and `level` must
+/// be writable or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_log_take_line(out: *mut u8, capacity: i32, level: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        let Ok(mut lines) = LINES.lock() else {
+            return 0;
+        };
+        let Some((said, line)) = lines.front() else {
+            return 0;
+        };
+
+        if !level.is_null() {
+            unsafe { *level = *said };
+        }
+
+        let needed = unsafe { crate::interop::write_text(line, out, capacity) };
+        if needed <= capacity && !out.is_null() {
+            lines.pop_front();
         }
 
         needed
@@ -207,6 +296,36 @@ mod tests {
 
         assert_eq!(take().as_deref(), Some("csharp: something failed"));
         assert_eq!(take(), None);
+    }
+
+    #[test]
+    fn every_line_is_collected_while_asked_for_with_its_level() {
+        let _alone = ALONE.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        assert_eq!(crate::interop::status::OK, bcs_log_collect(1));
+
+        let subscriber = bevy::log::tracing_subscriber::registry().with(Kept);
+        bevy::log::tracing::subscriber::with_default(subscriber, || {
+            bevy::log::info!(target: "bcs_test", "an ordinary line");
+            let line = std::ffi::CString::new("from C#").unwrap();
+            assert_eq!(crate::interop::status::OK, unsafe { bcs_log_write(3, line.as_ptr()) });
+        });
+
+        let mut taken = Vec::new();
+        loop {
+            let mut buffer = vec![0u8; 512];
+            let mut level = -1;
+            let length = unsafe { bcs_log_take_line(buffer.as_mut_ptr(), buffer.len() as i32, &mut level) };
+            if length == 0 {
+                break;
+            }
+            taken.push((level, String::from_utf8_lossy(&buffer[..length as usize]).into_owned()));
+        }
+
+        assert_eq!(crate::interop::status::OK, bcs_log_collect(0));
+        while take().is_some() {}
+
+        assert!(taken.contains(&(2, "bcs_test: an ordinary line".to_string())), "{taken:?}");
+        assert!(taken.contains(&(3, "from C#".to_string())), "{taken:?}");
     }
 
     #[test]

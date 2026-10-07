@@ -9,8 +9,11 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// None of this needs an engine, because a console is a list of lines, a list of commands and a
-/// history, and the panels that draw it are the only part that needs a window.
+/// history, and the panels that draw it are the only part that needs a window. In the engine
+/// collection all the same, since the ring is the process's and <c>CrashLogTests</c> tee the
+/// output into it and write lines of their own while they run.
 /// </remarks>
+[Collection("engine")]
 public sealed class ConsoleTests
 {
     [Fact]

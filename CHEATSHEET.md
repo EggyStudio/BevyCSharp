@@ -1791,6 +1791,12 @@ static LogLine[] All();                                         // The lines kep
 static void Clear();                                            // Forgets everything
 ```
 
+### `CrashLog`
+
+```csharp
+static string Write(string title, string what);                 // Writes a crash to this run's crash file, made the first time, and says where on the log
+```
+
 ### `CliClient`
 
 ```csharp

@@ -13,10 +13,8 @@
 //! every app's start that two loaders claim one extension, and its warning says those loads will
 //! not work, which they would.
 
-use core::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use std::panic::AssertUnwindSafe;
-use std::sync::Once;
 
 use bevy::asset::{AssetEvent, AssetId, AssetServer, Assets, UntypedAssetId};
 use bevy::audio::{AudioPlayer, AudioSink, AudioSource, Decodable, SpatialAudioSink};
@@ -47,25 +45,6 @@ impl CheckedSounds {
     }
 }
 
-thread_local! {
-    /// Whether this thread is building a decoder to see whether it panics, which says nothing.
-    static TRYING: Cell<bool> = const { Cell::new(false) };
-}
-
-/// Puts a hook before the process's panic hook that keeps quiet about the panic a decoder being
-/// tried throws, and passes every other panic on as it was, on every thread.
-fn quiet_while_trying() {
-    static ONCE: Once = Once::new();
-    ONCE.call_once(|| {
-        let previous = std::panic::take_hook();
-        std::panic::set_hook(Box::new(move |info| {
-            if !TRYING.with(Cell::get) {
-                previous(info);
-            }
-        }));
-    });
-}
-
 /// Whether Bevy's decoder reads a sound, or why it does not.
 ///
 /// Bevy's own `Decodable`, which unwraps what building the decoder gave and so panics on a file it
@@ -73,9 +52,8 @@ fn quiet_while_trying() {
 /// builder answers with an error instead, and is a package Bevy's audio depends on that the bridge
 /// does not reference, which N 2.8 of NORM.md leaves to the owner.
 fn decodes(source: &AudioSource) -> Result<(), String> {
-    TRYING.with(|trying| trying.set(true));
-    let built = std::panic::catch_unwind(AssertUnwindSafe(|| drop(source.decoder())));
-    TRYING.with(|trying| trying.set(false));
+    // Quietly, so the panic is neither printed as a fault nor kept as the last one said.
+    let built = crate::crash::quietly(|| std::panic::catch_unwind(AssertUnwindSafe(|| drop(source.decoder()))));
 
     built.map_err(|payload| {
         let said = payload
@@ -135,7 +113,6 @@ fn check(
 /// Adds the check, after Bevy's audio plugin has added the sounds, ahead of Bevy's playing them,
 /// which comes after transforms are propagated.
 pub fn install(app: &mut bevy::app::App) {
-    quiet_while_trying();
     app.init_resource::<CheckedSounds>();
     app.add_systems(
         bevy::app::PostUpdate,

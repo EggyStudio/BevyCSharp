@@ -323,8 +323,11 @@ pub unsafe fn write_text(text: &str, out: *mut u8, capacity: i32) -> i32 {
 }
 
 /// Runs `f`, converting any panic into [`status::PANIC`] instead of unwinding into .NET.
+///
+/// What the panic said is kept for the managed side to read with `bcs_last_panic`, and is not
+/// written as a crash, since it comes back as a status (`crash.rs`).
 pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
-    match crate::profile::crossing(|| std::panic::catch_unwind(AssertUnwindSafe(f))) {
+    match crate::profile::crossing(|| crate::crash::guarded(|| std::panic::catch_unwind(AssertUnwindSafe(f)))) {
         Ok(v) => v,
         Err(_) => status::PANIC,
     }
@@ -332,7 +335,7 @@ pub fn guard<F: FnOnce() -> i32>(f: F) -> i32 {
 
 /// Runs `f`, converting any panic into `fallback`.
 pub fn guard_with<T, F: FnOnce() -> T>(fallback: T, f: F) -> T {
-    match crate::profile::crossing(|| std::panic::catch_unwind(AssertUnwindSafe(f))) {
+    match crate::profile::crossing(|| crate::crash::guarded(|| std::panic::catch_unwind(AssertUnwindSafe(f)))) {
         Ok(v) => v,
         Err(_) => fallback,
     }
@@ -438,13 +441,12 @@ mod tests {
     fn a_panic_becomes_a_status_rather_than_an_unwind() {
         // Unwinding into the .NET runtime is undefined behavior, so the guard stands between a bug
         // on this side and a process that dies without saying why.
+        // Quietly, so the panics are not kept as the last one said while the crash log's tests
+        // read it on threads of their own.
         assert_eq!(status::OK, guard(|| status::OK));
-        assert_eq!(-42, guard_with(-42, || panic!("a bug on this side")));
+        assert_eq!(-42, crate::crash::quietly(|| guard_with(-42, || panic!("a bug on this side"))));
 
-        let previous = std::panic::take_hook();
-        std::panic::set_hook(Box::new(|_| {}));
-        let caught = guard(|| panic!("a bug on this side"));
-        std::panic::set_hook(previous);
+        let caught = crate::crash::quietly(|| guard(|| panic!("a bug on this side")));
 
         assert_eq!(status::PANIC, caught);
     }

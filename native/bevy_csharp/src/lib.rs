@@ -28,6 +28,7 @@
 pub mod app;
 pub mod capabilities;
 pub mod component_registry;
+pub mod crash;
 pub mod offscreen;
 pub mod systems;
 pub mod animation;
@@ -70,4 +71,4 @@ pub mod imgui;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 227;
+pub const ABI_VERSION: i32 = 228;

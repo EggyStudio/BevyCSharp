@@ -911,6 +911,7 @@ sealed class Bevy.Config
   string? AssetPack { get; set; }
   string? AssetRoot { get; set; }
   string? GameName { get; set; }
+  string? Logs { get; set; }
   uint HeadlessFps { get; set; }
   uint HeadlessFrames { get; set; }
   uint Height { get; set; }
@@ -991,6 +992,13 @@ readonly struct Bevy.Corners : IEquatable<Corners>
   static bool op_Equality(Corners left, Corners right)
   static bool op_Inequality(Corners left, Corners right)
   void Deconstruct(out Length TopLeft, out Length TopRight, out Length BottomRight, out Length BottomLeft)
+static class Bevy.CrashLog
+  const int Runs = 5
+  const int Tail = 200
+  static string? Crash { get; }
+  static string? Folder { get; }
+  static string? LastCrash { get; }
+  static string? Write(string title, string what)
 sealed class Bevy.CubicBSpline<T> where T : struct, IAdditionOperators<T, T, T>, IMultiplyOperators<T, float, T>
   CubicBSpline(IEnumerable<T> points)
   CubicCurve<T>? ToCurve()

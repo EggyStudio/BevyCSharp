@@ -435,6 +435,18 @@ public sealed class Config
     public bool RayTracedLighting { get; set; }
 
     /// <summary>
+    /// The folder the run's log and a crash's report are written in, or nothing for <c>logs</c>
+    /// beside the executable, or an empty string for neither.
+    /// </summary>
+    /// <remarks>
+    /// Read by the first app of a process, whose folder holds for the rest of it, since a run has
+    /// one log (<see cref="CrashLog"/>). A game on a player's machine keeps it, so what it said
+    /// before it ended can be sent, and a test leaves it empty, as the test harness does, since a
+    /// suite is many apps in one process and the console's tee would hold every test's output.
+    /// </remarks>
+    public string? Logs { get; set; }
+
+    /// <summary>
     /// Answer the command line while this app runs.
     /// </summary>
     /// <remarks>
