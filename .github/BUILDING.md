@@ -359,6 +359,20 @@ again:
 build/api.sh                # BevyCSharp/PublicApi.txt from the built library, and what changed in it
 ```
 
+### The tonemapper references
+
+`BevyCSharp.Tests/references/tonemapping` holds a picture for each of Bevy's eight tonemappers,
+named as Bevy names it: a ramp of light values from a four thousandth to 256 in eight colors, as
+SHARED.md defines it, drawn by a material of its own through the tonemapper and kept as an eight-bit
+sRGB PNG. 3DEngine holds its own tonemappers to these pictures, and `TonemapRampTests` holds this
+engine to them within two levels of 255, or four for the three Bevy draws through lookup tables. A
+Bevy release that changes what a tonemapper draws fails that test, and once the change is meant the
+pictures are written again and offered to 3DEngine under Replies in REVIEW.md:
+
+```bash
+build/tonemap-references.sh # the eight pictures from the built bridge, and which of them changed
+```
+
 ---
 
 ## Examples

@@ -10,13 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c70f17b`. `MeshletTests` moved into the assets' folder, nothing in it changed,
-N 1.4's list at 76 with 28 left out (`c70f17b`), pushed at 06:15 on 2026-10-08 and green on the
-three systems. Sponza's meshlets, item 3, are under way in the bridge's `meshlets.rs` and
-`assets.rs`. At 07:10 the owner decided that every tonemapper here comes to 3DEngine (Decision 16),
-this side's part the ramp references, item 14, after item 3.
+Reviewed up to `7c9a619`. Item 3 is settled: Sponza's heaviest meshes are drawn as meshlets where
+the bridge is built with them and the GPU can, `Render.CreateMeshletMesh` keeping the cut in the
+user's cache and `Render.MeshletsActive` choosing the plain meshes otherwise, `scene.meshlets` on
+the panel comparing the frame time of the two, the scenes workflow started by hand fetching each
+pack into the actions cache and capturing the reference views with their frame times, and
+`make-scene-pack.py` saying first that it needs Python 3.14 (`7c9a619`); the feature test's memory,
+measured in a scope of 16 GB with the bridge's allocations and wgpu's counts read each second:
+Sponza plain stands at 3.6 GB, its textures going up as the pack holds them, and as meshlets it
+passed 12 GB in a quarter of a minute with every count still, the NVIDIA driver's own, which a
+bisect led to the shadow views, Bevy 0.19 running every meshlet pass in every shadow view, each
+holding a few hundred megabytes of the driver's memory, Bevy's own meshlet example climbing from 1.2
+GB with one cascade to 7.5 GB with five lights, so where meshlets run the light hall's lamps cast no
+shadows and Sponza as meshlets stands at 6.5 GB and 60 frames a second with a peak of 7, what the
+driver keeps not traced further and said in `Config.MeshletClusters`; `MemoryGuard` holds every app
+`bcs`, the drive script, the suite and the feature test start to 8 GB or a quarter of the machine's
+memory, ending the run with exit code 86 through `_exit` and a crash file, since an ordinary exit
+crashed in the driver and its core dump held the memory fifteen seconds more, the `memory` command
+giving the peak and wgpu's pairs and the drive script writing the peak beside the frame times
+(`b646b79`); `tonemapping_luts` is on in the render profile for the ramp references, and the scratch
+is off `/tmp`. The pack's publishing stays the owner's. With item 3 out, the list is renumbered, the
+ramp references item 13 and the SHARED.md items 7 to 12. The suite: 1,257 passed, 2 skipped.
 
-Before them, scene packs came most of the way in, item 3's meshlets and workflow left: a pack mounts
+Before them, `MeshletTests` moved into the assets' folder, nothing in it changed, N 1.4's list at 76
+with 28 left out (`c70f17b`), pushed at 06:15 on 2026-10-08 and green on the three systems. Sponza's
+meshlets were under way in the bridge's `meshlets.rs` and `assets.rs`. At 07:10 the owner decided
+that every tonemapper here comes to 3DEngine (Decision 16), this side's part the ramp references.
+
+Before them, scene packs came most of the way in, the meshlets and workflow left: a pack mounts
 under a folder of the asset root while an app runs and both sides read it, the bridge's default
 source reading the list of carried files at each read; `ScenePacks` reads the manifests in
 `scenes/`, fetches a pack over HTTPS or from a file into a folder every game on the machine shares,
@@ -42,9 +63,6 @@ made and not published; the owner publishes it as the release `scene-packs` with
 `intel-sponza.pack`, after weighing the line Sponza's own license file sets beside its CC BY 4.0
 text, which limits commercial use. The suite: 1,248 passed, 5 skipped.
 
-Before them, two types of N 1.2's list moved into files of their names, `IPersistentValue` and
-`UserData` out of the persistent value's file, nothing in them changed, the list at 186 (`2b5c353`).
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -52,7 +70,7 @@ The norm has 44 rules, and this engine stands at 31 checked, 4 with places liste
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 8 to 13 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 7 to 12 are taken
 from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The runs of `540343d`, `edd577c` and `c70f17b` passed on Linux,
@@ -65,43 +83,23 @@ from [SHARED.md](SHARED.md).
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
-3. **Scene packs (Decision 15), Sponza in, the meshlets and the workflow left.** The manifests,
-   the fetch with its hash into the shared folder, the mount while the app runs, `bcs scenes`, the
-   pack maker with its own BC7, BC5 and BC1 encoders, Intel Sponza's manifest, and the Scenes page
-   loading Sponza into its zone with the door open and its walls as mesh colliders are in
-   (`c27fad0`, `9d1154a`, `02dab48`). Left: Sponza's heaviest meshes, the photogrammetry pieces of
-   hundreds of thousands of triangles, drawn as meshlets where the bridge is built with `--meshlet`
-   and the GPU has 64-bit texture atomics, through `Render.CreateMeshletMesh` with the cut kept in
-   the user's cache or cut at pack time where the bridge can write a meshlet mesh, the plain meshes
-   the fallback `Render.MeshletsActive` chooses, and a panel switch comparing the frame time of the
-   two, the picture drawn once a pixel while meshlets run, the feature test's bridge and the
-   published one built with the meshlet and Solari additions; the workflow started by hand that
-   fetches each pack, caches it between runs and captures reference views with a frame time, the
-   push workflows never fetching one; and `make-scene-pack.py` saying at its start that it needs
-   Python 3.14 for the standard library's zstd, where an older Python fails at the import. The
-   feature test's memory with Sponza is measured and bounded first, since on 2026-10-08 the kernel
-   killed it at 21 GB anonymous and 14 GB shared, where the workflow's runner has 16 GB: the pack's
-   textures uploaded as the pack holds them, the meshes let go once uploaded, the meshlets' scratch
-   freed, and the drive script reading the process's peak. The owner publishes the pack the script
-   made as the release `scene-packs` with the asset `intel-sponza.pack`, and Bistro, the classic
-   Sponza and San Miguel wait.
-4. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
+3. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
    through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
    the latitude on a panel page and in the settings file, the lights' colors and intensities on
    curves by the hour, and a console command setting the hour.
-5. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
+4. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
    into the working session, `WeatherPlugin` and `WeatherCamera`, its `WeatherTime`, `Weather`,
    `ProceduralWeather` and `WeatherConfig` reached from C# through the wrappers where they reflect
    and through bridge calls where they do not, the panel's weather page (kind, cloud coverage, the
-   tier, procedural on or off), item 4's time of day handing the sun to it, clouds at the lowest
+   tier, procedural on or off), item 3's time of day handing the sun to it, clouds at the lowest
    tier in CI's captures, and its cost measured on a real GPU and in the workflow's image and
    written into the comparison page's costs. The crate draws around Bevy's atmosphere, which stays.
-6. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
+5. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
    code for `win-x64` and `linux-x64` as `build/play-native.sh` does, the native library and the
    assets beside it and a `README.txt` for testers naming the keys, the panel, the console and where
    the logs are; a workflow started by hand makes the two zips as artifacts; the pack workflow plays
    the feature test from the package as it plays Courtyard, and the soak takes it.
-7. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
+6. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
    written in its batch: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
    decal's tag and a volume's voxels), the widgets' events as observers, keys observed as they reach
    a field, and what the table then names most. When the captures have settled, they are compared
@@ -118,33 +116,33 @@ from [SHARED.md](SHARED.md).
    on the camera only while it is inside (`6a19213`'s reply). Feathers' three examples and the two
    camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
    owner's word in the working session, and the four font examples stay missing (Decision 13).
-8. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+7. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
    a system, an observer or a loader's callback.
-9. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+8. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
    workflow, as the first game's first step would have a newcomer do.
-10. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
-    (`ab052859`): a query's filter or a world call answering the entities a component was removed
-    from since the system's last run, beside the added and changed ones a behavior reads.
-11. **Every example compiles on the package alone**, from 3DEngine's
+9. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+   (`ab052859`): a query's filter or a world call answering the entities a component was removed
+   from since the system's last run, beside the added and changed ones a behavior reads.
+10. **Every example compiles on the package alone**, from 3DEngine's
     `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
     project, so what they share to say a thing in one word becomes the package's own calls or stays
     in the example, and the workflow builds every example on the packed package.
-12. **A script that more than one system runs is read for the forms only GNU's tools or a later
+11. **A script that more than one system runs is read for the forms only GNU's tools or a later
     bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
     and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
-13. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+12. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
     generators report, so an editor offers the mend.
-14. **The tonemappers' ramp references for 3DEngine (Decision 16).** SHARED.md's ramp drawn by a
+13. **The tonemappers' ramp references for 3DEngine (Decision 16).** SHARED.md's ramp drawn by a
     Slang material of its own through each of the eight tonemappers, with dither and color grading
     off and nothing between the material's value and the tonemapper, captured at 8 bits in sRGB, one
     PNG a tonemapper named as `Tonemapper` names it, from the feature test's panel or a test, kept
     where 3DEngine's coder copies them from, with `tonemapping_luts` confirmed on in the bridge,
-    since without it Bevy draws AgX, Tony McMapface and Blender's filmic from placeholders. After
-    item 3's memory bound and meshlets, before item 4.
+    since without it Bevy draws AgX, Tony McMapface and Blender's filmic from placeholders. Before
+    item 3.
 
 ## Verdicts
 
@@ -253,27 +251,20 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3, the feature test's memory, measured and bounded.** Each run was measured in a scope of
-16 GB with a cap of its own, the resident size, the bridge's allocations and wgpu's counts read each
-second. Sponza drawn plain stands at 3.6 GB, 1.6 GB of it anonymous, of which the bridge's
-allocator holds 260 MB and its textures go up as BC7 and BC5 as the pack holds them, so letting the
-meshes and textures go from the main world would save little and is left. Drawn as meshlets it
-passed 12 GB in a quarter of a minute while the bridge's allocations, the managed heap and every
-count wgpu keeps, its allocator's bytes, buffers, pipelines and command encoders, stood still, so
-the memory was the NVIDIA driver's own. Turning things off one at a time led to the shadow views.
-With no shadows the meshlet meshes stood at 1.7 GB, with the sun's four cascades alone Sponza stood
-at 6.4 GB, and Bevy's own meshlet example, flat at 1.2 GB with its one cascade, climbed to 2.8 GB
-with one shadowed point light and to 7.5 GB with five and four cascades, the bunny alone. Bevy 0.19
-runs every meshlet pass in every shadow view whether or not a meshlet mesh is in it, and each view
-came to hold a few hundred megabytes of the driver's memory over its first fifteen seconds, then
-leveled. Where meshlets run, the light hall's lamps now cast no shadows and the sun alone does, and
-Sponza as meshlets stands at 6.5 GB and 60 frames a second, its peak 7 GB. What the driver keeps
-was not traced further, and `Config.MeshletClusters` says what was found. The `memory` command
-gains the peak and the `gpu.` pairs, read from wgpu with its counters on, and the drive script
-writes the peak beside the frame times. `MemoryGuard`, the safeguard asked for after the kill,
-holds every app `bcs`, the drive script, the suite and the feature test start to 8 GB or a quarter
-of the machine's memory where that is less, and past it the run says why on the console and in a
-crash file and ends with code 86 through `_exit`, since an ordinary exit with Bevy's threads
-drawing crashed in the driver and its core dump held the memory fifteen seconds more. The scratch
-is off `/tmp`, the Sponza download kept in `~/.cache/bevycsharp`, and `tonemapping_luts` is on in
-the render profile, for item 14.
+**Item 13, the tonemappers' ramp references.** `TonemapRampTests` draws SHARED.md's ramp with a
+Slang material of its own (`BevyCSharp.Tests/assets/shaders/tonemap_ramp.slang`) on a plane filling
+a 1024 by 8 view, on an HDR camera with dither, multisampling, bloom and antialiasing off and no
+grading, once for each of the eight tonemappers, reads the eight-bit sRGB picture back and holds it
+to the PNG kept for that tonemapper, within two levels for a formula and four for a table. With
+`BCS_WRITE_TONEMAP_REFERENCES` set, which `build/tonemap-references.sh` sets, it writes them, and
+a second test reads the kept pictures for a ramp that starts black and never darkens. `None` matches
+the ramp's own formula through a plain sRGB encode within one level, the half float the HDR target
+holds being the only thing between. `tonemapping_luts` is on in the render profile, and AgX, Tony
+McMapface and Blender's filmic bend and whiten as their tables do. BUILDING.md says how they are
+made and kept.
+
+Shared: the eight references are in `BevyCSharp.Tests/references/tonemapping`, each named as Bevy
+names its tonemapper (`None`, `Reinhard`, `ReinhardLuminance`, `AcesFitted`, `AgX`,
+`SomewhatBoringDisplayTransform`, `TonyMcMapface`, `BlenderFilmic`, each `.png`), RGBA at eight
+bits in sRGB with the rows stored unfiltered, row 0 the gray at the top, drawn on an NVIDIA RTX
+4070 with Bevy 0.19.1, for 3DEngine's item 2 to copy.
