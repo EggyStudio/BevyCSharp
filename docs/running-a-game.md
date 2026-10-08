@@ -46,14 +46,17 @@ captured once, an irradiance volume made in code, clustered decals and emission 
 of the hub a meadow of grass, every blade an entity drawn in one instanced batch, and a ring of
 trees bend in a wind a Slang vertex shader blows. In the scenes zone north-east of the hub the
 panel's Scenes page fetches a scene pack and loads it, Intel Sponza first, standing with its main
-door open for the player to walk in, and `./bcs scenes fetch intel-sponza` fetches one from a
-terminal. The panel's effects page switches the tonemapper and turns on ambient occlusion,
-screen-space reflections, a depth of field focused on whatever the view rests on, motion blur,
-chromatic aberration, auto exposure, sharpening and a dusk sky drawn in code, and
-`./bcs command setting AmbientOcclusion true` changes a setting as the panel does. In spectator mode
-`./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
-`build/drive-feature-test.sh` walks the player through each station through `bcs` and captures each
-zone, as the pack workflow does.
+door open for the player to walk in, its heaviest meshes drawn as meshlets where the graphics page's
+meshlets run from the next start, which its page switches off and on saying the frame time of each,
+the light hall's lamps then casting no shadows, since with meshlets each shadow view holds a few
+hundred megabytes of the graphics driver's memory, and `./bcs scenes fetch intel-sponza` fetches one
+from a terminal. The panel's effects page switches
+the tonemapper and turns on ambient occlusion, screen-space reflections, a depth of field focused on
+whatever the view rests on, motion blur, chromatic aberration, auto exposure, sharpening and a dusk
+sky drawn in code, and `./bcs command setting AmbientOcclusion true` changes a setting as the panel
+does. In spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at
+another. `build/drive-feature-test.sh` walks the player through each station through `bcs` and
+captures each zone, as the pack workflow does.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

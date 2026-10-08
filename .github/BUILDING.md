@@ -297,6 +297,14 @@ the README's install in a container (`build/readme-walk.sh`), and packs only onc
 The package is kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
 **publish** box pushes it to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
 
+The **scene packs** workflow, also run by hand and never by a push, builds the bridge with
+meshlets and ray-traced lighting, fetches each scene pack `scenes/` names into the actions cache,
+where it stays between runs under the manifests' hash, and drives the feature test, which loads
+each fetched pack and captures its reference views with their frame times as the run's artifact. A
+pack itself is made by `build/make-scene-pack.py` from the scene as its makers publish it, needs
+Python 3.14 and Pillow, and is published by hand as an asset of the release `scene-packs`, at the
+address its manifest names.
+
 The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
 GitHub runs the step's script in. A step that fails having said nothing is given an error naming
 the step, the command that failed with its line and exit code, the step's last lines, and the last

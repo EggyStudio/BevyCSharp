@@ -10,53 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2b5c353`. Two types of N 1.2's list moved into files of their names,
-`IPersistentValue` and `UserData` out of the persistent value's file, nothing in them changed, the
-list at 186 (`2b5c353`). The owner pushed it, and its run was in progress at 21:28; the run of
-`edd577c` had passed on all three systems at 21:03. Scene packs, item 3, are under way.
+Reviewed up to `c70f17b`. `MeshletTests` moved into the assets' folder, nothing in it changed,
+N 1.4's list at 76 with 28 left out (`c70f17b`), pushed at 06:15 on 2026-10-08 and green on the
+three systems. Sponza's meshlets, item 3, are under way in the bridge's `meshlets.rs` and
+`assets.rs`. At 07:10 the owner decided that every tonemapper here comes to 3DEngine (Decision 16),
+this side's part the ramp references, item 14, after item 3.
 
-Before them, the render gallery came to be done, settling its item, the list renumbered: south of
-the hub a meadow of fourteen thousand blades, each an entity sharing one mesh and one material so
-Bevy draws them as one instanced batch, placed, turned and sized from a seed, and a ring of trees
-whose crowns share the program over trunks the player cannot walk through, bend in a wind a Slang
-vertex shader blows, its gusts phased by where each blade stands and its prepass bent the same way,
-the blades casting no shadows and the crowns casting theirs; the drive script captures each zone
-drawn rather than played from the spectator camera through `look`, the gallery's wall and box, each
-bay of the hall from its aisle, the meadow, and the gallery again under ambient occlusion and the
-dusk sky set through `setting` and put back, after asking `entity.get` for a piece of each zone
-(`6a19213`). Writing the wind found the guide's example of a stage moving with the time reading
-`bcs::globals` in its prepass, which the prepass does not bind, so the example ended the app at the
-first shadow; it reads `bcs::prepass_globals`, and a test draws a ball whose prepass does, failing
-with the guide's line (`28a1eaf`). The camera's volumetric fog hazes the whole picture once a depth
-prepass is on the camera, found and not traced, so the hall puts the fog on the camera only while it
-is inside, which the gaps' item carries. The suite: 1,243 passed, 5 skipped.
+Before them, scene packs came most of the way in, item 3's meshlets and workflow left: a pack mounts
+under a folder of the asset root while an app runs and both sides read it, the bridge's default
+source reading the list of carried files at each read; `ScenePacks` reads the manifests in
+`scenes/`, fetches a pack over HTTPS or from a file into a folder every game on the machine shares,
+`BCS_SCENE_PACKS` naming another, telling its progress and keeping it only where its SHA-256 is the
+manifest's, and mounts it under `packs/` and its name, with `bcs scenes`, `bcs scenes fetch` and
+`bcs scenes pack`, four tests, the listing, the cheat sheet and the assets page (`c27fad0`);
+`build/make-scene-pack.py` makes a pack from a glTF scene, every texture resized to a power of two,
+mipmapped and written as KTX2 with BC7 for colors, BC5 for normal maps and BC1 for the rest, each
+level supercompressed with zstd from Python 3.14's own library, by encoders written in the script,
+BC7 in its mode 6 refined once by least squares, the glTF pointed at them with its cameras left out,
+the same pack byte for byte from the same input, and Intel Sponza's manifest names the pack it made,
+208,923,293 bytes with the scene's lights left out, credited in the notices by
+`build/third-party-notices.py` and the `scenes` folder in AGENTS.md's table as N 1.5 asks
+(`9d1154a`); the feature test's Scenes page fetches a pack with a bar and loads it into the scenes
+zone, Sponza with its main door swung open and its floors, walls, columns and arches as mesh
+colliders, its attribution over the doorway, `scene.load` and `scene.unload` as commands, and the
+drive script capturing Sponza where its pack is fetched, which the push workflows never do
+(`02dab48`). Walking in found a static body on an entity under others standing at its own transform
+taken as the world's, so a spawned scene's walls stopped nothing; it is put where its parents put
+it, with a test (`28a54cd`). The lists were missed once, `Persistent.cs` changed at `0f0f461` while
+on N 1.2's list and moved two batches later, and are read for each batch's files since. The pack is
+made and not published; the owner publishes it as the release `scene-packs` with the asset
+`intel-sponza.pack`, after weighing the line Sponza's own license file sets beside its CC BY 4.0
+text, which limits commercial use. The suite: 1,248 passed, 5 skipped.
 
-Before them, the light hall came to stand north of the hub, a roofed building of eight bays off an
-aisle, shut but for its doorway so each bay is lit by what it holds: point lights in red, green and
-blue whose shadows cross, a spot light through a cookie drawn in code, a light the size of a panel
-with soft shadows, since Bevy 0.19 has no rect or area light, a spot through slats into a fog volume
-drawn by the camera's volumetric fog, a reflection probe captured once with a chrome and a gold
-sphere, an irradiance volume made in code, clustered decals over a wall, the floor and a corner, and
-tubes glowing past white for the bloom, every picture drawn a pixel at a time so the workflow draws
-the hall whole (`8cf909f`); the panel's effects page switches the tonemapper and turns on ambient
-occlusion, screen-space reflections, a depth of field focused by a ray on what the view rests on,
-motion blur, chromatic aberration, the vignette, auto exposure, sharpening and a dusk sky drawn in
-code, MSAA giving way where a pass needs the picture once a pixel, and a `setting` command changes
-any of the panel's settings for the drive script (`edd577c`). The gallery and the hall found four
-more faults of the library, each mended with a test that failed first: an image made from pixels
-took its shape as a cube, a volume or an array only at the next frame, so an irradiance volume
-refused it and a skybox warned, and it takes it in the call where its pixels are here (`a5b35b1`);
-Solari lost the prepasses it reads when an effect, the occlusion, the reflections or a prepass
-request taken off after it took them away, so the whole map drew unlit under rays, and auto exposure
-taken off went on adjusting the picture, Bevy 0.19 forgetting its buffer by the camera's own entity
-where it keeps it by the render world's, mended by a new render-world entity for the camera as the
-effect goes (`62e0a4a`); and `Persistent<T>` read a field a file left out as its type's zero rather
-than its default, so it reads the file over the default's own JSON, an object laid over field by
-field and anything else the file's own, with the page saying so (`0f0f461`). The gallery's
-anisotropic spheres draw blown white under SSAO with forward rendering, found and not traced, which
-the gaps' item carries. On a bridge with Solari the suite passes 1,242 and skips 5, the meshlet
-cases. The run of `540343d` passed on Linux, macOS and Windows at 20:37, the first green on all
-three systems, which settles Verdict 11 and is the run the pack run for 0.4 follows.
+Before them, two types of N 1.2's list moved into files of their names, `IPersistentValue` and
+`UserData` out of the persistent value's file, nothing in them changed, the list at 186 (`2b5c353`).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -68,39 +55,36 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 8 to 13 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The runs of `540343d` and `edd577c` passed on Linux, macOS and
-   Windows, at 20:37 and 21:03, so main is green for the owner's pack run for 0.4, and Verdicts 2
-   and 3 settle on that run's page. Each push's run is read by the reviewing session, and a failure
-   it names comes first here.
+1. **What the next page says.** The runs of `540343d`, `edd577c` and `c70f17b` passed on Linux,
+   macOS and Windows, the last at 06:28 on 2026-10-08, so main is green for the owner's pack run for
+   0.4, and Verdicts 2 and 3 settle on that run's page. Each push's run is read by the reviewing
+   session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
-3. **Scene packs (Decision 15).** A well-known graphics scene comes as an asset pack fetched on
-   demand and is never checked in. `scenes/<name>.json` holds the scene's source, its license and
-   attribution, the pack's URL among this repository's release assets, its size and its SHA-256;
-   `build/make-scene-pack.py` makes a pack from the official download, Intel Sponza first from its
-   glTF, the textures resized to 1K and written as KTX2 with BC7, BC5 and BC1 blocks, mipmapped and
-   zstd-compressed, which the bridge's `ktx2` and `zstd_rust` read with no new crate, the meshes as
-   they are, `AssetPack.Write` packing the folder and the attribution written into
-   THIRD-PARTY-NOTICES.md; the panel's Scenes page lists the manifests, fetches a pack into the
-   user's cache under `Persistent`'s data directory with a progress bar, checks the hash, shows the
-   attribution and loads the scene, the pack opened while the app runs on both sides of the bridge,
-   or chosen before a start where the bridge cannot swap one; `bcs scenes fetch <name>` does the
-   same from a terminal; a workflow started by hand loads each pack and captures reference views
-   with a frame time, the packs cached between runs, and the push workflows never fetch one. Sponza
-   stands on the map at ground level beside the course with its main wooden door open, so the
-   character walks in, its floors and walls under Mesh colliders. Its heaviest meshes, the
-   photogrammetry pieces of hundreds of thousands of triangles, are drawn as meshlets where the
-   bridge is built with `--meshlet` and the GPU has 64-bit texture atomics, through
-   `Render.CreateMeshletMesh` with the cut kept in the user's cache or cut at pack time where the
-   bridge can write a meshlet mesh, the plain meshes the fallback `Render.MeshletsActive` chooses,
-   and a panel switch comparing the frame time of the two, the picture drawn once a pixel while
-   meshlets run; the feature test's bridge and the published one are built with the meshlet and
-   Solari additions. The owner publishes the pack the script makes as a release asset, and Bistro,
-   the classic Sponza and San Miguel wait.
+3. **Scene packs (Decision 15), Sponza in, the meshlets and the workflow left.** The manifests,
+   the fetch with its hash into the shared folder, the mount while the app runs, `bcs scenes`, the
+   pack maker with its own BC7, BC5 and BC1 encoders, Intel Sponza's manifest, and the Scenes page
+   loading Sponza into its zone with the door open and its walls as mesh colliders are in
+   (`c27fad0`, `9d1154a`, `02dab48`). Left: Sponza's heaviest meshes, the photogrammetry pieces of
+   hundreds of thousands of triangles, drawn as meshlets where the bridge is built with `--meshlet`
+   and the GPU has 64-bit texture atomics, through `Render.CreateMeshletMesh` with the cut kept in
+   the user's cache or cut at pack time where the bridge can write a meshlet mesh, the plain meshes
+   the fallback `Render.MeshletsActive` chooses, and a panel switch comparing the frame time of the
+   two, the picture drawn once a pixel while meshlets run, the feature test's bridge and the
+   published one built with the meshlet and Solari additions; the workflow started by hand that
+   fetches each pack, caches it between runs and captures reference views with a frame time, the
+   push workflows never fetching one; and `make-scene-pack.py` saying at its start that it needs
+   Python 3.14 for the standard library's zstd, where an older Python fails at the import. The
+   feature test's memory with Sponza is measured and bounded first, since on 2026-10-08 the kernel
+   killed it at 21 GB anonymous and 14 GB shared, where the workflow's runner has 16 GB: the pack's
+   textures uploaded as the pack holds them, the meshes let go once uploaded, the meshlets' scratch
+   freed, and the drive script reading the process's peak. The owner publishes the pack the script
+   made as the release `scene-packs` with the asset `intel-sponza.pack`, and Bistro, the classic
+   Sponza and San Miguel wait.
 4. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
    through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
    the latitude on a panel page and in the settings file, the lights' colors and intensities on
@@ -154,6 +138,13 @@ from [SHARED.md](SHARED.md).
 13. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
     generators report, so an editor offers the mend.
+14. **The tonemappers' ramp references for 3DEngine (Decision 16).** SHARED.md's ramp drawn by a
+    Slang material of its own through each of the eight tonemappers, with dither and color grading
+    off and nothing between the material's value and the tonemapper, captured at 8 bits in sRGB, one
+    PNG a tonemapper named as `Tonemapper` names it, from the feature test's panel or a test, kept
+    where 3DEngine's coder copies them from, with `tonemapping_luts` confirmed on in the bridge,
+    since without it Bevy draws AgX, Tony McMapface and Blender's filmic from placeholders. After
+    item 3's memory bound and meshlets, before item 4.
 
 ## Verdicts
 
@@ -254,44 +245,35 @@ from [SHARED.md](SHARED.md).
     level with its main door open, for the character to walk in, and its heaviest meshes are drawn
     as meshlets, to test them, where the GPU can.
 
+16. **Every tonemapper here comes to 3DEngine.** The owner decided on 2026-10-08 that 3DEngine
+    takes Bevy's eight tonemappers, the three drawn through lookup tables from Bevy's own data and
+    the others ported from Bevy's shader, so the two engines draw one picture from one value; this
+    side's part is the proof, a ramp drawn through each tonemapper and kept as references that
+    3DEngine's test compares its own picture with, the ramp defined in SHARED.md.
+
 ## Replies
 
-**Scene packs, item 3, under way.** A pack mounts under a folder of the asset root while an app runs
-and both sides read it, the bridge's default source reading the list of carried files at each read
-rather than the one it was built with, and `ScenePacks` reads the manifests of well-known graphics
-scenes in `scenes/`, fetches a pack over HTTPS or from a file into a folder every game on the
-machine shares, `BCS_SCENE_PACKS` naming another, telling its progress and keeping it only where its
-SHA-256 is the manifest's, and mounts it under `packs/` and its name, with `bcs scenes`,
-`bcs scenes fetch <name>` and `bcs scenes pack <folder> <pack>` (`c27fad0`).
-`build/make-scene-pack.py` makes a pack from a glTF scene, every texture its materials use resized
-to a power of two, mipmapped and written as KTX2 with BC7 for colors, BC5 for normal maps and BC1
-for the rest, each level supercompressed with zstd from Python's own library, by encoders written in
-the script, BC7 in its mode 6 refined once by least squares, the glTF pointed at them and its
-cameras left out, and it makes the same pack byte for byte from the same input; Intel Sponza's
-manifest names the pack it made, 208,923,293 bytes with its lights left out, all of them at an
-intensity of nothing, credited in the notices (`9d1154a`). The feature test's Scenes page fetches a
-pack with a bar and loads it into the scenes zone, Sponza standing with its main door swung open and
-its floors, walls, columns and arches as mesh colliders, its attribution over the doorway,
-`scene.load` and `scene.unload` are commands, and the drive script captures Sponza where it is
-fetched (the commit after `9d1154a`). Walking in found that a static body on an entity under others
-stood at its own transform taken as the world's, so a spawned scene's walls stopped nothing; it is
-put where its parents put it (`28a54cd`). Left in the item are the meshlets for Sponza's heaviest
-meshes with their switch, and the workflow started by hand.
-
-For the owner, the pack is made and not published. The manifest names
-`https://github.com/EggyStudio/BevyCSharp/releases/download/scene-packs/intel-sponza.pack`, a
-release tagged `scene-packs`, and its SHA-256 is
-`af156ab4e23374a329caab6bb58bdb49f9d892667145b55f210e75dbd04bc420`;
-`python3 build/make-scene-pack.py` with the arguments in the manifest's commit makes the file again
-from Intel's download, or the working machine's copy can be uploaded. Sponza's own
-`credits_license.txt`, which the pack carries, holds the CC BY 4.0 text and a line before it reading
-"For personal use and educational use. Limited commercial use for marketing and print purposes.",
-which the owner may weigh before publishing.
-
-Rule: N 1.2's list named `Persistent.cs` when `0f0f461` changed it, and the move came only now
-(`2b5c353`), before this batch touched it again; the lists were read for the files of each batch
-from then on.
-
-Shared: a static body under a parent placed by its parents' transforms (`28a54cd`), for the row of
-bodies held as components, and scene packs fetched on demand (`c27fad0`, `9d1154a`) for Decision
-15's row.
+**Item 3, the feature test's memory, measured and bounded.** Each run was measured in a scope of
+16 GB with a cap of its own, the resident size, the bridge's allocations and wgpu's counts read each
+second. Sponza drawn plain stands at 3.6 GB, 1.6 GB of it anonymous, of which the bridge's
+allocator holds 260 MB and its textures go up as BC7 and BC5 as the pack holds them, so letting the
+meshes and textures go from the main world would save little and is left. Drawn as meshlets it
+passed 12 GB in a quarter of a minute while the bridge's allocations, the managed heap and every
+count wgpu keeps, its allocator's bytes, buffers, pipelines and command encoders, stood still, so
+the memory was the NVIDIA driver's own. Turning things off one at a time led to the shadow views.
+With no shadows the meshlet meshes stood at 1.7 GB, with the sun's four cascades alone Sponza stood
+at 6.4 GB, and Bevy's own meshlet example, flat at 1.2 GB with its one cascade, climbed to 2.8 GB
+with one shadowed point light and to 7.5 GB with five and four cascades, the bunny alone. Bevy 0.19
+runs every meshlet pass in every shadow view whether or not a meshlet mesh is in it, and each view
+came to hold a few hundred megabytes of the driver's memory over its first fifteen seconds, then
+leveled. Where meshlets run, the light hall's lamps now cast no shadows and the sun alone does, and
+Sponza as meshlets stands at 6.5 GB and 60 frames a second, its peak 7 GB. What the driver keeps
+was not traced further, and `Config.MeshletClusters` says what was found. The `memory` command
+gains the peak and the `gpu.` pairs, read from wgpu with its counters on, and the drive script
+writes the peak beside the frame times. `MemoryGuard`, the safeguard asked for after the kill,
+holds every app `bcs`, the drive script, the suite and the feature test start to 8 GB or a quarter
+of the machine's memory where that is less, and past it the run says why on the console and in a
+crash file and ends with code 86 through `_exit`, since an ordinary exit with Bevy's threads
+drawing crashed in the driver and its core dump held the memory fifteen seconds more. The scratch
+is off `/tmp`, the Sponza download kept in `~/.cache/bevycsharp`, and `tonemapping_luts` is on in
+the render profile, for item 14.

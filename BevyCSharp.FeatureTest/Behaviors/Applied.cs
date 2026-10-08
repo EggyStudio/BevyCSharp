@@ -26,7 +26,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// traces its own into the same texture. The reflections draw every material deferred, which is
 /// put back to forward as they go unless Solari keeps it deferred. The backdrop is the
 /// atmosphere the scene starts with or a dusk sky drawn in code as a cubemap, made the first time
-/// it is asked for.
+/// it is asked for, and the dusk sky alone where meshlets run, since Bevy's meshlet pipelines end
+/// the app under an atmosphere.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -35,7 +36,7 @@ public partial struct Applied
     private static bool _due = true;
     private static readonly HashSet<Entity> Wired = [];
     private static bool _reflections;
-    private static Backdrop _backdrop;
+    private static Backdrop? _backdrop;
     private static AssetHandle _dusk = AssetHandle.None;
 
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
@@ -53,7 +54,7 @@ public partial struct Applied
         _due = true;
         Wired.Clear();
         _reflections = false;
-        _backdrop = Backdrop.Atmosphere;
+        _backdrop = Render.MeshletsActive ? null : Backdrop.Atmosphere;
         _dusk = AssetHandle.None;
         _focus = 10f;
     }
@@ -137,9 +138,11 @@ public partial struct Applied
             _reflections = settings.Reflections;
         }
 
-        if (settings.Backdrop != _backdrop)
+        // The dusk sky where meshlets run, which an atmosphere would end the app under.
+        var backdrop = Render.MeshletsActive ? Backdrop.Dusk : settings.Backdrop;
+        if (backdrop != _backdrop)
         {
-            if (settings.Backdrop == Backdrop.Dusk)
+            if (backdrop == Backdrop.Dusk)
             {
                 if (!_dusk.IsValid) _dusk = Dusk();
                 Render.ClearAtmosphere(camera);
@@ -151,7 +154,7 @@ public partial struct Applied
                 Render.SetAtmosphere(camera, new AtmosphereSettings());
             }
 
-            _backdrop = settings.Backdrop;
+            _backdrop = backdrop;
         }
     }
 

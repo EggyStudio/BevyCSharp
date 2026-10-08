@@ -73,8 +73,10 @@ public partial struct Scene
             + "orbit; F to frame the origin");
 
         // The sky, scattered from the sun below rather than painted. The camera sees it where the
-        // scene does not cover, and it tints everything in the distance.
-        Render.SetAtmosphere(camera, new AtmosphereSettings());
+        // scene does not cover, and it tints everything in the distance. Not where meshlets run,
+        // whose pipelines Bevy builds without an atmosphere's bindings, and the settings put the
+        // dusk sky there in its place.
+        if (!Render.MeshletsActive) Render.SetAtmosphere(camera, new AtmosphereSettings());
 
         // What the camera does with the picture once the scene is drawn, from the panel's
         // settings. The high dynamic range target makes the rest worth having. Without it nothing

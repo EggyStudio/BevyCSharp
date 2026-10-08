@@ -30,8 +30,9 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A pack can also be mounted under a folder of the asset root while an app runs
-/// (<see cref="Mount"/>), as a scene pack fetched for the player is, and Bevy reads it from then
-/// on as the managed side does, since the bridge asks for the list of carried files at each read.
+/// (<see cref="Mount(string, AssetPack)"/>), as a scene pack fetched for the player is, and Bevy
+/// reads it from then on as the managed side does, since the bridge asks for the list of carried
+/// files at each read.
 /// </para>
 /// <para>
 /// Only reads come here. Writing a scene or a data asset writes the folder, since what a game
@@ -47,8 +48,17 @@ public static unsafe class AssetFiles
     private static Assembly? _assembly;
     private static AssetPack? _pack;
 
-    /// <summary>The packs mounted while an app runs, by the folder each appears under.</summary>
-    private static readonly Dictionary<string, AssetPack> Mounts = new(StringComparer.Ordinal);
+    /// <summary>
+    /// The packs and the folders on disk mounted while an app runs, by the folder of the asset root
+    /// each appears under.
+    /// </summary>
+    private static readonly Dictionary<string, Mounted> Mounts = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// What is mounted under a folder, its files' paths under it and how to open one, and the pack
+    /// to close when it goes, where it is one.
+    /// </summary>
+    private sealed record Mounted(IReadOnlyList<string> Files, Func<string, Stream?> Open, AssetPack? Pack);
 
     /// <summary>
     /// Every carried file by its path under the asset root, with how to open it, the pack's copy
@@ -85,7 +95,7 @@ public static unsafe class AssetFiles
     public static void Use(Assembly? assembly, AssetPack? pack)
     {
         AssetPack? replaced;
-        AssetPack[] unmounted;
+        Mounted[] unmounted;
         lock (Gate)
         {
             replaced = _pack == pack ? null : _pack;
@@ -97,7 +107,7 @@ public static unsafe class AssetFiles
         }
 
         replaced?.Dispose();
-        foreach (var gone in unmounted) gone.Dispose();
+        foreach (var gone in unmounted) gone.Pack?.Dispose();
     }
 
     /// <summary>
@@ -123,43 +133,76 @@ public static unsafe class AssetFiles
     /// <param name="pack">The pack, from <see cref="AssetPack.Open"/>.</param>
     public static void Mount(string folder, AssetPack pack)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
         ArgumentNullException.ThrowIfNull(pack);
+        Mount(folder, new Mounted([.. pack.Files], pack.OpenFile, pack));
+    }
+
+    /// <summary>
+    /// Reads the files of a folder on this machine under a folder of the asset root while an app
+    /// runs, on both sides of the bridge, until <see cref="Unmount"/> or the next app, as a scene's
+    /// meshlets cut once and kept in a cache are read on the runs after.
+    /// </summary>
+    /// <remarks>
+    /// The files are listed as they are when it is mounted, every file under the folder by its path
+    /// under it, so one written after is read once the folder is mounted again. A file is opened
+    /// when it is read, so one changed in the meantime is read as it is then.
+    /// </remarks>
+    /// <param name="folder">
+    /// Where under the asset root the files appear, with forward slashes.
+    /// </param>
+    /// <param name="directory">The folder on this machine, which need not be there yet.</param>
+    public static void Mount(string folder, string directory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directory);
+
+        var full = Path.GetFullPath(directory);
+        string[] files = Directory.Exists(full)
+            ? [.. Directory.GetFiles(full, "*", SearchOption.AllDirectories).Select(file => Path.GetRelativePath(full, file).Replace('\\', '/')).Order(StringComparer.Ordinal)]
+            : [];
+
+        Mount(folder, new Mounted(files, file => File.OpenRead(Path.Combine(full, file)), null));
+    }
+
+    private static void Mount(string folder, Mounted mounted)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
 
         var under = folder.Replace('\\', '/').Trim('/');
-        AssetPack? replaced;
+        Mounted? replaced;
         lock (Gate)
         {
             replaced = Mounts.GetValueOrDefault(under);
-            Mounts[under] = pack;
+            Mounts[under] = mounted;
             _carried = Gather();
         }
 
-        if (replaced != pack) replaced?.Dispose();
+        if (replaced?.Pack != mounted.Pack) replaced?.Pack?.Dispose();
         Serve();
     }
 
-    /// <summary>Stops reading the pack mounted under a folder, and closes it.</summary>
-    /// <returns>Whether a pack was mounted there.</returns>
+    /// <summary>
+    /// Stops reading what is mounted under a folder, and closes it where it is a pack.
+    /// </summary>
+    /// <returns>Whether anything was mounted there.</returns>
     public static bool Unmount(string folder)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(folder);
 
         var under = folder.Replace('\\', '/').Trim('/');
-        AssetPack? pack;
+        Mounted? mounted;
         lock (Gate)
         {
-            if (!Mounts.Remove(under, out pack)) return false;
+            if (!Mounts.Remove(under, out mounted)) return false;
             _carried = Gather();
         }
 
-        pack.Dispose();
+        mounted.Pack?.Dispose();
         Serve();
         return true;
     }
 
     /// <summary>
-    /// Every carried file with how to open it, the assembly's under the app's pack under the packs
+    /// Every carried file with how to open it, the assembly's under the app's pack under what is
     /// mounted while it runs. Called holding the gate.
     /// </summary>
     private static Dictionary<string, Func<Stream?>> Gather()
@@ -183,7 +226,7 @@ public static unsafe class AssetFiles
 
         foreach (var (under, mounted) in Mounts)
         {
-            foreach (var file in mounted.Files) found[$"{under}/{file}"] = () => mounted.OpenFile(file);
+            foreach (var file in mounted.Files) found[$"{under}/{file}"] = () => mounted.Open(file);
         }
 
         return found;

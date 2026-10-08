@@ -5,7 +5,9 @@
 //! The bytes are counted by an allocator wrapped around the system's, which every allocation in
 //! this library goes through, Bevy's world, its assets and the renderer's copies on the CPU's side
 //! among them. What a graphics driver allocates for itself is not Rust's and is not counted here,
-//! which the process's resident size, read on the managed side, takes in.
+//! which the process's resident size, read on the managed side, takes in. Where a renderer runs,
+//! what wgpu has asked the GPU for is said beside them, so memory the driver holds can be told
+//! apart from the resources a frame asked it for.
 
 use core::cell::Cell;
 use std::alloc::{GlobalAlloc, Layout, System};
@@ -146,10 +148,54 @@ pub unsafe extern "C" fn bcs_memory_describe(out: *mut u8, capacity: i32) -> i32
             for (kind, held) in assets(world).into_iter().filter(|&(_, held)| held > 0) {
                 let _ = write!(text, " asset.{kind} {held}");
             }
+
+            #[cfg(feature = "render")]
+            gpu(world, &mut text);
         });
 
         unsafe { crate::interop::write_text(&text, out, capacity) }
     })
+}
+
+/// What wgpu holds on the GPU, as `gpu.<what> <count>` pairs.
+///
+/// The bytes its allocator has given out and the bytes it has reserved from the driver for them,
+/// then how many of each kind of resource are alive and the bytes of buffers and textures, as wgpu
+/// counts them. A count that climbs while a scene stands still names the resource a frame makes
+/// and never drops, and memory that climbs while every count stands still is the driver's own.
+#[cfg(feature = "render")]
+fn gpu(world: &World, text: &mut String) {
+    let Some(device) = world.get_resource::<bevy::render::renderer::RenderDevice>() else {
+        return;
+    };
+    let device = device.wgpu_device();
+
+    if let Some(report) = device.generate_allocator_report() {
+        let _ = write!(
+            text,
+            " gpu.allocated {} gpu.reserved {}",
+            report.total_allocated_bytes, report.total_reserved_bytes
+        );
+    }
+
+    let hal = device.get_internal_counters().hal;
+    for (name, counter) in [
+        ("buffers", &hal.buffers),
+        ("textures", &hal.textures),
+        ("textureViews", &hal.texture_views),
+        ("bindGroups", &hal.bind_groups),
+        ("renderPipelines", &hal.render_pipelines),
+        ("computePipelines", &hal.compute_pipelines),
+        ("commandEncoders", &hal.command_encoders),
+        ("shaderModules", &hal.shader_modules),
+        ("querySets", &hal.query_sets),
+        ("fences", &hal.fences),
+        ("memoryAllocations", &hal.memory_allocations),
+        ("bufferBytes", &hal.buffer_memory),
+        ("textureBytes", &hal.texture_memory),
+    ] {
+        let _ = write!(text, " gpu.{name} {}", counter.read());
+    }
 }
 
 /// How many assets of each kind the world holds, by the kind's name.

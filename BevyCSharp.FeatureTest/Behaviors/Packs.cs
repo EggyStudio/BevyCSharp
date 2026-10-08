@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using Bevy;
 using Bevy.Physics;
+using Bevy.Reflected;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -23,6 +24,15 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// colliders once their meshes have loaded. Its attribution is written over the doorway while it
 /// stands, as its license asks.
 /// </para>
+/// <para>
+/// Where meshlets run (the graphics page, from the next start), the scene's heaviest meshes, of
+/// more than <see cref="Heavy"/> triangles each, are drawn as meshlets, cut on a worker the first
+/// time and kept in the scene packs' folder beside the pack, which is mounted for the runs after.
+/// The pack's page switches them back to plain meshes and says the GPU's time for each, and where
+/// meshlets do not run the plain meshes are all there is. Each heavy mesh has a twin beside it
+/// drawing the meshlet mesh with the same material, one of the two hidden, since in Bevy 0.19 an
+/// entity that has drawn a meshlet mesh draws nothing given its mesh back.
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct Packs
@@ -41,6 +51,29 @@ public partial struct Packs
     private static readonly ConcurrentDictionary<string, double> Fetching = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, string> Problems = new(StringComparer.Ordinal);
 
+    /// <summary>How many triangles a mesh has above which it is drawn as meshlets.</summary>
+    private const int Heavy = 40_000;
+
+    /// <summary>
+    /// The heaviest meshes of the scene standing, each the entity drawing it plain, its twin
+    /// drawing it as meshlets, made the first time it is asked for, and its name.
+    /// </summary>
+    private static readonly List<(Entity Plain, Entity Twin, string Name)> Heaviest = [];
+
+    /// <summary>Each heaviest mesh's meshlet mesh, made or loaded once a load.</summary>
+    private static readonly Dictionary<string, AssetHandle> Cut = new(StringComparer.Ordinal);
+
+    /// <summary>The time in milliseconds, smoothed, with plain meshes and with meshlets.</summary>
+    private static (double Plain, double Meshlets) _timings;
+
+    /// <summary>Whether the heaviest meshes are drawn as meshlets now.</summary>
+    private static bool _asMeshlets;
+
+    /// <summary>
+    /// Whether the times are the GPU's, measured pass by pass, rather than the frame's.
+    /// </summary>
+    private static bool _onGpu;
+
     private static ScenePack? _shown;
     private static AssetHandle _scene = AssetHandle.None;
     private static Entity _root = Entity.None;
@@ -48,6 +81,17 @@ public partial struct Packs
 
     /// <summary>The packs the manifests name.</summary>
     internal static IReadOnlyList<ScenePack> Known { get; private set; } = [];
+
+    /// <summary>
+    /// Whether the heaviest meshes are to be drawn as meshlets, where meshlets run.
+    /// </summary>
+    internal static bool AsMeshlets { get; set; } = true;
+
+    /// <summary>
+    /// The times with plain meshes and with meshlets, as the pack's page says them.
+    /// </summary>
+    internal static string Timings =>
+        $"{(_onGpu ? "GPU" : "frame")} plain {(_timings.Plain > 0 ? $"{_timings.Plain:0.0} ms" : "unmeasured")}, meshlets {(_timings.Meshlets > 0 ? $"{_timings.Meshlets:0.0} ms" : "unmeasured")}";
 
     /// <summary>Reads the manifests and says which packs are fetched.</summary>
     [OnStartup]
@@ -57,6 +101,12 @@ public partial struct Packs
         _scene = AssetHandle.None;
         _root = Entity.None;
         _fitted = false;
+        _asMeshlets = false;
+        _onGpu = false;
+        _timings = default;
+        Heaviest.Clear();
+        Cut.Clear();
+        AsMeshlets = true;
         Problems.Clear();
 
         Known = ScenePacks.List(Path.Combine(AppContext.BaseDirectory, "scenes"), out var problems);
@@ -102,6 +152,19 @@ public partial struct Packs
         return ConsoleHost.World is { } world ? Load(new BehaviorContext(world), pack) : "there is no world to load into";
     }
 
+    /// <summary>
+    /// Switches the heaviest meshes between meshlets and plain meshes, as the pack's page does.
+    /// </summary>
+    [Command("scene.meshlets", "Draws the standing scene's heaviest meshes as meshlets or plain, and says the frame time of each: scene.meshlets [on|off]")]
+    internal static string MeshletsCommand(string state)
+    {
+        if (!Render.MeshletsActive) return "meshlets do not run, so the meshes are plain";
+
+        var words = state.Trim();
+        if (words.Length > 0) AsMeshlets = words is "on" or "1" or "true";
+        return $"{(AsMeshlets ? "meshlets" : "plain meshes")}, {Timings}";
+    }
+
     /// <summary>Takes the pack standing in the zone away.</summary>
     [Command("scene.unload", "Takes the scene pack standing in the scenes zone away")]
     internal static string UnloadCommand() =>
@@ -134,8 +197,104 @@ public partial struct Packs
             return;
         }
 
-        if (!_fitted) _fitted = Fit(ecs);
+        if (!_fitted)
+        {
+            _fitted = Fit(ecs);
+            return;
+        }
+
+        if (!Render.MeshletsActive) return;
+
+        // The GPU's time for the frame where it is measured, the sum of its passes as Bevy smooths
+        // them, or the frame's own, of the mode drawn now, smoothed over a second or so.
+        var gpu = Render.Timings().Sum(timing => timing.GpuMilliseconds ?? 0);
+        _onGpu = gpu > 0;
+        var frame = _onGpu ? gpu : ctx.Time.RawDeltaSeconds * 1000.0;
+        if (_asMeshlets) _timings.Meshlets = _timings.Meshlets > 0 ? (_timings.Meshlets * 0.98) + (frame * 0.02) : frame;
+        else _timings.Plain = _timings.Plain > 0 ? (_timings.Plain * 0.98) + (frame * 0.02) : frame;
+
+        if (AsMeshlets == _asMeshlets || !FindHeaviest(ecs)) return;
+
+        for (var i = 0; i < Heaviest.Count; i++)
+        {
+            var (plain, twin, name) = Heaviest[i];
+            if (!ecs.IsAlive(plain)) continue;
+
+            if (AsMeshlets && twin == Entity.None)
+            {
+                twin = TwinOf(ecs, pack, plain, name);
+                Heaviest[i] = (plain, twin, name);
+            }
+
+            ecs.Wrap<VisibilityRef>(plain).Value = AsMeshlets ? VisibilityRef.ValueVariant.Hidden : VisibilityRef.ValueVariant.Inherited;
+            if (ecs.IsAlive(twin)) ecs.Insert<VisibilityRef>(twin).Value = AsMeshlets ? VisibilityRef.ValueVariant.Inherited : VisibilityRef.ValueVariant.Hidden;
+        }
+
+        _asMeshlets = AsMeshlets;
+        Console.WriteLine($"[Packs] {Heaviest.Count} of {pack.Title}'s meshes are drawn as {(_asMeshlets ? "meshlets" : "plain meshes")}");
     }
+
+    /// <summary>
+    /// Finds the scene's heaviest meshes once every mesh in it has loaded, answering whether it
+    /// has.
+    /// </summary>
+    private static bool FindHeaviest(EcsWorld ecs)
+    {
+        if (Heaviest.Count > 0) return true;
+
+        var found = new List<(Entity, Entity, string)>();
+        foreach (var entity in ecs.Descendants(_root))
+        {
+            var mesh = Render.MeshOf(ecs, entity);
+            if (!mesh.IsValid) continue;
+            if (!Render.TryGetMeshInfo(mesh, out var info)) return false;
+            if (info.Triangles > Heavy) found.Add((entity, Entity.None, ecs.NameOf(entity) ?? $"mesh {entity}"));
+        }
+
+        Heaviest.AddRange(found);
+        return true;
+    }
+
+    /// <summary>
+    /// A heavy mesh's twin, beside it under the same parent, at the same place and with the same
+    /// material, drawing its meshlet mesh.
+    /// </summary>
+    private static Entity TwinOf(EcsWorld ecs, ScenePack pack, Entity plain, string name)
+    {
+        var twin = ecs.Spawn();
+        ecs.Add(twin, ecs.GetOrDefault<Transform>(plain));
+        Render.SetMeshletMesh(ecs, twin, MeshletOf(pack, name, Render.MeshOf(ecs, plain)));
+        Render.SetMaterial(ecs, twin, Render.MaterialOf(ecs, plain));
+        if (ecs.ParentOf(plain) is { IsNone: false } parent) ecs.SetParent(twin, parent);
+        ecs.SetName(twin, $"{name}, as meshlets");
+        return twin;
+    }
+
+    /// <summary>
+    /// A heaviest mesh's meshlet mesh, loaded from the cut kept in the cache or cut now on a worker
+    /// and kept there for the next run.
+    /// </summary>
+    private static AssetHandle MeshletOf(ScenePack pack, string name, AssetHandle mesh)
+    {
+        if (Cut.TryGetValue(name, out var made)) return made;
+
+        var file = string.Concat(name.Select(character => char.IsLetterOrDigit(character) || character is '_' or '-' ? character : '_')) + ".meshlet_mesh";
+        var kept = Path.Combine(CacheOf(pack), file);
+        made = AssetFiles.Exists($"{CacheFolder(pack)}/{file}")
+            ? AssetServer.Load(AssetKind.MeshletMesh, $"{CacheFolder(pack)}/{file}")
+            : Render.CreateMeshletMesh(mesh, saveTo: kept);
+
+        Cut[name] = made;
+        return made;
+    }
+
+    /// <summary>
+    /// Where a pack's meshlets are kept, beside the pack in the folder every game shares.
+    /// </summary>
+    private static string CacheOf(ScenePack pack) => Path.Combine(ScenePacks.Folder, $"{pack.Name}-meshlets");
+
+    /// <summary>Where that folder is mounted under the asset root while the pack stands.</summary>
+    private static string CacheFolder(ScenePack pack) => $"{ScenePacks.MountFolder}/{pack.Name}-meshlets";
 
     /// <summary>Writes the attribution over the doorway, every frame, while a scene stands.</summary>
     [OnUpdate]
@@ -150,10 +309,19 @@ public partial struct Packs
         Gizmos.Text(Wrap(pack.Attribution, 60), at + (outward * 0.1f), turned, 0.16f, (0f, 0f), (0.95f, 0.92f, 0.8f, 1f), inFront: false);
     }
 
-    /// <summary>The pack's page, its row and its attribution.</summary>
+    /// <summary>
+    /// The pack's page, its row, its meshlets where they run and its attribution.
+    /// </summary>
     internal static Page PageOf(ScenePack pack) => new(pack.Title,
     [
         new PackRow(pack),
+        .. Render.MeshletsActive
+            ? new Row[]
+            {
+                new ToggleRow("Heaviest meshes as meshlets", () => AsMeshlets, value => AsMeshlets = value),
+                new TimingRow(),
+            }
+            : [new TextRow("Meshlets do not run, so the meshes are plain.")],
         .. Wrap(pack.Attribution, 44).Split('\n').Select(line => (Row)new TextRow(line)),
     ]);
 
@@ -218,6 +386,12 @@ public partial struct Packs
         _scene = AssetServer.LoadGltfScene(model);
         _shown = pack;
         _fitted = false;
+        _asMeshlets = false;
+        Heaviest.Clear();
+        Cut.Clear();
+
+        // The meshlets cut on a run before, read from the folder they were kept in.
+        AssetFiles.Mount(CacheFolder(pack), CacheOf(pack));
         return $"loading {pack.Title}";
     }
 
@@ -229,7 +403,10 @@ public partial struct Packs
         _root = Entity.None;
         _scene = AssetHandle.None;
         _shown = null;
+        Heaviest.Clear();
+        Cut.Clear();
         ScenePacks.Unmount(pack);
+        AssetFiles.Unmount(CacheFolder(pack));
         return $"took {pack.Title} away";
     }
 
@@ -259,6 +436,16 @@ public partial struct Packs
     private sealed class Reporter(string name) : IProgress<double>
     {
         public void Report(double value) => Fetching[name] = value;
+    }
+}
+
+/// <summary>The time with plain meshes and with meshlets, as each was last measured.</summary>
+internal sealed record TimingRow() : Row("Time")
+{
+    public override string Value => Packs.Timings;
+
+    public override void Step(BehaviorContext ctx, int direction)
+    {
     }
 }
 

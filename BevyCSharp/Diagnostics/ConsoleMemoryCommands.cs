@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Bevy.Interop;
 
@@ -13,10 +14,13 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Every figure is a name and a whole number on one line, for a script to read without parsing a
-/// sentence. Managed memory is the garbage collector's, and the process's resident size takes in
-/// what a graphics driver holds, which on a software renderer is the device's memory too. The rest
-/// is the bridge's, the bytes Rust's allocator holds, the entities and their indices, the asset
-/// handles this side keeps, and the assets of each kind Bevy holds.
+/// sentence. Managed memory is the garbage collector's, and the process's resident size, with the
+/// most it has held since it started, takes in what a graphics driver holds, which on a software
+/// renderer is the device's memory too. The rest is the bridge's, the bytes Rust's allocator holds,
+/// the entities and their indices, the asset handles this side keeps, the assets of each kind Bevy
+/// holds, and where a renderer runs what wgpu has asked the GPU for, its allocator's bytes and how
+/// many of each resource are alive, as <c>gpu.</c> pairs. A resident size that climbs while every
+/// <c>gpu.</c> count stands still is memory the driver keeps for itself.
 /// </para>
 /// </remarks>
 internal static unsafe class ConsoleMemoryCommands
@@ -26,19 +30,26 @@ internal static unsafe class ConsoleMemoryCommands
     /// Read as the program left it, so a climb shows as it happens. <c>memory.collect</c> tells
     /// what is held apart from what waits to be collected.
     /// </remarks>
-    [Command("memory", "What the program holds, as name and number pairs: managed memory, the process, the bridge's allocations, entities and assets")]
+    [Command("memory", "What the program holds, as name and number pairs: managed memory, the process and its peak, the bridge's allocations, entities, assets and the GPU's resources")]
     internal static string Memory()
     {
         var info = GC.GetGCMemoryInfo();
         var line = string.Create(
             CultureInfo.InvariantCulture,
-            $"managed {GC.GetTotalMemory(forceFullCollection: false)} heap {info.HeapSizeBytes} gen2 {GC.CollectionCount(2)} process {Environment.WorkingSet}");
+            $"managed {GC.GetTotalMemory(forceFullCollection: false)} heap {info.HeapSizeBytes} gen2 {GC.CollectionCount(2)} process {Environment.WorkingSet} peak {Peak()}");
 
         // The handles need a world, which a command asked from outside a frame has not got.
         if (ConsoleHost.World is not null)
             line += string.Create(CultureInfo.InvariantCulture, $" handles {Native.bcs_asset_live_count()}");
 
         return line + " " + Native.ReadText(Native.bcs_memory_describe, "reading what the bridge holds");
+    }
+
+    /// <summary>The most of the machine's memory the process has held since it started.</summary>
+    private static long Peak()
+    {
+        using var process = Process.GetCurrentProcess();
+        return process.PeakWorkingSet64;
     }
 
     /// <summary>Says what the program holds after a full collection.</summary>

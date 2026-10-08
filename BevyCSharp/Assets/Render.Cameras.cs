@@ -466,11 +466,17 @@ public static unsafe partial class Render
     /// scattered through air is far brighter than white. Pair it with
     /// <see cref="SetPostProcessing"/> for a tonemapper to bring that range back down.
     /// </para>
+    /// <para>
+    /// Refused where meshlets run (<see cref="MeshletsActive"/>). Bevy 0.19 builds its meshlet
+    /// pipelines without the bindings an atmosphere adds to a camera's view, so the first meshlet
+    /// mesh drawn under one fails the GPU's validation and ends the app. A skybox
+    /// (<see cref="SetSkybox"/>) draws a sky where meshlets run.
+    /// </para>
     /// </remarks>
     /// <param name="camera">The camera that should see the sky.</param>
     /// <param name="settings">How thick the air is, and at what scale.</param>
     /// <exception cref="BevyNativeException">
-    /// The entity is gone or is not a camera, or this build has no renderer.
+    /// The entity is gone or is not a camera, this build has no renderer, or meshlets run.
     /// </exception>
     /// <example>
     /// <code>
@@ -485,6 +491,15 @@ public static unsafe partial class Render
     public static void SetAtmosphere(Entity camera, AtmosphereSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
+
+        if (MeshletsActive)
+        {
+            throw new BevyNativeException(
+                NativeStatus.Unsupported,
+                $"An atmosphere was refused on {camera}, since meshlets run, and Bevy's meshlet "
+                + "pipelines are built without the bindings an atmosphere adds to the view, so the "
+                + "first meshlet mesh drawn under it would end the app. A skybox draws a sky with them.");
+        }
 
         var native = new NativeAtmosphereConfig
         {

@@ -16,7 +16,8 @@ namespace Bevy;
 /// <see cref="Folder"/>, counting the bytes as they come for a progress bar and hashing them on the
 /// way, and keeps it only where its SHA-256 is the manifest's, so a pack cut short or replaced is
 /// never mounted. <see cref="TryMount"/> mounts a fetched pack under <c>packs/</c> and its name
-/// while an app runs (<see cref="AssetFiles.Mount"/>), and answers the path its model is loaded by.
+/// while an app runs (<see cref="AssetFiles.Mount(string, AssetPack)"/>), and answers the path its
+/// model is loaded by.
 /// </para>
 /// <para>
 /// The folder is shared, since a scene is no one game's own and a pack is large enough that a

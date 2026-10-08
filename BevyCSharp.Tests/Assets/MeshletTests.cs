@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -53,6 +54,43 @@ public sealed class MeshletTests
 
         Assert.True(middle.R > 120 && middle.R > middle.G + 60, $"the sphere's middle was {middle}");
         Assert.True(corner is { R: < 30, G: < 30, B: < 30 }, $"the empty corner was {corner}");
+    }
+
+    /// <summary>
+    /// An atmosphere is refused where meshlets run, since Bevy's meshlet pipelines lack the view
+    /// bindings it adds and the first meshlet mesh drawn under it would end the app.
+    /// </summary>
+    /// <remarks>
+    /// The feature test's camera has an atmosphere, and loading Sponza with meshlets ended it on a
+    /// validation error naming the view layout.
+    /// </remarks>
+    [SkippableFact]
+    public void AnAtmosphereIsRefusedWhereMeshletsRun()
+    {
+        Needs.Renderer();
+
+        var active = false;
+        Exception? refused = null;
+
+        var run = new PictureRun
+        {
+            Configure = config => config.MeshletClusters = 1 << 20,
+            Scene = ecs =>
+            {
+                active = Render.MeshletsActive;
+                if (!active) return;
+
+                var camera = PictureRun.Camera(ecs);
+                refused = Record.Exception(() => Render.SetAtmosphere(camera, new AtmosphereSettings()));
+            },
+        };
+
+        run.Wait(2).Go();
+
+        Needs.Meshlets(active);
+
+        var error = Assert.IsType<BevyNativeException>(refused);
+        Assert.Contains("meshlet", error.Message, StringComparison.Ordinal);
     }
 
     /// <summary>

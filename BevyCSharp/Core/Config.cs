@@ -304,8 +304,29 @@ public sealed class Config
     /// for a dense scene, and Bevy's limit is two to the twenty-fifth. While meshlets run every
     /// camera draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
     /// </para>
+    /// <para>
+    /// Bevy runs every meshlet pass in every shadow view, six for each point light that casts
+    /// shadows and one for each cascade of a directional light, whether or not a meshlet mesh is
+    /// in it. On an NVIDIA driver each such view came to hold a few hundred megabytes of the
+    /// driver's own memory over its first quarter of a minute, wgpu's resources standing still,
+    /// so a scene lit by many shadowed lights holds gigabytes more with meshlets than without, and
+    /// its lights are better left without shadows while they run. The <c>memory</c> command's
+    /// <c>gpu.</c> pairs beside the process's size tell this apart from a leak of the game's own.
+    /// </para>
     /// </remarks>
     public uint MeshletClusters { get; set; }
+
+    /// <summary>
+    /// How many gigabytes of the machine's memory the process may hold before it is stopped, or
+    /// zero for the cap <c>BCS_MEMORY_CAP_GB</c> names, or none where it names none either.
+    /// </summary>
+    /// <remarks>
+    /// For a run that might take the machine's memory with it, a test, a tool driving a scene or a
+    /// technique being tried, so it stops and says why where the system would otherwise end
+    /// whatever it chose. A shipped game is held to none unless it asks. See
+    /// <see cref="MemoryGuard"/>.
+    /// </remarks>
+    public double MemoryCap { get; set; }
 
     /// <summary>
     /// Measure how long every render pass takes, on the CPU and the GPU, for
@@ -319,18 +340,6 @@ public sealed class Config
     /// DirectX 12 have; elsewhere only CPU times arrive.
     /// </remarks>
     public bool GpuTimings { get; set; }
-
-    /// <summary>
-    /// How many gigabytes of the machine's memory the process may hold before it is stopped, or
-    /// zero for the cap <c>BCS_MEMORY_CAP_GB</c> names, or none where it names none either.
-    /// </summary>
-    /// <remarks>
-    /// For a run that might take the machine's memory with it, a test, a tool driving a scene or a
-    /// technique being tried, so it stops and says why where the system would otherwise end
-    /// whatever it chose. A shipped game is held to none unless it asks. See
-    /// <see cref="MemoryGuard"/>.
-    /// </remarks>
-    public double MemoryCap { get; set; }
 
     /// <summary>
     /// Add Bevy's wireframe plugins, so <see cref="Render.SetWireframe"/> can draw a mesh as its

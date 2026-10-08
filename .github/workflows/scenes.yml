@@ -1,0 +1,83 @@
+name: scene packs
+
+# Started by hand and never by a push, since a scene pack is hundreds of megabytes and a push would
+# fetch it every time. It fetches each pack the manifests in scenes/ name, kept in the actions cache
+# between runs under the manifests' hash, then drives the feature test, which loads each fetched
+# pack and captures its reference views with the frame time of each (build/drive-feature-test.sh),
+# the captures, the times and the most memory the run held kept as the run's artifact.
+#
+# The bridge is built here with meshlets and ray-traced lighting, as the feature test's published
+# one is, so a GPU that has them draws the scenes with them; Lavapipe, the runner's software Vulkan,
+# has neither, and the scenes are drawn plain.
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_WARNINGS: deny
+
+jobs:
+  scenes:
+    name: capture the scene packs
+    runs-on: ubuntu-24.04
+    # A cold bridge with meshlets and Solari is the half of it, and a pack's first fetch a minute.
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> ../build/target
+          key: scenes
+
+      - name: Install ALSA, libudev and a software Vulkan
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev mesa-vulkan-drivers
+
+      - name: Build the bridge
+        run: build/build-native.sh --render --meshlet --solari
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # The packs by the manifests' hash, so a pack made again under the same name is fetched again.
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/scene-packs
+          key: scene-packs-${{ hashFiles('scenes/*.json') }}
+
+      - name: Fetch the scene packs
+        env:
+          BCS_SCENE_PACKS: ${{ runner.temp }}/scene-packs
+        run: |
+          for manifest in scenes/*.json; do
+            ./bcs scenes fetch "$(basename "$manifest" .json)"
+          done
+
+      - name: Drive the feature test through the scenes
+        env:
+          BCS_SCENE_PACKS: ${{ runner.temp }}/scene-packs
+          SHOTS: ${{ runner.temp }}/scenes
+          BCS_STEP_LOGS: ${{ runner.temp }}/scenes
+        run: |
+          mkdir -p "$SHOTS"
+          dotnet build BevyCSharp.FeatureTest -c Release -warnaserror
+          build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
+          cat "$SHOTS/frame-times.txt"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: scenes
+          path: ${{ runner.temp }}/scenes
+          if-no-files-found: ignore

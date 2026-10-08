@@ -144,10 +144,12 @@ public static unsafe partial class Render
     /// meet without a crack need the same one.
     /// </para>
     /// <para>
-    /// <paramref name="saveTo"/>, a path under the asset root, also writes the finished mesh as a
-    /// <c>.meshlet_mesh</c> file, which <see cref="AssetKind.MeshletMesh"/> loads. A game bakes
-    /// this way, converting once, in a tool or on the first run, and loading the file after, which
-    /// takes as long as reading it.
+    /// <paramref name="saveTo"/>, a path under the asset root or a full one, also writes the
+    /// finished mesh as a <c>.meshlet_mesh</c> file, its folders made, which
+    /// <see cref="AssetKind.MeshletMesh"/> loads. A game bakes this way, converting once, in a tool
+    /// or on the first run, and loading the file after, which takes as long as reading it; a file
+    /// written to a cache outside the asset root is loaded once its folder is mounted
+    /// (<see cref="AssetFiles.Mount(string, string)"/>).
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">

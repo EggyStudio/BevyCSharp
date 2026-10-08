@@ -26,6 +26,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// Each bay is named over its opening in the gizmos' stroke font. The panel's effects page turns
 /// on ambient occlusion and the rest across the whole map, and the bays are where they show.
 /// </para>
+/// <para>
+/// Where meshlets run, the hall's lights cast no shadows and the sun alone does (see
+/// <see cref="CastShadows"/>).
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct Lights
@@ -46,6 +50,20 @@ public partial struct Lights
 
     /// <summary>Whether the camera has volumetric fog, which it has inside the hall.</summary>
     private static bool _fogged;
+
+    /// <summary>
+    /// Whether a light other than the sun casts shadows, which it does where meshlets do not run.
+    /// </summary>
+    /// <remarks>
+    /// Bevy 0.19 runs every meshlet pass in every shadow view, a point light's six among them,
+    /// whether or not a meshlet mesh casts a shadow there, and on an NVIDIA driver each such view
+    /// came to hold a few hundred megabytes of the driver's memory a quarter of a minute after it
+    /// began, wgpu's own resources standing still. With the hall's lights casting, Sponza drawn as
+    /// meshlets passed twelve gigabytes. With the sun alone it stood at six and a half, and with no
+    /// shadows at all the meshlet meshes alone stood under two, so the hall's lights give theirs up
+    /// while meshlets run.
+    /// </remarks>
+    internal static bool CastShadows => !Render.MeshletsActive;
 
     /// <summary>Builds the hall and its bays.</summary>
     [OnStartup]
@@ -197,7 +215,7 @@ public partial struct Lights
                 Color = color,
                 Range = 10f,
                 Radius = 0.05f,
-                Shadows = true,
+                Shadows = CastShadows,
             });
             ecs.Add(light, Transform.At(at.X, at.Y, at.Z));
             ecs.SetName(light, name);
@@ -222,7 +240,7 @@ public partial struct Lights
             Range = 16f,
             InnerAngle = 0.3f,
             OuterAngle = 0.42f,
-            Shadows = true,
+            Shadows = CastShadows,
         });
         ecs.Add(spot, Transform.LookingAt(new Vec3(-4.6f, Ground + 4.8f, z), new Vec3(-11.8f, Ground + 1.6f, z), Vec3.UnitY));
         ecs.SetName(spot, "Spot through a cookie");
@@ -250,7 +268,7 @@ public partial struct Lights
             Intensity = 400_000f,
             Color = (1f, 0.96f, 0.9f),
             Range = 12f,
-            Shadows = true,
+            Shadows = CastShadows,
         });
         ecs.Add(light, Transform.At(-8f, Ground + Height - 0.3f, z));
         ecs.SetName(light, "Panel light");
@@ -287,7 +305,7 @@ public partial struct Lights
             Range = 12f,
             InnerAngle = 0.25f,
             OuterAngle = 0.4f,
-            Shadows = true,
+            Shadows = CastShadows,
         });
         ecs.Add(spot, Transform.LookingAt(new Vec3(-8f, Ground + Height - 0.2f, z), new Vec3(-8.6f, Ground, z + 0.4f), Vec3.UnitX));
         ecs.Insert<VolumetricLightRef>(spot);

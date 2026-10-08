@@ -20,13 +20,21 @@ or written into a manifest with --manifest, whose address is where the pack will
 The same input makes the same pack, byte for byte, so a manifest written here holds the hash of the
 file the owner publishes.
 
-The encoders are written here in Python, standard library and Pillow alone, since no encoder is a
-dependency of the repository, and each texture is encoded in a process of its own. They are simple:
+The encoders are written here in Python 3.14, its standard library, zstd among it, and Pillow alone,
+since no encoder is a dependency of the repository, and each texture is encoded in a process of its own. They are simple:
 BC1 and BC4 take the ends of a block along its principal axis and the nearest step for each texel,
 and BC7 uses its mode 6 alone, one pair of RGBA endpoints a block with a bit each shared by their
 channels, fitted the same way and refined once by least squares. That is a little below what a
 dedicated encoder reaches, and plenty for a test scene seen at 1K.
 """
+import sys
+
+# Said before the imports, since on an older Python the import of zstd below fails with nothing said
+# about why.
+if sys.version_info < (3, 14):
+    sys.exit("build/make-scene-pack.py needs Python 3.14 or later, whose standard library has zstd "
+             f"(compression.zstd), and this is Python {sys.version.split()[0]}.")
+
 import argparse
 import hashlib
 import json
@@ -36,7 +44,6 @@ import os
 import shutil
 import struct
 import subprocess
-import sys
 import tempfile
 from compression import zstd
 

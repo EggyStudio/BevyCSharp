@@ -236,14 +236,26 @@ quiet setting "AmbientOcclusion $occlusion"
 quiet setting "Backdrop $backdrop"
 
 # Sponza, where its pack has been fetched, which the push workflows never do, from outside its
-# door and from inside its hall.
+# door and from inside its hall, each view's frame time written beside the captures, as the
+# workflow started by hand for the scene packs keeps them.
 if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END { exit !found }'; then
   quiet scene.load intel-sponza
   for _ in $(seq 1 60); do grep -q "Intel Sponza stands" "$log" && break; quiet frames.wait 10; done
   grep -q "Intel Sponza stands" "$log" || fail "Sponza did not load from its pack"
-  view 17-sponza 45 4 -45 60 3 -60 120
-  view 18-sponza-hall 57 2.5 -57 80 2 -80
+  timed() {
+    view "$@"
+    ./bcs command app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
+      | awk -v name="$1" '{ printf "%s %.1f ms\n", name, ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
+  }
+  timed 17-sponza 45 4 -45 60 3 -60 120
+  timed 18-sponza-hall 57 2.5 -57 80 2 -80 120
+  timed 19-sponza-gallery 74 6.5 -66 62 5.5 -78 120
   quiet scene.unload
 fi
+
+# The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
+# in what it kept before a run passes the cap and is stopped.
+./bcs command memory | tr ' ' '\n' | awk 'last == "peak" { printf "peak %.2f GB\n", $1 / 2^30 } { last = $1 }' \
+  | tee -a "$shots/frame-times.txt"
 
 echo "drove the feature test, captures in $shots"

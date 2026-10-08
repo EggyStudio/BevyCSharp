@@ -62,6 +62,15 @@ config.Vsync = saved.Vsync;
 // a GPU that traces no rays leaves off.
 config.RayTracedLighting = saved.RayTraced && (windowed || offscreen);
 
+// Bevy's meshlets where the panel asked for them, room for four million clusters, which Sponza's
+// heaviest meshes need a small part of; a bridge built without them or a GPU without 64-bit
+// texture atomics leaves them off.
+config.MeshletClusters = saved.Meshlets && (windowed || offscreen) ? 1u << 22 : 0;
+
+// The GPU's time for each pass, with the meshlets, so Sponza's page compares the GPU's work with
+// meshlets and without rather than frame times a display or the offscreen pace holds alike.
+config.GpuTimings = config.MeshletClusters > 0;
+
 // Asks for the interface the panel, the overlay and the console are drawn with, offscreen as well,
 // where bcs drives them with the keys it sends and a capture shows them. A bridge without it
 // compiled in ignores this and they are not drawn.

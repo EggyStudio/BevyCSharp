@@ -265,6 +265,7 @@ static class Bevy.AssetFiles
   static byte[] ReadAllBytes(string path)
   static string ReadAllText(string path)
   static void Mount(string folder, AssetPack pack)
+  static void Mount(string folder, string directory)
   static void Use(Assembly? assembly)
   static void Use(Assembly? assembly, AssetPack? pack)
 readonly struct Bevy.AssetHandle : IEquatable<AssetHandle>

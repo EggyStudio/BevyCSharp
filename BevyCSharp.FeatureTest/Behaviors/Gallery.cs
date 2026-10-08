@@ -98,7 +98,7 @@ public partial struct Gallery
         Gizmos.Text("clearcoat, polished to rough", new Vec3(-63.9f, Spot(0, 5.3f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text("anisotropy, none to whole", new Vec3(-63.9f, Spot(0, 6.5f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text(
-            Render.RayTracingActive ? "Cornell box, lit by rays" : "Cornell box, lit by a shadow map",
+            Render.RayTracingActive ? "Cornell box, lit by rays" : Lights.CastShadows ? "Cornell box, lit by a shadow map" : "Cornell box, lit with no shadows while meshlets run",
             new Vec3(-67.9f, Ground + 5.6f, -13f), facing, 0.25f, (0f, -0.5f), ink, inFront: false);
     }
 
@@ -139,7 +139,7 @@ public partial struct Gallery
             Intensity = 120_000f,
             Range = 12f,
             Radius = 0.3f,
-            Shadows = !Render.RayTracingActive,
+            Shadows = !Render.RayTracingActive && Lights.CastShadows,
         });
         ecs.Add(lamp, Transform.At(middle.X, middle.Y + Size - 0.4f, middle.Z));
         ecs.SetName(lamp, "Cornell light");

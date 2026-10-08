@@ -84,6 +84,12 @@ public sealed record FeatureSettings
     /// </summary>
     public bool RayTraced { get; init; }
 
+    /// <summary>
+    /// Whether the app asks for Bevy's meshlets, which takes effect at the next start, since the
+    /// room the GPU keeps for their clusters is given as the app is made.
+    /// </summary>
+    public bool Meshlets { get; init; }
+
     /// <summary>The tier last chosen, which set the four above.</summary>
     public Quality Quality { get; init; } = Quality.High;
 

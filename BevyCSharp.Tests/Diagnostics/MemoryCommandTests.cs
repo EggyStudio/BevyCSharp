@@ -38,7 +38,7 @@ public sealed class MemoryCommandTests
 
         Assert.NotNull(before);
         Assert.NotNull(after);
-        foreach (var name in new[] { "managed", "heap", "process", "nativeBytes", "nativeBlocks" })
+        foreach (var name in new[] { "managed", "heap", "process", "peak", "nativeBytes", "nativeBlocks" })
             Assert.True(before[name] > 0, $"{name} is {before[name]}");
 
         Assert.Equal(before["entities"] + 10, after["entities"]);

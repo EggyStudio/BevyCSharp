@@ -140,6 +140,34 @@ public sealed class AssetFilesTests : IDisposable
         Assert.True(gone, "the pack was still read after it was unmounted");
     }
 
+    /// <summary>
+    /// A folder on this machine mounted under a folder of the asset root is read by its files as
+    /// they were when it was mounted, one written after found once it is mounted again.
+    /// </summary>
+    [Fact]
+    public void AFolderMountedIsReadAsItWasListedUntilMountedAgain()
+    {
+        var cache = _folder.File("cache");
+        Directory.CreateDirectory(Path.Combine(cache, "inner"));
+        File.WriteAllText(Path.Combine(cache, "inner", "first.txt"), "the first");
+
+        AssetFiles.Mount("cached", cache);
+        Assert.Equal("the first", AssetFiles.ReadAllText("cached/inner/first.txt"));
+
+        File.WriteAllText(Path.Combine(cache, "second.txt"), "the second");
+        Assert.False(AssetFiles.Exists("cached/second.txt"));
+
+        AssetFiles.Mount("cached", cache);
+        Assert.Equal("the second", AssetFiles.ReadAllText("cached/second.txt"));
+
+        Assert.True(AssetFiles.Unmount("cached"));
+        Assert.False(AssetFiles.Exists("cached/inner/first.txt"));
+
+        // A folder not there yet mounts as one holding nothing.
+        AssetFiles.Mount("nowhere", _folder.File("nowhere"));
+        Assert.False(AssetFiles.Exists("nowhere/anything.txt"));
+    }
+
     [Fact]
     public void AStreamedReadTakesItsPartOfACarriedFile()
     {
