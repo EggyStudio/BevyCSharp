@@ -155,6 +155,10 @@ public sealed unsafe partial class App : IDisposable
         if (Config.Logs is not { Length: 0 } && CrashLog.StartedByApps)
             CrashLog.Start(Config.Logs ?? Path.Combine(AppContext.BaseDirectory, "logs"), Config.Backend);
 
+        // The memory the process may hold, where the config or the environment names a cap, held
+        // to from before Bevy starts, which is when a scene or a technique begins taking it.
+        MemoryGuard.Watch(MemoryGuard.CapFor(Config));
+
         // A clock set from outside, as a script capturing a game it did not write sets it, where the
         // game's own config left the machine's.
         if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)

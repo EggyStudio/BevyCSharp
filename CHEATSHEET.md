@@ -1832,6 +1832,14 @@ static string Written(LogLine line);                            // How a line re
 static string Write(string title, string what);                 // Writes a crash to this run's crash file, made the first time, and says where on the log
 ```
 
+### `MemoryGuard`
+
+```csharp
+static long ResidentBytes();                                    // How many bytes of the machine's memory the process holds now
+static void Watch(double gigabytes);                            // Holds the process to a cap from here on, starting the watch the first time, or with zero lifts the cap
+static double DefaultTheEnvironment();                          // Gives the environment the default cap where it names none, for a tool to call before it starts an app or makes one, so the app holds to it
+```
+
 ### `CliClient`
 
 ```csharp

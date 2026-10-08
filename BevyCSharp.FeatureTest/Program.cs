@@ -32,6 +32,12 @@ if (args.Contains("--headless")) windowed = false;
 
 Trace.Verbose = args.Contains("--verbose");
 
+// The memory cap a tool starting it would give, eight gigabytes or a quarter of the machine's where
+// that is less, unless BCS_MEMORY_CAP_GB names another, since a scene or a technique tried here can
+// take the machine's memory faster than anyone watching notices, and a machine that ran out ended
+// the terminal it was started from. Past it the run stops, saying so (MemoryGuard).
+MemoryGuard.DefaultTheEnvironment();
+
 // The panel's settings, read before the window opens, since vsync is the window's from its start.
 var saved = Settings.Current;
 

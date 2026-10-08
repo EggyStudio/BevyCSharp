@@ -899,6 +899,7 @@ sealed class Bevy.Config
   const string OffscreenVariable = "BCS_OFFSCREEN"
   double FixedHz { get; set; }
   double FrameSeconds { get; set; }
+  double MemoryCap { get; set; }
   float ScaleFactor { get; set; }
   float SpatialScale { get; set; }
   override string ToString()
@@ -3471,6 +3472,14 @@ sealed class Bevy.MaterialSettings
   float Thickness { get; set; }
   float Transmission { get; set; }
   float UvRotation { get; set; }
+static class Bevy.MemoryGuard
+  const int ExitCode = 86
+  const string Variable = "BCS_MEMORY_CAP_GB"
+  static double DefaultCap { get; }
+  static double DefaultTheEnvironment()
+  static long Cap { get; }
+  static long ResidentBytes()
+  static void Watch(double gigabytes)
 enum Bevy.MenuAction : int
   CloseAll = 2
   FocusRoot = 3

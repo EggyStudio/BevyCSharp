@@ -321,6 +321,18 @@ public sealed class Config
     public bool GpuTimings { get; set; }
 
     /// <summary>
+    /// How many gigabytes of the machine's memory the process may hold before it is stopped, or
+    /// zero for the cap <c>BCS_MEMORY_CAP_GB</c> names, or none where it names none either.
+    /// </summary>
+    /// <remarks>
+    /// For a run that might take the machine's memory with it, a test, a tool driving a scene or a
+    /// technique being tried, so it stops and says why where the system would otherwise end
+    /// whatever it chose. A shipped game is held to none unless it asks. See
+    /// <see cref="MemoryGuard"/>.
+    /// </remarks>
+    public double MemoryCap { get; set; }
+
+    /// <summary>
     /// Add Bevy's wireframe plugins, so <see cref="Render.SetWireframe"/> can draw a mesh as its
     /// edges, and Bevy's wireframe components and settings, for 3D and 2D meshes, are drawn.
     /// </summary>

@@ -149,6 +149,14 @@ the things a report from somebody else's machine is read for. The next run says 
 crash's file is as it starts, and `CrashLog.LastCrash` holds it for a game that offers to open it.
 `Config.Logs` names another folder, or an empty string for none.
 
+A run that might take the machine's memory with it, a test, a scene being tried or a tool driving a
+game, is given a cap in gigabytes by `Config.MemoryCap` or `BCS_MEMORY_CAP_GB`. A thread of its own
+reads how much memory the process holds four times a second, and past the cap the run says so on the
+console and in a crash file and exits with code 86, where a machine that ran out would have ended
+whatever process the system chose, the terminal or the editor among them. A game has no cap unless
+it asks for one. `bcs`, the drive script and the test suite give every app they start eight
+gigabytes, or a quarter of the machine's memory where that is less.
+
 ## Hot reload
 
 The editor profile watches the asset directory, so a running app picks up what changed on disk.

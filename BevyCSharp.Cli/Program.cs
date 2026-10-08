@@ -6,6 +6,11 @@ using BevyCSharp.Cli;
 
 var (options, rest) = Options.Parse(args);
 
+// Every app a verb starts, an app opened, a test run or a run of the feature test, holds to the
+// default memory cap where the environment names none, so one that runs away stops and says so
+// rather than take the machine's memory and whatever the system ends to get it back.
+Bevy.MemoryGuard.DefaultTheEnvironment();
+
 if (rest.Length == 0) return Help.Print();
 
 var verb = rest[0];

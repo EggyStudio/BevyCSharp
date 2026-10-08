@@ -16,6 +16,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 program="${1:-BevyCSharp.FeatureTest/bin/Debug/net10.0}"
+
+# The program holds to a memory cap, eight gigabytes where the environment names none, and
+# past it stops and says so, rather than take the machine's memory (MemoryGuard).
+export BCS_MEMORY_CAP_GB="${BCS_MEMORY_CAP_GB:-8}"
 shots="${SHOTS:-$(mktemp -d)}"
 log="$shots/feature-test.log"
 ground=-1.2
