@@ -75,6 +75,30 @@ public partial struct RayTracedOcclusion
         return said;
     }
 
+    /// <summary>
+    /// Makes every shader program the feature test can use, the occlusion's among them, which are
+    /// made only as it is turned on, so all of them compile into the cache under the asset root.
+    /// </summary>
+    /// <remarks>
+    /// For a build shipped without <c>slangc</c>, which reads the cache instead
+    /// (<c>build/publish-feature-test.sh</c>). The rest are made as the program starts. The
+    /// occlusion's are compiled whether or not this GPU traces rays, since compiling them asks
+    /// nothing of it, and <c>shader.list</c> says when each is ready.
+    /// </remarks>
+    [Command("feature.shaders", "Makes every shader program the feature test can use, so each compiles into the cache a build shipped without slangc reads")]
+    internal static string MakeEvery()
+    {
+        if (!App.HasRenderer) return "there is no renderer to compile for";
+
+        if (!_trace.IsValid)
+        {
+            Shaders.CreateProgram(new ShaderProgramSettings { Compute = "shaders/rtao.slang", ComputeTarget = ShaderTarget.SpirV });
+            Shaders.CreateProgram(new ShaderProgramSettings { Pass = "shaders/rtao_show.slang" });
+        }
+
+        return "every program is made; shader.list says when each has compiled";
+    }
+
     private static string Apply(EcsWorld ecs, string state)
     {
         var words = state.Split(' ', StringSplitOptions.RemoveEmptyEntries);

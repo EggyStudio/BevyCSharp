@@ -293,7 +293,8 @@ per-platform bridge and packs nothing, and nothing a commit message says changes
 A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
 builds the bridge for all six platforms, runs the tests on the three systems, plays Courtyard and
 Swarm, keeping Swarm's frame profile with the run's captures, drives the feature test's player
-through each station of its course (`build/drive-feature-test.sh`), builds and runs every step of
+through each station of its course, built on the package as Courtyard is
+(`build/drive-feature-test.sh`), soaks the four of them for a while, builds and runs every step of
 the first game (`build/first-game.sh`, whose `--shots` draws the page's pictures again), and walks
 the README's install in a container (`build/readme-walk.sh`), and packs only once all of them pass.
 The package is kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
@@ -306,6 +307,26 @@ each fetched pack and captures its reference views with their frame times as the
 pack itself is made by `build/make-scene-pack.py` from the scene as its makers publish it, needs
 Python 3.14 and Pillow, and is published by hand as an asset of the release `scene-packs`, at the
 address its manifest names.
+
+The **feature test zips** workflow, run by hand when a build is to go to testers, makes the feature
+test as a tester gets it, published as native code from the package for Linux and for Windows with
+the bridge built with meshlets and ray-traced lighting, each a zip kept as the run's artifact. A zip
+holds the program, the bridge and the interface's library, the assets, the scene packs' manifests
+and `BevyCSharp.FeatureTest/README.txt`, which names the keys, the panel, the console and where the
+logs and the settings are. A tester has no `slangc`, so each zip carries the cache of its compiled
+shaders, which the Linux job fills by running the published program on a software Vulkan with
+every program it can use made (`feature.shaders`), and which the Windows job, whose runner draws
+nothing, takes from it, an entry being named by the shader's path, its defines and the bridge's own
+modules. `build/publish-feature-test.sh` makes one zip for the machine it runs on, from a package
+packed into `build/package`:
+
+```bash
+dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.40-game
+build/publish-feature-test.sh 0.0.40-game   # build/feature-test/BevyCSharp-FeatureTest-<rid>.zip
+```
+
+A version named with `-p:BevyCSharpVersion` builds the feature test on that package rather than on
+the library's project, as the script and the pack workflow do.
 
 The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
 GitHub runs the step's script in. A step that fails having said nothing is given an error naming

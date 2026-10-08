@@ -48,6 +48,9 @@ msbuild.log
 # What build/soak.sh reads from a game it plays, and the game's log.
 /build/soak/
 
+# The testers' zips build/publish-feature-test.sh makes, and the folders they are made from.
+/build/feature-test/
+
 # A bare `cargo build` in native/ bypasses the script and defaults to here.
 /native/target/
 

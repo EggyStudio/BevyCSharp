@@ -334,28 +334,28 @@ jobs:
           BCS_STEP_LOGS: ${{ runner.temp }}/swarm
         run: mkdir -p "$SHOTS" && games/Swarm/play.sh
 
-      # The feature test, built from this checkout with the Linux bridge the native job made, and
-      # driven through the hub and each station of its course, every one judged by where the
-      # player ends up (build/drive-feature-test.sh).
+      # The feature test, built on the same package as Courtyard is, and driven through the hub and
+      # each station of its course, every one judged by where the player ends up
+      # (build/drive-feature-test.sh).
       - name: Drive the feature test
         env:
           SHOTS: ${{ runner.temp }}/feature-test
           BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
         run: |
           mkdir -p "$SHOTS"
-          dotnet build BevyCSharp.FeatureTest -c Release -warnaserror -p:BevyCSharpNativeOutDir="$PWD/build/artifacts/linux-x64/"
+          dotnet build BevyCSharp.FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
           build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
 
-      # Courtyard, the stress program and Swarm played at once a round at a time, while what each
-      # holds is read after its rounds (build/soak.sh), failing when any of it climbs without
-      # leveling off (build/soak-check.py), as a leak does. The readings and the games' logs are
-      # kept with the captures.
+      # Courtyard, the stress program, Swarm and the feature test built on the package played at
+      # once a round at a time, while what each holds is read after its rounds (build/soak.sh),
+      # failing when any of it climbs without leveling off (build/soak-check.py), as a leak does.
+      # The readings and the games' logs are kept with the captures.
       - name: Play the games a while and check nothing they hold grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
         run: |
           pids=()
-          for game in courtyard stress swarm; do
+          for game in courtyard stress swarm feature-test; do
             build/soak.sh "$game" 150 &
             pids+=($!)
           done

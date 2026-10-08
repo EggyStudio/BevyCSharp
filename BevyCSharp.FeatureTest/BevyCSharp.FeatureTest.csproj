@@ -12,11 +12,20 @@
       up by hand exactly the way the package wires them: the library as a reference, the
       generator as an analyzer.
     -->
-    <ItemGroup>
+    <ItemGroup Condition="'$(BevyCSharpVersion)' == ''">
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <!--
+      A version named, as the testers' zips and the pack workflow name one packed into
+      build/package, builds it on that package instead, as a game outside the repository is built,
+      the bridge for each platform coming with it (build/publish-feature-test.sh).
+    -->
+    <ItemGroup Condition="'$(BevyCSharpVersion)' != ''">
+        <PackageReference Include="BevyCSharp" Version="$(BevyCSharpVersion)"/>
     </ItemGroup>
 
 

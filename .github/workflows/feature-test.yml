@@ -1,0 +1,125 @@
+name: feature test zips
+
+# Started by hand, when a build is to go to testers. Makes the feature test as a tester gets it,
+# published as native code from the package for Linux and for Windows, with the bridge built with
+# meshlets and ray-traced lighting, its assets, the scene packs' manifests and a README.txt naming
+# the keys, the panel, the console and where the logs are, each a zip kept as the run's artifact
+# (build/publish-feature-test.sh).
+#
+# A tester's machine has no slangc, so each zip carries the cache of its compiled shaders. The Linux
+# job fills it by running the published program on the runner's software Vulkan, and the Windows
+# job, whose runner has no GPU to draw with, takes that cache, which holds on every system since an
+# entry is named by the shader's path, its defines and the bridge's own modules.
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_WARNINGS: deny
+
+jobs:
+  linux:
+    name: the Linux zip
+    runs-on: ubuntu-24.04
+    # A cold bridge with meshlets and Solari is the half of it.
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> ../build/target
+          key: feature-test-linux
+
+      # ALSA and libudev, which the bridge links against, a software Vulkan for the run that fills
+      # the shader cache, and clang and zlib, which the native compiler links with.
+      - name: Install what the build needs
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev mesa-vulkan-drivers clang zlib1g-dev
+
+      - name: Build the bridge
+        run: build/build-native.sh --render --meshlet --solari
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-testers -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Publish the feature test
+        env:
+          BCS_STEP_LOGS: ${{ github.workspace }}/build/feature-test/BevyCSharp-FeatureTest-linux-x64/logs
+        run: build/publish-feature-test.sh 0.0.0-testers
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: BevyCSharp-FeatureTest-linux-x64
+          path: build/feature-test/BevyCSharp-FeatureTest-linux-x64.zip
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shader-cache
+          path: build/feature-test/BevyCSharp-FeatureTest-linux-x64/assets/.slang-cache
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  windows:
+    name: the Windows zip
+    runs-on: windows-latest
+    needs: [linux]
+    timeout-minutes: 90
+    # Git's bash, as GitHub runs a bash step, rather than build/step.py, whose bash on a Windows
+    # runner may be the one WSL puts first on the path.
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> ../build/target
+          key: feature-test-windows
+
+      - name: Build the bridge
+        run: build/build-native.sh --render --meshlet --solari
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: shader-cache
+          path: build/shader-cache
+
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-testers -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Publish the feature test
+        run: build/publish-feature-test.sh 0.0.0-testers --cache build/shader-cache
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: BevyCSharp-FeatureTest-win-x64
+          path: build/feature-test/BevyCSharp-FeatureTest-win-x64.zip
+          if-no-files-found: error

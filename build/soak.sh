@@ -4,13 +4,15 @@
 # seconds, into build/soak/<game>.txt. build/soak-check.py then fails when anything it holds climbs
 # without leveling off, as a leak does.
 #
-#   build/soak.sh <courtyard|stress|swarm> <seconds> [folder the game was built to]
+#   build/soak.sh <courtyard|stress|swarm|feature-test> <seconds> [folder the game was built to]
 #
 # A round ends where the game is the same each time, so two readings of a game that leaks nothing
 # match. Courtyard's starts from the menu, saves, walks a square, loads the save, pauses and goes
 # back to the menu. Swarm's starts a game, fights its first wave walking a square and ends the game.
 # The stress program spawns its cubes once and draws them for as long as it runs, so its rounds are
-# frames alone, and they find what a frame leaks.
+# frames alone, and they find what a frame leaks. The feature test's walks a square on the hub
+# under the day and the weather, which go on as they would for a tester left at it, and its
+# folder is the one the pack workflow builds it to from the package.
 #
 # The game is started offscreen and serving and stopped at the end whatever happened, and every
 # call names it, so the three are played at once.
@@ -23,9 +25,14 @@ case "$name" in
     courtyard) program=Courtyard; args=() ;;
     stress) program=Stress; args=(drawn 1000) ;;
     swarm) program=Swarm; args=() ;;
-    *) echo "soak.sh: no game called $name, only courtyard, stress and swarm" >&2; exit 2 ;;
+    feature-test) program=BevyCSharp.FeatureTest; args=(--offscreen --frames 0 --serve) ;;
+    *) echo "soak.sh: no game called $name, only courtyard, stress, swarm and feature-test" >&2; exit 2 ;;
 esac
-folder="${3:-games/$program/bin/Debug/net10.0}"
+if [ "$name" = feature-test ]; then
+    folder="${3:-BevyCSharp.FeatureTest/bin/Release/net10.0}"
+else
+    folder="${3:-games/$program/bin/Debug/net10.0}"
+fi
 
 mkdir -p build/soak
 out="$PWD/build/soak/$name.txt"
@@ -45,6 +52,7 @@ for _ in $(seq 1 120); do ./bcs status 2>/dev/null | grep -q "ready.*$program" &
 # fast one.
 [ "$name" = stress ] || quiet app.frametime 0.0166667
 quiet frames.wait 60
+if [ "$name" = feature-test ]; then quiet mode walking; fi
 
 round() {
     case "$name" in
@@ -65,6 +73,12 @@ round() {
             quiet frames.wait 10 ;;
         stress)
             quiet frames.wait 120 ;;
+        feature-test)
+            quiet input.hold D 30
+            quiet input.hold S 30
+            quiet input.hold A 30
+            quiet input.hold W 30
+            quiet frames.wait 10 ;;
         swarm)
             quiet input.key Enter
             quiet input.hold D 40
