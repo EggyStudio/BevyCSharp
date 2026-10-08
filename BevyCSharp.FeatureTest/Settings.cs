@@ -167,6 +167,23 @@ public sealed record FeatureSettings
     /// <summary>How fast the game's clock runs, one being real time.</summary>
     public float TimeScale { get; init; } = 1f;
 
+    /// <summary>
+    /// The hour of the day, from midnight at zero, last set from the panel or the console, which
+    /// the day runs on from.
+    /// </summary>
+    public float Hour { get; init; } = 8f;
+
+    /// <summary>
+    /// How many hours of the day pass in a minute of the game's clock, none stopping it.
+    /// </summary>
+    public float DaySpeed { get; init; } = 1f;
+
+    /// <summary>
+    /// How far north of the equator the map stands, in degrees, which sets how high the sun climbs
+    /// and the moon with it.
+    /// </summary>
+    public float Latitude { get; init; } = 45f;
+
     /// <summary>The settings a tier gives, from these.</summary>
     public FeatureSettings At(Quality tier) => tier switch
     {

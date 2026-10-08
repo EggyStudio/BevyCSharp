@@ -52,6 +52,15 @@ for _ in $(seq 1 90); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.
 ./bcs status | grep -q "ready.*BevyCSharp.FeatureTest" || fail "the feature test never answered"
 
 quiet app.frametime 0.0166667
+
+# The day held still at eight in the morning, the sun low in the east as the views were framed
+# under, so each run captures the same light, and put back as it was at the end, as the effects
+# page's settings are.
+day_speed=$(./bcs command setting DaySpeed | sed -n 's/^DaySpeed = //p')
+day_hour=$(./bcs command setting Hour | sed -n 's/^Hour = //p')
+quiet setting "DaySpeed 0"
+quiet day.hour 8
+
 quiet frames.wait 30
 quiet mode walking
 shot 1-hub
@@ -252,6 +261,12 @@ if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END
   timed 19-sponza-gallery 74 6.5 -66 62 5.5 -78 120
   quiet scene.unload
 fi
+
+# Night over the hub, the moon and the stars over it, and the day put back as it was.
+quiet day.hour 23
+view 20-night 0 3 -20 0 16 20 60
+quiet setting "DaySpeed $day_speed"
+quiet setting "Hour $day_hour"
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
 # in what it kept before a run passes the cap and is stopped.

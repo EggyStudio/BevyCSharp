@@ -25,9 +25,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// MSAA gives way to either. The occlusion is left to <see cref="RayTracedOcclusion"/> while that
 /// traces its own into the same texture. The reflections draw every material deferred, which is
 /// put back to forward as they go unless Solari keeps it deferred. The backdrop is the
-/// atmosphere the scene starts with or a dusk sky drawn in code as a cubemap, made the first time
-/// it is asked for, and the dusk sky alone where meshlets run, since Bevy's meshlet pipelines end
-/// the app under an atmosphere.
+/// atmosphere the scene starts with, lighting the scene from its sky with the stars behind it, or
+/// a dusk sky drawn in code as a cubemap, made the first time it is asked for, and the dusk sky
+/// alone where meshlets run, since Bevy's meshlet pipelines end the app under an atmosphere.
+/// <see cref="DayNight"/> keeps the stars to the hour.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -54,7 +55,9 @@ public partial struct Applied
         _due = true;
         Wired.Clear();
         _reflections = false;
-        _backdrop = Render.MeshletsActive ? null : Backdrop.Atmosphere;
+        // Nothing yet, so the first pass puts the stars and the sky's lighting with the atmosphere
+        // the scene was made with.
+        _backdrop = null;
         _dusk = AssetHandle.None;
         _focus = 10f;
     }
@@ -145,13 +148,16 @@ public partial struct Applied
             if (backdrop == Backdrop.Dusk)
             {
                 if (!_dusk.IsValid) _dusk = Dusk();
+                Render.ClearSkyLighting(camera);
                 Render.ClearAtmosphere(camera);
                 Render.SetSkybox(camera, _dusk, brightness: 600f);
             }
             else
             {
-                Render.SetSkybox(camera, AssetHandle.None);
+                // The stars behind the atmosphere, dark until DayNight brightens them at dusk.
+                Render.SetSkybox(camera, DayNight.Stars(), brightness: 0f);
                 Render.SetAtmosphere(camera, new AtmosphereSettings());
+                Render.SetSkyLighting(camera);
             }
 
             _backdrop = backdrop;

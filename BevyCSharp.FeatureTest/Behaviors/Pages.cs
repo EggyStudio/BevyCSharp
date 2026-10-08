@@ -104,5 +104,8 @@ internal static class Pages
     private static Page Time() => new("Time",
     [
         new SliderRow("Time scale", () => S.TimeScale, value => Settings.Change(s => s with { TimeScale = value }), 0f, 4f, 0.25f),
+        new SliderRow("Hour", () => DayNight.Hour, DayNight.SetHour, 0f, 24f, 0.25f, "0.00"),
+        new SliderRow("Day speed, hours a minute", () => S.DaySpeed, value => Settings.Change(s => s with { DaySpeed = value }), 0f, 30f, 0.5f),
+        new SliderRow("Latitude", () => S.Latitude, value => Settings.Change(s => s with { Latitude = value }), -90f, 90f, 5f, "0"),
     ]);
 }

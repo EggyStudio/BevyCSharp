@@ -25,7 +25,11 @@ dotnet run --project BevyCSharp.FeatureTest -- --offscreen --frames 120
 The feature test opens a window by default on a hub with a signpost to each zone of its map, and a
 lit cube turning in the middle. F1 opens its admin panel, a list steered by the arrows or a pad,
 with pages for the graphics, the audio, the controls, the debug draws, teleports to the zones,
-things to spawn and the time scale, each setting kept in the player's folder for the next run. F3
+things to spawn and the time, each setting kept in the player's folder for the next run. A day
+passes over the map, an hour a minute unless the Time page sets another speed, the hour or the
+latitude, the sun and a full moon carried across Bevy's atmosphere as two directional lights whose
+strength and color follow the hour, the scene lit from the sky as it changes and the stars out at
+night, and `./bcs command day.hour 22` sets the hour from a terminal. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
 holds, and the key under Escape opens the console. The player is a capsule on a
 `CharacterController`, walked with WASD or a pad's stick, jumping with Space, sprinting with Shift

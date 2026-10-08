@@ -47,6 +47,11 @@ public partial struct Scene
     /// </summary>
     internal static Entity? Camera { get; private set; }
 
+    /// <summary>
+    /// The sun, which <see cref="DayNight"/> carries across the sky, or nothing before it is made.
+    /// </summary>
+    internal static Entity Sun => _sun;
+
     private static Entity _sun = Entity.None;
     private static bool? _shadows;
 
