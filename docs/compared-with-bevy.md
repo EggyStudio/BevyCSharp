@@ -92,6 +92,26 @@ games/Stress/measure.sh movers 100000 200000 400000 500000
 games/Stress/measure.sh drawn 10000 50000 100000 200000
 ```
 
+What the weather adds to a frame at each tier, at 1280 by 720 over the feature test's hub at noon
+under a partly cloudy sky, the broken sky the weather's clouds cost most in, measured as the frame
+time against the same view without it. The feature test holds its frame near 16 ms with its own
+work, so the two lowest tiers vanish into it:
+
+| tier | added to a frame |
+|---|---:|
+| Potato and Low | under a millisecond |
+| Medium | about 2 ms |
+| High | 5 to 9 ms |
+| Ultra | 10 to 13 ms |
+
+```bash
+cd BevyCSharp.FeatureTest/bin/Debug/net10.0 && ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve --timings
+./bcs command setting "WeatherTier High"    # and the frame rate from ./bcs command app.status
+```
+
+The workflow's drive of the feature test writes the hub's frame time under the weather's lowest
+tier beside its captures, which on its software renderer measures the weather's cost there.
+
 How much of Bevy is reached is [EXAMPLES.md](../.github/EXAMPLES.md)'s count, kept by
 `build/examples-table.py` from the table of every one of Bevy's examples.
 

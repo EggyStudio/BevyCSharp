@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Physics;
+using Bevy.Reflected;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -30,6 +31,13 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// alone where meshlets run, since Bevy's meshlet pipelines end the app under an atmosphere.
 /// <see cref="DayNight"/> keeps the stars to the hour.
 /// </para>
+/// <para>
+/// Where the weather runs, the sky is the weather's and the backdrop is left alone. Its tier and
+/// whether the forecast drives it go on its resources, and with the forecast off, the kind of
+/// weather is set as a preset, eased into, with the cloud cover over it. A kind chosen on the panel
+/// brings its own cover, which the panel then shows, and the cover saved with the settings is the
+/// one a run starts with.
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct Applied
@@ -39,6 +47,11 @@ public partial struct Applied
     private static bool _reflections;
     private static Backdrop? _backdrop;
     private static AssetHandle _dusk = AssetHandle.None;
+
+    /// <summary>
+    /// The kind of weather and the cloud cover last given the weather, or nothing yet.
+    /// </summary>
+    private static (WeatherPreset Kind, float Cover)? _weather;
 
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
     private static float _focus = 10f;
@@ -59,6 +72,7 @@ public partial struct Applied
         // the scene was made with.
         _backdrop = null;
         _dusk = AssetHandle.None;
+        _weather = null;
         _focus = 10f;
     }
 
@@ -87,6 +101,7 @@ public partial struct Applied
 
         if (!ctx.Res<Config>().Offscreen) Window.SetMode(settings.Window);
         if (Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera)) Camera(camera, settings);
+        if (Weather.Active) Skies(ctx.Ecs, settings);
         Scene.Light(ctx.Ecs, settings.Shadows);
         if (!settings.Wireframe) Wire(ctx.Ecs, false);
     }
@@ -141,9 +156,10 @@ public partial struct Applied
             _reflections = settings.Reflections;
         }
 
-        // The dusk sky where meshlets run, which an atmosphere would end the app under.
+        // The dusk sky where meshlets run, which an atmosphere would end the app under, and the
+        // weather's own where it runs.
         var backdrop = Render.MeshletsActive ? Backdrop.Dusk : settings.Backdrop;
-        if (backdrop != _backdrop)
+        if (!Weather.Active && backdrop != _backdrop)
         {
             if (backdrop == Backdrop.Dusk)
             {
@@ -161,6 +177,39 @@ public partial struct Applied
             }
 
             _backdrop = backdrop;
+        }
+    }
+
+    /// <summary>Puts the weather's settings on the weather.</summary>
+    private static void Skies(EcsWorld ecs, FeatureSettings settings)
+    {
+        if (ecs.Resource<WeatherConfigRef>() is { } config && config.Quality != settings.WeatherTier) config.Quality = settings.WeatherTier;
+        if (ecs.Resource<ProceduralWeatherRef>() is { } forecast && forecast.Enabled != settings.Procedural) forecast.Enabled = settings.Procedural;
+        if (settings.Procedural || ecs.Resource<WeatherRef>() is not { } weather)
+        {
+            _weather = null;
+            return;
+        }
+
+        if (_weather?.Kind != settings.WeatherKind)
+        {
+            // At once as the run starts, and eased into after.
+            Weather.SetPreset(settings.WeatherKind, immediately: _weather is null);
+
+            // A kind chosen on the panel brings its own cover, which the panel then shows.
+            if (_weather is not null)
+            {
+                var cover = weather.TargetCloudCoverage;
+                _weather = (settings.WeatherKind, cover);
+                Settings.Change(s => s with { CloudCover = cover });
+                return;
+            }
+        }
+
+        if (_weather is not { } given || given.Cover != settings.CloudCover || given.Kind != settings.WeatherKind)
+        {
+            weather.TargetCloudCoverage = settings.CloudCover;
+            _weather = (settings.WeatherKind, settings.CloudCover);
         }
     }
 

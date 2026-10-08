@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.FeatureTest;
 
@@ -183,6 +184,32 @@ public sealed record FeatureSettings
     /// and the moon with it.
     /// </summary>
     public float Latitude { get; init; } = 45f;
+
+    /// <summary>
+    /// Whether the app asks for the weather, which takes effect at the next start, since its
+    /// plugin is added as the app is made.
+    /// </summary>
+    public bool Weather { get; init; } = true;
+
+    /// <summary>The weather's conditions while the forecast is off.</summary>
+    public WeatherPreset WeatherKind { get; init; } = WeatherPreset.PartlyCloudy;
+
+    /// <summary>
+    /// How much of the sky the clouds cover while the forecast is off, from none to all, over what
+    /// <see cref="WeatherKind"/> gives.
+    /// </summary>
+    public float CloudCover { get; init; } = 0.45f;
+
+    /// <summary>
+    /// How finely the weather's clouds, fog and rain are drawn, against what they cost.
+    /// </summary>
+    public WeatherConfigRef.QualityVariant WeatherTier { get; init; } = WeatherConfigRef.QualityVariant.Low;
+
+    /// <summary>
+    /// Whether the weather comes from the forecast the clock drives, rather than from
+    /// <see cref="WeatherKind"/> and <see cref="CloudCover"/>.
+    /// </summary>
+    public bool Procedural { get; init; }
 
     /// <summary>The settings a tier gives, from these.</summary>
     public FeatureSettings At(Quality tier) => tier switch

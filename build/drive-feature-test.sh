@@ -61,9 +61,26 @@ day_hour=$(./bcs command setting Hour | sed -n 's/^Hour = //p')
 quiet setting "DaySpeed 0"
 quiet day.hour 8
 
+# The weather, where it runs, held to a few clouds at its lowest tier with the forecast off, so a
+# software renderer marches the clouds in time and each run captures the same sky, and put back as
+# it was at the end with the day.
+weather_was=()
+for name in WeatherTier WeatherKind Procedural CloudCover; do
+  weather_was+=("$name $(./bcs command setting "$name" | sed -n "s/^$name = //p")")
+done
+quiet setting "WeatherTier Potato"
+quiet setting "WeatherKind PartlyCloudy"
+quiet setting "Procedural false"
+quiet setting "CloudCover 0.45"
+
 quiet frames.wait 30
 quiet mode walking
 shot 1-hub
+
+# The hub's frame time under the weather, beside Sponza's, which on the workflow's software
+# renderer measures the weather's cost there.
+./bcs command app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
+  | awk '{ printf "1-hub, the weather at its lowest tier %.1f ms\n", ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
 read -r _ y z < <(where)
@@ -267,6 +284,7 @@ quiet day.hour 23
 view 20-night 0 3 -20 0 16 20 60
 quiet setting "DaySpeed $day_speed"
 quiet setting "Hour $day_hour"
+for was in "${weather_was[@]}"; do quiet setting "$was"; done
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
 # in what it kept before a run passes the cap and is stopped.

@@ -26,6 +26,8 @@ const GraphicsBackend Backend = GraphicsBackend.Vulkan;
 //   --frames N                 how many ticks to run, for a run with no window
 //   --serve                    answer `bcs` while it runs
 //   --verbose                  print a progress line every 20 frames
+//   --timings                  measure each render pass on the GPU, for render.timings, and run
+//                              offscreen as fast as the GPU goes, so the frame rate is its cost
 var offscreen = args.Contains("--offscreen");
 var windowed = !offscreen && (RunInWindow || args.Contains("--window"));
 if (args.Contains("--headless")) windowed = false;
@@ -67,9 +69,15 @@ config.RayTracedLighting = saved.RayTraced && (windowed || offscreen);
 // texture atomics leaves them off.
 config.MeshletClusters = saved.Meshlets && (windowed || offscreen) ? 1u << 22 : 0;
 
+// The weather where the panel asked for it, its sky, clouds, fog, rain and snow around Bevy's
+// atmosphere, which the bridge keeps out where meshlets run.
+config.Weather = saved.Weather && (windowed || offscreen);
+
 // The GPU's time for each pass, with the meshlets, so Sponza's page compares the GPU's work with
-// meshlets and without rather than frame times a display or the offscreen pace holds alike.
-config.GpuTimings = config.MeshletClusters > 0;
+// meshlets and without rather than frame times a display or the offscreen pace holds alike, and
+// wherever --timings asks, as a measurement of the weather's cost does.
+config.GpuTimings = config.MeshletClusters > 0 || args.Contains("--timings");
+if (offscreen && args.Contains("--timings")) config.HeadlessFps = 1000;
 
 // Asks for the interface the panel, the overlay and the console are drawn with, offscreen as well,
 // where bcs drives them with the keys it sends and a capture shows them. A bridge without it

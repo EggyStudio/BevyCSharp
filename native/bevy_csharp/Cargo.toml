@@ -118,6 +118,11 @@ render = [
     # wgpu's counts of the GPU's buffers, textures, pipelines and memory, which the memory command
     # says beside the bridge's own, at the cost of a count kept as each is made and dropped.
     "wgpu/counters",
+    # Weather and a sky around Bevy's atmosphere, clouds, fog, rain, snow and thunder, with stars
+    # and a moon, which an app asks for with `Config.Weather`. Its thunder plays through Bevy's
+    # audio, which this profile carries.
+    "dep:bevy_weather",
+    "bevy_weather/audio",
     # Reading the WGSL a Slang shader compiles to, to check its bindings before a pipeline is
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.
@@ -235,6 +240,8 @@ serde = "1"
 wgpu = { version = "29", default-features = false, optional = true }
 # The embedding behind the `embed` feature, at the release that targets Bevy 0.19.
 bevy_embedded_assets = { version = "0.16", optional = true }
+# The weather behind `Config.Weather`, at the release that targets Bevy 0.19.
+bevy_weather = { version = "0.2", default-features = false, optional = true }
 
 # Linux and the BSDs only.
 #

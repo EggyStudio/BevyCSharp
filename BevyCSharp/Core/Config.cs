@@ -317,6 +317,24 @@ public sealed class Config
     public uint MeshletClusters { get; set; }
 
     /// <summary>
+    /// Add the weather, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder,
+    /// stars and a moon, drawn for each camera marked as a weather camera
+    /// (<see cref="Bevy.Weather"/>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The <c>bevy_weather</c> crate, which the bridge's render profile carries. It brings a planet
+    /// with an atmosphere, and a sun and a moon of its own where the app marks none of its lights
+    /// as them, and puts on each weather camera the exposure its sky is calibrated for, leaving the
+    /// tonemapper and the bloom to <see cref="Render.SetPostProcessing"/>. Asked for rather than
+    /// assumed, since an app without it should get none of those. A headless app has no weather,
+    /// and one where meshlets run has none either, since a camera under the weather's atmosphere
+    /// would end it there, which <see cref="Bevy.Weather.Active"/> reports.
+    /// </para>
+    /// </remarks>
+    public bool Weather { get; set; }
+
+    /// <summary>
     /// How many gigabytes of the machine's memory the process may hold before it is stopped, or
     /// zero for the cap <c>BCS_MEMORY_CAP_GB</c> names, or none where it names none either.
     /// </summary>

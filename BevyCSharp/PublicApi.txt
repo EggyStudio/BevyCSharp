@@ -894,6 +894,7 @@ sealed class Bevy.Config
   bool Transparent { get; set; }
   bool Vsync { get; set; }
   bool WatchAssets { get; set; }
+  bool Weather { get; set; }
   bool Wireframes { get; set; }
   const string FrameTimeVariable = "BCS_FRAME_TIME"
   const string FramesVariable = "BCS_FRAMES"
@@ -2406,6 +2407,7 @@ struct Bevy.Interop.NativeConfig
   uint Transparent
   uint Vsync
   uint WatchAssets
+  uint Weather
   uint Width
   uint Wireframes
 struct Bevy.Interop.NativeEditableTextConfig
@@ -4418,6 +4420,22 @@ sealed class Bevy.Reflected.AssetIdImage.Uuid : AssetIdImage, IEquatable<AssetId
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(AssetIdImage.Uuid? left, AssetIdImage.Uuid? right)
   static bool op_Inequality(AssetIdImage.Uuid? left, AssetIdImage.Uuid? right)
+readonly struct Bevy.Reflected.AtmosphereConfigRef : IReflectedComponent<AtmosphereConfigRef>, IReflectedWrapper<AtmosphereConfigRef>
+  Bloom? Bloom { get; set; }
+  Entity Entity { get; }
+  Quality? Quality { get; set; }
+  Tonemapping? Tonemapping { get; set; }
+  bool EnvironmentLight { get; set; }
+  bool Raymarched { get; set; }
+  bool Remove()
+  bool SpawnPlanet { get; set; }
+  const string TypePath = "bevy_weather::atmosphere::AtmosphereConfig"
+  float AerialViewMaxDistance { get; set; }
+  float AerosolDensity { get; set; }
+  float DensityMultiplier { get; set; }
+  float TwilightExposureLift { get; set; }
+  float? ExposureEv100 { get; set; }
+  uint? EnvironmentMapSize { get; set; }
 readonly struct Bevy.Reflected.AutoDirectionalNavigationRef : IReflectedComponent<AutoDirectionalNavigationRef>, IReflectedWrapper<AutoDirectionalNavigationRef>
   Entity Entity { get; }
   bool Remove()
@@ -4460,6 +4478,27 @@ readonly struct Bevy.Reflected.BevyUiWidgetsButtonRef : IReflectedComponent<Bevy
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::button::Button"
+sealed class Bevy.Reflected.Bloom : IEquatable<Bloom>
+  Bloom(float Intensity, float LowFrequencyBoost, float LowFrequencyBoostCurvature, float HighPassFrequency, float PrefilterThreshold, float PrefilterThresholdSoftness, BloomCompositeMode CompositeMode, uint MaxMipDimension, Vec2 Scale)
+  BloomCompositeMode CompositeMode { get; init; }
+  Vec2 Scale { get; init; }
+  bool Equals(Bloom? other)
+  float HighPassFrequency { get; init; }
+  float Intensity { get; init; }
+  float LowFrequencyBoost { get; init; }
+  float LowFrequencyBoostCurvature { get; init; }
+  float PrefilterThreshold { get; init; }
+  float PrefilterThresholdSoftness { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(Bloom? left, Bloom? right)
+  static bool op_Inequality(Bloom? left, Bloom? right)
+  uint MaxMipDimension { get; init; }
+  void Deconstruct(out float Intensity, out float LowFrequencyBoost, out float LowFrequencyBoostCurvature, out float HighPassFrequency, out float PrefilterThreshold, out float PrefilterThresholdSoftness, out BloomCompositeMode CompositeMode, out uint MaxMipDimension, out Vec2 Scale)
+enum Bevy.Reflected.BloomCompositeMode : int
+  Additive = 1
+  EnergyConserving = 0
 readonly struct Bevy.Reflected.BloomRef : IReflectedComponent<BloomRef>, IReflectedWrapper<BloomRef>
   BloomRef.CompositeModeVariant CompositeMode { get; set; }
   Entity Entity { get; }
@@ -4638,6 +4677,20 @@ readonly struct Bevy.Reflected.CascadesVisibleEntitiesRef : IReflectedComponent<
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::visibility::CascadesVisibleEntities"
+readonly struct Bevy.Reflected.CelestialBodiesRef : IReflectedComponent<CelestialBodiesRef>, IReflectedWrapper<CelestialBodiesRef>
+  Color SunColor { get; set; }
+  Entity Entity { get; }
+  Vec3 MoonDirection { get; set; }
+  Vec3 SunDirection { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::celestial::CelestialBodies"
+  float Daylight { get; set; }
+  float MoonAltitude { get; set; }
+  float MoonAngularRadius { get; set; }
+  float MoonIllumination { get; set; }
+  float MoonPhase { get; set; }
+  float SunAltitude { get; set; }
+  float SunAngularRadius { get; set; }
 readonly struct Bevy.Reflected.CheckableRef : IReflectedComponent<CheckableRef>, IReflectedWrapper<CheckableRef>
   Entity Entity { get; }
   bool Remove()
@@ -4717,6 +4770,38 @@ readonly struct Bevy.Reflected.ClearColorRef : IReflectedComponent<ClearColorRef
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::clear_color::ClearColor"
+readonly struct Bevy.Reflected.CloudConfigRef : IReflectedComponent<CloudConfigRef>, IReflectedWrapper<CloudConfigRef>
+  Color Albedo { get; set; }
+  Entity Entity { get; }
+  Quality? Quality { get; set; }
+  bool AdaptiveMarching { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::clouds::CloudConfig"
+  float Ambient { get; set; }
+  float BackScattering { get; set; }
+  float DetailDistance { get; set; }
+  float DetailScale { get; set; }
+  float DetailStrength { get; set; }
+  float EvolutionRate { get; set; }
+  float Exposure { get; set; }
+  float Extinction { get; set; }
+  float ForwardScattering { get; set; }
+  float HorizonFade { get; set; }
+  float LightningResponse { get; set; }
+  float Powder { get; set; }
+  float ShapeScale { get; set; }
+  float WindMultiplier { get; set; }
+  uint? LightSteps { get; set; }
+  uint? Steps { get; set; }
+readonly struct Bevy.Reflected.CloudShadowConfigRef : IReflectedComponent<CloudShadowConfigRef>, IReflectedWrapper<CloudShadowConfigRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::cloud_shadows::CloudShadowConfig"
+  float Strength { get; set; }
+  float TileSize { get; set; }
+  float UpdateSeconds { get; set; }
+  uint Resolution { get; set; }
 abstract class Bevy.Reflected.ClusterConfig : IEquatable<ClusterConfig>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -5018,6 +5103,16 @@ sealed class Bevy.Reflected.DVec2 : IEquatable<DVec2>
   static bool op_Equality(DVec2? left, DVec2? right)
   static bool op_Inequality(DVec2? left, DVec2? right)
   void Deconstruct(out double X, out double Y)
+readonly struct Bevy.Reflected.DayPhaseRef : IReflectedComponent<DayPhaseRef>, IReflectedWrapper<DayPhaseRef>
+  DayPhaseRef.ValueVariant Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::celestial::DayPhase"
+enum Bevy.Reflected.DayPhaseRef.ValueVariant : int
+  Dawn = 3
+  Day = 0
+  Dusk = 1
+  Night = 2
 readonly struct Bevy.Reflected.DebandDitherRef : IReflectedComponent<DebandDitherRef>, IReflectedWrapper<DebandDitherRef>
   DebandDitherRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5156,6 +5251,24 @@ readonly struct Bevy.Reflected.FocusPolicyRef : IReflectedComponent<FocusPolicyR
 enum Bevy.Reflected.FocusPolicyRef.ValueVariant : int
   Block = 0
   Pass = 1
+readonly struct Bevy.Reflected.FogConfigRef : IReflectedComponent<FogConfigRef>, IReflectedWrapper<FogConfigRef>
+  Color DayColor { get; set; }
+  Color NightColor { get; set; }
+  Entity Entity { get; }
+  Quality? Quality { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::fog::FogConfig"
+  float AbsorptionFraction { get; set; }
+  float Jitter { get; set; }
+  float MaxOpticalDepth { get; set; }
+  float MaxVisibility { get; set; }
+  float MinVisibility { get; set; }
+  float ScatteringAsymmetry { get; set; }
+  float SunGlow { get; set; }
+  float SunGlowExponent { get; set; }
+  float VolumeHeight { get; set; }
+  float VolumeOffset { get; set; }
+  float VolumeSize { get; set; }
 abstract class Bevy.Reflected.FogFalloff : IEquatable<FogFalloff>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -5577,6 +5690,20 @@ enum Bevy.Reflected.FxaaRef.EdgeThresholdVariant : int
   Low = 0
   Medium = 1
   Ultra = 3
+readonly struct Bevy.Reflected.GalaxyConfigRef : IReflectedComponent<GalaxyConfigRef>, IReflectedWrapper<GalaxyConfigRef>
+  Color CoreColor { get; set; }
+  Color EdgeColor { get; set; }
+  Entity Entity { get; }
+  Vec3 Center { get; set; }
+  Vec3 Pole { get; set; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::sky::GalaxyConfig"
+  float BandTightness { get; set; }
+  float Brightness { get; set; }
+  float CoreConcentration { get; set; }
+  float Dust { get; set; }
+  float NoiseScale { get; set; }
 readonly struct Bevy.Reflected.GamepadRef : IReflectedComponent<GamepadRef>, IReflectedWrapper<GamepadRef>
   Entity Entity { get; }
   bool Remove()
@@ -5918,6 +6045,22 @@ sealed class Bevy.Reflected.GridTrackRepetition.Count : GridTrackRepetition, IEq
   static bool op_Inequality(GridTrackRepetition.Count? left, GridTrackRepetition.Count? right)
   ushort Value { get; init; }
   void Deconstruct(out ushort Value)
+readonly struct Bevy.Reflected.GroundConditionsRef : IReflectedComponent<GroundConditionsRef>, IReflectedWrapper<GroundConditionsRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::ground::GroundConditions"
+  float SnowCover { get; set; }
+  float Wetness { get; set; }
+readonly struct Bevy.Reflected.GroundConfigRef : IReflectedComponent<GroundConfigRef>, IReflectedWrapper<GroundConfigRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::ground::GroundConfig"
+  float DryingSeconds { get; set; }
+  float MeltSeconds { get; set; }
+  float SettlingTemperature { get; set; }
+  float SnowfallSeconds { get; set; }
+  float WettingSeconds { get; set; }
 readonly struct Bevy.Reflected.HdrRef : IReflectedComponent<HdrRef>, IReflectedWrapper<HdrRef>
   Entity Entity { get; }
   bool Remove()
@@ -6129,6 +6272,25 @@ readonly struct Bevy.Reflected.LightmapRef : IReflectedComponent<LightmapRef>, I
   bool BicubicSampling { get; set; }
   bool Remove()
   const string TypePath = "bevy_pbr::lightmap::Lightmap"
+readonly struct Bevy.Reflected.LightningLightRef : IReflectedComponent<LightningLightRef>, IReflectedWrapper<LightningLightRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::thunder::LightningLight"
+  float Duration { get; set; }
+  float PeakIntensity { get; set; }
+  float Remaining { get; set; }
+  uint Seed { get; set; }
+readonly struct Bevy.Reflected.LightningStateRef : IReflectedComponent<LightningStateRef>, IReflectedWrapper<LightningStateRef>
+  Color Color { get; set; }
+  Entity Entity { get; }
+  bool Active { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::thunder::LightningState"
+  float Duration { get; set; }
+  float Elapsed { get; set; }
+  float Intensity { get; set; }
+  float NextStrikeIn { get; set; }
+  uint StrikeCount { get; set; }
 readonly struct Bevy.Reflected.LineGizmoEntitiesRef : IReflectedComponent<LineGizmoEntitiesRef>, IReflectedWrapper<LineGizmoEntitiesRef>
   Entity Entity { get; }
   Entity LineGizmoRenderer { get; set; }
@@ -6541,6 +6703,19 @@ readonly struct Bevy.Reflected.MeshTagRef : IReflectedComponent<MeshTagRef>, IRe
   bool Remove()
   const string TypePath = "bevy_mesh::components::MeshTag"
   uint Value { get; set; }
+readonly struct Bevy.Reflected.MeshletMesh3dRef : IReflectedComponent<MeshletMesh3dRef>, IReflectedWrapper<MeshletMesh3dRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_pbr::meshlet::MeshletMesh3d"
+readonly struct Bevy.Reflected.MeteorConfigRef : IReflectedComponent<MeteorConfigRef>, IReflectedWrapper<MeteorConfigRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::sky::MeteorConfig"
+  float ArcLength { get; set; }
+  float Brightness { get; set; }
+  float Rate { get; set; }
+  float Width { get; set; }
 abstract class Bevy.Reflected.MinTrackSizingFunction : IEquatable<MinTrackSizingFunction>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -6737,6 +6912,28 @@ sealed class Bevy.Reflected.MonitorSelection.Primary : MonitorSelection, IEquata
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(MonitorSelection.Primary? left, MonitorSelection.Primary? right)
   static bool op_Inequality(MonitorSelection.Primary? left, MonitorSelection.Primary? right)
+readonly struct Bevy.Reflected.MoonConfigRef : IReflectedComponent<MoonConfigRef>, IReflectedWrapper<MoonConfigRef>
+  Color Tint { get; set; }
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::sky::MoonConfig"
+  float AngularRadius { get; set; }
+  float Brightness { get; set; }
+  float Earthshine { get; set; }
+  float SurfaceDetail { get; set; }
+  float WhiteBalance { get; set; }
+readonly struct Bevy.Reflected.MoonLightConfigRef : IReflectedComponent<MoonLightConfigRef>, IReflectedWrapper<MoonLightConfigRef>
+  Color Color { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  bool Shadows { get; set; }
+  const string TypePath = "bevy_weather::celestial::MoonLightConfig"
+  float Illuminance { get; set; }
+readonly struct Bevy.Reflected.MoonLightRef : IReflectedComponent<MoonLightRef>, IReflectedWrapper<MoonLightRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::celestial::MoonLight"
 readonly struct Bevy.Reflected.MorphWeightsRef : IReflectedComponent<MorphWeightsRef>, IReflectedWrapper<MorphWeightsRef>
   AssetHandle? FirstMesh { get; set; }
   Entity Entity { get; }
@@ -7160,6 +7357,11 @@ readonly struct Bevy.Reflected.ParallaxCorrectionRef : IReflectedComponent<Paral
   ParallaxCorrection Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_light::probe::ParallaxCorrection"
+readonly struct Bevy.Reflected.PathtracerRef : IReflectedComponent<PathtracerRef>, IReflectedWrapper<PathtracerRef>
+  Entity Entity { get; }
+  bool Remove()
+  bool Reset { get; set; }
+  const string TypePath = "bevy_solari::pathtracer::Pathtracer"
 readonly struct Bevy.Reflected.PickableRef : IReflectedComponent<PickableRef>, IReflectedWrapper<PickableRef>
   Entity Entity { get; }
   bool IsHoverable { get; set; }
@@ -7353,6 +7555,33 @@ sealed class Bevy.Reflected.PositionedGlyph : IEquatable<PositionedGlyph>
   ulong LineIndex { get; init; }
   ulong SectionIndex { get; init; }
   void Deconstruct(out Vec2 Position, out AssetIdImage AtlasInfoTexture, out Vec2 AtlasInfoRectMin, out Vec2 AtlasInfoRectMax, out Vec2 AtlasInfoOffset, out bool AtlasInfoIsAlphaMask, out ulong SectionIndex, out ulong LineIndex)
+readonly struct Bevy.Reflected.PrecipitationConfigRef : IReflectedComponent<PrecipitationConfigRef>, IReflectedWrapper<PrecipitationConfigRef>
+  Color RainColor { get; set; }
+  Color SnowColor { get; set; }
+  Entity Entity { get; }
+  Quality? Quality { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::precipitation::PrecipitationConfig"
+  float Ambient { get; set; }
+  float BoxSize { get; set; }
+  float RainFallSpeed { get; set; }
+  float RainLength { get; set; }
+  float RainOpacity { get; set; }
+  float RainWidth { get; set; }
+  float SnowFallSpeed { get; set; }
+  float SnowFlutter { get; set; }
+  float SnowOpacity { get; set; }
+  float SnowSize { get; set; }
+  uint Seed { get; set; }
+  uint? ParticleCount { get; set; }
+readonly struct Bevy.Reflected.PrecipitationKindRef : IReflectedComponent<PrecipitationKindRef>, IReflectedWrapper<PrecipitationKindRef>
+  Entity Entity { get; }
+  PrecipitationKindRef.ValueVariant Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::precipitation::PrecipitationKind"
+enum Bevy.Reflected.PrecipitationKindRef.ValueVariant : int
+  Rain = 0
+  Snow = 1
 readonly struct Bevy.Reflected.PressedRef : IReflectedComponent<PressedRef>, IReflectedWrapper<PressedRef>
   Entity Entity { get; }
   bool Remove()
@@ -7365,6 +7594,24 @@ readonly struct Bevy.Reflected.PrimaryWindowRef : IReflectedComponent<PrimaryWin
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_window::window::PrimaryWindow"
+readonly struct Bevy.Reflected.ProceduralWeatherRef : IReflectedComponent<ProceduralWeatherRef>, IReflectedWrapper<ProceduralWeatherRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::procedural::ProceduralWeather"
+  float ClimateBaseHumidity { get; set; }
+  float ClimateCloudinessBias { get; set; }
+  float ClimateDiurnalSwing { get; set; }
+  float ClimateFogginess { get; set; }
+  float ClimateMeanTemperature { get; set; }
+  float ClimateMeanWindSpeed { get; set; }
+  float ClimatePrevailingWind { get; set; }
+  float ClimateSeasonalSwing { get; set; }
+  float ClimateStorminess { get; set; }
+  float SystemsPerDay { get; set; }
+  float TransitionHalfLife { get; set; }
+  float Variability { get; set; }
+  uint Seed { get; set; }
 abstract class Bevy.Reflected.Projection : IEquatable<Projection>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -7427,6 +7674,12 @@ readonly struct Bevy.Reflected.ProjectionRef : IReflectedComponent<ProjectionRef
   Projection Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_camera::projection::Projection"
+enum Bevy.Reflected.Quality : int
+  High = 3
+  Low = 1
+  Medium = 2
+  Potato = 0
+  Ultra = 4
 readonly struct Bevy.Reflected.QueuedSelectAllRef : IReflectedComponent<QueuedSelectAllRef>, IReflectedWrapper<QueuedSelectAllRef>
   Entity Entity { get; }
   Entity? Value { get; set; }
@@ -7525,6 +7778,11 @@ readonly struct Bevy.Reflected.RayCastBackfacesRef : IReflectedComponent<RayCast
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::mesh_picking::ray_cast::RayCastBackfaces"
+readonly struct Bevy.Reflected.RaytracingMesh3dRef : IReflectedComponent<RaytracingMesh3dRef>, IReflectedWrapper<RaytracingMesh3dRef>
+  AssetHandle Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_solari::scene::types::RaytracingMesh3d"
 sealed class Bevy.Reflected.Rect : IEquatable<Rect>
   Rect(Vec2 Min, Vec2 Max)
   Vec2 Max { get; init; }
@@ -7971,6 +8229,10 @@ readonly struct Bevy.Reflected.SkinnedMeshRef : IReflectedComponent<SkinnedMeshR
   IReadOnlyList<Entity> Joints { get; set; }
   bool Remove()
   const string TypePath = "bevy_mesh::skinning::SkinnedMesh"
+readonly struct Bevy.Reflected.SkyDomeRef : IReflectedComponent<SkyDomeRef>, IReflectedWrapper<SkyDomeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::sky::SkyDome"
 readonly struct Bevy.Reflected.SkyboxRef : IReflectedComponent<SkyboxRef>, IReflectedWrapper<SkyboxRef>
   AssetHandle? Image { get; set; }
   Entity Entity { get; }
@@ -8067,6 +8329,11 @@ enum Bevy.Reflected.SmaaRef.PresetVariant : int
   Low = 0
   Medium = 1
   Ultra = 3
+readonly struct Bevy.Reflected.SolariLightingRef : IReflectedComponent<SolariLightingRef>, IReflectedWrapper<SolariLightingRef>
+  Entity Entity { get; }
+  bool Remove()
+  bool Reset { get; set; }
+  const string TypePath = "bevy_solari::realtime::SolariLighting"
 readonly struct Bevy.Reflected.SpatialListenerRef : IReflectedComponent<SpatialListenerRef>, IReflectedWrapper<SpatialListenerRef>
   Entity Entity { get; }
   Vec3 LeftEarOffset { get; set; }
@@ -8288,6 +8555,19 @@ enum Bevy.Reflected.SpriteScalingMode : int
   FitCenter = 3
   FitEnd = 5
   FitStart = 4
+readonly struct Bevy.Reflected.StarConfigRef : IReflectedComponent<StarConfigRef>, IReflectedWrapper<StarConfigRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::sky::StarConfig"
+  float Brightness { get; set; }
+  float ColorVariation { get; set; }
+  float Density { get; set; }
+  float MagnitudeFalloff { get; set; }
+  float Occupancy { get; set; }
+  float Size { get; set; }
+  float TwinkleAmount { get; set; }
+  float TwinkleSpeed { get; set; }
 readonly struct Bevy.Reflected.StrikethroughColorRef : IReflectedComponent<StrikethroughColorRef>, IReflectedWrapper<StrikethroughColorRef>
   Color Value { get; set; }
   Entity Entity { get; }
@@ -8307,6 +8587,22 @@ sealed class Bevy.Reflected.SubCameraView : IEquatable<SubCameraView>
   uint SizeX { get; init; }
   uint SizeY { get; init; }
   void Deconstruct(out uint FullSizeX, out uint FullSizeY, out Vec2 Offset, out uint SizeX, out uint SizeY)
+readonly struct Bevy.Reflected.SunConfigRef : IReflectedComponent<SunConfigRef>, IReflectedWrapper<SunConfigRef>
+  Entity Entity { get; }
+  bool Disk { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::celestial::SunConfig"
+  float AngularRadius { get; set; }
+  float DiskIntensity { get; set; }
+  float LightTint { get; set; }
+  float ShadowCascadeOverlap { get; set; }
+  float ShadowDistance { get; set; }
+  float ShadowNearDistance { get; set; }
+  ulong ShadowCascades { get; set; }
+readonly struct Bevy.Reflected.SunLightRef : IReflectedComponent<SunLightRef>, IReflectedWrapper<SunLightRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::celestial::SunLight"
 readonly struct Bevy.Reflected.SyncToRenderWorldRef : IReflectedComponent<SyncToRenderWorldRef>, IReflectedWrapper<SyncToRenderWorldRef>
   Entity Entity { get; }
   bool Remove()
@@ -8492,6 +8788,24 @@ sealed class Bevy.Reflected.TextureAtlas : IEquatable<TextureAtlas>
   static bool op_Inequality(TextureAtlas? left, TextureAtlas? right)
   ulong Index { get; init; }
   void Deconstruct(out ulong Index)
+readonly struct Bevy.Reflected.ThunderConfigRef : IReflectedComponent<ThunderConfigRef>, IReflectedWrapper<ThunderConfigRef>
+  AssetHandle? Sound { get; set; }
+  Color FlashColor { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  bool SpawnLight { get; set; }
+  const string TypePath = "bevy_weather::thunder::ThunderConfig"
+  float AudibleDistance { get; set; }
+  float FlashDuration { get; set; }
+  float FlashIntensity { get; set; }
+  float LightIntensity { get; set; }
+  float LightRange { get; set; }
+  float MaxDistance { get; set; }
+  float MinDistance { get; set; }
+  float RateMultiplier { get; set; }
+  float StrikeHeight { get; set; }
+  float Volume { get; set; }
+  uint Seed { get; set; }
 enum Bevy.Reflected.TileOrientationValue : int
   Default = 0
   MirrorH = 4
@@ -8571,6 +8885,16 @@ readonly struct Bevy.Reflected.TimeVirtualRef : IReflectedComponent<TimeVirtualR
   float DeltaSecs { get; set; }
   float ElapsedSecs { get; set; }
   float ElapsedSecsWrapped { get; set; }
+enum Bevy.Reflected.Tonemapping : int
+  AcesFitted = 3
+  AgX = 4
+  BlenderFilmic = 7
+  KhronosPbrNeutral = 8
+  None = 0
+  Reinhard = 1
+  ReinhardLuminance = 2
+  SomewhatBoringDisplayTransform = 5
+  TonyMcMapface = 6
 readonly struct Bevy.Reflected.TonemappingRef : IReflectedComponent<TonemappingRef>, IReflectedWrapper<TonemappingRef>
   Entity Entity { get; }
   TonemappingRef.ValueVariant Value { get; set; }
@@ -8986,6 +9310,92 @@ readonly struct Bevy.Reflected.VolumetricLightRef : IReflectedComponent<Volumetr
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_light::volumetric::VolumetricLight"
+readonly struct Bevy.Reflected.WeatherCameraRef : IReflectedComponent<WeatherCameraRef>, IReflectedWrapper<WeatherCameraRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::config::WeatherCamera"
+readonly struct Bevy.Reflected.WeatherConfigRef : IReflectedComponent<WeatherConfigRef>, IReflectedWrapper<WeatherConfigRef>
+  Entity Entity { get; }
+  WeatherConfigRef.QualityVariant Quality { get; set; }
+  bool Atmosphere { get; set; }
+  bool CelestialLights { get; set; }
+  bool Clouds { get; set; }
+  bool DistanceFog { get; set; }
+  bool Precipitation { get; set; }
+  bool Remove()
+  bool Sky { get; set; }
+  bool Thunder { get; set; }
+  bool VolumetricFog { get; set; }
+  const string TypePath = "bevy_weather::config::WeatherConfig"
+  float LightIntensityScale { get; set; }
+  float UnitsPerMeter { get; set; }
+enum Bevy.Reflected.WeatherConfigRef.QualityVariant : int
+  High = 3
+  Low = 1
+  Medium = 2
+  Potato = 0
+  Ultra = 4
+readonly struct Bevy.Reflected.WeatherFogVolumeRef : IReflectedComponent<WeatherFogVolumeRef>, IReflectedWrapper<WeatherFogVolumeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::fog::WeatherFogVolume"
+readonly struct Bevy.Reflected.WeatherPlanetRef : IReflectedComponent<WeatherPlanetRef>, IReflectedWrapper<WeatherPlanetRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::atmosphere::WeatherPlanet"
+readonly struct Bevy.Reflected.WeatherRef : IReflectedComponent<WeatherRef>, IReflectedWrapper<WeatherRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_weather::state::Weather"
+  float CurrentCloudAltitude { get; set; }
+  float CurrentCloudCoverage { get; set; }
+  float CurrentCloudDensity { get; set; }
+  float CurrentCloudThickness { get; set; }
+  float CurrentFog { get; set; }
+  float CurrentHumidity { get; set; }
+  float CurrentRain { get; set; }
+  float CurrentSnow { get; set; }
+  float CurrentTemperature { get; set; }
+  float CurrentThunder { get; set; }
+  float CurrentTurbulence { get; set; }
+  float CurrentWindDirection { get; set; }
+  float CurrentWindSpeed { get; set; }
+  float TargetCloudAltitude { get; set; }
+  float TargetCloudCoverage { get; set; }
+  float TargetCloudDensity { get; set; }
+  float TargetCloudThickness { get; set; }
+  float TargetFog { get; set; }
+  float TargetHumidity { get; set; }
+  float TargetRain { get; set; }
+  float TargetSnow { get; set; }
+  float TargetTemperature { get; set; }
+  float TargetThunder { get; set; }
+  float TargetTurbulence { get; set; }
+  float TargetWindDirection { get; set; }
+  float TargetWindSpeed { get; set; }
+  float TransitionHalfLife { get; set; }
+readonly struct Bevy.Reflected.WeatherTimeRef : IReflectedComponent<WeatherTimeRef>, IReflectedWrapper<WeatherTimeRef>
+  Entity Entity { get; }
+  bool Paused { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::time::WeatherTime"
+  float AxialTilt { get; set; }
+  float DayLengthSecs { get; set; }
+  float Latitude { get; set; }
+  float MoonPhaseOffset { get; set; }
+  float TimeOfDay { get; set; }
+  float YearOffset { get; set; }
+  uint Day { get; set; }
+readonly struct Bevy.Reflected.WindRef : IReflectedComponent<WindRef>, IReflectedWrapper<WindRef>
+  Entity Entity { get; }
+  Vec2 BaseVelocity { get; set; }
+  Vec2 Offset { get; set; }
+  Vec2 Velocity { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_weather::wind::Wind"
+  float Gust { get; set; }
+  float OffsetWrap { get; set; }
+  uint Seed { get; set; }
 abstract class Bevy.Reflected.WindowModeValue : IEquatable<WindowModeValue>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -10634,6 +11044,25 @@ enum Bevy.VisibilityMode : byte
   Hidden = 1
   Inherited = 0
   Visible = 2
+static class Bevy.Weather
+  static bool Active { get; }
+  static void SetPreset(WeatherPreset preset, bool immediately = false)
+enum Bevy.WeatherPreset : int
+  Blizzard = 11
+  Clear = 0
+  Drizzle = 5
+  FewClouds = 1
+  Fog = 12
+  Hazy = 4
+  LightSnow = 9
+  MistyMorning = 13
+  Overcast = 3
+  PartlyCloudy = 2
+  Rain = 6
+  Sandstorm = 14
+  Snow = 10
+  Storm = 7
+  Thunderstorm = 8
 sealed class Bevy.WideAttribute : Attribute
   WideAttribute()
 static class Bevy.Window

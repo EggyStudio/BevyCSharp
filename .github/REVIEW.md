@@ -10,46 +10,58 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `64ec311`. Item 13 is settled: `TonemapRampTests` draws SHARED.md's ramp with a Slang
-material of its own, `tonemap_ramp.slang`, whose formula and eight rows are the row's to the letter,
-on a plane filling a 1024 by 8 view of an HDR camera with dither, multisampling, bloom and
-antialiasing off and no grading, once for each of the eight tonemappers, reads the eight-bit sRGB
-picture back and holds it to the PNG kept for that tonemapper within two levels for a formula and
-four for a table, writes them with `BCS_WRITE_TONEMAP_REFERENCES` set, which
-`build/tonemap-references.sh` sets, and a second test reads each kept picture for a ramp that starts
-black and never darkens; the eight are in `BevyCSharp.Tests/references/tonemapping`, each named as
-Bevy names its tonemapper, RGBA at eight bits in sRGB with the rows unfiltered, which a read of
-their headers confirms, drawn on an RTX 4070 with Bevy 0.19.1 and `tonemapping_luts` on, `None`
-matching the ramp through a plain sRGB encode within one level, and BUILDING.md says how they are
-made and kept (`64ec311`). The 3DEngine coder is told where they are for its item 2. The coder goes
-on to item 3, day and night.
+Reviewed up to `97e523d`. Item 3 is settled: `DayNight` in the feature test runs the hour on at the
+settings' `DaySpeed` hours a game minute, one by default, and places the sun for the equinox at the
+settings' latitude, 45 by default, rising at six, 45 degrees up at noon and setting at eighteen; a
+full moon half an hour behind the opposite of the sun is a second directional light, whose disk and
+moonlit sky Bevy's atmosphere draws; the sun's and the moon's illuminance and color, the ambient
+light and the stars' brightness are curves by the hour, each light brought to nothing at the
+horizon, and whichever is up casts the shadows, so a night costs no more shadow views than a day,
+which the meshlet bound needs; the camera under the atmosphere is lit from its sky through
+`SetSkyLighting` with a star cubemap drawn in code behind it, drawn over by the atmosphere's
+transmittance, the stars fading in at dusk and turning about the pole star; the panel's Time page
+holds the hour, the speed and the latitude, `day.hour` sets or says the hour, and the drive script
+holds the day at eight with the speed at nothing, captures the hub at 23:00 as `20-night` and puts
+both back, its run passing every zone and Sponza with a peak of 3.67 GB (`97e523d`). Found there and
+left: Bevy's file watcher panics as the app ends, an event sent on a channel the asset server
+closed, which the crash hook writes as a crash, so the next run says the last one crashed; it goes
+first in the gaps' item. With item 3 out, the list is renumbered to eleven, the SHARED.md items 6 to
+11, and the coder goes on to bevy_weather, item 3.
 
-Before them, item 3 came to be settled: Sponza's heaviest meshes are drawn as meshlets where the
-bridge is built with them and the GPU can, `Render.CreateMeshletMesh` keeping the cut in the user's
-cache and `Render.MeshletsActive` choosing the plain meshes otherwise, `scene.meshlets` on the panel
-comparing the frame time of the two, the scenes workflow started by hand fetching each pack into the
-actions cache and capturing the reference views with their frame times, and `make-scene-pack.py`
-saying first that it needs Python 3.14 (`7c9a619`); the feature test's memory, measured in a scope
-of 16 GB with the bridge's allocations and wgpu's counts read each second: Sponza plain stands at
-3.6 GB, its textures going up as the pack holds them, and as meshlets it passed 12 GB in a quarter
-of a minute with every count still, the NVIDIA driver's own, which a bisect led to the shadow views,
-Bevy 0.19 running every meshlet pass in every shadow view, each holding a few hundred megabytes of
-the driver's memory, Bevy's own meshlet example climbing from 1.2 GB with one cascade to 7.5 GB with
-five lights, so where meshlets run the light hall's lamps cast no shadows and Sponza as meshlets
-stands at 6.5 GB and 60 frames a second with a peak of 7, what the driver keeps not traced further
-and said in `Config.MeshletClusters`; `MemoryGuard` holds every app `bcs`, the drive script, the
-suite and the feature test start to 8 GB or a quarter of the machine's memory, ending the run with
-exit code 86 through `_exit` and a crash file, since an ordinary exit crashed in the driver and its
-core dump held the memory fifteen seconds more, the `memory` command giving the peak and wgpu's
-pairs and the drive script writing the peak beside the frame times (`b646b79`); `tonemapping_luts`
-is on in the render profile for the ramp references, and the scratch is off `/tmp`. The pack's
-publishing stays the owner's. With item 3 out, the list was renumbered, the SHARED.md items 7 to 12.
+Before them, the tonemappers' ramp references came to be settled: `TonemapRampTests` draws
+SHARED.md's ramp with a Slang material of its own, `tonemap_ramp.slang`, whose formula and eight
+rows are the row's to the letter, on a plane filling a 1024 by 8 view of an HDR camera with dither,
+multisampling, bloom and antialiasing off and no grading, once for each of the eight tonemappers,
+reads the eight-bit sRGB picture back and holds it to the PNG kept for that tonemapper within two
+levels for a formula and four for a table, writes them with `BCS_WRITE_TONEMAP_REFERENCES` set,
+which `build/tonemap-references.sh` sets, and a second test reads each kept picture for a ramp that
+starts black and never darkens; the eight are in `BevyCSharp.Tests/references/tonemapping`, each
+named as Bevy names its tonemapper, RGBA at eight bits in sRGB with the rows unfiltered, which a
+read of their headers confirms, drawn on an RTX 4070 with Bevy 0.19.1 and `tonemapping_luts` on,
+`None` matching the ramp through a plain sRGB encode within one level, and BUILDING.md says how they
+are made and kept (`64ec311`). The 3DEngine coder was told where they are.
+
+Before them, the scene packs came to be settled: Sponza's heaviest meshes are drawn as meshlets
+where the bridge is built with them and the GPU can, `Render.CreateMeshletMesh` keeping the cut in
+the user's cache and `Render.MeshletsActive` choosing the plain meshes otherwise, `scene.meshlets`
+on the panel comparing the frame time of the two, the scenes workflow started by hand fetching each
+pack into the actions cache and capturing the reference views with their frame times, and
+`make-scene-pack.py` saying first that it needs Python 3.14 (`7c9a619`); the feature test's memory,
+measured in a scope of 16 GB with the bridge's allocations and wgpu's counts read each second:
+Sponza plain stands at 3.6 GB, its textures going up as the pack holds them, and as meshlets it
+passed 12 GB in a quarter of a minute with every count still, the NVIDIA driver's own, which a
+bisect led to the shadow views, Bevy 0.19 running every meshlet pass in every shadow view, each
+holding a few hundred megabytes of the driver's memory, Bevy's own meshlet example climbing from 1.2
+GB with one cascade to 7.5 GB with five lights, so where meshlets run the light hall's lamps cast no
+shadows and Sponza as meshlets stands at 6.5 GB and 60 frames a second with a peak of 7, what the
+driver keeps not traced further and said in `Config.MeshletClusters`; `MemoryGuard` holds every app
+`bcs`, the drive script, the suite and the feature test start to 8 GB or a quarter of the machine's
+memory, ending the run with exit code 86 through `_exit` and a crash file, since an ordinary exit
+crashed in the driver and its core dump held the memory fifteen seconds more, the `memory` command
+giving the peak and wgpu's pairs and the drive script writing the peak beside the frame times
+(`b646b79`); `tonemapping_luts` is on in the render profile for the ramp references, and the scratch
+is off `/tmp`. The pack's publishing stays the owner's. With that item out, the list was renumbered.
 The suite: 1,257 passed, 2 skipped.
-
-Before them, `MeshletTests` moved into the assets' folder, nothing in it changed, N 1.4's list at 76
-with 28 left out (`c70f17b`), pushed at 06:15 on 2026-10-08 and green on the three systems. Sponza's
-meshlets were under way in the bridge's `meshlets.rs` and `assets.rs`. At 07:10 the owner decided
-that every tonemapper here comes to 3DEngine (Decision 16), this side's part the ramp references.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -58,7 +70,7 @@ The norm has 44 rules, and this engine stands at 31 checked, 4 with places liste
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 7 to 12 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 6 to 11 are taken
 from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The runs of `540343d`, `edd577c` and `c70f17b` passed on Linux,
@@ -71,57 +83,57 @@ from [SHARED.md](SHARED.md).
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
-3. **Day and night.** A time of day in C# driving the sun and a moon as directional lights
-   through Bevy's atmosphere and `SetSkyLighting`, a star skybox at night, the hour, the speed and
-   the latitude on a panel page and in the settings file, the lights' colors and intensities on
-   curves by the hour, and a console command setting the hour.
-4. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
+3. **bevy_weather.** The crate added to the bridge's render profile on the owner's word typed
    into the working session, `WeatherPlugin` and `WeatherCamera`, its `WeatherTime`, `Weather`,
    `ProceduralWeather` and `WeatherConfig` reached from C# through the wrappers where they reflect
    and through bridge calls where they do not, the panel's weather page (kind, cloud coverage, the
-   tier, procedural on or off), item 3's time of day handing the sun to it, clouds at the lowest
-   tier in CI's captures, and its cost measured on a real GPU and in the workflow's image and
+   tier, procedural on or off), day and night's time of day handing the sun to it, clouds at the
+   lowest tier in CI's captures, and its cost measured on a real GPU and in the workflow's image and
    written into the comparison page's costs. The crate draws around Bevy's atmosphere, which stays.
-5. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
+4. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
    code for `win-x64` and `linux-x64` as `build/play-native.sh` does, the native library and the
    assets beside it and a `README.txt` for testers naming the keys, the panel, the console and where
    the logs are; a workflow started by hand makes the two zips as artifacts; the pack workflow plays
    the feature test from the package as it plays Courtyard, and the soak takes it.
-6. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
-   written in its batch: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a
-   decal's tag and a volume's voxels), the widgets' events as observers, keys observed as they reach
-   a field, and what the table then names most. When the captures have settled, they are compared
-   whole with checked-in references by the workflow, a small share of pixels allowed to differ
-   between devices, as 3DEngine does for its scenes. Transmission's glass spheres are missing from
-   about one capture in four with TAA on, before `6a84286` as after it, so the cause is found before
-   that job is red for them, or the example is compared with its spheres left out and the reason
-   beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under
-   (`b548987`'s reply), untraced, and is traced before those captures are compared, as is the
-   gallery's anisotropic spheres drawing blown white under SSAO with forward rendering though they
-   have tangents and draw right under deferred, Bevy's prepass normal for an anisotropic material
-   the suspect (`edd577c`'s reply), and the camera's volumetric fog hazing the whole picture, the
-   sky with it, once a depth prepass is on the camera, which the hall works round by putting the fog
-   on the camera only while it is inside (`6a19213`'s reply). Feathers' three examples and the two
-   camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
-   owner's word in the working session, and the four font examples stay missing (Decision 13).
-7. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+5. **The gaps, by how many rows each holds**, first Bevy's file watcher panicking as the app
+   ends, an event sent on a channel the asset server closed (`file_watcher.rs:269`), which the crash
+   hook writes as a crash so the next run says the last one crashed, found at `97e523d` and left,
+   the watcher stopped before the asset server goes or a panic after the app began ending kept out
+   of the crash file; then each gap bridged from Bevy with the examples it unlocks written in its
+   batch: more of Bevy's WGSL reached as its lighting is (the deferred buffers, a decal's tag and a
+   volume's voxels), the widgets' events as observers, keys observed as they reach a field, and what
+   the table then names most. When the captures have settled, they are compared whole with
+   checked-in references by the workflow, a small share of pixels allowed to differ between devices,
+   as 3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture
+   in four with TAA on, before `6a84286` as after it, so the cause is found before that job is red
+   for them, or the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
+   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
+   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
+   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+   prepass is on the camera, which the hall works round by putting the fog on the camera only while
+   it is inside (`6a19213`'s reply). Feathers' three examples and the two camera controllers follow
+   the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the working
+   session, and the four font examples stay missing (Decision 13).
+6. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
    a system, an observer or a loader's callback.
-8. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+7. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
    workflow, as the first game's first step would have a newcomer do.
-9. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+8. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
    from since the system's last run, beside the added and changed ones a behavior reads.
-10. **Every example compiles on the package alone**, from 3DEngine's
-    `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
-    project, so what they share to say a thing in one word becomes the package's own calls or stays
-    in the example, and the workflow builds every example on the packed package.
-11. **A script that more than one system runs is read for the forms only GNU's tools or a later
+9. **Every example compiles on the package alone**, from 3DEngine's
+   `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
+   project, so what they share to say a thing in one word becomes the package's own calls or stays
+   in the example, and the workflow builds every example on the packed package.
+10. **A script that more than one system runs is read for the forms only GNU's tools or a later
     bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
     and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
-12. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+11. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
     generators report, so an editor offers the mend.
 
@@ -232,21 +244,31 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3, day and night.** `DayNight` in the feature test runs the hour on at the settings'
-`DaySpeed` hours a game minute, one by default, and works out where the sun stands for the equinox
-at the settings' latitude, 45 by default, so it rises at six, stands 45 degrees up at noon and sets
-at eighteen. A full moon half an hour behind the opposite of the sun is a second directional light,
-whose disk and moonlit sky Bevy's atmosphere draws from it, as it scatters every directional light.
-The sun's and the moon's illuminance and color, the ambient light and the stars' brightness are
-curves by the hour, each light brought to nothing at the horizon, and whichever is up casts the
-shadows, so a night costs no more shadow views than a day, which meshlets need. The camera under
-the atmosphere is lit from its sky through `SetSkyLighting` and has a star cubemap drawn in code
-behind it, which the atmosphere draws over by its transmittance, the stars fading in at dusk and
-turning about the pole star with the hour. The panel's Time page has the hour, the speed and the
-latitude, kept in the settings file, and `day.hour [hour]` sets the hour or says it with the sun's
-and the moon's heights. The drive script holds the day at eight with the speed at nothing, puts
-both back as they were at the end, and captures the hub at 23:00 with the moon and the stars as
-`20-night`, its run passing every zone and Sponza with a peak of 3.67 GB. Found and not traced
-there, Bevy's file watcher panicked as the app ended, an event sent on a channel the asset server
-had already closed (`file_watcher.rs:269`), which the crash hook wrote as a crash, so the next run
-says the last one crashed.
+**Item 3, bevy_weather.** The crate is in the bridge's render profile at 0.2.0, the release on Bevy
+0.19.1, on the owner's word typed into the working session on 2026-10-07, with its thunder through
+Bevy's audio, BUILDING.md's packages and the notices naming it. `Config.Weather` asks for
+`WeatherPlugin`, and the bridge keeps it out where meshlets run, since its atmosphere would end the
+app there, and leaves the camera's tonemapper and bloom to `SetPostProcessing` while keeping the
+exposure its sky is calibrated for, ABI 230. Its resources and components reflect, so the schema
+dump gives them wrappers, `WeatherConfigRef`, `WeatherTimeRef`, `WeatherRef`,
+`ProceduralWeatherRef`, `WeatherCameraRef`, `SunLightRef`, `MoonLightRef` and the rest, and what
+does not reflect is a bridge call, `Weather.SetPreset` over the crate's fifteen presets, with
+`Weather.Active` saying whether it runs. Four tests: off unless asked, its clock at noon and
+midnight and a preset taken at once reaching it, a preset number refused, and kept out under
+meshlets. In the feature test the weather is on by default, its page setting the kind, the cloud
+cover, the tier and the forecast, and the day hands it the sun and the moon, marked as its own, and
+its clock, held still at this hour and latitude with the earth's tilt taken off so its sun rises at
+six as the day's does. The drive script holds it partly cloudy at the lowest tier with the forecast
+off, puts the settings back after, and writes the hub's frame time under it beside Sponza's, which
+the scenes workflow's run on its software renderer will measure; the run here passed every zone
+with a peak of 4.28 GB. Over the hub at noon at 1280 by 720, against the same view without it, it
+adds under a millisecond at Potato and Low, about 2 ms at Medium, 5 to 9 ms at High and 10 to 13 ms
+at Ultra on the RTX 4070, the feature test's own work holding its frame near 16 ms, which the
+comparison page now says with the way to measure it, a `--timings` argument the feature test gained
+for it. The guide's sky page has a section on it. A local pack of the package was needed for N 6.5,
+whose newest package in build/package predated the crate, and building the guides' blocks on it
+showed `build/docs-on-package.py` mapping the pattern `3DEngine` to the packed folder, a line its
+port from 3DEngine kept, so `BevyCSharp` came from nuget.org or the cache, here this repository's
+own 0.1.0 of August, and `Bevy.Reflected` missing from the library's usings it gives every page.
+Both are mended, and the guides' 195 blocks build on the package; the package workflow's run with
+`--version 0.0.0-ci` will say whether it had been building them on a published package.

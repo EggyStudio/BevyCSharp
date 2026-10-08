@@ -269,6 +269,10 @@ pub struct BcsConfig {
     /// Non-zero to add Bevy's mesh picking, which finds the mesh under a pointer for its events.
     /// Needs the `render` feature, and costs a ray cast at every mesh as the pointer moves.
     pub mesh_picking: u32,
+    /// Non-zero to add the weather, a sky with clouds, fog, rain, snow and thunder around Bevy's
+    /// atmosphere, on every camera marked as a weather camera. Needs the `render` feature, and is
+    /// kept out where meshlets run. See `render::weather`.
+    pub weather: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

@@ -33,6 +33,14 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// the hour, as the sun does. Under the dusk backdrop the sky stays the dusk one, and the sun and
 /// the moon go on moving.
 /// </para>
+/// <para>
+/// Where the weather runs, the day hands it the sun and the moon, marked as its own, and its clock,
+/// held still and set each frame to this hour and latitude, so the panel's Time page and
+/// <c>day.hour</c> go on setting the hour. The earth's tilt is taken off its clock, so every day of
+/// its calendar is the equinox and its sun stands where the one here would, rising at six. The
+/// weather then steers the two lights, the ambient light and its own stars and moon, and the curves
+/// here wait until it is gone.
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct DayNight
@@ -133,6 +141,10 @@ public partial struct DayNight
             Shadows = !Render.RayTracingActive,
         });
         ctx.Ecs.SetName(_moon, "Moon");
+
+        // The weather's moon where it runs, which it steers from then on, so it makes none of its
+        // own.
+        if (Weather.Active) ctx.Ecs.Insert<MoonLightRef>(_moon);
         Turn(ctx);
     }
 
@@ -144,6 +156,12 @@ public partial struct DayNight
 
         var settings = Settings.Current;
         _hour = Wrap(_hour + (settings.DaySpeed * ctx.Time.Delta / 60f));
+
+        if (Weather.Active)
+        {
+            Hand(ctx.Ecs, settings.Latitude);
+            return;
+        }
 
         var sun = Toward(_hour, settings.Latitude, 0f);
         var moon = Toward(_hour + 12.5f, settings.Latitude, -0.08f);
@@ -160,6 +178,20 @@ public partial struct DayNight
         }
 
         TurnStars(ctx.Ecs, settings.Latitude);
+    }
+
+    /// <summary>
+    /// Sets the weather's clock to this hour and latitude, held still between frames.
+    /// </summary>
+    private static void Hand(EcsWorld ecs, float latitude)
+    {
+        if (ecs.Resource<WeatherTimeRef>() is not { } clock) return;
+
+        var day = _hour / 24f;
+        if (!clock.Paused) clock.Paused = true;
+        if (MathF.Abs(clock.TimeOfDay - day) > 1e-6f) clock.TimeOfDay = day;
+        if (clock.Latitude != latitude) clock.Latitude = latitude;
+        if (clock.AxialTilt != 0f) clock.AxialTilt = 0f;
     }
 
     /// <summary>
@@ -189,6 +221,7 @@ public partial struct DayNight
         var latitude = Settings.Current.Latitude;
         var sun = Toward(_hour, latitude, 0f);
         var moon = Toward(_hour + 12.5f, latitude, -0.08f);
+
         var minutes = (int)MathF.Round(_hour * 60f) % (24 * 60);
         return $"{minutes / 60:00}:{minutes % 60:00}, the sun {Elevation(sun):0} degrees and the moon {Elevation(moon):0} degrees above the horizon";
     }

@@ -674,7 +674,8 @@ static bool ReleaseWhenUnused(AssetHandle handle);              // Releases a ha
 static void Use(Assembly assembly);                             // Looks for the asset files in an assembly's resources, or in none, and in no pack
 static void Use(Assembly assembly, AssetPack pack);             // Looks for the asset files in a pack and an assembly's resources, either of which may be nothing
 static void Mount(string folder, AssetPack pack);               // Reads a pack's files under a folder of the asset root while an app runs, on both sides of the bridge, until Unmount or the next app, as a scene pack fetched for the player is read
-static bool Unmount(string folder);                             // Stops reading the pack mounted under a folder, and closes it
+static void Mount(string folder, string directory);             // Reads the files of a folder on this machine under a folder of the asset root while an app runs, on both sides of the bridge, until Unmount or the next app, as a scene's meshlets cut once and kept in a cache are read on the runs after
+static bool Unmount(string folder);                             // Stops reading what is mounted under a folder, and closes it where it is a pack
 static bool Exists(string path);                                // Whether a file is there, on disk or among what the game carries
 static bool IsCarried(string path);                             // Whether a file is read from what the game carries, there being none on disk
 static string ReadAllText(string path);                         // A file's text, from disk or from what the game carries
@@ -1882,4 +1883,10 @@ GameTimer Tick(float delta);                                    // Runs it on by
 void Pause();                                                   // Stops it where it is until Unpause
 void Unpause();                                                 // Lets it run again from where it was paused
 void Reset();                                                   // Starts it again from nothing, unfinished, its duration and mode kept
+```
+
+### `Weather`
+
+```csharp
+static void SetPreset(WeatherPreset preset, bool immediately = false);  // Sets the weather to a preset, eased into over its transition, or at once
 ```

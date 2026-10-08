@@ -262,6 +262,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 );
             }
 
+            // The weather, where the app asked for it, after the meshlets, which keep it out.
+            crate::render::weather::forget();
+
+            if config.weather != 0 {
+                crate::render::weather::install(&mut app);
+            }
+
             // What the app before this one drew, which would otherwise answer for a camera of
             // this one that happens to reuse its entity number.
             crate::render::watch::forget();

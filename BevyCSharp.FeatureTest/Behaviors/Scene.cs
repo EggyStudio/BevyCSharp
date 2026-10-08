@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -80,8 +81,10 @@ public partial struct Scene
         // The sky, scattered from the sun below rather than painted. The camera sees it where the
         // scene does not cover, and it tints everything in the distance. Not where meshlets run,
         // whose pipelines Bevy builds without an atmosphere's bindings, and the settings put the
-        // dusk sky there in its place.
-        if (!Render.MeshletsActive) Render.SetAtmosphere(camera, new AtmosphereSettings());
+        // dusk sky there in its place. Where the weather runs, it brings the atmosphere, and the
+        // camera is marked to see the weather drawn around it.
+        if (Weather.Active) ctx.Ecs.Insert<WeatherCameraRef>(camera);
+        else if (!Render.MeshletsActive) Render.SetAtmosphere(camera, new AtmosphereSettings());
 
         // What the camera does with the picture once the scene is drawn, from the panel's
         // settings. The high dynamic range target makes the rest worth having. Without it nothing
@@ -191,6 +194,10 @@ public partial struct Scene
         });
         ecs.Add(_sun, Transform.LookingAt(new Vec3(6f, 2.5f, 4f), Vec3.Zero, Vec3.UnitY));
         ecs.SetName(_sun, "Sun");
+
+        // The weather's sun where it runs, which it steers across the sky from then on, so it
+        // makes no sun of its own.
+        if (Weather.Active) ecs.Insert<SunLightRef>(_sun);
         _shadows = shadows;
     }
 

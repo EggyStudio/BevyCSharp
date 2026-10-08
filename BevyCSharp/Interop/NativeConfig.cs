@@ -89,4 +89,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to add Bevy's mesh picking.</summary>
     public uint MeshPicking;
+
+    /// <summary>Non-zero to add the weather.</summary>
+    public uint Weather;
 }

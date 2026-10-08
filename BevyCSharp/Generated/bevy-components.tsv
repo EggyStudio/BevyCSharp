@@ -485,6 +485,7 @@ field	bevy_pbr::material::DefaultOpaqueRendererMethod	0	.0	Enum	OpaqueRendererMe
 component	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_pbr::decal::forward::ForwardDecalMaterialExt>>	MeshMaterial3d<ExtendedMaterial<StandardMaterial, ForwardDecalMaterialExt>>
 component	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::pbr_material::StandardMaterial>	MeshMaterial3d<StandardMaterial>
 field	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::pbr_material::StandardMaterial>	0	.0	Asset	Handle<StandardMaterial>	StandardMaterial
+component	bevy_pbr::meshlet::MeshletMesh3d	MeshletMesh3d
 component	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	ScreenSpaceAmbientOcclusion
 field	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	quality_level	.quality_level	Enum	ScreenSpaceAmbientOcclusionQualityLevel	Low,Medium,High,Ultra,Custom
 variant	bevy_pbr::ssao::ScreenSpaceAmbientOcclusion	quality_level	Custom	slice_count	.quality_level.slice_count	Int	u32	
@@ -640,6 +641,12 @@ variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.x	.0.size.
 variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.y	.0.size.y	Int	u32	
 component	bevy_scene::scene_component::SceneComponentInfo	SceneComponentInfo
 field	bevy_scene::scene_component::SceneComponentInfo	spawned_from_scene	.spawned_from_scene	Bool	bool	
+component	bevy_solari::pathtracer::Pathtracer	Pathtracer
+field	bevy_solari::pathtracer::Pathtracer	reset	.reset	Bool	bool	
+component	bevy_solari::realtime::SolariLighting	SolariLighting
+field	bevy_solari::realtime::SolariLighting	reset	.reset	Bool	bool	
+component	bevy_solari::scene::types::RaytracingMesh3d	RaytracingMesh3d
+field	bevy_solari::scene::types::RaytracingMesh3d	0	.0	Asset	Handle<Mesh>	Mesh
 component	bevy_sprite::picking_backend::SpritePickingCamera	SpritePickingCamera
 component	bevy_sprite::picking_backend::SpritePickingSettings	SpritePickingSettings
 field	bevy_sprite::picking_backend::SpritePickingSettings	require_markers	.require_markers	Bool	bool	
@@ -1362,6 +1369,274 @@ component	bevy_ui_widgets::text_input::QueuedSelectAll	QueuedSelectAll
 field	bevy_ui_widgets::text_input::QueuedSelectAll	0	.0	Enum	Option<Entity>	None,Some
 variant	bevy_ui_widgets::text_input::QueuedSelectAll	0	Some		.0.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_ui_widgets::text_input::SelectAllOnFocus	SelectAllOnFocus
+component	bevy_weather::atmosphere::AtmosphereConfig	AtmosphereConfig
+field	bevy_weather::atmosphere::AtmosphereConfig	quality	.quality	Enum	Option<Quality>	None,Some
+variant	bevy_weather::atmosphere::AtmosphereConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
+field	bevy_weather::atmosphere::AtmosphereConfig	spawn_planet	.spawn_planet	Bool	bool	
+field	bevy_weather::atmosphere::AtmosphereConfig	density_multiplier	.density_multiplier	Float	f32	
+field	bevy_weather::atmosphere::AtmosphereConfig	raymarched	.raymarched	Bool	bool	
+field	bevy_weather::atmosphere::AtmosphereConfig	environment_light	.environment_light	Bool	bool	
+field	bevy_weather::atmosphere::AtmosphereConfig	environment_map_size	.environment_map_size	Enum	Option<u32>	None,Some
+variant	bevy_weather::atmosphere::AtmosphereConfig	environment_map_size	Some		.environment_map_size.0	Int	u32	
+field	bevy_weather::atmosphere::AtmosphereConfig	exposure_ev100	.exposure_ev100	Enum	Option<f32>	None,Some
+variant	bevy_weather::atmosphere::AtmosphereConfig	exposure_ev100	Some		.exposure_ev100.0	Float	f32	
+field	bevy_weather::atmosphere::AtmosphereConfig	twilight_exposure_lift	.twilight_exposure_lift	Float	f32	
+field	bevy_weather::atmosphere::AtmosphereConfig	tonemapping	.tonemapping	Enum	Option<Tonemapping>	None,Some
+variant	bevy_weather::atmosphere::AtmosphereConfig	tonemapping	Some		.tonemapping.0	Enum	Tonemapping	None,Reinhard,ReinhardLuminance,AcesFitted,AgX,SomewhatBoringDisplayTransform,TonyMcMapface,BlenderFilmic,KhronosPbrNeutral
+field	bevy_weather::atmosphere::AtmosphereConfig	bloom	.bloom	Enum	Option<Bloom>	None,Some
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	intensity	.bloom.0.intensity	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	low_frequency_boost	.bloom.0.low_frequency_boost	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	low_frequency_boost_curvature	.bloom.0.low_frequency_boost_curvature	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	high_pass_frequency	.bloom.0.high_pass_frequency	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	prefilter.threshold	.bloom.0.prefilter.threshold	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	prefilter.threshold_softness	.bloom.0.prefilter.threshold_softness	Float	f32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	composite_mode	.bloom.0.composite_mode	Enum	BloomCompositeMode	EnergyConserving,Additive
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	max_mip_dimension	.bloom.0.max_mip_dimension	Int	u32	
+variant	bevy_weather::atmosphere::AtmosphereConfig	bloom	Some	scale	.bloom.0.scale	Vec2	glam::Vec2	
+field	bevy_weather::atmosphere::AtmosphereConfig	aerial_view_max_distance	.aerial_view_max_distance	Float	f32	
+field	bevy_weather::atmosphere::AtmosphereConfig	aerosol_density	.aerosol_density	Float	f32	
+component	bevy_weather::atmosphere::WeatherPlanet	WeatherPlanet
+component	bevy_weather::celestial::CelestialBodies	CelestialBodies
+field	bevy_weather::celestial::CelestialBodies	sun_direction	.sun_direction	Vec3	glam::Vec3	
+field	bevy_weather::celestial::CelestialBodies	moon_direction	.moon_direction	Vec3	glam::Vec3	
+field	bevy_weather::celestial::CelestialBodies	sun_altitude	.sun_altitude	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	moon_altitude	.moon_altitude	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	moon_phase	.moon_phase	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	moon_illumination	.moon_illumination	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	daylight	.daylight	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	sun_color	.sun_color	Color	LinearRgba	
+field	bevy_weather::celestial::CelestialBodies	sun_angular_radius	.sun_angular_radius	Float	f32	
+field	bevy_weather::celestial::CelestialBodies	moon_angular_radius	.moon_angular_radius	Float	f32	
+component	bevy_weather::celestial::DayPhase	DayPhase
+field	bevy_weather::celestial::DayPhase	value		Enum	DayPhase	Day,Dusk,Night,Dawn
+component	bevy_weather::celestial::MoonLight	MoonLight
+component	bevy_weather::celestial::MoonLightConfig	MoonLightConfig
+field	bevy_weather::celestial::MoonLightConfig	illuminance	.illuminance	Float	f32	
+field	bevy_weather::celestial::MoonLightConfig	color	.color	Color	Color	
+field	bevy_weather::celestial::MoonLightConfig	shadows	.shadows	Bool	bool	
+component	bevy_weather::celestial::SunConfig	SunConfig
+field	bevy_weather::celestial::SunConfig	disk	.disk	Bool	bool	
+field	bevy_weather::celestial::SunConfig	angular_radius	.angular_radius	Float	f32	
+field	bevy_weather::celestial::SunConfig	disk_intensity	.disk_intensity	Float	f32	
+field	bevy_weather::celestial::SunConfig	light_tint	.light_tint	Float	f32	
+field	bevy_weather::celestial::SunConfig	shadow_distance	.shadow_distance	Float	f32	
+field	bevy_weather::celestial::SunConfig	shadow_near_distance	.shadow_near_distance	Float	f32	
+field	bevy_weather::celestial::SunConfig	shadow_cascades	.shadow_cascades	Int	usize	
+field	bevy_weather::celestial::SunConfig	shadow_cascade_overlap	.shadow_cascade_overlap	Float	f32	
+component	bevy_weather::celestial::SunLight	SunLight
+component	bevy_weather::cloud_shadows::CloudShadowConfig	CloudShadowConfig
+field	bevy_weather::cloud_shadows::CloudShadowConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::cloud_shadows::CloudShadowConfig	resolution	.resolution	Int	u32	
+field	bevy_weather::cloud_shadows::CloudShadowConfig	tile_size	.tile_size	Float	f32	
+field	bevy_weather::cloud_shadows::CloudShadowConfig	strength	.strength	Float	f32	
+field	bevy_weather::cloud_shadows::CloudShadowConfig	update_seconds	.update_seconds	Float	f32	
+component	bevy_weather::clouds::CloudConfig	CloudConfig
+field	bevy_weather::clouds::CloudConfig	quality	.quality	Enum	Option<Quality>	None,Some
+variant	bevy_weather::clouds::CloudConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
+field	bevy_weather::clouds::CloudConfig	steps	.steps	Enum	Option<u32>	None,Some
+variant	bevy_weather::clouds::CloudConfig	steps	Some		.steps.0	Int	u32	
+field	bevy_weather::clouds::CloudConfig	light_steps	.light_steps	Enum	Option<u32>	None,Some
+variant	bevy_weather::clouds::CloudConfig	light_steps	Some		.light_steps.0	Int	u32	
+field	bevy_weather::clouds::CloudConfig	shape_scale	.shape_scale	Float	f32	
+field	bevy_weather::clouds::CloudConfig	detail_scale	.detail_scale	Float	f32	
+field	bevy_weather::clouds::CloudConfig	detail_distance	.detail_distance	Float	f32	
+field	bevy_weather::clouds::CloudConfig	detail_strength	.detail_strength	Float	f32	
+field	bevy_weather::clouds::CloudConfig	extinction	.extinction	Float	f32	
+field	bevy_weather::clouds::CloudConfig	forward_scattering	.forward_scattering	Float	f32	
+field	bevy_weather::clouds::CloudConfig	back_scattering	.back_scattering	Float	f32	
+field	bevy_weather::clouds::CloudConfig	powder	.powder	Float	f32	
+field	bevy_weather::clouds::CloudConfig	ambient	.ambient	Float	f32	
+field	bevy_weather::clouds::CloudConfig	exposure	.exposure	Float	f32	
+field	bevy_weather::clouds::CloudConfig	albedo	.albedo	Color	Color	
+field	bevy_weather::clouds::CloudConfig	evolution_rate	.evolution_rate	Float	f32	
+field	bevy_weather::clouds::CloudConfig	wind_multiplier	.wind_multiplier	Float	f32	
+field	bevy_weather::clouds::CloudConfig	horizon_fade	.horizon_fade	Float	f32	
+field	bevy_weather::clouds::CloudConfig	lightning_response	.lightning_response	Float	f32	
+field	bevy_weather::clouds::CloudConfig	adaptive_marching	.adaptive_marching	Bool	bool	
+component	bevy_weather::config::WeatherCamera	WeatherCamera
+component	bevy_weather::config::WeatherConfig	WeatherConfig
+field	bevy_weather::config::WeatherConfig	quality	.quality	Enum	Quality	Potato,Low,Medium,High,Ultra
+field	bevy_weather::config::WeatherConfig	atmosphere	.atmosphere	Bool	bool	
+field	bevy_weather::config::WeatherConfig	sky	.sky	Bool	bool	
+field	bevy_weather::config::WeatherConfig	clouds	.clouds	Bool	bool	
+field	bevy_weather::config::WeatherConfig	volumetric_fog	.volumetric_fog	Bool	bool	
+field	bevy_weather::config::WeatherConfig	distance_fog	.distance_fog	Bool	bool	
+field	bevy_weather::config::WeatherConfig	precipitation	.precipitation	Bool	bool	
+field	bevy_weather::config::WeatherConfig	thunder	.thunder	Bool	bool	
+field	bevy_weather::config::WeatherConfig	celestial_lights	.celestial_lights	Bool	bool	
+field	bevy_weather::config::WeatherConfig	light_intensity_scale	.light_intensity_scale	Float	f32	
+field	bevy_weather::config::WeatherConfig	units_per_meter	.units_per_meter	Float	f32	
+component	bevy_weather::fog::FogConfig	FogConfig
+field	bevy_weather::fog::FogConfig	quality	.quality	Enum	Option<Quality>	None,Some
+variant	bevy_weather::fog::FogConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
+field	bevy_weather::fog::FogConfig	volume_size	.volume_size	Float	f32	
+field	bevy_weather::fog::FogConfig	volume_height	.volume_height	Float	f32	
+field	bevy_weather::fog::FogConfig	volume_offset	.volume_offset	Float	f32	
+field	bevy_weather::fog::FogConfig	max_optical_depth	.max_optical_depth	Float	f32	
+field	bevy_weather::fog::FogConfig	absorption_fraction	.absorption_fraction	Float	f32	
+field	bevy_weather::fog::FogConfig	day_color	.day_color	Color	Color	
+field	bevy_weather::fog::FogConfig	night_color	.night_color	Color	Color	
+field	bevy_weather::fog::FogConfig	scattering_asymmetry	.scattering_asymmetry	Float	f32	
+field	bevy_weather::fog::FogConfig	sun_glow	.sun_glow	Float	f32	
+field	bevy_weather::fog::FogConfig	sun_glow_exponent	.sun_glow_exponent	Float	f32	
+field	bevy_weather::fog::FogConfig	jitter	.jitter	Float	f32	
+field	bevy_weather::fog::FogConfig	min_visibility	.min_visibility	Float	f32	
+field	bevy_weather::fog::FogConfig	max_visibility	.max_visibility	Float	f32	
+component	bevy_weather::fog::WeatherFogVolume	WeatherFogVolume
+component	bevy_weather::ground::GroundConditions	GroundConditions
+field	bevy_weather::ground::GroundConditions	wetness	.wetness	Float	f32	
+field	bevy_weather::ground::GroundConditions	snow_cover	.snow_cover	Float	f32	
+component	bevy_weather::ground::GroundConfig	GroundConfig
+field	bevy_weather::ground::GroundConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::ground::GroundConfig	wetting_seconds	.wetting_seconds	Float	f32	
+field	bevy_weather::ground::GroundConfig	drying_seconds	.drying_seconds	Float	f32	
+field	bevy_weather::ground::GroundConfig	snowfall_seconds	.snowfall_seconds	Float	f32	
+field	bevy_weather::ground::GroundConfig	melt_seconds	.melt_seconds	Float	f32	
+field	bevy_weather::ground::GroundConfig	settling_temperature	.settling_temperature	Float	f32	
+component	bevy_weather::precipitation::PrecipitationConfig	PrecipitationConfig
+field	bevy_weather::precipitation::PrecipitationConfig	quality	.quality	Enum	Option<Quality>	None,Some
+variant	bevy_weather::precipitation::PrecipitationConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
+field	bevy_weather::precipitation::PrecipitationConfig	particle_count	.particle_count	Enum	Option<u32>	None,Some
+variant	bevy_weather::precipitation::PrecipitationConfig	particle_count	Some		.particle_count.0	Int	u32	
+field	bevy_weather::precipitation::PrecipitationConfig	box_size	.box_size	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	rain_fall_speed	.rain_fall_speed	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	rain_width	.rain_width	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	rain_length	.rain_length	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	rain_opacity	.rain_opacity	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	rain_color	.rain_color	Color	Color	
+field	bevy_weather::precipitation::PrecipitationConfig	snow_fall_speed	.snow_fall_speed	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	snow_size	.snow_size	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	snow_opacity	.snow_opacity	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	snow_flutter	.snow_flutter	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	snow_color	.snow_color	Color	Color	
+field	bevy_weather::precipitation::PrecipitationConfig	ambient	.ambient	Float	f32	
+field	bevy_weather::precipitation::PrecipitationConfig	seed	.seed	Int	u32	
+component	bevy_weather::precipitation::PrecipitationKind	PrecipitationKind
+field	bevy_weather::precipitation::PrecipitationKind	value		Enum	PrecipitationKind	Rain,Snow
+component	bevy_weather::procedural::ProceduralWeather	ProceduralWeather
+field	bevy_weather::procedural::ProceduralWeather	enabled	.enabled	Bool	bool	
+field	bevy_weather::procedural::ProceduralWeather	seed	.seed	Int	u32	
+field	bevy_weather::procedural::ProceduralWeather	systems_per_day	.systems_per_day	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.mean_temperature	.climate.mean_temperature	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.seasonal_swing	.climate.seasonal_swing	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.diurnal_swing	.climate.diurnal_swing	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.base_humidity	.climate.base_humidity	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.storminess	.climate.storminess	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.cloudiness_bias	.climate.cloudiness_bias	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.fogginess	.climate.fogginess	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.prevailing_wind	.climate.prevailing_wind	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	climate.mean_wind_speed	.climate.mean_wind_speed	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	transition_half_life	.transition_half_life	Float	f32	
+field	bevy_weather::procedural::ProceduralWeather	variability	.variability	Float	f32	
+component	bevy_weather::sky::GalaxyConfig	GalaxyConfig
+field	bevy_weather::sky::GalaxyConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::sky::GalaxyConfig	brightness	.brightness	Float	f32	
+field	bevy_weather::sky::GalaxyConfig	noise_scale	.noise_scale	Float	f32	
+field	bevy_weather::sky::GalaxyConfig	dust	.dust	Float	f32	
+field	bevy_weather::sky::GalaxyConfig	band_tightness	.band_tightness	Float	f32	
+field	bevy_weather::sky::GalaxyConfig	core_concentration	.core_concentration	Float	f32	
+field	bevy_weather::sky::GalaxyConfig	core_color	.core_color	Color	Color	
+field	bevy_weather::sky::GalaxyConfig	edge_color	.edge_color	Color	Color	
+field	bevy_weather::sky::GalaxyConfig	pole	.pole	Vec3	glam::Vec3	
+field	bevy_weather::sky::GalaxyConfig	center	.center	Vec3	glam::Vec3	
+component	bevy_weather::sky::MeteorConfig	MeteorConfig
+field	bevy_weather::sky::MeteorConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::sky::MeteorConfig	rate	.rate	Float	f32	
+field	bevy_weather::sky::MeteorConfig	arc_length	.arc_length	Float	f32	
+field	bevy_weather::sky::MeteorConfig	width	.width	Float	f32	
+field	bevy_weather::sky::MeteorConfig	brightness	.brightness	Float	f32	
+component	bevy_weather::sky::MoonConfig	MoonConfig
+field	bevy_weather::sky::MoonConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::sky::MoonConfig	brightness	.brightness	Float	f32	
+field	bevy_weather::sky::MoonConfig	angular_radius	.angular_radius	Float	f32	
+field	bevy_weather::sky::MoonConfig	earthshine	.earthshine	Float	f32	
+field	bevy_weather::sky::MoonConfig	surface_detail	.surface_detail	Float	f32	
+field	bevy_weather::sky::MoonConfig	tint	.tint	Color	Color	
+field	bevy_weather::sky::MoonConfig	white_balance	.white_balance	Float	f32	
+component	bevy_weather::sky::SkyDome	SkyDome
+component	bevy_weather::sky::StarConfig	StarConfig
+field	bevy_weather::sky::StarConfig	enabled	.enabled	Bool	bool	
+field	bevy_weather::sky::StarConfig	density	.density	Float	f32	
+field	bevy_weather::sky::StarConfig	brightness	.brightness	Float	f32	
+field	bevy_weather::sky::StarConfig	occupancy	.occupancy	Float	f32	
+field	bevy_weather::sky::StarConfig	magnitude_falloff	.magnitude_falloff	Float	f32	
+field	bevy_weather::sky::StarConfig	size	.size	Float	f32	
+field	bevy_weather::sky::StarConfig	color_variation	.color_variation	Float	f32	
+field	bevy_weather::sky::StarConfig	twinkle_speed	.twinkle_speed	Float	f32	
+field	bevy_weather::sky::StarConfig	twinkle_amount	.twinkle_amount	Float	f32	
+component	bevy_weather::state::Weather	Weather
+field	bevy_weather::state::Weather	current.cloud_coverage	.current.cloud_coverage	Float	f32	
+field	bevy_weather::state::Weather	current.cloud_density	.current.cloud_density	Float	f32	
+field	bevy_weather::state::Weather	current.cloud_altitude	.current.cloud_altitude	Float	f32	
+field	bevy_weather::state::Weather	current.cloud_thickness	.current.cloud_thickness	Float	f32	
+field	bevy_weather::state::Weather	current.rain	.current.rain	Float	f32	
+field	bevy_weather::state::Weather	current.snow	.current.snow	Float	f32	
+field	bevy_weather::state::Weather	current.fog	.current.fog	Float	f32	
+field	bevy_weather::state::Weather	current.thunder	.current.thunder	Float	f32	
+field	bevy_weather::state::Weather	current.wind_speed	.current.wind_speed	Float	f32	
+field	bevy_weather::state::Weather	current.wind_direction	.current.wind_direction	Float	f32	
+field	bevy_weather::state::Weather	current.turbulence	.current.turbulence	Float	f32	
+field	bevy_weather::state::Weather	current.humidity	.current.humidity	Float	f32	
+field	bevy_weather::state::Weather	current.temperature	.current.temperature	Float	f32	
+field	bevy_weather::state::Weather	target.cloud_coverage	.target.cloud_coverage	Float	f32	
+field	bevy_weather::state::Weather	target.cloud_density	.target.cloud_density	Float	f32	
+field	bevy_weather::state::Weather	target.cloud_altitude	.target.cloud_altitude	Float	f32	
+field	bevy_weather::state::Weather	target.cloud_thickness	.target.cloud_thickness	Float	f32	
+field	bevy_weather::state::Weather	target.rain	.target.rain	Float	f32	
+field	bevy_weather::state::Weather	target.snow	.target.snow	Float	f32	
+field	bevy_weather::state::Weather	target.fog	.target.fog	Float	f32	
+field	bevy_weather::state::Weather	target.thunder	.target.thunder	Float	f32	
+field	bevy_weather::state::Weather	target.wind_speed	.target.wind_speed	Float	f32	
+field	bevy_weather::state::Weather	target.wind_direction	.target.wind_direction	Float	f32	
+field	bevy_weather::state::Weather	target.turbulence	.target.turbulence	Float	f32	
+field	bevy_weather::state::Weather	target.humidity	.target.humidity	Float	f32	
+field	bevy_weather::state::Weather	target.temperature	.target.temperature	Float	f32	
+field	bevy_weather::state::Weather	transition_half_life	.transition_half_life	Float	f32	
+component	bevy_weather::thunder::LightningLight	LightningLight
+field	bevy_weather::thunder::LightningLight	remaining	.remaining	Float	f32	
+field	bevy_weather::thunder::LightningLight	peak_intensity	.peak_intensity	Float	f32	
+field	bevy_weather::thunder::LightningLight	duration	.duration	Float	f32	
+field	bevy_weather::thunder::LightningLight	seed	.seed	Int	u32	
+component	bevy_weather::thunder::LightningState	LightningState
+field	bevy_weather::thunder::LightningState	color	.color	Color	LinearRgba	
+field	bevy_weather::thunder::LightningState	intensity	.intensity	Float	f32	
+field	bevy_weather::thunder::LightningState	next_strike_in	.next_strike_in	Float	f32	
+field	bevy_weather::thunder::LightningState	elapsed	.elapsed	Float	f32	
+field	bevy_weather::thunder::LightningState	duration	.duration	Float	f32	
+field	bevy_weather::thunder::LightningState	strike_count	.strike_count	Int	u32	
+field	bevy_weather::thunder::LightningState	active	.active	Bool	bool	
+component	bevy_weather::thunder::ThunderConfig	ThunderConfig
+field	bevy_weather::thunder::ThunderConfig	flash_color	.flash_color	Color	Color	
+field	bevy_weather::thunder::ThunderConfig	flash_intensity	.flash_intensity	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	flash_duration	.flash_duration	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	min_distance	.min_distance	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	max_distance	.max_distance	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	strike_height	.strike_height	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	light_intensity	.light_intensity	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	light_range	.light_range	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	spawn_light	.spawn_light	Bool	bool	
+field	bevy_weather::thunder::ThunderConfig	seed	.seed	Int	u32	
+field	bevy_weather::thunder::ThunderConfig	rate_multiplier	.rate_multiplier	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	sound	.sound	Enum	Option<Handle<AudioSource>>	None,Some
+variant	bevy_weather::thunder::ThunderConfig	sound	Some		.sound.0	Asset	Handle<AudioSource>	Audio
+field	bevy_weather::thunder::ThunderConfig	volume	.volume	Float	f32	
+field	bevy_weather::thunder::ThunderConfig	audible_distance	.audible_distance	Float	f32	
+component	bevy_weather::time::WeatherTime	WeatherTime
+field	bevy_weather::time::WeatherTime	time_of_day	.time_of_day	Float	f32	
+field	bevy_weather::time::WeatherTime	day	.day	Int	u32	
+field	bevy_weather::time::WeatherTime	day_length_secs	.day_length_secs	Float	f32	
+field	bevy_weather::time::WeatherTime	paused	.paused	Bool	bool	
+field	bevy_weather::time::WeatherTime	latitude	.latitude	Float	f32	
+field	bevy_weather::time::WeatherTime	axial_tilt	.axial_tilt	Float	f32	
+field	bevy_weather::time::WeatherTime	year_offset	.year_offset	Float	f32	
+field	bevy_weather::time::WeatherTime	moon_phase_offset	.moon_phase_offset	Float	f32	
+component	bevy_weather::wind::Wind	Wind
+field	bevy_weather::wind::Wind	velocity	.velocity	Vec2	glam::Vec2	
+field	bevy_weather::wind::Wind	base_velocity	.base_velocity	Vec2	glam::Vec2	
+field	bevy_weather::wind::Wind	gust	.gust	Float	f32	
+field	bevy_weather::wind::Wind	offset	.offset	Vec2	glam::Vec2	
+field	bevy_weather::wind::Wind	seed	.seed	Int	u32	
+field	bevy_weather::wind::Wind	offset_wrap	.offset_wrap	Float	f32	
 component	bevy_window::cursor::CursorIcon	CursorIcon
 field	bevy_window::cursor::CursorIcon	value		Enum	CursorIcon	System
 variant	bevy_window::cursor::CursorIcon	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut

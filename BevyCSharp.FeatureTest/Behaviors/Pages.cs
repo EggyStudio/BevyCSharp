@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -15,6 +16,7 @@ internal static class Pages
         new PageRow("Player", Player),
         new PageRow("Graphics", Graphics),
         new PageRow("Effects", Effects),
+        new PageRow("Weather", Skies),
         new PageRow("Audio", Audio),
         new PageRow("Controls", Controls),
         new PageRow("Debug", Debug),
@@ -62,6 +64,25 @@ internal static class Pages
         new ToggleRow("Auto exposure", () => S.AutoExposure, value => Settings.Change(s => s with { AutoExposure = value })),
         new SliderRow("Sharpening", () => S.Sharpen, value => Settings.Change(s => s with { Sharpen = value }), 0f, 1f, 0.1f),
         new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
+    ]);
+
+    /// <summary>
+    /// The weather's page, its switch and, where it runs, the kind of weather, the cloud cover, the
+    /// tier and whether the forecast drives it.
+    /// </summary>
+    private static Page Skies() => new("Weather",
+    [
+        new ToggleRow(Weather.Active ? "Weather, running" : "Weather, from the next start",
+            () => S.Weather, value => Settings.Change(s => s with { Weather = value })),
+        .. Weather.Active
+            ? (Row[])
+            [
+                new ChoiceRow<WeatherPreset>("Kind", () => S.WeatherKind, value => Settings.Change(s => s with { WeatherKind = value })),
+                new SliderRow("Cloud cover", () => S.CloudCover, value => Settings.Change(s => s with { CloudCover = value }), 0f, 1f, 0.05f),
+                new ChoiceRow<WeatherConfigRef.QualityVariant>("Tier", () => S.WeatherTier, value => Settings.Change(s => s with { WeatherTier = value })),
+                new ToggleRow("Forecast", () => S.Procedural, value => Settings.Change(s => s with { Procedural = value })),
+            ]
+            : [new TextRow(Render.MeshletsActive ? "Meshlets keep the weather out." : "The weather is not running.")],
     ]);
 
     private static Page Audio() => new("Audio",

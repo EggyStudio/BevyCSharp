@@ -116,6 +116,41 @@ surface reflects. It costs nothing at startup, which suits a shipped game and an
 large to filter again. Passing `AssetHandle.None` for either takes the lighting off, since a baked
 map is the pair and half of one is not a weaker version of it.
 
+### The weather
+
+The weather is a sky around Bevy's atmosphere, with clouds marched through a shell over the planet
+and their shadows on the ground, fog, rain, snow and thunder, stars, a galaxy and a moon with its
+phase, from the `bevy_weather` crate the bridge's render profile carries. `Config.Weather` asks for
+it, and a camera sees it once it carries `WeatherCameraRef`:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+ctx.Ecs.Insert<WeatherCameraRef>(camera);
+var clock = ctx.Ecs.Resource<WeatherTimeRef>()!.Value;
+clock.Latitude = 52f;
+clock.TimeOfDay = 0.75f;                                        // six in the evening
+var forecast = ctx.Ecs.Resource<ProceduralWeatherRef>()!.Value;
+forecast.Enabled = false;                                       // so a preset holds
+Weather.SetPreset(WeatherPreset.Rain);                          // eased into
+```
+
+The weather brings a planet with its atmosphere, so a weather camera needs no `SetAtmosphere`, and a
+sun and a moon, made where the app has marked none of its own lights with `SunLightRef` or
+`MoonLightRef`. A light marked so is steered across the sky from then on. The clock runs a day in
+`DayLengthSecs` unless it is `Paused`, `TimeOfDay` running from midnight at zero through noon at a
+half, and the forecast writes the conditions from it while `ProceduralWeatherRef.Enabled` is on, so
+the same clock gives the same sky on every machine. With the forecast off, a preset or the
+conditions themselves (`WeatherRef.TargetCloudCoverage` and the rest) say what the weather eases
+toward. `WeatherConfigRef.Quality` is one tier, from `Potato` to `Ultra`, over the clouds' samples,
+the fog and the particles, with a switch for each part beside it.
+
+The weather puts on each weather camera the exposure its sky is calibrated for, and leaves the
+tonemapper and the bloom to `SetPostProcessing`. A headless app has no weather, and an app where
+meshlets run has none either, since a camera under its atmosphere would end the app there, which
+`Weather.Active` reports. What it costs is in [Compared with Bevy](compared-with-bevy.md).
+
 ### Light probes
 
 A camera's environment lights everything it sees the same way, which is wrong the moment the scene

@@ -246,6 +246,7 @@ public sealed unsafe partial class App : IDisposable
                 ScaleFactor = Config.ScaleFactor,
                 FrameSeconds = Config.FrameSeconds,
                 MeshPicking = Config.MeshPicking ? 1u : 0u,
+                Weather = Config.Weather ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }

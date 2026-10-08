@@ -264,8 +264,9 @@ own Roslyn.
 | `Microsoft.CodeAnalysis.CSharp` | Roslyn, through which the generators read a game's code and write its behaviors, schemas and commands. |
 | `Microsoft.CodeAnalysis.Analyzers` | The rules Roslyn holds a generator to while it is built, such as the calls a generator may not make. |
 
-The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy and the embedding are in the tree
-through Bevy already, at the version it builds, so naming them adds nothing to the build.
+The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy, the embedding and the weather are
+in the tree through Bevy already, at the version it builds, so naming them adds nothing to the
+build.
 
 | Crate | Used for |
 |---|---|
@@ -277,6 +278,7 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 | `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
 | `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
 | `bevy_embedded_assets` | A game's assets compiled into the library (embed). |
+| `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). |
 | `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 
 ## Publishing
