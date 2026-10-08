@@ -40,7 +40,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from page import annotate
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-USINGS = ["System", "System.Collections.Generic", "System.IO", "System.Linq", "Bevy", "Bevy.Physics"]
+USINGS = ["System", "System.Collections.Generic", "System.IO", "System.Linq", "Bevy", "Bevy.Physics", "Bevy.Reflected"]
 STATIC_USINGS = []
 FENCE = re.compile(r"^```csharp\s*$")
 CONTEXT = re.compile(r"^<!-- compiled with:\s*$")
@@ -236,7 +236,7 @@ def main():
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
   <packageSourceMapping>
-    <packageSource key="engine"><package pattern="3DEngine" /></packageSource>
+    <packageSource key="engine"><package pattern="BevyCSharp" /></packageSource>
     <packageSource key="nuget.org"><package pattern="*" /></packageSource>
   </packageSourceMapping>
 </configuration>
