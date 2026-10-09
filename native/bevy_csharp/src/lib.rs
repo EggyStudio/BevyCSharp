@@ -64,6 +64,7 @@ pub mod states;
 pub mod skins;
 pub mod spawned_windows;
 pub mod sync;
+pub mod title_bar;
 pub mod ui;
 pub mod widget;
 pub mod window;

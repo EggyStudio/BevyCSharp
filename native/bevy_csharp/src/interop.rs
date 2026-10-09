@@ -239,7 +239,7 @@ pub struct BcsConfig {
     /// platform allows it. Ignored without a window.
     pub transparent: u32,
     /// Non-zero to have the desktop draw the window's title bar where it only does so for X11
-    /// windows, which is GNOME on Wayland. See `app::prefer_desktop_title_bar`.
+    /// windows, which is GNOME on Wayland. See `title_bar::prefer_desktop_title_bar`.
     pub desktop_title_bar: u32,
     /// The player's own directory, registered with Bevy as the `user` asset source so a texture or
     /// a model the game wrote there loads as `user://…`, or null for no such source.
