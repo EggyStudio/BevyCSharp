@@ -105,7 +105,7 @@ if [[ "$SOLARI" == 1 ]]; then
     FEATURES="$FEATURES,solari"
 fi
 
-# The folder is read when the library is compiled, through the variable bevy_embedded_assets
+# The folder is read when the library is compiled, through the variable the bridge's build script
 # looks for, so it is made absolute here, where the caller's relative path still means something.
 if [[ -n "$EMBED" ]]; then
     if [[ ! -d "$EMBED" ]]; then

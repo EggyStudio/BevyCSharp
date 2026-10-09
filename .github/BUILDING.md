@@ -143,11 +143,11 @@ build/build-native.sh --render --embed BevyCSharp.FeatureTest/assets    # bash
 build/build-native.ps1 -Render -Embed BevyCSharp.FeatureTest/assets      # PowerShell
 ```
 
-`bevy_embedded_assets` reads the folder as the library compiles and serves it in place of the asset
-root, so every path loads as before and `App.HasEmbeddedAssets` says so. A bridge built so serves
-one game, so it is staged under `build/embedded/<rid>/` rather than where the projects here copy
-the bridge from. Scenes, data assets and the other files the managed side reads for itself are
-still read from the folder or the game's assembly, which a bridge cannot serve.
+The bridge's build script reads the folder as the library compiles, and the bridge serves it in
+place of the asset root, so every path loads as before and `App.HasEmbeddedAssets` says so. A bridge
+built so serves one game, so it is staged under `build/embedded/<rid>/` rather than where the
+projects here copy the bridge from. Scenes, data assets and the other files the managed side reads
+for itself are still read from the folder or the game's assembly, which a bridge cannot serve.
 
 `--game` (`-Game`) stages a bridge apart in the same way, under `build/game/<rid>/`, which is the
 render bridge the Play tab's export ships, so a checkout whose projects run on the editor's bridge
@@ -264,9 +264,8 @@ own Roslyn.
 | `Microsoft.CodeAnalysis.CSharp` | Roslyn, through which the generators read a game's code and write its behaviors, schemas and commands. |
 | `Microsoft.CodeAnalysis.Analyzers` | The rules Roslyn holds a generator to while it is built, such as the calls a generator may not make. |
 
-The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy, the embedding and the weather are
-in the tree through Bevy already, at the version it builds, so naming them adds nothing to the
-build.
+The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy and the weather are in the tree
+through Bevy already, at the version it builds, so naming them adds nothing to the build.
 
 | Crate | Used for |
 |---|---|
@@ -277,7 +276,6 @@ build.
 | `serde_json` | Components read and written through Bevy's reflection, which cross as JSON, and the reflection slangc writes beside a compile. |
 | `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
 | `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
-| `bevy_embedded_assets` | A game's assets compiled into the library (embed). |
 | `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). Vendored at 0.2.0 in `native/bevy_weather`, a member of the workspace, under its own license. |
 | `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 

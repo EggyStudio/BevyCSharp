@@ -78,8 +78,8 @@ $Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet -or $Solari) 
 if ($Meshlet) { $Features = "$Features,meshlet" }
 if ($Solari) { $Features = "$Features,solari" }
 
-# The folder is read when the library is compiled, through the variable bevy_embedded_assets looks
-# for, so it is made absolute here, where the caller's relative path still means something.
+# The folder is read when the library is compiled, through the variable the bridge's build script
+# looks for, so it is made absolute here, where the caller's relative path still means something.
 if ($Embed) {
     if (-not (Test-Path -PathType Container $Embed)) { throw "-Embed names '$Embed', which is not a directory." }
     $Embed = (Resolve-Path $Embed).Path

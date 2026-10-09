@@ -29,6 +29,8 @@ pub mod app;
 pub mod capabilities;
 pub mod component_registry;
 pub mod crash;
+#[cfg(feature = "embed")]
+pub mod embedded;
 pub mod offscreen;
 pub mod systems;
 pub mod animation;

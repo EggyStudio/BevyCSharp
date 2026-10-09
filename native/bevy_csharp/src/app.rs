@@ -88,9 +88,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // source is, before the asset plugin builds the sources, and only by a bridge built for one
     // game (`build-native.sh --embed`).
     #[cfg(feature = "embed")]
-    app.add_plugins(bevy_embedded_assets::EmbeddedAssetPlugin {
-        mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-    });
+    crate::embedded::install(&mut app);
 
     // Whether the renderer is installed at all. A window is one way to draw and an image is the
     // other, and both take Bevy's full plugin set, so everything below asks this rather than

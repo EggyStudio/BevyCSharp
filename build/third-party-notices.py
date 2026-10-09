@@ -37,6 +37,14 @@ LICENSE_FILE = re.compile(r"^(LICEN[CS]E|COPYING|NOTICE|COPYRIGHT|UNLICENSE)|[-_
 SOURCE_ENDINGS = (".rs", ".toml", ".c", ".h", ".cpp", ".py", ".sh", ".html", ".json")
 SKIPPED_FOLDERS = {"tests", "benches", "examples", "target", ".git"}
 
+# Code a crate wrote that is now part of the bridge's own source, kept under its authors' license
+# after the crate left the lock: its name and release, license, holder, and what was taken.
+TAKEN = [
+    ("bevy_embedded_assets", "0.16.0", "MIT OR Apache-2.0", "François Mockers",
+     "the build script and the asset reader of the `embed` feature, in `native/bevy_csharp/build.rs` "
+     "and `native/bevy_csharp/src/embedded.rs`"),
+]
+
 # A line that names who holds a work, rather than one of a license's own lines about copyright,
 # such as Apache's "copyright owner" or a template's "[yyyy]".
 HOLDER = re.compile(r"^\W{0,3}(copyright|\(c\)|©)\b", re.I)
@@ -182,6 +190,15 @@ def build(packages):
                 row["texts"].append(standard[license]["number"])
                 standard[license]["taken"].append(f"{package['name']} {package['version']}")
 
+    taken = []
+    for name, version, license, holder, what in TAKEN:
+        numbers = []
+        for kind in license_ids(license):
+            if kind in standard:
+                standard[kind]["taken"].append(f"{name} {version}")
+                numbers.append(standard[kind]["number"])
+        taken.append((name, version, license, holder, what, numbers))
+
     with open(FONT_LICENSE, encoding="utf-8") as file:
         font = text_number(file.read().strip("\n"), "OFL-1.1")
     font["crates"].append("Fira Mono, Bevy's default font, inside bevy_text")
@@ -233,6 +250,17 @@ def build(packages):
         names = ", ".join(mpl[:-1]) + " and " + mpl[-1] if len(mpl) > 1 else mpl[0]
         out.append("The crates under the Mozilla Public License 2.0 are compiled in unchanged, and their source is")
         out.append(f"on crates.io at the versions above: {names}.\n")
+
+    if taken:
+        out.append("## Code taken into the bridge\n")
+        out.append("Code a crate wrote that is now part of the bridge's own source, kept under the licenses its")
+        out.append("authors offer it under.\n")
+        out.append("| Crate | Version | License | Copyright | Taken | Texts |")
+        out.append("|---|---|---|---|---|---|")
+        for name, version, license, holder, what, numbers in taken:
+            links = ", ".join(f"[{number}](#text-{number})" for number in numbers) or "none"
+            out.append(f"| {name} | {version} | {license} | by {cell(holder)} | {what} | {links} |")
+        out.append("")
 
     out.append("## The examples\n")
     out.append("The programs in `BevyCSharp.Examples` named for Bevy's examples are Bevy's")

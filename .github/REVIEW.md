@@ -10,27 +10,44 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `79f2fdb0`. Verdict 6 is settled (`601c6264`): the ImGui pass queues its pipeline the
-first frame it runs, before it asks whether there is anything to draw, and the other passes were
-read, the program, dispatch and view passes queuing on the first use of a program keyed by its
-generation and formats, which nothing earlier knows, the corners on the first frame a view has them
-and the watch's at startup, so the ImGui pass was the one; the suite passed whole, 1,276 and 2
-skipped, the console test among them, which is what settled it. The spike's report (`79f2fdb0`) is
-what the item asked for and more. Every shader slangc compiles to WGSL, 134 entry points with the
-feature test's nine among them, was composed on 0.20.0 through `Shader::from_wesl` and Bevy's own
-`ShaderCache` with all 148 of Bevy's WESL modules registered, under the defs Bevy's mesh pipeline
-gives, and validated by naga 30; the ten with glue had it ported in front. As slangc writes them, 71
-composed and 63 were refused, none for the glue: naga 30 requires `@interpolate(flat)` on every
-integer location, which Slang leaves off the instance index (31); it requires `enable
-wgpu_binding_array;` where a binding array is declared (3); and WESL's parser refuses a
-parenthesized left-hand side, `((width_0)) = dim.x;`, which WGSL allows and slangc writes for
-`GetDimensions` (19). With the three mended as the bridge mends slangc's output, all 134 composed
-and validated, and a unit with no glue stays `from_wgsl`, which 0.20 hands to naga untouched and
-which needs the first two mends alone. The counts of the three causes add to 53 against 63 refused,
-so the reply says in the port's commit which ten had two causes or another. The first two findings
-are Slang's and the third WESL's, and both are worth an issue upstream, the owner's to file, since
-every Slang program Bevy takes meets them. With the spike done, the port goes on to the manifests
-and the mechanical moves, item 3 b.
+Reviewed up to `24d39c29`. The weather is vendored (Decision 18): `bevy_weather` 0.2.0 as published
+is a member of the workspace at `native/bevy_weather` with its license and README, the bridge
+depending on it by path so the lock changes only in where the crate comes from, upstream's examples,
+their dev-dependency on Bevy's default plugins and dev tools, and its profiles left out, its 204
+tests building on its own dependencies; `default-members` keeps a plain cargo command on the bridge,
+and `build/third-party-notices.py` leaves out the bridge alone, so the vendored crate stays in the
+notices under its authors' license, which is right. Right too that it comes before the bump, as the
+embedding will, so each stands alone on 0.19 and the port goes with the bump. The `Rule:` line is
+taken: N 4.1's text names another's code kept whole in the tree beside the followed engine's words,
+Annex B names `native/bevy_weather` as that code, which the layout rules leave out as well since
+they read the bridge's own sources, and the test's leaving the folder out stands as it stands for
+Bevy's assets, in both repositories' NORM.md. The spike's counts are answered: the ten glued units
+composed through WESL and were then refused by naga 30 for the flat rule, which the report counted
+among the unglued alone, 31 and 10 flat, 3 enable and 19 parentheses, and the irradiance unit fails
+on the 0.19 condition's missing declaration when no volume is in view, which the port's reply says.
+The suite was last run whole at `601c6264`, 1,276 passed and 2 skipped, and this commit runs none of
+it but the norm's 18, which pass; the embedding on 0.19 is next, then the bump.
+
+Before them, Verdict 6 is settled (`601c6264`): the ImGui pass queues its pipeline the first frame
+it runs, before it asks whether there is anything to draw, and the other passes were read, the
+program, dispatch and view passes queuing on the first use of a program keyed by its generation and
+formats, which nothing earlier knows, the corners on the first frame a view has them and the watch's
+at startup, so the ImGui pass was the one; the suite passed whole, 1,276 and 2 skipped, the console
+test among them, which is what settled it. The spike's report (`79f2fdb0`) is what the item asked
+for and more. Every shader slangc compiles to WGSL, 134 entry points with the feature test's nine
+among them, was composed on 0.20.0 through `Shader::from_wesl` and Bevy's own `ShaderCache` with all
+148 of Bevy's WESL modules registered, under the defs Bevy's mesh pipeline gives, and validated by
+naga 30; the ten with glue had it ported in front. As slangc writes them, 71 composed and 63 were
+refused, none for the glue: naga 30 requires `@interpolate(flat)` on every integer location, which
+Slang leaves off the instance index (31); it requires `enable wgpu_binding_array;` where a binding
+array is declared (3); and WESL's parser refuses a parenthesized left-hand side, `((width_0)) =
+dim.x;`, which WGSL allows and slangc writes for `GetDimensions` (19). With the three mended as the
+bridge mends slangc's output, all 134 composed and validated, and a unit with no glue stays
+`from_wgsl`, which 0.20 hands to naga untouched and which needs the first two mends alone. The
+counts of the three causes add to 53 against 63 refused, so the reply says in the port's commit
+which ten had two causes or another. The first two findings are Slang's and the third WESL's, and
+both are worth an issue upstream, the owner's to file, since every Slang program Bevy takes meets
+them. With the spike done, the port goes on to the manifests and the mechanical moves, item 3 b.
 
 Before it, three commits came to be read, each its own. Verdict 4's mend (`22be0bc`):
 `prefer_desktop_title_bar` moves out of app.rs into `title_bar.rs`, code alone, app.rs at 781 lines,
@@ -54,19 +71,6 @@ skipped and 1 failed, `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedA
 the reply notes as a flake under load and leaves; it is not one, and Verdict 6 models it from the
 ImGui pass's code. With item 3 out, the list is renumbered to ten, Bevy 0.20 is item 3, and the
 coder is on its spike.
-
-Before them, the file watcher's panic at exit came to be settled: from the frame an exit is decided
-until the app is destroyed or another is made, `crash::ending` holds a flag the hook reads, and a
-panic outside the guard in that window is kept in `last()` and printed by the process's hook but not
-written as a crash, a native test holding such a panic to being kept and not written (`6363357`).
-Two remarks. A fault of Bevy's own in that window, a panic on a render thread as the app ends, is
-hidden from the crash file along with the watcher's, which is the price chosen, and it is read again
-at the upgrade, where the watcher's send on a closed channel may be mended upstream and the window
-could close. The reply gives no count of the suite for this commit, which each batch's reply does,
-so the next reply carries it. Today the owner decided the engine moves to Bevy 0.20 (Decisions 17 to
-20), item 4 after the deferred batch in flight, and the list is renumbered to eleven. The runs of
-`2443936` and `6363357` were read with it and are red, Verdicts 4 and 5, which come before item 3's
-commit.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -388,16 +392,16 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3, the weather vendored.** `bevy_weather` 0.2.0 is a member of the workspace at
-`native/bevy_weather`, its source as published and as `.ref` holds it, with its license and README,
-and the bridge depends on it by path, so the lock changes only in where the crate comes from. Left
-out of upstream's tree are its examples and its dev-dependency on Bevy's default plugins and dev
-tools, which would add `bevy_dev_tools`, `bevy_feathers`, `glow`, `sysinfo` and more to the lock,
-and its profiles, which a member cannot set; its 204 tests build on its own dependencies and pass.
-It comes before the bump, as the embedding does next, so each stands alone on 0.19, and its port
-goes with the bump. `build/third-party-notices.py` leaves out the bridge alone rather than every
-member, and the notices come out the same. The suite was last run whole at `601c6264`, 1,276 passed
-and 2 skipped; this commit changes no code it runs but the norm's tests, whose 18 pass.
-
-Rule: N 4.1's test leaves out the vendored crate as it leaves out Bevy's assets, since it carries
-its authors' own words, which the rule's text, naming the followed engine's alone, may name too.
+**Item 3, the embedding ported in.** `bevy_embedded_assets` 0.16 is no longer a dependency. Its
+build script is the bridge's `build.rs`, which does nothing without the `embed` feature and with it
+lists the folder `BEVY_ASSET_PATH` names, the crate's search for an `assets` folder beside the
+target and `cargo-emit` left out. Its reader is `src/embedded.rs`, in the one mode the bridge used,
+replacing the default source, each file read through Bevy's own `SliceReader`, which seeks where
+the crate's reader did not, and its other modes, its fallback and its public reader left out. The
+crate's reader tests came with it, with one that reads every file of the embedded folder back, and
+pass with `BEVY_ASSET_PATH` set, and a bridge built in the container with
+`build-native.sh --embed BevyCSharp.Tests/assets` compiled. The lock loses the crate and
+`cargo-emit`, and the notices keep the crate's MIT or Apache-2.0 under a new section, code taken
+into the bridge. Done on 0.19 like the weather, so it stands alone before the bump. The suite was
+last run whole at `601c6264`, 1,276 passed and 2 skipped; this commit changes nothing a test reaches
+without the feature, and the norm's tests pass.

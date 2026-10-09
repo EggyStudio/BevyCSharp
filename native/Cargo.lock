@@ -650,7 +650,6 @@ name = "bevy_csharp"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_embedded_assets",
  "bevy_weather",
  "bytemuck",
  "naga",
@@ -740,22 +739,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
-]
-
-[[package]]
-name = "bevy_embedded_assets"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9995a41d52f5e71b6343d80de6d13cf7269967486f9589803183d6ceea850241"
-dependencies = [
- "bevy_app",
- "bevy_asset",
- "bevy_ecs",
- "cargo-emit",
- "futures-io",
- "futures-lite",
- "log",
- "thiserror 2.0.20",
 ]
 
 [[package]]
@@ -1971,12 +1954,6 @@ dependencies = [
  "wayland-backend",
  "wayland-client",
 ]
-
-[[package]]
-name = "cargo-emit"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1582e1c9e755dd6ad6b224dcffb135d199399a4568d454bd89fe515ca8425695"
 
 [[package]]
 name = "cc"

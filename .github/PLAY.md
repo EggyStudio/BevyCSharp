@@ -129,18 +129,18 @@ sources are newer than it, and puts it over the one the publish copied. Not buil
 A shipped game carries its assets either as a folder beside it, which a player can open and change,
 or inside the binary, which is one file to ship and nothing to lose.
 
-`bevy_embedded_assets` 0.16 targets Bevy 0.19, which the bridge uses. It replaces the default asset
-source with one that reads from bytes compiled into the binary, so every `asset_server.load` finds
-the embedded file with no change to the paths. The catch is where it embeds from. It includes a
-directory at the time the Rust crate is compiled, and the bridge is one prebuilt library shared by
-every game (and by the NuGet package), so embedding a game's assets there means building the bridge
-once per game.
+The bridge's `embed` feature, taken into its own source from `bevy_embedded_assets` 0.16 when that
+crate stayed on Bevy 0.19, replaces the default asset source with one that reads from bytes compiled
+into the binary, so every `asset_server.load` finds the embedded file with no change to the paths.
+The catch is where it embeds from. It includes a directory at the time the Rust crate is compiled,
+and the bridge is one prebuilt library shared by every game (and by the NuGet package), so embedding
+a game's assets there means building the bridge once per game.
 
 That fits a build step that already builds the bridge per target, so the plan takes it in two parts:
 
 - **Per game, through the bridge.** A `--embed <dir>` option on `build-native.sh` and the export section
-  turns on a bridge feature that adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode over that
-  directory. It is the smallest change, and each game pays a bridge build for it.
+  turns on a bridge feature that registers the embedded files as the default asset source over
+  that directory. It is the smallest change, and each game pays a bridge build for it.
 - **Shared bridge, managed bytes.** The same reader serves the managed files as well (scenes, data
   assets and the rest in [SCENES.md](SCENES.md)), so one embedded copy of the assets feeds both
   sides. An asset source the bridge registers whose reader asks the
