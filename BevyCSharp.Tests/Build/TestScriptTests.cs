@@ -5,11 +5,11 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// <c>build/test.py</c>, which runs the tests in the workflow and for a working session, writes a
-/// page within its limits whatever the run held, says a process that is lost and runs the suite
-/// again in parts after it, and reads the bridge's failures from what cargo prints, as N 6.7 and
-/// N 6.8 of NORM.md have it. <c>build/step.py</c>, which runs each step of the pack workflow's jobs
-/// on Linux, says what failed in a step that fails having said nothing, and
+/// <c>build/test.py</c>, which runs the tests in the workflow and on a contributor's machine,
+/// writes a page within its limits whatever the run held, says a process that is lost and runs the
+/// suite again in parts after it, and reads the bridge's failures from what cargo prints, as N 6.7
+/// and N 6.8 of NORM.md have it. <c>build/step.py</c>, which runs each step of the pack workflow's
+/// jobs on Linux, says what failed in a step that fails having said nothing, and
 /// <c>build/bcs-answer.py</c> what a <c>bcs</c> command that failed answered.
 /// </summary>
 /// <remarks>

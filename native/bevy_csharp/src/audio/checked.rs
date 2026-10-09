@@ -50,7 +50,8 @@ impl CheckedSounds {
 /// Bevy's own `Decodable`, which unwraps what building the decoder gave and so panics on a file it
 /// cannot read, run where the panic is caught, so Bevy plays whatever passes here. Rodio's
 /// builder answers with an error instead, and is a package Bevy's audio depends on that the bridge
-/// does not reference, which N 2.8 of NORM.md leaves to the owner.
+/// does not reference, where referencing it would add to the dependencies N 2.8 of NORM.md holds
+/// to their list.
 fn decodes(source: &AudioSource) -> Result<(), String> {
     // Quietly, so the panic is neither printed as a fault nor kept as the last one said.
     let built = crate::crash::quietly(|| std::panic::catch_unwind(AssertUnwindSafe(|| drop(source.decoder()))));

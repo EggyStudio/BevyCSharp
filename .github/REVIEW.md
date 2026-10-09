@@ -10,12 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `24d39c29`. The weather is vendored (Decision 18): `bevy_weather` 0.2.0 as published
-is a member of the workspace at `native/bevy_weather` with its license and README, the bridge
-depending on it by path so the lock changes only in where the crate comes from, upstream's examples,
-their dev-dependency on Bevy's default plugins and dev tools, and its profiles left out, its 204
-tests building on its own dependencies; `default-members` keeps a plain cargo command on the bridge,
-and `build/third-party-notices.py` leaves out the bridge alone, so the vendored crate stays in the
+Reviewed up to `fda1c806`. The embedding is the bridge's own (Decision 17): `bevy_embedded_assets`
+0.16 is no longer a dependency, its build script the bridge's `build.rs`, which does nothing without
+the `embed` feature and with it lists the folder `BEVY_ASSET_PATH` names, the crate's search beside
+the target and `cargo-emit` left out, and its reader `src/embedded.rs` in the one mode the bridge
+used, each file read through Bevy's own `SliceReader`, the crate's reader tests brought along with
+one reading every embedded file back, a bridge built in the container with `--embed`, the lock
+lighter by the crate and `cargo-emit`, and the notices keeping the crate's MIT or Apache-2.0 under a
+new section for code taken into the bridge, BUILDING.md and PLAY.md saying so. Right, and done on
+0.19 as the weather was, so the bump that follows changes one thing. The suite was last run whole at
+`601c6264`; this commit reaches no test without the feature and the norm's pass, and the bump's
+reply gives the whole count. Before the bump comes the owner's order of 2026-10-09 in item 1, five
+places and N 4.7's check in one commit of prose.
+
+Before it, the weather came to be vendored (Decision 18): `bevy_weather` 0.2.0 as published is a
+member of the workspace at `native/bevy_weather` with its license and README, the bridge depending
+on it by path so the lock changes only in where the crate comes from, upstream's examples, their
+dev-dependency on Bevy's default plugins and dev tools, and its profiles left out, its 204 tests
+building on its own dependencies; `default-members` keeps a plain cargo command on the bridge, and
+`build/third-party-notices.py` leaves out the bridge alone, so the vendored crate stays in the
 notices under its authors' license, which is right. Right too that it comes before the bump, as the
 embedding will, so each stands alone on 0.19 and the port goes with the bump. The `Rule:` line is
 taken: N 4.1's text names another's code kept whole in the tree beside the followed engine's words,
@@ -49,29 +62,6 @@ which ten had two causes or another. The first two findings are Slang's and the 
 both are worth an issue upstream, the owner's to file, since every Slang program Bevy takes meets
 them. With the spike done, the port goes on to the manifests and the mechanical moves, item 3 b.
 
-Before it, three commits came to be read, each its own. Verdict 4's mend (`22be0bc`):
-`prefer_desktop_title_bar` moves out of app.rs into `title_bar.rs`, code alone, app.rs at 781 lines,
-the three profiles checked and the norm's tests passed before the commit; right. Verdict 5's
-(`4571689`): `MemoryGuard.ResidentBytes` keeps its largest reading in a compare-and-swap loop,
-`PeakBytes` answers the largest of that, this reading and `PeakWorkingSet64`, the `memory` command's
-`process` and `peak` pairs read through the guard, and `MemoryGuardTests` holds the peak at or above
-a reading; right, with the limit said in its remarks, that without a cap the readings are the ones
-taken, which the soak and the cap do not meet. Both settle on the next run's page. Item 3
-(`2ed99011`), the deferred batch: a program's `Deferred` stage returns `bcs::deferred(surface,
-mesh)`, Bevy's packed surface written through a fourth prelude over `pbr_deferred_functions`, the
-material's method `Deferred` where the stage exists so a forward camera leaves it out as Bevy's own
-deferred materials are left out, the program's prepass vertex shader given to the deferred prepass
-under Bevy's label for it, `Role::Deferred` the ninth role (ABI 231), and
-`PrepassVertexOutput.instance_index` without `nointerpolation`, since Slang copied the mark onto a
-struct WGSL refuses it on; `DeferredMaterialTests` reads the buffer back, sees the lit color and a
-forward camera drawing nothing, and refuses a deferred stage without a prepass vertex shader; the
-`ssr` example is written, its water Bevy's shader in Slang through the stage, 293 written. Right,
-and the prelude is the fourth to be rewritten under WESL in the spike. The suite: 1,275 passed, 2
-skipped and 1 failed, `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt`, which
-the reply notes as a flake under load and leaves; it is not one, and Verdict 6 models it from the
-ImGui pass's code. With item 3 out, the list is renumbered to ten, Bevy 0.20 is item 3, and the
-coder is on its spike.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -92,6 +82,15 @@ from [SHARED.md](SHARED.md).
    the test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
    (Decision 8), and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
    reviewing session, and a failure it names comes first here.
+
+   Before any other commit, the owner's order of 2026-10-09 (Decision 21): no document or comment a
+   reader sees names the owner or a session as the one who decided, and N 4.7 says so from today for every
+   Markdown file but the sessions' five and for the comments of every source, script, manifest and
+   workflow. Five places are mended in one commit of prose alone, with `N_4_7` widened to the rule's
+   new reach in the same commit so the list stays empty: `BevyCSharp.Tests/NormTests.cs:366`,
+   `BevyCSharp.Tests/Build/TestScriptTests.cs:8`, `build/make-scene-pack.py:21`,
+   `native/bevy_csharp/src/audio/checked.rs:53` and `.github/BUILDING.md:247`; the widgets' owner in
+   `MenuEvent.cs`, `WidgetTests.cs` and `standard_widgets.cs` is a thing's owner and stays.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -390,18 +389,21 @@ from [SHARED.md](SHARED.md).
     changes. DLSS waits for a tester to ask, Solari and meshlets stay additions outside the package,
     and Feathers' new widgets and theming stay under Decision 11.
 
+21. **No document or comment a reader sees names the owner or a session.** The owner ordered it on
+    2026-10-09 after a dependency row in 3DEngine's DESIGN.md said who admitted a crate and when; N
+    4.7 reaches every Markdown file but REVIEW.md, SHARED.md, NORM.md, AGENTS.md and COMMITS.md and
+    the comments of every source, script, manifest and workflow, in both repositories, and who chose
+    what stays in REVIEW.md's Decisions.
+
 ## Replies
 
-**Item 3, the embedding ported in.** `bevy_embedded_assets` 0.16 is no longer a dependency. Its
-build script is the bridge's `build.rs`, which does nothing without the `embed` feature and with it
-lists the folder `BEVY_ASSET_PATH` names, the crate's search for an `assets` folder beside the
-target and `cargo-emit` left out. Its reader is `src/embedded.rs`, in the one mode the bridge used,
-replacing the default source, each file read through Bevy's own `SliceReader`, which seeks where
-the crate's reader did not, and its other modes, its fallback and its public reader left out. The
-crate's reader tests came with it, with one that reads every file of the embedded folder back, and
-pass with `BEVY_ASSET_PATH` set, and a bridge built in the container with
-`build-native.sh --embed BevyCSharp.Tests/assets` compiled. The lock loses the crate and
-`cargo-emit`, and the notices keep the crate's MIT or Apache-2.0 under a new section, code taken
-into the bridge. Done on 0.19 like the weather, so it stands alone before the bump. The suite was
-last run whole at `601c6264`, 1,276 passed and 2 skipped; this commit changes nothing a test reaches
-without the feature, and the norm's tests pass.
+**Item 1, Decision 21.** The five places name no one now. The version's commit in `NormTests` is
+a setting of the version made by hand, `TestScriptTests` runs on a contributor's machine, the scene
+pack's file is the one that is published, the audio check's crate would add to the dependencies
+N 2.8 holds to their list, and BUILDING.md's dependency is decided apart from the work that would
+use it. `N_4_7` reaches every Markdown file but the sessions' five, the comments of every C#, Rust,
+Slang and WGSL file, and the whole of every script, manifest and workflow, for the owner named
+beside a decision or a session named at all, a thing's owner followed by what it owns left alone;
+it finds nothing else today, the widgets' owners among what it leaves. The vendored weather and
+Bevy's assets are left out as N 4.1 leaves them. The norm's tests passed with the bump in progress
+set aside, and the suite was last run whole at `601c6264`, 1,276 passed and 2 skipped.

@@ -244,9 +244,10 @@ slot is picked up at pack time and missing ones are skipped.
 ## Packages
 
 Every package the library and its generator reference and every crate the bridge names, with what
-each is used for. A dependency is surface the engine answers for, so adding one is the owner's
-decision, and NormTests' N 2.8 fails for one the project files reference and this list does not
-name, and for a row that names nothing they reference. The versions are the project files' own.
+each is used for. A dependency is surface the engine answers for, so adding one is decided apart
+from the work that would use it, and NormTests' N 2.8 fails for one the project files reference and
+this list does not name, and for a row that names nothing they reference. The versions are the
+project files' own.
 
 The library's, in `BevyCSharp/BevyCSharp.csproj`:
 

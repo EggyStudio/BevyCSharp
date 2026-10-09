@@ -246,13 +246,39 @@ public sealed class NormTests
         // The pages a game's author reads, none of whom has an owner or a session to follow. Case
         // is ignored, since a sentence can begin with any of the words.
         string[] deciders = ["the owner", "the reviewing session", "REVIEW.md"];
-        var found = new[] { "README.md", "CHEATSHEET.md" }.Concat(Sources("docs/", ".md"))
+        var pages = new[] { "README.md", "CHEATSHEET.md" }.Concat(Sources("docs/", ".md"))
             .SelectMany(page =>
             {
                 var text = Text(page);
                 return deciders.Where(word => text.Contains(word, StringComparison.OrdinalIgnoreCase)).Select(word => $"{page} {word}");
             });
-        Hold("4.7", found, "a page a game's author reads naming who decided rather than why");
+
+        // Everything else a reader sees, every Markdown file but the sessions' own five and the
+        // comments of every source, script, manifest and workflow, for a person or a session named
+        // where a reason belongs. A thing's owner in the code, a widget's or an entity's, is
+        // followed by "of" or names the thing, and is no person.
+        string[] sessions = [".github/REVIEW.md", ".github/SHARED.md", ".github/NORM.md", "AGENTS.md", ".github/COMMITS.md"];
+        var owner = @"(?:\b(?:the|an?)\s+owner\b(?!\s+(?:of|entity|window|camera))|\bowner's\b)";
+        var verb = @"\b(?:chose|choose|chosen|choosing|decid\w*|decision\w*|ask(?:s|ed)?|allow(?:s|ed)?|admit\w*|wants?|sets?|setting|files|filed|publish\w*|leaves?\s+(?:it\s+)?to|order\w*|approv\w*)\b";
+        var named = new Regex($@"{owner}[^.;:]{{0,80}}?{verb}|{verb}[^.;:]{{0,40}}?{owner}|\b(?:reviewing|working)\s+session", RegexOptions.IgnoreCase);
+        string[] commented = [".cs", ".rs", ".slang", ".wgsl", ".wesl"];
+        string[] whole = [".md", ".py", ".sh", ".ps1", ".toml", ".yml", ".yaml", ".props", ".targets", ".csproj"];
+        var rest = Files()
+            .Where(file => !sessions.Contains(file))
+            .Where(file => !file.StartsWith("native/bevy_weather/", StringComparison.Ordinal) && !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
+            .Where(file => commented.Concat(whole).Any(ending => file.EndsWith(ending, StringComparison.Ordinal)))
+            .SelectMany(file =>
+            {
+                var text = Text(file);
+                if (commented.Any(ending => file.EndsWith(ending, StringComparison.Ordinal)))
+                {
+                    text = string.Join('\n', text.Split('\n').Where(line => line.Contains("//", StringComparison.Ordinal)).Select(line => line[(line.IndexOf("//", StringComparison.Ordinal) + 2)..]));
+                }
+
+                return named.Matches(Regex.Replace(text, @"\s+", " ")).Select(match => $"{file} {match.Value}");
+            });
+
+        Hold("4.7", pages.Concat(rest), "a document or a comment naming who decided rather than why");
     }
 
     [SkippableFact]
@@ -363,8 +389,9 @@ public sealed class NormTests
             var sentence = body.Length > 0 && !body.Contains('\n') && body.EndsWith('.') && !Regex.IsMatch(body[..^1], @"[.!?] [A-Z]");
             if (subject == "‎ ‎ ‎" && sentence) continue;
 
-            // The owner's setting of the version, a commit of build/version.txt alone, whatever it
-            // says. Any other commit of the owner's is on the list with that reason.
+            // A setting of the version, a commit of build/version.txt alone, whatever it says, since
+            // it is made by hand with the version as its message. Any other commit off the form is
+            // on the list.
             if (Git("show", "--name-only", "--format=", parts[0])?.Trim() == "build/version.txt") continue;
             found.Add(hash);
         }

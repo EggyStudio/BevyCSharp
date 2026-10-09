@@ -18,7 +18,7 @@ and --no-lights leaves out the scene's punctual lights.
 The folder is written as one pack by `bcs scenes pack`, and the pack's size and SHA-256 printed,
 or written into a manifest with --manifest, whose address is where the pack will be published.
 The same input makes the same pack, byte for byte, so a manifest written here holds the hash of the
-file the owner publishes.
+file that is published.
 
 The encoders are written here in Python 3.14, its standard library, zstd among it, and Pillow alone,
 since no encoder is a dependency of the repository, and each texture is encoded in a process of its own. They are simple:
