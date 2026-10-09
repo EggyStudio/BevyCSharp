@@ -10,27 +10,47 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `87798b7`. Item 3 is settled: bevy_weather 0.2.0, the release on Bevy 0.19.1, is in
-the bridge's render profile on the owner's word typed into the coder's session on 2026-10-07, its
-thunder through Bevy's audio, BUILDING.md's packages and the notices naming it; `Config.Weather`
-asks for `WeatherPlugin`, which the bridge keeps out where meshlets run, since its atmosphere would
-end the app there, leaving the camera's tonemapper and bloom to `SetPostProcessing` and keeping the
-exposure its sky is calibrated for, ABI 230; its resources and components reflect into wrappers from
-the schema dump, the presets, which do not, go through `Weather.SetPreset` over the crate's fifteen,
-and `Weather.Active` says whether it runs; four tests, off unless asked, the clock and a preset
-reaching it, a preset number refused, and kept out under meshlets; the feature test has it on by
-default with a Weather page, the day handing it the sun, the moon and its clock with the earth's
-tilt taken off so its sun rises at six, the drive script holding it partly cloudy at the lowest tier
-with the forecast off and writing the hub's frame time, every zone passing with a peak of 4.28 GB;
-over the hub at noon at 1280 by 720 it adds under a millisecond at Potato and Low, about 2 ms at
-Medium, 5 to 9 at High and 10 to 13 at Ultra on the coder's GPU, in the comparison page with a
-`--timings` argument to measure it, and the sky guide has its section (`87798b7`). Before it,
+Reviewed up to `2443936`. Item 3 is settled: `build/publish-feature-test.sh <version>` publishes the
+feature test from a package in build/package as native code for the machine it runs on, with the
+bridge, the interface's library, the assets, the scene packs' manifests and a README for testers
+naming the keys, the panel, the console, the logs, the settings and the memory cap, and zips it
+under build/feature-test; since a tester has no `slangc`, it runs the published program offscreen
+first, makes every shader program with the new `feature.shaders`, the occlusion's two among them,
+and waits until `shader.list` has each of the nine ready, or takes a cache filled elsewhere with
+`--cache`, keyed by the shader's path, its defines and the bridge's modules with every checkout at
+LF; the feature test builds on the package where `BevyCSharpVersion` is named, through a
+`nuget.config` beside it; `feature-test.yml`, started by hand, makes the Linux zip with Lavapipe
+filling the cache and the Windows zip from that cache, each an artifact, the bridge built with
+meshlets and Solari, and the pack workflow drives the feature test built on its package and soaks it
+beside Courtyard, the stress program and Swarm; the Linux zip was driven through every zone with a
+peak of 4.14 GB, run where no `slangc` could be found with every shader read from its cache, and
+soaked for 150 seconds leveling near 2.85 GB, which `soak-check.py` passes, while the Windows zip
+waits on the workflow's first run (`2443936`). With it every feature-test item of Decision 14 is
+done, the program, the player, the course, the gallery, the scene packs, day and night, the weather
+and the zips. With item 3 out, the list is renumbered to nine, the SHARED.md items 4 to 9, and the
+coder goes on to the gaps, item 3, the file watcher's panic at exit first. The suite: 1,270 passed,
+2 skipped.
+
+Before them, bevy_weather came to be settled, 0.2.0, the release on Bevy 0.19.1, is in the bridge's
+render profile on the owner's word typed into the coder's session on 2026-10-07, its thunder through
+Bevy's audio, BUILDING.md's packages and the notices naming it; `Config.Weather` asks for
+`WeatherPlugin`, which the bridge keeps out where meshlets run, since its atmosphere would end the
+app there, leaving the camera's tonemapper and bloom to `SetPostProcessing` and keeping the exposure
+its sky is calibrated for, ABI 230; its resources and components reflect into wrappers from the
+schema dump, the presets, which do not, go through `Weather.SetPreset` over the crate's fifteen, and
+`Weather.Active` says whether it runs; four tests, off unless asked, the clock and a preset reaching
+it, a preset number refused, and kept out under meshlets; the feature test has it on by default with
+a Weather page, the day handing it the sun, the moon and its clock with the earth's tilt taken off
+so its sun rises at six, the drive script holding it partly cloudy at the lowest tier with the
+forecast off and writing the hub's frame time, every zone passing with a peak of 4.28 GB; over the
+hub at noon at 1280 by 720 it adds under a millisecond at Potato and Low, about 2 ms at Medium, 5 to
+9 at High and 10 to 13 at Ultra on the coder's GPU, in the comparison page with a `--timings`
+argument to measure it, and the sky guide has its section (`87798b7`). Before it,
 `build/docs-on-package.py` mapped the pattern `3DEngine` to the packed folder, a line kept from its
 port, so `BevyCSharp` came from nuget.org or the cache, and `Bevy.Reflected` was missing from the
 usings it gives every page, both mended, the guides' 195 blocks building on a fresh package
 (`1155200`), which the package workflow's run proves. The reply gives no count of the suite, which
-is asked for. With item 3 out, the list is renumbered to ten, the SHARED.md items 5 to 10, and the
-coder goes on to the zips, item 3.
+is asked for. With that item out, the list was renumbered.
 
 Before them, day and night came to be settled, `DayNight` in the feature test runs the hour on at
 the settings' `DaySpeed` hours a game minute, one by default, and places the sun for the equinox at
@@ -49,19 +69,6 @@ left: Bevy's file watcher panics as the app ends, an event sent on a channel the
 closed, which the crash hook writes as a crash, so the next run says the last one crashed; it goes
 first in the gaps' item. With that item out, the list was renumbered.
 
-Before them, the tonemappers' ramp references came to be settled: `TonemapRampTests` draws
-SHARED.md's ramp with a Slang material of its own, `tonemap_ramp.slang`, whose formula and eight
-rows are the row's to the letter, on a plane filling a 1024 by 8 view of an HDR camera with dither,
-multisampling, bloom and antialiasing off and no grading, once for each of the eight tonemappers,
-reads the eight-bit sRGB picture back and holds it to the PNG kept for that tonemapper within two
-levels for a formula and four for a table, writes them with `BCS_WRITE_TONEMAP_REFERENCES` set,
-which `build/tonemap-references.sh` sets, and a second test reads each kept picture for a ramp that
-starts black and never darkens; the eight are in `BevyCSharp.Tests/references/tonemapping`, each
-named as Bevy names its tonemapper, RGBA at eight bits in sRGB with the rows unfiltered, which a
-read of their headers confirms, drawn on an RTX 4070 with Bevy 0.19.1 and `tonemapping_luts` on,
-`None` matching the ramp through a plain sRGB encode within one level, and BUILDING.md says how they
-are made and kept (`64ec311`). The 3DEngine coder was told where they are.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -69,7 +76,7 @@ The norm has 44 rules, and this engine stands at 31 checked, 4 with places liste
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 4 to 9 are taken
 from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The runs of `540343d`, `edd577c` and `c70f17b` passed on Linux,
@@ -82,12 +89,7 @@ from [SHARED.md](SHARED.md).
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
-3. **The portable build and the testers' zip.** `build/publish-feature-test.sh` publishes native
-   code for `win-x64` and `linux-x64` as `build/play-native.sh` does, the native library and the
-   assets beside it and a `README.txt` for testers naming the keys, the panel, the console and where
-   the logs are; a workflow started by hand makes the two zips as artifacts; the pack workflow plays
-   the feature test from the package as it plays Courtyard, and the soak takes it.
-4. **The gaps, by how many rows each holds**, first Bevy's file watcher panicking as the app
+3. **The gaps, by how many rows each holds**, first Bevy's file watcher panicking as the app
    ends, an event sent on a channel the asset server closed (`file_watcher.rs:269`), which the crash
    hook writes as a crash so the next run says the last one crashed, found at `97e523d` and left,
    the watcher stopped before the asset server goes or a panic after the app began ending kept out
@@ -108,26 +110,26 @@ from [SHARED.md](SHARED.md).
    it is inside (`6a19213`'s reply). Feathers' three examples and the two camera controllers follow
    the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the working
    session, and the four font examples stay missing (Decision 13).
-5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+4. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
    a system, an observer or a loader's callback.
-6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+5. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
    workflow, as the first game's first step would have a newcomer do.
-7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+6. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
    from since the system's last run, beside the added and changed ones a behavior reads.
-8. **Every example compiles on the package alone**, from 3DEngine's
+7. **Every example compiles on the package alone**, from 3DEngine's
    `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
    project, so what they share to say a thing in one word becomes the package's own calls or stays
    in the example, and the workflow builds every example on the packed package.
-9. **A script that more than one system runs is read for the forms only GNU's tools or a later
+8. **A script that more than one system runs is read for the forms only GNU's tools or a later
    bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
    and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
-10. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
-    `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
-    generators report, so an editor offers the mend.
+9. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+   `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
+   generators report, so an editor offers the mend.
 
 ## Verdicts
 
@@ -236,24 +238,12 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3, the testers' zips.** `build/publish-feature-test.sh <version>` publishes the feature test
-from a package in build/package as native code for the machine it runs on, as `play-native.sh`
-publishes Courtyard, with the bridge, the interface's library, the assets, the scene packs'
-manifests and `BevyCSharp.FeatureTest/README.txt`, which names the keys, the panel, the console,
-where the logs and the settings are and the memory cap, and zips it under build/feature-test. A
-tester has no `slangc`, so before zipping it runs the published program offscreen, makes every
-shader program with a new `feature.shaders`, the occlusion's two that are made only as it turns on
-among them, and waits until `shader.list` has each ready, so the cache that ships holds all nine
-shaders; or it takes a cache filled elsewhere with `--cache`, which holds since an entry is keyed
-by the shader's path under the assets, its defines and the bridge's modules, and every checkout
-has LF line ends. The feature test builds on the package where `BevyCSharpVersion` is named, as
-Courtyard does, through a `nuget.config` beside it mapping BevyCSharp to build/package.
-`feature-test.yml`, started by hand, makes the Linux zip with Lavapipe filling the cache and the
-Windows zip from that cache, whose runner draws nothing, each an artifact, the bridge built with
-meshlets and Solari. The pack workflow drives the feature test built on its package rather than
-on the checkout's projects, and soaks it beside Courtyard, the stress program and Swarm, a square
-walked on the hub a round. Here the Linux zip was published natively and driven through every
-zone with a peak of 4.14 GB, unzipped and run where no `slangc` could be found with every shader
-read from its cache, and soaked for 150 seconds, the process climbing to 2.77 GB in its first
-ninety as the driver fills and leveling near 2.85, which `soak-check.py` passes. The Windows zip is
-not made here, so the workflow's first run is its check. The suite: 1,270 passed, 2 skipped.
+**Item 3, the file watcher's panic as the app ends.** From the frame an exit is decided, where the
+`Cleanup` callbacks run, until the app is destroyed, a panic outside the guard is kept and printed
+by the process's hook and not written to the crash file, so the watcher's send on the asset server's
+closed channel no longer makes the next run say the last one crashed. Destroying the app, or making
+another, ends that, since its threads are gone with it and a later panic is a crash again, which
+`CrashLogTests`' panic on a thread of Bevy's, made after other tests' apps have ended, needed. A
+native test holds a panic during the ending to being kept and not written. The suite's tests of the
+crash log and of an app's end pass; the whole suite was last run at `2443936`, 1,270 passed and 2
+skipped, and is run again with the next batch.

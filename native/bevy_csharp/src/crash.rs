@@ -14,9 +14,15 @@
 //! A panic the bridge expects and catches, as Bevy's decoder throws for a file that is no sound, is
 //! made inside [`quietly`], which the hook says nothing of and the process's earlier hook is not
 //! told of either.
+//!
+//! From the frame the app begins ending until it is destroyed ([`ending`]), a panic on a thread of
+//! Bevy's own is kept and printed as the process's hook prints one, and not written as a crash.
+//! Bevy's file watcher panicked there as the app ended, sending an event on a channel the asset
+//! server had already closed, and the crash file it was written to made the next run say the last
+//! one crashed when it had ended as it was asked to.
 
 use core::cell::Cell;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Mutex, Once};
 
 /// What the most recent panic said, with where it was and the stack that led there.
@@ -25,6 +31,15 @@ static LAST: Mutex<String> = Mutex::new(String::new());
 /// The managed side's writer for a panic outside the guard, as a function pointer, or zero for
 /// none.
 static WRITER: AtomicUsize = AtomicUsize::new(0);
+
+/// Whether the app has begun ending, after which a panic outside the guard is not a crash.
+static ENDING: AtomicBool = AtomicBool::new(false);
+
+/// Says the app has begun ending, on the frame an exit is decided, or that it is gone, once it has
+/// been destroyed or another is made.
+pub fn ending(ended: bool) {
+    ENDING.store(ended, Ordering::Release);
+}
 
 thread_local! {
     /// How many guards this thread is inside, a panic inside one coming back as a status.
@@ -80,7 +95,7 @@ fn said(info: &std::panic::PanicHookInfo<'_>) {
         last.clone_from(&text);
     }
 
-    if GUARDED.with(Cell::get) > 0 {
+    if GUARDED.with(Cell::get) > 0 || ENDING.load(Ordering::Acquire) {
         return;
     }
 
@@ -213,6 +228,22 @@ mod tests {
         let written = WRITTEN.lock().unwrap().clone();
         assert!(written.contains("thread 'panic on purpose' panicked at"), "{written}");
         assert!(written.contains("on a thread of its own"));
+
+        unsafe { bcs_crash_writer(None) };
+    }
+
+    #[test]
+    fn a_panic_once_the_app_has_begun_ending_is_kept_and_not_written() {
+        let _turn = TURN.lock();
+        unsafe { bcs_crash_writer(Some(keep)) };
+        WRITTEN.lock().unwrap().clear();
+
+        ending(true);
+        assert_eq!(crate::interop::status::OK, bcs_panic_on_purpose(0));
+        ending(false);
+
+        assert!(last().contains("on a thread of its own"), "{}", last());
+        assert!(WRITTEN.lock().unwrap().is_empty(), "a panic after the app began ending was written as a crash");
 
         unsafe { bcs_crash_writer(None) };
     }

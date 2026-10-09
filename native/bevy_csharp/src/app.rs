@@ -645,6 +645,10 @@ fn run_cleanup_on_exit(world: &mut World, cleanup: &CleanupList) {
 
     world.insert_resource(CleanupRan);
 
+    // From here a panic on one of Bevy's own threads is the end of a run that was asked to end,
+    // as the file watcher's is when the asset server it sends to goes first, and not a crash.
+    crate::crash::ending(true);
+
     // Copy the callbacks out before loaning the world, so the lock is not held across
     // arbitrary managed code that might register more of them.
     let callbacks: Vec<SystemReg> = match cleanup.lock() {
@@ -690,6 +694,9 @@ pub unsafe extern "C" fn bcs_app_create(config: *const BcsConfig) -> *mut BcsApp
         // The last app's component callbacks, by ids this app gives to components of its own.
         crate::lifecycle::forget();
 
+        // A new app, whose panics are crashes again until it, too, begins ending.
+        crate::crash::ending(false);
+
         let app = build_app(&config, title, cleanup.clone());
         Box::into_raw(Box::new(BcsApp::new(app, cleanup)))
     })
@@ -705,6 +712,9 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
         if !handle.is_null() {
             drop(unsafe { Box::from_raw(handle) });
         }
+
+        // Gone with its threads, so a panic after this is no longer the end of its run.
+        crate::crash::ending(false);
     });
 }
 
