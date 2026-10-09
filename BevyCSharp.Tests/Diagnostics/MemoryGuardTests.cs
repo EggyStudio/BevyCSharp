@@ -4,8 +4,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the memory cap: the memory the process holds read as it grows, the cap taken from the
-/// config before the environment, and what is said past it.
+/// Covers the memory cap, the memory the process holds read as it grows, the most it held, the cap
+/// taken from the config before the environment, and what is said past it.
 /// </summary>
 /// <remarks>
 /// The stop itself ends the process, which here is the whole suite, so it is tried on a running
@@ -28,6 +28,21 @@ public sealed class MemoryGuardTests
 
         Assert.True(before > 0);
         Assert.True(after - before > 200L << 20, $"the process held {before} bytes and then {after}");
+    }
+
+    /// <summary>
+    /// The peak is never below a resident size read, the readings being all it has where the
+    /// system answers no peak of its own, as macOS does.
+    /// </summary>
+    [Fact]
+    public void ThePeakIsAtLeastTheMostTheProcessWasReadToHold()
+    {
+        var held = new byte[64 << 20];
+        for (var at = 0; at < held.Length; at += 4096) held[at] = 1;
+        var resident = MemoryGuard.ResidentBytes();
+        GC.KeepAlive(held);
+
+        Assert.True(MemoryGuard.PeakBytes() >= resident, $"the peak was {MemoryGuard.PeakBytes()} after a reading of {resident}");
     }
 
     [Fact]

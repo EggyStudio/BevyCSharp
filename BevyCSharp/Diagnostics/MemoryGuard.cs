@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -43,6 +44,7 @@ public static partial class MemoryGuard
 
     private static readonly object Gate = new();
     private static long _cap;
+    private static long _peak;
     private static Thread? _watch;
 
     /// <summary>The cap in force, in bytes, or zero where there is none.</summary>
@@ -55,7 +57,38 @@ public static partial class MemoryGuard
     public static double DefaultCap { get; } = Math.Min(8.0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 4.0 / Gigabyte);
 
     /// <summary>How many bytes of the machine's memory the process holds now.</summary>
-    public static long ResidentBytes() => Environment.WorkingSet;
+    /// <remarks>Each reading is kept toward the peak the <c>memory</c> command says.</remarks>
+    public static long ResidentBytes()
+    {
+        var held = Environment.WorkingSet;
+        var peak = Interlocked.Read(ref _peak);
+        while (held > peak)
+        {
+            var was = Interlocked.CompareExchange(ref _peak, held, peak);
+            if (was == peak) break;
+            peak = was;
+        }
+
+        return held;
+    }
+
+    /// <summary>
+    /// The most of the machine's memory the process has held since it began, the largest resident
+    /// size read here, or what the system says where it says more.
+    /// </summary>
+    /// <remarks>
+    /// The readings here come first because they are the same on every system, and the same the
+    /// cap and the soak use, where the system's own peak, <see cref="Process.PeakWorkingSet64"/>,
+    /// is 0 on macOS. With a cap the watch reads four times a second, so a peak between two
+    /// readings of the command is caught. Without one, the readings are the ones taken, this call's
+    /// among them.
+    /// </remarks>
+    internal static long PeakBytes()
+    {
+        var now = ResidentBytes();
+        using var process = Process.GetCurrentProcess();
+        return Math.Max(Math.Max(now, Interlocked.Read(ref _peak)), process.PeakWorkingSet64);
+    }
 
     /// <summary>
     /// Holds the process to a cap from here on, starting the watch the first time, or with zero

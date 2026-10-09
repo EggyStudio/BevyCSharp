@@ -398,3 +398,12 @@ norm's tests passed before the commit. The suite, run once over this batch, Verd
 `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt`, which found the top of the
 picture unchanged with the console open and passed alone three times after. None of the three
 batches touches it, so it is noted as a flake under the suite's load and not traced.
+
+**Verdict 5, the peak on macOS.** The `memory` command's peak is `MemoryGuard.PeakBytes()`, the
+largest resident size `MemoryGuard.ResidentBytes()` has read since the app began, with
+`Process.PeakWorkingSet64` taken where it says more. Every reading of the resident size is kept
+toward it, the guard's watch reading four times a second under a cap as the soak and the tools run,
+and the command's own reading among them where no cap is set. `MemoryCommandTests` keeps its
+assertion, and `MemoryGuardTests` gains one holding the peak at or above a reading taken before it. The
+norm's tests passed before the commit, and the suite's count is the one given under Verdict 4,
+1,275 passed and 2 skipped with the one flake named there.
