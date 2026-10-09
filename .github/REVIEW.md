@@ -416,3 +416,26 @@ component coming with the request; and the watch's pipelines are queued at start
 something besides what it is asked to draw, so the ImGui pass was the one. The console test keeps
 its frame waits, since nothing can be asked about the pass's pipeline today. The norm's tests passed
 before the commit, and the suite passed 1,276 and skipped 2, the console test among the passed.
+
+**Item 3 a, the spike.** Every shader of the feature test, the examples and the suite's assets that
+slangc compiles to WGSL, 134 entry points with the feature test's nine programs among them, was
+taken as the bridge hands it to Bevy, compiled by slangc and reflected on 0.19. Each was composed on
+Bevy 0.20.0 through `Shader::from_wesl` and Bevy's own `ShaderCache`, with all 148 of Bevy's WESL
+modules registered under their embedded paths, and the result validated by naga 30. The defs were
+those Bevy's mesh pipeline and pipeline cache give, shown enough by Bevy's own `render/pbr.wesl`
+composing under them. The ten that call the glue had it in front, ported to WESL with 0.20's module
+paths. Five more were left out, four that trace rays and go to Bevy as SPIR-V, and one that needs a
+define. The spike's program lived outside the repository and is not committed.
+
+As slangc writes them, 71 composed and 63 were refused, for three causes and none of them the glue.
+naga 30 requires `@interpolate(flat)` on every integer location, which Slang leaves off the instance
+index (31 units, refused alike as plain WGSL); naga 30 requires `enable wgpu_binding_array;` where a
+binding array is declared (3); and WESL's parser refuses a parenthesized left-hand side,
+`((width_0)) = dim.x;`, which WGSL allows and slangc writes for `GetDimensions` (19, all without the
+glue today). Mended as the bridge would mend slangc's output, flat added to an integer location with
+no interpolation, the enable put first or after the glue's imports, and the parentheses dropped, all
+134 composed and validated, with motion vectors and an irradiance volume in view and without. Two
+things go into the port from this. A unit that calls no glue stays `from_wgsl`, which in 0.20 hands
+its WGSL to naga untouched and needs the first two mends alone. And the irradiance glue imports
+Bevy's module under `IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE`, since 0.20 declares the
+volumes' bindings only for a view that has one.
