@@ -195,8 +195,11 @@ public sealed class NormTests
     public void N_4_1()
     {
         string[] prose = [".md", ".cs", ".rs", ".slang", ".py", ".sh", ".yml", ".toml"];
+        // Bevy's assets and the vendored weather carry their authors' own words, as the rule's
+        // leaving out of the followed engine's has it.
         var found = Sources("", prose)
             .Where(file => !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
+            .Where(file => !file.StartsWith("native/bevy_weather/", StringComparison.Ordinal))
             .Where(file => Text(file).Any(c => c is '\u2014' or '\u2013'));
         Hold("4.1", found, "a file with a dash STYLE.md forbids");
     }

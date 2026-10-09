@@ -278,7 +278,7 @@ build.
 | `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
 | `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
 | `bevy_embedded_assets` | A game's assets compiled into the library (embed). |
-| `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). |
+| `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). Vendored at 0.2.0 in `native/bevy_weather`, a member of the workspace, under its own license. |
 | `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 
 ## Publishing

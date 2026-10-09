@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["bevy_csharp"]
+members = ["bevy_csharp", "bevy_weather"]
+default-members = ["bevy_csharp"]
 
 [workspace.package]
 version = "0.1.0"

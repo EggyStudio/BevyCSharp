@@ -241,7 +241,7 @@ wgpu = { version = "29", default-features = false, optional = true }
 # The embedding behind the `embed` feature, at the release that targets Bevy 0.19.
 bevy_embedded_assets = { version = "0.16", optional = true }
 # The weather behind `Config.Weather`, at the release that targets Bevy 0.19.
-bevy_weather = { version = "0.2", default-features = false, optional = true }
+bevy_weather = { path = "../bevy_weather", default-features = false, optional = true }
 
 # Linux and the BSDs only.
 #

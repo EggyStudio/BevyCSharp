@@ -120,8 +120,8 @@ map is the pair and half of one is not a weaker version of it.
 
 The weather is a sky around Bevy's atmosphere, with clouds marched through a shell over the planet
 and their shadows on the ground, fog, rain, snow and thunder, stars, a galaxy and a moon with its
-phase, from the `bevy_weather` crate the bridge's render profile carries. `Config.Weather` asks for
-it, and a camera sees it once it carries `WeatherCameraRef`:
+phase, from the `bevy_weather` crate the bridge's render profile carries, kept in the bridge's own
+source. `Config.Weather` asks for it, and a camera sees it once it carries `WeatherCameraRef`:
 
 <!-- compiled with:
 Entity camera = default;

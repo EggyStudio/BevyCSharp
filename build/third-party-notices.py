@@ -77,13 +77,14 @@ FONT_LICENSE = os.path.join(ROOT, "build", "notices", "FiraMono-LICENSE")
 
 
 def metadata():
-    """Every package of the lock, through cargo, with the workspace's own left out."""
+    """Every package of the lock, through cargo, with the bridge itself left out."""
     answer = subprocess.run(
         ["cargo", "metadata", "--format-version", "1", "--locked", "--all-features", "--manifest-path", MANIFEST],
         check=True, capture_output=True, text=True)
     meta = json.loads(answer.stdout)
-    members = set(meta["workspace_members"])
-    return [package for package in meta["packages"] if package["id"] not in members]
+    # The bridge alone, and not every member, since the weather is vendored into the workspace and
+    # stays its authors' under its own license.
+    return [package for package in meta["packages"] if package["name"] != "bevy_csharp"]
 
 
 def kind_of(text):

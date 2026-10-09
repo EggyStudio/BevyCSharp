@@ -1743,8 +1743,6 @@ dependencies = [
 [[package]]
 name = "bevy_weather"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b804b19e45e9faa94ac49afcf2797bb36a14f3cd44d737ab94617d0f1606e363"
 dependencies = [
  "bevy",
 ]

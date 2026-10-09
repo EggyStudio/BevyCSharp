@@ -10,7 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2ed99011`. Three commits, each its own. Verdict 4's mend (`22be0bc`):
+Reviewed up to `79f2fdb0`. Verdict 6 is settled (`601c6264`): the ImGui pass queues its pipeline the
+first frame it runs, before it asks whether there is anything to draw, and the other passes were
+read, the program, dispatch and view passes queuing on the first use of a program keyed by its
+generation and formats, which nothing earlier knows, the corners on the first frame a view has them
+and the watch's at startup, so the ImGui pass was the one; the suite passed whole, 1,276 and 2
+skipped, the console test among them, which is what settled it. The spike's report (`79f2fdb0`) is
+what the item asked for and more. Every shader slangc compiles to WGSL, 134 entry points with the
+feature test's nine among them, was composed on 0.20.0 through `Shader::from_wesl` and Bevy's own
+`ShaderCache` with all 148 of Bevy's WESL modules registered, under the defs Bevy's mesh pipeline
+gives, and validated by naga 30; the ten with glue had it ported in front. As slangc writes them, 71
+composed and 63 were refused, none for the glue: naga 30 requires `@interpolate(flat)` on every
+integer location, which Slang leaves off the instance index (31); it requires `enable
+wgpu_binding_array;` where a binding array is declared (3); and WESL's parser refuses a
+parenthesized left-hand side, `((width_0)) = dim.x;`, which WGSL allows and slangc writes for
+`GetDimensions` (19). With the three mended as the bridge mends slangc's output, all 134 composed
+and validated, and a unit with no glue stays `from_wgsl`, which 0.20 hands to naga untouched and
+which needs the first two mends alone. The counts of the three causes add to 53 against 63 refused,
+so the reply says in the port's commit which ten had two causes or another. The first two findings
+are Slang's and the third WESL's, and both are worth an issue upstream, the owner's to file, since
+every Slang program Bevy takes meets them. With the spike done, the port goes on to the manifests
+and the mechanical moves, item 3 b.
+
+Before it, three commits came to be read, each its own. Verdict 4's mend (`22be0bc`):
 `prefer_desktop_title_bar` moves out of app.rs into `title_bar.rs`, code alone, app.rs at 781 lines,
 the three profiles checked and the norm's tests passed before the commit; right. Verdict 5's
 (`4571689`): `MemoryGuard.ResidentBytes` keeps its largest reading in a compare-and-swap loop,
@@ -45,27 +67,6 @@ so the next reply carries it. Today the owner decided the engine moves to Bevy 0
 20), item 4 after the deferred batch in flight, and the list is renumbered to eleven. The runs of
 `2443936` and `6363357` were read with it and are red, Verdicts 4 and 5, which come before item 3's
 commit.
-
-Before it, the feature test's zips came to be settled, `build/publish-feature-test.sh <version>` publishes the
-feature test from a package in build/package as native code for the machine it runs on, with the
-bridge, the interface's library, the assets, the scene packs' manifests and a README for testers
-naming the keys, the panel, the console, the logs, the settings and the memory cap, and zips it
-under build/feature-test; since a tester has no `slangc`, it runs the published program offscreen
-first, makes every shader program with the new `feature.shaders`, the occlusion's two among them,
-and waits until `shader.list` has each of the nine ready, or takes a cache filled elsewhere with
-`--cache`, keyed by the shader's path, its defines and the bridge's modules with every checkout at
-LF; the feature test builds on the package where `BevyCSharpVersion` is named, through a
-`nuget.config` beside it; `feature-test.yml`, started by hand, makes the Linux zip with Lavapipe
-filling the cache and the Windows zip from that cache, each an artifact, the bridge built with
-meshlets and Solari, and the pack workflow drives the feature test built on its package and soaks it
-beside Courtyard, the stress program and Swarm; the Linux zip was driven through every zone with a
-peak of 4.14 GB, run where no `slangc` could be found with every shader read from its cache, and
-soaked for 150 seconds leveling near 2.85 GB, which `soak-check.py` passes, while the Windows zip
-waits on the workflow's first run (`2443936`). With it every feature-test item of Decision 14 is
-done, the program, the player, the course, the gallery, the scene packs, day and night, the weather
-and the zips. With item 3 out, the list is renumbered to nine, the SHARED.md items 4 to 9, and the
-coder goes on to the gaps, item 3, the file watcher's panic at exit first. The suite: 1,270 passed,
-2 skipped.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -285,25 +286,6 @@ from [SHARED.md](SHARED.md).
    memory cap use, with `PeakWorkingSet64` taken where it says more; the test keeps its assertion.
    Settled when a macOS run passes the test.
 
-6. **The suite of `2ed99011` fails
-   `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt` once, the top of the
-   picture unchanged with the console open, and the reply leaves it as a flake under load.** Modeled
-   from the code, and not a flake. The ImGui pass (`imgui/render.rs`) returns before anything else
-   while `frame.calls` is empty, so its pipeline is queued with `queue_render_pipeline` in the first
-   frame that has something to draw, the frame the console opens, and Bevy's cache compiles it on a
-   task in wall time while the pass answers `the pipeline is not ready` and draws nothing; the test
-   waits three frames after `IsOpen` and captures, frames of an offscreen run that take what they
-   take, so under the suite's load the compile outlasts the wait and the capture holds the frame
-   before the console. Alone, the compile fits in three frames, which is why it passed three times
-   after. Two things. The pass queues its pipeline the first frame it runs, before the empty check,
-   since the format is the view's and not the draw list's, so the fifteen frames the test waits
-   before its first picture compile it, and every pass of the bridge that queues on its first draw
-   is read for the same. And a picture test that waits in frames on work done in wall time, a
-   compile or an upload, waits on the thing itself where the engine can say it, as the feature test
-   waits on `shader.list`; the wait in frames stays only where nothing can be asked. No retry and no
-   longer wait. Settled when the pass queues at its first frame and the suite passes whole once more
-   under load.
-
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -406,36 +388,16 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Verdict 6, the ImGui pass.** The pass queues its pipeline the first frame it runs, before it
-asks whether there is anything to draw, since the format is the view's, so the frames before the
-console opens compile it. The bridge's other passes were read for the same. The pass of a program
-(`passes.rs`), a dispatch (`compute.rs`) and a camera's draws and dispatches (`views.rs`) queue on
-the first use of a program, keyed by its generation and the formats the use brings, so nothing
-earlier knows what to queue; the rounded corners queue on the first frame a view has them, the
-component coming with the request; and the watch's pipelines are queued at startup. None waits on
-something besides what it is asked to draw, so the ImGui pass was the one. The console test keeps
-its frame waits, since nothing can be asked about the pass's pipeline today. The norm's tests passed
-before the commit, and the suite passed 1,276 and skipped 2, the console test among the passed.
+**Item 3, the weather vendored.** `bevy_weather` 0.2.0 is a member of the workspace at
+`native/bevy_weather`, its source as published and as `.ref` holds it, with its license and README,
+and the bridge depends on it by path, so the lock changes only in where the crate comes from. Left
+out of upstream's tree are its examples and its dev-dependency on Bevy's default plugins and dev
+tools, which would add `bevy_dev_tools`, `bevy_feathers`, `glow`, `sysinfo` and more to the lock,
+and its profiles, which a member cannot set; its 204 tests build on its own dependencies and pass.
+It comes before the bump, as the embedding does next, so each stands alone on 0.19, and its port
+goes with the bump. `build/third-party-notices.py` leaves out the bridge alone rather than every
+member, and the notices come out the same. The suite was last run whole at `601c6264`, 1,276 passed
+and 2 skipped; this commit changes no code it runs but the norm's tests, whose 18 pass.
 
-**Item 3 a, the spike.** Every shader of the feature test, the examples and the suite's assets that
-slangc compiles to WGSL, 134 entry points with the feature test's nine programs among them, was
-taken as the bridge hands it to Bevy, compiled by slangc and reflected on 0.19. Each was composed on
-Bevy 0.20.0 through `Shader::from_wesl` and Bevy's own `ShaderCache`, with all 148 of Bevy's WESL
-modules registered under their embedded paths, and the result validated by naga 30. The defs were
-those Bevy's mesh pipeline and pipeline cache give, shown enough by Bevy's own `render/pbr.wesl`
-composing under them. The ten that call the glue had it in front, ported to WESL with 0.20's module
-paths. Five more were left out, four that trace rays and go to Bevy as SPIR-V, and one that needs a
-define. The spike's program lived outside the repository and is not committed.
-
-As slangc writes them, 71 composed and 63 were refused, for three causes and none of them the glue.
-naga 30 requires `@interpolate(flat)` on every integer location, which Slang leaves off the instance
-index (31 units, refused alike as plain WGSL); naga 30 requires `enable wgpu_binding_array;` where a
-binding array is declared (3); and WESL's parser refuses a parenthesized left-hand side,
-`((width_0)) = dim.x;`, which WGSL allows and slangc writes for `GetDimensions` (19, all without the
-glue today). Mended as the bridge would mend slangc's output, flat added to an integer location with
-no interpolation, the enable put first or after the glue's imports, and the parentheses dropped, all
-134 composed and validated, with motion vectors and an irradiance volume in view and without. Two
-things go into the port from this. A unit that calls no glue stays `from_wgsl`, which in 0.20 hands
-its WGSL to naga untouched and needs the first two mends alone. And the irradiance glue imports
-Bevy's module under `IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE`, since 0.20 declares the
-volumes' bindings only for a view that has one.
+Rule: N 4.1's test leaves out the vendored crate as it leaves out Bevy's assets, since it carries
+its authors' own words, which the rule's text, naming the followed engine's alone, may name too.
