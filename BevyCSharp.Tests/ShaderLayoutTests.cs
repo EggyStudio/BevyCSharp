@@ -22,6 +22,7 @@ public sealed class ShaderLayoutTests
     [InlineData(nameof(NativeShaderProgramConfig.Pass), 120)]
     [InlineData(nameof(NativeShaderProgramConfig.Defines), 144)]
     [InlineData(nameof(NativeShaderProgramConfig.DefineCount), 152)]
+    [InlineData(nameof(NativeShaderProgramConfig.Deferred), 216)]
     public void TheProgramConfigIsWhereTheBridgeReadsIt(string field, int offset) =>
         Assert.Equal(offset, Marshal.OffsetOf<NativeShaderProgramConfig>(field).ToInt32());
 
@@ -49,7 +50,7 @@ public sealed class ShaderLayoutTests
     [Fact]
     public void EachConfigIsTheSizeTheBridgeReads()
     {
-        Assert.Equal(216, Marshal.SizeOf<NativeShaderProgramConfig>());
+        Assert.Equal(240, Marshal.SizeOf<NativeShaderProgramConfig>());
         Assert.Equal(208, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.Flags)).ToInt32());
         Assert.Equal(160, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawVertex)).ToInt32());
         Assert.Equal(184, Marshal.OffsetOf<NativeShaderProgramConfig>(nameof(NativeShaderProgramConfig.DrawFragment)).ToInt32());

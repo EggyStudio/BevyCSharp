@@ -247,7 +247,10 @@ public struct PrepassVertexOutput
     public float4 world_tangent : TEXCOORD3;
     public float4 world_position : TEXCOORD4;
     public float4 previous_world_position : TEXCOORD5;
-    public nointerpolation uint instance_index : TEXCOORD7;
+    /// Not marked `nointerpolation`, as `VertexOutput`'s is not, since a deferred stage reads this
+    /// struct and Slang copies the mark onto the struct its inputs are copied into, where WGSL
+    /// refuses it, and an integer passed between stages is never interpolated.
+    public uint instance_index : TEXCOORD7;
 };
 
 /// Fills in everything the prepass reads from where a vertex ends up.
@@ -363,6 +366,93 @@ public float4 finish(float4 color, VertexOutput mesh)
 public float4 lit(Surface surface, VertexOutput mesh)
 {
     return finish(light(surface, mesh), mesh);
+}
+
+
+// -- Bevy's deferred buffers
+//
+// On a camera that draws deferred, a material whose program has a deferred stage writes its
+// surface into Bevy's deferred buffers rather than a color, and Bevy's deferred lighting pass
+// lights it with the rest, as it lights a standard material drawn deferred. Screen-space
+// reflections read those buffers. The surface is packed by WGSL the bridge puts in front of the
+// compiled shader, over Bevy's own deferred functions, as `light` is.
+
+/// What a deferred stage writes, the normal and the motion where the camera draws them, Bevy's
+/// packed surface and the lighting pass that lights it, at the locations Bevy's deferred prepass
+/// has them. A target the camera does not draw is left out of the pipeline, and what the stage
+/// writes to it goes nowhere.
+public struct Deferred
+{
+    public float4 normal : SV_Target0;
+    public float2 motion_vector : SV_Target1;
+    public uint4 gbuffer : SV_Target2;
+    public uint lighting_pass : SV_Target3;
+};
+
+/// A surface as Bevy's default standard material describes the mesh at this point of the prepass,
+/// for a deferred stage to start from.
+public Surface surface(PrepassVertexOutput mesh)
+{
+    Surface output;
+    output.base_color = float4(1.0);
+    output.emissive = float4(0.0, 0.0, 0.0, 1.0);
+    output.metallic = 0.0;
+    output.roughness = 0.5;
+    output.reflectance = float3(0.5);
+    output.occlusion = float3(1.0);
+    output.normal = mesh.world_normal;
+    return output;
+}
+
+uint4 deferred_gbuffer(
+    float4 base_color, float4 emissive, float metallic, float roughness, float3 reflectance,
+    float3 occlusion, float4 frag_coord, float4 world_position, float3 world_normal, float3 normal)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_deferred_gbuffer($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)";
+    default:
+        return uint4(0);
+    }
+}
+
+uint deferred_lighting_pass()
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_deferred_lighting_pass()";
+    default:
+        return 0;
+    }
+}
+
+float2 deferred_motion(float4 world_position, float4 previous_world_position)
+{
+    __target_switch
+    {
+    case wgsl:
+        __intrinsic_asm "bcs_deferred_motion($0, $1)";
+    default:
+        return float2(0.0);
+    }
+}
+
+/// The surface as Bevy's deferred buffers hold it, for a deferred stage to return. The surface's
+/// normal is the one lit, which a stage bumps with a normal map of its own as it would for `light`,
+/// and the normal buffer keeps the mesh's, as Bevy's deferred stage writes it.
+public Deferred deferred(Surface surface, PrepassVertexOutput mesh)
+{
+    Deferred output;
+    output.normal = float4(normalize(mesh.world_normal) * 0.5 + 0.5, 1.0);
+    output.motion_vector = deferred_motion(mesh.world_position, mesh.previous_world_position);
+    output.gbuffer = deferred_gbuffer(
+        surface.base_color, surface.emissive, surface.metallic, surface.roughness,
+        surface.reflectance, surface.occlusion, mesh.position, mesh.world_position,
+        mesh.world_normal, surface.normal);
+    output.lighting_pass = deferred_lighting_pass();
+    return output;
 }
 
 

@@ -626,9 +626,10 @@ public static unsafe partial class Render
     /// <remarks>
     /// Screen-space reflections read the deferred G-buffer, and deferred makes many lights cheap.
     /// It needs cameras drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), and applies to
-    /// Bevy's own materials, since one a Slang program draws is always forward, since it writes a
-    /// color rather than a surface description. Every Bevy material is prepared again when it
-    /// changes.
+    /// Bevy's own materials. One a Slang program draws is drawn forward, since its fragment shader
+    /// writes a color, unless the program has a deferred stage
+    /// (<see cref="ShaderProgramSettings.Deferred"/>), which writes the surface and is drawn only
+    /// by a camera that draws deferred. Every Bevy material is prepared again when it changes.
     /// </remarks>
     public static void SetDeferredRendering(bool on) =>
         Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");

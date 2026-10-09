@@ -23,15 +23,17 @@ struct Prelude {
 }
 
 /// Every prelude, in the order they are put in front.
-const PRELUDES: [Prelude; 3] = [
+const PRELUDES: [Prelude; 4] = [
     Prelude { call: "bcs_pbr_", source: LIGHTING, stand_in: LIGHTING_STAND_IN },
     Prelude { call: "bcs_decal_", source: DECALS, stand_in: DECALS_STAND_IN },
     Prelude { call: "bcs_irradiance_", source: IRRADIANCE, stand_in: IRRADIANCE_STAND_IN },
+    Prelude { call: "bcs_deferred_", source: DEFERRED, stand_in: DEFERRED_STAND_IN },
 ];
 
-/// A compiled fragment shader with each prelude it calls put in front of it.
+/// A compiled fragment shader with each prelude it calls put in front of it, a material's for the
+/// main pass or for the deferred buffers.
 pub(super) fn with_bevy(role: Role, wgsl: String) -> String {
-    if !matches!(role, Role::Fragment) {
+    if !matches!(role, Role::Fragment | Role::Deferred) {
         return wgsl;
     }
 
@@ -121,6 +123,78 @@ fn bcs_pbr_light(
 
 fn bcs_pbr_finish(color: vec4<f32>, frag_coord: vec4<f32>, world_position: vec4<f32>) -> vec4<f32> {
     return pbr_functions::main_pass_post_lighting_processing(bcs_pbr_input(frag_coord, world_position), color);
+}
+"#;
+
+// -- Bevy's deferred buffers
+
+/// Functions of the same signatures as those [`DEFERRED`] defines, which write nothing.
+const DEFERRED_STAND_IN: &str = "fn bcs_deferred_gbuffer(base_color: vec4<f32>, emissive: vec4<f32>, \
+    metallic: f32, roughness: f32, reflectance: vec3<f32>, occlusion: vec3<f32>, frag_coord: vec4<f32>, \
+    world_position: vec4<f32>, world_normal: vec3<f32>, normal: vec3<f32>) -> vec4<u32> { return vec4<u32>(0u); }\n\
+    fn bcs_deferred_lighting_pass() -> u32 { return 0u; }\n\
+    fn bcs_deferred_motion(world_position: vec4<f32>, previous_world_position: vec4<f32>) -> vec2<f32> { return vec2<f32>(0.0); }\n";
+
+/// What `bcs::deferred` calls, a standard material's surface packed into Bevy's deferred buffer as
+/// Bevy's own deferred materials pack theirs, the lighting pass that lights it, which is the
+/// standard material's, and the motion of the point since the frame before, where the camera
+/// draws motion vectors. Each is imported from Bevy as its deferred functions import it, so the
+/// buffer holds what Bevy's deferred lighting pass and its screen-space reflections read.
+///
+/// The surface is a shadow receiver and takes fog, as a standard material does by default, which
+/// the deferred lighting pass reads from the buffer's flags.
+const DEFERRED: &str = r#"#import bevy_pbr::{
+    pbr_types,
+    pbr_functions,
+    pbr_deferred_functions,
+    mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
+    mesh_view_bindings::view,
+}
+
+#ifdef MOTION_VECTOR_PREPASS
+#import bevy_pbr::pbr_prepass_functions::calculate_motion_vector
+#endif
+
+fn bcs_deferred_gbuffer(
+    base_color: vec4<f32>,
+    emissive: vec4<f32>,
+    metallic: f32,
+    roughness: f32,
+    reflectance: vec3<f32>,
+    occlusion: vec3<f32>,
+    frag_coord: vec4<f32>,
+    world_position: vec4<f32>,
+    world_normal: vec3<f32>,
+    normal: vec3<f32>,
+) -> vec4<u32> {
+    var pbr_input = pbr_types::pbr_input_new();
+    pbr_input.material.flags |= pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
+    pbr_input.material.base_color = base_color;
+    pbr_input.material.emissive = emissive;
+    pbr_input.material.metallic = metallic;
+    pbr_input.material.perceptual_roughness = roughness;
+    pbr_input.material.reflectance = reflectance;
+    pbr_input.diffuse_occlusion = occlusion;
+    pbr_input.frag_coord = frag_coord;
+    pbr_input.world_position = world_position;
+    pbr_input.is_orthographic = view.clip_from_world[3].w == 1.0;
+    pbr_input.V = pbr_functions::calculate_view(world_position, pbr_input.is_orthographic);
+    pbr_input.flags = MESH_FLAGS_SHADOW_RECEIVER_BIT;
+    pbr_input.world_normal = normalize(world_normal);
+    pbr_input.N = normalize(normal);
+    return pbr_deferred_functions::deferred_gbuffer_from_pbr_input(pbr_input);
+}
+
+fn bcs_deferred_lighting_pass() -> u32 {
+    return pbr_types::pbr_input_new().material.deferred_lighting_pass_id;
+}
+
+fn bcs_deferred_motion(world_position: vec4<f32>, previous_world_position: vec4<f32>) -> vec2<f32> {
+#ifdef MOTION_VECTOR_PREPASS
+    return calculate_motion_vector(world_position, previous_world_position);
+#else
+    return vec2<f32>(0.0);
+#endif
 }
 "#;
 
@@ -382,6 +456,36 @@ fn {entry}(vertex: Vertex) -> VertexOutput {{
         Role::Compute => {
             format!("@compute @workgroup_size(1)\nfn {entry}() {{\n}}\n")
         }
+
+        // Magenta in the deferred buffers, through Bevy's own deferred output, so a deferred stage
+        // that has never compiled is lit as a magenta surface where the rest of the scene is.
+        Role::Deferred => format!(
+            r#"#import bevy_pbr::{{
+    prepass_io::{{VertexOutput, FragmentOutput}},
+    pbr_types,
+    pbr_deferred_functions,
+}}
+
+#ifdef PREPASS_FRAGMENT
+@fragment
+fn {entry}(in: VertexOutput) -> FragmentOutput {{
+    var pbr_input = pbr_types::pbr_input_new();
+    pbr_input.material.base_color = vec4<f32>(1.0, 0.0, 1.0, 1.0);
+    pbr_input.frag_coord = in.position;
+    pbr_input.world_position = in.world_position;
+#ifdef NORMAL_PREPASS_OR_DEFERRED_PREPASS
+    pbr_input.world_normal = in.world_normal;
+    pbr_input.N = in.world_normal;
+#endif
+    return pbr_deferred_functions::deferred_output(in, pbr_input);
+}}
+#else
+@fragment
+fn {entry}(@builtin(position) position: vec4<f32>) {{
+}}
+#endif
+"#
+        ),
 
         // What Bevy's own prepass writes, which is a normal and a motion vector where the camera
         // asked for them, and nothing where it did not.

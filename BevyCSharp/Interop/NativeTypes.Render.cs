@@ -829,6 +829,9 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>Bit zero compiles the compute stage to SPIR-V rather than WGSL.</summary>
     public int Flags;
+
+    /// <summary>The fragment shader a material draws into Bevy's deferred buffers with.</summary>
+    public NativeShaderStage Deferred;
 }
 
 /// <summary>How a sampler reads. Mirrors <c>BcsSamplerConfig</c>.</summary>

@@ -2838,6 +2838,7 @@ struct Bevy.Interop.NativeShaderDefine
 struct Bevy.Interop.NativeShaderProgramConfig
   NativeShaderDefine* Defines
   NativeShaderStage Compute
+  NativeShaderStage Deferred
   NativeShaderStage DrawFragment
   NativeShaderStage DrawVertex
   NativeShaderStage Fragment
@@ -10167,6 +10168,7 @@ sealed class Bevy.ShaderProgramSettings
   Dictionary<string, ShaderDefine> Defines { get; init; }
   ShaderProgramSettings()
   ShaderStage Compute { get; init; }
+  ShaderStage Deferred { get; init; }
   ShaderStage DrawFragment { get; init; }
   ShaderStage DrawVertex { get; init; }
   ShaderStage Fragment { get; init; }

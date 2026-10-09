@@ -4,14 +4,14 @@ Bevy 0.19.1 has 421 examples, 408 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**292 written, 16 written in part, 0 can be written, 55 missing and 58 do not apply.** Of the 363 that apply, 308 can be written with what is bridged, 16 of them leaving something out.
+**293 written, 16 written in part, 0 can be written, 54 missing and 58 do not apply.** Of the 363 that apply, 309 can be written with what is bridged, 16 of them leaving something out.
 
-**140 of the 148 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**140 of the 149 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 10 |
-| [3D Rendering](#3d-rendering) | 56 | 4 | 0 | 7 | 0 | 37 of 37 |
+| [3D Rendering](#3d-rendering) | 57 | 4 | 0 | 6 | 0 | 37 of 38 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 2 | 5 | 3 of 3 |
@@ -44,7 +44,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 0 | 0 | 10 |  |
-| **All** | **292** | **16** | **0** | **55** | **58** | **140 of 148** |
+| **All** | **293** | **16** | **0** | **54** | **58** | **140 of 149** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -143,7 +143,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`split_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/split_screen.rs) | Demonstrates how to render two cameras to the same window to accomplish "split screen" | [written](../BevyCSharp.Examples/3d/split_screen.cs) |
 | [`spotlight`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/spotlight.rs) | Illustrates spot lights | [written](../BevyCSharp.Examples/3d/spotlight.cs), its cubes scattered by .NET's generator rather than Bevy's |
 | [`ssao`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssao.rs) | A scene showcasing screen space ambient occlusion | [written](../BevyCSharp.Examples/3d/ssao.cs) |
-| [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | missing, the water drawn into Bevy's deferred buffers, which a material drawn by a Slang shader does not draw into |
+| [`ssr`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/ssr.rs) | Demonstrates screen space reflections with water ripples | [written](../BevyCSharp.Examples/3d/ssr.cs), the water a Slang shader writing its surface into the deferred buffers through bcs::deferred |
 | [`texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/texture.rs) | Shows configuration of texture materials | [written](../BevyCSharp.Examples/3d/texture.cs) |
 | [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/tonemapping.rs) | Compares tonemapping options | [written](../BevyCSharp.Examples/3d/tonemapping.cs) |
 | [`transmission`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/transmission.rs) | Showcases light transmission in the PBR material | [written](../BevyCSharp.Examples/3d/transmission.cs) |

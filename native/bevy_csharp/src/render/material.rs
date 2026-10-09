@@ -45,7 +45,8 @@ use bevy::material::key::{ErasedMaterialKey, ErasedMaterialPipelineKey, ErasedMe
 use bevy::material::{AlphaMode, MaterialProperties, OpaqueRendererMethod, RenderPhaseType};
 use bevy::mesh::{Mesh, Mesh3d, MeshVertexBufferLayoutRef};
 use bevy::pbr::{
-    DeferredAlphaMaskDrawFunction, DeferredOpaqueDrawFunction, DrawDepthOnlyPrepass,
+    DeferredAlphaMaskDrawFunction, DeferredFragmentShader, DeferredOpaqueDrawFunction,
+    DeferredVertexShader, DrawDepthOnlyPrepass,
     DrawMaterial, DrawPrepass, MainPassAlphaMaskDrawFunction, MainPassOpaqueDrawFunction,
     MainPassTransmissiveDrawFunction, MainPassTransparentDrawFunction,
     MaterialBindGroupAllocator, MaterialBindGroupAllocators, MaterialExtractionSystems,
@@ -197,9 +198,13 @@ impl ErasedRenderAsset for BcsMaterial3d {
             return Err(PrepareAssetError::RetryNextUpdate(material));
         };
 
-        if program.stages[Role::Fragment as usize].is_none() {
+        // A deferred stage draws the material in place of a fragment shader.
+        if program.stages[Role::Fragment as usize].is_none()
+            && program.stages[Role::Deferred as usize].is_none()
+        {
             say_once(format!(
-                "Shader program {} has no fragment shader, so it cannot draw a material.",
+                "Shader program {} has no fragment shader or deferred stage, so it cannot draw a \
+                 material.",
                 material.program
             ));
             return Err(PrepareAssetError::RetryNextUpdate(material));
@@ -332,9 +337,15 @@ impl ErasedRenderAsset for BcsMaterial3d {
                 depth_bias: material.depth_bias,
                 reads_view_transmission_texture: false,
                 render_phase_type,
-                // Forward, whatever the camera prefers, because a program writes a color rather
-                // than the surface description a deferred lighting pass reads.
-                render_method: OpaqueRendererMethod::Forward,
+                // Forward, whatever the camera prefers, because a fragment shader writes a color
+                // rather than the surface a deferred lighting pass reads, unless the program has a
+                // deferred stage, which writes that surface, and is then drawn only by a camera
+                // that draws deferred, as Bevy's own deferred materials are.
+                render_method: if program.stages[Role::Deferred as usize].is_some() {
+                    OpaqueRendererMethod::Deferred
+                } else {
+                    OpaqueRendererMethod::Forward
+                },
                 mesh_pipeline_key_bits: ErasedMeshPipelineKey::new(
                     bevy::pbr::MeshPipelineKey::empty(),
                 ),
@@ -360,11 +371,15 @@ impl ErasedRenderAsset for BcsMaterial3d {
 
         properties.draw_functions.extend(draw_functions);
 
+        // The prepass vertex shader serves the deferred prepass too, which Bevy looks for under a
+        // label of its own, so a deferred stage reads what the program's own vertex shader wrote.
         for (role, label) in [
             (Role::Vertex, MaterialVertexShader.intern()),
             (Role::Fragment, MaterialFragmentShader.intern()),
             (Role::PrepassVertex, PrepassVertexShader.intern()),
             (Role::PrepassFragment, PrepassFragmentShader.intern()),
+            (Role::PrepassVertex, DeferredVertexShader.intern()),
+            (Role::Deferred, DeferredFragmentShader.intern()),
         ] {
             if let Some(stage) = &program.stages[role as usize] {
                 properties.shaders.push((label, stage.shader.clone()));

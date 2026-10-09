@@ -163,13 +163,22 @@ public static unsafe partial class Shaders
         ArgumentNullException.ThrowIfNull(settings);
 
         if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet
-            && !settings.DrawFragment.IsSet)
+            && !settings.DrawFragment.IsSet && !settings.Deferred.IsSet)
         {
             throw new ArgumentException(
                 "A shader program needs a fragment shader to draw with, a pass to run over a "
                 + "camera's picture, a compute shader to dispatch, or a draw fragment shader to draw "
                 + "on a camera with. Bevy's own fragment shader reads a material laid out "
                 + "differently, so there is no default to fall back on.",
+                nameof(settings));
+        }
+
+        if (settings.Deferred.IsSet && !settings.PrepassVertex.IsSet)
+        {
+            throw new ArgumentException(
+                "A deferred stage needs a prepass vertex shader of the program's own as well, which "
+                + "writes everything the deferred stage reads of the prepass (bcs::prepass_output), "
+                + "whatever the mesh carries.",
                 nameof(settings));
         }
 
@@ -241,6 +250,7 @@ public static unsafe partial class Shaders
                     DrawVertex = Stage(settings.DrawVertex),
                     DrawFragment = Stage(settings.DrawFragment),
                     Flags = settings.ComputeTarget == ShaderTarget.SpirV ? 1 : 0,
+                    Deferred = Stage(settings.Deferred),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);

@@ -173,6 +173,44 @@ puts in front of the compiled shader, over Bevy's own `apply_pbr_lighting` and
 the forward pass, even under a camera rendering deferred, and the surface receives shadows and takes
 fog as a standard material does by default.
 
+### Drawn deferred
+
+A material whose program has a deferred stage writes its surface into Bevy's deferred buffers, and
+Bevy's deferred lighting pass lights it with the rest of the scene. Screen-space reflections read
+those buffers, so water that reflects what stands around it is drawn this way. Like Bevy's own
+deferred materials it is drawn by a camera that draws deferred and by no other. The stage returns
+`bcs::deferred(surface, mesh)` from the prepass's vertex output, which a prepass vertex shader of
+the program's own writes whole:
+
+```csharp
+var water = Shaders.CreateMaterial(Shaders.CreateProgram(new ShaderProgramSettings
+{
+    PrepassVertex = new ShaderStage("shaders/water.slang", "prepass_vertex"),
+    Deferred = "shaders/water.slang",                // its entry point is called deferred
+}));
+```
+
+```slang
+[shader("vertex")]
+bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex v)
+{
+    return bcs::prepass_output(v.instance_index, v.position, v.normal, v.uv);
+}
+
+[shader("fragment")]
+bcs::Deferred deferred(bcs::PrepassVertexOutput mesh)
+{
+    var surface = bcs::surface(mesh);
+    surface.roughness = 0.05;
+    surface.normal = ripples(mesh);                     // a normal of the shader's own
+    return bcs::deferred(surface, mesh);
+}
+```
+
+The surface is packed as Bevy packs a standard material's, by WGSL the bridge puts in front of the
+compiled stage over Bevy's own deferred functions, and the normal and motion a camera's prepass
+draws are written beside it.
+
 ### Clustered decals
 
 Bevy projects a clustered decal onto whatever lies inside its box, and its standard material lays

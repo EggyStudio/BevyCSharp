@@ -67,6 +67,8 @@ pub struct BcsShaderProgramConfig {
     pub draw_fragment: BcsShaderStage,
     /// Bit zero compiles the compute stage to SPIR-V rather than WGSL.
     pub flags: i32,
+    /// The fragment shader a material draws into Bevy's deferred buffers with.
+    pub deferred: BcsShaderStage,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -168,6 +170,7 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.pass),
                     stage(config.draw_vertex),
                     stage(config.draw_fragment),
+                    stage(config.deferred),
                 ],
                 defines: Vec::new(),
                 compute_spirv: config.flags & 1 != 0,
@@ -759,7 +762,8 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_vertex), 160);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_fragment), 184);
         assert_eq!(offset_of!(BcsShaderProgramConfig, flags), 208);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 216);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, deferred), 216);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 240);
     }
 
     #[test]

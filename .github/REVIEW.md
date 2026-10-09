@@ -407,3 +407,17 @@ and the command's own reading among them where no cap is set. `MemoryCommandTest
 assertion, and `MemoryGuardTests` gains one holding the peak at or above a reading taken before it. The
 norm's tests passed before the commit, and the suite's count is the one given under Verdict 4,
 1,275 passed and 2 skipped with the one flake named there.
+
+**Item 3, the deferred batch.** A shader program takes a deferred stage,
+`ShaderProgramSettings.Deferred` (ABI 231), which returns `bcs::deferred(surface, mesh)` and writes
+the surface into Bevy's deferred buffers through WGSL the bridge puts in front of it over Bevy's
+`pbr_deferred_functions`, so Bevy's deferred lighting pass lights it with the rest. As Bevy's own
+deferred materials are, it is drawn by a camera that draws deferred and by no other, since Bevy's
+main pass leaves out a material whose method is deferred, which `DeferredMaterialTests` holds with
+the G-buffer read back, the lit color, and a forward camera drawing nothing. It needs a prepass
+vertex shader of the program's own, which the deferred prepass is given under Bevy's label for it,
+and it stands for the fragment shader where a material is prepared. `PrepassVertexOutput` lost
+`nointerpolation` on its instance index, which naga refused once a deferred stage read the struct.
+The `ssr` example is written, its water Bevy's shader in Slang, its models and range buttons
+carrying behaviors, and its capture shows the ripples reflecting the cube and the sky. The suite's
+count is the one given under Verdict 4.

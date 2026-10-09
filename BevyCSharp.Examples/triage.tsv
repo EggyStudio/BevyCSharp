@@ -52,7 +52,7 @@ mesh_ray_cast	can
 lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposure
 reflection_probes	can
 visibility_range	can
-ssr	missing	the water drawn into Bevy's deferred buffers, which a material drawn by a Slang shader does not draw into
+ssr	can	the water a Slang shader writing its surface into the deferred buffers through bcs::deferred
 camera_sub_view	can
 color_grading	can
 clearcoat	can

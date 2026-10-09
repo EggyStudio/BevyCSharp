@@ -30,6 +30,26 @@ public sealed class ShaderProgramSettings
     public ShaderStage PrepassFragment { get; init; }
 
     /// <summary>
+    /// The fragment shader the material draws into Bevy's deferred buffers with, on a camera that
+    /// draws deferred. Its entry point is called <c>deferred</c> unless it is named.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// It writes the surface rather than a color, through <c>bcs::deferred(surface, mesh)</c>, and
+    /// Bevy's deferred lighting pass lights it with every light, shadow and environment map the
+    /// view has, as it lights a standard material drawn deferred. Screen-space reflections read
+    /// those buffers, so a material that reflects the scene, as water does, is drawn this way.
+    /// </para>
+    /// <para>
+    /// A program with one is a deferred material, drawn by a camera that draws deferred and by no
+    /// other, as Bevy's own deferred materials are, so <see cref="Fragment"/> goes unused for it.
+    /// It needs <see cref="PrepassVertex"/>, which writes all of what the deferred stage reads of
+    /// the prepass (<c>bcs::prepass_output</c>), whatever the mesh carries.
+    /// </para>
+    /// </remarks>
+    public ShaderStage Deferred { get; init; }
+
+    /// <summary>
     /// A compute shader, run by <see cref="Shaders.Dispatch"/>. Its entry point is called
     /// <c>main</c> unless it is named.
     /// </summary>
@@ -90,7 +110,7 @@ public sealed class ShaderProgramSettings
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment }
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred }
             .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>

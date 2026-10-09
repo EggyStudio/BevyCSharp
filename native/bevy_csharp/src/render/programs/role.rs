@@ -17,10 +17,14 @@ pub enum Role {
     DrawVertex = 6,
     /// The fragment shader of the same.
     DrawFragment = 7,
+    /// The fragment shader a material draws into Bevy's deferred buffers with, on a camera that
+    /// draws deferred, which writes the surface Bevy's deferred lighting pass lights rather than a
+    /// color.
+    Deferred = 8,
 }
 
 /// How many roles a program has.
-pub const ROLE_COUNT: usize = 8;
+pub const ROLE_COUNT: usize = 9;
 
 impl Role {
     pub const ALL: [Role; ROLE_COUNT] = [
@@ -32,14 +36,16 @@ impl Role {
         Role::Pass,
         Role::DrawVertex,
         Role::DrawFragment,
+        Role::Deferred,
     ];
 
     /// The roles a material is drawn with.
-    pub const MATERIAL: [Role; 4] = [
+    pub const MATERIAL: [Role; 5] = [
         Role::Vertex,
         Role::Fragment,
         Role::PrepassVertex,
         Role::PrepassFragment,
+        Role::Deferred,
     ];
 
     /// The entry point a stage has when the program does not name one, the name Bevy's own shaders
@@ -48,6 +54,7 @@ impl Role {
         match self {
             Role::Vertex | Role::PrepassVertex | Role::DrawVertex => "vertex",
             Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment => "fragment",
+            Role::Deferred => "deferred",
             Role::Compute => "main",
         }
     }
@@ -55,7 +62,7 @@ impl Role {
     pub(super) fn stage(self) -> slang::Stage {
         match self {
             Role::Vertex | Role::PrepassVertex | Role::DrawVertex => slang::Stage::Vertex,
-            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment => {
+            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment | Role::Deferred => {
                 slang::Stage::Fragment
             }
             Role::Compute => slang::Stage::Compute,
@@ -65,9 +72,11 @@ impl Role {
     /// Where the stage's own globals go, which differs between a material, a pass and a dispatch.
     pub fn family(self) -> Family {
         match self {
-            Role::Vertex | Role::Fragment | Role::PrepassVertex | Role::PrepassFragment => {
-                Family::Material
-            }
+            Role::Vertex
+            | Role::Fragment
+            | Role::PrepassVertex
+            | Role::PrepassFragment
+            | Role::Deferred => Family::Material,
             // Drawing on a camera reads what a pass does, the camera's inputs in group one and its
             // own values in group zero, so it is laid out the way a pass is.
             Role::Pass | Role::DrawVertex | Role::DrawFragment => Family::Pass,
@@ -85,6 +94,7 @@ impl Role {
             Role::Pass => "pass",
             Role::DrawVertex => "draw vertex",
             Role::DrawFragment => "draw fragment",
+            Role::Deferred => "deferred",
         }
     }
 }

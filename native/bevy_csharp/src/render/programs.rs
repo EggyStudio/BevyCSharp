@@ -323,9 +323,10 @@ fn fingerprint(path: &Path) -> Option<u64> {
 /// Makes a program, or finds the one already made from the same description.
 ///
 /// Returns the program's number, or a negative status where the description names none of a
-/// fragment shader, a pass or a compute shader, or names a file that is not Slang.
+/// fragment shader, a deferred stage, a pass or a compute shader, or names a file that is not
+/// Slang.
 pub fn create(world: &mut World, description: ProgramDescription) -> i32 {
-    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment]
+    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment, Role::Deferred]
         .iter()
         .any(|role| description.stages[*role as usize].is_some());
 

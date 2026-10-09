@@ -109,6 +109,7 @@ internal static class Catalog
         new("rect_light", RectLight.Build),
         new("reflection_probes", ReflectionProbes.Build),
         new("ssao", Ssao.Build),
+        new("ssr", Ssr.Build),
         new("fog_volumes", FogVolumes.Build),
         new("scrolling_fog", ScrollingFog.Build),
         new("volumetric_fog", VolumetricFog.Build),
