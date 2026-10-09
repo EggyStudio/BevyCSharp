@@ -8,7 +8,7 @@
 // Nothing is simulated on the CPU and no buffer is ever re-uploaded, so the
 // cost of a hundred thousand raindrops is one draw call.
 
-#import bevy_pbr::mesh_view_bindings::view
+import bevy_pbr::render::mesh_view_bindings::view;
 
 struct PrecipitationUniform {
     // xyz: wind velocity, world units per second. w: fall speed.
@@ -23,7 +23,7 @@ struct PrecipitationUniform {
     light: vec4<f32>,
 }
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> precipitation: PrecipitationUniform;
+@group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> precipitation: PrecipitationUniform;
 
 const MODE_SNOW: f32 = 0.5;
 

@@ -41,6 +41,7 @@ pub mod probes;
 pub mod programs;
 pub mod rays;
 pub mod reflect;
+pub mod render_errors;
 pub mod scene;
 pub mod shader_buffers;
 pub mod shader_targets;
@@ -48,6 +49,7 @@ pub mod shader_views;
 pub mod shaders;
 pub mod slang;
 pub mod solari;
+pub mod spirv_compute;
 pub mod sprite_frames;
 pub mod tilemaps;
 pub mod timings;
@@ -56,6 +58,7 @@ pub mod views;
 pub mod watch;
 pub mod weather;
 pub mod corners;
+pub mod exposure;
 pub mod images;
 
 #[cfg(feature = "render")]

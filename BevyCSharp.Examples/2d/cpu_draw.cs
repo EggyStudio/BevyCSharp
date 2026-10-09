@@ -1,4 +1,4 @@
-// Bevy's cpu_draw example, examples/2d/cpu_draw.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's cpu_draw example, examples/2d/cpu_draw.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using Bevy;

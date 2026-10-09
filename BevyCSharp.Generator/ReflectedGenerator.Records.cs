@@ -68,6 +68,13 @@ public sealed partial class ReflectedGenerator
 
         public IEnumerable<UnionModel> All => _byName.Values;
 
+        /// <summary>
+        /// The types whose records are being made, by the name a record takes, so a type holding a
+        /// list of itself, as a font source holding the sources it falls back to, is not made again
+        /// inside itself.
+        /// </summary>
+        public HashSet<string> Making { get; } = new(StringComparer.Ordinal);
+
         /// <summary>The record for a Rust type, the one already made where it agrees.</summary>
         public UnionModel Add(string rust, List<Case> cases, bool isStruct, bool plain = false)
         {
@@ -113,19 +120,52 @@ public sealed partial class ReflectedGenerator
     /// </remarks>
     private static List<Case>? CasesOf(FieldModel field, IEnumerable<VariantFieldModel> parts, Scope scope)
     {
+        var making = Identifier(Last(field.Rust));
+        var added = scope.Unions.Making.Add(making);
+        try
+        {
+            return MakeCases(field, parts, scope);
+        }
+        finally
+        {
+            if (added) scope.Unions.Making.Remove(making);
+        }
+    }
+
+    /// <summary>
+    /// The cases of <see cref="CasesOf"/>, with the type they belong to marked as being made.
+    /// </summary>
+    private static List<Case>? MakeCases(FieldModel field, IEnumerable<VariantFieldModel> parts, Scope scope)
+    {
         var cases = new List<Case>();
         foreach (var variant in field.Extra.Split(',').Where(v => v.Length > 0))
         {
             var record = Identifier(variant);
             var held = new List<Part>();
+            var inside = false;
             foreach (var part in parts.Where(p => p.Variant == variant))
             {
                 // An enum's row inside the variant is named under it, as its values' rows are.
                 var row = part.Field.Length == 0 ? field.Name + "." + variant : field.Name + "." + variant + "." + part.Field;
-                if (PartOf(part.AsField, row, PartName(part.Field, record), scope) is not { } made) return null;
-                held.Add(made);
+                if (PartOf(part.AsField, row, PartName(part.Field, record), scope) is { } made)
+                {
+                    held.Add(made);
+                    continue;
+                }
+
+                // A variant holding a list of the type being made, as a font source's list of the
+                // sources it falls back to, is left out of the union rather than the whole union,
+                // which a record made inside itself would need.
+                if (part.AsField.Kind == "List" && scope.Unions.Making.Contains(Identifier(Last(part.AsField.Extra))))
+                {
+                    inside = true;
+                    break;
+                }
+
+                return null;
             }
-            cases.Add(new Case(variant, record, held));
+
+            if (!inside) cases.Add(new Case(variant, record, held));
         }
 
         // A variant called what a value is, as a mesh's morph weights have a variant Value beside a
@@ -192,6 +232,26 @@ public sealed partial class ReflectedGenerator
 
         // An item type with no rows, as a type id or a range of indices, has nothing a record holds.
         if (!scope.Items.TryGetValue(field.Extra, out var item) || item.Fields.Items.Count == 0) return null;
+
+        // One holding a list of itself is not typed inside itself, which leaves the field holding
+        // it the plain enum of its variants' names, as one a wrapper cannot type is.
+        var making = Identifier(Last(item.Path));
+        if (!scope.Unions.Making.Add(making)) return null;
+        try
+        {
+            return ListOfItems(field, name, scope, item);
+        }
+        finally
+        {
+            scope.Unions.Making.Remove(making);
+        }
+    }
+
+    /// <summary>
+    /// A list of records of an item type known to have rows, as <see cref="ListOf"/> has it.
+    /// </summary>
+    private static Part? ListOfItems(FieldModel field, string name, Scope scope, ComponentModel item)
+    {
 
         var rows = new Scope(item.Variants.Items, scope.Items, scope.Unions);
         UnionModel record;

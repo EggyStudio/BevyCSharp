@@ -1,4 +1,4 @@
-// Bevy's many_text example, examples/stress_tests/many_text.rs at v0.19.1, by Bevy's contributors
+// Bevy's many_text example, examples/stress_tests/many_text.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;

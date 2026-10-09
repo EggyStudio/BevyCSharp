@@ -96,6 +96,9 @@ internal static class ReflectedSchemas
                 remove: (world, entity) => world.RemoveReflected(entity, path))
             {
                 Origin = SchemaOrigin.Reflected,
+
+                // The paths a scene written before Bevy moved the component names it by.
+                FormerNames = ReflectedFormerPaths.Of(path),
             });
         }
 

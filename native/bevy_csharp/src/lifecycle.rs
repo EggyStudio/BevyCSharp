@@ -383,6 +383,7 @@ mod tests {
                 layout,
                 None,
                 true,
+                false,
                 ComponentCloneBehavior::Custom(cloned),
                 None,
             )

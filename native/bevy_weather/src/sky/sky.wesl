@@ -15,7 +15,7 @@
 // than a sunny one. Drawing the clouds afterwards, with their own aerial
 // perspective, is the only way to get grey weather.
 
-#import bevy_pbr::mesh_view_bindings::view
+import bevy_pbr::render::mesh_view_bindings::view;
 
 struct SkyUniform {
     // xyz: unit vector toward the sun. w: angular radius, radians.
@@ -82,7 +82,7 @@ struct SkyUniform {
     star_from_world: mat3x3<f32>,
 }
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sky: SkyUniform;
+@group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> sky: SkyUniform;
 
 const FLAG_STARS: u32 = 1u;
 const FLAG_GALAXY: u32 = 2u;
@@ -1217,7 +1217,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let eye = view.world_position / units_per_meter;
     let altitude = max(eye.y, 0.0);
 
-#ifdef CLOUD_PASS
+    @if(CLOUD_PASS) {
     var cloud_color = vec3(0.0);
     var cloud_alpha = 0.0;
 
@@ -1290,7 +1290,8 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let premultiplied = fog_rgb * fog_factor + cloud_color * cloud_alpha * (1.0 - fog_factor);
 
     return vec4(premultiplied / alpha, alpha);
-#else
+    }
+    @if(!CLOUD_PASS) {
     var color = vec3(0.0);
 
     // Stars, galaxy and moon all sit outside the atmosphere.
@@ -1361,5 +1362,5 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Bevy's atmosphere applies exposure to its own inscattering only, so this
     // has to match to be composited in the same units.
     return vec4(color * view.exposure, 1.0);
-#endif
+    }
 }

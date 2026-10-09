@@ -166,12 +166,13 @@ color = floor(color * 4.0) / 4.0;
 return bcs::finish(color, mesh);
 ```
 
-Bevy's lighting is its own WGSL over bindings that change with every feature a camera turns on, so
-it is not written again in Slang. The two calls reach WGSL functions by fixed names that the bridge
-puts in front of the compiled shader, over Bevy's own `apply_pbr_lighting` and
-`main_pass_post_lighting_processing`, only where the shader calls them. A lit material is drawn in
-the forward pass, even under a camera rendering deferred, and the surface receives shadows and takes
-fog as a standard material does by default.
+Bevy's lighting is its own WESL over bindings that change with every feature a camera turns on, so
+it is not written again in Slang. The two calls reach functions by fixed names that the bridge puts
+in front of the compiled shader, over Bevy's own `apply_pbr_lighting` and
+`main_pass_post_lighting_processing`, only where the shader calls them, and Bevy composes the two
+together as it composes its own shaders. A lit material is drawn in the forward pass, even under a
+camera rendering deferred, and the surface receives shadows and takes fog as a standard material
+does by default.
 
 ### Drawn deferred
 
@@ -207,7 +208,7 @@ bcs::Deferred deferred(bcs::PrepassVertexOutput mesh)
 }
 ```
 
-The surface is packed as Bevy packs a standard material's, by WGSL the bridge puts in front of the
+The surface is packed as Bevy packs a standard material's, by WESL the bridge puts in front of the
 compiled stage over Bevy's own deferred functions, and the normal and motion a camera's prepass
 draws are written beside it.
 
@@ -233,7 +234,7 @@ for (uint index = 0; index < bcs::decal_count(mesh); index++)
 return bcs::lit(surface, mesh);
 ```
 
-They reach Bevy's own walk through the decals over a point, its `ClusteredDecalIterator`, by WGSL
+They reach Bevy's own walk through the decals over a point, its `ClusteredDecalIterator`, by WESL
 the bridge puts in front of a shader that calls them, as it does for the lighting. A device that
 cannot have clustered decals, which Bevy decides by whether it can bind arrays of textures, has none
 over any point.

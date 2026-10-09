@@ -4471,14 +4471,6 @@ readonly struct Bevy.Reflected.BackgroundGradientRef : IReflectedComponent<Backg
   IReadOnlyList<Gradient> Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::gradients::BackgroundGradient"
-readonly struct Bevy.Reflected.BevyUiButtonRef : IReflectedComponent<BevyUiButtonRef>, IReflectedWrapper<BevyUiButtonRef>
-  Entity Entity { get; }
-  bool Remove()
-  const string TypePath = "bevy_ui::widget::button::Button"
-readonly struct Bevy.Reflected.BevyUiWidgetsButtonRef : IReflectedComponent<BevyUiWidgetsButtonRef>, IReflectedWrapper<BevyUiWidgetsButtonRef>
-  Entity Entity { get; }
-  bool Remove()
-  const string TypePath = "bevy_ui_widgets::button::Button"
 sealed class Bevy.Reflected.Bloom : IEquatable<Bloom>
   Bloom(float Intensity, float LowFrequencyBoost, float LowFrequencyBoostCurvature, float HighPassFrequency, float PrefilterThreshold, float PrefilterThresholdSoftness, BloomCompositeMode CompositeMode, uint MaxMipDimension, Vec2 Scale)
   BloomCompositeMode CompositeMode { get; init; }
@@ -4543,10 +4535,61 @@ readonly struct Bevy.Reflected.ButtonInputGamepadButtonRef : IReflectedComponent
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_input::button_input::ButtonInput<bevy_input::gamepad::GamepadButton>"
-readonly struct Bevy.Reflected.CalculatedClipRef : IReflectedComponent<CalculatedClipRef>, IReflectedWrapper<CalculatedClipRef>
+readonly struct Bevy.Reflected.ButtonRef : IReflectedComponent<ButtonRef>, IReflectedWrapper<ButtonRef>
   Entity Entity { get; }
-  Vec2 ClipMax { get; set; }
-  Vec2 ClipMin { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::button::Button"
+abstract class Bevy.Reflected.CalculatedClip : IEquatable<CalculatedClip>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected CalculatedClip(CalculatedClip original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CalculatedClip? left, CalculatedClip? right)
+  static bool op_Inequality(CalculatedClip? left, CalculatedClip? right)
+  virtual bool Equals(CalculatedClip? other)
+sealed class Bevy.Reflected.CalculatedClip.FullyClipped : CalculatedClip, IEquatable<CalculatedClip.FullyClipped>, IEquatable<CalculatedClip>
+  FullyClipped()
+  bool Equals(CalculatedClip.FullyClipped? other)
+  bool Equals(CalculatedClip? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CalculatedClip.FullyClipped? left, CalculatedClip.FullyClipped? right)
+  static bool op_Inequality(CalculatedClip.FullyClipped? left, CalculatedClip.FullyClipped? right)
+sealed class Bevy.Reflected.CalculatedClip.Rects : CalculatedClip, IEquatable<CalculatedClip.Rects>, IEquatable<CalculatedClip>
+  IReadOnlyList<CalculatedClipRect> Value { get; init; }
+  Rects(IReadOnlyList<CalculatedClipRect> Value)
+  bool Equals(CalculatedClip.Rects? other)
+  bool Equals(CalculatedClip? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CalculatedClip.Rects? left, CalculatedClip.Rects? right)
+  static bool op_Inequality(CalculatedClip.Rects? left, CalculatedClip.Rects? right)
+  void Deconstruct(out IReadOnlyList<CalculatedClipRect> Value)
+sealed class Bevy.Reflected.CalculatedClipRect : IEquatable<CalculatedClipRect>
+  CalculatedClipRect(Vec2 RectMin, Vec2 RectMax, Vec2 WorldToClipLocalMatrix2XAxis, Vec2 WorldToClipLocalMatrix2YAxis, Vec2 WorldToClipLocalTranslation)
+  Vec2 RectMax { get; init; }
+  Vec2 RectMin { get; init; }
+  Vec2 WorldToClipLocalMatrix2XAxis { get; init; }
+  Vec2 WorldToClipLocalMatrix2YAxis { get; init; }
+  Vec2 WorldToClipLocalTranslation { get; init; }
+  bool Equals(CalculatedClipRect? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(CalculatedClipRect? left, CalculatedClipRect? right)
+  static bool op_Inequality(CalculatedClipRect? left, CalculatedClipRect? right)
+  void Deconstruct(out Vec2 RectMin, out Vec2 RectMax, out Vec2 WorldToClipLocalMatrix2XAxis, out Vec2 WorldToClipLocalMatrix2YAxis, out Vec2 WorldToClipLocalTranslation)
+readonly struct Bevy.Reflected.CalculatedClipRef : IReflectedComponent<CalculatedClipRef>, IReflectedWrapper<CalculatedClipRef>
+  CalculatedClip Value { get; set; }
+  Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::CalculatedClip"
 readonly struct Bevy.Reflected.Camera2dRef : IReflectedComponent<Camera2dRef>, IReflectedWrapper<Camera2dRef>
@@ -4987,6 +5030,10 @@ readonly struct Bevy.Reflected.ComputedNodeRef : IReflectedComponent<ComputedNod
   Entity Entity { get; }
   Vec2 BorderMaxInset { get; set; }
   Vec2 BorderMinInset { get; set; }
+  Vec2 BorderRadiusBottomLeft { get; set; }
+  Vec2 BorderRadiusBottomRight { get; set; }
+  Vec2 BorderRadiusTopLeft { get; set; }
+  Vec2 BorderRadiusTopRight { get; set; }
   Vec2 ContentSize { get; set; }
   Vec2 PaddingMaxInset { get; set; }
   Vec2 PaddingMinInset { get; set; }
@@ -4996,13 +5043,11 @@ readonly struct Bevy.Reflected.ComputedNodeRef : IReflectedComponent<ComputedNod
   Vec2 UnroundedSize { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::ComputedNode"
-  float BorderRadiusBottomLeft { get; set; }
-  float BorderRadiusBottomRight { get; set; }
-  float BorderRadiusTopLeft { get; set; }
-  float BorderRadiusTopRight { get; set; }
+  float EmSize { get; set; }
   float InverseScaleFactor { get; set; }
   float OutlineOffset { get; set; }
   float OutlineWidth { get; set; }
+  float RemSize { get; set; }
 readonly struct Bevy.Reflected.ComputedStackIndexRef : IReflectedComponent<ComputedStackIndexRef>, IReflectedWrapper<ComputedStackIndexRef>
   Entity Entity { get; }
   bool Remove()
@@ -5024,8 +5069,8 @@ readonly struct Bevy.Reflected.ComputedUiRenderTargetInfoRef : IReflectedCompone
   uint PhysicalSizeX { get; set; }
   uint PhysicalSizeY { get; set; }
 readonly struct Bevy.Reflected.ComputedUiTargetCameraRef : IReflectedComponent<ComputedUiTargetCameraRef>, IReflectedWrapper<ComputedUiTargetCameraRef>
-  Entity Camera { get; set; }
   Entity Entity { get; }
+  Entity? Camera { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::ComputedUiTargetCamera"
 readonly struct Bevy.Reflected.ContactShadowsRef : IReflectedComponent<ContactShadowsRef>, IReflectedWrapper<ContactShadowsRef>
@@ -5118,10 +5163,15 @@ readonly struct Bevy.Reflected.DebandDitherRef : IReflectedComponent<DebandDithe
   DebandDitherRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
   bool Remove()
-  const string TypePath = "bevy_core_pipeline::tonemapping::DebandDither"
+  const string TypePath = "bevy_render::view::DebandDither"
 enum Bevy.Reflected.DebandDitherRef.ValueVariant : int
   Disabled = 0
   Enabled = 1
+readonly struct Bevy.Reflected.DefaultCursorRef : IReflectedComponent<DefaultCursorRef>, IReflectedWrapper<DefaultCursorRef>
+  Entity Entity { get; }
+  EntityCursor Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_picking::cursor::DefaultCursor"
 readonly struct Bevy.Reflected.DefaultOpaqueRendererMethodRef : IReflectedComponent<DefaultOpaqueRendererMethodRef>, IReflectedWrapper<DefaultOpaqueRendererMethodRef>
   DefaultOpaqueRendererMethodRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5158,6 +5208,19 @@ readonly struct Bevy.Reflected.DenoiseCasRef : IReflectedComponent<DenoiseCasRef
   bool Remove()
   bool Value { get; set; }
   const string TypePath = "bevy_anti_alias::contrast_adaptive_sharpening::DenoiseCas"
+readonly struct Bevy.Reflected.DeprecatedButtonRef : IReflectedComponent<DeprecatedButtonRef>, IReflectedWrapper<DeprecatedButtonRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui::widget::button::DeprecatedButton"
+readonly struct Bevy.Reflected.DeprecatedInteractionRef : IReflectedComponent<DeprecatedInteractionRef>, IReflectedWrapper<DeprecatedInteractionRef>
+  DeprecatedInteractionRef.ValueVariant Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui::focus::DeprecatedInteraction"
+enum Bevy.Reflected.DeprecatedInteractionRef.ValueVariant : int
+  Hovered = 1
+  None = 2
+  Pressed = 0
 readonly struct Bevy.Reflected.DepthOfFieldRef : IReflectedComponent<DepthOfFieldRef>, IReflectedWrapper<DepthOfFieldRef>
   DepthOfFieldRef.ModeVariant Mode { get; set; }
   Entity Entity { get; }
@@ -5179,6 +5242,21 @@ readonly struct Bevy.Reflected.DepthPrepassRef : IReflectedComponent<DepthPrepas
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_core_pipeline::prepass::DepthPrepass"
+readonly struct Bevy.Reflected.DialogDragHandleRef : IReflectedComponent<DialogDragHandleRef>, IReflectedWrapper<DialogDragHandleRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::dialog::DialogDragHandle"
+readonly struct Bevy.Reflected.DialogDragStateRef : IReflectedComponent<DialogDragStateRef>, IReflectedWrapper<DialogDragStateRef>
+  Entity Entity { get; }
+  Val StartDialogTranslationX { get; set; }
+  Val StartDialogTranslationY { get; set; }
+  Vec2 StartPointerLocation { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::dialog::DialogDragState"
+readonly struct Bevy.Reflected.DialogRef : IReflectedComponent<DialogRef>, IReflectedWrapper<DialogRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::dialog::Dialog"
 readonly struct Bevy.Reflected.DirectionalLightRef : IReflectedComponent<DirectionalLightRef>, IReflectedWrapper<DirectionalLightRef>
   Color Color { get; set; }
   Entity Entity { get; }
@@ -5231,6 +5309,39 @@ readonly struct Bevy.Reflected.DynamicWorldRootRef : IReflectedComponent<Dynamic
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_world_serialization::components::DynamicWorldRoot"
+readonly struct Bevy.Reflected.EmSizeRef : IReflectedComponent<EmSizeRef>, IReflectedWrapper<EmSizeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_text::text::EmSize"
+  float Value { get; set; }
+abstract class Bevy.Reflected.EntityCursor : IEquatable<EntityCursor>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected EntityCursor(EntityCursor original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(EntityCursor? left, EntityCursor? right)
+  static bool op_Inequality(EntityCursor? left, EntityCursor? right)
+  virtual bool Equals(EntityCursor? other)
+sealed class Bevy.Reflected.EntityCursor.System : EntityCursor, IEquatable<EntityCursor.System>, IEquatable<EntityCursor>
+  System(SystemCursorIcon Value)
+  SystemCursorIcon Value { get; init; }
+  bool Equals(EntityCursor.System? other)
+  bool Equals(EntityCursor? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(EntityCursor.System? left, EntityCursor.System? right)
+  static bool op_Inequality(EntityCursor.System? left, EntityCursor.System? right)
+  void Deconstruct(out SystemCursorIcon Value)
+readonly struct Bevy.Reflected.EntityCursorRef : IReflectedComponent<EntityCursorRef>, IReflectedWrapper<EntityCursorRef>
+  Entity Entity { get; }
+  EntityCursor Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_picking::cursor::EntityCursor"
 readonly struct Bevy.Reflected.EnvironmentMapLightRef : IReflectedComponent<EnvironmentMapLightRef>, IReflectedWrapper<EnvironmentMapLightRef>
   AssetHandle DiffuseMap { get; set; }
   AssetHandle SpecularMap { get; set; }
@@ -5244,6 +5355,10 @@ readonly struct Bevy.Reflected.ExposureRef : IReflectedComponent<ExposureRef>, I
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::camera::Exposure"
+readonly struct Bevy.Reflected.FixedNodeRef : IReflectedComponent<FixedNodeRef>, IReflectedWrapper<FixedNodeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui::ui_node::FixedNode"
 readonly struct Bevy.Reflected.FocusPolicyRef : IReflectedComponent<FocusPolicyRef>, IReflectedWrapper<FocusPolicyRef>
   Entity Entity { get; }
   FocusPolicyRef.ValueVariant Value { get; set; }
@@ -5456,28 +5571,17 @@ abstract class Bevy.Reflected.FontSource : IEquatable<FontSource>
   static bool op_Equality(FontSource? left, FontSource? right)
   static bool op_Inequality(FontSource? left, FontSource? right)
   virtual bool Equals(FontSource? other)
-sealed class Bevy.Reflected.FontSource.Cursive : FontSource, IEquatable<FontSource.Cursive>, IEquatable<FontSource>
-  Cursive()
-  bool Equals(FontSource.Cursive? other)
+sealed class Bevy.Reflected.FontSource.Families : FontSource, IEquatable<FontSource.Families>, IEquatable<FontSource>
+  Families()
+  bool Equals(FontSource.Families? other)
   bool Equals(FontSource? other)
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Cursive? left, FontSource.Cursive? right)
-  static bool op_Inequality(FontSource.Cursive? left, FontSource.Cursive? right)
-sealed class Bevy.Reflected.FontSource.Emoji : FontSource, IEquatable<FontSource.Emoji>, IEquatable<FontSource>
-  Emoji()
-  bool Equals(FontSource.Emoji? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Emoji? left, FontSource.Emoji? right)
-  static bool op_Inequality(FontSource.Emoji? left, FontSource.Emoji? right)
+  static bool op_Equality(FontSource.Families? left, FontSource.Families? right)
+  static bool op_Inequality(FontSource.Families? left, FontSource.Families? right)
 sealed class Bevy.Reflected.FontSource.Family : FontSource, IEquatable<FontSource.Family>, IEquatable<FontSource>
   Family()
   bool Equals(FontSource.Family? other)
@@ -5489,28 +5593,19 @@ sealed class Bevy.Reflected.FontSource.Family : FontSource, IEquatable<FontSourc
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(FontSource.Family? left, FontSource.Family? right)
   static bool op_Inequality(FontSource.Family? left, FontSource.Family? right)
-sealed class Bevy.Reflected.FontSource.FangSong : FontSource, IEquatable<FontSource.FangSong>, IEquatable<FontSource>
-  FangSong()
-  bool Equals(FontSource.FangSong? other)
+sealed class Bevy.Reflected.FontSource.Generic : FontSource, IEquatable<FontSource.Generic>, IEquatable<FontSource>
+  Generic(GenericFontFamily Value)
+  GenericFontFamily Value { get; init; }
+  bool Equals(FontSource.Generic? other)
   bool Equals(FontSource? other)
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.FangSong? left, FontSource.FangSong? right)
-  static bool op_Inequality(FontSource.FangSong? left, FontSource.FangSong? right)
-sealed class Bevy.Reflected.FontSource.Fantasy : FontSource, IEquatable<FontSource.Fantasy>, IEquatable<FontSource>
-  Fantasy()
-  bool Equals(FontSource.Fantasy? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Fantasy? left, FontSource.Fantasy? right)
-  static bool op_Inequality(FontSource.Fantasy? left, FontSource.Fantasy? right)
+  static bool op_Equality(FontSource.Generic? left, FontSource.Generic? right)
+  static bool op_Inequality(FontSource.Generic? left, FontSource.Generic? right)
+  void Deconstruct(out GenericFontFamily Value)
 sealed class Bevy.Reflected.FontSource.Handle : FontSource, IEquatable<FontSource.Handle>, IEquatable<FontSource>
   AssetHandle Value { get; init; }
   Handle(AssetHandle Value)
@@ -5524,105 +5619,6 @@ sealed class Bevy.Reflected.FontSource.Handle : FontSource, IEquatable<FontSourc
   static bool op_Equality(FontSource.Handle? left, FontSource.Handle? right)
   static bool op_Inequality(FontSource.Handle? left, FontSource.Handle? right)
   void Deconstruct(out AssetHandle Value)
-sealed class Bevy.Reflected.FontSource.Math : FontSource, IEquatable<FontSource.Math>, IEquatable<FontSource>
-  Math()
-  bool Equals(FontSource.Math? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Math? left, FontSource.Math? right)
-  static bool op_Inequality(FontSource.Math? left, FontSource.Math? right)
-sealed class Bevy.Reflected.FontSource.Monospace : FontSource, IEquatable<FontSource.Monospace>, IEquatable<FontSource>
-  Monospace()
-  bool Equals(FontSource.Monospace? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Monospace? left, FontSource.Monospace? right)
-  static bool op_Inequality(FontSource.Monospace? left, FontSource.Monospace? right)
-sealed class Bevy.Reflected.FontSource.SansSerif : FontSource, IEquatable<FontSource.SansSerif>, IEquatable<FontSource>
-  SansSerif()
-  bool Equals(FontSource.SansSerif? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.SansSerif? left, FontSource.SansSerif? right)
-  static bool op_Inequality(FontSource.SansSerif? left, FontSource.SansSerif? right)
-sealed class Bevy.Reflected.FontSource.Serif : FontSource, IEquatable<FontSource.Serif>, IEquatable<FontSource>
-  Serif()
-  bool Equals(FontSource.Serif? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.Serif? left, FontSource.Serif? right)
-  static bool op_Inequality(FontSource.Serif? left, FontSource.Serif? right)
-sealed class Bevy.Reflected.FontSource.SystemUi : FontSource, IEquatable<FontSource.SystemUi>, IEquatable<FontSource>
-  SystemUi()
-  bool Equals(FontSource.SystemUi? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.SystemUi? left, FontSource.SystemUi? right)
-  static bool op_Inequality(FontSource.SystemUi? left, FontSource.SystemUi? right)
-sealed class Bevy.Reflected.FontSource.UiMonospace : FontSource, IEquatable<FontSource.UiMonospace>, IEquatable<FontSource>
-  UiMonospace()
-  bool Equals(FontSource.UiMonospace? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.UiMonospace? left, FontSource.UiMonospace? right)
-  static bool op_Inequality(FontSource.UiMonospace? left, FontSource.UiMonospace? right)
-sealed class Bevy.Reflected.FontSource.UiRounded : FontSource, IEquatable<FontSource.UiRounded>, IEquatable<FontSource>
-  UiRounded()
-  bool Equals(FontSource.UiRounded? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.UiRounded? left, FontSource.UiRounded? right)
-  static bool op_Inequality(FontSource.UiRounded? left, FontSource.UiRounded? right)
-sealed class Bevy.Reflected.FontSource.UiSansSerif : FontSource, IEquatable<FontSource.UiSansSerif>, IEquatable<FontSource>
-  UiSansSerif()
-  bool Equals(FontSource.UiSansSerif? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.UiSansSerif? left, FontSource.UiSansSerif? right)
-  static bool op_Inequality(FontSource.UiSansSerif? left, FontSource.UiSansSerif? right)
-sealed class Bevy.Reflected.FontSource.UiSerif : FontSource, IEquatable<FontSource.UiSerif>, IEquatable<FontSource>
-  UiSerif()
-  bool Equals(FontSource.UiSerif? other)
-  bool Equals(FontSource? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  protected override Type EqualityContract { get; }
-  protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(FontSource.UiSerif? left, FontSource.UiSerif? right)
-  static bool op_Inequality(FontSource.UiSerif? left, FontSource.UiSerif? right)
 abstract class Bevy.Reflected.FontStyle : IEquatable<FontStyle>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -5733,6 +5729,20 @@ readonly struct Bevy.Reflected.GeneratedEnvironmentMapLightRef : IReflectedCompo
   bool Remove()
   const string TypePath = "bevy_light::probe::GeneratedEnvironmentMapLight"
   float Intensity { get; set; }
+enum Bevy.Reflected.GenericFontFamily : int
+  Cursive = 2
+  Emoji = 10
+  FangSong = 12
+  Fantasy = 3
+  Math = 11
+  Monospace = 4
+  SansSerif = 1
+  Serif = 0
+  SystemUi = 5
+  UiMonospace = 8
+  UiRounded = 9
+  UiSansSerif = 7
+  UiSerif = 6
 readonly struct Bevy.Reflected.GizmoConfigStoreRef : IReflectedComponent<GizmoConfigStoreRef>, IReflectedWrapper<GizmoConfigStoreRef>
   Entity Entity { get; }
   bool Remove()
@@ -5847,6 +5857,7 @@ readonly struct Bevy.Reflected.GizmoRef : IReflectedComponent<GizmoRef>, IReflec
   bool Remove()
   const string TypePath = "bevy_gizmos::retained::Gizmo"
   float DepthBias { get; set; }
+  float LineConfigAnimationOffset { get; set; }
   float LineConfigWidth { get; set; }
 readonly struct Bevy.Reflected.GlobalAmbientLightRef : IReflectedComponent<GlobalAmbientLightRef>, IReflectedWrapper<GlobalAmbientLightRef>
   Color Color { get; set; }
@@ -6066,6 +6077,10 @@ readonly struct Bevy.Reflected.HdrRef : IReflectedComponent<HdrRef>, IReflectedW
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::components::Hdr"
+readonly struct Bevy.Reflected.HoverMapRef : IReflectedComponent<HoverMapRef>, IReflectedWrapper<HoverMapRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_picking::hover::HoverMap"
 readonly struct Bevy.Reflected.HoveredRef : IReflectedComponent<HoveredRef>, IReflectedWrapper<HoveredRef>
   Entity Entity { get; }
   bool Remove()
@@ -6099,11 +6114,25 @@ readonly struct Bevy.Reflected.ImageNodeSizeRef : IReflectedComponent<ImageNodeS
   const string TypePath = "bevy_ui::widget::image::ImageNodeSize"
   uint SizeX { get; set; }
   uint SizeY { get; set; }
+readonly struct Bevy.Reflected.ImageNodeTextureAtlasLayoutRef : IReflectedComponent<ImageNodeTextureAtlasLayoutRef>, IReflectedWrapper<ImageNodeTextureAtlasLayoutRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_render::image::ImageNodeTextureAtlasLayout"
 readonly struct Bevy.Reflected.InheritedVisibilityRef : IReflectedComponent<InheritedVisibilityRef>, IReflectedWrapper<InheritedVisibilityRef>
   Entity Entity { get; }
   bool Remove()
   bool Value { get; set; }
   const string TypePath = "bevy_camera::visibility::InheritedVisibility"
+readonly struct Bevy.Reflected.InlineImageRef : IReflectedComponent<InlineImageRef>, IReflectedWrapper<InlineImageRef>
+  AssetHandle Image { get; set; }
+  Color Color { get; set; }
+  Entity Entity { get; }
+  bool FlipX { get; set; }
+  bool FlipY { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_ui::widget::inline_image::InlineImage"
+  float? Height { get; set; }
+  float? Width { get; set; }
 readonly struct Bevy.Reflected.InputFocusRef : IReflectedComponent<InputFocusRef>, IReflectedWrapper<InputFocusRef>
   Entity Entity { get; }
   Entity? CurrentFocus { get; set; }
@@ -6119,21 +6148,14 @@ readonly struct Bevy.Reflected.InteractionDisabledRef : IReflectedComponent<Inte
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::interaction_states::InteractionDisabled"
-readonly struct Bevy.Reflected.InteractionRef : IReflectedComponent<InteractionRef>, IReflectedWrapper<InteractionRef>
-  Entity Entity { get; }
-  InteractionRef.ValueVariant Value { get; set; }
-  bool Remove()
-  const string TypePath = "bevy_ui::focus::Interaction"
-enum Bevy.Reflected.InteractionRef.ValueVariant : int
-  Hovered = 1
-  None = 2
-  Pressed = 0
 enum Bevy.Reflected.InterpolationColorSpace : int
   Hsla = 5
   HslaLong = 6
   Hsva = 7
   HsvaLong = 8
   LinearRgba = 4
+  Okhsla = 9
+  OkhslaLong = 10
   Oklaba = 0
   Oklcha = 1
   OklchaLong = 2
@@ -6361,7 +6383,7 @@ readonly struct Bevy.Reflected.MainEntityRef : IReflectedComponent<MainEntityRef
   Entity Entity { get; }
   Entity Value { get; set; }
   bool Remove()
-  const string TypePath = "bevy_render::sync_world::MainEntity"
+  const string TypePath = "bevy_extract::sync_world::MainEntity"
 readonly struct Bevy.Reflected.MainPassResolutionOverrideRef : IReflectedComponent<MainPassResolutionOverrideRef>, IReflectedWrapper<MainPassResolutionOverrideRef>
   Entity Entity { get; }
   bool Remove()
@@ -6399,6 +6421,19 @@ sealed class Bevy.Reflected.MaxTrackSizingFunction.Auto : MaxTrackSizingFunction
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(MaxTrackSizingFunction.Auto? left, MaxTrackSizingFunction.Auto? right)
   static bool op_Inequality(MaxTrackSizingFunction.Auto? left, MaxTrackSizingFunction.Auto? right)
+sealed class Bevy.Reflected.MaxTrackSizingFunction.Em : MaxTrackSizingFunction, IEquatable<MaxTrackSizingFunction.Em>, IEquatable<MaxTrackSizingFunction>
+  Em(float Value)
+  bool Equals(MaxTrackSizingFunction.Em? other)
+  bool Equals(MaxTrackSizingFunction? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MaxTrackSizingFunction.Em? left, MaxTrackSizingFunction.Em? right)
+  static bool op_Inequality(MaxTrackSizingFunction.Em? left, MaxTrackSizingFunction.Em? right)
+  void Deconstruct(out float Value)
 sealed class Bevy.Reflected.MaxTrackSizingFunction.FitContentPercent : MaxTrackSizingFunction, IEquatable<MaxTrackSizingFunction.FitContentPercent>, IEquatable<MaxTrackSizingFunction>
   FitContentPercent(float Value)
   bool Equals(MaxTrackSizingFunction.FitContentPercent? other)
@@ -6485,6 +6520,19 @@ sealed class Bevy.Reflected.MaxTrackSizingFunction.Px : MaxTrackSizingFunction, 
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(MaxTrackSizingFunction.Px? left, MaxTrackSizingFunction.Px? right)
   static bool op_Inequality(MaxTrackSizingFunction.Px? left, MaxTrackSizingFunction.Px? right)
+  void Deconstruct(out float Value)
+sealed class Bevy.Reflected.MaxTrackSizingFunction.Rem : MaxTrackSizingFunction, IEquatable<MaxTrackSizingFunction.Rem>, IEquatable<MaxTrackSizingFunction>
+  Rem(float Value)
+  bool Equals(MaxTrackSizingFunction.Rem? other)
+  bool Equals(MaxTrackSizingFunction? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MaxTrackSizingFunction.Rem? left, MaxTrackSizingFunction.Rem? right)
+  static bool op_Inequality(MaxTrackSizingFunction.Rem? left, MaxTrackSizingFunction.Rem? right)
   void Deconstruct(out float Value)
 sealed class Bevy.Reflected.MaxTrackSizingFunction.VMax : MaxTrackSizingFunction, IEquatable<MaxTrackSizingFunction.VMax>, IEquatable<MaxTrackSizingFunction>
   VMax(float Value)
@@ -6627,10 +6675,10 @@ readonly struct Bevy.Reflected.MeshMaterial2dColorMaterialRef : IReflectedCompon
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_sprite_render::mesh2d::material::MeshMaterial2d<bevy_sprite_render::mesh2d::color_material::ColorMaterial>"
-readonly struct Bevy.Reflected.MeshMaterial2dSpriteMaterialRef : IReflectedComponent<MeshMaterial2dSpriteMaterialRef>, IReflectedWrapper<MeshMaterial2dSpriteMaterialRef>
+readonly struct Bevy.Reflected.MeshMaterial2dSpriteMeshMaterialRef : IReflectedComponent<MeshMaterial2dSpriteMeshMaterialRef>, IReflectedWrapper<MeshMaterial2dSpriteMeshMaterialRef>
   Entity Entity { get; }
   bool Remove()
-  const string TypePath = "bevy_sprite_render::mesh2d::material::MeshMaterial2d<bevy_sprite_render::sprite_mesh::sprite_material::SpriteMaterial>"
+  const string TypePath = "bevy_sprite_render::mesh2d::material::MeshMaterial2d<bevy_sprite_render::sprite_mesh::sprite_mesh_material::SpriteMeshMaterial>"
 readonly struct Bevy.Reflected.MeshMaterial2dTilemapChunkMaterialRef : IReflectedComponent<MeshMaterial2dTilemapChunkMaterialRef>, IReflectedWrapper<MeshMaterial2dTilemapChunkMaterialRef>
   Entity Entity { get; }
   bool Remove()
@@ -6738,6 +6786,19 @@ sealed class Bevy.Reflected.MinTrackSizingFunction.Auto : MinTrackSizingFunction
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(MinTrackSizingFunction.Auto? left, MinTrackSizingFunction.Auto? right)
   static bool op_Inequality(MinTrackSizingFunction.Auto? left, MinTrackSizingFunction.Auto? right)
+sealed class Bevy.Reflected.MinTrackSizingFunction.Em : MinTrackSizingFunction, IEquatable<MinTrackSizingFunction.Em>, IEquatable<MinTrackSizingFunction>
+  Em(float Value)
+  bool Equals(MinTrackSizingFunction.Em? other)
+  bool Equals(MinTrackSizingFunction? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MinTrackSizingFunction.Em? left, MinTrackSizingFunction.Em? right)
+  static bool op_Inequality(MinTrackSizingFunction.Em? left, MinTrackSizingFunction.Em? right)
+  void Deconstruct(out float Value)
 sealed class Bevy.Reflected.MinTrackSizingFunction.MaxContent : MinTrackSizingFunction, IEquatable<MinTrackSizingFunction.MaxContent>, IEquatable<MinTrackSizingFunction>
   MaxContent()
   bool Equals(MinTrackSizingFunction.MaxContent? other)
@@ -6785,6 +6846,19 @@ sealed class Bevy.Reflected.MinTrackSizingFunction.Px : MinTrackSizingFunction, 
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(MinTrackSizingFunction.Px? left, MinTrackSizingFunction.Px? right)
   static bool op_Inequality(MinTrackSizingFunction.Px? left, MinTrackSizingFunction.Px? right)
+  void Deconstruct(out float Value)
+sealed class Bevy.Reflected.MinTrackSizingFunction.Rem : MinTrackSizingFunction, IEquatable<MinTrackSizingFunction.Rem>, IEquatable<MinTrackSizingFunction>
+  Rem(float Value)
+  bool Equals(MinTrackSizingFunction.Rem? other)
+  bool Equals(MinTrackSizingFunction? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MinTrackSizingFunction.Rem? left, MinTrackSizingFunction.Rem? right)
+  static bool op_Inequality(MinTrackSizingFunction.Rem? left, MinTrackSizingFunction.Rem? right)
   void Deconstruct(out float Value)
 sealed class Bevy.Reflected.MinTrackSizingFunction.VMax : MinTrackSizingFunction, IEquatable<MinTrackSizingFunction.VMax>, IEquatable<MinTrackSizingFunction>
   VMax(float Value)
@@ -6843,6 +6917,14 @@ readonly struct Bevy.Reflected.MipBiasRef : IReflectedComponent<MipBiasRef>, IRe
   bool Remove()
   const string TypePath = "bevy_render::camera::MipBias"
   float Value { get; set; }
+readonly struct Bevy.Reflected.ModalDialogBarrierRef : IReflectedComponent<ModalDialogBarrierRef>, IReflectedWrapper<ModalDialogBarrierRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::modal::ModalDialogBarrier"
+readonly struct Bevy.Reflected.ModalDialogRef : IReflectedComponent<ModalDialogRef>, IReflectedWrapper<ModalDialogRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::modal::ModalDialog"
 readonly struct Bevy.Reflected.MonitorRef : IReflectedComponent<MonitorRef>, IReflectedWrapper<MonitorRef>
   Entity Entity { get; }
   IReadOnlyList<VideoModeValue> VideoModes { get; set; }
@@ -7080,10 +7162,14 @@ readonly struct Bevy.Reflected.NodeRef : IReflectedComponent<NodeRef>, IReflecte
   NodeRef.PositionTypeVariant PositionType { get; set; }
   Val BorderBottom { get; set; }
   Val BorderLeft { get; set; }
-  Val BorderRadiusBottomLeft { get; set; }
-  Val BorderRadiusBottomRight { get; set; }
-  Val BorderRadiusTopLeft { get; set; }
-  Val BorderRadiusTopRight { get; set; }
+  Val BorderRadiusBottomLeftX { get; set; }
+  Val BorderRadiusBottomLeftY { get; set; }
+  Val BorderRadiusBottomRightX { get; set; }
+  Val BorderRadiusBottomRightY { get; set; }
+  Val BorderRadiusTopLeftX { get; set; }
+  Val BorderRadiusTopLeftY { get; set; }
+  Val BorderRadiusTopRightX { get; set; }
+  Val BorderRadiusTopRightY { get; set; }
   Val BorderRight { get; set; }
   Val BorderTop { get; set; }
   Val Bottom { get; set; }
@@ -7115,34 +7201,49 @@ readonly struct Bevy.Reflected.NodeRef : IReflectedComponent<NodeRef>, IReflecte
   float ScrollbarWidth { get; set; }
   float? AspectRatio { get; set; }
 enum Bevy.Reflected.NodeRef.AlignContentVariant : int
-  Center = 5
+  Center = 9
+  CenterSafe = 10
   Default = 0
-  End = 2
-  FlexEnd = 4
-  FlexStart = 3
-  SpaceAround = 9
-  SpaceBetween = 7
-  SpaceEvenly = 8
+  End = 3
+  EndSafe = 4
+  FlexEnd = 7
+  FlexEndSafe = 8
+  FlexStart = 5
+  FlexStartSafe = 6
+  SpaceAround = 14
+  SpaceBetween = 12
+  SpaceEvenly = 13
   Start = 1
-  Stretch = 6
+  StartSafe = 2
+  Stretch = 11
 enum Bevy.Reflected.NodeRef.AlignItemsVariant : int
-  Baseline = 6
-  Center = 5
+  Baseline = 11
+  Center = 9
+  CenterSafe = 10
   Default = 0
-  End = 2
-  FlexEnd = 4
-  FlexStart = 3
+  End = 3
+  EndSafe = 4
+  FlexEnd = 7
+  FlexEndSafe = 8
+  FlexStart = 5
+  FlexStartSafe = 6
   Start = 1
-  Stretch = 7
+  StartSafe = 2
+  Stretch = 12
 enum Bevy.Reflected.NodeRef.AlignSelfVariant : int
   Auto = 0
-  Baseline = 6
-  Center = 5
-  End = 2
-  FlexEnd = 4
-  FlexStart = 3
+  Baseline = 11
+  Center = 9
+  CenterSafe = 10
+  End = 3
+  EndSafe = 4
+  FlexEnd = 7
+  FlexEndSafe = 8
+  FlexStart = 5
+  FlexStartSafe = 6
   Start = 1
-  Stretch = 7
+  StartSafe = 2
+  Stretch = 12
 enum Bevy.Reflected.NodeRef.BoxSizingVariant : int
   BorderBox = 0
   ContentBox = 1
@@ -7187,30 +7288,41 @@ enum Bevy.Reflected.NodeRef.GridRowStartVariant : int
   None = 0
   Some = 1
 enum Bevy.Reflected.NodeRef.JustifyContentVariant : int
-  Center = 5
+  Center = 9
+  CenterSafe = 10
   Default = 0
-  End = 2
-  FlexEnd = 4
-  FlexStart = 3
-  SpaceAround = 9
-  SpaceBetween = 7
-  SpaceEvenly = 8
+  End = 3
+  EndSafe = 4
+  FlexEnd = 7
+  FlexEndSafe = 8
+  FlexStart = 5
+  FlexStartSafe = 6
+  SpaceAround = 14
+  SpaceBetween = 12
+  SpaceEvenly = 13
   Start = 1
-  Stretch = 6
+  StartSafe = 2
+  Stretch = 11
 enum Bevy.Reflected.NodeRef.JustifyItemsVariant : int
-  Baseline = 4
-  Center = 3
+  Baseline = 7
+  Center = 5
+  CenterSafe = 6
   Default = 0
-  End = 2
+  End = 3
+  EndSafe = 4
   Start = 1
-  Stretch = 5
+  StartSafe = 2
+  Stretch = 8
 enum Bevy.Reflected.NodeRef.JustifySelfVariant : int
   Auto = 0
-  Baseline = 4
-  Center = 3
-  End = 2
+  Baseline = 7
+  Center = 5
+  CenterSafe = 6
+  End = 3
+  EndSafe = 4
   Start = 1
-  Stretch = 5
+  StartSafe = 2
+  Stretch = 8
 enum Bevy.Reflected.NodeRef.OverflowClipMarginVisualBoxVariant : int
   BorderBox = 2
   ContentBox = 0
@@ -7308,6 +7420,11 @@ readonly struct Bevy.Reflected.OverrideClipRef : IReflectedComponent<OverrideCli
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::OverrideClip"
+readonly struct Bevy.Reflected.OverrideCursorRef : IReflectedComponent<OverrideCursorRef>, IReflectedWrapper<OverrideCursorRef>
+  Entity Entity { get; }
+  EntityCursor? Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_picking::cursor::OverrideCursor"
 abstract class Bevy.Reflected.ParallaxCorrection : IEquatable<ParallaxCorrection>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -7505,13 +7622,21 @@ readonly struct Bevy.Reflected.PointerLocationRef : IReflectedComponent<PointerL
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::pointer::PointerLocation"
-readonly struct Bevy.Reflected.PointerPressRef : IReflectedComponent<PointerPressRef>, IReflectedWrapper<PointerPressRef>
+readonly struct Bevy.Reflected.PointerMapRef : IReflectedComponent<PointerMapRef>, IReflectedWrapper<PointerMapRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_picking::pointer::PointerMap"
+readonly struct Bevy.Reflected.PointerPressStateRef : IReflectedComponent<PointerPressStateRef>, IReflectedWrapper<PointerPressStateRef>
   Entity Entity { get; }
   bool Middle { get; set; }
   bool Primary { get; set; }
   bool Remove()
   bool Secondary { get; set; }
-  const string TypePath = "bevy_picking::pointer::PointerPress"
+  const string TypePath = "bevy_picking::pointer::PointerPressState"
+readonly struct Bevy.Reflected.PointerStateRef : IReflectedComponent<PointerStateRef>, IReflectedWrapper<PointerStateRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_picking::events::PointerState"
 enum Bevy.Reflected.PopoverAlign : int
   Center = 1
   End = 2
@@ -7541,7 +7666,7 @@ enum Bevy.Reflected.PopoverSide : int
   Top = 0
 sealed class Bevy.Reflected.PositionedGlyph : IEquatable<PositionedGlyph>
   AssetIdImage AtlasInfoTexture { get; init; }
-  PositionedGlyph(Vec2 Position, AssetIdImage AtlasInfoTexture, Vec2 AtlasInfoRectMin, Vec2 AtlasInfoRectMax, Vec2 AtlasInfoOffset, bool AtlasInfoIsAlphaMask, ulong SectionIndex, ulong LineIndex)
+  PositionedGlyph(Vec2 Position, AssetIdImage AtlasInfoTexture, Vec2 AtlasInfoRectMin, Vec2 AtlasInfoRectMax, Vec2 AtlasInfoOffset, bool AtlasInfoIsAlphaMask, uint SectionIndex, uint LineIndex)
   Vec2 AtlasInfoOffset { get; init; }
   Vec2 AtlasInfoRectMax { get; init; }
   Vec2 AtlasInfoRectMin { get; init; }
@@ -7553,9 +7678,9 @@ sealed class Bevy.Reflected.PositionedGlyph : IEquatable<PositionedGlyph>
   override string ToString()
   static bool op_Equality(PositionedGlyph? left, PositionedGlyph? right)
   static bool op_Inequality(PositionedGlyph? left, PositionedGlyph? right)
-  ulong LineIndex { get; init; }
-  ulong SectionIndex { get; init; }
-  void Deconstruct(out Vec2 Position, out AssetIdImage AtlasInfoTexture, out Vec2 AtlasInfoRectMin, out Vec2 AtlasInfoRectMax, out Vec2 AtlasInfoOffset, out bool AtlasInfoIsAlphaMask, out ulong SectionIndex, out ulong LineIndex)
+  uint LineIndex { get; init; }
+  uint SectionIndex { get; init; }
+  void Deconstruct(out Vec2 Position, out AssetIdImage AtlasInfoTexture, out Vec2 AtlasInfoRectMin, out Vec2 AtlasInfoRectMax, out Vec2 AtlasInfoOffset, out bool AtlasInfoIsAlphaMask, out uint SectionIndex, out uint LineIndex)
 readonly struct Bevy.Reflected.PrecipitationConfigRef : IReflectedComponent<PrecipitationConfigRef>, IReflectedWrapper<PrecipitationConfigRef>
   Color RainColor { get; set; }
   Color SnowColor { get; set; }
@@ -7587,6 +7712,10 @@ readonly struct Bevy.Reflected.PressedRef : IReflectedComponent<PressedRef>, IRe
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::interaction_states::Pressed"
+readonly struct Bevy.Reflected.PreviousHoverMapRef : IReflectedComponent<PreviousHoverMapRef>, IReflectedWrapper<PreviousHoverMapRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_picking::hover::PreviousHoverMap"
 readonly struct Bevy.Reflected.PrimaryMonitorRef : IReflectedComponent<PrimaryMonitorRef>, IReflectedWrapper<PrimaryMonitorRef>
   Entity Entity { get; }
   bool Remove()
@@ -7779,6 +7908,10 @@ readonly struct Bevy.Reflected.RayCastBackfacesRef : IReflectedComponent<RayCast
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::mesh_picking::ray_cast::RayCastBackfaces"
+readonly struct Bevy.Reflected.RayMapRef : IReflectedComponent<RayMapRef>, IReflectedWrapper<RayMapRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_picking::backend::ray::RayMap"
 readonly struct Bevy.Reflected.RaytracingMesh3dRef : IReflectedComponent<RaytracingMesh3dRef>, IReflectedWrapper<RaytracingMesh3dRef>
   AssetHandle Value { get; set; }
   Entity Entity { get; }
@@ -7810,11 +7943,6 @@ readonly struct Bevy.Reflected.RelativeCursorPositionRef : IReflectedComponent<R
   bool CursorOver { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::focus::RelativeCursorPosition"
-readonly struct Bevy.Reflected.RenderEntityRef : IReflectedComponent<RenderEntityRef>, IReflectedWrapper<RenderEntityRef>
-  Entity Entity { get; }
-  Entity Value { get; set; }
-  bool Remove()
-  const string TypePath = "bevy_render::sync_world::RenderEntity"
 readonly struct Bevy.Reflected.RenderLayersRef : IReflectedComponent<RenderLayersRef>, IReflectedWrapper<RenderLayersRef>
   Entity Entity { get; }
   IReadOnlyList<ulong> Value { get; set; }
@@ -7921,7 +8049,7 @@ readonly struct Bevy.Reflected.RootNonCameraViewRef : IReflectedComponent<RootNo
   bool Remove()
   const string TypePath = "bevy_core_pipeline::schedule::RootNonCameraView"
 sealed class Bevy.Reflected.RunGeometry : IEquatable<RunGeometry>
-  RunGeometry(ulong SectionIndex, Vec2 BoundsMin, Vec2 BoundsMax, float StrikethroughY, float StrikethroughThickness, float UnderlineY, float UnderlineThickness)
+  RunGeometry(uint SectionIndex, Vec2 BoundsMin, Vec2 BoundsMax, float StrikethroughY, float StrikethroughThickness, float UnderlineY, float UnderlineThickness)
   Vec2 BoundsMax { get; init; }
   Vec2 BoundsMin { get; init; }
   bool Equals(RunGeometry? other)
@@ -7934,8 +8062,8 @@ sealed class Bevy.Reflected.RunGeometry : IEquatable<RunGeometry>
   override string ToString()
   static bool op_Equality(RunGeometry? left, RunGeometry? right)
   static bool op_Inequality(RunGeometry? left, RunGeometry? right)
-  ulong SectionIndex { get; init; }
-  void Deconstruct(out ulong SectionIndex, out Vec2 BoundsMin, out Vec2 BoundsMax, out float StrikethroughY, out float StrikethroughThickness, out float UnderlineY, out float UnderlineThickness)
+  uint SectionIndex { get; init; }
+  void Deconstruct(out uint SectionIndex, out Vec2 BoundsMin, out Vec2 BoundsMax, out float StrikethroughY, out float StrikethroughThickness, out float UnderlineY, out float UnderlineThickness)
 abstract class Bevy.Reflected.ScalingMode : IEquatable<ScalingMode>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -8104,6 +8232,7 @@ readonly struct Bevy.Reflected.ScreenSpaceAmbientOcclusionRef : IReflectedCompon
   bool Remove()
   const string TypePath = "bevy_pbr::ssao::ScreenSpaceAmbientOcclusion"
   float ConstantObjectThickness { get; set; }
+  float Radius { get; set; }
 readonly struct Bevy.Reflected.ScreenSpaceReflectionsRef : IReflectedComponent<ScreenSpaceReflectionsRef>, IReflectedWrapper<ScreenSpaceReflectionsRef>
   Entity Entity { get; }
   FloatRange EdgeFadeout { get; set; }
@@ -8161,10 +8290,14 @@ readonly struct Bevy.Reflected.ScrollbarThumbRef : IReflectedComponent<Scrollbar
   Entity Entity { get; }
   Val BorderBottom { get; set; }
   Val BorderLeft { get; set; }
-  Val BorderRadiusBottomLeft { get; set; }
-  Val BorderRadiusBottomRight { get; set; }
-  Val BorderRadiusTopLeft { get; set; }
-  Val BorderRadiusTopRight { get; set; }
+  Val BorderRadiusBottomLeftX { get; set; }
+  Val BorderRadiusBottomLeftY { get; set; }
+  Val BorderRadiusBottomRightX { get; set; }
+  Val BorderRadiusBottomRightY { get; set; }
+  Val BorderRadiusTopLeftX { get; set; }
+  Val BorderRadiusTopLeftY { get; set; }
+  Val BorderRadiusTopRightX { get; set; }
+  Val BorderRadiusTopRightY { get; set; }
   Val BorderRight { get; set; }
   Val BorderTop { get; set; }
   bool Remove()
@@ -8173,6 +8306,11 @@ readonly struct Bevy.Reflected.SelectAllOnFocusRef : IReflectedComponent<SelectA
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::text_input::SelectAllOnFocus"
+readonly struct Bevy.Reflected.SelectedTabRef : IReflectedComponent<SelectedTabRef>, IReflectedWrapper<SelectedTabRef>
+  Entity Entity { get; }
+  Entity? Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::tabs::SelectedTab"
 readonly struct Bevy.Reflected.ShadowFilteringMethodRef : IReflectedComponent<ShadowFilteringMethodRef>, IReflectedWrapper<ShadowFilteringMethodRef>
   Entity Entity { get; }
   ShadowFilteringMethodRef.ValueVariant Value { get; set; }
@@ -8334,7 +8472,18 @@ readonly struct Bevy.Reflected.SolariLightingRef : IReflectedComponent<SolariLig
   Entity Entity { get; }
   bool Remove()
   bool Reset { get; set; }
+  bool Restir { get; set; }
   const string TypePath = "bevy_solari::realtime::SolariLighting"
+  float ConfidenceWeightCap { get; set; }
+  float WorldCacheMaxGiRayDistance { get; set; }
+  float WorldCacheMaxTemporalSamples { get; set; }
+  float WorldCachePositionBaseCellSize { get; set; }
+  float WorldCachePositionLodScale { get; set; }
+  uint MaxBounces { get; set; }
+  uint PrimaryDiSamples { get; set; }
+  uint SecondaryDiSamples { get; set; }
+  uint WorldCacheCellUpdatesSoftTarget { get; set; }
+  uint WorldCacheDirectLightSampleCount { get; set; }
 readonly struct Bevy.Reflected.SpatialListenerRef : IReflectedComponent<SpatialListenerRef>, IReflectedWrapper<SpatialListenerRef>
   Entity Entity { get; }
   Vec3 LeftEarOffset { get; set; }
@@ -8480,19 +8629,6 @@ sealed class Bevy.Reflected.SpriteImageModeValue.Tiled : SpriteImageModeValue, I
   static bool op_Equality(SpriteImageModeValue.Tiled? left, SpriteImageModeValue.Tiled? right)
   static bool op_Inequality(SpriteImageModeValue.Tiled? left, SpriteImageModeValue.Tiled? right)
   void Deconstruct(out bool TileX, out bool TileY, out float StretchValue)
-readonly struct Bevy.Reflected.SpriteMeshRef : IReflectedComponent<SpriteMeshRef>, IReflectedWrapper<SpriteMeshRef>
-  AssetHandle Image { get; set; }
-  Color Color { get; set; }
-  Entity Entity { get; }
-  Rect? Rect { get; set; }
-  SpriteAlphaMode AlphaMode { get; set; }
-  SpriteImageModeValue ImageMode { get; set; }
-  TextureAtlas? TextureAtlas { get; set; }
-  Vec2? CustomSize { get; set; }
-  bool FlipX { get; set; }
-  bool FlipY { get; set; }
-  bool Remove()
-  const string TypePath = "bevy_sprite::sprite_mesh::SpriteMesh"
 readonly struct Bevy.Reflected.SpritePickingCameraRef : IReflectedComponent<SpritePickingCameraRef>, IReflectedWrapper<SpritePickingCameraRef>
   Entity Entity { get; }
   bool Remove()
@@ -8542,6 +8678,7 @@ readonly struct Bevy.Reflected.SpriteRef : IReflectedComponent<SpriteRef>, IRefl
   Color Color { get; set; }
   Entity Entity { get; }
   Rect? Rect { get; set; }
+  SpriteAlphaMode AlphaMode { get; set; }
   SpriteImageModeValue ImageMode { get; set; }
   TextureAtlas? TextureAtlas { get; set; }
   Vec2? CustomSize { get; set; }
@@ -8604,10 +8741,6 @@ readonly struct Bevy.Reflected.SunLightRef : IReflectedComponent<SunLightRef>, I
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_weather::celestial::SunLight"
-readonly struct Bevy.Reflected.SyncToRenderWorldRef : IReflectedComponent<SyncToRenderWorldRef>, IReflectedWrapper<SyncToRenderWorldRef>
-  Entity Entity { get; }
-  bool Remove()
-  const string TypePath = "bevy_render::sync_world::SyncToRenderWorld"
 enum Bevy.Reflected.SystemCursorIcon : int
   Alias = 10
   AllScroll = 31
@@ -8654,6 +8787,22 @@ readonly struct Bevy.Reflected.TabIndexRef : IReflectedComponent<TabIndexRef>, I
   bool Remove()
   const string TypePath = "bevy_input_focus::tab_navigation::TabIndex"
   int Value { get; set; }
+readonly struct Bevy.Reflected.TabListRef : IReflectedComponent<TabListRef>, IReflectedWrapper<TabListRef>
+  Entity Entity { get; }
+  TabListRef.ActivationVariant Activation { get; set; }
+  TabListRef.OrientationVariant Orientation { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::tabs::TabList"
+enum Bevy.Reflected.TabListRef.ActivationVariant : int
+  Automatic = 1
+  Manual = 0
+enum Bevy.Reflected.TabListRef.OrientationVariant : int
+  Horizontal = 0
+  Vertical = 1
+readonly struct Bevy.Reflected.TabRef : IReflectedComponent<TabRef>, IReflectedWrapper<TabRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::tabs::Tab"
 readonly struct Bevy.Reflected.TemporalAntiAliasingRef : IReflectedComponent<TemporalAntiAliasingRef>, IReflectedWrapper<TemporalAntiAliasingRef>
   Entity Entity { get; }
   bool Remove()
@@ -8664,10 +8813,6 @@ readonly struct Bevy.Reflected.TemporalJitterRef : IReflectedComponent<TemporalJ
   Vec2 Offset { get; set; }
   bool Remove()
   const string TypePath = "bevy_render::camera::TemporalJitter"
-readonly struct Bevy.Reflected.TemporaryRenderEntityRef : IReflectedComponent<TemporaryRenderEntityRef>, IReflectedWrapper<TemporaryRenderEntityRef>
-  Entity Entity { get; }
-  bool Remove()
-  const string TypePath = "bevy_render::sync_world::TemporaryRenderEntity"
 readonly struct Bevy.Reflected.Text2dRef : IReflectedComponent<Text2dRef>, IReflectedWrapper<Text2dRef>
   Entity Entity { get; }
   bool Remove()
@@ -8720,6 +8865,10 @@ readonly struct Bevy.Reflected.TextFontRef : IReflectedComponent<TextFontRef>, I
 enum Bevy.Reflected.TextFontRef.FontSmoothingVariant : int
   AntiAliased = 1
   None = 0
+readonly struct Bevy.Reflected.TextInputRef : IReflectedComponent<TextInputRef>, IReflectedWrapper<TextInputRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui_widgets::text_input::TextInput"
 readonly struct Bevy.Reflected.TextLayoutInfoRef : IReflectedComponent<TextLayoutInfoRef>, IReflectedWrapper<TextLayoutInfoRef>
   Entity Entity { get; }
   IReadOnlyList<PositionedGlyph> Glyphs { get; set; }
@@ -8754,6 +8903,7 @@ enum Bevy.Reflected.TextLayoutRef.LinebreakVariant : int
   WordOrCharacter = 2
 readonly struct Bevy.Reflected.TextNodeFlagsRef : IReflectedComponent<TextNodeFlagsRef>, IReflectedWrapper<TextNodeFlagsRef>
   Entity Entity { get; }
+  Vec2? NoWrapMeasure { get; set; }
   bool NeedsMeasureFn { get; set; }
   bool NeedsRecompute { get; set; }
   bool Remove()
@@ -8763,11 +8913,6 @@ readonly struct Bevy.Reflected.TextRef : IReflectedComponent<TextRef>, IReflecte
   bool Remove()
   const string TypePath = "bevy_ui::widget::text::Text"
   string Value { get; set; }
-readonly struct Bevy.Reflected.TextScrollRef : IReflectedComponent<TextScrollRef>, IReflectedWrapper<TextScrollRef>
-  Entity Entity { get; }
-  Vec2 Value { get; set; }
-  bool Remove()
-  const string TypePath = "bevy_ui::widget::text_input_layout::TextScroll"
 readonly struct Bevy.Reflected.TextShadowRef : IReflectedComponent<TextShadowRef>, IReflectedWrapper<TextShadowRef>
   Color Color { get; set; }
   Entity Entity { get; }
@@ -8887,30 +9032,32 @@ readonly struct Bevy.Reflected.TimeVirtualRef : IReflectedComponent<TimeVirtualR
   float ElapsedSecs { get; set; }
   float ElapsedSecsWrapped { get; set; }
 enum Bevy.Reflected.Tonemapping : int
-  AcesFitted = 3
-  AgX = 4
-  BlenderFilmic = 7
-  KhronosPbrNeutral = 8
+  AcesFitted = 4
+  AgX = 5
+  BlenderFilmic = 8
+  KhronosPbrNeutral = 9
+  Linear = 1
   None = 0
-  Reinhard = 1
-  ReinhardLuminance = 2
-  SomewhatBoringDisplayTransform = 5
-  TonyMcMapface = 6
+  Reinhard = 2
+  ReinhardLuminance = 3
+  SomewhatBoringDisplayTransform = 6
+  TonyMcMapface = 7
 readonly struct Bevy.Reflected.TonemappingRef : IReflectedComponent<TonemappingRef>, IReflectedWrapper<TonemappingRef>
   Entity Entity { get; }
   TonemappingRef.ValueVariant Value { get; set; }
   bool Remove()
-  const string TypePath = "bevy_core_pipeline::tonemapping::Tonemapping"
+  const string TypePath = "bevy_render::view::Tonemapping"
 enum Bevy.Reflected.TonemappingRef.ValueVariant : int
-  AcesFitted = 3
-  AgX = 4
-  BlenderFilmic = 7
-  KhronosPbrNeutral = 8
+  AcesFitted = 4
+  AgX = 5
+  BlenderFilmic = 8
+  KhronosPbrNeutral = 9
+  Linear = 1
   None = 0
-  Reinhard = 1
-  ReinhardLuminance = 2
-  SomewhatBoringDisplayTransform = 5
-  TonyMcMapface = 6
+  Reinhard = 2
+  ReinhardLuminance = 3
+  SomewhatBoringDisplayTransform = 6
+  TonyMcMapface = 7
 enum Bevy.Reflected.TransformGizmoAxis : int
   View = 3
   X = 0
@@ -8934,6 +9081,7 @@ readonly struct Bevy.Reflected.TransformGizmoSettingsRef : IReflectedComponent<T
   float AxisHitDistance { get; set; }
   float AxisLength { get; set; }
   float RotateRingRadius { get; set; }
+  float ScaleSensitivity { get; set; }
   float ScreenScaleFactor { get; set; }
   float? SnapRotate { get; set; }
   float? SnapScale { get; set; }
@@ -9072,6 +9220,19 @@ sealed class Bevy.Reflected.Val.Auto : Val, IEquatable<Val.Auto>, IEquatable<Val
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(Val.Auto? left, Val.Auto? right)
   static bool op_Inequality(Val.Auto? left, Val.Auto? right)
+sealed class Bevy.Reflected.Val.Em : Val, IEquatable<Val.Em>, IEquatable<Val>
+  Em(float Value)
+  bool Equals(Val.Em? other)
+  bool Equals(Val? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Val.Em? left, Val.Em? right)
+  static bool op_Inequality(Val.Em? left, Val.Em? right)
+  void Deconstruct(out float Value)
 sealed class Bevy.Reflected.Val.Percent : Val, IEquatable<Val.Percent>, IEquatable<Val>
   Percent(float Value)
   bool Equals(Val.Percent? other)
@@ -9097,6 +9258,19 @@ sealed class Bevy.Reflected.Val.Px : Val, IEquatable<Val.Px>, IEquatable<Val>
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(Val.Px? left, Val.Px? right)
   static bool op_Inequality(Val.Px? left, Val.Px? right)
+  void Deconstruct(out float Value)
+sealed class Bevy.Reflected.Val.Rem : Val, IEquatable<Val.Rem>, IEquatable<Val>
+  Rem(float Value)
+  bool Equals(Val.Rem? other)
+  bool Equals(Val? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Val.Rem? left, Val.Rem? right)
+  static bool op_Inequality(Val.Rem? left, Val.Rem? right)
   void Deconstruct(out float Value)
 sealed class Bevy.Reflected.Val.VMax : Val, IEquatable<Val.VMax>, IEquatable<Val>
   VMax(float Value)
@@ -9642,6 +9816,7 @@ readonly struct Bevy.Reflected.WireframeConfigRef : IReflectedComponent<Wirefram
   WireframeConfigRef.DefaultTopologyVariant DefaultTopology { get; set; }
   bool Global { get; set; }
   bool Remove()
+  bool XrayMode { get; set; }
   const string TypePath = "bevy_pbr::wireframe::WireframeConfig"
   float DefaultLineWidth { get; set; }
 enum Bevy.Reflected.WireframeConfigRef.DefaultTopologyVariant : int
@@ -9664,6 +9839,11 @@ readonly struct Bevy.Reflected.WireframeTopologyRef : IReflectedComponent<Wirefr
 enum Bevy.Reflected.WireframeTopologyRef.ValueVariant : int
   Quads = 1
   Triangles = 0
+readonly struct Bevy.Reflected.WireframeXrayRef : IReflectedComponent<WireframeXrayRef>, IReflectedWrapper<WireframeXrayRef>
+  Entity Entity { get; }
+  bool Remove()
+  bool Value { get; set; }
+  const string TypePath = "bevy_pbr::wireframe::WireframeXray"
 readonly struct Bevy.Reflected.WorldAssetRootRef : IReflectedComponent<WorldAssetRootRef>, IReflectedWrapper<WorldAssetRootRef>
   AssetHandle Value { get; set; }
   Entity Entity { get; }

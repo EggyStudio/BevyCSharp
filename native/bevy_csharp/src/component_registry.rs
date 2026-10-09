@@ -63,6 +63,9 @@ pub unsafe extern "C" fn bcs_component_register(
                 layout.pad_to_align(),
                 None,
                 true,
+                // No summary tick, as a component of Bevy's has none unless it asks, since C#
+                // writes through column pointers that would not keep one.
+                false,
                 // Bevy clones only what implements Clone or Reflect, which bytes from C# do not, so
                 // every C# component is cloned by copying its bytes, through C# for its handles.
                 bevy::ecs::component::ComponentCloneBehavior::Custom(crate::lifecycle::cloned),
@@ -113,6 +116,8 @@ pub unsafe extern "C" fn bcs_component_register_live(
                     layout.pad_to_align(),
                     None,
                     true,
+                    // No summary tick, as in `bcs_component_register`.
+                    false,
                     // Bevy clones only what implements Clone or Reflect, which bytes from C# do not, so
                 // every C# component is cloned by copying its bytes, through C# for its handles.
                 bevy::ecs::component::ComponentCloneBehavior::Custom(crate::lifecycle::cloned),
@@ -166,8 +171,10 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                 }
                 #[cfg(feature = "render")]
                 "ViewVisibility" => world.register_component::<bevy::prelude::ViewVisibility>(),
+                // The managed side's handle for a node that reacts to the pointer, the bridge's own
+                // component since Bevy's `Interaction` was deprecated.
                 #[cfg(feature = "render")]
-                "Interaction" => world.register_component::<bevy::ui::Interaction>(),
+                "Interaction" => world.register_component::<crate::ui::PointerOnNode>(),
                 #[cfg(feature = "render")]
                 "Atmosphere" => {
                     world.register_component::<bevy::light::atmosphere::Atmosphere>()

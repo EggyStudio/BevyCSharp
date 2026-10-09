@@ -1,4 +1,4 @@
-// Bevy's split_screen example, examples/3d/split_screen.rs at v0.19.1, by Bevy's contributors under
+// Bevy's split_screen example, examples/3d/split_screen.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -121,9 +121,9 @@ public partial struct RotateCamera
     [Changed(typeof(Interaction))]
     public void ButtonSystem(BehaviorContext ctx)
     {
-        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed || ctx.Ecs.Get<ComputedUiTargetCameraRef>(ctx.Entity) is not { } target) return;
+        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed
+            || ctx.Ecs.Get<ComputedUiTargetCameraRef>(ctx.Entity) is not { Camera: { } camera }) return;
 
-        var camera = target.Camera;
         var transform = ctx.Ecs.GetOrDefault<Transform>(camera);
         var turn = Quat.FromAxisAngle(Vec3.UnitY, Direction == Direction.Left ? -0.1f : 0.1f);
         ctx.Ecs.Set(camera, new Transform(turn * transform.Translation, turn * transform.Rotation, transform.Scale));

@@ -7,7 +7,7 @@ gives up, and what was measured of the difference.
 
 Bevy itself runs underneath, unchanged. Its ECS holds the world, its scheduler runs the stages, and
 its renderer, assets, audio, input, interface, text, gizmos and picking do what they do in a Rust
-game, at the version `native/Cargo.lock` pins, Bevy 0.19.1. Nothing of it is written again in C#.
+game, at the version `native/Cargo.lock` pins, Bevy 0.20.0. Nothing of it is written again in C#.
 A component a C# struct declares is a Bevy component on a Bevy entity, a C# system is a system in
 Bevy's schedule, a `Transform` written from C# is the transform Bevy propagates and draws, and one
 of Bevy's own components is reached by its type path through Bevy's reflection. A Rust game and a

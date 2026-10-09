@@ -323,8 +323,8 @@ editor, whose undo puts an entity back with the handles it had, keeps them
 
 `Mesh` and `Image` load in any build. `StandardMaterial`, `Gltf`, `Audio` and `Font` need a render
 build, and asking for one without it reports which build would support it. Scenes load too. `Scene`
-is a trait in 0.19 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes is
-`WorldAsset`, which `ctx.Ecs.SpawnScene` spawns.
+is a trait in Bevy 0.20 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes
+is `WorldAsset`, which `ctx.Ecs.SpawnScene` spawns.
 
 ---
 

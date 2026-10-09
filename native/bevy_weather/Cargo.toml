@@ -22,7 +22,7 @@ default = ["audio"]
 audio = ["bevy/bevy_audio", "bevy/vorbis"]
 
 [dependencies]
-bevy = { version = "0.19.1", default-features = false, features = [
+bevy = { version = "0.20.0", default-features = false, features = [
     "bevy_asset",
     "bevy_camera",
     "bevy_color",

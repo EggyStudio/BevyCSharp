@@ -1,4 +1,4 @@
-// Bevy's bevymark example, examples/stress_tests/bevymark.rs at v0.19.1, by Bevy's contributors
+// Bevy's bevymark example, examples/stress_tests/bevymark.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -8,8 +8,8 @@ namespace BevyCSharp.Examples.StressTests;
 
 // Birds thrown from the top left corner that fall and bounce off the window's edges, ten thousand
 // a second while the left button is held, or in waves with --waves and --per-wave, to measure how
-// many 2D things can be drawn and moved. --mode sprite, sprite_mesh or mesh2d draws them as
-// sprites, sprite meshes or 2D meshes, --benchmark spawns every wave at once and steps them by the
+// many 2D things can be drawn and moved. --mode sprite or mesh2d draws them as sprites or 2D
+// meshes, --benchmark spawns every wave at once and steps them by the
 // same time each frame, --vary-per-instance gives each a color or material of its own,
 // --material-texture-count draws them from more textures, --ordered-z stacks them in order, and
 // --alpha-mode opaque, blend or alpha_mask sets how they blend.
@@ -170,20 +170,6 @@ internal static class Bevymark
             ecs.Add(bird, new Transform(at, Quat.Identity, new Vec3(BirdScale)));
             switch (_mode)
             {
-                case "sprite_mesh":
-                {
-                    var sprite = ecs.Insert<SpriteMeshRef>(bird);
-                    sprite.Image = _textures[_materialRandom.Next(_textures.Length)];
-                    sprite.Color = new Color(color.Item1, color.Item2, color.Item3, color.Item4);
-                    sprite.AlphaMode = _alphaMode switch
-                    {
-                        "opaque" => new SpriteAlphaMode.Opaque(),
-                        "alpha_mask" => new SpriteAlphaMode.Mask(0.5f),
-                        _ => new SpriteAlphaMode.Blend(),
-                    };
-                    break;
-                }
-
                 case "mesh2d":
                 {
                     var material = _varyPerInstance || _materialTextureCount > _waves
@@ -196,6 +182,12 @@ internal static class Bevymark
 
                 default:
                     Render2d.SetSprite(ecs, bird, _textures[_materialRandom.Next(_textures.Length)], new SpriteSettings { Color = color });
+                    ecs.Wrap<SpriteRef>(bird).AlphaMode = _alphaMode switch
+                    {
+                        "opaque" => new SpriteAlphaMode.Opaque(),
+                        "alpha_mask" => new SpriteAlphaMode.Mask(0.5f),
+                        _ => new SpriteAlphaMode.Blend(),
+                    };
                     break;
             }
 

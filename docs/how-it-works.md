@@ -15,7 +15,7 @@ BevyCSharp (managed)          App, World, EcsWorld, EcsCommands, BehaviorContext
 bevy_csharp (Rust cdylib)     dynamic component registration, exclusive systems,
       │                       chunked table access, frame-state mirroring
       ▼
-Bevy 0.19                     ECS, scheduler, time, input, windowing, renderer
+Bevy 0.20                     ECS, scheduler, time, input, windowing, renderer
 ```
 
 A few decisions worth knowing about:

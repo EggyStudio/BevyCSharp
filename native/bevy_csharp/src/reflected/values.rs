@@ -195,6 +195,9 @@ pub(super) fn retyped(held: &dyn PartialReflect, linear: LinearRgba) -> Option<B
             Color::Lcha(_) => Color::Lcha(linear.into()),
             Color::Oklaba(_) => Color::Oklaba(linear.into()),
             Color::Oklcha(_) => Color::Oklcha(linear.into()),
+            Color::Okhsla(_) => Color::Okhsla(linear.into()),
+            Color::Okhsva(_) => Color::Okhsva(linear.into()),
+            Color::Okhwba(_) => Color::Okhwba(linear.into()),
             Color::Xyza(_) => Color::Xyza(linear.into()),
         };
         return Some(Box::new(color));

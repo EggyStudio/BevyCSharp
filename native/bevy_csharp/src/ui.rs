@@ -163,11 +163,13 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
         },
         // Rounded corners are a field on the node rather than a component beside it, so a zeroed
         // config asks for the square ones it would have had anyway.
+        // Each corner circular, a single length as Bevy reads one, since its corners can be
+        // elliptical from 0.20 and the managed side gives one length a corner.
         border_radius: bevy::ui::BorderRadius {
-            top_left: length(config.corners[0], config.corner_units[0]),
-            top_right: length(config.corners[1], config.corner_units[1]),
-            bottom_right: length(config.corners[2], config.corner_units[2]),
-            bottom_left: length(config.corners[3], config.corner_units[3]),
+            top_left: length(config.corners[0], config.corner_units[0]).into(),
+            top_right: length(config.corners[1], config.corner_units[1]).into(),
+            bottom_right: length(config.corners[2], config.corner_units[2]).into(),
+            bottom_left: length(config.corners[3], config.corner_units[3]).into(),
         },
         position_type: if config.absolute != 0 {
             PositionType::Absolute
@@ -266,15 +268,56 @@ fn border_color_from(config: &BcsUiNodeConfig) -> bevy::ui::BorderColor {
 
 /// Gives a node the components the pointer is tracked with, when its config asks for them.
 ///
-/// `Button` rather than `Interaction` alone, because it is the marker that requires both, and it
-/// brings `FocusPolicy::Block` with it, so an interactive node captures the pointer instead of
-/// letting it reach whatever sits behind it. A node left plain carries neither, which keeps the
-/// focus system's work proportional to the number of things that react rather than to the whole
-/// screen.
+/// Bevy's headless `Button`, which keeps `Pressed` on it from the pointer going down until it is
+/// released, and `Hovered`, which picking keeps true while the pointer is over it or what it holds.
+/// Bevy's older `Interaction` is deprecated since 0.20, and the two together answer what it did. A
+/// node left plain carries neither, which keeps picking's hover work proportional to the number of
+/// things that react rather than to the whole screen.
 #[cfg(feature = "render")]
 fn make_interactive(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNodeConfig) {
     if config.interactive != 0 {
-        entity.insert(bevy::ui::widget::Button);
+        entity.insert((
+            bevy::ui_widgets::Button,
+            bevy::picking::hover::Hovered::default(),
+            PointerOnNode::default(),
+        ));
+    }
+}
+
+/// How the pointer stands on an interactive node, `0` none, `1` hovered and `2` pressed, kept from
+/// Bevy's `Hovered` and `Pressed` each frame.
+///
+/// One component that changes whenever either does, as Bevy's deprecated `Interaction` did, so the
+/// managed side's `Interaction` handle, which names this, still picks out the nodes that react and
+/// sees one change, a press among the changes, which `Hovered` alone does not.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component, Clone, Copy, Default, PartialEq, Eq)]
+pub struct PointerOnNode(pub u8);
+
+/// Keeps every interactive node's [`PointerOnNode`] up to date, once picking has settled the
+/// frame's hovers and presses, where Bevy's own `Interaction` was kept.
+#[cfg(feature = "render")]
+pub fn install(app: &mut bevy::app::App) {
+    use bevy::ecs::schedule::IntoScheduleConfigs;
+    app.add_systems(
+        bevy::app::PreUpdate,
+        keep_pointer_on_nodes.after(bevy::picking::PickingSystems::Last),
+    );
+}
+
+#[cfg(feature = "render")]
+fn keep_pointer_on_nodes(
+    mut nodes: bevy::ecs::system::Query<(
+        &bevy::picking::hover::Hovered,
+        bevy::ecs::query::Has<bevy::ui::Pressed>,
+        &mut PointerOnNode,
+    )>,
+) {
+    use bevy::ecs::change_detection::DetectChangesMut;
+
+    for (hovered, pressed, mut state) in &mut nodes {
+        let now = if pressed { 2 } else { u8::from(hovered.get()) };
+        state.set_if_neq(PointerOnNode(now));
     }
 }
 
@@ -345,13 +388,12 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
 
 /// Reports how the pointer stands on a node: `0` none, `1` hovered, `2` pressed.
 ///
-/// `Interaction` is a Rust enum, so the managed side holds it as a name-only handle and reads its
-/// value here instead of mirroring the bytes. The three codes are the bridge's own, and stay put
-/// whatever Bevy's discriminants do.
+/// Read from the node's [`PointerOnNode`], kept from Bevy's `Pressed` and `Hovered`, so the three
+/// codes are the bridge's own and stay put whatever Bevy keeps them in.
 ///
-/// A node spawned without `interactive` carries no `Interaction` at all, which is reported as
-/// `NOT_PRESENT` rather than as `0`: "nothing is touching it" and "it was never set up to notice"
-/// are different answers, and a button that silently never fires is the harder one to find.
+/// A node spawned without `interactive` carries none of them, which is reported as
+/// `NOT_PRESENT` rather than as `0`, since "nothing is touching it" and "it was never set up to
+/// notice" are different answers, and a button that silently never fires is the harder one to find.
 ///
 /// Pressed lasts from the frame the pointer goes down until it is released, so a click is the
 /// edge into it rather than a state of its own.
@@ -366,21 +408,15 @@ pub unsafe extern "C" fn bcs_ui_interaction(entity: u64) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::ui::Interaction;
-
             with_world(|world| {
                 let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
-                let Some(interaction) = entity_ref.get::<Interaction>() else {
+                let Some(state) = entity_ref.get::<PointerOnNode>() else {
                     return status::NOT_PRESENT;
                 };
 
-                match *interaction {
-                    Interaction::None => 0,
-                    Interaction::Hovered => 1,
-                    Interaction::Pressed => 2,
-                }
+                i32::from(state.0)
             })
         }
     })

@@ -1,4 +1,4 @@
-//! A CPU evaluation of the cloud shape field, matching `sky.wgsl`.
+//! A CPU evaluation of the cloud shape field, matching `sky.wesl`.
 //!
 //! The shader raymarches this field to draw the cloud deck; this module
 //! evaluates the same field on the CPU so that other things can know where the
@@ -37,7 +37,7 @@ fn fract3(v: Vec3) -> Vec3 {
     Vec3::new(fract(v.x), fract(v.y), fract(v.z))
 }
 
-/// Matches `hash13` in `sky.wgsl`.
+/// Matches `hash13` in `sky.wesl`.
 #[inline]
 fn hash13(p: Vec3) -> f32 {
     let mut q = fract3(p * 0.1031);
@@ -45,7 +45,7 @@ fn hash13(p: Vec3) -> f32 {
     fract((q.x + q.y) * q.z)
 }
 
-/// Matches `value_noise3` in `sky.wgsl`.
+/// Matches `value_noise3` in `sky.wesl`.
 fn value_noise3(p: Vec3) -> f32 {
     let i = p.floor();
     let f = p - i;
@@ -70,7 +70,7 @@ fn value_noise3(p: Vec3) -> f32 {
     mix(mix(x00, x10, u.y), mix(x01, x11, u.y), u.z)
 }
 
-/// Matches `fbm3` in `sky.wgsl`.
+/// Matches `fbm3` in `sky.wesl`.
 fn fbm3(p: Vec3, octaves: u32) -> f32 {
     let mut sum = 0.0;
     let mut amplitude = 0.5;
@@ -85,7 +85,7 @@ fn fbm3(p: Vec3, octaves: u32) -> f32 {
     sum / total.max(1e-6)
 }
 
-/// Matches `billow3` in `sky.wgsl`.
+/// Matches `billow3` in `sky.wesl`.
 fn billow3(p: Vec3, octaves: u32) -> f32 {
     let mut sum = 0.0;
     let mut amplitude = 0.5;
@@ -100,7 +100,7 @@ fn billow3(p: Vec3, octaves: u32) -> f32 {
     sum / total.max(1e-6)
 }
 
-/// Matches `remap` in `sky.wgsl`.
+/// Matches `remap` in `sky.wesl`.
 #[inline]
 fn remap(x: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
     c + ((x - a) / (b - a).max(1e-6)).clamp(0.0, 1.0) * (d - c)

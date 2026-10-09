@@ -63,6 +63,9 @@ use wgsl::{fallback_source, with_bevy};
 pub struct StageBinding {
     pub shader: Handle<Shader>,
     pub entry: Cow<'static, str>,
+    /// The stage's SPIR-V, for one compiled to it, which the bridge builds a compute pipeline from
+    /// itself (see [`super::spirv_compute`]).
+    pub spirv: Option<Arc<[u32]>>,
 }
 
 /// What the render side needs of a program.
@@ -237,6 +240,8 @@ struct Unit {
     path: String,
     /// The shader as last compiled, or the fallback, or `None` before either.
     shader: Option<Handle<Shader>>,
+    /// Its SPIR-V, where it was compiled to it.
+    spirv: Option<Arc<[u32]>>,
     layout: Layout,
     state: UnitState,
     diagnostics: String,
@@ -459,6 +464,7 @@ fn unit_for(
         role,
         path,
         shader: None,
+        spirv: None,
         layout: Layout {
             group: role.family().own_group(),
             ..Default::default()
@@ -553,9 +559,9 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
     unit.busy = false;
     unit.compiles += 1;
 
-    // Named after the file, the role, the entry point and the compile, because naga_oil registers
-    // a shader under its name, and two different shaders under one name would be taken for the
-    // same module.
+    // Named after the file, the role, the entry point and the compile, because Bevy composes a
+    // shader that imports its modules by a module path made of its name, and two different shaders
+    // under one name would be taken for the same module.
     let name = format!(
         "{}#{}:{}:{}",
         unit.path,
@@ -566,8 +572,10 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
 
     match done.result {
         Ok((compiled, reflected)) => {
+            unit.spirv = (!reflected.spirv.is_empty())
+                .then(|| Arc::from(super::spirv_compute::words(&reflected.spirv)));
             let shader = if reflected.spirv.is_empty() {
-                Shader::from_wgsl(with_bevy(unit.role, reflected.wgsl), name)
+                with_bevy(unit.role, reflected.wgsl).shader(&name)
             } else {
                 Shader::from_spirv(reflected.spirv, name)
             };
@@ -621,7 +629,8 @@ fn finish(programs: &mut ShaderPrograms, shaders: &mut Assets<Shader>, done: Fin
 
             if !unit.compiled {
                 let fallback = fallback_source(unit.role, &unit.request.entry);
-                unit.shader = Some(shaders.add(Shader::from_wgsl(fallback, name)));
+                unit.shader = Some(shaders.add(fallback.shader(&name)));
+                unit.spirv = None;
                 unit.layout = Layout {
                     group: unit.role.family().own_group(),
                     ..Default::default()
@@ -682,6 +691,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
         entry.stages[role as usize] = Some(StageBinding {
             shader: unit.shader.clone().expect("every stage has a shader"),
             entry: Cow::Owned(unit.request.entry.clone()),
+            spirv: unit.spirv.clone(),
         });
 
         // Both stages of a material, and both of a draw, share one group, so their layouts merge.

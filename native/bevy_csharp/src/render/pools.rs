@@ -69,7 +69,7 @@ pub fn create(world: &mut World) -> Result<[i32; 3], i32> {
 
         for buffer in [&vertices, &indices] {
             if let Some(mut buffer) = assets.get_mut(buffer) {
-                buffer.buffer_description.usage |= bevy::render::render_resource::BufferUsages::BLAS_INPUT;
+                buffer.buffer_usage |= bevy::render::render_resource::BufferUsages::BLAS_INPUT;
             }
         }
     }
@@ -173,15 +173,14 @@ fn upload(world: &mut World, handle: &Handle<ShaderBuffer>, bytes: Vec<u8>) {
         let mut assets = world.resource_mut::<Assets<ShaderBuffer>>();
         let Some(mut buffer) = assets.get_mut(handle) else { return };
 
-        let size = buffer.buffer_description.size;
+        let size = buffer.buffer_size();
         let wanted = super::compute::buffer_size(bytes.len() as u64).max(size);
 
         let mut data = bytes;
         data.resize(wanted as usize, 0);
 
-        buffer.buffer_description.size = wanted;
         buffer.copy_on_resize = false;
-        buffer.data = Some(data);
+        super::compute::fill(&mut buffer, &data);
 
         wanted != size
     };

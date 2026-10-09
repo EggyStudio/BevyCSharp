@@ -162,6 +162,7 @@ struct Built(HashMap<TextureFormat, CachedRenderPipelineId>);
 /// camera may have been given only part of it. Its picture starts transparent and is blended over
 /// whatever the other cameras drew, which makes it an overlay rather than a replacement.
 #[derive(Component, Clone, Copy, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 pub struct InterfaceView;
 
 /// Puts the interface into an app.
@@ -307,7 +308,7 @@ fn extract(
     let [left, top] = drawn.display_position;
 
     // Screen space, y downwards, straight to clip space. What ImGui's own backends build.
-    frame.projection = Mat4::orthographic_rh(left, left + width, top + height, top, -1.0, 1.0);
+    frame.projection = bevy::math::proj::orthographic(left, left + width, top + height, top, -1.0, 1.0);
     frame.scale = Vec2::new(drawn.framebuffer_scale[0], drawn.framebuffer_scale[1]);
     frame.display = Vec2::new(width, height);
 }

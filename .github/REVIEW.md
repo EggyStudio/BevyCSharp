@@ -10,15 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `fda1c806`. The embedding is the bridge's own (Decision 17): `bevy_embedded_assets`
-0.16 is no longer a dependency, its build script the bridge's `build.rs`, which does nothing without
-the `embed` feature and with it lists the folder `BEVY_ASSET_PATH` names, the crate's search beside
-the target and `cargo-emit` left out, and its reader `src/embedded.rs` in the one mode the bridge
-used, each file read through Bevy's own `SliceReader`, the crate's reader tests brought along with
-one reading every embedded file back, a bridge built in the container with `--embed`, the lock
-lighter by the crate and `cargo-emit`, and the notices keeping the crate's MIT or Apache-2.0 under a
-new section for code taken into the bridge, BUILDING.md and PLAY.md saying so. Right, and done on
-0.19 as the weather was, so the bump that follows changes one thing. The suite was last run whole at
+Reviewed up to `e4c122e3`. Decision 21 is carried out, prose alone: the five places name no one, the
+version's commit a setting made by hand, the test script run on a contributor's machine, the scene
+pack's file the one that is published, the audio check's crate one that would add to N 2.8's list,
+and BUILDING.md's dependency decided apart from the work that would use it; `N_4_7` reads every
+Markdown file but the sessions' five, the comments of every C#, Rust, Slang and WGSL file and the
+whole of every script, manifest and workflow, for the owner named within a sentence of a decision
+word or a reviewing or working session named at all, a thing's owner followed by what it owns left
+alone, the vendored weather and Bevy's assets left out as N 4.1 leaves them, and it finds nothing
+else today. Right, and the matcher is the rule's text made exact. The norm's tests passed with the
+bump set aside, 29 with the script's, and the tree holds the bump in progress, headless compiling on
+0.20 and the render profile half done, whose reply gives the whole suite's count. The owner's order
+is in both repositories, 3DEngine's seven places next on its side.
+
+Before it, the embedding came to be the bridge's own (Decision 17): `bevy_embedded_assets` 0.16 is
+no longer a dependency, its build script the bridge's `build.rs`, which does nothing without the
+`embed` feature and with it lists the folder `BEVY_ASSET_PATH` names, the crate's search beside the
+target and `cargo-emit` left out, and its reader `src/embedded.rs` in the one mode the bridge used,
+each file read through Bevy's own `SliceReader`, the crate's reader tests brought along with one
+reading every embedded file back, a bridge built in the container with `--embed`, the lock lighter
+by the crate and `cargo-emit`, and the notices keeping the crate's MIT or Apache-2.0 under a new
+section for code taken into the bridge, BUILDING.md and PLAY.md saying so. Right, and done on 0.19
+as the weather was, so the bump that follows changes one thing. The suite was last run whole at
 `601c6264`; this commit reaches no test without the feature and the norm's pass, and the bump's
 reply gives the whole count. Before the bump comes the owner's order of 2026-10-09 in item 1, five
 places and N 4.7's check in one commit of prose.
@@ -41,27 +54,6 @@ on the 0.19 condition's missing declaration when no volume is in view, which the
 The suite was last run whole at `601c6264`, 1,276 passed and 2 skipped, and this commit runs none of
 it but the norm's 18, which pass; the embedding on 0.19 is next, then the bump.
 
-Before them, Verdict 6 is settled (`601c6264`): the ImGui pass queues its pipeline the first frame
-it runs, before it asks whether there is anything to draw, and the other passes were read, the
-program, dispatch and view passes queuing on the first use of a program keyed by its generation and
-formats, which nothing earlier knows, the corners on the first frame a view has them and the watch's
-at startup, so the ImGui pass was the one; the suite passed whole, 1,276 and 2 skipped, the console
-test among them, which is what settled it. The spike's report (`79f2fdb0`) is what the item asked
-for and more. Every shader slangc compiles to WGSL, 134 entry points with the feature test's nine
-among them, was composed on 0.20.0 through `Shader::from_wesl` and Bevy's own `ShaderCache` with all
-148 of Bevy's WESL modules registered, under the defs Bevy's mesh pipeline gives, and validated by
-naga 30; the ten with glue had it ported in front. As slangc writes them, 71 composed and 63 were
-refused, none for the glue: naga 30 requires `@interpolate(flat)` on every integer location, which
-Slang leaves off the instance index (31); it requires `enable wgpu_binding_array;` where a binding
-array is declared (3); and WESL's parser refuses a parenthesized left-hand side, `((width_0)) =
-dim.x;`, which WGSL allows and slangc writes for `GetDimensions` (19). With the three mended as the
-bridge mends slangc's output, all 134 composed and validated, and a unit with no glue stays
-`from_wgsl`, which 0.20 hands to naga untouched and which needs the first two mends alone. The
-counts of the three causes add to 53 against 63 refused, so the reply says in the port's commit
-which ten had two causes or another. The first two findings are Slang's and the third WESL's, and
-both are worth an issue upstream, the owner's to file, since every Slang program Bevy takes meets
-them. With the spike done, the port goes on to the manifests and the mechanical moves, item 3 b.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -83,14 +75,15 @@ from [SHARED.md](SHARED.md).
    (Decision 8), and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
    reviewing session, and a failure it names comes first here.
 
-   Before any other commit, the owner's order of 2026-10-09 (Decision 21): no document or comment a
-   reader sees names the owner or a session as the one who decided, and N 4.7 says so from today for every
-   Markdown file but the sessions' five and for the comments of every source, script, manifest and
-   workflow. Five places are mended in one commit of prose alone, with `N_4_7` widened to the rule's
-   new reach in the same commit so the list stays empty: `BevyCSharp.Tests/NormTests.cs:366`,
-   `BevyCSharp.Tests/Build/TestScriptTests.cs:8`, `build/make-scene-pack.py:21`,
-   `native/bevy_csharp/src/audio/checked.rs:53` and `.github/BUILDING.md:247`; the widgets' owner in
-   `MenuEvent.cs`, `WidgetTests.cs` and `standard_widgets.cs` is a thing's owner and stays.
+   After the batch in flight, the owner's order of 2026-10-10 (Decision 23): a run that shows no
+   window, headless or offscreen, as `./bcs open --offscreen`, the suite, the soak and the drive
+   script run one, makes no sound. The bridge gives Bevy an `AudioOutput` with no device before the
+   audio plugin would open one (`AudioPlugin` initializes the resource and keeps one already there),
+   so no device is opened and nothing reaches the speakers; a sound still plays its course and ends
+   as it would, a sink that advances by the clock where Bevy's own path would leave it unstarted, so
+   a game that waits on a sound's end works there; a config field lets a windowless run have real
+   audio where one is wanted; a test holds a headless and an offscreen app to no device and a sound
+   ending on time. Small, a commit of its own.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -395,15 +388,83 @@ from [SHARED.md](SHARED.md).
     the comments of every source, script, manifest and workflow, in both repositories, and who chose
     what stays in REVIEW.md's Decisions.
 
+22. **Content streamed on the go stays in the ledger, and the browser stays out.** The owner chose
+    on 2026-10-09, after reading a browser port of a large game that downloads its world as it is
+    played, that the idea is recorded in SHARED.md as the file layer that port has (packs on a
+    static host, reads by byte range into a block cache, a recorded first-run set, prefetch by the
+    game's own streaming), to consider until a game here ships a world too large to download first,
+    over a streaming file layer in both engines and over an HTTP source alone, since nothing here
+    needs it today; and that the browser is out, as BUILDING.md has it, since .NET in the browser
+    calls only native code linked into its own build and Bevy's web runtime is another toolchain
+    that owns the page's loop.
+
+23. **A run that shows no window makes no sound.** The owner ordered it on 2026-10-10, since a
+    hidden or offscreen run, a test or a soak, played through the machine's speakers; its audio goes
+    to no device or a device of silence, sounds still run their course, and a config field turns
+    real audio on for such a run.
+
 ## Replies
 
-**Item 1, Decision 21.** The five places name no one now. The version's commit in `NormTests` is
-a setting of the version made by hand, `TestScriptTests` runs on a contributor's machine, the scene
-pack's file is the one that is published, the audio check's crate would add to the dependencies
-N 2.8 holds to their list, and BUILDING.md's dependency is decided apart from the work that would
-use it. `N_4_7` reaches every Markdown file but the sessions' five, the comments of every C#, Rust,
-Slang and WGSL file, and the whole of every script, manifest and workflow, for the owner named
-beside a decision or a session named at all, a thing's owner followed by what it owns left alone;
-it finds nothing else today, the widgets' owners among what it leaves. The vendored weather and
-Bevy's assets are left out as N 4.1 leaves them. The norm's tests passed with the bump in progress
-set aside, and the suite was last run whole at `601c6264`, 1,276 passed and 2 skipped.
+**Item 3 b, Bevy 0.20.** The bridge, the weather and the managed side are on Bevy 0.20.0 with wgpu
+and naga 30, every profile compiling with warnings denied and the bridge's 116 tests passing with
+meshlets and Solari. The lock gains what Bevy's own tree now holds, WESL and its parsers among it,
+and loses `naga_oil`; the bridge names one feature more, `bevy/bevy_curve`, which only makes
+reachable as `bevy::curve` the crate animation already compiles. ABI 232.
+
+The moves are the ones item 3 listed, which take in observers on the lifecycle events themselves
+(`On<AddEvent>`), the flat pointer events, `bevy::curve` and `bevy::shape` for what left
+`bevy_math`, the typed `ShaderBuffer` filled through its own calls, `constants` on every pipeline
+stage, `#[extract_app(RenderApp)]` on each extracted component, `ViewDepthStencilTexture`, the
+prepass depth's own attachment type, extracted windows as render entities with their handle beside
+them, a corner radius made circular from one length, Bevy's SSAO reach kept, a summary tick refused
+for a C# component, and a Slang material left out of order-independent transparency, since its
+fragment shader writes no buffers of that pass. `SpriteMesh` is gone, so the sprite frames move
+sprites alone, bevymark takes 0.20's alpha mode on its sprites, and `many_sprite_meshes` and
+`many_animated_sprite_meshes`, which Bevy dropped, are dropped here.
+
+The interaction keeps its surface over `Hovered` and `Pressed`, as item 3 asked. An interactive node
+carries Bevy's headless `Button` and `Hovered`, and the managed `Interaction` handle names a small
+component of the bridge's, `PointerOnNode`, kept from the two in `PreUpdate` after picking, since
+thirteen examples react through `[Changed(typeof(Interaction))]` and `Hovered` does not change on a
+press. A hover now counts the nodes inside the node, as Bevy's does.
+
+The glue is WESL with 0.20's module paths, each prelude's imports put once at the head, a directive
+slangc wrote put after them, and the irradiance volumes' module imported only under
+`IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE`; a glued unit is made with `from_wesl` under a
+module path of its own, and every other stays `from_wgsl`. The fallbacks are WESL too and decompress
+the vertex as Bevy's own shaders do. The spike's three mends live in `reflect/mend.rs` with tests of
+their own, applied to every unit slangc writes. On the spike's count, the ten that make 63 are the
+ten glued units, which composed and were then refused by naga 30 for the integer rule, which the
+report counted only among the unglued. The weather's two shaders are WESL, their import, their one
+condition and naga_oil's `#{MATERIAL_BIND_GROUP}` moved, and its Rust compiled unchanged.
+
+Four of Bevy 0.20's own faults are worked around in the bridge, each said where it is done.
+Passthrough SPIR-V is handed to wgpu 30 without the entry point it now asks for, so every SPIR-V
+compute pipeline was refused; the bridge builds those itself (`render/spirv_compute.rs`), the module
+naming its one entry point, and keeps the stage's words for it. A clip's targets are found by its
+curves alone, so an event placed on a target with no curve never fired; such a target is given an
+empty list of curves. Auto exposure's pass stays on a camera's view after the effect is removed, as
+in 0.19, and 0.19's workaround, a new render entity for the camera, now bins its meshes twice and
+panics; the pass's private component is taken off every view without the effect
+(`render/exposure.rs`). A focused field takes keys only with `bevy_ui_widgets::TextInput`, which the
+field now carries. `bcs_ray` follows Solari 0.20's scene group, the previous frame's acceleration
+structure at binding 6 and the transforms as three rows of an affine matrix, and Solari 0.20 binds
+its scene only once it holds a light, which the guide now says and the two tests tracing it now give
+it.
+
+The schema was dumped again from an editor build; its diff reads as the list of what Bevy changed.
+The generator stopped on `FontSource::List(Vec<FontSource>)`, a type holding a list of itself, and
+now leaves such a variant out of its union rather than recurse. Moved components get former paths
+from `BevyCSharp/Generated/bevy-former-paths.tsv`, which `FormerPathsGenerator` turns into the paths
+a reflected schema is also found by, so `Tonemapping` and `DebandDither` read from a file written on
+0.19, Courtyard's left as it is, with a test placing one by its old path. The examples' table is
+written from 0.20's list, the five lines Bevy no longer has taken out and the 22 new ones triaged.
+`material.rs` and `reflected.rs`, which the port took past 800 lines, move their render errors and
+their resource finder into modules of their own in this commit; the six listed files it touches,
+`views.rs`, `post.rs`, `compute.rs`, `window.rs`, `slang.rs` and `ecs.rs`, are mended in commits of
+their own that move code alone, next.
+
+The suite passed 1,276, skipped 2 and failed 1, N 6.5, which reads the newest local package, one
+packed on 0.19 whose notices name 0.19's crates; against a package packed from this tree it and the
+rest of the norm's tests pass. Every example's head names 0.20.0, as the table's script writes it
+from the lock.

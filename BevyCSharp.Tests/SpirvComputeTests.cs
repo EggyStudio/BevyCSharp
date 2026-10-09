@@ -348,6 +348,9 @@ public sealed class SpirvComputeTests
                 ecs.Add(cube, Transform.At(0f, 1.5f, 0f));
                 Render.SetRayTraced(cube, cubeMesh);
 
+                // A light, without which Solari binds no scene to trace against.
+                Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
+
                 Shaders.SetViewImages(camera, new ViewImage("lit", ShaderImageFormat.R32Float));
                 Shaders.SetViewDispatches(
                     camera,
@@ -422,6 +425,9 @@ public sealed class SpirvComputeTests
                 Render.SetMaterial(ecs, cube, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f) }));
                 ecs.Add(cube, Transform.At(0f, 0f, 0f));
                 Render.SetRayTraced(cube, mesh);
+
+                // A light, without which Solari binds no scene to trace against.
+                Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
 
                 // Nine rays a unit apart, from four to the left to four to the right.
                 hits = Shaders.CreateBuffer<Vector4>(new Vector4[9]);

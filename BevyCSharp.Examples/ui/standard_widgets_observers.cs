@@ -1,5 +1,5 @@
 // Bevy's standard_widgets_observers example, examples/ui/widgets/standard_widgets_observers.rs at
-// v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+// v0.20.0, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 using Bevy.Reflected;
@@ -101,7 +101,7 @@ internal static class StandardWidgetsObservers
             Color = StandardWidgets.NormalButton,
         });
         ecs.Add(button, new ObservedButton());
-        ecs.Insert<BevyUiWidgetsButtonRef>(button);
+        ecs.Insert<ButtonRef>(button);
         ecs.Insert<HoveredRef>(button);
         ecs.Insert<TabIndexRef>(button);
         Widgets.Add(button);

@@ -43,7 +43,7 @@ use bevy::ecs::reflect::ReflectComponent;
 use bevy::ecs::reflect::ReflectResource;
 use bevy::reflect::std_traits::ReflectDefault;
 
-const SHADER_PATH: &str = "embedded://bevy_weather/precipitation/precipitation.wgsl";
+const SHADER_PATH: &str = "embedded://bevy_weather/precipitation/precipitation.wesl";
 
 /// Which kind of particle an entity draws.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
@@ -153,7 +153,7 @@ impl Default for PrecipitationConfig {
 /// Uniform for the precipitation shader.
 ///
 /// Field order and types must match `PrecipitationUniform` in
-/// `precipitation.wgsl` exactly.
+/// `precipitation.wesl` exactly.
 #[derive(ShaderType, Debug, Clone, Default)]
 pub struct PrecipitationUniform {
     /// `xyz`: wind velocity. `w`: fall speed.
@@ -286,7 +286,7 @@ pub struct PrecipitationPlugin;
 
 impl Plugin for PrecipitationPlugin {
     fn build(&self, app: &mut App) {
-        embedded_asset!(app, "precipitation.wgsl");
+        embedded_asset!(app, "precipitation.wesl");
 
         app.init_resource::<PrecipitationConfig>()
             .register_type::<PrecipitationConfig>()

@@ -51,7 +51,7 @@ use bevy::ecs::reflect::ReflectComponent;
 use bevy::ecs::reflect::ReflectResource;
 use bevy::reflect::std_traits::ReflectDefault;
 
-const SHADER_PATH: &str = "embedded://bevy_weather/sky/sky.wgsl";
+const SHADER_PATH: &str = "embedded://bevy_weather/sky/sky.wesl";
 
 /// Mean planetary radius in metres, used for the curvature of the cloud layer.
 pub const EARTH_RADIUS_M: f32 = 6_371_000.0;
@@ -306,7 +306,7 @@ pub struct SkyDome;
 
 /// Everything the sky shader needs, in one uniform.
 ///
-/// Field order and types must match `SkyUniform` in `sky.wgsl` exactly.
+/// Field order and types must match `SkyUniform` in `sky.wesl` exactly.
 #[derive(ShaderType, Debug, Clone)]
 pub struct SkyUniform {
     /// `xyz`: direction to the sun. `w`: its angular radius.
@@ -478,7 +478,7 @@ impl Material for SkyMaterial {
 ///
 /// A separate material from [`SkyMaterial`] purely so it can be alpha-blended
 /// in the transparent pass, which runs *after* Bevy's atmosphere. See the
-/// header comment in `sky.wgsl` for why that ordering is not optional.
+/// header comment in `sky.wesl` for why that ordering is not optional.
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone, Default)]
 pub struct CloudMaterial {
     /// The same uniform [`SkyMaterial`] uses; both passes are driven together.
@@ -634,7 +634,7 @@ pub struct SkyPlugin;
 
 impl Plugin for SkyPlugin {
     fn build(&self, app: &mut App) {
-        embedded_asset!(app, "sky.wgsl");
+        embedded_asset!(app, "sky.wesl");
 
         app.init_resource::<StarConfig>()
             .init_resource::<GalaxyConfig>()

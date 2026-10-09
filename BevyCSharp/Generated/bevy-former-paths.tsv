@@ -1,0 +1,7 @@
+# Bevy's reflected components that moved to another path, for BevyCSharp.Generator to turn into
+# the former names a scene written before the move is read through. A line a move, the path a file
+# written before it names, then the path Bevy gives the component now, kept as long as such a file
+# may still be read, so a scene or a saved game outlives the upgrade that moved what it holds.
+# former <old path> <new path>
+former	bevy_core_pipeline::tonemapping::Tonemapping	bevy_render::view::Tonemapping
+former	bevy_core_pipeline::tonemapping::DebandDither	bevy_render::view::DebandDither

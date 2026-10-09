@@ -84,7 +84,9 @@ pub unsafe extern "C" fn bcs_ui_set_editable_text(
                     editable.visible_width = visible_width;
                     editable.visible_lines = visible_lines;
                     editable.allow_newlines = allow_newlines;
-                    entity_mut.insert((editable, TextCursorStyle::default()));
+                    // Bevy 0.20's text input widget, which takes the keys a focused field is
+                    // typed into and requires the editable text it edits.
+                    entity_mut.insert((editable, TextCursorStyle::default(), bevy::ui_widgets::TextInput));
                 }
                 match allowed {
                     Some(allowed) => {

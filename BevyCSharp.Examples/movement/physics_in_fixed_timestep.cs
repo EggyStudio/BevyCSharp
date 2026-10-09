@@ -1,5 +1,5 @@
 // Bevy's physics_in_fixed_timestep example, examples/movement/physics_in_fixed_timestep.rs at
-// v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+// v0.20.0, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 

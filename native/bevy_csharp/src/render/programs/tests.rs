@@ -16,7 +16,7 @@ fn a_false_define_is_left_out() {
 #[test]
 fn every_fallback_has_the_entry_point_it_was_asked_for() {
     for role in Role::ALL {
-        assert!(fallback_source(role, "custom_entry").contains("fn custom_entry("));
+        assert!(fallback_source(role, "custom_entry").text().contains("fn custom_entry("));
     }
 }
 
@@ -34,10 +34,10 @@ fn a_fragment_shader_is_given_the_preludes_it_calls_and_no_others() {
     let both = "fn fragment() { bcs_decal_tag(a, b, 0u); bcs_pbr_light(); }".to_string();
 
     let given = with_bevy(Role::Fragment, decals.clone());
-    assert!(given.contains("fn bcs_decal_seek(") && !given.contains("fn bcs_pbr_light("));
-    assert!(with_bevy(Role::Fragment, both.clone()).contains("fn bcs_pbr_light("));
-    assert_eq!(with_bevy(Role::Vertex, decals.clone()), decals);
-    assert_eq!(with_bevy(Role::Fragment, "fn fragment() {}".into()), "fn fragment() {}");
+    assert!(given.text().contains("fn bcs_decal_seek(") && !given.text().contains("fn bcs_pbr_light("));
+    assert!(with_bevy(Role::Fragment, both.clone()).text().contains("fn bcs_pbr_light("));
+    assert_eq!(with_bevy(Role::Vertex, decals.clone()).text(), decals);
+    assert_eq!(with_bevy(Role::Fragment, "fn fragment() {}".into()).text(), "fn fragment() {}");
 
     let stand_ins = super::stand_ins(&both).expect("a shader calling both is read with stand-ins");
     assert!(stand_ins.contains("fn bcs_decal_tag(") && stand_ins.contains("fn bcs_pbr_light("));

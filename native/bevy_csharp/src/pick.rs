@@ -21,14 +21,14 @@ pub struct Picks(pub Vec<u64>);
 /// Adds mesh picking and the queue behind [`bcs_pick_events`].
 #[cfg(feature = "render")]
 pub fn install(app: &mut bevy::app::App) {
-    use bevy::picking::events::{Click, Pointer};
+    use bevy::picking::events::PointerClick;
     use bevy::prelude::*;
 
     app.add_plugins(bevy::picking::mesh_picking::MeshPickingPlugin);
     app.init_resource::<Picks>();
 
     app.add_observer(
-        |click: On<Pointer<Click>>,
+        |click: On<PointerClick>,
          meshes: Query<(), With<bevy::mesh::Mesh3d>>,
          mut picks: ResMut<Picks>| {
             // The primary button only. The secondary one steers the camera in every editor
@@ -127,7 +127,8 @@ pub unsafe extern "C" fn bcs_pick_ray(
         {
             use bevy::camera::visibility::RenderLayers;
             use bevy::ecs::system::SystemState;
-            use bevy::math::{Dir3, Ray3d, Vec3};
+            use bevy::math::{Dir3, Vec3};
+            use bevy::shape::Ray3d;
             use bevy::picking::mesh_picking::ray_cast::{MeshRayCast, MeshRayCastSettings};
 
             let from = unsafe { Vec3::from_slice(std::slice::from_raw_parts(origin, 3)) };

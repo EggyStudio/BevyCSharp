@@ -185,7 +185,9 @@ public static partial class SceneFile
             {
                 try
                 {
-                    world.InsertReflected(entity, component.Name, component.Value.GetRawText());
+                    // By the path Bevy has for it now, which a scene written before it moved
+                    // names otherwise.
+                    world.InsertReflected(entity, schema.QualifiedName, component.Value.GetRawText());
                 }
                 catch (Interop.BevyNativeException error)
                 {

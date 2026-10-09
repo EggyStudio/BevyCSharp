@@ -57,6 +57,7 @@ use bevy::render::{ExtractSchedule, MainWorld, Render, RenderApp, RenderStartup,
 use super::material::say_once;
 use super::programs::{self, Role};
 use super::values::{PackContext, PackError, Stand, Values, pack};
+use super::spirv_compute::ComputePipelineRef;
 use crate::interop::status;
 
 /// The smallest a buffer is made, because a buffer has to have a size to be bound.
@@ -224,12 +225,12 @@ struct ComputePipelines {
     /// Group one, which is time and nothing else.
     inputs: BindGroupLayoutDescriptor,
     /// One pipeline per program and version of it.
-    pipelines: HashMap<(u32, u32), CachedComputePipelineId>,
+    pipelines: HashMap<(u32, u32), ComputePipelineRef>,
 }
 
 /// A dispatch ready to run.
 struct PreparedDispatch {
-    pipeline: CachedComputePipelineId,
+    pipeline: ComputePipelineRef,
     own: BindGroup,
     inputs: BindGroup,
     /// Whether it binds Solari's scene as group two, which is taken when it runs, since Solari
@@ -325,8 +326,9 @@ fn own_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
 fn pipeline_for(
     pipelines: &mut ComputePipelines,
     cache: &PipelineCache,
+    device: &RenderDevice,
     id: u32,
-) -> Option<(CachedComputePipelineId, programs::PipelineProgram)> {
+) -> Option<(ComputePipelineRef, programs::PipelineProgram)> {
     let program = programs::lookup(id)?;
     let layout = program.compute.clone()?;
     let stage = program.stages[Role::Compute as usize].clone()?;
@@ -340,7 +342,7 @@ fn pipeline_for(
     let key = (id, program.generation);
 
     if let Some(pipeline) = pipelines.pipelines.get(&key) {
-        return Some((*pipeline, program));
+        return Some((pipeline.clone(), program));
     }
 
     let mut groups = vec![own_layout(&layout), pipelines.inputs.clone()];
@@ -350,19 +352,24 @@ fn pipeline_for(
         groups.push(super::solari::scene_layout()?);
     }
 
-    let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
-        label: Some("bcs_compute".into()),
-        layout: groups,
-        immediate_size: 0,
-        shader: stage.shader,
-        shader_defs: Vec::new(),
-        // A shader handed over as SPIR-V is not read on the way in, so nothing finds its entry
-        // point for it.
-        entry_point: layout.spirv.then(|| stage.entry.clone()),
-        zero_initialize_workgroup_memory: true,
-    });
+    // SPIR-V built here, with its entry point named, and anything else queued in Bevy's cache. A
+    // pipeline that could not be built is kept as one that never will be, so it is not tried again.
+    let pipeline = match &stage.spirv {
+        Some(spirv) => super::spirv_compute::build(device, cache, "bcs_compute", &groups, spirv, &stage.entry)
+            .map_or(ComputePipelineRef::Cached(CachedComputePipelineId::INVALID), ComputePipelineRef::Own),
+        None => ComputePipelineRef::Cached(cache.queue_compute_pipeline(ComputePipelineDescriptor {
+            label: Some("bcs_compute".into()),
+            layout: groups,
+            immediate_size: 0,
+            shader: stage.shader,
+            shader_defs: Vec::new(),
+            entry_point: None,
+            zero_initialize_workgroup_memory: true,
+            constants: Vec::new(),
+        })),
+    };
 
-    pipelines.pipelines.insert(key, pipeline);
+    pipelines.pipelines.insert(key, pipeline.clone());
     Some((pipeline, program))
 }
 
@@ -385,8 +392,8 @@ fn prepare_dispatches(
     // it exists, rather than when it is first dispatched, so a dispatch made once the program
     // reports ready runs rather than being dropped while its pipeline compiles.
     for id in 0..programs::table_len() {
-        if let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, id)
-            && cache.get_compute_pipeline(pipeline).is_some()
+        if let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, &render_device, id)
+            && pipeline.get(&cache).is_some()
         {
             programs::mark_compute_ready(id, program.generation);
         }
@@ -406,7 +413,7 @@ fn prepare_dispatches(
     );
 
     for dispatch in &extracted.0 {
-        let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, dispatch.program)
+        let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, &render_device, dispatch.program)
         else {
             // Silent while the program is still compiling, which is every program's first few
             // frames and says nothing wrong about the dispatch.
@@ -531,12 +538,12 @@ fn run_dispatches(
     for dispatch in &prepared.0 {
         // Still compiling. Dropped rather than kept for later, because a dispatch is about the
         // frame it was asked for in.
-        let Some(pipeline) = cache.get_compute_pipeline(dispatch.pipeline) else {
+        let Some(pipeline) = dispatch.pipeline.get(&cache) else {
             continue;
         };
 
         // Solari builds its scene's bind group once there is something in it, so a shader tracing
-        // rays waits for the first mesh given to ray tracing.
+        // rays waits for the first mesh given to ray tracing and the first light.
         if dispatch.traces_scene && scene.is_none() {
             continue;
         }
@@ -613,6 +620,12 @@ fn sized(bytes: &[u8], size: u64) -> Vec<u8> {
     data
 }
 
+/// Makes `bytes` the whole of what a buffer holds, its size theirs.
+pub fn fill(buffer: &mut ShaderBuffer, bytes: &[u8]) {
+    buffer.clear();
+    buffer.extend_from_slice(bytes);
+}
+
 /// The size a buffer asked to hold `wanted` bytes is made, which is a whole number of words and
 /// never less than sixteen.
 pub fn buffer_size(wanted: u64) -> u64 {
@@ -627,10 +640,9 @@ pub fn create_buffer(world: &mut World, bytes: &[u8], size: u64) -> i32 {
         return status::UNSUPPORTED;
     };
 
-    let mut buffer = ShaderBuffer::new(&sized(bytes, size), RenderAssetUsages::default());
-    buffer.buffer_description.label = Some("bcs_shader_buffer");
-    buffer.buffer_description.size = size;
-    buffer.buffer_description.usage = buffer_usage();
+    let mut buffer = ShaderBuffer::new(sized(bytes, size), RenderAssetUsages::default());
+    buffer.label = "bcs_shader_buffer".into();
+    buffer.buffer_usage = buffer_usage();
 
     let handle = assets.add(buffer);
     crate::assets::insert_handle(world, handle.untyped())
@@ -657,13 +669,13 @@ pub fn write_buffer(world: &mut World, key: i32, bytes: &[u8]) -> i32 {
         return status::NO_COMPONENT;
     };
 
-    let size = buffer.buffer_description.size;
+    let size = buffer.buffer_size();
 
     if bytes.len() as u64 > size {
         return status::BUFFER_TOO_SMALL;
     }
 
-    buffer.data = Some(sized(bytes, size));
+    fill(&mut buffer, &sized(bytes, size));
     status::OK
 }
 
@@ -690,8 +702,8 @@ pub fn grow_buffer(world: &mut World, key: i32, size: u64) -> i32 {
             return status::NO_COMPONENT;
         };
 
-        if current.buffer_description.size >= wanted {
-            return current.buffer_description.size.min(i32::MAX as u64) as i32;
+        if current.buffer_size() >= wanted {
+            return current.buffer_size().min(i32::MAX as u64) as i32;
         }
 
         let Some(mut buffer) = assets.get_mut(&handle) else {
@@ -700,9 +712,8 @@ pub fn grow_buffer(world: &mut World, key: i32, size: u64) -> i32 {
 
         // No data, so the new buffer takes the old one's contents rather than bytes from here,
         // which would be what the CPU last wrote rather than what the GPU has since.
-        buffer.data = None;
+        buffer.data = bevy::render::storage::ShaderBufferData::Uninitialized(wanted);
         buffer.copy_on_resize = true;
-        buffer.buffer_description.size = wanted;
     }
 
     rebind_buffer(world, &handle);
@@ -750,7 +761,7 @@ pub fn size_of_buffer(world: &World, key: i32) -> i32 {
     world
         .get_resource::<Assets<ShaderBuffer>>()
         .and_then(|assets| assets.get(&handle))
-        .map(|buffer| buffer.buffer_description.size.min(i32::MAX as u64) as i32)
+        .map(|buffer| buffer.buffer_size().min(i32::MAX as u64) as i32)
         .unwrap_or(status::NO_COMPONENT)
 }
 

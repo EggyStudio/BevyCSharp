@@ -319,6 +319,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // Which clip each spawned model plays, and the clips that reached their end.
             crate::animation::install(&mut app);
 
+            // How the pointer stands on each interactive node, which the managed side reads.
+            crate::ui::install(&mut app);
+
             // HTML and CSS driven UI, when the profile carries it and the app asked for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never
@@ -344,6 +347,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // The scene-wide ambient light and clear color, kept in the picture from the frame
             // they are set, which Bevy's own copying misses for a value set at startup.
             crate::render::post::install(&mut app);
+            crate::render::exposure::install(&mut app);
 
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.

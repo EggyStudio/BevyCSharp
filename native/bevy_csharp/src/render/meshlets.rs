@@ -63,7 +63,7 @@ pub fn install(app: &mut bevy::app::App, clusters: u32, backends: Option<wgpu::B
 
     // On every insert, which is how both a new camera's default and a later post-processing
     // setting arrive, so there is no frame on which a camera draws more than once a pixel.
-    app.add_observer(|insert: On<Insert, Msaa>, mut cameras: Query<&mut Msaa>| {
+    app.add_observer(|insert: On<Insert<Msaa>>, mut cameras: Query<&mut Msaa>| {
         if let Ok(mut msaa) = cameras.get_mut(insert.entity)
             && *msaa != Msaa::Off
         {

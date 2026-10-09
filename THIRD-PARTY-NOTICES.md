@@ -33,11 +33,11 @@ hold, or for a crate whose package holds none, the standard text of each license
 | ab_glyph | 0.2.32 | Apache-2.0 | by Alex Butler &lt;alexheretic@gmail.com&gt; | [1](#text-1) |
 | ab_glyph_rasterizer | 0.1.10 | Apache-2.0 | by Alex Butler &lt;alexheretic@gmail.com&gt; | [1](#text-1) |
 | accesskit | 0.24.1 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
-| accesskit_consumer | 0.35.0 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
 | accesskit_consumer | 0.38.0 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
+| accesskit_ios | 0.1.2 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
 | accesskit_macos | 0.26.3 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
-| accesskit_windows | 0.32.1 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
-| accesskit_winit | 0.32.2 | Apache-2.0 | by The AccessKit contributors | [5](#text-5) |
+| accesskit_windows | 0.34.0 | MIT OR Apache-2.0 | by The AccessKit contributors | [4](#text-4), [5](#text-5) |
+| accesskit_winit | 0.33.2 | Apache-2.0 | by The AccessKit contributors | [5](#text-5) |
 | adler2 | 2.0.1 | 0BSD OR MIT OR Apache-2.0 | Copyright (C) Jonas Schievink &lt;jonasschievink@gmail.com&gt; | [2](#text-2), [3](#text-3), [4](#text-4) |
 | ahash | 0.8.12 | MIT OR Apache-2.0 | Copyright (c) 2018 Tom Kaitchuck | [5](#text-5), [4](#text-4) |
 | aho-corasick | 1.1.5 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
@@ -48,214 +48,218 @@ hold, or for a crate whose package holds none, the standard text of each license
 | android-properties | 0.2.2 | MIT | Copyright (c) 2020 Mikhail Lappo | [9](#text-9) |
 | android_log-sys | 0.3.2 | MIT OR Apache-2.0 | Copyright 2016 The android_log_sys Developers<br>Copyright (c) 2016 The android_log_sys Developers | [11](#text-11), [4](#text-4) |
 | android_system_properties | 0.1.6 | MIT OR Apache-2.0 | Copyright 2016 Nicolas Silva<br>Copyright (c) 2013 Nicolas Silva<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [12](#text-12), [13](#text-13) |
+| annotate-snippets | 0.12.16 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| anstream | 1.0.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| anstyle | 1.0.14 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| anstyle-parse | 1.0.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| anstyle-query | 1.1.5 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| anstyle-wincon | 3.0.11 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
 | approx | 0.5.1 | Apache-2.0 | by Brendan Zabarauskas &lt;bjzaba@yahoo.com.au&gt; | [5](#text-5) |
 | arboard | 3.6.1 | MIT OR Apache-2.0 | Copyright (c) 2022 The Arboard contributors | [1](#text-1), [9](#text-9) |
-| arrayref | 0.3.9 | BSD-2-Clause | Copyright (c) 2015 David Roundy &lt;roundyd@physics.oregonstate.edu&gt; | [14](#text-14) |
+| arrayref | 0.3.9 | BSD-2-Clause | Copyright (c) 2015 David Roundy &lt;roundyd@physics.oregonstate.edu&gt; | [15](#text-15) |
 | arrayvec | 0.7.8 | MIT OR Apache-2.0 | Copyright (c) Ulrik Sverdrup "bluss" 2015-2023 | [5](#text-5), [4](#text-4) |
 | as-raw-xcb-connection | 1.0.1 | MIT OR Apache-2.0 | Copyright 2019 as-raw-xcb-connection Contributers | [5](#text-5), [4](#text-4) |
-| ash | 0.38.0+1.3.281 | MIT OR Apache-2.0 | Copyright 2016 Maik Klein<br>Copyright (c) 2016 ASH | [15](#text-15), [4](#text-4) |
+| ash | 0.38.0+1.3.281 | MIT OR Apache-2.0 | Copyright 2016 Maik Klein<br>Copyright (c) 2016 ASH | [16](#text-16), [4](#text-4) |
 | assert_type_match | 0.1.1 | MIT OR Apache-2.0 | Copyright (c) 2024 Gino Valente | [5](#text-5), [9](#text-9) |
-| async-broadcast | 0.7.2 | MIT OR Apache-2.0 | Copyright 2020 Yoshua Wuyts<br>Copyright (c) 2020 Yoshua Wuyts | [16](#text-16), [7](#text-7) |
+| async-broadcast | 0.7.2 | MIT OR Apache-2.0 | Copyright 2020 Yoshua Wuyts<br>Copyright (c) 2020 Yoshua Wuyts | [17](#text-17), [7](#text-7) |
 | async-channel | 2.5.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | async-executor | 1.14.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt;, John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
 | async-fs | 2.2.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | async-io | 2.6.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | async-lock | 3.4.2 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | async-task | 4.7.1 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
-| atomic-waker | 1.1.2 | Apache-2.0 OR MIT | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors<br>Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [5](#text-5), [4](#text-4), [17](#text-17) |
+| atomic-waker | 1.1.2 | Apache-2.0 OR MIT | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors<br>Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [5](#text-5), [4](#text-4), [18](#text-18) |
 | atomicow | 1.2.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/atomicow | [1](#text-1), [9](#text-9) |
 | autocfg | 1.5.1 | Apache-2.0 OR MIT | Copyright (c) 2018 Josh Stone | [5](#text-5), [4](#text-4) |
-| base64 | 0.22.1 | MIT OR Apache-2.0 | Copyright (c) 2015 Alice Maz | [5](#text-5), [7](#text-7) |
-| bevy | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_a11y | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_android | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_animation | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_animation_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_anti_alias | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_app | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_asset | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_asset_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_audio | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_camera | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_clipboard | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_color | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_core_pipeline | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_diagnostic | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ecs | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ecs_macro_logic | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_ecs_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_encase_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_gilrs | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_gizmos | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_gizmos_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_gizmos_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_gltf | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_image | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_input | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_input_focus | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_internal | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_light | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_log | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_macro_utils | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_material | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_material_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_math | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_mesh | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| base64 | 0.23.1 | MIT OR Apache-2.0 | Copyright (c) 2025 Alice Maz, Marshall Pierce | [5](#text-5), [7](#text-7) |
+| bevy | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_a11y | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_android | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_animation | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_animation_macros | 0.20.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_anti_alias | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_app | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_asset | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_asset_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_audio | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_camera | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_clipboard | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_color | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_core_pipeline | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_curve | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_derive | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_diagnostic | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ecs | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ecs_macro_logic | 0.20.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_ecs_macros | 0.20.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_encase_derive | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_extract | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_extract_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gilrs | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gizmos_render | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_gltf | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_image | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_input | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_input_focus | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_internal | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_light | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_log | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_macro_utils | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_material | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_material_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_math | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_mesh | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_mikktspace | 1.0.0 | Zlib AND (MIT OR Apache-2.0) | Copyright (c) 2017 The mikktspace Library Developers | [1](#text-1), [4](#text-4) |
-| bevy_pbr | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_picking | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_platform | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_post_process | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ptr | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_reflect | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_reflect_derive | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_render_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_scene | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_scene_macros | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [4](#text-4), [5](#text-5) |
-| bevy_shader | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_solari | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_sprite | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_sprite_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_state | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_state_macros | 0.19.1 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
-| bevy_tasks | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_text | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_time | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_transform | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ui | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ui_render | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_ui_widgets | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_utils | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_pbr | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_picking | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_platform | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_post_process | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ptr | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_reflect | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_reflect_derive | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_render | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_render_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_scene | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_scene_macros | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [4](#text-4), [5](#text-5) |
+| bevy_shader | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_shape | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_solari | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_sprite | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_sprite_render | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_state | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_state_macros | 0.20.0 | MIT OR Apache-2.0 | none given | [1](#text-1), [9](#text-9) |
+| bevy_tasks | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_text | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_time | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_transform | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui_render | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_ui_widgets | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_utils | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
 | bevy_weather | 0.2.0 | MIT OR Apache-2.0 | Copyright (c) 2026 the bevy_weather authors | [9](#text-9) |
-| bevy_window | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_winit | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bevy_world_serialization | 0.19.1 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
-| bit-set | 0.9.1 | Apache-2.0 OR MIT | Copyright (c) 2026 The Rust Project Developers | [5](#text-5), [4](#text-4) |
+| bevy_window | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_winit | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bevy_world_serialization | 0.20.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/bevy | [1](#text-1), [9](#text-9) |
+| bit-set | 0.10.0 | Apache-2.0 OR MIT | Copyright (c) 2026 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bit-vec | 0.9.1 | Apache-2.0 OR MIT | Copyright (c) 2023 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bitflags | 1.3.2 | MIT/Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bitflags | 2.13.1 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | bitvec | 1.1.1 | MIT | Copyright (c) 2018 myrrlyn (Alexander Payne) | [9](#text-9) |
-| blake3 | 1.8.7 | CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception | Copyright 2019 Jack O'Connor and Samuel Neves | [18](#text-18), [19](#text-19), [20](#text-20) |
+| blake3 | 1.8.7 | CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception | Copyright 2019 Jack O'Connor and Samuel Neves | [19](#text-19), [20](#text-20), [21](#text-21) |
 | block2 | 0.5.1 | MIT | by Steven Sheldon, Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | block2 | 0.6.2 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | blocking | 1.7.0 | Apache-2.0 OR MIT | the contributors to https://github.com/smol-rs/blocking | [5](#text-5), [4](#text-4) |
 | bumpalo | 3.20.3 | MIT OR Apache-2.0 | Copyright (c) 2019 Nick Fitzgerald | [5](#text-5), [4](#text-4) |
-| bytemuck | 1.25.2 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [21](#text-21), [22](#text-22) |
-| bytemuck_derive | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [21](#text-21), [22](#text-22) |
+| bytemuck | 1.25.2 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [22](#text-22), [23](#text-23) |
+| bytemuck_derive | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [22](#text-22), [23](#text-23) |
 | byteorder | 1.5.0 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
 | byteorder-lite | 0.1.0 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [7](#text-7), [8](#text-8) |
 | bytes | 1.12.1 | MIT | Copyright (c) 2018 Carl Lerche | [4](#text-4) |
 | calloop | 0.13.0 | MIT | Copyright (c) 2018 Victor Berger | [4](#text-4) |
 | calloop-wayland-source | 0.3.0 | MIT | Copyright (c) 2023 Kirill Chibisov | [4](#text-4) |
 | cc | 1.4.4 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
-| cesu8 | 1.1.0 | Apache-2.0/MIT | copyright itself, held by the contributor. | [23](#text-23) |
+| cesu8 | 1.1.0 | Apache-2.0/MIT | copyright itself, held by the contributor. | [24](#text-24) |
 | cfg-if | 1.0.4 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
-| cfg_aliases | 0.2.2 | MIT | Copyright (c) 2020 Katharos Technology | [9](#text-9), [24](#text-24) |
+| cfg_aliases | 0.2.2 | MIT | Copyright (c) 2020 Katharos Technology | [9](#text-9), [25](#text-25) |
 | claxon | 0.4.3 | Apache-2.0 | by Ruud van Asseldonk &lt;dev@veniogames.com&gt; | [5](#text-5) |
 | clipboard-win | 5.4.1 | BSL-1.0 | by Douman &lt;douman@gmx.se&gt; | [33](#text-33) |
-| codespan-reporting | 0.12.0 | Apache-2.0 | by Brendan Zabarauskas &lt;bjzaba@yahoo.com.au&gt; | [5](#text-5) |
 | codespan-reporting | 0.13.1 | Apache-2.0 | by Brendan Zabarauskas &lt;bjzaba@yahoo.com.au&gt; | [5](#text-5) |
+| colorchoice | 1.0.5 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
 | combine | 4.6.8 | MIT | Copyright (c) 2015 Markus Westerlind | [7](#text-7) |
 | concurrent-queue | 2.5.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt;, Taiki Endo &lt;te316e89@gmail.com&gt;, John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
 | console_error_panic_hook | 0.1.7 | Apache-2.0/MIT | Copyright (c) 2018 Nick Fitzgerald | [5](#text-5), [4](#text-4) |
 | const-fnv1a-hash | 1.1.0 | MIT | Copyright (c) 2021 Hindrik Stegenga | [9](#text-9) |
-| const_panic | 0.2.17 | Zlib | Copyright (c) 2021 Matias Rodriguez. | [22](#text-22) |
-| const_soft_float | 0.1.4 | MIT OR Apache-2.0 | Copyright 2023 Kirk Nickish and https://github.com/823984418<br>Copyright (c) 2023 Kirk Nickish and https://github.com/823984418 | [18](#text-18), [4](#text-4) |
-| constant_time_eq | 0.4.2 | CC0-1.0 OR MIT-0 OR Apache-2.0 | by Cesar Eduardo Barros &lt;cesarb@cesarb.eti.br&gt; | [1](#text-1), [20](#text-20), [25](#text-25) |
+| const_panic | 0.2.17 | Zlib | Copyright (c) 2021 Matias Rodriguez. | [23](#text-23) |
+| const_soft_float | 0.1.4 | MIT OR Apache-2.0 | Copyright 2023 Kirk Nickish and https://github.com/823984418<br>Copyright (c) 2023 Kirk Nickish and https://github.com/823984418 | [19](#text-19), [4](#text-4) |
+| constant_time_eq | 0.4.2 | CC0-1.0 OR MIT-0 OR Apache-2.0 | by Cesar Eduardo Barros &lt;cesarb@cesarb.eti.br&gt; | [1](#text-1), [21](#text-21), [26](#text-26) |
 | constgebra | 0.1.4 | MIT OR Apache-2.0 | the contributors to https://github.com/knickish/constgebra | [4](#text-4), [5](#text-5) |
 | convert_case | 0.10.0 | MIT | Copyright (c) 2025 rutrum | [9](#text-9) |
 | core-foundation | 0.9.4 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
 | core-foundation-sys | 0.8.7 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
-| core-graphics | 0.23.2 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [26](#text-26), [5](#text-5), [4](#text-4) |
+| core-graphics | 0.23.2 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [27](#text-27), [5](#text-5), [4](#text-4) |
 | core-graphics-types | 0.1.3 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [5](#text-5), [4](#text-4) |
-| core_maths | 0.1.1 | MIT | Copyright (c) 2024 Robert Bastian | [9](#text-9) |
 | coreaudio-rs | 0.14.2 | MIT/Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
 | cpal | 0.17.3 | Apache-2.0 | the contributors to https://github.com/RustAudio/cpal | [5](#text-5) |
 | cpufeatures | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2020-2026 The RustCrypto Project Developers | [5](#text-5), [4](#text-4) |
-| crc32fast | 1.5.1 | MIT OR Apache-2.0 | Copyright (c) 2018 Sam Rijs, Alex Crichton and contributors | [27](#text-27), [9](#text-9) |
+| crc32fast | 1.5.1 | MIT OR Apache-2.0 | Copyright (c) 2018 Sam Rijs, Alex Crichton and contributors | [14](#text-14), [9](#text-9) |
 | critical-section | 1.2.0 | MIT OR Apache-2.0 | Copyright (c) 2022 The critical-section authors | [5](#text-5), [4](#text-4) |
 | crossbeam-channel | 0.5.16 | MIT OR Apache-2.0 | Copyright (c) 2019 The Crossbeam Project Developers<br>COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS<br>copyright protection under copyright law or other applicable laws.<br>Copyright (c) 2009 The Go Authors. All rights reserved. | [5](#text-5), [7](#text-7), [28](#text-28) |
 | crossbeam-queue | 0.3.13 | MIT OR Apache-2.0 | Copyright (c) 2019 The Crossbeam Project Developers | [5](#text-5), [7](#text-7) |
 | crossbeam-utils | 0.8.22 | MIT OR Apache-2.0 | Copyright (c) 2019 The Crossbeam Project Developers | [5](#text-5), [7](#text-7) |
 | crunchy | 0.2.4 | MIT | Copyright 2017-2023 Eira Fransham. | [7](#text-7) |
-| ctrlc | 3.5.2 | MIT/Apache-2.0 | Copyright 2017 CtrlC developers | [18](#text-18), [4](#text-4) |
-| cursor-icon | 1.2.0 | MIT OR Apache-2.0 OR Zlib | Copyright 2023 Kirill Chibisov<br>Copyright (c) 2023 Kirill Chibisov | [18](#text-18), [4](#text-4), [22](#text-22) |
+| ctrlc | 3.5.2 | MIT/Apache-2.0 | Copyright 2017 CtrlC developers | [19](#text-19), [4](#text-4) |
+| cursor-icon | 1.2.0 | MIT OR Apache-2.0 OR Zlib | Copyright 2023 Kirill Chibisov<br>Copyright (c) 2023 Kirill Chibisov | [19](#text-19), [4](#text-4), [23](#text-23) |
 | dasp_sample | 0.11.0 | MIT OR Apache-2.0 | by mitchmindtree &lt;mitchell.nordine@gmail.com&gt; | [4](#text-4), [5](#text-5) |
-| data-encoding | 2.11.1 | MIT | Copyright (c) 2015-2020 Julien Cretin<br>Copyright (c) 2017-2020 Google Inc. | [7](#text-7) |
 | derive_more | 2.1.1 | MIT | Copyright (c) 2016 Jelte Fennema | [7](#text-7) |
 | derive_more-impl | 2.1.1 | MIT | Copyright (c) 2016 Jelte Fennema | [7](#text-7) |
 | dispatch | 0.2.0 | MIT | by Steven Sheldon | [4](#text-4) |
-| dispatch2 | 0.3.1 | Zlib OR Apache-2.0 OR MIT | by Mads Marquart &lt;mads@marquart.dk&gt;, Mary &lt;mary@mary.zone&gt; | [22](#text-22), [5](#text-5), [4](#text-4) |
+| dispatch2 | 0.3.1 | Zlib OR Apache-2.0 OR MIT | by Mads Marquart &lt;mads@marquart.dk&gt;, Mary &lt;mary@mary.zone&gt; | [23](#text-23), [5](#text-5), [4](#text-4) |
 | displaydoc | 0.2.7 | MIT OR Apache-2.0 | by Jane Lusby &lt;jlusby@yaah.dev&gt; | [5](#text-5), [4](#text-4) |
 | disqualified | 1.0.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/disqualified | [1](#text-1), [9](#text-9) |
 | dlib | 0.5.3 | MIT | Copyright (c) 2015 Victor Berger | [4](#text-4) |
 | document-features | 0.2.12 | MIT OR Apache-2.0 | Copyright (c) 2020 Olivier Goffart &lt;ogoffart@sixtyfps.io&gt; | [5](#text-5), [4](#text-4) |
 | downcast-rs | 1.2.1 | MIT/Apache-2.0 | Copyright (c) 2020 Ashish Myles and contributors | [5](#text-5), [4](#text-4) |
 | downcast-rs | 2.0.2 | MIT OR Apache-2.0 | Copyright (c) 2020 Ashish Myles and contributors | [5](#text-5), [4](#text-4) |
-| dpi | 0.1.2 | Apache-2.0 AND MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [27](#text-27), [29](#text-29) |
+| dpi | 0.1.2 | Apache-2.0 AND MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [14](#text-14), [29](#text-29) |
 | either | 1.18.0 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
 | encase | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [30](#text-30) |
-| encase_derive | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [25](#text-25) |
-| encase_derive_impl | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [25](#text-25) |
+| encase_derive | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [26](#text-26) |
+| encase_derive_impl | 0.12.1 | MIT-0 | the contributors to https://github.com/teoxoy/encase | [26](#text-26) |
 | encoding_rs | 0.8.35 | (Apache-2.0 OR MIT) AND BSD-3-Clause | Copyright Mozilla Foundation<br>Copyright © WHATWG (Apple, Google, Mozilla, Microsoft). | [31](#text-31), [5](#text-5), [4](#text-4), [32](#text-32) |
 | equivalent | 1.0.2 | Apache-2.0 OR MIT | Copyright (c) 2016--2023 | [5](#text-5), [4](#text-4) |
 | erased-serde | 0.4.10 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | errno | 0.3.14 | MIT OR Apache-2.0 | Copyright (c) 2014 Chris Wong | [5](#text-5), [4](#text-4) |
 | error-code | 3.4.0 | BSL-1.0 | by Douman &lt;douman@gmx.se&gt; | [33](#text-33) |
-| euclid | 0.22.14 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [26](#text-26), [5](#text-5), [4](#text-4) |
+| euclid | 0.22.14 | MIT OR Apache-2.0 | Copyright (c) 2012-2013 Mozilla Foundation | [27](#text-27), [5](#text-5), [4](#text-4) |
 | event-listener | 5.4.2 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt;, John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
 | event-listener-strategy | 0.5.4 | Apache-2.0 OR MIT | by John Nunley &lt;dev@notgull.net&gt; | [5](#text-5), [4](#text-4) |
 | fastrand | 2.5.0 | Apache-2.0 OR MIT | by Stjepan Glavina &lt;stjepang@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | fdeflate | 0.3.7 | MIT OR Apache-2.0 | by The image-rs Developers | [1](#text-1), [9](#text-9) |
-| file-id | 0.2.3 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [18](#text-18), [4](#text-4) |
+| file-id | 0.2.3 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [19](#text-19), [4](#text-4) |
 | find-msvc-tools | 0.1.11 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | fixedbitset | 0.5.7 | MIT OR Apache-2.0 | Copyright (c) 2015-2017 | [5](#text-5), [4](#text-4) |
 | flate2 | 1.1.10 | MIT OR Apache-2.0 | Copyright (c) 2014-2026 Alex Crichton | [5](#text-5), [4](#text-4) |
 | float-cmp | 0.10.0 | MIT | Copyright (c) 2014-2020 Optimal Computing (NZ) Ltd | [4](#text-4) |
 | fnv | 1.0.7 | Apache-2.0 / MIT | Copyright (c) 2017 Contributors | [5](#text-5), [4](#text-4) |
-| foldhash | 0.1.5 | Zlib | Copyright (c) 2024 Orson Peters | [22](#text-22) |
-| foldhash | 0.2.0 | Zlib | Copyright (c) 2024 Orson Peters | [22](#text-22) |
-| font-types | 0.11.3 | MIT OR Apache-2.0 | Copyright 2019 Colin Rothfels<br>Copyright (c) 2019 Colin Rothfels | [15](#text-15), [4](#text-4) |
-| font-types | 0.12.4 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [15](#text-15), [4](#text-4) |
-| fontique | 0.9.0 | Apache-2.0 OR MIT | Copyright 2024 the Parley Authors | [5](#text-5), [4](#text-4) |
-| foreign-types | 0.5.0 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [27](#text-27), [4](#text-4) |
-| foreign-types-macros | 0.2.4 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [27](#text-27), [4](#text-4) |
-| foreign-types-shared | 0.3.1 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [27](#text-27), [4](#text-4) |
+| foldhash | 0.1.5 | Zlib | Copyright (c) 2024 Orson Peters | [23](#text-23) |
+| foldhash | 0.2.0 | Zlib | Copyright (c) 2024 Orson Peters | [23](#text-23) |
+| font-types | 0.12.4 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [16](#text-16), [4](#text-4) |
+| fontique | 0.11.1 | Apache-2.0 OR MIT | Copyright 2024 the Parley Authors | [5](#text-5), [4](#text-4) |
+| foreign-types | 0.5.0 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [14](#text-14), [4](#text-4) |
+| foreign-types-macros | 0.2.4 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [14](#text-14), [4](#text-4) |
+| foreign-types-shared | 0.3.1 | MIT/Apache-2.0 | Copyright (c) 2017 The foreign-types Developers | [14](#text-14), [4](#text-4) |
 | fsevent-sys | 4.1.0 | MIT | Copyright (c) 2015 Pierre Baillet | [7](#text-7) |
 | funty | 2.0.0 | MIT | Copyright (c) 2020 myrrlyn (Alexander Payne) | [9](#text-9) |
-| futures-channel | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
-| futures-core | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
-| futures-io | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
-| futures-lite | 2.6.1 | Apache-2.0 OR MIT | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors<br>Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [5](#text-5), [4](#text-4), [17](#text-17) |
-| futures-macro | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
-| futures-task | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
-| futures-util | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [18](#text-18), [4](#text-4) |
+| futures-channel | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
+| futures-core | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
+| futures-io | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
+| futures-lite | 2.6.1 | Apache-2.0 OR MIT | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors<br>Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [5](#text-5), [4](#text-4), [18](#text-18) |
+| futures-macro | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
+| futures-task | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
+| futures-util | 0.3.34 | MIT OR Apache-2.0 | Copyright (c) 2016 Alex Crichton<br>Copyright (c) 2017 The Tokio Authors | [19](#text-19), [4](#text-4) |
 | gethostname | 1.1.0 | Apache-2.0 | by Sebastian Wiesner &lt;sebastian@swsnr.de&gt; | [5](#text-5) |
 | getrandom | 0.3.4 | MIT OR Apache-2.0 | Copyright (c) 2018-2025 The rust-random Project Developers<br>Copyright (c) 2014 The Rust Project Developers | [34](#text-34), [4](#text-4) |
 | getrandom | 0.4.3 | MIT OR Apache-2.0 | Copyright (c) 2018-2026 The rust-random Project Developers<br>Copyright (c) 2014 The Rust Project Developers | [34](#text-34), [4](#text-4) |
-| gilrs | 0.11.2 | Apache-2.0/MIT | Copyright (C) 1997-2025 Sam Lantinga &lt;slouken@libsdl.org&gt; | [22](#text-22) |
+| gilrs | 0.11.2 | Apache-2.0/MIT | Copyright (C) 1997-2025 Sam Lantinga &lt;slouken@libsdl.org&gt; | [23](#text-23) |
 | gilrs-core | 0.6.8 | Apache-2.0/MIT | by Mateusz Sieczko &lt;arvamer@gmail.com&gt; | [5](#text-5), [4](#text-4) |
-| glam | 0.32.1 | MIT OR Apache-2.0 | Copyright 2020 Cameron Hart | [18](#text-18), [4](#text-4) |
+| glam | 0.33.12 | MIT OR Apache-2.0 | Copyright 2020 Cameron Hart | [19](#text-19), [4](#text-4) |
+| glob | 0.3.4 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | gltf | 1.4.1 | MIT OR Apache-2.0 | Copyright (c) 2017 The gltf Library Developers | [5](#text-5), [4](#text-4) |
 | gltf-derive | 1.4.1 | MIT OR Apache-2.0 | Copyright (c) 2016 Vincent Prouillet | [5](#text-5), [35](#text-35) |
 | gltf-json | 1.4.1 | MIT OR Apache-2.0 | Copyright (c) 2017 The gltf Library Developers | [5](#text-5), [4](#text-4) |
-| gpu-allocator | 0.28.0 | MIT OR Apache-2.0 | Copyright 2021 Traverse Research B.V.<br>Copyright (c) 2021 Traverse Research B.V. | [18](#text-18), [4](#text-4) |
-| gpu-descriptor | 0.3.2 | MIT OR Apache-2.0 | by Zakarum &lt;zakarumych@ya.ru&gt; | [4](#text-4), [5](#text-5) |
-| gpu-descriptor-types | 0.2.0 | MIT OR Apache-2.0 | by Zakarum &lt;zakarumych@ya.ru&gt; | [4](#text-4), [5](#text-5) |
-| grid | 1.0.1 | MIT | Copyright (c) 2020 Armin Becher | [9](#text-9) |
-| guillotiere | 0.6.2 | MIT/Apache-2.0 | Copyright (c) 2019 Nicolas Silva | [9](#text-9) |
+| gpu-allocator | 0.28.0 | MIT OR Apache-2.0 | Copyright 2021 Traverse Research B.V.<br>Copyright (c) 2021 Traverse Research B.V. | [19](#text-19), [4](#text-4) |
+| guillotiere | 0.7.0 | MIT/Apache-2.0 | Copyright 2019 Nicolas Silva<br>Copyright (c) 2019 Nicolas Silva<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [12](#text-12), [13](#text-13) |
 | half | 2.7.1 | MIT OR Apache-2.0 | by Kathryn Long &lt;squeeself@gmail.com&gt; | [1](#text-1), [9](#text-9) |
-| harfrust | 0.6.2 | MIT | Copyright (c) HarfBuzz developers<br>Copyright (c) 2020 Yevhenii Reizner | [7](#text-7) |
+| harfrust | 0.12.0 | MIT | Copyright (c) HarfBuzz developers<br>Copyright (c) 2020 Yevhenii Reizner | [7](#text-7) |
 | hash32 | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2018 Jorge Aparicio | [5](#text-5), [4](#text-4) |
 | hashbrown | 0.15.5 | MIT OR Apache-2.0 | Copyright (c) 2016 Amanieu d'Antras | [5](#text-5), [4](#text-4) |
 | hashbrown | 0.16.1 | MIT OR Apache-2.0 | Copyright (c) 2016 Amanieu d'Antras | [5](#text-5), [4](#text-4) |
 | hashbrown | 0.17.1 | MIT OR Apache-2.0 | Copyright (c) 2016 Amanieu d'Antras | [5](#text-5), [4](#text-4) |
 | heapless | 0.9.3 | MIT OR Apache-2.0 | Copyright (c) 2017 Jorge Aparicio | [5](#text-5), [4](#text-4) |
 | hermit-abi | 0.5.2 | MIT OR Apache-2.0 | by Stefan Lankes | [5](#text-5), [4](#text-4) |
-| hexasphere | 18.0.0 | MIT OR Apache-2.0 | by OptimisticPeach &lt;patrikbuhring@gmail.com&gt; | [1](#text-1), [4](#text-4) |
-| hexf-parse | 0.2.1 | CC0-1.0 | by Kang Seonghoon &lt;public+rust@mearie.org&gt; | [20](#text-20) |
+| hexasphere | 19.0.0 | MIT OR Apache-2.0 | by OptimisticPeach &lt;patrikbuhring@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | hound | 3.5.1 | Apache-2.0 | by Ruud van Asseldonk &lt;dev@veniogames.com&gt; | [5](#text-5) |
 | icu_collections | 2.3.0 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | icu_locale_core | 2.3.0 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
@@ -275,108 +279,123 @@ hold, or for a crate whose package holds none, the standard text of each license
 | inotify | 0.11.5 | ISC | Copyright (c) Hanno Braun and contributors | [37](#text-37) |
 | inotify-sys | 0.1.8 | ISC | Copyright (c) Hanno Braun and contributors | [37](#text-37) |
 | inventory | 0.3.24 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
+| is_terminal_polyfill | 1.70.2 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
 | itertools | 0.14.0 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
+| itertools | 0.15.0 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4) |
 | itoa | 1.0.18 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | jni | 0.21.1 | MIT/Apache-2.0 | Copyright (c) 2016 Prevoty, Inc. and jni-rs contributors | [5](#text-5), [7](#text-7) |
 | jni | 0.22.4 | MIT OR Apache-2.0 | by jni team | [4](#text-4), [5](#text-5) |
 | jni-macros | 0.22.4 | MIT OR Apache-2.0 | the contributors to https://github.com/jni-rs/jni-rs | [4](#text-4), [5](#text-5) |
-| jni-sys | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [27](#text-27), [4](#text-4) |
-| jni-sys | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [27](#text-27), [4](#text-4) |
+| jni-sys | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [14](#text-14), [4](#text-4) |
+| jni-sys | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) 2015 The rust-jni-sys Developers | [14](#text-14), [4](#text-4) |
 | jni-sys-macros | 0.4.1 | MIT OR Apache-2.0 | by Robert Bragg &lt;robert@sixbynine.org&gt; | [4](#text-4), [5](#text-5) |
 | jobserver | 0.1.35 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | js-sys | 0.3.104 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | kqueue | 1.2.1 | MIT | Copyright (c) 2016 William Orr &lt;will@worrbase.com&gt; | [4](#text-4) |
 | kqueue-sys | 1.1.2 | MIT | Copyright (c) 2016 William Orr &lt;will@worrbase.com&gt; | [4](#text-4) |
-| ktx2 | 0.5.0 | Apache-2.0 | Copyright 2021 The BVE-Reborn Developers | [18](#text-18) |
+| ktx2 | 0.5.0 | Apache-2.0 | Copyright 2021 The BVE-Reborn Developers | [19](#text-19) |
+| lalrpop-util | 0.23.1 | Apache-2.0 OR MIT | Copyright (c) 2015 The LALRPOP Project Developers | [5](#text-5), [4](#text-4) |
 | lazy_static | 1.5.0 | MIT OR Apache-2.0 | Copyright (c) 2010 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | lewton | 0.10.2 | MIT OR Apache-2.0 | Copyright (c) 2016 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2016 est31 &lt;MTest31@outlook.com&gt; and contributors | [38](#text-38) |
+| lexical | 7.0.5 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
+| lexical-core | 1.0.6 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
+| lexical-parse-float | 1.0.6 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
+| lexical-parse-integer | 1.0.6 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
+| lexical-util | 1.0.7 | MIT/Apache-2.0 | by Alex Huszagh &lt;ahuszagh@gmail.com&gt; | [5](#text-5), [4](#text-4) |
+| lexical-write-float | 1.0.6 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
+| lexical-write-integer | 1.0.6 | MIT/Apache-2.0 | Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright 2014, the V8 project authors. All rights reserved.<br>Copyright (c) 2013 Andreas Samoljuk | [5](#text-5), [4](#text-4), [39](#text-39) |
 | libc | 0.2.189 | MIT OR Apache-2.0 | Copyright (c) The Rust Project Developers | [1](#text-1), [4](#text-4) |
 | libloading | 0.8.9 | ISC | Copyright © 2015, Simonas Kazlauskas | [37](#text-37) |
-| libm | 0.2.16 | MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [39](#text-39) |
+| libm | 0.2.16 | MIT | copyright:<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited | [40](#text-40) |
 | libredox | 0.1.21 | MIT | Copyright (c) 2023 4lDO2 | [9](#text-9) |
 | libudev-sys | 0.1.4 | MIT | Copyright (c) 2015 David Cuddeback | [4](#text-4) |
 | linebender_resource_handle | 0.1.1 | Apache-2.0 OR MIT | the contributors to https://github.com/linebender/raw_resource_handle | [1](#text-1), [9](#text-9) |
-| linux-raw-sys | 0.4.15 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [40](#text-40), [5](#text-5), [41](#text-41), [4](#text-4) |
-| linux-raw-sys | 0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [40](#text-40), [5](#text-5), [41](#text-41), [4](#text-4) |
+| linux-raw-sys | 0.4.15 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [41](#text-41), [5](#text-5), [42](#text-42), [4](#text-4) |
+| linux-raw-sys | 0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt; | [41](#text-41), [5](#text-5), [42](#text-42), [4](#text-4) |
 | litemap | 0.8.3 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | litrs | 1.0.0 | MIT OR Apache-2.0 | Copyright (c) 2020 Project Developers | [1](#text-1), [4](#text-4) |
 | lock_api | 0.4.14 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | log | 0.4.34 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
+| logos | 0.16.1 | MIT OR Apache-2.0 | Copyright 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt;<br>Copyright (c) 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt; | [19](#text-19), [7](#text-7) |
+| logos-codegen | 0.16.1 | MIT OR Apache-2.0 | Copyright 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt;<br>Copyright (c) 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt; | [19](#text-19), [7](#text-7) |
+| logos-derive | 0.16.1 | MIT OR Apache-2.0 | Copyright 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt;<br>Copyright (c) 2018 Maciej Hirsz &lt;maciej.hirsz@gmail.com&gt; | [19](#text-19), [7](#text-7) |
 | lz4_flex | 0.13.1 | MIT | Copyright (c) 2020 Pascal Seitz<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [13](#text-13) |
-| mach2 | 0.5.0 | BSD-2-Clause OR MIT OR Apache-2.0 | Copyright (c) 2019 Nick Fitzgerald, 2021 Yuki Okushi | [1](#text-1), [14](#text-14), [4](#text-4) |
+| mach2 | 0.5.0 | BSD-2-Clause OR MIT OR Apache-2.0 | Copyright (c) 2019 Nick Fitzgerald, 2021 Yuki Okushi | [1](#text-1), [15](#text-15), [4](#text-4) |
 | matchers | 0.2.0 | MIT | Copyright (c) 2019 Eliza Weisman | [4](#text-4) |
 | memchr | 2.8.3 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
-| memmap2 | 0.9.11 | MIT OR Apache-2.0 | Copyright [2015] [Dan Burkert]<br>Copyright (c) 2020 Yevhenii Reizner<br>Copyright (c) 2015 Dan Burkert | [18](#text-18), [4](#text-4) |
+| memmap2 | 0.9.11 | MIT OR Apache-2.0 | Copyright [2015] [Dan Burkert]<br>Copyright (c) 2020 Yevhenii Reizner<br>Copyright (c) 2015 Dan Burkert | [19](#text-19), [4](#text-4) |
 | meshopt | 0.6.2 | MIT OR Apache-2.0 | by Graham Wihlidal &lt;graham@wihlidal.ca&gt; | [4](#text-4), [5](#text-5) |
-| metis | 0.2.2 | MIT OR Apache-2.0 | Copyright 2021 CEA and Contributors<br>Copyright (c) 2021 CEA and Contributors | [18](#text-18), [9](#text-9) |
-| metis-sys | 0.3.2 | MIT OR Apache-2.0 | Copyright 1995-2018, Regents of the University of Minnesota<br>Copyright 1995-2013, Regents of the University of Minnesota | [42](#text-42) |
-| miniz_oxide | 0.8.9 | MIT OR Zlib OR Apache-2.0 | Copyright 2013-2014 RAD Game Tools and Valve Software<br>Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC<br>Copyright (c) 2017 Frommi<br>Copyright (c) 2017-2024 oyvindln<br>Copyright (c) 2020 Frommi | [9](#text-9), [1](#text-1), [22](#text-22) |
-| miniz_oxide | 0.9.1 | MIT OR Zlib OR Apache-2.0 | Copyright 2013-2014 RAD Game Tools and Valve Software<br>Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC<br>Copyright (c) 2017 Frommi<br>Copyright (c) 2017-2024 oyvindln<br>Copyright (c) 2020 Frommi | [9](#text-9), [1](#text-1), [22](#text-22) |
+| metis | 0.2.2 | MIT OR Apache-2.0 | Copyright 2021 CEA and Contributors<br>Copyright (c) 2021 CEA and Contributors | [19](#text-19), [9](#text-9) |
+| metis-sys | 0.3.2 | MIT OR Apache-2.0 | Copyright 1995-2018, Regents of the University of Minnesota<br>Copyright 1995-2013, Regents of the University of Minnesota | [43](#text-43) |
+| miniz_oxide | 0.8.9 | MIT OR Zlib OR Apache-2.0 | Copyright 2013-2014 RAD Game Tools and Valve Software<br>Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC<br>Copyright (c) 2017 Frommi<br>Copyright (c) 2017-2024 oyvindln<br>Copyright (c) 2020 Frommi | [9](#text-9), [1](#text-1), [23](#text-23) |
+| miniz_oxide | 0.9.1 | MIT OR Zlib OR Apache-2.0 | Copyright 2013-2014 RAD Game Tools and Valve Software<br>Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC<br>Copyright (c) 2017 Frommi<br>Copyright (c) 2017-2024 oyvindln<br>Copyright (c) 2020 Frommi | [9](#text-9), [1](#text-1), [23](#text-23) |
 | mio | 1.2.3 | MIT | Copyright (c) 2014 Carl Lerche and other MIO contributors | [4](#text-4) |
-| naga | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| naga_oil | 0.22.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/naga_oil/ | [1](#text-1), [9](#text-9) |
+| mutants | 0.0.3 | MIT | the contributors to https://github.com/sourcefrog/cargo-mutants | [4](#text-4) |
+| naga | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| naga-types | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
 | ndk | 0.9.0 | MIT OR Apache-2.0 | by The Rust Mobile contributors | [4](#text-4), [5](#text-5) |
 | ndk-context | 0.1.1 | MIT OR Apache-2.0 | by The Rust Windowing contributors | [4](#text-4), [5](#text-5) |
 | ndk-sys | 0.6.0+11769913 | MIT OR Apache-2.0 | by The Rust Windowing contributors | [4](#text-4), [5](#text-5) |
 | nix | 0.31.3 | MIT | Copyright (c) 2015 Carl Lerche + nix-rust Authors | [7](#text-7) |
 | nom | 8.0.0 | MIT | Copyright (c) 2014-2019 Geoffroy Couprie | [4](#text-4) |
-| nonmax | 0.5.5 | MIT OR Apache-2.0 | Copyright (c) 2020 Lucien Greathouse | [43](#text-43), [4](#text-4) |
-| notify | 8.2.0 | CC0-1.0 | by Félix Saparelli &lt;me@passcod.name&gt;, Daniel Faust &lt;hessijames@gmail.com&gt;, Aron Heinecke &lt;Ox0p54r36@t-online.de&gt; | [44](#text-44) |
-| notify-debouncer-full | 0.7.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [18](#text-18), [4](#text-4) |
-| notify-types | 2.1.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [18](#text-18), [4](#text-4) |
+| nonmax | 0.5.5 | MIT OR Apache-2.0 | Copyright (c) 2020 Lucien Greathouse | [44](#text-44), [4](#text-4) |
+| notify | 8.2.0 | CC0-1.0 | by Félix Saparelli &lt;me@passcod.name&gt;, Daniel Faust &lt;hessijames@gmail.com&gt;, Aron Heinecke &lt;Ox0p54r36@t-online.de&gt; | [45](#text-45) |
+| notify-debouncer-full | 0.7.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [19](#text-19), [4](#text-4) |
+| notify-types | 2.1.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [19](#text-19), [4](#text-4) |
 | nu-ansi-term | 0.50.3 | MIT | Copyright (c) 2014 Benjamin Sago<br>Copyright (c) 2021-2022 The Nushell Project Developers | [7](#text-7) |
 | num-bigint | 0.4.8 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-derive | 0.4.2 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-integer | 0.1.47 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-rational | 0.4.2 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-traits | 0.2.19 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| num_enum | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [45](#text-45), [4](#text-4) |
-| num_enum_derive | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [45](#text-45), [4](#text-4) |
+| num_enum | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [46](#text-46), [4](#text-4) |
+| num_enum_derive | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [46](#text-46), [4](#text-4) |
 | objc-sys | 0.3.5 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.5.2 | MIT | by Steven Sheldon, Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.6.4 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2-app-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-app-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-audio-toolbox | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-avf-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-app-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
+| objc2-audio-toolbox | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
+| objc2-avf-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-cloud-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-contacts | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-core-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-audio-types | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-audio | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
+| objc2-core-audio-types | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-core-data | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-core-foundation | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-core-graphics | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-core-foundation | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
+| objc2-core-graphics | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-core-image | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-core-location | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-encode | 4.1.0 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2-foundation | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-foundation | 0.3.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-io-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
-| objc2-io-surface | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-io-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
+| objc2-io-surface | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-link-presentation | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-metal | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-metal | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-metal | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-quartz-core | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
-| objc2-quartz-core | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [22](#text-22), [5](#text-5), [4](#text-4) |
+| objc2-quartz-core | 0.3.2 | Zlib OR Apache-2.0 OR MIT | the contributors to https://github.com/madsmtm/objc2 | [23](#text-23), [5](#text-5), [4](#text-4) |
 | objc2-symbols | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-ui-kit | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-uniform-type-identifiers | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-user-notifications | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | offset-allocator | 0.2.0 | MIT | Copyright (c) 2023 Sebastian Aaltonen, Patrick Walton | [9](#text-9) |
-| ogg | 0.8.0 | BSD-3-Clause | Copyright (c) 2016-2017 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2002-2015 Xiph.org Foundation | [46](#text-46) |
+| ogg | 0.8.0 | BSD-3-Clause | Copyright (c) 2016-2017 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2002-2015 Xiph.org Foundation | [47](#text-47) |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 | by Aleksey Kladov &lt;aleksey.kladov@gmail.com&gt; | [5](#text-5), [4](#text-4) |
-| orbclient | 0.3.55 | MIT | Copyright (c) 2015-2019 Jeremy Soller<br>Copyright (C) 1989, 1991 Free Software Foundation, Inc., | [7](#text-7), [47](#text-47) |
+| once_cell_polyfill | 1.70.2 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| orbclient | 0.3.55 | MIT | Copyright (c) 2015-2019 Jeremy Soller<br>Copyright (C) 1989, 1991 Free Software Foundation, Inc., | [7](#text-7), [48](#text-48) |
 | ordered-float | 5.5.0 | MIT | Copyright (c) 2015 Jonathan Reem | [4](#text-4) |
 | os_pipe | 1.2.3 | MIT | by Jack O'Connor | [7](#text-7) |
 | owned_ttf_parser | 0.25.1 | Apache-2.0 | by Alex Butler &lt;alexheretic@gmail.com&gt; | [1](#text-1) |
-| parking | 2.2.1 | Apache-2.0 OR MIT | Copyright 2014-2020 The Rust Project Developers | [5](#text-5), [4](#text-4), [48](#text-48) |
+| parking | 2.2.1 | Apache-2.0 OR MIT | Copyright 2014-2020 The Rust Project Developers | [5](#text-5), [4](#text-4), [49](#text-49) |
 | parking_lot | 0.12.5 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | parking_lot_core | 0.9.12 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | parlance | 0.1.0 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
-| parley | 0.9.0 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
-| parley_data | 0.9.0 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
+| parley | 0.11.1 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
+| parley_data | 0.11.1 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
 | percent-encoding | 2.3.2 | MIT OR Apache-2.0 | Copyright (c) 2013-2025 The rust-url developers | [5](#text-5), [4](#text-4) |
-| petgraph | 0.8.3 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4), [49](#text-49) |
+| petgraph | 0.8.3 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4), [50](#text-50) |
 | pin-project | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
 | pin-project-internal | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
 | pin-project-lite | 0.2.17 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project-lite | [1](#text-1), [4](#text-4) |
@@ -388,12 +407,11 @@ hold, or for a crate whose package holds none, the standard text of each license
 | portable-atomic | 1.15.0 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/portable-atomic | [1](#text-1), [4](#text-4) |
 | portable-atomic-util | 0.2.7 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/portable-atomic-util | [1](#text-1), [4](#text-4) |
 | potential_utf | 0.1.6 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
-| pp-rs | 0.2.1 | BSD-3-Clause | Copyright (c) 2020, Corentin Wallez | [50](#text-50) |
 | presser | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) 2019 Embark Studios | [5](#text-5), [4](#text-4) |
 | proc-macro-crate | 3.5.0 | MIT OR Apache-2.0 | by Bastian Köcher &lt;git@kchr.de&gt; | [3](#text-3), [4](#text-4) |
 | proc-macro2 | 1.0.107 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt;, Alex Crichton &lt;alex@alexcrichton.com&gt; | [1](#text-1), [4](#text-4) |
 | profiling | 1.0.18 | MIT OR Apache-2.0 | by Philip Degarmo &lt;aclysma@gmail.com&gt; | [4](#text-4), [5](#text-5) |
-| quick-error | 2.0.1 | MIT/Apache-2.0 | Copyright (c) 2015 The quick-error Developers | [27](#text-27), [4](#text-4) |
+| quick-error | 2.0.1 | MIT/Apache-2.0 | Copyright (c) 2015 The quick-error Developers | [14](#text-14), [4](#text-4) |
 | quick-xml | 0.41.0 | MIT | Copyright (c) 2016 Johann Tuffe | [7](#text-7) |
 | quote | 1.0.47 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | r-efi | 5.3.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | the contributors to https://github.com/r-efi/r-efi | [4](#text-4), [5](#text-5) |
@@ -404,24 +422,23 @@ hold, or for a crate whose package holds none, the standard text of each license
 | rand_core | 0.10.1 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright (c) 2018-2026 The Rand Project Developers | [53](#text-53), [54](#text-54), [4](#text-4) |
 | rand_distr | 0.6.0 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project | [51](#text-51), [54](#text-54), [4](#text-4) |
 | range-alloc | 0.1.5 | MIT OR Apache-2.0 | Copyright (c) 2023 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| raw-window-handle | 0.6.2 | MIT OR Apache-2.0 OR Zlib | Copyright (c) 2019 Osspial<br>Copyright (c) 2020 Osspial | [1](#text-1), [9](#text-9), [22](#text-22) |
+| raw-window-handle | 0.6.2 | MIT OR Apache-2.0 OR Zlib | Copyright (c) 2019 Osspial<br>Copyright (c) 2020 Osspial | [1](#text-1), [9](#text-9), [23](#text-23) |
 | raw-window-metal | 1.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/rust-windowing/raw-window-metal | [5](#text-5), [4](#text-4) |
-| read-fonts | 0.39.2 | MIT OR Apache-2.0 | Copyright 2019 Colin Rothfels<br>Copyright (c) 2019 Colin Rothfels | [15](#text-15), [4](#text-4) |
-| read-fonts | 0.41.0 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [15](#text-15), [4](#text-4) |
-| rectangle-pack | 0.4.2 | MIT/Apache-2.0 | Copyright 2021 Chinedu Francis Nwafili<br>Copyright (c) 2021 Chinedu Francis Nwafili | [18](#text-18), [4](#text-4) |
+| read-fonts | 0.41.0 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [16](#text-16), [4](#text-4) |
+| rectangle-pack | 0.4.2 | MIT/Apache-2.0 | Copyright 2021 Chinedu Francis Nwafili<br>Copyright (c) 2021 Chinedu Francis Nwafili | [19](#text-19), [4](#text-4) |
 | redox_syscall | 0.4.1 | MIT | Copyright (c) 2017 Redox OS Developers | [9](#text-9) |
 | redox_syscall | 0.5.18 | MIT | Copyright (c) 2017 Redox OS Developers | [9](#text-9) |
 | redox_syscall | 0.9.3 | MIT | Copyright (c) 2017 Redox OS Developers | [9](#text-9) |
-| regex | 1.13.1 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | regex-automata | 0.4.18 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | regex-syntax | 0.8.11 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers<br>Copyright © 1991-2018 Unicode, Inc. All rights reserved. | [5](#text-5), [4](#text-4), [55](#text-55) |
 | renderdoc-sys | 1.1.0 | MIT OR Apache-2.0 | Copyright (c) 2022 Eyal Kalderon | [5](#text-5), [4](#text-4) |
 | rodio | 0.22.2 | MIT OR Apache-2.0 | Copyright (c) The Rodio Project Contributors | [1](#text-1), [4](#text-4) |
 | ron | 0.12.2 | MIT OR Apache-2.0 | Copyright (c) 2017 RON developers | [5](#text-5), [4](#text-4) |
 | rustc-hash | 1.1.0 | Apache-2.0/MIT | by The Rust Project Developers | [5](#text-5), [4](#text-4) |
+| rustc-hash | 2.1.3 | Apache-2.0 OR MIT | by The Rust Project Developers | [1](#text-1), [4](#text-4) |
 | rustc_version | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| rustix | 0.38.44 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [56](#text-56), [5](#text-5), [41](#text-41), [4](#text-4) |
-| rustix | 1.1.4 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [56](#text-56), [5](#text-5), [41](#text-41), [4](#text-4) |
+| rustix | 0.38.44 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [56](#text-56), [5](#text-5), [42](#text-42), [4](#text-4) |
+| rustix | 1.1.4 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [56](#text-56), [5](#text-5), [42](#text-42), [4](#text-4) |
 | rustversion | 1.0.23 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | ruzstd | 0.8.3 | MIT | Copyright (c) 2019 Moritz Borcherding | [9](#text-9) |
 | same-file | 1.0.6 | Unlicense/MIT | Copyright (c) 2017 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
@@ -434,25 +451,24 @@ hold, or for a crate whose package holds none, the standard text of each license
 | serde_core | 1.0.229 | MIT OR Apache-2.0 | by Erick Tryzelaar &lt;erick.tryzelaar@gmail.com&gt;, David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | serde_derive | 1.0.229 | MIT OR Apache-2.0 | by Erick Tryzelaar &lt;erick.tryzelaar@gmail.com&gt;, David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | serde_json | 1.0.151 | MIT OR Apache-2.0 | by Erick Tryzelaar &lt;erick.tryzelaar@gmail.com&gt;, David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
+| serde_spanned | 1.1.2 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
 | sharded-slab | 0.1.7 | MIT | Copyright (c) 2019 Eliza Weisman | [4](#text-4) |
 | shlex | 2.0.1 | MIT OR Apache-2.0 | Copyright 2015 Nicholas Allegra (comex).<br>Copyright (c) 2015 Nicholas Allegra (comex). | [12](#text-12), [7](#text-7) |
 | simd-adler32 | 0.3.10 | MIT | Copyright (c) [2021] [Marvin Countryman] | [9](#text-9) |
 | simd_cesu8 | 1.2.0 | Apache-2.0 OR MIT | by Sean C. Roach &lt;me@seancroach.dev&gt; | [5](#text-5), [4](#text-4) |
 | simdutf8 | 0.1.5 | MIT OR Apache-2.0 | by Hans Kratz &lt;hans@appfour.com&gt; | [1](#text-1), [9](#text-9) |
-| skrifa | 0.42.1 | MIT OR Apache-2.0 | Copyright 2019 Colin Rothfels<br>Copyright (c) 2019 Colin Rothfels | [15](#text-15), [4](#text-4) |
-| skrifa | 0.44.0 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [15](#text-15), [4](#text-4) |
+| skrifa | 0.44.0 | MIT OR Apache-2.0 | Copyright 2019 Fontations Developers<br>Copyright (c) 2019 Fontations Developers | [16](#text-16), [4](#text-4) |
 | slab | 0.4.12 | MIT | Copyright (c) 2019 Carl Lerche | [4](#text-4) |
-| slotmap | 1.1.1 | Zlib | Copyright (c) 2021 Orson Peters &lt;orsonpeters@gmail.com&gt; | [22](#text-22) |
+| slotmap | 1.1.1 | Zlib | Copyright (c) 2021 Orson Peters &lt;orsonpeters@gmail.com&gt; | [23](#text-23) |
 | smallvec | 1.15.2 | MIT OR Apache-2.0 | Copyright (c) 2018 The Servo Project Developers | [5](#text-5), [4](#text-4) |
 | smithay-client-toolkit | 0.19.2 | MIT | Copyright (c) 2018 Victor Berger | [4](#text-4) |
 | smol_str | 0.2.2 | MIT OR Apache-2.0 | by Aleksey Kladov &lt;aleksey.kladov@gmail.com&gt; | [5](#text-5), [4](#text-4) |
-| spin | 0.10.1 | MIT | Copyright (c) 2014 Mathijs van de Nes | [7](#text-7) |
+| spin | 0.12.3 | MIT | Copyright (c) 2014 Mathijs van de Nes | [7](#text-7) |
 | spirv | 0.4.0+sdk-1.4.341.0 | Apache-2.0 | by Lei Zhang &lt;antiagainst@gmail.com&gt; | [5](#text-5) |
 | stable_deref_trait | 1.2.1 | MIT OR Apache-2.0 | Copyright (c) 2017 Robert Grosse | [5](#text-5), [4](#text-4) |
 | stackfuture | 0.3.1 | MIT | Copyright (c) Microsoft Corporation. | [57](#text-57) |
 | static_assertions | 1.1.0 | MIT OR Apache-2.0 | Copyright (c) 2017 Nikolai Vazquez | [5](#text-5), [9](#text-9) |
 | strict-num | 0.1.1 | MIT | Copyright (c) 2022 Yevhenii Reizner | [4](#text-4) |
-| svg_fmt | 0.4.5 | MIT/Apache-2.0 | by Nicolas Silva &lt;nical@fastmail.com&gt; | [4](#text-4), [5](#text-5) |
 | swash | 0.2.10 | Apache-2.0 OR MIT | Copyright (c) 2020 Chad Brokaw | [5](#text-5), [4](#text-4) |
 | symphonia | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [68](#text-68) |
 | symphonia-bundle-mp3 | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [68](#text-68) |
@@ -462,7 +478,7 @@ hold, or for a crate whose package holds none, the standard text of each license
 | syn | 3.0.4 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | synstructure | 0.13.2 | MIT | Copyright 2016 Nika Layzell | [4](#text-4) |
 | sys-locale | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) 2021 1Password | [5](#text-5), [9](#text-9) |
-| taffy | 0.10.1 | MIT | by Alice Cecile &lt;alice.i.cecile@gmail.com&gt;, Johnathan Kelley &lt;jkelleyrtp@gmail.com&gt;, Nico Burns &lt;nico@nicoburns.com&gt; | [4](#text-4) |
+| taffy | 0.14.0 | MIT | by Alice Cecile &lt;alice.i.cecile@gmail.com&gt;, Johnathan Kelley &lt;jkelleyrtp@gmail.com&gt;, Nico Burns &lt;nico@nicoburns.com&gt; | [4](#text-4) |
 | tap | 1.0.1 | MIT | Copyright (c) 2017 Elliot Linder &lt;darfink@gmail.com&gt; | [9](#text-9) |
 | termcolor | 1.4.1 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
 | thiserror | 1.0.69 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
@@ -473,11 +489,13 @@ hold, or for a crate whose package holds none, the standard text of each license
 | tiny-skia | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [58](#text-58) |
 | tiny-skia-path | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [58](#text-58) |
 | tinystr | 0.8.4 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
-| tinyvec | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [4](#text-4), [22](#text-22) |
-| tinyvec_macros | 0.1.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2020 Tomasz "Soveu" Marx<br>Copyright (c) 2020 Soveu | [18](#text-18), [9](#text-9), [59](#text-59) |
-| toml_datetime | 1.1.1+spec-1.1.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [27](#text-27), [4](#text-4) |
-| toml_edit | 0.25.13+spec-1.1.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [27](#text-27), [4](#text-4) |
-| toml_parser | 1.1.3+spec-1.1.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [27](#text-27), [4](#text-4) |
+| tinyvec | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [4](#text-4), [23](#text-23) |
+| tinyvec_macros | 0.1.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2020 Tomasz "Soveu" Marx<br>Copyright (c) 2020 Soveu | [19](#text-19), [9](#text-9), [59](#text-59) |
+| toml | 1.1.8+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
+| toml_datetime | 1.1.2+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
+| toml_edit | 0.25.13+spec-1.1.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [14](#text-14), [4](#text-4) |
+| toml_parser | 1.1.5+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
+| toml_writer | 1.1.3+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
 | tracing | 0.1.44 | MIT | Copyright (c) 2019 Tokio Contributors | [4](#text-4) |
 | tracing-attributes | 0.1.31 | MIT | Copyright (c) 2019 Tokio Contributors | [4](#text-4) |
 | tracing-core | 0.1.36 | MIT | Copyright (c) 2019 Tokio Contributors<br>Copyright (c) 2014 Mathijs van de Nes | [4](#text-4), [7](#text-7) |
@@ -489,20 +507,22 @@ hold, or for a crate whose package holds none, the standard text of each license
 | ttf-parser | 0.25.1 | MIT OR Apache-2.0 | Copyright (c) 2018 Yevhenii Reizner | [5](#text-5), [4](#text-4) |
 | twox-hash | 2.1.4 | MIT | Copyright (c) 2015 Jake Goulding | [7](#text-7) |
 | typeid | 1.0.3 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
-| typewit | 1.15.2 | Zlib | Copyright (c) 2023 Matias Rodriguez. | [22](#text-22) |
+| typewit | 1.15.2 | Zlib | Copyright (c) 2023 Matias Rodriguez. | [23](#text-23) |
 | unicode-ident | 1.0.24 | (MIT OR Apache-2.0) AND Unicode-3.0 | Copyright © 1991-2023 Unicode, Inc. | [1](#text-1), [4](#text-4), [61](#text-61) |
-| unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [26](#text-26), [5](#text-5), [4](#text-4) |
-| unicode-width | 0.2.2 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [26](#text-26), [5](#text-5), [4](#text-4) |
-| unicode-xid | 0.2.6 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [26](#text-26), [5](#text-5), [4](#text-4) |
+| unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [27](#text-27), [5](#text-5), [4](#text-4) |
+| unicode-width | 0.2.2 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [27](#text-27), [5](#text-5), [4](#text-4) |
+| unicode-xid | 0.2.6 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [27](#text-27), [5](#text-5), [4](#text-4) |
+| unsynn | 0.3.0 | MIT OR Apache-2.0 | by Christian Thäter &lt;ct@pipapo.org&gt; | [5](#text-5), [4](#text-4) |
 | utf8_iter | 1.0.4 | Apache-2.0 OR MIT | Copyright Mozilla Foundation | [62](#text-62), [5](#text-5), [4](#text-4) |
+| utf8parse | 0.2.2 | Apache-2.0 OR MIT | Copyright (c) 2016 Joe Wilm | [1](#text-1), [4](#text-4) |
 | uuid | 1.26.0 | Apache-2.0 OR MIT | Copyright (c) 2014 The Rust Project Developers<br>Copyright (c) 2018 Ashley Mannix, Christopher Armstrong, Dylan DPC, Hunar Roop Kahlon | [5](#text-5), [4](#text-4) |
 | valuable | 0.1.1 | MIT | the contributors to https://github.com/tokio-rs/valuable | [4](#text-4) |
-| variadics_please | 1.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/variadics_please | [1](#text-1), [9](#text-9) |
+| variadics_please | 2.0.0 | MIT OR Apache-2.0 | the contributors to https://github.com/bevyengine/variadics_please | [1](#text-1), [9](#text-9) |
 | vec_map | 0.8.2 | MIT/Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | version_check | 0.9.5 | MIT/Apache-2.0 | Copyright (c) 2017-2018 Sergio Benitez<br>COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER | [5](#text-5), [13](#text-13) |
 | walkdir | 2.5.0 | Unlicense/MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
-| wasi | 0.11.1+wasi-snapshot-preview1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by The Cranelift Project Developers | [5](#text-5), [41](#text-41), [4](#text-4) |
-| wasip2 | 1.0.4+wasi-0.2.12 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | the contributors to https://github.com/bytecodealliance/wasi-rs | [5](#text-5), [41](#text-41), [4](#text-4) |
+| wasi | 0.11.1+wasi-snapshot-preview1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by The Cranelift Project Developers | [5](#text-5), [42](#text-42), [4](#text-4) |
+| wasip2 | 1.0.4+wasi-0.2.12 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | the contributors to https://github.com/bytecodealliance/wasi-rs | [5](#text-5), [42](#text-42), [4](#text-4) |
 | wasm-bindgen | 0.2.127 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | wasm-bindgen-futures | 0.4.77 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | wasm-bindgen-macro | 0.2.127 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
@@ -517,63 +537,68 @@ hold, or for a crate whose package holds none, the standard text of each license
 | wayland-protocols-wlr | 0.3.12 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
 | wayland-scanner | 0.31.11 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
 | wayland-sys | 0.31.11 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
-| weak-table | 0.3.2 | MIT | Copyright (c) 2018 Jesse A. Tov | [9](#text-9) |
+| weak-table | 0.4.0 | MIT | Copyright (c) 2018 Jesse A. Tov<br>Copyright 2026 Nick Mathewson | [9](#text-9) |
 | web-sys | 0.3.104 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton | [5](#text-5), [4](#text-4) |
 | web-task | 1.1.3 | MIT OR Apache-2.0 | Copyright (c) 2014 Alex Crichton<br>Copyright (c) 2025 Miles Silberling-Cook | [5](#text-5), [4](#text-4) |
-| web-time | 1.1.0 | MIT OR Apache-2.0 | Copyright 2023 dAxpeDDa<br>Copyright (c) 2023 dAxpeDDa | [18](#text-18), [9](#text-9) |
-| wgpu | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-core | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-core-deps-apple | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-core-deps-windows-linux-android | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-hal | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-naga-bridge | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
-| wgpu-types | 29.0.4 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| web-time | 1.1.0 | MIT OR Apache-2.0 | Copyright 2023 dAxpeDDa<br>Copyright (c) 2023 dAxpeDDa | [19](#text-19), [9](#text-9) |
+| wesl | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
+| wesl-core | 0.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
+| wesl-macros | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
+| wgpu | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-core | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-core-deps-apple | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-core-deps-windows-linux-android | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-hal | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-naga-bridge | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgpu-types | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
+| wgsl-parse | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
+| wgsl-types | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
 | winapi-util | 0.1.11 | Unlicense OR MIT | Copyright (c) 2017 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
-| windows | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-collections | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-core | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-future | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-implement | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-interface | 0.59.3 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-link | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-numerics | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-result | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-strings | 0.5.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-sys | 0.45.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-sys | 0.52.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-sys | 0.59.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-sys | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-sys | 0.61.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-targets | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-targets | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-targets | 0.53.5 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows-threading | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_aarch64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_i686_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| windows_x86_64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [18](#text-18), [65](#text-65) |
-| winit | 0.30.13 | Apache-2.0 | by The winit contributors, Pierre Krieger &lt;pierre.krieger1708@gmail.com&gt; | [27](#text-27) |
+| windows | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-collections | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-core | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-future | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-implement | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-interface | 0.59.3 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-link | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-numerics | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-result | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-strings | 0.5.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-sys | 0.45.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-sys | 0.52.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-sys | 0.59.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-sys | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-sys | 0.61.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-targets | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-targets | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-targets | 0.53.5 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows-threading | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_aarch64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_i686_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| windows_x86_64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [19](#text-19), [65](#text-65) |
+| winit | 0.30.13 | Apache-2.0 | by The winit contributors, Pierre Krieger &lt;pierre.krieger1708@gmail.com&gt; | [14](#text-14) |
 | winnow | 1.0.4 | MIT | the contributors to https://github.com/winnow-rs/winnow | [4](#text-4) |
-| wit-bindgen | 0.57.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Alex Crichton &lt;alex@alexcrichton.com&gt; | [5](#text-5), [41](#text-41), [4](#text-4) |
+| wit-bindgen | 0.57.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Alex Crichton &lt;alex@alexcrichton.com&gt; | [5](#text-5), [42](#text-42), [4](#text-4) |
 | wl-clipboard-rs | 0.9.3 | MIT/Apache-2.0 | Copyright (c) 2019 Ivan Molodetskikh | [5](#text-5), [4](#text-4) |
 | writeable | 0.6.4 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | wyz | 0.5.1 | MIT | Copyright (c) 2018 myrrlyn (Alexander Payne) | [9](#text-9) |
@@ -582,13 +607,13 @@ hold, or for a crate whose package holds none, the standard text of each license
 | x11rb-protocol | 0.13.2 | MIT OR Apache-2.0 | Copyright 2019 x11rb Contributers | [5](#text-5), [4](#text-4) |
 | xcursor | 0.3.11 | MIT | Copyright (c) 2020 Samuele Esposito | [9](#text-9) |
 | xkbcommon-dl | 0.4.2 | MIT | Copyright (c) 2023 Kirill Chibisov | [7](#text-7) |
-| xkeysym | 0.2.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2022-2023 John Nunley<br>Copyright (c) 2022-2023 John Nunley | [18](#text-18), [4](#text-4), [22](#text-22) |
+| xkeysym | 0.2.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2022-2023 John Nunley<br>Copyright (c) 2022-2023 John Nunley | [19](#text-19), [4](#text-4), [23](#text-23) |
 | yazi | 0.2.1 | Apache-2.0 OR MIT | Copyright (c) 2020 Chad Brokaw | [5](#text-5), [4](#text-4) |
 | yoke | 0.8.3 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | yoke-derive | 0.8.2 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zeno | 0.3.3 | Apache-2.0 OR MIT | Copyright (c) 2020 Chad Brokaw | [5](#text-5), [4](#text-4) |
-| zerocopy | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [18](#text-18), [66](#text-66), [4](#text-4) |
-| zerocopy-derive | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [18](#text-18), [66](#text-66), [4](#text-4) |
+| zerocopy | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [19](#text-19), [66](#text-66), [4](#text-4) |
+| zerocopy-derive | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [19](#text-19), [66](#text-66), [4](#text-4) |
 | zerofrom | 0.1.8 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zerofrom-derive | 0.1.7 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zerotrie | 0.2.5 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
@@ -596,8 +621,8 @@ hold, or for a crate whose package holds none, the standard text of each license
 | zerovec-derive | 0.11.6 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [36](#text-36) |
 | zlib-rs | 0.6.7 | Zlib | the contributors to https://github.com/trifectatechfoundation/zlib-rs | [67](#text-67) |
 | zmij | 1.0.23 | MIT | by David Tolnay &lt;dtolnay@gmail.com&gt; | [4](#text-4) |
-| zune-core | 0.4.12 | MIT OR Apache-2.0 OR Zlib | the contributors to https://github.com/etemesi254/zune-image/tree/dev/zune-core | [4](#text-4), [5](#text-5), [22](#text-22) |
-| zune-jpeg | 0.4.21 | MIT OR Apache-2.0 OR Zlib | by caleb &lt;etemesicaleb@gmail.com&gt; | [4](#text-4), [5](#text-5), [22](#text-22) |
+| zune-core | 0.4.12 | MIT OR Apache-2.0 OR Zlib | the contributors to https://github.com/etemesi254/zune-image/tree/dev/zune-core | [4](#text-4), [5](#text-5), [23](#text-23) |
+| zune-jpeg | 0.4.21 | MIT OR Apache-2.0 OR Zlib | by caleb &lt;etemesicaleb@gmail.com&gt; | [4](#text-4), [5](#text-5), [23](#text-23) |
 
 Bevy's default font, a subset of Fira Mono that bevy_text compiles into the bridge, is under the
 SIL Open Font License 1.1, whose text with its holders is [text 69](#text-69).
@@ -617,7 +642,7 @@ authors offer it under.
 ## The examples
 
 The programs in `BevyCSharp.Examples` named for Bevy's examples are Bevy's
-(https://github.com/bevyengine/bevy/tree/v0.19.1/examples), by Bevy's contributors under
+(https://github.com/bevyengine/bevy/tree/v0.20.0/examples), by Bevy's contributors under
 MIT or Apache-2.0, written again in C#, each naming at its head the example of Bevy's it is written
 from. They are not in the package. The files of Bevy's they load are fetched from Bevy's repository
 by `build/fetch-bevy-assets.sh` and are not kept in this one. Bevy credits them so:
@@ -657,7 +682,7 @@ beside its model.
 
 ### Text 1
 
-Apache-2.0, as ab_glyph 0.2.32, ab_glyph_rasterizer 0.1.10, allocator-api2 0.2.21, alsa 0.11.0, android-activity 0.6.1, arboard 3.6.1, atomicow 1.2.0, bevy 0.19.1, bevy_a11y 0.19.1, bevy_android 0.19.1, bevy_animation 0.19.1, bevy_animation_macros 0.19.1, bevy_anti_alias 0.19.1, bevy_app 0.19.1, bevy_asset 0.19.1, bevy_asset_macros 0.19.1, bevy_audio 0.19.1, bevy_camera 0.19.1, bevy_clipboard 0.19.1, bevy_color 0.19.1, bevy_core_pipeline 0.19.1, bevy_derive 0.19.1, bevy_diagnostic 0.19.1, bevy_ecs 0.19.1, bevy_ecs_macro_logic 0.19.1, bevy_ecs_macros 0.19.1, bevy_encase_derive 0.19.1, bevy_gilrs 0.19.1, bevy_gizmos 0.19.1, bevy_gizmos_macros 0.19.1, bevy_gizmos_render 0.19.1, bevy_gltf 0.19.1, bevy_image 0.19.1, bevy_input 0.19.1, bevy_input_focus 0.19.1, bevy_internal 0.19.1, bevy_light 0.19.1, bevy_log 0.19.1, bevy_macro_utils 0.19.1, bevy_material 0.19.1, bevy_material_macros 0.19.1, bevy_math 0.19.1, bevy_mesh 0.19.1, bevy_mikktspace 1.0.0, bevy_pbr 0.19.1, bevy_picking 0.19.1, bevy_platform 0.19.1, bevy_post_process 0.19.1, bevy_ptr 0.19.1, bevy_reflect 0.19.1, bevy_reflect_derive 0.19.1, bevy_render 0.19.1, bevy_render_macros 0.19.1, bevy_scene 0.19.1, bevy_shader 0.19.1, bevy_solari 0.19.1, bevy_sprite 0.19.1, bevy_sprite_render 0.19.1, bevy_state 0.19.1, bevy_state_macros 0.19.1, bevy_tasks 0.19.1, bevy_text 0.19.1, bevy_time 0.19.1, bevy_transform 0.19.1, bevy_ui 0.19.1, bevy_ui_render 0.19.1, bevy_ui_widgets 0.19.1, bevy_utils 0.19.1, bevy_window 0.19.1, bevy_winit 0.19.1, bevy_world_serialization 0.19.1, constant_time_eq 0.4.2, disqualified 1.0.0, erased-serde 0.4.10, fdeflate 0.3.7, half 2.7.1, hexasphere 18.0.0, image 0.25.6, image-webp 0.2.4, inventory 0.3.24, itoa 1.0.18, libc 0.2.189, linebender_resource_handle 0.1.1, litrs 1.0.0, mach2 0.5.0, miniz_oxide 0.8.9, miniz_oxide 0.9.1, naga 29.0.4, naga_oil 0.22.0, num_enum 0.7.6, num_enum_derive 0.7.6, owned_ttf_parser 0.25.1, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, portable-atomic 1.15.0, portable-atomic-util 0.2.7, proc-macro2 1.0.107, quote 1.0.47, range-alloc 0.1.5, raw-window-handle 0.6.2, rodio 0.22.2, rustversion 1.0.23, semver 1.0.28, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, simdutf8 0.1.5, syn 2.0.119, syn 3.0.4, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, typeid 1.0.3, unicode-ident 1.0.24, variadics_please 1.1.0, wgpu 29.0.4, wgpu-core 29.0.4, wgpu-core-deps-apple 29.0.4, wgpu-core-deps-windows-linux-android 29.0.4, wgpu-hal 29.0.4, wgpu-naga-bridge 29.0.4, wgpu-types 29.0.4 carry it.
+Apache-2.0, as ab_glyph 0.2.32, ab_glyph_rasterizer 0.1.10, allocator-api2 0.2.21, alsa 0.11.0, android-activity 0.6.1, arboard 3.6.1, atomicow 1.2.0, bevy 0.20.0, bevy_a11y 0.20.0, bevy_android 0.20.0, bevy_animation 0.20.0, bevy_animation_macros 0.20.0, bevy_anti_alias 0.20.0, bevy_app 0.20.0, bevy_asset 0.20.0, bevy_asset_macros 0.20.0, bevy_audio 0.20.0, bevy_camera 0.20.0, bevy_clipboard 0.20.0, bevy_color 0.20.0, bevy_core_pipeline 0.20.0, bevy_curve 0.20.0, bevy_derive 0.20.0, bevy_diagnostic 0.20.0, bevy_ecs 0.20.0, bevy_ecs_macro_logic 0.20.0, bevy_ecs_macros 0.20.0, bevy_encase_derive 0.20.0, bevy_extract 0.20.0, bevy_extract_macros 0.20.0, bevy_gilrs 0.20.0, bevy_gizmos 0.20.0, bevy_gizmos_macros 0.20.0, bevy_gizmos_render 0.20.0, bevy_gltf 0.20.0, bevy_image 0.20.0, bevy_input 0.20.0, bevy_input_focus 0.20.0, bevy_internal 0.20.0, bevy_light 0.20.0, bevy_log 0.20.0, bevy_macro_utils 0.20.0, bevy_material 0.20.0, bevy_material_macros 0.20.0, bevy_math 0.20.0, bevy_mesh 0.20.0, bevy_mikktspace 1.0.0, bevy_pbr 0.20.0, bevy_picking 0.20.0, bevy_platform 0.20.0, bevy_post_process 0.20.0, bevy_ptr 0.20.0, bevy_reflect 0.20.0, bevy_reflect_derive 0.20.0, bevy_render 0.20.0, bevy_render_macros 0.20.0, bevy_scene 0.20.0, bevy_shader 0.20.0, bevy_shape 0.20.0, bevy_solari 0.20.0, bevy_sprite 0.20.0, bevy_sprite_render 0.20.0, bevy_state 0.20.0, bevy_state_macros 0.20.0, bevy_tasks 0.20.0, bevy_text 0.20.0, bevy_time 0.20.0, bevy_transform 0.20.0, bevy_ui 0.20.0, bevy_ui_render 0.20.0, bevy_ui_widgets 0.20.0, bevy_utils 0.20.0, bevy_window 0.20.0, bevy_winit 0.20.0, bevy_world_serialization 0.20.0, constant_time_eq 0.4.2, disqualified 1.0.0, erased-serde 0.4.10, fdeflate 0.3.7, half 2.7.1, hexasphere 19.0.0, image 0.25.6, image-webp 0.2.4, inventory 0.3.24, itoa 1.0.18, libc 0.2.189, linebender_resource_handle 0.1.1, litrs 1.0.0, mach2 0.5.0, miniz_oxide 0.8.9, miniz_oxide 0.9.1, naga 30.0.1, naga-types 30.0.1, num_enum 0.7.6, num_enum_derive 0.7.6, owned_ttf_parser 0.25.1, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, portable-atomic 1.15.0, portable-atomic-util 0.2.7, proc-macro2 1.0.107, quote 1.0.47, range-alloc 0.1.5, raw-window-handle 0.6.2, rodio 0.22.2, rustc-hash 2.1.3, rustversion 1.0.23, semver 1.0.28, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, simdutf8 0.1.5, syn 2.0.119, syn 3.0.4, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, typeid 1.0.3, unicode-ident 1.0.24, utf8parse 0.2.2, variadics_please 2.0.0, wgpu 30.0.1, wgpu-core 30.0.1, wgpu-core-deps-apple 30.0.1, wgpu-core-deps-windows-linux-android 30.0.1, wgpu-hal 30.0.1, wgpu-naga-bridge 30.0.1, wgpu-types 30.0.1 carry it.
 
 ~~~~
                                  Apache License
@@ -1065,7 +1090,7 @@ limitations under the License.
 
 ### Text 4
 
-MIT, as adler2 2.0.1, ahash 0.8.12, allocator-api2 0.2.21, android_log-sys 0.3.2, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, ash 0.38.0+1.3.281, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, bevy_mikktspace 1.0.0, bit-set 0.9.1, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytes 1.12.1, calloop 0.13.0, calloop-wayland-source 0.3.0, cc 1.4.4, cfg-if 1.0.4, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, const_soft_float 0.1.4, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpufeatures 0.3.1, critical-section 1.2.0, ctrlc 3.5.2, cursor-icon 1.2.0, displaydoc 0.2.7, dlib 0.5.3, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, erased-serde 0.4.10, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, file-id 0.2.3, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, float-cmp 0.10.0, fnv 1.0.7, font-types 0.11.3, font-types 0.12.4, fontique 0.9.0, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-lite 2.6.1, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, getrandom 0.3.4, getrandom 0.4.3, glam 0.32.1, gltf 1.4.1, gltf-json 1.4.1, gpu-allocator 0.28.0, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hexasphere 18.0.0, indexmap 2.14.1, inflections 1.1.1, inventory 0.3.24, itertools 0.14.0, itoa 1.0.18, jni-sys 0.3.1, jni-sys 0.4.1, jobserver 0.1.35, js-sys 0.3.104, kqueue 1.2.1, kqueue-sys 1.1.2, lazy_static 1.5.0, libc 0.2.189, libudev-sys 0.1.4, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, litrs 1.0.0, lock_api 0.4.14, log 0.4.34, mach2 0.5.0, matchers 0.2.0, memmap2 0.9.11, mio 1.2.3, nom 8.0.0, nonmax 0.5.5, notify-debouncer-full 0.7.0, notify-types 2.1.0, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, num_enum 0.7.6, num_enum_derive 0.7.6, once_cell 1.21.4, ordered-float 5.5.0, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.9.0, parley_data 0.9.0, percent-encoding 2.3.2, petgraph 0.8.3, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, portable-atomic 1.15.0, portable-atomic-util 0.2.7, presser 0.3.1, proc-macro-crate 3.5.0, proc-macro2 1.0.107, quick-error 2.0.1, quote 1.0.47, radsort 0.1.1, rand 0.10.2, rand_core 0.10.1, rand_distr 0.6.0, raw-window-metal 1.1.0, read-fonts 0.39.2, read-fonts 0.41.0, rectangle-pack 0.4.2, regex 1.13.1, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, rodio 0.22.2, ron 0.12.2, rustc-hash 1.1.0, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, rustversion 1.0.23, scoped-tls 1.0.1, scopeguard 1.2.0, semver 1.0.28, send_wrapper 0.6.0, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, sharded-slab 0.1.7, simd_cesu8 1.2.0, skrifa 0.42.1, skrifa 0.44.0, slab 0.4.12, smallvec 1.15.2, smithay-client-toolkit 0.19.2, smol_str 0.2.2, stable_deref_trait 1.2.1, strict-num 0.1.1, swash 0.2.10, syn 2.0.119, syn 3.0.4, synstructure 0.13.2, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, thread_local 1.1.10, tinyvec 1.12.0, toml_datetime 1.1.1+spec-1.1.0, toml_edit 0.25.13+spec-1.1.0, toml_parser 1.1.3+spec-1.1.0, tracing 0.1.44, tracing-attributes 0.1.31, tracing-core 0.1.36, tracing-log 0.2.0, tracing-subscriber 0.3.23, tracing-wasm 0.2.1, ttf-parser 0.25.1, typeid 1.0.3, unicode-ident 1.0.24, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, utf8_iter 1.0.4, uuid 1.26.0, vec_map 0.8.2, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, wayland-backend 0.3.17, wayland-client 0.31.15, wayland-csd-frame 0.3.0, wayland-cursor 0.31.14, wayland-protocols 0.32.13, wayland-protocols-plasma 0.3.12, wayland-protocols-wlr 0.3.12, wayland-scanner 0.31.11, wayland-sys 0.31.11, web-sys 0.3.104, web-task 1.1.3, winnow 1.0.4, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11-dl 2.21.0, x11rb 0.13.2, x11rb-protocol 0.13.2, xkeysym 0.2.1, yazi 0.2.1, zeno 0.3.3, zerocopy 0.8.56, zerocopy-derive 0.8.56, zmij 1.0.23 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.35.0, accesskit_consumer 0.38.0, accesskit_macos 0.26.3, accesskit_windows 0.32.1, bevy_scene_macros 0.19.1, block2 0.5.1, block2 0.6.2, constgebra 0.1.4, dasp_sample 0.11.0, dispatch 0.2.0, dispatch2 0.3.1, gilrs-core 0.6.8, gpu-descriptor 0.3.2, gpu-descriptor-types 0.2.0, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc-sys 0.3.5, objc2 0.5.2, objc2 0.6.4, objc2-app-kit 0.2.2, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-cloud-kit 0.2.2, objc2-contacts 0.2.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-data 0.2.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-core-image 0.2.2, objc2-core-location 0.2.2, objc2-encode 4.1.0, objc2-foundation 0.2.2, objc2-foundation 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-link-presentation 0.2.2, objc2-metal 0.2.2, objc2-metal 0.3.2, objc2-quartz-core 0.2.2, objc2-quartz-core 0.3.2, objc2-symbols 0.2.2, objc2-ui-kit 0.2.2, objc2-uniform-type-identifiers 0.2.2, objc2-user-notifications 0.2.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, svg_fmt 0.4.5, taffy 0.10.1, valuable 0.1.1, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
+MIT, as adler2 2.0.1, ahash 0.8.12, allocator-api2 0.2.21, android_log-sys 0.3.2, annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, ash 0.38.0+1.3.281, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, bevy_mikktspace 1.0.0, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytes 1.12.1, calloop 0.13.0, calloop-wayland-source 0.3.0, cc 1.4.4, cfg-if 1.0.4, colorchoice 1.0.5, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, const_soft_float 0.1.4, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpufeatures 0.3.1, critical-section 1.2.0, ctrlc 3.5.2, cursor-icon 1.2.0, displaydoc 0.2.7, dlib 0.5.3, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, erased-serde 0.4.10, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, file-id 0.2.3, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, float-cmp 0.10.0, fnv 1.0.7, font-types 0.12.4, fontique 0.11.1, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-lite 2.6.1, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, getrandom 0.3.4, getrandom 0.4.3, glam 0.33.12, glob 0.3.4, gltf 1.4.1, gltf-json 1.4.1, gpu-allocator 0.28.0, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hexasphere 19.0.0, indexmap 2.14.1, inflections 1.1.1, inventory 0.3.24, is_terminal_polyfill 1.70.2, itertools 0.14.0, itertools 0.15.0, itoa 1.0.18, jni-sys 0.3.1, jni-sys 0.4.1, jobserver 0.1.35, js-sys 0.3.104, kqueue 1.2.1, kqueue-sys 1.1.2, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, libc 0.2.189, libudev-sys 0.1.4, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, litrs 1.0.0, lock_api 0.4.14, log 0.4.34, mach2 0.5.0, matchers 0.2.0, memmap2 0.9.11, mio 1.2.3, nom 8.0.0, nonmax 0.5.5, notify-debouncer-full 0.7.0, notify-types 2.1.0, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, num_enum 0.7.6, num_enum_derive 0.7.6, once_cell 1.21.4, once_cell_polyfill 1.70.2, ordered-float 5.5.0, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, portable-atomic 1.15.0, portable-atomic-util 0.2.7, presser 0.3.1, proc-macro-crate 3.5.0, proc-macro2 1.0.107, quick-error 2.0.1, quote 1.0.47, radsort 0.1.1, rand 0.10.2, rand_core 0.10.1, rand_distr 0.6.0, raw-window-metal 1.1.0, read-fonts 0.41.0, rectangle-pack 0.4.2, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, rodio 0.22.2, ron 0.12.2, rustc-hash 1.1.0, rustc-hash 2.1.3, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, rustversion 1.0.23, scoped-tls 1.0.1, scopeguard 1.2.0, semver 1.0.28, send_wrapper 0.6.0, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, serde_spanned 1.1.2, sharded-slab 0.1.7, simd_cesu8 1.2.0, skrifa 0.44.0, slab 0.4.12, smallvec 1.15.2, smithay-client-toolkit 0.19.2, smol_str 0.2.2, stable_deref_trait 1.2.1, strict-num 0.1.1, swash 0.2.10, syn 2.0.119, syn 3.0.4, synstructure 0.13.2, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, thread_local 1.1.10, tinyvec 1.12.0, toml 1.1.8+spec-1.1.0, toml_datetime 1.1.2+spec-1.1.0, toml_edit 0.25.13+spec-1.1.0, toml_parser 1.1.5+spec-1.1.0, toml_writer 1.1.3+spec-1.1.0, tracing 0.1.44, tracing-attributes 0.1.31, tracing-core 0.1.36, tracing-log 0.2.0, tracing-subscriber 0.3.23, tracing-wasm 0.2.1, ttf-parser 0.25.1, typeid 1.0.3, unicode-ident 1.0.24, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, utf8parse 0.2.2, uuid 1.26.0, vec_map 0.8.2, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, wayland-backend 0.3.17, wayland-client 0.31.15, wayland-csd-frame 0.3.0, wayland-cursor 0.31.14, wayland-protocols 0.32.13, wayland-protocols-plasma 0.3.12, wayland-protocols-wlr 0.3.12, wayland-scanner 0.31.11, wayland-sys 0.31.11, web-sys 0.3.104, web-task 1.1.3, winnow 1.0.4, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11-dl 2.21.0, x11rb 0.13.2, x11rb-protocol 0.13.2, xkeysym 0.2.1, yazi 0.2.1, zeno 0.3.3, zerocopy 0.8.56, zerocopy-derive 0.8.56, zmij 1.0.23 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, bevy_scene_macros 0.20.0, block2 0.5.1, block2 0.6.2, constgebra 0.1.4, dasp_sample 0.11.0, dispatch 0.2.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, mutants 0.0.3, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc-sys 0.3.5, objc2 0.5.2, objc2 0.6.4, objc2-app-kit 0.2.2, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-cloud-kit 0.2.2, objc2-contacts 0.2.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-data 0.2.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-core-image 0.2.2, objc2-core-location 0.2.2, objc2-encode 4.1.0, objc2-foundation 0.2.2, objc2-foundation 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-link-presentation 0.2.2, objc2-metal 0.2.2, objc2-metal 0.3.2, objc2-quartz-core 0.2.2, objc2-quartz-core 0.3.2, objc2-symbols 0.2.2, objc2-ui-kit 0.2.2, objc2-uniform-type-identifiers 0.2.2, objc2-user-notifications 0.2.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, taffy 0.14.0, valuable 0.1.1, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
 
 ~~~~
 Permission is hereby granted, free of charge, to any
@@ -1095,7 +1120,7 @@ DEALINGS IN THE SOFTWARE.
 
 ### Text 5
 
-Apache-2.0, as ahash 0.8.12, approx 0.5.1, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, assert_type_match 0.1.1, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, base64 0.22.1, bit-set 0.9.1, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytemuck 1.25.2, bytemuck_derive 1.12.0, cc 1.4.4, cfg-if 1.0.4, claxon 0.4.3, codespan-reporting 0.12.0, codespan-reporting 0.13.1, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpal 0.17.3, cpufeatures 0.3.1, critical-section 1.2.0, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, displaydoc 0.2.7, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, fnv 1.0.7, fontique 0.9.0, futures-lite 2.6.1, gethostname 1.1.0, gltf 1.4.1, gltf-derive 1.4.1, gltf-json 1.4.1, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hound 3.5.1, indexmap 2.14.1, itertools 0.14.0, jni 0.21.1, jobserver 0.1.35, js-sys 0.3.104, lazy_static 1.5.0, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, lock_api 0.4.14, log 0.4.34, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, once_cell 1.21.4, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.9.0, parley_data 0.9.0, percent-encoding 2.3.2, petgraph 0.8.3, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, presser 0.3.1, radsort 0.1.1, raw-window-metal 1.1.0, regex 1.13.1, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, ron 0.12.2, rustc-hash 1.1.0, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, scoped-tls 1.0.1, scopeguard 1.2.0, send_wrapper 0.6.0, simd_cesu8 1.2.0, smallvec 1.15.2, smol_str 0.2.2, stable_deref_trait 1.2.1, static_assertions 1.1.0, swash 0.2.10, sys-locale 0.3.2, thread_local 1.1.10, tinyvec 1.12.0, tracing-wasm 0.2.1, ttf-parser 0.25.1, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, utf8_iter 1.0.4, uuid 1.26.0, vec_map 0.8.2, version_check 0.9.5, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, web-sys 0.3.104, web-task 1.1.3, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11rb 0.13.2, x11rb-protocol 0.13.2, yazi 0.2.1, zeno 0.3.3 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.35.0, accesskit_consumer 0.38.0, accesskit_macos 0.26.3, accesskit_windows 0.32.1, accesskit_winit 0.32.2, bevy_scene_macros 0.19.1, constgebra 0.1.4, dasp_sample 0.11.0, dispatch2 0.3.1, gilrs-core 0.6.8, gpu-descriptor 0.3.2, gpu-descriptor-types 0.2.0, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-metal 0.3.2, objc2-quartz-core 0.3.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, spirv 0.4.0+sdk-1.4.341.0, svg_fmt 0.4.5, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
+Apache-2.0, as ahash 0.8.12, approx 0.5.1, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, assert_type_match 0.1.1, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, base64 0.23.1, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytemuck 1.25.2, bytemuck_derive 1.12.0, cc 1.4.4, cfg-if 1.0.4, claxon 0.4.3, codespan-reporting 0.13.1, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpal 0.17.3, cpufeatures 0.3.1, critical-section 1.2.0, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, displaydoc 0.2.7, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, fnv 1.0.7, fontique 0.11.1, futures-lite 2.6.1, gethostname 1.1.0, glob 0.3.4, gltf 1.4.1, gltf-derive 1.4.1, gltf-json 1.4.1, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hound 3.5.1, indexmap 2.14.1, itertools 0.14.0, itertools 0.15.0, jni 0.21.1, jobserver 0.1.35, js-sys 0.3.104, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, lock_api 0.4.14, log 0.4.34, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, once_cell 1.21.4, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, presser 0.3.1, radsort 0.1.1, raw-window-metal 1.1.0, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, ron 0.12.2, rustc-hash 1.1.0, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, scoped-tls 1.0.1, scopeguard 1.2.0, send_wrapper 0.6.0, simd_cesu8 1.2.0, smallvec 1.15.2, smol_str 0.2.2, stable_deref_trait 1.2.1, static_assertions 1.1.0, swash 0.2.10, sys-locale 0.3.2, thread_local 1.1.10, tinyvec 1.12.0, tracing-wasm 0.2.1, ttf-parser 0.25.1, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, uuid 1.26.0, vec_map 0.8.2, version_check 0.9.5, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, web-sys 0.3.104, web-task 1.1.3, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11rb 0.13.2, x11rb-protocol 0.13.2, yazi 0.2.1, zeno 0.3.3 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, accesskit_winit 0.33.2, bevy_scene_macros 0.20.0, constgebra 0.1.4, dasp_sample 0.11.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-metal 0.3.2, objc2-quartz-core 0.3.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, spirv 0.4.0+sdk-1.4.341.0, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
 
 ~~~~
                               Apache License
@@ -1313,7 +1338,7 @@ You may use this code under the terms of either license.
 
 ### Text 7
 
-MIT, as aho-corasick 1.1.5, async-broadcast 0.7.2, base64 0.22.1, byteorder 1.5.0, byteorder-lite 0.1.0, combine 4.6.8, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, crunchy 0.2.4, data-encoding 2.11.1, derive_more 2.1.1, derive_more-impl 2.1.1, fsevent-sys 4.1.0, harfrust 0.6.2, jni 0.21.1, memchr 2.8.3, nix 0.31.3, nu-ansi-term 0.50.3, orbclient 0.3.55, os_pipe 1.2.3, quick-xml 0.41.0, same-file 1.0.6, shlex 2.0.1, spin 0.10.1, termcolor 1.4.1, tracing-core 0.1.36, twox-hash 2.1.4, walkdir 2.5.0, winapi-util 0.1.11, xkbcommon-dl 0.4.2 carry it.
+MIT, as aho-corasick 1.1.5, async-broadcast 0.7.2, base64 0.23.1, byteorder 1.5.0, byteorder-lite 0.1.0, combine 4.6.8, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, crunchy 0.2.4, derive_more 2.1.1, derive_more-impl 2.1.1, fsevent-sys 4.1.0, harfrust 0.12.0, jni 0.21.1, logos 0.16.1, logos-codegen 0.16.1, logos-derive 0.16.1, memchr 2.8.3, nix 0.31.3, nu-ansi-term 0.50.3, orbclient 0.3.55, os_pipe 1.2.3, quick-xml 0.41.0, same-file 1.0.6, shlex 2.0.1, spin 0.12.3, termcolor 1.4.1, tracing-core 0.1.36, twox-hash 2.1.4, walkdir 2.5.0, winapi-util 0.1.11, xkbcommon-dl 0.4.2 carry it.
 
 ~~~~
 The MIT License (MIT)
@@ -1371,7 +1396,7 @@ For more information, please refer to <http://unlicense.org/>
 
 ### Text 9
 
-MIT, as alsa 0.11.0, alsa-sys 0.4.0, android-activity 0.6.1, android-properties 0.2.2, arboard 3.6.1, assert_type_match 0.1.1, atomicow 1.2.0, bevy 0.19.1, bevy_a11y 0.19.1, bevy_android 0.19.1, bevy_animation 0.19.1, bevy_animation_macros 0.19.1, bevy_anti_alias 0.19.1, bevy_app 0.19.1, bevy_asset 0.19.1, bevy_asset_macros 0.19.1, bevy_audio 0.19.1, bevy_camera 0.19.1, bevy_clipboard 0.19.1, bevy_color 0.19.1, bevy_core_pipeline 0.19.1, bevy_derive 0.19.1, bevy_diagnostic 0.19.1, bevy_ecs 0.19.1, bevy_ecs_macro_logic 0.19.1, bevy_ecs_macros 0.19.1, bevy_encase_derive 0.19.1, bevy_gilrs 0.19.1, bevy_gizmos 0.19.1, bevy_gizmos_macros 0.19.1, bevy_gizmos_render 0.19.1, bevy_gltf 0.19.1, bevy_image 0.19.1, bevy_input 0.19.1, bevy_input_focus 0.19.1, bevy_internal 0.19.1, bevy_light 0.19.1, bevy_log 0.19.1, bevy_macro_utils 0.19.1, bevy_material 0.19.1, bevy_material_macros 0.19.1, bevy_math 0.19.1, bevy_mesh 0.19.1, bevy_pbr 0.19.1, bevy_picking 0.19.1, bevy_platform 0.19.1, bevy_post_process 0.19.1, bevy_ptr 0.19.1, bevy_reflect 0.19.1, bevy_reflect_derive 0.19.1, bevy_render 0.19.1, bevy_render_macros 0.19.1, bevy_scene 0.19.1, bevy_shader 0.19.1, bevy_solari 0.19.1, bevy_sprite 0.19.1, bevy_sprite_render 0.19.1, bevy_state 0.19.1, bevy_state_macros 0.19.1, bevy_tasks 0.19.1, bevy_text 0.19.1, bevy_time 0.19.1, bevy_transform 0.19.1, bevy_ui 0.19.1, bevy_ui_render 0.19.1, bevy_ui_widgets 0.19.1, bevy_utils 0.19.1, bevy_weather 0.2.0, bevy_window 0.19.1, bevy_winit 0.19.1, bevy_world_serialization 0.19.1, bitvec 1.1.1, cfg_aliases 0.2.2, const-fnv1a-hash 1.1.0, convert_case 0.10.0, core_maths 0.1.1, crc32fast 1.5.1, disqualified 1.0.0, fdeflate 0.3.7, funty 2.0.0, grid 1.0.1, guillotiere 0.6.2, half 2.7.1, image 0.25.6, image-webp 0.2.4, libredox 0.1.21, linebender_resource_handle 0.1.1, metis 0.2.2, miniz_oxide 0.8.9, miniz_oxide 0.9.1, naga 29.0.4, naga_oil 0.22.0, offset-allocator 0.2.0, radium 0.7.0, range-alloc 0.1.5, raw-window-handle 0.6.2, redox_syscall 0.4.1, redox_syscall 0.5.18, redox_syscall 0.9.3, ruzstd 0.8.3, sctk-adwaita 0.10.1, simd-adler32 0.3.10, simdutf8 0.1.5, static_assertions 1.1.0, sys-locale 0.3.2, tap 1.0.1, tinyvec_macros 0.1.1, tree_magic_mini 3.2.2, variadics_please 1.1.0, weak-table 0.3.2, web-time 1.1.0, wgpu 29.0.4, wgpu-core 29.0.4, wgpu-core-deps-apple 29.0.4, wgpu-core-deps-windows-linux-android 29.0.4, wgpu-hal 29.0.4, wgpu-naga-bridge 29.0.4, wgpu-types 29.0.4, wyz 0.5.1, xcursor 0.3.11 carry it.
+MIT, as alsa 0.11.0, alsa-sys 0.4.0, android-activity 0.6.1, android-properties 0.2.2, arboard 3.6.1, assert_type_match 0.1.1, atomicow 1.2.0, bevy 0.20.0, bevy_a11y 0.20.0, bevy_android 0.20.0, bevy_animation 0.20.0, bevy_animation_macros 0.20.0, bevy_anti_alias 0.20.0, bevy_app 0.20.0, bevy_asset 0.20.0, bevy_asset_macros 0.20.0, bevy_audio 0.20.0, bevy_camera 0.20.0, bevy_clipboard 0.20.0, bevy_color 0.20.0, bevy_core_pipeline 0.20.0, bevy_curve 0.20.0, bevy_derive 0.20.0, bevy_diagnostic 0.20.0, bevy_ecs 0.20.0, bevy_ecs_macro_logic 0.20.0, bevy_ecs_macros 0.20.0, bevy_encase_derive 0.20.0, bevy_extract 0.20.0, bevy_extract_macros 0.20.0, bevy_gilrs 0.20.0, bevy_gizmos 0.20.0, bevy_gizmos_macros 0.20.0, bevy_gizmos_render 0.20.0, bevy_gltf 0.20.0, bevy_image 0.20.0, bevy_input 0.20.0, bevy_input_focus 0.20.0, bevy_internal 0.20.0, bevy_light 0.20.0, bevy_log 0.20.0, bevy_macro_utils 0.20.0, bevy_material 0.20.0, bevy_material_macros 0.20.0, bevy_math 0.20.0, bevy_mesh 0.20.0, bevy_pbr 0.20.0, bevy_picking 0.20.0, bevy_platform 0.20.0, bevy_post_process 0.20.0, bevy_ptr 0.20.0, bevy_reflect 0.20.0, bevy_reflect_derive 0.20.0, bevy_render 0.20.0, bevy_render_macros 0.20.0, bevy_scene 0.20.0, bevy_shader 0.20.0, bevy_shape 0.20.0, bevy_solari 0.20.0, bevy_sprite 0.20.0, bevy_sprite_render 0.20.0, bevy_state 0.20.0, bevy_state_macros 0.20.0, bevy_tasks 0.20.0, bevy_text 0.20.0, bevy_time 0.20.0, bevy_transform 0.20.0, bevy_ui 0.20.0, bevy_ui_render 0.20.0, bevy_ui_widgets 0.20.0, bevy_utils 0.20.0, bevy_weather 0.2.0, bevy_window 0.20.0, bevy_winit 0.20.0, bevy_world_serialization 0.20.0, bitvec 1.1.1, cfg_aliases 0.2.2, const-fnv1a-hash 1.1.0, convert_case 0.10.0, crc32fast 1.5.1, disqualified 1.0.0, fdeflate 0.3.7, funty 2.0.0, half 2.7.1, image 0.25.6, image-webp 0.2.4, libredox 0.1.21, linebender_resource_handle 0.1.1, metis 0.2.2, miniz_oxide 0.8.9, miniz_oxide 0.9.1, naga 30.0.1, naga-types 30.0.1, offset-allocator 0.2.0, radium 0.7.0, range-alloc 0.1.5, raw-window-handle 0.6.2, redox_syscall 0.4.1, redox_syscall 0.5.18, redox_syscall 0.9.3, ruzstd 0.8.3, sctk-adwaita 0.10.1, simd-adler32 0.3.10, simdutf8 0.1.5, static_assertions 1.1.0, sys-locale 0.3.2, tap 1.0.1, tinyvec_macros 0.1.1, tree_magic_mini 3.2.2, variadics_please 2.0.0, weak-table 0.4.0, web-time 1.1.0, wgpu 30.0.1, wgpu-core 30.0.1, wgpu-core-deps-apple 30.0.1, wgpu-core-deps-windows-linux-android 30.0.1, wgpu-hal 30.0.1, wgpu-naga-bridge 30.0.1, wgpu-types 30.0.1, wyz 0.5.1, xcursor 0.3.11 carry it.
 
 ~~~~
 MIT License
@@ -1429,7 +1454,7 @@ at your option.
 
 ### Text 11
 
-Apache-2.0, as android_log-sys 0.3.2 carries it.
+Apache-2.0, as android_log-sys 0.3.2, serde_spanned 1.1.2, toml 1.1.8+spec-1.1.0, toml_datetime 1.1.2+spec-1.1.0, toml_parser 1.1.5+spec-1.1.0, toml_writer 1.1.3+spec-1.1.0 carry it.
 
 ~~~~
 Apache License
@@ -1636,7 +1661,7 @@ limitations under the License.
 
 ### Text 12
 
-Apache-2.0, as android_system_properties 0.1.6, shlex 2.0.1 carry it.
+Apache-2.0, as android_system_properties 0.1.6, guillotiere 0.7.0, shlex 2.0.1 carry it.
 
 ~~~~
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -1654,7 +1679,7 @@ limitations under the License.
 
 ### Text 13
 
-MIT, as android_system_properties 0.1.6, lz4_flex 0.13.1, version_check 0.9.5 carry it.
+MIT, as android_system_properties 0.1.6, guillotiere 0.7.0, lz4_flex 0.13.1, version_check 0.9.5 carry it.
 
 ~~~~
 The MIT License (MIT)
@@ -1678,6 +1703,214 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ~~~~
 
 ### Text 14
+
+Apache-2.0, as annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, colorchoice 1.0.5, crc32fast 1.5.1, dpi 0.1.2, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, is_terminal_polyfill 1.70.2, jni-sys 0.3.1, jni-sys 0.4.1, once_cell_polyfill 1.70.2, quick-error 2.0.1, toml_edit 0.25.13+spec-1.1.0, winit 0.30.13 carry it.
+
+~~~~
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "{}"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright {yyyy} {name of copyright owner}
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+~~~~
+
+### Text 15
 
 BSD-2-Clause, as arrayref 0.3.9, mach2 0.5.0 carry it.
 
@@ -1709,9 +1942,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 15
+### Text 16
 
-Apache-2.0, as ash 0.38.0+1.3.281, font-types 0.11.3, font-types 0.12.4, read-fonts 0.39.2, read-fonts 0.41.0, skrifa 0.42.1, skrifa 0.44.0 carry it.
+Apache-2.0, as ash 0.38.0+1.3.281, font-types 0.12.4, read-fonts 0.41.0, skrifa 0.44.0 carry it.
 
 ~~~~
 Apache License
@@ -1782,7 +2015,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ~~~~
 
-### Text 16
+### Text 17
 
 Apache-2.0, as async-broadcast 0.7.2 carries it.
 
@@ -1978,7 +2211,7 @@ Apache-2.0, as async-broadcast 0.7.2 carries it.
    limitations under the License.
 ~~~~
 
-### Text 17
+### Text 18
 
 Apache-2.0, as atomic-waker 1.1.2, futures-lite 2.6.1 carry it.
 
@@ -2026,9 +2259,9 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ~~~~
 
-### Text 18
+### Text 19
 
-Apache-2.0, as blake3 1.8.7, const_soft_float 0.1.4, ctrlc 3.5.2, cursor-icon 1.2.0, file-id 0.2.3, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, glam 0.32.1, gpu-allocator 0.28.0, ktx2 0.5.0, memmap2 0.9.11, metis 0.2.2, notify-debouncer-full 0.7.0, notify-types 2.1.0, rectangle-pack 0.4.2, tinyvec_macros 0.1.1, web-time 1.1.0, windows 0.62.2, windows-collections 0.3.2, windows-core 0.62.2, windows-future 0.3.2, windows-implement 0.60.2, windows-interface 0.59.3, windows-link 0.2.1, windows-numerics 0.3.1, windows-result 0.4.1, windows-strings 0.5.1, windows-sys 0.45.0, windows-sys 0.52.0, windows-sys 0.59.0, windows-sys 0.60.2, windows-sys 0.61.2, windows-targets 0.42.2, windows-targets 0.52.6, windows-targets 0.53.5, windows-threading 0.2.1, windows_aarch64_gnullvm 0.42.2, windows_aarch64_gnullvm 0.52.6, windows_aarch64_gnullvm 0.53.1, windows_aarch64_msvc 0.42.2, windows_aarch64_msvc 0.52.6, windows_aarch64_msvc 0.53.1, windows_i686_gnu 0.42.2, windows_i686_gnu 0.52.6, windows_i686_gnu 0.53.1, windows_i686_gnullvm 0.52.6, windows_i686_gnullvm 0.53.1, windows_i686_msvc 0.42.2, windows_i686_msvc 0.52.6, windows_i686_msvc 0.53.1, windows_x86_64_gnu 0.42.2, windows_x86_64_gnu 0.52.6, windows_x86_64_gnu 0.53.1, windows_x86_64_gnullvm 0.42.2, windows_x86_64_gnullvm 0.52.6, windows_x86_64_gnullvm 0.53.1, windows_x86_64_msvc 0.42.2, windows_x86_64_msvc 0.52.6, windows_x86_64_msvc 0.53.1, xkeysym 0.2.1, zerocopy 0.8.56, zerocopy-derive 0.8.56 carry it.
+Apache-2.0, as blake3 1.8.7, const_soft_float 0.1.4, ctrlc 3.5.2, cursor-icon 1.2.0, file-id 0.2.3, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, glam 0.33.12, gpu-allocator 0.28.0, ktx2 0.5.0, logos 0.16.1, logos-codegen 0.16.1, logos-derive 0.16.1, memmap2 0.9.11, metis 0.2.2, notify-debouncer-full 0.7.0, notify-types 2.1.0, rectangle-pack 0.4.2, tinyvec_macros 0.1.1, web-time 1.1.0, windows 0.62.2, windows-collections 0.3.2, windows-core 0.62.2, windows-future 0.3.2, windows-implement 0.60.2, windows-interface 0.59.3, windows-link 0.2.1, windows-numerics 0.3.1, windows-result 0.4.1, windows-strings 0.5.1, windows-sys 0.45.0, windows-sys 0.52.0, windows-sys 0.59.0, windows-sys 0.60.2, windows-sys 0.61.2, windows-targets 0.42.2, windows-targets 0.52.6, windows-targets 0.53.5, windows-threading 0.2.1, windows_aarch64_gnullvm 0.42.2, windows_aarch64_gnullvm 0.52.6, windows_aarch64_gnullvm 0.53.1, windows_aarch64_msvc 0.42.2, windows_aarch64_msvc 0.52.6, windows_aarch64_msvc 0.53.1, windows_i686_gnu 0.42.2, windows_i686_gnu 0.52.6, windows_i686_gnu 0.53.1, windows_i686_gnullvm 0.52.6, windows_i686_gnullvm 0.53.1, windows_i686_msvc 0.42.2, windows_i686_msvc 0.52.6, windows_i686_msvc 0.53.1, windows_x86_64_gnu 0.42.2, windows_x86_64_gnu 0.52.6, windows_x86_64_gnu 0.53.1, windows_x86_64_gnullvm 0.42.2, windows_x86_64_gnullvm 0.52.6, windows_x86_64_gnullvm 0.53.1, windows_x86_64_msvc 0.42.2, windows_x86_64_msvc 0.52.6, windows_x86_64_msvc 0.53.1, xkeysym 0.2.1, zerocopy 0.8.56, zerocopy-derive 0.8.56 carry it.
 
 ~~~~
                                  Apache License
@@ -2233,7 +2466,7 @@ Apache-2.0, as blake3 1.8.7, const_soft_float 0.1.4, ctrlc 3.5.2, cursor-icon 1.
    limitations under the License.
 ~~~~
 
-### Text 19
+### Text 20
 
 Apache-2.0, as blake3 1.8.7 carries it.
 
@@ -2458,9 +2691,9 @@ the License, but only in their entirety and only with respect to the Combined
 Software.
 ~~~~
 
-### Text 20
+### Text 21
 
-CC0-1.0, as blake3 1.8.7, constant_time_eq 0.4.2 carry it, and the text taken for hexf-parse 0.2.1, whose packages hold none.
+CC0-1.0, as blake3 1.8.7, constant_time_eq 0.4.2 carry it.
 
 ~~~~
 Creative Commons Legal Code
@@ -2586,7 +2819,7 @@ express Statement of Purpose.
     this CC0 or use of the Work.
 ~~~~
 
-### Text 21
+### Text 22
 
 MIT, as bytemuck 1.25.2, bytemuck_derive 1.12.0 carry it.
 
@@ -2601,7 +2834,7 @@ The above copyright notice and this permission notice (including the next paragr
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ~~~~
 
-### Text 22
+### Text 23
 
 Zlib, as bytemuck 1.25.2, bytemuck_derive 1.12.0, const_panic 0.2.17, cursor-icon 1.2.0, foldhash 0.1.5, foldhash 0.2.0, gilrs 0.11.2, miniz_oxide 0.8.9, miniz_oxide 0.9.1, raw-window-handle 0.6.2, slotmap 1.1.1, tinyvec 1.12.0, typewit 1.15.2, xkeysym 0.2.1 carry it, and the text taken for dispatch2 0.3.1, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-metal 0.3.2, objc2-quartz-core 0.3.2, zune-core 0.4.12, zune-jpeg 0.4.21, whose packages hold none.
 
@@ -2617,7 +2850,7 @@ Permission is granted to anyone to use this software for any purpose, including 
 3. This notice may not be removed or altered from any source distribution.
 ~~~~
 
-### Text 23
+### Text 24
 
 Apache-2.0, as cesu8 1.1.0 carries it.
 
@@ -3045,7 +3278,7 @@ their own copyright notices and license terms:
   of this file. The only difference is the retention of
 ~~~~
 
-### Text 24
+### Text 25
 
 MIT, as cfg_aliases 0.2.2 carries it.
 
@@ -3078,7 +3311,7 @@ The `cfg_aliases!` macro uses a lot of the code from [`tectonic_cfg_support::tar
 ---
 ~~~~
 
-### Text 25
+### Text 26
 
 MIT-0, as constant_time_eq 0.4.2 carries it, and the text taken for encase_derive 0.12.1, encase_derive_impl 0.12.1, whose packages hold none.
 
@@ -3099,7 +3332,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ~~~~
 
-### Text 26
+### Text 27
 
 Apache-2.0, as core-graphics 0.23.2, euclid 0.22.14, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6 carry it.
 
@@ -3109,214 +3342,6 @@ http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 option. All files in the project carrying such notice may not be
 copied, modified, or distributed except according to those terms.
-~~~~
-
-### Text 27
-
-Apache-2.0, as crc32fast 1.5.1, dpi 0.1.2, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, jni-sys 0.3.1, jni-sys 0.4.1, quick-error 2.0.1, toml_datetime 1.1.1+spec-1.1.0, toml_edit 0.25.13+spec-1.1.0, toml_parser 1.1.3+spec-1.1.0, winit 0.30.13 carry it.
-
-~~~~
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "{}"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright {yyyy} {name of copyright owner}
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
 ~~~~
 
 ### Text 28
@@ -4603,6 +4628,347 @@ Apache License, version 2.0
 
 ### Text 39
 
+Apache-2.0, as lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-write-float 1.0.6, lexical-write-integer 1.0.6 carry it.
+
+~~~~
+# Licensing
+
+Lexical is dual licensed under the Apache 2.0 license as well as the MIT
+license. See the LICENCE-MIT and the LICENCE-APACHE files for the licenses.
+
+Other licensing terms may apply, as described in depth below for various features and functionality. All assume use of `lexical` or `lexical-core`.
+
+## `write-floats, not(compact)`
+
+`lexical-write-float/src/algorithm.rs` is a direct port of the reference C++ implementation of Dragonbox, found [here](https://github.com/jk-jeon/dragonbox/).
+This code (used if the `write-floats` feature is enabled and the `compact` feature is disabled) is subject to a [Boost Software License](https://github.com/jk-jeon/dragonbox/blob/71993f55067a89f4b4e27591605e21521f5c61be/LICENSE-Boost) and a modified [Apache2 license](https://github.com/jk-jeon/dragonbox/blob/71993f55067a89f4b4e27591605e21521f5c61be/LICENSE-Apache2-LLVM), shown in the [Boost Software License](#boost-software-license) and [Apache2 With LLVM Exceptions](#apache2-with-llvm-exceptions) sections below.
+
+## `write-floats, compact`
+
+`lexical-write-float/src/compact.rs` is a direct port of a C++ implementation of the Grisu algorithm, found [here](https://github.com/night-shift/fpconv/).
+This code (used if both the `write-floats` and `compact` features are enabled) is subject to a [MIT License](https://github.com/night-shift/fpconv/blob/dfeb7e938fb85fb5eca130b84f856705ced75012/license), shown in the [fpconv License](#fpconv-license) section below.
+
+## `write-floats, radix`
+
+`lexical-write-float/src/radix.rs` is adapted from the V8 implementation found [here](). This code (used if both the `parse-floats` and `radix` features are enabled) is subject to a [3-clause BSD license](https://github.com/v8/v8/blob/f80bfeaf0792652bfbc1f174d5a7b8ab8bc0cbbd/LICENSE.v8), shown in the [V8 License](#v8-license) section below.
+
+## `parse-floats, compact`
+
+`lexical-parse-float/src/bellerophon.rs` is loosely based off the Golang implementation,
+found [here](https://github.com/golang/go/blob/b10849fbb97a2244c086991b4623ae9f32c212d0/src/strconv/extfloat.go). This code (used if both the `parse-floats` and `compact` features are enabled) is subject to a [3-clause BSD license](https://github.com/golang/go/blob/b10849fbb97a2244c086991b4623ae9f32c212d0/LICENSE), shown in the [Go License](#go-license) section below.
+
+# License Terms
+
+This contains complete copies of the licensing terms for the feature-dependent code described above.
+
+## Go License
+
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name of Google Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Boost Software License
+
+Boost Software License - Version 1.0 - August 17th, 2003
+
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of the software and accompanying documentation covered by
+this license (the "Software") to use, reproduce, display, distribute,
+execute, and transmit the Software, and to prepare derivative works of the
+Software, and to permit third-parties to whom the Software is furnished to
+do so, all subject to the following:
+
+The copyright notices in the Software and this entire statement, including
+the above license grant, this restriction and the following disclaimer,
+must be included in all copies of the Software, in whole or in part, and
+all derivative works of the Software, unless such copies or derivative
+works are solely in the form of machine-executable object code generated by
+a source language processor.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+## Apache2 With LLVM Exceptions
+
+_Version 2.0, January 2004_
+_&lt;<http://www.apache.org/licenses/>&gt;_
+
+### Terms and Conditions for use, reproduction, and distribution
+
+#### 1. Definitions
+
+“License” shall mean the terms and conditions for use, reproduction, and
+distribution as defined by Sections 1 through 9 of this document.
+
+“Licensor” shall mean the copyright owner or entity authorized by the copyright
+owner that is granting the License.
+
+“Legal Entity” shall mean the union of the acting entity and all other entities
+that control, are controlled by, or are under common control with that entity.
+For the purposes of this definition, “control” means **(i)** the power, direct or
+indirect, to cause the direction or management of such entity, whether by
+contract or otherwise, or **(ii)** ownership of fifty percent (50%) or more of the
+outstanding shares, or **(iii)** beneficial ownership of such entity.
+
+“You” (or “Your”) shall mean an individual or Legal Entity exercising
+permissions granted by this License.
+
+“Source” form shall mean the preferred form for making modifications, including
+but not limited to software source code, documentation source, and configuration
+files.
+
+“Object” form shall mean any form resulting from mechanical transformation or
+translation of a Source form, including but not limited to compiled object code,
+generated documentation, and conversions to other media types.
+
+“Work” shall mean the work of authorship, whether in Source or Object form, made
+available under the License, as indicated by a copyright notice that is included
+in or attached to the work (an example is provided in the Appendix below).
+
+“Derivative Works” shall mean any work, whether in Source or Object form, that
+is based on (or derived from) the Work and for which the editorial revisions,
+annotations, elaborations, or other modifications represent, as a whole, an
+original work of authorship. For the purposes of this License, Derivative Works
+shall not include works that remain separable from, or merely link (or bind by
+name) to the interfaces of, the Work and Derivative Works thereof.
+
+“Contribution” shall mean any work of authorship, including the original version
+of the Work and any modifications or additions to that Work or Derivative Works
+thereof, that is intentionally submitted to Licensor for inclusion in the Work
+by the copyright owner or by an individual or Legal Entity authorized to submit
+on behalf of the copyright owner. For the purposes of this definition,
+“submitted” means any form of electronic, verbal, or written communication sent
+to the Licensor or its representatives, including but not limited to
+communication on electronic mailing lists, source code control systems, and
+issue tracking systems that are managed by, or on behalf of, the Licensor for
+the purpose of discussing and improving the Work, but excluding communication
+that is conspicuously marked or otherwise designated in writing by the copyright
+owner as “Not a Contribution.”
+
+“Contributor” shall mean Licensor and any individual or Legal Entity on behalf
+of whom a Contribution has been received by Licensor and subsequently
+incorporated within the Work.
+
+#### 2. Grant of Copyright License
+
+Subject to the terms and conditions of this License, each Contributor hereby
+grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free,
+irrevocable copyright license to reproduce, prepare Derivative Works of,
+publicly display, publicly perform, sublicense, and distribute the Work and such
+Derivative Works in Source or Object form.
+
+#### 3. Grant of Patent License
+
+Subject to the terms and conditions of this License, each Contributor hereby
+grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free,
+irrevocable (except as stated in this section) patent license to make, have
+made, use, offer to sell, sell, import, and otherwise transfer the Work, where
+such license applies only to those patent claims licensable by such Contributor
+that are necessarily infringed by their Contribution(s) alone or by combination
+of their Contribution(s) with the Work to which such Contribution(s) was
+submitted. If You institute patent litigation against any entity (including a
+cross-claim or counterclaim in a lawsuit) alleging that the Work or a
+Contribution incorporated within the Work constitutes direct or contributory
+patent infringement, then any patent licenses granted to You under this License
+for that Work shall terminate as of the date such litigation is filed.
+
+#### 4. Redistribution
+
+You may reproduce and distribute copies of the Work or Derivative Works thereof
+in any medium, with or without modifications, and in Source or Object form,
+provided that You meet the following conditions:
+
+* **(a)** You must give any other recipients of the Work or Derivative Works a copy of
+this License; and
+* **(b)** You must cause any modified files to carry prominent notices stating that You
+changed the files; and
+* **(c)** You must retain, in the Source form of any Derivative Works that You distribute,
+all copyright, patent, trademark, and attribution notices from the Source form
+of the Work, excluding those notices that do not pertain to any part of the
+Derivative Works; and
+* **(d)** If the Work includes a “NOTICE” text file as part of its distribution, then any
+Derivative Works that You distribute must include a readable copy of the
+attribution notices contained within such NOTICE file, excluding those notices
+that do not pertain to any part of the Derivative Works, in at least one of the
+following places: within a NOTICE text file distributed as part of the
+Derivative Works; within the Source form or documentation, if provided along
+with the Derivative Works; or, within a display generated by the Derivative
+Works, if and wherever such third-party notices normally appear. The contents of
+the NOTICE file are for informational purposes only and do not modify the
+License. You may add Your own attribution notices within Derivative Works that
+You distribute, alongside or as an addendum to the NOTICE text from the Work,
+provided that such additional attribution notices cannot be construed as
+modifying the License.
+
+You may add Your own copyright statement to Your modifications and may provide
+additional or different license terms and conditions for use, reproduction, or
+distribution of Your modifications, or for any such Derivative Works as a whole,
+provided Your use, reproduction, and distribution of the Work otherwise complies
+with the conditions stated in this License.
+
+#### 5. Submission of Contributions
+
+Unless You explicitly state otherwise, any Contribution intentionally submitted
+for inclusion in the Work by You to the Licensor shall be under the terms and
+conditions of this License, without any additional terms or conditions.
+Notwithstanding the above, nothing herein shall supersede or modify the terms of
+any separate license agreement you may have executed with Licensor regarding
+such Contributions.
+
+#### 6. Trademarks
+
+This License does not grant permission to use the trade names, trademarks,
+service marks, or product names of the Licensor, except as required for
+reasonable and customary use in describing the origin of the Work and
+reproducing the content of the NOTICE file.
+
+#### 7. Disclaimer of Warranty
+
+Unless required by applicable law or agreed to in writing, Licensor provides the
+Work (and each Contributor provides its Contributions) on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
+including, without limitation, any warranties or conditions of TITLE,
+NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are
+solely responsible for determining the appropriateness of using or
+redistributing the Work and assume any risks associated with Your exercise of
+permissions under this License.
+
+#### 8. Limitation of Liability
+
+In no event and under no legal theory, whether in tort (including negligence),
+contract, or otherwise, unless required by applicable law (such as deliberate
+and grossly negligent acts) or agreed to in writing, shall any Contributor be
+liable to You for damages, including any direct, indirect, special, incidental,
+or consequential damages of any character arising as a result of this License or
+out of the use or inability to use the Work (including but not limited to
+damages for loss of goodwill, work stoppage, computer failure or malfunction, or
+any and all other commercial damages or losses), even if such Contributor has
+been advised of the possibility of such damages.
+
+#### 9. Accepting Warranty or Additional Liability
+
+While redistributing the Work or Derivative Works thereof, You may choose to
+offer, and charge a fee for, acceptance of support, warranty, indemnity, or
+other liability obligations and/or rights consistent with this License. However,
+in accepting such obligations, You may act only on Your own behalf and on Your
+sole responsibility, not on behalf of any other Contributor, and only if You
+agree to indemnify, defend, and hold each Contributor harmless for any liability
+incurred by, or claims asserted against, such Contributor by reason of your
+accepting any such warranty or additional liability.
+
+_END OF TERMS AND CONDITIONS_
+
+### APPENDIX: How to apply the Apache License to your work
+
+To apply the Apache License to your work, attach the following boilerplate
+notice, with the fields enclosed by brackets `[]` replaced with your own
+identifying information. (Don't include the brackets!) The text should be
+enclosed in the appropriate comment syntax for the file format. We also
+recommend that a file or class name and description of purpose be included on
+the same “printed page” as the copyright notice for easier identification within
+third-party archives.
+
+    Copyright [yyyy] [name of copyright owner]
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+### LLVM Exceptions to the Apache 2.0 License
+
+As an exception, if, as a result of your compiling your source code, portions
+of this Software are embedded into an Object form of such source code, you
+may redistribute such embedded portions in such Object form without complying
+with the conditions of Sections 4(a), 4(b) and 4(d) of the License.
+
+In addition, if you combine or link compiled forms of this Software with
+software that is licensed under the GPLv2 ("Combined Software") and if a
+court of competent jurisdiction determines that the patent provision (Section
+3), the indemnity provision (Section 9) or other Section of the License
+conflicts with the conditions of the GPLv2, you may retroactively and
+prospectively choose to deem waived or otherwise exclude such Section(s) of
+the License, but only in their entirety and only with respect to the Combined
+Software.
+
+## V8 License
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name of Google Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## fpconv License
+
+The MIT License
+
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+~~~~
+
+### Text 40
+
 Apache-2.0, as libm 0.2.16 carries it.
 
 ~~~~
@@ -4859,7 +5225,7 @@ have been licensed under extremely permissive terms.
 Copyright notices are retained in src/* files where relevant.
 ~~~~
 
-### Text 40
+### Text 41
 
 Apache-2.0, as linux-raw-sys 0.4.15, linux-raw-sys 0.12.1 carry it.
 
@@ -4895,7 +5261,7 @@ is licensed under:
 at your option.
 ~~~~
 
-### Text 41
+### Text 42
 
 Apache-2.0, as linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, rustix 0.38.44, rustix 1.1.4, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wit-bindgen 0.57.1 carry it.
 
@@ -5120,7 +5486,7 @@ the License, but only in their entirety and only with respect to the Combined
 Software.
 ~~~~
 
-### Text 42
+### Text 43
 
 Apache-2.0, as metis-sys 0.3.2 carries it.
 
@@ -5142,7 +5508,7 @@ implied. See the License for the specific language governing
 permissions and limitations under the License.
 ~~~~
 
-### Text 43
+### Text 44
 
 Apache-2.0, as nonmax 0.5.5 carries it.
 
@@ -5350,7 +5716,7 @@ i                                 Apache License
    limitations under the License.
 ~~~~
 
-### Text 44
+### Text 45
 
 CC0-1.0, as notify 8.2.0 carries it.
 
@@ -5398,7 +5764,7 @@ For these and/or other purposes and motivations, and without any expectation of 
      d. Affirmer understands and acknowledges that Creative Commons is not a party to this document and has no duty or obligation with respect to this CC0 or use of the Work.
 ~~~~
 
-### Text 45
+### Text 46
 
 BSD-3-Clause, as num_enum 0.7.6, num_enum_derive 0.7.6 carry it.
 
@@ -5431,7 +5797,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 46
+### Text 47
 
 BSD-3-Clause, as ogg 0.8.0 carries it.
 
@@ -5472,7 +5838,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 47
+### Text 48
 
 LGPL-2.1, as orbclient 0.3.55 carries it.
 
@@ -5849,7 +6215,7 @@ library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
 ~~~~
 
-### Text 48
+### Text 49
 
 Apache-2.0, as parking 2.2.1 carries it.
 
@@ -5864,7 +6230,7 @@ option. All files in the project carrying such notice may not be
 copied, modified, or distributed except according to those terms.
 ~~~~
 
-### Text 49
+### Text 50
 
 A notice, as petgraph 0.8.3 carries it.
 
@@ -5876,41 +6242,6 @@ Creative Commons Attribution-ShareAlike 4.0 International License.
 
 You should have received a copy of the license along with this
 work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
-~~~~
-
-### Text 50
-
-BSD-3-Clause, as pp-rs 0.2.1 carries it.
-
-~~~~
-BSD 3-Clause License
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
 ### Text 51

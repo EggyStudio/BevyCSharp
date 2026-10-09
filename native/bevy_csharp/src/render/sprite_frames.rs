@@ -2,15 +2,13 @@
 //!
 //! Without this a sprite whose frame turns is set again, a call a sprite, and an animation of
 //! thousands of sprites turns thousands a frame, each one replacing the whole sprite. Here only the
-//! index of each one's atlas is written, in place, as a Rust system moves it, for a sprite and a
-//! sprite mesh alike.
+//! index of each one's atlas is written, in place, as a Rust system moves it.
 
 use crate::interop::status;
 
-/// Sets the atlas frame of each entity's sprite or sprite mesh, `count` of each, and answers how
-/// many it set.
+/// Sets the atlas frame of each entity's sprite, `count` of each, and answers how many it set.
 ///
-/// An entity that is gone, that has neither, or whose sprite shows no sheet is passed over rather
+/// An entity that is gone, that has no sprite, or whose sprite shows no sheet is passed over rather
 /// than refused, since an animation over many sprites outlives the odd one despawned under it.
 ///
 /// # Safety
@@ -47,16 +45,9 @@ pub unsafe extern "C" fn bcs_sprite_frames(entities: *const u64, frames: *const 
 
                     // Read before it is reached mutably, so a sprite with no sheet is not marked
                     // changed and drawn again for nothing.
-                    if entity.get::<bevy::sprite::Sprite>().is_some_and(|sprite| sprite.texture_atlas.is_some()) {
-                        if let Some(mut sprite) = entity.get_mut::<bevy::sprite::Sprite>()
-                            && let Some(atlas) = sprite.texture_atlas.as_mut()
-                        {
-                            atlas.index = frame as usize;
-                            set += 1;
-                        }
-                    } else if entity.get::<bevy::sprite::SpriteMesh>().is_some_and(|mesh| mesh.texture_atlas.is_some())
-                        && let Some(mut mesh) = entity.get_mut::<bevy::sprite::SpriteMesh>()
-                        && let Some(atlas) = mesh.texture_atlas.as_mut()
+                    if entity.get::<bevy::sprite::Sprite>().is_some_and(|sprite| sprite.texture_atlas.is_some())
+                        && let Some(mut sprite) = entity.get_mut::<bevy::sprite::Sprite>()
+                        && let Some(atlas) = sprite.texture_atlas.as_mut()
                     {
                         atlas.index = frame as usize;
                         set += 1;

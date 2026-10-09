@@ -98,6 +98,7 @@ pub struct ShaderPass {
 
 /// The passes a camera runs over its picture, in order.
 #[derive(Component, Clone, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsShaderPasses {
     pub passes: Vec<ShaderPass>,
@@ -220,6 +221,7 @@ fn pipeline_for(
                 blend: None,
                 write_mask: ColorWrites::ALL,
             })],
+            constants: Vec::new(),
         }),
         ..Default::default()
     });

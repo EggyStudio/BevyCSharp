@@ -58,6 +58,7 @@ pub struct Watch {
 
 /// The images of a camera being watched.
 #[derive(Component, Clone, ExtractComponent, Default)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsWatches(pub Vec<Watch>);
 
@@ -186,6 +187,7 @@ fn init_pipelines(mut commands: Commands, shaders: Res<WatchShaders>, cache: Res
                 shader_defs: Vec::new(),
                 entry_point: None,
                 buffers: Vec::new(),
+                constants: Vec::new(),
             },
             fragment: Some(FragmentState {
                 shader: shader.clone(),
@@ -196,6 +198,7 @@ fn init_pipelines(mut commands: Commands, shaders: Res<WatchShaders>, cache: Res
                     blend: None,
                     write_mask: ColorWrites::ALL,
                 })],
+                constants: Vec::new(),
             }),
             ..Default::default()
         });
@@ -238,19 +241,17 @@ fn draw_watches(
             .map(|texture| (texture.level.clone(), texture.format))
             .or_else(|| {
                 let prepass = prepass?;
-                let attachment = match watch.name.as_str() {
-                    "depth" => prepass.depth.as_ref(),
-                    "normals" => prepass.normal.as_ref(),
-                    "motion" => prepass.motion_vectors.as_ref(),
+                // The depth's attachment is of another kind than the colors', and both hold a
+                // texture, which is all a watch reads.
+                let texture = match watch.name.as_str() {
+                    "depth" => prepass.depth.as_ref().map(|attachment| &attachment.texture),
+                    "normals" => prepass.normal.as_ref().map(|attachment| &attachment.texture),
+                    "motion" => prepass.motion_vectors.as_ref().map(|attachment| &attachment.texture),
                     _ => None,
                 }?;
 
-                single(&attachment.texture.texture).then(|| {
-                    (
-                        attachment.texture.default_view.clone(),
-                        attachment.texture.texture.format(),
-                    )
-                })
+                single(&texture.texture)
+                    .then(|| (texture.default_view.clone(), texture.texture.format()))
             });
 
         let Some((source, format)) = found else {
@@ -505,12 +506,12 @@ fn record_drawn_names(
 
         // The prepass's own, which a watch can only show drawn once a pixel, as it checks too.
         if let Some(prepass) = prepass {
-            for (name, attachment) in [
-                ("depth", prepass.depth.as_ref()),
-                ("normals", prepass.normal.as_ref()),
-                ("motion", prepass.motion_vectors.as_ref()),
+            for (name, texture) in [
+                ("depth", prepass.depth.as_ref().map(|attachment| &attachment.texture)),
+                ("normals", prepass.normal.as_ref().map(|attachment| &attachment.texture)),
+                ("motion", prepass.motion_vectors.as_ref().map(|attachment| &attachment.texture)),
             ] {
-                if attachment.is_some_and(|attachment| attachment.texture.texture.sample_count() == 1) {
+                if texture.is_some_and(|texture| texture.texture.sample_count() == 1) {
                     names.push(name.into());
                 }
             }

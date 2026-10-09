@@ -1,4 +1,4 @@
-// Bevy's desk_toy example, examples/showcase/desk_toy.rs at v0.19.1, by Bevy's contributors under
+// Bevy's desk_toy example, examples/showcase/desk_toy.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;

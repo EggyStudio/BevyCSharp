@@ -62,10 +62,11 @@ public struct Material
     public float reflectance;
 };
 
-/// A matrix held as four columns, the way Bevy writes one.
-public struct Columns
+/// An instance's transform as Solari keeps it, the top three rows of the matrix, its translation
+/// in each row's last place, the bottom row being always the same.
+public struct Affine
 {
-    public float4 columns[4];
+    public float4 rows[3];
 };
 
 /// A light Solari samples. The low bit of `kind` says which kind, and the rest is extra data.
@@ -96,15 +97,16 @@ public static const uint LIGHT_DIRECTIONAL = 1;
 [[vk::binding(3, 2)]] public SamplerState samplers[5000];
 [[vk::binding(4, 2)]] public StructuredBuffer<Material> materials;
 [[vk::binding(5, 2)]] public RaytracingAccelerationStructure tlas;
-[[vk::binding(6, 2)]] public StructuredBuffer<Columns> transforms;
-[[vk::binding(7, 2)]] public StructuredBuffer<Columns> previous_transforms;
-[[vk::binding(8, 2)]] public StructuredBuffer<GeometryIds> geometry_ids;
-[[vk::binding(9, 2)]] public StructuredBuffer<uint> material_ids;
-[[vk::binding(10, 2)]] public StructuredBuffer<LightSource> light_sources;
-[[vk::binding(11, 2)]] public StructuredBuffer<DirectionalLight> directional_lights;
-[[vk::binding(12, 2)]] public StructuredBuffer<uint> previous_light_ids;
-[[vk::binding(13, 2)]] public Texture2D<float4> brdf_lut;
-[[vk::binding(14, 2)]] public SamplerState brdf_lut_sampler;
+[[vk::binding(6, 2)]] public RaytracingAccelerationStructure previous_tlas;
+[[vk::binding(7, 2)]] public StructuredBuffer<Affine> transforms;
+[[vk::binding(8, 2)]] public StructuredBuffer<Affine> previous_transforms;
+[[vk::binding(9, 2)]] public StructuredBuffer<GeometryIds> geometry_ids;
+[[vk::binding(10, 2)]] public StructuredBuffer<uint> material_ids;
+[[vk::binding(11, 2)]] public StructuredBuffer<LightSource> light_sources;
+[[vk::binding(12, 2)]] public StructuredBuffer<DirectionalLight> directional_lights;
+[[vk::binding(13, 2)]] public StructuredBuffer<uint> previous_light_ids;
+[[vk::binding(14, 2)]] public Texture2D<float4> brdf_lut;
+[[vk::binding(15, 2)]] public SamplerState brdf_lut_sampler;
 
 /// What a ray met, or `hit` false where it met nothing between its two distances.
 public struct Hit
@@ -193,17 +195,16 @@ public bool visible_in(RaytracingAccelerationStructure scene, float3 from, float
     return query.CommittedStatus() != COMMITTED_TRIANGLE_HIT;
 }
 
-/// Multiplies a matrix held as four columns by a vector.
-public float4 transform(Columns matrix, float4 v)
+/// Multiplies an instance's transform by a vector.
+public float4 transform(Affine matrix, float4 v)
 {
-    return matrix.columns[0] * v.x + matrix.columns[1] * v.y + matrix.columns[2] * v.z
-        + matrix.columns[3] * v.w;
+    return float4(dot(matrix.rows[0], v), dot(matrix.rows[1], v), dot(matrix.rows[2], v), v.w);
 }
 
-/// Multiplies a direction by a matrix's upper three columns, which leaves out its translation.
-public float3 transform_direction(Columns matrix, float3 v)
+/// Multiplies a direction by an instance's transform, which leaves out its translation.
+public float3 transform_direction(Affine matrix, float3 v)
 {
-    return matrix.columns[0].xyz * v.x + matrix.columns[1].xyz * v.y + matrix.columns[2].xyz * v.z;
+    return float3(dot(matrix.rows[0].xyz, v), dot(matrix.rows[1].xyz, v), dot(matrix.rows[2].xyz, v));
 }
 
 /// A texture of the scene's, read at `uv` from its largest level.

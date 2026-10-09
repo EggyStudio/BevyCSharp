@@ -1,4 +1,4 @@
-// Bevy's edit_material_on_gltf example, examples/gltf/edit_material_on_gltf.rs at v0.19.1, by
+// Bevy's edit_material_on_gltf example, examples/gltf/edit_material_on_gltf.rs at v0.20.0, by
 // Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;

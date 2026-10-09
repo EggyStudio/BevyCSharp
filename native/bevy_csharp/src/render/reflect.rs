@@ -33,6 +33,7 @@ use naga::{
 use serde_json::Value;
 
 mod layout;
+mod mend;
 mod spirv;
 
 #[cfg(test)]
@@ -122,7 +123,7 @@ fn unsigned_shuffle_lanes(wgsl: &str) -> String {
 
 /// Renumbers the groups of WGSL `slangc` wrote, and reads the shader's own group.
 pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected, String> {
-    let wgsl = unsigned_shuffle_lanes(&drop_subgroup_enable(&remap_groups(wgsl, family)));
+    let wgsl = mend::mend(&unsigned_shuffle_lanes(&drop_subgroup_enable(&remap_groups(wgsl, family))));
 
     let json: Value = serde_json::from_str(reflection)
         .map_err(|error| format!("slangc's reflection does not parse: {error}"))?;

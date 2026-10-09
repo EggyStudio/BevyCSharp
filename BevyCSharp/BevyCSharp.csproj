@@ -71,10 +71,12 @@
       The description of Bevy's reflected components, written by the schema.dump command and
       checked in. The generator turns it into the typed wrappers in Bevy.Reflected. It is named here
       and nowhere else, so only the library is compiled with the wrappers and a game's own
-      compilation emits nothing for it.
+      compilation emits nothing for it. The list of the components that moved beside it gives a
+      reflected component the paths a scene written before the move names.
     -->
     <ItemGroup>
         <AdditionalFiles Include="Generated/bevy-components.tsv"/>
+        <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>
     </ItemGroup>
 
     <!-- Ship the generator in the package's analyzer slot. -->

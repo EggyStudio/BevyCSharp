@@ -532,7 +532,7 @@ mod tests {
     fn a_cuboid_is_twenty_four_vertices_and_twelve_triangles() {
         // Four corners a face rather than eight a box, because each face has normals of its own.
         let mut app = app();
-        let mesh = bevy::math::primitives::Cuboid::new(1.0, 2.0, 3.0).mesh().build();
+        let mesh = bevy::shape::Cuboid::new(1.0, 2.0, 3.0).mesh().build();
         let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
         let key = crate::assets::key_for(app.world_mut(), handle);
 
@@ -553,7 +553,7 @@ mod tests {
     #[test]
     fn a_meshes_normals_come_back_with_its_positions() {
         let mut app = app();
-        let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+        let mesh = bevy::shape::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
         let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
         let key = crate::assets::key_for(app.world_mut(), handle);
 

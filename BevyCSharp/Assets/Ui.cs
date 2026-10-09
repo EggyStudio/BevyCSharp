@@ -193,7 +193,8 @@ public static unsafe partial class Ui
     /// <see cref="UiInteraction.Pressed"/> lasts from the frame the pointer goes down until it is
     /// released, so a click is the edge into it, found by keeping the previous answer and
     /// comparing. A release over the node reads as <see cref="UiInteraction.Hovered"/> again in the
-    /// same frame.
+    /// same frame. The node is hovered while the pointer is over it or over a node inside it, as
+    /// Bevy's picking reads a hover.
     /// </para>
     /// <para>
     /// The pointer is tracked by a system that comes with the window, so a windowless run leaves

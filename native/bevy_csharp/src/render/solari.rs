@@ -36,18 +36,33 @@ pub fn running() -> bool {
     }
 }
 
-/// The layout of Solari's scene group, or `None` where this app has no Solari to bind it.
-///
-/// Solari describes its group the same way every time it is made, so a fresh one's description is
-/// the one the running Solari binds.
+/// The running Solari's description of its scene group, kept from the render world once Solari
+/// has made it, since from Bevy 0.20 it is made with the render device and not alone.
+#[cfg(feature = "solari")]
+static LAYOUT: std::sync::Mutex<Option<bevy::render::render_resource::BindGroupLayoutDescriptor>> =
+    std::sync::Mutex::new(None);
+
+/// The layout of Solari's scene group, or `None` where this app has no Solari to bind it or Solari
+/// has not described it yet, which a dispatch waits a frame for.
 #[cfg(feature = "render")]
 pub fn scene_layout() -> Option<bevy::render::render_resource::BindGroupLayoutDescriptor> {
     #[cfg(feature = "solari")]
     if ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
-        return Some(SceneBindings::new().bind_group_layout);
+        return LAYOUT.lock().ok().and_then(|layout| layout.clone());
     }
 
     None
+}
+
+/// Keeps the description of Solari's scene group, the first frame it is there.
+#[cfg(feature = "solari")]
+fn keep_layout(bindings: Option<bevy::ecs::system::Res<SceneBindings>>) {
+    if let Some(bindings) = bindings
+        && let Ok(mut layout) = LAYOUT.lock()
+        && layout.is_none()
+    {
+        *layout = Some(bindings.bind_group_layout.clone());
+    }
 }
 
 /// Says Solari is not running, before an app decides whether to add it.
@@ -57,6 +72,9 @@ pub fn scene_layout() -> Option<bevy::render::render_resource::BindGroupLayoutDe
 #[cfg(feature = "solari")]
 pub fn forget() {
     ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
+    if let Ok(mut layout) = LAYOUT.lock() {
+        *layout = None;
+    }
 }
 
 /// Adds Solari, if the adapter Bevy would choose can run it.
@@ -79,10 +97,18 @@ pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>) {
 
     app.add_plugins(bevy::solari::SolariPlugins);
 
+    if let Some(renderer) = app.get_sub_app_mut(bevy::render::RenderApp) {
+        use bevy::ecs::schedule::IntoScheduleConfigs;
+        renderer.add_systems(
+            bevy::render::Render,
+            keep_layout.in_set(bevy::render::RenderSystems::PrepareResources),
+        );
+    }
+
     // A camera traced with Solari draws once a pixel, which is kept by setting it on every insert
     // rather than refusing a post-processing setting that arrives later.
     app.add_observer(
-        |insert: On<Insert, Msaa>,
+        |insert: On<Insert<Msaa>>,
          mut cameras: Query<&mut Msaa, bevy::ecs::query::With<bevy::solari::realtime::SolariLighting>>| {
             if let Ok(mut msaa) = cameras.get_mut(insert.entity)
                 && *msaa != Msaa::Off

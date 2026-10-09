@@ -84,8 +84,8 @@ public static class ComponentSchemas
     /// The name route needs no world, so a tool listing what it could show before an app exists has
     /// to use it. It also matches on the short name, because Bevy reports its own components by a
     /// path this side does not share. A name a type had before, kept on it with
-    /// <see cref="FormerNameAttribute"/>, is tried last, so a type that has since taken that name
-    /// wins over the one that gave it up.
+    /// <see cref="FormerNameAttribute"/>, or a path one of Bevy's components had before it moved,
+    /// is tried last, so a type that has since taken that name wins over the one that gave it up.
     /// </remarks>
     public static ComponentSchema? For(string name)
     {
@@ -100,7 +100,8 @@ public static class ComponentSchemas
                     name.EndsWith("::" + schema.Name, StringComparison.Ordinal)
                     || name == schema.Name)
                 ?? _reflected.FirstOrDefault(schema => name == schema.Name)
-                ?? Registered.FirstOrDefault(schema => schema.FormerNames.Contains(name));
+                ?? Registered.FirstOrDefault(schema => schema.FormerNames.Contains(name))
+                ?? _reflected.FirstOrDefault(schema => schema.FormerNames.Contains(name));
         }
     }
 

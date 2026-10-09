@@ -44,6 +44,7 @@ use bevy::shader::Shader;
 /// How round a camera's picture is at its corners, in physical pixels, and what shows outside
 /// them, as premultiplied linear RGBA.
 #[derive(Component, Clone, Copy, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsRoundedCorners {
     pub radius: f32,
@@ -146,6 +147,7 @@ fn draw_corners(
                         shader_defs: Vec::new(),
                         entry_point: Some("vertex".into()),
                         buffers: Vec::new(),
+                        constants: Vec::new(),
                     },
                     fragment: Some(FragmentState {
                         shader: shader.0.clone(),
@@ -159,6 +161,7 @@ fn draw_corners(
                             }),
                             write_mask: ColorWrites::ALL,
                         })],
+                        constants: Vec::new(),
                     }),
                     ..Default::default()
                 })

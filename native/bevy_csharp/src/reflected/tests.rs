@@ -262,7 +262,7 @@ fn a_handle_crosses_as_the_key_the_asset_table_gives_it() {
 
     let first = app.world_mut().resource_mut::<Assets<Image>>().add(Image::default());
     let second = app.world_mut().resource_mut::<Assets<Image>>().add(Image::default());
-    let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+    let mesh = bevy::shape::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
     let mesh = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh);
     let entity = app.world_mut().spawn(Textured { image: first.clone() }).id();
 

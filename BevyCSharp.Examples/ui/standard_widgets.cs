@@ -1,4 +1,4 @@
-// Bevy's standard_widgets example, examples/ui/widgets/standard_widgets.rs at v0.19.1, by Bevy's
+// Bevy's standard_widgets example, examples/ui/widgets/standard_widgets.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -134,7 +134,7 @@ internal static class StandardWidgets
             Color = NormalButton,
         });
         ecs.Add(button, new DemoButton());
-        ecs.Insert<BevyUiWidgetsButtonRef>(button);
+        ecs.Insert<ButtonRef>(button);
         ecs.Insert<HoveredRef>(button);
         ecs.Insert<TabIndexRef>(button);
         Widgets.Add(button);
@@ -163,7 +163,7 @@ internal static class StandardWidgets
             Color = NormalButton,
         });
         ecs.Add(button, new DemoMenuButton());
-        ecs.Insert<BevyUiWidgetsButtonRef>(button);
+        ecs.Insert<ButtonRef>(button);
         ecs.Insert<MenuButtonRef>(button);
         ecs.Insert<HoveredRef>(button);
         ecs.Insert<TabIndexRef>(button);

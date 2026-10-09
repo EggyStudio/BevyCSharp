@@ -1,4 +1,4 @@
-// Bevy's gltf_skinned_mesh example, examples/gltf/gltf_skinned_mesh.rs at v0.19.1, by Bevy's
+// Bevy's gltf_skinned_mesh example, examples/gltf/gltf_skinned_mesh.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;

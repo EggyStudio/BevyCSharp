@@ -41,11 +41,11 @@ mod built {
 
     use core::any::TypeId;
 
-    use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve, AnimatableProperty, AnimatedField, EvaluatorId};
+    use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve, AnimatableProperty, EvaluatorId};
     use bevy::animation::{animated_field, AnimationClip, AnimationEntityMut, AnimationEvaluationError, AnimationTargetId};
     use bevy::color::{Color, Srgba};
-    use bevy::math::curve::easing::{EaseFunction, EasingCurve, JumpAt};
-    use bevy::math::curve::{interval, CurveExt};
+    use bevy::curve::easing::{EaseFunction, EasingCurve, JumpAt};
+    use bevy::curve::{interval, CurveExt};
     use bevy::math::{Quat, Rot2, Vec2, Vec3};
     use bevy::text::TextColor;
     use bevy::transform::components::Transform;
@@ -138,7 +138,7 @@ mod built {
     fn add_typed<P, T>(clip: &mut AnimationClip, target: AnimationTargetId, property: P, curve: &BcsAnimationCurve, times: &[f32], values: Vec<T>) -> i32
     where
         P: AnimatableProperty<Property = T> + Clone,
-        T: bevy::animation::animatable::Animatable + bevy::math::curve::Ease + Clone + core::fmt::Debug + bevy::reflect::Reflectable + bevy::reflect::FromReflect,
+        T: bevy::animation::animatable::Animatable + Clone + core::fmt::Debug + bevy::reflect::Reflectable + bevy::reflect::FromReflect + Send + Sync,
     {
         match curve.kind {
             0 => {
@@ -154,7 +154,12 @@ mod built {
                 let Ok(domain) = interval(0.0, curve.duration.max(f32::EPSILON)) else {
                     return status::NULL_ARG;
                 };
-                let Ok(eased) = EasingCurve::new(start, end, ease).reparametrize_linear(domain) else {
+                // The easing runs from nothing to all of the way, and the value is the start
+                // interpolated toward the end that far, as the property interpolates, since a
+                // color has no easing of its own since Bevy 0.20 and needs none this way.
+                let between = EasingCurve::new(0.0_f32, 1.0, ease)
+                    .map(move |t| T::interpolate(&start, &end, t));
+                let Ok(eased) = between.reparametrize_linear(domain) else {
                     return status::NULL_ARG;
                 };
                 if curve.ping_pong != 0 {
@@ -549,6 +554,11 @@ pub extern "C" fn bcs_animation_clip_add_event(clip: i32, time: f32, event: u32,
                 } else {
                     let target = bevy::animation::AnimationTargetId(bevy::asset::uuid::Uuid::from_u64_pair(high, low));
                     clip.add_event_fn_to_target(target, time, fire);
+
+                    // Bevy 0.20 finds the targets a clip reaches by its curves alone, and fires a
+                    // target's events only once it has found the target, so a target holding
+                    // events and no curve is given an empty list of curves to be found by.
+                    clip.curves_mut().entry(target).or_default();
                 }
                 status::OK
             })

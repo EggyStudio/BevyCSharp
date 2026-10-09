@@ -61,7 +61,7 @@ pub unsafe extern "C" fn bcs_mesh_create(
 /// that is none of them.
 #[cfg(feature = "render")]
 fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
-    use bevy::math::primitives::{
+    use bevy::shape::{
         Annulus, Capsule2d, Capsule3d, Circle, CircularSector, CircularSegment, Cone,
         ConicalFrustum, Cuboid, Cylinder, Ellipse, Plane3d, Rectangle, RegularPolygon, Rhombus,
         Sphere, Tetrahedron, Torus, Triangle3d,
@@ -150,7 +150,7 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
 /// the turn the other way. Nothing for a name that is neither.
 #[cfg(feature = "render")]
 fn turned_image(arc: &str, radius: f32, half_angle: f32, angle: f32) -> Option<bevy::mesh::Mesh> {
-    use bevy::math::primitives::{CircularSector, CircularSegment};
+    use bevy::shape::{CircularSector, CircularSegment};
     use bevy::mesh::{CircularMeshUvMode, Meshable};
 
     let uv_mode = CircularMeshUvMode::Mask { angle };
@@ -169,7 +169,7 @@ fn turned_image(arc: &str, radius: f32, half_angle: f32, angle: f32) -> Option<b
 /// examples give them, the same sector of a smaller radius and an ellipse smaller on each axis.
 #[cfg(feature = "render")]
 fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mesh> {
-    use bevy::math::primitives::{
+    use bevy::shape::{
         Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Rectangle, RegularPolygon,
         Rhombus, Ring, ToRing, Triangle2d,
     };
@@ -201,7 +201,7 @@ fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mes
 /// measures `a` and `b` give the flat shape, or nothing for a shape Bevy does not extrude.
 #[cfg(feature = "render")]
 fn extrusion(outline: &str, a: f32, b: f32, depth: f32) -> Option<bevy::mesh::Mesh> {
-    use bevy::math::primitives::{
+    use bevy::shape::{
         Annulus, Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Extrusion, Rectangle,
         RegularPolygon, Rhombus, Triangle2d,
     };
@@ -308,7 +308,7 @@ mod tests {
     #[test]
     fn a_primitive_rebuilt_in_place_keeps_its_key() {
         let mut app = app();
-        let mesh = bevy::math::primitives::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
+        let mesh = bevy::shape::Cuboid::new(1.0, 1.0, 1.0).mesh().build();
         let handle = app.world_mut().resource_mut::<Assets<Mesh>>().add(mesh).untyped();
         let key = crate::assets::key_for(app.world_mut(), handle);
 

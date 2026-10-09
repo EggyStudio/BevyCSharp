@@ -977,7 +977,11 @@ pub fn pick_alpha(offered: &[wgpu::CompositeAlphaMode]) -> bevy::window::Composi
 /// request over it each time, though only the frame the surface is made reads it.
 #[cfg(feature = "render")]
 fn settle_alpha(
-    mut windows: bevy::ecs::system::ResMut<bevy::render::view::ExtractedWindows>,
+    mut windows: bevy::ecs::system::Query<(
+        bevy::ecs::entity::Entity,
+        &mut bevy::render::view::ExtractedWindow,
+        &bevy::window::RawHandleWrapper,
+    )>,
     instance: bevy::ecs::system::Res<bevy::render::renderer::RenderInstance>,
     adapter: bevy::ecs::system::Res<bevy::render::renderer::RenderAdapter>,
 ) {
@@ -986,7 +990,7 @@ fn settle_alpha(
     let Ok(mut settled) = ALPHA.lock() else { return };
     let settled = settled.get_or_insert_with(Default::default);
 
-    for window in windows.windows.values_mut() {
+    for (entity, mut window, handle) in &mut windows {
         if !matches!(
             window.alpha_mode,
             CompositeAlphaMode::PreMultiplied | CompositeAlphaMode::PostMultiplied
@@ -994,10 +998,10 @@ fn settle_alpha(
             continue;
         }
 
-        let mode = *settled.entry(window.entity).or_insert_with(|| {
+        let mode = *settled.entry(entity).or_insert_with(|| {
             let target = wgpu::SurfaceTargetUnsafe::RawHandle {
-                raw_display_handle: Some(window.handle.get_display_handle()),
-                raw_window_handle: window.handle.get_window_handle(),
+                raw_display_handle: Some(handle.get_display_handle()),
+                raw_window_handle: handle.get_window_handle(),
             };
 
             // SAFETY: the handles come from a window that is open, as the ones Bevy makes its own

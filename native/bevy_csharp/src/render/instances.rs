@@ -227,11 +227,11 @@ fn upload(tracked: &mut Tracked, bytes: Vec<u8>, assets: &mut Assets<ShaderBuffe
     };
 
     // The buffer may have been grown since, in which case the slots past the first are zeros.
-    let size = buffer.buffer_description.size as usize;
+    let size = buffer.buffer_size() as usize;
     let mut data = bytes.clone();
     data.resize(size.max(data.len()), 0);
     data.truncate(size);
-    buffer.data = Some(data);
+    super::compute::fill(&mut buffer, &data);
 
     tracked.written = bytes;
 }

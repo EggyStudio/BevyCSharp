@@ -1,5 +1,5 @@
 // Bevy's external_source_external_thread example,
-// examples/async_tasks/external_source_external_thread.rs at v0.19.1, by Bevy's contributors under
+// examples/async_tasks/external_source_external_thread.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using System.Threading.Channels;

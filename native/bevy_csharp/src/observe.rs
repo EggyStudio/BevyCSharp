@@ -11,14 +11,14 @@
 //! The observer itself only copies the component's bytes, while they are still there, and queues
 //! a command. The command runs with the whole world and calls C# inside it, as a C# system is
 //! called, so the managed handler can reach anything, and the bytes let a handler of a removal see
-//! the value that went, as Bevy's own `On<Remove, T>` can. Bevy applies the queue as the change
+//! the value that went, as Bevy's own `On<Remove<T>>` can. Bevy applies the queue as the change
 //! that triggered the observer finishes, so a change made from C# has been observed by the time
 //! the call that made it returns.
 
 use core::ffi::c_void;
 
 use bevy::ecs::component::ComponentId;
-use bevy::ecs::lifecycle::{Add, Despawn, Discard, Insert, Remove};
+use bevy::ecs::lifecycle::{AddEvent, DespawnEvent, DiscardEvent, InsertEvent, RemoveEvent};
 use bevy::ecs::observer::{Observer, On};
 use bevy::ecs::world::{DeferredWorld, World};
 use bevy::prelude::Entity;
@@ -77,11 +77,11 @@ fn queue(world: &mut DeferredWorld, target: Target, kind: i32, id: ComponentId, 
 /// Spawns an observer of one kind of change to one component, and returns its entity.
 fn spawn(world: &mut World, kind: i32, id: ComponentId, target: Target) -> Option<Entity> {
     let observer = match kind {
-        0 => Observer::new(move |event: On<Add>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
-        1 => Observer::new(move |event: On<Insert>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
-        2 => Observer::new(move |event: On<Discard>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
-        3 => Observer::new(move |event: On<Remove>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
-        4 => Observer::new(move |event: On<Despawn>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
+        0 => Observer::new(move |event: On<AddEvent>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
+        1 => Observer::new(move |event: On<InsertEvent>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
+        2 => Observer::new(move |event: On<DiscardEvent>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
+        3 => Observer::new(move |event: On<RemoveEvent>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
+        4 => Observer::new(move |event: On<DespawnEvent>, mut world: DeferredWorld| queue(&mut world, target, kind, id, event.entity)),
         _ => return None,
     };
     Some(world.spawn(observer.with_component(id)).id())
@@ -168,6 +168,7 @@ mod tests {
                 Layout::new::<u32>(),
                 None,
                 true,
+                false,
                 ComponentCloneBehavior::Default,
                 None,
             )

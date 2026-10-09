@@ -1375,6 +1375,8 @@ pub extern "C" fn bcs_render_set_ambient_occlusion(camera: u64, quality: i32, th
                     } else {
                         ScreenSpaceAmbientOcclusion::default().constant_object_thickness
                     },
+                    // Bevy's own reach, the distance it samples over, which 0.20 made a setting.
+                    ..ScreenSpaceAmbientOcclusion::default()
                 });
 
                 status::OK
@@ -1527,7 +1529,7 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                 let points = (config.compensation_points as usize).min(8);
                 let compensation = if config.auto_exposure != 0 && points >= 2 {
                     let curve =
-                        bevy::math::cubic_splines::LinearSpline::new((0..points).map(|i| {
+                        bevy::curve::cubic_splines::LinearSpline::new((0..points).map(|i| {
                             Vec2::new(
                                 config.compensation_curve[i * 2],
                                 config.compensation_curve[i * 2 + 1],
@@ -1683,19 +1685,10 @@ pub unsafe extern "C" fn bcs_render_set_effects(
                         metering_mask,
                         compensation_curve: compensation,
                     });
-                } else if entity_mut.take::<AutoExposure>().is_some() {
-                    // Bevy 0.19 forgets the effect's buffer by the camera's own entity where it
-                    // keeps it by the render world's, so its pass went on adjusting the picture
-                    // after the component was gone, brighter and brighter in a dark room. The
-                    // camera is given a new entity in the render world, which starts without it,
-                    // at the cost of the history the old one kept for temporal effects, a frame's
-                    // worth of which a settings screen turning the effect off can afford. The old
-                    // one's small buffer is left behind in Bevy's map. Bevy's removal despawns the
-                    // old entity at the next sync and leaves the link to it, which the new one
-                    // would find and refuse, so the link goes too.
-                    use bevy::render::sync_world::{RenderEntity, SyncToRenderWorld};
-                    entity_mut.remove::<(SyncToRenderWorld, RenderEntity)>();
-                    entity_mut.insert(SyncToRenderWorld);
+                } else {
+                    // Its pass is taken off the camera's view in the render world by
+                    // `super::exposure`, which Bevy leaves running once the effect is gone.
+                    entity_mut.remove::<AutoExposure>();
                 }
 
                 status::OK

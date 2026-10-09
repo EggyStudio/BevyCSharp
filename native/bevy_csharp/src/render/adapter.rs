@@ -25,6 +25,8 @@ pub fn lacking(backends: Option<wgpu::Backends>, needed: wgpu::Features) -> Resu
         power_preference: wgpu::PowerPreference::from_env().unwrap_or(wgpu::PowerPreference::HighPerformance),
         compatible_surface: None,
         force_fallback_adapter: false,
+        // The adapter's own limits, as Bevy asks for them when it chooses the same adapter.
+        apply_limit_buckets: false,
     };
 
     let adapter = bevy::tasks::block_on(instance.request_adapter(&options)).map_err(|error| error.to_string())?;

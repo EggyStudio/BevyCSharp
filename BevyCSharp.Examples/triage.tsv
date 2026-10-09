@@ -237,7 +237,6 @@ load_gltf_extras	missing	a glTF node's extras
 load_gltf	can
 query_gltf_primitives	can
 update_gltf_scene	can
-widgets	n/a	a module of helpers Bevy's examples share rather than an example, which BevyCSharp.Examples/Widgets.cs is here
 char_input_events	can
 gamepad_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form
 gamepad_input	can
@@ -311,9 +310,7 @@ shader_defs	can	a program compiled with the define and one without, where Bevy's
 shader_material_2d	missing	2D meshes (Mesh2d) with a shader material
 shader_material	can
 shader_material_bindless	can	each material binding its own textures, as Bevy's does on a GPU without bindless support
-shader_material_glsl	n/a	GLSL, where shaders here are Slang
 shader_material_screenspace_texture	can
-shader_material_wesl	n/a	WESL, where shaders here are Slang
 shader_prepass	can	the prepass shown by a pass over the picture, where Bevy's material on a quad filling the view reads it, since a material here does not
 specialized_mesh_pipeline	n/a	writes a mesh pipeline in Rust
 storage_buffer	can
@@ -324,7 +321,6 @@ states	can
 sub_states	can
 bevymark_3d	can
 bevymark	part	its static transform optimizations turned off, a resource Bevy reflects but not as a resource, which the bridge cannot set
-many_animated_sprite_meshes	can	through Bevy's reflected SpriteMesh
 many_animated_sprites	can
 many_buttons	can
 many_cameras_lights	can
@@ -337,7 +333,6 @@ many_gradients	can	through Bevy's reflected BackgroundGradient
 many_lights	part	the lights its render world saw and drew, counted in its log, which no wrapper reaches there, and its sphere subdivided as Bevy subdivides one by default rather than nine times
 many_materials	can
 many_morph_targets	can	through Bevy's reflected MorphWeights
-many_sprite_meshes	can	through Bevy's reflected SpriteMesh
 many_sprites	can
 many_text2d	part	the font atlases' count and bytes in its log, which Bevy's FontAtlasSet holds and no wrapper reaches
 many_text	part	--clear-font-atlases, which empties Bevy's FontAtlasSet, which no wrapper reaches
@@ -427,3 +422,25 @@ transparent_window	can
 window_drag_move	can
 window_resizing	can	the size read each frame and shown when it changes, where Bevy reads its resize messages
 window_settings	part	the custom cursor image among its pointers, Bevy's custom_cursor feature, which the bridge does not compile in, and the frame time it logs
+inline_image	can	through Bevy's reflected InlineImage
+solari_reflections	missing	the settings of Solari's reflections its panel sets, which Config.RayTracedLighting does not reach
+compressed_image_saver	missing	Bevy's asset processor and its compressing image saver, which the bridge does not run
+mines	can
+mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types
+pipeline_constants	missing	pipeline-overridable constants, which a shader program does not set
+sprite_material	missing	a sprite drawn with a material of its own, which a Slang program does not draw as a sprite
+deferred_raymarch	missing	a pass writing the deferred buffers, which a pass over a camera's picture does not
+mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build
+many_meshlet_materials	can	needs a bridge built with --meshlet
+overflow_transform	can	through Bevy's reflected UiTransform
+fixed_node	can	through Bevy's reflected FixedNode
+draggable_slider	missing	pointer capture, Bevy's PointerCaptureMap, which no call here takes
+test_meshlet	can	needs a bridge built with --meshlet
+character_creation	missing	the select widgets' changes observed as they happen, which reach C# only through each widget's state read every frame
+headless_tabs	missing	the tab widgets' changes observed as they happen, which reach C# only through each widget's state read every frame
+feathers_number_input	missing	Feathers' number input, whose crate the bridge does not compile in
+pan_orbit_camera_cad	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
+pan_orbit_camera_minimal	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
+pan_orbit_camera_ortho	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
+shader_material_2d_bindless	missing	a bindless 2D material, which a Slang program does not draw in 2D
+gpu_component_array_buffer	missing	per-instance data in Bevy's GpuComponentArrayBuffer, which a shader program does not bind

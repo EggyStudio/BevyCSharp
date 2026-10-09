@@ -739,6 +739,7 @@ pub struct ViewImageSpec {
 
 /// The images a camera owns.
 #[derive(Component, Clone, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewImages(pub Vec<ViewImageSpec>);
 
@@ -1125,13 +1126,14 @@ pub struct ViewDispatch {
 
 /// The dispatches a camera runs every frame, in order.
 #[derive(Component, Clone, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewDispatches(pub Vec<ViewDispatch>);
 
 /// A dispatch ready to run on a view.
 struct PreparedViewDispatch {
     point: FramePoint,
-    pipeline: CachedComputePipelineId,
+    pipeline: super::spirv_compute::ComputePipelineRef,
     own: BindGroup,
     workgroups: PreparedWorkgroups,
     /// Whether it binds Solari's scene as group two, taken when it runs.
@@ -1150,7 +1152,7 @@ pub struct PreparedViewDispatches(Vec<PreparedViewDispatch>);
 
 /// One compute pipeline per program and version of it, for dispatches on a camera.
 #[derive(Resource, Default)]
-struct ViewComputePipelines(HashMap<(u32, u32), CachedComputePipelineId>);
+struct ViewComputePipelines(HashMap<(u32, u32), super::spirv_compute::ComputePipelineRef>);
 
 /// The layout of a program's own group for a dispatch on a camera.
 fn own_layout(layout: &super::reflect::Layout) -> BindGroupLayoutDescriptor {
@@ -1163,8 +1165,9 @@ fn view_pipeline_for(
     pipelines: &mut ViewComputePipelines,
     inputs: &ViewInputs,
     cache: &PipelineCache,
+    device: &RenderDevice,
     id: u32,
-) -> Option<(CachedComputePipelineId, programs::PipelineProgram)> {
+) -> Option<(super::spirv_compute::ComputePipelineRef, programs::PipelineProgram)> {
     let program = programs::lookup(id)?;
     let layout = program.compute.clone()?;
     let stage = program.stages[Role::Compute as usize].clone()?;
@@ -1172,7 +1175,7 @@ fn view_pipeline_for(
     let key = (id, program.generation);
 
     if let Some(pipeline) = pipelines.0.get(&key) {
-        return Some((*pipeline, program));
+        return Some((pipeline.clone(), program));
     }
 
     let mut groups = vec![own_layout(&layout), inputs.layout.clone()];
@@ -1182,19 +1185,24 @@ fn view_pipeline_for(
         groups.push(super::solari::scene_layout()?);
     }
 
-    let pipeline = cache.queue_compute_pipeline(ComputePipelineDescriptor {
-        label: Some("bcs_view_compute".into()),
-        layout: groups,
-        immediate_size: 0,
-        shader: stage.shader,
-        shader_defs: Vec::new(),
-        // A shader handed over as SPIR-V is not read on the way in, so nothing finds its entry
-        // point for it.
-        entry_point: layout.spirv.then(|| stage.entry.clone()),
-        zero_initialize_workgroup_memory: true,
-    });
+    // SPIR-V built here, as `super::compute` builds it, and anything else queued in Bevy's cache.
+    use super::spirv_compute::ComputePipelineRef;
+    let pipeline = match &stage.spirv {
+        Some(spirv) => super::spirv_compute::build(device, cache, "bcs_view_compute", &groups, spirv, &stage.entry)
+            .map_or(ComputePipelineRef::Cached(CachedComputePipelineId::INVALID), ComputePipelineRef::Own),
+        None => ComputePipelineRef::Cached(cache.queue_compute_pipeline(ComputePipelineDescriptor {
+            label: Some("bcs_view_compute".into()),
+            layout: groups,
+            immediate_size: 0,
+            shader: stage.shader,
+            shader_defs: Vec::new(),
+            entry_point: None,
+            zero_initialize_workgroup_memory: true,
+            constants: Vec::new(),
+        })),
+    };
 
-    pipelines.0.insert(key, pipeline);
+    pipelines.0.insert(key, pipeline.clone());
     Some((pipeline, program))
 }
 
@@ -1231,8 +1239,8 @@ fn prepare_view_dispatches(
             .is_some_and(|layout| layout.reads_view);
 
         if reads_view
-            && let Some((pipeline, program)) = view_pipeline_for(&mut pipelines, &inputs, &cache, id)
-            && cache.get_compute_pipeline(pipeline).is_some()
+            && let Some((pipeline, program)) = view_pipeline_for(&mut pipelines, &inputs, &cache, &render_device, id)
+            && pipeline.get(&cache).is_some()
         {
             programs::mark_compute_ready(id, program.generation);
         }
@@ -1244,7 +1252,7 @@ fn prepare_view_dispatches(
 
         for dispatch in &asked.0 {
             let Some((pipeline, program)) =
-                view_pipeline_for(&mut pipelines, &inputs, &cache, dispatch.program)
+                view_pipeline_for(&mut pipelines, &inputs, &cache, &render_device, dispatch.program)
             else {
                 let found = programs::lookup(dispatch.program).filter(|program| program.generation > 0);
 
@@ -1410,11 +1418,12 @@ fn run_view_dispatches<const POINT: u8>(
         }
 
         // Still compiling. Left out of this frame, as a pass still compiling is.
-        let Some(pipeline) = cache.get_compute_pipeline(dispatch.pipeline) else {
+        let Some(pipeline) = dispatch.pipeline.get(&cache) else {
             continue;
         };
 
-        // Solari has not built its scene's bind group yet, which it does once a mesh is traced.
+        // Solari has not built its scene's bind group yet, which it does once a mesh is traced
+        // and a light shines.
         if dispatch.traces_scene && traced.is_none() {
             continue;
         }
@@ -1497,6 +1506,7 @@ pub struct ViewDraw {
 
 /// The draws a camera makes every frame, in order.
 #[derive(Component, Clone, ExtractComponent)]
+#[extract_app(bevy::render::RenderApp)]
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewDraws(pub Vec<ViewDraw>);
 
@@ -1690,6 +1700,7 @@ fn prepare_view_draws(
                         shader_defs: Vec::new(),
                         entry_point: None,
                         buffers: Vec::new(),
+                        constants: Vec::new(),
                     },
                     fragment: Some(FragmentState {
                         shader: fragment.shader,
@@ -1709,6 +1720,7 @@ fn prepare_view_draws(
                                 })
                             })
                             .collect(),
+                            constants: Vec::new(),
                     }),
                     depth_stencil: has_depth.then(|| DepthStencilState {
                         format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
@@ -1745,6 +1757,7 @@ fn prepare_view_draws(
                             shader_defs: Vec::new(),
                             entry_point: None,
                             buffers: Vec::new(),
+                            constants: Vec::new(),
                         },
                         fragment: None,
                         primitive: bevy::render::render_resource::PrimitiveState {
@@ -1843,7 +1856,7 @@ fn run_view_draws<const POINT: u8>(
         &ViewTarget,
         &ViewUniformOffset,
         &PreparedViewDraws,
-        &bevy::render::view::ViewDepthTexture,
+        &bevy::render::view::ViewDepthStencilTexture,
         Option<&ViewPrepassTextures>,
         Option<&PreviousViewUniformOffset>,
         Option<&ViewLightsUniformOffset>,

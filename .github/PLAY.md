@@ -177,9 +177,10 @@ through the same reader, ahead of the assembly and behind the disk ([SCENES.md](
 
 ## 5. Saving settings and progress
 
-`bevy-persistent` 0.11 also targets Bevy 0.19. It wraps a resource in `Persistent<R>`, which loads
-it from a file under the platform's data or config directory, writes it back when asked, and falls
-back to a default when the file is missing or unreadable, in JSON, TOML, RON, YAML, INI or bincode.
+`bevy-persistent` 0.11 targets Bevy 0.19, where the bridge is on 0.20. It wraps a resource in
+`Persistent<R>`, which loads it from a file under the platform's data or config directory, writes it
+back when asked, and falls back to a default when the file is missing or unreadable, in JSON, TOML,
+RON, YAML, INI or bincode.
 
 The resource it persists is a Rust type that implements `serde`, and a game's settings and save
 data are C# types the bridge cannot name. So it would fit only what the bridge owns and C# does

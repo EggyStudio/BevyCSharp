@@ -68,7 +68,7 @@ public sealed class WidgetTests
             });
 
             button = At(0f, 0f, 60f, 40f);
-            ecs.Insert<BevyUiWidgetsButtonRef>(button);
+            ecs.Insert<ButtonRef>(button);
             ecs.Observe<Activate>(button, on => activated.Add(on.Event.Entity));
 
             checkbox = At(100f, 0f, 40f, 40f);
@@ -97,7 +97,7 @@ public sealed class WidgetTests
 
             owner = At(200f, 100f, 100f, 40f);
             menuButton = Ui.SpawnNode(new UiSettings { Width = Length.Px(100f), Height = Length.Px(40f) });
-            ecs.Insert<BevyUiWidgetsButtonRef>(menuButton);
+            ecs.Insert<ButtonRef>(menuButton);
             ecs.Insert<MenuButtonRef>(menuButton);
             ecs.SetParent(menuButton, owner);
             ecs.Observe<MenuEvent>(owner, on => menus.Add((on.Entity, on.Event)));

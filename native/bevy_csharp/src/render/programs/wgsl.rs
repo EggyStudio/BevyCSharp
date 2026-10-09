@@ -1,11 +1,53 @@
-//! The WGSL the bridge writes itself, put in front of what slangc compiled or in place of a stage
-//! that has never compiled.
+//! The shaders the bridge writes itself, WESL put in front of what slangc compiled where it reaches
+//! Bevy's own, or a stage in place of one that has never compiled.
+
+use bevy::shader::Shader;
 
 use super::Role;
 
-// -- What a shader reaches of Bevy's WGSL
+/// A shader's text, and the language Bevy reads it in.
+///
+/// WESL where it imports Bevy's modules, since from Bevy 0.20 only WESL is composed with them and
+/// WGSL is handed to the device as it is, and WGSL elsewhere, which then takes no composing.
+pub(super) enum Source {
+    Wgsl(String),
+    Wesl(String),
+}
 
-/// WGSL the bridge puts in front of a compiled fragment shader that calls it, over Bevy's own.
+impl Source {
+    /// The shader Bevy is given, named `name`.
+    pub(super) fn shader(self, name: &str) -> Shader {
+        match self {
+            Source::Wgsl(text) => Shader::from_wgsl(text, name.to_string()),
+            Source::Wesl(text) => Shader::from_wesl(text, module_path(name)),
+        }
+    }
+
+    /// What the shader says.
+    #[cfg(test)]
+    pub(super) fn text(&self) -> &str {
+        match self {
+            Source::Wgsl(text) | Source::Wesl(text) => text,
+        }
+    }
+}
+
+/// `name` as the path of a WESL module of its own, under a folder of the bridge's.
+///
+/// WESL composes by module path, which Bevy makes of a shader's path without its extension, so
+/// every character but a letter, a digit or an underscore becomes an underscore, which keeps the
+/// role and the compile's number in a name that ends in a file's extension apart.
+fn module_path(name: &str) -> String {
+    let flat: String = name
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
+        .collect();
+    format!("bcs/{flat}.wesl")
+}
+
+// -- What a shader reaches of Bevy's WESL
+
+/// WESL the bridge puts in front of a compiled fragment shader that calls it, over Bevy's own.
 ///
 /// `bcs.slang` reaches each by functions whose names begin with `call`, written into the WGSL
 /// Slang writes as they are, and which take and return only numbers and vectors, so nothing depends
@@ -15,8 +57,11 @@ use super::Role;
 struct Prelude {
     /// What every function the prelude defines is called, to the end of a word.
     call: &'static str,
-    /// The functions themselves, over Bevy's imports.
-    source: &'static str,
+    /// What it imports of Bevy's, a statement a line, put once at the head of the shader however
+    /// many preludes import it, since WESL takes its imports before anything else.
+    imports: &'static [&'static str],
+    /// The functions themselves.
+    body: &'static str,
     /// Functions of the same signatures that import nothing, for reading the compiled shader
     /// before the real ones are put in front, which naga cannot follow there.
     stand_in: &'static str,
@@ -24,31 +69,76 @@ struct Prelude {
 
 /// Every prelude, in the order they are put in front.
 const PRELUDES: [Prelude; 4] = [
-    Prelude { call: "bcs_pbr_", source: LIGHTING, stand_in: LIGHTING_STAND_IN },
-    Prelude { call: "bcs_decal_", source: DECALS, stand_in: DECALS_STAND_IN },
-    Prelude { call: "bcs_irradiance_", source: IRRADIANCE, stand_in: IRRADIANCE_STAND_IN },
-    Prelude { call: "bcs_deferred_", source: DEFERRED, stand_in: DEFERRED_STAND_IN },
+    Prelude { call: "bcs_pbr_", imports: LIGHTING_IMPORTS, body: LIGHTING, stand_in: LIGHTING_STAND_IN },
+    Prelude { call: "bcs_decal_", imports: DECALS_IMPORTS, body: DECALS, stand_in: DECALS_STAND_IN },
+    Prelude {
+        call: "bcs_irradiance_",
+        imports: IRRADIANCE_IMPORTS,
+        body: IRRADIANCE,
+        stand_in: IRRADIANCE_STAND_IN,
+    },
+    Prelude { call: "bcs_deferred_", imports: DEFERRED_IMPORTS, body: DEFERRED, stand_in: DEFERRED_STAND_IN },
 ];
 
-/// A compiled fragment shader with each prelude it calls put in front of it, a material's for the
-/// main pass or for the deferred buffers.
-pub(super) fn with_bevy(role: Role, wgsl: String) -> String {
+/// A compiled shader with each prelude it calls put in front of it, a material's fragment shader
+/// for the main pass or its stage for the deferred buffers, or the shader as it was where it calls
+/// none.
+pub(super) fn with_bevy(role: Role, wgsl: String) -> Source {
     if !matches!(role, Role::Fragment | Role::Deferred) {
-        return wgsl;
+        return Source::Wgsl(wgsl);
+    }
+
+    let called: Vec<&Prelude> = PRELUDES.iter().filter(|prelude| wgsl.contains(prelude.call)).collect();
+    if called.is_empty() {
+        return Source::Wgsl(wgsl);
     }
 
     let mut out = String::new();
-    for prelude in PRELUDES.iter().filter(|prelude| wgsl.contains(prelude.call)) {
-        out.push_str(prelude.source);
-        out.push('\n');
+    let mut imported: Vec<&str> = Vec::new();
+    for import in called.iter().flat_map(|prelude| prelude.imports.iter()) {
+        if !imported.contains(import) {
+            imported.push(import);
+            out.push_str(import);
+            out.push('\n');
+        }
     }
 
-    if out.is_empty() {
-        wgsl
-    } else {
-        out.push_str(&wgsl);
-        out
+    // A directive slangc wrote, such as an `enable`, after the imports and before any declaration,
+    // which is the one place WESL takes it.
+    let (directives, rest) = split_directives(&wgsl);
+    out.push_str(&directives);
+
+    for prelude in &called {
+        out.push('\n');
+        out.push_str(prelude.body);
     }
+
+    out.push('\n');
+    out.push_str(rest);
+    Source::Wesl(out)
+}
+
+/// The directives at the head of compiled WGSL, and what follows them.
+fn split_directives(wgsl: &str) -> (String, &str) {
+    let mut directives = String::new();
+    let mut rest = wgsl;
+
+    loop {
+        let line_end = rest.find('\n').map_or(rest.len(), |end| end + 1);
+        let line = rest[..line_end].trim();
+        let directive = ["enable ", "requires ", "diagnostic("].iter().any(|word| line.starts_with(word));
+
+        if directive {
+            directives.push_str(line);
+            directives.push('\n');
+        } else if !(line.is_empty() || line.starts_with("//")) || line_end == 0 {
+            break;
+        }
+
+        rest = &rest[line_end..];
+    }
+
+    (directives, rest)
 }
 
 /// The stand-ins of every prelude a compiled shader calls, for reading it, or nothing where it
@@ -79,13 +169,7 @@ const LIGHTING_STAND_IN: &str = "fn bcs_pbr_light(base_color: vec4<f32>, emissiv
 ///
 /// The surface is a shadow receiver, which a standard material's mesh is unless told otherwise,
 /// and takes fog, as one does by default.
-const LIGHTING: &str = r#"#import bevy_pbr::{
-    pbr_types,
-    pbr_functions,
-    mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
-    mesh_view_bindings::view,
-}
-
+const LIGHTING: &str = r#"
 fn bcs_pbr_input(frag_coord: vec4<f32>, world_position: vec4<f32>) -> pbr_types::PbrInput {
     var pbr_input = pbr_types::pbr_input_new();
     pbr_input.material.flags |= pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
@@ -126,6 +210,14 @@ fn bcs_pbr_finish(color: vec4<f32>, frag_coord: vec4<f32>, world_position: vec4<
 }
 "#;
 
+/// What [`LIGHTING`] imports of Bevy's.
+const LIGHTING_IMPORTS: &[&str] = &[
+    "import bevy_pbr::render::pbr_types;",
+    "import bevy_pbr::render::pbr_functions;",
+    "import bevy_pbr::render::mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT;",
+    "import bevy_pbr::render::mesh_view_bindings::view;",
+];
+
 // -- Bevy's deferred buffers
 
 /// Functions of the same signatures as those [`DEFERRED`] defines, which write nothing.
@@ -143,18 +235,7 @@ const DEFERRED_STAND_IN: &str = "fn bcs_deferred_gbuffer(base_color: vec4<f32>, 
 ///
 /// The surface is a shadow receiver and takes fog, as a standard material does by default, which
 /// the deferred lighting pass reads from the buffer's flags.
-const DEFERRED: &str = r#"#import bevy_pbr::{
-    pbr_types,
-    pbr_functions,
-    pbr_deferred_functions,
-    mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
-    mesh_view_bindings::view,
-}
-
-#ifdef MOTION_VECTOR_PREPASS
-#import bevy_pbr::pbr_prepass_functions::calculate_motion_vector
-#endif
-
+const DEFERRED: &str = r#"
 fn bcs_deferred_gbuffer(
     base_color: vec4<f32>,
     emissive: vec4<f32>,
@@ -190,13 +271,22 @@ fn bcs_deferred_lighting_pass() -> u32 {
 }
 
 fn bcs_deferred_motion(world_position: vec4<f32>, previous_world_position: vec4<f32>) -> vec2<f32> {
-#ifdef MOTION_VECTOR_PREPASS
-    return calculate_motion_vector(world_position, previous_world_position);
-#else
+    @if(MOTION_VECTOR_PREPASS) {
+        return calculate_motion_vector(world_position, previous_world_position);
+    }
     return vec2<f32>(0.0);
-#endif
 }
 "#;
+
+/// What [`DEFERRED`] imports of Bevy's, motion vectors' function only where the camera draws them.
+const DEFERRED_IMPORTS: &[&str] = &[
+    "import bevy_pbr::render::pbr_types;",
+    "import bevy_pbr::render::pbr_functions;",
+    "import bevy_pbr::render::mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT;",
+    "import bevy_pbr::render::mesh_view_bindings::view;",
+    "import bevy_pbr::deferred::functions as pbr_deferred_functions;",
+    "@if(MOTION_VECTOR_PREPASS) import bevy_pbr::render::pbr_prepass_functions::calculate_motion_vector;",
+];
 
 // -- Bevy's clustered decals
 
@@ -216,12 +306,7 @@ const DECALS_STAND_IN: &str = "fn bcs_decal_count(frag_coord: vec4<f32>, world_p
 /// map is 0 for the base color, 1 for the normal map, 2 for metallic and roughness and 3 for the
 /// light given off, as Bevy's iterator names them. Where the device cannot have clustered decals,
 /// Bevy compiles none of their bindings, and every point has none over it.
-const DECALS: &str = r#"#import bevy_pbr::{
-    clustered_forward,
-    decal::clustered,
-    mesh_view_bindings,
-}
-
+const DECALS: &str = r#"
 // Moves the iterator on to the decal at `index` over the point, saying whether there is one.
 fn bcs_decal_seek(
     frag_coord: vec4<f32>,
@@ -229,24 +314,24 @@ fn bcs_decal_seek(
     index: u32,
     iterator: ptr<function, clustered::ClusteredDecalIterator>,
 ) -> bool {
-#ifdef CLUSTERED_DECALS_ARE_USABLE
-    let view_z = clustered::get_view_z(world_position.xyz);
-    let cluster_index = clustered_forward::view_fragment_cluster_index(
-        frag_coord.xy,
-        view_z,
-        clustered::view_is_orthographic(),
-    );
-    var ranges = clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
-    *iterator = clustered::clustered_decal_iterator_new(world_position.xyz, &ranges);
+    @if(CLUSTERED_DECALS_ARE_USABLE) {
+        let view_z = clustered::get_view_z(world_position.xyz);
+        let cluster_index = clustered_forward::view_fragment_cluster_index(
+            frag_coord.xy,
+            view_z,
+            clustered::view_is_orthographic(),
+        );
+        var ranges = clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
+        *iterator = clustered::clustered_decal_iterator_new(world_position.xyz, &ranges);
 
-    var at = 0u;
-    while (clustered::clustered_decal_iterator_next(iterator)) {
-        if (at == index) {
-            return true;
+        var at = 0u;
+        while (clustered::clustered_decal_iterator_next(iterator)) {
+            if (at == index) {
+                return true;
+            }
+            at += 1u;
         }
-        at += 1u;
     }
-#endif
     return false;
 }
 
@@ -285,35 +370,42 @@ fn bcs_decal_has(frag_coord: vec4<f32>, world_position: vec4<f32>, index: u32, m
 }
 
 fn bcs_decal_sample(frag_coord: vec4<f32>, world_position: vec4<f32>, index: u32, map: u32) -> vec4<f32> {
-#ifdef CLUSTERED_DECALS_ARE_USABLE
-    var iterator: clustered::ClusteredDecalIterator;
-    if (bcs_decal_seek(frag_coord, world_position, index, &iterator)) {
-        let texture = bcs_decal_texture(iterator, map);
-        if (texture >= 0) {
-            return textureSampleLevel(
-                mesh_view_bindings::clustered_decal_textures[texture],
-                mesh_view_bindings::clustered_decal_sampler,
-                iterator.uv,
-                0.0,
-            );
+    @if(CLUSTERED_DECALS_ARE_USABLE) {
+        var iterator: clustered::ClusteredDecalIterator;
+        if (bcs_decal_seek(frag_coord, world_position, index, &iterator)) {
+            let texture = bcs_decal_texture(iterator, map);
+            if (texture >= 0) {
+                return textureSampleLevel(
+                    mesh_view_bindings::clustered_decal_textures[texture],
+                    mesh_view_bindings::clustered_decal_sampler,
+                    iterator.uv,
+                    0.0,
+                );
+            }
         }
     }
-#endif
     return vec4<f32>(0.0);
 }
 
 // A normal bent by the decal's normal map, by the Whiteout blend Bevy's `apply_decals` uses, on a
 // mesh with tangents as there, and as it was elsewhere.
 fn bcs_decal_normal(frag_coord: vec4<f32>, world_position: vec4<f32>, index: u32, normal: vec3<f32>) -> vec3<f32> {
-#ifdef VERTEX_TANGENTS
-    if (bcs_decal_has(frag_coord, world_position, index, 1u)) {
-        let bent = bcs_decal_sample(frag_coord, world_position, index, 1u).rgb * 2.0 - 1.0;
-        return vec3(normal.xy + bent.xy, normal.z * bent.z);
+    @if(VERTEX_TANGENTS) {
+        if (bcs_decal_has(frag_coord, world_position, index, 1u)) {
+            let bent = bcs_decal_sample(frag_coord, world_position, index, 1u).rgb * 2.0 - 1.0;
+            return vec3(normal.xy + bent.xy, normal.z * bent.z);
+        }
     }
-#endif
     return normal;
 }
 "#;
+
+/// What [`DECALS`] imports of Bevy's.
+const DECALS_IMPORTS: &[&str] = &[
+    "import bevy_pbr::render::clustered_forward;",
+    "import bevy_pbr::decal::clustered;",
+    "import bevy_pbr::render::mesh_view_bindings;",
+];
 
 // -- Bevy's irradiance volumes
 
@@ -324,203 +416,195 @@ const IRRADIANCE_STAND_IN: &str = "fn bcs_irradiance_light(frag_coord: vec4<f32>
 /// What `bcs::irradiance` calls: Bevy's own `irradiance_volume_light`, the diffuse light the
 /// irradiance volumes over a point give a surface facing a way there, at each volume's intensity,
 /// found through the view's clusters as Bevy's standard material finds it. Where the device cannot
-/// have irradiance volumes Bevy compiles none of their bindings, and every point has none over it.
-const IRRADIANCE: &str = r#"#import bevy_pbr::{
-    clustered_forward,
-    irradiance_volume,
-    mesh_view_bindings::view,
-}
-
+/// have irradiance volumes, or the view has none, Bevy declares none of their bindings, and every
+/// point has none over it.
+const IRRADIANCE: &str = r#"
 fn bcs_irradiance_light(frag_coord: vec4<f32>, world_position: vec4<f32>, normal: vec3<f32>) -> vec3<f32> {
-#ifdef IRRADIANCE_VOLUMES_ARE_USABLE
-    let view_z = dot(vec4<f32>(
-        view.view_from_world[0].z,
-        view.view_from_world[1].z,
-        view.view_from_world[2].z,
-        view.view_from_world[3].z,
-    ), world_position);
-    let cluster_index = clustered_forward::view_fragment_cluster_index(
-        frag_coord.xy,
-        view_z,
-        view.clip_from_view[3].w == 1.0,
-    );
-    var ranges = clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
-    return irradiance_volume::irradiance_volume_light(world_position.xyz, normalize(normal), &ranges);
-#else
+    @if(IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE) {
+        let view_z = dot(vec4<f32>(
+            view.view_from_world[0].z,
+            view.view_from_world[1].z,
+            view.view_from_world[2].z,
+            view.view_from_world[3].z,
+        ), world_position);
+        let cluster_index = clustered_forward::view_fragment_cluster_index(
+            frag_coord.xy,
+            view_z,
+            view.clip_from_view[3].w == 1.0,
+        );
+        var ranges = clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
+        return irradiance_volume::irradiance_volume_light(world_position.xyz, normalize(normal), &ranges);
+    }
     return vec3<f32>(0.0);
-#endif
 }
 "#;
+
+/// What [`IRRADIANCE`] imports of Bevy's, the volumes' module only where the view has a volume,
+/// since from Bevy 0.20 their bindings are declared only then.
+const IRRADIANCE_IMPORTS: &[&str] = &[
+    "import bevy_pbr::render::clustered_forward;",
+    "import bevy_pbr::render::mesh_view_bindings::view;",
+    "@if(IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE) import bevy_pbr::light_probe::irradiance_volume;",
+];
 
 // -- Fallbacks
 
 /// A shader standing in for a stage that has never compiled, with the entry point it asked for.
-pub(super) fn fallback_source(role: Role, entry: &str) -> String {
+pub(super) fn fallback_source(role: Role, entry: &str) -> Source {
     match role {
         // Magenta, reading nothing but the position, so it is valid after any vertex shader and
         // in a pass as well as in a material.
-        Role::Fragment | Role::Pass | Role::DrawFragment => format!(
+        Role::Fragment | Role::Pass | Role::DrawFragment => Source::Wgsl(format!(
             "@fragment\nfn {entry}(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {{\n    \
              let checker = (u32(position.x / 8.0) + u32(position.y / 8.0)) % 2u;\n    \
              return select(vec4<f32>(1.0, 0.0, 1.0, 1.0), vec4<f32>(0.1, 0.0, 0.1, 1.0), checker == 1u);\n}}\n"
-        ),
+        )),
 
-        Role::Vertex => format!(
-            r#"#import bevy_pbr::{{
-    mesh_functions,
-    forward_io::{{Vertex, VertexOutput}},
-    view_transformations::position_world_to_clip,
-}}
+        // Bevy's own mesh vertex shader, short of skins and morph targets, the vertex decompressed
+        // first as Bevy's is, since a mesh may carry its attributes packed smaller.
+        Role::Vertex => Source::Wesl(format!(
+            r#"import bevy_pbr::render::mesh_functions;
+import bevy_pbr::render::forward_io::{{Vertex, VertexOutput, decompress_vertex}};
+import bevy_pbr::render::view_transformations::position_world_to_clip;
 
 @vertex
-fn {entry}(vertex: Vertex) -> VertexOutput {{
+fn {entry}(vertex_in: Vertex) -> VertexOutput {{
+    let vertex = decompress_vertex(vertex_in, vertex_in.instance_index);
     var out: VertexOutput;
     let world_from_local = mesh_functions::get_world_from_local(vertex.instance_index);
     out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0));
     out.position = position_world_to_clip(out.world_position.xyz);
-#ifdef VERTEX_NORMALS
-    out.world_normal = mesh_functions::mesh_normal_local_to_world(vertex.normal, vertex.instance_index);
-#endif
-#ifdef VERTEX_UVS_A
-    out.uv = vertex.uv;
-#endif
-#ifdef VERTEX_UVS_B
-    out.uv_b = vertex.uv_b;
-#endif
-#ifdef VERTEX_TANGENTS
-    out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex.instance_index);
-#endif
-#ifdef VERTEX_COLORS
-    out.color = vertex.color;
-#endif
-#ifdef VERTEX_OUTPUT_INSTANCE_INDEX
-    out.instance_index = vertex.instance_index;
-#endif
+    @if(VERTEX_NORMALS) {{
+        out.world_normal = mesh_functions::mesh_normal_local_to_world(vertex.normal, vertex.instance_index);
+    }}
+    @if(VERTEX_UVS_A) {{
+        out.uv = vertex.uv;
+    }}
+    @if(VERTEX_UVS_B) {{
+        out.uv_b = vertex.uv_b;
+    }}
+    @if(VERTEX_TANGENTS) {{
+        out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex.instance_index);
+    }}
+    @if(VERTEX_COLORS) {{
+        out.color = vertex.color;
+    }}
+    @if(VERTEX_OUTPUT_INSTANCE_INDEX) {{
+        out.instance_index = vertex.instance_index;
+    }}
     return out;
 }}
 "#
-        ),
+        )),
 
-        Role::PrepassVertex => format!(
-            r#"#import bevy_pbr::{{
-    mesh_functions,
-    prepass_io::{{Vertex, VertexOutput}},
-    view_transformations::position_world_to_clip,
-}}
+        Role::PrepassVertex => Source::Wesl(format!(
+            r#"import bevy_pbr::render::mesh_functions;
+import bevy_pbr::prepass::io::{{Vertex, VertexOutput, decompress_vertex}};
+import bevy_pbr::render::view_transformations::position_world_to_clip;
 
 @vertex
-fn {entry}(vertex: Vertex) -> VertexOutput {{
+fn {entry}(vertex_in: Vertex) -> VertexOutput {{
+    let vertex = decompress_vertex(vertex_in, vertex_in.instance_index);
     var out: VertexOutput;
     let world_from_local = mesh_functions::get_world_from_local(vertex.instance_index);
     out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0));
     out.position = position_world_to_clip(out.world_position.xyz);
-#ifdef UNCLIPPED_DEPTH_ORTHO_EMULATION
-    out.unclipped_depth = out.position.z;
-    out.position.z = min(out.position.z, 1.0);
-#endif
-#ifdef VERTEX_UVS_A
-    out.uv = vertex.uv;
-#endif
-#ifdef VERTEX_UVS_B
-    out.uv_b = vertex.uv_b;
-#endif
-#ifdef NORMAL_PREPASS_OR_DEFERRED_PREPASS
-#ifdef VERTEX_NORMALS
-    out.world_normal = mesh_functions::mesh_normal_local_to_world(vertex.normal, vertex.instance_index);
-#endif
-#ifdef VERTEX_TANGENTS
-    out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex.instance_index);
-#endif
-#endif
-#ifdef MOTION_VECTOR_PREPASS_OR_DEFERRED_PREPASS
-    let previous_world_from_local = mesh_functions::get_previous_world_from_local(vertex.instance_index);
-    out.previous_world_position = mesh_functions::mesh_position_local_to_world(previous_world_from_local, vec4<f32>(vertex.position, 1.0));
-#endif
-#ifdef VERTEX_OUTPUT_INSTANCE_INDEX
-    out.instance_index = vertex.instance_index;
-#endif
+    @if(UNCLIPPED_DEPTH_ORTHO_EMULATION) {{
+        out.unclipped_depth = out.position.z;
+        out.position.z = min(out.position.z, 1.0);
+    }}
+    @if(VERTEX_UVS_A) {{
+        out.uv = vertex.uv;
+    }}
+    @if(VERTEX_UVS_B) {{
+        out.uv_b = vertex.uv_b;
+    }}
+    @if(NORMAL_PREPASS_OR_DEFERRED_PREPASS && VERTEX_NORMALS) {{
+        out.world_normal = mesh_functions::mesh_normal_local_to_world(vertex.normal, vertex.instance_index);
+    }}
+    @if(NORMAL_PREPASS_OR_DEFERRED_PREPASS && VERTEX_TANGENTS) {{
+        out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex.instance_index);
+    }}
+    @if(MOTION_VECTOR_PREPASS) {{
+        let previous_world_from_local = mesh_functions::get_previous_world_from_local(vertex.instance_index);
+        out.previous_world_position = mesh_functions::mesh_position_local_to_world(previous_world_from_local, vec4<f32>(vertex.position, 1.0));
+    }}
+    @if(VERTEX_OUTPUT_INSTANCE_INDEX) {{
+        out.instance_index = vertex.instance_index;
+    }}
     return out;
 }}
 "#
-        ),
+        )),
 
         // Every vertex at one point, which draws nothing, since what a draw's vertex shader reads
         // to place its geometry is not known here.
-        Role::DrawVertex => format!(
+        Role::DrawVertex => Source::Wgsl(format!(
             "@vertex\nfn {entry}(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {{\n    \
              return vec4<f32>(0.0, 0.0, 0.0, 1.0);\n}}\n"
-        ),
+        )),
 
         // Does nothing, which is the only thing a compute shader can safely do without knowing
         // what the buffers it was handed hold.
-        Role::Compute => {
-            format!("@compute @workgroup_size(1)\nfn {entry}() {{\n}}\n")
-        }
+        Role::Compute => Source::Wgsl(format!("@compute @workgroup_size(1)\nfn {entry}() {{\n}}\n")),
 
         // Magenta in the deferred buffers, through Bevy's own deferred output, so a deferred stage
         // that has never compiled is lit as a magenta surface where the rest of the scene is.
-        Role::Deferred => format!(
-            r#"#import bevy_pbr::{{
-    prepass_io::{{VertexOutput, FragmentOutput}},
-    pbr_types,
-    pbr_deferred_functions,
-}}
+        Role::Deferred => Source::Wesl(format!(
+            r#"import bevy_pbr::prepass::io::VertexOutput;
+@if(PREPASS_FRAGMENT) import bevy_pbr::prepass::io::FragmentOutput;
+import bevy_pbr::render::pbr_types;
+import bevy_pbr::deferred::functions as pbr_deferred_functions;
 
-#ifdef PREPASS_FRAGMENT
+@if(PREPASS_FRAGMENT)
 @fragment
 fn {entry}(in: VertexOutput) -> FragmentOutput {{
     var pbr_input = pbr_types::pbr_input_new();
     pbr_input.material.base_color = vec4<f32>(1.0, 0.0, 1.0, 1.0);
     pbr_input.frag_coord = in.position;
     pbr_input.world_position = in.world_position;
-#ifdef NORMAL_PREPASS_OR_DEFERRED_PREPASS
-    pbr_input.world_normal = in.world_normal;
-    pbr_input.N = in.world_normal;
-#endif
+    @if(NORMAL_PREPASS_OR_DEFERRED_PREPASS) {{
+        pbr_input.world_normal = in.world_normal;
+        pbr_input.N = in.world_normal;
+    }}
     return pbr_deferred_functions::deferred_output(in, pbr_input);
 }}
-#else
+
+@if(!PREPASS_FRAGMENT)
 @fragment
 fn {entry}(@builtin(position) position: vec4<f32>) {{
 }}
-#endif
 "#
-        ),
+        )),
 
         // What Bevy's own prepass writes, which is a normal and a motion vector where the camera
         // asked for them, and nothing where it did not.
-        Role::PrepassFragment => format!(
-            r#"#import bevy_pbr::{{
-    prepass_io::{{VertexOutput, FragmentOutput}},
-    prepass_bindings,
-    mesh_view_bindings::view,
-}}
+        Role::PrepassFragment => Source::Wesl(format!(
+            r#"import bevy_pbr::prepass::io::VertexOutput;
+@if(PREPASS_FRAGMENT) import bevy_pbr::prepass::io::FragmentOutput;
+@if(MOTION_VECTOR_PREPASS) import bevy_pbr::render::pbr_prepass_functions::calculate_motion_vector;
 
-#ifdef PREPASS_FRAGMENT
+@if(PREPASS_FRAGMENT)
 @fragment
 fn {entry}(in: VertexOutput) -> FragmentOutput {{
     var out: FragmentOutput;
-#ifdef NORMAL_PREPASS
-    out.normal = vec4(in.world_normal * 0.5 + vec3(0.5), 1.0);
-#endif
-#ifdef UNCLIPPED_DEPTH_ORTHO_EMULATION
-    out.frag_depth = in.unclipped_depth;
-#endif
-#ifdef MOTION_VECTOR_PREPASS
-    let clip_position_t = view.unjittered_clip_from_world * in.world_position;
-    let clip_position = clip_position_t.xy / clip_position_t.w;
-    let previous_clip_position_t = prepass_bindings::previous_view_uniforms.clip_from_world * in.previous_world_position;
-    let previous_clip_position = previous_clip_position_t.xy / previous_clip_position_t.w;
-    out.motion_vector = (clip_position - previous_clip_position) * vec2(0.5, -0.5);
-#endif
+    @if(NORMAL_PREPASS) {{
+        out.normal = vec4(in.world_normal * 0.5 + vec3(0.5), 1.0);
+    }}
+    @if(UNCLIPPED_DEPTH_ORTHO_EMULATION) {{
+        out.frag_depth = in.unclipped_depth;
+    }}
+    @if(MOTION_VECTOR_PREPASS) {{
+        out.motion_vector = calculate_motion_vector(in.world_position, in.previous_world_position);
+    }}
     return out;
 }}
-#else
+
+@if(!PREPASS_FRAGMENT)
 @fragment
 fn {entry}(@builtin(position) position: vec4<f32>) {{
 }}
-#endif
 "#
-        ),
+        )),
     }
 }

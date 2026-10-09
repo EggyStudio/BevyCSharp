@@ -22,7 +22,6 @@
 
 use std::any::TypeId;
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use bevy::asset::{AsAssetId, Asset, AssetApp, AssetId, Assets, Handle};
@@ -49,15 +48,18 @@ use bevy::pbr::{
     DeferredVertexShader, DrawDepthOnlyPrepass,
     DrawMaterial, DrawPrepass, MainPassAlphaMaskDrawFunction, MainPassOpaqueDrawFunction,
     MainPassTransmissiveDrawFunction, MainPassTransparentDrawFunction,
-    MaterialBindGroupAllocator, MaterialBindGroupAllocators, MaterialExtractionSystems,
+    MaterialExtractionSystems,
     MaterialFragmentShader, MaterialVertexShader, PrepassAlphaMaskDrawFunction,
     PrepassFragmentShader, PrepassOpaqueDepthOnlyDrawFunction, PrepassOpaqueDrawFunction,
     PrepassPipeline, PrepassPipelineSpecializer, PrepassVertexShader, PreparedMaterial,
-    RenderMaterialBindings, RenderMaterialInstance, RenderMaterialInstances, Shadow,
+    RenderMaterialInstance, RenderMaterialInstances, Shadow,
     ShadowsDepthOnlyDrawFunction, ShadowsDrawFunction, Transmissive3d, base_specialize,
     late_sweep_material_instances,
 };
 use bevy::platform::collections::hash_map::Entry;
+use bevy::render::material_bind_groups::{
+    MaterialBindGroupAllocator, MaterialBindGroupAllocators, RenderMaterialBindings,
+};
 use bevy::reflect::TypePath;
 use bevy::render::camera::{DirtySpecializationSystems, DirtySpecializations};
 use bevy::render::erased_render_asset::{
@@ -261,11 +263,13 @@ impl ErasedRenderAsset for BcsMaterial3d {
         let binding = match render_material_bindings.entry(material_id.into()) {
             Entry::Occupied(mut occupied) => {
                 allocator.free(*occupied.get());
-                let binding = allocator.allocate_prepared(prepared);
+                let binding = allocator.allocate_prepared(prepared, descriptor.clone());
                 *occupied.get_mut() = binding;
                 binding
             }
-            Entry::Vacant(vacant) => *vacant.insert(allocator.allocate_prepared(prepared)),
+            Entry::Vacant(vacant) => {
+                *vacant.insert(allocator.allocate_prepared(prepared, descriptor.clone()))
+            }
         };
 
         let (
@@ -367,6 +371,10 @@ impl ErasedRenderAsset for BcsMaterial3d {
                 }),
                 shadows_enabled: true,
                 prepass_enabled: true,
+                // Not drawn into order-independent transparency's buffers, which Bevy's own
+                // fragment shader writes and one compiled from Slang does not, so a transparent
+                // program blends as it always has under a camera that keeps them.
+                oit_enabled: false,
         };
 
         properties.draw_functions.extend(draw_functions);
@@ -411,7 +419,7 @@ impl ErasedRenderAsset for BcsMaterial3d {
 /// Builds a prepass pipeline, the same way Bevy does for its own materials.
 fn prepass_specialize(
     world: &mut World,
-    key: ErasedMaterialPipelineKey,
+    key: &ErasedMaterialPipelineKey,
     layout: &MeshVertexBufferLayoutRef,
     properties: &Arc<MaterialProperties>,
 ) -> Result<CachedRenderPipelineId, SpecializedMeshPipelineError> {
@@ -425,7 +433,7 @@ fn prepass_specialize(
                 properties: properties.clone(),
             };
 
-            pipelines.specialize(pipeline_cache, &specializer, key, layout)
+            pipelines.specialize(pipeline_cache, &specializer, key.clone(), layout)
         },
     )
 }
@@ -485,6 +493,7 @@ fn user_specialize(
             shader_defs: descriptor.vertex.shader_defs.clone(),
             entry_point: None,
             targets: Vec::new(),
+            constants: Vec::new(),
         });
     }
 
@@ -672,51 +681,7 @@ fn add_bind_group_allocator(
     commands.insert_resource(Stand::new(&render_device));
 }
 
-// -- Errors the renderer reports
-
-/// Whether a validation error leaves the app running rather than closing it.
-static KEEP_RENDERING: AtomicBool = AtomicBool::new(false);
-
-/// The last error the renderer reported, for whoever asks.
-static LAST_ERROR: Mutex<String> = Mutex::new(String::new());
-
-/// Says whether a validation error closes the app, which is Bevy's answer, or is logged and
-/// survived.
-pub fn keep_rendering_after_errors(keep: bool) {
-    KEEP_RENDERING.store(keep, Ordering::Relaxed);
-}
-
-/// The last error the renderer reported, or an empty string.
-pub fn last_error() -> String {
-    LAST_ERROR.lock().map(|text| text.clone()).unwrap_or_default()
-}
-
-/// Decides what a render error does to the app.
-///
-/// A shader that compiles can still disagree with the pipeline it is put in, by reading an input
-/// its vertex shader never wrote for instance. That is a validation error, and Bevy's answer to any
-/// of those is to close the app, which is right for a shipped game and wrong for one somebody is
-/// editing a shader in. Surviving means the frames that use the broken pipeline are not drawn until
-/// the shader is fixed and reloads, and every other error still closes the app.
-fn on_render_error(
-    error: &bevy::render::error_handler::RenderError,
-    main_world: &mut World,
-    _render_world: &mut World,
-) -> bevy::render::error_handler::RenderErrorPolicy {
-    use bevy::render::error_handler::{ErrorType, RenderErrorPolicy};
-
-    if let Ok(mut last) = LAST_ERROR.lock() {
-        *last = error.description.clone();
-    }
-
-    if KEEP_RENDERING.load(Ordering::Relaxed) && matches!(error.ty, ErrorType::Validation) {
-        return RenderErrorPolicy::Ignore;
-    }
-
-    bevy::log::error!("Quitting the application due to {:?} RenderError", error.ty);
-    main_world.write_message(bevy::app::AppExit::error());
-    RenderErrorPolicy::StopRendering
-}
+pub use super::render_errors::{keep_rendering_after_errors, last_error};
 
 /// Adds what draws shader materials and shader passes, what runs compute shaders, and what
 /// compiles and reloads the programs all three are made of.
@@ -763,7 +728,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
                 .after(bevy::mesh::mark_3d_meshes_as_changed_if_their_assets_changed),
         )
         .insert_resource(bevy::render::error_handler::RenderErrorHandler(
-            on_render_error,
+            super::render_errors::on_render_error,
         ));
 
     if let Some(render_app) = app.get_sub_app_mut(RenderApp) {

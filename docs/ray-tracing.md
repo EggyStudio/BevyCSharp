@@ -82,8 +82,9 @@ texture coordinates, and the material's color, emission, roughness and metalness
 read. The acceleration structure, vertices, transforms, materials and lights are Solari's, declared
 in group two and bound to the bind group Solari builds each frame, so they follow the scene without
 a copy. It runs where ray-traced lighting runs, in a bridge built with `--solari`, an app that set
-`Config.RayTracedLighting`, and on meshes given to `SetRayTraced`. A camera's own Solari lighting
-stays off unless `SetRayTracedLighting` turns it on, so the rays can be the package's alone.
+`Config.RayTracedLighting`, and on meshes given to `SetRayTraced`, once the scene holds a light,
+which Solari waits for before it binds the scene. A camera's own Solari lighting stays off unless
+`SetRayTracedLighting` turns it on, so the rays can be the package's alone.
 
 A ray scene of the game's own needs no Solari. It is built over a [geometry pool](compute.md#compute), each
 pool mesh once, with entities in numbered slots placed where their transforms are every frame:

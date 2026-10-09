@@ -1,4 +1,4 @@
-// Bevy's box_shadow example, examples/ui/styling/box_shadow.rs at v0.19.1, by Bevy's contributors
+// Bevy's box_shadow example, examples/ui/styling/box_shadow.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -145,7 +145,7 @@ internal static class BoxShadowExample
         {
             var node = ecs.Wrap<NodeRef>(shadowNode);
             (node.Width, node.Height) = (new Val.Px(w), new Val.Px(h));
-            node.BorderRadiusTopLeft = node.BorderRadiusTopRight = node.BorderRadiusBottomRight = node.BorderRadiusBottomLeft = new Val.Px(radius);
+            node.BorderRadiusTopLeftX = node.BorderRadiusTopRightX = node.BorderRadiusBottomRightX = node.BorderRadiusBottomLeftX = new Val.Px(radius);
             ecs.Wrap<BoxShadowRef>(shadowNode).Value = shadows;
         }
 

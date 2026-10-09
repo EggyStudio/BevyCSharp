@@ -620,7 +620,7 @@ pub extern "C" fn bcs_atlas_create(
 mod tests {
     use super::*;
     use bevy::mesh::{Mesh, MeshBuilder, Meshable};
-    use bevy::math::primitives::Cuboid;
+    use bevy::shape::Cuboid;
 
     /// An app with assets and nothing else, which is all these tests need.
     fn asset_app() -> App {

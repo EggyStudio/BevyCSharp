@@ -2,7 +2,7 @@
 //! picking events.
 //!
 //! Bevy's picking finds what is under each pointer, the interface's nodes, sprites and meshes, and
-//! triggers a `Pointer<E>` at that entity for each of seventeen kinds of thing a pointer does. A
+//! triggers an event at that entity for each of seventeen kinds of thing a pointer does. A
 //! C# game observes them as any entity event, so the first C# observer of a kind asks for an
 //! observer here, which copies the event into one shape every kind fits and queues a call into C#,
 //! made with the whole world on loan once the trigger finishes, as [`crate::observe`] calls C# for
@@ -112,37 +112,37 @@ mod observers {
     }
 
     /// What every kind shares, the entity, the pointer and where it is.
-    fn common<E: core::fmt::Debug + Clone + bevy::reflect::Reflect>(kind: i32, pointer: &Pointer<E>) -> BcsPointerEvent {
-        let (pointer_kind, pointer_number) = match pointer.pointer_id {
+    fn common(kind: i32, entity: Entity, pointer: &Pointer) -> BcsPointerEvent {
+        let (pointer_kind, pointer_number) = match pointer.id {
             PointerId::Mouse => (0, 0),
             PointerId::Touch(id) => (1, id),
             PointerId::Custom(uuid) => (2, uuid.as_u64_pair().1),
         };
         BcsPointerEvent {
-            entity: pointer.entity.to_bits(),
+            entity: entity.to_bits(),
             pointer_number,
             kind,
             pointer_kind,
-            position: pointer.pointer_location.position.to_array(),
+            position: pointer.position.to_array(),
             ..Default::default()
         }
     }
 
     /// Queues the call into C# for the first step of an event, the entity the pointer was over.
-    fn forward<E: core::fmt::Debug + Clone + bevy::reflect::Reflect>(
-        event: &On<Pointer<E>>,
+    fn forward<E: PointerEvent>(
+        pointer: &E,
+        original: Entity,
         world: &mut DeferredWorld,
         target: Target,
         fill: impl FnOnce(&mut BcsPointerEvent, &E),
         kind: i32,
     ) {
-        let pointer = event.event();
-        if pointer.entity != event.original_event_target() {
+        if pointer.event_target() != original {
             return;
         }
 
-        let mut report = common(kind, pointer);
-        fill(&mut report, &pointer.event);
+        let mut report = common(kind, pointer.event_target(), pointer.pointer());
+        fill(&mut report, pointer);
         world.commands().queue(move |world: &mut World| {
             loan_world(world, || target.call(&report));
         });
@@ -153,76 +153,76 @@ mod observers {
     pub fn spawn(world: &mut World, kind: i32, target: Target) -> Option<Entity> {
         macro_rules! observe {
             ($event:ty, $fill:expr) => {
-                Observer::new(move |event: On<Pointer<$event>>, mut world: DeferredWorld| {
-                    forward(&event, &mut world, target, $fill, kind)
+                Observer::new(move |event: On<$event>, mut world: DeferredWorld| {
+                    forward(event.event(), event.original_event_target(), &mut world, target, $fill, kind)
                 })
             };
         }
 
         let observer = match kind {
-            0 => observe!(Over, |r, e: &Over| hit(r, &e.hit)),
-            1 => observe!(Out, |r, e: &Out| hit(r, &e.hit)),
-            2 => observe!(Enter, |r, e: &Enter| {
+            0 => observe!(PointerOver, |r, e: &PointerOver| hit(r, &e.hit)),
+            1 => observe!(PointerOut, |r, e: &PointerOut| hit(r, &e.hit)),
+            2 => observe!(PointerEnter, |r, e: &PointerEnter| {
                 hit(r, &e.hit);
                 r.in_bounds = e.is_in_bounds as u32;
             }),
-            3 => observe!(Leave, |r, e: &Leave| {
+            3 => observe!(PointerLeave, |r, e: &PointerLeave| {
                 hit(r, &e.hit);
                 r.in_bounds = e.was_in_bounds as u32;
             }),
-            4 => observe!(Press, |r, e: &Press| {
+            4 => observe!(PointerPress, |r, e: &PointerPress| {
                 button(r, e.button);
                 hit(r, &e.hit);
                 r.count = e.count as u32;
             }),
-            5 => observe!(Release, |r, e: &Release| {
+            5 => observe!(PointerRelease, |r, e: &PointerRelease| {
                 button(r, e.button);
                 hit(r, &e.hit);
             }),
-            6 => observe!(Click, |r, e: &Click| {
+            6 => observe!(PointerClick, |r, e: &PointerClick| {
                 button(r, e.button);
                 hit(r, &e.hit);
                 r.duration = e.duration.as_secs_f64();
                 r.count = e.count as u32;
             }),
-            7 => observe!(Move, |r, e: &Move| {
+            7 => observe!(PointerMove, |r, e: &PointerMove| {
                 hit(r, &e.hit);
                 r.delta = e.delta.to_array();
             }),
-            8 => observe!(DragStart, |r, e: &DragStart| {
+            8 => observe!(PointerDragStart, |r, e: &PointerDragStart| {
                 button(r, e.button);
                 hit(r, &e.hit);
             }),
-            9 => observe!(Drag, |r, e: &Drag| {
+            9 => observe!(PointerDrag, |r, e: &PointerDrag| {
                 button(r, e.button);
                 r.distance = e.distance.to_array();
                 r.delta = e.delta.to_array();
             }),
-            10 => observe!(DragEnd, |r, e: &DragEnd| {
+            10 => observe!(PointerDragEnd, |r, e: &PointerDragEnd| {
                 button(r, e.button);
                 r.distance = e.distance.to_array();
             }),
-            11 => observe!(DragEnter, |r, e: &DragEnter| {
+            11 => observe!(PointerDragEnter, |r, e: &PointerDragEnter| {
                 button(r, e.button);
                 r.other = e.dragged.to_bits();
                 hit(r, &e.hit);
             }),
-            12 => observe!(DragOver, |r, e: &DragOver| {
+            12 => observe!(PointerDragOver, |r, e: &PointerDragOver| {
                 button(r, e.button);
                 r.other = e.dragged.to_bits();
                 hit(r, &e.hit);
             }),
-            13 => observe!(DragLeave, |r, e: &DragLeave| {
+            13 => observe!(PointerDragLeave, |r, e: &PointerDragLeave| {
                 button(r, e.button);
                 r.other = e.dragged.to_bits();
                 hit(r, &e.hit);
             }),
-            14 => observe!(DragDrop, |r, e: &DragDrop| {
+            14 => observe!(PointerDragDrop, |r, e: &PointerDragDrop| {
                 button(r, e.button);
                 r.other = e.dropped.to_bits();
                 hit(r, &e.hit);
             }),
-            15 => observe!(Scroll, |r, e: &Scroll| {
+            15 => observe!(PointerScroll, |r, e: &PointerScroll| {
                 r.scroll_unit = match e.unit {
                     bevy::input::mouse::MouseScrollUnit::Line => 0,
                     bevy::input::mouse::MouseScrollUnit::Pixel => 1,
@@ -230,7 +230,7 @@ mod observers {
                 r.scroll = [e.x, e.y];
                 hit(r, &e.hit);
             }),
-            16 => observe!(Cancel, |r, e: &Cancel| hit(r, &e.hit)),
+            16 => observe!(PointerCancel, |r, e: &PointerCancel| hit(r, &e.hit)),
             _ => return None,
         };
 

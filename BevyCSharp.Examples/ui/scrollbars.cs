@@ -1,4 +1,4 @@
-// Bevy's scrollbars example, examples/ui/scroll_and_overflow/scrollbars.rs at v0.19.1, by Bevy's
+// Bevy's scrollbars example, examples/ui/scroll_and_overflow/scrollbars.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -83,7 +83,7 @@ internal static class Scrollbars
             var thumb = Ui.SpawnNode(new UiSettings { Color = (Gray2.R, Gray2.G, Gray2.B, 1f), BorderColor = (Gray3.R, Gray3.G, Gray3.B, 1f) });
             ecs.Insert<HoveredRef>(thumb);
             var style = ecs.Insert<ScrollbarThumbRef>(thumb);
-            style.BorderRadiusTopLeft = style.BorderRadiusTopRight = style.BorderRadiusBottomLeft = style.BorderRadiusBottomRight = new Val.Px(4f);
+            style.BorderRadiusTopLeftX = style.BorderRadiusTopRightX = style.BorderRadiusBottomLeftX = style.BorderRadiusBottomRightX = new Val.Px(4f);
             style.BorderLeft = style.BorderTop = style.BorderRight = style.BorderBottom = new Val.Px(1f);
             ecs.SetParent(thumb, bar);
             Thumbs.Add(thumb);

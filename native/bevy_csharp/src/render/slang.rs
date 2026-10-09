@@ -1,9 +1,10 @@
 //! Shaders are written in Slang and compiled to WGSL, which Bevy's pipeline cache takes.
 //!
-//! WGSL rather than SPIR-V, because Bevy takes WGSL through naga_oil with no extra feature, it runs
-//! on every backend including WebGPU, and a pipeline built from it is rebuilt when the shader asset
-//! changes. Slang's WGSL backend keeps explicit bindings, and it numbers stage inputs and outputs
-//! by semantic index, which lets a Slang fragment shader follow Bevy's own vertex shader.
+//! WGSL rather than SPIR-V, because Bevy takes WGSL with no extra feature, as WESL where the bridge
+//! puts Bevy's imports in front of it, it runs on every backend including WebGPU, and a pipeline
+//! built from it is rebuilt when the shader asset changes. Slang's WGSL backend keeps explicit
+//! bindings, and it numbers stage inputs and outputs by semantic index, which lets a Slang fragment
+//! shader follow Bevy's own vertex shader.
 //!
 //! A compute shader can ask for SPIR-V instead, for what WGSL cannot say, such as a ray query.
 //! That is compiled the same way with a different target, and the binary is handed to the driver

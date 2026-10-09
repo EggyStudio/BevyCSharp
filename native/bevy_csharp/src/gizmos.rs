@@ -106,7 +106,7 @@ fn spacing(shape: &QueuedGizmo) -> bevy::math::Vec2 {
 #[cfg(feature = "render")]
 macro_rules! draw_shape {
     ($gizmos:expr, $shape:expr, $position:expr, $rotation:expr, $color:expr, $fades_to:expr) => {{
-        use bevy::math::primitives::{Capsule3d, ConicalFrustum, Cone, Cuboid, Cylinder, Torus};
+        use bevy::shape::{Capsule3d, ConicalFrustum, Cone, Cuboid, Cylinder, Torus};
         use bevy::math::{Isometry2d, Isometry3d, Rot2, UVec2, Vec2, Vec3};
         use bevy::transform::components::Transform;
 

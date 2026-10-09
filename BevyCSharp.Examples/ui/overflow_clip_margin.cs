@@ -1,5 +1,5 @@
 // Bevy's overflow_clip_margin example, examples/ui/scroll_and_overflow/overflow_clip_margin.rs at
-// v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+// v0.20.0, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 

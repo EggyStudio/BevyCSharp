@@ -204,6 +204,49 @@ public sealed class SceneFileTests : IDisposable
         Assert.True(ran);
     }
 
+    /// <summary>
+    /// A component Bevy moved to another path is read from a scene that names its old one, as a
+    /// file written before the upgrade does, and placed as the component it is now.
+    /// </summary>
+    [SkippableFact]
+    public void AComponentBevyMovedIsReadByThePathItHadBefore()
+    {
+        Needs.Renderer();
+
+        var file = _folder.File("moved.scene.json");
+        File.WriteAllText(file, """
+            {
+              "format": "bevycsharp.scene.2",
+              "entities": [
+                {
+                  "id": 1,
+                  "name": "Camera",
+                  "components": {
+                    "bevy_core_pipeline::tonemapping::Tonemapping": "AcesFitted"
+                  }
+                }
+              ]
+            }
+            """);
+
+        var ran = false;
+        using var loading = new EngineHarness(frames: 2);
+
+        loading.OnContext(Stage.Startup, ctx =>
+        {
+            var loaded = SceneFile.Load(ctx.Ecs, file);
+            Assert.Empty(loaded.Refused);
+            Assert.Empty(loaded.Unknown);
+
+            var camera = Assert.Single(loaded.Entities);
+            Assert.Equal("\"AcesFitted\"", ctx.Ecs.GetReflected(camera, "bevy_render::view::Tonemapping", ""));
+            ran = true;
+        });
+
+        loading.Run();
+        Assert.True(ran);
+    }
+
     [SkippableFact]
     public void AMeshAndMaterialMadeInMemoryAreWrittenAsHowToMakeThemAndStayShared()
     {

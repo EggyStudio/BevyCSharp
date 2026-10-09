@@ -533,6 +533,7 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
                                 nonmax::NonMaxU32::new(begin as u32).unwrap_or_default(),
                             ))
                             .as_ptr()
+                            .cast_mut()
                     };
                     let chunk = BcsChunk {
                         // SAFETY: `begin < len`, so this stays inside the entity slice.
@@ -719,10 +720,10 @@ pub unsafe extern "C" fn bcs_ecs_components_of(entity: u64, out: *mut i32, capac
             let capacity = capacity.max(0) as usize;
             let mut total = 0usize;
 
-            for info in components {
+            for (id, _) in components {
                 if total < capacity {
                     // SAFETY: `total < capacity` and `out` is valid for `capacity` writes.
-                    unsafe { out.add(total).write(info.id().index() as i32) };
+                    unsafe { out.add(total).write(id.index() as i32) };
                 }
 
                 total += 1;

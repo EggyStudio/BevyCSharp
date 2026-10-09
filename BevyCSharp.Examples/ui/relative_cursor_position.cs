@@ -1,4 +1,4 @@
-// Bevy's relative_cursor_position example, examples/ui/relative_cursor_position.rs at v0.19.1, by
+// Bevy's relative_cursor_position example, examples/ui/relative_cursor_position.rs at v0.20.0, by
 // Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;

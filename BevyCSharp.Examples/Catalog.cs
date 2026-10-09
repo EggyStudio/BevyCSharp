@@ -279,7 +279,6 @@ internal static class Catalog
         // Stress Tests
         new("bevymark", Bevymark.Build, Bevymark.Configure),
         new("bevymark_3d", Bevymark3d.Build, Bevymark3d.Configure),
-        new("many_animated_sprite_meshes", ManyAnimatedSpriteMeshes.Build, ManyAnimatedSpriteMeshes.Configure),
         new("many_animated_sprites", ManyAnimatedSprites.Build, ManyAnimatedSprites.Configure),
         new("many_buttons", ManyButtons.Build, ManyButtons.Configure),
         new("many_cameras_lights", ManyCamerasLights.Build, ManyCamerasLights.Configure),
@@ -291,7 +290,6 @@ internal static class Catalog
         new("many_lights", ManyLights.Build, ManyLights.Configure),
         new("many_materials", ManyMaterials.Build, ManyMaterials.Configure),
         new("many_morph_targets", ManyMorphTargets.Build, ManyMorphTargets.Configure),
-        new("many_sprite_meshes", ManySpriteMeshes.Build, ManySpriteMeshes.Configure),
         new("many_sprites", ManySprites.Build, ManySprites.Configure),
         new("many_text", ManyText.Build, ManyText.Configure),
         new("many_text2d", ManyText2d.Build, ManyText2d.Configure),
