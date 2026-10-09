@@ -80,10 +80,6 @@ internal static class Needs
     internal static void OpenFiles() =>
         Skip.IfNot(OperatingSystem.IsLinux() || OperatingSystem.IsWindows(), "needs Linux's /proc/self/fd or Windows' locks to find a file held open");
 
-    /// <summary>A sound device, as a test learned from whether anything played.</summary>
-    internal static void SoundDevice(bool present) =>
-        Skip.IfNot(present, "needs a sound device");
-
     /// <summary>A folder beside the tests, such as the sample's assets, which a checkout has.</summary>
     internal static void Folder(string path, string what) =>
         Skip.IfNot(Directory.Exists(path), $"needs {what} at {path}");

@@ -273,6 +273,9 @@ pub struct BcsConfig {
     /// atmosphere, on every camera marked as a weather camera. Needs the `render` feature, and is
     /// kept out where meshlets run. See `render::weather`.
     pub weather: u32,
+    /// Non-zero to play sound to the machine's device in a run with no window, headless or
+    /// offscreen, which otherwise plays every sound to none. See `audio::silent`.
+    pub audio_without_window: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

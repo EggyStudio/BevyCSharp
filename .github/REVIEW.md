@@ -10,7 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e4c122e3`. Decision 21 is carried out, prose alone: the five places name no one, the
+Reviewed up to `340639b1`. Bevy 0.20 is in, item 3's steps b to e in one commit of 393 files: the
+bridge, the vendored weather and the library on 0.20.0 with wgpu and naga 30, every profile
+compiling with warnings denied, the bridge's 116 tests passing with meshlets and Solari, the lock
+losing naga_oil and gaining WESL, `bevy/bevy_curve` named, ABI 232 on both sides; the moves as
+listed, lifecycle observers, flat pointer events, `bevy::curve` and `bevy::shape`, the typed
+`ShaderBuffer`, `constants` on every stage, `#[extract_app(RenderApp)]`, the depth and stencil
+types, extracted windows as render entities, the corner radius circular from one length; the glue
+WESL under 0.20's module paths with the volumes' import under both defines, a glued unit from
+`from_wesl` under a module path of its own and every other from `from_wgsl`, the spike's three mends
+in `reflect/mend.rs` with their tests; the weather's two shaders WESL and its Rust compiled
+unchanged; the four faults of 0.20's worked around where each is done, `spirv_compute.rs`, the empty
+curve list, `exposure.rs` and the ray scene's new group; the schema dumped again, the generator
+leaving a self-holding variant out of its union, and moved types given former paths from
+`bevy-former-paths.tsv` through `FormerPathsGenerator`, so a file written on 0.19 reads its
+tonemapper, Courtyard's left as it is with a test placing one by its old path; the examples' table
+from 0.20's list; the notices written again; `compared-with-bevy.md` and `how-it-works.md` on 0.20.
+Right throughout, and the interaction is a design of its own worth saying in the release notes: a
+node carries Bevy's `Button` and `Hovered`, and `Interaction` names a small component of the
+bridge's, `PointerOnNode`, kept from the two in `PreUpdate` after picking, since thirteen examples
+react through a change of it and `Hovered` does not change on a press; a hover counts the nodes
+inside a node, as Bevy's does, which a game that read the old answer sees. `SpriteMesh` is gone with
+the two stress examples Bevy dropped. The suite: 1,276 passed, 2 skipped and 1 failed, N 6.5 against
+a local package packed on 0.19, which passes against one packed from this tree and which the pack
+run proves. Steps f, g's captures and release notes, and h remain: the captures compared and each
+difference named, the feature test driven and soaked under the memory scope, Courtyard from the
+package, the shuffle-seed run, the crash file read against 0.20's panics, the release notes naming
+what a game's author sees, and the pack run for 0.4. The coder takes Decision 23 next, then the six
+listed files in move-only commits, then those steps. The norm's Annex B names the followed engine as
+Bevy 0.20.0 from this pass.
+
+Before it, Decision 21 came to be carried out, prose alone: the five places name no one, the
 version's commit a setting made by hand, the test script run on a contributor's machine, the scene
 pack's file the one that is published, the audio check's crate one that would add to N 2.8's list,
 and BUILDING.md's dependency decided apart from the work that would use it; `N_4_7` reads every
@@ -35,24 +65,6 @@ as the weather was, so the bump that follows changes one thing. The suite was la
 `601c6264`; this commit reaches no test without the feature and the norm's pass, and the bump's
 reply gives the whole count. Before the bump comes the owner's order of 2026-10-09 in item 1, five
 places and N 4.7's check in one commit of prose.
-
-Before it, the weather came to be vendored (Decision 18): `bevy_weather` 0.2.0 as published is a
-member of the workspace at `native/bevy_weather` with its license and README, the bridge depending
-on it by path so the lock changes only in where the crate comes from, upstream's examples, their
-dev-dependency on Bevy's default plugins and dev tools, and its profiles left out, its 204 tests
-building on its own dependencies; `default-members` keeps a plain cargo command on the bridge, and
-`build/third-party-notices.py` leaves out the bridge alone, so the vendored crate stays in the
-notices under its authors' license, which is right. Right too that it comes before the bump, as the
-embedding will, so each stands alone on 0.19 and the port goes with the bump. The `Rule:` line is
-taken: N 4.1's text names another's code kept whole in the tree beside the followed engine's words,
-Annex B names `native/bevy_weather` as that code, which the layout rules leave out as well since
-they read the bridge's own sources, and the test's leaving the folder out stands as it stands for
-Bevy's assets, in both repositories' NORM.md. The spike's counts are answered: the ten glued units
-composed through WESL and were then refused by naga 30 for the flat rule, which the report counted
-among the unglued alone, 31 and 10 flat, 3 enable and 19 parentheses, and the irradiance unit fails
-on the 0.19 condition's missing declaration when no volume is in view, which the port's reply says.
-The suite was last run whole at `601c6264`, 1,276 passed and 2 skipped, and this commit runs none of
-it but the norm's 18, which pass; the embedding on 0.19 is next, then the bump.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -405,66 +417,20 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 3 b, Bevy 0.20.** The bridge, the weather and the managed side are on Bevy 0.20.0 with wgpu
-and naga 30, every profile compiling with warnings denied and the bridge's 116 tests passing with
-meshlets and Solari. The lock gains what Bevy's own tree now holds, WESL and its parsers among it,
-and loses `naga_oil`; the bridge names one feature more, `bevy/bevy_curve`, which only makes
-reachable as `bevy::curve` the crate animation already compiles. ABI 232.
-
-The moves are the ones item 3 listed, which take in observers on the lifecycle events themselves
-(`On<AddEvent>`), the flat pointer events, `bevy::curve` and `bevy::shape` for what left
-`bevy_math`, the typed `ShaderBuffer` filled through its own calls, `constants` on every pipeline
-stage, `#[extract_app(RenderApp)]` on each extracted component, `ViewDepthStencilTexture`, the
-prepass depth's own attachment type, extracted windows as render entities with their handle beside
-them, a corner radius made circular from one length, Bevy's SSAO reach kept, a summary tick refused
-for a C# component, and a Slang material left out of order-independent transparency, since its
-fragment shader writes no buffers of that pass. `SpriteMesh` is gone, so the sprite frames move
-sprites alone, bevymark takes 0.20's alpha mode on its sprites, and `many_sprite_meshes` and
-`many_animated_sprite_meshes`, which Bevy dropped, are dropped here.
-
-The interaction keeps its surface over `Hovered` and `Pressed`, as item 3 asked. An interactive node
-carries Bevy's headless `Button` and `Hovered`, and the managed `Interaction` handle names a small
-component of the bridge's, `PointerOnNode`, kept from the two in `PreUpdate` after picking, since
-thirteen examples react through `[Changed(typeof(Interaction))]` and `Hovered` does not change on a
-press. A hover now counts the nodes inside the node, as Bevy's does.
-
-The glue is WESL with 0.20's module paths, each prelude's imports put once at the head, a directive
-slangc wrote put after them, and the irradiance volumes' module imported only under
-`IRRADIANCE_VOLUME && IRRADIANCE_VOLUMES_ARE_USABLE`; a glued unit is made with `from_wesl` under a
-module path of its own, and every other stays `from_wgsl`. The fallbacks are WESL too and decompress
-the vertex as Bevy's own shaders do. The spike's three mends live in `reflect/mend.rs` with tests of
-their own, applied to every unit slangc writes. On the spike's count, the ten that make 63 are the
-ten glued units, which composed and were then refused by naga 30 for the integer rule, which the
-report counted only among the unglued. The weather's two shaders are WESL, their import, their one
-condition and naga_oil's `#{MATERIAL_BIND_GROUP}` moved, and its Rust compiled unchanged.
-
-Four of Bevy 0.20's own faults are worked around in the bridge, each said where it is done.
-Passthrough SPIR-V is handed to wgpu 30 without the entry point it now asks for, so every SPIR-V
-compute pipeline was refused; the bridge builds those itself (`render/spirv_compute.rs`), the module
-naming its one entry point, and keeps the stage's words for it. A clip's targets are found by its
-curves alone, so an event placed on a target with no curve never fired; such a target is given an
-empty list of curves. Auto exposure's pass stays on a camera's view after the effect is removed, as
-in 0.19, and 0.19's workaround, a new render entity for the camera, now bins its meshes twice and
-panics; the pass's private component is taken off every view without the effect
-(`render/exposure.rs`). A focused field takes keys only with `bevy_ui_widgets::TextInput`, which the
-field now carries. `bcs_ray` follows Solari 0.20's scene group, the previous frame's acceleration
-structure at binding 6 and the transforms as three rows of an affine matrix, and Solari 0.20 binds
-its scene only once it holds a light, which the guide now says and the two tests tracing it now give
-it.
-
-The schema was dumped again from an editor build; its diff reads as the list of what Bevy changed.
-The generator stopped on `FontSource::List(Vec<FontSource>)`, a type holding a list of itself, and
-now leaves such a variant out of its union rather than recurse. Moved components get former paths
-from `BevyCSharp/Generated/bevy-former-paths.tsv`, which `FormerPathsGenerator` turns into the paths
-a reflected schema is also found by, so `Tonemapping` and `DebandDither` read from a file written on
-0.19, Courtyard's left as it is, with a test placing one by its old path. The examples' table is
-written from 0.20's list, the five lines Bevy no longer has taken out and the 22 new ones triaged.
-`material.rs` and `reflected.rs`, which the port took past 800 lines, move their render errors and
-their resource finder into modules of their own in this commit; the six listed files it touches,
-`views.rs`, `post.rs`, `compute.rs`, `window.rs`, `slang.rs` and `ecs.rs`, are mended in commits of
-their own that move code alone, next.
-
-The suite passed 1,276, skipped 2 and failed 1, N 6.5, which reads the newest local package, one
-packed on 0.19 whose notices name 0.19's crates; against a package packed from this tree it and the
-rest of the norm's tests pass. Every example's head names 0.20.0, as the table's script writes it
-from the lock.
+**Decision 23 is in.** A run with no window, headless or offscreen, plays every sound to no device
+unless `Config.AudioWithoutWindow` asks for one, and `Audio.IsSilent` says which a run does. Bevy
+0.20 keeps `AudioOutput` private to its crate, so the bridge cannot hand Bevy one with no device
+before the plugin opens its own. It adds a plugin of its own in place of Bevy's instead
+(`audio/silent.rs`), which registers the same assets and settings, opens nothing, and gives each
+sound a sink of the bridge's that carries Bevy's `AudioSinkPlayback`. That sink decodes the clip
+with the window and the loop Bevy would give it and draws from it on the app's real clock, so a
+pause, a speed, a seek, a loop's refused seek and a despawn at the end behave as they do on a
+device, and every `bcs_audio_*` call reaches it through one helper beside Bevy's two sinks. The
+windowed path never passed `Config.SpatialScale` to Bevy's plugin, and now does. A test holds a
+headless and an offscreen app to silence and a second of tone to its end between 1.0 and 1.15
+seconds after its sink arrived on a set clock, another holds the field to Bevy's plugin, and the
+audio tests that skipped without a device now run on every machine. ABI 233. The suite passed 1,272
+and skipped 2 of 1,274, N 6.5 reading the package packed from the bump. That total is eight short of
+the bump's 1,279 once this batch's three are taken off, though the listing at `340639b1` names every
+test this tree does but those three and no test's source lost one since `601c6264`, so the rows a
+theory finds at run time are the likeliest place, and I have not traced them.

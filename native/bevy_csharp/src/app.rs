@@ -190,7 +190,17 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     render_creation: RenderCreation::Automatic(Box::new(wgpu)),
                     ..default()
                 })
-                .set(asset_plugin(&asset_root));
+                .set(asset_plugin(&asset_root))
+                .set(crate::audio::device_plugin(config));
+
+            // Sound to the machine's device where there is a window, and to none in a run drawn
+            // offscreen unless the app asks for it. See `audio::silent`.
+            let heard = !offscreen || config.audio_without_window != 0;
+            let plugins = if heard {
+                plugins
+            } else {
+                plugins.disable::<bevy::audio::AudioPlugin>()
+            };
 
             // Bevy's logger, set by the first app of the process alone, since a second app's
             // plugin finds it set and says so as an error. See the log module.
@@ -206,6 +216,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 // leaves the app with no runner, so the schedule runner takes the loop instead,
                 // paced like a headless run.
                 app.add_plugins(plugins.disable::<WinitPlugin>());
+                if !heard {
+                    app.add_plugins(crate::audio::silent_plugin(config));
+                }
 
                 let runner = if config.headless_fps > 0 {
                     ScheduleRunnerPlugin::run_loop(Duration::from_secs_f64(
@@ -509,22 +522,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // scene is too. Unlike the two above, this registers its loader in `build`.
         app.add_plugins(bevy::world_serialization::WorldSerializationPlugin);
 
-        // Registers `AudioSource`, its decoders, and the output device if there is one. Bevy
-        // tolerates having none, so it logs and plays nothing, which suits a windowless run anyway.
-        // Without this a sound load panics rather than failing, because Bevy refuses to hand out a
-        // handle for an asset type it was never told about.
+        // Registers `AudioSource` and its decoders, without which a sound load panics rather than
+        // failing, because Bevy refuses to hand out a handle for an asset type it was never told
+        // about. A run with no window plays to no device unless the app asks for one, since
+        // nobody beside a test or a server asked to hear it. See `audio::silent`.
         #[cfg(feature = "render")]
-        app.add_plugins(bevy::audio::AudioPlugin {
-            // One answer for the app, because how far away a sound is depends on what the world
-            // is measured in, and that is a fact about the game rather than about any one sound.
-            // A sound may still say otherwise for itself.
-            default_spatial_scale: if config.spatial_scale > 0.0 {
-                bevy::audio::SpatialScale::new(config.spatial_scale)
-            } else {
-                bevy::audio::SpatialScale::new(1.0)
-            },
-            ..Default::default()
-        });
+        if config.audio_without_window != 0 {
+            app.add_plugins(crate::audio::device_plugin(config));
+        } else {
+            app.add_plugins(crate::audio::silent_plugin(config));
+        }
 
         // Registers the glTF loader and the asset types it produces. `DefaultPlugins` carries it
         // on the windowed path, so adding it there as well would hit the double-registration

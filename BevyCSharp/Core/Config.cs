@@ -288,6 +288,28 @@ public sealed class Config
     public float SpatialScale { get; set; }
 
     /// <summary>
+    /// Play sound to the machine's device in a run with no window, headless or
+    /// <see cref="Offscreen"/>, which otherwise plays every sound to none.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A run with no window to look at is a test, a soak, a capture or a tool, and a sound it
+    /// plays reaches somebody beside the machine who never asked for it, so by default such a run
+    /// opens no device. Its sounds still run their course: each is decoded and drawn from on the
+    /// app's clock as a device would draw from it, so it pauses, seeks, loops and ends when it
+    /// would be heard to, a sound played with <see cref="PlaybackMode.Despawn"/> goes on time, and
+    /// a game that waits on a sound's end works the same. <see cref="Audio.IsSilent"/> says which
+    /// a run does.
+    /// </para>
+    /// <para>
+    /// Set where a run with no window is meant to be heard, a game played offscreen into a stream
+    /// or a tool that plays sounds for somebody listening. A run with a window always plays to the
+    /// device, where the machine has one.
+    /// </para>
+    /// </remarks>
+    public bool AudioWithoutWindow { get; set; }
+
+    /// <summary>
     /// How many meshlet clusters the GPU keeps room for at once, which turns Bevy's meshlets on.
     /// Zero, the default, leaves them off.
     /// </summary>

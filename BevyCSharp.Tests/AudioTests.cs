@@ -10,7 +10,9 @@ namespace Bevy.Tests;
 /// <remarks>
 /// Whether anything is audible needs a sound card and an ear. What is checked here is that a clip
 /// loads, that playing one produces an entity that behaves like any other, and that a build
-/// without audio refuses rather than pretending.
+/// without audio refuses rather than pretending. Every run here has no window, so each sound plays
+/// to no device and is given the bridge's own sink, which runs it through on the app's clock, and
+/// none of this needs a device or makes a sound.
 /// </remarks>
 [Collection("engine")]
 public sealed class AudioTests
@@ -217,8 +219,7 @@ public sealed class AudioTests
     public void PositionAndSeekNeedTheSinkThatArrivesWithPlayback()
     {
         // The same rule the volume follows. The sink knows where a clip is, and it is attached once
-        // playback has started. A machine with no audio device never attaches one at all, which is
-        // why the answer is checked for being refused rather than for a number.
+        // playback has started, which is after the frame the sound was started in.
         using var harness = new EngineHarness(frames: 4);
         Needs.Renderer();
 
@@ -246,8 +247,7 @@ public sealed class AudioTests
     /// it plays, and neither a bus change nor a volume change undoes a pause.
     /// </summary>
     /// <remarks>
-    /// Silent throughout, since the global volume is zero and the volumes read back are each
-    /// sound's own. Needs a sound device for the sink, so it is skipped without one.
+    /// The global volume is zero, so the volumes read back are each sound's own.
     /// </remarks>
     [SkippableFact]
     public void ABusScalesItsSoundsAndKeepsTheirPauses()
@@ -279,7 +279,7 @@ public sealed class AudioTests
             }
             catch (BevyNativeException)
             {
-                // The sink arrives with playback, and only if there is a device to play on.
+                // The sink arrives with playback.
                 return;
             }
 
@@ -293,8 +293,6 @@ public sealed class AudioTests
         });
 
         harness.Run();
-
-        Needs.SoundDevice(readings.Count > 0);
 
         Assert.Equal(5, readings.Count);
         Assert.Equal((0.5f, 0.8f, false), readings[0]);
@@ -327,8 +325,6 @@ public sealed class AudioTests
     [SkippableFact]
     public void ASoundReportsWhereItIsUntilItIsAskedToLoop()
     {
-        // Both halves need a sound device, because without one Bevy attaches no sink and there is
-        // nothing to ask, which is why the assertions are guarded on having got an answer.
         using var harness = new EngineHarness(frames: 400, fps: 240);
         Needs.Renderer();
 
@@ -357,7 +353,7 @@ public sealed class AudioTests
             }
             catch (BevyNativeException)
             {
-                // The sink arrives with playback, and only if there is a device to play on.
+                // The sink arrives with playback.
                 return;
             }
 
@@ -368,8 +364,7 @@ public sealed class AudioTests
 
         harness.Run();
 
-        Needs.SoundDevice(position >= 0f);
-
+        Assert.True(position >= 0f, "the sound never started");
         Assert.Equal(NativeStatus.Ok, plainSeek);
 
         // Looping keeps the decoded samples so the clip can start again, and what holds them
@@ -409,7 +404,7 @@ public sealed class AudioTests
     {
         Needs.Renderer();
 
-        using var harness = new EngineHarness(frames: 40, fps: 60);
+        using var harness = new EngineHarness(frames: 40, frameSeconds: 1.0 / 60);
 
         var clipped = Entity.None;
         var whole = Entity.None;
@@ -434,7 +429,7 @@ public sealed class AudioTests
 
         harness.OnContext(Stage.Update, ctx =>
         {
-            // Playback starts when the sink arrives, and only where there is a device to play on.
+            // Playback starts when the sink arrives.
             if (!started)
             {
                 try
@@ -448,8 +443,8 @@ public sealed class AudioTests
                 }
             }
 
-            // A third of a second in, past the window the first was given and well short of the
-            // second's whole tone.
+            // Half a second in on a clock that moves a sixtieth a frame, past the window the first
+            // was given and well short of the second's whole tone.
             if (ctx.Time.FrameCount != 30) return;
 
             clippedGone = !ctx.Ecs.IsAlive(clipped);
@@ -458,11 +453,99 @@ public sealed class AudioTests
 
         harness.Run();
 
-        // No device on this machine leaves nothing to play.
-        Needs.SoundDevice(clippedGone is not null && wholeGone is not null);
-
+        Assert.True(clippedGone is not null && wholeGone is not null, "the sounds never started");
         Assert.True(clippedGone!.Value, "the sound given a fifth of a second was still playing");
         Assert.False(wholeGone!.Value, "the sound given the whole tone ended early");
+    }
+
+    /// <summary>
+    /// A run with no window, headless or offscreen, plays to no device, and a sound in it still
+    /// ends when it would have been heard to end.
+    /// </summary>
+    /// <remarks>
+    /// A game that waits on a sound's end, a door that opens when its creak is over, has to work in
+    /// a test or a soak as it does with a window, so the second of tone is timed from the frame
+    /// its sink arrived to the frame it despawned itself, on a clock that moves a set step a frame.
+    /// It is played at no volume, so a run that wrongly opened a device is still not heard.
+    /// </remarks>
+    [SkippableTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ARunWithNoWindowIsSilentAndItsSoundsEndOnTime(bool offscreen)
+    {
+        Needs.Renderer();
+
+        const double step = 0.05;
+        bool? silent = null;
+        var playing = Entity.None;
+        ulong started = 0, ended = 0;
+
+        using var app = new App(new Config
+        {
+            Headless = !offscreen,
+            Offscreen = offscreen,
+            Width = 32,
+            Height = 32,
+            HeadlessFrames = 200,
+            FrameSeconds = step,
+            AssetRoot = EngineHarness.AssetDirectory,
+        });
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ =>
+        {
+            silent = Audio.IsSilent;
+            playing = Audio.Play(
+                AssetServer.Load(AssetKind.Audio, "sounds/tone.wav"),
+                new AudioSettings { Mode = PlaybackMode.Despawn, Volume = 0f });
+        }, "Test.Play"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var ctx = new BehaviorContext(world);
+            if (ended > 0) return;
+
+            if (!ctx.Ecs.IsAlive(playing))
+            {
+                ended = ctx.Time.FrameCount;
+                ctx.Exit();
+            }
+            else if (started == 0 && Audio.HasStarted(playing))
+            {
+                started = ctx.Time.FrameCount;
+            }
+        }, "Test.Listen"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.True(silent, "a run with no window plays to a device");
+        Assert.True(started > 0, "the sound never started");
+        Assert.True(ended > started, "the sound never ended");
+
+        // A second of tone, the frame that drew past its last sample, and the one that saw it gone.
+        Assert.InRange((ended - started) * step, 1.0, 1.0 + 3 * step);
+    }
+
+    /// <summary>A run with no window plays to the machine's device when its config asks.</summary>
+    [SkippableFact]
+    public void ARunWithNoWindowCanAskToBeHeard()
+    {
+        Needs.Renderer();
+
+        bool? silent = null;
+
+        using var app = new App(new Config
+        {
+            Headless = true,
+            HeadlessFrames = 2,
+            AudioWithoutWindow = true,
+            AssetRoot = EngineHarness.AssetDirectory,
+        });
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            _ => silent = Audio.IsSilent, "Test.Ask"));
+
+        Assert.Equal(0, app.Run());
+        Assert.False(silent, "a run that asked for a device plays to none");
     }
 
 }

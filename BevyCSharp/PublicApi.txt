@@ -353,6 +353,7 @@ static class Bevy.Audio
   static bool HasStarted(Entity playing)
   static bool IsMuted(Entity playing)
   static bool IsPaused(Entity playing)
+  static bool IsSilent { get; }
   static float BusVolume(string? bus)
   static float DecibelsFromVolume(float volume)
   static float PositionOf(Entity playing)
@@ -880,6 +881,7 @@ sealed class Bevy.Config
   Config()
   Dictionary<string, string> AssetSources { get; }
   GraphicsBackend Backend { get; set; }
+  bool AudioWithoutWindow { get; set; }
   bool DesktopTitleBar { get; set; }
   bool FailFastOnSystemException { get; set; }
   bool GpuTimings { get; set; }
@@ -2390,6 +2392,7 @@ struct Bevy.Interop.NativeConfig
   float SpatialScale
   int X
   int Y
+  uint AudioWithoutWindow
   uint Backend
   uint DesktopTitleBar
   uint GpuTimings

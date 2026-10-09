@@ -2,15 +2,20 @@
 //!
 //! A sound that is playing is an entity carrying an `AudioPlayer` and the settings it was started
 //! with, so it is despawned like anything else and can be parented, tagged or queried. Bevy adds an
-//! `AudioSink` to it once playback begins, and volume and pausing go through it.
+//! `AudioSink` to it once playback begins, and volume and pausing go through it. In a run with no
+//! window the bridge's `SilentSink` stands in its place, which plays to no device. See `silent`.
 //!
 //! Everything here needs a render build, because that is the profile Bevy's audio is compiled
 //! into, which is the one that takes a system library.
 
 use crate::interop::{status, BcsAudioConfig};
+#[cfg(feature = "render")]
+use crate::interop::BcsConfig;
 
 #[cfg(feature = "render")]
 pub mod checked;
+#[cfg(feature = "render")]
+pub mod silent;
 #[cfg(feature = "render")]
 use crate::state::{with_world, with_world_opt};
 
@@ -22,6 +27,35 @@ use crate::state::{with_world, with_world_opt};
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component, Clone, Copy)]
 pub struct OwnVolume(pub f32);
+
+/// What a world unit is to every spatial sound that does not say otherwise.
+///
+/// One answer for the app, because how far away a sound is depends on what the world is measured
+/// in, and that is a fact about the game rather than about any one sound. A sound may still say
+/// otherwise for itself.
+#[cfg(feature = "render")]
+fn spatial_scale(config: &BcsConfig) -> bevy::audio::SpatialScale {
+    let scale = if config.spatial_scale > 0.0 { config.spatial_scale } else { 1.0 };
+    bevy::audio::SpatialScale::new(scale)
+}
+
+/// Bevy's audio plugin, which plays to the machine's device where there is one.
+#[cfg(feature = "render")]
+pub(crate) fn device_plugin(config: &BcsConfig) -> bevy::audio::AudioPlugin {
+    bevy::audio::AudioPlugin {
+        default_spatial_scale: spatial_scale(config),
+        ..Default::default()
+    }
+}
+
+/// The bridge's audio plugin, which plays to no device. Added after the asset plugin, whose types
+/// it registers its own with.
+#[cfg(feature = "render")]
+pub(crate) fn silent_plugin(config: &BcsConfig) -> silent::SilentAudio {
+    silent::SilentAudio {
+        default_spatial_scale: spatial_scale(config),
+    }
+}
 
 /// The global volume, as a multiplier.
 #[cfg(feature = "render")]
@@ -124,7 +158,7 @@ pub extern "C" fn bcs_audio_control(entity: u64, volume: f32, paused: i32) -> i3
 
         #[cfg(feature = "render")]
         {
-            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink, Volume};
+            use bevy::audio::Volume;
 
             with_world(|world| {
                 let global = global_volume(world);
@@ -137,33 +171,21 @@ pub extern "C" fn bcs_audio_control(entity: u64, volume: f32, paused: i32) -> i3
                 let own = volume;
                 let volume = own * global;
 
-                // A spatial sound gets a different component carrying the same trait, so both
-                // are tried rather than only the one a plain sound has.
-                let answer = if let Some(mut sink) = entity_mut.get_mut::<AudioSink>() {
+                let controlled = sink_of(&mut entity_mut, |sink| {
                     sink.set_volume(Volume::Linear(volume));
                     if paused != 0 {
                         sink.pause();
                     } else {
                         sink.play();
                     }
-                    status::OK
-                } else if let Some(mut sink) = entity_mut.get_mut::<SpatialAudioSink>() {
-                    sink.set_volume(Volume::Linear(volume));
-                    if paused != 0 {
-                        sink.pause();
-                    } else {
-                        sink.play();
-                    }
-                    status::OK
-                } else {
-                    status::NOT_PRESENT
-                };
+                });
 
-                if answer == status::OK {
-                    entity_mut.insert(OwnVolume(own));
+                if controlled.is_none() {
+                    return status::NOT_PRESENT;
                 }
 
-                answer
+                entity_mut.insert(OwnVolume(own));
+                status::OK
             })
         }
     })
@@ -184,20 +206,13 @@ pub extern "C" fn bcs_audio_stop(entity: u64) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
-
             with_world(|world| {
                 let entity = crate::ecs::entity_from(entity);
                 let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
                     return status::NO_ENTITY;
                 };
 
-                if let Some(sink) = entity_mut.get_mut::<AudioSink>() {
-                    sink.stop();
-                } else if let Some(sink) = entity_mut.get_mut::<SpatialAudioSink>() {
-                    sink.stop();
-                }
-
+                sink_of(&mut entity_mut, |sink| sink.stop());
                 entity_mut.despawn();
                 status::OK
             })
@@ -309,26 +324,12 @@ pub unsafe extern "C" fn bcs_audio_position(entity: u64, seconds: *mut f32) -> i
 
         #[cfg(feature = "render")]
         {
-            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
-
             if seconds.is_null() {
                 return status::NULL_ARG;
             }
 
-            with_world(|world| {
-                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
-                    return status::NO_ENTITY;
-                };
-
-                let position = if let Some(sink) = entity_ref.get::<AudioSink>() {
-                    sink.position()
-                } else if let Some(sink) = entity_ref.get::<SpatialAudioSink>() {
-                    sink.position()
-                } else {
-                    return status::NOT_PRESENT;
-                };
-
-                unsafe { *seconds = position.as_secs_f32() };
+            with_sink(entity, |sink| {
+                unsafe { *seconds = sink.position().as_secs_f32() };
                 status::OK
             })
         }
@@ -354,22 +355,17 @@ pub unsafe extern "C" fn bcs_audio_state(entity: u64, volume: *mut f32, paused: 
 
         #[cfg(feature = "render")]
         {
-            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
-
             with_world(|world| {
-                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity))
+                else {
                     return status::NO_ENTITY;
                 };
 
-                let held = if let Some(sink) = entity_ref.get::<AudioSink>() {
-                    sink.is_paused()
-                } else if let Some(sink) = entity_ref.get::<SpatialAudioSink>() {
-                    sink.is_paused()
-                } else {
+                let Some(held) = sink_of(&mut entity_mut, |sink| sink.is_paused()) else {
                     return status::NOT_PRESENT;
                 };
 
-                let heard = entity_ref.get::<OwnVolume>().map_or(1.0, |own| own.0);
+                let heard = entity_mut.get::<OwnVolume>().map_or(1.0, |own| own.0);
 
                 if !volume.is_null() {
                     unsafe { *volume = heard };
@@ -384,26 +380,40 @@ pub unsafe extern "C" fn bcs_audio_state(entity: u64, volume: *mut f32, paused: 
     })
 }
 
-/// Runs `f` over a playing sound's sink, a plain one or a spatial one, which carry the same trait.
+/// Runs `f` over a playing sound's sink, or answers `None` before it has one.
+///
+/// Three components carry the same trait: Bevy's sink for a plain sound, its sink for a spatial
+/// one, and the bridge's for a sound in a run with no window, so each is tried in turn.
+#[cfg(feature = "render")]
+fn sink_of<R>(
+    entity: &mut bevy::ecs::world::EntityWorldMut,
+    f: impl FnOnce(&mut dyn bevy::audio::AudioSinkPlayback) -> R,
+) -> Option<R> {
+    use bevy::audio::{AudioSink, SpatialAudioSink};
+
+    if let Some(mut sink) = entity.get_mut::<AudioSink>() {
+        Some(f(&mut *sink))
+    } else if let Some(mut sink) = entity.get_mut::<SpatialAudioSink>() {
+        Some(f(&mut *sink))
+    } else if let Some(mut sink) = entity.get_mut::<silent::SilentSink>() {
+        Some(f(&mut *sink))
+    } else {
+        None
+    }
+}
+
+/// Runs `f` over a playing sound's sink, whichever kind it has.
 ///
 /// Answers [`status::NO_ENTITY`] for an entity that is gone and [`status::NOT_PRESENT`] before the
 /// sink exists, which is the frame the sound was started in.
 #[cfg(feature = "render")]
 fn with_sink(entity: u64, f: impl FnOnce(&mut dyn bevy::audio::AudioSinkPlayback) -> i32) -> i32 {
-    use bevy::audio::{AudioSink, SpatialAudioSink};
-
     with_world(|world| {
         let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
             return status::NO_ENTITY;
         };
 
-        if let Some(mut sink) = entity_mut.get_mut::<AudioSink>() {
-            f(&mut *sink)
-        } else if let Some(mut sink) = entity_mut.get_mut::<SpatialAudioSink>() {
-            f(&mut *sink)
-        } else {
-            status::NOT_PRESENT
-        }
+        sink_of(&mut entity_mut, f).unwrap_or(status::NOT_PRESENT)
     })
 }
 
@@ -505,31 +515,14 @@ pub extern "C" fn bcs_audio_seek(entity: u64, seconds: f32) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::audio::{AudioSink, AudioSinkPlayback, SpatialAudioSink};
-            use core::time::Duration;
-
             if !seconds.is_finite() || seconds < 0.0 {
                 return status::NULL_ARG;
             }
-            let position = Duration::from_secs_f32(seconds);
+            let position = core::time::Duration::from_secs_f32(seconds);
 
-            with_world(|world| {
-                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
-                    return status::NO_ENTITY;
-                };
-
-                let sought = if let Some(sink) = entity_ref.get::<AudioSink>() {
-                    sink.try_seek(position)
-                } else if let Some(sink) = entity_ref.get::<SpatialAudioSink>() {
-                    sink.try_seek(position)
-                } else {
-                    return status::NOT_PRESENT;
-                };
-
-                match sought {
-                    Ok(()) => status::OK,
-                    Err(_) => status::INVALID_STATE,
-                }
+            with_sink(entity, |sink| match sink.try_seek(position) {
+                Ok(()) => status::OK,
+                Err(_) => status::INVALID_STATE,
             })
         }
     })
@@ -573,6 +566,40 @@ pub extern "C" fn bcs_audio_global_volume(volume: f32) -> i32 {
                     sink.set_volume(Volume::Linear(own.0 * volume));
                 }
 
+                let mut unheard = world.query::<(&OwnVolume, &mut silent::SilentSink)>();
+                for (own, mut sink) in unheard.iter_mut(world) {
+                    sink.set_volume(Volume::Linear(own.0 * volume));
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
+/// Writes whether this run plays its sounds to no device, as a run with no window does unless its
+/// config asks otherwise. A build without audio has nothing to play to and answers so too.
+///
+/// # Safety
+/// `silent` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_audio_silent(silent: *mut i32) -> i32 {
+    crate::interop::guard(|| {
+        if silent.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            unsafe { *silent = 1 };
+            status::OK
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let none = world.contains_resource::<crate::audio::silent::SilentOutput>();
+                unsafe { *silent = none as i32 };
                 status::OK
             })
         }

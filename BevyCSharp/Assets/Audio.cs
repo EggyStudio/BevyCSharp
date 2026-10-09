@@ -13,8 +13,14 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Needs a render build. Sound is compiled into the same profile as the renderer because it is
-/// the profile that takes a system library, and a windowless run reports that rather than
+/// the profile that takes a system library, and a build without it reports that rather than
 /// pretending to play.
+/// </para>
+/// <para>
+/// A run with no window, headless or offscreen, plays every sound to no device unless
+/// <see cref="Config.AudioWithoutWindow"/> asks for one, and its sounds still run their course on
+/// the app's clock, so everything here answers as it would with a device. <see cref="IsSilent"/>
+/// says which a run does.
 /// </para>
 /// </remarks>
 /// <example>
@@ -174,9 +180,11 @@ public static unsafe class Audio
 
     /// <summary>Whether Bevy has attached the sink that plays a sound, which the calls that reach the sink need.</summary>
     /// <remarks>
-    /// A sound is given its sink the frame after it is started, once its clip has loaded, and never
-    /// where the machine has no device to play on, as a container often has not. A system that
-    /// controls a sound asks this first, as Bevy's own skip a query for a sink that is not there.
+    /// A sound is given its sink the frame after it is started, once its clip has loaded. A run
+    /// with a window on a machine with no device to play on, as a container often has not, gives
+    /// it none, and a run with no window gives it one that plays to no device
+    /// (<see cref="IsSilent"/>). A system that controls a sound asks this first, as Bevy's own skip
+    /// a query for a sink that is not there.
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is gone, or this build has no audio.</exception>
     public static bool HasStarted(Entity playing)
@@ -378,4 +386,24 @@ public static unsafe class Audio
     /// </exception>
     public static void SetGlobalVolume(float volume) =>
         Native.Check(Native.bcs_audio_global_volume(volume), "setting the global volume");
+
+    /// <summary>
+    /// Whether this run plays its sounds to no device, as a run with no window does unless
+    /// <see cref="Config.AudioWithoutWindow"/> asks otherwise. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A silent run still plays every sound through, on the app's clock, so everything else here
+    /// answers as it would with a device, and a sound ends when it would have been heard to end.
+    /// A build without audio has nothing to play to, and answers true.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">Called outside a system.</exception>
+    public static bool IsSilent
+    {
+        get
+        {
+            int silent;
+            Native.Check(Native.bcs_audio_silent(&silent), "asking whether sound reaches a device");
+            return silent != 0;
+        }
+    }
 }

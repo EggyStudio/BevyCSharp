@@ -92,4 +92,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to add the weather.</summary>
     public uint Weather;
+
+    /// <summary>Non-zero to play sound to the machine's device in a run with no window.</summary>
+    public uint AudioWithoutWindow;
 }

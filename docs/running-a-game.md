@@ -79,6 +79,12 @@ it to a PNG, and `HeadlessFps` and `HeadlessFrames` pace and bound the run, beca
 window has no window to close. The editor takes `--offscreen` as well, so the interface itself can
 be captured where there is no screen to draw it on.
 
+A run with no window, headless or offscreen, makes no sound, since it is a test, a soak, a capture
+or a tool and whoever sits beside the machine did not ask to hear it. Its sounds still run their
+course on the game's clock, so one played to despawn at its end goes on time and a game waiting on
+a sound works the same. `Config.AudioWithoutWindow` plays such a run to the machine's device
+instead, and `Audio.IsSilent` says which a run does.
+
 A game that opens a window draws offscreen instead when `BCS_OFFSCREEN` is set in its environment,
 as `BCS_SERVE` makes any app answer `bcs`, so a tool can run a game it did not write with nothing
 on the screen. The editor's Play sets it when the editor itself has no window, and
