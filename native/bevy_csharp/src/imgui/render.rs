@@ -394,11 +394,10 @@ fn draw(
         }
     };
 
-    if frame.calls.is_empty() {
-        announce("nothing to draw");
-        return;
-    }
-
+    // Queued the first frame the pass runs, whatever there is to draw, since the format is the
+    // view's and not the draw list's. Queued on the first frame with something to draw instead, it
+    // compiled while the window that asked for it waited, and a picture taken a few frames after
+    // the console opened could hold the frame before it.
     let target = view.into_inner();
     let format = target.main_texture_format();
 
@@ -406,6 +405,11 @@ fn draw(
         .0
         .entry(format)
         .or_insert_with(|| cache.queue_render_pipeline(descriptor(&pipeline, format)));
+
+    if frame.calls.is_empty() {
+        announce("nothing to draw");
+        return;
+    }
 
     let Some(built) = cache.get_render_pipeline(id) else {
         announce("the pipeline is not ready");

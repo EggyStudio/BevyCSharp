@@ -10,18 +10,41 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6363357`. The file watcher's panic at exit is settled: from the frame an exit is
-decided until the app is destroyed or another is made, `crash::ending` holds a flag the hook reads,
-and a panic outside the guard in that window is kept in `last()` and printed by the process's hook
-but not written as a crash, a native test holding such a panic to being kept and not written
-(`6363357`). Two remarks. A fault of Bevy's own in that window, a panic on a render thread as the
-app ends, is hidden from the crash file along with the watcher's, which is the price chosen, and it
-is read again at the upgrade, where the watcher's send on a closed channel may be mended upstream
-and the window could close. The reply gives no count of the suite for this commit, which each
-batch's reply does, so the next reply carries it. Today the owner decided the engine moves to Bevy
-0.20 (Decisions 17 to 20), item 4 after the deferred batch in flight, and the list is renumbered to
-eleven. The runs of `2443936` and `6363357` were read with it and are red, Verdicts 4 and 5, which
-come before item 3's commit.
+Reviewed up to `2ed99011`. Three commits, each its own. Verdict 4's mend (`22be0bc`):
+`prefer_desktop_title_bar` moves out of app.rs into `title_bar.rs`, code alone, app.rs at 781 lines,
+the three profiles checked and the norm's tests passed before the commit; right. Verdict 5's
+(`4571689`): `MemoryGuard.ResidentBytes` keeps its largest reading in a compare-and-swap loop,
+`PeakBytes` answers the largest of that, this reading and `PeakWorkingSet64`, the `memory` command's
+`process` and `peak` pairs read through the guard, and `MemoryGuardTests` holds the peak at or above
+a reading; right, with the limit said in its remarks, that without a cap the readings are the ones
+taken, which the soak and the cap do not meet. Both settle on the next run's page. Item 3
+(`2ed99011`), the deferred batch: a program's `Deferred` stage returns `bcs::deferred(surface,
+mesh)`, Bevy's packed surface written through a fourth prelude over `pbr_deferred_functions`, the
+material's method `Deferred` where the stage exists so a forward camera leaves it out as Bevy's own
+deferred materials are left out, the program's prepass vertex shader given to the deferred prepass
+under Bevy's label for it, `Role::Deferred` the ninth role (ABI 231), and
+`PrepassVertexOutput.instance_index` without `nointerpolation`, since Slang copied the mark onto a
+struct WGSL refuses it on; `DeferredMaterialTests` reads the buffer back, sees the lit color and a
+forward camera drawing nothing, and refuses a deferred stage without a prepass vertex shader; the
+`ssr` example is written, its water Bevy's shader in Slang through the stage, 293 written. Right,
+and the prelude is the fourth to be rewritten under WESL in the spike. The suite: 1,275 passed, 2
+skipped and 1 failed, `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt`, which
+the reply notes as a flake under load and leaves; it is not one, and Verdict 6 models it from the
+ImGui pass's code. With item 3 out, the list is renumbered to ten, Bevy 0.20 is item 3, and the
+coder is on its spike.
+
+Before them, the file watcher's panic at exit came to be settled: from the frame an exit is decided
+until the app is destroyed or another is made, `crash::ending` holds a flag the hook reads, and a
+panic outside the guard in that window is kept in `last()` and printed by the process's hook but not
+written as a crash, a native test holding such a panic to being kept and not written (`6363357`).
+Two remarks. A fault of Bevy's own in that window, a panic on a render thread as the app ends, is
+hidden from the crash file along with the watcher's, which is the price chosen, and it is read again
+at the upgrade, where the watcher's send on a closed channel may be mended upstream and the window
+could close. The reply gives no count of the suite for this commit, which each batch's reply does,
+so the next reply carries it. Today the owner decided the engine moves to Bevy 0.20 (Decisions 17 to
+20), item 4 after the deferred batch in flight, and the list is renumbered to eleven. The runs of
+`2443936` and `6363357` were read with it and are red, Verdicts 4 and 5, which come before item 3's
+commit.
 
 Before it, the feature test's zips came to be settled, `build/publish-feature-test.sh <version>` publishes the
 feature test from a package in build/package as native code for the machine it runs on, with the
@@ -44,27 +67,6 @@ and the zips. With item 3 out, the list is renumbered to nine, the SHARED.md ite
 coder goes on to the gaps, item 3, the file watcher's panic at exit first. The suite: 1,270 passed,
 2 skipped.
 
-Before them, bevy_weather came to be settled, 0.2.0, the release on Bevy 0.19.1, is in the bridge's
-render profile on the owner's word typed into the coder's session on 2026-10-07, its thunder through
-Bevy's audio, BUILDING.md's packages and the notices naming it; `Config.Weather` asks for
-`WeatherPlugin`, which the bridge keeps out where meshlets run, since its atmosphere would end the
-app there, leaving the camera's tonemapper and bloom to `SetPostProcessing` and keeping the exposure
-its sky is calibrated for, ABI 230; its resources and components reflect into wrappers from the
-schema dump, the presets, which do not, go through `Weather.SetPreset` over the crate's fifteen, and
-`Weather.Active` says whether it runs; four tests, off unless asked, the clock and a preset reaching
-it, a preset number refused, and kept out under meshlets; the feature test has it on by default with
-a Weather page, the day handing it the sun, the moon and its clock with the earth's tilt taken off
-so its sun rises at six, the drive script holding it partly cloudy at the lowest tier with the
-forecast off and writing the hub's frame time, every zone passing with a peak of 4.28 GB; over the
-hub at noon at 1280 by 720 it adds under a millisecond at Potato and Low, about 2 ms at Medium, 5 to
-9 at High and 10 to 13 at Ultra on the coder's GPU, in the comparison page with a `--timings`
-argument to measure it, and the sky guide has its section (`87798b7`). Before it,
-`build/docs-on-package.py` mapped the pattern `3DEngine` to the packed folder, a line kept from its
-port, so `BevyCSharp` came from nuget.org or the cache, and `Bevy.Reflected` was missing from the
-usings it gives every page, both mended, the guides' 195 blocks building on a fresh package
-(`1155200`), which the package workflow's run proves. The reply gives no count of the suite, which
-is asked for. With that item out, the list was renumbered.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -72,17 +74,17 @@ The norm has 44 rules, and this engine stands at 31 checked, 4 with places liste
 ## Now
 
 The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 6 to 11 are taken
+with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The runs of `2443936` and `6363357` are red. macOS fails
-   `MemoryCommandTests` on both, the memory command's peak being 0 there (Verdict 5), and all three
-   systems fail `NormTests.N_1_3` at `6363357`, app.rs at 810 lines (Verdict 4), so the two verdicts
-   come before item 3's commit, each a commit of its own. The page's repeated lines carry 116
-   warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to
-   a state no other app adds and registered in every app by the module initializer, which drowns
-   what else repeats (Decision 7); they are quieted in the batch that next touches the tests, the
-   test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
+1. **What the next page says.** The runs of `2443936` and `6363357` are red, macOS failing
+   `MemoryCommandTests` on both with the memory command's peak at 0 (Verdict 5) and all three
+   systems failing `NormTests.N_1_3` at `6363357` with app.rs at 810 lines (Verdict 4); both are
+   mended at `22be0bc` and `4571689` and settle on the next run's page. The page's repeated lines
+   carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors
+   scoped to a state no other app adds and registered in every app by the module initializer, which
+   drowns what else repeats (Decision 7); they are quieted in the batch that next touches the tests,
+   the test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
    (Decision 8), and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
    reviewing session, and a failure it names comes first here.
 
@@ -93,12 +95,7 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today, so the list stays as it is.
 
-3. **The deferred batch in flight is finished on 0.19 and committed.** The deferred buffers reached
-   from Slang through the bridge's WGSL glue, with the example it unlocks, as the gaps item had it,
-   committed before anything of item 4 is touched, since the upgrade changes every line of that glue
-   and a half-done batch would be ported twice. Its reply gives the suite's count.
-
-4. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
+3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
    unchanged, a minimum Rust of 1.97.1 that this machine, the portable image and the runners meet,
@@ -178,7 +175,7 @@ from [SHARED.md](SHARED.md).
    `bevy/debug` offers and the headless profile has, and what it finds is mended or listed. The
    crash file's logic of `6363357` is read against 0.20, where a panic in a system becomes an error
    for `FallbackErrorHandler`, which re-panics by default, so the hook fires twice; a Rust panic
-   reported to the managed side as C# exceptions are is noted for item 6 and not taken here.
+   reported to the managed side as C# exceptions are is noted for item 5 and not taken here.
 
    **Documents and the table.** `docs/compared-with-bevy.md` and `docs/how-it-works.md` name 0.19,
    PLAY.md names the two crates' 0.19 releases at lines 132 and 180, BUILDING.md's bridge package
@@ -196,7 +193,7 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-5. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
+4. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
    written in its batch: a decal's tag and a volume's voxels through the WESL glue,
    `deferred_raymarch` on the deferred buffers, the widgets' events as observers with
    `headless_tabs` and `draggable_slider`, keys observed as they reach a field, `sprite_material`
@@ -220,24 +217,24 @@ from [SHARED.md](SHARED.md).
    comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
    memory after the kill of 2026-10-08.
 
-6. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
    a system, an observer or a loader's callback.
-7. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
    workflow, as the first game's first step would have a newcomer do.
-8. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
    from since the system's last run, beside the added and changed ones a behavior reads.
-9. **Every example compiles on the package alone**, from 3DEngine's
+8. **Every example compiles on the package alone**, from 3DEngine's
    `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
    project, so what they share to say a thing in one word becomes the package's own calls or stays
    in the example, and the workflow builds every example on the packed package.
-10. **A script that more than one system runs is read for the forms only GNU's tools or a later
-    bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
-    and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
-11. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+9. **A script that more than one system runs is read for the forms only GNU's tools or a later
+   bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
+   and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
+10. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
     generators report, so an editor offers the mend.
 
@@ -287,6 +284,25 @@ from [SHARED.md](SHARED.md).
    guard has read since the app began, the same reading on every system and the one the soak and the
    memory cap use, with `PeakWorkingSet64` taken where it says more; the test keeps its assertion.
    Settled when a macOS run passes the test.
+
+6. **The suite of `2ed99011` fails
+   `ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt` once, the top of the
+   picture unchanged with the console open, and the reply leaves it as a flake under load.** Modeled
+   from the code, and not a flake. The ImGui pass (`imgui/render.rs`) returns before anything else
+   while `frame.calls` is empty, so its pipeline is queued with `queue_render_pipeline` in the first
+   frame that has something to draw, the frame the console opens, and Bevy's cache compiles it on a
+   task in wall time while the pass answers `the pipeline is not ready` and draws nothing; the test
+   waits three frames after `IsOpen` and captures, frames of an offscreen run that take what they
+   take, so under the suite's load the compile outlasts the wait and the capture holds the frame
+   before the console. Alone, the compile fits in three frames, which is why it passed three times
+   after. Two things. The pass queues its pipeline the first frame it runs, before the empty check,
+   since the format is the view's and not the draw list's, so the fifteen frames the test waits
+   before its first picture compile it, and every pass of the bridge that queues on its first draw
+   is read for the same. And a picture test that waits in frames on work done in wall time, a
+   compile or an upload, waits on the thing itself where the engine can say it, as the feature test
+   waits on `shader.list`; the wait in frames stays only where nothing can be asked. No retry and no
+   longer wait. Settled when the pass queues at its first frame and the suite passes whole once more
+   under load.
 
 ## Decisions
 
@@ -390,34 +406,13 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Verdict 4, app.rs under 800 lines.** `prefer_desktop_title_bar` moved out of
-`native/bevy_csharp/src/app.rs` into a module of its own, `title_bar.rs`, in a commit that moves
-code alone, and app.rs holds 781 lines. The three profiles were checked with warnings denied and the
-norm's tests passed before the commit. The suite, run once over this batch, Verdict 5's and item
-3's together, passed 1,275, skipped 2 and failed 1. The one was
-`ImGuiConsoleTests.TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt`, which found the top of the
-picture unchanged with the console open and passed alone three times after. None of the three
-batches touches it, so it is noted as a flake under the suite's load and not traced.
-
-**Verdict 5, the peak on macOS.** The `memory` command's peak is `MemoryGuard.PeakBytes()`, the
-largest resident size `MemoryGuard.ResidentBytes()` has read since the app began, with
-`Process.PeakWorkingSet64` taken where it says more. Every reading of the resident size is kept
-toward it, the guard's watch reading four times a second under a cap as the soak and the tools run,
-and the command's own reading among them where no cap is set. `MemoryCommandTests` keeps its
-assertion, and `MemoryGuardTests` gains one holding the peak at or above a reading taken before it. The
-norm's tests passed before the commit, and the suite's count is the one given under Verdict 4,
-1,275 passed and 2 skipped with the one flake named there.
-
-**Item 3, the deferred batch.** A shader program takes a deferred stage,
-`ShaderProgramSettings.Deferred` (ABI 231), which returns `bcs::deferred(surface, mesh)` and writes
-the surface into Bevy's deferred buffers through WGSL the bridge puts in front of it over Bevy's
-`pbr_deferred_functions`, so Bevy's deferred lighting pass lights it with the rest. As Bevy's own
-deferred materials are, it is drawn by a camera that draws deferred and by no other, since Bevy's
-main pass leaves out a material whose method is deferred, which `DeferredMaterialTests` holds with
-the G-buffer read back, the lit color, and a forward camera drawing nothing. It needs a prepass
-vertex shader of the program's own, which the deferred prepass is given under Bevy's label for it,
-and it stands for the fragment shader where a material is prepared. `PrepassVertexOutput` lost
-`nointerpolation` on its instance index, which naga refused once a deferred stage read the struct.
-The `ssr` example is written, its water Bevy's shader in Slang, its models and range buttons
-carrying behaviors, and its capture shows the ripples reflecting the cube and the sky. The suite's
-count is the one given under Verdict 4.
+**Verdict 6, the ImGui pass.** The pass queues its pipeline the first frame it runs, before it
+asks whether there is anything to draw, since the format is the view's, so the frames before the
+console opens compile it. The bridge's other passes were read for the same. The pass of a program
+(`passes.rs`), a dispatch (`compute.rs`) and a camera's draws and dispatches (`views.rs`) queue on
+the first use of a program, keyed by its generation and the formats the use brings, so nothing
+earlier knows what to queue; the rounded corners queue on the first frame a view has them, the
+component coming with the request; and the watch's pipelines are queued at startup. None waits on
+something besides what it is asked to draw, so the ImGui pass was the one. The console test keeps
+its frame waits, since nothing can be asked about the pass's pipeline today. The norm's tests passed
+before the commit, and the suite passed 1,276 and skipped 2, the console test among the passed.
