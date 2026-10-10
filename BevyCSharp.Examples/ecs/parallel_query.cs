@@ -10,8 +10,15 @@ namespace BevyCSharp.Examples.Ecs;
 // enough of them.
 internal static class ParallelQueryExample
 {
+    // The window's size, read once a frame before the logos move, as Bevy's system reads its
+    // window once, since a method run for each logo may run on a thread the world is not lent to.
+    // Read by a system of the example's own rather than a static method of the behavior, which
+    // would run in every example and fail in one with no window.
+    internal static (uint Width, uint Height) WindowSize;
+
     public static void Build(App app)
     {
+        app.On(Stage.PreUpdate, _ => WindowSize = Window.Size(), "parallel_query.MeasureWindow");
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
@@ -48,20 +55,12 @@ public partial struct Drift
     /// <summary>Pixels a frame up.</summary>
     public float Y;
 
-    // The window's size, read once a frame before the logos move, as Bevy's system reads its
-    // window once, since a method run for each logo may run on a thread the world is not lent to.
-    private static (uint Width, uint Height) _window;
-
-    /// <summary>Reads the window's size for the logos to bounce off.</summary>
-    [OnPreUpdate]
-    public static void MeasureWindow(BehaviorContext ctx) => _window = Window.Size();
-
     [OnUpdate]
     public void Move(BehaviorContext ctx, ref Transform transform)
     {
         transform.Translation += new Vec3(X, Y, 0f);
 
-        var (width, height) = _window;
+        var (width, height) = ParallelQueryExample.WindowSize;
         var (x, y) = (transform.Translation.X, transform.Translation.Y);
         if (!(-width / 2f < x && x < width / 2f && -height / 2f < y && y < height / 2f)) (X, Y) = (-X, -Y);
     }

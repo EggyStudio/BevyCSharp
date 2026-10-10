@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5d955562`. One commit, item 8: every example builds on the package alone, the script
+Reviewed up to `d328fdc3`. Two commits, items 9 and 10, the last of the list that wait on no word.
+Item 9 at `8f02d976`: N 6.6's test reads every shell script of the checkout, 26 and the `bcs`
+launcher, not only what the Windows and macOS jobs run, still holding the jobs' scripts to be among
+them and the launcher and Courtyard's play script to be found, with the build's outputs and copies
+left out; three bash-4 forms join the seven, `declare -A` and its kin, `|&` and `&>>`, each with a
+found and a not-found case, and none is found in any script, the `sed -i` of the templates' pack
+script already gone at `c67c7981`; 22 of 22. Item 10 at `d328fdc3`: `BevyCSharp.CodeFixes`, a
+netstandard2.0 project on the generator's compiler version, ported from 3DEngine's, fixes the five
+diagnostics with one clear mend, a behavior made partial, a stage method given its context first and
+up to two components kept, one stage kept of several, a command made static or internal, and names
+in its remarks the seven that have none, what was meant being the program's to say; it is built
+before the package through a project reference that references no assembly and packed into the
+analyzers' slot beside the generator, which N 6.4 expects and a fresh pack holds, every example
+building on it with no warning; N 2.8 reads its project, AGENTS.md has its row, the solution and the
+behaviors guide name it, and six tests apply each fix through a workspace as an editor does and hold
+the generator to reporting nothing after; 90 of 90. Right, the fixes held to the mends that are
+clear and the rest named, the scripts' test widened to the checkout rather than the jobs' list.
+`NormTests.cs` stands at 794. With the list's last free items done, what comes after the comparison
+commit is the examples written in part that want no crate and the groups not yet at B 4, 144 of 160
+(Decision 5), and the gaps wait on the owner's words.
+
+Before it, one commit came to be read, item 8: every example builds on the package alone, the script
 removing the catalog, the program, the examples' record and the capture's input from its copy and
 building a library, so an example reaching into the runner fails there; the nine capture drivers
 leave their examples for one `Drives.cs` with a sentence each of what it presses, the stress tests'
@@ -25,24 +46,6 @@ out of the copy so the check cannot be fooled, and the two helpers' standing sai
 words. The five test classes touched pass, 61 of 61, the whole suite waiting for the comparison
 commit so it does not run against the lavapipe pass for the CPU. Item 9 next, the scripts read for
 GNU-only forms wherever they run.
-
-Before it, one commit came to be read, after the home disk filled: at 21:05 it held 19 GB of 1.9 TB,
-this repository's build trees holding the room, `native/target` 213 GB of five profile and feature
-combinations over two Bevy versions, `build/target` 26 GB of stale and cross-compiled folders, and
-the bare Bevy comparison harness's 58 GB outside the repository, and a capture of the retake was
-lost to it at 20:20. Some 171 GB came back, every byte of it rebuildable, and the staged libraries,
-the portable build's cache, the artifacts, the package and the examples' binaries the lavapipe pass
-runs from were kept; the disk reads 190 GB free. The bounds: `build/trim-caches.sh`, run by
-`build-native.sh` before every native build and by hand after a long run of `cargo check` and `cargo
-test`, holds `native/target` to 80 GB and `build/target-portable` to 50, a cache past its bound
-losing its incremental state first and the whole of it only when that is not enough, and
-`build/target` to 2 GB with its staged libraries kept whatever the size, in `du -sk` and `find -exec
-rm {} +` that GNU's and BSD's tools both read; BUILDING.md's new section carries the table. Right,
-the bound held where the growth comes from and the cheapest state let go first; the lesson is a row
-of SHARED.md, since it was the machine's disk and not this repository's alone. Item 8 goes on as
-set: the drivers to one file, the warn and the cube scene written in, the opened size from
-`Window.Size()`, which answers offscreen, read once a frame in `PreUpdate` where a method may run
-off the main thread, and `FreeCamera` and `RadioButtons` on the script's list with their decisions.
 
 Before it, two commits came to be read, item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
 `RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
@@ -102,8 +105,9 @@ from [SHARED.md](SHARED.md).
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
-   at `60141490`. The runs of `c39dd61d`, `e09a2ed8` and `90075005` are green on all three. Each
-   push's run is read by the reviewing session, and a failure it names comes first here.
+   at `60141490`. The runs of `c39dd61d`, `e09a2ed8`, `90075005` and `d328fdc3` are green on all
+   three, `5d955562`'s cancelled by the push after it. Each push's run is read by the reviewing
+   session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -297,12 +301,15 @@ from [SHARED.md](SHARED.md).
    owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
    second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
    list only getting shorter. Done at `5d955562`, the two helpers listed.
-9. **A script that more than one system runs is read for the forms only GNU's tools or a later
-   bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
-   and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.
+9. **A script that more than one system runs is read for the forms only GNU's tools or a later bash
+   read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows and a
+   developer run on Linux, macOS and Windows' Git bash, where one line was found there. Done at
+   `8f02d976`, every script of the checkout read for ten forms, none found.
 10. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
     `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
-    generators report, so an editor offers the mend.
+    generators report, so an editor offers the mend. Done at `d328fdc3`, `BevyCSharp.CodeFixes`
+    fixing the five diagnostics with one clear mend and naming the seven without, packed beside the
+    generator.
 
 ## Verdicts
 
