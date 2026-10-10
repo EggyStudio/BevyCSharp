@@ -31,6 +31,12 @@ namespace Bevy;
 /// drawing then, and a GPU driver torn down under them by the handlers of an ordinary exit crashed
 /// the process, whose core dump held the memory for as long again as it took to write.
 /// </para>
+/// <para>
+/// A test host stopped this way reads to <c>dotnet test</c> as one that crashed, and its tally of
+/// the tests that ran before still says they passed, so <c>build/test.py</c>, which <c>bcs test</c>
+/// and CI run the suite through, says a host whose output holds this line was stopped at its cap,
+/// runs the suite again in parts and counts every listed test without a result.
+/// </para>
 /// </remarks>
 public static partial class MemoryGuard
 {
@@ -167,6 +173,10 @@ public static partial class MemoryGuard
         {
             // Said on the console already, and a tool driving the app reads the console.
         }
+
+        // Said again, last, since Bevy's threads go on writing to the console while the crash file
+        // is written, and build/test.py reads the end of a lost host's output for why it went.
+        Console.Error.WriteLine(said);
 
         try
         {

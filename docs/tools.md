@@ -212,8 +212,9 @@ not, with a stable token in `errors[0].code` and an exit code that separates *it
 ```
 
 `bcs` also wraps the cold paths, in the order this repository needs them: `bcs build` builds the
-bridge and then the managed side, `bcs test` runs the suite and exits 8 when tests fail and 6 when
-the run never reached a verdict, and `bcs doctor` answers why nothing is starting. `bcs help` lists
+bridge and then the managed side, `bcs test` runs the suite through `build/test.py`, as CI does,
+and exits 8 when tests fail and 6 when the run never reached a verdict, a test host lost to a crash
+or to its memory cap among them, and `bcs doctor` answers why nothing is starting. `bcs help` lists
 the rest.
 
 Nothing about this is privileged. The plugin ships in the library and is off unless asked for, so a

@@ -1,10 +1,10 @@
-using System.Text.RegularExpressions;
+using System.Text.Json;
 using Bevy;
 
 namespace BevyCSharp.Cli;
 
 /// <summary>The cold verbs: building, testing, a one-shot run, and why nothing works.</summary>
-internal static partial class Tools
+internal static class Tools
 {
     /// <summary>
     /// Builds the bridge and then the managed side, in that order.
@@ -125,12 +125,22 @@ internal static partial class Tools
     }
 
     /// <summary>
-    /// Runs the tests, and says which kind of failure it was.
+    /// Runs the tests through <c>build/test.py</c>, and says which kind of failure it was.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// Through the script CI runs, so a run here is counted as CI's is. A host that is lost, to a
+    /// crash, a hang or the memory cap MemoryGuard holds it to, still prints a tally of the tests
+    /// that ran before it went, which <c>dotnet test</c> alone shows as a pass. The script says
+    /// such a host was lost, runs the suite again in parts, and counts every listed test without a
+    /// result.
+    /// </para>
+    /// <para>
     /// A run that finished and reported failures exits 8. A run that never reached a verdict (a
-    /// compile error, a missing bridge, a crash) keeps 6. Only the second is ever worth retrying,
-    /// and a caller can only tell them apart if they are different numbers.
+    /// compile error, a missing bridge, a host lost before every test had a result) keeps 6. Only
+    /// the second is ever worth retrying, and a caller can only tell them apart if they are
+    /// different numbers.
+    /// </para>
     /// </remarks>
     public static int Test(Options options, string[] arguments)
     {
@@ -140,10 +150,7 @@ internal static partial class Tools
                 options, "test", "NO_CHECKOUT", "This is not inside a BevyCSharp checkout.");
         }
 
-        var line = new List<string>
-        {
-            "test", "BevyCSharp.Tests/BevyCSharp.Tests.csproj", "--nologo",
-        };
+        var line = new List<string> { Path.Combine("build", "test.py"), "suite" };
 
         for (var index = 0; index < arguments.Length; index++)
         {
@@ -158,42 +165,57 @@ internal static partial class Tools
         // shaders were wrong.
         FetchSlang(!options.Json && !options.Quiet);
 
-        var ran = Shell.Run("dotnet", line, Repo.Root, echo: !options.Json && !options.Quiet);
-        var counted = Counts().Match(ran.Output);
+        var python = OperatingSystem.IsWindows() ? "python" : "python3";
+        var ran = Shell.Run(python, line, Repo.Root, echo: !options.Json && !options.Quiet);
 
-        // A crashed host still prints a tally, for the tests that ran before it went down. Trusting
-        // it would report a green run that never covered most of the suite, which is the one
-        // failure mode a test command must not have.
-        if (Aborted().IsMatch(ran.Output))
+        var page = Path.Combine(Repo.Root, "BevyCSharp.Tests", "TestResults", "digest.json");
+        JsonElement digest;
+
+        try
+        {
+            using var read = JsonDocument.Parse(File.ReadAllText(page));
+            digest = read.RootElement.Clone();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException
+                                          or JsonException)
         {
             return Output.Print(options, Failure(
                 "test",
                 "TEST_RUN_ERROR",
-                "The test host crashed, so the run never covered the whole suite. Any tally it "
-                + "printed is of the tests that ran before it went down. Note that a windowed "
-                + "session serving at the same time can do this: 'bcs stop' first.",
+                $"build/test.py wrote no page of the run, so it never reached a verdict. Is {python} "
+                + "on the PATH?",
                 ran));
         }
 
-        if (!counted.Success)
-        {
-            return Output.Print(options, Failure(
-                "test",
-                ran.Ok ? "NO_VERDICT" : "TEST_RUN_ERROR",
-                "The test run did not report a result. That is an infrastructure failure rather "
-                + "than a failing test, such as a compile error or a bridge that will not load.",
-                ran));
-        }
+        var failed = digest.GetProperty("failed").GetInt32();
+        var passed = digest.GetProperty("passed").GetInt32();
+        var skipped = digest.GetProperty("skipped").GetInt32();
+        var unrun = digest.GetProperty("no_result").GetInt32();
+        var lost = digest.GetProperty("processes").EnumerateArray()
+            .Where(process => process.GetProperty("lost").ValueKind == JsonValueKind.String)
+            .Select(process => process.GetProperty("summary").GetString())
+            .ToList();
 
-        var failed = int.Parse(counted.Groups["failed"].Value);
-        var passed = int.Parse(counted.Groups["passed"].Value);
-        var skipped = int.Parse(counted.Groups["skipped"].Value);
-
-        void Tally(System.Text.Json.Utf8JsonWriter writer)
+        void Tally(Utf8JsonWriter writer)
         {
             writer.WriteNumber("passed", passed);
             writer.WriteNumber("failed", failed);
             writer.WriteNumber("skipped", skipped);
+            writer.WriteNumber("withoutResult", unrun);
+        }
+
+        // A host that went before every test had a result covered less than the suite, whatever
+        // its tally says, so the run has no verdict even where every test that ran passed.
+        if (lost.Count > 0 || unrun > 0)
+        {
+            return Output.Print(options, Failure(
+                "test",
+                "TEST_RUN_ERROR",
+                (lost.Count > 0 ? $"Lost: {string.Join("; ", lost)}. " : "")
+                + $"{unrun} listed tests have no result, so the run never covered the whole suite. "
+                + "The page is BevyCSharp.Tests/TestResults/digest.md. A windowed session serving "
+                + "at the same time can do this: 'bcs stop' first.",
+                ran));
         }
 
         if (failed == 0 && ran.Ok)
@@ -362,13 +384,4 @@ internal static partial class Tools
                 writer.WriteString("tail", ran.Tail(30));
             },
             errors: [new CliError(code, message)]);
-
-    /// <summary>How a run says it never finished.</summary>
-    [GeneratedRegex(@"Test Run Aborted|Test host process crashed|The active test run was aborted")]
-    private static partial Regex Aborted();
-
-    /// <summary>What a finished test run says about itself.</summary>
-    [GeneratedRegex(
-        @"Failed:\s*(?<failed>\d+),\s*Passed:\s*(?<passed>\d+),\s*Skipped:\s*(?<skipped>\d+)")]
-    private static partial Regex Counts();
 }

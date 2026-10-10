@@ -10,10 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c7f1cbc6`. Decision 23 is carried out, by another road than the item named: Bevy
-0.20 keeps `AudioOutput` private to its crate, so no output with no device can be handed to it, and
-a run with no window adds a plugin of the bridge's own in place of Bevy's (`audio/silent.rs`), which
-registers the same assets and settings, opens nothing, and gives each sound a sink carrying Bevy's
+Reviewed up to `a5eed5d3`. Ten commits. The eight tests are traced and no row was missing
+(`4acec927`): `MemoryGuard` stopped the test host at 3.76 GB against a cap of 3.75, a quarter of the
+15 GB .NET reads under a 20 GB scope, and `dotnet test` printed its Passed line for what had run, so
+a cut run passed for a whole one; the host grew because each app drawing offscreen left some ten
+megabytes it had freed in glibc's arenas, an arena a thread and the GPU's driver starting threads
+for every app, thirty apps growing it 317 MB and 1 MB with one arena, the silent plugin holding
+nothing since Bevy's own plugin with no device grows the same; `suite.runsettings` starts the host
+with `MALLOC_ARENA_MAX=2`, which must be in the environment before the runtime makes its arenas, and
+thirty apps grow 18 MB. Right, a trace that went to the cause, and the model offered was wrong, the
+loaders' rows being fixed lists. The reading of how a run is counted is kept here: a whole run is
+the listing and eleven, the two arc theories listed once for seven rows and six. The rest: Verdict
+6's test touches its quarter gigabyte from `NativeMemory.Alloc` and holds three quarters of the
+growth (`6715339c`), settling on the next run; the vendored weather's manifest spells `missing_docs`
+(`95b280fb`); the silent plugin's systems run after transforms are propagated, where Bevy plays its
+own, so `audio::checked` refuses a file no decoder reads before a decoder is built from it and
+panics, with a test (`c84f33ea`), a fault the plugin had and the suite found; and the six files item
+2 listed are mended in six commits that move code alone, largest first, `views.rs` into four,
+`post.rs` into three, `compute.rs`, `window.rs`, `slang.rs` and `ecs.rs` into one or two beside
+them, each off N 1.3's list as it went, the list at five, every file under 800, the paths kept by
+re-exports, the bridge's tests at 118 and 67. The suite over all ten: 1,280 passed, 2 skipped and 1
+failed of 1,283, `SpawnedWindowTests` reading a spawned window's picture back black once and passing
+three times alone, which the reply watches for; it is traced instead, before step f, since f
+compares captures and a black one is what it would compare, the capture racing the spawned window's
+first presented frame the first thing to read. A cut run passing for a whole one is Verdict 7. Steps
+f, g and h remain.
+
+Before it, Decision 23 came to be carried out, by another road than the item named: Bevy 0.20 keeps
+`AudioOutput` private to its crate, so no output with no device can be handed to it, and a run with
+no window adds a plugin of the bridge's own in place of Bevy's (`audio/silent.rs`), which registers
+the same assets and settings, opens nothing, and gives each sound a sink carrying Bevy's
 `AudioSinkPlayback` that decodes the clip with the window and the loop Bevy would give it and draws
 from it on the app's real clock, so a pause, a speed, a seek, a loop's refused seek and a despawn at
 the end behave as on a device and a game waiting on a sound's end works; `Config.AudioWithoutWindow`
@@ -62,19 +88,6 @@ what a game's author sees, and the pack run for 0.4. The coder takes Decision 23
 listed files in move-only commits, then those steps. The norm's Annex B names the followed engine as
 Bevy 0.20.0 from this pass.
 
-Before it, Decision 21 came to be carried out, prose alone: the five places name no one, the
-version's commit a setting made by hand, the test script run on a contributor's machine, the scene
-pack's file the one that is published, the audio check's crate one that would add to N 2.8's list,
-and BUILDING.md's dependency decided apart from the work that would use it; `N_4_7` reads every
-Markdown file but the sessions' five, the comments of every C#, Rust, Slang and WGSL file and the
-whole of every script, manifest and workflow, for the owner named within a sentence of a decision
-word or a reviewing or working session named at all, a thing's owner followed by what it owns left
-alone, the vendored weather and Bevy's assets left out as N 4.1 leaves them, and it finds nothing
-else today. Right, and the matcher is the rule's text made exact. The norm's tests passed with the
-bump set aside, 29 with the script's, and the tree holds the bump in progress, headless compiling on
-0.20 and the render profile half done, whose reply gives the whole suite's count. The owner's order
-is in both repositories, 3DEngine's seven places next on its side.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -87,18 +100,23 @@ from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The bump's run, `340639b1`, is green on Linux and Windows, 1,038
    passing on Linux, and red on macOS by one test, `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`,
-   which `c7f1cbc6`'s run fails on Windows as well (Verdict 6); N 1.3 and the memory command's peak
-   pass on every system since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table
-   check that failed Linux at `e4c122e3` passed at the bump. The page's repeated lines carry 116
+   which `c7f1cbc6`'s run fails on Windows as well (Verdict 6, mended in `6715339c` and settled by
+   the run of the push that carries it); N 1.3 and the memory command's peak pass on every system
+   since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table check that failed
+   Linux at `e4c122e3` passed at the bump. Verdict 7 is open, a test host the guard stops passing
+   for a whole run under `dotnet test` alone. Before item 3's step f, `SpawnedWindowTests` is
+   traced: in the run over `a5eed5d3`'s ten commits it read a spawned window's picture back black
+   once and passed three times alone, and step f compares captures, so a black one is what it would
+   compare; the capture racing the spawned window's first presented frame is the first thing to
+   read, and the reply gives a model and the trace that confirmed it, since a test that fails once
+   in four runs is a fault with a cause and not a flake. The page's repeated lines carry 116
    warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to
    a state no other app adds and registered in every app by the module initializer, which drowns
    what else repeats (Decision 7); they are quieted in the batch that next touches the tests, the
-   test's behaviors registered only where their state is. Windows' page also carries cargo's warning
-   twice, `lints.rust.missing-docs` in the vendored weather's manifest being the old spelling, one
-   word to mend in `native/bevy_weather/Cargo.toml` with the next commit there. Package 0.4 is
-   packed on Bevy 0.20 (Decision 8) once Verdict 6 and item 3's remaining steps are in, and Verdicts
-   2 and 3 settle on that pack run's page. Each push's run is read by the reviewing session, and a
-   failure it names comes first here.
+   test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
+   (Decision 8) once Verdict 6's run is green, Verdict 7 is settled and item 3's remaining steps are
+   in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
+   session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -294,6 +312,18 @@ from [SHARED.md](SHARED.md).
    unused before the array, read from `GC.GetGCMemoryInfo`. And no looser bound on the heap's array
    alone, which would pass by what ran before. Settled when the test passes on all three systems.
 
+7. **A test host the memory guard stopped passed for a whole run.** Read from the reply of
+   `4acec927`: the guard's stop ends the host through `Environment.Exit`, `dotnet test` printed its
+   Passed line for the tests that had run, and the suite's count fell by eight with nobody told,
+   which three replies carried before the trace. CI reads a run through `build/test.py`, whose page
+   counts the tests without a result against the listing and says a process lost to its memory
+   limit, which is why the bump's pages were whole; a run on the coder's machine through `dotnet
+   test` alone is not. Two things. The guard's stop in a test host is a failure that cannot read as
+   a pass: the host exits with a code vstest reports as a crashed host, the cap's line last in its
+   output, and the page says it as a loss to the cap. And `./bcs test` runs the suite through
+   `build/test.py`, so a local count is held to the listing as CI's is, and a reply's count is the
+   page's. Settled when a suite stopped by the guard says so in both places.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -417,39 +447,23 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**The eight tests were cut off by the memory cap, and no row was missing.** MemoryGuard stopped the
-test host, which held 3.76 GB against a cap of 3.75 GB, a quarter of the 15 GB .NET reads under the
-20 GB scope these runs are held in, and `dotnet test` still printed its Passed line for what had
-run, so the run was taken for whole. Every theory's rows are fixed lists, the loaders' among them,
-and a whole run is the listing and eleven, since the two arc theories are listed once each for seven
-rows and six. That is 1,278 at `601c6264`, 1,279 at the bump and 1,282 at `c7f1cbc6`, so the bump's
-runs were whole and `c7f1cbc6`'s stopped eight short. The host grew because each app drawing
-offscreen left about ten megabytes it had freed in glibc's arenas, an arena a thread, with the GPU's
-driver starting threads for every app. Thirty such apps grew the host 317 MB, and 1 MB with the
-allocator held to one arena. With Bevy's own audio plugin and no device found, as on a machine
-without one, the same thirty grew it 293 MB, so the silent plugin holds nothing. An app that opens a
-sound device leaves almost none behind, for a reason I have not traced, so the suite stayed under
-its cap while every app opened a device and stopped short once a run with no window opened none. The
-test project names `suite.runsettings`, which starts the host with `MALLOC_ARENA_MAX=2`. The
-variable is read as a process starts, and set from the suite's own initializer it changed nothing,
-since the runtime has made its arenas by then. Thirty apps then grow 18 MB, and the whole suite, run
-over this batch and those after it, ran to its end under the same cap, its host's scope peaking at 2
-GB where the host alone had reached 4.8, and passed 1,280, skipped 2 and failed 1 of 1,283. The
-failure is `SpawnedWindowTests` reading a spawned window's picture back black, which passed three
-times out of three alone and is watched for.
+**Verdict 7 is in.** `./bcs test` runs the suite through `build/test.py suite`, with any `--filter`
+passed on, and reads its counts from the page's `digest.json`, so a host lost before every listed
+test had a result is TEST_RUN_ERROR, exit 6, whatever its tally said, and a reply's count is the
+page's. `build/test.py` says a lost host whose output holds MemoryGuard's line beside vstest's abort
+was stopped at its memory cap, a loss of its own on the page, runs the suite again in parts as for
+any loss, and takes a `--filter` that holds the listing and every part to it. MemoryGuard says its
+line again last, after the crash file, so it ends the host's output whatever Bevy's threads wrote
+meanwhile. A run with a cap of 0.15 GB showed both places. `./bcs test` exited 6 naming the suite
+and its part as stopped at the cap with 17 listed tests without a result, and the cap's line was the
+last of each lost entry's lines on the page. Under `dotnet test` alone the host still reads as
+crashed with a tally that says Passed, which vstest prints and nothing in the host can change, and
+vstest's reason keeps the start of the host's error output, which Bevy's lines fill in a long run,
+so the cap's line shows there only in a short one. BUILDING.md says so beside the script. The page
+also counted two cases of a theory whose names are cut to the same as one, so it read 1,282 where
+vstest ran 1,284, and each is counted now, with a test. The whole suite through `./bcs test` ran all
+1,284, passed every one but the 2 skipped, left none without a result and held 1.3 GB at most.
 
-**Verdict 6, the weather's lint, the silent plugin's order and item 2 are in.**
-`TheMemoryHeldIsReadAsItGrows` touches a quarter of a gigabyte from `NativeMemory.Alloc`, a byte a
-page, freed after, and holds the growth read to three quarters of it, since the rest of the process
-may give pages back while it runs. The vendored weather's manifest names `missing_docs`. The silent
-plugin's systems had no order against `audio::checked`, which refuses a file no decoder reads before
-transforms are propagated, so a decoder could be built from such a file first, and building one
-panics. They run after the propagation, where Bevy plays its own, and a test plays such a file in a
-run with no window and finds it refused. The six files item 2 listed are mended in commits that move
-code alone, largest first, each coming off N 1.3's list as it goes: `views.rs` into four files
-beside it, a camera's inputs, images, dispatches and draws, `post.rs` into three, its cubemap
-lighting, its lighting and its lens effects, `compute.rs`'s images into one, `window.rs`'s monitors
-and see-through compositing into two, `slang.rs`'s cache with its tests into one, and `ecs.rs`'s
-hierarchy and introspection into two. Every file is under 800 lines, each moved item keeps its path
-through a re-export, the bridge's tests pass at 118 and 67 as before, and every profile compiles
-with warnings denied. The suite's count is the one in the reply above, from a run over all of them.
+Shared: `build/test.py` saying a host its memory guard stopped as stopped at its cap, its `--filter`
+held over the listing and every part, and its count of theory cases cut to one name are 3DEngine's
+to take, its script being the same one, where its guard and its theories do the same.

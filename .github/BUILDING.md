@@ -23,9 +23,13 @@ tests of the bridge, `renderer`, the same with the renderer's crates, and `suite
 suite. Naming parts runs those alone, as `build/test.py suite` does. The log ends with a page of at
 most 200 lines, the counts and a line for each part, any process lost, and the failures by cause,
 which is also written to `BevyCSharp.Tests/TestResults/digest.md`. A suite that is lost, by a crash,
-a hang, its time or its memory, runs again in parts, so one crash costs only its own part's tests.
-`dotnet test` and `cargo test` still run as they always did. A test during which the engine logs an
-error fails unless it says it expects that error with `[ExpectsError]`.
+a hang, its time, its memory or the cap MemoryGuard holds the test host to, runs again in parts, so
+one crash costs only its own part's tests, and every listed test without a result is counted.
+`--filter` holds the suite and its parts to a filter, as `dotnet test` takes one. `./bcs test` runs
+the suite this way, so a count there is the page's. `dotnet test` and `cargo test` still run as they
+always did, and a host the cap stopped prints a tally of the tests that ran before it as though they
+were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during
+which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
 
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.

@@ -132,6 +132,7 @@ public sealed class TestScriptTests : IDisposable
     [InlineData("hang", "ended at its time limit")]
     [InlineData("grow", "ended at its memory limit")]
     [InlineData("die", "lost to a crash")]
+    [InlineData("cap", "stopped at its memory cap")]
     public void ALostSuiteIsSaidFirstAndRunsAgainInParts(string mode, string said)
     {
         var python = Needs.Python();
@@ -143,10 +144,33 @@ public sealed class TestScriptTests : IDisposable
         var page = File.ReadAllLines(_folder.File("digest.md"));
         Assert.Contains("110 passed, 0 failed, 0 skipped, 0 without a result", page[0]);
         Assert.StartsWith($"### Lost: the suite, {said}", page.First(line => line.StartsWith("### ", StringComparison.Ordinal)));
+        if (mode == "cap") Assert.Contains(page, line => line.Contains("past its cap of 3.75 GB", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- AlphaTests to CharlieTests: 105 passed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- NormTests: 5 passed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- everything else: 0 passed", StringComparison.Ordinal));
         Assert.EndsWith("end of the page " + new string('=', 30), log.TrimEnd());
+    }
+
+    /// <summary>
+    /// Two cases of a theory whose arguments are cut to the same name are both counted, as the
+    /// suite's own tally counts them, and the same cases read again from a part are not.
+    /// </summary>
+    [SkippableFact]
+    public void CasesCutToOneNameAreCountedApart()
+    {
+        var python = Needs.Python();
+        const string cut = "Bevy.Tests.ScriptTests.Compiles(script: &quot;[Behavior] public partial struct&quot;···)";
+        var cases = $"<UnitTestResult testName=\"{cut}\" outcome=\"Passed\" /><UnitTestResult testName=\"{cut}\" outcome=\"Passed\" />";
+
+        foreach (var file in new[] { "results-the-suite.trx", "results-ScriptTests.trx" })
+        {
+            File.WriteAllText(_folder.File(file),
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?><TestRun xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\"><Results>"
+                + cases + "</Results></TestRun>");
+        }
+
+        Script(python, new(), "--read", _folder.Path);
+        Assert.Contains("2 passed, 0 failed, 0 skipped", File.ReadAllLines(_folder.File("digest.md"))[0]);
     }
 
     [SkippableFact]

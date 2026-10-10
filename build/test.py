@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Runs the tests and writes a page of what happened, at most 200 lines.
 
-    build/test.py [PART ...] [--parts] [--no-build]    # every part, or the parts named
-    build/test.py --read DIR                           # the page of results already in a folder
-    build/test.py --digest DIR ...                     # one page from several systems' digests
+    build/test.py [PART ...] [--parts] [--no-build] [--filter F]   # every part, or the parts named
+    build/test.py --read DIR                                       # the page of results in a folder
+    build/test.py --digest DIR ...                                 # one page from several digests
 
 The tests are three parts, each a process of its own: `bridge`, the bridge's own tests through
 cargo, `renderer`, the same with the renderer's crates, and `suite`, the managed suite through
 dotnet test. Each is held to a time and a memory. A process that ends by itself, passing or
 failing, is read, the suite from its results file and cargo from what it prints under `failures:`.
-One that is lost, by a crash, a hang, its time or its memory, or a bridge that does not build, is
-said first on the page. A suite that is lost runs again in parts, each a process under the same
+One that is lost, by a crash, a hang, its time or its memory, the memory cap MemoryGuard holds the
+suite's host to, or a bridge that does not build, is said first on the page. A suite that is lost runs again in parts, each a process under the same
 limits, so a part that is lost costs only its own tests. A part of the suite is a run of its test
 classes in order, at least a hundred tests, and the last part takes whatever no other names, so no
 test falls between two parts.
@@ -75,7 +75,7 @@ class Process:
         self.exit_code = None
         self.seconds = 0.0
         self.peak_mb = 0
-        self.lost = None          # None, or "crash", "hang", "time", "memory" or "build"
+        self.lost = None          # None, or "crash", "hang", "time", "memory", "cap" or "build"
         self.running = []         # the tests it was in, where the blame collector says
         self.after = None         # the last test to end before it was lost
         self.last_lines = []
@@ -90,7 +90,11 @@ class Process:
 
 
 LOSSES = {"time": "ended at its time limit", "memory": "ended at its memory limit", "hang": "lost to a test that hung",
-          "crash": "lost to a crash", "build": "did not build"}
+          "crash": "lost to a crash", "build": "did not build", "cap": "stopped at its memory cap"}
+
+# What MemoryGuard says as it ends a process past its cap, whose exit vstest reports as a crashed
+# host, its tally of the tests that ran before passing for a whole run's.
+CAP_SAID = re.compile(r"\[BevyCSharp\] The process holds [\d.]+ GB of the machine's memory, past its cap of")
 
 
 def command_of(process, args, results):
@@ -135,6 +139,8 @@ def run(process, args, results):
     if process.lost is None:
         if "inactivity time of" in text:
             process.lost = "hang"
+        elif CAP_SAID.search(text) and ("Test Run Aborted" in text or "test run was aborted" in text):
+            process.lost = "cap"
         elif "Test Run Aborted" in text or "test run was aborted" in text or not os.path.exists(os.path.join(results, process.name + ".trx")):
             process.lost = "crash"
     process.counts = Counter(outcome for outcome, _, _ in read_results(os.path.join(results, process.name + ".trx")).values())
@@ -220,6 +226,8 @@ def list_tests(args):
     command = shlex.split(args.dotnet, posix=os.name != "nt") + ["test", args.project, "-c", args.configuration, "--list-tests"]
     if args.no_build:
         command.append("--no-build")
+    if args.filter:
+        command += ["--filter", args.filter]
     text = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, errors="replace").stdout
     names, listing = [], False
     for line in text.splitlines():
@@ -230,11 +238,12 @@ def list_tests(args):
     return names
 
 
-def parts_of(names):
+def parts_of(names, held_to=None):
     """
     The suite in parts, each a run of its test classes in order holding PART_SIZE tests or more, and
     a last part for whatever no other part names. The tests here share one namespace, so a class is
-    the unit a part is made of, as a namespace is in 3DEngine's.
+    the unit a part is made of, as a namespace is in 3DEngine's. A filter the run was given holds
+    every part to it, so a part runs the tests of its classes the filter takes and no others.
     """
     counts = Counter(segment(name) for name in names if segment(name))
     parts, current, held = [], [], 0
@@ -247,10 +256,15 @@ def parts_of(names):
     if current:
         parts.append(current)
 
+    def within(filter_):
+        if not held_to:
+            return filter_
+        return f"({filter_})&({held_to})" if filter_ else held_to
+
     processes = [Process(f"{group[0]} to {group[-1]}" if len(group) > 1 else group[0], "dotnet",
-                         "|".join(f"FullyQualifiedName~{PREFIX}{name}." for name in group)) for group in parts]
+                         within("|".join(f"FullyQualifiedName~{PREFIX}{name}." for name in group))) for group in parts]
     rest = "&".join(f"FullyQualifiedName!~{PREFIX}{name}." for name in counts)
-    processes.append(Process("everything else", "dotnet", rest or None))
+    processes.append(Process("everything else", "dotnet", within(rest or None)))
     return processes
 
 
@@ -380,7 +394,11 @@ def read_text(path):
 
 
 def read_results(path):
-    """Each test in a results file, by name, as its outcome, its message and its stack."""
+    """
+    Each test in a results file, by name, as its outcome, its message and its stack. Two cases of a
+    theory whose arguments are cut to the same name are both counted, the second under the name
+    and a number, so the same cases read from a lost run and from its parts are still one each.
+    """
     try:
         run_ = ET.parse(path).getroot()
     except (OSError, ET.ParseError):
@@ -389,7 +407,10 @@ def read_results(path):
     for result in run_.iterfind("t:Results/t:UnitTestResult", NS):
         message = result.findtext("t:Output/t:ErrorInfo/t:Message", default="", namespaces=NS)
         stack = result.findtext("t:Output/t:ErrorInfo/t:StackTrace", default="", namespaces=NS)
-        results[result.get("testName", "?")] = (result.get("outcome", ""), message, stack)
+        name = key = result.get("testName", "?")
+        while key in results:
+            key = f"{name} [{len([k for k in results if k == name or k.startswith(name + ' [')]) + 1}]"
+        results[key] = (result.get("outcome", ""), message, stack)
     return results
 
 
@@ -657,6 +678,7 @@ def main():
     parser.add_argument("names", nargs="*", metavar="PART", help="bridge, renderer or suite, every one when none is named")
     parser.add_argument("--parts", dest="all_parts", action="store_true", help="run the suite in its parts, each a process")
     parser.add_argument("--no-build", action="store_true", help="pass --no-build to dotnet test")
+    parser.add_argument("--filter", help="the suite's tests to run, as dotnet test's --filter takes them")
     parser.add_argument("--read", metavar="DIR", help="write the page of the results already in DIR")
     parser.add_argument("--digest", metavar="DIR", nargs="+", help="one page from the digest.json in each DIR")
     parser.add_argument("--results", default=RESULTS, help="where results, output and the page go")
@@ -709,9 +731,11 @@ def main():
     for name in [n for n in PARTS if n in names]:
         if name == "suite" and args.all_parts:
             listed = list_tests(args)
-            processes += parts_of(listed)
+            processes += parts_of(listed, args.filter)
+        elif name == "suite":
+            processes.append(Process(LABELS[name], "dotnet", args.filter))
         else:
-            processes.append(Process(LABELS[name], "dotnet" if name == "suite" else "cargo", None if name != "renderer" else "renderer"))
+            processes.append(Process(LABELS[name], "cargo", None if name != "renderer" else "renderer"))
 
     done = []
     for process in processes:
@@ -720,7 +744,7 @@ def main():
         if process.label == "the suite" and process.lost:
             # Run again in parts, each a process, so a part that is lost costs only its own tests.
             listed = list_tests(args)
-            for part in parts_of(listed):
+            for part in parts_of(listed, args.filter):
                 done.append(run(part, args, results))
                 print(part.summary(), flush=True)
 
