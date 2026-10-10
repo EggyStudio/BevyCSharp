@@ -10,8 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a54dda9e`. Three commits, and the 95 re-ports are done but for six that wait on
-gaps: bevymark seeds each of its random sources apart as Bevy's does, standard_widgets_observers
+Reviewed up to `7849ecf6`. One commit, item 4's second gap, the first having come with the bump: the
+decal's tag and the volume's voxels reach Bevy's WESL through the glue `340639b1` ported,
+`bcs_decal_tag` walking 0.20's decal iterator and the irradiance call its volume function, two tests
+holding them and irradiance_volumes headed 0.20. `deferred_raymarch` on the deferred buffers: a new
+point of the frame, `FramePoint.InPrepass`, runs a camera's dispatches and draws inside the prepass
+after Bevy's geometry has drawn its depth, normals, motion and deferred buffers and before anything
+reads them, where a draw may target `gbuffer` and `lighting_pass` and nowhere else, since by the
+next point the deferred lighting has taken which pixels it lights, refused with a line where it is
+asked elsewhere, the camera's depth copied into the prepass's once the draws there are done; a
+shadow stage of a draw's own, `DrawShadow`, writes each fragment's depth into the shadow maps, drawn
+into every directional cascade of the camera and into every point and spot light's shadow views,
+which are views of their own shared by every camera, the draw's vertex shader placing its geometry
+as each light sees it; and `bcs_pass` gains the full-screen triangle, a pixel's ray, a world point's
+depth, a surface, the G-buffer packed in Slang as Bevy packs a standard material, since Bevy's own
+packing reads the view in group zero, and the shadow map's depth for a point. Four tests hold it,
+the packed surface read back, the deferred lighting lighting the draw inside the prepass and nothing
+after it, the sphere's shadow darkening the floor, and a shadow stage refused without the draw's
+stages; the example matches bare Bevy's frame 120 but for its gyroid's motion; ABI 234, three lines
+on the public surface, the guide's compute page saying how, and `views/draws.rs` split into
+`draw_shadows.rs` for N 1.3. One trap found and written where a shader's author reads: slangc
+2026.18.2 writes a function's own `SV_Depth` return as a color at location zero in WGSL and a struct
+member marked `SV_Depth` as the depth, so the stage returns its depth in `bcs_pass::ShadowDepth`.
+Right, a gap bridged as Bevy does it rather than beside it, with the one copy of Bevy's packing held
+to Bevy by the lighting test; SHARED.md takes the row and the trap. The suite: 1,292 passed and 2
+skipped. The widgets' events as observers next, with headless_tabs and draggable_slider, as item 4
+has it.
+
+Before it, three commits came to be read, and the 95 re-ports came to be done but for six that wait
+on gaps: bevymark seeds each of its random sources apart as Bevy's does, standard_widgets_observers
 changed only in its observers' types, and ui_transform, tab_navigation, ui_texture_slice and
 ui_texture_atlas_slice with widget buttons styled by their press and hover, tab_navigation focusing
 by a click on a button and clearing by one on the page. Three more set aside with their reason:
@@ -46,29 +73,6 @@ moved from can to part, and five stress tests say they are. Pictures captured ag
 picture changed, four. Right, each change said in its commit's sentence, the triage made honest
 where a port lost a switch, and the heads true. Eleven of the 95 remain, then the twenty with
 Feathers.
-
-Before it, fifteen commits came to be read, item 4's re-ports begun, 43 of the 95 that do not wait
-on Feathers. The order is the reply's and right: twenty of the 115 are built on Feathers in 0.20,
-its panes, number inputs and radio buttons in place of the helpers the ports draw, and item 4
-bridges Feathers after the other gaps, so those twenty go with it, box_shadow among them, and the
-rest go by how much Bevy changed them, directional_navigation_overrides first. Each re-port is a
-commit of its own where Bevy changed what the example does, its sentence saying what: the two
-directional navigation examples' buttons widgets with a tab index and the first focused by
-`AutoFocus`; size_constraints' rows radio groups answered by their value change; hierarchy's six
-ways of building a tree each a state that despawns it on leaving; gradients stepped by widget
-buttons; game_menu's buttons widgets and its settings radio groups; computed_states' menu a button
-and a checkbox; cooldown's foods buttons an observer answers; button a widget reporting its click as
-an `Activate` and drawn each frame from its hover and press; borders' elliptical corners through the
-reflected node; solari's R turning ReSTIR on and off; custom_post_processing and many_cubes headed
-0.20 with the render world's bind groups and a mesh compression switch listed as what the bridge
-does not reach. The 32 changed by Bevy only in paths, names and shaders moved to WESL go in two
-batches, bloom_2d stepping through `Linear` where it stepped through `None`, many_gradients saying
-it is a stress test, hello_world logging its greeting once at start, 2d_text_gizmos drawing a line
-of tabs. A printing example's capture holds the lines it logged after what it printed, since Bevy's
-own print with `info!`, the script stripping the log's colors and times (`3126b5e4`), and
-BUILDING.md's sentence mended. Pictures are captured again where a re-port changed the picture,
-eight of them. Right, each change said and the heads true, EXAMPLES.md following. Item 3's order is
-amended to the reply's. The remaining 52 and then the twenty with Feathers.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -215,28 +219,28 @@ from [SHARED.md](SHARED.md).
    item (Decision 8).
 
 4. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
-   written in its batch: a decal's tag and a volume's voxels through the WESL glue,
-   `deferred_raymarch` on the deferred buffers, the widgets' events as observers with
-   `headless_tabs` and `draggable_slider`, keys observed as they reach a field, `sprite_material`
-   and `shader_material_2d_bindless` as 2D materials, `inline_image` and `fixed_node` in the
-   interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from
-   Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then
-   names most. When the captures have settled, they are compared whole with checked-in references by
-   the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
-   scenes. Transmission's glass spheres are missing from about one capture in four with TAA on,
-   before `6a84286` as after it, so the cause is found before that job is red for them, or the
-   example is compared with its spheres left out and the reason beside it. `dragdrop_picking`'s pale
-   preview draws over the words Bevy sorts it under (`b548987`'s reply), untraced, and is traced
-   before those captures are compared, as is the gallery's anisotropic spheres drawing blown white
-   under SSAO with forward rendering though they have tangents and draw right under deferred, Bevy's
-   prepass normal for an anisotropic material the suspect (`edd577c`'s reply), and the camera's
-   volumetric fog hazing the whole picture, the sky with it, once a depth prepass is on the camera,
-   which the hall works round by putting the fog on the camera only while it is inside (`6a19213`'s
-   reply). Feathers' three examples with `feathers_number_input` and the three camera controllers
-   follow the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the
-   working session, and the four font examples stay missing (Decision 13). `compressed_image_saver`
-   comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
-   memory after the kill of 2026-10-08.
+   written in its batch: a decal's tag and a volume's voxels through the WESL glue (in with
+   `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
+   observers with `headless_tabs` and `draggable_slider`, keys observed as they reach a field,
+   `sprite_material` and `shader_material_2d_bindless` as 2D materials, `inline_image` and
+   `fixed_node` in the interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders,
+   mesh shaders from Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and
+   what the table then names most. When the captures have settled, they are compared whole with
+   checked-in references by the workflow, a small share of pixels allowed to differ between devices,
+   as 3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture
+   in four with TAA on, before `6a84286` as after it, so the cause is found before that job is red
+   for them, or the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
+   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
+   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
+   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+   prepass is on the camera, which the hall works round by putting the fog on the camera only while
+   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
+   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
+   owner's word in the working session, and the four font examples stay missing (Decision 13).
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -410,17 +414,3 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Item 4's first gap closed with the move to 0.20, so this batch is the second.** A decal's tag and
-a volume's voxels reach Bevy's WESL through the glue `340639b1` ported: `bcs_decal_tag` walks Bevy
-0.20's `ClusteredDecalIterator` and `bcs_irradiance_` calls its `irradiance_volume_light`, with
-`AShaderReadsTheTagOfTheDecalOverIt` and `AShaderReadsTheLightTheVolumeGivesEachFace` green on 0.20
-and irradiance_volumes headed v0.20.0. clustered_decals keeps its 0.19.1 head for Feathers alone,
-as one of the twenty. `deferred_raymarch` is written here on the deferred buffers.
-
-Shared: a draw on a camera writes Bevy's own G-buffer and lighting pass ids from inside the prepass
-(`FramePoint.InPrepass`, targets `gbuffer` and `lighting_pass`), packed in Slang as Bevy packs a
-standard material, and casts shadows from a fragment stage of its own, which is how a surface found
-by marching a ray is lit and shadowed with the rest of the scene. It sits beside the ledger's row
-on render targets of several images. slangc 2026.18.2 writes a function's own `SV_Depth` return as a color at
-location zero when it writes WGSL, and a struct member marked `SV_Depth` as the depth, which a
-sibling compiling Slang to WGSL meets as a shadow that never appears.

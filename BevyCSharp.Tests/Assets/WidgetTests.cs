@@ -145,6 +145,60 @@ public sealed class WidgetTests
     }
 
     /// <summary>
+    /// A tab list reports the tab clicked as Bevy's <c>ValueChange</c> of an optional entity, and
+    /// made to keep its own state, its <c>SelectedTab</c> follows the click.
+    /// </summary>
+    [SkippableFact]
+    public void ATabListReportsTheTabClickedAndKeepsIt()
+    {
+        Needs.Renderer();
+
+        var changes = new List<ValueChange<Entity?>>();
+        Entity list = default, third = default;
+        Entity? selected = null;
+        var frame = 0;
+
+        using var app = new App(Config.OffscreenFor(400, 100, frames: 40));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+
+            // Three tabs in a row, each a hundred pixels wide, the third from 200 to 300 across.
+            list = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(0f) });
+            ecs.Insert<TabListRef>(list);
+            for (var i = 0; i < 3; i++)
+            {
+                var tab = Ui.SpawnNode(new UiSettings { Width = Length.Px(100f), Height = Length.Px(40f) });
+                ecs.Insert<TabRef>(tab);
+                ecs.SetParent(tab, list);
+                third = tab;
+            }
+
+            Ui.SelfUpdate(list, UiWidgetKind.TabList);
+            ecs.Observe<ValueChange<Entity?>>(list, on => changes.Add(on.Event));
+        }, "Test.Setup"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            frame++;
+            if (frame == 10) SyntheticInput.MoveTo(250f, 20f);
+            if (frame == 12) SyntheticInput.Press(250f, 20f);
+            if (frame == 14) SyntheticInput.Release(250f, 20f);
+            if (frame == 30) selected = world.Resource<EcsWorld>().Get<SelectedTabRef>(list)?.Value;
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        var change = Assert.Single(changes);
+        Assert.Equal(list, change.Source);
+        Assert.Equal(third, change.Value);
+        Assert.Equal(third, selected);
+    }
+
+    /// <summary>
     /// A slider, a checkbox and a radio group are made from their wrappers and made to keep their
     /// own state, the slider's value is written and read through its wrapper, and an entity that is
     /// gone is refused.

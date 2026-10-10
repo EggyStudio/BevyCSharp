@@ -371,9 +371,9 @@ Navigation.AddEdge(endOfRow, startOfNextRow, CompassOctant.East, bothWays: true)
 if (CompassOctants.Of(stick) is { } way) Navigation.Move(way);   // the focus moved, or null
 ```
 
-Bevy's widgets are its own components, a slider, a checkbox, a radio group, a scrollbar, put on a
-node through their wrappers. A widget reports a change rather than making it, and
-`Ui.SelfUpdate` attaches Bevy's own listener that makes it, so the state is read back from the
+Bevy's widgets are its own components, a slider, a checkbox, a radio group, a tab list, a
+scrollbar, put on a node through their wrappers. A widget reports a change rather than making it,
+and `Ui.SelfUpdate` attaches Bevy's own listener that makes it, so the state is read back from the
 widget's components:
 
 ```csharp
@@ -389,10 +389,11 @@ float level = ctx.Ecs.Wrap<SliderValueRef>(volume).Value;   // as the player dra
 
 A game that decides a change itself, keeping the value somewhere of its own or refusing it,
 observes what the widget reports instead. A button and a menu item report Bevy's `Activate`, a
-slider a `ValueChange<float>`, a checkbox or a radio button a `ValueChange<bool>`, and a radio
-group a `ValueChange<Entity>` naming the button chosen. A menu reports `MenuEvent`, asking to open
-or close, which goes up from the item to the menu's owner, where the game spawns the menu's popup
-or despawns it:
+slider a `ValueChange<float>`, a checkbox or a radio button a `ValueChange<bool>`, a radio group a
+`ValueChange<Entity>` naming the button chosen, and a tab list a `ValueChange<Entity?>` naming the
+tab chosen, read back from its `SelectedTabRef` where it keeps its own. A menu reports
+`MenuEvent`, asking to open or close, which goes up from the item to the menu's owner, where the
+game spawns the menu's popup or despawns it:
 
 <!-- compiled with:
 public sealed class Settings { public float Volume; }

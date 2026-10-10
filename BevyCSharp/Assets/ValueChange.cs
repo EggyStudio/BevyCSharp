@@ -3,7 +3,8 @@ namespace Bevy;
 /// <summary>A widget that edits a value was asked to take a new one.</summary>
 /// <typeparam name="T">
 /// The value, a <see cref="float"/> for a slider, a <see cref="bool"/> for a checkbox or a radio
-/// button, and an <see cref="Bevy.Entity"/> for a radio group, the button chosen.
+/// button, an <see cref="Bevy.Entity"/> for a radio group, the button chosen, and an
+/// <see cref="Bevy.Entity"/>? for a tab list, the tab chosen, null for none.
 /// </typeparam>
 /// <param name="Source">The widget.</param>
 /// <param name="Value">The value asked for.</param>
@@ -28,7 +29,6 @@ namespace Bevy;
 /// </para>
 /// </remarks>
 public readonly record struct ValueChange<T>(Entity Source, T Value, bool IsFinal) : IEntityEvent, IReportedEvent
-    where T : struct
 {
     /// <inheritdoc/>
     Entity IEntityEvent.Entity => Source;

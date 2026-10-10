@@ -99,6 +99,61 @@ public sealed class PointerTests
     }
 
     /// <summary>
+    /// A thumb that takes the pointer as its drag starts keeps it while the drag crosses another
+    /// node, which hears nothing come over it, where without the capture it hears the pointer pass,
+    /// and the drag reaches the thumb all the way.
+    /// </summary>
+    [SkippableTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ACapturedPointerIsOverNothingElse(bool capture)
+    {
+        Needs.Renderer();
+
+        var (decoyOver, drags) = (0, 0);
+        var frame = 0;
+
+        using var app = new App(Config.OffscreenFor(300, 100, frames: 50));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+
+            // The thumb at the left, the decoy from 150 to 250 across, both forty pixels down.
+            var thumb = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(0f), Width = Length.Px(40f), Height = Length.Px(40f) });
+            var decoy = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(150f), Top = Length.Px(0f), Width = Length.Px(100f), Height = Length.Px(40f) });
+
+            ecs.Observe<Pointer<DragStart>>(thumb, on =>
+            {
+                if (capture) Picking.CapturePointer(on.Event.PointerId, on.Event.Entity, on.Event.Event.Hit);
+            });
+            ecs.Observe<Pointer<Drag>>(thumb, _ => drags++);
+            ecs.Observe<Pointer<DragEnd>>(thumb, on => Picking.ReleaseCapture(on.Event.PointerId));
+            ecs.Observe<Pointer<Over>>(decoy, _ => decoyOver++);
+        }, "Test.Setup"));
+
+        // Pressed on the thumb, dragged right across the decoy a frame at a time, and let go there.
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ =>
+        {
+            frame++;
+            if (frame == 10) SyntheticInput.MoveTo(20f, 20f);
+            if (frame == 12) SyntheticInput.Press(20f, 20f);
+            if (frame is > 13 and <= 37) SyntheticInput.MoveTo(20f + (frame - 13) * 10f, 20f);
+            if (frame == 40) SyntheticInput.Release(260f, 20f);
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.True(drags > 10, $"the drag reached the thumb {drags} times");
+        if (capture)
+            Assert.Equal(0, decoyOver);
+        else
+            Assert.True(decoyOver > 0, "the decoy heard nothing come over it with the pointer free");
+    }
+
+    /// <summary>
     /// A click on a cube, in an app that asked for meshes to be picked, is observed at the cube with
     /// where the pointer met its face and which way the face looks.
     /// </summary>

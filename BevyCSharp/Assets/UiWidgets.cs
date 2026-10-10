@@ -13,6 +13,12 @@ public enum UiWidgetKind
 
     /// <summary>A radio group, the button clicked marked <c>Checked</c> and the others not.</summary>
     RadioGroup = 2,
+
+    /// <summary>
+    /// A tab list, its <c>SelectedTab</c> following the tab clicked, or the tab the focus moves to
+    /// where the list activates tabs as they are focused.
+    /// </summary>
+    TabList = 3,
 }
 
 public static unsafe partial class Ui

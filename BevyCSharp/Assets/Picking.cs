@@ -159,6 +159,62 @@ public static unsafe class Picking
     public static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary) =>
         Send(pointer, image, position, 2, button);
 
+    /// <summary>
+    /// Locks a pointer to an entity, so the entity is all the pointer is over until the capture is
+    /// released or the pointer's button is let go. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>PointerCaptureMap::capture</c>. A slider's thumb dragged across other widgets
+    /// keeps the pointer this way, so they do not light up as the pointer passes over them, and
+    /// the drag goes on reaching the thumb wherever the pointer strays:
+    /// </para>
+    /// <code>
+    /// ecs.Observe&lt;Pointer&lt;DragStart&gt;&gt;(thumb, on =&gt;
+    ///     Picking.CapturePointer(on.Event.PointerId, on.Event.Entity, on.Event.Event.Hit));
+    /// ecs.Observe&lt;Pointer&lt;DragEnd&gt;&gt;(thumb, on =&gt; Picking.ReleaseCapture(on.Event.PointerId));
+    /// </code>
+    /// <para>
+    /// The pointer reports the hit given here as what it meets while it is held, usually the one
+    /// the event that started the drag carried. A pointer of the game's own is one from
+    /// <see cref="SpawnPointer"/>.
+    /// </para>
+    /// </remarks>
+    /// <param name="pointer">The pointer.</param>
+    /// <param name="entity">What it is locked to.</param>
+    /// <param name="hit">What it reports it meets while it is held.</param>
+    /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
+    public static void CapturePointer(PointerId pointer, Entity entity, PointerHit hit)
+    {
+        var position = hit.Position ?? default;
+        var normal = hit.Normal ?? default;
+        var at = stackalloc float[] { position.X, position.Y, position.Z };
+        var facing = stackalloc float[] { normal.X, normal.Y, normal.Z };
+
+        Native.Check(
+            Native.bcs_pointer_capture(
+                (int)pointer.Kind,
+                pointer.Number,
+                entity.Bits,
+                hit.Camera.Bits,
+                hit.Depth,
+                hit.Position is null ? null : at,
+                hit.Normal is null ? null : facing),
+            $"locking {pointer} to {entity}");
+    }
+
+    /// <summary>
+    /// Releases what a pointer was locked to by <see cref="CapturePointer"/>, which does nothing
+    /// where it was not locked. Only valid inside a system.
+    /// </summary>
+    /// <remarks>Bevy's <c>PointerCaptureMap::release</c>.</remarks>
+    /// <param name="pointer">The pointer.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void ReleaseCapture(PointerId pointer) =>
+        Native.Check(
+            Native.bcs_pointer_release_capture((int)pointer.Kind, pointer.Number),
+            $"releasing {pointer}");
+
     private static void Send(PointerId pointer, AssetHandle image, Vec2 position, int action, PointerButton button)
     {
         if (pointer.Kind != PointerKind.Custom)

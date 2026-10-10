@@ -434,10 +434,10 @@ mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only throu
 many_meshlet_materials	can	needs a bridge built with --meshlet
 overflow_transform	can	through Bevy's reflected UiTransform
 fixed_node	can	through Bevy's reflected FixedNode
-draggable_slider	missing	pointer capture, Bevy's PointerCaptureMap, which no call here takes
+draggable_slider	can	with the pointer captured through Picking.CapturePointer
 test_meshlet	can	needs a bridge built with --meshlet
-character_creation	missing	the select widgets' changes observed as they happen, which reach C# only through each widget's state read every frame
-headless_tabs	missing	the tab widgets' changes observed as they happen, which reach C# only through each widget's state read every frame
+character_creation	can	its character changed in place where Bevy spawns its parts again, the hat alone made again
+headless_tabs	can	through Bevy's reflected TabList, Tab and SelectedTab, a tab's selection read from its list since Bevy does not reflect Selected
 feathers_number_input	missing	Feathers' number input, whose crate the bridge does not compile in
 pan_orbit_camera_cad	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
 pan_orbit_camera_minimal	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in

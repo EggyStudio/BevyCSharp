@@ -394,6 +394,104 @@ pub extern "C" fn bcs_pointer_input(number: u64, image: i32, x: f32, y: f32, act
     })
 }
 
+/// The pointer Bevy knows by the kind and number C# reports it under: `0` the mouse, `1` a touch by
+/// its finger, `2` a pointer [`bcs_pointer_spawn`] made, by its number.
+#[cfg(feature = "render")]
+fn pointer_id(kind: i32, number: u64) -> Option<bevy::picking::pointer::PointerId> {
+    use bevy::picking::pointer::PointerId;
+
+    Some(match kind {
+        0 => PointerId::Mouse,
+        1 => PointerId::Touch(number),
+        2 => PointerId::Custom(bevy::asset::uuid::Uuid::from_u64_pair(OWN_POINTER, number)),
+        _ => return None,
+    })
+}
+
+/// Locks a pointer to an entity, Bevy's `PointerCaptureMap::capture`, so the entity is all the
+/// pointer is over until the capture is released or the pointer's button is let go, as a slider's
+/// thumb keeps the pointer through a drag that strays over other widgets.
+///
+/// The pointer reports the hit while it is held, given as the camera it was seen through, the depth
+/// and, where `position` and `normal` are not null, three numbers each for where and which way.
+/// Returns [`status::UNSUPPORTED`] in a build without the renderer, which has no picking.
+///
+/// # Safety
+/// `position` and `normal` must each be null or point at three floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_pointer_capture(
+    kind: i32,
+    number: u64,
+    entity: u64,
+    camera: u64,
+    depth: f32,
+    position: *const f32,
+    normal: *const f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (kind, number, entity, camera, depth, position, normal);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::math::Vec3;
+            use bevy::picking::backend::HitData;
+            use bevy::picking::hover::PointerCaptureMap;
+
+            let Some(pointer) = pointer_id(kind, number) else {
+                return status::NULL_ARG;
+            };
+            let three = |at: *const f32| {
+                (!at.is_null()).then(|| unsafe { Vec3::from_slice(core::slice::from_raw_parts(at, 3)) })
+            };
+            let hit = HitData::new(crate::ecs::entity_from(camera), depth, three(position), three(normal));
+
+            crate::state::with_world(|world| {
+                let entity = crate::ecs::entity_from(entity);
+                if world.get_entity(entity).is_err() {
+                    return status::NO_ENTITY;
+                }
+                let Some(mut captures) = world.get_resource_mut::<PointerCaptureMap>() else {
+                    return status::UNSUPPORTED;
+                };
+                captures.capture(pointer, entity, hit);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Releases what a pointer was locked to by [`bcs_pointer_capture`], Bevy's
+/// `PointerCaptureMap::release`, which does nothing where it was not captured.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_pointer_release_capture(kind: i32, number: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (kind, number);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            let Some(pointer) = pointer_id(kind, number) else {
+                return status::NULL_ARG;
+            };
+
+            crate::state::with_world(|world| {
+                let Some(mut captures) = world.get_resource_mut::<bevy::picking::hover::PointerCaptureMap>() else {
+                    return status::UNSUPPORTED;
+                };
+                captures.release(pointer);
+                status::OK
+            })
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

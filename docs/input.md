@@ -151,6 +151,21 @@ observer calls `on.Propagate(false)`. There are seventeen, `Over`, `Out`, `Enter
 `Release`, `Click`, `Move`, `DragStart`, `Drag`, `DragEnd`, `DragEnter`, `DragOver`, `DragLeave`,
 `DragDrop`, `Scroll` and `Cancel`, named as Bevy names them.
 
+An entity can hold a pointer through a drag, Bevy's pointer capture, so the entity is all the
+pointer is over until the drag ends, and the widgets it crosses do not light up as if about to be
+pressed. `Picking.CapturePointer` takes the pointer as the drag starts, with the hit the drag
+started from, and `Picking.ReleaseCapture` lets it go, which Bevy also does as the button is let
+go:
+
+<!-- compiled with:
+Entity thumb = default;
+-->
+```csharp
+ctx.Ecs.Observe<Pointer<DragStart>>(thumb, on =>
+    Picking.CapturePointer(on.Event.PointerId, on.Entity, on.Event.Event.Hit));
+ctx.Ecs.Observe<Pointer<DragEnd>>(thumb, on => Picking.ReleaseCapture(on.Event.PointerId));
+```
+
 Nodes are found as in Bevy, and a sprite where it carries Bevy's `Pickable`, as Bevy's own
 examples give theirs (`ecs.Insert<PickableRef>(sprite)`). Meshes are found where the app asks, with
 `Config.MeshPicking`, since that casts a ray at every mesh as the pointer moves, and Bevy's own

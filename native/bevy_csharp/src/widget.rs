@@ -2,8 +2,9 @@
 //! observers of the widgets' own events.
 //!
 //! Bevy's widgets do not change themselves. A button triggers `Activate` when it is pressed, a
-//! slider, a checkbox and a radio group trigger `ValueChange` with the value the player asked for,
-//! and a menu triggers `MenuEvent` to open or close, and whoever listens decides what follows. A
+//! slider, a checkbox, a radio group and a tab list trigger `ValueChange` with the value the player
+//! asked for, and a menu triggers `MenuEvent` to open or close, and whoever listens decides what
+//! follows. A
 //! C# game observes them as any entity event, so the first C# observer of a kind asks for an
 //! observer here, which copies the event into one shape every kind fits and queues a call into C#,
 //! made with the whole world on loan once the trigger finishes, as [`crate::pointer`] reports what
@@ -26,13 +27,15 @@ use crate::interop::status;
 pub struct BcsWidgetEvent {
     /// The widget it happened to, the button activated or the slider changed.
     pub entity: u64,
-    /// The value of a change that names an entity, the radio button a group's choice moved to.
+    /// The value of a change that names an entity, the radio button a group's choice moved to or
+    /// the tab a tab list's did.
     pub other: u64,
-    /// Which of the five kinds, in the order of [`spawn`]'s match.
+    /// Which of the six kinds, in the order of [`spawn`]'s match.
     pub kind: i32,
     /// The value of a change that is a number, a slider's.
     pub value: f32,
-    /// The value of a change that is yes or no, a checkbox's, as one or zero.
+    /// The value of a change that is yes or no, a checkbox's, as one or zero, and for a tab list's
+    /// whether it names a tab at all.
     pub flag: u32,
     /// One where the change is the last of its interaction, the button let go or the drag ended,
     /// and zero while it goes on.
@@ -146,6 +149,17 @@ mod observers {
                     MenuAction::FocusRoot => (3, 0),
                 };
                 let report = BcsWidgetEvent { entity: event.source.to_bits(), kind, action, navigation, ..Default::default() };
+                forward(&mut world, target, report);
+            }),
+            5 => Observer::new(move |event: On<ValueChange<Option<Entity>>>, mut world: DeferredWorld| {
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    other: event.value.map_or(0, Entity::to_bits),
+                    flag: event.value.is_some() as u32,
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
                 forward(&mut world, target, report);
             }),
             _ => return None,

@@ -269,6 +269,7 @@ internal static class Catalog
         new("simple_picking", SimplePicking.Build, SimplePicking.Configure),
         new("sprite_picking", SpritePicking.Build),
         new("dragdrop_picking", DragdropPicking.Build, DragdropPicking.Configure),
+        new("draggable_slider", DraggableSlider.Build),
 
         // State
         new("computed_states", ComputedStatesExample.Build),
@@ -376,9 +377,11 @@ internal static class Catalog
         new("vertical_slider", VerticalSliderExample.Build),
         new("standard_widgets", StandardWidgets.Build),
         new("standard_widgets_observers", StandardWidgetsObservers.Build),
+        new("headless_tabs", HeadlessTabs.Build),
         new("z_index", ZIndex.Build),
 
         // Usage
+        new("character_creation", CharacterCreation.Build),
         new("context_menu", ContextMenuExample.Build),
         new("cooldown", CooldownExample.Build),
         new("debug_frustum_culling", DebugFrustumCulling.Build),

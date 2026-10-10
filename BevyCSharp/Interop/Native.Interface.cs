@@ -87,6 +87,17 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_pointer_input(ulong number, int image, float x, float y, int action, int button);
 
+    /// <summary>Locks a pointer to an entity, as Bevy's <c>PointerCaptureMap::capture</c>, with the hit it reports.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pointer_capture(
+        int kind, ulong number, ulong entity, ulong camera, float depth, float* position, float* normal);
+
+    /// <summary>Releases what a pointer was locked to, as Bevy's <c>PointerCaptureMap::release</c>.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_pointer_release_capture(int kind, ulong number);
+
     /// <summary>Projects a world point onto a camera's viewport, in logical pixels.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**291 written, 17 written in part, 6 can be written, 68 missing and 56 do not apply.** Of the 382 that apply, 314 can be written with what is bridged, 17 of them leaving something out.
+**294 written, 17 written in part, 6 can be written, 65 missing and 56 do not apply.** Of the 382 that apply, 317 can be written with what is bridged, 17 of them leaving something out.
 
-**140 of the 151 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**140 of the 154 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -27,7 +27,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Input](#input) | 11 | 1 | 0 | 0 | 0 |  |
 | [Math](#math) | 4 | 0 | 0 | 1 | 1 | 3 of 4 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Picking](#picking) | 4 | 0 | 0 | 2 | 1 | 3 of 3 |
+| [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 3 of 4 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 50 | 0 | 3 | 12 | 0 | 17 of 20 |
-| [Usage](#usage) | 3 | 0 | 0 | 1 | 0 | 3 of 3 |
+| [UI (User Interface)](#ui-user-interface) | 51 | 0 | 3 | 11 | 0 | 17 of 21 |
+| [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 3 of 4 |
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 1 | 0 | 10 |  |
-| **All** | **291** | **17** | **6** | **68** | **56** | **140 of 151** |
+| **All** | **294** | **17** | **6** | **65** | **56** | **140 of 154** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -386,7 +386,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_hit_data`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/custom_hit_data.rs) | Demonstrates a custom picking backend with custom hit data. | does not apply, writes a Rust picking backend |
 | [`debug_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/debug_picking.rs) | Demonstrates picking debug overlay | missing, Bevy's picking debug overlay |
 | [`dragdrop_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/dragdrop_picking.rs) | Demonstrates drag and drop using picking events | [written](../BevyCSharp.Examples/picking/dragdrop_picking.cs) |
-| [`draggable_slider`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/draggable_slider.rs) | Demonstrates pointer capture using a draggable slider | missing, pointer capture, Bevy's PointerCaptureMap, which no call here takes |
+| [`draggable_slider`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/draggable_slider.rs) | Demonstrates pointer capture using a draggable slider | [written](../BevyCSharp.Examples/picking/draggable_slider.cs), with the pointer captured through Picking.CapturePointer |
 | [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/mesh_picking.rs) | Demonstrates picking meshes | [written](../BevyCSharp.Examples/picking/mesh_picking.cs), the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps |
 | [`simple_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/simple_picking.rs) | Demonstrates how to use picking events to spawn simple objects | [written](../BevyCSharp.Examples/picking/simple_picking.cs) |
 | [`sprite_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/sprite_picking.rs) | Demonstrates picking sprites and sprite atlases | [written](../BevyCSharp.Examples/picking/sprite_picking.cs) |
@@ -548,7 +548,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`ghost_nodes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/ghost_nodes.rs) | Demonstrates the use of Ghost Nodes to skip entities in the UI layout hierarchy | missing, ghost nodes (GhostNode) |
 | [`gradients`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/styling/gradients.rs) | An example demonstrating gradients | [written](../BevyCSharp.Examples/ui/gradients.cs), through Bevy's reflected BackgroundGradient and BorderGradient |
 | [`grid`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/grid.rs) | An example for CSS Grid layout | [written](../BevyCSharp.Examples/ui/grid.cs) |
-| [`headless_tabs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/headless_tabs.rs) | Demonstrates controlled and self-updating headless tab lists | missing, the tab widgets' changes observed as they happen, which reach C# only through each widget's state read every frame |
+| [`headless_tabs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/headless_tabs.rs) | Demonstrates controlled and self-updating headless tab lists | [written](../BevyCSharp.Examples/ui/headless_tabs.cs), through Bevy's reflected TabList, Tab and SelectedTab, a tab's selection read from its list since Bevy does not reflect Selected |
 | [`image_node`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/image_node.rs) | Demonstrates how to create an image node | [written](../BevyCSharp.Examples/ui/image_node.cs) |
 | [`image_node_resizing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/image_node_resizing.rs) | Demonstrates how to resize an image node | missing, Bevy's outlines of interface nodes for debugging, which the bridge does not build |
 | [`ime_support`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/ime_support.rs) | Demonstrates IME (Input Method Editor) support for text input | missing, a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in |
@@ -596,7 +596,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`character_creation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/character_creation.rs) | Demonstrates how to use headless widgets to power a Character Creation Menu | missing, the select widgets' changes observed as they happen, which reach C# only through each widget's state read every frame |
+| [`character_creation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/character_creation.rs) | Demonstrates how to use headless widgets to power a Character Creation Menu | [written](../BevyCSharp.Examples/usage/character_creation.cs), its character changed in place where Bevy spawns its parts again, the hat alone made again |
 | [`context_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/context_menu.rs) | Example of a context menu | [written](../BevyCSharp.Examples/usage/context_menu.cs), its nodes' interactions read as they change, where Bevy observes its pointer events |
 | [`cooldown`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/cooldown.rs) | Example for cooldown on button clicks | [written](../BevyCSharp.Examples/usage/cooldown.cs) |
 | [`debug_frustum_culling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/debug_frustum_culling.rs) | Example demonstrating how to debug frustum culling | [written](../BevyCSharp.Examples/usage/debug_frustum_culling.cs), each shape's box tested against the small camera's frustum, read through Bevy's reflected Frustum, where Bevy reads the camera's visible entities |

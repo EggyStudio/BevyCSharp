@@ -4047,8 +4047,10 @@ static class Bevy.Picking
   static PointerId SpawnPointer()
   static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal)
   static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal, out Vec2? uv)
+  static void CapturePointer(PointerId pointer, Entity entity, PointerHit hit)
   static void MovePointer(PointerId pointer, AssetHandle image, Vec2 position)
   static void PressPointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary)
+  static void ReleaseCapture(PointerId pointer)
   static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary)
 readonly struct Bevy.PinchGesture : IEquatable<PinchGesture>
   PinchGesture(float Delta)
@@ -11049,6 +11051,7 @@ enum Bevy.UiWidgetKind : int
   Checkbox = 1
   RadioGroup = 2
   Slider = 0
+  TabList = 3
 enum Bevy.UiWrap : int
   NoWrap = 0
   Wrap = 1
@@ -11062,10 +11065,10 @@ static class Bevy.UserData
   static string Resolve(string path)
   static string Root { get; set; }
   static void WriteAtomically(string full, ReadOnlySpan<byte> bytes)
-readonly struct Bevy.ValueChange<T> : IEntityEvent, IEquatable<ValueChange<T>>, IReportedEvent where T : struct
+readonly struct Bevy.ValueChange<T> : IEntityEvent, IEquatable<ValueChange<T>>, IReportedEvent
   Entity Source { get; init; }
-  T Value { get; init; }
-  ValueChange(Entity Source, T Value, bool IsFinal)
+  T? Value { get; init; }
+  ValueChange(Entity Source, T? Value, bool IsFinal)
   bool Equals(ValueChange<T> other)
   bool IsFinal { get; init; }
   override bool Equals(object obj)
@@ -11073,7 +11076,7 @@ readonly struct Bevy.ValueChange<T> : IEntityEvent, IEquatable<ValueChange<T>>, 
   override string ToString()
   static bool op_Equality(ValueChange<T> left, ValueChange<T> right)
   static bool op_Inequality(ValueChange<T> left, ValueChange<T> right)
-  void Deconstruct(out Entity Source, out T Value, out bool IsFinal)
+  void Deconstruct(out Entity Source, out T? Value, out bool IsFinal)
 struct Bevy.Vec2 : IAdditionOperators<Vec2, Vec2, Vec2>, IEquatable<Vec2>, IMultiplyOperators<Vec2, float, Vec2>
   Vec2 Normalized { get; }
   Vec2(float value)

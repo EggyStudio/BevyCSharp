@@ -973,6 +973,8 @@ static PointerId SpawnPointer();                                // Makes a point
 static void MovePointer(PointerId pointer, AssetHandle image, Vec2 position);  // Moves a pointer from SpawnPointer to a place on an image
 static void PressPointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary);  // Presses a button of a pointer from SpawnPointer where it is put
 static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary);  // Lets a button of a pointer from SpawnPointer go where it is put
+static void CapturePointer(PointerId pointer, Entity entity, PointerHit hit);  // Locks a pointer to an entity, so the entity is all the pointer is over until the capture is released or the pointer's button is let go
+static void ReleaseCapture(PointerId pointer);                  // Releases what a pointer was locked to by CapturePointer, which does nothing where it was not locked
 ```
 
 ## Shaders
