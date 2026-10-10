@@ -1,4 +1,4 @@
-// Bevy's many_buttons example, examples/stress_tests/many_buttons.rs at v0.19.1, by Bevy's
+// Bevy's many_buttons example, examples/stress_tests/many_buttons.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -11,14 +11,15 @@ namespace BevyCSharp.Examples.StressTests;
 // measure layout, text, the pointer and drawing at once. --text labels each button, --no-borders
 // leaves the borders off, --relayout and --recompute-text lay everything out again each frame,
 // --grid lays the buttons out as a grid rather than rows, --respawn spawns the whole tree again
-// each frame, --display-none hides it all, --no-camera spawns no camera, and --many-cameras draws
-// each button with a camera of its own.
+// each frame, --display-none hides it all, --no-camera spawns no camera, --many-cameras draws each
+// button with a camera of its own, and --overflow-clip clips what each button holds to it. Each
+// button is a button of Bevy's widgets, colored as its Hovered changes.
 internal static class ManyButtons
 {
     private const float FontSize = 7f;
 
     // Bevy's Args, read from the command line.
-    private static bool _text, _noBorders, _grid, _displayNone, _manyCameras;
+    private static bool _text, _noBorders, _grid, _displayNone, _manyCameras, _overflowClip;
     private static int _buttons = 110, _imageFreq = 4;
 
     private static Entity _root;
@@ -37,9 +38,9 @@ internal static class ManyButtons
     public static void Build(App app)
     {
         var arguments = Environment.GetCommandLineArgs();
-        (_text, _noBorders, _grid, _displayNone, _manyCameras) = (
+        (_text, _noBorders, _grid, _displayNone, _manyCameras, _overflowClip) = (
             arguments.Contains("--text"), arguments.Contains("--no-borders"), arguments.Contains("--grid"),
-            arguments.Contains("--display-none"), arguments.Contains("--many-cameras"));
+            arguments.Contains("--display-none"), arguments.Contains("--many-cameras"), arguments.Contains("--overflow-clip"));
         _buttons = Option(arguments, "--buttons", 110);
         _imageFreq = Option(arguments, "--image-freq", 4);
         Nodes.Clear();
@@ -201,7 +202,11 @@ internal static class ManyButtons
             Justify = UiJustify.Center,
             Color = color,
             BorderColor = (1f, 1f, 1f, 0.5f),
+            OverflowX = _overflowClip ? UiOverflow.Clip : UiOverflow.Visible,
+            OverflowY = _overflowClip ? UiOverflow.Clip : UiOverflow.Visible,
         });
+        ecs.Insert<ButtonRef>(button);
+        ecs.Insert<HoveredRef>(button);
 
         var layout = ecs.Wrap<NodeRef>(button);
         var (width, height) = (90f / _buttons, 90f / _buttons);
@@ -243,11 +248,17 @@ public partial struct IdleColor
     /// Orange red while hovered, and its own color otherwise, each time the pointer's relation to
     /// it changes.
     /// </summary>
+    /// <remarks>
+    /// Bevy's filters on a change of <c>Hovered</c>, which no C# type names for a filter. The
+    /// bridge's <c>Interaction</c> on an interactive node changes as its hover does, so it stands
+    /// in as the filter, and the color is read from <c>Hovered</c>.
+    /// </remarks>
     [OnUpdate]
     [Changed(typeof(Interaction))]
     public void ButtonSystem(BehaviorContext ctx)
     {
-        var (r, g, b, a) = Ui.InteractionOf(ctx.Entity) == UiInteraction.Hovered ? Color.FromSrgb8(255, 69, 0) : (Idle.X, Idle.Y, Idle.Z, Idle.W);
+        var hovered = ctx.Ecs.Get<HoveredRef>(ctx.Entity)?.Value == true;
+        var (r, g, b, a) = hovered ? Color.FromSrgb8(255, 69, 0) : (Idle.X, Idle.Y, Idle.Z, Idle.W);
         ctx.Ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = new Color(r, g, b, a);
     }
 }
