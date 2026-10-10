@@ -157,3 +157,7 @@ models/IrradianceVolumeExample/IrradianceVolumeExample.glb
 textures/arrow.png
 textures/water_normals.png
 textures/flag.png
+textures/parallax_example/cube_color.png
+textures/parallax_example/cube_depth.png
+textures/parallax_example/cube_normal.png
+textures/AlphaNoise.png

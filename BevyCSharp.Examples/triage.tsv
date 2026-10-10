@@ -25,14 +25,14 @@ ssao	can
 spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
 bloom_3d	can
 decal	missing	forward decals (ForwardDecal)
-deferred_rendering	missing	a material's depth map for parallax mapping, and a material drawn forward while the rest are deferred
+deferred_rendering	can
 motion_blur	can
 order_independent_transparency	can
 tonemapping	can
 orthographic	can
 parenting	can
 pbr	can	its view sized for a window of 1280 by 720 at any size
-parallax_mapping	missing	a depth map and parallax settings on the standard material
+parallax_mapping	can
 render_to_texture	can
 shadow_biases	can
 shadow_caster_receiver	can
@@ -65,7 +65,7 @@ post_processing	can
 rotate_environment_map	can
 pcss	can
 mixed_lighting	can	through Bevy's reflected Lightmap
-specular_tint	missing	specular tint and the specular maps on the standard material
+specular_tint	can	its two choices drawn as the examples' own radio buttons, where Bevy draws them with Feathers
 clustered_decals	can
 light_textures	can
 occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers

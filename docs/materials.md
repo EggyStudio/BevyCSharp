@@ -97,6 +97,50 @@ ecs.InsertReflected(wall, "bevy_pbr::lightmap::Lightmap");
 ecs.SetReflectedAsset(wall, "bevy_pbr::lightmap::Lightmap", "image", AssetServer.Load(AssetKind.Image, "lightmaps/wall.ktx2"));
 ```
 
+`DepthMap` carves the surface without changing its geometry. Parallax mapping moves each pixel's
+texture coordinates along the line of sight to where it would meet the heights in the map's red
+channel, black the top and white the bottom, so the textures sink and rise as the camera moves.
+Like a normal map, it is read along the mesh's tangents. It needs a normal map drawn from the same
+heights beside it, or the textures move while the lighting stays flat:
+
+<!-- compiled with:
+EcsWorld ecs = ctx.Ecs;
+-->
+```csharp
+var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
+Render.GenerateTangents(cube);
+
+var carved = Render.CreateMaterial(new MaterialSettings
+{
+    BaseColorTexture = AssetServer.Load(AssetKind.Image, "textures/stone.png"),
+    NormalMap = AssetServer.LoadImage("textures/stone-normal.png", new TextureSettings { Srgb = false }),
+    DepthMap = AssetServer.Load(AssetKind.Image, "textures/stone-depth.png"),
+    ParallaxDepthScale = 0.09f,             // a tenth of the texture's width deep, at most
+    ParallaxMethod = ParallaxMethod.Relief,
+    ReliefSteps = 4,
+    ParallaxLayers = 32f,
+});
+ecs.SpawnMesh(cube, carved, Transform.Identity);
+```
+
+The depth map is cut into layers, `ParallaxLayers` of them where the surface is seen edge on, and a
+sample is taken a layer. `ParallaxMethod.Occlusion` blends between the last two layers, which is
+cheap and can let the surface seem to writhe. `ParallaxMethod.Relief` searches between them for
+`ReliefSteps` steps, so a few layers and a few steps can look better than many layers without them.
+Each method is a shader of its own, so a scene does best to give every material the same one.
+
+`SpecularTint` colors what a non-metal reflects, its highlights and its reflections both, and a
+metal, which reflects in its base color, ignores it. `SpecularTexture` holds how much it reflects in
+its alpha channel and `SpecularTintTexture` the tint in its color channels, and a glTF file's
+specular extension fills both. A full alpha counts as half, as glTF has it, so a material whose map
+should reach the whole range sets `Reflectance` to two.
+
+The G-buffer has no room for a tint, so a material drawn deferred
+(`Render.SetDeferredRendering`) shows none. `OpaqueRenderMethod` takes one opaque or masked material
+out of the way the rest are drawn. `Forward` draws it forward while the rest are deferred, as Bevy's
+deferred example draws its ground, and `Deferred` writes it into the G-buffer while the rest are
+forward, which only a camera drawing the G-buffer then shows. `Auto`, the default, follows the rest.
+
 A material file and a scene write these only where they differ from a plain material's, and the
 editor's Material card keeps them in a Surface fold, with their maps in a Surface maps fold.
 

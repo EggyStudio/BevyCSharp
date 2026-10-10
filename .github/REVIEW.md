@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `60141490`. One commit, Verdict 9's mend: the shader, view, effects and material
+Reviewed up to `af4242ae`. Two commits. Verdict 8's mend at `7527af4d`: the SPIR-V compute pipeline
+is built with no error scope, as the mesh pipeline is, and handed back itself, `compute.rs` and
+`dispatches.rs` holding it as their own, so a pipeline wgpu refuses is a render error as any other,
+which the `ComputeTarget` and `DrawMesh` remarks say; and a correction of this file's reading,
+taken: wgpu 30 keeps a stack of scopes for each thread and not one for the device, so the
+out-of-order pop was not two threads interleaving on one stack, and how another scope came above the
+builder's was not found, which the module comment says and SHARED.md's row says since. Verdict 8 is
+settled. Then `af4242ae`, item 4's four rows that could be written as they were: `test_meshlet`,
+compared with bare Bevy with 0.6% of pixels past 3%, which needs a bridge built with `--meshlet` and
+says so; `many_meshlet_materials`, whose streaks of missing bunnies bare Bevy shows alike, listed
+under N 4.5 for Bevy's stress window; `overflow_transform` through the reflected `UiTransform`; and
+`mines`, its menu and play as states with `DespawnOnExit` and an observer to each button and tile,
+driven offscreen by a move before a click so picking sees the hover. EXAMPLES.md reads 306 written
+and none left that can be. Right, the four closed where they stood and the one window listed by the
+rule. The suite: 1,317 passed and 2 skipped, the bridge's 126. Next the standard material's depth
+and specular maps, whose specular textures sit behind Bevy's `pbr_specular_textures` feature, a
+feature of the crate in the tree that pulls no crate, which the working session may turn on
+(Decision 25); a feature that pulls a crate in waits on the owner's word, the dev tools' with
+Feathers' (Decision 11). Then `c39dd61d`, `MaterialSurfaceTests` moved into the folder of the assets
+it tests and off N 1.4's list, which the norm's table counts at 73 since; its run is in progress.
+
+Before it, one commit came to be read, Verdict 9's mend: the shader, view, effects and material
 structs the bridge reads move out of `NativeTypes.Render.cs` into ten files named for them, which
 takes the file to 552 lines and off N 1.3's list and the ten types off N 1.2's, code moved alone,
 the sizes' and offsets' tests as they were. Right, the mend in a commit of its own as item 2 asks,
@@ -47,25 +68,6 @@ compiling, as its sibling was. The next page says where the three mesh tests ran
 shaders being wgpu's experimental feature; item 4 goes on with what the table names most, in the
 order it has.
 
-Before it, one commit came to be read, and item 4's shader gaps came to be whole:
-`App.AddComponentArray<T>` keeps every entity's component in one storage buffer a shader reads at
-the entity's mesh tag, as Bevy's `GpuComponentArrayBuffer` does, managed-side alone over the buffer
-calls and the reflected mesh tag, so no bridge change and no ABI change. At the end of every frame
-it scans the entities with the component: a new one takes the next place and the tag, a changed one
-is written again, one that lost the component or was despawned gives its place to the last entry,
-which is retagged, and a living entity that lost it loses its tag; the buffer grows by half as
-Bevy's does and is written whole only when something changed; a scan rather than component hooks,
-since hooks are one a component type and the game's to use, said in the remarks; and a struct shared
-with a structured buffer spells its padding out, which the guide says. The test draws two squares of
-one material in their entries' colors, recolors one and despawns the other, the survivor keeping its
-color through its new tag; gpu_component_array_buffer is written with .NET's random numbers from
-Bevy's seed, the triage saying the cubes fall in other places and no bare-Bevy frame compared for
-it, rightly; the guide's nine C# blocks build against a scratch pack. Right, the array built from
-what the bridge already gives and its two limits said where a reader finds them, the tag the array's
-and one entity in two arrays unsupported as in Bevy. The suite: 1,314 passed and 2 skipped.
-mesh_shader_intro next as a gap of its own, Slang's task and mesh stages through SPIR-V on Vulkan,
-which this machine's driver reports, as item 4 has it.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -99,8 +101,8 @@ from [SHARED.md](SHARED.md).
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
-   at `60141490`. Each push's run is read by the reviewing session, and a failure it names comes
-   first here.
+   at `60141490`. The run of `c39dd61d` is green on all three. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -227,29 +229,29 @@ from [SHARED.md](SHARED.md).
    (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface (`095bccd7`),
    `pipeline_constants` (`4e3dd60a`) and `gpu_component_array_buffer` (`2359425d`) in shaders, mesh
    shaders from Slang through SPIR-V (`e9a8508e`), and what the table then names most, in this
-   order: the four rows that can be written as they are, `overflow_transform`,
-   `many_meshlet_materials`, `test_meshlet` and `mines`; the standard material's depth and specular
-   maps, `parallax_mapping`, `specular_tint` and `deferred_rendering`'s forward-in-deferred
-   material; and Bevy's diagnostics store, `custom_diagnostic`, `enabling_disabling_diagnostic` and
-   `log_diagnostics`. The dev tools' three, `fps_overlay`, `infinite_grid` and `scene_viewer`, wait
-   on the owner's word for their crate as Feathers' do (Decision 11), and the remote protocol's
-   three stay as they are, `./bcs` being this engine's own. When the captures have settled, they are
-   compared whole with checked-in references by the workflow, a small share of pixels allowed to
-   differ between devices, as 3DEngine does for its scenes. Transmission's glass spheres are missing
-   from about one capture in four with TAA on, before `6a84286` as after it, so the cause is found
-   before that job is red for them, or the example is compared with its spheres left out and the
-   reason beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under
-   (`b548987`'s reply), untraced, and is traced before those captures are compared, as is the
-   gallery's anisotropic spheres drawing blown white under SSAO with forward rendering though they
-   have tangents and draw right under deferred, Bevy's prepass normal for an anisotropic material
-   the suspect (`edd577c`'s reply), and the camera's volumetric fog hazing the whole picture, the
-   sky with it, once a depth prepass is on the camera, which the hall works round by putting the fog
-   on the camera only while it is inside (`6a19213`'s reply). Feathers' three examples with
-   `feathers_number_input` and the three camera controllers follow the other gaps, their crates
-   allowed (Decisions 11 and 12) on the owner's word in the working session, and the four font
-   examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the scene
-   packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
-   2026-10-08.
+   order: the four rows that could be written as they were, done at `af4242ae`; the standard
+   material's depth and specular maps, `parallax_mapping`, `specular_tint` and
+   `deferred_rendering`'s forward-in-deferred material, the specular textures behind Bevy's
+   `pbr_specular_textures` feature, which pulls no crate (Decision 25); and Bevy's diagnostics
+   store, `custom_diagnostic`, `enabling_disabling_diagnostic` and `log_diagnostics`. The dev tools'
+   three, `fps_overlay`, `infinite_grid` and `scene_viewer`, wait on the owner's word for their
+   crate as Feathers' do (Decision 11), and the remote protocol's three stay as they are, `./bcs`
+   being this engine's own. When the captures have settled, they are compared whole with checked-in
+   references by the workflow, a small share of pixels allowed to differ between devices, as
+   3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture in
+   four with TAA on, before `6a84286` as after it, so the cause is found before that job is red for
+   them, or the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
+   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
+   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
+   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+   prepass is on the camera, which the hall works round by putting the fog on the camera only while
+   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
+   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
+   owner's word in the working session, and the four font examples stay missing (Decision 13).
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -299,21 +301,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-8. **The SPIR-V compute pipeline is built inside an error scope that shares the device's one stack
-   with Bevy's shader cache, so the race `e9a8508e` met at the mesh pipeline stands there.** The
-   mesh pipeline's scope was popped out of order a few runs in ten, once on the building thread and
-   once in Bevy's own `load_module` on an async compute thread, and wgpu panicked; wgpu keeps one
-   stack of scopes a device, and Bevy's cache pushes its own around each module it loads on those
-   threads, so two scopes from two threads interleave and a pop meets the other's. The compute build
-   in `spirv_compute.rs` pushes the same kind of scope while Bevy's cache loads modules at the same
-   moment of a start, the window the mesh runs showed in a few of ten and the compute tests in none
-   of eight, which is its width and not its absence. The scope goes as the mesh pipeline's did, a
-   compute pipeline that fails to build a render error as any other, closing the app unless
-   `Shaders.KeepRenderingAfterErrors` says not to, which the `ComputeTarget` remarks say in place of
-   the pipeline going unbuilt; wgpu's error sink and Bevy's `ShaderCache` are read once to confirm
-   the stack is the device's, said in the module comment where the mesh pipeline's says it. Settled
-   when the scope is gone, the remarks changed and the compute tests pass.
 
 ## Decisions
 
@@ -447,5 +434,11 @@ from [SHARED.md](SHARED.md).
     session writes nothing in it. ASKS.md and AGENTS.md's bullet on it are the reviewing session's
     and are committed with whichever batch comes next, as REVIEW.md is; a game's own files are the
     game's session's to commit.
+
+25. **A feature of a crate already in the tree that pulls no crate in is the working session's to
+    turn on; a feature that pulls a crate in waits on the owner's word as Decision 11 has it.** Read
+    by review on 2026-10-10 from the rule that nothing else is added, asked over Bevy's
+    `pbr_specular_textures`, which turns on code in a crate the tree builds, where Feathers' and the
+    dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
 
 ## Replies

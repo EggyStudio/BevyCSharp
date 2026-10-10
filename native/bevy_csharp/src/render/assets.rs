@@ -67,12 +67,12 @@ fn standard_material(
     use bevy::asset::Handle;
     use bevy::color::{Color, LinearRgba};
     use bevy::image::Image;
-    use bevy::material::AlphaMode;
-    use bevy::pbr::StandardMaterial;
+    use bevy::material::{AlphaMode, OpaqueRendererMethod};
+    use bevy::pbr::{ParallaxMappingMethod, StandardMaterial};
 
     // Resolved before the material is built, because each one needs the world and
     // building it needs the world back to insert the result.
-    let mut textures: [Option<Handle<Image>>; 12] = Default::default();
+    let mut textures: [Option<Handle<Image>>; 15] = Default::default();
     let keys = [
         config.base_color_texture,
         config.normal_map,
@@ -86,6 +86,9 @@ fn standard_material(
         config.diffuse_transmission_texture,
         config.thickness_texture,
         config.anisotropy_texture,
+        config.depth_map,
+        config.specular_texture,
+        config.specular_tint_texture,
     ];
 
     for (slot, key) in keys.iter().enumerate() {
@@ -108,6 +111,9 @@ fn standard_material(
         diffuse_transmission_texture,
         thickness_texture,
         anisotropy_texture,
+        depth_map,
+        specular_texture,
+        specular_tint_texture,
     ] = textures;
 
     let alpha_mode = match config.alpha_mode {
@@ -117,6 +123,19 @@ fn standard_material(
         4 => AlphaMode::Multiply,
         5 => AlphaMode::Premultiplied,
         _ => AlphaMode::Opaque,
+    };
+
+    let parallax_mapping_method = match config.parallax_method {
+        1 => ParallaxMappingMethod::Relief { max_steps: config.relief_steps },
+        _ => ParallaxMappingMethod::Occlusion,
+    };
+
+    // Auto follows the app's default, which `bcs_render_set_deferred` switches, so a material
+    // left at it changes with the rest and one set either way stays.
+    let opaque_render_method = match config.opaque_render_method {
+        1 => OpaqueRendererMethod::Forward,
+        2 => OpaqueRendererMethod::Deferred,
+        _ => OpaqueRendererMethod::Auto,
     };
 
     let material = StandardMaterial {
@@ -180,6 +199,19 @@ fn standard_material(
         thickness_texture,
         anisotropy_texture,
         lightmap_exposure: config.lightmap_exposure,
+        depth_map,
+        parallax_depth_scale: config.parallax_depth_scale,
+        parallax_mapping_method,
+        max_parallax_layer_count: config.parallax_layers,
+        specular_tint: Color::linear_rgba(
+            config.specular_tint[0],
+            config.specular_tint[1],
+            config.specular_tint[2],
+            config.specular_tint[3],
+        ),
+        specular_texture,
+        specular_tint_texture,
+        opaque_render_method,
         ..Default::default()
     };
 
@@ -261,8 +293,8 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
         {
             use bevy::asset::{Assets, Handle};
             use bevy::image::Image;
-            use bevy::material::AlphaMode;
-            use bevy::pbr::StandardMaterial;
+            use bevy::material::{AlphaMode, OpaqueRendererMethod};
+            use bevy::pbr::{ParallaxMappingMethod, StandardMaterial};
 
             if out.is_null() {
                 return status::NULL_ARG;
@@ -297,7 +329,20 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     _ => (0, 0.5),
                 };
 
+                // Occlusion mapping takes no steps, and reads back with Bevy's own number for relief
+                // mapping, so a material switched over starts where Bevy's would.
+                let (parallax_method, relief_steps) = match material.parallax_mapping_method {
+                    ParallaxMappingMethod::Relief { max_steps } => (1, max_steps),
+                    ParallaxMappingMethod::Occlusion => (0, 5),
+                };
+                let opaque_render_method = match material.opaque_render_method {
+                    OpaqueRendererMethod::Forward => 1,
+                    OpaqueRendererMethod::Deferred => 2,
+                    OpaqueRendererMethod::Auto => 0,
+                };
+
                 let base = material.base_color.to_linear();
+                let tint = material.specular_tint.to_linear();
                 let (scale, rotation, offset) = material.uv_transform.to_scale_angle_translation();
 
                 let config = BcsMaterialConfig {
@@ -344,6 +389,15 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     thickness_texture: key(material.thickness_texture),
                     anisotropy_texture: key(material.anisotropy_texture),
                     lightmap_exposure: material.lightmap_exposure,
+                    depth_map: key(material.depth_map),
+                    parallax_depth_scale: material.parallax_depth_scale,
+                    parallax_method,
+                    relief_steps,
+                    parallax_layers: material.max_parallax_layer_count,
+                    specular_tint: [tint.red, tint.green, tint.blue, tint.alpha],
+                    specular_texture: key(material.specular_texture),
+                    specular_tint_texture: key(material.specular_tint_texture),
+                    opaque_render_method,
                 };
 
                 unsafe { out.write(config) };
@@ -591,6 +645,24 @@ mod tests {
 
     use crate::state::loan_world;
 
+    /// Where the managed mirror (`NativeMaterialLayoutTests`) expects the fields, since a field
+    /// added on one side in another place than on the other reads every field after it wrongly
+    /// while the two sizes can still agree.
+    #[test]
+    fn the_material_config_is_laid_out_where_the_mirror_expects() {
+        use core::mem::{offset_of, size_of};
+
+        assert_eq!(offset_of!(BcsMaterialConfig, emissive), 24);
+        assert_eq!(offset_of!(BcsMaterialConfig, uv_scale), 76);
+        assert_eq!(offset_of!(BcsMaterialConfig, attenuation_color), 128);
+        assert_eq!(offset_of!(BcsMaterialConfig, lightmap_exposure), 180);
+        assert_eq!(offset_of!(BcsMaterialConfig, depth_map), 184);
+        assert_eq!(offset_of!(BcsMaterialConfig, relief_steps), 196);
+        assert_eq!(offset_of!(BcsMaterialConfig, specular_tint), 204);
+        assert_eq!(offset_of!(BcsMaterialConfig, opaque_render_method), 228);
+        assert_eq!(size_of::<BcsMaterialConfig>(), 232);
+    }
+
     fn app() -> App {
         let mut app = App::new();
         app.add_plugins(bevy::app::TaskPoolPlugin::default());
@@ -644,6 +716,15 @@ mod tests {
             thickness_texture: -1,
             anisotropy_texture: -1,
             lightmap_exposure: 250.0,
+            depth_map: -1,
+            parallax_depth_scale: 0.09,
+            parallax_method: 1,
+            relief_steps: 4,
+            parallax_layers: 32.0,
+            specular_tint: [1.0, 0.5, 0.0, 1.0],
+            specular_texture: -1,
+            specular_tint_texture: -1,
+            opaque_render_method: 1,
         };
 
         loan_world(app.world_mut(), || {
@@ -667,6 +748,12 @@ mod tests {
             assert_eq!(made.anisotropy_strength, read.anisotropy_strength);
             assert_eq!(made.lightmap_exposure, read.lightmap_exposure);
             assert_eq!(made.anisotropy_rotation, read.anisotropy_rotation);
+            assert_eq!(made.parallax_depth_scale, read.parallax_depth_scale);
+            assert_eq!((1, 4), (read.parallax_method, read.relief_steps));
+            assert_eq!(made.parallax_layers, read.parallax_layers);
+            assert_eq!(made.specular_tint, read.specular_tint);
+            assert_eq!(1, read.opaque_render_method);
+            assert_eq!(-1, read.depth_map);
             assert_eq!(-1, read.clearcoat_normal_texture);
             assert_eq!(made.reflectance, read.reflectance);
             assert_eq!(made.roughness, read.roughness);

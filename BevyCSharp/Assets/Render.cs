@@ -265,6 +265,15 @@ public static unsafe partial class Render
             ThicknessTexture = Texture(read.ThicknessTexture),
             AnisotropyTexture = Texture(read.AnisotropyTexture),
             LightmapExposure = read.LightmapExposure,
+            DepthMap = Texture(read.DepthMap),
+            ParallaxDepthScale = read.ParallaxDepthScale,
+            ParallaxMethod = (ParallaxMethod)read.ParallaxMethod,
+            ReliefSteps = read.ReliefSteps,
+            ParallaxLayers = read.ParallaxLayers,
+            SpecularTint = (read.SpecularTintR, read.SpecularTintG, read.SpecularTintB, read.SpecularTintA),
+            SpecularTexture = Texture(read.SpecularTexture),
+            SpecularTintTexture = Texture(read.SpecularTintTexture),
+            OpaqueRenderMethod = (OpaqueRenderMethod)read.OpaqueRenderMethod,
         };
         return true;
 
@@ -700,6 +709,18 @@ public static unsafe partial class Render
             ThicknessTexture = Key(settings.ThicknessTexture),
             AnisotropyTexture = Key(settings.AnisotropyTexture),
             LightmapExposure = settings.LightmapExposure,
+            DepthMap = Key(settings.DepthMap),
+            ParallaxDepthScale = settings.ParallaxDepthScale,
+            ParallaxMethod = (int)settings.ParallaxMethod,
+            ReliefSteps = settings.ReliefSteps,
+            ParallaxLayers = settings.ParallaxLayers,
+            SpecularTintR = settings.SpecularTint.R,
+            SpecularTintG = settings.SpecularTint.G,
+            SpecularTintB = settings.SpecularTint.B,
+            SpecularTintA = settings.SpecularTint.A,
+            SpecularTexture = Key(settings.SpecularTexture),
+            SpecularTintTexture = Key(settings.SpecularTintTexture),
+            OpaqueRenderMethod = (int)settings.OpaqueRenderMethod,
         };
 
         // An unset handle is -1, which the bridge reads as "no texture here".

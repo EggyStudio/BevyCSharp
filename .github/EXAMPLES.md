@@ -4,14 +4,14 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**306 written, 17 written in part, 0 can be written, 59 missing and 56 do not apply.** Of the 382 that apply, 323 can be written with what is bridged, 17 of them leaving something out.
+**309 written, 17 written in part, 0 can be written, 56 missing and 56 do not apply.** Of the 382 that apply, 326 can be written with what is bridged, 17 of them leaving something out.
 
-**142 of the 158 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**144 of the 160 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 12 |
-| [3D Rendering](#3d-rendering) | 57 | 4 | 0 | 7 | 0 | 38 of 39 |
+| [3D Rendering](#3d-rendering) | 60 | 4 | 0 | 4 | 0 | 40 of 41 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 1 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 3 | 5 | 3 of 3 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **306** | **17** | **0** | **59** | **56** | **142 of 158** |
+| **All** | **309** | **17** | **0** | **56** | **56** | **144 of 160** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -103,7 +103,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`color_grading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/color_grading.rs) | Demonstrates color grading | [written](../BevyCSharp.Examples/3d/color_grading.cs) |
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs) | Showcases how contact shadows add shadow detail | [written](../BevyCSharp.Examples/3d/contact_shadows.cs), its model spun by a press over it found with a ray, where Bevy observes picking's drag |
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/decal.rs) | Decal rendering | missing, forward decals (ForwardDecal) |
-| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | missing, a material's depth map for parallax mapping, and a material drawn forward while the rest are deferred |
+| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | [written](../BevyCSharp.Examples/3d/deferred_rendering.cs) |
 | [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/depth_of_field.rs) | Demonstrates depth of field | [written](../BevyCSharp.Examples/3d/depth_of_field.cs) |
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
@@ -122,7 +122,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`occlusion_culling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/occlusion_culling.rs) | Demonstration of Occlusion Culling | missing, the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers |
 | [`order_independent_transparency`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/order_independent_transparency.rs) | Demonstrates how to use OIT | [written](../BevyCSharp.Examples/3d/order_independent_transparency.cs) |
 | [`orthographic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/orthographic.rs) | Shows how to create a 3D orthographic view (for isometric-look in games or CAD applications) | [written](../BevyCSharp.Examples/3d/orthographic.cs) |
-| [`parallax_mapping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/parallax_mapping.rs) | Demonstrates use of a normal map and depth map for parallax mapping | missing, a depth map and parallax settings on the standard material |
+| [`parallax_mapping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/parallax_mapping.rs) | Demonstrates use of a normal map and depth map for parallax mapping | [written](../BevyCSharp.Examples/3d/parallax_mapping.cs) |
 | [`parenting`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/parenting.rs) | Demonstrates parent->child relationships and relative transformations | [written](../BevyCSharp.Examples/3d/parenting.cs) |
 | [`pbr`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/pbr.rs) | Demonstrates use of Physically Based Rendering (PBR) properties | [written](../BevyCSharp.Examples/3d/pbr.cs), its view sized for a window of 1280 by 720 at any size |
 | [`pccm`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/pccm.rs) | Demonstrates parallax-corrected cubemap reflections | [written](../BevyCSharp.Examples/3d/pccm.cs) |
@@ -138,7 +138,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`skybox`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/skybox.rs) | Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture formats. | [written in part](../BevyCSharp.Examples/3d/skybox.cs), the ASTC and ETC2 cubemaps, since the bridge does not say which compressed formats the GPU decodes |
 | [`solari`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | [written in part](../BevyCSharp.Examples/3d/solari.cs), Bevy's path tracer and its scene of many lights, which its command line chooses, and the count of the world cache's cells its panel ends with; needs a bridge built with --solari and an adapter with ray queries |
 | [`solari_reflections`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/solari_reflections.rs) | Test bed for Solari reflections. | missing, the settings of Solari's reflections its panel sets, which Config.RayTracedLighting does not reach |
-| [`specular_tint`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/specular_tint.rs) | Demonstrates specular tints and maps | missing, specular tint and the specular maps on the standard material |
+| [`specular_tint`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/specular_tint.rs) | Demonstrates specular tints and maps | [written](../BevyCSharp.Examples/3d/specular_tint.cs), its two choices drawn as the examples' own radio buttons, where Bevy draws them with Feathers |
 | [`spherical_area_lights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/spherical_area_lights.rs) | Demonstrates how point light radius values affect light behavior | [written](../BevyCSharp.Examples/3d/spherical_area_lights.cs) |
 | [`split_screen`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/split_screen.rs) | Demonstrates how to render two cameras to the same window to accomplish "split screen" | [written](../BevyCSharp.Examples/3d/split_screen.cs) |
 | [`spotlight`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/spotlight.rs) | Illustrates spot lights | [written](../BevyCSharp.Examples/3d/spotlight.cs), its cubes scattered by .NET's generator rather than Bevy's |

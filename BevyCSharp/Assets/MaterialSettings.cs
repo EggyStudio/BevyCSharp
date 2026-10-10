@@ -220,4 +220,88 @@ public sealed class MaterialSettings
     /// 250. It changes nothing on a material no lightmap is given to.
     /// </remarks>
     public float LightmapExposure { get; set; } = 1f;
+
+    /// <summary>
+    /// A height map the surface is drawn as though carved to, in its red channel, black the top and
+    /// white the bottom.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Parallax mapping. Each pixel's texture coordinates are moved along the line of sight to where
+    /// that line would meet the carved surface, so the textures sink and rise as the camera moves
+    /// while the geometry stays flat, which the mesh's silhouette still shows. It needs tangents, as
+    /// a normal map does, and a normal map drawn from the same heights, or the textures move while
+    /// the lighting stays flat.
+    /// </para>
+    /// <para>
+    /// It costs a texture sample a layer (<see cref="ParallaxLayers"/>), and a steep change in the
+    /// map shows as a jagged edge, which blurring the map softens.
+    /// </para>
+    /// </remarks>
+    public AssetHandle DepthMap { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// How deep the depth map's white is, as a share of the width the texture covers, a tenth by
+    /// default.
+    /// </summary>
+    /// <remarks>
+    /// So a texture across one world unit at a tenth is carved a tenth of a unit deep, and the same
+    /// texture across ten units a whole one. Past a tenth or so the surface looks smeared.
+    /// </remarks>
+    public float ParallaxDepthScale { get; set; } = 0.1f;
+
+    /// <summary>How the depth map's surface is found, occlusion mapping by default.</summary>
+    public ParallaxMethod ParallaxMethod { get; set; } = ParallaxMethod.Occlusion;
+
+    /// <summary>
+    /// How many steps relief mapping's search takes at most, five by default. Occlusion mapping
+    /// reads none of it.
+    /// </summary>
+    public uint ReliefSteps { get; set; } = 5;
+
+    /// <summary>
+    /// How many layers the depth map is cut into at most, sixteen by default.
+    /// </summary>
+    /// <remarks>
+    /// The most where the surface is seen edge on, and one where it is seen head on. Raising it
+    /// smooths a jagged edge at the cost of a sample a layer. Below one the depth map is not read.
+    /// </remarks>
+    public float ParallaxLayers { get; set; } = 16f;
+
+    /// <summary>
+    /// The color a non-metal's reflection is tinted, linear RGBA. White tints nothing.
+    /// </summary>
+    /// <remarks>
+    /// Modulates <see cref="Reflectance"/>, so it colors the highlights and what the surface
+    /// reflects, and a metal, which reflects in its base color, ignores it. The G-buffer has no room
+    /// for it, so a material drawn deferred shows none (<see cref="OpaqueRenderMethod"/>).
+    /// </remarks>
+    public (float R, float G, float B, float A) SpecularTint { get; set; } = (1f, 1f, 1f, 1f);
+
+    /// <summary>
+    /// How much a non-metal reflects, in the alpha channel, multiplied by
+    /// <see cref="Reflectance"/>.
+    /// </summary>
+    /// <remarks>
+    /// A full alpha counts as half, as glTF's specular extension has it, so a material whose map
+    /// should reach the whole range sets <see cref="Reflectance"/> to two. Its alpha and the tint
+    /// map's color channels can be one image given to both.
+    /// </remarks>
+    public AssetHandle SpecularTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// The reflection's tint, in the color channels, multiplied by <see cref="SpecularTint"/>.
+    /// </summary>
+    /// <remarks>Drawn forward only, as the tint is.</remarks>
+    public AssetHandle SpecularTintTexture { get; set; } = AssetHandle.None;
+
+    /// <summary>
+    /// Whether the material is drawn forward or deferred, if it is opaque or masked, as every other
+    /// material is by default.
+    /// </summary>
+    /// <remarks>
+    /// One material can be drawn forward while the rest are deferred, for what the G-buffer cannot
+    /// hold, as Bevy's deferred example draws its ground. Changing it prepares the material again.
+    /// </remarks>
+    public OpaqueRenderMethod OpaqueRenderMethod { get; set; } = OpaqueRenderMethod.Auto;
 }

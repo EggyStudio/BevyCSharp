@@ -458,6 +458,27 @@ pub struct BcsMaterialConfig {
     /// What a baked lightmap's values are multiplied by, in nits, for a lightmap stored at a
     /// scale other than the one the scene is lit at. One leaves them as they are.
     pub lightmap_exposure: f32,
+    /// Asset key of the height map parallax mapping reads, black the top and white the bottom, or
+    /// `-1`.
+    pub depth_map: i32,
+    /// How deep the depth map's white is, as a share of the texture's width on the surface.
+    pub parallax_depth_scale: f32,
+    /// `0` for parallax occlusion mapping and `1` for relief mapping.
+    pub parallax_method: i32,
+    /// How many steps relief mapping's search takes at most. Occlusion mapping reads none of it.
+    pub relief_steps: u32,
+    /// How many layers the depth map is cut into at most, the most where the surface is seen edge
+    /// on.
+    pub parallax_layers: f32,
+    /// The color a non-metal's reflection is tinted, linear RGBA.
+    pub specular_tint: [f32; 4],
+    /// Asset key of the map of how much a non-metal reflects, in its alpha channel, or `-1`.
+    pub specular_texture: i32,
+    /// Asset key of the map of the reflection's tint, in its color channels, or `-1`.
+    pub specular_tint_texture: i32,
+    /// `0` to draw an opaque or masked material as every other is drawn, `1` forward and `2`
+    /// deferred whatever the rest are.
+    pub opaque_render_method: i32,
 }
 
 /// What kind of light to spawn and how it behaves.

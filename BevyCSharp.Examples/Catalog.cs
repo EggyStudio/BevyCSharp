@@ -127,6 +127,9 @@ internal static class Catalog
         new("pcss", Pcss.Build),
         new("orthographic", Orthographic.Build),
         new("parenting", Parenting.Build),
+        new("parallax_mapping", ParallaxMapping.Build),
+        new("specular_tint", SpecularTint.Build),
+        new("deferred_rendering", DeferredRendering.Build),
 
         // Animation
         new("animated_mesh", AnimatedMesh.Build),

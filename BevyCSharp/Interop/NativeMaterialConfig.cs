@@ -143,4 +143,40 @@ public struct NativeMaterialConfig
 
     /// <summary>What a baked lightmap's values are multiplied by, in nits.</summary>
     public float LightmapExposure;
+
+    /// <summary>Asset key of the height map parallax mapping reads, or -1.</summary>
+    public int DepthMap;
+
+    /// <summary>How deep the depth map's white is, as a share of the texture's width.</summary>
+    public float ParallaxDepthScale;
+
+    /// <summary>0 for parallax occlusion mapping, 1 for relief mapping.</summary>
+    public int ParallaxMethod;
+
+    /// <summary>How many steps relief mapping's search takes at most.</summary>
+    public uint ReliefSteps;
+
+    /// <summary>How many layers the depth map is cut into at most.</summary>
+    public float ParallaxLayers;
+
+    /// <summary>Specular tint red, linear.</summary>
+    public float SpecularTintR;
+
+    /// <summary>Specular tint green, linear.</summary>
+    public float SpecularTintG;
+
+    /// <summary>Specular tint blue, linear.</summary>
+    public float SpecularTintB;
+
+    /// <summary>Specular tint alpha.</summary>
+    public float SpecularTintA;
+
+    /// <summary>Asset key of the reflectance map, or -1.</summary>
+    public int SpecularTexture;
+
+    /// <summary>Asset key of the specular tint map, or -1.</summary>
+    public int SpecularTintTexture;
+
+    /// <summary>0 as every other material, 1 forward, 2 deferred.</summary>
+    public int OpaqueRenderMethod;
 }

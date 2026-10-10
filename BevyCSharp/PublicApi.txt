@@ -2718,8 +2718,14 @@ struct Bevy.Interop.NativeMaterialConfig
   float Ior
   float LightmapExposure
   float Metallic
+  float ParallaxDepthScale
+  float ParallaxLayers
   float Reflectance
   float Roughness
+  float SpecularTintA
+  float SpecularTintB
+  float SpecularTintG
+  float SpecularTintR
   float SpecularTransmission
   float Thickness
   float UvOffsetX
@@ -2733,15 +2739,21 @@ struct Bevy.Interop.NativeMaterialConfig
   int ClearcoatNormalTexture
   int ClearcoatRoughnessTexture
   int ClearcoatTexture
+  int DepthMap
   int DiffuseTransmissionTexture
   int DoubleSided
   int EmissiveTexture
   int MetallicRoughnessTexture
   int NormalMap
   int OcclusionTexture
+  int OpaqueRenderMethod
+  int ParallaxMethod
+  int SpecularTexture
+  int SpecularTintTexture
   int SpecularTransmissionTexture
   int ThicknessTexture
   int Unlit
+  uint ReliefSteps
 struct Bevy.Interop.NativeMeshData
   float* Colors
   float* Normals
@@ -3478,20 +3490,26 @@ sealed class Bevy.MaterialSettings
   (float, float, float, float) AttenuationColor { get; set; }
   (float, float, float, float) BaseColor { get; set; }
   (float, float, float, float) Emissive { get; set; }
+  (float, float, float, float) SpecularTint { get; set; }
   AlphaMode AlphaMode { get; set; }
   AssetHandle AnisotropyTexture { get; set; }
   AssetHandle BaseColorTexture { get; set; }
   AssetHandle ClearcoatNormalTexture { get; set; }
   AssetHandle ClearcoatRoughnessTexture { get; set; }
   AssetHandle ClearcoatTexture { get; set; }
+  AssetHandle DepthMap { get; set; }
   AssetHandle DiffuseTransmissionTexture { get; set; }
   AssetHandle EmissiveTexture { get; set; }
   AssetHandle MetallicRoughnessTexture { get; set; }
   AssetHandle NormalMap { get; set; }
   AssetHandle OcclusionTexture { get; set; }
+  AssetHandle SpecularTexture { get; set; }
+  AssetHandle SpecularTintTexture { get; set; }
   AssetHandle ThicknessTexture { get; set; }
   AssetHandle TransmissionTexture { get; set; }
   MaterialSettings()
+  OpaqueRenderMethod OpaqueRenderMethod { get; set; }
+  ParallaxMethod ParallaxMethod { get; set; }
   bool DoubleSided { get; set; }
   bool Unlit { get; set; }
   float AlphaCutoff { get; set; }
@@ -3503,12 +3521,15 @@ sealed class Bevy.MaterialSettings
   float DiffuseTransmission { get; set; }
   float LightmapExposure { get; set; }
   float Metallic { get; set; }
+  float ParallaxDepthScale { get; set; }
+  float ParallaxLayers { get; set; }
   float Reflectance { get; set; }
   float RefractiveIndex { get; set; }
   float Roughness { get; set; }
   float Thickness { get; set; }
   float Transmission { get; set; }
   float UvRotation { get; set; }
+  uint ReliefSteps { get; set; }
 static class Bevy.MemoryGuard
   const int ExitCode = 86
   const string Variable = "BCS_MEMORY_CAP_GB"
@@ -3793,6 +3814,10 @@ sealed class Bevy.On<TEvent>
   TEvent? Event { get; }
   World World { get; }
   void Propagate(bool propagate)
+enum Bevy.OpaqueRenderMethod : int
+  Auto = 0
+  Deferred = 2
+  Forward = 1
 sealed class Bevy.OrderAttribute : Attribute
   OrderAttribute(int order)
   int Order { get; }
@@ -3823,6 +3848,9 @@ enum Bevy.OverrideKind : int
   Remove = 2
   Rename = 4
   Set = 0
+enum Bevy.ParallaxMethod : int
+  Occlusion = 0
+  Relief = 1
 readonly struct Bevy.PassTiming : IEquatable<PassTiming>
   PassTiming(string Name, double? CpuMilliseconds, double? GpuMilliseconds)
   bool Equals(PassTiming other)

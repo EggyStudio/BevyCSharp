@@ -62,6 +62,12 @@ internal static class MaterialJson
         if (settings.AnisotropyStrength != plain.AnisotropyStrength) json.WriteNumber("anisotropyStrength", settings.AnisotropyStrength);
         if (settings.AnisotropyRotation != plain.AnisotropyRotation) json.WriteNumber("anisotropyRotation", settings.AnisotropyRotation);
         if (settings.LightmapExposure != plain.LightmapExposure) json.WriteNumber("lightmapExposure", settings.LightmapExposure);
+        if (settings.ParallaxDepthScale != plain.ParallaxDepthScale) json.WriteNumber("parallaxDepthScale", settings.ParallaxDepthScale);
+        if (settings.ParallaxMethod != plain.ParallaxMethod) json.WriteString("parallaxMethod", settings.ParallaxMethod.ToString());
+        if (settings.ReliefSteps != plain.ReliefSteps) json.WriteNumber("reliefSteps", settings.ReliefSteps);
+        if (settings.ParallaxLayers != plain.ParallaxLayers) json.WriteNumber("parallaxLayers", settings.ParallaxLayers);
+        if (settings.SpecularTint != plain.SpecularTint) Four(json, "specularTint", settings.SpecularTint);
+        if (settings.OpaqueRenderMethod != plain.OpaqueRenderMethod) json.WriteString("opaqueRenderMethod", settings.OpaqueRenderMethod.ToString());
 
         // The finer maps, each written only where one is set, as every slot is.
         Texture(json, "clearcoatTexture", settings.ClearcoatTexture, references);
@@ -71,6 +77,9 @@ internal static class MaterialJson
         Texture(json, "diffuseTransmissionTexture", settings.DiffuseTransmissionTexture, references);
         Texture(json, "thicknessTexture", settings.ThicknessTexture, references);
         Texture(json, "anisotropyTexture", settings.AnisotropyTexture, references);
+        Texture(json, "depthMap", settings.DepthMap, references);
+        Texture(json, "specularTexture", settings.SpecularTexture, references);
+        Texture(json, "specularTintTexture", settings.SpecularTintTexture, references);
         json.WriteEndObject();
     }
 
@@ -111,6 +120,14 @@ internal static class MaterialJson
         if (json.TryGetProperty("anisotropyStrength", out var strength)) settings.AnisotropyStrength = strength.GetSingle();
         if (json.TryGetProperty("anisotropyRotation", out var turn)) settings.AnisotropyRotation = turn.GetSingle();
         if (json.TryGetProperty("lightmapExposure", out var exposure)) settings.LightmapExposure = exposure.GetSingle();
+        if (json.TryGetProperty("parallaxDepthScale", out var depth)) settings.ParallaxDepthScale = depth.GetSingle();
+        if (json.TryGetProperty("parallaxMethod", out var method) && Enum.TryParse<ParallaxMethod>(method.GetString(), out var parallax))
+            settings.ParallaxMethod = parallax;
+        if (json.TryGetProperty("reliefSteps", out var steps)) settings.ReliefSteps = steps.GetUInt32();
+        if (json.TryGetProperty("parallaxLayers", out var layers)) settings.ParallaxLayers = layers.GetSingle();
+        if (Floats(json, "specularTint", 4) is { } specular) settings.SpecularTint = (specular[0], specular[1], specular[2], specular[3]);
+        if (json.TryGetProperty("opaqueRenderMethod", out var drawn) && Enum.TryParse<OpaqueRenderMethod>(drawn.GetString(), out var render))
+            settings.OpaqueRenderMethod = render;
 
         settings.ClearcoatTexture = Image(json, "clearcoatTexture");
         settings.ClearcoatRoughnessTexture = Image(json, "clearcoatRoughnessTexture");
@@ -119,6 +136,9 @@ internal static class MaterialJson
         settings.DiffuseTransmissionTexture = Image(json, "diffuseTransmissionTexture");
         settings.ThicknessTexture = Image(json, "thicknessTexture");
         settings.AnisotropyTexture = Image(json, "anisotropyTexture");
+        settings.DepthMap = Image(json, "depthMap");
+        settings.SpecularTexture = Image(json, "specularTexture");
+        settings.SpecularTintTexture = Image(json, "specularTintTexture");
         return settings;
     }
 

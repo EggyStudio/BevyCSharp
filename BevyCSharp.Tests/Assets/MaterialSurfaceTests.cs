@@ -8,8 +8,8 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// Covers a material's finer surface, reflectance, clearcoat, transmission, attenuation,
-/// anisotropy and the exposure a lightmap is shown at, through the bridge and through the JSON a
-/// scene or a material file holds.
+/// anisotropy, the exposure a lightmap is shown at, parallax mapping, the specular tint and how the
+/// material is drawn, through the bridge and through the JSON a scene or a material file holds.
 /// </summary>
 [Collection("engine")]
 public sealed class MaterialSurfaceTests
@@ -28,6 +28,12 @@ public sealed class MaterialSurfaceTests
         AnisotropyStrength = 0.7f,
         AnisotropyRotation = 0.3f,
         LightmapExposure = 250f,
+        ParallaxDepthScale = 0.09f,
+        ParallaxMethod = ParallaxMethod.Relief,
+        ReliefSteps = 4,
+        ParallaxLayers = 32f,
+        SpecularTint = (1f, 0.5f, 0f, 1f),
+        OpaqueRenderMethod = OpaqueRenderMethod.Forward,
     };
 
     [SkippableFact]
@@ -42,6 +48,7 @@ public sealed class MaterialSurfaceTests
         {
             var glassy = Glassy();
             glassy.AnisotropyTexture = Render.CreateImage([128, 255, 255, 255], 1, 1, srgb: false);
+            glassy.SpecularTintTexture = Render.CreateImage([255, 128, 0, 255], 1, 1);
             var material = Render.CreateMaterial(glassy);
             Assert.True(Render.TryReadMaterial(material, out read));
         });
@@ -62,12 +69,21 @@ public sealed class MaterialSurfaceTests
         Assert.Equal(made.AnisotropyStrength, read.AnisotropyStrength, 4);
         Assert.Equal(made.AnisotropyRotation, read.AnisotropyRotation, 4);
 
-        // Last in the mirror, after the maps, so it reads true only if every field before it lines up.
         Assert.Equal(made.LightmapExposure, read.LightmapExposure, 4);
+        Assert.Equal(made.ParallaxDepthScale, read.ParallaxDepthScale, 4);
+        Assert.Equal((ParallaxMethod.Relief, 4u), (read.ParallaxMethod, read.ReliefSteps));
+        Assert.Equal(made.ParallaxLayers, read.ParallaxLayers, 4);
+        Assert.Equal(made.SpecularTint, read.SpecularTint);
 
-        // The map in the last slot of the mirror comes back in that slot and no other, which a
+        // Last in the mirror, after the maps, so it reads true only if every field before it lines up.
+        Assert.Equal(OpaqueRenderMethod.Forward, read.OpaqueRenderMethod);
+
+        // The maps in the last slots of each group come back in those slots and no other, which a
         // field out of step between the two sides would move.
         Assert.True(read.AnisotropyTexture.IsValid);
+        Assert.True(read.SpecularTintTexture.IsValid);
+        Assert.False(read.SpecularTexture.IsValid);
+        Assert.False(read.DepthMap.IsValid);
         Assert.False(read.ThicknessTexture.IsValid);
         Assert.False(read.ClearcoatTexture.IsValid);
     }
@@ -93,6 +109,13 @@ public sealed class MaterialSurfaceTests
         Assert.Equal(0.7f, read.AnisotropyStrength);
         Assert.Equal(250f, read.LightmapExposure);
         Assert.False(plain.RootElement.TryGetProperty("lightmapExposure", out _));
+        Assert.Equal(0.09f, read.ParallaxDepthScale);
+        Assert.Equal((ParallaxMethod.Relief, 4u), (read.ParallaxMethod, read.ReliefSteps));
+        Assert.Equal(32f, read.ParallaxLayers);
+        Assert.Equal((1f, 0.5f, 0f, 1f), read.SpecularTint);
+        Assert.Equal(OpaqueRenderMethod.Forward, read.OpaqueRenderMethod);
+        Assert.False(plain.RootElement.TryGetProperty("parallaxMethod", out _));
+        Assert.False(plain.RootElement.TryGetProperty("opaqueRenderMethod", out _));
 
         // Infinity, a clear material's distance, is left out and read back as itself.
         Assert.False(plain.RootElement.TryGetProperty("attenuationDistance", out _));

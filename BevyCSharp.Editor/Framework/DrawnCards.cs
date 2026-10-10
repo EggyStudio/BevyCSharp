@@ -405,6 +405,36 @@ internal static class DrawnCards
                 new FieldHints(Tooltip: "Radians the stretch is turned by, from the mesh's tangent.", Minimum: -3.1416d, Maximum: 3.1416d, Foldout: "Surface", FoldoutOpen: false)),
             Field("Lightmap", FieldKind.Float, settings => settings.LightmapExposure, (settings, value) => Number(value, number => settings.LightmapExposure = number),
                 Folded("What a baked lightmap's values are multiplied by, in nits, where one is the stored value.")),
+            Field("Spec. tint", FieldKind.Color, settings => Linear(settings.SpecularTint), (settings, value) =>
+            {
+                if (value is not Color color) return false;
+                settings.SpecularTint = (color.R, color.G, color.B, color.A);
+                return true;
+            }, new FieldHints(Tooltip: "The color a non-metal's reflection is tinted, drawn forward only.", Foldout: "Surface", FoldoutOpen: false)),
+            Field("Depth scale", FieldKind.Float, settings => settings.ParallaxDepthScale, (settings, value) => Number(value, number => settings.ParallaxDepthScale = number),
+                new FieldHints(Tooltip: "How deep the depth map's white is, as a share of the width the texture covers.", Minimum: 0d, Maximum: 0.3d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Parallax", FieldKind.Enum, settings => settings.ParallaxMethod.ToString(), (settings, value) =>
+            {
+                if (!Enum.TryParse<ParallaxMethod>(value.ToString(), out var method)) return false;
+                settings.ParallaxMethod = method;
+                return true;
+            }, new FieldHints(Tooltip: "How the depth map's surface is found, occlusion mapping or relief mapping's search.", Foldout: "Surface", FoldoutOpen: false),
+                Enum.GetNames<ParallaxMethod>()),
+            Field("Relief steps", FieldKind.Int, settings => (int)settings.ReliefSteps, (settings, value) =>
+            {
+                if (value is not int steps || steps < 0) return false;
+                settings.ReliefSteps = (uint)steps;
+                return true;
+            }, new FieldHints(Tooltip: "How many steps relief mapping's search takes at most.", Minimum: 0d, Maximum: 16d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Layers", FieldKind.Float, settings => settings.ParallaxLayers, (settings, value) => Number(value, number => settings.ParallaxLayers = number),
+                new FieldHints(Tooltip: "How many layers the depth map is cut into at most, the most where the surface is seen edge on.", Minimum: 0d, Maximum: 64d, Foldout: "Surface", FoldoutOpen: false)),
+            Field("Drawn", FieldKind.Enum, settings => settings.OpaqueRenderMethod.ToString(), (settings, value) =>
+            {
+                if (!Enum.TryParse<OpaqueRenderMethod>(value.ToString(), out var method)) return false;
+                settings.OpaqueRenderMethod = method;
+                return true;
+            }, new FieldHints(Tooltip: "Forward or deferred, for an opaque or masked material, or as every other material is.", Foldout: "Surface", FoldoutOpen: false),
+                Enum.GetNames<OpaqueRenderMethod>()),
 
             // The texture slots, each picked in the grid from the images under the asset root and
             // inside models, named short enough for the name column, with what each is in full on
@@ -423,6 +453,9 @@ internal static class DrawnCards
             Texture("Scatter map", "Where light passes through and scatters, in the alpha channel.", settings => settings.DiffuseTransmissionTexture, (settings, map) => settings.DiffuseTransmissionTexture = map, "Surface maps"),
             Texture("Thick map", "How thick the material is, in the green channel.", settings => settings.ThicknessTexture, (settings, map) => settings.ThicknessTexture = map, "Surface maps"),
             Texture("Stretch map", "The stretch's direction in red and green and its strength in blue.", settings => settings.AnisotropyTexture, (settings, map) => settings.AnisotropyTexture = map, "Surface maps"),
+            Texture("Depth map", "Heights the surface is drawn as though carved to, in the red channel, black the top.", settings => settings.DepthMap, (settings, map) => settings.DepthMap = map, "Surface maps"),
+            Texture("Spec. map", "How much a non-metal reflects, in the alpha channel.", settings => settings.SpecularTexture, (settings, map) => settings.SpecularTexture = map, "Surface maps"),
+            Texture("Tint map", "The reflection's tint, in the color channels.", settings => settings.SpecularTintTexture, (settings, map) => settings.SpecularTintTexture = map, "Surface maps"),
         };
 
         var schema = new ComponentSchema("Material", "Bevy.StandardMaterial", static () => -1, fields);
