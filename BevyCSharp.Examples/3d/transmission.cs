@@ -1,4 +1,4 @@
-// Bevy's transmission example, examples/3d/transmission.rs at v0.19.1, by Bevy's contributors under
+// Bevy's transmission example, examples/3d/transmission.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using System.Globalization;
@@ -19,7 +19,10 @@ internal static class Transmission
     private static Entity _camera;
     private static float _diffuse, _specular, _thickness, _ior, _roughness, _reflectance;
     private static bool _autoCamera, _hdr, _depthPrepass, _taa;
+    // Bevy's state.transmission, the steps and quality kept apart from the camera, which has
+    // screen-space transmission only while it is on.
     private static ulong _steps;
+    private static bool _transmissionOn;
     private static ScreenSpaceTransmissionRef.QualityVariant _quality;
     private static Random _random = new();
 
@@ -128,7 +131,7 @@ internal static class Transmission
             25f);
 
         var transmission = ecs.Get<ScreenSpaceTransmissionRef>(_camera) ?? ecs.Insert<ScreenSpaceTransmissionRef>(_camera);
-        (_steps, _quality) = (transmission.Steps, transmission.Quality);
+        (_steps, _quality, _transmissionOn) = (transmission.Steps, transmission.Quality, true);
 
         ecs.Add(Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new TransmissionDisplay());
     }
@@ -197,13 +200,29 @@ internal static class Transmission
         }
         if (input.KeyPressed(Key.T)) { _taa = !_taa; ApplyPost(); }
 
-        if (input.KeyPressed(Key.O) && _steps > 0) SetSteps(ecs, _steps - 1);
-        if (input.KeyPressed(Key.P) && _steps < 4) SetSteps(ecs, _steps + 1);
+        if (input.KeyPressed(Key.O) && _steps > 0) _steps--;
+        if (input.KeyPressed(Key.P) && _steps < 4) _steps++;
         foreach (var (key, quality) in new[] { (Key.J, Quality.Low), (Key.K, Quality.Medium), (Key.L, Quality.High), (Key.Semicolon, Quality.Ultra) })
         {
-            if (!input.KeyPressed(key)) continue;
-            _quality = quality;
-            ecs.Wrap<ScreenSpaceTransmissionRef>(_camera).Quality = quality;
+            if (input.KeyPressed(key)) _quality = quality;
+        }
+
+        if (ecs.Get<ScreenSpaceTransmissionRef>(_camera) is { } transmission) (transmission.Steps, transmission.Quality) = (_steps, _quality);
+
+        // Space takes screen-space transmission off the camera and gives it back with the steps
+        // and quality kept.
+        if (input.KeyPressed(Key.Space))
+        {
+            _transmissionOn = !_transmissionOn;
+            if (_transmissionOn)
+            {
+                var given = ecs.Insert<ScreenSpaceTransmissionRef>(_camera);
+                (given.Steps, given.Quality) = (_steps, _quality);
+            }
+            else
+            {
+                ecs.Get<ScreenSpaceTransmissionRef>(_camera)?.Remove();
+            }
         }
 
         // The camera turns slowly by itself until an arrow key takes it.
@@ -219,6 +238,7 @@ internal static class Transmission
         ecs.Set(_camera, new Transform(turn * (camera.Translation * MathF.Exp(distance)), turn * camera.Rotation, camera.Scale));
 
         var text = string.Create(CultureInfo.InvariantCulture, $"""
+                     Space  Screen Space Specular Transmission: {(_transmissionOn ? "ON" : "OFF")}
              J / K / L / ;  Screen Space Specular Transmissive Quality: {_quality}
                      O / P  Screen Space Specular Transmissive Steps: {_steps}
                      1 / 2  Diffuse Transmission: {_diffuse:0.00}
@@ -235,12 +255,6 @@ internal static class Transmission
 
             """);
         foreach (var display in ecs.EntitiesWith<TransmissionDisplay>()) Ui.SetText(display, text);
-    }
-
-    private static void SetSteps(EcsWorld ecs, ulong steps)
-    {
-        _steps = steps;
-        ecs.Wrap<ScreenSpaceTransmissionRef>(_camera).Steps = steps;
     }
 
     // The flame and its light waver together, the flame the one of the two with a mesh, as Bevy's
