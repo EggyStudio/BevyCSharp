@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `37b2118f`. One commit, item 1's warnings. An assembly's behaviors are registered
+Reviewed up to `c9c460df`. One commit, and step g is whole. ReSTIR is on with ray-traced lighting,
+chosen by measurement as item 3 asked: a Cornell box lit by a panel at 1280 by 720 on the RTX 4070
+took 0.42 ms of the GPU in Solari's passes with it off and 1.69 ms with it on, and the mean change
+of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on, the grain plain to see
+without it; Bevy leaves it off for a denoiser, and its denoiser is DLSS's, which the bridge does not
+build, so `bcs_render_set_ray_traced_lighting` turns it on, a test holding a traced camera to it,
+the remarks and `docs/ray-tracing.md` giving the numbers and an example. The reply disputes item 3's
+second half, the fields reaching `Config`, and is right: the light samples, the bounces and the
+world cache are Bevy's per camera, reached through the reflected `SolariLightingRef`, and a copy in
+`Config` would be a second home for what the camera holds; item 3 is amended. With it, g's list is
+read whole: the documents name 0.20, naga_oil is named nowhere in the bridge, BUILDING.md's package
+table has the weather and not the embedding, THIRD-PARTY-NOTICES.md names both, EXAMPLES.md is
+written from the lock with the 23 new examples in `triage.tsv`, and the release notes are the
+commits' sentences, as BUILDING.md has them, each change a game's author sees named in the commit
+that made it. Step h is the owner's: 29 commits since `c7f1cbc6` wait for a push, and the pack run
+for 0.4 follows a green run with Verdict 6's fix in it (Decision 8). Item 4 next, box_shadow's
+re-port first, while the push and the pack are the owner's.
+
+Before it, one commit came to be read, item 1's warnings. An assembly's behaviors are registered
 together and nothing leaves three of them out of an app, so `EngineHarness` with discovered
 behaviors adds `Screen` at its menu beside them, where none of the three runs, a test that sets the
 state adding it again before the run, and the two tests of an app without the state add the
@@ -33,42 +51,6 @@ about what each port follows, item 3's order carried out as written. The compile
 reads `Once`. And two moves, `AudioTests` into Assets and `StateTests` into Core, renames whole with
 nothing in them changed, two entries off N 1.4's list, which stands at 106. The rest of g and h
 remain, the release notes among them.
-
-Before it, two commits came to be read, step f's second half, and a fault of Bevy's the soak found.
-The captures: 193 of 279 within 0.02 and 54 above 0.05, each looked at and named, most moving or
-random at the frame; scroll, anchor_layout and text_wrap_debug laid out as 0.20 lays out its own,
-checked against Bevy's source built alone, as are pcss's trunk, pccm's walls and the panels that
-moved with them; transmission black once at frame 120 with its pipelines ready at 163, matching
-since the capture waits; headless_renderer saving a black picture on 0.20, copying forty frames in
-whether or not its pipelines had compiled, waiting for them as well in `13f06dd7` and matching
-within 0.003; six read blank by the check and as flat as their pictures, the check's fault. Right,
-each difference named and the hard ones set against bare Bevy, which is what f asked. The feature
-test passed every station under its scope at 4.26 GB, Courtyard from the package played to a win,
-and the soak leveled off for three of the four while Swarm's entity indices climbed from 1,024 to
-16,384 with 500 alive, traced to Bevy: 0.20.0's `World::despawn_all_where` despawns each match
-without freeing its index and then frees those whose old id still reads as despawned, which none
-does once the generation has moved on, so every index it despawns is lost for the world's life,
-262,144 in 3,000 frames from Bevy alone against 256 one at a time, reached through what a state
-scopes, a sound ended on a device and a screenshot taken. `384f9150`: `ecs::despawn_all` despawns
-the same entities first, one at a time, a system before Bevy's in the same set for every state the
-bridge adds; a sound told to despawn at its end is played once and marked, since Bevy's marker and
-set are private and a sound can end on the device's thread between two looks, and is despawned when
-its sink is empty, so its settings read `Once` and `PlaybackMode.Despawn`'s remarks say so; a
-screenshot is despawned at the end of its frame, before Bevy's at the start of the next; a native
-test holds Bevy to the fault and fails when a release mends it, which is when the module goes, three
-hold the bridge's despawns, and two managed tests hold four thousand despawned by state within 1,024
-indices and 1,200 sounds within 512; Swarm's soak held at 1,024 for five minutes. Right, the shape
-for a fault of the followed engine's, ahead of Bevy rather than in place of it, with the test that
-says when it can go. Three things. The release notes at step g name the index loss and that a
-sound's settings read `Once`, since a game's author reading them through the wrappers sees it.
-`SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox` joins `SpirvComputeTests` at
-the compile limit under load, in item 1. And the 115 ports whose heads say v0.20.0 and whose code
-follows 0.19.1 are ordered in item 3: the heads made true with the next commit, the pictures written
-again on 0.20 where the difference was named as Bevy's, and each ported to 0.20's code under item 4
-in the order of how much Bevy changed it, box_shadow first; the owner may order the whole re-port
-before 0.4 instead, which this file will then carry. The exit's comment gives its eight runs. The
-suite: 1,283 passed and 2 skipped of 1,287, N 3.3 mended within the batch, the other failure the
-limit. Steps g and h remain.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -95,9 +77,9 @@ from [SHARED.md](SHARED.md).
    quieted at `37b2118f`, the harness adding `Screen` beside the behaviors it discovers, so the
    warning shows once, from the test that asks for it, and the third repeated line is the 67 errors
    `ShaderMaterialTests` asks for (Decision 7). Package 0.4 is packed on Bevy 0.20 (Decision 8) once
-   Verdict 6's run is green and item 3's remaining steps are in, and Verdicts 2 and 3 settle on that
-   pack run's page. Each push's run is read by the reviewing session, and a failure it names comes
-   first here.
+   a push's run is green with Verdict 6's fix in it, item 3's steps being in at `c9c460df`, and
+   Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
+   session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -145,7 +127,9 @@ from [SHARED.md](SHARED.md).
    focus and propagates, `FocusCause::Auto` is new, `Node` requires `EmSize`, and the default font
    size is `rem(1)` where it was `px(20)`. `SolariLighting` has ReSTIR off by default and new fields
    (world cache size, light samples, temporal accumulation, bounces); `restir` is chosen by
-   measurement on the comparison page and the fields reach `Config.RayTracedLighting`.
+   measurement on the comparison page, and the fields stay the camera's, reached through its
+   reflected `SolariLightingRef`, since a copy in `Config` would be a second home for what the
+   camera holds (`c9c460df`).
 
    **The embedding ported in.** `bevy_embedded_assets` 0.16 targets 0.19 alone; its build script
    (139 lines, reading `BEVY_ASSET_PATH`, which `build/build-native.sh --embed` already sets), its
@@ -420,17 +404,16 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**ReSTIR is on with ray-traced lighting, chosen by measurement, and Bevy's other settings for it are
-the camera's reflected `SolariLightingRef`.** Item 3 asked for `restir` chosen by measurement and
-the fields brought to the config. A Cornell box lit by a panel, drawn at 1280 by 720 on this
-machine's RTX 4070, took 0.42 ms of the GPU in Solari's passes with ReSTIR off and 1.69 ms with it
-on, and the mean change of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on
-at the same brightness, the grain plain to see without it. Bevy leaves it off for a denoiser to
-clean the picture, and Bevy's denoiser is DLSS's, which the bridge does not build, so
-`bcs_render_set_ray_traced_lighting` turns it on. The other fields, the light samples, the bounces
-and the world cache, are Bevy's per camera and reach a game through the reflected wrapper, which
-`Render.SetRayTracedLighting`'s remarks and `docs/ray-tracing.md` name with an example, so `Config`
-takes none of them, since a copy there would be a second home for what the camera holds.
-`RayTracingTests.RayTracedLightingReusesItsSamples` holds a traced camera to ReSTIR on. Every test
-that traces rays passes with it, the ray tracing and SPIR-V compute tests, ten of them here, and so
-do the norm's.
+**box_shadow waits on Feathers, so the re-ports go by size among the 95 of the 115 that do not use
+it.** Twenty are built on Feathers in 0.20, its panes, number inputs and radio buttons in place of
+the helpers the ports draw (box_shadow, color_grading, order_independent_transparency,
+display_and_visibility, ssr, light_textures, clustered_decals, animation_masks,
+light_probe_blending, contact_shadows, pcss, animation_graph, split_screen, wireframe_2d, mirror,
+pccm, clustered_decal_maps, 2d_shapes, mixed_lighting and clearcoat), and item 4 bridges Feathers
+after the other gaps, so those twenty are ported with it. The other 95 go in the order of how much
+Bevy changed them, directional_navigation_overrides first, with directional_navigation, whose input
+it shares, in this commit. In 0.20 their buttons carry the widgets' `Button` and a tab index, so a
+click moves the focus to the button, a click draws the focus again, the first button is focused by
+`AutoFocus`, and the overrides' pages are `Inherited` with the grid pages' caption at 10 px. Most of
+what else Bevy changed in them is `bsn!` in place of spawns, which a C# port has no counterpart of.
+Both are headed v0.20.0 and captured again.

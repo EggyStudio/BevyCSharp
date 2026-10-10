@@ -1,5 +1,5 @@
 // Bevy's directional_navigation example, examples/ui/navigation/directional_navigation.rs at
-// v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+// v0.20.0, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 using Bevy.Reflected;
@@ -61,7 +61,8 @@ internal static class DirectionalNavigationExample
             if (first.IsNone) first = button;
         }
 
-        Ui.Focus(first);
+        // Bevy's init_focus, the first button focused as it is spawned.
+        ecs.Insert<AutoFocusRef>(first);
     }
 }
 
@@ -95,7 +96,8 @@ internal static class NavigationInput
     }
 
     // The focus drawn, as Bevy's InputFocusVisible asks, the search's settings, and Bevy's
-    // universal_button_click_behavior, a click showing the button pressed for a moment.
+    // universal_button_click_behavior, a click showing the button pressed for a moment and the
+    // focus drawn again, which a click with the pointer hides.
     internal static void Setup(EcsWorld ecs, float minAlignment, float maxDistance)
     {
         (ecs.Resource<InputFocusVisibleRef>() ?? ecs.InsertResource<InputFocusVisibleRef>()).Value = true;
@@ -108,6 +110,7 @@ internal static class NavigationInput
             on.Ecs.Wrap<BackgroundColorRef>(on.Entity).Value = Pressed[button.Page];
             on.Ecs.Set(on.Entity, button with { Reset = GameTimer.FromSeconds(0.3f, TimerMode.Once) });
             on.Propagate(false);
+            if (on.Ecs.Resource<InputFocusVisibleRef>() is { } shown) shown.Value = true;
         });
     }
 
@@ -136,7 +139,8 @@ internal static class NavigationInput
         ecs.Add(Panel("Last Key: None", null, Length.Px(20f), Color.FromSrgb(0.5f, 0.1f, 0.5f, 0.8f)), new KeyDisplay());
     }
 
-    // A button the search reaches, Bevy's AutoDirectionalNavigation on it, named for the focus display.
+    // A button the search reaches, Bevy's AutoDirectionalNavigation on it, named for the focus
+    // display, and a widget's button with a tab index, so a click on it moves the focus to it.
     internal static Entity SpawnButton(EcsWorld ecs, string name, float left, float top, float width, float height, int page)
     {
         var button = Ui.SpawnNode(new UiSettings
@@ -154,6 +158,8 @@ internal static class NavigationInput
             Interactive = true,
         });
         ecs.Insert<AutoDirectionalNavigationRef>(button);
+        ecs.Insert<ButtonRef>(button);
+        ecs.Insert<TabIndexRef>(button);
         ecs.Add(button, new NavigationButton { Page = page });
         ecs.SetName(button, name);
         ecs.SetParent(Ui.SpawnText(name, new UiSettings(), new UiTextSettings { Justify = TextJustify.Center }), button);

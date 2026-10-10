@@ -1,8 +1,9 @@
 // Bevy's directional_navigation_overrides example,
-// examples/ui/navigation/directional_navigation_overrides.rs at v0.19.1, by Bevy's contributors
+// examples/ui/navigation/directional_navigation_overrides.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -53,7 +54,7 @@ internal static class DirectionalNavigationOverrides
         for (var page = 0; page < 3; page++)
         {
             var node = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f) });
-            ecs.Add(node, page == 0 ? Visibility.Visible : Visibility.Hidden);
+            ecs.Add(node, page == 0 ? Visibility.Inherited : Visibility.Hidden);
 
             var (buttons, texts) = page == 1 ? TrianglePage(ecs, page) : GridPage(ecs, page);
             foreach (var child in buttons.Concat(texts)) ecs.SetParent(child, node);
@@ -90,7 +91,7 @@ internal static class DirectionalNavigationOverrides
         Navigation.AddEdge(pages[2][0], pages[1][3], CompassOctant.West);
         Navigation.AddEdge(pages[2][11], pages[0][0], CompassOctant.East, bothWays: true);
 
-        Ui.Focus(pages[0][0]);
+        ecs.Insert<AutoFocusRef>(pages[0][0]);
     }
 
     // Bevy's setup_buttons_for_grid_page, its buttons and the texts saying where each edge leads.
@@ -102,7 +103,7 @@ internal static class DirectionalNavigationOverrides
         var previous = page == 0 ? 3 : page;
         List<Entity> texts =
         [
-            SmallText($"Currently on Page {page + 1}", 650, 20, TextJustify.Center),
+            SmallText($"Currently on Page {page + 1}", 650, 10, TextJustify.Center),
             SmallText($"Page {previous} << ", 310, 120, TextJustify.Right),
             SmallText($">> Page {(page + 1) % 3 + 1}", 1000, 525, TextJustify.Left),
             SmallText("> Btn 2-1", 1000, 120, TextJustify.Left),
@@ -154,7 +155,7 @@ internal static class DirectionalNavigationOverrides
     {
         var page = ecs.ParentOf(next);
         if (page.IsNone) return;
-        ecs.Set(page, Visibility.Visible);
+        ecs.Set(page, Visibility.Inherited);
 
         if (previous is { } left && ecs.ParentOf(left) is var leftPage && !leftPage.IsNone && leftPage != page)
             ecs.Set(leftPage, Visibility.Hidden);
