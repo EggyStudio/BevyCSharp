@@ -47,6 +47,13 @@ public sealed class SampleLightTests
     /// The sample's ray-traced occlusion, painted in place of the picture, is dark where a box
     /// hangs just above the floor and open far from it.
     /// </summary>
+    /// <remarks>
+    /// Its program is compiled by slangc to SPIR-V with ray queries, and its pipeline then by the
+    /// driver, which a quiet machine does in a few seconds. Under the whole suite the compile once
+    /// outran the run's 1,200 frames and the run ended still compiling, and it passed alone, so the
+    /// limit is one a loaded machine's compile can outrun, as
+    /// <c>SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera</c>'s is.
+    /// </remarks>
     [SkippableFact]
     public void TheSamplesTracedOcclusionDarkensTheFloorUnderABox()
     {

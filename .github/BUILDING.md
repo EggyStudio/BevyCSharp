@@ -37,7 +37,10 @@ render world runs its systems in, within what their constraints allow, as Bevy's
 leans on an order nothing states. An app with a seed says so in its log as it starts. Under one,
 `SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` once reached its 1,200th frame still
 compiling, slangc and Solari's pipelines outrunning twenty seconds under the suite's load, and
-passed alone with the same seed, so a run on a loaded machine may see it, as its remarks say.
+passed alone with the same seed.
+`SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox`, whose ray-query program
+slangc compiles to SPIR-V, did the same in a run with no seed and passed alone, so a run on a loaded
+machine may see either, as their remarks say.
 
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.
