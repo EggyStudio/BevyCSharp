@@ -439,9 +439,10 @@ row in EXAMPLES.md links Bevy's source at that release. The package workflow cap
 on the Linux bridge it built.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
-headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is
-what it printed, as `<name>.txt` beside the pictures, which its row in EXAMPLES.md links. `--window`
-opens an empty window for one that reads keys, as Bevy's does, and `--printing` lists them.
+headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is what
+it printed, followed by the lines it logged through `Log`, as `<name>.txt` beside the pictures,
+which its row in EXAMPLES.md links. `--window` opens an empty window for one that reads keys, as
+Bevy's does, and `--printing` lists them.
 
 ## The guide
 

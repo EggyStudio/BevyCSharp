@@ -10,7 +10,8 @@
 # The picture goes to .github/assets/examples/<example>.webp unless another path is given, written
 # by ImageMagick, or by libwebp's cwebp where ImageMagick was built without WebP. An
 # example with nothing to draw is run headless instead, and what it prints goes beside where the
-# picture would, as <example>.txt.
+# picture would, as <example>.txt, followed by what it logged itself, as Bevy's own print with info!,
+# the lines of the log under the target C# logs with, without their colors and times.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,7 +19,10 @@ program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 if "$program" --printing | grep -qx "$1"; then
     out="${2:-.github/assets/examples/$1.webp}"
     mkdir -p "$(dirname "$out")"
-    "$program" "$1" --drive > "${out%.webp}.txt"
+    text="${out%.webp}.txt"
+    "$program" "$1" --drive > "$text" 2> "$text.log"
+    sed -E 's/\x1b\[[0-9;]*m//g' "$text.log" | grep -E '^[^ ]+Z +[A-Z]+ csharp: ' | sed -E 's/^[^ ]+Z +//' >> "$text" || true
+    rm -f "$text.log"
     exit 0
 fi
 
