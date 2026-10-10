@@ -7,7 +7,8 @@ using Bevy.Reflected;
 namespace BevyCSharp.Examples.Application;
 
 // Renders a scene with no window into an image of 1920 by 1080, copies it back once forty frames
-// have let it settle, saves it as a PNG beside the program, in test_images, and stops.
+// have let it settle and its pipelines have compiled, saves it as a PNG beside the program, in
+// test_images, and stops.
 //
 // Bevy writes the copy out of the render world itself, and here the camera draws offscreen and the
 // picture is captured, which is the same copy made for a C# program.
@@ -41,7 +42,9 @@ internal static class HeadlessRenderer
 
         app.Update(ctx =>
         {
-            if (++_frame < PreRollFrames) return;
+            // And the pipelines compiled, which can take longer than the frames on a machine
+            // compiling them for the first time, where the copy would come back black.
+            if (++_frame < PreRollFrames || !Render.PipelinesReady()) return;
             _capture ??= Render.BeginCapture();
             if (!Render.TryReadCapture(_capture.Value, out var picture) || picture is null) return;
 

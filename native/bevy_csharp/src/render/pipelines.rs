@@ -37,8 +37,8 @@ pub fn install(app: &mut bevy::app::App) {
 /// for, and a process that exits while a compile is still inside the GPU's driver has the driver
 /// torn down under it. Bevy's `headless_renderer`, which ends on the frame its picture is saved,
 /// crashed so in two runs of three with an NVIDIA driver, the compile's thread in the driver's
-/// pipeline creation and the main thread in its teardown. Ten seconds at most, so a compile that
-/// never finishes cannot hold the end of the app.
+/// pipeline creation and the main thread in its teardown, and in none of eight runs with this
+/// wait. Ten seconds at most, so a compile that never finishes cannot hold the end of the app.
 #[cfg(feature = "render")]
 fn finish_compiles_on_exit(cache: bevy::ecs::system::Res<bevy::render::render_resource::PipelineCache>) {
     use bevy::render::render_resource::CachedPipelineState;
