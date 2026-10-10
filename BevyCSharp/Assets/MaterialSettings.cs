@@ -179,8 +179,17 @@ public sealed class MaterialSettings
     /// none at zero to one.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Stretched along the mesh's tangents, so a mesh needs them, which a glTF file exported with
     /// tangents has and a primitive generates.
+    /// </para>
+    /// <para>
+    /// Drawn forward by a camera with a normal prepass, which ambient occlusion asks for, Bevy 0.20
+    /// draws an anisotropic surface blown white. Its forward shader then loads the normal the
+    /// prepass wrote and skips the block that sets up the stretch's tangents, while the material
+    /// still asks for the stretched highlight, which with no tangents has no falloff. A camera
+    /// drawing deferred (<see cref="Render.SetDeferredRendering"/>) draws it right.
+    /// </para>
     /// </remarks>
     public float AnisotropyStrength { get; set; }
 

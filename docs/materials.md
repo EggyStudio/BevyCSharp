@@ -70,7 +70,10 @@ greener at its edge than its face. `AnisotropyStrength` and `AnisotropyRotation`
 highlight along the mesh's tangents, as brushed metal's is stretched. A glTF file's meshes usually
 carry tangents and Bevy's primitives are made without them, so a sphere from `Render.CreateMesh`
 under an anisotropic material or a normal map is given them first with
-`Render.GenerateTangents(sphere)`, or anisotropy draws it as a blaze of white. Each of these has a
+`Render.GenerateTangents(sphere)`, or anisotropy draws it as a blaze of white. A camera drawing
+forward with a normal prepass, which ambient occlusion asks for, draws an anisotropic surface blown
+white as well, since Bevy's forward shader then takes the prepass's normal and skips the stretch's
+tangents, and a camera drawing deferred draws it right. Each of these has a
 map beside it (`ClearcoatTexture`, `ClearcoatRoughnessTexture`, `ClearcoatNormalTexture`,
 `TransmissionTexture`, `DiffuseTransmissionTexture`, `ThicknessTexture`, `AnisotropyTexture`), and a
 glTF file's clearcoat, transmission and anisotropy extensions fill them as it loads.

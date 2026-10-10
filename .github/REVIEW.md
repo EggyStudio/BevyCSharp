@@ -10,7 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e09a2ed8`. One commit, item 4's standard material maps: the material takes a depth
+Reviewed up to `90075005`. One commit, item 4's diagnostics store: a game registers its own measures
+in Bevy's store, measures, reads and turns them off beside Bevy's frame, entity and render ones, a
+`Diagnostics` class over six entry points of a new `diagnostics.rs`, ABI 242, the config's frame
+times flag become a bit each for the log, the frame time, the entity count and the render passes,
+the render one skipped where GPU timings added the plugin or nothing draws, and `app.rs` giving its
+block to the module, 790 lines of N 1.3's 800 since. Read: a path Bevy checks only in a debug build
+is refused here on every build, so a game meets the refusal where Bevy would take it quietly; a
+measurement goes straight into the store since the call is inside a system; a path nobody registered
+or one turned off keeps nothing, as Bevy's own does not; the log filter is refused in an app without
+the log. Tests register, measure six times into a history of four, list, turn off and are refused
+with the history kept, read Bevy's frame and entity counts back, take and refuse the log filter, pin
+the 32-byte reading's layout on both sides and the entry points in Rust; the harness takes a
+`configure` since the app sends its config in its constructor and a change after reached nothing,
+which the first run found. Three examples, two of them print alone and are captured as text with
+Bevy's own diagnostic lines kept by `capture-example.sh`, and `log_diagnostics` is part, Bevy's
+system information wanting the `sysinfo` crate, which waits on the owner's word as any crate does
+(Decision 11); `deferred_rendering`'s triage says why its frame differs, as asked. Right, the
+refusals where Bevy is quiet, the store written inside the system, and the examples' text captures.
+The suite: 1,337 passed and 2 skipped; the bridge's 129; cargo check clean. EXAMPLES.md reads 311
+written and 18 in part. Item 4's gaps that wait on no word are done, so next are the captures
+compared whole by the workflow and the three faults named before that job goes red, the transmission
+flake first; Feathers, the dev tools and the system information wait on the owner's word.
+
+Before it, one commit came to be read, item 4's standard material maps: the material takes a depth
 map with its parallax depth, method and layers, a specular tint with the specular and tint maps
 behind Bevy's `pbr_specular_textures` feature (Decision 25), which a glTF file's specular extension
 fills too, and whether it is drawn forward or deferred, Auto following the app's deferred switch as
@@ -35,27 +58,6 @@ passed and 2 skipped; the bridge's 127 on editor, meshlet and Solari; cargo chec
 profiles. EXAMPLES.md reads 309 written and B 4 at 144 of 160. `render/assets.rs` stands at 783
 lines of N 1.3's 800, so its next addition comes with a split, as item 2 asks. Next Bevy's
 diagnostics store.
-
-Before it, two commits came to be read, Verdict 8's mend at `7527af4d`: the SPIR-V compute pipeline
-is built with no error scope, as the mesh pipeline is, and handed back itself, `compute.rs` and
-`dispatches.rs` holding it as their own, so a pipeline wgpu refuses is a render error as any other,
-which the `ComputeTarget` and `DrawMesh` remarks say; and a correction of this file's reading,
-taken: wgpu 30 keeps a stack of scopes for each thread and not one for the device, so the
-out-of-order pop was not two threads interleaving on one stack, and how another scope came above the
-builder's was not found, which the module comment says and SHARED.md's row says since. Verdict 8 is
-settled. Then `af4242ae`, item 4's four rows that could be written as they were: `test_meshlet`,
-compared with bare Bevy with 0.6% of pixels past 3%, which needs a bridge built with `--meshlet` and
-says so; `many_meshlet_materials`, whose streaks of missing bunnies bare Bevy shows alike, listed
-under N 4.5 for Bevy's stress window; `overflow_transform` through the reflected `UiTransform`; and
-`mines`, its menu and play as states with `DespawnOnExit` and an observer to each button and tile,
-driven offscreen by a move before a click so picking sees the hover. EXAMPLES.md reads 306 written
-and none left that can be. Right, the four closed where they stood and the one window listed by the
-rule. The suite: 1,317 passed and 2 skipped, the bridge's 126. Next the standard material's depth
-and specular maps, whose specular textures sit behind Bevy's `pbr_specular_textures` feature, a
-feature of the crate in the tree that pulls no crate, which the working session may turn on
-(Decision 25); a feature that pulls a crate in waits on the owner's word, the dev tools' with
-Feathers' (Decision 11). Then `c39dd61d`, `MaterialSurfaceTests` moved into the folder of the assets
-it tests and off N 1.4's list, which the norm's table counts at 73 since; its run is in progress.
 
 Before it, one commit came to be read, Verdict 9's mend: the shader, view, effects and material
 structs the bridge reads move out of `NativeTypes.Render.cs` into ten files named for them, which
@@ -100,8 +102,8 @@ from [SHARED.md](SHARED.md).
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
-   at `60141490`. The run of `c39dd61d` is green on all three. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
+   at `60141490`. The runs of `c39dd61d`, `e09a2ed8` and `90075005` are green on all three. Each
+   push's run is read by the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -110,6 +112,7 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
+   `render/assets.rs` at 783 lines and `app.rs` at 790 split with their next addition.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
@@ -230,26 +233,27 @@ from [SHARED.md](SHARED.md).
    shaders from Slang through SPIR-V (`e9a8508e`), and what the table then names most, in this
    order: the four rows that could be written as they were, done at `af4242ae`; the standard
    material's depth and specular maps, done at `e09a2ed8` with `pbr_specular_textures` on (Decision
-   25); and Bevy's diagnostics store, `custom_diagnostic`, `enabling_disabling_diagnostic` and
-   `log_diagnostics`, next. The dev tools' three, `fps_overlay`, `infinite_grid` and `scene_viewer`,
-   wait on the owner's word for their crate as Feathers' do (Decision 11), and the remote protocol's
-   three stay as they are, `./bcs` being this engine's own. When the captures have settled, they are
-   compared whole with checked-in references by the workflow, a small share of pixels allowed to
-   differ between devices, as 3DEngine does for its scenes. Transmission's glass spheres are missing
-   from about one capture in four with TAA on, before `6a84286` as after it, so the cause is found
-   before that job is red for them, or the example is compared with its spheres left out and the
-   reason beside it. `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under
-   (`b548987`'s reply), untraced, and is traced before those captures are compared, as is the
-   gallery's anisotropic spheres drawing blown white under SSAO with forward rendering though they
-   have tangents and draw right under deferred, Bevy's prepass normal for an anisotropic material
-   the suspect (`edd577c`'s reply), and the camera's volumetric fog hazing the whole picture, the
-   sky with it, once a depth prepass is on the camera, which the hall works round by putting the fog
-   on the camera only while it is inside (`6a19213`'s reply). Feathers' three examples with
-   `feathers_number_input` and the three camera controllers follow the other gaps, their crates
-   allowed (Decisions 11 and 12) on the owner's word in the working session, and the four font
-   examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the scene
-   packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
-   2026-10-08.
+   25); and Bevy's diagnostics store, done at `90075005`, `log_diagnostics` in part for the system
+   information behind the `sysinfo` crate. The dev tools' three, `fps_overlay`, `infinite_grid` and
+   `scene_viewer`, wait on the owner's word for their crate as Feathers' and the system information
+   do (Decision 11), and the remote protocol's three stay as they are, `./bcs` being this engine's
+   own. With the gaps that wait on no word done, the captures' comparison below is next, the
+   transmission flake first. When the captures have settled, they are compared whole with checked-in
+   references by the workflow, a small share of pixels allowed to differ between devices, as
+   3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture in
+   four with TAA on, before `6a84286` as after it, so the cause is found before that job is red for
+   them, or the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
+   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
+   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
+   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+   prepass is on the camera, which the hall works round by putting the fog on the camera only while
+   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
+   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
+   owner's word in the working session, and the four font examples stay missing (Decision 13).
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

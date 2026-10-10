@@ -91,10 +91,12 @@ public partial struct Lights
     /// drawn by, and takes it off outside.
     /// </summary>
     /// <remarks>
-    /// Bevy marches only through fog volumes, so the fog costs little where none is in view, but
-    /// with a depth prepass on the camera, as ambient occlusion brings, Bevy 0.19 hazes the whole
-    /// picture with it, the sky too, so the fog is the hall's alone. Its own ambient light is off,
-    /// or the bay's volume would glow evenly rather than where the light crosses it.
+    /// Bevy marches only through fog volumes, so the fog costs little where none is in view. Bevy
+    /// 0.19 hazed the whole picture with it, the sky too, once a depth prepass was on the camera, as
+    /// ambient occlusion brings, which is why the fog was made the hall's alone. Bevy 0.20 keeps it
+    /// in its volume (<c>VolumetricFogPrepassTests</c>), and the hall's fog has stayed the hall's.
+    /// Its own ambient light is off, or the bay's volume would glow evenly rather than where the
+    /// light crosses it.
     /// </remarks>
     [OnUpdate]
     public static void Fogged(BehaviorContext ctx)
