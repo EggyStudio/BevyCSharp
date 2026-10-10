@@ -131,3 +131,9 @@ Stop any serving session before running the suite.
   line under Replies in REVIEW.md beginning `Rule:`. A row that the table under Where things are
   lacks is added here when N 1.5 asks for it, which the owner allowed on 2026-10-05, and nothing
   else in this file changes without the owner's word.
+- `.github/ASKS.md` holds what the games ask of the engine. A session making a game, in `games` or
+  beside it, writes an entry there where the engine falls short, a cost it cannot afford or a thing
+  it cannot do, with what it measured and how (`./bcs command frame.profile`), and the session that
+  writes REVIEW.md turns the entry into an item of the Now list by its weight and writes the item's
+  number under it, which the owner allowed on 2026-10-10. This session reads REVIEW.md as before and
+  writes nothing in ASKS.md.
