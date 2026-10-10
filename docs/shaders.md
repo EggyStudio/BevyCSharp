@@ -130,6 +130,47 @@ string generated = "";
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
 
+### On a 2D mesh
+
+A program draws a 2D mesh with its 2D stages, and a 2D camera draws the material as Bevy draws a
+`Material2d`. Its fragment shader imports `bcs2d`, Bevy's 2D view and mesh, and takes the
+`bcs2d::VertexOutput` Bevy's own 2D vertex shader hands on, which puts its values elsewhere than
+the 3D one does. Its own values are declared and set by name as a 3D material's are, and a 2D
+vertex shader of the program's own places the mesh where Bevy's would leave it:
+
+<!-- compiled with:
+Entity square = default;
+AssetHandle icon = default;
+-->
+```csharp
+var program = Shaders.CreateProgram(new ShaderProgramSettings { Fragment2d = "shaders/tinted.slang" });
+var material = Shaders.CreateMaterial2d(program, AlphaMode2d.Blend)
+    .Set("tint", new Vector4(0f, 0f, 1f, 1f))
+    .SetTexture("picture", icon);
+Render2d.SetMesh(ctx.Ecs, square, Render.CreateMesh(MeshShape.Rectangle, 1f, 1f));
+Render2d.SetMaterial(ctx.Ecs, square, material);
+```
+
+```slang
+import bcs2d;
+
+uniform float4 tint;
+Texture2D picture;
+SamplerState picture_sampler;
+
+[shader("fragment")]
+float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+{
+    return tint * picture.Sample(picture_sampler, mesh.uv);
+}
+```
+
+A 2D material is opaque, masked or blended, which is every way Bevy's 2D pipeline draws, and casts
+no shadow, since 2D has none. A blended one is mixed with what is behind it by its alpha, and a
+masked one is drawn in the alpha-masked pass and discards where its fragment shader does, as Bevy's
+own 2D materials do. One program may have 3D stages and 2D stages both, and draws each kind of
+material with its own.
+
 ### Lit by Bevy
 
 A material's fragment shader writes the color drawn, and is lit by nothing unless it lights itself.

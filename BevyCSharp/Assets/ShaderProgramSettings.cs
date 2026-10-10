@@ -107,6 +107,26 @@ public sealed class ShaderProgramSettings
     /// </remarks>
     public ShaderStage DrawShadow { get; init; }
 
+    /// <summary>
+    /// The fragment shader of a material drawn on a 2D mesh by a 2D camera
+    /// (<see cref="Shaders.CreateMaterial2d"/>). Its entry point is called <c>fragment</c> unless
+    /// it is named.
+    /// </summary>
+    /// <remarks>
+    /// It reaches Bevy's 2D view and mesh through <c>import bcs2d;</c> and takes the
+    /// <c>bcs2d::VertexOutput</c> Bevy's own 2D vertex shader hands on, which differs from the 3D
+    /// one in where it puts each value. The material's own values are declared and set by name as
+    /// a 3D material's are. A program may have 2D stages and 3D stages both, and draws a 3D
+    /// material or a 2D one with each.
+    /// </remarks>
+    public ShaderStage Fragment2d { get; init; }
+
+    /// <summary>
+    /// The vertex shader of a material drawn on a 2D mesh. Unset, Bevy's own 2D vertex shader
+    /// draws the mesh where it is. Its entry point is called <c>vertex</c> unless it is named.
+    /// </summary>
+    public ShaderStage Vertex2d { get; init; }
+
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
@@ -135,10 +155,10 @@ public sealed class ShaderProgramSettings
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow }
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow, Vertex2d, Fragment2d }
             .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>
     internal ShaderStage Main() =>
-        Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment;
+        Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment.IsSet ? DrawFragment : Fragment2d;
 }

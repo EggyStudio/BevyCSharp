@@ -14,12 +14,14 @@
 //! be checked, so it is kept and checked when the material is prepared.
 //!
 //! The images, dispatches, draws and passes a camera runs are in [`super::shader_views`], values
-//! set by name on a target in [`super::shader_targets`], and buffers and images in
-//! [`super::shader_buffers`], each reachable through this module as well.
+//! set by name on a target in [`super::shader_targets`], materials in
+//! [`super::shader_materials`], and buffers and images in [`super::shader_buffers`], each
+//! reachable through this module as well.
 
 use crate::interop::status;
 
 pub use super::shader_buffers::*;
+pub use super::shader_materials::*;
 pub use super::shader_targets::*;
 pub use super::shader_views::*;
 
@@ -71,6 +73,9 @@ pub struct BcsShaderProgramConfig {
     pub deferred: BcsShaderStage,
     /// The fragment shader geometry drawn on a camera is drawn into shadow maps with.
     pub draw_shadow: BcsShaderStage,
+    /// The vertex and fragment shaders of a material drawn on a 2D mesh.
+    pub vertex_2d: BcsShaderStage,
+    pub fragment_2d: BcsShaderStage,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -174,6 +179,8 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.draw_fragment),
                     stage(config.deferred),
                     stage(config.draw_shadow),
+                    stage(config.vertex_2d),
+                    stage(config.fragment_2d),
                 ],
                 defines: Vec::new(),
                 compute_spirv: config.flags & 1 != 0,
@@ -409,178 +416,6 @@ pub unsafe extern "C" fn bcs_shader_last_render_error(out: *mut u8, capacity: i3
     })
 }
 
-// -- Materials
-
-#[cfg(feature = "render")]
-fn alpha_mode(alpha: i32, cutoff: f32) -> bevy::material::AlphaMode {
-    use bevy::material::AlphaMode;
-
-    match alpha {
-        1 => AlphaMode::Mask(cutoff),
-        2 => AlphaMode::Blend,
-        3 => AlphaMode::Add,
-        4 => AlphaMode::Multiply,
-        5 => AlphaMode::Premultiplied,
-        _ => AlphaMode::Opaque,
-    }
-}
-
-/// Whether `program` names a program the running app made.
-#[cfg(feature = "render")]
-fn program_exists(program: i32) -> bool {
-    program >= 0 && super::programs::lookup(program as u32).is_some()
-}
-
-/// Makes a material drawn by a program, and answers its asset key.
-///
-/// `alpha` is `0` opaque, `1` masked at `cutoff`, `2` blended, `3` added, `4` multiplied and `5`
-/// premultiplied. `cull` is `0` back faces, `1` front faces, `2` neither.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_shader_material_create(
-    program: i32,
-    alpha: i32,
-    cutoff: f32,
-    cull: i32,
-    depth_bias: f32,
-) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (program, alpha, cutoff, cull, depth_bias);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use super::material::BcsMaterial;
-            use bevy::render::render_resource::Face;
-
-            if !program_exists(program) {
-                return status::INVALID_STATE;
-            }
-
-            let mut material = BcsMaterial::new(program as u32);
-            material.alpha = alpha_mode(alpha, cutoff);
-            material.depth_bias = depth_bias;
-            material.cull = match cull {
-                1 => Some(Face::Front),
-                2 => None,
-                _ => Some(Face::Back),
-            };
-
-            crate::state::with_world(|world| {
-                let Some(mut assets) =
-                    world.get_resource_mut::<bevy::asset::Assets<BcsMaterial>>()
-                else {
-                    return status::UNSUPPORTED;
-                };
-
-                let handle = assets.add(material);
-                crate::assets::insert_handle(world, handle.untyped())
-            })
-        }
-    })
-}
-
-/// Changes how a material is drawn: its program, alpha, faces culled and depth bias.
-///
-/// A negative `program` leaves the program as it is, and a negative `alpha` leaves the rest, so
-/// changing the program alone needs nothing read back first.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_shader_material_configure(
-    material: i32,
-    program: i32,
-    alpha: i32,
-    cutoff: f32,
-    cull: i32,
-    depth_bias: f32,
-) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (material, program, alpha, cutoff, cull, depth_bias);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use bevy::render::render_resource::Face;
-
-            if program >= 0 && !program_exists(program) {
-                return status::INVALID_STATE;
-            }
-
-            with_target(TARGET_MATERIAL, material as i64, |target| {
-                let Target::Material(current) = target else {
-                    return status::NO_COMPONENT;
-                };
-
-                if program >= 0 {
-                    current.program = program as u32;
-                }
-
-                if alpha < 0 {
-                    return status::OK;
-                }
-
-                current.alpha = alpha_mode(alpha, cutoff);
-                current.depth_bias = depth_bias;
-                current.cull = match cull {
-                    1 => Some(Face::Front),
-                    2 => None,
-                    _ => Some(Face::Back),
-                };
-
-                status::OK
-            })
-        }
-    })
-}
-
-/// Reports which program draws a material, or an entity's material with `kind` two.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_shader_target_program(kind: i32, id: i64) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (kind, id);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            let mut program = status::NO_COMPONENT;
-
-            let answer = read_target(kind, id, |target| {
-                program = match target {
-                    Target::Material(material) => material.program as i32,
-                    Target::Instance(instance) => instance.program as i32,
-                };
-            });
-
-            if answer == status::OK { program } else { answer }
-        }
-    })
-}
-
-/// Gives an entity a shader material, if the handle names one.
-#[cfg(feature = "render")]
-pub fn attach(
-    entity: &mut bevy::ecs::world::EntityWorldMut,
-    untyped: &bevy::asset::UntypedHandle,
-) -> bool {
-    match untyped
-        .clone()
-        .try_typed::<super::material::BcsMaterial>()
-    {
-        Ok(handle) => {
-            entity.insert(super::material::BcsMaterial3d(handle));
-            true
-        }
-        Err(_) => false,
-    }
-}
-
 // -- Shader instances, which passes and dispatches run
 
 /// Makes a shader instance for a program, which a pass over a camera's picture or a dispatch runs,
@@ -767,7 +602,9 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, flags), 208);
         assert_eq!(offset_of!(BcsShaderProgramConfig, deferred), 216);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_shadow), 240);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 264);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, vertex_2d), 264);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, fragment_2d), 288);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 312);
     }
 
     #[test]

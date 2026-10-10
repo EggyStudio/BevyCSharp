@@ -143,6 +143,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_create(int program, int alpha, float cutoff, int cull, float depthBias);
 
+    /// <summary>Makes a material a program draws a 2D mesh with, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_2d_create(int program, int alpha, float cutoff);
+
     /// <summary>Changes a material's program, alpha, culling and depth bias.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

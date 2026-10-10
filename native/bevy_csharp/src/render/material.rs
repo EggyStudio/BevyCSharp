@@ -92,6 +92,9 @@ pub struct BcsMaterial {
     pub alpha: AlphaMode,
     pub cull: Option<Face>,
     pub depth_bias: f32,
+    /// Drawn on a 2D mesh, held in a [`super::material2d::BcsMaterial2d`], whose values are checked
+    /// against the program's 2D stages rather than its 3D ones.
+    pub flat: bool,
 }
 
 impl BcsMaterial {
@@ -103,6 +106,7 @@ impl BcsMaterial {
             alpha: AlphaMode::Opaque,
             cull: Some(Face::Back),
             depth_bias: 0.0,
+            flat: false,
         }
     }
 }
@@ -575,15 +579,28 @@ fn mark_meshes_as_changed_if_their_materials_changed(
 }
 
 /// Marks every material of a program whose shaders were replaced as changed, so each builds its
-/// bind group again in the new layout, keeping its values by name.
+/// bind group again in the new layout, keeping its values by name, 2D materials among them.
 fn refresh_materials_of_changed_programs(
     mut programs: ResMut<programs::ShaderPrograms>,
     mut materials: ResMut<Assets<BcsMaterial>>,
+    mut flat: ResMut<Assets<super::material2d::BcsMaterial2d>>,
 ) {
     let changed = programs.take_changed();
 
     if changed.is_empty() {
         return;
+    }
+
+    let stale_flat: Vec<_> = flat
+        .iter()
+        .filter(|(_, material)| changed.contains(&material.0.program))
+        .map(|(id, _)| id)
+        .collect();
+
+    for id in stale_flat {
+        if let Some(material) = flat.get_mut(id) {
+            material.into_inner();
+        }
     }
 
     let stale: Vec<AssetId<BcsMaterial>> = materials
@@ -749,6 +766,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
             );
     }
 
+    super::material2d::install(app);
     super::views::install(app);
     super::probes::install(app);
     super::watch::install(app);

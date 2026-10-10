@@ -7,6 +7,9 @@ use super::*;
 pub enum Family {
     /// Drawn on a mesh, in Bevy's pipeline. Its own globals are group three.
     Material,
+    /// Drawn on a 2D mesh, in Bevy's 2D pipeline, whose view is group zero, mesh group one and
+    /// material group two. Its own globals are group two.
+    Material2d,
     /// Run over a camera's picture. Its own globals are group zero, the bridge's inputs group one.
     Pass,
     /// Dispatched over buffers and images. Group zero is its own, group one the bridge's.
@@ -18,6 +21,7 @@ impl Family {
     pub fn own_group(self) -> u32 {
         match self {
             Family::Material => 3,
+            Family::Material2d => 2,
             Family::Pass | Family::Compute => 0,
         }
     }
@@ -25,12 +29,14 @@ impl Family {
     /// Where a group `slangc` wrote goes.
     ///
     /// Space zero is the shader's own. Spaces 100 to 102 are Bevy's groups zero to two, which only a
-    /// material has, and space 101 is also where the pass and compute modules put the bridge's
-    /// inputs, which are group one there.
+    /// material has, and a 2D material's view and mesh are spaces 100 and 101, groups zero and one.
+    /// Space 101 is also where the pass and compute modules put the bridge's inputs, which are
+    /// group one there.
     pub fn remap(self, group: u32) -> u32 {
         match (self, group) {
             (_, 0) => self.own_group(),
             (Family::Material, 100..=102) => group - 100,
+            (Family::Material2d, 100..=101) => group - 100,
             (Family::Pass | Family::Compute, 101) => 1,
             (_, other) => other,
         }
@@ -43,6 +49,7 @@ impl Family {
     pub(super) fn allowed(self) -> &'static [u32] {
         match self {
             Family::Material => &[0, 1, 2, 3],
+            Family::Material2d => &[0, 1, 2],
             Family::Pass | Family::Compute => &[0, 1],
         }
     }

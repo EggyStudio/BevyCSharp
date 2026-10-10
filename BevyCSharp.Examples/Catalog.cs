@@ -314,6 +314,7 @@ internal static class Catalog
         new("gpu_readback", GpuReadback.Build),
         new("shader_defs", ShaderDefs.Build),
         new("shader_material", ShaderMaterialExample.Build),
+        new("shader_material_2d", ShaderMaterial2dExample.Build),
         new("shader_material_bindless", ShaderMaterialBindless.Build),
         new("shader_material_screenspace_texture", ShaderMaterialScreenspaceTexture.Build),
         new("shader_prepass", ShaderPrepass.Build),

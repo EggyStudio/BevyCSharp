@@ -413,11 +413,14 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                         }
                         Err(_) => status::NO_COMPONENT,
                     },
-                    "MeshMaterial2d" => match untyped.try_typed::<bevy::sprite_render::ColorMaterial>() {
+                    "MeshMaterial2d" => match untyped.clone().try_typed::<bevy::sprite_render::ColorMaterial>() {
                         Ok(handle) => {
                             entity_mut.insert(bevy::sprite_render::MeshMaterial2d(handle));
                             status::OK
                         }
+                        // Not a color material, so it may be a 2D material drawn by a shader the
+                        // caller wrote.
+                        Err(_) if crate::render::shaders::attach_2d(&mut entity_mut, &untyped) => status::OK,
                         Err(_) => status::NO_COMPONENT,
                     },
                     #[cfg(feature = "meshlet")]

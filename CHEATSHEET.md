@@ -922,7 +922,7 @@ static TileData? TileAt(EcsWorld world, Entity entity, int index);  // A chunk's
 static AssetHandle CreateMaterial(ColorMaterialSettings settings);  // Makes a 2D mesh's material and returns it
 static void WriteMaterial(AssetHandle material, ColorMaterialSettings settings);  // Writes settings over a 2D mesh's material in place, so every mesh drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh for a 2D camera to draw
-static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a 2D material, from CreateMaterial, to draw its mesh with
+static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a 2D material to draw its mesh with, a color material from CreateMaterial or a shader material from CreateMaterial2d
 ```
 
 ### `CapturedImage`
@@ -990,6 +990,7 @@ static ShaderProgram CreateProgram(ShaderStage fragment);       // Makes a progr
 static ShaderProgram CreateProgram(ShaderProgramSettings settings);  // Makes a program from the Slang named
 static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque);  // Makes a material drawn by a program
 static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings);  // Makes a material drawn by a program
+static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d alpha = AlphaMode2d.Opaque, float cutoff = 0.5f);  // Makes a material a program draws a 2D mesh with
 static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
 static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
 static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs

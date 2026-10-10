@@ -114,7 +114,10 @@ public static unsafe partial class Render2d
     public static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh) =>
         Render.Attach(world, entity, "Mesh2d", mesh, "a mesh");
 
-    /// <summary>Gives an entity a 2D material, from <see cref="CreateMaterial"/>, to draw its mesh with.</summary>
+    /// <summary>
+    /// Gives an entity a 2D material to draw its mesh with, a color material from
+    /// <see cref="CreateMaterial"/> or a shader material from <see cref="Shaders.CreateMaterial2d"/>.
+    /// </summary>
     public static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material) =>
         Render.Attach(world, entity, "MeshMaterial2d", material, "a 2D material");
 }

@@ -163,13 +163,22 @@ public static unsafe partial class Shaders
         ArgumentNullException.ThrowIfNull(settings);
 
         if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet
-            && !settings.DrawFragment.IsSet && !settings.Deferred.IsSet)
+            && !settings.DrawFragment.IsSet && !settings.Deferred.IsSet && !settings.Fragment2d.IsSet)
         {
             throw new ArgumentException(
                 "A shader program needs a fragment shader to draw with, a pass to run over a "
-                + "camera's picture, a compute shader to dispatch, or a draw fragment shader to draw "
-                + "on a camera with. Bevy's own fragment shader reads a material laid out "
-                + "differently, so there is no default to fall back on.",
+                + "camera's picture, a compute shader to dispatch, a draw fragment shader to draw "
+                + "on a camera with, or a 2D fragment shader to draw a 2D mesh with. Bevy's own "
+                + "fragment shader reads a material laid out differently, so there is no default "
+                + "to fall back on.",
+                nameof(settings));
+        }
+
+        if (settings.Vertex2d.IsSet && !settings.Fragment2d.IsSet)
+        {
+            throw new ArgumentException(
+                "A 2D vertex shader draws a 2D material with the 2D fragment shader beside it, so "
+                + "it needs one.",
                 nameof(settings));
         }
 
@@ -260,6 +269,8 @@ public static unsafe partial class Shaders
                     Flags = settings.ComputeTarget == ShaderTarget.SpirV ? 1 : 0,
                     Deferred = Stage(settings.Deferred),
                     DrawShadow = Stage(settings.DrawShadow),
+                    Vertex2d = Stage(settings.Vertex2d),
+                    Fragment2d = Stage(settings.Fragment2d),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);
@@ -321,6 +332,43 @@ public static unsafe partial class Shaders
 
         ThrowIfNoProgram(key, settings.Program);
         Native.Check(key, $"making a material drawn by shader program {settings.Program.Id}");
+        return new ShaderMaterial(new AssetHandle(key));
+    }
+
+    /// <summary>
+    /// Makes a material a program draws a 2D mesh with. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The program's <see cref="ShaderProgramSettings.Fragment2d"/> draws it, with its
+    /// <see cref="ShaderProgramSettings.Vertex2d"/> where it has one. Its values are set by name
+    /// on what this returns as a 3D material's are, starting at zero, its textures at a stand-in
+    /// of the right shape. It goes on an entity with <see cref="Render2d.SetMaterial"/>, beside the
+    /// 2D mesh <see cref="Render2d.SetMesh"/> gives it, and a 2D camera draws it as Bevy draws a
+    /// <c>Material2d</c>.
+    /// </para>
+    /// </remarks>
+    /// <param name="program">The program that draws it.</param>
+    /// <param name="alpha">
+    /// Which of Bevy's 2D passes draws it: the opaque one, the alpha-masked one, where the fragment
+    /// shader discards what it leaves undrawn, as Bevy's own 2D materials do, or the blended one,
+    /// which mixes it with what is behind by its alpha.
+    /// </param>
+    /// <param name="cutoff">
+    /// The cutoff a masked material is made with, as Bevy's <c>AlphaMode2d::Mask</c> holds it.
+    /// Bevy hands it to no shader, so a fragment shader that discards does it by a value of its
+    /// own.
+    /// </param>
+    /// <exception cref="ArgumentException">No program was given.</exception>
+    /// <exception cref="BevyNativeException">The program does not exist, or there is no renderer.</exception>
+    public static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d alpha = AlphaMode2d.Opaque, float cutoff = 0.5f)
+    {
+        RequireProgram(program, nameof(program));
+
+        var key = Native.bcs_shader_material_2d_create(program.Id, (int)alpha, cutoff);
+
+        ThrowIfNoProgram(key, program);
+        Native.Check(key, $"making a 2D material drawn by shader program {program.Id}");
         return new ShaderMaterial(new AssetHandle(key));
     }
 

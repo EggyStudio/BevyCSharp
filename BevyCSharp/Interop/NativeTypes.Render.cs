@@ -838,6 +838,12 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>The fragment shader geometry drawn on a camera is drawn into shadow maps with.</summary>
     public NativeShaderStage DrawShadow;
+
+    /// <summary>The vertex shader of a material drawn on a 2D mesh.</summary>
+    public NativeShaderStage Vertex2d;
+
+    /// <summary>The fragment shader of the same.</summary>
+    public NativeShaderStage Fragment2d;
 }
 
 /// <summary>How a sampler reads. Mirrors <c>BcsSamplerConfig</c>.</summary>

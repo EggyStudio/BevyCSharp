@@ -45,6 +45,9 @@ use cache::{cache_key, read_cache, write_cache};
 /// What every Slang shader can import as `bcs`.
 pub const PRELUDE: &str = include_str!("bcs.slang");
 
+/// What a Slang shader drawing a 2D mesh can import as `bcs2d`.
+pub const PRELUDE_2D: &str = include_str!("bcs2d.slang");
+
 /// What a Slang shader pass can import as `bcs_pass`.
 pub const PASS_PRELUDE: &str = include_str!("bcs_pass.slang");
 
@@ -60,8 +63,9 @@ pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 pub const RAY_PRELUDE: &str = include_str!("bcs_ray.slang");
 
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 5] = [
+const MODULES: [(&str, &str); 6] = [
     ("bcs.slang", PRELUDE),
+    ("bcs2d.slang", PRELUDE_2D),
     ("bcs_pass.slang", PASS_PRELUDE),
     ("bcs_compute.slang", COMPUTE_PRELUDE),
     ("bcs_scene.slang", SCENE_PRELUDE),

@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5bbbe1a5`. One commit, item 4's fourth gap, the keys observed as they reach a field,
+Reviewed up to `827b382e`. One commit, the last of the three text re-ports: a text field's cursor
+and selection styled through `Ui.SetTextCursor`, Bevy's `TextCursorStyle` set from the bridge since
+Bevy does not reflect it and no wrapper reaches it, its colors, the selected text's color, the
+unfocused selection and the selection's radius, clamped to a half; its viewport read as
+`TextViewport` and scrolled with `Ui.ScrollText`, since Bevy keeps a field's scroll in
+`EditableText::viewport` and not as a node's scroll position, so Bevy's scrollbar cannot drive it
+and a field's own scrollbar sizes its thumb from the viewport and the text's laid-out size; and
+`Ui.SetVisibleLines`, which changes a field's height and keeps its text where setting the field
+again replaced it. multiline_text_input is written again on 0.20 with its scrollbar on the viewport,
+its corner-radius row and its justify menu as a menu button, a popup and a popover, its triage
+caveats gone; driven offscreen, eleven lines show the thumb with the caret revealed, the menu opens
+above its button, centering applies and renames the button, and dragging the thumb scrolls to the
+top. A test covers the viewport read, scrolled and grown, the text kept, and the cursor set and
+refused on a node that is no field, with the struct's layout held on both sides; N 1.2 sent three
+types into files of their own; ABI 237. Right, each of Bevy's three things reached as Bevy has it
+and the remarks saying why a wrapper could not. The suite: 1,298 passed and 2 skipped. Of the six
+set aside, context_menu waits on the list box and 2d_gizmos, 3d_gizmos and wireframe on their gaps;
+sprite_material and shader_material_2d_bindless as 2D materials next, as item 4 has it.
+
+Before it, one commit came to be read, item 4's fourth gap, the keys observed as they reach a field,
 and the Tab traced to its cause: Bevy's focused input dispatches nothing unless there is exactly one
 primary window, and its tab navigation hangs its observer on that window at startup, so an offscreen
 run had neither. The bridge's offscreen dispatcher already sent a key to the focused entity; with
@@ -45,24 +64,6 @@ commit, and ASKS.md is committed with that batch as REVIEW.md is; and NORM.md's 
 gains a testbed, a game built on the engine's project beside it, which N 5.3 does not ask the
 workflow to play, for 3DEngine's voxel game, and nothing here changes for it. The keys observed as
 they reach a field next, where offscreen keys reach a placeholder window, as the reply has it.
-
-Before it, one commit came to be read, item 4's third gap, the widgets' events as observers: a tab
-list's choice reaches C# as `ValueChange<Entity?>`, Bevy's optional entity, for which the type's
-`struct` constraint goes and the listing shows `T? Value`, the same value for a value type;
-`Ui.SelfUpdate(list, UiWidgetKind.TabList)` attaches Bevy's own update; `Picking.CapturePointer` and
-`ReleaseCapture` are Bevy's pointer capture, with the hit the pointer reports while held; ABI 235.
-headless_tabs, draggable_slider and character_creation are written and captured,
-character_creation's triage row having been stale, headless_tabs reading a tab's selection from its
-list since Bevy does not reflect `Selected`, each driven offscreen with clicks and drags and
-behaving as Bevy's does; two tests hold a tab list reporting and keeping the tab clicked and a
-captured pointer a decoy never hears, both ways. Right, each gap closed as Bevy has it and the
-triage made true. One thing: the CHEATSHEET's two lines were added by hand because its writer would
-rewrite 536 lines, so the written file and its writer have drifted, and a hand-edited generated file
-drifts further; the writer is run, why its 536 lines differ is read, and its output committed as a
-commit of its own or the writer mended, with the next commit. The suite: 1,294 passed and 2 skipped,
-the 65 validation errors on the page a test's own. The keys observed as they reach a field next,
-where typing into character_creation's name field offscreen belongs, `input.type` reaching the ImGui
-interface alone.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -202,11 +203,11 @@ from [SHARED.md](SHARED.md).
    written again on 0.20 where step f named the difference as Bevy's, and each is ported to 0.20's
    code under item 4 in the order of how much Bevy changed it, its head and picture moving with it,
    the twenty built on Feathers in 0.20 (`faecca0b`'s reply) going with Feathers after the other
-   gaps, and multiline_text_input and context_menu going with the gap that brings what each reads,
-   the text field's viewport and the list box, multiple_text_inputs in at `5bbbe1a5` with the
-   field's edits (`2e7a1c2c`'s reply); 2d_gizmos, 3d_gizmos and wireframe the same, for the gizmo
-   lines' animation offset and the wireframe's x-ray, and tab_navigation's Tab, which moves no focus
-   in an offscreen run, is traced with the keys' gap (`a54dda9e`'s reply).
+   gaps, and context_menu going with the gap that brings the list box, multiple_text_inputs in at
+   `5bbbe1a5` with the field's edits and multiline_text_input at `827b382e` with its viewport and
+   cursor (`2e7a1c2c`'s reply); 2d_gizmos, 3d_gizmos and wireframe the same, for the gizmo lines'
+   animation offset and the wireframe's x-ray, and tab_navigation's Tab, which moves no focus in an
+   offscreen run, is traced with the keys' gap (`a54dda9e`'s reply).
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).

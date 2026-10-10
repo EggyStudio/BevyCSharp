@@ -22,20 +22,34 @@ pub enum Target<'a> {
     Instance(&'a mut Instance),
 }
 
+/// A material a target names, drawn on a mesh or on a 2D mesh.
+#[cfg(feature = "render")]
+enum MaterialHandle {
+    Mesh(bevy::asset::Handle<super::material::BcsMaterial>),
+    Flat(bevy::asset::Handle<super::material2d::BcsMaterial2d>),
+}
+
 /// The material handle a target names, where it names a material.
 #[cfg(feature = "render")]
-fn material_handle(
-    world: &bevy::ecs::world::World,
-    kind: i32,
-    id: i64,
-) -> Option<bevy::asset::Handle<super::material::BcsMaterial>> {
+fn material_handle(world: &bevy::ecs::world::World, kind: i32, id: i64) -> Option<MaterialHandle> {
+    use super::material::{BcsMaterial, BcsMaterial3d};
+    use super::material2d::{BcsMaterial2d, BcsMeshMaterial2d};
+
     match kind {
-        TARGET_MATERIAL => crate::assets::clone_handle(world, i32::try_from(id).ok()?)?
-            .try_typed::<super::material::BcsMaterial>()
-            .ok(),
-        TARGET_ENTITY => world
-            .get::<super::material::BcsMaterial3d>(bevy::ecs::entity::Entity::from_bits(id as u64))
-            .map(|material| material.0.clone()),
+        TARGET_MATERIAL => {
+            let untyped = crate::assets::clone_handle(world, i32::try_from(id).ok()?)?;
+            match untyped.clone().try_typed::<BcsMaterial>() {
+                Ok(handle) => Some(MaterialHandle::Mesh(handle)),
+                Err(_) => untyped.try_typed::<BcsMaterial2d>().ok().map(MaterialHandle::Flat),
+            }
+        }
+        TARGET_ENTITY => {
+            let entity = bevy::ecs::entity::Entity::from_bits(id as u64);
+            world
+                .get::<BcsMaterial3d>(entity)
+                .map(|material| MaterialHandle::Mesh(material.0.clone()))
+                .or_else(|| world.get::<BcsMeshMaterial2d>(entity).map(|material| MaterialHandle::Flat(material.0.clone())))
+        }
         _ => None,
     }
 }
@@ -72,8 +86,30 @@ pub(super) fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32)
             return answer;
         }
 
-        let Some(handle) = material_handle(world, kind, id) else {
-            return status::NO_COMPONENT;
+        let handle = match material_handle(world, kind, id) {
+            Some(MaterialHandle::Mesh(handle)) => handle,
+            Some(MaterialHandle::Flat(handle)) => {
+                let Some(mut assets) =
+                    world.get_resource_mut::<bevy::asset::Assets<super::material2d::BcsMaterial2d>>()
+                else {
+                    return status::UNSUPPORTED;
+                };
+
+                let Some(mut copy) = assets.get(&handle).cloned() else {
+                    return status::NO_COMPONENT;
+                };
+
+                let answer = f(Target::Material(&mut copy.0));
+
+                if answer == status::OK
+                    && let Some(mut slot) = assets.get_mut(&handle)
+                {
+                    *slot = copy;
+                }
+
+                return answer;
+            }
+            None => return status::NO_COMPONENT,
         };
 
         let Some(mut assets) = world.get_resource_mut::<bevy::asset::Assets<BcsMaterial>>() else {
@@ -120,6 +156,7 @@ pub(super) fn read_target(kind: i32, id: i64, f: impl FnOnce(&Target<'_>)) -> i3
 #[cfg(feature = "render")]
 fn layout_of(target: &Target<'_>) -> Option<std::sync::Arc<super::reflect::Layout>> {
     match target {
+        Target::Material(material) if material.flat => super::programs::lookup(material.program)?.material2d,
         Target::Material(material) => super::programs::lookup(material.program)?.material,
         Target::Instance(instance) => {
             let program = super::programs::lookup(instance.program)?;

@@ -307,7 +307,7 @@ extended_material_bindless	can	the extension a Slang shader lighting its surface
 gpu_readback	can	the buffer read whole and its range taken from it, and each read asked for again as it arrives
 render_depth_to_texture	missing	depth-only cameras rendered to a texture
 shader_defs	can	a program compiled with the define and one without, where Bevy's material sets it as its pipeline is specialized
-shader_material_2d	missing	2D meshes (Mesh2d) with a shader material
+shader_material_2d	can
 shader_material	can
 shader_material_bindless	can	each material binding its own textures, as Bevy's does on a GPU without bindless support
 shader_material_screenspace_texture	can

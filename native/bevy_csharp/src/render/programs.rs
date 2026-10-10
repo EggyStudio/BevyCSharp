@@ -79,6 +79,8 @@ pub struct PipelineProgram {
     pub compute: Option<Arc<Layout>>,
     /// The layout of what a program drawing on a camera declares, merged from both of its stages.
     pub draw: Option<Arc<Layout>>,
+    /// The layout of a 2D material's own group, merged from both of its stages.
+    pub material2d: Option<Arc<Layout>>,
     /// Moves on every time a stage is replaced, and a pipeline or a bind group made from an older
     /// version checks itself against it.
     pub generation: u32,
@@ -328,10 +330,10 @@ fn fingerprint(path: &Path) -> Option<u64> {
 /// Makes a program, or finds the one already made from the same description.
 ///
 /// Returns the program's number, or a negative status where the description names none of a
-/// fragment shader, a deferred stage, a pass or a compute shader, or names a file that is not
-/// Slang.
+/// fragment shader, a deferred stage, a pass, a compute shader, a draw's fragment shader or a 2D
+/// fragment shader, or names a file that is not Slang.
 pub fn create(world: &mut World, description: ProgramDescription) -> i32 {
-    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment, Role::Deferred]
+    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment, Role::Deferred, Role::Fragment2d]
         .iter()
         .any(|role| description.stages[*role as usize].is_some());
 
@@ -674,6 +676,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
     let mut entry = PipelineProgram::default();
     let mut material: Option<Layout> = None;
     let mut draw: Option<Layout> = None;
+    let mut material2d: Option<Layout> = None;
     let mut problem = String::new();
 
     for role in Role::ALL {
@@ -699,6 +702,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
         let merged_into = match role {
             Role::DrawVertex | Role::DrawFragment | Role::DrawShadow => Some(&mut draw),
             _ if role.family() == Family::Material => Some(&mut material),
+            _ if role.family() == Family::Material2d => Some(&mut material2d),
             _ => None,
         };
 
@@ -721,6 +725,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
     if problem.is_empty() {
         entry.material = material.map(Arc::new);
         entry.draw = draw.map(Arc::new);
+        entry.material2d = material2d.map(Arc::new);
     } else {
         bevy::log::error!("{}: {problem}", program.description);
     }

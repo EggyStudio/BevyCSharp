@@ -454,7 +454,7 @@ pub(super) fn fallback_source(role: Role, entry: &str) -> Source {
     match role {
         // Magenta, reading nothing but the position, so it is valid after any vertex shader and
         // in a pass as well as in a material.
-        Role::Fragment | Role::Pass | Role::DrawFragment => Source::Wgsl(format!(
+        Role::Fragment | Role::Pass | Role::DrawFragment | Role::Fragment2d => Source::Wgsl(format!(
             "@fragment\nfn {entry}(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {{\n    \
              let checker = (u32(position.x / 8.0) + u32(position.y / 8.0)) % 2u;\n    \
              return select(vec4<f32>(1.0, 0.0, 1.0, 1.0), vec4<f32>(0.1, 0.0, 0.1, 1.0), checker == 1u);\n}}\n"
@@ -532,6 +532,37 @@ fn {entry}(vertex_in: Vertex) -> VertexOutput {{
     @if(VERTEX_OUTPUT_INSTANCE_INDEX) {{
         out.instance_index = vertex.instance_index;
     }}
+    return out;
+}}
+"#
+        )),
+
+        // Bevy's own 2D mesh vertex shader, the vertex decompressed first as Bevy's is.
+        Role::Vertex2d => Source::Wesl(format!(
+            r#"import bevy_sprite_render::mesh2d::functions as mesh_functions;
+import bevy_sprite_render::mesh2d::vertex_input::{{Vertex, decompress_vertex}};
+import bevy_sprite_render::mesh2d::vertex_output::VertexOutput;
+
+@vertex
+fn {entry}(vertex_in: Vertex) -> VertexOutput {{
+    let vertex = decompress_vertex(vertex_in, vertex_in.instance_index);
+    var out: VertexOutput;
+    let world_from_local = mesh_functions::get_world_from_local(vertex.instance_index);
+    out.world_position = mesh_functions::mesh2d_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0));
+    out.position = mesh_functions::mesh2d_position_world_to_clip(out.world_position);
+    @if(VERTEX_NORMALS) {{
+        out.world_normal = mesh_functions::mesh2d_normal_local_to_world(vertex.normal, vertex.instance_index);
+    }}
+    @if(VERTEX_UVS) {{
+        out.uv = vertex.uv;
+    }}
+    @if(VERTEX_TANGENTS) {{
+        out.world_tangent = mesh_functions::mesh2d_tangent_local_to_world(world_from_local, vertex.tangent);
+    }}
+    @if(VERTEX_COLORS) {{
+        out.color = vertex.color;
+    }}
+    out.instance_index = vertex.instance_index;
     return out;
 }}
 "#
