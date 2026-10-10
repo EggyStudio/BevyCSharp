@@ -10,7 +10,27 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `46f60650`. Fifteen commits, item 4's re-ports begun, 43 of the 95 that do not wait
+Reviewed up to `2e7a1c2c`. Six commits, 38 more re-ports, 81 of the 95, and three of the 95 set
+aside with their reason: multiline_text_input reads and moves the field's viewport against the text
+layout's size for a scrollbar of its own and opens a justify menu on a popover, context_menu lists
+its items in a `ListBox` Bevy does not reflect, and multiple_text_inputs sets a field's read-write
+mode and observes its edits, none of which the bridge reaches, so each keeps its 0.19.1 head and
+goes with the gap that brings what it reads. Right, and item 3 notes them. Of the 38: tonemapping
+and headless_renderer step through `Linear` where they stepped through `None`; ssao widens and
+narrows its radius on the arrows and starts from Bevy's default where the camera has none; overflow
+outlines a hovered logo red alone, as 0.20's does; projection_zoom reads the wheel in lines;
+transmission takes screen-space transmission off the camera and gives it back on Space with its
+steps and quality kept, and anisotropy gives its camera the same so the lamp's glass shows what is
+behind it, both as the guide says a camera must be given it; many_buttons' buttons are widgets
+colored from `Hovered` with `--overflow-clip`; the states' menus are widget buttons; callbacks keeps
+its three boxed systems and gpu_readback reads its buffer once more on Space; many_foxes and
+many_morph_targets list the mesh compression the bridge does not reach, their rows in `triage.tsv`
+moved from can to part, and five stress tests say they are. Pictures captured again where the
+picture changed, four. Right, each change said in its commit's sentence, the triage made honest
+where a port lost a switch, and the heads true. Eleven of the 95 remain, then the twenty with
+Feathers.
+
+Before it, fifteen commits came to be read, item 4's re-ports begun, 43 of the 95 that do not wait
 on Feathers. The order is the reply's and right: twenty of the 115 are built on Feathers in 0.20,
 its panes, number inputs and radio buttons in place of the helpers the ports draw, and item 4
 bridges Feathers after the other gaps, so those twenty go with it, box_shadow among them, and the
@@ -50,16 +70,6 @@ commits' sentences, as BUILDING.md has them, each change a game's author sees na
 that made it. Step h is the owner's: 29 commits since `c7f1cbc6` wait for a push, and the pack run
 for 0.4 follows a green run with Verdict 6's fix in it (Decision 8). Item 4 next, box_shadow's
 re-port first, while the push and the pack are the owner's.
-
-Before it, one commit came to be read, item 1's warnings. An assembly's behaviors are registered
-together and nothing leaves three of them out of an app, so `EngineHarness` with discovered
-behaviors adds `Screen` at its menu beside them, where none of the three runs, a test that sets the
-state adding it again before the run, and the two tests of an app without the state add the
-behaviors alone; the suite's output carries the warning once, from the test that asks for it, and
-the page's third repeated line is then the 67 errors `ShaderMaterialTests` asks for. Right, the
-state given wherever the behaviors are rather than the behaviors held back, which comes to the same
-and is the smaller change. The suite: 1,285 passed and 2 skipped of 1,287. The rest of g and h
-remain.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -197,7 +207,9 @@ from [SHARED.md](SHARED.md).
    written again on 0.20 where step f named the difference as Bevy's, and each is ported to 0.20's
    code under item 4 in the order of how much Bevy changed it, its head and picture moving with it,
    the twenty built on Feathers in 0.20 (`faecca0b`'s reply) going with Feathers after the other
-   gaps.
+   gaps, and multiline_text_input, context_menu and multiple_text_inputs going with the gap that
+   brings what each reads, the text field's viewport, the list box and the field's edits
+   (`2e7a1c2c`'s reply).
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
@@ -414,11 +426,14 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Three of the 95 wait on what Bevy 0.20 gives them and the bridge does not reach yet.**
-multiline_text_input reads and moves the field's viewport, `EditableText::viewport`, against
-`TextLayoutInfo`'s size for a scrollbar of its own, sets `TextCursorStyle::selection_radius`, and
-opens a justify menu on a `Popover`, none of which has a row in the table. context_menu lists its
-items in a `ListBox`, which Bevy does not reflect, so no wrapper puts it on. multiple_text_inputs
-sets a field's `TextReadWriteMode` and observes `TextEditChange`, neither bridged. Each keeps its
-0.19.1 head and is ported with the gap that brings what it reads, the widgets' events or the keys
-reaching a field.
+**Three more of the 95 wait on what the bridge does not reach, and Tab moves no focus in an app with
+no window.** 2d_gizmos and 3d_gizmos animate the dashes of their round gizmos on L through
+`GizmoLineConfig::animation_offset`, which the bridge's gizmo configuration does not carry, and
+wireframe turns x-ray on and off through `WireframeConfig::xray_mode` and a `WireframeXray`
+component, neither of which has a row in the table, so the three keep their 0.19.1 heads for the
+gaps that bring them. Porting tab_navigation, a Tab sent by `input.key` to the example drawn
+offscreen moved the focus neither from a focused button nor from none, in the committed port as in
+this one, where a click focuses and a click on the page clears as they should. The input focus
+plugin hands keys to the focused entity or, with none, to the primary window, and an offscreen run
+has no window, so either the keys never reach tab navigation there or they never come as the
+messages it reads. It is untraced, and belongs to the gap of keys observed as they reach a field.

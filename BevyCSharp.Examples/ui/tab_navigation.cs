@@ -1,4 +1,4 @@
-// Bevy's tab_navigation example, examples/ui/widgets/tab_navigation.rs at v0.19.1, by Bevy's
+// Bevy's tab_navigation example, examples/ui/widgets/tab_navigation.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -18,9 +18,9 @@ internal static class TabNavigation
     private static readonly Color Hovered = Color.FromSrgb(0.25f, 0.25f, 0.25f);
     private static readonly Color Pressed = Color.FromSrgb(0.35f, 0.75f, 0.35f);
 
-    private static readonly Dictionary<Entity, UiInteraction> Buttons = [];
+    private static readonly Dictionary<Entity, (bool Pressed, bool Hovered)?> Buttons = [];
     private static Entity _page, _focused;
-    private static UiInteraction _pageWas;
+
 
     public static void Build(App app)
     {
@@ -33,18 +33,24 @@ internal static class TabNavigation
     {
         var ecs = ctx.Ecs;
         Buttons.Clear();
-        (_focused, _pageWas) = (Entity.None, UiInteraction.None);
+        _focused = Entity.None;
         Render2d.SpawnCamera2d();
 
         _page = Ui.SpawnNode(new UiSettings
         {
-            Interactive = true,
             Width = Length.Percent(100f),
             Height = Length.Percent(100f),
             Direction = UiDirection.Column,
             Align = UiAlign.Center,
             Justify = UiJustify.Center,
             RowGap = Length.Px(6f),
+        });
+
+        // A click on the page itself, away from every button, lets the focus go.
+        ecs.Observe<Pointer<Click>>(_page, on =>
+        {
+            if (on.Ecs.Resource<InputFocusRef>() is { } focus) focus.CurrentFocus = null;
+            on.Propagate(false);
         });
 
         foreach (var (label, order, modal, indices) in new (string, int, bool, int[])[]
@@ -70,7 +76,6 @@ internal static class TabNavigation
             {
                 var button = Ui.SpawnNode(new UiSettings
                 {
-                    Interactive = true,
                     Width = Length.Px(200f),
                     Height = Length.Px(65f),
                     Border = Sides.All(Length.Px(5f)),
@@ -80,42 +85,42 @@ internal static class TabNavigation
                     Color = (Normal.R, Normal.G, Normal.B, 1f),
                 });
                 ecs.Insert<TabIndexRef>(button).Value = index;
+                ecs.Insert<ButtonRef>(button);
+                ecs.Insert<HoveredRef>(button);
+
+                // A click on a button gives it the focus.
+                ecs.Observe<Pointer<Click>>(button, on =>
+                {
+                    (on.Ecs.Resource<InputFocusRef>() ?? on.Ecs.InsertResource<InputFocusRef>()).CurrentFocus = on.Entity;
+                    on.Propagate(false);
+                });
                 ecs.SetParent(Ui.SpawnText($"TabIndex {index}", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { FontSize = 20f }), button);
                 ecs.SetParent(button, group);
-                Buttons[button] = UiInteraction.None;
+                Buttons[button] = null;
             }
         }
     }
 
-    // Each button colored as the pointer moves over and presses it, and a press giving it the
-    // focus. A press on the page itself, away from every button, lets the focus go.
+    // Bevy's button_styles, each button colored as whether it is pressed or hovered changes.
     private static void ButtonSystem(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        var focus = ecs.Resource<InputFocusRef>() ?? ecs.InsertResource<InputFocusRef>();
-
         foreach (var (button, was) in Buttons.ToArray())
         {
-            var now = Ui.InteractionOf(button);
+            var now = (Pressed: ecs.Get<PressedRef>(button) is not null, Hovered: ecs.Get<HoveredRef>(button)?.Value == true);
             if (now == was) continue;
             Buttons[button] = now;
 
             var (color, border) = now switch
             {
-                UiInteraction.Pressed => (Pressed, new Color(1f, 0f, 0f, 1f)),
-                UiInteraction.Hovered => (Hovered, Color.White),
+                (true, _) => (Pressed, new Color(1f, 0f, 0f, 1f)),
+                (false, true) => (Hovered, Color.White),
                 _ => (Normal, Color.Black),
             };
             ecs.Wrap<BackgroundColorRef>(button).Value = color;
             var edge = ecs.Wrap<BorderColorRef>(button);
             edge.Top = edge.Right = edge.Bottom = edge.Left = border;
-
-            if (now == UiInteraction.Pressed) focus.CurrentFocus = button;
         }
-
-        var page = Ui.InteractionOf(_page);
-        if (page == UiInteraction.Pressed && _pageWas != UiInteraction.Pressed) focus.CurrentFocus = null;
-        _pageWas = page;
     }
 
     // The focused button outlined in white, wherever the focus came from.

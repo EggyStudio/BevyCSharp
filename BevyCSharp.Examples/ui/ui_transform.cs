@@ -1,4 +1,4 @@
-// Bevy's ui_transform example, examples/ui/ui_transform.rs at v0.19.1, by Bevy's contributors under
+// Bevy's ui_transform example, examples/ui/ui_transform.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -53,6 +53,8 @@ internal static class UiTransformExample
         foreach (var (label, turn, scale) in buttons)
         {
             var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(50f), Height = Length.Px(50f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (1f, 1f, 1f, 1f) });
+            ecs.Insert<ButtonRef>(button);
+            ecs.Insert<HoveredRef>(button);
             ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = (0f, 0f, 0f, 1f) }), button);
             ecs.SetParent(button, column);
             ecs.Add(button, new TransformButton());
@@ -65,6 +67,8 @@ internal static class UiTransformExample
     private static void Edge(EcsWorld ecs, Entity parent, string label, float angle)
     {
         var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(80f), Height = Length.Px(80f), Align = UiAlign.Center, Justify = UiJustify.Center, Color = (1f, 1f, 1f, 1f) });
+        ecs.Insert<ButtonRef>(button);
+        ecs.Insert<HoveredRef>(button);
         ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = (0f, 0f, 0f, 1f) }), button);
         ecs.Insert<UiTransformRef>(button);
         Turn(ecs, button, angle);
@@ -117,30 +121,28 @@ public partial struct TargetNode
     }
 }
 
-/// <summary>
-/// A button of the example, Bevy's <c>Button</c>, which a node made interactive here does not carry
-/// by that name, so the example marks its own.
-/// </summary>
+/// <summary>A button of the example, one of Bevy's widgets, marked for the example's query.</summary>
 [Behavior]
 public partial struct TransformButton
 {
     /// <summary>
-    /// Colored by its interaction as it changes, and when pressed turning or scaling the panel by
-    /// what the button carries, the scale kept between a quarter and three.
+    /// Colored by whether it is pressed or hovered as either changes, and as it is pressed turning
+    /// or scaling the panel by what the button carries, the scale kept between a quarter and three.
     /// </summary>
+    /// <remarks>
+    /// Bevy's acts on a change of <c>Hovered</c> or <c>Pressed</c>, which no C# type names for a
+    /// filter. The bridge's <c>Interaction</c> on an interactive node changes with both, so it
+    /// stands in as the filter, and the state is read from <c>Hovered</c> and <c>Pressed</c>.
+    /// </remarks>
     [OnUpdate]
     [Changed(typeof(Interaction))]
     public void ButtonSystem(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        var interaction = Ui.InteractionOf(ctx.Entity);
-        ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = interaction switch
-        {
-            UiInteraction.Pressed => UiTransformExample.Pressed,
-            UiInteraction.Hovered => UiTransformExample.Hovered,
-            _ => UiTransformExample.Normal,
-        };
-        if (interaction != UiInteraction.Pressed) return;
+        var pressed = ecs.Get<PressedRef>(ctx.Entity) is not null;
+        var hovered = ecs.Get<HoveredRef>(ctx.Entity)?.Value == true;
+        ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = pressed ? UiTransformExample.Pressed : hovered ? UiTransformExample.Hovered : UiTransformExample.Normal;
+        if (!pressed) return;
 
         foreach (var target in ecs.EntitiesWith<TargetNode>())
         {
