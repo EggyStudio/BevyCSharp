@@ -20,6 +20,9 @@ refused once it has loaded, before anything plays it, so its handle reports `Fai
 playing is an entity, so it can be despawned,
 parented, tagged with your own components and found by a query, and `Play` hands that entity back.
 `PlaybackMode.Despawn` suits a one-shot effect, because nothing has to remember to clean it up.
+Played to a device, such a sound is played once and despawned at its end by the bridge rather than
+by Bevy, whose despawn of it never gives the entity's index back to the world, so its
+`PlaybackSettings` read through the reflected wrappers say `Once`.
 
 A run with no window, headless or offscreen, as a test or a soak is, plays to no device unless
 `Config.AudioWithoutWindow` asks for one. Its sounds are given a sink of the bridge's own, which
