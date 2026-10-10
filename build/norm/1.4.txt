@@ -57,7 +57,6 @@ BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/LensTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
 BevyCSharp.Tests/MaterialFileTests.cs
-BevyCSharp.Tests/MaterialSurfaceTests.cs
 BevyCSharp.Tests/MaterialTests.cs
 BevyCSharp.Tests/Mesh2dTests.cs
 BevyCSharp.Tests/MeshFileTests.cs
