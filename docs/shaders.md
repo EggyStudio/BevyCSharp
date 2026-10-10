@@ -165,6 +165,56 @@ every frame, which a uniform is for. A pass or a dispatch has one pipeline for e
 its program, so it runs with the shader's own value, and setting a constant on an instance is
 refused.
 
+### Every entity's own values
+
+A material shared by many entities can still give each its own values, read from a buffer at the
+entity's mesh tag, as Bevy's `GpuComponentArrayBuffer` does. `app.AddComponentArray<T>()` keeps
+every entity's `T` in one storage buffer, written again at the end of each frame where a component
+was added, changed or taken off, and gives each entity a mesh tag holding its place, moving the
+last entry into a place given up so the array stays packed:
+
+<!-- compiled with:
+using System.Numerics;
+ShaderProgram tinted = default;
+-->
+```csharp
+[Behavior]
+public partial struct Tint
+{
+    public Vector4 Color;
+}
+
+var tints = app.AddComponentArray<Tint>();
+
+app.Startup(ctx =>
+{
+    var material = Shaders.CreateMaterial(tinted).SetBuffer("tints", tints.Buffer);
+    var cube = ctx.Ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), material, Transform.Identity);
+    ctx.Ecs.Add(cube, new Tint { Color = new Vector4(1f, 0.5f, 0f, 1f) });
+});
+```
+
+```slang
+import bcs;
+
+struct Tint
+{
+    float4 color;
+};
+
+StructuredBuffer<Tint> tints;
+
+[shader("fragment")]
+float4 fragment(bcs::VertexOutput mesh) : SV_Target
+{
+    return tints[bcs::tag(mesh.instance_index)].color;
+}
+```
+
+The component crosses as C# lays it out, and a structured buffer gives a `float3` sixteen bytes, so
+a struct shared with one spells its padding out. The tag is the array's, so an entity in it has no
+tag of its own to give, and `bcs2d::tag` reads it the same way on a 2D mesh.
+
 ### On a 2D mesh
 
 A program draws a 2D mesh with its 2D stages, and a 2D camera draws the material as Bevy draws a

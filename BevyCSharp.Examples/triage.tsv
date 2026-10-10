@@ -443,4 +443,4 @@ pan_orbit_camera_cad	missing	Bevy's pan-orbit camera controller, which the bridg
 pan_orbit_camera_minimal	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
 pan_orbit_camera_ortho	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
 shader_material_2d_bindless	can	each material binding its own textures, as Bevy's does on a GPU without bindless support
-gpu_component_array_buffer	missing	per-instance data in Bevy's GpuComponentArrayBuffer, which a shader program does not bind
+gpu_component_array_buffer	can	its cubes placed by .NET's random numbers from Bevy's seed rather than by ChaCha8, so they fall in other places

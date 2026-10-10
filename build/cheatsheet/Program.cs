@@ -27,7 +27,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Scenes and saves", "scenes-and-saves.md", ["DataAssets", "SceneFile", "SceneInstances", "SceneReferences", "SceneValue", "SaveGame", "SaveId", "Persistent`1", "IPersistentValue", "ProjectSettings", "UserData"]),
     ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "IAnimationEvent", "MeshFiles", "MaterialFiles"]),
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
-    ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw"]),
+    ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw", "ComponentArray`1"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),
     ("The interface", "ui.md", ["Ui", "UiGrid", "Length", "Sides", "Corners", "Track", "ImGuiRuntime", "ImGuiTextures"]),
     ("Audio", "audio.md", ["Audio"]),

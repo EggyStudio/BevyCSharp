@@ -311,6 +311,7 @@ internal static class Catalog
         new("compute_shader_game_of_life", ComputeShaderGameOfLife.Build, ComputeShaderGameOfLife.Configure),
         new("extended_material", ExtendedMaterial.Build),
         new("extended_material_bindless", ExtendedMaterialBindless.Build),
+        new("gpu_component_array_buffer", GpuComponentArrayBuffer.Build),
         new("gpu_readback", GpuReadback.Build),
         new("pipeline_constants", PipelineConstants.Build),
         new("shader_defs", ShaderDefs.Build),

@@ -20,6 +20,7 @@ static App Build(Config? config = null);                        // Builds an app
 ### `App`
 
 ```csharp
+ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
 App OnAdd<T>(ComponentHook<T> hook);                            // Runs hook the first time a T is put on an entity, Bevy's on_add
 App OnInsert<T>(ComponentHook<T> hook);                         // Runs hook each time a T is put on an entity, after OnAdd the first time, Bevy's on_insert
 App OnDiscard<T>(ComponentHook<T> hook);                        // Runs hook with a T's value before it is overwritten or taken off, Bevy's on_discard
@@ -1650,6 +1651,12 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 
 ```csharp
 static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
+```
+
+### `ComponentArray<T>`
+
+```csharp
+int PlaceOf(Entity entity);                                     // Where an entity's entry is, its mesh tag, or -1 where it has none
 ```
 
 ### `ConsoleView`

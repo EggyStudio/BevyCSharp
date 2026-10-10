@@ -198,6 +198,7 @@ sealed class Bevy.App : IDisposable
   App Startup(Action<BehaviorContext> setup, string name = "Startup")
   App Update(Action<BehaviorContext> update, string name = "Update")
   App(Config? config = null)
+  ComponentArray<T> AddComponentArray<T>() where T : unmanaged
   Config Config { get; }
   IReadOnlyCollection<Type> Plugins { get; }
   IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage)
@@ -796,6 +797,10 @@ enum Bevy.CompassOctant : int
   West = 6
 static class Bevy.CompassOctants
   static CompassOctant? Of(Vec2 direction)
+sealed class Bevy.ComponentArray<T> where T : unmanaged
+  AssetHandle Buffer { get; }
+  int Count { get; }
+  int PlaceOf(Entity entity)
 sealed class Bevy.ComponentField
   ComponentField(string name, FieldKind kind, string type, Func<EcsWorld, Entity, object?> read, Func<EcsWorld, Entity, object, bool>? write = null, IReadOnlyList<string>? options = null, FieldHints? hints = null)
   ComponentSchema? Schema { get; }

@@ -44,6 +44,9 @@ internal sealed class PictureRun
     /// <summary>Changes to the app's configuration before it is made, for a run needing more.</summary>
     public Action<Config>? Configure { get; init; }
 
+    /// <summary>What to add to the app once it is made and before it runs, its own systems and parts.</summary>
+    public Action<App>? Build { get; init; }
+
     /// <summary>
     /// What to do every frame, before the steps are looked at, which is how a test keeps something
     /// moving while it waits and takes pictures.
@@ -120,6 +123,7 @@ internal sealed class PictureRun
 
         using var app = new App(config);
         app.AddPlugin(new EnginePlugin());
+        Build?.Invoke(app);
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(
             world => Guard(() => Scene?.Invoke(world.Resource<EcsWorld>())),

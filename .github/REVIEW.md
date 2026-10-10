@@ -10,7 +10,27 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `095bccd7`. One commit, two examples with nothing to bridge: inline_image puts each
+Reviewed up to `4e3dd60a`. One commit, pipeline constants: a Slang `[SpecializationConstant]`, an
+`override` in WGSL, is set on a material by name as any value is and compiled into pipelines of its
+own for each set of values. Reflection reads each constant's name, id and type from Slang's JSON for
+those the stage's WGSL kept, since naga refuses a key its module does not declare, so each stage
+carries its own list and a constant one stage kept and another left out is still the material's; the
+check takes one number for a constant; the material's key gains the constant values as bits by name,
+so each set gets its pipelines; the 3D specialization and a new 2D one hand each stage the constants
+it declares; and a pass's or dispatch's pipeline being shared by every instance of its program, a
+constant there is refused once the program has compiled and reported at pack if set before, through
+one flag in each of the six pack contexts. No new API and no ABI change, the guide gaining a
+section. pipeline_constants is written and matches bare Bevy's frame with no pixel past 3%; a bridge
+test holds a constant kept and one dropped and the one-number check, and two managed tests hold two
+materials of one program drawn apart by their constants and redrawn when one changes, and an
+instance refusing a constant. Right, the constants reflected only where the stage kept them, which
+is the thing naga would otherwise refuse at pipeline time, and the refusal where a pipeline is
+shared said plainly. The suite: 1,313 passed and 2 skipped. gpu_component_array_buffer next, drafted
+on the managed side: `AddComponentArray<T>` keeping each entity's T in a shader buffer at the end of
+every frame with a mesh tag an entity, the last entry swapped into a freed place and retagged as
+Bevy does, the buffer grown by half.
+
+Before it, one commit came to be read, two examples with nothing to bridge: inline_image puts each
 image in as a child entity among the text's runs in order through the reflected `InlineImage`, and
 fixed_node's square is laid out as a root though its parent holds it, the parent `Pickable` with
 neither hover nor block so it hears of the square alone, turning red under the pointer and blue as
@@ -46,27 +66,6 @@ is given 3,600 frames, which it ends well short of once the program is ready, a 
 measure, so right. The suite: 1,310 passed and 2 skipped. SHARED.md takes the slangc trap the reply
 offers, a fragment shader's struct of inputs kept whole in WGSL. inline_image and fixed_node next,
 through the reflected `InlineImage` and `FixedNode`, as item 4 has it.
-
-Before it, one commit came to be read, the first half of item 4's 2D materials: a Slang program
-draws a 2D mesh as Bevy draws a `Material2d`, through 2D stages of its own, `Fragment2d` and
-`Vertex2d`, a family with its own group two and the spaces Bevy's 2D view and mesh take moved to
-groups zero and one; the new `bcs2d` module gives a shader Bevy's 2D view, globals, mesh and vertex
-output; and `Shaders.CreateMaterial2d` takes values set by name as a 3D material does, the asset a
-type of its own since Bevy prepares every asset of a type for the renderer the type belongs to. The
-bridge implements Bevy's erased 2D material layer directly, its own allocator entry, the extraction
-of which entity is drawn with which material and the specialization systems, and reaches Bevy's
-crate-private draw function through a type alias of the same tuple, which is the same type and finds
-the same function; a Bevy that changes the tuple breaks it, and the test that draws a 2D material
-would say so. N 1.3 sent the material entry points into `shader_materials.rs`; ABI 238;
-shader_material_2d is written and its capture matches bare Bevy's frame; four tests hold a
-material's color set and changed by material and by entity, a 2D vertex shader moving the mesh, a
-blended material mixed with what is behind it against an opaque one, and a 2D vertex shader refused
-without its fragment shader; and the guide says masking is the shader's job, since Bevy's own masked
-2D materials discard nothing either. Right, the layer taken as Bevy has it and the one coupling to
-Bevy's private type said where it is. The suite: 1,304 passed and 2 skipped. sprite_material and
-shader_material_2d_bindless next, under way: Bevy's own `SpriteMaterial` of the bridge's material,
-so Bevy's count of sprite materials holds, the shared copies carrying the sprite, a `bcs_sprite`
-module with Bevy's sprite functions and the sprite bound at 100 to 102.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -221,10 +220,10 @@ from [SHARED.md](SHARED.md).
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
    field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials
    (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface (`095bccd7`),
-   `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from Slang through
-   SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then names most.
-   When the captures have settled, they are compared whole with checked-in references by the
-   workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
+   `pipeline_constants` (`4e3dd60a`) and `gpu_component_array_buffer` in shaders, mesh shaders from
+   Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then
+   names most. When the captures have settled, they are compared whole with checked-in references by
+   the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
    scenes. Transmission's glass spheres are missing from about one capture in four with TAA on,
    before `6a84286` as after it, so the cause is found before that job is red for them, or the
    example is compared with its spheres left out and the reason beside it. `dragdrop_picking`'s pale
