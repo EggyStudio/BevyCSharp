@@ -1,7 +1,8 @@
-// Bevy's ui_texture_slice example, examples/ui/images/ui_texture_slice.rs at v0.19.1, by Bevy's
+// Bevy's ui_texture_slice example, examples/ui/images/ui_texture_slice.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
@@ -10,7 +11,7 @@ namespace BevyCSharp.Examples.Interface;
 internal static class UiTextureSlice
 {
     private static readonly List<(Entity Button, Entity Label, UiImageSettings Image)> Buttons = [];
-    private static readonly Dictionary<Entity, UiInteraction> Last = [];
+    private static readonly Dictionary<Entity, (bool Pressed, bool Hovered)> Last = [];
 
     public static void Build(App app)
     {
@@ -29,7 +30,6 @@ internal static class UiTextureSlice
             {
                 var button = Ui.SpawnNode(new UiSettings
                 {
-                    Interactive = true,
                     Width = Length.Px(w),
                     Height = Length.Px(h),
                     Justify = UiJustify.Center,
@@ -38,6 +38,8 @@ internal static class UiTextureSlice
                 });
                 var image = new UiImageSettings { Image = panel, Mode = UiImageMode.Sliced, SliceBorder = (22f, 22f, 22f, 22f) };
                 Ui.SetImage(button, image);
+                ecs.Insert<ButtonRef>(button);
+                ecs.Insert<HoveredRef>(button);
                 ecs.SetParent(button, middle);
 
                 var label = Ui.SpawnText("Button", new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, new UiTextSettings { Font = font, FontSize = 33f });
@@ -50,14 +52,16 @@ internal static class UiTextureSlice
         {
             foreach (var (button, label, image) in Buttons)
             {
-                var interaction = Ui.InteractionOf(button);
-                if (Last.TryGetValue(button, out var last) && last == interaction) continue;
-                Last[button] = interaction;
+                // Bevy's button_system, the button styled as whether it is pressed or hovered
+                // changes.
+                var now = (Pressed: ctx.Ecs.Get<PressedRef>(button) is not null, Hovered: ctx.Ecs.Get<HoveredRef>(button)?.Value == true);
+                if (Last.TryGetValue(button, out var last) && last == now) continue;
+                Last[button] = now;
 
-                (var text, image.Color) = interaction switch
+                (var text, image.Color) = now switch
                 {
-                    UiInteraction.Pressed => ("Press", Color.FromSrgb8(255, 215, 0)),
-                    UiInteraction.Hovered => ("Hover", Color.FromSrgb8(255, 165, 0)),
+                    (true, _) => ("Press", Color.FromSrgb8(255, 215, 0)),
+                    (false, true) => ("Hover", Color.FromSrgb8(255, 165, 0)),
                     _ => ("Button", (1f, 1f, 1f, 1f)),
                 };
                 Ui.SetText(label, text);
