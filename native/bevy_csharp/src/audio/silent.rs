@@ -50,7 +50,9 @@ impl Plugin for SilentAudio {
             .init_asset::<Pitch>();
 
         // Sounds playing move on before this frame's are started, so a new sound starts at its
-        // first sample, and one that runs out is despawned in the frame it did.
+        // first sample, and one that runs out is despawned in the frame it did. After transforms
+        // are propagated, where Bevy plays its own, which is after `audio::checked` has refused a
+        // file no decoder reads, since building a decoder from one panics.
         app.add_systems(
             PostUpdate,
             (
@@ -58,7 +60,8 @@ impl Plugin for SilentAudio {
                 (start::<AudioSource>, start::<Pitch>),
                 (finish::<AudioSource>, finish::<Pitch>),
             )
-                .chain(),
+                .chain()
+                .after(bevy::transform::TransformSystems::Propagate),
         );
     }
 }

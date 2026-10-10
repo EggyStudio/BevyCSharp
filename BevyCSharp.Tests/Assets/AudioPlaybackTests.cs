@@ -6,10 +6,10 @@ namespace Bevy.Tests;
 
 /// <summary>Covers a playing sound's speed and mute, and asking whether it has its sink yet.</summary>
 /// <remarks>
-/// A sound has a sink only where the machine has a device to play on, which a test machine may not
-/// have, so these hold what is true either way. A sound started this frame has no sink and says so, the
-/// calls that reach the sink refuse until it has one, and a speed no sound can play at is refused
-/// before any sink is looked for.
+/// A sound is given its sink once its clip has loaded, the frame after it was started, and in a run
+/// with no window, as every test is, the sink is the bridge's own, which plays to no device. A sound
+/// started this frame has no sink and says so, the calls that reach the sink refuse until it has
+/// one, and a speed no sound can play at is refused before any sink is looked for.
 /// </remarks>
 [Collection("engine")]
 public sealed class AudioPlaybackTests

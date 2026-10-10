@@ -525,6 +525,50 @@ public sealed class AudioTests
         Assert.InRange((ended - started) * step, 1.0, 1.0 + 3 * step);
     }
 
+    /// <summary>
+    /// A sound whose file no decoder reads is refused in a run with no window, and waits for a sink
+    /// it is never given, where building its decoder would have panicked inside the frame.
+    /// </summary>
+    /// <remarks>
+    /// The check that refuses it runs before transforms are propagated, and the bridge's sink is
+    /// given after them, as Bevy's own is, so the file is refused before anything decodes it.
+    /// </remarks>
+    [SkippableFact]
+    [ExpectsError("bevy", "not-a-sound")]
+    public void ASoundNoDecoderReadsIsRefusedRatherThanPlayed()
+    {
+        Needs.Renderer();
+
+        var name = $"not-a-sound-{Guid.NewGuid():N}.wav";
+        var file = Path.Combine(EngineHarness.AssetDirectory, "sounds", name);
+        var noise = new byte[4096];
+        new Random(7).NextBytes(noise);
+        File.WriteAllBytes(file, noise);
+
+        try
+        {
+            using var harness = new EngineHarness(frames: 40, frameSeconds: 1.0 / 60);
+            var playing = Entity.None;
+            bool? started = null;
+
+            harness.OnContext(Stage.Startup, _ =>
+                playing = Audio.Play(AssetServer.Load(AssetKind.Audio, $"sounds/{name}"), new AudioSettings { Volume = 0f }));
+
+            harness.OnContext(Stage.Update, ctx =>
+            {
+                if (ctx.Time.FrameCount == 30) started = Audio.HasStarted(playing);
+            });
+
+            harness.Run();
+
+            Assert.False(started, "a sound no decoder reads was given a sink");
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
     /// <summary>A run with no window plays to the machine's device when its config asks.</summary>
     [SkippableFact]
     public void ARunWithNoWindowCanAskToBeHeard()
