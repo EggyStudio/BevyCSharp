@@ -1,4 +1,4 @@
-// Bevy's bloom_2d example, examples/2d/bloom_2d.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's bloom_2d example, examples/2d/bloom_2d.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using System.Text;
@@ -14,10 +14,11 @@ using CompositeMode = Bevy.Reflected.BloomRef.CompositeModeVariant;
 // against black, with Bevy's Bloom component changed field by field through its wrapper.
 internal static class Bloom2d
 {
-    // The tonemappers in the order O steps through them, as Bevy's next_tonemap does.
+    // The tonemappers in the order O steps through them, as Bevy's next_tonemap does, a camera at
+    // None stepping on to Linear.
     private static readonly Tonemap[] Tonemappers =
     [
-        Tonemap.None, Tonemap.AcesFitted, Tonemap.AgX, Tonemap.BlenderFilmic, Tonemap.Reinhard,
+        Tonemap.Linear, Tonemap.AcesFitted, Tonemap.AgX, Tonemap.BlenderFilmic, Tonemap.Reinhard,
         Tonemap.ReinhardLuminance, Tonemap.SomewhatBoringDisplayTransform, Tonemap.TonyMcMapface,
         Tonemap.KhronosPbrNeutral,
     ];

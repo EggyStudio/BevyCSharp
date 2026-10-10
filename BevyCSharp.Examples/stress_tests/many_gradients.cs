@@ -1,4 +1,4 @@
-// Bevy's many_gradients example, examples/stress_tests/many_gradients.rs at v0.19.1, by Bevy's
+// Bevy's many_gradients example, examples/stress_tests/many_gradients.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -39,6 +39,7 @@ internal static class ManyGradients
         Console.WriteLine($"Gradient stress test with {_gradientCount} gradients");
         Console.WriteLine($"Color space: {(ColorSpace == InterpolationColorSpace.Srgba ? "sRGB" : ColorSpace == InterpolationColorSpace.Hsla ? "HSL" : "OkLab (default)")}");
 
+        StressTest.Warn();
         app.Startup(Setup, "many_gradients.Setup");
     }
 
