@@ -25,7 +25,7 @@ ssao	can
 spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
 bloom_3d	can
 decal	missing	forward decals (ForwardDecal)
-deferred_rendering	can
+deferred_rendering	can	compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred
 motion_blur	can
 order_independent_transparency	can
 tonemapping	can
@@ -174,9 +174,9 @@ projection_zoom	can
 fps_overlay	missing	Bevy's FPS overlay and frame time graph, from its dev tools, which the bridge does not compile in
 infinite_grid	missing	Bevy's infinite grid
 schedule_data	n/a	reads Bevy's schedule graphs from Rust
-custom_diagnostic	missing	diagnostics a game registers in Bevy's store
-enabling_disabling_diagnostic	missing	turning one of Bevy's diagnostics on and off
-log_diagnostics	missing	Bevy's diagnostics store and its logging, which the bridge reads only render timings from
+custom_diagnostic	can
+enabling_disabling_diagnostic	can
+log_diagnostics	part	Bevy's system information diagnostics, the process's and the machine's CPU and memory, whose crate the bridge does not compile in
 callbacks	can
 change_detection	missing	a resource's change ticks, and when a component was added and by what
 component_hooks	can	the hooks' change of the world queued on the app's commands, applied after the frame's systems, where Bevy's apply as the hook's command ends

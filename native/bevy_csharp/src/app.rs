@@ -447,18 +447,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
     let _ = title;
 
-    // Bevy's frame time diagnostics and its log of every diagnostic once a second, where the app
-    // asks, as Bevy's stress tests add them, so a program measured beside Bevy's logs by the same
-    // code. A windowless app has no diagnostics plugin among its minimal ones, and is given it.
-    if config.log_frame_times != 0 {
-        if !app.is_plugin_added::<bevy::diagnostic::DiagnosticsPlugin>() {
-            app.add_plugins(bevy::diagnostic::DiagnosticsPlugin);
-        }
-        app.add_plugins((
-            bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),
-            bevy::diagnostic::LogDiagnosticsPlugin::default(),
-        ));
-    }
+    // Bevy's diagnostics plugins the app asks for, as Bevy's stress tests add frame times and their
+    // log, so a program measured beside Bevy's logs by the same code.
+    crate::diagnostics::install(&mut app, config.diagnostics);
 
     // Bevy refuses to allocate a handle for an asset type it has not been told about, and says
     // so by panicking rather than failing the load. `DefaultPlugins` registers these three, so

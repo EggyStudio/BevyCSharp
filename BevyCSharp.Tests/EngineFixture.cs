@@ -96,6 +96,10 @@ public sealed class EngineHarness : IDisposable
     /// Seconds each frame advances the clock by, or 0 for the machine's clock. A test of something
     /// that moves with time sets it, and counts frames rather than pacing them and waiting.
     /// </param>
+    /// <param name="configure">
+    /// Changes to the configuration before the app is made, which reads it then, so a change to
+    /// <see cref="App.Config"/> afterward reaches nothing the bridge built.
+    /// </param>
     public EngineHarness(
         uint frames = 4,
         bool discoverBehaviors = false,
@@ -103,9 +107,10 @@ public sealed class EngineHarness : IDisposable
         double fixedHz = 0,
         System.Reflection.Assembly? carried = null,
         string? pack = null,
-        double frameSeconds = 0)
+        double frameSeconds = 0,
+        Action<Config>? configure = null)
     {
-        _app = new App(new Config
+        var config = new Config
         {
             Headless = true,
             HeadlessFrames = frames,
@@ -116,7 +121,9 @@ public sealed class EngineHarness : IDisposable
             AssetRoot = AssetDirectory,
             AssetAssembly = carried,
             AssetPack = pack,
-        });
+        };
+        configure?.Invoke(config);
+        _app = new App(config);
 
         _app.AddPlugin(new EnginePlugin());
         if (!discoverBehaviors) return;

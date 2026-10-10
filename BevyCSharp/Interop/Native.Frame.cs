@@ -12,6 +12,38 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_adapter(byte* buffer, int capacity);
 
+    // -- Diagnostics
+
+    /// <summary>Registers a diagnostic in Bevy's store.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostic_register(string path, string suffix, uint history);
+
+    /// <summary>Adds a measurement to a diagnostic, taken now.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostic_measure(string path, double value);
+
+    /// <summary>Reads what a diagnostic holds now.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostic_read(string path, NativeDiagnostic* reading);
+
+    /// <summary>Turns a diagnostic on or off.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostic_set_enabled(string path, int on);
+
+    /// <summary>Every diagnostic in the store, a line each.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostics_list(byte* buffer, int capacity);
+
+    /// <summary>Says which diagnostics Bevy's log prints, a path a line, or all where null.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_diagnostics_set_log_filter(string? paths);
+
     // -- Assets
 
     /// <summary>Starts loading an asset and returns the key the engine knows it by.</summary>

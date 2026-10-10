@@ -95,4 +95,24 @@ internal static class ConsoleProfileCommands
 
         return string.Join("\n", lines);
     }
+
+    /// <summary>Lists Bevy's diagnostics store, a diagnostic a line, as its log prints them.</summary>
+    /// <remarks>
+    /// Each line is the path, the smoothed value and the average with the suffix, as Bevy's log has
+    /// them, and says where one is off or has no measurement yet. The store holds Bevy's own where
+    /// the app asks for them (<see cref="Config.DiagnosticPlugins"/>) and a game's own.
+    /// </remarks>
+    [Command("diagnostics", "Lists Bevy's diagnostics store, its measures and a game's: diagnostics")]
+    internal static string ListDiagnostics(string line)
+    {
+        var all = Diagnostics.All();
+        if (all.Count == 0) return "no diagnostics; Config.DiagnosticPlugins adds Bevy's, and Diagnostics.Register a game's";
+
+        static string N(double? value) => value?.ToString("0.000000", CultureInfo.InvariantCulture) ?? "-";
+        var width = all.Max(reading => reading.Path.Length);
+
+        return string.Join("\n", all.Select(reading =>
+            $"{reading.Path.PadRight(width)}: {N(reading.Smoothed),14}{reading.Suffix} (avg {N(reading.Average)}{reading.Suffix})"
+            + (reading.Enabled ? "" : ", off")));
+    }
 }

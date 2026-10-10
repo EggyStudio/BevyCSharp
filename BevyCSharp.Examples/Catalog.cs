@@ -11,6 +11,7 @@ using BevyCSharp.Examples.Gizmo;
 using BevyCSharp.Examples.Inputs;
 using BevyCSharp.Examples.Interface;
 using BevyCSharp.Examples.Maths;
+using BevyCSharp.Examples.Measuring;
 using BevyCSharp.Examples.Movement;
 using BevyCSharp.Examples.Pointers;
 using BevyCSharp.Examples.Shading;
@@ -186,6 +187,11 @@ internal static class Catalog
         new("camera_orbit", CameraOrbit.Build),
         new("first_person_view_model", FirstPersonViewModel.Build),
         new("projection_zoom", ProjectionZoom.Build),
+
+        // Diagnostics
+        new("custom_diagnostic", CustomDiagnostic.Build, CustomDiagnostic.Configure, Prints: 150),
+        new("enabling_disabling_diagnostic", EnablingDisablingDiagnostic.Build, EnablingDisablingDiagnostic.Configure, Prints: 690),
+        new("log_diagnostics", LogDiagnostics.Build, LogDiagnostics.Configure),
 
         // ECS (Entity Component System)
         new("callbacks", Callbacks.Build, Prints: 2),

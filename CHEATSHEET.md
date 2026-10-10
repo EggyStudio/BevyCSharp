@@ -1520,6 +1520,17 @@ static string Unwrap(string line);                              // A line with o
 static string[] Split(string line);                             // A line of arguments as words, keeping quoted runs together
 ```
 
+### `Diagnostics`
+
+```csharp
+static void Register(string path, string suffix = "", int history = 0);  // Registers a diagnostic, so measurements of it are kept
+static bool Measure(string path, double value);                 // Adds a measurement to a diagnostic, taken now
+static bool TryRead(string path, out DiagnosticReading reading);  // What a diagnostic holds now
+static bool SetEnabled(string path, bool on);                   // Turns a diagnostic's measuring and its line in Bevy's log on or off, its history kept
+static IReadOnlyList<DiagnosticReading> All();                  // Every diagnostic in the store, by path
+static void SetLogFilter(IEnumerable<string>? paths);           // Has Bevy's log print only these diagnostics, or every one when given nothing
+```
+
 ### `ConsoleHost`
 
 ```csharp

@@ -1,0 +1,44 @@
+INFO bevy_diagnostic: fps               :   59.369400   (avg 55.982821)
+INFO bevy_diagnostic: frame_time        :   16.843694ms (avg 42.297487ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 24.000000
+INFO bevy_diagnostic: fps               :   59.608905   (avg 58.600960)
+INFO bevy_diagnostic: frame_time        :   16.776017ms (avg 24.144432ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 83.000000
+INFO bevy_diagnostic: fps               :   60.041157   (avg 59.627335)
+INFO bevy_diagnostic: frame_time        :   16.655242ms (avg 16.771070ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 143.000000
+INFO bevy_diagnostic: fps               :   59.675663   (avg 59.599180)
+INFO bevy_diagnostic: frame_time        :   16.757250ms (avg 16.779050ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 202.000000
+INFO bevy_diagnostic: fps               :   59.602660   (avg 59.612815)
+INFO bevy_diagnostic: frame_time        :   16.777775ms (avg 16.775230ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 262.000000
+INFO bevy_diagnostic: fps               :   59.402798   (avg 59.613845)
+INFO bevy_diagnostic: frame_time        :   16.834224ms (avg 16.774926ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 322.000000
+INFO bevy_diagnostic: fps               :   59.770329   (avg 59.615697)
+INFO bevy_diagnostic: frame_time        :   16.730716ms (avg 16.774409ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 381.000000
+INFO bevy_diagnostic: fps               :   59.341025   (avg 59.614505)
+INFO bevy_diagnostic: frame_time        :   16.851748ms (avg 16.774739ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 441.000000
+INFO bevy_diagnostic: fps               :   59.779817   (avg 59.571432)
+INFO bevy_diagnostic: frame_time        :   16.728054ms (avg 16.786914ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 500.000000
+INFO bevy_diagnostic: fps               :   59.492293   (avg 59.532892)
+INFO bevy_diagnostic: frame_time        :   16.808900ms (avg 16.797936ms)
+INFO bevy_diagnostic: started_load_count:    0.000000   (avg 0.000000)
+INFO bevy_diagnostic: frame_count       : 560.000000
+INFO csharp: toggling diagnostic fps
+INFO csharp: toggling diagnostic frame_count
+INFO csharp: toggling diagnostic frame_time
+INFO csharp: toggling diagnostic started_load_count

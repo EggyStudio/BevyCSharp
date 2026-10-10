@@ -400,9 +400,22 @@ public sealed class Config
     /// <remarks>
     /// What Bevy's stress tests add, so a program written again on this package and Bevy's own,
     /// measured side by side, log their frames by the same code, and the program here runs no system
-    /// of its own for it. The lines go to the log Bevy writes to the console.
+    /// of its own for it. The lines go to the log Bevy writes to the console. The same as
+    /// <see cref="DiagnosticPlugins.Log"/> and <see cref="DiagnosticPlugins.FrameTime"/> in
+    /// <see cref="DiagnosticPlugins"/>.
     /// </remarks>
     public bool LogFrameTimes { get; set; }
+
+    /// <summary>
+    /// Bevy's plugins that measure frames, entities and render passes into its diagnostics store,
+    /// and its log of the store, none by default.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Diagnostics"/> reads what they measure and is where a game's own measures go.
+    /// The log prints every diagnostic once a second, a game's among them, unless
+    /// <see cref="Diagnostics.SetLogFilter"/> says which.
+    /// </remarks>
+    public DiagnosticPlugins DiagnosticPlugins { get; set; }
 
     /// <summary>
     /// The window's scale factor in place of the display's, or zero to keep the display's.

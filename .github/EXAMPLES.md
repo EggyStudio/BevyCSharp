@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**309 written, 17 written in part, 0 can be written, 56 missing and 56 do not apply.** Of the 382 that apply, 326 can be written with what is bridged, 17 of them leaving something out.
+**311 written, 18 written in part, 0 can be written, 53 missing and 56 do not apply.** Of the 382 that apply, 329 can be written with what is bridged, 18 of them leaving something out.
 
-**144 of the 160 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**144 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -19,7 +19,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Audio](#audio) | 6 | 0 | 0 | 2 | 0 | 4 of 4 |
 | [Camera](#camera) | 6 | 0 | 0 | 6 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
-| [Diagnostics](#diagnostics) | 0 | 0 | 0 | 3 | 0 |  |
+| [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 0 of 1 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 19 | 0 | 0 | 7 | 9 | 11 of 12 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 6 | 1 | 0 | 0 | 0 | 5 of 6 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **309** | **17** | **0** | **56** | **56** | **144 of 160** |
+| **All** | **311** | **18** | **0** | **53** | **56** | **144 of 161** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -103,7 +103,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`color_grading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/color_grading.rs) | Demonstrates color grading | [written](../BevyCSharp.Examples/3d/color_grading.cs) |
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs) | Showcases how contact shadows add shadow detail | [written](../BevyCSharp.Examples/3d/contact_shadows.cs), its model spun by a press over it found with a ray, where Bevy observes picking's drag |
 | [`decal`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/decal.rs) | Decal rendering | missing, forward decals (ForwardDecal) |
-| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | [written](../BevyCSharp.Examples/3d/deferred_rendering.cs) |
+| [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | [written](../BevyCSharp.Examples/3d/deferred_rendering.cs), compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred |
 | [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/depth_of_field.rs) | Demonstrates depth of field | [written](../BevyCSharp.Examples/3d/depth_of_field.cs) |
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |
 | [`fog_volumes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/fog_volumes.rs) | Demonstrates fog volumes | [written](../BevyCSharp.Examples/3d/fog_volumes.cs), through Bevy's reflected FogVolume |
@@ -269,9 +269,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`custom_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/custom_diagnostic.rs) | Shows how to create a custom diagnostic | missing, diagnostics a game registers in Bevy's store |
-| [`enabling_disabling_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/enabling_disabling_diagnostic.rs) | Shows how to disable/re-enable a Diagnostic during runtime | missing, turning one of Bevy's diagnostics on and off |
-| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | missing, Bevy's diagnostics store and its logging, which the bridge reads only render timings from |
+| [`custom_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/custom_diagnostic.rs) | Shows how to create a custom diagnostic | [written](../BevyCSharp.Examples/diagnostics/custom_diagnostic.cs), prints [its output](assets/examples/custom_diagnostic.txt) |
+| [`enabling_disabling_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/enabling_disabling_diagnostic.rs) | Shows how to disable/re-enable a Diagnostic during runtime | [written](../BevyCSharp.Examples/diagnostics/enabling_disabling_diagnostic.cs), prints [its output](assets/examples/enabling_disabling_diagnostic.txt) |
+| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | [written in part](../BevyCSharp.Examples/diagnostics/log_diagnostics.cs), Bevy's system information diagnostics, the process's and the machine's CPU and memory, whose crate the bridge does not compile in |
 
 ## ECS (Entity Component System)
 

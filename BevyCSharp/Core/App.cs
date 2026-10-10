@@ -242,7 +242,7 @@ public sealed unsafe partial class App : IDisposable
                 X = opening.X,
                 Y = opening.Y,
                 Wireframes = Config.Wireframes ? 1u : 0u,
-                LogFrameTimes = Config.LogFrameTimes ? 1u : 0u,
+                Diagnostics = (uint)(Config.DiagnosticPlugins | (Config.LogFrameTimes ? DiagnosticPlugins.Log | DiagnosticPlugins.FrameTime : DiagnosticPlugins.None)),
                 ScaleFactor = Config.ScaleFactor,
                 FrameSeconds = Config.FrameSeconds,
                 MeshPicking = Config.MeshPicking ? 1u : 0u,

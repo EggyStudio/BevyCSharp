@@ -156,6 +156,32 @@ refused rather than handed to code that was never written for it.
 drawing one. The editor's is the tab along the bottom, which the key under Escape raises and puts
 away, and everything it knows about the log and the commands it asks the library for.
 
+## Diagnostics
+
+Bevy keeps a store of named measures, each a history of numbers with a value smoothed over time and
+an average over what it keeps. Bevy's own plugins measure into it where `Config.DiagnosticPlugins`
+asks for them: `FrameTime` for the frame time, frames a second and the frame count, `EntityCount`
+for the entities, and `Render` for each render pass's CPU and GPU time. `Log` prints every
+diagnostic once a second to Bevy's log. A game's own measures go in the same store and are printed
+beside Bevy's, a suffix after each number:
+
+<!-- compiled with:
+struct Enemy { }
+-->
+```csharp
+app.Startup(ctx => Diagnostics.Register("game/enemies", " enemies"));
+app.Update(ctx => Diagnostics.Measure("game/enemies", ctx.Ecs.EntitiesWith<Enemy>().Length));
+```
+
+A diagnostic is registered before it is measured, since the store drops a measurement of a path it
+does not have. A path is names apart by slashes. `Diagnostics.TryRead` gives one's last, smoothed
+and average values, and `Diagnostics.All` gives every one, which an overlay of the frame rate reads.
+`Diagnostics.SetEnabled` stops one being measured and logged and keeps its history, and
+`Diagnostics.SetLogFilter` has the log print only the paths it is given, or none for an empty list,
+or all of them again for null. Bevy's measures of the process's and the machine's CPU and memory
+need a crate the bridge does not compile in, so they are not in the store. The `diagnostics` command
+lists the store as the log prints it.
+
 ## Driving a running app
 
 The same catalog is reachable from a terminal. `Config.Serve`, or `--serve`, or `BCS_SERVE` in the
@@ -177,6 +203,7 @@ and asks it things:
 ./bcs command frames.wait 5
 ./bcs command pipelines.wait           # until every pipeline asked for has compiled
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
+./bcs command diagnostics              # Bevy's diagnostics store, as its log prints it
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition
 ./bcs command memory.collect           # what it holds, after a full collection
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file

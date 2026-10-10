@@ -78,8 +78,8 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to add Bevy's wireframe plugins, for 3D and 2D meshes.</summary>
     public uint Wireframes;
 
-    /// <summary>Non-zero to add Bevy's frame time diagnostics and its log of them once a second.</summary>
-    public uint LogFrameTimes;
+    /// <summary>Bevy's diagnostics plugins to add, a bit each, as <see cref="DiagnosticPlugins"/> has them.</summary>
+    public uint Diagnostics;
 
     /// <summary>The window's scale factor in place of the display's, or zero for the display's.</summary>
     public float ScaleFactor;

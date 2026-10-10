@@ -884,6 +884,7 @@ sealed class Bevy.ComputedFromAttribute : Attribute
 sealed class Bevy.Config
   Assembly? AssetAssembly { get; set; }
   Config()
+  DiagnosticPlugins DiagnosticPlugins { get; set; }
   Dictionary<string, string> AssetSources { get; }
   GraphicsBackend Backend { get; set; }
   bool AudioWithoutWindow { get; set; }
@@ -1198,6 +1199,39 @@ readonly struct Bevy.Despawn<T> : IEntityEvent, IEquatable<Despawn<T>>, IReporte
   static bool op_Equality(Despawn<T> left, Despawn<T> right)
   static bool op_Inequality(Despawn<T> left, Despawn<T> right)
   void Deconstruct(out Entity Entity, out T Value)
+enum Bevy.DiagnosticPlugins : int
+  EntityCount = 4
+  FrameTime = 2
+  Log = 1
+  None = 0
+  Render = 8
+readonly struct Bevy.DiagnosticReading : IEquatable<DiagnosticReading>
+  DiagnosticReading(string Path, string Suffix, bool Enabled, int History, double? Value, double? Smoothed, double? Average)
+  bool Enabled { get; init; }
+  bool Equals(DiagnosticReading other)
+  double? Average { get; init; }
+  double? Smoothed { get; init; }
+  double? Value { get; init; }
+  int History { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(DiagnosticReading left, DiagnosticReading right)
+  static bool op_Inequality(DiagnosticReading left, DiagnosticReading right)
+  string Path { get; init; }
+  string Suffix { get; init; }
+  void Deconstruct(out string Path, out string Suffix, out bool Enabled, out int History, out double? Value, out double? Smoothed, out double? Average)
+static class Bevy.Diagnostics
+  const string EntityCount = "entity_count"
+  const string Fps = "fps"
+  const string FrameCount = "frame_count"
+  const string FrameTime = "frame_time"
+  static IReadOnlyList<DiagnosticReading> All()
+  static bool Measure(string path, double value)
+  static bool SetEnabled(string path, bool on)
+  static bool TryRead(string path, out DiagnosticReading reading)
+  static void Register(string path, string suffix = "", int history = 0)
+  static void SetLogFilter(IEnumerable<string>? paths)
 readonly struct Bevy.Discard<T> : IEntityEvent, IEquatable<Discard<T>>, IReportedEvent where T : struct
   Discard(Entity Entity, T Value)
   Entity Entity { get; init; }
@@ -2401,6 +2435,7 @@ struct Bevy.Interop.NativeConfig
   uint AudioWithoutWindow
   uint Backend
   uint DesktopTitleBar
+  uint Diagnostics
   uint GpuTimings
   uint Gui
   uint HasPosition
@@ -2408,7 +2443,6 @@ struct Bevy.Interop.NativeConfig
   uint HeadlessFps
   uint HeadlessFrames
   uint Height
-  uint LogFrameTimes
   uint MeshPicking
   uint MeshletClusters
   uint Offscreen
@@ -2419,6 +2453,12 @@ struct Bevy.Interop.NativeConfig
   uint Weather
   uint Width
   uint Wireframes
+struct Bevy.Interop.NativeDiagnostic
+  double Average
+  double Smoothed
+  double Value
+  uint Enabled
+  uint History
 struct Bevy.Interop.NativeEditableTextConfig
   float VisibleLines
   float VisibleWidth
