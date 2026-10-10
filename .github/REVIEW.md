@@ -10,7 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9d2f7e31`. One commit, after the home disk filled: at 21:05 it held 19 GB of 1.9 TB,
+Reviewed up to `5d955562`. One commit, item 8: every example builds on the package alone, the script
+removing the catalog, the program, the examples' record and the capture's input from its copy and
+building a library, so an example reaching into the runner fails there; the nine capture drivers
+leave their examples for one `Drives.cs` with a sentence each of what it presses, the stress tests'
+warning is written into each of the 19 as Bevy's each say theirs, the transforms' cube scene into
+each of its four, and the opened size comes from `Window.Size()`, which answers offscreen, read once
+a frame into a field where a method may run on a worker thread, as Bevy's system reads its window
+once; `FreeCamera` moves to a file of its own and, with the radio buttons, stays a helper the script
+lists with its reason, each note saying what it stands in for and that it goes when that can be
+asked for, no decision or person named (N 4.7). On a fresh pack every example builds beside the two
+helpers, and a driven example prints its checked-in capture exactly. Right, the runner's files taken
+out of the copy so the check cannot be fooled, and the two helpers' standing said in the code's own
+words. The five test classes touched pass, 61 of 61, the whole suite waiting for the comparison
+commit so it does not run against the lavapipe pass for the CPU. Item 9 next, the scripts read for
+GNU-only forms wherever they run.
+
+Before it, one commit came to be read, after the home disk filled: at 21:05 it held 19 GB of 1.9 TB,
 this repository's build trees holding the room, `native/target` 213 GB of five profile and feature
 combinations over two Bevy versions, `build/target` 26 GB of stale and cross-compiled folders, and
 the bare Bevy comparison harness's 58 GB outside the repository, and a capture of the retake was
@@ -52,32 +68,6 @@ and was retaken; seven examples flat by their design and byte-identical to their
 blank check and go on a list with that reason; the lavapipe run began at 20:58 under its own
 sessions and runs some hours, the comparison commit after it. Item 8 meanwhile, every example on the
 package alone.
-
-Before it, one commit came to be read, item 6: a template package, `BevyCSharp.Templates`, whose one
-template `dotnet new bevycsharp` makes the README's first program, `Spin.cs` and `Program.cs` as the
-README's two blocks have them in a project asking for the engine at a placeholder version, with
-`--package-folder` writing a `nuget.config` for a local folder as 3DEngine's does; the template
-project stands outside the solution and compiles nothing. `build/pack-templates.sh` copies it to an
-ignored folder inside the repository, so `Directory.Build.props` gives it the license, the icon and
-the addresses, writes the engine's packed version into its `template.json` and packs it beside the
-engine; the README job packs both and walks, installing the template from its package, making the
-game, diffing its two files against the README's blocks, building and running 120 frames offscreen,
-which passed in a container on llvmpipe; the pack job packs and lists both, and `BCS_PACKAGE` takes
-the engine's by a digit after its name, as the three lookups that took any `BevyCSharp.*.nupkg` do
-since, where the template's package lay beside the engine's and was picked. The README's install
-reads the template's three commands and names `dotnet add package BevyCSharp` for any other project;
-BUILDING.md and AGENTS.md's `templates` row say it. `FirstGameTests` holds the template's files to
-the README's blocks line for line and the placeholder and the default on every push; 59 of the five
-test classes touched pass, the whole suite waiting on the comparison commit while the capture run
-holds the GPU, which is right for a change of tests, scripts and a template. Right, the template
-held to the README by a diff on every push and the lookups narrowed to the engine. Two things for
-the owner: the publish push carries both packages, so ticking it puts `BevyCSharp.Templates` on
-nuget.org beside the engine, a second package in the owner's name, which the README's install needs
-and which the owner's word allows, the package being theirs to pack and publish (Decision 8); and
-`docs/first-game.md` starts from `dotnet new console` where 3DEngine's starts from its template, as
-item 6 had it, so it moves to the template with the next batch, the cube's two files removed as the
-page's first step or an empty-window template beside the first, 3DEngine's two templates read for
-the shape. `NormTests.cs` stands at 794. The capture run is a third through.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -306,7 +296,7 @@ from [SHARED.md](SHARED.md).
    and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on the
    owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
    second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
-   list only getting shorter.
+   list only getting shorter. Done at `5d955562`, the two helpers listed.
 9. **A script that more than one system runs is read for the forms only GNU's tools or a later
    bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
    and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.

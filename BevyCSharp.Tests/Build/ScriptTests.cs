@@ -4,9 +4,9 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The shell scripts a workflow runs on Windows or macOS, and those they call, use only what GNU's
-/// tools and the BSD ones macOS has both read, and what the bash 3.2 macOS ships reads, as N 6.6 of
-/// NORM.md has it.
+/// Every shell script of the checkout uses only what GNU's tools and the BSD ones macOS has both
+/// read, and what the bash 3.2 macOS ships reads, as N 6.6 of NORM.md has it, those a workflow runs
+/// on Windows or macOS among them.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -19,6 +19,11 @@ namespace Bevy.Tests;
 /// A job runs elsewhere than Linux when its <c>runs-on</c> names anything but an Ubuntu label, which
 /// takes in a job whose system comes from a matrix of inputs, since the inputs decide that and not
 /// the job. A job that calls another workflow names no script of its own.
+/// </para>
+/// <para>
+/// A script no job runs elsewhere is still run by a developer on whichever system they work on, a
+/// build of the bridge on a Mac or a capture in Windows' Git bash, so every script is read, the
+/// launcher <c>bcs</c> with them, and the jobs' are counted to be sure they are among them.
 /// </para>
 /// </remarks>
 public sealed class ScriptTests
@@ -35,13 +40,21 @@ public sealed class ScriptTests
         ("stat -c", new(@"\bstat\s+(?:-\w+\s+)*(?:-c|--format)\b"), "wc -c, or Python"),
         ("sha256sum", new(@"\b(?:sha256sum|sha1sum|md5sum)\b"), "Python's hashlib"),
         ("${x,,}", new(@"\$\{[A-Za-z_]\w*(?:,,?|\^\^?)\}"), "tr"),
+        ("declare -A", new(@"\b(?:declare|local|typeset)\s+(?:-\w+\s+)*-\w*A\b"), "a list of pairs, or a case"),
+        ("|&", new(@"\|&"), "2>&1 |"),
+        ("&>>", new(@"&>>"), ">> file 2>&1"),
     ];
 
     [Fact]
-    public void TheScriptsRunOnWindowsAndMacOSUseOnlyWhatBothSystemsToolsRead()
+    public void EveryScriptUsesOnlyWhatBothSystemsToolsRead()
     {
-        var scripts = ScriptsRunElsewhere();
-        Assert.Contains("build/build-native.sh", scripts);
+        var elsewhere = ScriptsRunElsewhere();
+        Assert.Contains("build/build-native.sh", elsewhere);
+
+        var scripts = Scripts();
+        Assert.Superset(elsewhere, scripts);
+        Assert.Contains("bcs", scripts);
+        Assert.Contains("games/Courtyard/play.sh", scripts);
 
         var found = new List<string>();
         foreach (var script in scripts)
@@ -53,7 +66,7 @@ public sealed class ScriptTests
                         found.Add($"{script}:{i + 1} has {form}, where {instead} reads on both");
         }
 
-        Assert.True(found.Count == 0, "N 6.6: scripts run on macOS use what only GNU's tools or bash 4 read:\n  " + string.Join("\n  ", found));
+        Assert.True(found.Count == 0, "N 6.6: scripts use what only GNU's tools or bash 4 read:\n  " + string.Join("\n  ", found));
     }
 
     [Theory]
@@ -65,6 +78,13 @@ public sealed class ScriptTests
     [InlineData("size=$(stat -c %s file)", "stat -c")]
     [InlineData("sha256sum package.nupkg", "sha256sum")]
     [InlineData("echo \"${profile,,}\"", "${x,,}")]
+    [InlineData("declare -A seen=()", "declare -A")]
+    [InlineData("local -rA kinds", "declare -A")]
+    [InlineData("make |& tee build.log", "|&")]
+    [InlineData("echo done &>> run.log", "&>>")]
+    [InlineData("declare -a seen=()", null)]
+    [InlineData("make 2>&1 | tee build.log", null)]
+    [InlineData("echo done >> run.log 2>&1", null)]
     [InlineData("sed -e 's/a/b/' file > file.new && mv file.new file", null)]
     [InlineData("floor=$(objdump -T \"$BUILT\" | grep -oE 'GLIBC_[0-9]+' | sed 's/^GLIBC_//')", null)]
     [InlineData("now=$(date +%s)", null)]
@@ -96,6 +116,21 @@ public sealed class ScriptTests
                 foreach (var line in File.ReadLines(Path.Combine(Root, script)))
                     foreach (var called in Called(Code(line)))
                         pending.Push(called);
+        return scripts;
+    }
+
+    // Every shell script of the checkout by path from the root, the launcher with them, and none of
+    // what a build or a fetch leaves.
+    private static SortedSet<string> Scripts()
+    {
+        var scripts = new SortedSet<string>(StringComparer.Ordinal) { "bcs" };
+        foreach (var file in Directory.EnumerateFiles(Root, "*.sh", SearchOption.AllDirectories))
+        {
+            var path = Path.GetRelativePath(Root, file).Replace('\\', '/');
+            if (!Regex.IsMatch(path, @"(^|/)(bin|obj|target|target-portable|\.ref|\.git|node_modules)/|^build/(package|artifacts|tools|templates)/"))
+                scripts.Add(path);
+        }
+
         return scripts;
     }
 
