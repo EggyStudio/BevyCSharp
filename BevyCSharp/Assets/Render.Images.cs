@@ -323,6 +323,19 @@ public static unsafe partial class Render
         Native.Check(Native.bcs_render_make_cubemap(image.Key), "making an image a cubemap");
 
     /// <summary>
+    /// The compressed texture formats this device decodes, none where nothing draws. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A file compressed in a format the device does not decode is refused as it loads, so a game
+    /// shipping one texture compressed several ways loads the copy the device takes, as Bevy's
+    /// skybox example does. Desktop GPUs decode <see cref="CompressedImageFormats.Bc"/> and phones
+    /// <see cref="CompressedImageFormats.Astc"/> and <see cref="CompressedImageFormats.Etc2"/>, though a
+    /// device may decode more than its kind does.
+    /// </remarks>
+    public static CompressedImageFormats CompressedFormats => (CompressedImageFormats)Native.bcs_render_compressed_formats();
+
+    /// <summary>
     /// Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is.
     /// </summary>
     /// <remarks>

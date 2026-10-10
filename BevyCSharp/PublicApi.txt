@@ -877,6 +877,12 @@ static class Bevy.ComponentType<T> where T : struct
   static int Alignment { get; }
   static int Id { get; }
   static int Size { get; }
+enum Bevy.CompressedImageFormats : int
+  Astc = 1
+  AstcHdr = 2
+  Bc = 4
+  Etc2 = 8
+  None = 0
 sealed class Bevy.ComputedFromAttribute : Attribute
   ComputedFromAttribute(Type source, params Type[] more)
   IReadOnlyList<Type> Sources { get; }
@@ -10035,6 +10041,7 @@ static class Bevy.Render
   static AssetHandle MeshOf(EcsWorld world, Entity entity)
   static Capture BeginCapture()
   static Capture BeginCapture(AssetHandle target)
+  static CompressedImageFormats CompressedFormats { get; }
   static Entity SpawnCamera3d()
   static Entity SpawnCamera3d(CameraSettings settings)
   static Entity SpawnLight(LightKind kind, float intensity)

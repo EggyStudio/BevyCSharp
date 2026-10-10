@@ -6,14 +6,17 @@ using Bevy;
 namespace BevyCSharp.Examples.ThreeD;
 
 // Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture
-// formats.
-//
-// Bevy asks the GPU which compressed formats it decodes and cycles through those. The bridge does
-// not say, so this cycles through the uncompressed picture and BC7, which every desktop GPU
-// decodes, and leaves ASTC and ETC2 out.
+// formats, those the GPU decodes.
 internal static class Skybox
 {
-    private static readonly string[] Cubemaps = ["textures/Ryfjallet_cubemap.png", "textures/Ryfjallet_cubemap_bc7.ktx2"];
+    // Each copy of the sky, with the format a device decodes to load it.
+    private static readonly (string Path, CompressedImageFormats Format)[] Cubemaps =
+    [
+        ("textures/Ryfjallet_cubemap.png", CompressedImageFormats.None),
+        ("textures/Ryfjallet_cubemap_astc4x4.ktx2", CompressedImageFormats.Astc),
+        ("textures/Ryfjallet_cubemap_bc7.ktx2", CompressedImageFormats.Bc),
+        ("textures/Ryfjallet_cubemap_etc2.ktx2", CompressedImageFormats.Etc2),
+    ];
     private const float SwapDelay = 3f;
 
     private static Entity _camera;
@@ -35,7 +38,7 @@ internal static class Skybox
             ecs.Add(_camera, new FreeCamera());
             Render.SetPostProcessing(_camera, new PostSettings { Msaa = 1, AntiAlias = AntiAliasPass.Temporal });
             Render.SetAmbientOcclusion(_camera, AmbientOcclusionQuality.High);
-            Show(Cubemaps[0]);
+            Show(Cubemaps[0].Path);
 
             var sky = Color.FromSrgb8(210, 220, 240);
             Render.SetAmbientLight((sky.R, sky.G, sky.B), 1f);
@@ -54,9 +57,21 @@ internal static class Skybox
             if (now < _nextSwap) return;
             _nextSwap += SwapDelay;
 
-            _index = (_index + 1) % Cubemaps.Length;
-            Console.WriteLine($"Swapping to {Cubemaps[_index]}...");
-            Show(Cubemaps[_index]);
+            // The next the device decodes, skipping those it does not, and the same one again where
+            // it decodes none of the others.
+            var decoded = Render.CompressedFormats;
+            var next = _index;
+            for (var i = 0; i < Cubemaps.Length; i++)
+            {
+                next = (next + 1) % Cubemaps.Length;
+                if (decoded.HasFlag(Cubemaps[next].Format)) break;
+                Console.WriteLine($"Skipping format which is not supported by current hardware: {Cubemaps[next]}");
+            }
+
+            if (next == _index) return;
+            _index = next;
+            Console.WriteLine($"Swapping to {Cubemaps[_index].Path}...");
+            Show(Cubemaps[_index].Path);
         }, "skybox.CycleCubemapAsset");
     }
 

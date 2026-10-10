@@ -36,6 +36,8 @@ models/VolumetricFogExample/VolumetricFogExample.glb
 textures/ScratchedGold-Normal.png
 textures/Ryfjallet_cubemap.png
 textures/Ryfjallet_cubemap_bc7.ktx2
+textures/Ryfjallet_cubemap_astc4x4.ktx2
+textures/Ryfjallet_cubemap_etc2.ktx2
 models/TonemappingTest/TestPattern.png
 models/TonemappingTest/TonemappingTest.bin
 models/TonemappingTest/TonemappingTest.gltf

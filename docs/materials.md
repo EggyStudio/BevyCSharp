@@ -170,6 +170,14 @@ PNG, JPEG, WebP, BMP, TGA and Radiance's `.hdr` decode in every build, headless 
 that is work on data rather than on a GPU. An `.hdr` image holds light brighter than white, as a
 baked lightmap does.
 
+A KTX2 or DDS file compressed in a format the device does not decode is refused as it loads, so a
+game shipping a texture compressed more than one way loads the copy `Render.CompressedFormats`
+names, BC on a desktop GPU and ASTC or ETC2 on a phone:
+
+```csharp
+var sky = Render.CompressedFormats.HasFlag(CompressedImageFormats.Bc) ? "sky_bc7.ktx2" : "sky.png";
+```
+
 ---
 
 Before this, [Drawing](drawing.md).
