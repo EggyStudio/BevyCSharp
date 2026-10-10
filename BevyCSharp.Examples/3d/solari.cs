@@ -1,4 +1,4 @@
-// Bevy's solari example, examples/3d/solari.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's solari example, examples/3d/solari.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using System.Text;
@@ -33,7 +33,7 @@ internal static class Solari
 
     private static readonly List<Entity> Roots = [];
     private static readonly HashSet<Entity> Traced = [];
-    private static Entity _sun;
+    private static Entity _sun, _camera;
     private static AssetHandle _robotLight;
 
     public static void Configure(Config config)
@@ -63,6 +63,7 @@ internal static class Solari
         app.Update(AddRaytracingMeshes, "solari.AddRaytracingMeshes");
         app.Update(PauseScene, "solari.PauseScene");
         app.Update(ToggleLights, "solari.ToggleLights");
+        app.Update(ToggleRestir, "solari.ToggleRestir");
 
     }
 
@@ -71,7 +72,7 @@ internal static class Solari
         var ecs = ctx.Ecs;
         _sun = SpawnSun(ecs);
 
-        var camera = ecs.SpawnCamera3d(
+        var camera = _camera = ecs.SpawnCamera3d(
             new Transform(new Vec3(0.219417f, 2.5764852f, 6.9718704f), new Quat(-0.1466768f, 0.013738206f, 0.002037309f, 0.989087f), Vec3.One),
             new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
         ecs.Add(camera, new FreeCamera { Speed = 3f });
@@ -182,7 +183,14 @@ internal static class Solari
             ? "\n(2): Disable robot emissive light"
             : "\n(2): Enable robot emissive light");
         controls.Append("\nDenoising: App not compiled with DLSS support");
+        controls.Append(ctx.Ecs.Get<SolariLightingRef>(_camera)?.Restir == true ? "\n(R): Disable ReSTIR" : "\n(R): Enable ReSTIR");
         return controls.ToString();
+    }
+
+    // Bevy's toggle_restir, R turning the reuse of samples between pixels and frames on and off.
+    private static void ToggleRestir(BehaviorContext ctx)
+    {
+        if (ctx.Input.KeyPressed(Key.R) && ctx.Ecs.Get<SolariLightingRef>(_camera) is { } lighting) lighting.Restir = !lighting.Restir;
     }
 
     // Each of Solari's passes as the GPU timed it, smoothed over the last frames.
