@@ -24,7 +24,7 @@ internal static class CubicSplines
     private static CubicCurve<Vec2>? _curve;
     private static Vec2? _mousePosition;
     private static Vec2? _editStart;
-    private static Entity _camera, _splineText, _cyclingText;
+    private static Entity _camera;
 
     public static void Build(App app)
     {
@@ -37,7 +37,12 @@ internal static class CubicSplines
             HandleMouseMove(ctx);
             changed |= HandleMousePress(ctx);
             DrawEditMove();
-            if (changed) UpdateCurve();
+            if (changed)
+            {
+                UpdateCurve();
+                UpdateTexts(ctx.Ecs);
+            }
+
             DrawCurve();
             DrawControlPoints();
         }, "cubic_splines.Update");
@@ -66,12 +71,14 @@ internal static class CubicSplines
             Direction = UiDirection.Column,
             RowGap = Length.Px(20f),
         });
-        _splineText = Ui.SpawnText(string.Empty, new UiSettings());
-        _cyclingText = Ui.SpawnText(string.Empty, new UiSettings());
+        var splineText = Ui.SpawnText(string.Empty, new UiSettings());
+        var cyclingText = Ui.SpawnText(string.Empty, new UiSettings());
+        ctx.Ecs.Add(splineText, new SplineModeText());
+        ctx.Ecs.Add(cyclingText, new CyclingModeText());
         ctx.Ecs.SetParent(Ui.SpawnText(Instructions, new UiSettings()), column);
-        ctx.Ecs.SetParent(_splineText, column);
-        ctx.Ecs.SetParent(_cyclingText, column);
-        UpdateTexts();
+        ctx.Ecs.SetParent(splineText, column);
+        ctx.Ecs.SetParent(cyclingText, column);
+        UpdateTexts(ctx.Ecs);
     }
 
     // Bevy's form_curve, the curve the control points make in the modes chosen, or none where they
@@ -88,15 +95,16 @@ internal static class CubicSplines
             _ when _cyclic => new CubicBSpline<Vec2>(points).ToCurveCyclic(),
             _ => new CubicBSpline<Vec2>(points).ToCurve(),
         };
-        UpdateTexts();
     }
 
-    // Bevy's update_spline_mode_text and update_cycling_mode_text.
-    private static void UpdateTexts()
+    // Bevy's update_spline_mode_text and update_cycling_mode_text, which run where the modes have
+    // changed, as the curve is made again.
+    private static void UpdateTexts(EcsWorld ecs)
     {
-        if (_splineText.IsNone) return;
-        Ui.SetText(_splineText, $"Spline: {(_splineMode == SplineMode.B ? "B" : _splineMode.ToString())}");
-        Ui.SetText(_cyclingText, _cyclic ? "Cyclic" : "Not Cyclic");
+        foreach (var text in ecs.EntitiesWith<SplineModeText>())
+            Ui.SetText(text, $"Spline: {(_splineMode == SplineMode.B ? "B" : _splineMode.ToString())}");
+        foreach (var text in ecs.EntitiesWith<CyclingModeText>())
+            Ui.SetText(text, _cyclic ? "Cyclic" : "Not Cyclic");
     }
 
     // Bevy's draw_curve, the curve as a hundred lines a segment, so it stays smooth as it grows.
@@ -205,3 +213,11 @@ internal static class CubicSplines
         B,
     }
 }
+
+/// <summary>The text naming the spline's construction, Bevy's example's <c>SplineModeText</c>.</summary>
+[Behavior]
+public partial struct SplineModeText;
+
+/// <summary>The text saying whether the curve loops, Bevy's example's <c>CyclingModeText</c>.</summary>
+[Behavior]
+public partial struct CyclingModeText;

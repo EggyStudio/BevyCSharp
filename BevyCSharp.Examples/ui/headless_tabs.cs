@@ -12,31 +12,24 @@ namespace BevyCSharp.Examples.Interface;
 // moves.
 //
 // Bevy marks the selected tab with a Selected component, which it does not reflect. Here a tab is
-// selected where its list's SelectedTab names it.
+// selected where its list's SelectedTab names it, the list being the tab's parent.
 internal static class HeadlessTabs
 {
     private static readonly Color TextLabel = Color.FromSrgb(0.72f, 0.76f, 0.84f);
     private static readonly Color TabText = Color.FromSrgb(0.88f, 0.89f, 0.92f);
     private static readonly Color Strip = Color.FromSrgb(0.10f, 0.11f, 0.14f);
-    private static readonly Color Idle = Color.FromSrgb(0.13f, 0.14f, 0.18f);
-    private static readonly Color Edge = Color.FromSrgb(0.24f, 0.25f, 0.30f);
+    internal static readonly Color Idle = Color.FromSrgb(0.13f, 0.14f, 0.18f);
+    internal static readonly Color Edge = Color.FromSrgb(0.24f, 0.25f, 0.30f);
 
-    // The tabs and the list each belongs to, which the styles read the selection from.
-    private static readonly Dictionary<Entity, Entity> Tabs = [];
-
-    // The controlled strip's selection, kept by the game rather than the list.
+    // Bevy's ControlledSelection resource, the controlled strip's selection, kept by the game
+    // rather than the list.
     private static Entity? _controlledSelection;
 
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "headless_tabs.Setup");
-        app.Update(UpdateTabStyles, "headless_tabs.UpdateTabStyles");
-    }
+    public static void Build(App app) => app.Startup(Setup, "headless_tabs.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Tabs.Clear();
         _controlledSelection = null;
         Render2d.SpawnCamera2d();
 
@@ -105,40 +98,47 @@ internal static class HeadlessTabs
                 Color = Idle,
                 BorderColor = Edge,
             });
+            ecs.Add(tab, new ShowcaseTab());
             ecs.Insert<TabRef>(tab);
             ecs.Insert<HoveredRef>(tab);
             ecs.SetParent(Ui.SpawnText(labels[i], new UiSettings { Color = TabText }, new UiTextSettings { FontSize = 16f }), tab);
             ecs.SetParent(tab, strip);
-            Tabs[tab] = strip;
             tabs[i] = tab;
         }
 
         ecs.Insert<SelectedTabRef>(strip).Value = tabs[0];
         return (strip, tabs);
     }
+}
 
-    private static void UpdateTabStyles(BehaviorContext ctx)
+/// <summary>A tab of the showcase's strips, Bevy's example's <c>ShowcaseTab</c>.</summary>
+[Behavior]
+public partial struct ShowcaseTab
+{
+    /// <summary>
+    /// Bevy's update_tab_styles, the tab colored as it is disabled, selected or hovered, and
+    /// outlined while it holds the focus Tab moves.
+    /// </summary>
+    [OnUpdate]
+    public void UpdateTabStyles(BehaviorContext ctx)
     {
-        var ecs = ctx.Ecs;
+        var (ecs, tab) = (ctx.Ecs, ctx.Entity);
         var focus = ecs.Resource<InputFocusRef>()?.CurrentFocus;
         var focusVisible = ecs.Resource<InputFocusVisibleRef>()?.Value == true;
 
-        foreach (var (tab, list) in Tabs)
+        var disabled = ecs.Get<InteractionDisabledRef>(tab) is not null;
+        var selected = ecs.Get<SelectedTabRef>(ecs.ParentOf(tab))?.Value == tab;
+        var hovered = ecs.Get<HoveredRef>(tab)?.Value == true;
+
+        ecs.Wrap<BackgroundColorRef>(tab).Value = (disabled, selected, hovered) switch
         {
-            var disabled = ecs.Get<InteractionDisabledRef>(tab) is not null;
-            var selected = ecs.Get<SelectedTabRef>(list)?.Value == tab;
-            var hovered = ecs.Get<HoveredRef>(tab)?.Value == true;
+            (true, _, _) => Color.FromSrgb(0.10f, 0.10f, 0.11f),
+            (false, true, _) => Color.FromSrgb(0.18f, 0.34f, 0.52f),
+            (false, false, true) => Color.FromSrgb(0.20f, 0.21f, 0.26f),
+            _ => HeadlessTabs.Idle,
+        };
 
-            ecs.Wrap<BackgroundColorRef>(tab).Value = (disabled, selected, hovered) switch
-            {
-                (true, _, _) => Color.FromSrgb(0.10f, 0.10f, 0.11f),
-                (false, true, _) => Color.FromSrgb(0.18f, 0.34f, 0.52f),
-                (false, false, true) => Color.FromSrgb(0.20f, 0.21f, 0.26f),
-                _ => Idle,
-            };
-
-            var edge = ecs.Wrap<BorderColorRef>(tab);
-            edge.Top = edge.Right = edge.Bottom = edge.Left = focusVisible && focus == tab ? Color.FromSrgb(0.45f, 0.78f, 1f) : Edge;
-        }
+        var edge = ecs.Wrap<BorderColorRef>(tab);
+        edge.Top = edge.Right = edge.Bottom = edge.Left = focusVisible && focus == tab ? Color.FromSrgb(0.45f, 0.78f, 1f) : HeadlessTabs.Edge;
     }
 }

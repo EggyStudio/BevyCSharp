@@ -3,7 +3,9 @@
 
 using Bevy;
 
-namespace BevyCSharp.Examples.Ecs;
+// In a namespace of its own within the group's, since the removal_detection example names a
+// behavior of its own MyComponent as Bevy's does.
+namespace BevyCSharp.Examples.Ecs.Hooks;
 
 // This example illustrates the different ways you can employ component lifecycle hooks. Each key
 // pressed spawns an entity holding it, the hooks keep an index from each key to its entity as the
@@ -52,11 +54,13 @@ internal static class ComponentHooksExample
 
     // Bevy's MyMessage, sent as a key's component is added.
     private readonly record struct MyMessage;
+}
 
-    // Bevy's MyComponent, a key held by an entity while the key is. Nested, since the
-    // removal_detection example names a behavior of its own the same in this namespace.
-    internal struct MyComponent
-    {
-        public Key Key;
-    }
+/// <summary>A key held by an entity while the key is, Bevy's example's <c>MyComponent</c>.</summary>
+/// <remarks>Its hooks are registered by the example, as Bevy's are, rather than declared on it.</remarks>
+[Behavior]
+public partial struct MyComponent
+{
+    /// <summary>The key.</summary>
+    public Key Key;
 }

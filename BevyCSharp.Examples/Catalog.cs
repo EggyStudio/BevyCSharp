@@ -5,6 +5,7 @@ using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
+using BevyCSharp.Examples.Ecs.Hooks;
 using BevyCSharp.Examples.Games;
 using BevyCSharp.Examples.Gltf;
 using BevyCSharp.Examples.Gizmo;

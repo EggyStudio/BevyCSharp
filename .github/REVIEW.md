@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `28e2d97b`. Two commits, items 9 and 10, the last of the list that wait on no word.
+Reviewed up to `d17f0d97`. One commit, item 4's comparison of the captures, as proposed and taken on
+its terms. Each capture is taken in a frame counted from the app's first, `shot <path> [frame]`
+holding the request until then, on a clock of a sixtieth a frame, and an app begun on a set clock
+compiles each pipeline in the frame that asks for it, so a frame is the same moment of the scene,
+drawn whole, on a device compiling for seconds as on a fast one; before, a capture taken when the
+waits ended landed on whatever frame the app had reached, and a lavapipe pass found 29 of 191
+differing, most the same scene some frames apart. A capture runs as the workflow runs it, seeded,
+and one that prints runs on the set clock with its numbers set apart in the comparison. Every
+picture was taken again on the laptop's GPU and on lavapipe, 190 changed and one text new, and the
+two devices match in all 329, seven within an allowance listed with its cause in
+`build/captures-differ.txt`, four of Bevy's drawn at random and unseeded, one whose animation starts
+in the frame its model loads, the meshlets lavapipe draws some of, and solari's noise and timings,
+the list's head saying a fault is never listed and the list only gets shorter; two heavy scenes are
+taken at frame 30, lavapipe taking seconds a frame over them; seven examples flat by their design
+are named so the blank check passes them and they are still compared. `build/compare-captures.py`
+holds a pixel to 24 in a channel and a capture to 2% of its pixels or lines, names a failure's share
+and the box its differing pixels lie in, passes a new example with nothing checked in, and the
+examples job runs it after capturing under `!cancelled()`. Right, every term met and the clock's
+cause found and said rather than the tolerance widened. One thing found on the way, which is Verdict
+10: `irradiance_volumes` hung once on the GPU at frame 90, the offscreen run's wait for the frame
+before it never ending, and that wait has no limit. The suite ran whole, 1,363 of 1,368 with two
+skipped, the three failing the tree's unbuilt skybox batch's and not this commit's. Every picture
+changes with the retake, which the owner is told. Next, as the coder has them: B 4's twelve
+examples, alpha to coverage, canceled touches, the static transform optimizations reflected, and the
+skybox's compressed formats.
+
+Before it, two commits came to be read, items 9 and 10, the last of the list that wait on no word.
 Item 9 at `8f02d976`: N 6.6's test reads every shell script of the checkout, 26 and the `bcs`
 launcher, not only what the Windows and macOS jobs run, still holding the jobs' scripts to be among
 them and the launcher and Courtyard's play script to be found, with the build's outputs and copies
@@ -33,22 +59,6 @@ commit is the examples written in part that want no crate and the groups not yet
 size is read by a system of the example's own, since a static stage method on its behavior ran in
 every example and failed in one with no window, which is the trap a static stage method is in a
 project of many examples; right, and the remark says why.
-
-Before it, one commit came to be read, item 8: every example builds on the package alone, the script
-removing the catalog, the program, the examples' record and the capture's input from its copy and
-building a library, so an example reaching into the runner fails there; the nine capture drivers
-leave their examples for one `Drives.cs` with a sentence each of what it presses, the stress tests'
-warning is written into each of the 19 as Bevy's each say theirs, the transforms' cube scene into
-each of its four, and the opened size comes from `Window.Size()`, which answers offscreen, read once
-a frame into a field where a method may run on a worker thread, as Bevy's system reads its window
-once; `FreeCamera` moves to a file of its own and, with the radio buttons, stays a helper the script
-lists with its reason, each note saying what it stands in for and that it goes when that can be
-asked for, no decision or person named (N 4.7). On a fresh pack every example builds beside the two
-helpers, and a driven example prints its checked-in capture exactly. Right, the runner's files taken
-out of the copy so the check cannot be fooled, and the two helpers' standing said in the code's own
-words. The five test classes touched pass, 61 of 61, the whole suite waiting for the comparison
-commit so it does not run against the lavapipe pass for the CPU. Item 9 next, the scripts read for
-GNU-only forms wherever they run.
 
 Before it, two commits came to be read, item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
 `RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
@@ -253,26 +263,16 @@ from [SHARED.md](SHARED.md).
    over the words is Bevy's own, the same on bare 0.20; the anisotropic spheres blown white under a
    normal prepass are Bevy's shader skipping anisotropy's setup with the tangent frame, pinned by a
    test that fails when Bevy mends it, no report filed from here as the owner has it; and the fog's
-   haze under a depth prepass is gone on 0.20, pinned. The comparison job then, as proposed and
-   taken: every example captured at a fixed frame time of a sixtieth, so its clock is the frame
-   count on any device, lavapipe on the machine's clock having turned transmission's camera half
-   round; every checked-in capture taken again on that clock, the owner told since every picture
-   changes; `build/compare-captures.py` over the webp's pixels comparing each capture with its
-   checked-in one as 3DEngine's reference frames are compared, a pixel differing past 24 in a
-   channel and a capture failing past 2% of its pixels, a text capture compared as text, with a list
-   beside it in N 4.5's form naming each example allowed more, its measured share and its reason,
-   which only gets shorter, an example the runner's device draws less of (mesh shaders, ray queries,
-   meshlets) listed with that reason or its capture carrying the device's refusal for the script to
-   honor, and the page naming a failure's share and where it lies; the whole set run on lavapipe
-   here first and each failure named before the job goes red, the long capture run told to the
-   engine's session first, which measures its lamps' cost on the same GPU. The retake on the fixed
-   clock is done, 185 pictures changed and seven examples flat by their design listed with that
-   reason, and the lavapipe run began at 20:58; the comparison commit comes after it with
-   `build/captures-differ.txt`. Feathers' three examples with `feathers_number_input` and the three
-   camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
-   owner's word in the working session, and the four font examples stay missing (Decision 13).
-   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
-   with their mipmaps, less memory after the kill of 2026-10-08.
+   haze under a depth prepass is gone on 0.20, pinned. The captures are compared whole by the
+   workflow since `d17f0d97`: each taken in a set frame on a clock of a sixtieth, every pipeline
+   compiled in the frame that asks for it, all 329 matching between the laptop's GPU and lavapipe,
+   seven within allowances listed with their causes in `build/captures-differ.txt`, which only gets
+   shorter, and `build/compare-captures.py` failing a capture past 24 in a channel over 2% of its
+   pixels and naming the share and the box. Feathers' three examples with `feathers_number_input`
+   and the three camera controllers follow the other gaps, their crates allowed (Decisions 11 and
+   12) on the owner's word in the working session, and the four font examples stay missing (Decision
+   13). `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or
+   ASTC with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -341,6 +341,18 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
+
+10. **The offscreen run's wait for the frame before it has no limit, and `irradiance_volumes` hung
+    in it once on the laptop's GPU at frame 90 while its capture was taken.** Taken again at once it
+    passed, so the cause is a race the wait meets seldom, and a wait with no limit turns it into a
+    hang, which in the examples job would stand until the step's timeout with the example unnamed.
+    Two things: the wait takes a limit, some seconds of the machine's clock, past which the run ends
+    with a line naming the frame it waited for and what it waited on, so a page names the example
+    and the frame; and the frame before's wait is read for what it waits on and what can leave that
+    undone, a fence never signaled, a frame skipped by the swapchain's offscreen stand-in, or a
+    request held past the frame it named, and the race mended where it is found. Settled when the
+    limit is in with its test and the cause is named or shown not to repeat in a hundred captures of
+    the example.
 
 ## Decisions
 
@@ -483,23 +495,11 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-Comparison: each capture is taken in a frame counted from the app's first, `shot <path> [frame]`
-holding the request until then, and a run begun on a set clock compiles each pipeline in the frame
-that asks for it. A capture taken when the waits ended landed on whatever frame the app had reached,
-which a device compiling for seconds puts many frames later, and a lavapipe pass stopped at 191
-found 29 differing, most of them the same scene some frames apart. A capture is also run as the
-workflow runs it, seeded, and one that prints runs on the set clock. Every picture changes with the
-retake, 190 of them, with touch_input_events' text new; all 329 were taken again on the laptop's GPU
-and on lavapipe, and the two match in every one, seven within an allowance listed with its cause in
-`build/captures-differ.txt`: four of Bevy's drawn at random and unseeded (async_channel_pattern,
-many_animated_sprites, many_lights, many_sprites), one whose animation starts in the frame its model
-loads (animated_mesh_control), the meshlets lavapipe draws some of, and solari's noise and timings.
-multi_asset_sync and many_morph_targets are taken at frame 30, lavapipe taking five to seven seconds
-a frame over them, so frame 120 lay past the capture's ten minutes. irradiance_volumes hung once on
-the GPU at frame 90, the offscreen run's wait for the frame before it never ending, and was taken
-again at once; that wait has no limit. The suite ran whole, 1,363 of 1,368 with two skipped, the
-three failing being the skybox batch's, whose bridge is not yet built.
-
-Shared: a capture compared across devices taken at a frame the app holds the request for, on a set
-clock with each pipeline compiled in the frame that asks for it, which 3DEngine's captures could
-take up.
+B 4: twelve brought over, 156 of 161, each driven offscreen as before. 2d_shapes, wireframe_2d and
+order_independent_transparency follow 0.19.1, whose examples keep nothing in a component of their
+own, the components the table counts being 0.20's Feathers checkboxes and radio, so they come with
+Feathers (Decision 11); custom_shader_instancing keeps nothing in a static field, its instances being
+the camera's draw's buffer; directional_navigation_overrides keeps its buttons' state in
+directional_navigation's behaviors, which the table's test, reading the one file, does not see. A
+click on a text field focuses nothing offscreen, Bevy's `click_to_focus` asking for the primary
+window an offscreen run has none of, the same gap as tab_navigation's Tab under item 4.

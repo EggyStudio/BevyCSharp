@@ -11,16 +11,10 @@ namespace BevyCSharp.Examples.Animations;
 // message fades as it waits for the next.
 internal static class AnimationEvents
 {
-    private static Entity _message;
-
     // An event placed on the clip, the text it sets and its color.
     internal readonly record struct SetMessage(string Value, Color Color) : IAnimationEvent;
 
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "animation_events.Setup");
-        app.Update(AnimateTextOpacity, "animation_events.AnimateTextOpacity");
-    }
+    public static void Build(App app) => app.Startup(Setup, "animation_events.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
@@ -30,18 +24,20 @@ internal static class AnimationEvents
         ecs.Wrap<CameraRef>(camera).ClearColor = new ClearColorConfig.Custom(new Color(0f, 0f, 0f, 1f));
         ecs.Insert<BloomRef>(camera).Intensity = 0.4f;
 
-        _message = ecs.Spawn();
-        ecs.Add(_message, Transform.Identity);
-        ecs.Insert<Text2dRef>(_message).Value = string.Empty;
-        ecs.Insert<TextFontRef>(_message).FontSize = new FontSize.Px(119f);
-        ecs.Insert<TextColorRef>(_message).Value = new Color(0f, 0f, 0f, 0f);
+        var message = ecs.Spawn();
+        ecs.Add(message, Transform.Identity);
+        ecs.Add(message, new MessageText());
+        ecs.Insert<Text2dRef>(message).Value = string.Empty;
+        ecs.Insert<TextFontRef>(message).FontSize = new FontSize.Px(119f);
+        ecs.Insert<TextColorRef>(message).Value = new Color(0f, 0f, 0f, 0f);
 
-        // Bevy's on_set_message, observing every such event, which sets the message's text and
-        // color from the event.
+        // Bevy's on_set_message, observing every such event, which sets the text and color of the
+        // one message there is from the event.
         ecs.Observe<SetMessage>(on =>
         {
-            on.Ecs.Wrap<Text2dRef>(_message).Value = on.Event.Value;
-            on.Ecs.Wrap<TextColorRef>(_message).Value = on.Event.Color;
+            if (on.Ecs.EntitiesWith<MessageText>() is not [var text]) return;
+            on.Ecs.Wrap<Text2dRef>(text).Value = on.Event.Value;
+            on.Ecs.Wrap<TextColorRef>(text).Value = on.Event.Color;
         });
 
         // The clip, two seconds long, with an event at its start and one a second in.
@@ -54,11 +50,23 @@ internal static class AnimationEvents
         var (graph, node) = Animation.GraphFromClip(clip);
         Animation.PlayGraph(ecs.Spawn(), graph, node, repeat: true);
     }
+}
 
-    // The message fading by the frame's time, so it is gone shortly before the next event.
-    private static void AnimateTextOpacity(BehaviorContext ctx)
+/// <summary>The text the clip's events set, Bevy's example's <c>MessageText</c>.</summary>
+[Behavior]
+public partial struct MessageText
+{
+    /// <summary>
+    /// Fades by the frame's time, so it is gone shortly before the next event.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's animate_text_opacity fades every text color there is, and the message's is the only
+    /// one, so it runs here on the message.
+    /// </remarks>
+    [OnUpdate]
+    public void AnimateTextOpacity(BehaviorContext ctx)
     {
-        var color = ctx.Ecs.Wrap<TextColorRef>(_message);
+        var color = ctx.Ecs.Wrap<TextColorRef>(ctx.Entity);
         var value = color.Value;
         color.Value = new Color(value.R, value.G, value.B, value.A - ctx.Time.Delta);
     }

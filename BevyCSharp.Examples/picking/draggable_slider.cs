@@ -31,9 +31,9 @@ internal static class DraggableSlider
     private static readonly Color ResetIdle = Color.FromSrgb(0.3f, 0.3f, 0.55f);
     private static readonly Color ResetHover = Color.FromSrgb(0.5f, 0.5f, 0.75f);
 
+    // Bevy's SliderValue and CaptureEnabled resources.
     private static float _value;
     private static bool _capture;
-    private static Entity _thumb, _fill, _valueLabel, _toggleLabel, _toggle;
 
     public static void Build(App app)
     {
@@ -76,11 +76,12 @@ internal static class DraggableSlider
         Ignored(ecs, track);
         ecs.SetParent(track, row);
 
-        _fill = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Width = Length.Px(FillWidth(DefaultValue)), Height = Length.Px(FillHeight), Color = Fill });
-        Ignored(ecs, _fill);
-        ecs.SetParent(_fill, track);
+        var fill = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Width = Length.Px(FillWidth(DefaultValue)), Height = Length.Px(FillHeight), Color = Fill });
+        Ignored(ecs, fill);
+        ecs.Add(fill, new SliderFill());
+        ecs.SetParent(fill, track);
 
-        _thumb = Ui.SpawnNode(new UiSettings
+        var thumb = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
             Left = Length.Px(ThumbLeft(DefaultValue)),
@@ -89,27 +90,29 @@ internal static class DraggableSlider
             Corners = Corners.All(Length.Px(4f)),
             Color = ThumbIdle,
         });
-        ecs.SetParent(_thumb, track);
+        ecs.Add(thumb, new SliderThumb());
+        ecs.SetParent(thumb, track);
 
         // The thumb takes the pointer as the drag starts, where capture is on, and lets it go as it
         // ends. Bevy releases it too when the button is let go.
-        ecs.Observe<Pointer<DragStart>>(_thumb, on =>
+        ecs.Observe<Pointer<DragStart>>(thumb, on =>
         {
             if (_capture) Picking.CapturePointer(on.Event.PointerId, on.Event.Entity, on.Event.Event.Hit);
-            on.Ecs.Wrap<BackgroundColorRef>(_fill).Value = FillDragging;
+            if (on.Ecs.EntitiesWith<SliderFill>() is [var fill]) on.Ecs.Wrap<BackgroundColorRef>(fill).Value = FillDragging;
         });
-        ecs.Observe<Pointer<Drag>>(_thumb, on => _value = Math.Clamp(_value + on.Event.Event.Delta.X / (TrackWidth - ThumbSize), 0f, 1f));
-        ecs.Observe<Pointer<DragEnd>>(_thumb, on =>
+        ecs.Observe<Pointer<Drag>>(thumb, on => _value = Math.Clamp(_value + on.Event.Event.Delta.X / (TrackWidth - ThumbSize), 0f, 1f));
+        ecs.Observe<Pointer<DragEnd>>(thumb, on =>
         {
             Picking.ReleaseCapture(on.Event.PointerId);
-            on.Ecs.Wrap<BackgroundColorRef>(_fill).Value = Fill;
+            if (on.Ecs.EntitiesWith<SliderFill>() is [var fill]) on.Ecs.Wrap<BackgroundColorRef>(fill).Value = Fill;
         });
-        Hover(ecs, _thumb, ThumbIdle, ThumbHover);
+        Hover(ecs, thumb, ThumbIdle, ThumbHover);
 
         ecs.SetParent(Text(ecs, "1.0", 13f, Color.FromSrgb(0.55f, 0.55f, 0.55f), pickable: true), row);
 
-        _valueLabel = Text(ecs, $"Value: {DefaultValue:F2}", 18f, Color.White, pickable: true);
-        ecs.SetParent(_valueLabel, root);
+        var valueLabel = Text(ecs, $"Value: {DefaultValue:F2}", 18f, Color.White, pickable: true);
+        ecs.Add(valueLabel, new SliderLabel());
+        ecs.SetParent(valueLabel, root);
 
         // The buttons the thumb is dragged across, which redden when the pointer is over them.
         var decoys = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Row, ColumnGap = Length.Px(16f) });
@@ -118,6 +121,7 @@ internal static class DraggableSlider
         foreach (var label in new[] { "Button A", "Button B", "Button C", "Button D", "Button E" })
         {
             var (decoy, _) = Button(ecs, label, 15f, DecoyIdle, new Sides(Length.Px(24f), Length.Px(14f), Length.Px(24f), Length.Px(14f)));
+            ecs.Add(decoy, new DecoyButton());
             ecs.SetParent(decoy, decoys);
             Hover(ecs, decoy, DecoyIdle, DecoyHover);
         }
@@ -126,16 +130,21 @@ internal static class DraggableSlider
         Ignored(ecs, controls);
         ecs.SetParent(controls, root);
 
-        (_toggle, _toggleLabel) = Button(ecs, "Capture: ON  (click to toggle)", 16f, ToggleOn, Padding());
-        ecs.SetParent(_toggle, controls);
-        ecs.Observe<Pointer<Click>>(_toggle, on =>
+        var (toggle, toggleLabel) = Button(ecs, "Capture: ON  (click to toggle)", 16f, ToggleOn, Padding());
+        ecs.Add(toggle, new ToggleButton());
+        ecs.Add(toggleLabel, new ToggleLabel());
+        ecs.SetParent(toggle, controls);
+        ecs.Observe<Pointer<Click>>(toggle, on =>
         {
             _capture = !_capture;
-            Ui.SetText(_toggleLabel, _capture ? "Capture: ON  (click to toggle)" : "Capture: OFF  (click to toggle)");
-            on.Ecs.Wrap<BackgroundColorRef>(_toggle).Value = _capture ? ToggleOn : ToggleOff;
+            if (on.Ecs.EntitiesWith<ToggleLabel>() is [var label])
+                Ui.SetText(label, _capture ? "Capture: ON  (click to toggle)" : "Capture: OFF  (click to toggle)");
+            if (on.Ecs.EntitiesWith<ToggleButton>() is [var button])
+                on.Ecs.Wrap<BackgroundColorRef>(button).Value = _capture ? ToggleOn : ToggleOff;
         });
 
         var (reset, _) = Button(ecs, "Reset", 16f, ResetIdle, Padding());
+        ecs.Add(reset, new ResetButton());
         ecs.SetParent(reset, controls);
         Hover(ecs, reset, ResetIdle, ResetHover);
         ecs.Observe<Pointer<Click>>(reset, _ => _value = DefaultValue);
@@ -183,9 +192,42 @@ internal static class DraggableSlider
     // The thumb placed and the readout written from the value.
     private static void SyncThumbAndLabel(BehaviorContext ctx)
     {
-        ctx.Ecs.Wrap<NodeRef>(_thumb).Left = new Val.Px(ThumbLeft(_value));
-        Ui.SetText(_valueLabel, $"Value: {_value:F2}");
+        var ecs = ctx.Ecs;
+        if (ecs.EntitiesWith<SliderThumb>() is not [var thumb] || ecs.EntitiesWith<SliderLabel>() is not [var label]) return;
+        ecs.Wrap<NodeRef>(thumb).Left = new Val.Px(ThumbLeft(_value));
+        Ui.SetText(label, $"Value: {_value:F2}");
     }
 
-    private static void SyncFill(BehaviorContext ctx) => ctx.Ecs.Wrap<NodeRef>(_fill).Width = new Val.Px(FillWidth(_value));
+    private static void SyncFill(BehaviorContext ctx)
+    {
+        if (ctx.Ecs.EntitiesWith<SliderFill>() is [var fill]) ctx.Ecs.Wrap<NodeRef>(fill).Width = new Val.Px(FillWidth(_value));
+    }
 }
+
+/// <summary>The slider's thumb, which the pointer drags, Bevy's example's <c>SliderThumb</c>.</summary>
+[Behavior]
+public partial struct SliderThumb;
+
+/// <summary>The bar growing with the value, Bevy's example's <c>SliderFill</c>.</summary>
+[Behavior]
+public partial struct SliderFill;
+
+/// <summary>The readout of the value, Bevy's example's <c>SliderLabel</c>.</summary>
+[Behavior]
+public partial struct SliderLabel;
+
+/// <summary>The label of the button turning capture on and off, Bevy's example's <c>ToggleLabel</c>.</summary>
+[Behavior]
+public partial struct ToggleLabel;
+
+/// <summary>The button turning capture on and off, Bevy's example's <c>ToggleButton</c>.</summary>
+[Behavior]
+public partial struct ToggleButton;
+
+/// <summary>The button putting the value back, Bevy's example's <c>ResetButton</c>.</summary>
+[Behavior]
+public partial struct ResetButton;
+
+/// <summary>A button the thumb is dragged across, Bevy's example's <c>DecoyButton</c>.</summary>
+[Behavior]
+public partial struct DecoyButton;

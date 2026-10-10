@@ -24,10 +24,9 @@ internal static class LogDiagnostics
     private static readonly Color Red = Color.FromHex("f87171");
 
     // Bevy's LogDiagnosticsStatus, whether the log is filtered, and LogDiagnosticsFilters, which
-    // groups the filter lets through.
+    // groups the filter lets through, resources of its app.
     private static bool _filtering, _frameTime, _entityCount, _systemInfo;
     private static readonly HashSet<string> Filter = [];
-    private static readonly List<(Entity Label, Entity Value)> Rows = [];
 
     public static void Configure(Config config) =>
         config.DiagnosticPlugins = DiagnosticPlugins.Log | DiagnosticPlugins.FrameTime | DiagnosticPlugins.EntityCount | DiagnosticPlugins.Render;
@@ -36,7 +35,6 @@ internal static class LogDiagnostics
     {
         (_filtering, _frameTime, _entityCount, _systemInfo) = (false, false, false, false);
         Filter.Clear();
-        Rows.Clear();
 
         app.Startup(Setup, "log_diagnostics.Setup");
         app.Update(FiltersInputs, "log_diagnostics.FiltersInputs");
@@ -57,15 +55,13 @@ internal static class LogDiagnostics
         ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
 
         var commands = Ui.SpawnNode(new UiSettings { Top = Length.Px(5f), Left = Length.Px(5f), Direction = UiDirection.Column });
+        ecs.Add(commands, new LogDiagnosticsCommands());
         foreach (var label in new[] { "[Q] Toggle filtering:", "[1] Frame times:", "[2] Entity count:", "[3] System info:", "[4] Render diagnostics:" })
         {
             var row = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Row, ColumnGap = Length.Px(5f) });
             ecs.SetParent(row, commands);
-            var name = Ui.SpawnText(label, new UiSettings());
-            var value = Ui.SpawnText("", new UiSettings());
-            ecs.SetParent(name, row);
-            ecs.SetParent(value, row);
-            Rows.Add((name, value));
+            ecs.SetParent(Ui.SpawnText(label, new UiSettings()), row);
+            ecs.SetParent(Ui.SpawnText("", new UiSettings()), row);
         }
 
         UpdateCommands(ecs);
@@ -99,9 +95,13 @@ internal static class LogDiagnostics
 
     // Each row's name white and its value green or red, both faded while the log is unfiltered,
     // except the first row's, which says whether it is. Bevy's render diagnostics' paths are its
-    // own, so their row says they are private.
+    // own, so their row says they are private. The rows are the children of the node marked as
+    // Bevy's marks it, each a name and a value.
     private static void UpdateCommands(EcsWorld ecs)
     {
+        if (ecs.EntitiesWith<LogDiagnosticsCommands>() is not [var commands]) return;
+        var rows = ecs.ChildrenOf(commands);
+
         var alpha = _filtering ? 1f : 0.25f;
         (string Text, bool On)[] values =
         [
@@ -112,9 +112,9 @@ internal static class LogDiagnostics
             ("Private", false),
         ];
 
-        for (var i = 0; i < Rows.Count; i++)
+        for (var i = 0; i < rows.Length; i++)
         {
-            var (label, value) = Rows[i];
+            if (ecs.ChildrenOf(rows[i]) is not [var label, var value]) continue;
             var faded = i == 0 ? 1f : alpha;
             var color = values[i].On ? Green : Red;
 
@@ -124,3 +124,7 @@ internal static class LogDiagnostics
         }
     }
 }
+
+/// <summary>The node holding the rows that say how the log is filtered, Bevy's example's <c>LogDiagnosticsCommands</c>.</summary>
+[Behavior]
+public partial struct LogDiagnosticsCommands;

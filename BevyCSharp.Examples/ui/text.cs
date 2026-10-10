@@ -12,15 +12,7 @@ namespace BevyCSharp.Examples.Interface;
 // font's OpenType features at the top right, each drawn on a line of its own.
 internal static class TextExample
 {
-    private static Entity _fps;
-    private static Entity _animated;
-
-    public static void Build(App app)
-    {
-        app.Startup(Setup, "text.Setup");
-        app.Update(TextUpdateSystem, "text.TextUpdateSystem");
-        app.Update(TextColorSystem, "text.TextColorSystem");
-    }
+    public static void Build(App app) => app.Startup(Setup, "text.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {
@@ -29,16 +21,17 @@ internal static class TextExample
         Render2d.SpawnCamera2d();
 
         // Text with one section, a fifth of the window's height tall.
-        _animated = Ui.SpawnText("hello\nbevy!",
+        var animated = Ui.SpawnText("hello\nbevy!",
             new UiSettings { Absolute = true, Bottom = Length.Px(5f), Right = Length.Px(5f) },
             new UiTextSettings { Font = bold, Justify = TextJustify.Center });
-        Ui.SetUnderline(_animated);
-        ecs.Wrap<TextFontRef>(_animated).FontSize = new FontSize.Vh(20f);
-        ecs.Insert<TextShadowRef>(_animated);
+        Ui.SetUnderline(animated);
+        ecs.Wrap<TextFontRef>(animated).FontSize = new FontSize.Vh(20f);
+        ecs.Insert<TextShadowRef>(animated);
+        ecs.Add(animated, new AnimatedText());
 
         // Text with multiple sections, the second the frames per second in gold.
         var fps = Ui.SpawnText("FPS: ", new UiSettings(), new UiTextSettings { Font = bold, FontSize = 42f });
-        _fps = Ui.SpawnTextSpan(fps, string.Empty, new UiTextSettings { FontSize = 33f }, Color.FromSrgb8(255, 215, 0));
+        ecs.Add(Ui.SpawnTextSpan(fps, string.Empty, new UiTextSettings { FontSize = 33f }, Color.FromSrgb8(255, 215, 0)), new FpsText());
 
         // Text with OpenType features, each line's text drawn with one turned on.
         var garamond = AssetServer.Load(AssetKind.Font, "fonts/EBGaramond12-Regular.otf");
@@ -69,21 +62,33 @@ internal static class TextExample
         Ui.SpawnText("From an &str into a Text with the default font!",
             new UiSettings { Absolute = true, Bottom = Length.Px(5f), Left = Length.Px(15f) });
     }
+}
 
-    // The color cycling through the hues at three rates.
-    private static void TextColorSystem(BehaviorContext ctx)
+/// <summary>The span showing the frames per second, Bevy's example's <c>FpsText</c>.</summary>
+[Behavior]
+public partial struct FpsText
+{
+    /// <summary>Bevy's text_update_system, the frames per second smoothed as Bevy's diagnostic smooths it.</summary>
+    [OnUpdate]
+    public void TextUpdateSystem(BehaviorContext ctx)
+    {
+        if (ctx.Time.SmoothedFps > 0.0)
+            ctx.Ecs.Wrap<TextSpanRef>(ctx.Entity).Value = ctx.Time.SmoothedFps.ToString("0.00", CultureInfo.InvariantCulture);
+    }
+}
+
+/// <summary>The text whose color cycles, Bevy's example's <c>AnimatedText</c>.</summary>
+[Behavior]
+public partial struct AnimatedText
+{
+    /// <summary>Bevy's text_color_system, the color cycling through the hues at three rates.</summary>
+    [OnUpdate]
+    public void TextColorSystem(BehaviorContext ctx)
     {
         var seconds = ctx.Time.Elapsed;
-        ctx.Ecs.Wrap<TextColorRef>(_animated).Value = Color.FromSrgb(
+        ctx.Ecs.Wrap<TextColorRef>(ctx.Entity).Value = Color.FromSrgb(
             MathF.Sin(1.25f * seconds) / 2f + 0.5f,
             MathF.Sin(0.75f * seconds) / 2f + 0.5f,
             MathF.Sin(0.50f * seconds) / 2f + 0.5f);
-    }
-
-    // The frames per second, smoothed as Bevy's diagnostic smooths it.
-    private static void TextUpdateSystem(BehaviorContext ctx)
-    {
-        if (ctx.Time.SmoothedFps > 0.0)
-            ctx.Ecs.Wrap<TextSpanRef>(_fps).Value = ctx.Time.SmoothedFps.ToString("0.00", CultureInfo.InvariantCulture);
     }
 }

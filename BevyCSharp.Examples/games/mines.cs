@@ -26,23 +26,13 @@ internal static class Mines
 
     private enum GameState { Menu, Playing }
 
-    // What each button does, as Bevy's ButtonAction, by the button.
-    private static readonly Dictionary<Entity, Action<BehaviorContext>> Actions = [];
-
-    // Where each covered tile is, as Bevy's TileCell, by the tile.
-    private static readonly Dictionary<Entity, (int X, int Y)> Tiles = [];
-
+    // The field and whether a mine went off, Bevy's MineField and GameOver resources.
     private static MineField _field = MineField.Of(Difficulty.Normal);
     private static bool _gameOver;
-    private static Entity _root = Entity.None;
-
-    private enum Difficulty { Easy, Normal, Hard }
 
     public static void Build(App app)
     {
         // Here rather than at startup, since the menu is entered before startup runs.
-        Actions.Clear();
-        Tiles.Clear();
         (_field, _gameOver) = (MineField.Of(Difficulty.Normal), false);
 
         app.AddState(GameState.Menu);
@@ -54,7 +44,6 @@ internal static class Mines
 
     private static void SetupMenu(EcsWorld ecs)
     {
-        Actions.Clear();
         var menu = Ui.SpawnNode(new UiSettings
         {
             Width = Length.Percent(100f),
@@ -70,25 +59,25 @@ internal static class Mines
         var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, RowGap = Length.Px(10f) });
         ecs.SetParent(column, menu);
         foreach (var (label, difficulty) in new[] { ("easy", Difficulty.Easy), ("normal", Difficulty.Normal), ("hard", Difficulty.Hard) })
-            ecs.SetParent(TextButton(ecs, label, ctx => NewGame(ctx, difficulty)), column);
+            ecs.SetParent(TextButton(ecs, label, new ButtonAction { Kind = ButtonKind.NewGame, Difficulty = difficulty }), column);
     }
 
     private static void SetupGame(EcsWorld ecs)
     {
-        _root = Ui.SpawnNode(new UiSettings { Margin = Sides.All(Length.Auto) });
-        ecs.DespawnOnExit(_root, GameState.Playing);
+        var root = Ui.SpawnNode(new UiSettings { Margin = Sides.All(Length.Auto) });
+        ecs.Add(root, new GameRoot());
+        ecs.DespawnOnExit(root, GameState.Playing);
         Rebuild(ecs);
     }
 
     // The board and the line under it, made again after every move, as Bevy's rebuild_game_ui.
     private static void Rebuild(EcsWorld ecs)
     {
-        foreach (var child in ecs.ChildrenOf(_root)) ecs.Despawn(child);
-        Actions.Clear();
-        Tiles.Clear();
+        if (ecs.EntitiesWith<GameRoot>() is not [var root]) return;
+        foreach (var child in ecs.ChildrenOf(root)) ecs.Despawn(child);
 
         var column = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column, RowGap = Length.Px(20f) });
-        ecs.SetParent(column, _root);
+        ecs.SetParent(column, root);
 
         var board = Ui.SpawnNode(new UiSettings
         {
@@ -124,7 +113,7 @@ internal static class Mines
             else
             {
                 node = Ui.SpawnNode(Tile(TileBorder));
-                Tiles[node] = (x, y);
+                ecs.Add(node, new TileCell { X = x, Y = y });
                 Listen(ecs, node);
                 if (tile.Flagged) ecs.SetParent(Flag(ecs, 20f), node);
             }
@@ -161,7 +150,7 @@ internal static class Mines
         Ignore(ecs, message);
         ecs.SetParent(Ui.SpawnText(_field.Cleared ? "mines cleared!" : "boom!", new UiSettings(), 24f), message);
         ecs.SetParent(message, bar);
-        ecs.SetParent(TextButton(ecs, "new game", ctx => ctx.SetState(GameState.Menu)), bar);
+        ecs.SetParent(TextButton(ecs, "new game", new ButtonAction { Kind = ButtonKind.Menu }), bar);
     }
 
     // A tile of the board, its border in the color given.
@@ -175,8 +164,8 @@ internal static class Mines
         BorderColor = border,
     };
 
-    // A button that is its own label, as Bevy's text_button.
-    private static Entity TextButton(EcsWorld ecs, string label, Action<BehaviorContext> action)
+    // A button that is its own label, as Bevy's text_button, and what it does.
+    private static Entity TextButton(EcsWorld ecs, string label, ButtonAction action)
     {
         var button = Ui.SpawnText(label, new UiSettings
         {
@@ -188,7 +177,7 @@ internal static class Mines
         }, new UiTextSettings { FontSize = 24f, Justify = TextJustify.Center, LineHeight = 40f, LineHeightInPixels = true });
         // A text node's color is its text's, so its background is set apart.
         ecs.Insert<BackgroundColorRef>(button).Value = Background;
-        Actions[button] = action;
+        ecs.Add(button, action);
         Listen(ecs, button);
         return button;
     }
@@ -208,9 +197,16 @@ internal static class Mines
         (pickable.IsHoverable, pickable.ShouldBlockLower) = (false, false);
     }
 
-    private static void NewGame(BehaviorContext ctx, Difficulty difficulty)
+    // A new game of the difficulty asked for, or the menu again, as Bevy's handle_button_action.
+    private static void Act(BehaviorContext ctx, ButtonAction action)
     {
-        (_field, _gameOver) = (MineField.Of(difficulty), false);
+        if (action.Kind == ButtonKind.Menu)
+        {
+            ctx.SetState(GameState.Menu);
+            return;
+        }
+
+        (_field, _gameOver) = (MineField.Of(action.Difficulty), false);
         ctx.SetState(GameState.Playing);
     }
 
@@ -226,15 +222,16 @@ internal static class Mines
     // A click on a button does what it says, and one on a covered tile reveals or flags it.
     private static void OnClick(On<Pointer<Click>> on)
     {
-        var target = on.Entity;
+        var (ecs, target) = (on.Ecs, on.Entity);
 
-        if (Actions.TryGetValue(target, out var action))
+        if (ecs.Has<ButtonAction>(target))
         {
-            if (on.Event.Event.Button == PointerButton.Primary) action(on.Context);
+            if (on.Event.Event.Button == PointerButton.Primary) Act(on.Context, ecs.GetOrDefault<ButtonAction>(target));
             return;
         }
 
-        if (_gameOver || _field.Cleared || !Tiles.TryGetValue(target, out var at)) return;
+        if (_gameOver || _field.Cleared || !ecs.Has<TileCell>(target)) return;
+        var at = ecs.GetOrDefault<TileCell>(target);
 
         switch (on.Event.Event.Button)
         {
@@ -258,12 +255,12 @@ internal static class Mines
     private static void Hover(EcsWorld ecs, Entity target, bool over)
     {
         // The pointer leaves a button as the click on it takes it away, which hears of it gone.
-        if (!ecs.IsAlive(target) || !Actions.ContainsKey(target) && !Tiles.ContainsKey(target)) return;
+        if (!ecs.IsAlive(target) || !ecs.Has<ButtonAction>(target) && !ecs.Has<TileCell>(target)) return;
 
         var border = ecs.Wrap<BorderColorRef>(target);
         var color = over ? HoveredTileBorder : TileBorder;
         (border.Top, border.Bottom, border.Left, border.Right) = (color, color, color, color);
-        if (Actions.ContainsKey(target)) ecs.Wrap<BackgroundColorRef>(target).Value = Background;
+        if (ecs.Has<ButtonAction>(target)) ecs.Wrap<BackgroundColorRef>(target).Value = Background;
     }
 
     // The field, a tile at a time, as Bevy's MineField.
@@ -338,4 +335,36 @@ internal static class Mines
             }
         }
     }
+}
+
+/// <summary>How large a field of mines is.</summary>
+public enum Difficulty { Easy, Normal, Hard }
+
+/// <summary>What a button of mines does.</summary>
+public enum ButtonKind { NewGame, Menu }
+
+/// <summary>The node the game's board and its line hang from, Bevy's example's <c>GameRoot</c>.</summary>
+[Behavior]
+public partial struct GameRoot;
+
+/// <summary>Where a covered tile is on the field, Bevy's example's <c>TileCell</c>.</summary>
+[Behavior]
+public partial struct TileCell
+{
+    /// <summary>Its column, from the left.</summary>
+    public int X;
+
+    /// <summary>Its row, from the top.</summary>
+    public int Y;
+}
+
+/// <summary>What a button does, Bevy's example's <c>ButtonAction</c>.</summary>
+[Behavior]
+public partial struct ButtonAction
+{
+    /// <summary>A new game or the menu.</summary>
+    public ButtonKind Kind;
+
+    /// <summary>How large a new game's field is.</summary>
+    public Difficulty Difficulty;
 }

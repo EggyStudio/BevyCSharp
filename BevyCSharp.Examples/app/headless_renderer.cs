@@ -16,7 +16,8 @@ internal static class HeadlessRenderer
 {
     private const uint PreRollFrames = 40;
 
-    private static Capture? _capture;
+    // Bevy's SceneController resource, counting the frames before the copy, and its update's
+    // Local, numbering the files written.
     private static uint _frame, _fileNumber;
 
     public static void Configure(Config config)
@@ -29,7 +30,7 @@ internal static class HeadlessRenderer
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_capture, _frame, _fileNumber) = (null, 0, 0);
+            (_frame, _fileNumber) = (0, 0);
             Render.SetClearColor((0f, 0f, 0f, 1f));
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Circle, 4f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.FromRotationX(-MathF.PI / 2f), Vec3.One));
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)), Transform.At(0f, 0.5f, 0f));
@@ -39,6 +40,9 @@ internal static class HeadlessRenderer
             // with no curve put on it.
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
             ecs.Wrap<TonemappingRef>(camera).Value = TonemappingRef.ValueVariant.Linear;
+
+            // The image to save, as Bevy spawns it beside the camera drawing into it.
+            ecs.Add(ecs.Spawn(), new ImageToSave());
         }, "headless_renderer.Setup");
 
         app.Update(ctx =>
@@ -46,14 +50,34 @@ internal static class HeadlessRenderer
             // And the pipelines compiled, which can take longer than the frames on a machine
             // compiling them for the first time, where the copy would come back black.
             if (++_frame < PreRollFrames || !Render.PipelinesReady()) return;
-            _capture ??= Render.BeginCapture();
-            if (!Render.TryReadCapture(_capture.Value, out var picture) || picture is null) return;
 
-            var directory = Path.Combine(AppContext.BaseDirectory, "test_images");
-            Console.WriteLine($"Saving image to: {directory}");
-            Directory.CreateDirectory(directory);
-            File.WriteAllBytes(Path.Combine(directory, $"{_fileNumber++:000}.png"), picture.ToPng());
-            ctx.Exit();
+            var saved = false;
+            foreach (var row in ctx.Ecs.Query<ImageToSave>())
+            {
+                ref var image = ref row.Component;
+                if (!image.Capture.IsValid) image.Capture = Render.BeginCapture();
+                if (!Render.TryReadCapture(image.Capture, out var picture) || picture is null) continue;
+
+                var directory = Path.Combine(AppContext.BaseDirectory, "test_images");
+                Console.WriteLine($"Saving image to: {directory}");
+                Directory.CreateDirectory(directory);
+                File.WriteAllBytes(Path.Combine(directory, $"{_fileNumber++:000}.png"), picture.ToPng());
+                saved = true;
+            }
+
+            if (saved) ctx.Exit();
         }, "headless_renderer.Update");
     }
+}
+
+/// <summary>An image to save once it has been drawn, Bevy's example's <c>ImageToSave</c>.</summary>
+/// <remarks>
+/// Bevy's holds the image its copier fills each frame, and here the copy is a capture, asked for
+/// once the frames have settled and answered frames later.
+/// </remarks>
+[Behavior]
+public partial struct ImageToSave
+{
+    /// <summary>The capture asked for, none until the frames have settled.</summary>
+    public Capture Capture;
 }

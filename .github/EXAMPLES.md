@@ -6,40 +6,40 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 
 **311 written, 18 written in part, 0 can be written, 53 missing and 56 do not apply.** Of the 382 that apply, 329 can be written with what is bridged, 18 of them leaving something out.
 
-**144 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**156 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 12 |
 | [3D Rendering](#3d-rendering) | 60 | 4 | 0 | 4 | 0 | 40 of 41 |
-| [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 8 of 9 |
-| [Application](#application) | 11 | 0 | 0 | 1 | 7 | 1 of 2 |
+| [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 9 of 9 |
+| [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 3 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Audio](#audio) | 6 | 0 | 0 | 2 | 0 | 4 of 4 |
 | [Camera](#camera) | 6 | 0 | 0 | 6 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
-| [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 0 of 1 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 19 | 0 | 0 | 7 | 9 | 11 of 12 |
+| [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 19 | 0 | 0 | 7 | 9 | 12 of 12 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
-| [Games](#games) | 6 | 1 | 0 | 0 | 0 | 5 of 6 |
+| [Games](#games) | 6 | 1 | 0 | 0 | 0 | 6 of 6 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
 | [Input](#input) | 11 | 1 | 0 | 0 | 0 |  |
-| [Math](#math) | 4 | 0 | 0 | 1 | 1 | 3 of 4 |
+| [Math](#math) | 4 | 0 | 0 | 1 | 1 | 4 of 4 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 3 of 4 |
+| [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 4 of 4 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
-| [Shaders](#shaders) | 22 | 0 | 0 | 2 | 3 | 6 of 8 |
+| [Shaders](#shaders) | 22 | 0 | 0 | 2 | 3 | 7 of 8 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 12 | 7 | 0 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 54 | 0 | 0 | 11 | 0 | 18 of 22 |
-| [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 3 of 4 |
+| [UI (User Interface)](#ui-user-interface) | 54 | 0 | 0 | 11 | 0 | 21 of 22 |
+| [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
