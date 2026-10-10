@@ -1,4 +1,4 @@
-// Bevy's many_cubes example, examples/stress_tests/many_cubes.rs at v0.19.1, by Bevy's contributors
+// Bevy's many_cubes example, examples/stress_tests/many_cubes.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -15,7 +15,8 @@ namespace BevyCSharp.Examples.StressTests;
 // turns the camera by the same step each frame.
 //
 // Bevy's --no-automatic-batching, --no-indirect-drawing and --no-cpu-culling put on components
-// Bevy does not reflect, which the bridge cannot reach, and are left out.
+// Bevy does not reflect, which the bridge cannot reach, and --mesh-compression compresses each mesh
+// through a call of Bevy's the bridge has no counterpart of, so all four are left out.
 internal static class ManyCubes
 {
     private const int Width = 200, Height = 200;
