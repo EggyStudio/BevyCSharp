@@ -467,7 +467,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | [written](../BevyCSharp.Examples/state/computed_states.cs), InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number |
+| [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | [written](../BevyCSharp.Examples/state/computed_states.cs), InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number |
 | [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written in part](../BevyCSharp.Examples/state/custom_transitions.cs), schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does |
 | [`states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
 | [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |

@@ -1,4 +1,4 @@
-// Bevy's computed_states example, examples/state/computed_states.rs at v0.19.1, by Bevy's
+// Bevy's computed_states example, examples/state/computed_states.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.States;
 // Advanced state patterns using computed states. The app's state holds values, a game paused or in
 // turbo, and states worked out from it say whether the game is on, whether it is paused, whether
 // it is in turbo, and which tutorial to show, each with systems of its own. Space pauses, T turns
-// turbo on and off, Escape goes back to the menu, whose Tutorial button turns the tutorial off.
+// turbo on and off, Escape goes back to the menu, whose Tutorial checkbox turns the tutorial off.
 internal static class ComputedStatesExample
 {
     // Bevy's AppState, Menu or InGame { paused, turbo }, its values as bits of the one number a
@@ -56,8 +56,24 @@ internal static class ComputedStatesExample
         app.AddComputedState<Tutorial, TutorialState, InGame, IsPaused>((tutorial, _, paused) =>
             tutorial != TutorialState.Active ? null : paused == IsPaused.Paused ? Tutorial.PauseInstructions : Tutorial.MovementInstructions);
 
-        app.Startup(_ => Render2d.SpawnCamera2d(), "computed_states.Setup");
+        app.Startup(ctx =>
+        {
+            Render2d.SpawnCamera2d();
+
+            // Bevy's menu_activate and menu_tutorial_checked, the Play button starting the game and
+            // the Tutorial checkbox turning the tutorial on and off, while the menu is up.
+            ctx.Ecs.Observe<Activate>(on =>
+            {
+                if (StateRegistry.Current<AppState>() == AppState.Menu) on.Context.SetState(AppState.InGame);
+            });
+            ctx.Ecs.Observe<ValueChange<bool>>(on =>
+            {
+                if (StateRegistry.Current<AppState>() == AppState.Menu)
+                    on.Context.SetState(on.Event.Value ? TutorialState.Active : TutorialState.Inactive);
+            });
+        }, "computed_states.Setup");
         OnEnter(app, AppState.Menu, SetupMenu);
+        app.On(Stage.Update, MenuStyling, "computed_states.MenuStyling", BehaviorConditions.InState(AppState.Menu));
         app.AddStateSystem(AppState.Menu, entering: false, new SystemDescriptor(world => world.Resource<EcsWorld>().Despawn(_menu), "computed_states.CleanupMenu"));
         OnEnter(app, InGame.Present, SetupGame);
 
@@ -111,16 +127,49 @@ internal static class ComputedStatesExample
     {
         _menu = Column(ecs, UiJustify.Center);
 
-        void Button(MenuButtonKind kind, Color color)
+        // A widget of Bevy's, hovered as the pointer is over it and acting as it is pressed.
+        Entity Widget(MenuButtonKind kind, Color color)
         {
-            var button = Ui.SpawnNode(new UiSettings { Interactive = true, Width = Length.Px(200f), Height = Length.Px(65f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = color });
-            ecs.Add(button, new MenuButton { Kind = kind });
-            ecs.SetParent(button, _menu);
-            ecs.SetParent(Ui.SpawnText(kind.ToString(), new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, 33f), button);
+            var widget = Ui.SpawnNode(new UiSettings { Width = Length.Px(200f), Height = Length.Px(65f), Justify = UiJustify.Center, Align = UiAlign.Center, Color = color });
+            ecs.Insert<HoveredRef>(widget);
+            ecs.Insert<ActivateOnPressRef>(widget);
+            ecs.Add(widget, new MenuButton { Kind = kind });
+            ecs.SetParent(widget, _menu);
+            ecs.SetParent(Ui.SpawnText(kind.ToString(), new UiSettings { Color = Color.FromSrgb(0.9f, 0.9f, 0.9f) }, 33f), widget);
+            return widget;
         }
 
-        Button(MenuButtonKind.Play, NormalButton);
-        Button(MenuButtonKind.Tutorial, StateRegistry.Current<TutorialState>() == TutorialState.Active ? ActiveButton : NormalButton);
+        ecs.Insert<ButtonRef>(Widget(MenuButtonKind.Play, NormalButton));
+
+        // The tutorial a checkbox, checked while it is on, which checks and unchecks itself.
+        var active = StateRegistry.Current<TutorialState>() == TutorialState.Active;
+        var tutorial = Widget(MenuButtonKind.Tutorial, active ? ActiveButton : NormalButton);
+        ecs.Insert<CheckboxRef>(tutorial);
+        if (active) ecs.Insert<CheckedRef>(tutorial);
+        Ui.SelfUpdate(tutorial, UiWidgetKind.Checkbox);
+    }
+
+    // Bevy's menu_styling, each widget colored by whether it is pressed or hovered, the tutorial's
+    // greener while the tutorial is on.
+    private static void MenuStyling(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var tutorialOn = StateRegistry.Current<TutorialState>() == TutorialState.Active;
+        foreach (var widget in ecs.EntitiesWith<MenuButton>())
+        {
+            var on = tutorialOn && ecs.GetOrDefault<MenuButton>(widget).Kind == MenuButtonKind.Tutorial;
+            var pressed = ecs.Get<PressedRef>(widget) is not null;
+            var hovered = ecs.Get<HoveredRef>(widget)?.Value == true;
+            ecs.Wrap<BackgroundColorRef>(widget).Value = (pressed, hovered, on) switch
+            {
+                (true, _, true) => PressedActiveButton,
+                (true, _, false) => PressedButton,
+                (false, true, true) => HoveredActiveButton,
+                (false, true, false) => HoveredButton,
+                (false, false, true) => ActiveButton,
+                _ => NormalButton,
+            };
+        }
     }
 
     private static void SetupGame(EcsWorld ecs)
@@ -196,33 +245,6 @@ public partial struct MenuButton
 {
     /// <summary>Whether it starts the game or turns the tutorial on and off.</summary>
     public MenuButtonKind Kind;
-
-    /// <summary>
-    /// Colored by its interaction as it changes, and acted on when pressed, while the menu is up, as
-    /// Bevy's <c>menu</c> does. The tutorial's button is colored as on while the tutorial is.
-    /// </summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void Menu(BehaviorContext ctx)
-    {
-        if (ctx.State<ComputedStatesExample.AppState>() != ComputedStatesExample.AppState.Menu) return;
-
-        var interaction = Ui.InteractionOf(ctx.Entity);
-        var on = Kind == MenuButtonKind.Tutorial && ctx.State<ComputedStatesExample.TutorialState>() == ComputedStatesExample.TutorialState.Active;
-        ctx.Ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = (interaction, on) switch
-        {
-            (UiInteraction.Pressed, true) => ComputedStatesExample.PressedActiveButton,
-            (UiInteraction.Pressed, false) => ComputedStatesExample.PressedButton,
-            (UiInteraction.Hovered, true) => ComputedStatesExample.HoveredActiveButton,
-            (UiInteraction.Hovered, false) => ComputedStatesExample.HoveredButton,
-            (_, true) => ComputedStatesExample.ActiveButton,
-            _ => ComputedStatesExample.NormalButton,
-        };
-
-        if (interaction != UiInteraction.Pressed) return;
-        if (Kind == MenuButtonKind.Play) ctx.SetState(ComputedStatesExample.AppState.InGame);
-        else ctx.SetState(on ? ComputedStatesExample.TutorialState.Inactive : ComputedStatesExample.TutorialState.Active);
-    }
 }
 
 /// <summary>The buttons of <c>computed_states</c>'s menu.</summary>
