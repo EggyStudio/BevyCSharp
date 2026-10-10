@@ -51,13 +51,19 @@ public sealed class SpawnedWindowTests : IDisposable
         Assert.False(AllBlack(path), "the window's picture came back black");
     }
 
-    // An offscreen run with a window of 96 by 64 a camera clears to green, captured by the window.
+    // An offscreen run with a window of 96 by 64 a camera clears to green, captured by the window
+    // once every pipeline the run asked for has compiled. The window's picture is written into its
+    // image by a pass whose pipeline Bevy compiles off the main thread, and until it has, the image
+    // holds the zeros it was made with. A capture at the tenth frame, which a quiet machine reaches
+    // with some thirty pipelines still compiling, read the window back black in one run of forty
+    // with every core busy, and that run had drawn it by the twenty-fifth.
     private string Captured(float? scale)
     {
         var path = _folder.File($"window-{scale ?? 1f}.png");
         var window = Entity.None;
+        var captured = -1L;
 
-        using var app = new App(Config.OffscreenFor(320, 180, frames: 60));
+        using var app = new App(Config.OffscreenFor(320, 180, frames: 600));
         app.AddPlugin(new EnginePlugin());
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(
@@ -77,7 +83,17 @@ public sealed class SpawnedWindowTests : IDisposable
         app.AddSystem(Stage.Update, new SystemDescriptor(
             world =>
             {
-                if (world.Resource<Time>().FrameCount == 10) Render.Screenshot(path, window);
+                var frame = (long)world.Resource<Time>().FrameCount;
+
+                // From the tenth frame, since none is waiting before the first is asked for.
+                if (captured < 0 && frame >= 10 && Render.PipelinesReady())
+                {
+                    Render.Screenshot(path, window);
+                    captured = frame;
+                }
+
+                // The picture comes back off the GPU over the frames after it is asked for.
+                if (captured >= 0 && frame == captured + 10) new BehaviorContext(world).Exit();
             },
             "Test.Capture"));
 

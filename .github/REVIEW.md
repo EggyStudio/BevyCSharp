@@ -467,3 +467,16 @@ vstest ran 1,284, and each is counted now, with a test. The whole suite through 
 Shared: `build/test.py` saying a host its memory guard stopped as stopped at its cap, its `--filter`
 held over the listing and every part, and its count of theory cases cut to one name are 3DEngine's
 to take, its script being the same one, where its guard and its theories do the same.
+
+**`SpawnedWindowTests`' black capture is traced.** The window's picture is written into its image by
+a pass whose pipeline Bevy compiles off the main thread, and until it has, the image holds the zeros
+it was made with. The test captured at the tenth frame, which a quiet machine reaches with some
+thirty pipelines still compiling, the count reaching none between the twenty-seventh frame and the
+thirty-fifth. Forty runs of the test's scene on a quiet machine were never black. Forty with every
+core busy were black twice, and forty more once, that run read again at the twenty-fifth frame and
+drawn by then, so the picture comes late rather than not at all. The test captures from the tenth
+frame once `Render.PipelinesReady()` says every pipeline asked for has compiled, and twenty runs of
+the class with every core busy, forty captures, gave no black one. The other captures at the tenth
+frame, in `OffscreenTests` and `RenderTargetTests`, read a picture's size alone, which the image has
+from its making, and the examples' captures wait 120 frames or more, past the thirty a quiet machine
+takes, so step f compares pictures that were drawn.
