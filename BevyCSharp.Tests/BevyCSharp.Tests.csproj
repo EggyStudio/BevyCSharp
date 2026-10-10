@@ -9,6 +9,8 @@
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <!-- The input tests write the native snapshot struct directly, which has fixed buffers. -->
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- The environment the test host starts in. See the file. -->
+        <RunSettingsFilePath>$(MSBuildProjectDirectory)/suite.runsettings</RunSettingsFilePath>
     </PropertyGroup>
 
     <ItemGroup>

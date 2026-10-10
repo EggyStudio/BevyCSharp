@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <RunConfiguration>
+        <EnvironmentVariables>
+            <!--
+              glibc's allocator held to two arenas in the test host. glibc gives a thread an arena of
+              its own, every app the suite makes starts threads of its own in the GPU's driver, and
+              each app left its arenas holding about ten megabytes it had freed, which MemoryGuard
+              counts as held. A suite of a thousand apps then reached its cap holding a third of it.
+              An app that opens a sound device leaves almost none behind, for a reason not traced,
+              so the suite stayed under while each app opened one, and stopped short once a run with
+              no window opened none. Read as the process starts, so it is set here rather than from
+              the suite, whose runtime has made its arenas by then. Other C libraries ignore it.
+            -->
+            <MALLOC_ARENA_MAX>2</MALLOC_ARENA_MAX>
+        </EnvironmentVariables>
+    </RunConfiguration>
+</RunSettings>

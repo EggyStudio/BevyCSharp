@@ -10,19 +10,41 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `340639b1`. Bevy 0.20 is in, item 3's steps b to e in one commit of 393 files: the
-bridge, the vendored weather and the library on 0.20.0 with wgpu and naga 30, every profile
-compiling with warnings denied, the bridge's 116 tests passing with meshlets and Solari, the lock
-losing naga_oil and gaining WESL, `bevy/bevy_curve` named, ABI 232 on both sides; the moves as
-listed, lifecycle observers, flat pointer events, `bevy::curve` and `bevy::shape`, the typed
-`ShaderBuffer`, `constants` on every stage, `#[extract_app(RenderApp)]`, the depth and stencil
-types, extracted windows as render entities, the corner radius circular from one length; the glue
-WESL under 0.20's module paths with the volumes' import under both defines, a glued unit from
-`from_wesl` under a module path of its own and every other from `from_wgsl`, the spike's three mends
-in `reflect/mend.rs` with their tests; the weather's two shaders WESL and its Rust compiled
-unchanged; the four faults of 0.20's worked around where each is done, `spirv_compute.rs`, the empty
-curve list, `exposure.rs` and the ray scene's new group; the schema dumped again, the generator
-leaving a self-holding variant out of its union, and moved types given former paths from
+Reviewed up to `c7f1cbc6`. Decision 23 is carried out, by another road than the item named: Bevy
+0.20 keeps `AudioOutput` private to its crate, so no output with no device can be handed to it, and
+a run with no window adds a plugin of the bridge's own in place of Bevy's (`audio/silent.rs`), which
+registers the same assets and settings, opens nothing, and gives each sound a sink carrying Bevy's
+`AudioSinkPlayback` that decodes the clip with the window and the loop Bevy would give it and draws
+from it on the app's real clock, so a pause, a speed, a seek, a loop's refused seek and a despawn at
+the end behave as on a device and a game waiting on a sound's end works; `Config.AudioWithoutWindow`
+switches back to Bevy's plugin and `Audio.IsSilent` says which a run uses; the windowed path passes
+`Config.SpatialScale` to Bevy's plugin, which it never did; the audio tests that skipped without a
+device run on every machine; ABI 233. Right, and the road taken is the sound one, since a sink that
+only drops a sound would have broken every game that waits on one. One thing before the move-only
+commits: the suite ran 1,274 tests where the bump ran 1,279 and this batch adds three, eight tests
+fewer with no test's source changed since `601c6264` and the listing the same, which the reply says
+and leaves untraced. The rows a theory finds at run time are the place, and the first suspect is the
+audio loaders: `BadFileTests` and `FileHandleTests` give every loader its bad files and its handle,
+and the suite runs headless, so if the silent plugin registers the audio asset and not its loader's
+extensions, the four formats' rows are gone, which is eight for two cases or for two tests; the
+results file of this run against the bump's names the eight, and the reply says which and why before
+the moves. The suite: 1,272 passed and 2 skipped of 1,274. The runs of `e4c122e3`, `340639b1` and
+`c7f1cbc6` were read after: the bump is green on Linux and Windows in CI, Verdicts 4 and 5 settle on
+them, and one test is red on macOS and Windows, Verdict 6.
+
+Before it, Bevy 0.20 came in, item 3's steps b to e in one commit of 393 files: the bridge, the
+vendored weather and the library on 0.20.0 with wgpu and naga 30, every profile compiling with
+warnings denied, the bridge's 116 tests passing with meshlets and Solari, the lock losing naga_oil
+and gaining WESL, `bevy/bevy_curve` named, ABI 232 on both sides; the moves as listed, lifecycle
+observers, flat pointer events, `bevy::curve` and `bevy::shape`, the typed `ShaderBuffer`,
+`constants` on every stage, `#[extract_app(RenderApp)]`, the depth and stencil types, extracted
+windows as render entities, the corner radius circular from one length; the glue WESL under 0.20's
+module paths with the volumes' import under both defines, a glued unit from `from_wesl` under a
+module path of its own and every other from `from_wgsl`, the spike's three mends in
+`reflect/mend.rs` with their tests; the weather's two shaders WESL and its Rust compiled unchanged;
+the four faults of 0.20's worked around where each is done, `spirv_compute.rs`, the empty curve
+list, `exposure.rs` and the ray scene's new group; the schema dumped again, the generator leaving a
+self-holding variant out of its union, and moved types given former paths from
 `bevy-former-paths.tsv` through `FormerPathsGenerator`, so a file written on 0.19 reads its
 tonemapper, Courtyard's left as it is with a test placing one by its old path; the examples' table
 from 0.20's list; the notices written again; `compared-with-bevy.md` and `how-it-works.md` on 0.20.
@@ -53,19 +75,6 @@ bump set aside, 29 with the script's, and the tree holds the bump in progress, h
 0.20 and the render profile half done, whose reply gives the whole suite's count. The owner's order
 is in both repositories, 3DEngine's seven places next on its side.
 
-Before it, the embedding came to be the bridge's own (Decision 17): `bevy_embedded_assets` 0.16 is
-no longer a dependency, its build script the bridge's `build.rs`, which does nothing without the
-`embed` feature and with it lists the folder `BEVY_ASSET_PATH` names, the crate's search beside the
-target and `cargo-emit` left out, and its reader `src/embedded.rs` in the one mode the bridge used,
-each file read through Bevy's own `SliceReader`, the crate's reader tests brought along with one
-reading every embedded file back, a bridge built in the container with `--embed`, the lock lighter
-by the crate and `cargo-emit`, and the notices keeping the crate's MIT or Apache-2.0 under a new
-section for code taken into the bridge, BUILDING.md and PLAY.md saying so. Right, and done on 0.19
-as the weather was, so the bump that follows changes one thing. The suite was last run whole at
-`601c6264`; this commit reaches no test without the feature and the norm's pass, and the bump's
-reply gives the whole count. Before the bump comes the owner's order of 2026-10-09 in item 1, five
-places and N 4.7's check in one commit of prose.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -76,26 +85,20 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The runs of `2443936` and `6363357` are red, macOS failing
-   `MemoryCommandTests` on both with the memory command's peak at 0 (Verdict 5) and all three
-   systems failing `NormTests.N_1_3` at `6363357` with app.rs at 810 lines (Verdict 4); both are
-   mended at `22be0bc` and `4571689` and settle on the next run's page. The page's repeated lines
-   carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors
-   scoped to a state no other app adds and registered in every app by the module initializer, which
-   drowns what else repeats (Decision 7); they are quieted in the batch that next touches the tests,
-   the test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
-   (Decision 8), and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
-
-   After the batch in flight, the owner's order of 2026-10-10 (Decision 23): a run that shows no
-   window, headless or offscreen, as `./bcs open --offscreen`, the suite, the soak and the drive
-   script run one, makes no sound. The bridge gives Bevy an `AudioOutput` with no device before the
-   audio plugin would open one (`AudioPlugin` initializes the resource and keeps one already there),
-   so no device is opened and nothing reaches the speakers; a sound still plays its course and ends
-   as it would, a sink that advances by the clock where Bevy's own path would leave it unstarted, so
-   a game that waits on a sound's end works there; a config field lets a windowless run have real
-   audio where one is wanted; a test holds a headless and an offscreen app to no device and a sound
-   ending on time. Small, a commit of its own.
+1. **What the next page says.** The bump's run, `340639b1`, is green on Linux and Windows, 1,038
+   passing on Linux, and red on macOS by one test, `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`,
+   which `c7f1cbc6`'s run fails on Windows as well (Verdict 6); N 1.3 and the memory command's peak
+   pass on every system since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table
+   check that failed Linux at `e4c122e3` passed at the bump. The page's repeated lines carry 116
+   warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to
+   a state no other app adds and registered in every app by the module initializer, which drowns
+   what else repeats (Decision 7); they are quieted in the batch that next touches the tests, the
+   test's behaviors registered only where their state is. Windows' page also carries cargo's warning
+   twice, `lints.rust.missing-docs` in the vendored weather's manifest being the old spelling, one
+   word to mend in `native/bevy_weather/Cargo.toml` with the next commit there. Package 0.4 is
+   packed on Bevy 0.20 (Decision 8) once Verdict 6 and item 3's remaining steps are in, and Verdicts
+   2 and 3 settle on that pack run's page. Each push's run is read by the reviewing session, and a
+   failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -275,24 +278,21 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-4. **The runs of `6363357` fail `NormTests.N_1_3` on Linux, macOS and Windows,
-   `native/bevy_csharp/src/app.rs` at 810 lines.** It had 800 at `2443936`, at the rule's edge, and
-   the ten lines of `crash::ending` took it over; the list `build/norm/1.3.txt` only gets shorter,
-   so the file is not added to it, and app.rs is cut under 800 in a commit that moves code alone,
-   what stands alone first, as item 2 has it for a listed file. The commit was made with the crash
-   log's tests run and not the suite, which `NormTests` is part of and takes seconds, so each commit
-   runs the norm's tests before it is made and each reply gives the suite's count. Settled when a
-   run passes N 1.3.
-
-5. **The macOS job fails `MemoryCommandTests.MemoryReadsWhatTheProgramHoldsAsNameAndNumberPairs` at
-   `2443936` and `6363357`, with `peak is 0`.** `ConsoleMemoryCommands.Peak` answers
-   `Process.PeakWorkingSet64`, which is 0 on macOS in the runner's .NET where it is a number on
-   Linux and Windows, and the test holds every pair above 0; `c70f17b`'s macOS job passed before the
-   pair came. `MemoryGuard` already reads the resident size every frame (`ResidentBytes`,
-   `Environment.WorkingSet`, which macOS answers), so the peak is the largest resident size the
-   guard has read since the app began, the same reading on every system and the one the soak and the
-   memory cap use, with `PeakWorkingSet64` taken where it says more; the test keeps its assertion.
-   Settled when a macOS run passes the test.
+6. **The macOS jobs of `e4c122e3`, `340639b1` and `c7f1cbc6` and the Windows jobs of the first and
+   the last fail `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`.** Read from the pages and modeled:
+   the test allocates 256 MB on the GC's heap, touches a byte a page, and holds the resident size to
+   have grown by more than 200 MB; it grew by 79 and 163 MB on Windows and by 196 to 202 MB on
+   macOS, and passed on every system through `6363357` and fails since `2ed99011`, the deferred
+   batch and the two mends. What changed is the suite around it, not the reading, and the GC
+   keeps memory it freed earlier in the process
+   committed and resident, so an array it places there adds nothing to the working set when touched,
+   and how much it had kept depends on what ran before, which the collection's order moved; the test
+   measures the GC's retention and not the guard. Two things. The memory touched is taken outside
+   the GC, `NativeMemory.Alloc` of 256 MB written a byte a page and freed after, so the pages must
+   be new to the process and the growth is the allocation's less what the system trims, held at
+   three quarters with the reason said, or the growth is held against what the GC had committed and
+   unused before the array, read from `GC.GetGCMemoryInfo`. And no looser bound on the heap's array
+   alone, which would pass by what ran before. Settled when the test passes on all three systems.
 
 ## Decisions
 
@@ -417,20 +417,23 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Decision 23 is in.** A run with no window, headless or offscreen, plays every sound to no device
-unless `Config.AudioWithoutWindow` asks for one, and `Audio.IsSilent` says which a run does. Bevy
-0.20 keeps `AudioOutput` private to its crate, so the bridge cannot hand Bevy one with no device
-before the plugin opens its own. It adds a plugin of its own in place of Bevy's instead
-(`audio/silent.rs`), which registers the same assets and settings, opens nothing, and gives each
-sound a sink of the bridge's that carries Bevy's `AudioSinkPlayback`. That sink decodes the clip
-with the window and the loop Bevy would give it and draws from it on the app's real clock, so a
-pause, a speed, a seek, a loop's refused seek and a despawn at the end behave as they do on a
-device, and every `bcs_audio_*` call reaches it through one helper beside Bevy's two sinks. The
-windowed path never passed `Config.SpatialScale` to Bevy's plugin, and now does. A test holds a
-headless and an offscreen app to silence and a second of tone to its end between 1.0 and 1.15
-seconds after its sink arrived on a set clock, another holds the field to Bevy's plugin, and the
-audio tests that skipped without a device now run on every machine. ABI 233. The suite passed 1,272
-and skipped 2 of 1,274, N 6.5 reading the package packed from the bump. That total is eight short of
-the bump's 1,279 once this batch's three are taken off, though the listing at `340639b1` names every
-test this tree does but those three and no test's source lost one since `601c6264`, so the rows a
-theory finds at run time are the likeliest place, and I have not traced them.
+**The eight tests were cut off by the memory cap, and no row was missing.** MemoryGuard stopped the
+test host, which held 3.76 GB against a cap of 3.75 GB, a quarter of the 15 GB .NET reads under the
+20 GB scope these runs are held in, and `dotnet test` still printed its Passed line for what had
+run, so the run was taken for whole. Every theory's rows are fixed lists, the loaders' among them,
+and a whole run is the listing and eleven, since the two arc theories are listed once each for seven
+rows and six. That is 1,278 at `601c6264`, 1,279 at the bump and 1,282 at `c7f1cbc6`, so the bump's
+runs were whole and `c7f1cbc6`'s stopped eight short. The host grew because each app drawing
+offscreen left about ten megabytes it had freed in glibc's arenas, an arena a thread, with the GPU's
+driver starting threads for every app. Thirty such apps grew the host 317 MB, and 1 MB with the
+allocator held to one arena. With Bevy's own audio plugin and no device found, as on a machine
+without one, the same thirty grew it 293 MB, so the silent plugin holds nothing. An app that opens a
+sound device leaves almost none behind, for a reason I have not traced, so the suite stayed under
+its cap while every app opened a device and stopped short once a run with no window opened none. The
+test project names `suite.runsettings`, which starts the host with `MALLOC_ARENA_MAX=2`. The
+variable is read as a process starts, and set from the suite's own initializer it changed nothing,
+since the runtime has made its arenas by then. Thirty apps then grow 18 MB, and the whole suite, run
+over this batch and those after it, ran to its end under the same cap, its host's scope peaking at 2
+GB where the host alone had reached 4.8, and passed 1,280, skipped 2 and failed 1 of 1,283. The
+failure is `SpawnedWindowTests` reading a spawned window's picture back black, which passed three
+times out of three alone and is watched for.
