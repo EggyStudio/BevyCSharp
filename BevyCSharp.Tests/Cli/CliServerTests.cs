@@ -84,6 +84,11 @@ public sealed class CliServerTests : IDisposable
             Assert.True(
                 waited.GetProperty("data").GetProperty("frame").GetUInt64() >= before + 10,
                 "frames.wait answered before the frames it was waiting for had passed");
+
+            // A run that draws nothing has no pipelines to wait for, and says so at once.
+            var compiled = Ask(session, "run", "pipelines.wait");
+            Assert.True(compiled.GetProperty("success").GetBoolean());
+            Assert.Contains("draws nothing", compiled.GetRawText());
         }
         finally
         {

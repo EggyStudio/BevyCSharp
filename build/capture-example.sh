@@ -99,6 +99,9 @@ case "$example" in
   *) ;;
 esac
 ./bcs command frames.wait "$frames" --quiet --timeout 600
+# And until every pipeline asked for has compiled, which no count of frames promises, since what is
+# drawn with one still compiling is left out of the picture.
+./bcs command pipelines.wait --quiet --timeout 120
 
 shot="${out%.webp}.shot.png"
 ./bcs shot "$shot" --quiet --timeout 120

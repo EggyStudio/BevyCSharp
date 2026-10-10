@@ -309,8 +309,17 @@ public sealed class SpirvComputeTests
     /// under a cube and nowhere else.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Shadows traced this way need no shadow map, so the floor under the cube is dark here with
     /// no light in the scene at all. Runs only where Solari runs.
+    /// </para>
+    /// <para>
+    /// Its program is compiled by slangc and its pipelines by Solari, which a quiet machine does in
+    /// a few seconds. Under the whole suite with its schedules shuffled the compile once outran the
+    /// run's 1,200 frames, twenty seconds at sixty a second, and the run ended still compiling. It
+    /// passed alone with the same seed, so the limit is one a loaded machine's compile can outrun
+    /// rather than an order the test leans on.
+    /// </para>
     /// </remarks>
     [SkippableFact]
     public void ShadowsAreTracedPerPixelOnACamera()

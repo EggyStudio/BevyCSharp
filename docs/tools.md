@@ -175,6 +175,7 @@ and asks it things:
 ./bcs command input.drag 400 300 120 0 10   # pressed, moved 12 pixels a frame for ten frames, released
 ./bcs command input.drop 'levels/yard.scene.json;notes.txt'   # files dropped on the window, for a game to read
 ./bcs command frames.wait 5
+./bcs command pipelines.wait           # until every pipeline asked for has compiled
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition
 ./bcs command memory.collect           # what it holds, after a full collection

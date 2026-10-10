@@ -34,7 +34,10 @@ which the engine logs an error fails unless it says it expects that error with `
 `BCS_SCHEDULE_SHUFFLE_SEED` set to a number shuffles the order every schedule of an app and its
 render world runs its systems in, within what their constraints allow, as Bevy's
 `ScheduleBuildSettings::shuffle_seed` does, so a run of the suite with a seed finds a system that
-leans on an order nothing states. An app with a seed says so in its log as it starts.
+leans on an order nothing states. An app with a seed says so in its log as it starts. Under one,
+`SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` once reached its 1,200th frame still
+compiling, slangc and Solari's pipelines outrunning twenty seconds under the suite's load, and
+passed alone with the same seed, so a run on a loaded machine may see it, as its remarks say.
 
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.

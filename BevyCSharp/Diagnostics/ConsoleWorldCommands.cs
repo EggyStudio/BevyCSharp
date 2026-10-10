@@ -318,6 +318,41 @@ internal static partial class ConsoleWorldCommands
         return $"waited {wanted} frames, from {now}";
     }
 
+    /// <summary>Answers once every pipeline the renderer was asked for has compiled.</summary>
+    /// <remarks>
+    /// What a capture of a scene waits for, rather than a number of frames, since Bevy compiles a
+    /// pipeline off the main thread over a time no count of frames promises, and what is drawn with
+    /// one still compiling is left out of the picture. A capture of every example taken a hundred
+    /// and twenty frames in drew the transmission example black once, which the same capture taken
+    /// again did not. A run that draws nothing answers at once, having nothing to compile.
+    /// </remarks>
+    [Command("pipelines.wait", "Answers once every pipeline asked for has compiled: pipelines.wait")]
+    internal static string WaitForPipelines()
+    {
+        const string none = "this run draws nothing, so nothing compiles";
+
+        // Not in the first three frames, when nothing has been asked for yet and none is waiting.
+        string? Ready()
+        {
+            try
+            {
+                var frame = ConsoleHost.Time.FrameCount;
+                return frame >= 3 && Render.PipelinesReady() ? $"pipelines ready at frame {frame}" : null;
+            }
+            catch (Interop.BevyNativeException)
+            {
+                // A headless run keeps no count of pipelines, having none.
+                return none;
+            }
+        }
+
+        if (!App.HasRenderer) return none;
+        if (Ready() is { } now) return now;
+
+        ConsoleHost.Later(Ready);
+        return "waiting for pipelines";
+    }
+
     /// <summary>Stops or starts the game's clock.</summary>
     /// <remarks>
     /// The window, the interface and this console go on while the game is paused, so a stopped
