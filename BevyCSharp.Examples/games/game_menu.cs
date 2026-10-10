@@ -1,4 +1,4 @@
-// Bevy's game_menu example, examples/showcase/game_menu.rs at v0.19.1, by Bevy's contributors under
+// Bevy's game_menu example, examples/showcase/game_menu.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -7,7 +7,8 @@ using Bevy.Reflected;
 namespace BevyCSharp.Examples.Games;
 
 // Shows how to make a game's menus, a splash screen, then a main menu with a settings menu for the
-// display quality and the volume, then a game that waits five seconds and returns to the menu. Each
+// display quality and the volume, then a game that waits five seconds and returns to the menu. The
+// buttons are Bevy's widgets, activated as they are pressed, and each setting a radio group. Each
 // screen is despawned as the state that made it ends.
 internal static class GameMenu
 {
@@ -33,7 +34,26 @@ internal static class GameMenu
         (Quality, Volume) = (DisplayQuality.Medium, 7);
         app.AddState(GameState.Splash);
         app.AddState(MenuState.Disabled);
-        app.Startup(_ => Render2d.SpawnCamera2d(), "game_menu.Setup");
+        app.Startup(ctx =>
+        {
+            Render2d.SpawnCamera2d();
+
+            // Bevy's menu_plugin's observers, which style the buttons and the radio buttons as the
+            // pointer comes and goes, take a setting's choice, and move through the menus.
+            var ecs = ctx.Ecs;
+            ecs.Observe<Pointer<Over>>(on => Style(on.Ecs, on.Entity, hovered: true, pressed: false));
+            ecs.Observe<Pointer<Out>>(on => Style(on.Ecs, on.Entity, hovered: false, pressed: false));
+            ecs.Observe<Pointer<Press>>(on =>
+            {
+                if (on.Ecs.Get<RadioButtonRef>(on.Entity) is not null) on.Ecs.Wrap<BackgroundColorRef>(on.Entity).Value = PressedButton;
+            });
+            ecs.Observe<Pointer<Release>>(on =>
+            {
+                if (on.Ecs.Get<RadioButtonRef>(on.Entity) is not null) Style(on.Ecs, on.Entity, hovered: true, pressed: false);
+            });
+            ecs.Observe<ValueChange<Entity>>(OnValueChangeSettingRadio);
+            ecs.Observe<Activate>(OnButtonActivateUpdateStates);
+        }, "game_menu.Setup");
 
         // The splash, a logo for a second.
         app.AddStateSystem(GameState.Splash, entering: true, new SystemDescriptor(world => SplashSetup(new BehaviorContext(world)), "game_menu.SplashSetup"));
@@ -49,8 +69,7 @@ internal static class GameMenu
             if (_gameTimer.Tick(ctx.Time.Delta).Finished) ctx.SetState(GameState.Menu);
         }, "game_menu.Game", BehaviorConditions.InState(GameState.Game));
 
-        // The menus, a state of their own that the game's leaves at Disabled. The buttons' own
-        // behaviors answer their presses.
+        // The menus, a state of their own that the game's leaves at Disabled.
         app.AddStateSystem(GameState.Menu, entering: true, new SystemDescriptor(world => new BehaviorContext(world).SetState(MenuState.Main), "game_menu.MenuSetup"));
         app.AddStateSystem(MenuState.Main, entering: true, new SystemDescriptor(world => MainMenuSetup(new BehaviorContext(world)), "game_menu.MainMenuSetup"));
         app.AddStateSystem(MenuState.Settings, entering: true, new SystemDescriptor(world => SettingsMenuSetup(new BehaviorContext(world)), "game_menu.SettingsMenuSetup"));
@@ -130,7 +149,7 @@ internal static class GameMenu
         var row = Row(ecs, column, "Display Quality");
         foreach (var quality in Enum.GetValues<DisplayQuality>())
         {
-            var button = SpawnButton(ecs, row, 150f, quality.ToString(), selected: quality == Quality);
+            var button = SpawnRadioButton(ecs, row, 150f, quality.ToString(), quality == Quality);
             ecs.Add(button, new QualitySetting { Value = quality });
         }
 
@@ -146,7 +165,7 @@ internal static class GameMenu
         var row = Row(ecs, column, "Volume");
         for (var volume = 0; volume < 10; volume++)
         {
-            var button = SpawnButton(ecs, row, 30f, null, selected: volume == Volume);
+            var button = SpawnRadioButton(ecs, row, 30f, null, volume == Volume);
             ecs.Add(button, new VolumeSetting { Value = volume });
         }
 
@@ -168,49 +187,124 @@ internal static class GameMenu
         return column;
     }
 
-    // A row with a label in front of the buttons for a setting's values.
+    // A row with a label in front of the radio buttons for a setting's values, a radio group of
+    // Bevy's widgets.
     private static Entity Row(EcsWorld ecs, Entity column, string label)
     {
         var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, Color = Crimson });
+        ecs.Insert<RadioGroupRef>(row);
         ecs.SetParent(row, column);
         ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = TextColor }, 33f), row);
         return row;
     }
 
-    // A button, marked as the setting chosen where it is, its color following its interaction.
-    private static Entity SpawnButton(EcsWorld ecs, Entity parent, float width, string? label, bool selected = false)
+    // A button of Bevy's widgets, activated as it is pressed rather than released.
+    private static Entity SpawnButton(EcsWorld ecs, Entity parent, float width, string label)
+    {
+        var button = Node(ecs, parent, width, label, NormalButton);
+        ecs.Insert<ButtonRef>(button);
+        ecs.Insert<ActivateOnPressRef>(button);
+        return button;
+    }
+
+    // A radio button of Bevy's widgets, checked where its value is the setting's.
+    private static Entity SpawnRadioButton(EcsWorld ecs, Entity parent, float width, string? label, bool chosen)
+    {
+        var button = Node(ecs, parent, width, label, chosen ? PressedButton : NormalButton);
+        ecs.Insert<RadioButtonRef>(button);
+        if (chosen) ecs.Insert<CheckedRef>(button);
+        return button;
+    }
+
+    private static Entity Node(EcsWorld ecs, Entity parent, float width, string? label, Color color)
     {
         var entity = Ui.SpawnNode(new UiSettings
         {
-            Interactive = true,
             Width = Length.Px(width),
             Height = Length.Px(65f),
             Margin = Sides.All(Length.Px(20f)),
             Justify = UiJustify.Center,
             Align = UiAlign.Center,
-            Color = selected ? PressedButton : NormalButton,
+            Color = color,
         });
         ecs.SetParent(entity, parent);
-        ecs.Add(entity, new MenuButton());
-        if (selected) ecs.Add(entity, new SelectedOption());
         if (label is not null) ecs.SetParent(Ui.SpawnText(label, new UiSettings { Color = TextColor }, 33f), entity);
         return entity;
     }
 
-    // A setting's button pressed takes the choice from the one that had it, Bevy's setting_button
-    // for either kind of setting, and answers whether the choice moved.
-    internal static bool TakeSelection(BehaviorContext ctx, bool differs)
+    // Bevy's on_button_over_style and on_button_out_style, and the color a radio button takes as
+    // it is let go, a checked one green and a button or an unchecked one gray, lighter where the
+    // pointer is over it.
+    private static void Style(EcsWorld ecs, Entity entity, bool hovered, bool pressed)
     {
-        if (!differs || Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return false;
+        var radio = ecs.Get<RadioButtonRef>(entity) is not null;
+        if (!radio && ecs.Get<ButtonRef>(entity) is null) return;
 
-        foreach (var previous in ctx.Ecs.EntitiesWith<SelectedOption>())
+        var chosen = radio && ecs.Get<CheckedRef>(entity) is not null;
+        ecs.Wrap<BackgroundColorRef>(entity).Value = (chosen, hovered || pressed) switch
         {
-            ctx.Ecs.Wrap<BackgroundColorRef>(previous).Value = NormalButton;
-            ctx.Cmd.Remove<SelectedOption>(previous);
+            (true, true) => HoveredPressedButton,
+            (true, false) => PressedButton,
+            (false, true) => HoveredButton,
+            _ => NormalButton,
+        };
+    }
+
+    // Bevy's on_value_change_setting_radio, for either setting while its screen is up, the radio
+    // button chosen checked in place of the one that was and the setting taking its value.
+    private static void OnValueChangeSettingRadio(On<ValueChange<Entity>> on)
+    {
+        var ecs = on.Ecs;
+        var chosen = on.Event.Value;
+        if (ecs.Get<CheckedRef>(chosen) is not null) return;
+
+        var menu = App.TryState<MenuState>(out var now) ? now : MenuState.Disabled;
+        if (menu == MenuState.SettingsDisplay && ecs.TryGet<QualitySetting>(chosen, out var quality) && quality.Value != Quality)
+            Quality = quality.Value;
+        else if (menu == MenuState.SettingsSound && ecs.TryGet<VolumeSetting>(chosen, out var volume) && volume.Value != Volume)
+            Volume = volume.Value;
+        else
+            return;
+
+        foreach (var previous in ecs.EntitiesWith<QualitySetting>().Concat(ecs.EntitiesWith<VolumeSetting>()))
+        {
+            if (ecs.Get<CheckedRef>(previous) is not { } was) continue;
+            ecs.Wrap<BackgroundColorRef>(previous).Value = NormalButton;
+            was.Remove();
         }
 
-        ctx.Cmd.Add(ctx.Entity, new SelectedOption());
-        return true;
+        ecs.Insert<CheckedRef>(chosen);
+    }
+
+    // Bevy's on_button_activate_update_states, the menus and the game moved on by the button
+    // activated.
+    private static void OnButtonActivateUpdateStates(On<Activate> on)
+    {
+        if (!on.Ecs.TryGet<MenuButtonAction>(on.Entity, out var button)) return;
+
+        var ctx = on.Context;
+        switch (button.Action)
+        {
+            case MenuAction.Quit:
+                ctx.Exit();
+                break;
+            case MenuAction.Play:
+                ctx.SetState(GameState.Game);
+                ctx.SetState(MenuState.Disabled);
+                break;
+            case MenuAction.Settings or MenuAction.BackToSettings:
+                ctx.SetState(MenuState.Settings);
+                break;
+            case MenuAction.SettingsDisplay:
+                ctx.SetState(MenuState.SettingsDisplay);
+                break;
+            case MenuAction.SettingsSound:
+                ctx.SetState(MenuState.SettingsSound);
+                break;
+            case MenuAction.BackToMainMenu:
+                ctx.SetState(MenuState.Main);
+                break;
+        }
     }
 }
 
@@ -220,110 +314,29 @@ public enum DisplayQuality { Low, Medium, High }
 /// <summary>What a menu button does.</summary>
 public enum MenuAction { Play, Settings, SettingsDisplay, SettingsSound, BackToMainMenu, BackToSettings, Quit }
 
-/// <summary>
-/// A button of the menus, Bevy's <c>Button</c>, which a node made interactive here does not carry
-/// by that name, so the menus mark their own.
-/// </summary>
-[Behavior]
-public partial struct MenuButton
-{
-    /// <summary>
-    /// Colored by its interaction as it changes and by whether it is the setting chosen, while the
-    /// menus are up, as Bevy's <c>button_system</c> colors it.
-    /// </summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void ButtonSystem(BehaviorContext ctx)
-    {
-        if (ctx.State<GameMenu.GameState>() != GameMenu.GameState.Menu) return;
-
-        var selected = ctx.Ecs.Has<SelectedOption>(ctx.Entity);
-        ctx.Ecs.Wrap<BackgroundColorRef>(ctx.Entity).Value = (Ui.InteractionOf(ctx.Entity), selected) switch
-        {
-            (UiInteraction.Pressed, _) or (UiInteraction.None, true) => GameMenu.PressedButton,
-            (UiInteraction.Hovered, true) => GameMenu.HoveredPressedButton,
-            (UiInteraction.Hovered, false) => GameMenu.HoveredButton,
-            _ => GameMenu.NormalButton,
-        };
-    }
-}
-
 /// <summary>A button that moves through the menus, starts the game or quits.</summary>
 [Behavior]
 public partial struct MenuButtonAction
 {
     /// <summary>What it does.</summary>
     public MenuAction Action;
-
-    /// <summary>Done when it is pressed, while the menus are up, as Bevy's <c>menu_action</c> does it.</summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void MenuActionSystem(BehaviorContext ctx)
-    {
-        if (ctx.State<GameMenu.GameState>() != GameMenu.GameState.Menu || Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return;
-
-        switch (Action)
-        {
-            case MenuAction.Quit:
-                ctx.Exit();
-                break;
-            case MenuAction.Play:
-                ctx.SetState(GameMenu.GameState.Game);
-                ctx.SetState(GameMenu.MenuState.Disabled);
-                break;
-            case MenuAction.Settings or MenuAction.BackToSettings:
-                ctx.SetState(GameMenu.MenuState.Settings);
-                break;
-            case MenuAction.SettingsDisplay:
-                ctx.SetState(GameMenu.MenuState.SettingsDisplay);
-                break;
-            case MenuAction.SettingsSound:
-                ctx.SetState(GameMenu.MenuState.SettingsSound);
-                break;
-            case MenuAction.BackToMainMenu:
-                ctx.SetState(GameMenu.MenuState.Main);
-                break;
-        }
-    }
 }
 
-/// <summary>A button choosing the display quality, Bevy's <c>Setting</c> of a <c>DisplayQuality</c>.</summary>
+/// <summary>A radio button choosing the display quality, Bevy's <c>Setting</c> of a <c>DisplayQuality</c>.</summary>
 [Behavior]
 public partial struct QualitySetting
 {
     /// <summary>The quality it chooses.</summary>
     public DisplayQuality Value;
-
-    /// <summary>The quality chosen when it is pressed, in the display settings.</summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void SettingButton(BehaviorContext ctx)
-    {
-        if (ctx.State<GameMenu.MenuState>() != GameMenu.MenuState.SettingsDisplay) return;
-        if (GameMenu.TakeSelection(ctx, GameMenu.Quality != Value)) GameMenu.Quality = Value;
-    }
 }
 
-/// <summary>A button choosing the volume, Bevy's <c>Setting</c> of a <c>Volume</c>.</summary>
+/// <summary>A radio button choosing the volume, Bevy's <c>Setting</c> of a <c>Volume</c>.</summary>
 [Behavior]
 public partial struct VolumeSetting
 {
     /// <summary>The volume it chooses, from zero to nine.</summary>
     public int Value;
-
-    /// <summary>The volume chosen when it is pressed, in the sound settings.</summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void SettingButton(BehaviorContext ctx)
-    {
-        if (ctx.State<GameMenu.MenuState>() != GameMenu.MenuState.SettingsSound) return;
-        if (GameMenu.TakeSelection(ctx, GameMenu.Volume != Value)) GameMenu.Volume = Value;
-    }
 }
-
-/// <summary>The setting's button chosen now.</summary>
-[Behavior]
-public partial struct SelectedOption;
 
 /// <summary>The splash screen.</summary>
 [Behavior]
