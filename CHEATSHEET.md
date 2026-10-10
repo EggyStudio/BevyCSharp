@@ -271,6 +271,8 @@ T Insert<T>(Entity entity, string? json = null);                // Puts one of B
 Entity? ResourceEntity(string typePath);                        // The entity holding one of Bevy's resources, or null when the world has none of it
 T? Resource<T>();                                               // A typed wrapper over one of Bevy's resources, or null when the world has none of it
 T InsertResource<T>(string? json = null);                       // Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it has, and returns a typed wrapper over it
+List<Entity> Removed<T>();                                      // The entities that lost T, by a removal or a despawn, since the running system last asked, oldest first
+List<Entity> RemovedById(int componentId);                      // The entities that lost the component with this id since the running system last asked, as Removed lists them
 Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spawns an entity drawn with a mesh and a material, placed by a transform, as Bevy's (Mesh3d(mesh), MeshMaterial3d(material), transform) bundle does
 Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, as Bevy's default one is, a million lumens reaching twenty units and casting no shadow unless asked
 Entity SpawnCamera3d(Transform at, CameraSettings? settings = null);  // Spawns a 3D camera placed by a transform, with Bevy's defaults or the settings given

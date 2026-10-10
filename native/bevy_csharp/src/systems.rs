@@ -42,7 +42,11 @@ pub unsafe extern "C" fn bcs_app_add_system(
         let reg = SystemReg { func, user };
         let id = app.next_system;
         app.next_system += 1;
-        let run = (move |world: &mut World| loan_world(world, || reg.invoke())).in_set(BcsSystem(id));
+        // The system's cursors over the components' removals, its own from one run to the next,
+        // which it makes the running ones while it runs (`removals`).
+        let mut cursors = crate::removals::RemovalCursors::default();
+        let run = (move |world: &mut World| crate::removals::running(&mut cursors, || loan_world(world, || reg.invoke())))
+            .in_set(BcsSystem(id));
 
         match stage {
             Stage::Startup => {

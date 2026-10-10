@@ -338,6 +338,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_changed_since(int component, uint since, ulong* entities, int capacity, uint* now);
 
+    /// <summary>The entities that lost a component since the running system last asked.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_removed(int component, ulong* entities, int capacity);
+
     /// <summary>For each of a list of entities, whether it carries a component, or changed it after a tick.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

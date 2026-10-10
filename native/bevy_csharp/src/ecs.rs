@@ -37,7 +37,7 @@ pub(crate) fn entity_from(bits: u64) -> Entity {
 
 /// Rebuilds a `ComponentId` from the index C# is holding.
 #[inline]
-fn component_from(index: i32) -> Option<ComponentId> {
+pub(crate) fn component_from(index: i32) -> Option<ComponentId> {
     if index < 0 {
         None
     } else {

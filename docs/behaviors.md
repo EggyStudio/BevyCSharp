@@ -211,6 +211,24 @@ public void Tick(BehaviorContext ctx) { }
 `[Changed]` skips entities whose listed components did not change this frame. It is a per-entity
 test against Bevy's change ticks, so a method carrying it runs sequentially.
 
+What lost a component is no longer there to filter, so a system asks for it. `ctx.Ecs.Removed<T>()`
+lists the entities that lost `T`, by a removal or a despawn, since the running system last asked,
+as Bevy's `RemovedComponents<T>` gives a Rust system. Each system keeps its own place, so each
+removal reaches each system that asks once. Bevy holds a removal for two frames, so a system that
+asks less often misses the older ones, and an entity listed may already be gone:
+
+<!-- compiled with:
+public struct Health { public int Value; }
+-->
+```csharp
+[OnUpdate]
+public static void Forget(BehaviorContext ctx)
+{
+    foreach (var entity in ctx.Ecs.Removed<Health>())
+        Console.WriteLine($"{entity} lost its health");
+}
+```
+
 ## Conditions
 
 `[RunIf]` gates a system on a static `bool` member of the same struct, a field, a property, or a

@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f12a5879`. One commit, item 5's last part: `NormTests.N_2_10`, here since `869c9fbe`
+Reviewed up to `fef6bbeb`. One commit, item 6: a template package, `BevyCSharp.Templates`, whose one
+template `dotnet new bevycsharp` makes the README's first program, `Spin.cs` and `Program.cs` as the
+README's two blocks have them in a project asking for the engine at a placeholder version, with
+`--package-folder` writing a `nuget.config` for a local folder as 3DEngine's does; the template
+project stands outside the solution and compiles nothing. `build/pack-templates.sh` copies it to an
+ignored folder inside the repository, so `Directory.Build.props` gives it the license, the icon and
+the addresses, writes the engine's packed version into its `template.json` and packs it beside the
+engine; the README job packs both and walks, installing the template from its package, making the
+game, diffing its two files against the README's blocks, building and running 120 frames offscreen,
+which passed in a container on llvmpipe; the pack job packs and lists both, and `BCS_PACKAGE` takes
+the engine's by a digit after its name, as the three lookups that took any `BevyCSharp.*.nupkg` do
+since, where the template's package lay beside the engine's and was picked. The README's install
+reads the template's three commands and names `dotnet add package BevyCSharp` for any other project;
+BUILDING.md and AGENTS.md's `templates` row say it. `FirstGameTests` holds the template's files to
+the README's blocks line for line and the placeholder and the default on every push; 59 of the five
+test classes touched pass, the whole suite waiting on the comparison commit while the capture run
+holds the GPU, which is right for a change of tests, scripts and a template. Right, the template
+held to the README by a diff on every push and the lookups narrowed to the engine. Two things for
+the owner: the publish push carries both packages, so ticking it puts `BevyCSharp.Templates` on
+nuget.org beside the engine, a second package in the owner's name, which the README's install needs
+and which the owner's word allows, the package being theirs to pack and publish (Decision 8); and
+`docs/first-game.md` starts from `dotnet new console` where 3DEngine's starts from its template, as
+item 6 had it, so it moves to the template with the next batch, the cube's two files removed as the
+page's first step or an empty-window template beside the first, 3DEngine's two templates read for
+the shape. `NormTests.cs` stands at 794. The capture run is a third through.
+
+Before it, one commit came to be read, item 5's last part: `NormTests.N_2_10`, here since `869c9fbe`
 for the methods marked `UnmanagedCallersOnly` and the delegates of an `UnmanagedFunctionPointer`
 type in the library and the editor, takes 3DEngine's third source as well, the overrides a binding's
 own callbacks reach from native code, a binding being an assembly a class here derives from other
@@ -49,29 +75,6 @@ it was called Bevy's, and the two that stand pinned so Bevy's mend is noticed. O
 owner: driving the feature test, the coder set its saved hour to 8 without reading it first. The
 suite: 1,344 passed and 2 skipped. The comparison job's plan is taken as the coder proposes, with
 the conditions item 4 carries.
-
-Before it, one commit came to be read, item 4's diagnostics store: a game registers its own measures
-in Bevy's store, measures, reads and turns them off beside Bevy's frame, entity and render ones, a
-`Diagnostics` class over six entry points of a new `diagnostics.rs`, ABI 242, the config's frame
-times flag become a bit each for the log, the frame time, the entity count and the render passes,
-the render one skipped where GPU timings added the plugin or nothing draws, and `app.rs` giving its
-block to the module, 790 lines of N 1.3's 800 since. Read: a path Bevy checks only in a debug build
-is refused here on every build, so a game meets the refusal where Bevy would take it quietly; a
-measurement goes straight into the store since the call is inside a system; a path nobody registered
-or one turned off keeps nothing, as Bevy's own does not; the log filter is refused in an app without
-the log. Tests register, measure six times into a history of four, list, turn off and are refused
-with the history kept, read Bevy's frame and entity counts back, take and refuse the log filter, pin
-the 32-byte reading's layout on both sides and the entry points in Rust; the harness takes a
-`configure` since the app sends its config in its constructor and a change after reached nothing,
-which the first run found. Three examples, two of them print alone and are captured as text with
-Bevy's own diagnostic lines kept by `capture-example.sh`, and `log_diagnostics` is part, Bevy's
-system information wanting the `sysinfo` crate, which waits on the owner's word as any crate does
-(Decision 11); `deferred_rendering`'s triage says why its frame differs, as asked. Right, the
-refusals where Bevy is quiet, the store written inside the system, and the examples' text captures.
-The suite: 1,337 passed and 2 skipped; the bridge's 129; cargo check clean. EXAMPLES.md reads 311
-written and 18 in part. Item 4's gaps that wait on no word are done, so next are the captures
-compared whole by the workflow and the three faults named before that job goes red, the transmission
-flake first; Feathers, the dev tools and the system information wait on the owner's word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -116,7 +119,7 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs` at 783 lines, `app.rs` at 790 and `NormTests.cs` at 788 split with their next
+   `render/assets.rs` at 783 lines, `app.rs` at 790 and `NormTests.cs` at 794 split with their next
    addition.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
@@ -277,7 +280,11 @@ from [SHARED.md](SHARED.md).
    none, and every method it finds catches every exception.
 6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
-   workflow, as the first game's first step would have a newcomer do.
+   workflow, as the first game's first step would have a newcomer do. Done at `fef6bbeb`, `dotnet
+   new bevycsharp` making the README's first program, packed beside the engine and walked by the
+   README job; its publishing on nuget.org beside the engine, a second package in the owner's name,
+   waits on the owner's word (Decision 8), and the README's install line needs it;
+   `docs/first-game.md` starts from the template with the next batch, as 3DEngine's does.
 7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
    from since the system's last run, beside the added and changed ones a behavior reads.

@@ -1500,6 +1500,8 @@ sealed class Bevy.EcsWorld
   IDisposable Observe<TEvent>(Action<On<TEvent?>> observer)
   IDisposable Observe<TEvent>(Entity entity, Action<On<TEvent?>> observer)
   IEnumerable<Entity> Descendants(Entity root)
+  List<Entity> Removed<T>() where T : unmanaged
+  List<Entity> RemovedById(int componentId)
   T GetOrDefault<T>(Entity entity) where T : unmanaged
   T Insert<T>(Entity entity, string? json = null) where T : struct, IReflectedComponent<T>
   T InsertResource<T>(string? json = null) where T : struct, IReflectedComponent<T>
