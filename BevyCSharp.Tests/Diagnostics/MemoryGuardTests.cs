@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Bevy;
 using Xunit;
 
@@ -15,19 +16,30 @@ namespace Bevy.Tests;
 public sealed class MemoryGuardTests
 {
     [Fact]
-    public void TheMemoryHeldIsReadAsItGrows()
+    public unsafe void TheMemoryHeldIsReadAsItGrows()
     {
+        const nuint size = 256 << 20;
         var before = MemoryGuard.ResidentBytes();
 
-        // A quarter of a gigabyte written to, so its pages are the machine's and not only promised.
-        var held = new byte[256 << 20];
-        for (var at = 0; at < held.Length; at += 4096) held[at] = 1;
+        // A quarter of a gigabyte from the system rather than from the GC, which may hand an array
+        // pages it kept resident from earlier tests, so the growth read would be what it held back
+        // rather than what the guard reads. A byte a page written, so its pages are the machine's
+        // and not only promised.
+        var held = (byte*)NativeMemory.Alloc(size);
+        try
+        {
+            for (nuint at = 0; at < size; at += 4096) held[at] = 1;
+            var after = MemoryGuard.ResidentBytes();
 
-        var after = MemoryGuard.ResidentBytes();
-        GC.KeepAlive(held);
-
-        Assert.True(before > 0);
-        Assert.True(after - before > 200L << 20, $"the process held {before} bytes and then {after}");
+            // Three quarters of it, since the reading is the whole process's, and the rest of the
+            // process, the GC and the C allocator among it, may give pages back while this runs.
+            Assert.True(before > 0);
+            Assert.True(after - before > 192L << 20, $"the process held {before} bytes and then {after}");
+        }
+        finally
+        {
+            NativeMemory.Free(held);
+        }
     }
 
     /// <summary>
