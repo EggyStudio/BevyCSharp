@@ -62,7 +62,9 @@ public static unsafe partial class Render
     /// <remarks>
     /// The window's own picture, or in an offscreen run the image standing for it, which it is
     /// given the frame after it is spawned (<see cref="SetCameraTarget(Entity, Entity)"/>). The
-    /// file appears a frame or two later, as with any capture.
+    /// file appears a frame or two later, as with any capture. The picture is written into the
+    /// window by a pass whose pipeline Bevy compiles over the first frames, so a capture taken
+    /// before <see cref="PipelinesReady"/> holds may come back black.
     /// </remarks>
     /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
     /// <param name="window">An entity carrying Bevy's <c>Window</c>.</param>

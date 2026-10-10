@@ -12,6 +12,13 @@ namespace Bevy;
 public enum Tonemapper
 {
     /// <summary>Clip anything brighter than white, as no tonemapping does.</summary>
+    /// <remarks>
+    /// The picture passes through untouched, so a camera's grade
+    /// (<see cref="Render.SetColorGrading(Entity, GradingSettings?)"/>) and its dithering
+    /// (<see cref="PostSettings.Dither"/>) do nothing under it, and Bevy warns once for a camera
+    /// that asks for either. A 2D camera keeps both until it is given a tonemapper, since Bevy
+    /// starts one with a curve that clips as this does and keeps them.
+    /// </remarks>
     None = 0,
 
     /// <summary>The classic curve. Colors shift hue as they brighten.</summary>

@@ -194,7 +194,10 @@ Bevy's `multi_window_text` keeps a line of text to each window. Closing the wind
 entity. The calls on `Window` above address the first window alone, and a further one is changed
 through its `WindowRef`. An offscreen run opens no window, and draws each window the game spawns
 into an image of its own, at the window's size and scale, so the game runs the same with no display
-and `Render.Screenshot(path, second)` reads the picture each window would show.
+and `Render.Screenshot(path, second)` reads the picture each window would show. The picture is
+written into the window by a pass whose pipeline compiles over the first frames, so a window
+captured before `Render.PipelinesReady()` holds may come back black, and a capture meant to show
+what it draws waits for that.
 
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case

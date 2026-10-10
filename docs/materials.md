@@ -59,6 +59,12 @@ var water = Render.CreateMaterial(new MaterialSettings
 });
 ```
 
+A camera draws the scene behind a transmissive surface only where it carries Bevy's
+`ScreenSpaceTransmission`, which a camera is given rather than having by default, as
+`ecs.Insert<ScreenSpaceTransmissionRef>(camera)` from `Bevy.Reflected` gives it, its `Steps` saying
+how many layers of glass are seen through and its `Quality` how finely a rough one blurs. A camera
+without it shows the environment map through glass and not the scene.
+
 `AttenuationDistance` and `AttenuationColor` tint light on its way through, so thick glass is
 greener at its edge than its face. `AnisotropyStrength` and `AnisotropyRotation` stretch the
 highlight along the mesh's tangents, as brushed metal's is stretched. A glTF file's meshes usually

@@ -10,10 +10,14 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b0fa935e`. One commit, Verdict 7's last line: `./bcs test` deletes `digest.json`
-before it starts the script, so a script that never started leaves no earlier page to be read as the
-run's, and with no `python3` on the PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote
-no page. Right, and the verdict is settled. One line on it, in item 1: `File.Delete` lets a missing
+Reviewed up to `61f80bc6`. One line: `./bcs test` deletes the last page only where there is one, the
+comment saying why Windows needs the question. Right. Steps f, g and h next, and the next page is
+the push's.
+
+Before it, Verdict 7's last line came in (`b0fa935e`): `./bcs test` deletes `digest.json` before it
+starts the script, so a script that never started leaves no earlier page to be read as the run's,
+and with no `python3` on the PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote no
+page. Right, and the verdict is settled. One line on it, in item 1: `File.Delete` lets a missing
 file pass on every system and a missing folder pass on Linux and macOS alone, where the runtime's
 Windows delete returns on the file's error and throws the folder's, so a fresh checkout's first
 `./bcs test` on Windows, with no `TestResults` yet, throws before anything runs; `File.Exists`
@@ -47,32 +51,6 @@ window captured before `Render.PipelinesReady()` holds may come back black, with
 through `./bcs test`: 1,284, 2 skipped, none without a result, 1.3 GB held at most. Steps f, g and h
 next.
 
-Before it, ten commits came to be read. The eight tests are traced and no row was missing
-(`4acec927`): `MemoryGuard` stopped the test host at 3.76 GB against a cap of 3.75, a quarter of the
-15 GB .NET reads under a 20 GB scope, and `dotnet test` printed its Passed line for what had run, so
-a cut run passed for a whole one; the host grew because each app drawing offscreen left some ten
-megabytes it had freed in glibc's arenas, an arena a thread and the GPU's driver starting threads
-for every app, thirty apps growing it 317 MB and 1 MB with one arena, the silent plugin holding
-nothing since Bevy's own plugin with no device grows the same; `suite.runsettings` starts the host
-with `MALLOC_ARENA_MAX=2`, which must be in the environment before the runtime makes its arenas, and
-thirty apps grow 18 MB. Right, a trace that went to the cause, and the model offered was wrong, the
-loaders' rows being fixed lists. The reading of how a run is counted is kept here: a whole run is
-the listing and eleven, the two arc theories listed once for seven rows and six. The rest: Verdict
-6's test touches its quarter gigabyte from `NativeMemory.Alloc` and holds three quarters of the
-growth (`6715339c`), settling on the next run; the vendored weather's manifest spells `missing_docs`
-(`95b280fb`); the silent plugin's systems run after transforms are propagated, where Bevy plays its
-own, so `audio::checked` refuses a file no decoder reads before a decoder is built from it and
-panics, with a test (`c84f33ea`), a fault the plugin had and the suite found; and the six files item
-2 listed are mended in six commits that move code alone, largest first, `views.rs` into four,
-`post.rs` into three, `compute.rs`, `window.rs`, `slang.rs` and `ecs.rs` into one or two beside
-them, each off N 1.3's list as it went, the list at five, every file under 800, the paths kept by
-re-exports, the bridge's tests at 118 and 67. The suite over all ten: 1,280 passed, 2 skipped and 1
-failed of 1,283, `SpawnedWindowTests` reading a spawned window's picture back black once and passing
-three times alone, which the reply watches for; it is traced instead, before step f, since f
-compares captures and a black one is what it would compare, the capture racing the spawned window's
-first presented frame the first thing to read. A cut run passing for a whole one is Verdict 7. Steps
-f, g and h remain.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -89,20 +67,18 @@ from [SHARED.md](SHARED.md).
    the run of the push that carries it); N 1.3 and the memory command's peak pass on every system
    since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table check that failed
    Linux at `e4c122e3` passed at the bump. Verdict 7 is settled at `b0fa935e`, the page removed
-   before the script starts; `File.Delete` there lets a missing file pass on every system and a
-   missing folder pass on Linux and macOS alone, the runtime's Windows delete returning on the
-   file's error and throwing the folder's, so a fresh checkout's first `./bcs test` on Windows, with
-   no `TestResults` yet, throws before anything runs, and `File.Exists` goes first, before the pack
-   run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the window's image holding its
-   zeros until the pass that draws it has its pipeline, and the test captures once
-   `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and `docs/window.md`
-   say so with step g. The page's repeated lines carry 116 warnings of `Screen.Playing` in every run
-   since before `c70f17b`, StateTests' behaviors scoped to a state no other app adds and registered
-   in every app by the module initializer, which drowns what else repeats (Decision 7); they are
-   quieted in the batch that next touches the tests, the test's behaviors registered only where
-   their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and
-   item 3's remaining steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's
-   run is read by the reviewing session, and a failure it names comes first here.
+   before the script starts, and `61f80bc6` asks whether it is there first, since the runtime's
+   Windows delete throws on a missing folder, a fresh checkout's first run. `SpawnedWindowTests`'
+   black capture is traced at `c46fd24e`, the window's image holding its zeros until the pass that
+   draws it has its pipeline, and the test captures once `Render.PipelinesReady()` holds;
+   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g. The page's
+   repeated lines carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
+   StateTests' behaviors scoped to a state no other app adds and registered in every app by the
+   module initializer, which drowns what else repeats (Decision 7); they are quieted in the batch
+   that next touches the tests, the test's behaviors registered only where their state is. Package
+   0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and item 3's remaining
+   steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -421,3 +397,24 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
+**Step f, its first half.** The suite ran with `BCS_SCHEDULE_SHUFFLE_SEED`, which the bridge reads
+as an app starts to run and sets as Bevy's `ScheduleBuildSettings::shuffle_seed` on every schedule
+of the app and its render world, leaving the rest of their settings. Under seed 1 two tests failed.
+`ShadowTests` read no pixel darker with contact shadows, its picture taken thirty frames in, before
+the shadows' pipelines had compiled under the suite's load, the spawned window's race, and
+`PictureRun.Capture` takes its picture once `Render.PipelinesReady()` holds, which mends it for
+every test that captures through it. `SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` reached
+its 1,200th frame still compiling its program, slangc and Solari's pipelines taking more than twenty
+seconds under the load. Both classes passed twice with seed 1 alone, so neither failure is an order
+a system leaned on, and the second is listed, a limit in frames that a loaded machine's compile can
+outrun. Under seed 7 the whole suite passed 1,283 and skipped 2 of 1,285, none without a result. The
+crash file's hook fires once for a panic in a system, since 0.20's executor hands the panic to the
+fallback handler as an error of severity `Panic` carrying its payload, and that handler resumes the
+unwinding with `resume_unwind`, which calls no hook. `ScreenSpaceTransmission` is opt-in, the
+transmission example inserting it where the camera has none, and `docs/materials.md` says a camera
+without it shows the environment map through glass. `Tonemapping::None` is a passthrough that drops
+the grade and the dithering, which `Tonemapper.None`'s remarks say, a 2D camera starting with
+`Linear`. `TonemapRampTests` passed against `None.png` as it stands, so nothing is rewritten.
+`Render.Screenshot`'s remarks for a window and `docs/window.md` say a window captured before
+`Render.PipelinesReady()` holds may come back black. The captures compared, the feature test driven,
+the soak and Courtyard from the package follow.
