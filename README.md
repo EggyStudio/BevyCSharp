@@ -162,21 +162,16 @@ dotnet run --project BevyCSharp.Examples -- 3d_scene
 
 ## Install
 
-```
-dotnet add package BevyCSharp
-```
-
-The package carries the managed library, the source generator and a prebuilt bridge per platform.
-
-The program above, in a new console project with the package added, is a game, and `dotnet run`
-opens its window:
-
 ```bash
-dotnet new console -o MyGame && cd MyGame
-dotnet add package BevyCSharp
-# Spin.cs and Program.cs as above
+dotnet new install BevyCSharp.Templates
+dotnet new bevycsharp -o MyGame && cd MyGame
 dotnet run
 ```
+
+The template makes the program above, `Spin.cs` and `Program.cs`, in a project asking for the
+package of the template's own version, and `dotnet run` opens its window. The package carries the
+managed library, the source generator and a prebuilt bridge per platform, and any other project
+takes it with `dotnet add package BevyCSharp`.
 
 On Linux the bridge's audio links ALSA, so the bridge needs ALSA's library to load, `libasound2`
 (`libasound2t64` on Ubuntu 24.04 and Debian 13) or `alsa-lib` on Fedora and Arch, which a desktop
@@ -189,7 +184,8 @@ draws where there is no graphics card:
 BCS_OFFSCREEN=1 BCS_FRAMES=120 dotnet run
 ```
 
-The package workflow follows these steps in a container holding the .NET SDK and the package alone.
+The package workflow follows these steps in a container holding the .NET SDK and the two packages
+alone.
 
 ## Guide
 

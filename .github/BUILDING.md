@@ -243,7 +243,14 @@ scope here rather than merely unbuilt.
 ```bash
 build/build-native.sh          # stage the native bridge first
 dotnet pack BevyCSharp/BevyCSharp.csproj -c Release
+build/pack-templates.sh        # the template, at the engine's version, beside it
 ```
+
+`BevyCSharp.Templates` is the template `dotnet new bevycsharp` makes a game from, the README's
+first program in a project asking for the engine of the template's own version. It lives in
+`templates/` with a placeholder for that version, and `build/pack-templates.sh` packs a copy with
+the version of the engine package packed last written in, into `build/package` beside it, so the
+two go out together.
 
 Packing fails with `BCS101` if the staged bridge is older than the Rust sources, because shipping
 a stale one produces an `EntryPointNotFoundException` far from its cause.
@@ -310,9 +317,11 @@ Swarm, keeping Swarm's frame profile with the run's captures, drives the feature
 through each station of its course, built on the package as Courtyard is
 (`build/drive-feature-test.sh`), soaks the four of them for a while, builds and runs every step of
 the first game (`build/first-game.sh`, whose `--shots` draws the page's pictures again), and walks
-the README's install in a container (`build/readme-walk.sh`), and packs only once all of them pass.
-The package is kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
-**publish** box pushes it to nuget.org from the run instead, which needs the `NUGET_API_KEY` secret.
+the README's install in a container, the template installed and a game made from it
+(`build/readme-walk.sh`), and packs only once all of them pass. The engine's package and the
+template's are kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
+**publish** box pushes both to nuget.org from the run instead, which needs the `NUGET_API_KEY`
+secret.
 
 The **scene packs** workflow, also run by hand and never by a push, builds the bridge with
 meshlets and ray-traced lighting, fetches each scene pack `scenes/` names into the actions cache,

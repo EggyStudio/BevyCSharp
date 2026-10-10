@@ -35,6 +35,8 @@ msbuild.log
 /build/game/
 # The Slang compiler build/fetch-slang.sh downloads.
 /build/tools/
+# The copy of templates/ that build/pack-templates.sh packs with the engine's version written in.
+/build/templates/
 
 # Compiled Slang, written beside the assets of whatever ran a shader. Every checkout fetches
 # slangc on its first build and fills this again, and each entry is keyed by a hash of the

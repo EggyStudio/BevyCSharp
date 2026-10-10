@@ -1,0 +1,3 @@
+using Bevy;
+
+BevyApp.Run();

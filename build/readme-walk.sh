@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 # Follows the README as a stranger would, in a container holding the .NET SDK and nothing of this
-# repository but a packed package: a new project, the package added as Install says, the README's
-# first program as it is written, built, and run with no display as Install says. A step the
-# README leaves out or gets wrong fails here.
+# repository but the packed packages: the template installed and a game made from it as Install
+# says, built, and run with no display as Install says. A step the README leaves out or gets wrong
+# fails here.
 #
 #   dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=1.2.3   # into build/package
+#   build/pack-templates.sh 1.2.3
 #   build/readme-walk.sh [version]
 #
-# The program is taken out of README.md rather than written down here, the first C# block under
-# the title and the one under "In Program.cs", so the walk follows the README as it reads now.
+# The game the template makes is held to the README's first program, the first C# block under the
+# title and the one under "In Program.cs", taken out of README.md rather than written down here, so
+# the README shows what a newcomer's first command makes.
 # CONTAINER names the container tool, podman or docker, whichever is found otherwise.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# The package packed last unless one is named, since a version number says nothing about which of
-# the packages lying in build/package was made from this checkout.
-version="${1:-$(ls -t build/package/BevyCSharp.*.nupkg | head -1 | sed 's/.*BevyCSharp\.\(.*\)\.nupkg/\1/')}"
+# The engine's package packed last unless one is named, since a version number says nothing about
+# which of the packages lying in build/package was made from this checkout.
+version="${1:-$(ls -t build/package/BevyCSharp.[0-9]*.nupkg | head -1 | sed 's/.*BevyCSharp\.\([0-9].*\)\.nupkg/\1/')}"
 engine="${CONTAINER:-$(command -v podman || command -v docker)}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
@@ -36,22 +38,24 @@ awk '
 
 [ -s "$work/Spin.cs" ] && [ -s "$work/Program.cs" ] || { echo "the README's first program was not found" >&2; exit 1; }
 
-cp "build/package/BevyCSharp.$version.nupkg" "$work/"
+cp "build/package/BevyCSharp.$version.nupkg" "build/package/BevyCSharp.Templates.$version.nupkg" "$work/"
 
-# The steps as Install gives them, with the package in a folder of its own as the only source
-# besides nuget.org, then what Install says Linux needs, which this image lacks: ALSA's library and
-# a Vulkan driver that draws on the processor. Run with no display, it ends after 120 frames.
+# The steps as Install gives them, with the template installed from its package rather than from
+# nuget.org and the engine taken from a folder of its own, which the template's --package-folder
+# writes a nuget.config for, then what Install says Linux needs, which this image lacks: ALSA's
+# library and a Vulkan driver that draws on the processor. Run with no display, it ends after 120
+# frames.
 cat > "$work/walk.sh" <<WALK
 set -euo pipefail
 export DOTNET_NOLOGO=1 DOTNET_CLI_TELEMETRY_OPTOUT=1
-mkdir -p /packages && cp /given/*.nupkg /packages/
+mkdir -p /packages && cp /given/BevyCSharp.$version.nupkg /packages/
 
-dotnet new console -o /game --framework net10.0 >/dev/null
+dotnet new install /given/BevyCSharp.Templates.$version.nupkg >/dev/null
+dotnet new bevycsharp -o /game --package-folder /packages >/dev/null
 cd /game
-dotnet nuget add source /packages --name local >/dev/null
-dotnet add package BevyCSharp --version '$version' >/dev/null
-cp /given/Spin.cs Spin.cs
-cp /given/Program.cs Program.cs
+diff -u /given/Spin.cs Spin.cs
+diff -u /given/Program.cs Program.cs
+echo "[walk] the template made the README's program"
 
 dotnet build -c Release
 echo '[walk] built'

@@ -10,7 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d98c299d`. One commit, item 4's four faults traced before the captures are compared.
+Reviewed up to `f12a5879`. One commit, item 5's last part: `NormTests.N_2_10`, here since `869c9fbe`
+for the methods marked `UnmanagedCallersOnly` and the delegates of an `UnmanagedFunctionPointer`
+type in the library and the editor, takes 3DEngine's third source as well, the overrides a binding's
+own callbacks reach from native code, a binding being an assembly a class here derives from other
+than corelib, each binding's native-called methods followed through its own calls and every override
+here of a virtual they reach counted as handed over. It finds none, ImGui's binding calling no
+override of ours and BepuPhysics being managed throughout, and every method it does find already
+catches every exception, the system trampoline, the observers' reports, the hooks, the computed and
+joint rules, the carried-file reader, the crash writer and the IME callback, so nothing is mended
+and item 5 is done. Right, the source 3DEngine's test needed for Assimp held here too, so a binding
+that one day calls an override is caught. `NormTests.cs` stands at 788 lines of N 1.3's 800, so its
+next addition comes with a split. The suite's 18 norm tests pass. The capture run on the fixed clock
+stands at some twenty examples of 329 at 37 seconds each, three and a half hours, the lavapipe run
+and the comparison commit after it; item 6, the template package, goes on meanwhile, wanting no GPU.
+
+Before it, one commit came to be read, item 4's four faults traced before the captures are compared.
 Transmission's missing spheres do not reproduce on Bevy 0.20, 32 captures on the laptop's GPU on the
 machine's clock and 6 on lavapipe at a fixed frame time all with their spheres, where one in four
 lacked them before, so 38 clean would come once in 55,000; and eight lavapipe captures on the
@@ -58,32 +73,6 @@ written and 18 in part. Item 4's gaps that wait on no word are done, so next are
 compared whole by the workflow and the three faults named before that job goes red, the transmission
 flake first; Feathers, the dev tools and the system information wait on the owner's word.
 
-Before it, one commit came to be read, item 4's standard material maps: the material takes a depth
-map with its parallax depth, method and layers, a specular tint with the specular and tint maps
-behind Bevy's `pbr_specular_textures` feature (Decision 25), which a glTF file's specular extension
-fills too, and whether it is drawn forward or deferred, Auto following the app's deferred switch as
-Bevy resolves it; the config grows at its end to 232 bytes, ABI 241, with a layout test on each side
-pinning the new groups' offsets and the size, so a field added in another place on one side cannot
-pass as the sizes agree; a material that was occlusion-mapped reads back with relief steps 5, Bevy's
-own, said; the settings, their JSON written only where they differ from a plain material's, the
-editor's card rows, PublicApi.txt and the guide's section follow. Three tests draw each setting so a
-value that reads back and never reaches the shader fails: a red tint colors a black non-metal's
-highlight where white leaves it gray, a depth map moves a checker under both methods, and a Forward
-material keeps its tint among deferred ones where the same at Auto reflects white, the G-buffer
-having no room for a tint. `parallax_mapping` and `specular_tint` match bare Bevy apart from how far
-each has turned, the tint's two choices as the examples' own radio buttons where Bevy draws
-Feathers, said in the triage; `deferred_rendering` does not match, and the difference is read as
-Bevy's, its offscreen harness drawing one kind of material at a time when forward and deferred are
-mixed, whichever the camera's aim at its image decides, where with the ground left at Auto bare Bevy
-draws the whole scene and that picture matches ours, a windowed bare run out of reach since the
-harness builds for X11 alone; that reading belongs in the triage's note as the component array's is,
-with the next batch. Right, the layout pinned on both sides, the tests drawing rather than reading
-back, and the deferred difference measured both ways before it was called Bevy's. The suite: 1,330
-passed and 2 skipped; the bridge's 127 on editor, meshlet and Solari; cargo check clean on the three
-profiles. EXAMPLES.md reads 309 written and B 4 at 144 of 160. `render/assets.rs` stands at 783
-lines of N 1.3's 800, so its next addition comes with a split, as item 2 asks. Next Bevy's
-diagnostics store.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -127,7 +116,8 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs` at 783 lines and `app.rs` at 790 split with their next addition.
+   `render/assets.rs` at 783 lines, `app.rs` at 790 and `NormTests.cs` at 788 split with their next
+   addition.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
@@ -282,7 +272,9 @@ from [SHARED.md](SHARED.md).
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
-   a system, an observer or a loader's callback.
+   a system, an observer or a loader's callback. Done at `f12a5879`: the test has had the first two
+   sources since `869c9fbe` and takes the third, the overrides a binding's callbacks reach, finding
+   none, and every method it finds catches every exception.
 6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
    (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
    workflow, as the first game's first step would have a newcomer do.

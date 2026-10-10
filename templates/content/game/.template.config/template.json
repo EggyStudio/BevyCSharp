@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "EggyStudio",
+  "classifications": ["Game", "Bevy", "BevyCSharp"],
+  "identity": "EggyStudio.BevyCSharp.Game",
+  "name": "BevyCSharp game",
+  "description": "A game on BevyCSharp: a window with a turning cube, a behavior and the one line that runs it.",
+  "shortName": "bevycsharp",
+  "sourceName": "MyGame",
+  "preferNameDirectory": true,
+  "tags": { "language": "C#", "type": "project" },
+  "symbols": {
+    "engineVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "The version of the BevyCSharp package the project asks for.",
+      "defaultValue": "PACKED_VERSION",
+      "replaces": "BEVYCSHARP_VERSION"
+    },
+    "packageFolder": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "A folder of packages built from a checkout, which a nuget.config written beside the project takes the engine from.",
+      "defaultValue": "",
+      "replaces": "PACKAGE_FOLDER"
+    },
+    "hasPackageFolder": {
+      "type": "computed",
+      "value": "(packageFolder != \"\")"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        { "condition": "(!hasPackageFolder)", "exclude": ["nuget.config"] }
+      ]
+    }
+  ]
+}

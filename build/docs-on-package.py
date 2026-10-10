@@ -185,8 +185,9 @@ def write(project, pages):
 
 
 def newest(package):
-    """The version of the BevyCSharp package packed last into the folder."""
-    packed = sorted(glob.glob(os.path.join(package, "BevyCSharp.*.nupkg")), key=os.path.getmtime)
+    """The version of the BevyCSharp package packed last into the folder, the template's package
+    beside it left out by its name, which no version follows."""
+    packed = sorted(glob.glob(os.path.join(package, "BevyCSharp.[0-9]*.nupkg")), key=os.path.getmtime)
     if not packed:
         sys.exit(f"{package} holds no BevyCSharp package to build the guides' blocks on")
     return os.path.basename(packed[-1])[len("BevyCSharp."):-len(".nupkg")]

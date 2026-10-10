@@ -434,10 +434,10 @@ jobs:
           path: ${{ runner.temp }}/examples
           if-no-files-found: ignore
 
-  # The README followed as a stranger would, in a container holding the .NET SDK and a package of
-  # this commit alone, with a new project, the package added, the first program as the README has
-  # it, built and run with no display. build/readme-walk.sh takes the program out of README.md, so a
-  # change to the README that breaks it fails here.
+  # The README followed as a stranger would, in a container holding the .NET SDK and the packages of
+  # this commit alone, the template installed and a game made from it, held to the first program as
+  # the README has it, built and run with no display. build/readme-walk.sh takes the program out of
+  # README.md, so a change to the README or the template that parts them fails here.
   readme:
     name: walk the README
     if: ${{ inputs.pack }}
@@ -462,7 +462,9 @@ jobs:
           path: build/artifacts/linux-x64
 
       - name: Pack
-        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+        run: |
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+          build/pack-templates.sh 0.0.0-ci
 
       - name: Walk the README
         env:
@@ -524,9 +526,10 @@ jobs:
             args+=(-p:Version=${{ inputs.version }})
           fi
           dotnet pack BevyCSharp/BevyCSharp.csproj "${args[@]}"
+          build/pack-templates.sh
 
       - name: Show what shipped
-        run: unzip -l build/package/*.nupkg
+        run: for package in build/package/*.nupkg; do unzip -l "$package"; done
 
       # N 6.4 and N 6.5 of NORM.md, the package holding the library, its generator, its build files
       # and the natives of every system staged above, and the notices naming every crate of the lock.
@@ -534,7 +537,7 @@ jobs:
         run: |
           # A whole path, since the test runs from its own folder. It reads a relative one from the
           # checkout as well, and the job does not lean on that.
-          export BCS_PACKAGE="$PWD/$(ls build/package/*.nupkg | head -1)"
+          export BCS_PACKAGE="$PWD/$(ls build/package/BevyCSharp.[0-9]*.nupkg | head -1)"
           dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4|FullyQualifiedName~NormTests.N_6_5"
 
       - uses: actions/upload-artifact@v7

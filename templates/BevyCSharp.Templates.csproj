@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The template `dotnet new` starts a game from, packed beside the engine by
+         build/pack-templates.sh from a copy in build/templates with the engine's version written
+         into its template.json, as the version a new project asks for. Nothing here is compiled,
+         and the solution leaves it out, since its game's project names the engine by a version
+         that only packing writes in. The license, the icon and the addresses are the repository's,
+         from Directory.Build.props. -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <PackageType>Template</PackageType>
+        <PackageId>BevyCSharp.Templates</PackageId>
+        <Title>BevyCSharp templates</Title>
+        <Description>A template for a game on BevyCSharp, Bevy written in C#: `dotnet new bevycsharp` makes a window with a turning cube, a behavior and the one line that runs it.</Description>
+        <PackageTags>dotnet-new;templates;bevy;game-engine;ecs;BevyCSharp</PackageTags>
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <IncludeSymbols>false</IncludeSymbols>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <EnableDefaultItems>false</EnableDefaultItems>
+        <!-- A template package holds no library, which NuGet warns of for any package. -->
+        <NoWarn>$(NoWarn);NU5128</NoWarn>
+    </PropertyGroup>
+
+    <!-- The readme is this folder's, about the template, in place of the repository's, and the
+         bridge's notices stay with the engine's package, which carries the bridge. -->
+    <ItemGroup>
+        <None Remove="$(BevyCSharpReadme)" />
+        <None Remove="$(BevyCSharpNotices)" />
+        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**" Pack="true" PackagePath="content\%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+</Project>

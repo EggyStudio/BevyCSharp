@@ -27,7 +27,7 @@ public sealed class DocsScriptTests : IDisposable
     {
         var python = Needs.Python();
         var package = Path.Combine(CheatsheetTests.RepositoryRoot(), "build", "package");
-        Skip.IfNot(Directory.Exists(package) && Directory.EnumerateFiles(package, "BevyCSharp.*.nupkg").Any(),
+        Skip.IfNot(Directory.Exists(package) && Directory.EnumerateFiles(package, "BevyCSharp.*.nupkg").Any(NormTests.EnginePackage),
             "build/package holds no BevyCSharp package to build the blocks on");
 
         var page = _folder.File("guide.md");

@@ -354,9 +354,15 @@ public sealed class NormTests
 
         var packed = Path.Combine(Root, "build", "package");
         return Directory.Exists(packed)
-            ? Directory.EnumerateFiles(packed, "BevyCSharp.*.nupkg").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
+            ? Directory.EnumerateFiles(packed, "BevyCSharp.*.nupkg").Where(EnginePackage).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
             : null;
     }
+
+    /// <summary>
+    /// Whether a package is the engine's, whose version follows its name, where the template's,
+    /// <c>BevyCSharp.Templates</c>, lies beside it in the same folder.
+    /// </summary>
+    internal static bool EnginePackage(string path) => char.IsAsciiDigit(Path.GetFileName(path)["BevyCSharp.".Length]);
 
     /// <summary>Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.</summary>
     private static List<string> LockedCrates() =>

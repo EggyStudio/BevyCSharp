@@ -98,6 +98,7 @@ Stop any serving session before running the suite.
 | `games/Courtyard` | A game built from the packed package, which the workflow plays |
 | `games/Stress` | The engine under load, for the measurements of PERFORMANCE.md |
 | `scenes` | The manifests of the scene packs, well-known graphics scenes fetched as packs on demand |
+| `templates` | The template `dotnet new bevycsharp` makes a game from, packed beside the engine by `build/pack-templates.sh` |
 
 ## Conventions
 
