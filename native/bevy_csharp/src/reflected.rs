@@ -51,6 +51,7 @@ use crate::state::with_world;
 mod describe;
 mod lists;
 mod resources;
+pub(crate) mod type_data;
 mod values;
 
 #[cfg(test)]
