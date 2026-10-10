@@ -6,7 +6,6 @@ BevyCSharp.Tests/AnimationTests.cs
 BevyCSharp.Tests/AssetEditTests.cs
 BevyCSharp.Tests/AssetIdTests.cs
 BevyCSharp.Tests/AssetPackTests.cs
-BevyCSharp.Tests/AudioTests.cs
 BevyCSharp.Tests/Build/DocsScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
