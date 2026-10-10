@@ -428,7 +428,7 @@ compressed_image_saver	missing	Bevy's asset processor and its compressing image 
 mines	can
 mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types
 pipeline_constants	missing	pipeline-overridable constants, which a shader program does not set
-sprite_material	missing	a sprite drawn with a material of its own, which a Slang program does not draw as a sprite
+sprite_material	can
 deferred_raymarch	can	as a draw over the whole view inside the camera's prepass, into the G-buffer and the lighting pass ids, with a shadow stage of its own
 mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build
 many_meshlet_materials	can	needs a bridge built with --meshlet
@@ -442,5 +442,5 @@ feathers_number_input	missing	Feathers' number input, whose crate the bridge doe
 pan_orbit_camera_cad	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
 pan_orbit_camera_minimal	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
 pan_orbit_camera_ortho	missing	Bevy's pan-orbit camera controller, which the bridge does not compile in
-shader_material_2d_bindless	missing	a bindless 2D material, which a Slang program does not draw in 2D
+shader_material_2d_bindless	can	each material binding its own textures, as Bevy's does on a GPU without bindless support
 gpu_component_array_buffer	missing	per-instance data in Bevy's GpuComponentArrayBuffer, which a shader program does not bind

@@ -296,10 +296,12 @@ fn write_numbers(buffer: &mut [u8], offset: u32, ty: &FieldType, components: u32
 /// What a bind group is built from, owned so the entries can borrow it.
 #[derive(Default)]
 pub struct Packed {
-    buffers: Vec<(u32, Buffer)>,
+    /// Open to the rest of the renderer, which binds what it makes itself beside what values made,
+    /// as a sprite's material binds the sprite.
+    pub(super) buffers: Vec<(u32, Buffer)>,
     structures: Vec<(u32, bevy::render::render_resource::Tlas)>,
-    views: Vec<(u32, Vec<TextureView>)>,
-    samplers: Vec<(u32, Vec<Sampler>)>,
+    pub(super) views: Vec<(u32, Vec<TextureView>)>,
+    pub(super) samplers: Vec<(u32, Vec<Sampler>)>,
     /// The bindings that are arrays, which are bound as arrays even when they hold one.
     arrays: Vec<u32>,
     /// What was set that the shader does not declare, or declares as something else.

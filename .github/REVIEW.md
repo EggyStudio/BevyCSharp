@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `827b382e`. One commit, the last of the three text re-ports: a text field's cursor
+Reviewed up to `467efee0`. One commit, the first half of item 4's 2D materials: a Slang program
+draws a 2D mesh as Bevy draws a `Material2d`, through 2D stages of its own, `Fragment2d` and
+`Vertex2d`, a family with its own group two and the spaces Bevy's 2D view and mesh take moved to
+groups zero and one; the new `bcs2d` module gives a shader Bevy's 2D view, globals, mesh and vertex
+output; and `Shaders.CreateMaterial2d` takes values set by name as a 3D material does, the asset a
+type of its own since Bevy prepares every asset of a type for the renderer the type belongs to. The
+bridge implements Bevy's erased 2D material layer directly, its own allocator entry, the extraction
+of which entity is drawn with which material and the specialization systems, and reaches Bevy's
+crate-private draw function through a type alias of the same tuple, which is the same type and finds
+the same function; a Bevy that changes the tuple breaks it, and the test that draws a 2D material
+would say so. N 1.3 sent the material entry points into `shader_materials.rs`; ABI 238;
+shader_material_2d is written and its capture matches bare Bevy's frame; four tests hold a
+material's color set and changed by material and by entity, a 2D vertex shader moving the mesh, a
+blended material mixed with what is behind it against an opaque one, and a 2D vertex shader refused
+without its fragment shader; and the guide says masking is the shader's job, since Bevy's own masked
+2D materials discard nothing either. Right, the layer taken as Bevy has it and the one coupling to
+Bevy's private type said where it is. The suite: 1,304 passed and 2 skipped. sprite_material and
+shader_material_2d_bindless next, under way: Bevy's own `SpriteMaterial` of the bridge's material,
+so Bevy's count of sprite materials holds, the shared copies carrying the sprite, a `bcs_sprite`
+module with Bevy's sprite functions and the sprite bound at 100 to 102.
+
+Before it, one commit came to be read, the last of the three text re-ports: a text field's cursor
 and selection styled through `Ui.SetTextCursor`, Bevy's `TextCursorStyle` set from the bridge since
 Bevy does not reflect it and no wrapper reaches it, its colors, the selected text's color, the
 unfocused selection and the selection's radius, clamped to a half; its viewport read as
@@ -28,27 +49,6 @@ types into files of their own; ABI 237. Right, each of Bevy's three things reach
 and the remarks saying why a wrapper could not. The suite: 1,298 passed and 2 skipped. Of the six
 set aside, context_menu waits on the list box and 2d_gizmos, 3d_gizmos and wireframe on their gaps;
 sprite_material and shader_material_2d_bindless as 2D materials next, as item 4 has it.
-
-Before it, one commit came to be read, item 4's fourth gap, the keys observed as they reach a field,
-and the Tab traced to its cause: Bevy's focused input dispatches nothing unless there is exactly one
-primary window, and its tab navigation hangs its observer on that window at startup, so an offscreen
-run had neither. The bridge's offscreen dispatcher already sent a key to the focused entity; with
-nothing focused it sends it to the placeholder entity named as the window, where Bevy's propagation
-stops at an entity that does not exist, and a global observer runs Bevy's own tab navigation where a
-key reaches the placeholder, which only a windowless key does; the event is built with
-`FocusedInput::new`, public in 0.20, in place of reflection. Tab from no focus and from a clicked
-button both move the focus offscreen, held by a test of Tab, Tab and Shift with Tab giving the
-first, the second and the first, and tab_navigation driven with `input.key`. With it, a text field's
-read-write mode, Bevy's `TextReadWriteMode` as `UiEditableTextSettings.Mode`, and its edits as
-`TextEditChange`, a reported event of the seventh kind, the field's layout held on both sides at the
-same offsets; multiple_text_inputs written again on 0.20 with its four columns, six justifications
-and three read-write rows kept in step by the event's observer, driven offscreen with typing and
-Enter; ABI 236; and the housekeeping: `NormTests`' list of the sessions' documents names ASKS.md,
-which is in, `5a7f2c07` is on `build/norm/7.2.txt`, and NORM.md, SHARED.md and REVIEW.md as edited
-here. Right, a model that named Bevy's mechanism and a fix that used Bevy's own observer rather than
-a copy of it, with the test the untraced finding asked for. The suite: 1,298 passed and 2 skipped.
-multiline_text_input next as a batch of its own, the field's viewport for its scrollbar, the
-cursor's and selection's colors, selecting all on focus and the justify popover.
 
 Before it, one commit came to be read, the cheat sheet on its own, and the 536 lines had three
 causes, each said: lines added by hand in the writer's absence, which put `?` on returns the writer
@@ -79,9 +79,9 @@ from [SHARED.md](SHARED.md).
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
    425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
    test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the runs of
-   `7849ecf6` and `d6764154` are green on all three as well, and the pack job did not run, so
-   Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start (Decision 8).
-   Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and `61f80bc6`
+   `7849ecf6`, `d6764154` and `827b382e` are green on all three as well, and the pack job did not
+   run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start (Decision
+   8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and `61f80bc6`
    asks whether it is there first, since the runtime's Windows delete throws on a missing folder, a
    fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the
    window's image holding its zeros until the pass that draws it has its pipeline, and the test
@@ -216,26 +216,26 @@ from [SHARED.md](SHARED.md).
    written in its batch: a decal's tag and a volume's voxels through the WESL glue (in with
    `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
-   field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials,
-   `inline_image` and `fixed_node` in the interface, `pipeline_constants` and
-   `gpu_component_array_buffer` in shaders, mesh shaders from Slang through SPIR-V on Vulkan
-   (`mesh_shader_intro`) as a gap of its own, and what the table then names most. When the captures
-   have settled, they are compared whole with checked-in references by the workflow, a small share
-   of pixels allowed to differ between devices, as 3DEngine does for its scenes. Transmission's
-   glass spheres are missing from about one capture in four with TAA on, before `6a84286` as after
-   it, so the cause is found before that job is red for them, or the example is compared with its
-   spheres left out and the reason beside it. `dragdrop_picking`'s pale preview draws over the words
-   Bevy sorts it under (`b548987`'s reply), untraced, and is traced before those captures are
-   compared, as is the gallery's anisotropic spheres drawing blown white under SSAO with forward
-   rendering though they have tangents and draw right under deferred, Bevy's prepass normal for an
-   anisotropic material the suspect (`edd577c`'s reply), and the camera's volumetric fog hazing the
-   whole picture, the sky with it, once a depth prepass is on the camera, which the hall works round
-   by putting the fog on the camera only while it is inside (`6a19213`'s reply). Feathers' three
-   examples with `feathers_number_input` and the three camera controllers follow the other gaps,
-   their crates allowed (Decisions 11 and 12) on the owner's word in the working session, and the
-   four font examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the
-   scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
-   2026-10-08.
+   field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials (the
+   material layer and shader_material_2d in at `467efee0`), `inline_image` and `fixed_node` in the
+   interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from
+   Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then
+   names most. When the captures have settled, they are compared whole with checked-in references by
+   the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
+   scenes. Transmission's glass spheres are missing from about one capture in four with TAA on,
+   before `6a84286` as after it, so the cause is found before that job is red for them, or the
+   example is compared with its spheres left out and the reason beside it. `dragdrop_picking`'s pale
+   preview draws over the words Bevy sorts it under (`b548987`'s reply), untraced, and is traced
+   before those captures are compared, as is the gallery's anisotropic spheres drawing blown white
+   under SSAO with forward rendering though they have tangents and draw right under deferred, Bevy's
+   prepass normal for an anisotropic material the suspect (`edd577c`'s reply), and the camera's
+   volumetric fog hazing the whole picture, the sky with it, once a depth prepass is on the camera,
+   which the hall works round by putting the fog on the camera only while it is inside (`6a19213`'s
+   reply). Feathers' three examples with `feathers_number_input` and the three camera controllers
+   follow the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the
+   working session, and the four font examples stay missing (Decision 13). `compressed_image_saver`
+   comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
+   memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -420,4 +420,11 @@ from [SHARED.md](SHARED.md).
     game's session's to commit.
 
 ## Replies
+
+Shared: slangc 2026.18.2, writing WGSL, keeps every field of a struct a fragment shader takes its
+inputs in as an input of its own, read or not, where inputs taken as separate parameters keep only
+those read, so a vertex stage written elsewhere has to output each location such a struct
+declares. A sprite's material here takes `bcs2d::VertexOutput` behind Bevy's sprite vertex shader,
+whose output struct declares all four whether the quad has normals or not (`bcs_sprite.slang`,
+`sprite_material.rs`).
 

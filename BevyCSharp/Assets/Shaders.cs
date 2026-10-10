@@ -336,7 +336,7 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// Makes a material a program draws a 2D mesh with. Only valid inside a system.
+    /// Makes a material a program draws a 2D mesh or a sprite with. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -347,25 +347,36 @@ public static unsafe partial class Shaders
     /// 2D mesh <see cref="Render2d.SetMesh"/> gives it, and a 2D camera draws it as Bevy draws a
     /// <c>Material2d</c>.
     /// </para>
+    /// <para>
+    /// On a sprite it draws the sprite, as Bevy's <c>SpriteMaterial</c> does, and a fragment shader
+    /// importing <c>bcs_sprite</c> reads the sprite's image, color, flipping and slicing there, its
+    /// <c>sample_final_color</c> drawing the sprite as Bevy would. The sprite keeps the quad Bevy
+    /// sizes to its image, so a program with a 2D vertex shader of its own draws no sprite, and one
+    /// importing <c>bcs_sprite</c> draws nothing else. Every sprite with the same image and settings
+    /// shares one copy of the material, and values set on the material reach the copies in the next
+    /// frame, as they do in Bevy.
+    /// </para>
     /// </remarks>
     /// <param name="program">The program that draws it.</param>
     /// <param name="alpha">
     /// Which of Bevy's 2D passes draws it: the opaque one, the alpha-masked one, where the fragment
     /// shader discards what it leaves undrawn, as Bevy's own 2D materials do, or the blended one,
-    /// which mixes it with what is behind by its alpha.
+    /// which mixes it with what is behind by its alpha. None draws a 2D mesh opaque and a sprite as
+    /// the sprite's own alpha mode says, as a Bevy sprite material naming no alpha mode does.
     /// </param>
     /// <param name="cutoff">
     /// The cutoff a masked material is made with, as Bevy's <c>AlphaMode2d::Mask</c> holds it.
-    /// Bevy hands it to no shader, so a fragment shader that discards does it by a value of its
-    /// own.
+    /// Bevy hands it to no shader on a 2D mesh, so a fragment shader that discards does it by a
+    /// value of its own there, and on a sprite <c>bcs_sprite</c>'s <c>get_final_color</c> applies
+    /// it.
     /// </param>
     /// <exception cref="ArgumentException">No program was given.</exception>
     /// <exception cref="BevyNativeException">The program does not exist, or there is no renderer.</exception>
-    public static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d alpha = AlphaMode2d.Opaque, float cutoff = 0.5f)
+    public static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d? alpha = null, float cutoff = 0.5f)
     {
         RequireProgram(program, nameof(program));
 
-        var key = Native.bcs_shader_material_2d_create(program.Id, (int)alpha, cutoff);
+        var key = Native.bcs_shader_material_2d_create(program.Id, alpha is { } given ? (int)given : -1, cutoff);
 
         ThrowIfNoProgram(key, program);
         Native.Check(key, $"making a 2D material drawn by shader program {program.Id}");

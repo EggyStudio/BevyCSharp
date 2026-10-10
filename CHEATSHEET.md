@@ -990,7 +990,7 @@ static ShaderProgram CreateProgram(ShaderStage fragment);       // Makes a progr
 static ShaderProgram CreateProgram(ShaderProgramSettings settings);  // Makes a program from the Slang named
 static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque);  // Makes a material drawn by a program
 static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings);  // Makes a material drawn by a program
-static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d alpha = AlphaMode2d.Opaque, float cutoff = 0.5f);  // Makes a material a program draws a 2D mesh with
+static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d? alpha = null, float cutoff = 0.5f);  // Makes a material a program draws a 2D mesh or a sprite with
 static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
 static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
 static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs

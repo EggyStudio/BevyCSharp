@@ -29,14 +29,14 @@ impl Family {
     /// Where a group `slangc` wrote goes.
     ///
     /// Space zero is the shader's own. Spaces 100 to 102 are Bevy's groups zero to two, which only a
-    /// material has, and a 2D material's view and mesh are spaces 100 and 101, groups zero and one.
-    /// Space 101 is also where the pass and compute modules put the bridge's inputs, which are
-    /// group one there.
+    /// material has. A 2D material's view and mesh are spaces 100 and 101, groups zero and one, and
+    /// what a sprite says is space 102, the material's own group two at bindings past the shader's
+    /// own ([`SPRITE_BINDINGS`]). Space 101 is also where the pass and compute modules put the
+    /// bridge's inputs, which are group one there.
     pub fn remap(self, group: u32) -> u32 {
         match (self, group) {
             (_, 0) => self.own_group(),
-            (Family::Material, 100..=102) => group - 100,
-            (Family::Material2d, 100..=101) => group - 100,
+            (Family::Material | Family::Material2d, 100..=102) => group - 100,
             (Family::Pass | Family::Compute, 101) => 1,
             (_, other) => other,
         }
@@ -54,6 +54,14 @@ impl Family {
         }
     }
 }
+
+/// Where `bcs_sprite.slang` declares what a sprite says, in a 2D material's own group: the sprite's
+/// numbers, its image and the image's sampler.
+///
+/// Bound by the bridge from the sprite a material draws rather than from values, so reflection
+/// leaves them out of the layout values are set against and notes that the shader reads them.
+/// Past any number a shader's own globals reach, which `slangc` numbers from zero.
+pub const SPRITE_BINDINGS: std::ops::RangeInclusive<u32> = 100..=102;
 
 /// A scalar a uniform holds.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -217,6 +225,9 @@ pub struct Layout {
     /// Whether the shader reads Solari's scene through `bcs_ray`, in group two, which only a
     /// dispatch in an app running Solari can bind.
     pub traces_scene: bool,
+    /// Whether a 2D shader reads the sprite it draws through `bcs_sprite`, at
+    /// [`SPRITE_BINDINGS`], which only a material drawing a sprite can bind.
+    pub reads_sprite: bool,
 }
 
 /// The name the loose globals' uniform buffer goes by, which no global can have.
@@ -312,6 +323,8 @@ impl Layout {
     /// binding the two share has to be the same thing. When it is not, the stages were written in
     /// different files that disagree, and the material could not be bound for both.
     pub fn merge(&mut self, other: &Layout) -> Result<(), String> {
+        self.reads_sprite |= other.reads_sprite;
+
         for (number, binding) in &other.bindings {
             match self.bindings.get_mut(number) {
                 None => {

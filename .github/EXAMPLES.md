@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**295 written, 17 written in part, 6 can be written, 64 missing and 56 do not apply.** Of the 382 that apply, 318 can be written with what is bridged, 17 of them leaving something out.
+**297 written, 17 written in part, 6 can be written, 62 missing and 56 do not apply.** Of the 382 that apply, 320 can be written with what is bridged, 17 of them leaving something out.
 
-**140 of the 154 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**140 of the 155 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -31,7 +31,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
-| [Shaders](#shaders) | 18 | 0 | 0 | 6 | 3 | 5 of 6 |
+| [Shaders](#shaders) | 20 | 0 | 0 | 4 | 3 | 5 of 7 |
 | [Shaders Advanced](#shaders-advanced) | 2 | 0 | 0 | 1 | 1 | 1 of 1 |
 | [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 11 | 7 | 1 | 0 | 1 | 9 of 9 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 1 | 0 | 10 |  |
-| **All** | **295** | **17** | **6** | **64** | **56** | **140 of 154** |
+| **All** | **297** | **17** | **6** | **62** | **56** | **140 of 155** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -445,12 +445,12 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`shader_defs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_defs.rs) | A shader that uses "shaders defs" (a bevy tool to selectively toggle parts of a shader) | [written](../BevyCSharp.Examples/shader/shader_defs.cs), a program compiled with the define and one without, where Bevy's material sets it as its pipeline is specialized |
 | [`shader_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material.rs) | A shader and a material that uses it | [written](../BevyCSharp.Examples/shader/shader_material.cs) |
 | [`shader_material_2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material_2d.rs) | A shader and a material that uses it on a 2d mesh | [written](../BevyCSharp.Examples/shader/shader_material_2d.cs) |
-| [`shader_material_2d_bindless`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material_2d_bindless.rs) | Demonstrates bindless materials in 2D | missing, a bindless 2D material, which a Slang program does not draw in 2D |
+| [`shader_material_2d_bindless`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material_2d_bindless.rs) | Demonstrates bindless materials in 2D | [written](../BevyCSharp.Examples/shader/shader_material_2d_bindless.cs), each material binding its own textures, as Bevy's does on a GPU without bindless support |
 | [`shader_material_bindless`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material_bindless.rs) | Demonstrates how to make materials that use bindless textures | [written](../BevyCSharp.Examples/shader/shader_material_bindless.cs), each material binding its own textures, as Bevy's does on a GPU without bindless support |
 | [`shader_material_screenspace_texture`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_material_screenspace_texture.rs) | A shader that samples a texture with view-independent UV coordinates | [written](../BevyCSharp.Examples/shader/shader_material_screenspace_texture.cs) |
 | [`shader_prepass`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/shader_prepass.rs) | A shader that uses the various textures generated by the prepass | [written](../BevyCSharp.Examples/shader/shader_prepass.cs), the prepass shown by a pass over the picture, where Bevy's material on a quad filling the view reads it, since a material here does not |
 | [`specialized_mesh_pipeline`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/specialized_mesh_pipeline.rs) | Demonstrates how to write a specialized mesh pipeline | does not apply, writes a mesh pipeline in Rust |
-| [`sprite_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/sprite_material.rs) | A custom shader for sprites | missing, a sprite drawn with a material of its own, which a Slang program does not draw as a sprite |
+| [`sprite_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/sprite_material.rs) | A custom shader for sprites | [written](../BevyCSharp.Examples/shader/sprite_material.cs) |
 | [`storage_buffer`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/storage_buffer.rs) | A shader that shows how to bind a storage buffer using a custom material. | [written](../BevyCSharp.Examples/shader/storage_buffer.cs) |
 | [`texture_binding_array`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/texture_binding_array.rs) | A shader that shows how to bind and sample multiple textures as a binding array (a.k.a. bindless textures). | [written](../BevyCSharp.Examples/shader_advanced/texture_binding_array.cs), without Bevy's check that the GPU indexes such an array by a value that differs from pixel to pixel |
 

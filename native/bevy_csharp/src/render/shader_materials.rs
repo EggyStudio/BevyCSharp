@@ -54,6 +54,7 @@ pub extern "C" fn bcs_shader_material_create(
 
             let mut material = BcsMaterial::new(program as u32);
             material.alpha = alpha_mode(alpha, cutoff);
+            material.alpha_given = true;
             material.depth_bias = depth_bias;
             material.cull = match cull {
                 1 => Some(Face::Front),
@@ -75,10 +76,10 @@ pub extern "C" fn bcs_shader_material_create(
     })
 }
 
-/// Makes a material a program draws a 2D mesh with, and answers its asset key.
+/// Makes a material a program draws a 2D mesh or a sprite with, and answers its asset key.
 ///
 /// `alpha` is `0` opaque, `1` masked at `cutoff` and `2` blended, which is every way Bevy's 2D
-/// pipeline draws.
+/// pipeline draws, or `-1` for none, which draws a 2D mesh opaque and a sprite as the sprite says.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_material_2d_create(program: i32, alpha: i32, cutoff: f32) -> i32 {
     crate::interop::guard(|| {
@@ -96,12 +97,13 @@ pub extern "C" fn bcs_shader_material_2d_create(program: i32, alpha: i32, cutoff
             if !program_exists(program) {
                 return status::INVALID_STATE;
             }
-            if !(0..=2).contains(&alpha) {
+            if !(-1..=2).contains(&alpha) {
                 return status::NULL_ARG;
             }
 
             let mut material = BcsMaterial::new(program as u32);
             material.alpha = alpha_mode(alpha, cutoff);
+            material.alpha_given = alpha >= 0;
             material.cull = None;
             material.flat = true;
 
@@ -110,7 +112,7 @@ pub extern "C" fn bcs_shader_material_2d_create(program: i32, alpha: i32, cutoff
                     return status::UNSUPPORTED;
                 };
 
-                let handle = assets.add(BcsMaterial2d(material));
+                let handle = assets.add(BcsMaterial2d { material, sprite: None });
                 crate::assets::insert_handle(world, handle.untyped())
             })
         }
@@ -159,6 +161,7 @@ pub extern "C" fn bcs_shader_material_configure(
                 }
 
                 current.alpha = alpha_mode(alpha, cutoff);
+                current.alpha_given = true;
                 current.depth_bias = depth_bias;
                 current.cull = match cull {
                     1 => Some(Face::Front),
@@ -199,14 +202,23 @@ pub extern "C" fn bcs_shader_target_program(kind: i32, id: i64) -> i32 {
 }
 
 /// Gives an entity a 2D shader material, if the handle names one.
+///
+/// A sprite takes it as Bevy's `SpriteMaterial`, which [`super::sprite_material`] draws the sprite
+/// with, and any other entity as the material of its 2D mesh.
 #[cfg(feature = "render")]
 pub fn attach_2d(
     entity: &mut bevy::ecs::world::EntityWorldMut,
     untyped: &bevy::asset::UntypedHandle,
 ) -> bool {
-    match untyped.clone().try_typed::<super::material2d::BcsMaterial2d>() {
+    use super::material2d::{BcsMaterial2d, BcsMeshMaterial2d};
+
+    match untyped.clone().try_typed::<BcsMaterial2d>() {
+        Ok(handle) if entity.contains::<bevy::sprite::Sprite>() => {
+            entity.insert(bevy::sprite_render::SpriteMaterial(handle));
+            true
+        }
         Ok(handle) => {
-            entity.insert(super::material2d::BcsMeshMaterial2d(handle));
+            entity.insert(BcsMeshMaterial2d(handle));
             true
         }
         Err(_) => false,

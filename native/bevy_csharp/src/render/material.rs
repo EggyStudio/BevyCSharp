@@ -90,6 +90,9 @@ pub struct BcsMaterial {
     /// What the game has said about the names the program declares.
     pub values: Values,
     pub alpha: AlphaMode,
+    /// Whether `alpha` was given rather than left as it starts. A 2D material made without one draws
+    /// a sprite as the sprite blends, as Bevy's sprite materials do when they name no alpha mode.
+    pub alpha_given: bool,
     pub cull: Option<Face>,
     pub depth_bias: f32,
     /// Drawn on a 2D mesh, held in a [`super::material2d::BcsMaterial2d`], whose values are checked
@@ -104,6 +107,7 @@ impl BcsMaterial {
             program,
             values: Values::default(),
             alpha: AlphaMode::Opaque,
+            alpha_given: false,
             cull: Some(Face::Back),
             depth_bias: 0.0,
             flat: false,
@@ -123,7 +127,8 @@ impl AsAssetId for BcsMaterial3d {
     }
 }
 
-/// What decides a material's pipelines: the program, which version of it, and the faces culled.
+/// What decides a material's pipelines: the program, which version of it, the faces culled, and
+/// whether it draws a sprite.
 ///
 /// The version, because a program whose shader was edited has a new layout as well as new code,
 /// and a pipeline built for the old one must not be reused for the new.
@@ -133,6 +138,9 @@ pub struct BcsMaterialKey {
     pub generation: u32,
     /// `0` back, `1` front, `2` neither.
     pub cull: u8,
+    /// A 2D material drawing a sprite, which draws with the sprite's vertex shader and binds the
+    /// sprite beside the program's own, so it cannot share a pipeline with the program on a mesh.
+    pub sprite: bool,
 }
 
 type DrawFunctionParams = (
@@ -372,6 +380,7 @@ impl ErasedRenderAsset for BcsMaterial3d {
                         Some(Face::Front) => 1,
                         None => 2,
                     },
+                    sprite: false,
                 }),
                 shadows_enabled: true,
                 prepass_enabled: true,
@@ -593,7 +602,7 @@ fn refresh_materials_of_changed_programs(
 
     let stale_flat: Vec<_> = flat
         .iter()
-        .filter(|(_, material)| changed.contains(&material.0.program))
+        .filter(|(_, material)| changed.contains(&material.material.program))
         .map(|(id, _)| id)
         .collect();
 

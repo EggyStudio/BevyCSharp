@@ -118,6 +118,12 @@ public static unsafe partial class Render2d
     /// Gives an entity a 2D material to draw its mesh with, a color material from
     /// <see cref="CreateMaterial"/> or a shader material from <see cref="Shaders.CreateMaterial2d"/>.
     /// </summary>
+    /// <remarks>
+    /// A shader material given to an entity that is already a sprite, from
+    /// <see cref="SetSprite(EcsWorld, Entity, AssetHandle)"/>, draws the sprite, as Bevy's
+    /// <c>SpriteMaterial</c> does, so the sprite comes first. Any other material is for an entity
+    /// with a 2D mesh.
+    /// </remarks>
     public static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material) =>
         Render.Attach(world, entity, "MeshMaterial2d", material, "a 2D material");
 }

@@ -196,6 +196,12 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
             continue;
         }
 
+        // What a sprite says, which the bridge binds from the sprite and no value sets.
+        if family == Family::Material2d && SPRITE_BINDINGS.contains(&binding.binding) {
+            layout.reads_sprite = true;
+            continue;
+        }
+
         let emitted = global.name.clone().unwrap_or_default();
         let name = source_name(&emitted);
 

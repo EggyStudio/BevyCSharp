@@ -43,11 +43,18 @@ fn material_handle(world: &bevy::ecs::world::World, kind: i32, id: i64) -> Optio
                 Err(_) => untyped.try_typed::<BcsMaterial2d>().ok().map(MaterialHandle::Flat),
             }
         }
+        // A sprite's material before its 2D mesh's, which on a sprite is the copy the sprite is
+        // drawn with and is made again from the material whenever either changes.
         TARGET_ENTITY => {
             let entity = bevy::ecs::entity::Entity::from_bits(id as u64);
             world
                 .get::<BcsMaterial3d>(entity)
                 .map(|material| MaterialHandle::Mesh(material.0.clone()))
+                .or_else(|| {
+                    world
+                        .get::<bevy::sprite_render::SpriteMaterial<BcsMaterial2d>>(entity)
+                        .map(|material| MaterialHandle::Flat(material.0.clone()))
+                })
                 .or_else(|| world.get::<BcsMeshMaterial2d>(entity).map(|material| MaterialHandle::Flat(material.0.clone())))
         }
         _ => None,
@@ -99,7 +106,7 @@ pub(super) fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32)
                     return status::NO_COMPONENT;
                 };
 
-                let answer = f(Target::Material(&mut copy.0));
+                let answer = f(Target::Material(&mut copy.material));
 
                 if answer == status::OK
                     && let Some(mut slot) = assets.get_mut(&handle)

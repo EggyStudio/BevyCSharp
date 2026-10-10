@@ -10482,7 +10482,7 @@ static class Bevy.Shaders
   static ShaderInstance CreateInstance(ShaderProgram program)
   static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings)
   static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque)
-  static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d alpha = AlphaMode2d.Opaque, float cutoff = 0.5f)
+  static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d? alpha = null, float cutoff = 0.5f)
   static ShaderMaterial MaterialOn(Entity entity)
   static ShaderProgram CreateProgram(ShaderProgramSettings settings)
   static ShaderProgram CreateProgram(ShaderStage fragment)

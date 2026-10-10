@@ -171,6 +171,47 @@ masked one is drawn in the alpha-masked pass and discards where its fragment sha
 own 2D materials do. One program may have 3D stages and 2D stages both, and draws each kind of
 material with its own.
 
+### On a sprite
+
+A 2D material given to a sprite draws the sprite, as Bevy's `SpriteMaterial` does. Bevy draws a
+sprite as a quad it sizes to the image and moves by the anchor, and the sprite keeps that quad, so
+the program brings a 2D fragment shader and no vertex shader. The fragment shader imports
+`bcs_sprite` beside `bcs2d` for what the sprite says, its image, color, flipping, tiling, slicing
+and atlas, with Bevy's own functions for them. `sample_final_color` draws the sprite as Bevy would,
+and `sample_sprite_texture` and `get_final_color` are its two halves, the image where the sprite
+puts it and then the sprite's color and alpha mode:
+
+<!-- compiled with:
+Entity bird = default;
+-->
+```csharp
+var program = Shaders.CreateProgram(new ShaderProgramSettings { Fragment2d = "shaders/fade.slang" });
+var fade = Shaders.CreateMaterial2d(program).Set("amount", 0.5f);
+Render2d.SetSprite(ctx.Ecs, bird, AssetServer.Load(AssetKind.Image, "branding/bevy_bird_dark.png"));
+Render2d.SetMaterial(ctx.Ecs, bird, fade);
+```
+
+```slang
+import bcs2d;
+import bcs_sprite;
+
+uniform float amount;
+
+[shader("fragment")]
+float4 fragment(bcs2d::VertexOutput input) : SV_Target
+{
+    let color = bcs_sprite::sample_sprite_texture(input.uv);
+    return bcs_sprite::get_final_color(float4(color.rgb, color.a * (1.0 - amount)));
+}
+```
+
+A material made without an alpha mode draws the sprite as the sprite's own alpha mode says, as a
+Bevy sprite material naming none does, and one made with one draws by it, `get_final_color` applying
+its mask cutoff. Sprites with the same image and settings share one copy of the material, which
+keeps them in one batch, and a value set on the material reaches them in the next frame, as it does
+in Bevy. A program reading `bcs_sprite` draws only sprites, and one with a 2D vertex shader of its
+own draws none.
+
 ### Lit by Bevy
 
 A material's fragment shader writes the color drawn, and is lit by nothing unless it lights itself.

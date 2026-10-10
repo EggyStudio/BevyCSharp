@@ -9,7 +9,8 @@
 //!
 //! The asset holds a [`BcsMaterial`], so values are set on a 2D material by name exactly as on a
 //! 3D one, and is a type of its own because Bevy prepares every asset of a type for the renderer
-//! the type belongs to, which would prepare each 3D material for 2D as well.
+//! the type belongs to, which would prepare each 3D material for 2D as well. A copy of one that
+//! holds a sprite as well draws that sprite, which [`super::sprite_material`] makes.
 
 #![cfg(feature = "render")]
 
@@ -53,15 +54,23 @@ use bevy::sprite_render::{
     Material2dVertexShader, Mesh2dPipelineKey, Pass2dAlphaMaskDrawFunction,
     Pass2dOpaqueDrawFunction, Pass2dTransparentDrawFunction, PreparedMaterial2d,
     RenderMaterial2dInstances, SetMaterial2dBindGroup, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
+    SpriteMeshMaterial,
 };
 
 use super::material::{BcsMaterial, BcsMaterialKey, say_once};
 use super::programs::{self, Role};
+use super::sprite_material;
 use super::values::{PackContext, PackError, Stand, pack};
 
 /// A material drawn on a 2D mesh by a program the game wrote.
 #[derive(Asset, TypePath, Clone, Debug)]
-pub struct BcsMaterial2d(pub BcsMaterial);
+pub struct BcsMaterial2d {
+    /// The program, its values and how it blends, set by name as a 3D material's are.
+    pub material: BcsMaterial,
+    /// What a sprite says, on a copy that draws sprites, bound beside the program's own at
+    /// [`super::reflect::SPRITE_BINDINGS`].
+    pub sprite: Option<Box<SpriteMeshMaterial>>,
+}
 
 /// Draws an entity's 2D mesh with a [`BcsMaterial2d`].
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
@@ -117,7 +126,7 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             stand,
         ): &mut SystemParamItem<Self::Param>,
     ) -> Result<Self::ErasedAsset, PrepareAssetError<Self::SourceAsset>> {
-        let material = &source.0;
+        let material = &source.material;
 
         let Some(program) = programs::lookup(material.program) else {
             say_once(format!(
@@ -140,10 +149,32 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             return Err(PrepareAssetError::RetryNextUpdate(source));
         }
 
-        let descriptor = BindGroupLayoutDescriptor::new(
-            "bcs_material_2d",
-            &layout.entries(ShaderStages::VERTEX_FRAGMENT),
-        );
+        match &source.sprite {
+            None if layout.reads_sprite => {
+                say_once(format!(
+                    "Shader program {} reads the sprite it draws through bcs_sprite, so its 2D \
+                     material draws only on a sprite.",
+                    material.program
+                ));
+                return Err(PrepareAssetError::RetryNextUpdate(source));
+            }
+            Some(_) if program.stages[Role::Vertex2d as usize].is_some() => {
+                say_once(format!(
+                    "Shader program {} has a 2D vertex shader, and a sprite is drawn with the \
+                     sprite's own, which places its image, so the program's material draws no \
+                     sprite.",
+                    material.program
+                ));
+                return Err(PrepareAssetError::RetryNextUpdate(source));
+            }
+            _ => {}
+        }
+
+        let mut entries = layout.entries(ShaderStages::VERTEX_FRAGMENT);
+        if source.sprite.is_some() {
+            entries.extend(sprite_material::entries());
+        }
+        let descriptor = BindGroupLayoutDescriptor::new("bcs_material_2d", &entries);
 
         let context = PackContext {
             device: render_device,
@@ -154,7 +185,7 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             view: None,
         };
 
-        let packed = match pack(&layout, &material.values, &context) {
+        let mut packed = match pack(&layout, &material.values, &context) {
             Ok(packed) => packed,
             Err(PackError::NotReady) => return Err(PrepareAssetError::RetryNextUpdate(source)),
             Err(PackError::Missing(message)) => {
@@ -162,6 +193,13 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
                 return Err(PrepareAssetError::RetryNextUpdate(source));
             }
         };
+
+        // Not until the sprite's image has reached the GPU, as Bevy waits with its own.
+        if let Some(sprite) = &source.sprite
+            && !sprite_material::bind(&mut packed, sprite, render_device, images)
+        {
+            return Err(PrepareAssetError::RetryNextUpdate(source));
+        }
 
         for problem in &packed.problems {
             say_once(format!("A 2D material of shader program {}: {problem}", material.program));
@@ -194,18 +232,25 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             }
         };
 
-        // 2D draws opaque, masked or blended, which is all a 2D material is made with.
-        let render_phase_type = match material.alpha {
+        // 2D draws opaque, masked or blended, which is all a 2D material is made with. A copy for a
+        // sprite blends as its sprite part says, which holds the material's alpha mode where it
+        // was given one and the sprite's where not.
+        let alpha = source
+            .sprite
+            .as_ref()
+            .map_or(material.alpha, |sprite| sprite.alpha_mode.into());
+
+        let render_phase_type = match alpha {
             AlphaMode::Opaque => RenderPhaseType::Opaque,
             AlphaMode::Mask(_) => RenderPhaseType::AlphaMask,
             _ => RenderPhaseType::Transparent,
         };
 
         let mut mesh_key = Mesh2dPipelineKey::empty();
-        mesh_key.insert(alpha_mode_pipeline_key_2d(material.alpha));
+        mesh_key.insert(alpha_mode_pipeline_key_2d(alpha));
 
         let mut properties = MaterialProperties {
-            alpha_mode: material.alpha,
+            alpha_mode: alpha,
             depth_bias: material.depth_bias,
             reads_view_transmission_texture: false,
             render_phase_type,
@@ -222,6 +267,7 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
                 program: material.program,
                 generation: program.generation,
                 cull: 2,
+                sprite: source.sprite.is_some(),
             }),
             shadows_enabled: false,
             prepass_enabled: false,
@@ -234,7 +280,8 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             (Pass2dTransparentDrawFunction.intern(), transparent.read().id::<DrawMaterial2d>()),
         ]);
 
-        // Without a 2D vertex shader of the program's own, Bevy's own draws the mesh.
+        // Without a 2D vertex shader of the program's own, Bevy's own draws the mesh, and the
+        // bridge's version of Bevy's sprite vertex shader draws a sprite.
         for (role, label) in [
             (Role::Vertex2d, Material2dVertexShader.intern()),
             (Role::Fragment2d, Material2dFragmentShader.intern()),
@@ -242,6 +289,11 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             if let Some(stage) = &program.stages[role as usize] {
                 properties.shaders.push((label, stage.shader.clone()));
             }
+        }
+        if source.sprite.is_some() {
+            properties
+                .shaders
+                .push((Material2dVertexShader.intern(), sprite_material::VERTEX));
         }
 
         Ok(PreparedMaterial2d {
@@ -393,11 +445,14 @@ pub(super) fn install(app: &mut bevy::app::App) {
         .add_systems(
             PostUpdate,
             (
+                sprite_material::give_sprites_their_materials.before(bevy::asset::AssetEventSystems),
                 mark_meshes_as_changed_if_their_materials_changed,
                 check_entities_needing_specialization.after(bevy::asset::AssetEventSystems),
             )
                 .chain(),
         );
+
+    sprite_material::install(app);
 
     if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
         render_app

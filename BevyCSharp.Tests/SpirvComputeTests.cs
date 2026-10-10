@@ -315,10 +315,10 @@ public sealed class SpirvComputeTests
     /// </para>
     /// <para>
     /// Its program is compiled by slangc and its pipelines by Solari, which a quiet machine does in
-    /// a few seconds. Under the whole suite with its schedules shuffled the compile once outran the
-    /// run's 1,200 frames, twenty seconds at sixty a second, and the run ended still compiling. It
-    /// passed alone with the same seed, so the limit is one a loaded machine's compile can outrun
-    /// rather than an order the test leans on.
+    /// a few seconds. Under the whole suite with its schedules shuffled the compile outran a run of
+    /// 1,200 frames, twenty seconds at sixty a second, twice, once with every shader compiled again
+    /// because the bridge's modules had changed, and each time the test passed alone. So the run is
+    /// given a minute, which the run ends well short of once the program is ready.
     /// </para>
     /// </remarks>
     [SkippableFact]
@@ -330,6 +330,7 @@ public sealed class SpirvComputeTests
 
         var run = new PictureRun
         {
+            Frames = 3600,
             Configure = config => config.RayTracedLighting = true,
             Scene = ecs =>
             {

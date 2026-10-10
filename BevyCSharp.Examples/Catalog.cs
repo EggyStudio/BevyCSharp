@@ -315,9 +315,11 @@ internal static class Catalog
         new("shader_defs", ShaderDefs.Build),
         new("shader_material", ShaderMaterialExample.Build),
         new("shader_material_2d", ShaderMaterial2dExample.Build),
+        new("shader_material_2d_bindless", ShaderMaterial2dBindless.Build),
         new("shader_material_bindless", ShaderMaterialBindless.Build),
         new("shader_material_screenspace_texture", ShaderMaterialScreenspaceTexture.Build),
         new("shader_prepass", ShaderPrepass.Build),
+        new("sprite_material", SpriteMaterialExample.Build),
         new("storage_buffer", StorageBuffer.Build),
 
         // Shaders - Advanced
