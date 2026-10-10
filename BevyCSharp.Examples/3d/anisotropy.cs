@@ -1,4 +1,4 @@
-// Bevy's anisotropy example, examples/3d/anisotropy.rs at v0.19.1, by Bevy's contributors under MIT
+// Bevy's anisotropy example, examples/3d/anisotropy.rs at v0.20.0, by Bevy's contributors under MIT
 // or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -36,6 +36,10 @@ internal static class Anisotropy
         {
             var ecs = ctx.Ecs;
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(CameraStart, Vec3.Zero, Vec3.UnitY));
+
+            // The lamp's glass is drawn through screen-space transmission, which a camera takes in
+            // Bevy 0.20 only where it is given it.
+            ecs.Insert<ScreenSpaceTransmissionRef>(_camera);
             _light = SpawnDirectional();
 
             // A sphere given tangents, which a primitive is made without and anisotropy reads the
