@@ -1,4 +1,4 @@
-// Bevy's many_morph_targets example, examples/stress_tests/many_morph_targets.rs at v0.19.1, by
+// Bevy's many_morph_targets example, examples/stress_tests/many_morph_targets.rs at v0.20.0, by
 // Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -11,7 +11,8 @@ namespace BevyCSharp.Examples.StressTests;
 // animations of its weights, to measure how morph targets are blended. --weights one, zero or tiny
 // sets every weight still rather than animating it, --camera far zooms out so the vertices rather
 // than the pixels cost, --spawning gradual, regular-cycle, random-cycle or random-steady spawns and
-// despawns them a frame at a time, and --motion-blur blurs them.
+// despawns them a frame at a time, and --motion-blur blurs them. Bevy's --mesh-compression sets the
+// glTF plugin's compression, which the bridge does not reach, and is left out.
 internal static class ManyMorphTargets
 {
     private const string Path = "models/animated/MorphStressTest.gltf";
@@ -47,6 +48,7 @@ internal static class ManyMorphTargets
 
     public static void Build(App app)
     {
+        StressTest.Warn();
         var arguments = Environment.GetCommandLineArgs();
         string Option(string name, string fallback)
         {

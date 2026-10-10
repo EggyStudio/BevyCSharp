@@ -1,4 +1,4 @@
-// Bevy's sub_states example, examples/state/sub_states.rs at v0.19.1, by Bevy's contributors under
+// Bevy's sub_states example, examples/state/sub_states.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -14,12 +14,19 @@ internal static class SubStates
     {
         app.AddState(AppState.Menu);
         app.AddSubState(IsPaused.Running);
-        app.Startup(_ => Render2d.SpawnCamera2d(), "sub_states.Setup");
+        app.Startup(ctx =>
+        {
+            Render2d.SpawnCamera2d();
+            StatesExample.ObserveActivate(ctx.Ecs);
+        }, "sub_states.Setup");
 
         app.AddStateSystem(AppState.Menu, entering: true, new SystemDescriptor(world => StatesExample.SetupMenu(new BehaviorContext(world)), "sub_states.SetupMenu"));
-        app.On(Stage.Update, StatesExample.Menu, "sub_states.Menu", BehaviorConditions.InState(AppState.Menu));
         app.AddStateSystem(AppState.Menu, entering: false, new SystemDescriptor(world => StatesExample.CleanupMenu(new BehaviorContext(world)), "sub_states.CleanupMenu"));
-        app.AddStateSystem(AppState.InGame, entering: true, new SystemDescriptor(world => StatesExample.SetupGame(new BehaviorContext(world)), "sub_states.SetupGame"));
+        app.AddStateSystem(AppState.InGame, entering: true, new SystemDescriptor(world =>
+        {
+            StatesExample.SetupGame(new BehaviorContext(world));
+            Ui.SpawnText("Move with arrow keys.\nPress SPACEBAR to pause.", new UiSettings { Margin = Sides.All(Length.Px(10f)) });
+        }, "sub_states.SetupGame"));
         app.AddStateSystem(IsPaused.Paused, entering: true, new SystemDescriptor(world => SetupPausedScreen(new BehaviorContext(world)), "sub_states.SetupPausedScreen"));
 
         app.On(Stage.Update, StatesExample.Movement, "sub_states.Movement", BehaviorConditions.InState(IsPaused.Running));

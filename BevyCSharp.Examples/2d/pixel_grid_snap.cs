@@ -1,4 +1,4 @@
-// Bevy's pixel_grid_snap example, examples/2d/pixel_grid_snap.rs at v0.19.1, by Bevy's contributors
+// Bevy's pixel_grid_snap example, examples/2d/pixel_grid_snap.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -94,7 +94,7 @@ public partial struct OuterCamera
     public void FitCanvas(BehaviorContext ctx, ref Transform transform)
     {
         var (width, height) = Window.Size();
-        var fit = MathF.Max(MathF.Round(MathF.Min(width / (float)PixelGridSnap.ResWidth, height / (float)PixelGridSnap.ResHeight)), 1f);
+        var fit = MathF.Max(MathF.Floor(MathF.Min(width / (float)PixelGridSnap.ResWidth, height / (float)PixelGridSnap.ResHeight)), 1f);
         var scale = new Vec3(1f / fit, 1f / fit, 1f);
         if (transform.Scale != scale) transform.Scale = scale;
     }

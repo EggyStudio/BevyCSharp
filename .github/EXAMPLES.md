@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**291 written, 16 written in part, 6 can be written, 69 missing and 56 do not apply.** Of the 382 that apply, 313 can be written with what is bridged, 16 of them leaving something out.
+**290 written, 17 written in part, 6 can be written, 69 missing and 56 do not apply.** Of the 382 that apply, 313 can be written with what is bridged, 17 of them leaving something out.
 
 **140 of the 151 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -34,7 +34,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Shaders](#shaders) | 17 | 0 | 0 | 7 | 3 | 5 of 6 |
 | [Shaders Advanced](#shaders-advanced) | 1 | 0 | 0 | 2 | 1 | 1 of 1 |
 | [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
-| [Stress Tests](#stress-tests) | 12 | 6 | 1 | 0 | 1 | 9 of 9 |
+| [Stress Tests](#stress-tests) | 11 | 7 | 1 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 1 | 0 | 10 |  |
-| **All** | **291** | **16** | **6** | **69** | **56** | **140 of 151** |
+| **All** | **290** | **17** | **6** | **69** | **56** | **140 of 151** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -64,7 +64,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mesh2d_vertex_color_texture`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/mesh2d_vertex_color_texture.rs) | Renders a 2d mesh with vertex color attributes | [written](../BevyCSharp.Examples/2d/mesh2d_vertex_color_texture.cs) |
 | [`move_sprite`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/move_sprite.rs) | Changes the transform of a sprite | [written](../BevyCSharp.Examples/2d/move_sprite.cs) |
 | [`multi_window_text`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/multi_window_text.rs) | Renders text to multiple windows with different scale factors using both Text and Text2d | [written](../BevyCSharp.Examples/window/multi_window_text.cs) |
-| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/2d/pixel_grid_snap.rs) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | [written](../BevyCSharp.Examples/2d/pixel_grid_snap.cs), the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types |
+| [`pixel_grid_snap`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/pixel_grid_snap.rs) | Shows how to create graphics that snap to the pixel grid by rendering to a texture in 2D | [written](../BevyCSharp.Examples/2d/pixel_grid_snap.cs), the window's camera scaled where Bevy's sets its projection's scale, which sits beside a scaling mode no wrapper types |
 | [`rotate_to_cursor`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/rotate_to_cursor.rs) | Demonstrates rotating entities in 2D to follow the cursor | [written](../BevyCSharp.Examples/2d/rotate_to_cursor.cs) |
 | [`rotation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/rotation.rs) | Demonstrates rotating entities in 2D with quaternions | [written](../BevyCSharp.Examples/2d/rotation.cs) |
 | [`sprite`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/sprite.rs) | Renders a sprite | [written](../BevyCSharp.Examples/2d/sprite.cs) |
@@ -85,7 +85,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`3d_scene`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/3d_scene.rs) | Simple 3D scene with basic shapes and lighting | [written](../BevyCSharp.Examples/3d/3d_scene.cs) |
+| [`3d_scene`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/3d_scene.rs) | Simple 3D scene with basic shapes and lighting | [written](../BevyCSharp.Examples/3d/3d_scene.cs) |
 | [`3d_shapes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/3d_shapes.rs) | A scene showcasing the built-in 3D shapes | [written in part](../BevyCSharp.Examples/3d/3d_shapes.cs), the segment, the polyline, the convex polygon's extrusion and the extruded rings, which are shapes the bridge does not build |
 | [`3d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/3d_viewport_to_world.rs) | Demonstrates how to use the `Camera::viewport_to_world` method | [written](../BevyCSharp.Examples/3d/3d_viewport_to_world.cs) |
 | [`animated_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/animated_material.rs) | Shows how to animate material properties | [written](../BevyCSharp.Examples/3d/animated_material.cs) |
@@ -468,9 +468,9 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | [written](../BevyCSharp.Examples/state/computed_states.cs), InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number |
-| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written in part](../BevyCSharp.Examples/state/custom_transitions.cs), schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does |
-| [`states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
-| [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |
+| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written in part](../BevyCSharp.Examples/state/custom_transitions.cs), schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does |
+| [`states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
+| [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |
 
 ## Stress Tests
 
@@ -490,7 +490,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`many_lights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_lights.rs) | Simple benchmark to test rendering many point lights. Run with `WGPU_SETTINGS_PRIO=webgl2` to restrict to uniform buffers and max 256 lights | [written in part](../BevyCSharp.Examples/stress_tests/many_lights.cs), the lights its render world saw and drew, counted in its log, which no wrapper reaches there, and its sphere subdivided as Bevy subdivides one by default rather than nine times |
 | [`many_materials`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_materials.rs) | Benchmark to test rendering many animated materials | [written](../BevyCSharp.Examples/stress_tests/many_materials.cs) |
 | [`many_meshlet_materials`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_meshlet_materials.rs) | Benchmark to test rendering many meshlet materials (experimental) | can be written, needs a bridge built with --meshlet |
-| [`many_morph_targets`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/stress_tests/many_morph_targets.rs) | Simple benchmark to test rendering many meshes with animated morph targets. | [written](../BevyCSharp.Examples/stress_tests/many_morph_targets.cs), through Bevy's reflected MorphWeights |
+| [`many_morph_targets`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_morph_targets.rs) | Simple benchmark to test rendering many meshes with animated morph targets. | [written in part](../BevyCSharp.Examples/stress_tests/many_morph_targets.cs), --mesh-compression, whose compression the bridge does not reach, the weights set through Bevy's reflected MorphWeights |
 | [`many_sprites`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_sprites.rs) | Displays many sprites in a grid arrangement! Used for performance testing. Use `--colored` to enable color tinted sprites. | [written](../BevyCSharp.Examples/stress_tests/many_sprites.cs) |
 | [`many_text`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_text.rs) | Displays many UI Text nodes. Used for performance testing. | [written in part](../BevyCSharp.Examples/stress_tests/many_text.cs), --clear-font-atlases, which empties Bevy's FontAtlasSet, which no wrapper reaches |
 | [`many_text2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_text2d.rs) | Displays many Text2d! Used for performance testing. | [written in part](../BevyCSharp.Examples/stress_tests/many_text2d.cs), the font atlases' count and bytes in its log, which Bevy's FontAtlasSet holds and no wrapper reaches |
@@ -561,7 +561,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`overflow_debug`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/scroll_and_overflow/overflow_debug.rs) | An example to debug overflow and clipping behavior | [written](../BevyCSharp.Examples/ui/overflow_debug.cs) |
 | [`overflow_transform`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/scroll_and_overflow/overflow_transform.rs) | Demonstrates nested transformed UI clipping | can be written, through Bevy's reflected UiTransform |
 | [`relative_cursor_position`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/relative_cursor_position.rs) | Showcases the RelativeCursorPosition component | [written](../BevyCSharp.Examples/ui/relative_cursor_position.cs), through Bevy's reflected RelativeCursorPosition |
-| [`render_ui_to_texture`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/render_ui_to_texture.rs) | An example of rendering UI as a part of a 3D world | [written](../BevyCSharp.Examples/ui/render_ui_to_texture.cs), the cube's pointer is spawned by the game and put where a ray from the mouse meets the cube, at the texture coordinate the cast answers |
+| [`render_ui_to_texture`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/render_ui_to_texture.rs) | An example of rendering UI as a part of a 3D world | [written](../BevyCSharp.Examples/ui/render_ui_to_texture.cs), the cube's pointer is spawned by the game and put where a ray from the mouse meets the cube, at the texture coordinate the cast answers |
 | [`scroll`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/scroll_and_overflow/scroll.rs) | Demonstrates scrolling UI containers | [written](../BevyCSharp.Examples/ui/scroll.cs), the wheel taken from picking's Pointer<Scroll> at what the mouse's pointer is over, where Bevy's reads the wheel's messages and every pointer's hovers itself, and the items' list item role for accessibility, which Bevy's AccessibilityNode carries and no wrapper reaches |
 | [`scrollbars`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/scroll_and_overflow/scrollbars.rs) | Demonstrates use of core scrollbar in Bevy UI | [written](../BevyCSharp.Examples/ui/scrollbars.cs) |
 | [`size_constraints`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/size_constraints.rs) | Demonstrates how the to use the size constraints to control the size of a UI node. | [written](../BevyCSharp.Examples/ui/size_constraints.cs) |
