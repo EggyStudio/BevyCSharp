@@ -10,7 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `225a4eef`. Five commits, the first of step g. The ports (`e009a580`): the 115 whose
+Reviewed up to `37b2118f`. One commit, item 1's warnings. An assembly's behaviors are registered
+together and nothing leaves three of them out of an app, so `EngineHarness` with discovered
+behaviors adds `Screen` at its menu beside them, where none of the three runs, a test that sets the
+state adding it again before the run, and the two tests of an app without the state add the
+behaviors alone; the suite's output carries the warning once, from the test that asks for it, and
+the page's third repeated line is then the 67 errors `ShaderMaterialTests` asks for. Right, the
+state given wherever the behaviors are rather than the behaviors held back, which comes to the same
+and is the smaller change. The suite: 1,285 passed and 2 skipped of 1,287. The rest of g and h
+remain.
+
+Before it, five commits came to be read, the first of step g. The ports (`e009a580`): the 115 whose
 code follows 0.19.1 name that release at their heads; `build/examples-table.py` keeps a head naming
 a release earlier than the lock's and links Bevy's source at that release in the example's row of
 EXAMPLES.md, until the example is written again from the current one with its head taken off, which
@@ -60,24 +70,6 @@ before 0.4 instead, which this file will then carry. The exit's comment gives it
 suite: 1,283 passed and 2 skipped of 1,287, N 3.3 mended within the batch, the other failure the
 limit. Steps g and h remain.
 
-Before it, two commits came to be read from the code, step f going on. `pipelines.wait`
-(`ea490243`): a console command answering once every pipeline asked for has compiled, from the third
-frame, and at once in a run that draws nothing, with a test for that, which
-`build/capture-example.sh` asks after its frames, since a capture of every example a hundred and
-twenty frames in drew the transmission example black once; and the compile limit written in
-`SpirvComputeTests`' remarks and beside the shuffle in BUILDING.md, item 1's line closed. The exit
-(`ee2dc43a`): a render system in the Cleanup set waits, on the frame an exit is decided, for every
-pipeline the cache is still creating, ten seconds at most, since a process that exits with a compile
-inside the GPU's driver has the driver torn down under it, which `headless_renderer` showed in two
-runs of three with NVIDIA's; the ending is set in the main world's cleanup on the frame the exit
-message appears, before that frame is extracted, and the pipelined render frame is handed back
-before the process ends, so the wait is reached. Right, both, and the second is a fault a game's
-author meets in any app that ends within its first seconds. One thing: the comment gives the two
-runs of three before the wait and no count after it, so the runs of `headless_renderer` with the
-wait and how many crashed go in the comment beside the two in three, with the next commit there. The
-rest of f remains, the captures compared, the feature test driven under its scope, the soak and
-Courtyard from the package.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -99,13 +91,13 @@ from [SHARED.md](SHARED.md).
    black capture is traced at `c46fd24e`, the window's image holding its zeros until the pass that
    draws it has its pipeline, and the test captures once `Render.PipelinesReady()` holds;
    `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g. The page's
-   repeated lines carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
-   StateTests' behaviors scoped to a state no other app adds and registered in every app by the
-   module initializer, which drowns what else repeats (Decision 7); they are quieted in the batch
-   that next touches the tests, the test's behaviors registered only where their state is. Package
-   0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and item 3's remaining
-   steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
+   repeated lines carried 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
+   quieted at `37b2118f`, the harness adding `Screen` beside the behaviors it discovers, so the
+   warning shows once, from the test that asks for it, and the third repeated line is the 67 errors
+   `ShaderMaterialTests` asks for (Decision 7). Package 0.4 is packed on Bevy 0.20 (Decision 8) once
+   Verdict 6's run is green and item 3's remaining steps are in, and Verdicts 2 and 3 settle on that
+   pack run's page. Each push's run is read by the reviewing session, and a failure it names comes
+   first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -428,12 +420,17 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**The warnings of `Screen.Playing` are quieted by giving their state to every app that takes the
-tests' behaviors.** An assembly's behaviors are registered together, and nothing leaves three of
-them out of an app, so `EngineHarness` with `discoverBehaviors` adds `Screen` at its menu beside
-them, where none of the three runs, and a test that sets the state adds it again before the run,
-which replaces the value. The two tests of an app without the state add the behaviors alone. The
-suite passed 1,285 and skipped 2 of 1,287, and its output carries the warning once, from the test
-that holds such an app to not running them. The third line the page repeats is then the 67 errors
-`ShaderMaterialTests.AMismatchedShaderIsSurvivedWhenAsked` asks for, a pipeline whose fragment stage
-reads a location its vertex stage never writes.
+**ReSTIR is on with ray-traced lighting, chosen by measurement, and Bevy's other settings for it are
+the camera's reflected `SolariLightingRef`.** Item 3 asked for `restir` chosen by measurement and
+the fields brought to the config. A Cornell box lit by a panel, drawn at 1280 by 720 on this
+machine's RTX 4070, took 0.42 ms of the GPU in Solari's passes with ReSTIR off and 1.69 ms with it
+on, and the mean change of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on
+at the same brightness, the grain plain to see without it. Bevy leaves it off for a denoiser to
+clean the picture, and Bevy's denoiser is DLSS's, which the bridge does not build, so
+`bcs_render_set_ray_traced_lighting` turns it on. The other fields, the light samples, the bounces
+and the world cache, are Bevy's per camera and reach a game through the reflected wrapper, which
+`Render.SetRayTracedLighting`'s remarks and `docs/ray-tracing.md` name with an example, so `Config`
+takes none of them, since a copy there would be a second home for what the camera holds.
+`RayTracingTests.RayTracedLightingReusesItsSamples` holds a traced camera to ReSTIR on. Every test
+that traces rays passes with it, the ray tracing and SPIR-V compute tests, ten of them here, and so
+do the norm's.

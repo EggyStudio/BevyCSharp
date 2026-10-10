@@ -31,6 +31,35 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
+    /// A camera given ray-traced lighting has Bevy's ReSTIR on, which Bevy leaves off for a
+    /// denoiser the bridge does not build, so its picture is not left grainy.
+    /// </summary>
+    [SkippableFact]
+    public void RayTracedLightingReusesItsSamples()
+    {
+        Needs.Renderer();
+
+        bool? restir = null;
+        var run = new PictureRun
+        {
+            Configure = config => config.RayTracedLighting = true,
+            Scene = ecs =>
+            {
+                if (!Render.RayTracingActive) return;
+
+                var camera = PictureRun.Camera(ecs);
+                Render.SetRayTracedLighting(camera, true);
+                restir = ecs.Wrap<Bevy.Reflected.SolariLightingRef>(camera).Restir;
+            },
+        };
+
+        run.Wait(2).Go();
+        Needs.RayTracing(restir is not null);
+
+        Assert.True(restir, "the camera traced rays with ReSTIR off");
+    }
+
+    /// <summary>
     /// A glowing wall made of a mesh with no texture coordinates, as a model drawn in plain colors
     /// often is, is given coordinates of zero rather than refused, and lights the floor as one with
     /// coordinates does.

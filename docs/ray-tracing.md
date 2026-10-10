@@ -31,6 +31,22 @@ tangents where it has none, so the entity keeps drawing it as before and the ray
 triangles the picture shows. A mesh with no texture coordinates, as a model drawn in plain colors
 often is, is given coordinates of zero, so every mesh of a loaded model can be handed over.
 
+Bevy's ReSTIR, which reuses samples between pixels and frames, is on. Bevy leaves it off for a
+denoiser to clean the picture instead, and its denoiser is DLSS's, which the bridge does not build,
+so without ReSTIR the picture stays grainy. With it the noise between frames halves, for about a
+millisecond more of a laptop's GPU at 720p. Bevy's other settings for it, the light samples, the
+bounces and the world cache, are fields of the camera's `SolariLightingRef`:
+
+<!-- compiled with:
+EcsWorld ecs = null!;
+Entity camera = default;
+-->
+```csharp
+var lighting = ecs.Wrap<SolariLightingRef>(camera);
+lighting.MaxBounces = 2;                          // fewer bounces, a cheaper frame
+lighting.Restir = false;                          // the grain back, for a quarter of the rays' time
+```
+
 ### Tracing rays of your own
 
 A compute shader can trace rays against the same scene, for shadows, reflections or global
