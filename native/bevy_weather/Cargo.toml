@@ -39,4 +39,4 @@ bevy = { version = "0.20.0", default-features = false, features = [
 ] }
 
 [lints.rust]
-missing-docs = "warn"
+missing_docs = "warn"
