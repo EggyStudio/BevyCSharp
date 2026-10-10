@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <!-- The template `dotnet new` starts a game from, packed beside the engine by
+    <!-- The templates `dotnet new` starts a game from, packed beside the engine by
          build/pack-templates.sh from a copy in build/templates with the engine's version written
-         into its template.json, as the version a new project asks for. Nothing here is compiled,
-         and the solution leaves it out, since its game's project names the engine by a version
+         into each template.json, as the version a new project asks for. Nothing here is compiled,
+         and the solution leaves it out, since each game's project names the engine by a version
          that only packing writes in. The license, the icon and the addresses are the repository's,
          from Directory.Build.props. -->
     <PropertyGroup>
@@ -12,7 +12,7 @@
         <PackageType>Template</PackageType>
         <PackageId>BevyCSharp.Templates</PackageId>
         <Title>BevyCSharp templates</Title>
-        <Description>A template for a game on BevyCSharp, Bevy written in C#: `dotnet new bevycsharp` makes a window with a turning cube, a behavior and the one line that runs it.</Description>
+        <Description>Templates for a game on BevyCSharp, Bevy written in C#: `dotnet new bevycsharp` makes a window with a turning cube, a behavior and the one line that runs it, and `dotnet new bevycsharp-empty` an empty window.</Description>
         <PackageTags>dotnet-new;templates;bevy;game-engine;ecs;BevyCSharp</PackageTags>
         <IncludeContentInPack>true</IncludeContentInPack>
         <IncludeBuildOutput>false</IncludeBuildOutput>

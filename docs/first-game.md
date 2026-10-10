@@ -11,14 +11,15 @@ package, so none of them stops compiling.
 
 ## 1. A project
 
-A console project with the package added is a game:
+The engine's templates make a game to start from, and the empty one makes a window titled for the
+project and nothing in it:
 
 ```bash
-dotnet new console -o Coins && cd Coins
-dotnet add package BevyCSharp
+dotnet new install BevyCSharp.Templates
+dotnet new bevycsharp-empty -o Coins && cd Coins
 ```
 
-`Program.cs` becomes a window. `Config.Windowed` says its title and size, and `BevyApp.Run` runs
+Its `Program.cs` is the window. `Config.Windowed` says its title and size, and `BevyApp.Run` runs
 the game until the window is closed, with every `[Behavior]` the program declares found and run,
 of which there are none yet:
 

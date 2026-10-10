@@ -243,14 +243,14 @@ scope here rather than merely unbuilt.
 ```bash
 build/build-native.sh          # stage the native bridge first
 dotnet pack BevyCSharp/BevyCSharp.csproj -c Release
-build/pack-templates.sh        # the template, at the engine's version, beside it
+build/pack-templates.sh        # the templates, at the engine's version, beside it
 ```
 
-`BevyCSharp.Templates` is the template `dotnet new bevycsharp` makes a game from, the README's
-first program in a project asking for the engine of the template's own version. It lives in
-`templates/` with a placeholder for that version, and `build/pack-templates.sh` packs a copy with
-the version of the engine package packed last written in, into `build/package` beside it, so the
-two go out together.
+`BevyCSharp.Templates` holds the templates a game is made from, `dotnet new bevycsharp` the README's
+first program and `dotnet new bevycsharp-empty` the first game's first step, each in a project
+asking for the engine of the templates' own version. They live in `templates/` with a placeholder
+for that version, and `build/pack-templates.sh` packs a copy with the version of the engine package
+packed last written in, into `build/package` beside it, so the two go out together.
 
 Packing fails with `BCS101` if the staged bridge is older than the Rust sources, because shipping
 a stale one produces an `EntryPointNotFoundException` far from its cause.

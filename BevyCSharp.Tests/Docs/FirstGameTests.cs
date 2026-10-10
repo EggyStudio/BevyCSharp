@@ -80,7 +80,22 @@ public sealed partial class FirstGameTests
         Assert.Equal(Lines(first), Lines(File.ReadAllText(Path.Combine(template, "Spin.cs"))).SkipLast(1));
         Assert.Equal(Lines(program), Lines(File.ReadAllText(Path.Combine(template, "Program.cs"))).SkipLast(1));
 
-        Assert.Contains("Version=\"BEVYCSHARP_VERSION\"", File.ReadAllText(Path.Combine(template, "MyGame.csproj")), StringComparison.Ordinal);
-        Assert.Contains("\"defaultValue\": \"PACKED_VERSION\"", File.ReadAllText(Path.Combine(template, ".template.config", "template.json")), StringComparison.Ordinal);
+        foreach (var made in new[] { template, Path.Combine(Root, "templates", "content", "empty") })
+        {
+            Assert.Contains("Version=\"BEVYCSHARP_VERSION\"", File.ReadAllText(Path.Combine(made, "MyGame.csproj")), StringComparison.Ordinal);
+            Assert.Contains("\"defaultValue\": \"PACKED_VERSION\"", File.ReadAllText(Path.Combine(made, ".template.config", "template.json")), StringComparison.Ordinal);
+        }
+    }
+
+    /// <summary>
+    /// The empty template, <c>dotnet new bevycsharp-empty -o Coins</c>, makes the page's first step,
+    /// its window titled for the project, which the template names <c>MyGame</c> until it is made.
+    /// </summary>
+    [Fact]
+    public void TheEmptyTemplateMakesTheFirstStep()
+    {
+        var made = File.ReadAllText(Path.Combine(Root, "templates", "content", "empty", "Program.cs")).Replace("MyGame", "Coins", StringComparison.Ordinal);
+
+        Assert.Equal(Lines(File.ReadAllText(Path.Combine(Game, "steps", "01.cs"))), Lines(made));
     }
 }
