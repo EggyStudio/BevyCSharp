@@ -156,3 +156,4 @@ irradiance_volumes/Example.vxgi.ktx2
 models/IrradianceVolumeExample/IrradianceVolumeExample.glb
 textures/arrow.png
 textures/water_normals.png
+textures/flag.png

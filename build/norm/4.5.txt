@@ -16,6 +16,7 @@ many_glyphs 1920x1080	a stress test, drawn at the window Bevy's stress tests ask
 many_gradients 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_lights 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_materials 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
+many_meshlet_materials 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_morph_targets 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_sprites 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_text 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for

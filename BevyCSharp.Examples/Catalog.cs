@@ -98,6 +98,7 @@ internal static class Catalog
         new("generate_custom_mesh", GenerateCustomMesh.Build),
         new("light_probe_blending", LightProbeBlending.Build),
         new("meshlet", Meshlet.Build, Meshlet.Configure),
+        new("test_meshlet", TestMeshlet.Build, TestMeshlet.Configure),
         new("mirror", MirrorExample.Build),
         new("solari", Solari.Build, Solari.Configure),
         new("light_textures", LightTextures.Build),
@@ -211,6 +212,7 @@ internal static class Catalog
         new("desk_toy", DeskToy.Build, DeskToy.Configure),
         new("game_menu", GameMenu.Build),
         new("loading_screen", LoadingScreenExample.Build),
+        new("mines", Mines.Build),
 
         // glTF
         new("edit_material_on_gltf", EditMaterialOnGltf.Build),
@@ -290,6 +292,7 @@ internal static class Catalog
         new("many_gradients", ManyGradients.Build, ManyGradients.Configure),
         new("many_lights", ManyLights.Build, ManyLights.Configure),
         new("many_materials", ManyMaterials.Build, ManyMaterials.Configure),
+        new("many_meshlet_materials", ManyMeshletMaterials.Build, ManyMeshletMaterials.Configure),
         new("many_morph_targets", ManyMorphTargets.Build, ManyMorphTargets.Configure),
         new("many_sprites", ManySprites.Build, ManySprites.Configure),
         new("many_text", ManyText.Build, ManyText.Configure),
@@ -357,6 +360,7 @@ internal static class Catalog
         new("overflow", OverflowExample.Build),
         new("overflow_clip_margin", OverflowClipMargin.Build),
         new("overflow_debug", OverflowDebug.Build),
+        new("overflow_transform", OverflowTransform.Build),
         new("relative_cursor_position", RelativeCursorPosition.Build),
         new("scrollbars", Scrollbars.Build),
         new("size_constraints", SizeConstraints.Build),
