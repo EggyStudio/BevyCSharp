@@ -5,6 +5,5 @@
 BevyCSharp.Tests/RenderControlTests.cs
 BevyCSharp.Tests/ViewShaderTests.cs
 BevyCSharp/Interop/NativeTypes.Render.cs
-native/bevy_csharp/src/ecs.rs
 native/bevy_csharp/src/render/scene.rs
 native/bevy_csharp/src/render/values.rs

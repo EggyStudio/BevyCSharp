@@ -437,3 +437,19 @@ over this batch and those after it, ran to its end under the same cap, its host'
 GB where the host alone had reached 4.8, and passed 1,280, skipped 2 and failed 1 of 1,283. The
 failure is `SpawnedWindowTests` reading a spawned window's picture back black, which passed three
 times out of three alone and is watched for.
+
+**Verdict 6, the weather's lint, the silent plugin's order and item 2 are in.**
+`TheMemoryHeldIsReadAsItGrows` touches a quarter of a gigabyte from `NativeMemory.Alloc`, a byte a
+page, freed after, and holds the growth read to three quarters of it, since the rest of the process
+may give pages back while it runs. The vendored weather's manifest names `missing_docs`. The silent
+plugin's systems had no order against `audio::checked`, which refuses a file no decoder reads before
+transforms are propagated, so a decoder could be built from such a file first, and building one
+panics. They run after the propagation, where Bevy plays its own, and a test plays such a file in a
+run with no window and finds it refused. The six files item 2 listed are mended in commits that move
+code alone, largest first, each coming off N 1.3's list as it goes: `views.rs` into four files
+beside it, a camera's inputs, images, dispatches and draws, `post.rs` into three, its cubemap
+lighting, its lighting and its lens effects, `compute.rs`'s images into one, `window.rs`'s monitors
+and see-through compositing into two, `slang.rs`'s cache with its tests into one, and `ecs.rs`'s
+hierarchy and introspection into two. Every file is under 800 lines, each moved item keeps its path
+through a re-export, the bridge's tests pass at 118 and 67 as before, and every profile compiles
+with warnings denied. The suite's count is the one in the reply above, from a run over all of them.
