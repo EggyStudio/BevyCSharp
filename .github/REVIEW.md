@@ -10,7 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `90075005`. One commit, item 4's diagnostics store: a game registers its own measures
+Reviewed up to `d98c299d`. One commit, item 4's four faults traced before the captures are compared.
+Transmission's missing spheres do not reproduce on Bevy 0.20, 32 captures on the laptop's GPU on the
+machine's clock and 6 on lavapipe at a fixed frame time all with their spheres, where one in four
+lacked them before, so 38 clean would come once in 55,000; and eight lavapipe captures on the
+machine's clock showed the paper from behind, lavapipe compiling slowly so the turning camera had
+gone half round by frame 120, which is the clock and bears on the comparison. `dragdrop_picking`'s
+pale preview over the words is Bevy's own on 0.20, the same scene on bare Bevy drawing the ghost at
+the square's depth over the text at z 1, so the reading that Bevy sorts it under was 0.19's and
+nothing changes. The gallery's anisotropic spheres blown white under ambient occlusion are Bevy's
+shader: with a normal prepass the forward shader loads the prepass normal and skips the block that
+builds the tangent frame, where anisotropy's setup lives, so the stretch's tangent and bitangent
+stay zero while the material still takes the anisotropic highlight, whose distribution then has no
+falloff, 5,026 white pixels of a 96 by 96 picture under a normal prepass or occlusion and none
+forward or deferred; two tests pin it, right forward and deferred and blown white under a normal
+prepass as Bevy draws it, the second failing once Bevy mends its shader, the remarks and the guide
+saying a deferred camera draws it right, and a bridge-side patch of Bevy's shader source at load
+left out as fragile across versions, rightly; no upstream report is filed from here, as the owner
+has it, and the finding is theirs to carry. The fog's haze under a depth prepass is gone on 0.20, a
+test holding the fog to its volume under none, a depth prepass and occlusion, and the hall's fog
+stays the hall's with its remark saying why it was. Right, each fault measured on bare Bevy before
+it was called Bevy's, and the two that stand pinned so Bevy's mend is noticed. One slip, told to the
+owner: driving the feature test, the coder set its saved hour to 8 without reading it first. The
+suite: 1,344 passed and 2 skipped. The comparison job's plan is taken as the coder proposes, with
+the conditions item 4 carries.
+
+Before it, one commit came to be read, item 4's diagnostics store: a game registers its own measures
 in Bevy's store, measures, reads and turns them off beside Bevy's frame, entity and render ones, a
 `Diagnostics` class over six entry points of a new `diagnostics.rs`, ABI 242, the config's frame
 times flag become a bit each for the log, the frame time, the entity count and the render passes,
@@ -58,16 +83,6 @@ passed and 2 skipped; the bridge's 127 on editor, meshlet and Solari; cargo chec
 profiles. EXAMPLES.md reads 309 written and B 4 at 144 of 160. `render/assets.rs` stands at 783
 lines of N 1.3's 800, so its next addition comes with a split, as item 2 asks. Next Bevy's
 diagnostics store.
-
-Before it, one commit came to be read, Verdict 9's mend: the shader, view, effects and material
-structs the bridge reads move out of `NativeTypes.Render.cs` into ten files named for them, which
-takes the file to 552 lines and off N 1.3's list and the ten types off N 1.2's, code moved alone,
-the sizes' and offsets' tests as they were. Right, the mend in a commit of its own as item 2 asks,
-and Verdict 9 is settled. The run of `60141490` is green on all three systems, and read against
-`2359425d`'s each system skips three more, the three mesh shader tests, so the workflow's devices
-run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's alone, which
-item 1 says. Verdict 8's scope is coming out in the tree, `spirv_compute.rs`, `compute.rs` and
-`dispatches.rs` open, with item 4's first can rows beside it, read on their commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -240,20 +255,29 @@ from [SHARED.md](SHARED.md).
    own. With the gaps that wait on no word done, the captures' comparison below is next, the
    transmission flake first. When the captures have settled, they are compared whole with checked-in
    references by the workflow, a small share of pixels allowed to differ between devices, as
-   3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture in
-   four with TAA on, before `6a84286` as after it, so the cause is found before that job is red for
-   them, or the example is compared with its spheres left out and the reason beside it.
-   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
-   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
-   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
-   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
-   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
-   prepass is on the camera, which the hall works round by putting the fog on the camera only while
-   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
-   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
-   owner's word in the working session, and the four font examples stay missing (Decision 13).
-   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
-   with their mipmaps, less memory after the kill of 2026-10-08.
+   3DEngine does for its scenes. The four faults named before that job goes red are traced at
+   `d98c299d`: transmission's missing spheres do not reproduce on 0.20; `dragdrop_picking`'s preview
+   over the words is Bevy's own, the same on bare 0.20; the anisotropic spheres blown white under a
+   normal prepass are Bevy's shader skipping anisotropy's setup with the tangent frame, pinned by a
+   test that fails when Bevy mends it, no report filed from here as the owner has it; and the fog's
+   haze under a depth prepass is gone on 0.20, pinned. The comparison job then, as proposed and
+   taken: every example captured at a fixed frame time of a sixtieth, so its clock is the frame
+   count on any device, lavapipe on the machine's clock having turned transmission's camera half
+   round; every checked-in capture taken again on that clock, the owner told since every picture
+   changes; `build/compare-captures.py` over the webp's pixels comparing each capture with its
+   checked-in one as 3DEngine's reference frames are compared, a pixel differing past 24 in a
+   channel and a capture failing past 2% of its pixels, a text capture compared as text, with a list
+   beside it in N 4.5's form naming each example allowed more, its measured share and its reason,
+   which only gets shorter, an example the runner's device draws less of (mesh shaders, ray queries,
+   meshlets) listed with that reason or its capture carrying the device's refusal for the script to
+   honor, and the page naming a failure's share and where it lies; the whole set run on lavapipe
+   here first and each failure named before the job goes red, the long capture run told to the
+   engine's session first, which measures its lamps' cost on the same GPU. Feathers' three examples
+   with `feathers_number_input` and the three camera controllers follow the other gaps, their crates
+   allowed (Decisions 11 and 12) on the owner's word in the working session, and the four font
+   examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the scene
+   packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
+   2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

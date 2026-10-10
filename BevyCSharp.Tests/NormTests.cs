@@ -479,12 +479,17 @@ public sealed class NormTests
     /// A function pointer the bridge is given can only point at a method marked to be called from
     /// native code, so the mark finds every callback of the bridge, ImGui's among them. A delegate
     /// handed over by the marshaller is found by its type, which none is today and which 3DEngine's
-    /// test finds the same way.
+    /// test finds the same way. A binding whose own callback calls a virtual method, which a class
+    /// here overrides, reaches the override from native code as well, so the overrides of what each
+    /// binding's callbacks call are taken too, the bindings being the assemblies a class here
+    /// derives from. None is today, ImGui's binding calling no override of ours and BepuPhysics
+    /// being managed throughout, and 3DEngine's test found Assimp's this way.
     /// </remarks>
     private static List<MethodBase> HandedToNativeCode()
     {
+        Assembly[] ours = [typeof(App).Assembly, Assembly.Load("BevyCSharp.Editor")];
         var handed = new HashSet<MethodBase>();
-        foreach (var assembly in new[] { typeof(App).Assembly, Assembly.Load("BevyCSharp.Editor") })
+        foreach (var assembly in ours)
             foreach (var method in Methods(assembly))
             {
                 if (method.IsDefined(typeof(UnmanagedCallersOnlyAttribute))) handed.Add(method);
@@ -492,7 +497,45 @@ public sealed class NormTests
                     if (target.Module.Assembly == assembly) handed.Add(target);
             }
 
+        var bindings = ours.SelectMany(assembly => assembly.GetTypes())
+            .SelectMany(Bases)
+            .Select(type => type.Assembly)
+            .Where(assembly => !ours.Contains(assembly) && assembly != typeof(object).Assembly)
+            .ToHashSet();
+        var reached = bindings.SelectMany(VirtualsReachedFromNativeCode).ToHashSet();
+        foreach (var method in ours.SelectMany(Methods))
+            if (method is MethodInfo { IsVirtual: true } info && reached.Contains(info.GetBaseDefinition()))
+                handed.Add(method);
+
         return [.. handed.OrderBy(Name, StringComparer.Ordinal)];
+    }
+
+    /// <summary>
+    /// The virtual methods a binding's methods that native code calls reach, through the binding's
+    /// own calls, which are followed where others' are not.
+    /// </summary>
+    private static IEnumerable<MethodBase> VirtualsReachedFromNativeCode(Assembly binding)
+    {
+        var pending = new Stack<MethodBase>(Methods(binding)
+            .SelectMany(method => DelegatesHandedOver(method).Concat(method.IsDefined(typeof(UnmanagedCallersOnlyAttribute)) ? [method] : []))
+            .Where(method => method.Module.Assembly == binding));
+        var seen = new HashSet<MethodBase>();
+        while (pending.TryPop(out var method))
+        {
+            if (!seen.Add(method)) continue;
+            foreach (var (_, code, operand) in Instructions(method))
+                if ((code == OpCodes.Call || code == OpCodes.Callvirt) && Resolve(method, operand) is { } called && called.Module.Assembly == binding)
+                {
+                    if (called.IsVirtual) yield return called is MethodInfo info ? info.GetBaseDefinition() : called;
+                    pending.Push(called);
+                }
+        }
+    }
+
+    /// <summary>A type's bases, from its own up.</summary>
+    private static IEnumerable<Type> Bases(Type type)
+    {
+        for (var at = type.BaseType; at is not null; at = at.BaseType) yield return at;
     }
 
     /// <summary>The methods a method makes into a delegate of a type marked to be handed to native code.</summary>
