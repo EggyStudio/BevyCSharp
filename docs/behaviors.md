@@ -4,6 +4,12 @@ A `[Behavior]` struct is both a component and the systems that act on it. This c
 game writes: what a method runs as, when it runs, which entities it sees, and what it may touch
 while it does.
 
+The generator checks a behavior as it is compiled and says what is wrong as an error with a number,
+such as a struct that is not `partial`, a stage method that does not take a `BehaviorContext` first,
+or a method given two stages. An editor offers to fix those three, and to make a `[Command]` static
+or reachable, from the code fixes the package carries beside the generator. Where what was meant is
+the game's to say, as for a `[RunIf]` naming nothing, the error says what is wrong and offers no fix.
+
 ## Systems and components
 
 Which one a method is depends on whether it is static.

@@ -137,9 +137,9 @@ public sealed class NormTests
             .Select(match => match.Groups[1].Value)
             .ToHashSet(StringComparer.Ordinal);
 
-        // What the package carries, the library and its generator, and the bridge's crates, those of
-        // a platform's own table among them.
-        var referenced = new[] { "BevyCSharp/BevyCSharp.csproj", "BevyCSharp.Generator/BevyCSharp.Generator.csproj" }
+        // What the package carries, the library, its generator and its code fixes, and the bridge's
+        // crates, those of a platform's own table among them.
+        var referenced = new[] { "BevyCSharp/BevyCSharp.csproj", "BevyCSharp.Generator/BevyCSharp.Generator.csproj", "BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj" }
             .SelectMany(project => Regex.Matches(Text(project), @"<PackageReference Include=""([^""]+)""").Select(match => match.Groups[1].Value))
             .Concat(Crates("native/bevy_csharp/Cargo.toml"))
             .ToHashSet(StringComparer.Ordinal);
@@ -292,7 +292,7 @@ public sealed class NormTests
         var wanted = new List<string>
         {
             "lib/net10.0/BevyCSharp.dll",
-            "analyzers/dotnet/cs/BevyCSharp.Generator.dll",
+            "analyzers/dotnet/cs/BevyCSharp.Generator.dll", "analyzers/dotnet/cs/BevyCSharp.CodeFixes.dll",
             "build/BevyCSharp.props",
             "build/BevyCSharp.targets",
             "README.md",

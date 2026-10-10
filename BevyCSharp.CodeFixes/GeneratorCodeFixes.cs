@@ -1,0 +1,197 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Composition;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace Bevy.CodeFixes;
+
+/// <summary>
+/// The fixes an editor offers for the behavior and command generators' diagnostics, where the right
+/// change is clear from the diagnostic alone: a behavior struct made partial, a stage method given
+/// the context it takes, one stage kept of several, and a command made static or reachable.
+/// </summary>
+/// <remarks>
+/// A <c>[RunIf]</c> naming nothing (BCS004), a filter or a behavior holding references (BCS005 and
+/// BCS006), a <c>[DataVersion]</c> with no migration (BCS008), a transition across two states
+/// (BCS009), and a command's return or parameter of the wrong type (BCS202 and BCS203) have no fix,
+/// since what was meant is the program's to say.
+/// </remarks>
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(GeneratorCodeFixes)), Shared]
+public sealed class GeneratorCodeFixes : CodeFixProvider
+{
+    /// <summary>A behavior struct that is not partial.</summary>
+    public const string NotPartial = "BCS001";
+
+    /// <summary>A stage method that does not return void and take a <c>BehaviorContext</c> first.</summary>
+    public const string BadSignature = "BCS003";
+
+    /// <summary>A method with more than one stage attribute, or a stage and a transition.</summary>
+    public const string MultipleStages = "BCS007";
+
+    /// <summary>A command that is not static.</summary>
+    public const string NotStatic = "BCS200";
+
+    /// <summary>A command that is neither public nor internal.</summary>
+    public const string NotReachable = "BCS201";
+
+    // The attributes that place a method, by their short names, as a program writes them.
+    private static readonly string[] StageAttributes =
+    [
+        "OnStartup", "OnFirst", "OnPreUpdate", "OnUpdate", "OnFixedUpdate", "OnPostUpdate", "OnRender", "OnLast", "OnCleanup",
+        "OnEnter", "OnExit", "OnTransition",
+    ];
+
+    // How many components an instance method takes after its context, the generator's own bound.
+    private const int MostComponents = 2;
+
+    /// <inheritdoc />
+    public override ImmutableArray<string> FixableDiagnosticIds { get; } = [NotPartial, BadSignature, MultipleStages, NotStatic, NotReachable];
+
+    /// <inheritdoc />
+    public override FixAllProvider? GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
+
+    /// <inheritdoc />
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
+    {
+        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+        if (root?.FindNode(context.Span) is not { } node) return;
+
+        foreach (var diagnostic in context.Diagnostics)
+        {
+            if (diagnostic.Id == NotPartial)
+            {
+                if (node.FirstAncestorOrSelf<TypeDeclarationSyntax>() is { } type)
+                    Register(context, diagnostic, root, "Make the behavior partial", type, Partial(type));
+                continue;
+            }
+
+            if (node.FirstAncestorOrSelf<MethodDeclarationSyntax>() is not { } method) continue;
+
+            switch (diagnostic.Id)
+            {
+                case BadSignature when method.ReturnType is PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.VoidKeyword }:
+                    Register(context, diagnostic, root, "Take the BehaviorContext a stage method is given", method,
+                        method.WithParameterList(ContextFirst(method)));
+                    break;
+
+                case MultipleStages:
+                    foreach (var keep in StagesOn(method))
+                        Register(context, diagnostic, root, $"Run in {keep} alone", method, KeepingStage(method, keep));
+                    break;
+
+                case NotStatic:
+                    Register(context, diagnostic, root, "Make the command static", method, WithModifier(method, SyntaxKind.StaticKeyword, first: false));
+                    break;
+
+                case NotReachable:
+                    Register(context, diagnostic, root, "Make the command internal", method, Internal(method));
+                    break;
+            }
+        }
+    }
+
+    private static void Register(CodeFixContext context, Diagnostic diagnostic, SyntaxNode root, string title, SyntaxNode before, SyntaxNode after)
+    {
+        context.RegisterCodeFix(
+            CodeAction.Create(title, _ => Task.FromResult(context.Document.WithSyntaxRoot(root.ReplaceNode(before, after))), title),
+            diagnostic);
+    }
+
+    // The struct with partial put last among its modifiers, where C# takes it, before the keyword
+    // struct, or first where it had none.
+    private static TypeDeclarationSyntax Partial(TypeDeclarationSyntax type)
+    {
+        var token = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space);
+        if (type.Modifiers.Count > 0) return type.WithModifiers(type.Modifiers.Add(token));
+
+        var keyword = type.Keyword;
+        return type.WithKeyword(keyword.WithLeadingTrivia())
+            .WithModifiers(SyntaxFactory.TokenList(token.WithLeadingTrivia(keyword.LeadingTrivia)));
+    }
+
+    // The stage attributes on the method, by short name, in the order written.
+    private static IEnumerable<string> StagesOn(MethodDeclarationSyntax method) =>
+        method.AttributeLists.SelectMany(list => list.Attributes).Select(ShortName).Where(StageAttributes.Contains).Distinct();
+
+    private static string ShortName(AttributeSyntax attribute)
+    {
+        var name = attribute.Name switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right.Identifier.ValueText,
+            AliasQualifiedNameSyntax alias => alias.Name.Identifier.ValueText,
+            SimpleNameSyntax simple => simple.Identifier.ValueText,
+            _ => attribute.Name.ToString(),
+        };
+        return name.EndsWith("Attribute", StringComparison.Ordinal) ? name.Substring(0, name.Length - "Attribute".Length) : name;
+    }
+
+    // The method with every stage attribute but the one kept taken out, and lists left empty removed.
+    private static MethodDeclarationSyntax KeepingStage(MethodDeclarationSyntax method, string keep)
+    {
+        var lists = new List<AttributeListSyntax>();
+        foreach (var list in method.AttributeLists)
+        {
+            var kept = list.Attributes.Where(attribute => ShortName(attribute) is var name && (!StageAttributes.Contains(name) || name == keep)).ToList();
+            if (kept.Count > 0) lists.Add(list.WithAttributes(SyntaxFactory.SeparatedList(kept)));
+        }
+
+        var result = method.WithAttributeLists(SyntaxFactory.List(lists));
+        // An attribute list removed from the front takes the method's leading trivia with it.
+        return lists.Count == method.AttributeLists.Count ? result : result.WithLeadingTrivia(method.GetLeadingTrivia());
+    }
+
+    // The method with its accessibility replaced by internal, or internal put first where it had none.
+    private static MethodDeclarationSyntax Internal(MethodDeclarationSyntax method)
+    {
+        var access = method.Modifiers.Where(modifier => modifier.IsKind(SyntaxKind.PrivateKeyword) || modifier.IsKind(SyntaxKind.ProtectedKeyword)).ToList();
+        if (access.Count == 0) return WithModifier(method, SyntaxKind.InternalKeyword, first: true);
+
+        var internalToken = SyntaxFactory.Token(SyntaxKind.InternalKeyword).WithTrailingTrivia(SyntaxFactory.Space);
+        var modifiers = method.Modifiers.Replace(access[0], internalToken.WithLeadingTrivia(access[0].LeadingTrivia));
+        foreach (var extra in access.Skip(1)) modifiers = modifiers.Remove(modifiers.First(modifier => modifier.IsKind(extra.Kind())));
+        return method.WithModifiers(modifiers);
+    }
+
+    // The method with a modifier added first or last among its modifiers. The indentation before
+    // the method's first word stays first, on the new modifier when it goes in front.
+    private static MethodDeclarationSyntax WithModifier(MethodDeclarationSyntax method, SyntaxKind kind, bool first)
+    {
+        var token = SyntaxFactory.Token(kind).WithTrailingTrivia(SyntaxFactory.Space);
+        if (method.Modifiers.Count > 0)
+        {
+            if (!first) return method.WithModifiers(method.Modifiers.Add(token));
+            var head = method.Modifiers[0];
+            return method.WithModifiers(method.Modifiers.Replace(head, head.WithLeadingTrivia()).Insert(0, token.WithLeadingTrivia(head.LeadingTrivia)));
+        }
+
+        var returnType = method.ReturnType;
+        return method.WithReturnType(returnType.WithLeadingTrivia())
+            .WithModifiers(SyntaxFactory.TokenList(token.WithLeadingTrivia(returnType.GetLeadingTrivia())));
+    }
+
+    // The parameters with the context first, the one the method takes kept by its name or one named
+    // ctx added, followed by those an instance method takes by ref or in, up to the two the generator
+    // reads, which may be its entity's components. Any other could not be one and is dropped, as a
+    // static method's all are.
+    private static ParameterListSyntax ContextFirst(MethodDeclarationSyntax method)
+    {
+        var list = method.ParameterList;
+        static bool IsContext(ParameterSyntax parameter) => parameter.Type?.ToString() is "BehaviorContext" or "Bevy.BehaviorContext";
+        var isStatic = method.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword));
+        var context = list.Parameters.FirstOrDefault(IsContext)?.ToString() ?? "BehaviorContext ctx";
+        var rest = list.Parameters
+            .Where(parameter => !isStatic && !IsContext(parameter)
+                && parameter.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.RefKeyword) || modifier.IsKind(SyntaxKind.InKeyword)))
+            .Take(MostComponents)
+            .Select(parameter => parameter.ToString());
+        return SyntaxFactory.ParseParameterList($"({string.Join(", ", rest.Prepend(context))})")
+            .WithTrailingTrivia(list.GetTrailingTrivia());
+    }
+}

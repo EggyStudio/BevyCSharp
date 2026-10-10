@@ -304,6 +304,14 @@ own Roslyn.
 | `Microsoft.CodeAnalysis.CSharp` | Roslyn, through which the generators read a game's code and write its behaviors, schemas and commands. |
 | `Microsoft.CodeAnalysis.Analyzers` | The rules Roslyn holds a generator to while it is built, such as the calls a generator may not make. |
 
+The code fixes', in `BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj`, which the package carries
+beside the generator for an editor to offer. Both are private to the build, since the editor that
+loads the fixes brings its own Roslyn.
+
+| Package | Used for |
+|---|---|
+| `Microsoft.CodeAnalysis.CSharp.Workspaces` | Roslyn's workspace layer, through which a fix for a generator's diagnostic changes the game's code in an editor. |
+
 The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy and the weather are in the tree
 through Bevy already, at the version it builds, so naming them adds nothing to the build.
 

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <!--
+      The fixes an editor offers for the generators' diagnostics, which the package carries beside
+      the generator in its analyzer slot. They need Roslyn's workspace layer, which an editor loads
+      and the compiler does not, so they live apart from the generator, which the compiler runs.
+    -->
+    <PropertyGroup>
+        <!-- An editor loads them as it loads analyzers, which target netstandard2.0. -->
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Bevy.CodeFixes</RootNamespace>
+        <AssemblyName>BevyCSharp.CodeFixes</AssemblyName>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>false</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+        <!-- RS2008 asks for an AnalyzerReleases.md changelog, which ids shipped with the package and
+             not apart from it have no use for. -->
+        <NoWarn>$(NoWarn);RS2008</NoWarn>
+    </PropertyGroup>
+    <!-- The compiler version of the generator, so the two are loaded beside each other. -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all"/>
+    </ItemGroup>
+</Project>

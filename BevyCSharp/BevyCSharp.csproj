@@ -68,6 +68,15 @@
     </ItemGroup>
 
     <!--
+      The fixes an editor offers for the generator's diagnostics, built before the package is packed
+      and carried beside it, and neither referenced nor run by the library's own build.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <!--
       The description of Bevy's reflected components, written by the schema.dump command and
       checked in. The generator turns it into the typed wrappers in Bevy.Reflected. It is named here
       and nowhere else, so only the library is compiled with the wrappers and a game's own
@@ -79,9 +88,13 @@
         <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>
     </ItemGroup>
 
-    <!-- Ship the generator in the package's analyzer slot. -->
+    <!-- Ship the generator and its code fixes in the package's analyzer slot. -->
     <ItemGroup>
         <None Include="../BevyCSharp.Generator/bin/$(Configuration)/netstandard2.0/BevyCSharp.Generator.dll"
+              Pack="true"
+              PackagePath="analyzers/dotnet/cs/"
+              Visible="false"/>
+        <None Include="../BevyCSharp.CodeFixes/bin/$(Configuration)/netstandard2.0/BevyCSharp.CodeFixes.dll"
               Pack="true"
               PackagePath="analyzers/dotnet/cs/"
               Visible="false"/>

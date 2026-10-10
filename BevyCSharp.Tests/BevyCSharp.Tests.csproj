@@ -37,6 +37,13 @@
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
+
+        <!--
+          The generators' code fixes, applied in a workspace as an editor applies them, which the
+          workspace layer of the generators' compiler version gives.
+        -->
+        <ProjectReference Include="../BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
     </ItemGroup>
 
 

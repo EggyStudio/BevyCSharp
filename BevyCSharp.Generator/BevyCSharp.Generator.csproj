@@ -11,7 +11,8 @@
         <IsPackable>false</IsPackable>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        <!-- RS2008 wants an AnalyzerReleases.md changelog; these ids ship with the package, not separately. -->
+        <!-- RS2008 asks for an AnalyzerReleases.md changelog, which ids shipped with the package and
+             not apart from it have no use for. -->
         <NoWarn>$(NoWarn);RS2008</NoWarn>
     </PropertyGroup>
 
