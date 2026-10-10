@@ -41,6 +41,11 @@ pub fn ending(ended: bool) {
     ENDING.store(ended, Ordering::Release);
 }
 
+/// Whether the app has begun ending, from the frame an exit is decided.
+pub fn is_ending() -> bool {
+    ENDING.load(Ordering::Acquire)
+}
+
 thread_local! {
     /// How many guards this thread is inside, a panic inside one coming back as a status.
     static GUARDED: Cell<u32> = const { Cell::new(0) };

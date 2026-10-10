@@ -22,7 +22,41 @@ pub fn install(app: &mut bevy::app::App) {
 
     app.init_resource::<PipelinesWaiting>();
     if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
-        render_app.add_systems(ExtractSchedule, copy_count);
+        use bevy::ecs::schedule::IntoScheduleConfigs;
+
+        render_app.add_systems(ExtractSchedule, copy_count).add_systems(
+            bevy::render::Render,
+            finish_compiles_on_exit.in_set(bevy::render::RenderSystems::Cleanup),
+        );
+    }
+}
+
+/// Waits, on the frame the app ends, for every pipeline the cache is compiling to be compiled.
+///
+/// A pipeline is compiled on a thread of Bevy's task pool, which an app that ends does not wait
+/// for, and a process that exits while a compile is still inside the GPU's driver has the driver
+/// torn down under it. Bevy's `headless_renderer`, which ends on the frame its picture is saved,
+/// crashed so in two runs of three with an NVIDIA driver, the compile's thread in the driver's
+/// pipeline creation and the main thread in its teardown. Ten seconds at most, so a compile that
+/// never finishes cannot hold the end of the app.
+#[cfg(feature = "render")]
+fn finish_compiles_on_exit(cache: bevy::ecs::system::Res<bevy::render::render_resource::PipelineCache>) {
+    use bevy::render::render_resource::CachedPipelineState;
+    use std::time::{Duration, Instant};
+
+    if !crate::crash::is_ending() {
+        return;
+    }
+
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let compiling = || {
+        cache
+            .pipelines()
+            .any(|pipeline| matches!(&pipeline.state, CachedPipelineState::Creating(task) if !task.is_finished()))
+    };
+
+    while compiling() && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(2));
     }
 }
 
