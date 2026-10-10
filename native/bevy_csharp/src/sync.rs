@@ -206,9 +206,13 @@ fn collect_touches(world: &bevy::ecs::world::World, input: &mut crate::interop::
         }
         push(touch, 0);
     }
-    // Released touches are gone from `iter`, so they are reported once, on the frame they end.
+    // Released touches are gone from `iter`, so they are reported once, on the frame they end, and
+    // a touch the platform takes away, as a call coming in does, once on the frame it goes.
     for touch in touches.iter_just_released() {
         push(touch, 2);
+    }
+    for touch in touches.iter_just_canceled() {
+        push(touch, 4);
     }
 
     input.touch_count = count as u32;
@@ -391,5 +395,33 @@ mod tests {
         for nothing in [0.0, -0.5, f64::NAN, f64::INFINITY] {
             assert!(frame_strategy(nothing).is_none(), "{nothing} set the clock");
         }
+    }
+
+    #[test]
+    fn a_canceled_touch_is_reported_once_with_its_own_phase() {
+        use bevy::ecs::message::Messages;
+        use bevy::input::touch::{touch_screen_input_system, TouchInput, TouchPhase, Touches};
+        use bevy::prelude::{Entity, Vec2, World};
+
+        let mut world = World::new();
+        world.init_resource::<Touches>();
+        world.init_resource::<Messages<TouchInput>>();
+        let system = world.register_system(touch_screen_input_system);
+
+        // Bevy's own system turns the messages into the touches, a frame at a time, so the reader
+        // keeps its place between frames as it does in an app.
+        let mut frame = |phase: Option<TouchPhase>| {
+            if let Some(phase) = phase {
+                world.write_message(TouchInput { phase, position: Vec2::new(4.0, 2.0), window: Entity::PLACEHOLDER, force: None, id: 7 });
+            }
+            world.run_system(system).unwrap();
+            let mut input = crate::interop::BcsInput::default();
+            collect_touches(&world, &mut input);
+            input.touches[..input.touch_count as usize].iter().map(|touch| (touch.id, touch.phase)).collect::<Vec<_>>()
+        };
+
+        assert_eq!(frame(Some(TouchPhase::Started)), [(7, 1)]);
+        assert_eq!(frame(Some(TouchPhase::Canceled)), [(7, 4)]);
+        assert_eq!(frame(None), []);
     }
 }

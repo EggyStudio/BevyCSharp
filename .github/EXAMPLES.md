@@ -24,7 +24,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 6 | 1 | 0 | 0 | 0 | 6 of 6 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
-| [Input](#input) | 11 | 1 | 0 | 0 | 0 |  |
+| [Input](#input) | 12 | 0 | 0 | 0 | 0 |  |
 | [Math](#math) | 4 | 0 | 0 | 1 | 1 | 4 of 4 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 4 of 4 |
@@ -359,7 +359,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mouse_grab`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/mouse_grab.rs) | Demonstrates how to grab the mouse, locking the cursor to the app's screen | [written](../BevyCSharp.Examples/input/mouse_grab.cs) |
 | [`mouse_input`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/mouse_input.rs) | Demonstrates handling a mouse button press/release | [written](../BevyCSharp.Examples/input/mouse_input.cs), prints [its output](assets/examples/mouse_input.txt) |
 | [`mouse_input_events`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/mouse_input_events.rs) | Prints out all mouse events (buttons, movement, etc.) | [written](../BevyCSharp.Examples/input/mouse_input_events.cs), prints [its output](assets/examples/mouse_input_events.txt), each message printed as C# writes the record, where Bevy prints its debug form, and its capture rolling the wheel alone, a run with no window having nothing for a pretended button to press on |
-| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written in part](../BevyCSharp.Examples/input/touch_input.cs), prints [its output](assets/examples/touch_input.txt), a touch the platform cancels, which is not reported |
+| [`touch_input`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/touch_input.rs) | Displays touch presses, releases, and cancels | [written](../BevyCSharp.Examples/input/touch_input.cs), prints [its output](assets/examples/touch_input.txt) |
 | [`touch_input_events`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/input/touch_input_events.rs) | Prints out all touch inputs | [written](../BevyCSharp.Examples/input/touch_input_events.cs), prints [its output](assets/examples/touch_input_events.txt), each message printed as C# writes the record, where Bevy prints its debug form, and none on a machine with no touch screen |
 
 ## Math

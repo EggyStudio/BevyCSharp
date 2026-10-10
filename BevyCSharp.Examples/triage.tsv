@@ -246,7 +246,6 @@ keyboard_modifiers	can
 mouse_grab	can
 mouse_input	can
 mouse_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form, and its capture rolling the wheel alone, a run with no window having nothing for a pretended button to press on
-touch_input	part	a touch the platform cancels, which is not reported
 touch_input_events	can	each message printed as C# writes the record, where Bevy prints its debug form, and none on a machine with no touch screen
 bounding_2d	can	each shape drawn from gizmo lines as Bevy's primitive_2d draws it, the capsule's ends from short lines, and its three systems after the update run as one in Bevy's order
 cubic_splines	can	its points added by a drag in a window, where an offscreen run's pretended pointer moves no cursor

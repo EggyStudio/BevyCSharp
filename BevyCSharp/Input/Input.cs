@@ -313,7 +313,8 @@ public sealed class Input
     /// <summary>The touches in progress this frame.</summary>
     /// <remarks>
     /// A touch that ended is reported once, on the frame it ends, with
-    /// <see cref="TouchPhase.Ended"/>. Nothing else reports it, so a release is missed by a
+    /// <see cref="TouchPhase.Ended"/>, and one the platform canceled once with
+    /// <see cref="TouchPhase.Canceled"/>. Nothing else reports either, so a release is missed by a
     /// system that skips a frame.
     /// </remarks>
     public ReadOnlySpan<Touch> Touches => _touches.AsSpan(0, _touchCount);
