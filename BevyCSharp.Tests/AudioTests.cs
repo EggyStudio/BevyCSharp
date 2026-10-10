@@ -592,4 +592,84 @@ public sealed class AudioTests
         Assert.False(silent, "a run that asked for a device plays to none");
     }
 
+    /// <summary>
+    /// Sounds played to a device and told to despawn at their end do so, and give their indices
+    /// back to the world for the entities after them.
+    /// </summary>
+    /// <remarks>
+    /// Bevy 0.20.0 despawns such a sound through a call that frees no index it despawns, so every
+    /// effect a game played took one for good. The bridge plays it once instead and despawns it
+    /// itself (see <c>ecs::despawn_all</c> in the bridge). Forty waves of thirty short sounds, each
+    /// wave played once the last has ended, keep the world at 512 indices, where Bevy's own
+    /// despawn carries it to 2,048 by the thirty-fifth. Played at no volume, and skipped on a
+    /// machine with no device to play to.
+    /// </remarks>
+    [SkippableFact]
+    public void SoundsEndingOnADeviceGiveBackTheirIndices()
+    {
+        Needs.Renderer();
+
+        var playing = new List<Entity>();
+        var waves = 0;
+        var started = false;
+        ulong? firstWave = null;
+        Dictionary<string, long>? held = null;
+        var clip = AssetHandle.None;
+
+        using var app = new App(new Config
+        {
+            Headless = true,
+            // Frames come as fast as the machine makes them and the device plays in its own time,
+            // so the run is held to a count of frames far beyond what forty waves take anywhere.
+            HeadlessFrames = 200_000,
+            AudioWithoutWindow = true,
+            AssetRoot = EngineHarness.AssetDirectory,
+        });
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            _ => clip = AssetServer.Load(AssetKind.Audio, "sounds/tone.wav"), "Test.Load"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var ctx = new BehaviorContext(world);
+            playing.RemoveAll(sound => !ctx.Ecs.IsAlive(sound));
+            started |= playing.Any(Audio.HasStarted);
+
+            // A device gives a sound of a loaded clip its sink in a frame or two, so a machine
+            // with none is known long before five thousand frames have passed.
+            if (!started && ctx.Time.FrameCount > firstWave + 5_000)
+            {
+                ctx.Exit();
+                return;
+            }
+
+            if (playing.Count > 0 || AssetServer.StateOf(clip) != AssetLoadState.Loaded) return;
+
+            if (waves == 40)
+            {
+                held = MemoryCommandTests.Pairs(ConsoleMemoryCommands.Memory());
+                ctx.Exit();
+                return;
+            }
+
+            waves++;
+            firstWave ??= ctx.Time.FrameCount;
+            var effect = new AudioSettings
+            {
+                Mode = PlaybackMode.Despawn,
+                Volume = 0f,
+                Play = 0.05f,
+            };
+            for (var i = 0; i < 30; i++) playing.Add(Audio.Play(clip, effect));
+        }, "Test.Waves"));
+
+        Assert.Equal(0, app.Run());
+        Skip.IfNot(started, "this machine has no sound device to play to");
+
+        Assert.NotNull(held);
+        Assert.True(
+            held["entityIds"] <= 1024,
+            $"{held["entityIds"]} indices for {held["entities"]} entities after 1,200 sounds");
+    }
+
 }

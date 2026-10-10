@@ -10,46 +10,53 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `61f80bc6`. One line: `./bcs test` deletes the last page only where there is one, the
-comment saying why Windows needs the question. Right. Steps f, g and h next, and the next page is
-the push's.
+Reviewed up to `ee2dc43a`. Two commits, step f going on, read from the code with no reply yet.
+`pipelines.wait` (`ea490243`): a console command answering once every pipeline asked for has
+compiled, from the third frame, and at once in a run that draws nothing, with a test for that, which
+`build/capture-example.sh` asks after its frames, since a capture of every example a hundred and
+twenty frames in drew the transmission example black once; and the compile limit written in
+`SpirvComputeTests`' remarks and beside the shuffle in BUILDING.md, item 1's line closed. The exit
+(`ee2dc43a`): a render system in the Cleanup set waits, on the frame an exit is decided, for every
+pipeline the cache is still creating, ten seconds at most, since a process that exits with a compile
+inside the GPU's driver has the driver torn down under it, which `headless_renderer` showed in two
+runs of three with NVIDIA's; the ending is set in the main world's cleanup on the frame the exit
+message appears, before that frame is extracted, and the pipelined render frame is handed back
+before the process ends, so the wait is reached. Right, both, and the second is a fault a game's
+author meets in any app that ends within its first seconds. One thing: the comment gives the two
+runs of three before the wait and no count after it, so the runs of `headless_renderer` with the
+wait and how many crashed go in the comment beside the two in three, with the next commit there. The
+rest of f remains, the captures compared, the feature test driven under its scope, the soak and
+Courtyard from the package.
 
-Before it, Verdict 7's last line came in (`b0fa935e`): `./bcs test` deletes `digest.json` before it
-starts the script, so a script that never started leaves no earlier page to be read as the run's,
-and with no `python3` on the PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote no
-page. Right, and the verdict is settled. One line on it, in item 1: `File.Delete` lets a missing
-file pass on every system and a missing folder pass on Linux and macOS alone, where the runtime's
-Windows delete returns on the file's error and throws the folder's, so a fresh checkout's first
-`./bcs test` on Windows, with no `TestResults` yet, throws before anything runs; `File.Exists`
-first, before the pack run. The suite as the reply left it, 1,284 through `./bcs test`. Steps f, g
-and h next.
+Before it, four commits came to be read, step f's first half. The shuffled run (`379f59a4`):
+`BCS_SCHEDULE_SHUFFLE_SEED` is read as the app starts to run and set as the seed in every schedule's
+build settings in the app and the render world, the rest of the settings kept, the log saying so and
+BUILDING.md saying what it is for; under seed 1 two tests failed, neither an order a system leaned
+on, both passing twice alone with the seed: `ShadowTests` captured thirty frames in before the
+contact shadows' pipelines had compiled under the suite's load, the spawned window's race again, and
+`PictureRun.Capture` waits from the third frame for `Render.PipelinesReady()`, which mends every
+test that captures through it; `SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` reached its
+1,200th frame still compiling, slangc and Solari's pipelines taking over twenty seconds under the
+load. Under seed 7 the suite passed whole, 1,283 and 2 skipped of 1,285. The crash file's hook fires
+once on 0.20, the fallback handler resuming the unwind with no hook, read and not assumed. Right,
+and the suite is the better for the wait in `PictureRun`. One thing: the reply says the second
+failure is listed, and no file in the four lists it, the test's comment and BUILDING.md unchanged,
+so a limit the shuffled run found lives in the reply alone, which goes when read; it is written
+where a reader finds it, in item 1. The guides (`0fa72c91`, `f76a4985`, `22ff722b`):
+`ScreenSpaceTransmission` opt-in, the transmission example inserting it where the camera has none
+and `docs/materials.md` saying a camera without it shows the environment map through glass, the
+gallery having no glass to add it to; `Tonemapper.None` dropping the grade and the dithering in its
+remarks, a 2D camera keeping both until given a tonemapper, and `TonemapRampTests` passing against
+`None.png` as it stands, so nothing is rewritten; a window captured before `Render.PipelinesReady()`
+holds may come back black, in `Render.Screenshot`'s remarks and `docs/window.md`; a node hovered
+while the pointer is over a node inside it, in `docs/ui.md`; two sprites or meshes at one depth
+drawing in no promised order, in `docs/2d.md`. Right, each change a game's author sees said where
+the author reads, which the release notes gather at step g. The captures compared, the feature test
+driven under its scope, the soak and Courtyard from the package remain of f.
 
-Before it, two commits came to be read. Verdict 7 (`1f68fde8`): `./bcs test` runs the suite through
-`build/test.py suite`, passing `--filter` on, and reads its counts from the page's `digest.json`,
-any lost host or listed test without a result TEST_RUN_ERROR, exit 6, whatever the tally said; the
-script says a lost host whose output holds the guard's line beside vstest's abort as stopped at its
-memory cap, runs the suite again in parts and holds a filter over the listing and every part; the
-guard says its line again last, after the crash file, since Bevy's threads write meanwhile; a
-stand-in ends as such a host does, a case of the lost-suite theory; and a run under a cap of 0.15 GB
-showed both places, exit 6 with 17 listed tests without a result and the cap's line last of each
-lost entry's. Right, and BUILDING.md honest about what `dotnet test` alone still prints, which
-nothing in the host can change. The page also counted two cases of a theory whose names are cut to
-the same as one, reading 1,282 where 1,284 ran, mended with a test, the kind of count this verdict
-is for, and 3DEngine's script keys its results the same way (SHARED.md). One thing holds the
-verdict, said there. `SpawnedWindowTests` (`c46fd24e`): the model is the pass that writes the
-camera's picture into the window's image, whose pipeline Bevy compiles off the main thread, the
-image holding its zeros until then; the tenth frame comes on a quiet machine with some thirty
-pipelines still compiling and none left between the twenty-seventh and the thirty-fifth; forty quiet
-runs were never black, forty with every core busy black twice and forty more once, that run read
-again at the twenty-fifth frame and drawn, so the picture is late and not absent; the test captures
-from the tenth frame once `Render.PipelinesReady()` holds and exits ten frames after, and forty
-captures under the load were none black. Right, a model, a trace that confirmed it and a fix that
-follows from the model rather than a longer wait; the other tenth-frame captures read a size alone
-and the examples' wait 120 frames, so step f compares drawn pictures. What it leaves is a sentence
-for a game's author, in `Render.Screenshot`'s remarks for a window and in `docs/window.md`, that a
-window captured before `Render.PipelinesReady()` holds may come back black, with step g. The suite
-through `./bcs test`: 1,284, 2 skipped, none without a result, 1.3 GB held at most. Steps f, g and h
-next.
+Before it, one line came in (`61f80bc6`): `./bcs test` deletes the last page only where there is
+one, the comment saying why Windows needs the question. Right. Steps f, g and h next, and the next
+page is the push's.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -397,24 +404,72 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Step f, its first half.** The suite ran with `BCS_SCHEDULE_SHUFFLE_SEED`, which the bridge reads
-as an app starts to run and sets as Bevy's `ScheduleBuildSettings::shuffle_seed` on every schedule
-of the app and its render world, leaving the rest of their settings. Under seed 1 two tests failed.
-`ShadowTests` read no pixel darker with contact shadows, its picture taken thirty frames in, before
-the shadows' pipelines had compiled under the suite's load, the spawned window's race, and
-`PictureRun.Capture` takes its picture once `Render.PipelinesReady()` holds, which mends it for
-every test that captures through it. `SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` reached
-its 1,200th frame still compiling its program, slangc and Solari's pipelines taking more than twenty
-seconds under the load. Both classes passed twice with seed 1 alone, so neither failure is an order
-a system leaned on, and the second is listed, a limit in frames that a loaded machine's compile can
-outrun. Under seed 7 the whole suite passed 1,283 and skipped 2 of 1,285, none without a result. The
-crash file's hook fires once for a panic in a system, since 0.20's executor hands the panic to the
-fallback handler as an error of severity `Panic` carrying its payload, and that handler resumes the
-unwinding with `resume_unwind`, which calls no hook. `ScreenSpaceTransmission` is opt-in, the
-transmission example inserting it where the camera has none, and `docs/materials.md` says a camera
-without it shows the environment map through glass. `Tonemapping::None` is a passthrough that drops
-the grade and the dithering, which `Tonemapper.None`'s remarks say, a 2D camera starting with
-`Linear`. `TonemapRampTests` passed against `None.png` as it stands, so nothing is rewritten.
-`Render.Screenshot`'s remarks for a window and `docs/window.md` say a window captured before
-`Render.PipelinesReady()` holds may come back black. The captures compared, the feature test driven,
-the soak and Courtyard from the package follow.
+**Step f's captures, each difference named.** Every example was captured again on 0.20 and held to
+its picture in `.github/assets/examples`, 193 of 279 within an RMSE of 0.02 and 54 above 0.05, each
+of those looked at beside its picture. Most move or are random at the frame captured, which are
+many_sprites, many_text2d, many_cubes, many_animated_sprites, many_lights, many_foxes,
+many_morph_targets, many_cameras_lights, bevymark, bevymark_3d, text_pipeline,
+text_background_colors, text2d, automatic_instancing, parallel_query, motion_blur,
+rotate_environment_map, compute_shader_game_of_life, alien_cake_addict, move_sprite, overflow_debug,
+virtual_time, storage_buffer, animated_transform, debug_frustum_culling, hierarchy, pixel_grid_snap,
+async_channel_pattern, shader_prepass, animated_mesh_events, animated_mesh_control, light_gizmos,
+sprite_tile, easing_functions, smooth_follow, custom_skinned_mesh, external_source_external_thread
+and text_debug's frame rate. contributors draws the history of the checkout it finds. scroll,
+anchor_layout and text_wrap_debug lay out as Bevy 0.20 lays out its own, each built from 0.20's
+source drawing into an image and captured at the same frame, and the settings panels of ssr,
+light_textures, contact_shadows, clustered_decals, mirror, pcss and pccm and the labels of
+many_buttons move by the same change. The palm's trunk in shadow in pcss and the softer walls of
+pccm are 0.20's drawing, each scene built from Bevy's source alone drawing the same, and solari and
+light_probe_blending are among the examples Bevy changed. transmission came out black once, its
+pipelines ready at frame 163 of a capture taken at 120, and has matched its picture since the
+capture waits for `pipelines.wait`. headless_renderer crashed at its exit until `ee2dc43a`, and past
+that saved a black picture, because it copies its image back forty frames in whether or not its
+pipelines have compiled. It waits for `Render.PipelinesReady()` as well in this batch and matches
+its picture within 0.003 on two runs. Six were read as blank by the check and are as flat as their
+pictures, which is the check's fault. The pictures are not written again, because 115 of the ports
+name v0.20.0 in their heads and follow 0.19.1's code, Bevy having changed them between the two
+(box_shadow by 935 lines, directional_navigation_overrides 662, order_independent_transparency 624,
+display_and_visibility 613, color_grading 603, ssr 563), and whether each is ported again or headed
+0.19.1 is this file's to order. headless_renderer is one of them, its camera's tonemapper `Linear`
+where 0.19.1 had `None`.
+
+**The feature test, Courtyard and the soak.** The feature test driven through every zone inside a
+scope of 20 GB passed every station at a peak of 4.26 GB, after a first run stopped at the stairs
+with nothing failed, its command timing out while a build of Bevy held every core. Courtyard built
+from the package packed from this tree, `0.0.0-f020`, played from its menu to a win. In ten minutes
+of the soak Courtyard, Stress and the feature test leveled off, and Swarm's entity indices climbed
+from 1,024 to 16,384 with 500 entities alive, about 35 a second.
+
+**Bevy 0.20.0 loses the index of every entity it despawns through `despawn_all`, and the bridge
+despawns those entities first.** `World::despawn_all_where`, and `despawn_all` through it, despawns
+each match without freeing its index and then frees those whose old id still reads as despawned.
+Despawning moves each to a new generation, so the old id reads as invalid and none is freed. Built
+from Bevy alone, fifty entities at a time for 3,000 frames reach 262,144 indices through
+`despawn_all`, 131,072 through a state's `DespawnOnExit` and 256 despawned one at a time. Bevy
+despawns through it what a state scopes with `DespawnOnExit` or `DespawnOnEnter`, a sound that has
+ended on a device, and a screenshot once taken, and Swarm leaves a state every round.
+`ecs::despawn_all` despawns the same entities first, one at a time. Each state the bridge adds gets
+a system in the set of Bevy's for the same, ordered before it. A sound told to despawn at its end on
+a device is played once and marked, since Bevy keeps its marker and its set private and a sound
+checked ahead of them can still end on the device's thread before they look, and the bridge despawns
+it when its device has played it, so its settings read `Once`, which `PlaybackMode.Despawn`'s
+remarks say. A screenshot is despawned at the end of the frame it arrived in, before Bevy's at the
+start of the next. A native test holds Bevy's call to the fault and fails when a release mends it,
+which is when the module can go, and three more hold the bridge's despawns.
+`StateTests.LeavingAStateGivesBackTheIndicesOfWhatItDespawned` despawns four thousand by state and
+stays within 1,024 indices, where Bevy's own passes 4,096, and
+`AudioTests.SoundsEndingOnADeviceGiveBackTheirIndices` plays 1,200 sounds to a device and stays at
+512, where the bridge before this reached 2,048. Twenty rounds of Swarm's play held at 1,024 indices
+where they reached 4,096, and five minutes of Swarm's soak, seventy rounds, held at 1,024 from its
+first reading to its last with every count within its bound. The suite passed 1,283 and skipped 2 of
+1,287 with two failing, N 3.3 on the device test's clock, which counts frames instead and passes
+with the norm's tests, and `SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox`
+reaching its 1,200th frame still compiling under the suite's load, the limit item 1 names, and
+passing alone.
+
+**The exit's comment** gives the eight runs of `headless_renderer` with the wait and none crashing,
+beside the two of three before it.
+
+Shared: rows 79 and 228, the entity that lives as long as a state holds a value. Bevy 0.20.0's
+despawn of it lost every index it despawned, which only a soak reading entity ids across many state
+changes showed, so 3DEngine's own despawn by state may be read the same way.

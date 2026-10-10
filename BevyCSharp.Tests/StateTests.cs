@@ -200,6 +200,49 @@ public sealed class StateTests
     }
 
     [Fact]
+    public void LeavingAStateGivesBackTheIndicesOfWhatItDespawned()
+    {
+        // Bevy 0.20.0 despawns what a state scopes through a call that frees no index it
+        // despawns, so a game that leaves a state over and over climbs to far more indices than it
+        // ever holds. The bridge despawns them first, one at a time, which frees each. See
+        // ecs::despawn_all in the bridge.
+        using var harness = new EngineHarness(frames: 800);
+        harness.App.AddState(Screen.Menu);
+        Dictionary<string, long>? held = null;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            switch (ctx.Time.FrameCount % 4)
+            {
+                case 0:
+                    ctx.SetState(Screen.Playing);
+                    break;
+
+                case 1:
+                    for (var i = 0; i < 20; i++)
+                        ctx.Ecs.DespawnOnExit(ctx.Ecs.Spawn(), Screen.Playing);
+                    break;
+
+                case 2:
+                    ctx.SetState(Screen.Menu);
+                    break;
+            }
+
+            if (ctx.Time.FrameCount == 790)
+                held = MemoryCommandTests.Pairs(ConsoleMemoryCommands.Memory());
+        });
+
+        harness.Run();
+
+        // Four thousand despawned and twenty alive at most, which lost would have taken the world
+        // past 4,096 indices.
+        Assert.NotNull(held);
+        Assert.True(
+            held["entityIds"] <= 1024,
+            $"{held["entityIds"]} indices for {held["entities"]} entities");
+    }
+
+    [Fact]
     public void ScopingNeedsAnEntityAndAStateThatExist()
     {
         using var harness = new EngineHarness(frames: 3);

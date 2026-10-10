@@ -624,6 +624,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // to notice there, so the queue exists in every profile.
     app.init_resource::<crate::events::AssetFailures>();
 
+    // Sounds and screenshots despawned by the bridge ahead of Bevy, whose despawn of them loses
+    // their indices. Last of the plugins, since whether a sound reaches a device is known only
+    // once every plugin is in. See `ecs::despawn_all`.
+    #[cfg(feature = "render")]
+    crate::ecs::despawn_all::install(&mut app);
+
     // A spawned scene is announced to an observer rather than in a queue, so one is kept here to
     // turn each announcement into an entry the managed side collects once a frame.
     app.init_resource::<crate::events::ReadyInstances>();

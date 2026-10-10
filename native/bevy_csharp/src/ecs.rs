@@ -17,6 +17,7 @@ use bevy::ptr::OwningPtr;
 use crate::interop::{opt_slice, status, BcsChunk};
 use crate::state::{with_world, with_world_opt};
 
+pub mod despawn_all;
 pub mod hierarchy;
 pub mod introspection;
 

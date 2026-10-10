@@ -184,6 +184,7 @@ macro_rules! define_slots {
                     JOINT_SUB_INITIAL[$jsslot].store(initial, Ordering::Relaxed);
                     every_axis_message(app);
                     app.add_sub_state::<$jsub>();
+                    crate::ecs::despawn_all::scope_state::<$jsub>(app);
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -205,6 +206,7 @@ macro_rules! define_slots {
                 $($jslot => {
                     every_axis_message(app);
                     app.add_computed_state::<$joint>();
+                    crate::ecs::despawn_all::scope_state::<$joint>(app);
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -264,6 +266,7 @@ macro_rules! define_slots {
                     COMPUTED_LEN[$cslot].store(from.len() as i32, Ordering::Relaxed);
                     COMPUTED_BY_RULE[$cslot].store(ruled, Ordering::Relaxed);
                     app.add_computed_state::<$derived>();
+                    crate::ecs::despawn_all::scope_state::<$derived>(app);
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -306,6 +309,7 @@ macro_rules! define_slots {
                     SUB_PARENT[$subslot].store(parent, Ordering::Relaxed);
                     SUB_INITIAL[$subslot].store(initial, Ordering::Relaxed);
                     app.add_sub_state::<$sub>();
+                    crate::ecs::despawn_all::scope_state::<$sub>(app);
                     status::OK
                 })+
                 _ => status::NULL_ARG,
@@ -316,6 +320,7 @@ macro_rules! define_slots {
             match slot {
                 $($slot => {
                     app.insert_state($ty(initial));
+                    crate::ecs::despawn_all::scope_state::<$ty>(app);
                     status::OK
                 })+
                 _ => status::NULL_ARG,

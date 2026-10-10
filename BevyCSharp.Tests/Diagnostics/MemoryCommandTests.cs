@@ -58,7 +58,7 @@ public sealed class MemoryCommandTests
         Assert.False(pairs.ContainsKey("handles"));
     }
 
-    private static Dictionary<string, long> Pairs(string answer)
+    internal static Dictionary<string, long> Pairs(string answer)
     {
         var words = answer.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         Assert.True(words.Length % 2 == 0, $"an odd number of words in '{answer}'");
