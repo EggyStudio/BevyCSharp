@@ -77,7 +77,9 @@ var config = Config.OffscreenFor(1280, 720, frames: 120);
 `Width` and `Height` size the image the way they would size the window, `Render.Screenshot` writes
 it to a PNG, and `HeadlessFps` and `HeadlessFrames` pace and bound the run, because a run with no
 window has no window to close. The editor takes `--offscreen` as well, so the interface itself can
-be captured where there is no screen to draw it on.
+be captured where there is no screen to draw it on. An offscreen run keeps a frame behind the GPU,
+as a window does, and one whose GPU has not finished a frame after a minute says which frame and
+exits with code 87, rather than waiting forever on a device that has stopped.
 
 A run with no window, headless or offscreen, makes no sound, since it is a test, a soak, a capture
 or a tool and whoever sits beside the machine did not ask to hear it. Its sounds still run their

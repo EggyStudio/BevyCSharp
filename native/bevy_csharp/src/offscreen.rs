@@ -132,16 +132,61 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
 /// minute that way, which `build/soak.sh` found. So each frame waits, as its last step, for the GPU
 /// to finish the one before, and one frame is drawn while the next is made ready, as a window's two
 /// images allow.
+///
+/// The wait has a limit. wgpu signals a submission's fence even when nothing was submitted, so the
+/// mark waited on is always in the queue behind the frame's work, and a wait that does not end is a
+/// GPU that has not finished that work, as `irradiance_volumes` met once at frame 90 on a laptop's
+/// GPU. Without a limit the run stood still with nothing said until whatever drove it gave up. Past
+/// [`FRAME_BEFORE_LIMIT`] the run ends, saying which frame the GPU did not finish, with
+/// [`STALLED_EXIT_CODE`], since a device that has not finished a frame in that long cannot be
+/// counted on to finish closing either.
 #[cfg(feature = "render")]
 fn wait_for_the_frame_before(
     queue: bevy::ecs::system::Res<bevy::render::renderer::RenderQueue>,
     device: bevy::ecs::system::Res<bevy::render::renderer::RenderDevice>,
-    mut before: bevy::ecs::system::Local<Option<wgpu::SubmissionIndex>>,
+    frame: Option<bevy::ecs::system::Res<bevy::diagnostic::FrameCount>>,
+    mut before: bevy::ecs::system::Local<Option<(wgpu::SubmissionIndex, u32)>>,
 ) {
     // Nothing submitted, which marks where this frame's work ends in the queue.
     let now = queue.submit([]);
-    if let Some(index) = before.replace(now) {
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(index), timeout: None });
+    let drawn = frame.map_or(0, |frame| frame.0);
+    if let Some((index, frame)) = before.replace((now, drawn)) {
+        let waited = device.poll(wgpu::PollType::Wait { submission_index: Some(index), timeout: Some(FRAME_BEFORE_LIMIT) });
+        if let Some(line) = stalled(waited.err(), frame) {
+            bevy::log::error!("{line}");
+            std::process::exit(STALLED_EXIT_CODE);
+        }
+    }
+}
+
+/// How long a frame of an offscreen run waits for the GPU to finish the one before.
+///
+/// Long beside any frame drawn, a CPU device such as lavapipe taking some seconds over the heaviest
+/// stress tests, and short beside the ten minutes a capture waits for an answer.
+#[cfg(feature = "render")]
+pub(crate) const FRAME_BEFORE_LIMIT: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// What an offscreen run exits with when the GPU has not finished a frame within the limit, beside
+/// the 86 a run stopped at its memory cap exits with.
+#[cfg(feature = "render")]
+pub(crate) const STALLED_EXIT_CODE: i32 = 87;
+
+/// The line an offscreen run ends with when the wait for the frame before ran out, naming the frame
+/// as Bevy counts it, or nothing when the wait ended as it should.
+#[cfg(feature = "render")]
+fn stalled(error: Option<wgpu::PollError>, frame: u32) -> Option<String> {
+    match error {
+        Some(wgpu::PollError::Timeout) => Some(format!(
+            "The GPU has not finished frame {frame} after {} seconds, waited on as the submission \
+             that marks the end of that frame's work, so the offscreen run ends with exit code {}.",
+            FRAME_BEFORE_LIMIT.as_secs(),
+            STALLED_EXIT_CODE
+        )),
+        Some(other) => Some(format!(
+            "Waiting for the GPU to finish frame {frame} failed ({other}), so the offscreen run ends \
+             with exit code {STALLED_EXIT_CODE}."
+        )),
+        None => None,
     }
 }
 
@@ -252,5 +297,21 @@ fn choose_offscreen_ui_camera(
         commands
             .entity(entity)
             .insert((OffscreenUiCamera, bevy::ui::IsDefaultUiCamera));
+    }
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_wait_that_runs_out_ends_the_run_naming_its_frame() {
+        let line = stalled(Some(wgpu::PollError::Timeout), 90).expect("a wait that ran out ends the run");
+        assert!(line.contains("frame 90"), "{line}");
+        assert!(line.contains(&format!("{} seconds", FRAME_BEFORE_LIMIT.as_secs())), "{line}");
+        assert!(line.contains(&STALLED_EXIT_CODE.to_string()), "{line}");
+
+        // A wait that ended as it should says nothing, and the run goes on.
+        assert_eq!(stalled(None, 90), None);
     }
 }

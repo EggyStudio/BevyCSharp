@@ -503,3 +503,14 @@ the camera's draw's buffer; directional_navigation_overrides keeps its buttons' 
 directional_navigation's behaviors, which the table's test, reading the one file, does not see. A
 click on a text field focuses nothing offscreen, Bevy's `click_to_focus` asking for the primary
 window an offscreen run has none of, the same gap as tab_navigation's Tab under item 4.
+
+Verdict 10: the offscreen run's wait for the frame before it takes a limit of sixty seconds, long
+beside lavapipe's heaviest frames of some seconds and short beside a capture's ten minutes, past
+which the run logs that the GPU has not finished frame N, as Bevy counts it, and exits with code 87,
+beside the memory cap's 86; a native test holds the line to naming the frame, the limit and the
+code. What the wait waits on was read: wgpu signals a submission's fence even when nothing was
+submitted, and the mark is submitted in the frame's Cleanup after its work, so a fence never
+signaled is a GPU that never finished the frame's work, with no frame skipped and no request held,
+since an offscreen run has no swapchain and the mark is taken and waited on by the one system.
+irradiance_volumes was then captured a hundred times on the laptop's GPU, each matching its
+checked-in picture and none hanging, so the hang is shown not to repeat.
