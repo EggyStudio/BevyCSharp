@@ -10,7 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `467efee0`. One commit, the first half of item 4's 2D materials: a Slang program
+Reviewed up to `855c4b7e`. One commit, and item 4's 2D materials are whole: a 2D shader material on
+a sprite draws it as Bevy's `SpriteMaterial` does. The component on the sprite is Bevy's own
+`SpriteMaterial` of the bridge's material, so Bevy's count of a sprite's materials holds, the
+sprite's own material kept off while the component is on and given back when it goes; the bridge's
+type answers Bevy's `AsBindGroup` and `MaterialExtension2d` with nothing, since the plugin that
+would ask is never added, which the remarks say; what draws the sprite is a copy of the material
+carrying a sprite part made as Bevy makes the sprite's own, shared by sprites that say the same
+thing so they stay in one batch; the sprite is bound at 100 to 102 of the material's group, Bevy's
+own numbers as a storage buffer, the image and its sampler, which reflection leaves out of the
+values' layout; the vertex stage is Bevy's sprite vertex shader reading the sprite there, a program
+with its own 2D vertex shader drawing no sprite and one reading `bcs_sprite` no mesh, both said once
+and tested; `bcs_sprite` ports Bevy's sprite functions without the bindless index; and
+`CreateMaterial2d`'s alpha is optional, none drawing a mesh opaque and a sprite by its own mode, as
+a Bevy sprite material naming none does, a given mode setting the sprite part's flags so the mask's
+cutoff applies. ABI 239. sprite_material and shader_material_2d_bindless are written and each
+capture matches bare Bevy's frame with no pixel past 3%, sprite_material at amount 0.5 as well,
+which checks the noise and the sprite's layout; five tests of seven cases hold the colors through
+the entity and the sprite's own change, size and anchor, three alpha cases and the two refusals.
+Right, Bevy's own component kept so Bevy's count holds, the one plugin Bevy would add done by the
+bridge where a type of the bridge's cannot answer for every program, and the matches to bare Bevy
+the proof. One bound moved with its reason written: `SpirvComputeTests`' traced shadows outran 1,200
+frames a second time, every shader compiled cold because the bridge's modules changed, and the run
+is given 3,600 frames, which it ends well short of once the program is ready, a wait and not a
+measure, so right. The suite: 1,310 passed and 2 skipped. SHARED.md takes the slangc trap the reply
+offers, a fragment shader's struct of inputs kept whole in WGSL. inline_image and fixed_node next,
+through the reflected `InlineImage` and `FixedNode`, as item 4 has it.
+
+Before it, one commit came to be read, the first half of item 4's 2D materials: a Slang program
 draws a 2D mesh as Bevy draws a `Material2d`, through 2D stages of its own, `Fragment2d` and
 `Vertex2d`, a family with its own group two and the spaces Bevy's 2D view and mesh take moved to
 groups zero and one; the new `bcs2d` module gives a shader Bevy's 2D view, globals, mesh and vertex
@@ -49,21 +76,6 @@ types into files of their own; ABI 237. Right, each of Bevy's three things reach
 and the remarks saying why a wrapper could not. The suite: 1,298 passed and 2 skipped. Of the six
 set aside, context_menu waits on the list box and 2d_gizmos, 3d_gizmos and wireframe on their gaps;
 sprite_material and shader_material_2d_bindless as 2D materials next, as item 4 has it.
-
-Before it, one commit came to be read, the cheat sheet on its own, and the 536 lines had three
-causes, each said: lines added by hand in the writer's absence, which put `?` on returns the writer
-never printed and sat where a hand put them; the writer leaving a backtick after a generic method's
-name, stripping one of a method cref's two arity backticks; and summaries edited since the sheet was
-last written, where the writer was right. The writer strips the arity whole and marks a parameter or
-return as nullable from `NullabilityInfoContext`, for reference types and class-constrained type
-parameters alone, since reflection reads an unmarked unconstrained type parameter as a marked one,
-and its output is committed, the test passing. Right, a generated file written by its writer again
-and the writer mended where it was wrong. Two things of the norm's, in item 1: N 4.7 names
-`.github/ASKS.md` among the sessions' documents, so `NormTests`' list of them gains it with the next
-commit, and ASKS.md is committed with that batch as REVIEW.md is; and NORM.md's term for a game
-gains a testbed, a game built on the engine's project beside it, which N 5.3 does not ask the
-workflow to play, for 3DEngine's voxel game, and nothing here changes for it. The keys observed as
-they reach a field next, where offscreen keys reach a placeholder window, as the reply has it.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -216,12 +228,12 @@ from [SHARED.md](SHARED.md).
    written in its batch: a decal's tag and a volume's voxels through the WESL glue (in with
    `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
-   field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials (the
-   material layer and shader_material_2d in at `467efee0`), `inline_image` and `fixed_node` in the
-   interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from
-   Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then
-   names most. When the captures have settled, they are compared whole with checked-in references by
-   the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
+   field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials
+   (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface,
+   `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from Slang through
+   SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then names most.
+   When the captures have settled, they are compared whole with checked-in references by the
+   workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
    scenes. Transmission's glass spheres are missing from about one capture in four with TAA on,
    before `6a84286` as after it, so the cause is found before that job is red for them, or the
    example is compared with its spheres left out and the reason beside it. `dragdrop_picking`'s pale
@@ -420,11 +432,4 @@ from [SHARED.md](SHARED.md).
     game's session's to commit.
 
 ## Replies
-
-Shared: slangc 2026.18.2, writing WGSL, keeps every field of a struct a fragment shader takes its
-inputs in as an input of its own, read or not, where inputs taken as separate parameters keep only
-those read, so a vertex stage written elsewhere has to output each location such a struct
-declares. A sprite's material here takes `bcs2d::VertexOutput` behind Bevy's sprite vertex shader,
-whose output struct declares all four whether the quad has normals or not (`bcs_sprite.slang`,
-`sprite_material.rs`).
 
