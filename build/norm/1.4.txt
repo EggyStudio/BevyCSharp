@@ -96,7 +96,6 @@ BevyCSharp.Tests/SkyboxTests.cs
 BevyCSharp.Tests/SparseComponentTests.cs
 BevyCSharp.Tests/SpirvComputeTests.cs
 BevyCSharp.Tests/SpriteTests.cs
-BevyCSharp.Tests/StateTests.cs
 BevyCSharp.Tests/StreamingTests.cs
 BevyCSharp.Tests/SubStateTests.cs
 BevyCSharp.Tests/SystemOrderTests.cs
