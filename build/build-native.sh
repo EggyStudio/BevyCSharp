@@ -122,6 +122,9 @@ if [[ ! -f "$NATIVE_DIR/Cargo.toml" ]]; then
     exit 1
 fi
 
+# The caches kept under their bounds before this build adds to them (build/trim-caches.sh).
+"$BUILD_DIR/trim-caches.sh"
+
 CONTAINER=""
 if [[ $PORTABLE -eq 1 ]]; then
     for candidate in podman docker; do

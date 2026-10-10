@@ -10,7 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `fef6bbeb`. One commit, item 6: a template package, `BevyCSharp.Templates`, whose one
+Reviewed up to `c67c7981`. Two commits. Item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
+`RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
+system last asked, oldest first, as Bevy's `RemovedComponents<T>` gives a Rust system; each C#
+system's closure holds a cursor a component, which `removals.rs` makes the running one in a
+thread-local while the system runs and gives back whatever the body does, and the call reads Bevy's
+removal messages from the cursor or the oldest kept up to the newest and moves the cursor on only
+when the entities fitted, so a caller with too small a buffer asks again; outside a system it is
+refused, Bevy keeps a removal two frames, which the remarks and the behaviors guide say, and ABI
+243. Two Rust tests see a removal and a despawn once each and another system's cursor see both, a
+too-small buffer moving nothing; `RemovedTests` runs two systems that each see the stripped and the
+gone exactly once and throws outside a system. Right, the cursor the system's own, the retry on a
+small buffer, and the two frames said. Then `c67c7981`: a second template, `bevycsharp-empty`, makes
+the first game's first step with the project's name as the window's title, so the guide's step one
+is the two install and new commands as 3DEngine's are, held by `FirstGameTests` against
+`steps/01.cs`, both templates' placeholders and defaults checked; `pack-templates.sh` writes the
+version beside each template's `template.json` and moves it over, since macOS's `sed` reads `-i`
+otherwise, the thing item 9's wider test would have found. The suite before the two: 1,348 passed
+and 2 skipped, the bridge's 131. Item 4's retake on the fixed clock is done, 185 pictures changed in
+bytes and one text capture new, so every picture changes when it is committed, which the owner is
+told; `many_cubes` lost its capture to a full disk at 20:20, said to be another session's copies,
+and was retaken; seven examples flat by their design and byte-identical to their pictures fail the
+blank check and go on a list with that reason; the lavapipe run began at 20:58 under its own
+sessions and runs some hours, the comparison commit after it. Item 8 meanwhile, every example on the
+package alone.
+
+Before it, one commit came to be read, item 6: a template package, `BevyCSharp.Templates`, whose one
 template `dotnet new bevycsharp` makes the README's first program, `Spin.cs` and `Program.cs` as the
 README's two blocks have them in a project asking for the engine at a placeholder version, with
 `--package-folder` writing a `nuget.config` for a local folder as 3DEngine's does; the template
@@ -35,21 +60,6 @@ and which the owner's word allows, the package being theirs to pack and publish 
 item 6 had it, so it moves to the template with the next batch, the cube's two files removed as the
 page's first step or an empty-window template beside the first, 3DEngine's two templates read for
 the shape. `NormTests.cs` stands at 794. The capture run is a third through.
-
-Before it, one commit came to be read, item 5's last part: `NormTests.N_2_10`, here since `869c9fbe`
-for the methods marked `UnmanagedCallersOnly` and the delegates of an `UnmanagedFunctionPointer`
-type in the library and the editor, takes 3DEngine's third source as well, the overrides a binding's
-own callbacks reach from native code, a binding being an assembly a class here derives from other
-than corelib, each binding's native-called methods followed through its own calls and every override
-here of a virtual they reach counted as handed over. It finds none, ImGui's binding calling no
-override of ours and BepuPhysics being managed throughout, and every method it does find already
-catches every exception, the system trampoline, the observers' reports, the hooks, the computed and
-joint rules, the carried-file reader, the crash writer and the IME callback, so nothing is mended
-and item 5 is done. Right, the source 3DEngine's test needed for Assimp held here too, so a binding
-that one day calls an override is caught. `NormTests.cs` stands at 788 lines of N 1.3's 800, so its
-next addition comes with a split. The suite's 18 norm tests pass. The capture run on the fixed clock
-stands at some twenty examples of 329 at 37 seconds each, three and a half hours, the lavapipe run
-and the comparison commit after it; item 6, the template package, goes on meanwhile, wanting no GPU.
 
 Before it, one commit came to be read, item 4's four faults traced before the captures are compared.
 Transmission's missing spheres do not reproduce on Bevy 0.20, 32 captures on the laptop's GPU on the
@@ -265,12 +275,14 @@ from [SHARED.md](SHARED.md).
    meshlets) listed with that reason or its capture carrying the device's refusal for the script to
    honor, and the page naming a failure's share and where it lies; the whole set run on lavapipe
    here first and each failure named before the job goes red, the long capture run told to the
-   engine's session first, which measures its lamps' cost on the same GPU. Feathers' three examples
-   with `feathers_number_input` and the three camera controllers follow the other gaps, their crates
-   allowed (Decisions 11 and 12) on the owner's word in the working session, and the four font
-   examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the scene
-   packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
-   2026-10-08.
+   engine's session first, which measures its lamps' cost on the same GPU. The retake on the fixed
+   clock is done, 185 pictures changed and seven examples flat by their design listed with that
+   reason, and the lavapipe run began at 20:58; the comparison commit comes after it with
+   `build/captures-differ.txt`. Feathers' three examples with `feathers_number_input` and the three
+   camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
+   owner's word in the working session, and the four font examples stay missing (Decision 13).
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -284,14 +296,24 @@ from [SHARED.md](SHARED.md).
    new bevycsharp` making the README's first program, packed beside the engine and walked by the
    README job; its publishing on nuget.org beside the engine, a second package in the owner's name,
    waits on the owner's word (Decision 8), and the README's install line needs it;
-   `docs/first-game.md` starts from the template with the next batch, as 3DEngine's does.
+   `docs/first-game.md` starts from a second template, `bevycsharp-empty`, since `c67c7981`, as
+   3DEngine's does.
 7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
-   from since the system's last run, beside the added and changed ones a behavior reads.
-8. **Every example compiles on the package alone**, from 3DEngine's
-   `build/examples-on-package.sh` (`a61308b0`): 208 of 231 examples call helpers of the examples
-   project, so what they share to say a thing in one word becomes the package's own calls or stays
-   in the example, and the workflow builds every example on the packed package.
+   from since the system's last run, beside the added and changed ones a behavior reads. Done at
+   `7a2a99ac`, `EcsWorld.Removed<T>()` and `RemovedById` with a cursor a system, as Bevy's
+   `RemovedComponents<T>`.
+8. **Every example compiles on the package alone**, from 3DEngine's `build/examples-on-package.sh`
+   (`a61308b0`): some 55 of 331 examples reach a helper of the examples project, so what they share
+   to say a thing in one word becomes the package's own calls or stays in the example, and the
+   workflow builds every example on the packed package with the shared files left out, so a reach
+   into the project fails the build. The capture drivers move to one file beside the catalog,
+   `StressTest.Warn` and the transforms' cube scene are written into each example as Bevy's carry
+   theirs, and the opened size comes from a library call or is read as Bevy's read it; `FreeCamera`
+   and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on the
+   owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
+   second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
+   list only getting shorter.
 9. **A script that more than one system runs is read for the forms only GNU's tools or a later
    bash read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows
    and a developer run on Linux, macOS and Windows' Git bash, where one line was found there.

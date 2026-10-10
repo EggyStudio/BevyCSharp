@@ -238,6 +238,23 @@ Beyond the desktop, Bevy also targets Android, iOS and the web. Those need a dif
 story entirely (a different app model and, for the web, a different runtime), so they are out of
 scope here rather than merely unbuilt.
 
+## Caches and their bounds
+
+Cargo keeps what it compiled, a profile and a feature set apart, and the bridge's builds keep it in
+three places, which grow by tens of gigabytes as Bevy and the features change. Each has a bound,
+and `build/trim-caches.sh`, which `build/build-native.sh` runs before every build, takes a cache
+past its bound back under it, its incremental state first and all of it only when that is not
+enough. Everything it removes comes back on the next build, which only takes longer.
+
+| Cache | Written by | Bound |
+|---|---|---|
+| `native/target` | `cargo check` and `cargo test`, every profile apart | 80 GB |
+| `build/target-portable` | a portable build in the container | 50 GB |
+| `build/target` | a local build | 2 GB, its staged libraries kept |
+
+`cargo check` and `cargo test` are run by hand, so `native/target` grows between two native builds
+as well, and after a long run of them the script is worth running by hand too.
+
 ## Packing
 
 ```bash
