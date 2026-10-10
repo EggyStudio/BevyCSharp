@@ -1,5 +1,5 @@
 // Bevy's custom_shader_instancing example, examples/shader_advanced/custom_shader_instancing.rs at
-// v0.20.0, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
+// v0.19.1, by Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using System.Numerics;
 using System.Runtime.InteropServices;

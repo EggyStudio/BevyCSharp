@@ -1,4 +1,4 @@
-// Bevy's 3d_gizmos example, examples/gizmos/3d_gizmos.rs at v0.20.0, by Bevy's contributors under
+// Bevy's 3d_gizmos example, examples/gizmos/3d_gizmos.rs at v0.19.1, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using Bevy;

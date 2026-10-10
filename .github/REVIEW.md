@@ -10,9 +10,45 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ee2dc43a`. Two commits, step f going on, read from the code with no reply yet.
-`pipelines.wait` (`ea490243`): a console command answering once every pipeline asked for has
-compiled, from the third frame, and at once in a run that draws nothing, with a test for that, which
+Reviewed up to `384f9150`. Two commits, step f's second half, and a fault of Bevy's the soak found.
+The captures: 193 of 279 within 0.02 and 54 above 0.05, each looked at and named, most moving or
+random at the frame; scroll, anchor_layout and text_wrap_debug laid out as 0.20 lays out its own,
+checked against Bevy's source built alone, as are pcss's trunk, pccm's walls and the panels that
+moved with them; transmission black once at frame 120 with its pipelines ready at 163, matching
+since the capture waits; headless_renderer saving a black picture on 0.20, copying forty frames in
+whether or not its pipelines had compiled, waiting for them as well in `13f06dd7` and matching
+within 0.003; six read blank by the check and as flat as their pictures, the check's fault. Right,
+each difference named and the hard ones set against bare Bevy, which is what f asked. The feature
+test passed every station under its scope at 4.26 GB, Courtyard from the package played to a win,
+and the soak leveled off for three of the four while Swarm's entity indices climbed from 1,024 to
+16,384 with 500 alive, traced to Bevy: 0.20.0's `World::despawn_all_where` despawns each match
+without freeing its index and then frees those whose old id still reads as despawned, which none
+does once the generation has moved on, so every index it despawns is lost for the world's life,
+262,144 in 3,000 frames from Bevy alone against 256 one at a time, reached through what a state
+scopes, a sound ended on a device and a screenshot taken. `384f9150`: `ecs::despawn_all` despawns
+the same entities first, one at a time, a system before Bevy's in the same set for every state the
+bridge adds; a sound told to despawn at its end is played once and marked, since Bevy's marker and
+set are private and a sound can end on the device's thread between two looks, and is despawned when
+its sink is empty, so its settings read `Once` and `PlaybackMode.Despawn`'s remarks say so; a
+screenshot is despawned at the end of its frame, before Bevy's at the start of the next; a native
+test holds Bevy to the fault and fails when a release mends it, which is when the module goes, three
+hold the bridge's despawns, and two managed tests hold four thousand despawned by state within 1,024
+indices and 1,200 sounds within 512; Swarm's soak held at 1,024 for five minutes. Right, the shape
+for a fault of the followed engine's, ahead of Bevy rather than in place of it, with the test that
+says when it can go. Three things. The release notes at step g name the index loss and that a
+sound's settings read `Once`, since a game's author reading them through the wrappers sees it.
+`SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox` joins `SpirvComputeTests` at
+the compile limit under load, in item 1. And the 115 ports whose heads say v0.20.0 and whose code
+follows 0.19.1 are ordered in item 3: the heads made true with the next commit, the pictures written
+again on 0.20 where the difference was named as Bevy's, and each ported to 0.20's code under item 4
+in the order of how much Bevy changed it, box_shadow first; the owner may order the whole re-port
+before 0.4 instead, which this file will then carry. The exit's comment gives its eight runs. The
+suite: 1,283 passed and 2 skipped of 1,287, N 3.3 mended within the batch, the other failure the
+limit. Steps g and h remain.
+
+Before it, two commits came to be read from the code, step f going on. `pipelines.wait`
+(`ea490243`): a console command answering once every pipeline asked for has compiled, from the third
+frame, and at once in a run that draws nothing, with a test for that, which
 `build/capture-example.sh` asks after its frames, since a capture of every example a hundred and
 twenty frames in drew the transmission example black once; and the compile limit written in
 `SpirvComputeTests`' remarks and beside the shuffle in BUILDING.md, item 1's line closed. The exit
@@ -54,10 +90,6 @@ drawing in no promised order, in `docs/2d.md`. Right, each change a game's autho
 the author reads, which the release notes gather at step g. The captures compared, the feature test
 driven under its scope, the soak and Courtyard from the package remain of f.
 
-Before it, one line came in (`61f80bc6`): `./bcs test` deletes the last page only where there is
-one, the comment saying why Windows needs the question. Right. Steps f, g and h next, and the next
-page is the push's.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -78,14 +110,17 @@ from [SHARED.md](SHARED.md).
    Windows delete throws on a missing folder, a fresh checkout's first run. `SpawnedWindowTests`'
    black capture is traced at `c46fd24e`, the window's image holding its zeros until the pass that
    draws it has its pipeline, and the test captures once `Render.PipelinesReady()` holds;
-   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g. The page's
-   repeated lines carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
-   StateTests' behaviors scoped to a state no other app adds and registered in every app by the
-   module initializer, which drowns what else repeats (Decision 7); they are quieted in the batch
-   that next touches the tests, the test's behaviors registered only where their state is. Package
-   0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and item 3's remaining
-   steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
+   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g.
+   `SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox` reached its 1,200th frame
+   still compiling under the suite's load in `384f9150`'s run and passes alone, the limit
+   `SpirvComputeTests` has, and says so in its remarks and in BUILDING.md's line with the next
+   commit. The page's repeated lines carry 116 warnings of `Screen.Playing` in every run since
+   before `c70f17b`, StateTests' behaviors scoped to a state no other app adds and registered in
+   every app by the module initializer, which drowns what else repeats (Decision 7); they are
+   quieted in the batch that next touches the tests, the test's behaviors registered only where
+   their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and
+   item 3's remaining steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's
+   run is read by the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -187,7 +222,11 @@ from [SHARED.md](SHARED.md).
    `feathers_number_input`, `inline_image`, `fixed_node`, `overflow_transform`, `draggable_slider`,
    `mutation_by_reflection`, `mines`, `many_meshlet_materials` and three `pan_orbit_camera_*`) and
    22 gone from it; the release notes name each change above that a game's author sees, with its
-   reason and no one who decided (N 4.7).
+   reason and no one who decided (N 4.7). The 115 ports whose heads say v0.20.0 and whose code
+   follows 0.19.1 (`384f9150`'s reply) are headed 0.19.1 with the next commit, their pictures
+   written again on 0.20 where step f named the difference as Bevy's, and each is ported to 0.20's
+   code under item 4 in the order of how much Bevy changed it, box_shadow first, its head and
+   picture moving with it.
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
@@ -404,72 +443,3 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Step f's captures, each difference named.** Every example was captured again on 0.20 and held to
-its picture in `.github/assets/examples`, 193 of 279 within an RMSE of 0.02 and 54 above 0.05, each
-of those looked at beside its picture. Most move or are random at the frame captured, which are
-many_sprites, many_text2d, many_cubes, many_animated_sprites, many_lights, many_foxes,
-many_morph_targets, many_cameras_lights, bevymark, bevymark_3d, text_pipeline,
-text_background_colors, text2d, automatic_instancing, parallel_query, motion_blur,
-rotate_environment_map, compute_shader_game_of_life, alien_cake_addict, move_sprite, overflow_debug,
-virtual_time, storage_buffer, animated_transform, debug_frustum_culling, hierarchy, pixel_grid_snap,
-async_channel_pattern, shader_prepass, animated_mesh_events, animated_mesh_control, light_gizmos,
-sprite_tile, easing_functions, smooth_follow, custom_skinned_mesh, external_source_external_thread
-and text_debug's frame rate. contributors draws the history of the checkout it finds. scroll,
-anchor_layout and text_wrap_debug lay out as Bevy 0.20 lays out its own, each built from 0.20's
-source drawing into an image and captured at the same frame, and the settings panels of ssr,
-light_textures, contact_shadows, clustered_decals, mirror, pcss and pccm and the labels of
-many_buttons move by the same change. The palm's trunk in shadow in pcss and the softer walls of
-pccm are 0.20's drawing, each scene built from Bevy's source alone drawing the same, and solari and
-light_probe_blending are among the examples Bevy changed. transmission came out black once, its
-pipelines ready at frame 163 of a capture taken at 120, and has matched its picture since the
-capture waits for `pipelines.wait`. headless_renderer crashed at its exit until `ee2dc43a`, and past
-that saved a black picture, because it copies its image back forty frames in whether or not its
-pipelines have compiled. It waits for `Render.PipelinesReady()` as well in this batch and matches
-its picture within 0.003 on two runs. Six were read as blank by the check and are as flat as their
-pictures, which is the check's fault. The pictures are not written again, because 115 of the ports
-name v0.20.0 in their heads and follow 0.19.1's code, Bevy having changed them between the two
-(box_shadow by 935 lines, directional_navigation_overrides 662, order_independent_transparency 624,
-display_and_visibility 613, color_grading 603, ssr 563), and whether each is ported again or headed
-0.19.1 is this file's to order. headless_renderer is one of them, its camera's tonemapper `Linear`
-where 0.19.1 had `None`.
-
-**The feature test, Courtyard and the soak.** The feature test driven through every zone inside a
-scope of 20 GB passed every station at a peak of 4.26 GB, after a first run stopped at the stairs
-with nothing failed, its command timing out while a build of Bevy held every core. Courtyard built
-from the package packed from this tree, `0.0.0-f020`, played from its menu to a win. In ten minutes
-of the soak Courtyard, Stress and the feature test leveled off, and Swarm's entity indices climbed
-from 1,024 to 16,384 with 500 entities alive, about 35 a second.
-
-**Bevy 0.20.0 loses the index of every entity it despawns through `despawn_all`, and the bridge
-despawns those entities first.** `World::despawn_all_where`, and `despawn_all` through it, despawns
-each match without freeing its index and then frees those whose old id still reads as despawned.
-Despawning moves each to a new generation, so the old id reads as invalid and none is freed. Built
-from Bevy alone, fifty entities at a time for 3,000 frames reach 262,144 indices through
-`despawn_all`, 131,072 through a state's `DespawnOnExit` and 256 despawned one at a time. Bevy
-despawns through it what a state scopes with `DespawnOnExit` or `DespawnOnEnter`, a sound that has
-ended on a device, and a screenshot once taken, and Swarm leaves a state every round.
-`ecs::despawn_all` despawns the same entities first, one at a time. Each state the bridge adds gets
-a system in the set of Bevy's for the same, ordered before it. A sound told to despawn at its end on
-a device is played once and marked, since Bevy keeps its marker and its set private and a sound
-checked ahead of them can still end on the device's thread before they look, and the bridge despawns
-it when its device has played it, so its settings read `Once`, which `PlaybackMode.Despawn`'s
-remarks say. A screenshot is despawned at the end of the frame it arrived in, before Bevy's at the
-start of the next. A native test holds Bevy's call to the fault and fails when a release mends it,
-which is when the module can go, and three more hold the bridge's despawns.
-`StateTests.LeavingAStateGivesBackTheIndicesOfWhatItDespawned` despawns four thousand by state and
-stays within 1,024 indices, where Bevy's own passes 4,096, and
-`AudioTests.SoundsEndingOnADeviceGiveBackTheirIndices` plays 1,200 sounds to a device and stays at
-512, where the bridge before this reached 2,048. Twenty rounds of Swarm's play held at 1,024 indices
-where they reached 4,096, and five minutes of Swarm's soak, seventy rounds, held at 1,024 from its
-first reading to its last with every count within its bound. The suite passed 1,283 and skipped 2 of
-1,287 with two failing, N 3.3 on the device test's clock, which counts frames instead and passes
-with the norm's tests, and `SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox`
-reaching its 1,200th frame still compiling under the suite's load, the limit item 1 names, and
-passing alone.
-
-**The exit's comment** gives the eight runs of `headless_renderer` with the wait and none crashing,
-beside the two of three before it.
-
-Shared: rows 79 and 228, the entity that lives as long as a state holds a value. Bevy 0.20.0's
-despawn of it lost every index it despawned, which only a soak reading entity ids across many state
-changes showed, so 3DEngine's own despawn by state may be read the same way.

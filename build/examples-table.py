@@ -16,7 +16,10 @@ that drew it, so a reader goes from what an example draws to the code that draws
 
 Each written example says at its head which of Bevy's it is written from, at which version and
 under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
-example and a new Bevy have it without anybody writing it by hand.
+example and a new Bevy have it without anybody writing it by hand. A head that names an earlier
+release than the lock's is kept, since the example follows that release's code until it is written
+again from the current one, and its row links Bevy's source at that release. Writing it again
+includes taking the old head off, for this to write the current one.
 """
 
 import glob
@@ -133,7 +136,7 @@ def on_behaviors(path):
         return "[Behavior]" in program.read()
 
 
-def build(version, examples, order, triage, written, source):
+def build(version, examples, order, triage, written, source, followed):
     unknown = sorted(set(triage) - {example["name"] for example in examples})
     if unknown:
         sys.exit("triage.tsv names examples Bevy does not have: " + ", ".join(unknown))
@@ -229,7 +232,8 @@ def build(version, examples, order, triage, written, source):
         out.append("| Example | What it shows | State |")
         out.append("|---|---|---|")
         for example in sorted((e for e in examples if e["group"] == group), key=lambda e: e["name"]):
-            source = f"https://github.com/bevyengine/bevy/blob/v{version}/{example['path']}" if example["path"] else ""
+            release = followed.get(example["name"], version)
+            source = f"https://github.com/bevyengine/bevy/blob/v{release}/{example['path']}" if example["path"] else ""
             name = f"[`{example['name']}`]({source})" if source else f"`{example['name']}`"
             state = STATES[example["state"]]
             if example["state"] in ("written", "part"):
@@ -271,7 +275,24 @@ def head(example, version):
     return ["// " + line for line in textwrap.wrap(words, 97)]
 
 
-def heads(examples, written, version):
+def release_of(version):
+    """A release's number as a tuple, to tell an earlier one from a later one."""
+    return tuple(int(part) for part in version.split("."))
+
+
+def followed_releases(written, version):
+    """The release each written example follows where its head names one earlier than the lock's."""
+    followed = {}
+    for name, path in written.items():
+        with open(os.path.join(ROOT, path), encoding="utf-8") as file:
+            head = " ".join(line[3:] for line in file.read().split("\n\n")[0].split("\n"))
+        found = re.match(rf"Bevy's {re.escape(name)} example, \S+ at v(\d+\.\d+\.\d+),", head)
+        if found and release_of(found.group(1)) < release_of(version):
+            followed[name] = found.group(1)
+    return followed
+
+
+def heads(examples, written, version, followed):
     """Each written example's file as it reads with its head, by its path, where that differs."""
     changed = {}
     for example in examples:
@@ -285,7 +306,7 @@ def heads(examples, written, version):
         if lines[0].startswith(f"// Bevy's {example['name']} example,") and "" in lines:
             lines = lines[lines.index("") + 1:]
 
-        text = "\n".join(head(example, version) + [""] + lines)
+        text = "\n".join(head(example, followed.get(example["name"], version)) + [""] + lines)
         with open(os.path.join(ROOT, path), encoding="utf-8") as file:
             if file.read() != text:
                 changed[path] = text
@@ -297,7 +318,8 @@ def main():
     version = bevy_version()
     source = bevy_source(version)
     examples = read_examples(source)
-    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples(), source)
+    followed = followed_releases(written_examples(), version)
+    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples(), source, followed)
 
     with open(README, encoding="utf-8") as readme:
         text = readme.read()
@@ -312,7 +334,7 @@ def main():
     readme_text = pictures.sub(lambda match: match.group(1) + (gallery + "\n" if gallery else "") + match.group(2), readme_text, count=1)
 
     current = open(TABLE, encoding="utf-8").read() if os.path.exists(TABLE) else ""
-    changed = heads(examples, written_examples(), version)
+    changed = heads(examples, written_examples(), version, followed)
     if check:
         stale = [path for path, old, new in ((TABLE, current, table), (README, text, readme_text)) if old != new]
         stale += [os.path.join(ROOT, path) for path in sorted(changed)]

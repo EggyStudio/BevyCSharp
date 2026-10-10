@@ -428,9 +428,12 @@ build/measure-stress.sh many_sprites       # a stress test beside Bevy's own pro
 
 `build/examples-table.py` reads Bevy's example metadata from the cargo registry, which holds the
 bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.tsv`, where each
-example not yet written has its state and what it waits on. It also writes the comment each
-written example opens with, naming the example of Bevy's it is written from, at which version and
-under Bevy's licenses. The package workflow captures every example on the Linux bridge it built.
+example not yet written has its state and what it waits on. It also writes the comment each written
+example opens with, naming the example of Bevy's it is written from, at which version and under
+Bevy's licenses. A head naming an earlier release than the lock's is kept, the example following
+that release's code until it is written again from the current one with its head taken off, and its
+row in EXAMPLES.md links Bevy's source at that release. The package workflow captures every example
+on the Linux bridge it built.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is
