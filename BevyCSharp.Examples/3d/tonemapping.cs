@@ -1,4 +1,4 @@
-// Bevy's tonemapping example, examples/3d/tonemapping.rs at v0.19.1, by Bevy's contributors under
+// Bevy's tonemapping example, examples/3d/tonemapping.rs at v0.20.0, by Bevy's contributors under
 // MIT or Apache-2.0, written again in C#.
 
 using System.Text;
@@ -19,7 +19,7 @@ internal static class TonemappingExample
 
     private static readonly Tonemapping[] Methods =
     [
-        Tonemapping.None, Tonemapping.Reinhard, Tonemapping.ReinhardLuminance, Tonemapping.AcesFitted, Tonemapping.AgX,
+        Tonemapping.Linear, Tonemapping.Reinhard, Tonemapping.ReinhardLuminance, Tonemapping.AcesFitted, Tonemapping.AgX,
         Tonemapping.SomewhatBoringDisplayTransform, Tonemapping.TonyMcMapface, Tonemapping.BlenderFilmic, Tonemapping.KhronosPbrNeutral,
     ];
 
@@ -218,7 +218,7 @@ internal static class TonemappingExample
         text.Append($"(E) {(_scene == 3 ? ">" : "")} Image Viewer\n");
         text.Append("\n\nTonemapping Method:\n");
 
-        string[] names = ["Disabled", "Reinhard", "Reinhard Luminance", "ACES Fitted", "AgX", "SomewhatBoringDisplayTransform", "TonyMcMapface", "Blender Filmic", "Khronos PBR Neutral"];
+        string[] names = ["Linear", "Reinhard", "Reinhard Luminance", "ACES Fitted", "AgX", "SomewhatBoringDisplayTransform", "TonyMcMapface", "Blender Filmic", "Khronos PBR Neutral"];
         for (var i = 0; i < Methods.Length; i++)
         {
             // Bevy's own line for Reinhard marks it with a space after the arrow, kept as it is.

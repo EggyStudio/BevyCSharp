@@ -1,4 +1,4 @@
-// Bevy's headless_renderer example, examples/app/headless_renderer.rs at v0.19.1, by Bevy's
+// Bevy's headless_renderer example, examples/app/headless_renderer.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -35,9 +35,10 @@ internal static class HeadlessRenderer
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)), Transform.At(0f, 0.5f, 0f));
             ecs.SpawnPointLight(new Vec3(4f, 8f, 4f), shadows: true);
 
-            // Tonemapping off, as Bevy's camera has it, so the saved picture is the light as drawn.
+            // Linear tonemapping, as Bevy's camera has it, so the saved picture is the light as drawn
+            // with no curve put on it.
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2.5f, 4.5f, 9f), Vec3.Zero, Vec3.UnitY));
-            ecs.Wrap<TonemappingRef>(camera).Value = TonemappingRef.ValueVariant.None;
+            ecs.Wrap<TonemappingRef>(camera).Value = TonemappingRef.ValueVariant.Linear;
         }, "headless_renderer.Setup");
 
         app.Update(ctx =>

@@ -1,4 +1,4 @@
-// Bevy's projection_zoom example, examples/camera/projection_zoom.rs at v0.19.1, by Bevy's
+// Bevy's projection_zoom example, examples/camera/projection_zoom.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -13,6 +13,7 @@ internal static class ProjectionZoom
     private const float OrthographicHeight = 5f;
     private const float OrthographicZoomSpeed = 0.2f;
     private const float PerspectiveZoomSpeed = 0.05f;
+    private const float PixelsPerLine = 100f;
     private static readonly (float Min, float Max) OrthographicZoom = (0.1f, 10f);
     private static readonly (float Min, float Max) PerspectiveZoom = (MathF.PI / 5f, MathF.PI - 0.2f);
 
@@ -54,7 +55,11 @@ internal static class ProjectionZoom
                 Apply(ecs);
             }
 
-            var wheel = ctx.Input.WheelY;
+            // The wheel in lines, as Bevy's to_lines gives it, a scroll in pixels, as a touchpad's
+            // is, divided by the pixels Bevy's MouseScrollPixelsPerLine makes a line, its default
+            // of a hundred, since no wrapper reaches the resource.
+            var wheel = 0f;
+            foreach (var scroll in ctx.Read<MouseWheel>()) wheel += scroll.Unit == ScrollUnit.Pixel ? scroll.Y / PixelsPerLine : scroll.Y;
             if (wheel == 0f) return;
 
             if (_orthographic) _scale = Math.Clamp(_scale * (1f - wheel * OrthographicZoomSpeed), OrthographicZoom.Min, OrthographicZoom.Max);

@@ -1,8 +1,9 @@
-// Bevy's ssao example, examples/3d/ssao.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's ssao example, examples/3d/ssao.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using System.Globalization;
 using Bevy;
+using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
@@ -10,8 +11,11 @@ namespace BevyCSharp.Examples.ThreeD;
 internal static class Ssao
 {
     private static Entity _camera, _text;
+    // Bevy's default occlusion, its thickness and its radius.
+    private const float DefaultThickness = 0.25f, DefaultRadius = 0.5f * 1.457f;
+
     private static AmbientOcclusionQuality? _quality;
-    private static float _thickness;
+    private static float _thickness, _radius;
     private static bool _temporal;
 
     public static void Build(App app)
@@ -20,10 +24,10 @@ internal static class Ssao
         {
             var ecs = ctx.Ecs;
             Render.SetAmbientLight((1f, 1f, 1f), 1000f);
-            (_quality, _thickness, _temporal) = (AmbientOcclusionQuality.High, 0.25f, true);
+            (_quality, _thickness, _radius, _temporal) = (AmbientOcclusionQuality.High, DefaultThickness, DefaultRadius, true);
 
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-2f, 2f, -2f), Vec3.Zero, Vec3.UnitY));
-            Apply();
+            Apply(ecs);
 
             var gray = Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 0.5f, 0.5f), Roughness = 1f, Reflectance = 0f });
             var cube = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
@@ -46,6 +50,12 @@ internal static class Ssao
         app.Update(ctx =>
         {
             var input = ctx.Input;
+
+            // An arrow pressed with no occlusion on puts Bevy's default on and changes that, as
+            // Bevy's update starts from the default where the camera has none.
+            if (_quality is null && (input.KeyPressed(Key.ArrowUp) || input.KeyPressed(Key.ArrowDown) || input.KeyPressed(Key.ArrowLeft) || input.KeyPressed(Key.ArrowRight)))
+                (_quality, _thickness, _radius) = (AmbientOcclusionQuality.High, DefaultThickness, DefaultRadius);
+
             var changed = true;
             if (input.KeyPressed(Key.Digit1)) _quality = null;
             else if (input.KeyPressed(Key.Digit2)) _quality = AmbientOcclusionQuality.Low;
@@ -54,26 +64,29 @@ internal static class Ssao
             else if (input.KeyPressed(Key.Digit5)) _quality = AmbientOcclusionQuality.Ultra;
             else if (input.KeyPressed(Key.ArrowUp)) _thickness = MathF.Min(_thickness * 2f, 4f);
             else if (input.KeyPressed(Key.ArrowDown)) _thickness = MathF.Max(_thickness * 0.5f, 0.0625f);
+            else if (input.KeyPressed(Key.ArrowRight)) _radius = MathF.Min(_radius * 1.25f, 8f);
+            else if (input.KeyPressed(Key.ArrowLeft)) _radius = MathF.Max(_radius * 0.8f, 0.1f);
             else if (input.KeyPressed(Key.Space)) _temporal = !_temporal;
             else changed = false;
 
             if (!changed) return;
-            Apply();
+            Apply(ctx.Ecs);
             Ui.SetText(_text, Text());
         }, "ssao.Update");
     }
 
     // High quality with temporal antialiasing, as Bevy's default occlusion and its example camera.
-    private static void Apply()
+    private static void Apply(EcsWorld ecs)
     {
         Render.SetPostProcessing(_camera, new PostSettings { Hdr = true, Msaa = 1, AntiAlias = _temporal ? AntiAliasPass.Temporal : AntiAliasPass.None });
         Render.SetAmbientOcclusion(_camera, _quality, _thickness);
+        if (ecs.Get<ScreenSpaceAmbientOcclusionRef>(_camera) is { } occlusion) occlusion.Radius = _radius;
     }
 
     private static string Text()
     {
         string Mark(AmbientOcclusionQuality? quality) => _quality == quality ? "*" : "";
-        var text = _quality is null ? "" : FormattableString.Invariant($"Constant object thickness: {_thickness} (Up/Down)\n\n");
+        var text = _quality is null ? "" : FormattableString.Invariant($"Radius: {_radius} (Left/Right)\nConstant object thickness: {_thickness} (Up/Down)\n\n");
         return text
             + "SSAO Quality:\n"
             + $"(1) {Mark(null)}Off{Mark(null)}\n"

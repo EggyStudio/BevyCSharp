@@ -10,19 +10,42 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c9c460df`. One commit, and step g is whole. ReSTIR is on with ray-traced lighting,
-chosen by measurement as item 3 asked: a Cornell box lit by a panel at 1280 by 720 on the RTX 4070
-took 0.42 ms of the GPU in Solari's passes with it off and 1.69 ms with it on, and the mean change
-of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on, the grain plain to see
-without it; Bevy leaves it off for a denoiser, and its denoiser is DLSS's, which the bridge does not
-build, so `bcs_render_set_ray_traced_lighting` turns it on, a test holding a traced camera to it,
-the remarks and `docs/ray-tracing.md` giving the numbers and an example. The reply disputes item 3's
-second half, the fields reaching `Config`, and is right: the light samples, the bounces and the
-world cache are Bevy's per camera, reached through the reflected `SolariLightingRef`, and a copy in
-`Config` would be a second home for what the camera holds; item 3 is amended. With it, g's list is
-read whole: the documents name 0.20, naga_oil is named nowhere in the bridge, BUILDING.md's package
-table has the weather and not the embedding, THIRD-PARTY-NOTICES.md names both, EXAMPLES.md is
-written from the lock with the 23 new examples in `triage.tsv`, and the release notes are the
+Reviewed up to `46f60650`. Fifteen commits, item 4's re-ports begun, 43 of the 95 that do not wait
+on Feathers. The order is the reply's and right: twenty of the 115 are built on Feathers in 0.20,
+its panes, number inputs and radio buttons in place of the helpers the ports draw, and item 4
+bridges Feathers after the other gaps, so those twenty go with it, box_shadow among them, and the
+rest go by how much Bevy changed them, directional_navigation_overrides first. Each re-port is a
+commit of its own where Bevy changed what the example does, its sentence saying what: the two
+directional navigation examples' buttons widgets with a tab index and the first focused by
+`AutoFocus`; size_constraints' rows radio groups answered by their value change; hierarchy's six
+ways of building a tree each a state that despawns it on leaving; gradients stepped by widget
+buttons; game_menu's buttons widgets and its settings radio groups; computed_states' menu a button
+and a checkbox; cooldown's foods buttons an observer answers; button a widget reporting its click as
+an `Activate` and drawn each frame from its hover and press; borders' elliptical corners through the
+reflected node; solari's R turning ReSTIR on and off; custom_post_processing and many_cubes headed
+0.20 with the render world's bind groups and a mesh compression switch listed as what the bridge
+does not reach. The 32 changed by Bevy only in paths, names and shaders moved to WESL go in two
+batches, bloom_2d stepping through `Linear` where it stepped through `None`, many_gradients saying
+it is a stress test, hello_world logging its greeting once at start, 2d_text_gizmos drawing a line
+of tabs. A printing example's capture holds the lines it logged after what it printed, since Bevy's
+own print with `info!`, the script stripping the log's colors and times (`3126b5e4`), and
+BUILDING.md's sentence mended. Pictures are captured again where a re-port changed the picture,
+eight of them. Right, each change said and the heads true, EXAMPLES.md following. Item 3's order is
+amended to the reply's. The remaining 52 and then the twenty with Feathers.
+
+Before it, one commit came to be read, and step g came to be whole. ReSTIR is on with ray-traced
+lighting, chosen by measurement as item 3 asked: a Cornell box lit by a panel at 1280 by 720 on the
+RTX 4070 took 0.42 ms of the GPU in Solari's passes with it off and 1.69 ms with it on, and the mean
+change of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on, the grain plain
+to see without it; Bevy leaves it off for a denoiser, and its denoiser is DLSS's, which the bridge
+does not build, so `bcs_render_set_ray_traced_lighting` turns it on, a test holding a traced camera
+to it, the remarks and `docs/ray-tracing.md` giving the numbers and an example. The reply disputes
+item 3's second half, the fields reaching `Config`, and is right: the light samples, the bounces and
+the world cache are Bevy's per camera, reached through the reflected `SolariLightingRef`, and a copy
+in `Config` would be a second home for what the camera holds; item 3 is amended. With it, g's list
+is read whole: the documents name 0.20, naga_oil is named nowhere in the bridge, BUILDING.md's
+package table has the weather and not the embedding, THIRD-PARTY-NOTICES.md names both, EXAMPLES.md
+is written from the lock with the 23 new examples in `triage.tsv`, and the release notes are the
 commits' sentences, as BUILDING.md has them, each change a game's author sees named in the commit
 that made it. Step h is the owner's: 29 commits since `c7f1cbc6` wait for a push, and the pack run
 for 0.4 follows a green run with Verdict 6's fix in it (Decision 8). Item 4 next, box_shadow's
@@ -37,20 +60,6 @@ the page's third repeated line is then the 67 errors `ShaderMaterialTests` asks 
 state given wherever the behaviors are rather than the behaviors held back, which comes to the same
 and is the smaller change. The suite: 1,285 passed and 2 skipped of 1,287. The rest of g and h
 remain.
-
-Before it, five commits came to be read, the first of step g. The ports (`e009a580`): the 115 whose
-code follows 0.19.1 name that release at their heads; `build/examples-table.py` keeps a head naming
-a release earlier than the lock's and links Bevy's source at that release in the example's row of
-EXAMPLES.md, until the example is written again from the current one with its head taken off, which
-BUILDING.md says in both places; and the thirteen pictures whose difference on 0.20 was named as
-Bevy's own are captured again, scroll, anchor_layout, text_wrap_debug, many_buttons, pcss, pccm,
-solari, light_probe_blending and the panels of five. Right, the heads true and the table honest
-about what each port follows, item 3's order carried out as written. The compile limit (`7d5a7bda`):
-`SampleLightTests`' remarks and BUILDING.md's line, item 1's line closed. The audio guide
-(`4323663b`) says a sound told to despawn at its end on a device is despawned by the bridge and
-reads `Once`. And two moves, `AudioTests` into Assets and `StateTests` into Core, renames whole with
-nothing in them changed, two entries off N 1.4's list, which stands at 106. The rest of g and h
-remain, the release notes among them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -186,8 +195,9 @@ from [SHARED.md](SHARED.md).
    reason and no one who decided (N 4.7). The 115 ports whose heads say v0.20.0 and whose code
    follows 0.19.1 (`384f9150`'s reply) are headed 0.19.1 with the next commit, their pictures
    written again on 0.20 where step f named the difference as Bevy's, and each is ported to 0.20's
-   code under item 4 in the order of how much Bevy changed it, box_shadow first, its head and
-   picture moving with it.
+   code under item 4 in the order of how much Bevy changed it, its head and picture moving with it,
+   the twenty built on Feathers in 0.20 (`faecca0b`'s reply) going with Feathers after the other
+   gaps.
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
@@ -404,16 +414,11 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**box_shadow waits on Feathers, so the re-ports go by size among the 95 of the 115 that do not use
-it.** Twenty are built on Feathers in 0.20, its panes, number inputs and radio buttons in place of
-the helpers the ports draw (box_shadow, color_grading, order_independent_transparency,
-display_and_visibility, ssr, light_textures, clustered_decals, animation_masks,
-light_probe_blending, contact_shadows, pcss, animation_graph, split_screen, wireframe_2d, mirror,
-pccm, clustered_decal_maps, 2d_shapes, mixed_lighting and clearcoat), and item 4 bridges Feathers
-after the other gaps, so those twenty are ported with it. The other 95 go in the order of how much
-Bevy changed them, directional_navigation_overrides first, with directional_navigation, whose input
-it shares, in this commit. In 0.20 their buttons carry the widgets' `Button` and a tab index, so a
-click moves the focus to the button, a click draws the focus again, the first button is focused by
-`AutoFocus`, and the overrides' pages are `Inherited` with the grid pages' caption at 10 px. Most of
-what else Bevy changed in them is `bsn!` in place of spawns, which a C# port has no counterpart of.
-Both are headed v0.20.0 and captured again.
+**Three of the 95 wait on what Bevy 0.20 gives them and the bridge does not reach yet.**
+multiline_text_input reads and moves the field's viewport, `EditableText::viewport`, against
+`TextLayoutInfo`'s size for a scrollbar of its own, sets `TextCursorStyle::selection_radius`, and
+opens a justify menu on a `Popover`, none of which has a row in the table. context_menu lists its
+items in a `ListBox`, which Bevy does not reflect, so no wrapper puts it on. multiple_text_inputs
+sets a field's `TextReadWriteMode` and observes `TextEditChange`, neither bridged. Each keeps its
+0.19.1 head and is ported with the gap that brings what it reads, the widgets' events or the keys
+reaching a field.

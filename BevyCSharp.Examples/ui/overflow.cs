@@ -1,4 +1,4 @@
-// Bevy's overflow example, examples/ui/scroll_and_overflow/overflow.rs at v0.19.1, by Bevy's
+// Bevy's overflow example, examples/ui/scroll_and_overflow/overflow.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -7,13 +7,13 @@ using Bevy.Reflected;
 namespace BevyCSharp.Examples.Interface;
 
 // Simple example demonstrating overflow, four frames each holding a logo larger than itself and
-// letting it spill out, cutting it off across, down, or both, the logo outlined white under the
-// pointer and red while pressed.
+// letting it spill out, cutting it off across, down, or both, the logo outlined red while the pointer
+// is over it.
 internal static class OverflowExample
 {
 
     private static readonly List<Entity> Logos = [];
-    private static readonly Dictionary<Entity, UiInteraction> Last = [];
+    private static readonly Dictionary<Entity, bool> Last = [];
 
     public static void Build(App app)
     {
@@ -49,8 +49,9 @@ internal static class OverflowExample
                 });
                 ecs.SetParent(frame, column);
 
-                var image = Ui.SpawnNode(new UiSettings { Interactive = true, MinWidth = Length.Px(100f), MinHeight = Length.Px(100f) });
+                var image = Ui.SpawnNode(new UiSettings { MinWidth = Length.Px(100f), MinHeight = Length.Px(100f) });
                 Ui.SetImage(image, logo);
+                ecs.Insert<HoveredRef>(image);
                 var outline = ecs.Insert<OutlineRef>(image);
                 (outline.Width, outline.Offset, outline.Color) = (new Val.Px(2f), new Val.Px(2f), new Color(0f, 0f, 0f, 0f));
                 ecs.SetParent(image, frame);
@@ -60,19 +61,13 @@ internal static class OverflowExample
 
         app.Update(ctx =>
         {
+            // Bevy's update_outlines, as an image's Hovered changes.
             foreach (var image in Logos)
             {
-                var interaction = Ui.InteractionOf(image);
-                if (Last.TryGetValue(image, out var last) && last == interaction) continue;
-                Last[image] = interaction;
-
-                var color = interaction switch
-                {
-                    UiInteraction.Pressed => new Color(1f, 0f, 0f),
-                    UiInteraction.Hovered => Color.White,
-                    _ => new Color(0f, 0f, 0f, 0f),
-                };
-                ctx.Ecs.Wrap<OutlineRef>(image).Color = color;
+                var hovered = ctx.Ecs.Get<HoveredRef>(image)?.Value == true;
+                if (Last.TryGetValue(image, out var last) && last == hovered) continue;
+                Last[image] = hovered;
+                ctx.Ecs.Wrap<OutlineRef>(image).Color = hovered ? new Color(1f, 0f, 0f) : new Color(0f, 0f, 0f, 0f);
             }
         }, "overflow.UpdateOutlines");
     }
