@@ -2850,7 +2850,9 @@ struct Bevy.Interop.NativeShaderProgramConfig
   NativeShaderStage Compute
   NativeShaderStage Deferred
   NativeShaderStage DrawFragment
+  NativeShaderStage DrawMesh
   NativeShaderStage DrawShadow
+  NativeShaderStage DrawTask
   NativeShaderStage DrawVertex
   NativeShaderStage Fragment
   NativeShaderStage Fragment2d
@@ -3105,6 +3107,9 @@ struct Bevy.Interop.NativeViewDraw
   int Instance
   int Mode
   int Point
+  uint GroupsX
+  uint GroupsY
+  uint GroupsZ
   uint Instances
   uint Offset
   uint Vertices
@@ -10380,7 +10385,9 @@ sealed class Bevy.ShaderProgramSettings
   ShaderStage Compute { get; init; }
   ShaderStage Deferred { get; init; }
   ShaderStage DrawFragment { get; init; }
+  ShaderStage DrawMesh { get; init; }
   ShaderStage DrawShadow { get; init; }
+  ShaderStage DrawTask { get; init; }
   ShaderStage DrawVertex { get; init; }
   ShaderStage Fragment { get; init; }
   ShaderStage Fragment2d { get; init; }
@@ -10494,6 +10501,7 @@ static class Bevy.Shaders
   static ShaderProgram ProgramOn(Entity entity)
   static bool KeepRenderingAfterErrors { get; set; }
   static bool SlangAvailable { get; }
+  static bool SupportsMeshShaders { get; }
   static bool SupportsRayQueries { get; }
   static bool TryReadBuffer(BufferRead read, out byte[]? bytes)
   static bool TryReadBuffer<T>(BufferRead read, out T[]? items) where T : unmanaged
@@ -11246,6 +11254,7 @@ enum Bevy.ViewDispatchMode : int
   Indirect = 2
   PerPixel = 0
 readonly struct Bevy.ViewDraw : IEquatable<ViewDraw>
+  (uint, uint, uint) Groups { get; init; }
   AssetHandle Buffer { get; init; }
   DrawBlend Blend { get; init; }
   FramePoint Point { get; init; }
@@ -11260,6 +11269,7 @@ readonly struct Bevy.ViewDraw : IEquatable<ViewDraw>
   override string ToString()
   static ViewDraw Fixed(ShaderInstance instance, FramePoint point, uint vertices, uint instances = 1u, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true)
   static ViewDraw Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0u, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true)
+  static ViewDraw Meshes(ShaderInstance instance, FramePoint point, uint x, uint y = 1u, uint z = 1u, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true)
   static bool op_Equality(ViewDraw left, ViewDraw right)
   static bool op_Inequality(ViewDraw left, ViewDraw right)
   string? Into { get; init; }

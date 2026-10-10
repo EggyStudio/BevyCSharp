@@ -178,6 +178,13 @@ public static unsafe partial class Shaders
     public static bool SupportsRayQueries => Native.bcs_shader_ray_queries_supported() != 0;
 
     /// <summary>
+    /// Whether this device runs mesh shaders, which a program's <see cref="ShaderProgramSettings.DrawMesh"/>
+    /// draws with, which takes Vulkan, DirectX 12 or Metal on hardware that has them. Only valid
+    /// inside a system.
+    /// </summary>
+    public static bool SupportsMeshShaders => Native.bcs_shader_mesh_shaders_supported() != 0;
+
+    /// <summary>
     /// Makes a scene rays are traced through, over the meshes of a geometry pool, with
     /// <paramref name="capacity"/> slots for the entities in it. Only valid inside a system.
     /// </summary>

@@ -844,6 +844,12 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>The fragment shader of the same.</summary>
     public NativeShaderStage Fragment2d;
+
+    /// <summary>The task shader of geometry drawn on a camera with mesh shaders.</summary>
+    public NativeShaderStage DrawTask;
+
+    /// <summary>The mesh shader of the same.</summary>
+    public NativeShaderStage DrawMesh;
 }
 
 /// <summary>How a sampler reads. Mirrors <c>BcsSamplerConfig</c>.</summary>
@@ -918,7 +924,7 @@ public unsafe struct NativeViewDraw
     /// <summary>A <see cref="FramePoint"/>.</summary>
     public int Point;
 
-    /// <summary>0 a fixed count, 1 counts read from a buffer.</summary>
+    /// <summary>0 a fixed count, 1 counts read from a buffer, 2 workgroups of mesh shaders.</summary>
     public int Mode;
 
     /// <summary>How many vertices, for mode 0.</summary>
@@ -941,6 +947,15 @@ public unsafe struct NativeViewDraw
 
     /// <summary>NUL-terminated UTF-8 naming a camera image to draw into, or null for the picture.</summary>
     public byte* Target;
+
+    /// <summary>Workgroups of mesh shaders across, for mode 2.</summary>
+    public uint GroupsX;
+
+    /// <summary>Down.</summary>
+    public uint GroupsY;
+
+    /// <summary>Deep.</summary>
+    public uint GroupsZ;
 }
 
 /// <summary>How screen-space reflections march. Mirrors <c>BcsReflectionConfig</c>.</summary>

@@ -79,8 +79,48 @@ public sealed class ShaderProgramSettings
     /// </remarks>
     public ShaderStage DrawVertex { get; init; }
 
-    /// <summary>The fragment shader of geometry drawn on a camera. Required with <see cref="DrawVertex"/>.</summary>
+    /// <summary>
+    /// The fragment shader of geometry drawn on a camera. Required with <see cref="DrawVertex"/>
+    /// or <see cref="DrawMesh"/>.
+    /// </summary>
     public ShaderStage DrawFragment { get; init; }
+
+    /// <summary>
+    /// The mesh shader of geometry drawn on a camera with mesh shaders, in place of
+    /// <see cref="DrawVertex"/>. Its entry point is called <c>mesh</c> unless it is named.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A mesh shader is a compute shader that writes vertices and triangles straight to the
+    /// rasterizer, each workgroup writing as many as it declares (<c>[outputtopology("triangle")]</c>,
+    /// <c>out vertices</c>, <c>out indices</c>, <c>SetMeshOutputCounts</c>), with no vertex buffer or
+    /// vertex shader between, as Bevy's <c>mesh_shader_intro</c> draws. A draw counts it in
+    /// workgroups (<see cref="ViewDraw.Meshes"/>). It reads the camera's inputs through
+    /// <c>import bcs_pass;</c> as a draw vertex shader does.
+    /// </para>
+    /// <para>
+    /// Slang writes mesh shaders only as SPIR-V, so this stage, <see cref="DrawTask"/> and the
+    /// <see cref="DrawFragment"/> beside them are compiled to SPIR-V and handed to the driver as
+    /// they are, with what that means for checks (see <see cref="ComputeTarget"/>), and a stage
+    /// that disagrees with the pipeline it is built into is a render error as any other
+    /// (<see cref="Shaders.KeepRenderingAfterErrors"/>). They run where the device has mesh shaders
+    /// (<see cref="Shaders.SupportsMeshShaders"/>), and draw nothing elsewhere. A fragment shader reads what the mesh shader writes for each vertex; Slang
+    /// declares nothing a fragment shader reads per triangle, so a value the same across a
+    /// triangle is written to each of its vertices. Such a draw casts no shadow.
+    /// </para>
+    /// </remarks>
+    public ShaderStage DrawMesh { get; init; }
+
+    /// <summary>
+    /// The task shader before <see cref="DrawMesh"/>, which decides how many of its workgroups run
+    /// and hands them a payload (<c>DispatchMesh</c>), Slang's amplification shader. Its entry
+    /// point is called <c>task</c> unless it is named.
+    /// </summary>
+    /// <remarks>
+    /// Where a program has one, a draw's workgroups are the task shader's, and without one they are
+    /// the mesh shader's.
+    /// </remarks>
+    public ShaderStage DrawTask { get; init; }
 
     /// <summary>
     /// The fragment shader geometry drawn on a camera is drawn into shadow maps with, where a draw
@@ -155,7 +195,7 @@ public sealed class ShaderProgramSettings
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow, Vertex2d, Fragment2d }
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow, Vertex2d, Fragment2d, DrawTask, DrawMesh }
             .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>

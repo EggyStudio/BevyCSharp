@@ -1065,7 +1065,14 @@ static ViewDispatch Indirect(ShaderInstance instance, FramePoint point, AssetHan
 
 ```csharp
 static ViewDraw Fixed(ShaderInstance instance, FramePoint point, uint vertices, uint instances = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // vertices vertices, instances times
+static ViewDraw Meshes(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // x by y by z workgroups of a program's task shader, or of its mesh shader where it has no task shader, for a program drawing with mesh shaders (DrawMesh)
 static ViewDraw Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // As many vertices and instances as four unsigned integers in a buffer say when it runs: vertices, instances, the first vertex and the first instance
+```
+
+### `ComponentArray<T>`
+
+```csharp
+int PlaceOf(Entity entity);                                     // Where an entity's entry is, its mesh tag, or -1 where it has none
 ```
 
 ## Gizmos
@@ -1651,12 +1658,6 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 
 ```csharp
 static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
-```
-
-### `ComponentArray<T>`
-
-```csharp
-int PlaceOf(Entity entity);                                     // Where an entity's entry is, its mesh tag, or -1 where it has none
 ```
 
 ### `ConsoleView`

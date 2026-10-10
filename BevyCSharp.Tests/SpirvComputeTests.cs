@@ -404,7 +404,9 @@ public sealed class SpirvComputeTests
     /// </summary>
     /// <remarks>
     /// Runs only where Solari runs, in a bridge built with <c>--solari</c> on an adapter with ray
-    /// queries, and is skipped anywhere else.
+    /// queries, and is skipped anywhere else. Given a minute for its compile, which under the whole
+    /// suite outran 1,200 frames once and passed alone, as
+    /// <see cref="ShadowsAreTracedPerPixelOnACamera"/> says of its own.
     /// </remarks>
     [SkippableFact]
     public void RaysTracedByAComputeShaderMeetTheSceneSolariKeeps()
@@ -419,6 +421,7 @@ public sealed class SpirvComputeTests
 
         var run = new PictureRun
         {
+            Frames = 3600,
             Configure = config => config.RayTracedLighting = true,
             Scene = ecs =>
             {

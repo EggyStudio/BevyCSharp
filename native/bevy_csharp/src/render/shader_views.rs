@@ -260,7 +260,7 @@ pub struct BcsViewDraw {
     pub instance: i32,
     /// As [`BcsViewDispatch::point`].
     pub point: i32,
-    /// `0` a fixed count, `1` counts read from a buffer.
+    /// `0` a fixed count, `1` counts read from a buffer, `2` workgroups of mesh shaders.
     pub mode: i32,
     pub vertices: u32,
     pub instances: u32,
@@ -275,6 +275,9 @@ pub struct BcsViewDraw {
     /// NUL-terminated UTF-8 naming the camera's images to draw into, one to a line in the order of
     /// the fragment shader's outputs, or null for the picture.
     pub target: *const core::ffi::c_char,
+    /// For `2`, how many workgroups of a program drawing with mesh shaders run, across, down and
+    /// deep.
+    pub groups: [u32; 3],
 }
 
 /// Replaces the draws a camera makes every frame with `count` of them, in order. A count of zero
@@ -352,6 +355,11 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                                 offset: draw.offset as u64,
                             }
                         }
+                        2 => DrawCount::Groups {
+                            x: draw.groups[0],
+                            y: draw.groups[1],
+                            z: draw.groups[2],
+                        },
                         _ => return status::NULL_ARG,
                     };
 
@@ -754,6 +762,7 @@ mod tests {
         assert_eq!(offset_of!(BcsViewDraw, offset), 24);
         assert_eq!(offset_of!(BcsViewDraw, depth_write), 32);
         assert_eq!(offset_of!(BcsViewDraw, target), 40);
-        assert_eq!(size_of::<BcsViewDraw>(), 48);
+        assert_eq!(offset_of!(BcsViewDraw, groups), 48);
+        assert_eq!(size_of::<BcsViewDraw>(), 64);
     }
 }

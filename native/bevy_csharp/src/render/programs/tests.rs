@@ -43,3 +43,11 @@ fn a_fragment_shader_is_given_the_preludes_it_calls_and_no_others() {
     assert!(stand_ins.contains("fn bcs_decal_tag(") && stand_ins.contains("fn bcs_pbr_light("));
     assert!(super::stand_ins("fn fragment() {}").is_none());
 }
+
+#[test]
+fn the_mesh_stand_ins_are_mesh_shaders_naga_reads() {
+    for role in [Role::DrawTask, Role::DrawMesh] {
+        let text = fallback_source(role, "entry").text().to_string();
+        naga::front::wgsl::parse_str(&text).unwrap_or_else(|error| panic!("{role:?}: {error}"));
+    }
+}

@@ -29,10 +29,16 @@ pub enum Role {
     Vertex2d = 10,
     /// The fragment shader of the same.
     Fragment2d = 11,
+    /// The task shader of geometry a program draws on a camera with mesh shaders, which decides
+    /// how many mesh shader workgroups run, compiled to SPIR-V.
+    DrawTask = 12,
+    /// The mesh shader of the same, which writes the vertices and triangles a draw's fragment
+    /// shader colors, in place of a draw vertex stage, compiled to SPIR-V.
+    DrawMesh = 13,
 }
 
 /// How many roles a program has.
-pub const ROLE_COUNT: usize = 12;
+pub const ROLE_COUNT: usize = 14;
 
 impl Role {
     pub const ALL: [Role; ROLE_COUNT] = [
@@ -48,6 +54,8 @@ impl Role {
         Role::DrawShadow,
         Role::Vertex2d,
         Role::Fragment2d,
+        Role::DrawTask,
+        Role::DrawMesh,
     ];
 
     /// The roles a material is drawn with.
@@ -70,6 +78,8 @@ impl Role {
             Role::Deferred => "deferred",
             Role::DrawShadow => "shadow",
             Role::Compute => "main",
+            Role::DrawTask => "task",
+            Role::DrawMesh => "mesh",
         }
     }
 
@@ -84,6 +94,8 @@ impl Role {
             | Role::DrawShadow
             | Role::Fragment2d => slang::Stage::Fragment,
             Role::Compute => slang::Stage::Compute,
+            Role::DrawTask => slang::Stage::Task,
+            Role::DrawMesh => slang::Stage::Mesh,
         }
     }
 
@@ -97,7 +109,12 @@ impl Role {
             | Role::Deferred => Family::Material,
             // Drawing on a camera reads what a pass does, the camera's inputs in group one and its
             // own values in group zero, so it is laid out the way a pass is.
-            Role::Pass | Role::DrawVertex | Role::DrawFragment | Role::DrawShadow => Family::Pass,
+            Role::Pass
+            | Role::DrawVertex
+            | Role::DrawFragment
+            | Role::DrawShadow
+            | Role::DrawTask
+            | Role::DrawMesh => Family::Pass,
             Role::Compute => Family::Compute,
             Role::Vertex2d | Role::Fragment2d => Family::Material2d,
         }
@@ -117,6 +134,8 @@ impl Role {
             Role::DrawShadow => "draw shadow",
             Role::Vertex2d => "2D vertex",
             Role::Fragment2d => "2D fragment",
+            Role::DrawTask => "draw task",
+            Role::DrawMesh => "draw mesh",
         }
     }
 }

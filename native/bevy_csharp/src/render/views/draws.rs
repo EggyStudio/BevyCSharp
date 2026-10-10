@@ -19,8 +19,8 @@ use bevy::render::extract_component::ExtractComponent;
 use bevy::render::globals::GlobalsBuffer;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    BindGroup, BindGroupLayoutDescriptor, Buffer, PipelineCache, ShaderStages, TextureFormat,
-    TextureSampleType, TextureView,
+    BindGroup, BindGroupLayoutDescriptor, Buffer, PipelineCache, RenderPipeline, ShaderStages,
+    TextureFormat, TextureSampleType, TextureView,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
@@ -47,12 +47,16 @@ pub enum DrawBlend {
     Add,
 }
 
-/// How many vertices and instances a draw on a camera draws.
+/// How many vertices and instances a draw on a camera draws, or how many workgroups of its task
+/// or mesh shader run, for a program drawing with mesh shaders.
 #[derive(Clone, Debug)]
 pub enum DrawCount {
     Fixed { vertices: u32, instances: u32 },
-    /// Four unsigned integers at `offset` in a buffer, written on the GPU: vertices, instances,
-    /// the first vertex and the first instance.
+    /// Workgroups of the task shader, or of the mesh shader where there is no task shader.
+    Groups { x: u32, y: u32, z: u32 },
+    /// Unsigned integers at `offset` in a buffer, written on the GPU: four for vertices,
+    /// instances, the first vertex and the first instance, or three workgroup counts for a program
+    /// drawing with mesh shaders.
     Indirect {
         buffer: Handle<ShaderBuffer>,
         offset: u64,
@@ -84,21 +88,29 @@ pub struct ViewDraw {
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewDraws(pub Vec<ViewDraw>);
 
-/// One render pipeline per program, version, target format, sample count, blend, depth write and
-/// whether there is depth at all, since a pipeline names all of them.
+/// What decides a draw's pipeline: program, version, target formats, sample count, blend, depth
+/// write and whether there is depth at all, since a pipeline names all of them.
+type PipelineKey = (u32, u32, Vec<TextureFormat>, u32, DrawBlend, bool, bool);
+
+/// One render pipeline for each [`PipelineKey`], queued in Bevy's cache, or built by the bridge for
+/// a program drawing with mesh shaders, where one that could not be built is kept as nothing so it
+/// is not tried every frame.
 #[derive(Resource, Default)]
-#[allow(clippy::type_complexity)]
-pub(super) struct ViewDrawPipelines(
-    HashMap<
-        (u32, u32, Vec<TextureFormat>, u32, DrawBlend, bool, bool),
-        bevy::render::render_resource::CachedRenderPipelineId,
-    >,
-);
+pub(super) struct ViewDrawPipelines {
+    cached: HashMap<PipelineKey, bevy::render::render_resource::CachedRenderPipelineId>,
+    meshes: HashMap<PipelineKey, Option<RenderPipeline>>,
+}
+
+/// A draw's pipeline, queued in Bevy's cache or built by the bridge.
+pub(super) enum DrawPipeline {
+    Cached(bevy::render::render_resource::CachedRenderPipelineId),
+    Own(RenderPipeline),
+}
 
 /// A draw ready to run on a view.
 pub(super) struct PreparedViewDraw {
     point: FramePoint,
-    pipeline: bevy::render::render_resource::CachedRenderPipelineId,
+    pipeline: DrawPipeline,
     pub(super) own: BindGroup,
     pub(super) count: PreparedDrawCount,
     /// The camera images it draws into instead of the picture, and whether it is tested against
@@ -118,18 +130,36 @@ pub(super) struct PreparedViewDraw {
 pub(super) enum PreparedDrawCount {
     Direct(u32, u32),
     Indirect(Buffer, u64),
+    Groups(u32, u32, u32),
+    GroupsIndirect(Buffer, u64),
+}
+
+impl PreparedDrawCount {
+    /// Draws as counted, on a pass with the draw's pipeline and groups set.
+    pub(super) fn draw(&self, pass: &mut wgpu::RenderPass<'_>) {
+        match self {
+            PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
+            PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
+            PreparedDrawCount::Groups(x, y, z) => pass.draw_mesh_tasks(*x, *y, *z),
+            PreparedDrawCount::GroupsIndirect(buffer, offset) => pass.draw_mesh_tasks_indirect(buffer, *offset),
+        }
+    }
 }
 
 /// A view's draws, ready to run.
 #[derive(Component)]
 pub struct PreparedViewDraws(pub(super) Vec<PreparedViewDraw>);
 
-/// The layout of a program's own group for a draw on a camera.
-fn draw_layout(layout: &crate::render::reflect::Layout) -> BindGroupLayoutDescriptor {
-    BindGroupLayoutDescriptor::new(
-        "bcs_view_draw_own",
-        &layout.entries(ShaderStages::VERTEX_FRAGMENT),
-    )
+/// The layout of a program's own group for a draw on a camera, seen by its task and mesh stages
+/// where it draws with mesh shaders.
+fn draw_layout(layout: &crate::render::reflect::Layout, meshes: bool) -> BindGroupLayoutDescriptor {
+    let stages = if meshes {
+        ShaderStages::TASK | ShaderStages::MESH | ShaderStages::FRAGMENT
+    } else {
+        ShaderStages::VERTEX_FRAGMENT
+    };
+
+    BindGroupLayoutDescriptor::new("bcs_view_draw_own", &layout.entries(stages))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -174,22 +204,32 @@ pub(super) fn prepare_view_draws(
                 continue;
             };
 
-            let (Some(layout), Some(vertex), Some(fragment)) = (
+            // A vertex stage, or a mesh stage with the task stage before it where there is one.
+            let meshes = super::mesh_draws::draws_meshes(&program);
+            let vertex = program.stages[Role::DrawVertex as usize].clone();
+
+            let (Some(layout), Some(fragment), true) = (
                 program.draw.clone(),
-                program.stages[Role::DrawVertex as usize].clone(),
                 program.stages[Role::DrawFragment as usize].clone(),
+                meshes || vertex.is_some(),
             ) else {
                 if program.generation > 0 {
                     say_once(format!(
-                        "A camera draws shader program {}, which needs both a draw vertex and a \
-                         draw fragment stage, so it draws nothing.",
+                        "A camera draws shader program {}, which needs a draw fragment stage and \
+                         a draw vertex or draw mesh stage before it, so it draws nothing.",
                         draw.program
                     ));
                 }
                 continue;
             };
 
-            let vertex_shader = vertex.shader.clone();
+            if meshes && draw.casts_shadows {
+                say_once(format!(
+                    "A draw on a camera of shader program {} draws with mesh shaders, which are \
+                     not drawn into shadow maps, so it casts no shadow.",
+                    draw.program
+                ));
+            }
 
             // The deferred buffers are drawn into inside the prepass and nowhere else, since by
             // the next point Bevy has copied out of them which pixels its deferred lighting lights,
@@ -304,58 +344,86 @@ pub(super) fn prepare_view_draws(
                 has_depth,
             );
 
-            let pipeline = *pipelines.0.entry(key).or_insert_with(|| {
-                let add = BlendComponent {
-                    src_factor: BlendFactor::One,
-                    dst_factor: BlendFactor::One,
-                    operation: BlendOperation::Add,
-                };
+            let add = BlendComponent {
+                src_factor: BlendFactor::One,
+                dst_factor: BlendFactor::One,
+                operation: BlendOperation::Add,
+            };
 
-                cache.queue_render_pipeline(RenderPipelineDescriptor {
-                    label: Some("bcs_view_draw".into()),
-                    layout: vec![draw_layout(&layout), inputs.layout.clone()],
-                    vertex: VertexState {
-                        shader: vertex.shader,
-                        shader_defs: Vec::new(),
-                        entry_point: None,
-                        buffers: Vec::new(),
-                        constants: Vec::new(),
-                    },
-                    fragment: Some(FragmentState {
-                        shader: fragment.shader,
-                        shader_defs: Vec::new(),
-                        entry_point: None,
-                        targets: formats
-                            .iter()
-                            .map(|format| {
-                                Some(ColorTargetState {
-                                    format: *format,
-                                    blend: match blend {
-                                        DrawBlend::Opaque => None,
-                                        DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
-                                        DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
-                                    },
-                                    write_mask: ColorWrites::ALL,
-                                })
-                            })
-                            .collect(),
-                            constants: Vec::new(),
-                    }),
-                    depth_stencil: has_depth.then(|| DepthStencilState {
-                        format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
-                        depth_write_enabled: Some(draw.depth_write),
-                        // Bevy's depth runs backwards, so nearer is greater.
-                        depth_compare: Some(CompareFunction::GreaterEqual),
-                        stencil: Default::default(),
-                        bias: Default::default(),
-                    }),
-                    multisample: MultisampleState {
-                        count: samples,
-                        ..Default::default()
-                    },
-                    ..Default::default()
+            let targets: Vec<_> = formats
+                .iter()
+                .map(|format| {
+                    Some(ColorTargetState {
+                        format: *format,
+                        blend: match blend {
+                            DrawBlend::Opaque => None,
+                            DrawBlend::Alpha => Some(BlendState::ALPHA_BLENDING),
+                            DrawBlend::Add => Some(BlendState { color: add, alpha: add }),
+                        },
+                        write_mask: ColorWrites::ALL,
+                    })
                 })
+                .collect();
+
+            let depth_stencil = has_depth.then(|| DepthStencilState {
+                format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
+                depth_write_enabled: Some(draw.depth_write),
+                // Bevy's depth runs backwards, so nearer is greater.
+                depth_compare: Some(CompareFunction::GreaterEqual),
+                stencil: Default::default(),
+                bias: Default::default(),
             });
+
+            let pipeline = match &vertex {
+                _ if meshes => {
+                    let built = pipelines.meshes.entry(key).or_insert_with(|| {
+                        super::mesh_draws::build(
+                            &render_device,
+                            &cache,
+                            &program,
+                            &programs::label(draw.program),
+                            super::mesh_draws::MeshPipeline {
+                                groups: &[draw_layout(&layout, true), inputs.layout.clone()],
+                                targets,
+                                depth: depth_stencil,
+                                samples,
+                            },
+                        )
+                    });
+
+                    match built {
+                        Some(pipeline) => DrawPipeline::Own(pipeline.clone()),
+                        None => continue,
+                    }
+                }
+                Some(vertex) => DrawPipeline::Cached(*pipelines.cached.entry(key).or_insert_with(|| {
+                    cache.queue_render_pipeline(RenderPipelineDescriptor {
+                        label: Some("bcs_view_draw".into()),
+                        layout: vec![draw_layout(&layout, false), inputs.layout.clone()],
+                        vertex: VertexState {
+                            shader: vertex.shader.clone(),
+                            shader_defs: Vec::new(),
+                            entry_point: None,
+                            buffers: Vec::new(),
+                            constants: Vec::new(),
+                        },
+                        fragment: Some(FragmentState {
+                            shader: fragment.shader,
+                            shader_defs: Vec::new(),
+                            entry_point: None,
+                            targets,
+                            constants: Vec::new(),
+                        }),
+                        depth_stencil,
+                        multisample: MultisampleState {
+                            count: samples,
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    })
+                })),
+                None => continue,
+            };
 
             // Depth alone into a shadow map, from the vertex stage or from the program's draw
             // shadow stage where it writes its own, keyed apart from every draw into a picture by
@@ -363,18 +431,18 @@ pub(super) fn prepare_view_draws(
             // light's cascades are boxes and a caster in front of one still shadows what is inside
             // it, as Bevy's own shadow pipelines do.
             let shadow_fragment = program.stages[Role::DrawShadow as usize].clone();
-            let shadow_pipeline = draw.casts_shadows.then(|| {
+            let shadow_pipeline = vertex.filter(|_| draw.casts_shadows).map(|vertex| {
                 let key = (draw.program, program.generation, Vec::new(), 1, DrawBlend::Opaque, true, true);
                 let unclipped = render_device
                     .features()
                     .contains(bevy::render::settings::WgpuFeatures::DEPTH_CLIP_CONTROL);
 
-                *pipelines.0.entry(key).or_insert_with(|| {
+                *pipelines.cached.entry(key).or_insert_with(|| {
                     cache.queue_render_pipeline(RenderPipelineDescriptor {
                         label: Some("bcs_view_draw_shadow".into()),
-                        layout: vec![draw_layout(&layout), inputs.layout.clone()],
+                        layout: vec![draw_layout(&layout, false), inputs.layout.clone()],
                         vertex: VertexState {
-                            shader: vertex_shader.clone(),
+                            shader: vertex.shader,
                             shader_defs: Vec::new(),
                             entry_point: None,
                             buffers: Vec::new(),
@@ -432,15 +500,27 @@ pub(super) fn prepare_view_draws(
                 ));
             }
 
-            let count = match &draw.count {
-                DrawCount::Fixed {
-                    vertices,
-                    instances,
-                } => PreparedDrawCount::Direct(*vertices, *instances),
-                DrawCount::Indirect { buffer, offset } => match buffers.get(buffer) {
+            let count = match (&draw.count, meshes) {
+                (DrawCount::Fixed { vertices, instances }, false) => {
+                    PreparedDrawCount::Direct(*vertices, *instances)
+                }
+                (DrawCount::Groups { x, y, z }, true) => PreparedDrawCount::Groups(*x, *y, *z),
+                (DrawCount::Indirect { buffer, offset }, meshes) => match buffers.get(buffer) {
+                    Some(gpu) if meshes => PreparedDrawCount::GroupsIndirect(gpu.buffer.clone(), *offset),
                     Some(gpu) => PreparedDrawCount::Indirect(gpu.buffer.clone(), *offset),
                     None => continue,
                 },
+                (_, meshes) => {
+                    say_once(format!(
+                        "A draw on a camera of shader program {} is counted in {}, and the program \
+                         draws with {}, so it draws nothing. ViewDraw.{} counts it as it draws.",
+                        draw.program,
+                        if meshes { "vertices" } else { "workgroups" },
+                        if meshes { "mesh shaders, which run workgroups" } else { "a vertex shader, which runs on vertices" },
+                        if meshes { "Meshes" } else { "Fixed" },
+                    ));
+                    continue;
+                }
             };
 
             prepared.push(PreparedViewDraw {
@@ -449,7 +529,7 @@ pub(super) fn prepare_view_draws(
                 own: packed.bind_group(
                     &render_device,
                     "bcs_view_draw_own",
-                    &cache.get_bind_group_layout(&draw_layout(&layout)),
+                    &cache.get_bind_group_layout(&draw_layout(&layout, meshes)),
                 ),
                 count,
                 target: (!slots.is_empty()).then(|| (slots.iter().map(|slot| slot.0.clone()).collect(), has_depth)),
@@ -631,7 +711,11 @@ pub(super) fn run_view_draws<const POINT: u8>(
         let span = diagnostics.pass_span(&mut pass, here[start].label.clone());
 
         for draw in &here[start..end] {
-            let Some(pipeline) = cache.get_render_pipeline(draw.pipeline) else {
+            let pipeline = match &draw.pipeline {
+                DrawPipeline::Cached(id) => cache.get_render_pipeline(*id),
+                DrawPipeline::Own(pipeline) => Some(pipeline),
+            };
+            let Some(pipeline) = pipeline else {
                 continue;
             };
 
@@ -639,10 +723,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
             pass.set_bind_group(0, &draw.own, &[]);
             pass.set_bind_group(1, group, &offsets);
 
-            match &draw.count {
-                PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
-                PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
-            }
+            draw.count.draw(&mut pass);
         }
 
         span.end(&mut pass);

@@ -11,7 +11,7 @@ use bevy::render::renderer::{RenderContext, ViewQuery};
 use bevy::render::texture::FallbackImage;
 use bevy::render::view::{ViewUniformOffset, ViewUniforms};
 
-use super::draws::{PreparedDrawCount, PreparedViewDraws};
+use super::draws::PreparedViewDraws;
 use super::{SceneLights, ViewEnvironmentTextures, ViewInputSources, ViewInputs, ViewLights};
 
 /// Draws every draw that casts shadows into each of the camera's directional shadow cascades,
@@ -101,10 +101,7 @@ pub(super) fn run_view_draw_shadows(
             pass.set_bind_group(0, &draw.own, &[]);
             pass.set_bind_group(1, &group, &offsets);
 
-            match &draw.count {
-                PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
-                PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
-            }
+            draw.count.draw(&mut pass);
         }
     }
 }
@@ -175,9 +172,6 @@ pub(super) fn run_shared_draw_shadows(
         pass.set_bind_group(0, &draw.own, &[]);
         pass.set_bind_group(1, &group, &offsets);
 
-        match &draw.count {
-            PreparedDrawCount::Direct(vertices, instances) => pass.draw(0..*vertices, 0..*instances),
-            PreparedDrawCount::Indirect(buffer, offset) => pass.draw_indirect(buffer, *offset),
-        }
+        draw.count.draw(&mut pass);
     }
 }

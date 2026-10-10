@@ -199,11 +199,28 @@ public static unsafe partial class Shaders
                 nameof(settings));
         }
 
-        if (settings.DrawFragment.IsSet != settings.DrawVertex.IsSet)
+        if (settings.DrawVertex.IsSet && settings.DrawMesh.IsSet)
         {
             throw new ArgumentException(
-                "Drawing on a camera takes both a draw vertex shader, which places what is drawn "
-                + "out of buffers, and a draw fragment shader, which colors it.",
+                "Geometry drawn on a camera is placed by a draw vertex shader or written by a draw "
+                + "mesh shader, and a program has one of the two.",
+                nameof(settings));
+        }
+
+        if (settings.DrawTask.IsSet && !settings.DrawMesh.IsSet)
+        {
+            throw new ArgumentException(
+                "A draw task shader decides how many of the draw mesh shader's workgroups run, so "
+                + "it needs one.",
+                nameof(settings));
+        }
+
+        if (settings.DrawFragment.IsSet != (settings.DrawVertex.IsSet || settings.DrawMesh.IsSet))
+        {
+            throw new ArgumentException(
+                "Drawing on a camera takes a draw vertex shader, which places what is drawn out of "
+                + "buffers, or a draw mesh shader, which writes it, and a draw fragment shader, "
+                + "which colors it.",
                 nameof(settings));
         }
 
@@ -271,6 +288,8 @@ public static unsafe partial class Shaders
                     DrawShadow = Stage(settings.DrawShadow),
                     Vertex2d = Stage(settings.Vertex2d),
                     Fragment2d = Stage(settings.Fragment2d),
+                    DrawTask = Stage(settings.DrawTask),
+                    DrawMesh = Stage(settings.DrawMesh),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);

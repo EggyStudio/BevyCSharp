@@ -430,7 +430,7 @@ mutation_by_reflection	n/a	Rust's reflection over the types a Rust program decla
 pipeline_constants	can
 sprite_material	can
 deferred_raymarch	can	as a draw over the whole view inside the camera's prepass, into the G-buffer and the lighting pass ids, with a shadow stage of its own
-mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build
+mesh_shader_intro	can	each cube's color written once a corner rather than once a triangle, since Slang declares nothing a fragment shader reads per triangle, which draws the same cubes
 many_meshlet_materials	can	needs a bridge built with --meshlet
 overflow_transform	can	through Bevy's reflected UiTransform
 fixed_node	can	through Bevy's reflected FixedNode

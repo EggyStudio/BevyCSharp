@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>Geometry a camera draws every frame out of buffers. See <see cref="Shaders.SetViewDraws"/>.</summary>
-/// <remarks>Made with <see cref="Fixed"/> or <see cref="Indirect"/>.</remarks>
+/// <remarks>Made with <see cref="Fixed"/>, <see cref="Meshes"/> or <see cref="Indirect"/>.</remarks>
 public readonly record struct ViewDraw
 {
     /// <summary>The instance whose program and values draw.</summary>
@@ -18,6 +18,12 @@ public readonly record struct ViewDraw
 
     /// <summary>How many instances, for a fixed draw.</summary>
     public uint Instances { get; init; }
+
+    /// <summary>
+    /// How many workgroups run across, down and deep, for a program drawing with mesh shaders
+    /// (<see cref="ShaderProgramSettings.DrawMesh"/>).
+    /// </summary>
+    public (uint X, uint Y, uint Z) Groups { get; init; }
 
     /// <summary>The buffer an indirect draw reads its counts from.</summary>
     public AssetHandle Buffer { get; init; }
@@ -111,8 +117,30 @@ public readonly record struct ViewDraw
     };
 
     /// <summary>
+    /// <paramref name="x"/> by <paramref name="y"/> by <paramref name="z"/> workgroups of a
+    /// program's task shader, or of its mesh shader where it has no task shader, for a program
+    /// drawing with mesh shaders (<see cref="ShaderProgramSettings.DrawMesh"/>).
+    /// </summary>
+    public static ViewDraw Meshes(
+        ShaderInstance instance,
+        FramePoint point,
+        uint x,
+        uint y = 1,
+        uint z = 1,
+        DrawBlend blend = DrawBlend.Opaque,
+        bool writesDepth = true) => new()
+    {
+        Instance = instance,
+        Point = point,
+        Groups = (x, y, z),
+        Blend = blend,
+        WritesDepth = writesDepth,
+    };
+
+    /// <summary>
     /// As many vertices and instances as four unsigned integers in a buffer say when it runs:
-    /// vertices, instances, the first vertex and the first instance.
+    /// vertices, instances, the first vertex and the first instance. For a program drawing with mesh
+    /// shaders, as many workgroups as three unsigned integers there say instead.
     /// </summary>
     public static ViewDraw Indirect(
         ShaderInstance instance,

@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**301 written, 17 written in part, 4 can be written, 60 missing and 56 do not apply.** Of the 382 that apply, 322 can be written with what is bridged, 17 of them leaving something out.
+**302 written, 17 written in part, 4 can be written, 59 missing and 56 do not apply.** Of the 382 that apply, 323 can be written with what is bridged, 17 of them leaving something out.
 
 **141 of the 156 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -32,7 +32,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
 | [Shaders](#shaders) | 22 | 0 | 0 | 2 | 3 | 6 of 8 |
-| [Shaders Advanced](#shaders-advanced) | 2 | 0 | 0 | 1 | 1 | 1 of 1 |
+| [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 11 | 7 | 1 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 3 | 0 | 1 | 0 | 10 |  |
-| **All** | **301** | **17** | **4** | **60** | **56** | **141 of 156** |
+| **All** | **302** | **17** | **4** | **59** | **56** | **141 of 156** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -461,7 +461,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`deferred_raymarch`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/deferred_raymarch.rs) | Writes a raymarched SDF into the deferred gbuffer so it is lit by the standard PBR deferred lighting pass | [written](../BevyCSharp.Examples/shader_advanced/deferred_raymarch.cs), as a draw over the whole view inside the camera's prepass, into the G-buffer and the lighting pass ids, with a shadow stage of its own |
 | [`fullscreen_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/fullscreen_material.rs) | Demonstrates how to write a fullscreen material | [written](../BevyCSharp.Examples/shader_advanced/fullscreen_material.cs), as a pass the camera runs |
 | [`manual_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/manual_material.rs) | Demonstrates how to implement a material manually using the mid-level render APIs | does not apply, writes a material with Rust's mid-level render API |
-| [`mesh_shader_intro`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/mesh_shader_intro.rs) | Demonstrates how to use Task/Amplification/Mesh Shaders | missing, mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build |
+| [`mesh_shader_intro`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/mesh_shader_intro.rs) | Demonstrates how to use Task/Amplification/Mesh Shaders | [written](../BevyCSharp.Examples/shader_advanced/mesh_shader_intro.cs), each cube's color written once a corner rather than once a triangle, since Slang declares nothing a fragment shader reads per triangle, which draws the same cubes |
 
 ## State
 

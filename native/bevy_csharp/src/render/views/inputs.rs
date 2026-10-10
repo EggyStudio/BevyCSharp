@@ -168,9 +168,16 @@ pub(super) fn init_inputs(
     render_device: Res<RenderDevice>,
     queue: Res<bevy::render::renderer::RenderQueue>,
 ) {
+    // Seen by mesh shaders too where the device runs them, which a draw drawing with them reads
+    // the view and time through, and only there, since a layout naming them is refused elsewhere.
+    let mut visibility = ShaderStages::VERTEX | ShaderStages::FRAGMENT | ShaderStages::COMPUTE;
+    if super::mesh_draws::supported(&render_device) {
+        visibility |= ShaderStages::TASK | ShaderStages::MESH;
+    }
+
     let entry = |binding: u32, ty: BindingType| BindGroupLayoutEntry {
         binding,
-        visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT | ShaderStages::COMPUTE,
+        visibility,
         ty,
         count: None,
     };

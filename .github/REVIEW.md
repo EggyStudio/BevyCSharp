@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4e3dd60a`. One commit, pipeline constants: a Slang `[SpecializationConstant]`, an
+Reviewed up to `2359425d`. One commit, and item 4's shader gaps are whole:
+`App.AddComponentArray<T>` keeps every entity's component in one storage buffer a shader reads at
+the entity's mesh tag, as Bevy's `GpuComponentArrayBuffer` does, managed-side alone over the buffer
+calls and the reflected mesh tag, so no bridge change and no ABI change. At the end of every frame
+it scans the entities with the component: a new one takes the next place and the tag, a changed one
+is written again, one that lost the component or was despawned gives its place to the last entry,
+which is retagged, and a living entity that lost it loses its tag; the buffer grows by half as
+Bevy's does and is written whole only when something changed; a scan rather than component hooks,
+since hooks are one a component type and the game's to use, said in the remarks; and a struct shared
+with a structured buffer spells its padding out, which the guide says. The test draws two squares of
+one material in their entries' colors, recolors one and despawns the other, the survivor keeping its
+color through its new tag; gpu_component_array_buffer is written with .NET's random numbers from
+Bevy's seed, the triage saying the cubes fall in other places and no bare-Bevy frame compared for
+it, rightly; the guide's nine C# blocks build against a scratch pack. Right, the array built from
+what the bridge already gives and its two limits said where a reader finds them, the tag the array's
+and one entity in two arrays unsupported as in Bevy. The suite: 1,314 passed and 2 skipped.
+mesh_shader_intro next as a gap of its own, Slang's task and mesh stages through SPIR-V on Vulkan,
+which this machine's driver reports, as item 4 has it.
+
+Before it, one commit came to be read, pipeline constants: a Slang `[SpecializationConstant]`, an
 `override` in WGSL, is set on a material by name as any value is and compiled into pipelines of its
 own for each set of values. Reflection reads each constant's name, id and type from Slang's JSON for
 those the stage's WGSL kept, since naga refuses a key its module does not declare, so each stage
@@ -40,33 +59,6 @@ and away, and the norm's and cheat sheet's tests and the examples table's check 
 being examples alone. Right. pipeline_constants and gpu_component_array_buffer in shaders next, as
 item 4 has it.
 
-Before it, one commit came to be read, and item 4's 2D materials came to be whole: a 2D shader
-material on a sprite draws it as Bevy's `SpriteMaterial` does. The component on the sprite is Bevy's
-own `SpriteMaterial` of the bridge's material, so Bevy's count of a sprite's materials holds, the
-sprite's own material kept off while the component is on and given back when it goes; the bridge's
-type answers Bevy's `AsBindGroup` and `MaterialExtension2d` with nothing, since the plugin that
-would ask is never added, which the remarks say; what draws the sprite is a copy of the material
-carrying a sprite part made as Bevy makes the sprite's own, shared by sprites that say the same
-thing so they stay in one batch; the sprite is bound at 100 to 102 of the material's group, Bevy's
-own numbers as a storage buffer, the image and its sampler, which reflection leaves out of the
-values' layout; the vertex stage is Bevy's sprite vertex shader reading the sprite there, a program
-with its own 2D vertex shader drawing no sprite and one reading `bcs_sprite` no mesh, both said once
-and tested; `bcs_sprite` ports Bevy's sprite functions without the bindless index; and
-`CreateMaterial2d`'s alpha is optional, none drawing a mesh opaque and a sprite by its own mode, as
-a Bevy sprite material naming none does, a given mode setting the sprite part's flags so the mask's
-cutoff applies. ABI 239. sprite_material and shader_material_2d_bindless are written and each
-capture matches bare Bevy's frame with no pixel past 3%, sprite_material at amount 0.5 as well,
-which checks the noise and the sprite's layout; five tests of seven cases hold the colors through
-the entity and the sprite's own change, size and anchor, three alpha cases and the two refusals.
-Right, Bevy's own component kept so Bevy's count holds, the one plugin Bevy would add done by the
-bridge where a type of the bridge's cannot answer for every program, and the matches to bare Bevy
-the proof. One bound moved with its reason written: `SpirvComputeTests`' traced shadows outran 1,200
-frames a second time, every shader compiled cold because the bridge's modules changed, and the run
-is given 3,600 frames, which it ends well short of once the program is ready, a wait and not a
-measure, so right. The suite: 1,310 passed and 2 skipped. SHARED.md takes the slangc trap the reply
-offers, a fragment shader's struct of inputs kept whole in WGSL. inline_image and fixed_node next,
-through the reflected `InlineImage` and `FixedNode`, as item 4 has it.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -81,22 +73,22 @@ from [SHARED.md](SHARED.md).
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
    425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
    test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the runs of
-   `7849ecf6`, `d6764154`, `827b382e` and `095bccd7` are green on all three as well, and the pack
-   job did not run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start
-   (Decision 8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and
-   `61f80bc6` asks whether it is there first, since the runtime's Windows delete throws on a missing
-   folder, a fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at
-   `c46fd24e`, the window's image holding its zeros until the pass that draws it has its pipeline,
-   and the test captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a
-   window and `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
-   `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the harness adding
-   `Screen` beside the behaviors it discovers, so the warning shows once, from the test that asks
-   for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7).
-   Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps
-   in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The cheat sheet is its
-   writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which is in, and the
-   owner's `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
+   `7849ecf6`, `d6764154`, `827b382e`, `095bccd7` and `2359425d` are green on all three as well, and
+   the pack job did not run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's
+   to start (Decision 8). Verdict 7 is settled at `b0fa935e`, the page removed before the script
+   starts, and `61f80bc6` asks whether it is there first, since the runtime's Windows delete throws
+   on a missing folder, a fresh checkout's first run. `SpawnedWindowTests`' black capture is traced
+   at `c46fd24e`, the window's image holding its zeros until the pass that draws it has its
+   pipeline, and the test captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s
+   remarks for a window and `docs/window.md` say so with step g. The page's repeated lines carried
+   116 warnings of `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the
+   harness adding `Screen` beside the behaviors it discovers, so the warning shows once, from the
+   test that asks for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks
+   for (Decision 7). Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green
+   and item 3's steps in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The
+   cheat sheet is its writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which
+   is in, and the owner's `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. Each push's run
+   is read by the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -220,24 +212,24 @@ from [SHARED.md](SHARED.md).
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
    field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials
    (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface (`095bccd7`),
-   `pipeline_constants` (`4e3dd60a`) and `gpu_component_array_buffer` in shaders, mesh shaders from
-   Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then
-   names most. When the captures have settled, they are compared whole with checked-in references by
-   the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for its
-   scenes. Transmission's glass spheres are missing from about one capture in four with TAA on,
-   before `6a84286` as after it, so the cause is found before that job is red for them, or the
-   example is compared with its spheres left out and the reason beside it. `dragdrop_picking`'s pale
-   preview draws over the words Bevy sorts it under (`b548987`'s reply), untraced, and is traced
-   before those captures are compared, as is the gallery's anisotropic spheres drawing blown white
-   under SSAO with forward rendering though they have tangents and draw right under deferred, Bevy's
-   prepass normal for an anisotropic material the suspect (`edd577c`'s reply), and the camera's
-   volumetric fog hazing the whole picture, the sky with it, once a depth prepass is on the camera,
-   which the hall works round by putting the fog on the camera only while it is inside (`6a19213`'s
-   reply). Feathers' three examples with `feathers_number_input` and the three camera controllers
-   follow the other gaps, their crates allowed (Decisions 11 and 12) on the owner's word in the
-   working session, and the four font examples stay missing (Decision 13). `compressed_image_saver`
-   comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
-   memory after the kill of 2026-10-08.
+   `pipeline_constants` (`4e3dd60a`) and `gpu_component_array_buffer` (`2359425d`) in shaders, mesh
+   shaders from Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what
+   the table then names most. When the captures have settled, they are compared whole with
+   checked-in references by the workflow, a small share of pixels allowed to differ between devices,
+   as 3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture
+   in four with TAA on, before `6a84286` as after it, so the cause is found before that job is red
+   for them, or the example is compared with its spheres left out and the reason beside it.
+   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
+   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
+   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
+   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
+   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
+   prepass is on the camera, which the hall works round by putting the fog on the camera only while
+   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
+   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
+   owner's word in the working session, and the four font examples stay missing (Decision 13).
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -422,4 +414,9 @@ from [SHARED.md](SHARED.md).
     game's session's to commit.
 
 ## Replies
+
+Shared: Slang 2026.18.2 writes task and mesh shaders only as SPIR-V, and declares nothing a fragment
+shader reads per triangle. `SV_CullPrimitive` goes in a mesh shader's `out primitives`, and a value
+meant once a triangle is written to each of its corners for a fragment shader to read it
+(`mesh_shader_intro.slang`, `MeshShaderTests`).
 

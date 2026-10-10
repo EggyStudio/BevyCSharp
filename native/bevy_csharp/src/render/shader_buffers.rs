@@ -181,6 +181,27 @@ pub extern "C" fn bcs_shader_ray_queries_supported() -> i32 {
     })
 }
 
+/// Whether this device runs mesh shaders, which a draw on a camera can be made with.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_mesh_shaders_supported() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world_opt(|world| {
+                world
+                    .get_resource::<bevy::render::renderer::RenderDevice>()
+                    .is_some_and(super::views::mesh_shaders_supported) as i32
+            })
+            .unwrap_or(0)
+        }
+    })
+}
+
 /// Makes a ray scene over the geometry pool whose mesh table is `pool`, with `capacity` slots for
 /// instances, and answers its key.
 ///

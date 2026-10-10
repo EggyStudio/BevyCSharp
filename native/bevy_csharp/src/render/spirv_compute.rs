@@ -53,7 +53,51 @@ pub fn build(
     let wgpu = device.wgpu_device();
     let scope = wgpu.push_error_scope(wgpu::ErrorFilter::Validation);
 
-    let module = if device.features().contains(wgpu::Features::PASSTHROUGH_SHADERS) {
+    let module = module(device, label, spirv, entry);
+    let layout = pipeline_layout(device, cache, label, groups);
+
+    let pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+        label: Some(label),
+        layout: Some(&layout),
+        module: &module,
+        entry_point: Some(entry),
+        compilation_options: Default::default(),
+        cache: None,
+    });
+
+    // Caught here rather than by Bevy's handler of uncaught errors, which ends the app, as a
+    // pipeline Bevy's cache could not build only goes unbuilt.
+    if let Some(Some(error)) = bevy::tasks::futures::now_or_never(scope.pop()) {
+        super::material::say_once(format!("A SPIR-V compute shader could not be built. {error}"));
+        return None;
+    }
+
+    Some(pipeline)
+}
+
+/// The layout of a pipeline whose groups are `groups`, in order.
+pub fn pipeline_layout(
+    device: &RenderDevice,
+    cache: &PipelineCache,
+    label: &str,
+    groups: &[BindGroupLayoutDescriptor],
+) -> wgpu::PipelineLayout {
+    let layouts: Vec<_> = groups.iter().map(|group| cache.get_bind_group_layout(group)).collect();
+    let bound: Vec<Option<&wgpu::BindGroupLayout>> = layouts.iter().map(|layout| Some(&**layout)).collect();
+
+    device.wgpu_device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some(label),
+        bind_group_layouts: &bound,
+        immediate_size: 0,
+    })
+}
+
+/// A shader module of SPIR-V slangc wrote with one entry point, handed to the driver as it is
+/// where the device takes it so, and otherwise read through naga as Bevy would.
+pub fn module(device: &RenderDevice, label: &str, spirv: &[u32], entry: &str) -> wgpu::ShaderModule {
+    let wgpu = device.wgpu_device();
+
+    if device.features().contains(wgpu::Features::PASSTHROUGH_SHADERS) {
         // SAFETY: the words are what slangc wrote, handed to the driver as Bevy hands SPIR-V to it,
         // with the entry point named as wgpu asks.
         unsafe {
@@ -79,31 +123,5 @@ pub fn build(
                 wgpu::ShaderRuntimeChecks::unchecked(),
             )
         }
-    };
-
-    let layouts: Vec<_> = groups.iter().map(|group| cache.get_bind_group_layout(group)).collect();
-    let bound: Vec<Option<&wgpu::BindGroupLayout>> = layouts.iter().map(|layout| Some(&**layout)).collect();
-    let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        label: Some(label),
-        bind_group_layouts: &bound,
-        immediate_size: 0,
-    });
-
-    let pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-        label: Some(label),
-        layout: Some(&layout),
-        module: &module,
-        entry_point: Some(entry),
-        compilation_options: Default::default(),
-        cache: None,
-    });
-
-    // Caught here rather than by Bevy's handler of uncaught errors, which ends the app, as a
-    // pipeline Bevy's cache could not build only goes unbuilt.
-    if let Some(Some(error)) = bevy::tasks::futures::now_or_never(scope.pop()) {
-        super::material::say_once(format!("A SPIR-V compute shader could not be built. {error}"));
-        return None;
     }
-
-    Some(pipeline)
 }

@@ -297,6 +297,62 @@ cube, so it shadows Bevy's geometry and its own. Its vertex shader runs once for
 with that view in `bcs_pass::view`, so a shader placing geometry from the view places it as the
 light sees it without knowing it is drawing a shadow.
 
+**With mesh shaders.** A program with a `DrawMesh` stage in place of `DrawVertex` draws with mesh
+shaders, where the device has them (`Shaders.SupportsMeshShaders`). A mesh shader is a compute
+shader that writes vertices and triangles straight to the rasterizer, as many a workgroup as it
+declares, and a `DrawTask` stage before it, where the program has one, decides how many of its
+workgroups run and hands them a payload, as Bevy's mesh_shader_intro draws its cubes. The draw is
+counted in workgroups, of the task shader where there is one and of the mesh shader otherwise, fixed
+with `ViewDraw.Meshes` or read from three unsigned integers in a buffer with `ViewDraw.Indirect`:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+var cubes = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+{
+    DrawTask = "shaders/cubes.slang",                 // entry points task, mesh and fragment
+    DrawMesh = "shaders/cubes.slang",
+    DrawFragment = "shaders/cubes.slang",
+}));
+
+Shaders.SetViewDraws(camera, ViewDraw.Meshes(cubes, FramePoint.AfterOpaque, 1));
+```
+
+```slang
+import bcs_pass;
+
+struct Corner
+{
+    float4 position : SV_Position;
+    float4 color : COLOR0;
+};
+
+[shader("mesh")]
+[numthreads(1, 1, 1)]
+[outputtopology("triangle")]
+void mesh(uint3 group : SV_GroupID, out vertices Corner corners[3], out indices uint3 triangles[1])
+{
+    SetMeshOutputCounts(3, 1);
+
+    let at = float3(group);
+    corners[0].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at, 1.0));
+    corners[1].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at + float3(1, 0, 0), 1.0));
+    corners[2].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at + float3(0, 1, 0), 1.0));
+
+    for (uint i = 0; i < 3; i++)
+        corners[i].color = float4(float3(group) / 8.0, 1.0);
+
+    triangles[0] = uint3(0, 1, 2);
+}
+```
+
+Slang writes mesh shaders only as SPIR-V, so the three stages are compiled to it and handed to the
+driver as they are, with fewer checks than WGSL is given. The fragment shader reads what the mesh
+shader writes for each corner, and Slang declares nothing a fragment shader reads per triangle, so
+a value the same across a triangle is written to each of its corners. A triangle is left out with
+`SV_CullPrimitive` in the mesh shader's `out primitives`. Such a draw casts no shadow.
+
 **Into the deferred buffers.** A draw at `FramePoint.InPrepass` runs inside the camera's prepass,
 once Bevy's geometry has drawn depth, normals, motion and the G-buffer and before anything reads
 them, so everything after it sees what it drew as it sees Bevy's own geometry. It draws into

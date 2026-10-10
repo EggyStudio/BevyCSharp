@@ -330,6 +330,7 @@ internal static class Catalog
         new("custom_shader_instancing", CustomShaderInstancing.Build),
         new("deferred_raymarch", DeferredRaymarch.Build),
         new("fullscreen_material", FullscreenMaterial.Build),
+        new("mesh_shader_intro", MeshShaderIntro.Build),
         new("texture_binding_array", TextureBindingArray.Build),
 
         // UI (User Interface)

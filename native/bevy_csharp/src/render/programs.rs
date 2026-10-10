@@ -398,7 +398,12 @@ fn create_in(programs: &mut ShaderPrograms, description: ProgramDescription) -> 
             },
         };
 
-        let spirv = role == Role::Compute && description.compute_spirv;
+        // Mesh shaders reach the driver as SPIR-V, which is the one way Slang writes them, and the
+        // fragment shader beside them with them, since one pipeline holds all three.
+        let meshes = description.stages[Role::DrawMesh as usize].is_some();
+        let spirv = (role == Role::Compute && description.compute_spirv)
+            || matches!(role, Role::DrawTask | Role::DrawMesh)
+            || (role == Role::DrawFragment && meshes);
         let unit = unit_for(programs, role, path, file.describe(), &entry, &description.defines, spirv);
         programs.units[unit].programs.push(id);
         stages[role as usize] = Some(unit);
@@ -709,7 +714,9 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
         // Every stage of a material, and every stage of a draw, share one group, so their layouts
         // merge.
         let merged_into = match role {
-            Role::DrawVertex | Role::DrawFragment | Role::DrawShadow => Some(&mut draw),
+            Role::DrawVertex | Role::DrawFragment | Role::DrawShadow | Role::DrawTask | Role::DrawMesh => {
+                Some(&mut draw)
+            }
             _ if role.family() == Family::Material => Some(&mut material),
             _ if role.family() == Family::Material2d => Some(&mut material2d),
             _ => None,

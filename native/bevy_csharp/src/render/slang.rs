@@ -113,6 +113,9 @@ pub enum Stage {
     Vertex,
     Fragment,
     Compute,
+    /// A mesh pipeline's task shader, which Slang calls an amplification shader, as HLSL does.
+    Task,
+    Mesh,
 }
 
 impl Stage {
@@ -122,6 +125,8 @@ impl Stage {
             Stage::Vertex => "vertex",
             Stage::Fragment => "fragment",
             Stage::Compute => "compute",
+            Stage::Task => "amplification",
+            Stage::Mesh => "mesh",
         }
     }
 }

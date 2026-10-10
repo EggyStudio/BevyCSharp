@@ -582,6 +582,25 @@ fn {entry}(vertex_in: Vertex) -> VertexOutput {{
              discard;\n}}\n"
         )),
 
+        // No workgroups and no triangles, for mesh stages that have never compiled. A mesh draw
+        // runs only the SPIR-V its stages compiled to, so these are never run, and they are naga's
+        // WGSL for mesh shaders because a stand-in has to be a shader of the stage's kind.
+        Role::DrawTask => Source::Wgsl(format!(
+            "enable wgpu_mesh_shader;\n\nvar<task_payload> nothing: u32;\n\n\
+             @task\n@payload(nothing)\n@workgroup_size(1)\n\
+             fn {entry}() -> @builtin(mesh_task_size) vec3<u32> {{\n    return vec3<u32>(0u);\n}}\n"
+        )),
+        Role::DrawMesh => Source::Wgsl(format!(
+            "enable wgpu_mesh_shader;\n\n\
+             struct Corner {{\n    @builtin(position) position: vec4<f32>,\n}}\n\n\
+             struct Triangle {{\n    @builtin(triangle_indices) indices: vec3<u32>,\n}}\n\n\
+             struct Nothing {{\n    @builtin(vertices) vertices: array<Corner, 1>,\n    \
+             @builtin(primitives) primitives: array<Triangle, 1>,\n    \
+             @builtin(vertex_count) vertex_count: u32,\n    @builtin(primitive_count) primitive_count: u32,\n}}\n\n\
+             var<workgroup> nothing: Nothing;\n\n\
+             @mesh(nothing)\n@workgroup_size(1)\nfn {entry}() {{\n    nothing.vertex_count = 0u;\n    nothing.primitive_count = 0u;\n}}\n"
+        )),
+
         // Does nothing, which is the only thing a compute shader can safely do without knowing
         // what the buffers it was handed hold.
         Role::Compute => Source::Wgsl(format!("@compute @workgroup_size(1)\nfn {entry}() {{\n}}\n")),

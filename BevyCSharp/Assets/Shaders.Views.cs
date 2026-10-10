@@ -555,7 +555,7 @@ public static unsafe partial class Shaders
                 {
                     Instance = draw.Instance.Id,
                     Point = (int)draw.Point,
-                    Mode = draw.FromBuffer ? 1 : 0,
+                    Mode = draw.FromBuffer ? 1 : draw.Groups != default ? 2 : 0,
                     Vertices = draw.Vertices,
                     Instances = draw.Instances,
                     Buffer = draw.Buffer.Key,
@@ -563,6 +563,9 @@ public static unsafe partial class Shaders
                     Blend = (int)draw.Blend,
                     DepthWrite = (draw.WritesDepth ? 1 : 0) | (draw.CastsShadows ? 2 : 0),
                     Target = (byte*)target,
+                    GroupsX = draw.Groups.X,
+                    GroupsY = draw.Groups.Y,
+                    GroupsZ = draw.Groups.Z,
                 };
             }
 
