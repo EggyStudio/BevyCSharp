@@ -598,7 +598,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`character_creation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/character_creation.rs) | Demonstrates how to use headless widgets to power a Character Creation Menu | missing, the select widgets' changes observed as they happen, which reach C# only through each widget's state read every frame |
 | [`context_menu`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/context_menu.rs) | Example of a context menu | [written](../BevyCSharp.Examples/usage/context_menu.cs), its nodes' interactions read as they change, where Bevy observes its pointer events |
-| [`cooldown`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/usage/cooldown.rs) | Example for cooldown on button clicks | [written](../BevyCSharp.Examples/usage/cooldown.cs) |
+| [`cooldown`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/cooldown.rs) | Example for cooldown on button clicks | [written](../BevyCSharp.Examples/usage/cooldown.cs) |
 | [`debug_frustum_culling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/usage/debug_frustum_culling.rs) | Example demonstrating how to debug frustum culling | [written](../BevyCSharp.Examples/usage/debug_frustum_culling.cs), each shape's box tested against the small camera's frustum, read through Bevy's reflected Frustum, where Bevy reads the camera's visible entities |
 
 ## Window

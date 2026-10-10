@@ -1,4 +1,4 @@
-// Bevy's cooldown example, examples/usage/cooldown.rs at v0.19.1, by Bevy's contributors under MIT
+// Bevy's cooldown example, examples/usage/cooldown.rs at v0.20.0, by Bevy's contributors under MIT
 // or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -50,13 +50,13 @@ internal static class CooldownExample
         {
             var button = Ui.SpawnNode(new UiSettings
             {
-                Interactive = true,
                 Width = Length.Px(80f),
                 Height = Length.Px(80f),
                 Direction = UiDirection.ColumnReverse,
                 Color = slate400,
             });
             Ui.SetImage(button, new UiImageSettings { Image = texture, Atlas = layout, Frame = index });
+            ecs.Insert<ButtonRef>(button);
             ecs.SetName(button, name);
             ecs.Add(button, new Cooldown { Timer = GameTimer.FromSeconds(cooldown, TimerMode.Once) });
             ecs.SetParent(button, row);
@@ -64,7 +64,32 @@ internal static class CooldownExample
             ecs.SetParent(Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(0f), Color = slate50 }), button);
         }
 
-        Text = Ui.SpawnText("*Click some food to eat it*", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+        var status = Ui.SpawnNode(new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
+        Text = Ui.SpawnText("*Click some food to eat it*", new UiSettings());
+        ecs.SetParent(Text, status);
+
+        ecs.Observe<Activate>(OnActivateStartCooldown);
+    }
+
+    // Bevy's on_activate_start_cooldown, an activated food eaten and its cooldown started, or the
+    // time left on it said where it is cooling down.
+    private static void OnActivateStartCooldown(On<Activate> on)
+    {
+        var ecs = on.Ecs;
+        if (!ecs.TryGet<Cooldown>(on.Entity, out var cooldown)) return;
+
+        var name = ecs.NameOf(on.Entity);
+        if (!ecs.Has<ActiveCooldown>(on.Entity))
+        {
+            cooldown.Timer.Reset();
+            ecs.Set(on.Entity, cooldown);
+            ecs.Add(on.Entity, new ActiveCooldown());
+            Ui.SetText(Text, $"You ate {name}");
+        }
+        else
+        {
+            Ui.SetText(Text, $"You can eat {name} again in {MathF.Ceiling(cooldown.Timer.Remaining)} seconds.");
+        }
     }
 }
 
@@ -74,29 +99,6 @@ public partial struct Cooldown
 {
     /// <summary>The cooldown, run once each time the food is eaten.</summary>
     public GameTimer Timer;
-
-    /// <summary>
-    /// A press on a food eats it and starts its cooldown, or says how long is left on it, once for
-    /// each time the button's interaction changes, as Bevy's <c>activate_ability</c> does.
-    /// </summary>
-    [OnUpdate]
-    [Changed(typeof(Interaction))]
-    public void ActivateAbility(BehaviorContext ctx)
-    {
-        if (Ui.InteractionOf(ctx.Entity) != UiInteraction.Pressed) return;
-
-        var name = ctx.Ecs.NameOf(ctx.Entity);
-        if (!ctx.Ecs.Has<ActiveCooldown>(ctx.Entity))
-        {
-            Timer.Reset();
-            ctx.Cmd.Add(ctx.Entity, new ActiveCooldown());
-            Ui.SetText(CooldownExample.Text, $"You ate {name}");
-        }
-        else
-        {
-            Ui.SetText(CooldownExample.Text, $"You can eat {name} again in {MathF.Ceiling(Timer.Remaining)} seconds.");
-        }
-    }
 
     /// <summary>
     /// The cover as tall as the share of the cooldown still to go, and gone with the cooldown once
