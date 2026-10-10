@@ -4,7 +4,8 @@
 //! Bevy's widgets do not change themselves. A button triggers `Activate` when it is pressed, a
 //! slider, a checkbox, a radio group and a tab list trigger `ValueChange` with the value the player
 //! asked for, and a menu triggers `MenuEvent` to open or close, and whoever listens decides what
-//! follows. A
+//! follows. A text field triggers `TextEditChange` once the edits of a frame are made, its text
+//! changed or its cursor moved. A
 //! C# game observes them as any entity event, so the first C# observer of a kind asks for an
 //! observer here, which copies the event into one shape every kind fits and queues a call into C#,
 //! made with the whole world on loan once the trigger finishes, as [`crate::pointer`] reports what
@@ -30,7 +31,7 @@ pub struct BcsWidgetEvent {
     /// The value of a change that names an entity, the radio button a group's choice moved to or
     /// the tab a tab list's did.
     pub other: u64,
-    /// Which of the six kinds, in the order of [`spawn`]'s match.
+    /// Which of the seven kinds, in the order of [`spawn`]'s match.
     pub kind: i32,
     /// The value of a change that is a number, a slider's.
     pub value: f32,
@@ -160,6 +161,12 @@ mod observers {
                     is_final: event.is_final as u32,
                     ..Default::default()
                 };
+                forward(&mut world, target, report);
+            }),
+            6 => Observer::new(move |event: On<bevy::text::TextEditChange>, mut world: DeferredWorld| {
+                use bevy::ecs::event::EntityEvent;
+
+                let report = BcsWidgetEvent { entity: event.event_target().to_bits(), kind, ..Default::default() };
                 forward(&mut world, target, report);
             }),
             _ => return None,

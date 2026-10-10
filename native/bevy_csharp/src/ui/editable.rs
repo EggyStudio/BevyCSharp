@@ -14,6 +14,9 @@ pub struct BcsEditableTextConfig {
     pub visible_lines: f32,
     /// Non-zero to let Enter start a new line.
     pub allow_newlines: i32,
+    /// `0` typed into, `1` read only, its text selected and copied but not changed, `2` shown
+    /// alone, neither changed nor selected, Bevy's `TextReadWriteMode`.
+    pub mode: i32,
 }
 
 /// Makes a UI node a text field the player types into, holding `text` to begin with.
@@ -42,7 +45,7 @@ pub unsafe extern "C" fn bcs_ui_set_editable_text(
 
         #[cfg(feature = "render")]
         {
-            use bevy::text::{EditableText, EditableTextFilter, TextCursorStyle, TextEdit};
+            use bevy::text::{EditableText, EditableTextFilter, TextCursorStyle, TextEdit, TextReadWriteMode};
 
             if config.is_null() {
                 return status::NULL_ARG;
@@ -88,6 +91,11 @@ pub unsafe extern "C" fn bcs_ui_set_editable_text(
                     // typed into and requires the editable text it edits.
                     entity_mut.insert((editable, TextCursorStyle::default(), bevy::ui_widgets::TextInput));
                 }
+                entity_mut.insert(match config.mode {
+                    1 => TextReadWriteMode::ReadOnly,
+                    2 => TextReadWriteMode::Static,
+                    _ => TextReadWriteMode::Editable,
+                });
                 match allowed {
                     Some(allowed) => {
                         let allowed: Vec<char> = allowed.chars().collect();
@@ -171,4 +179,17 @@ pub unsafe extern "C" fn bcs_ui_set_editable_value(entity: u64, text: *const cor
             })
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The managed mirror is checked against these same numbers.
+    #[test]
+    fn the_field_config_has_the_layout_the_managed_side_mirrors() {
+        assert_eq!(core::mem::offset_of!(BcsEditableTextConfig, allow_newlines), 12);
+        assert_eq!(core::mem::offset_of!(BcsEditableTextConfig, mode), 16);
+        assert_eq!(core::mem::size_of::<BcsEditableTextConfig>(), 20);
+    }
 }

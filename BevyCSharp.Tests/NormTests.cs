@@ -253,11 +253,11 @@ public sealed class NormTests
                 return deciders.Where(word => text.Contains(word, StringComparison.OrdinalIgnoreCase)).Select(word => $"{page} {word}");
             });
 
-        // Everything else a reader sees, every Markdown file but the sessions' own five and the
+        // Everything else a reader sees, every Markdown file but the sessions' own six and the
         // comments of every source, script, manifest and workflow, for a person or a session named
         // where a reason belongs. A thing's owner in the code, a widget's or an entity's, is
         // followed by "of" or names the thing, and is no person.
-        string[] sessions = [".github/REVIEW.md", ".github/SHARED.md", ".github/NORM.md", "AGENTS.md", ".github/COMMITS.md"];
+        string[] sessions = [".github/REVIEW.md", ".github/SHARED.md", ".github/NORM.md", "AGENTS.md", ".github/COMMITS.md", ".github/ASKS.md"];
         var owner = @"(?:\b(?:the|an?)\s+owner\b(?!\s+(?:of|entity|window|camera))|\bowner's\b)";
         var verb = @"\b(?:chose|choose|chosen|choosing|decid\w*|decision\w*|ask(?:s|ed)?|allow(?:s|ed)?|admit\w*|wants?|sets?|setting|files|filed|publish\w*|leaves?\s+(?:it\s+)?to|order\w*|approv\w*)\b";
         var named = new Regex($@"{owner}[^.;:]{{0,80}}?{verb}|{verb}[^.;:]{{0,40}}?{owner}|\b(?:reviewing|working)\s+session", RegexOptions.IgnoreCase);

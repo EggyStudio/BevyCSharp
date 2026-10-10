@@ -2,3 +2,4 @@
 # A place a line, then a tab and why. A commit of the owner's other than one of build/version.txt
 # alone is put here with that reason, and NormTests fails for a line whose commit keeps the rule.
 
+5a7f2c0	the owner's commit of the paragraph on ASKS.md in AGENTS.md

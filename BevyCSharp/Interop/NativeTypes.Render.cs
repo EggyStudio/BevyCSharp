@@ -430,6 +430,9 @@ public struct NativeEditableTextConfig
 
     /// <summary>Non-zero to let Enter start a new line.</summary>
     public int AllowNewlines;
+
+    /// <summary>A <see cref="TextReadWriteMode"/>.</summary>
+    public int Mode;
 }
 
 /// <summary>Where and how a run of gizmo text is drawn. Mirrors <c>BcsGizmoText</c>.</summary>

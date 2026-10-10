@@ -10,7 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7849ecf6`. One commit, item 4's second gap, the first having come with the bump: the
+Reviewed up to `d6764154`. One commit, the cheat sheet on its own, and the 536 lines had three
+causes, each said: lines added by hand in the writer's absence, which put `?` on returns the writer
+never printed and sat where a hand put them; the writer leaving a backtick after a generic method's
+name, stripping one of a method cref's two arity backticks; and summaries edited since the sheet was
+last written, where the writer was right. The writer strips the arity whole and marks a parameter or
+return as nullable from `NullabilityInfoContext`, for reference types and class-constrained type
+parameters alone, since reflection reads an unmarked unconstrained type parameter as a marked one,
+and its output is committed, the test passing. Right, a generated file written by its writer again
+and the writer mended where it was wrong. Two things of the norm's, in item 1: N 4.7 names
+`.github/ASKS.md` among the sessions' documents, so `NormTests`' list of them gains it with the next
+commit, and ASKS.md is committed with that batch as REVIEW.md is; and NORM.md's term for a game
+gains a testbed, a game built on the engine's project beside it, which N 5.3 does not ask the
+workflow to play, for 3DEngine's voxel game, and nothing here changes for it. The keys observed as
+they reach a field next, where offscreen keys reach a placeholder window, as the reply has it.
+
+Before it, one commit came to be read, item 4's third gap, the widgets' events as observers: a tab
+list's choice reaches C# as `ValueChange<Entity?>`, Bevy's optional entity, for which the type's
+`struct` constraint goes and the listing shows `T? Value`, the same value for a value type;
+`Ui.SelfUpdate(list, UiWidgetKind.TabList)` attaches Bevy's own update; `Picking.CapturePointer` and
+`ReleaseCapture` are Bevy's pointer capture, with the hit the pointer reports while held; ABI 235.
+headless_tabs, draggable_slider and character_creation are written and captured,
+character_creation's triage row having been stale, headless_tabs reading a tab's selection from its
+list since Bevy does not reflect `Selected`, each driven offscreen with clicks and drags and
+behaving as Bevy's does; two tests hold a tab list reporting and keeping the tab clicked and a
+captured pointer a decoy never hears, both ways. Right, each gap closed as Bevy has it and the
+triage made true. One thing: the CHEATSHEET's two lines were added by hand because its writer would
+rewrite 536 lines, so the written file and its writer have drifted, and a hand-edited generated file
+drifts further; the writer is run, why its 536 lines differ is read, and its output committed as a
+commit of its own or the writer mended, with the next commit. The suite: 1,294 passed and 2 skipped,
+the 65 validation errors on the page a test's own. The keys observed as they reach a field next,
+where typing into character_creation's name field offscreen belongs, `input.type` reaching the ImGui
+interface alone.
+
+Before it, one commit came to be read, item 4's second gap, the first having come with the bump: the
 decal's tag and the volume's voxels reach Bevy's WESL through the glue `340639b1` ported,
 `bcs_decal_tag` walking 0.20's decal iterator and the irradiance call its volume function, two tests
 holding them and irradiance_volumes headed 0.20. `deferred_raymarch` on the deferred buffers: a new
@@ -37,43 +70,6 @@ to Bevy by the lighting test; SHARED.md takes the row and the trap. The suite: 1
 skipped. The widgets' events as observers next, with headless_tabs and draggable_slider, as item 4
 has it.
 
-Before it, three commits came to be read, and the 95 re-ports came to be done but for six that wait
-on gaps: bevymark seeds each of its random sources apart as Bevy's does, standard_widgets_observers
-changed only in its observers' types, and ui_transform, tab_navigation, ui_texture_slice and
-ui_texture_atlas_slice with widget buttons styled by their press and hover, tab_navigation focusing
-by a click on a button and clearing by one on the page. Three more set aside with their reason:
-2d_gizmos and 3d_gizmos animate their dashes through the gizmo lines' animation offset and wireframe
-turns x-ray on through its config and a component, none of which the bridge carries, so they keep
-their 0.19.1 heads for the gaps that bring them, as the three before. Right. One thing left
-untraced, and rightly placed: a Tab sent by `input.key` to tab_navigation drawn offscreen moves the
-focus neither from a button nor from none, in the committed port as in this one, the focus plugin
-handing keys to the focused entity or else to the primary window, which an offscreen run has none
-of, so either the keys never reach tab navigation there or they do not come as the messages it
-reads; it belongs to the gap of keys observed as they reach a field and is traced there, a model
-with two readings being not yet a cause. The twenty built on Feathers wait on the owner's word for
-its crate (Decision 11), which comes after the other gaps, so item 4's first gap is next, the
-decal's tag and the volume's voxels through the WESL glue, as the Now list has it.
-
-Before it, six commits came to be read, 38 more re-ports, 81 of the 95, and three of the 95 set
-aside with their reason: multiline_text_input reads and moves the field's viewport against the text
-layout's size for a scrollbar of its own and opens a justify menu on a popover, context_menu lists
-its items in a `ListBox` Bevy does not reflect, and multiple_text_inputs sets a field's read-write
-mode and observes its edits, none of which the bridge reaches, so each keeps its 0.19.1 head and
-goes with the gap that brings what it reads. Right, and item 3 notes them. Of the 38: tonemapping
-and headless_renderer step through `Linear` where they stepped through `None`; ssao widens and
-narrows its radius on the arrows and starts from Bevy's default where the camera has none; overflow
-outlines a hovered logo red alone, as 0.20's does; projection_zoom reads the wheel in lines;
-transmission takes screen-space transmission off the camera and gives it back on Space with its
-steps and quality kept, and anisotropy gives its camera the same so the lamp's glass shows what is
-behind it, both as the guide says a camera must be given it; many_buttons' buttons are widgets
-colored from `Hovered` with `--overflow-clip`; the states' menus are widget buttons; callbacks keeps
-its three boxed systems and gpu_readback reads its buffer once more on Space; many_foxes and
-many_morph_targets list the mesh compression the bridge does not reach, their rows in `triage.tsv`
-moved from can to part, and five stress tests say they are. Pictures captured again where the
-picture changed, four. Right, each change said in its commit's sentence, the triage made honest
-where a port lost a switch, and the heads true. Eleven of the 95 remain, then the twenty with
-Feathers.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -87,20 +83,26 @@ from [SHARED.md](SHARED.md).
 1. **What the next page says.** The run of `a54dda9e`, the first since `c7f1cbc6` and the first
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
    425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
-   test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, and the pack
-   job did not run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start
-   (Decision 8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and
-   `61f80bc6` asks whether it is there first, since the runtime's Windows delete throws on a missing
-   folder, a fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at
-   `c46fd24e`, the window's image holding its zeros until the pass that draws it has its pipeline,
-   and the test captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a
-   window and `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
-   `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the harness adding
-   `Screen` beside the behaviors it discovers, so the warning shows once, from the test that asks
-   for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7).
-   Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps
-   in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by
-   the reviewing session, and a failure it names comes first here.
+   test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the run of
+   `7849ecf6` is green on all three as well, and the pack job did not run, so Verdicts 2 and 3
+   settle on the pack run's page, which is the owner's to start (Decision 8). Verdict 7 is settled
+   at `b0fa935e`, the page removed before the script starts, and `61f80bc6` asks whether it is there
+   first, since the runtime's Windows delete throws on a missing folder, a fresh checkout's first
+   run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the window's image holding its
+   zeros until the pass that draws it has its pipeline, and the test captures once
+   `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and `docs/window.md`
+   say so with step g. The page's repeated lines carried 116 warnings of `Screen.Playing` in every
+   run since before `c70f17b`, quieted at `37b2118f`, the harness adding `Screen` beside the
+   behaviors it discovers, so the warning shows once, from the test that asks for it, and the third
+   repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7). Package 0.4 is ready
+   to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps in at `c9c460df`,
+   and Verdicts 2 and 3 settle on that pack run's page. The cheat sheet is its writer's again at
+   `d6764154`. The commit `5a7f2c07`, three marks with no sentence, is the owner's, made with the
+   owner's tools at 11:05 and carrying the paragraph on ASKS.md in AGENTS.md, so it goes on
+   `build/norm/7.2.txt` with that reason with the next commit. N 4.7 names `.github/ASKS.md` among
+   the sessions' documents (Decision 24), so `NormTests`' list of them gains it with the next
+   commit, and ASKS.md is committed with that batch as REVIEW.md is. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -221,8 +223,8 @@ from [SHARED.md](SHARED.md).
 4. **The gaps, by how many rows each holds**, each bridged from Bevy with the examples it unlocks
    written in its batch: a decal's tag and a volume's voxels through the WESL glue (in with
    `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
-   observers with `headless_tabs` and `draggable_slider`, keys observed as they reach a field,
-   `sprite_material` and `shader_material_2d_bindless` as 2D materials, `inline_image` and
+   observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
+   field, `sprite_material` and `shader_material_2d_bindless` as 2D materials, `inline_image` and
    `fixed_node` in the interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders,
    mesh shaders from Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and
    what the table then names most. When the captures have settled, they are compared whole with
@@ -411,6 +413,18 @@ from [SHARED.md](SHARED.md).
     hidden or offscreen run, a test or a soak, played through the machine's speakers; its audio goes
     to no device or a device of silence, sounds still run their course, and a config field turns
     real audio on for such a run.
+
+24. **A game's session writes what the engine lacks in `.github/ASKS.md`, here as in 3DEngine.** The
+    owner ordered it on 2026-10-10, when the session making a voxel game in `3DEngine.Game` found
+    the sun's shadows costing the GPU 14.8 ms and the CPU 13 ms over some 1,800 draws, every chunk
+    drawn once a cascade with no culling, and had no way to tell the engine's session: the game's
+    session writes an entry there with what it measured and how, the reviewing session turns it into
+    an item of the Now list by its weight and writes the item's number under the entry, and the
+    engine's session reads REVIEW.md as before; no game of this engine has written one yet;
+    AGENTS.md names the file beside SHARED.md and NORM.md, with the owner's word, and the engine's
+    session writes nothing in it. ASKS.md and AGENTS.md's bullet on it are the reviewing session's
+    and are committed with whichever batch comes next, as REVIEW.md is; a game's own files are the
+    game's session's to commit.
 
 ## Replies
 

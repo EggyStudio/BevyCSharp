@@ -24,6 +24,11 @@ public sealed class UiEditableTextSettings
     public bool AllowNewlines { get; set; }
 
     /// <summary>
+    /// Whether it is typed into, read only or shown alone. Typed into by default.
+    /// </summary>
+    public TextReadWriteMode Mode { get; set; }
+
+    /// <summary>
     /// The only characters it takes, or null for any. A character typed or pasted that is not
     /// among them is refused, and a paste holding one is refused whole.
     /// </summary>
@@ -46,7 +51,12 @@ public static unsafe partial class Ui
     /// does Tab within a <c>TabGroup</c> by each field's <c>TabIndex</c>, and Bevy's <c>AutoFocus</c>
     /// gives it on the frame the field is spawned, and <see cref="Focus"/> gives it from C#. Bevy
     /// hands each key to the focused field only where there is a primary window, and the bridge
-    /// hands them out itself in a run with none, so an offscreen run's fields are typed into too.
+    /// hands them out itself in a run with none, so an offscreen run's fields are typed into too,
+    /// and Tab moves the focus there as in a window.
+    /// </para>
+    /// <para>
+    /// A field reports each frame's edits as <see cref="TextEditChange"/>, and
+    /// <see cref="UiEditableTextSettings.Mode"/> makes one read only or shown alone.
     /// </para>
     /// <para>
     /// Setting a node's field again changes it where it stands, its text replaced with the
@@ -73,6 +83,7 @@ public static unsafe partial class Ui
             VisibleWidth = settings.VisibleWidth,
             VisibleLines = settings.VisibleLines,
             AllowNewlines = settings.AllowNewlines ? 1 : 0,
+            Mode = (int)settings.Mode,
         };
 
         var status = Native.bcs_ui_set_editable_text(node.Bits, &native, settings.Text ?? string.Empty, settings.Allowed);

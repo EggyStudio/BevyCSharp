@@ -331,8 +331,18 @@ focus itself is Bevy's `InputFocus` resource, `ctx.Ecs.Resource<InputFocusRef>()
 it with `Ui.Focus`, which Bevy records so the field that lost it and the one that gained it are
 told, and asks where Tab would move it with `Ui.Navigate`. `Allowed` names the only characters a
 field takes, where Bevy's filter is a function of the game's own, and the field's font, size and
-wrapping are the node's `TextFont` and `TextLayout`. A field set again is changed where it stands,
-its text replaced with the settings' text and the rest of them taken.
+wrapping are the node's `TextFont` and `TextLayout`. `Mode` makes a field read only, its text
+selected and copied and never changed, or shown alone, as Bevy's `TextReadWriteMode` does. A field
+set again is changed where it stands, its text replaced with the settings' text and the rest of them
+taken. A field reports each frame's edits as Bevy's `TextEditChange`, its text changed or its cursor
+moved, so a game keeps something in step with it without reading it every frame:
+
+<!-- compiled with:
+Entity name = default, echo = default;
+-->
+```csharp
+ctx.Ecs.Observe<TextEditChange>(name, on => Ui.SetText(echo, Ui.EditableTextOf(on.Event.Entity) ?? ""));
+```
 
 Each key reaches the focused entity as Bevy's `FocusedInput<KeyboardInput>`, which goes on up its
 parents, so a game observes Enter in a field, or in any field of a row:
@@ -352,8 +362,8 @@ if (Ui.Navigate(NavAction.Next) is { } next) Ui.Focus(next);      // on to the n
 
 Bevy hands keys out only where there is a primary window, and the bridge hands them out itself in a
 run with none, so a test or `./bcs command input.key` types into an offscreen run's fields as a hand
-would. Tab moves the focus there only through `Ui.Navigate`, since Bevy's own Tab is heard at the
-window.
+would. A key there reaches a stand-in for the window where Bevy's would reach the window, and the
+bridge runs Bevy's tab navigation at it, so Tab moves the focus offscreen as it does in a window.
 
 The arrows or a pad move the focus by direction where a node carries Bevy's
 `AutoDirectionalNavigation`. `Navigation.Move` moves it to the nearest such node on the screen that

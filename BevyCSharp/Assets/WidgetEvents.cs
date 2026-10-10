@@ -11,6 +11,7 @@ internal static class WidgetEvents
     internal const int Choice = 3;
     internal const int Menu = 4;
     internal const int Tab = 5;
+    internal const int TextEdit = 6;
 
     /// <summary>The number the bridge reports a <see cref="ValueChange{T}"/> of <typeparamref name="T"/> under.</summary>
     /// <exception cref="NotSupportedException">No widget of Bevy's reports a value of that type.</exception>
@@ -38,6 +39,7 @@ internal static class WidgetEvents
             case Choice: registry.Trigger(new ValueChange<Entity>(entity, new Entity(reported.Other), final)); break;
             case Menu: registry.Trigger(new MenuEvent(entity, (MenuAction)reported.Action, (NavAction)reported.Navigation)); break;
             case Tab: registry.Trigger(new ValueChange<Entity?>(entity, reported.Flag != 0 ? new Entity(reported.Other) : null, final)); break;
+            case TextEdit: registry.Trigger(new TextEditChange(entity)); break;
         }
     }
 }

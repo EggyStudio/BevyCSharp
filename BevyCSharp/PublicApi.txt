@@ -2419,6 +2419,7 @@ struct Bevy.Interop.NativeEditableTextConfig
   float VisibleWidth
   int AllowNewlines
   int MaxCharacters
+  int Mode
 struct Bevy.Interop.NativeEffectsConfig
   NativeEffectsConfig.<CompensationCurve>e__FixedBuffer CompensationCurve
   const int CompensationPoints = 8
@@ -10699,6 +10700,16 @@ sealed class Bevy.SystemToggleRegistry
 enum Bevy.TargetFormat : int
   Rgba16Float = 1
   Rgba8 = 0
+readonly struct Bevy.TextEditChange : IEntityEvent, IEquatable<TextEditChange>, IReportedEvent
+  Entity Entity { get; init; }
+  TextEditChange(Entity Entity)
+  bool Equals(TextEditChange other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(TextEditChange left, TextEditChange right)
+  static bool op_Inequality(TextEditChange left, TextEditChange right)
+  void Deconstruct(out Entity Entity)
 enum Bevy.TextJustify : int
   Center = 1
   End = 5
@@ -10706,6 +10717,10 @@ enum Bevy.TextJustify : int
   Left = 0
   Right = 2
   Start = 4
+enum Bevy.TextReadWriteMode : int
+  Editable = 0
+  ReadOnly = 1
+  Static = 2
 enum Bevy.TextWrap : int
   AnyCharacter = 1
   NoWrap = 3
@@ -10944,6 +10959,7 @@ enum Bevy.UiDisplay : int
   Grid = 3
   None = 2
 sealed class Bevy.UiEditableTextSettings
+  TextReadWriteMode Mode { get; set; }
   UiEditableTextSettings()
   bool AllowNewlines { get; set; }
   float VisibleLines { get; set; }

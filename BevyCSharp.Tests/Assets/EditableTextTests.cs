@@ -1,4 +1,6 @@
+using System.Runtime.InteropServices;
 using Bevy;
+using Bevy.Interop;
 using Bevy.Reflected;
 using Xunit;
 
@@ -8,6 +10,14 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class EditableTextTests
 {
+    /// <summary>The field's settings sit where the bridge reads them.</summary>
+    [Fact]
+    public void TheFieldsSettingsAreWhereTheBridgeReadsThem()
+    {
+        Assert.Equal(16, Marshal.OffsetOf<NativeEditableTextConfig>(nameof(NativeEditableTextConfig.Mode)).ToInt32());
+        Assert.Equal(20, Marshal.SizeOf<NativeEditableTextConfig>());
+    }
+
     /// <summary>
     /// A field holds the text it was made with, takes the focus Bevy's <c>AutoFocus</c> gives it,
     /// and is replaced and cleared from C#.
@@ -105,6 +115,106 @@ public sealed class EditableTextTests
         Assert.Equal(
             ["Character(\"a\") from the field", "Character(\"b\") from the field", "Backspace from the field", "Enter from the field"],
             heard);
+    }
+
+    /// <summary>
+    /// Tab in a run with no window moves the focus along the tab order, from nothing to the first
+    /// node and on to the second, and Shift with it back, as Bevy's observer on the window moves it
+    /// in a run with one.
+    /// </summary>
+    [SkippableFact]
+    public void TabMovesTheFocusInARunWithNoWindow()
+    {
+        Needs.Renderer();
+
+        var (first, second) = (Entity.None, Entity.None);
+        var seen = new List<Entity?>();
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                var group = Ui.SpawnNode(new UiSettings());
+                ecs.Insert<TabGroupRef>(group);
+                (first, second) = (Ui.SpawnNode(new UiSettings()), Ui.SpawnNode(new UiSettings()));
+                ecs.Insert<TabIndexRef>(first).Value = 0;
+                ecs.Insert<TabIndexRef>(second).Value = 1;
+                ecs.SetParent(first, group);
+                ecs.SetParent(second, group);
+            },
+        };
+
+        Action<World> Look(List<Entity?> into) => world => into.Add(world.Resource<EcsWorld>().Resource<InputFocusRef>()?.CurrentFocus);
+
+        run.Wait(2)
+            .Do("pressing Tab with nothing focused", _ => SyntheticInput.Tap(Key.Tab))
+            .Wait(3)
+            .Do("looking", Look(seen))
+            .Do("pressing Tab again", _ => SyntheticInput.Tap(Key.Tab))
+            .Wait(3)
+            .Do("looking again", Look(seen))
+            .Do("holding Shift", _ => SyntheticInput.Press(Key.ShiftLeft))
+            .Wait(2)
+            .Do("pressing Tab with Shift held", _ => SyntheticInput.Tap(Key.Tab))
+            .Wait(3)
+            .Do("letting Shift go and looking", world =>
+            {
+                SyntheticInput.Lift(Key.ShiftLeft);
+                Look(seen)(world);
+            })
+            .Go();
+
+        Assert.Equal([first, second, first], seen);
+    }
+
+    /// <summary>
+    /// A field reports its edits as Bevy's <c>TextEditChange</c> as it is typed into, and a field
+    /// made read only takes none of what is typed while it has the focus.
+    /// </summary>
+    [SkippableFact]
+    public void AFieldReportsItsEditsAndAReadOnlyOneTakesNoTyping()
+    {
+        Needs.Renderer();
+
+        var (editable, readOnly) = (Entity.None, Entity.None);
+        var edits = 0;
+        string? typed = null, kept = null;
+
+        var run = new PictureRun
+        {
+            Width = 320,
+            Height = 96,
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                editable = Ui.SpawnNode(new UiSettings { Width = Length.Px(240f) });
+                Ui.SetEditableText(editable, new UiEditableTextSettings());
+                readOnly = Ui.SpawnNode(new UiSettings { Width = Length.Px(240f) });
+                Ui.SetEditableText(readOnly, new UiEditableTextSettings { Text = "fixed", Mode = TextReadWriteMode.ReadOnly });
+                Ui.Focus(editable);
+
+                ecs.Observe<TextEditChange>(editable, _ => edits++);
+            },
+        };
+
+        run.Wait(2)
+            .Do("typing into the field", _ => SyntheticInput.Tap(Key.A, "a"))
+            .Wait(3)
+            .Do("reading it and focusing the read-only one", _ =>
+            {
+                typed = Ui.EditableTextOf(editable);
+                Ui.Focus(readOnly);
+            })
+            .Wait(2)
+            .Do("typing into the read-only one", _ => SyntheticInput.Tap(Key.B, "b"))
+            .Wait(3)
+            .Do("reading it", _ => kept = Ui.EditableTextOf(readOnly))
+            .Go();
+
+        Assert.Equal("a", typed);
+        Assert.True(edits > 0, "the field reported no edit");
+        Assert.Equal("fixed", kept);
     }
 
     /// <summary>

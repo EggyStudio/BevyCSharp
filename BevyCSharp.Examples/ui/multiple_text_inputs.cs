@@ -1,15 +1,18 @@
-// Bevy's multiple_text_inputs example, examples/ui/text/multiple_text_inputs.rs at v0.19.1, by
+// Bevy's multiple_text_inputs example, examples/ui/text/multiple_text_inputs.rs at v0.20.0, by
 // Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 using Bevy.Reflected;
 
+using Justify = Bevy.Reflected.TextLayoutRef.JustifyVariant;
+
 namespace BevyCSharp.Examples.Interface;
 
-// Arranges three text fields in a grid of three rows. Each field has its value beside it, kept in
-// step as it is typed into, and the text it held when Enter was last pressed in it, which also
-// clears it and moves the focus on to the next field. A row whose field has not the focus is drawn
-// dimmer.
+// Arranges text fields in a grid of four columns, one for each way a line is justified and one for
+// each way a field takes changes, typed into, read only or shown alone. Each field has its value
+// beside it, kept in step as it reports its edits, and the text it held when Enter was last pressed
+// in it, which also clears it and moves the focus on to the next field. A row whose field has not
+// the focus is drawn dimmer.
 internal static class MultipleTextInputs
 {
     private static readonly Color Slate300 = Color.FromSrgb8(203, 213, 225);
@@ -18,18 +21,17 @@ internal static class MultipleTextInputs
     private static readonly Color DarkSlateGray = Color.FromSrgb8(47, 79, 79);
     private static readonly Color White = Color.FromSrgb(1f, 1f, 1f);
 
-    // What each field held when last read, so its value is written only as it changes, as Bevy's
-    // system runs only for a field that changed.
-    private static readonly Dictionary<Entity, string> Shown = [];
-
     // The focus as it was last drawn, so the rows are redrawn only as it moves, as Bevy's are.
     private static Entity? _focusDrawn;
     private static bool _drawn;
 
     public static void Build(App app)
     {
-        app.Startup(Setup, "multiple_text_inputs.Setup");
-        app.Update(SynchronizeOutputText, "multiple_text_inputs.SynchronizeOutputText");
+        app.Startup(ctx =>
+        {
+            Setup(ctx);
+            ctx.Ecs.Observe<TextEditChange>(SynchronizeOutputText);
+        }, "multiple_text_inputs.Setup");
         app.Update(SubmitText, "multiple_text_inputs.SubmitText");
         app.Update(UpdateRowBorderColors, "multiple_text_inputs.UpdateRowBorderColors");
     }
@@ -37,7 +39,6 @@ internal static class MultipleTextInputs
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        Shown.Clear();
         (_focusDrawn, _drawn) = (null, false);
         Render2d.SpawnCamera2d();
 
@@ -54,30 +55,35 @@ internal static class MultipleTextInputs
             RowGap = Length.Px(8f),
             ColumnGap = Length.Px(8f),
         });
-        UiGrid.Set(root, new GridSettings { Columns = [Track.Px(320f).Repeated(3)], Rows = [Track.Auto.Repeated(6)] });
+        UiGrid.Set(root, new GridSettings { Columns = [Track.Px(160f), Track.Px(320f).Repeated(3)] });
         ecs.Insert<TabGroupRef>(root);
 
-        // Spans the three columns, centered within them.
-        Entity Across(string text, Sides margin)
+        // Spans the four columns, centered within them.
+        void Across(string text, Sides margin)
         {
             var line = Ui.SpawnText(text, new UiSettings { Margin = margin, Color = White }, Font(24f));
-            UiGrid.Place(line, new GridPlacement { ColumnSpan = 3 });
+            UiGrid.Place(line, new GridPlacement { ColumnSpan = 4 });
             ecs.Wrap<NodeRef>(line).JustifySelf = NodeRef.JustifySelfVariant.Center;
             ecs.SetParent(line, root);
-            return line;
         }
 
-        Across("Multiple Text Inputs Example", new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(16f)));
-
-        foreach (var label in new[] { "EditableText", "value", "submission" })
+        void Headings(string first)
         {
-            var heading = Ui.SpawnText(label, new UiSettings { Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(-4f)) }, Font(14f));
-            ecs.Wrap<NodeRef>(heading).JustifySelf = NodeRef.JustifySelfVariant.Center;
-            ecs.SetParent(heading, root);
+            foreach (var label in new[] { first, "EditableText", "value", "submission" })
+            {
+                var heading = Ui.SpawnText(label, new UiSettings { Margin = new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(-4f)) }, Font(14f));
+                ecs.Wrap<NodeRef>(heading).JustifySelf = NodeRef.JustifySelfVariant.Center;
+                ecs.SetParent(heading, root);
+            }
         }
 
-        for (var row = 0; row < 3; row++)
+        // A row of the grid: what sets its field apart, the field, its value and its submission.
+        Entity Row(int row, string name)
         {
+            var label = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(4f)), Justify = UiJustify.Center, Align = UiAlign.Center, BorderColor = White });
+            ecs.SetParent(Ui.SpawnText(name, new UiSettings(), Font(24f)), label);
+            ecs.SetParent(label, root);
+
             var input = Ui.SpawnNode(new UiSettings
             {
                 Border = Sides.All(Length.Px(4f)),
@@ -85,13 +91,6 @@ internal static class MultipleTextInputs
                 Color = DarkGrey,
                 BorderColor = Slate300,
             });
-            Ui.SetEditableText(input, new UiEditableTextSettings { Text = $"Initial text {row}" });
-            var inputFont = ecs.Wrap<TextFontRef>(input);
-            (inputFont.Font, inputFont.FontSize) = (new FontSource.Handle(font), new FontSize.Px(24f));
-            ecs.Wrap<TextLayoutRef>(input).Linebreak = TextLayoutRef.LinebreakVariant.NoWrap;
-            ecs.Insert<TabIndexRef>(input).Value = row;
-            ecs.Add(input, new TextInputRow { Row = row });
-            if (row == 0) ecs.Insert<AutoFocusRef>(input);
             ecs.SetParent(input, root);
 
             // The value, kept in step with the field, and the submission, each clipped to the
@@ -124,26 +123,51 @@ internal static class MultipleTextInputs
                 }
                 ecs.SetParent(output, box);
             }
+
+            return input;
         }
+
+        // Its field set in its font at its size, on one line, at a place in the tab order.
+        void Field(Entity input, int row, TextReadWriteMode mode, Justify justify)
+        {
+            Ui.SetEditableText(input, new UiEditableTextSettings { Text = $"Initial text {row % 100}", Mode = mode });
+            var inputFont = ecs.Wrap<TextFontRef>(input);
+            (inputFont.Font, inputFont.FontSize) = (new FontSource.Handle(font), new FontSize.Px(24f));
+            var layout = ecs.Wrap<TextLayoutRef>(input);
+            (layout.Linebreak, layout.Justify) = (TextLayoutRef.LinebreakVariant.NoWrap, justify);
+            ecs.Insert<TabIndexRef>(input).Value = row;
+            ecs.Add(input, new TextInputRow { Row = row });
+            if (row % 100 == 0) ecs.Insert<AutoFocusRef>(input);
+        }
+
+        Across("Multiple Text Inputs Example", new Sides(Length.Zero, Length.Zero, Length.Zero, Length.Px(16f)));
+
+        // A field for each of the ways a line is justified.
+        Headings("Justify");
+        Justify[] justifications = [Justify.Left, Justify.Center, Justify.Right, Justify.Justified, Justify.Start, Justify.End];
+        for (var row = 0; row < justifications.Length; row++)
+            Field(Row(row, $"{justifications[row]}"), row, TextReadWriteMode.Editable, justifications[row]);
+
+        // And one for each of the ways a field takes changes, after the others in the tab order.
+        Headings("ReadWrite");
+        TextReadWriteMode[] modes = [TextReadWriteMode.Editable, TextReadWriteMode.ReadOnly, TextReadWriteMode.Static];
+        for (var row = 0; row < modes.Length; row++)
+            Field(Row(row + 100, $"{modes[row]}"), row + 100, modes[row], Justify.Left);
 
         Across("Press Enter to submit", new Sides(Length.Zero, Length.Px(16f), Length.Zero, Length.Zero));
     }
 
-    // Bevy's synchronize_output_text, each field's value written beside it as it changes.
-    private static void SynchronizeOutputText(BehaviorContext ctx)
+    // Bevy's synchronize_output_text, each field's value written beside it as it reports an edit.
+    private static void SynchronizeOutputText(On<TextEditChange> on)
     {
-        var ecs = ctx.Ecs;
-        foreach (var input in Inputs(ecs))
-        {
-            var text = Ui.EditableTextOf(input) ?? string.Empty;
-            if (Shown.TryGetValue(input, out var shown) && shown == text) continue;
-            Shown[input] = text;
+        var ecs = on.Ecs;
+        var input = on.Event.Entity;
+        if (!ecs.Has<TextInputRow>(input) || Ui.EditableTextOf(input) is not { } text) return;
 
-            var row = ecs.GetOrDefault<TextInputRow>(input).Row;
-            foreach (var output in ecs.EntitiesWith<ValueOutput>())
-            {
-                if (ecs.GetOrDefault<TextInputRow>(output).Row == row) Ui.SetText(output, text);
-            }
+        var row = ecs.GetOrDefault<TextInputRow>(input).Row;
+        foreach (var output in ecs.EntitiesWith<ValueOutput>())
+        {
+            if (ecs.GetOrDefault<TextInputRow>(output).Row == row) Ui.SetText(output, text);
         }
     }
 
@@ -213,7 +237,9 @@ internal static class MultipleTextInputs
     }
 }
 
-/// <summary>Which of the three rows a field, a box or a text belongs to.</summary>
+/// <summary>
+/// Which row a field, a box or a text belongs to, the read-write rows numbered from a hundred.
+/// </summary>
 [Behavior]
 public partial struct TextInputRow
 {

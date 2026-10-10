@@ -397,6 +397,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // defaults, and an interface with text fields is hard to use without it; one that
             // marks nothing with a tab index is unaffected.
             app.add_plugins(bevy::input_focus::tab_navigation::TabNavigationPlugin);
+            app.add_observer(crate::focus::navigate_without_window);
             // And the arrows or a pad moving it by direction, which needs the map of edges and the
             // settings of the nearest-node search this plugin makes, and which nothing does until a
             // game moves the focus through `bcs_nav_move`.

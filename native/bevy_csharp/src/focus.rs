@@ -84,7 +84,9 @@ mod observers {
     /// Spawns the observer of keys reaching the focused entity, and returns its entity.
     pub fn spawn(world: &mut World, target: Target) -> Entity {
         let observer = Observer::new(move |event: On<FocusedInput<KeyboardInput>>, mut world: DeferredWorld| {
-            if event.focused_entity != event.original_event_target() {
+            // Only at the first step, and not for a key a windowless run handed to no entity,
+            // which there is nothing in C# to observe at.
+            if event.focused_entity != event.original_event_target() || event.focused_entity == Entity::PLACEHOLDER {
                 return;
             }
 
@@ -128,8 +130,11 @@ mod observers {
     /// Bevy hands keys out only where there is a primary window, which it names in the event as
     /// where the key goes after the focused entity's parents, so an offscreen run's text fields
     /// took no keys and nothing observed one. This hands them out as Bevy would, naming no window.
-    /// The event's window is private to Bevy, so it is made through Bevy's reflection, which builds
-    /// any reflected struct from its fields.
+    ///
+    /// Where nothing has the focus Bevy hands the key to the window, and here, with none, to the
+    /// placeholder entity named as the window, where [`navigate_without_window`] moves the focus
+    /// for Tab as Bevy's observer on the window does. The placeholder is no entity, so the key goes
+    /// no further than its observers.
     pub fn dispatch_offscreen_keys(
         mut keys: bevy::prelude::MessageReader<KeyboardInput>,
         focus: Option<bevy::prelude::Res<bevy::input_focus::InputFocus>>,
@@ -137,32 +142,40 @@ mod observers {
         offscreen: Option<bevy::prelude::Res<crate::offscreen::OffscreenTarget>>,
         mut commands: bevy::prelude::Commands,
     ) {
-        use bevy::reflect::FromReflect;
-        use bevy::reflect::structs::DynamicStruct;
-
         if !windows.is_empty() || offscreen.is_none() {
             keys.clear();
             return;
         }
-        let Some(focused) = focus.and_then(|focus| focus.get()) else {
-            keys.clear();
-            return;
-        };
+        let focused = focus.and_then(|focus| focus.get()).unwrap_or(Entity::PLACEHOLDER);
 
         for key in keys.read() {
-            let mut fields = DynamicStruct::default();
-            fields.insert("focused_entity", focused);
-            fields.insert("input", key.clone());
-            fields.insert("window", Entity::PLACEHOLDER);
-            if let Some(event) = FocusedInput::<KeyboardInput>::from_reflect(&fields) {
-                commands.trigger(event);
-            }
+            commands.trigger(FocusedInput::new(focused, key.clone(), Entity::PLACEHOLDER));
+        }
+    }
+
+    /// Runs Bevy's tab navigation for a key that reached the placeholder named as the window,
+    /// which only a run with no window hands keys to.
+    ///
+    /// Bevy moves the focus for Tab in an observer of the primary window, which it adds at startup
+    /// to the window there is then, so a run with none had nothing to move it. This runs the same
+    /// observer where the key reaches the end of its way up, as the window's would.
+    pub fn navigate_without_window(
+        event: On<FocusedInput<KeyboardInput>>,
+        navigation: bevy::input_focus::tab_navigation::TabNavigation,
+        focus: bevy::prelude::ResMut<bevy::input_focus::InputFocus>,
+        visible: bevy::prelude::ResMut<bevy::input_focus::InputFocusVisible>,
+        keys: bevy::prelude::Res<bevy::prelude::ButtonInput<bevy::prelude::KeyCode>>,
+    ) {
+        use bevy::ecs::event::EntityEvent;
+
+        if event.event_target() == Entity::PLACEHOLDER {
+            bevy::input_focus::tab_navigation::handle_tab_navigation(event, navigation, focus, visible, keys);
         }
     }
 }
 
 #[cfg(feature = "render")]
-pub use observers::dispatch_offscreen_keys;
+pub use observers::{dispatch_offscreen_keys, navigate_without_window};
 
 /// Asks Bevy to report each key that reaches the focused entity to C#, through an observer it
 /// spawns, and writes the observer's entity to `out`.
