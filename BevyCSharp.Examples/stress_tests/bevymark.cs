@@ -1,4 +1,4 @@
-// Bevy's bevymark example, examples/stress_tests/bevymark.rs at v0.19.1, by Bevy's contributors
+// Bevy's bevymark example, examples/stress_tests/bevymark.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -40,10 +40,10 @@ internal static class Bevymark
     private static AssetHandle[] _textures = [];
     private static AssetHandle[] _materials = [];
     private static AssetHandle _quad;
-    private static Random _colorRandom = new(42), _materialRandom = new(42), _velocityRandom = new(42), _transformRandom = new(42);
+    private static Random _colorRandom = new(100), _materialRandom = new(200), _velocityRandom = new(300), _transformRandom = new(400);
 
     // The mouse handler's own generator and wave, Locals in Bevy.
-    private static Random _mouseRandom = new(42);
+    private static Random _mouseRandom = new(500);
     private static int _wave;
 
     private static Entity _countSpan, _rawSpan, _smaSpan, _emaSpan;
@@ -74,7 +74,7 @@ internal static class Bevymark
         _waves = int.Parse(Option("--waves", "0"));
         _materialTextureCount = int.Parse(Option("--material-texture-count", "1"));
         (_count, _color, _wave, _shownCount) = (0, (1f, 1f, 1f, 1f), 0, -1);
-        (_colorRandom, _materialRandom, _velocityRandom, _transformRandom, _mouseRandom) = (new(42), new(42), new(42), new(42), new(42));
+        (_colorRandom, _materialRandom, _velocityRandom, _transformRandom, _mouseRandom) = (new(100), new(200), new(300), new(400), new(500));
         Fps.Clear();
 
         app.Startup(Setup, "bevymark.Setup");
@@ -218,7 +218,7 @@ internal static class Bevymark
     // Single colors 256 a side, as many as asked for beyond the icon.
     private static void InitTextures(List<AssetHandle> textures)
     {
-        var random = new Random(42);
+        var random = new Random(600);
         while (textures.Count < _materialTextureCount)
         {
             var pixel = new byte[] { (byte)random.Next(256), (byte)random.Next(256), (byte)random.Next(256), 255 };
@@ -239,7 +239,7 @@ internal static class Bevymark
             Render2d.CreateMaterial(new ColorMaterialSettings { Texture = textures.FirstOrDefault(), AlphaMode = alphaMode }),
         };
 
-        var (colors, picks) = (new Random(42), new Random(42));
+        var (colors, picks) = (new Random(700), new Random(800));
         while (materials.Count < capacity)
         {
             materials.Add(Render2d.CreateMaterial(new ColorMaterialSettings
