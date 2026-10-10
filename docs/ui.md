@@ -306,10 +306,12 @@ var state = Ui.InteractionOf(button);       // None, Hovered or Pressed
 ```
 
 `Pressed` lasts from the frame the pointer goes down until it is released, so a click is the edge
-into it, which is the previous answer kept in a behavior field and compared. An interactive node captures
-the pointer, so nothing behind it is hovered through it, and a plain node carries nothing to
-update, which is why it is not the default. Asking a plain node is refused rather than answered
-`None`, since a button that quietly never fires is the harder mistake to find.
+into it, which is the previous answer kept in a behavior field and compared. A node is hovered while
+the pointer is over it or over a node inside it, as Bevy's picking reads a hover, so a button stays
+hovered with the pointer on its label. An interactive node captures the pointer, so nothing behind
+it is hovered through it, and a plain node carries nothing to update, which is why it is not the
+default. Asking a plain node is refused rather than answered `None`, since a button that quietly
+never fires is the harder mistake to find.
 
 A node becomes a text field the player types into with `Ui.SetEditableText`, Bevy's own editable
 text with its cursor, selection, copy and paste:
