@@ -301,6 +301,29 @@ pub fn reflect(wgsl: &str, reflection: &str, family: Family) -> Result<Reflected
         layout.bindings.insert(binding.binding, Binding { name, kind, count });
     }
 
+    // The pipeline constants the WGSL kept, by the names and types Slang reports for their numbers.
+    // Only those kept, because a pipeline handed a constant its stage does not declare is refused,
+    // and Slang leaves out of a stage one it does not read.
+    for (_, kept) in module.overrides.iter() {
+        let Some(id) = kept.id else {
+            continue;
+        };
+
+        let declared = parameters.iter().find(|parameter| {
+            parameter["binding"]["kind"] == "specializationConstant"
+                && parameter["binding"]["index"].as_u64() == Some(u64::from(id))
+        });
+
+        if let Some(name) = declared.and_then(|parameter| parameter["name"].as_str()) {
+            let scalar = declared
+                .and_then(|parameter| parameter["type"]["scalarType"].as_str())
+                .and_then(Scalar::from_reflection)
+                .unwrap_or(Scalar::F32);
+
+            layout.constants.insert(name.to_string(), Constant { key: id.to_string(), scalar });
+        }
+    }
+
     Ok(Reflected {
         wgsl: numbers_in_storage(&wgsl, group),
         spirv: Vec::new(),

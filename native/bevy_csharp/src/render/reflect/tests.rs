@@ -329,3 +329,37 @@ fn a_name_loses_the_number_slang_adds() {
     assert_eq!(source_name("albedo_sampler_12"), "albedo_sampler");
     assert_eq!(source_name("plain"), "plain");
 }
+
+/// A pipeline constant is read by the name and type Slang reports for its number, one that the
+/// stage's WGSL left out is not, and a material's value for it is one number.
+#[test]
+fn a_pipeline_constant_is_read_where_the_stage_kept_it() {
+    use crate::render::values::{Value, check};
+
+    let wgsl = "@id(0) override LEVELS_0 : f32 = 4.0f;\n\n\
+                @fragment\nfn fragment(@location(2) uv : vec2<f32>) -> @location(0) vec4<f32> {\n    \
+                return vec4<f32>(floor(uv.x * LEVELS_0) / LEVELS_0);\n}\n";
+    let reflection = r#"{
+        "parameters": [
+            {"name": "LEVELS", "binding": {"kind": "specializationConstant", "index": 0},
+             "type": {"kind": "scalar", "scalarType": "float32"}},
+            {"name": "STEPS", "binding": {"kind": "specializationConstant", "index": 7},
+             "type": {"kind": "scalar", "scalarType": "int32"}}
+        ]
+    }"#;
+
+    let layout = super::reflect(wgsl, reflection, super::Family::Material2d).unwrap().layout;
+
+    let levels = &layout.constants["LEVELS"];
+    assert_eq!((levels.key.as_str(), levels.scalar), ("0", super::Scalar::F32));
+    assert!(!layout.constants.contains_key("STEPS"), "STEPS is not in the stage's WGSL");
+
+    let one = |count: usize| Value::Numbers {
+        scalar: super::Scalar::F32,
+        components: count as u32,
+        data: vec![0; 4 * count],
+    };
+    assert_eq!(check(&layout, "LEVELS", &one(1)), Ok(()));
+    assert!(check(&layout, "LEVELS", &one(2)).is_err());
+    assert!(check(&layout, "STEPS", &one(1)).is_err());
+}

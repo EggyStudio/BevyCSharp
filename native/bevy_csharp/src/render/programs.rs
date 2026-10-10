@@ -66,6 +66,9 @@ pub struct StageBinding {
     /// The stage's SPIR-V, for one compiled to it, which the bridge builds a compute pipeline from
     /// itself (see [`super::spirv_compute`]).
     pub spirv: Option<Arc<[u32]>>,
+    /// The pipeline constants the stage declares, by name, each beside the key a pipeline sets it
+    /// by. A stage's own, since a pipeline handed one its stage does not declare is refused.
+    pub constants: Arc<[(String, String)]>,
 }
 
 /// What the render side needs of a program.
@@ -695,6 +698,12 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
             shader: unit.shader.clone().expect("every stage has a shader"),
             entry: Cow::Owned(unit.request.entry.clone()),
             spirv: unit.spirv.clone(),
+            constants: unit
+                .layout
+                .constants
+                .iter()
+                .map(|(name, constant)| (name.clone(), constant.key.clone()))
+                .collect(),
         });
 
         // Every stage of a material, and every stage of a draw, share one group, so their layouts

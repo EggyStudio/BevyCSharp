@@ -26,6 +26,7 @@
 pub mod adapter;
 pub mod assets;
 pub mod compute;
+pub mod constants;
 pub mod instances;
 pub mod layers;
 pub mod material;

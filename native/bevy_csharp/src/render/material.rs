@@ -132,7 +132,7 @@ impl AsAssetId for BcsMaterial3d {
 ///
 /// The version, because a program whose shader was edited has a new layout as well as new code,
 /// and a pipeline built for the old one must not be reused for the new.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct BcsMaterialKey {
     pub program: u32,
     pub generation: u32,
@@ -141,6 +141,9 @@ pub struct BcsMaterialKey {
     /// A 2D material drawing a sprite, which draws with the sprite's vertex shader and binds the
     /// sprite beside the program's own, so it cannot share a pipeline with the program on a mesh.
     pub sprite: bool,
+    /// The values the material sets for the program's pipeline constants, which are compiled into
+    /// its pipelines (see [`super::constants`]).
+    pub constants: Arc<[(String, u64)]>,
 }
 
 type DrawFunctionParams = (
@@ -236,6 +239,7 @@ impl ErasedRenderAsset for BcsMaterial3d {
             fallback,
             stand,
             view: None,
+            constants: true,
         };
 
         let packed = match pack(&layout, &material.values, &context) {
@@ -381,6 +385,7 @@ impl ErasedRenderAsset for BcsMaterial3d {
                         None => 2,
                     },
                     sprite: false,
+                    constants: super::constants::of(&layout, &material.values),
                 }),
                 shadows_enabled: true,
                 prepass_enabled: true,
@@ -481,13 +486,14 @@ fn user_specialize(
         .iter()
         .any(|def| matches!(def, ShaderDefVal::Bool(name, true) if name == "PREPASS_PIPELINE"));
 
-    if !prepass {
-        return Ok(());
-    }
-
     let Some(program) = programs::lookup(material.program) else {
         return Ok(());
     };
+
+    if !prepass {
+        super::constants::apply(descriptor, &program, &material.constants);
+        return Ok(());
+    }
 
     if program.stages[Role::PrepassVertex as usize].is_some() {
         // Every attribute the mesh has, at the locations Bevy's prepass uses. Bevy hands a shadow
@@ -510,6 +516,7 @@ fn user_specialize(
         });
     }
 
+    super::constants::apply(descriptor, &program, &material.constants);
     Ok(())
 }
 

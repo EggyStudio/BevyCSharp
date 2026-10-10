@@ -149,6 +149,12 @@ pub fn check(layout: &Layout, name: &str, value: &Value) -> Result<(), String> {
     };
 
     match (target, value) {
+        (Target::Constant(_), Value::Numbers { components: 1, data, .. }) if data.len() == 4 => Ok(()),
+        (Target::Constant(constant), value) => Err(format!(
+            "{base} is a pipeline constant, a {}, which takes one number, and {} cannot go there",
+            constant.scalar.describe(),
+            value.describe()
+        )),
         (Target::Uniform { ty, .. }, Value::Numbers { scalar, components, data }) => {
             fits(ty, *scalar, *components, data.len() / 4)
         }
@@ -462,6 +468,9 @@ pub struct PackContext<'a> {
     /// for one. A name found here wins over a value set under the same name, because the shader was
     /// written against the camera's image.
     pub view: Option<&'a HashMap<String, ViewTexture>>,
+    /// Whether pipeline constants are compiled into the target's pipelines, as a material's are.
+    /// A pass or a dispatch has one pipeline for every instance, so a value for one is reported.
+    pub constants: bool,
 }
 
 /// Builds what each binding of `layout` holds from `values`.
@@ -476,6 +485,8 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
     for (name, value) in &values.entries {
         if let Err(problem) = check(layout, name, value) {
             packed.problems.push(format!("{name}: {problem}"));
+        } else if !context.constants && layout.constants.contains_key(name) {
+            packed.problems.push(format!("{name}: a pipeline constant, which runs as the shader declares it here"));
         }
     }
 

@@ -176,10 +176,21 @@ fn layout_of(target: &Target<'_>) -> Option<std::sync::Arc<super::reflect::Layou
 #[cfg(feature = "render")]
 pub(super) fn put(kind: i32, id: i64, name: String, value: super::values::Value) -> i32 {
     with_target(kind, id, |mut target| {
-        if let Some(layout) = layout_of(&target)
-            && let Err(message) = super::values::check(&layout, &name, &value)
-        {
-            return refuse(format!("{name} was not set, because {message}"));
+        if let Some(layout) = layout_of(&target) {
+            if let Err(message) = super::values::check(&layout, &name, &value) {
+                return refuse(format!("{name} was not set, because {message}"));
+            }
+
+            // Compiled into a material's pipelines, and a pass or a dispatch has one pipeline for
+            // every instance of its program, which no instance's constant could change alone.
+            if matches!(target, Target::Instance(_))
+                && matches!(layout.find(&name), Some(super::reflect::Target::Constant(_)))
+            {
+                return refuse(format!(
+                    "{name} was not set, because it is a pipeline constant, which a material sets \
+                     and a pass or a dispatch takes as the shader declares it"
+                ));
+            }
         }
 
         let values = match &mut target {

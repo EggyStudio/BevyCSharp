@@ -312,6 +312,7 @@ internal static class Catalog
         new("extended_material", ExtendedMaterial.Build),
         new("extended_material_bindless", ExtendedMaterialBindless.Build),
         new("gpu_readback", GpuReadback.Build),
+        new("pipeline_constants", PipelineConstants.Build),
         new("shader_defs", ShaderDefs.Build),
         new("shader_material", ShaderMaterialExample.Build),
         new("shader_material_2d", ShaderMaterial2dExample.Build),

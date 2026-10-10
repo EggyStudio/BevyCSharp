@@ -298,6 +298,7 @@ fn prepare_passes(
                         fallback: &fallback,
                         stand: &stand,
                         view: names.as_deref(),
+                        constants: false,
                     };
 
                     let packed = match pack(&layout, &pass.values, &context) {

@@ -10,9 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `855c4b7e`. One commit, and item 4's 2D materials are whole: a 2D shader material on
-a sprite draws it as Bevy's `SpriteMaterial` does. The component on the sprite is Bevy's own
-`SpriteMaterial` of the bridge's material, so Bevy's count of a sprite's materials holds, the
+Reviewed up to `095bccd7`. One commit, two examples with nothing to bridge: inline_image puts each
+image in as a child entity among the text's runs in order through the reflected `InlineImage`, and
+fixed_node's square is laid out as a root though its parent holds it, the parent `Pickable` with
+neither hover nor block so it hears of the square alone, turning red under the pointer and blue as
+it leaves through observers of `Pointer<Over>` and `Pointer<Leave>`. Both captures match bare Bevy's
+offscreen frames with no pixel past 3%, fixed_node driven offscreen with the pointer over the square
+and away, and the norm's and cheat sheet's tests and the examples table's check pass, the changes
+being examples alone. Right. pipeline_constants and gpu_component_array_buffer in shaders next, as
+item 4 has it.
+
+Before it, one commit came to be read, and item 4's 2D materials came to be whole: a 2D shader
+material on a sprite draws it as Bevy's `SpriteMaterial` does. The component on the sprite is Bevy's
+own `SpriteMaterial` of the bridge's material, so Bevy's count of a sprite's materials holds, the
 sprite's own material kept off while the component is on and given back when it goes; the bridge's
 type answers Bevy's `AsBindGroup` and `MaterialExtension2d` with nothing, since the plugin that
 would ask is never added, which the remarks say; what draws the sprite is a copy of the material
@@ -58,25 +68,6 @@ shader_material_2d_bindless next, under way: Bevy's own `SpriteMaterial` of the 
 so Bevy's count of sprite materials holds, the shared copies carrying the sprite, a `bcs_sprite`
 module with Bevy's sprite functions and the sprite bound at 100 to 102.
 
-Before it, one commit came to be read, the last of the three text re-ports: a text field's cursor
-and selection styled through `Ui.SetTextCursor`, Bevy's `TextCursorStyle` set from the bridge since
-Bevy does not reflect it and no wrapper reaches it, its colors, the selected text's color, the
-unfocused selection and the selection's radius, clamped to a half; its viewport read as
-`TextViewport` and scrolled with `Ui.ScrollText`, since Bevy keeps a field's scroll in
-`EditableText::viewport` and not as a node's scroll position, so Bevy's scrollbar cannot drive it
-and a field's own scrollbar sizes its thumb from the viewport and the text's laid-out size; and
-`Ui.SetVisibleLines`, which changes a field's height and keeps its text where setting the field
-again replaced it. multiline_text_input is written again on 0.20 with its scrollbar on the viewport,
-its corner-radius row and its justify menu as a menu button, a popup and a popover, its triage
-caveats gone; driven offscreen, eleven lines show the thumb with the caret revealed, the menu opens
-above its button, centering applies and renames the button, and dragging the thumb scrolls to the
-top. A test covers the viewport read, scrolled and grown, the text kept, and the cursor set and
-refused on a node that is no field, with the struct's layout held on both sides; N 1.2 sent three
-types into files of their own; ABI 237. Right, each of Bevy's three things reached as Bevy has it
-and the remarks saying why a wrapper could not. The suite: 1,298 passed and 2 skipped. Of the six
-set aside, context_menu waits on the list box and 2d_gizmos, 3d_gizmos and wireframe on their gaps;
-sprite_material and shader_material_2d_bindless as 2D materials next, as item 4 has it.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -91,14 +82,14 @@ from [SHARED.md](SHARED.md).
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
    425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
    test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the runs of
-   `7849ecf6`, `d6764154` and `827b382e` are green on all three as well, and the pack job did not
-   run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start (Decision
-   8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and `61f80bc6`
-   asks whether it is there first, since the runtime's Windows delete throws on a missing folder, a
-   fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the
-   window's image holding its zeros until the pass that draws it has its pipeline, and the test
-   captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and
-   `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
+   `7849ecf6`, `d6764154`, `827b382e` and `095bccd7` are green on all three as well, and the pack
+   job did not run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start
+   (Decision 8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and
+   `61f80bc6` asks whether it is there first, since the runtime's Windows delete throws on a missing
+   folder, a fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at
+   `c46fd24e`, the window's image holding its zeros until the pass that draws it has its pipeline,
+   and the test captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a
+   window and `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
    `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the harness adding
    `Screen` beside the behaviors it discovers, so the warning shows once, from the test that asks
    for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7).
@@ -229,7 +220,7 @@ from [SHARED.md](SHARED.md).
    `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
    field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials
-   (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface,
+   (`467efee0` and `855c4b7e`), `inline_image` and `fixed_node` in the interface (`095bccd7`),
    `pipeline_constants` and `gpu_component_array_buffer` in shaders, mesh shaders from Slang through
    SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and what the table then names most.
    When the captures have settled, they are compared whole with checked-in references by the

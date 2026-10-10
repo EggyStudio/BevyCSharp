@@ -427,7 +427,7 @@ solari_reflections	missing	the settings of Solari's reflections its panel sets, 
 compressed_image_saver	missing	Bevy's asset processor and its compressing image saver, which the bridge does not run
 mines	can
 mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types
-pipeline_constants	missing	pipeline-overridable constants, which a shader program does not set
+pipeline_constants	can
 sprite_material	can
 deferred_raymarch	can	as a draw over the whole view inside the camera's prepass, into the G-buffer and the lighting pass ids, with a shadow stage of its own
 mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build

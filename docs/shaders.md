@@ -130,6 +130,41 @@ string generated = "";
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
 
+### Pipeline constants
+
+A constant the shader declares with `[SpecializationConstant]` is compiled into the material's
+pipelines rather than read as it draws, which WGSL calls an `override` and which lets the driver
+fold the value into the code. A material sets it by name with one number, as it sets any value, and
+the shader's own value stands where it sets none:
+
+```slang
+import bcs2d;
+
+[SpecializationConstant]
+const float LEVELS = 4.0;
+
+[shader("fragment")]
+float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+{
+    let t = floor(mesh.uv.x * LEVELS) / LEVELS;
+    return float4(t, t * 0.4, 1.0 - t, 1.0);
+}
+```
+
+<!-- compiled with:
+ShaderProgram posterize = default;
+-->
+```csharp
+var coarse = Shaders.CreateMaterial2d(posterize).Set("LEVELS", 2f);
+var fine = Shaders.CreateMaterial2d(posterize).Set("LEVELS", 8f);
+```
+
+Materials with different values have pipelines of their own, made when each is first drawn and
+again whenever a value changes, so a constant suits what is chosen once rather than what moves
+every frame, which a uniform is for. A pass or a dispatch has one pipeline for every instance of
+its program, so it runs with the shader's own value, and setting a constant on an instance is
+refused.
+
 ### On a 2D mesh
 
 A program draws a 2D mesh with its 2D stages, and a 2D camera draws the material as Bevy draws a

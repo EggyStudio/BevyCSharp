@@ -183,6 +183,7 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             fallback,
             stand,
             view: None,
+            constants: true,
         };
 
         let mut packed = match pack(&layout, &material.values, &context) {
@@ -262,12 +263,13 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             bindless: false,
             base_specialize: Some(base_specialize),
             prepass_specialize: None,
-            user_specialize: None,
+            user_specialize: Some(user_specialize),
             material_key: ErasedMaterialKey::new(BcsMaterialKey {
                 program: material.program,
                 generation: program.generation,
                 cull: 2,
                 sprite: source.sprite.is_some(),
+                constants: super::constants::of(&layout, &material.values),
             }),
             shadows_enabled: false,
             prepass_enabled: false,
@@ -314,6 +316,22 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
             allocator.free(binding);
         }
     }
+}
+
+/// Hands each stage of a 2D material's pipeline the pipeline constants it declares.
+fn user_specialize(
+    _pipeline: &dyn std::any::Any,
+    descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+    _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+    key: bevy::material::key::ErasedMaterialPipelineKey,
+) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+    let material: BcsMaterialKey = key.material_key.to_key();
+
+    if let Some(program) = programs::lookup(material.program) {
+        super::constants::apply(descriptor, &program, &material.constants);
+    }
+
+    Ok(())
 }
 
 // -- What Material2dPlugin would do for a material type

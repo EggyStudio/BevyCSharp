@@ -228,6 +228,20 @@ pub struct Layout {
     /// Whether a 2D shader reads the sprite it draws through `bcs_sprite`, at
     /// [`SPRITE_BINDINGS`], which only a material drawing a sprite can bind.
     pub reads_sprite: bool,
+    /// The pipeline constants the shader declares, by the names it gives them.
+    pub constants: BTreeMap<String, Constant>,
+}
+
+/// A constant a pipeline is made with, a Slang `[SpecializationConstant]`, which WGSL calls an
+/// `override`.
+///
+/// Set by name on a material as any value is, and compiled into its pipelines rather than bound,
+/// so each value builds pipelines of its own, which the driver can fold the constant into.
+#[derive(Clone, PartialEq, Debug)]
+pub struct Constant {
+    /// What a pipeline names it by, the number Slang gave it, as its `@id` in WGSL.
+    pub key: String,
+    pub scalar: Scalar,
 }
 
 /// The name the loose globals' uniform buffer goes by, which no global can have.
@@ -244,6 +258,8 @@ pub enum Target<'a> {
     },
     /// A whole binding: a texture, a sampler, a buffer, or a uniform buffer set as bytes.
     Resource { binding: u32, info: &'a Binding },
+    /// A pipeline constant, which takes one number.
+    Constant(&'a Constant),
 }
 
 impl Layout {
@@ -252,6 +268,10 @@ impl Layout {
     /// A loose global is found by its own name, and a field of a `ConstantBuffer` by the buffer's
     /// name and the field's.
     pub fn find(&self, path: &str) -> Option<Target<'_>> {
+        if let Some(constant) = self.constants.get(path) {
+            return Some(Target::Constant(constant));
+        }
+
         let (head, rest) = split_head(path);
 
         // A binding named outright: a resource, or a uniform buffer as a whole.
@@ -313,6 +333,7 @@ impl Layout {
             }
         }
 
+        names.extend(self.constants.keys().cloned());
         names
     }
 
@@ -324,6 +345,11 @@ impl Layout {
     /// different files that disagree, and the material could not be bound for both.
     pub fn merge(&mut self, other: &Layout) -> Result<(), String> {
         self.reads_sprite |= other.reads_sprite;
+
+        // A constant one stage kept and another left out is still the material's to set.
+        for (name, constant) in &other.constants {
+            self.constants.entry(name.clone()).or_insert_with(|| constant.clone());
+        }
 
         for (number, binding) in &other.bindings {
             match self.bindings.get_mut(number) {

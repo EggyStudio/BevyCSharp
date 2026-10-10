@@ -330,6 +330,7 @@ fn prepare_dispatches(
             fallback: &fallback,
             stand: &stand,
             view: None,
+            constants: false,
         };
 
         // A buffer or an image that has not reached the GPU yet holds the dispatch back rather
