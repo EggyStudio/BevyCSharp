@@ -18,7 +18,7 @@ use bevy::render::extract_component::ExtractComponent;
 use bevy::render::globals::GlobalsBuffer;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    BindGroup, BindGroupLayoutDescriptor, Buffer, CachedComputePipelineId, ComputePassDescriptor,
+    BindGroup, BindGroupLayoutDescriptor, Buffer, ComputePassDescriptor,
     ComputePipelineDescriptor, PipelineCache, ShaderStages,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
@@ -151,8 +151,14 @@ fn view_pipeline_for(
     // SPIR-V built here, as `crate::render::compute` builds it, and anything else queued in Bevy's cache.
     use crate::render::spirv_compute::ComputePipelineRef;
     let pipeline = match &stage.spirv {
-        Some(spirv) => crate::render::spirv_compute::build(device, cache, "bcs_view_compute", &groups, spirv, &stage.entry)
-            .map_or(ComputePipelineRef::Cached(CachedComputePipelineId::INVALID), ComputePipelineRef::Own),
+        Some(spirv) => ComputePipelineRef::Own(crate::render::spirv_compute::build(
+            device,
+            cache,
+            "bcs_view_compute",
+            &groups,
+            spirv,
+            &stage.entry,
+        )),
         None => ComputePipelineRef::Cached(cache.queue_compute_pipeline(ComputePipelineDescriptor {
             label: Some("bcs_view_compute".into()),
             layout: groups,

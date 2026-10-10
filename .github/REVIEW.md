@@ -10,11 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e9a8508e`. One commit, and item 4's mesh shaders are in: a program draws on a camera
-with Slang task and mesh stages, `DrawTask` and `DrawMesh` as roles 12 and 13 laid out as a pass,
-which with the draw fragment beside them are compiled to SPIR-V, the one way Slang writes them, and
-built into a mesh pipeline by the bridge itself in `mesh_draws.rs` from passthrough modules, the
-compute path's module and layout drawn out for both; a draw counts them in workgroups,
+Reviewed up to `60141490`. One commit, Verdict 9's mend: the shader, view, effects and material
+structs the bridge reads move out of `NativeTypes.Render.cs` into ten files named for them, which
+takes the file to 552 lines and off N 1.3's list and the ten types off N 1.2's, code moved alone,
+the sizes' and offsets' tests as they were. Right, the mend in a commit of its own as item 2 asks,
+and Verdict 9 is settled. The run of `60141490` is green on all three systems, and read against
+`2359425d`'s each system skips three more, the three mesh shader tests, so the workflow's devices
+run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's alone, which
+item 1 says. Verdict 8's scope is coming out in the tree, `spirv_compute.rs`, `compute.rs` and
+`dispatches.rs` open, with item 4's first can rows beside it, read on their commits.
+
+Before it, one commit came to be read, and item 4's mesh shaders came in: a program draws on a
+camera with Slang task and mesh stages, `DrawTask` and `DrawMesh` as roles 12 and 13 laid out as a
+pass, which with the draw fragment beside them are compiled to SPIR-V, the one way Slang writes
+them, and built into a mesh pipeline by the bridge itself in `mesh_draws.rs` from passthrough
+modules, the compute path's module and layout drawn out for both; a draw counts them in workgroups,
 `ViewDraw.Meshes` or three unsigned integers of a buffer, mode 2 of a 64-byte `BcsViewDraw`, ABI
 240, sizes and offsets held in both languages; the camera's inputs layout is visible to the task and
 mesh stages where the device has them, a pipeline that could not be built is kept as nothing rather
@@ -56,26 +66,6 @@ and one entity in two arrays unsupported as in Bevy. The suite: 1,314 passed and
 mesh_shader_intro next as a gap of its own, Slang's task and mesh stages through SPIR-V on Vulkan,
 which this machine's driver reports, as item 4 has it.
 
-Before it, one commit came to be read, pipeline constants: a Slang `[SpecializationConstant]`, an
-`override` in WGSL, is set on a material by name as any value is and compiled into pipelines of its
-own for each set of values. Reflection reads each constant's name, id and type from Slang's JSON for
-those the stage's WGSL kept, since naga refuses a key its module does not declare, so each stage
-carries its own list and a constant one stage kept and another left out is still the material's; the
-check takes one number for a constant; the material's key gains the constant values as bits by name,
-so each set gets its pipelines; the 3D specialization and a new 2D one hand each stage the constants
-it declares; and a pass's or dispatch's pipeline being shared by every instance of its program, a
-constant there is refused once the program has compiled and reported at pack if set before, through
-one flag in each of the six pack contexts. No new API and no ABI change, the guide gaining a
-section. pipeline_constants is written and matches bare Bevy's frame with no pixel past 3%; a bridge
-test holds a constant kept and one dropped and the one-number check, and two managed tests hold two
-materials of one program drawn apart by their constants and redrawn when one changes, and an
-instance refusing a constant. Right, the constants reflected only where the stage kept them, which
-is the thing naga would otherwise refuse at pipeline time, and the refusal where a pipeline is
-shared said plainly. The suite: 1,313 passed and 2 skipped. gpu_component_array_buffer next, drafted
-on the managed side: `AddComponentArray<T>` keeping each entity's T in a shader buffer at the end of
-every frame with a mesh tag an entity, the last entry swapped into a freed place and retagged as
-Bevy does, the buffer grown by half.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -105,16 +95,20 @@ from [SHARED.md](SHARED.md).
    and item 3's steps in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The
    cheat sheet is its writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which
    is in, and the owner's `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. The run of
-   `e9a8508e` says where the three mesh shader tests ran and where they skipped, the device's mesh
-   shaders being wgpu's experimental feature. Each push's run is read by the reviewing session, and
-   a failure it names comes first here.
+   `60141490`, with `e9a8508e`'s mesh shaders and Verdict 9's mend, is green on all three, and each
+   system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
+   devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
+   alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
+   at `60141490`. Each push's run is read by the reviewing session, and a failure it names comes
+   first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
-   its `09419080`, none of them over 800 today, so the list stays as it is.
+   its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
+   list, split into ten files named for their structs, and those ten types off N 1.2's.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
@@ -320,15 +314,6 @@ from [SHARED.md](SHARED.md).
    the pipeline going unbuilt; wgpu's error sink and Bevy's `ShaderCache` are read once to confirm
    the stack is the device's, said in the module comment where the mesh pipeline's says it. Settled
    when the scope is gone, the remarks changed and the compute tests pass.
-
-9. **`e9a8508e` touches `NativeTypes.Render.cs`, listed under N 1.3 at 1,047 lines, without the mend
-   item 2 asks.** A listed file is mended when a batch next touches it, in a commit of its own that
-   moves code alone, and a batch reads the lists for the files it will touch before it starts; the
-   batch added `DrawTask`, `DrawMesh` and the three group counts to it and left it as it was. The
-   mend comes next in a commit of its own, the render structs split by what they describe so each
-   file is under 800 lines, the sizes' and offsets' tests unchanged; `programs.rs` at 785,
-   `shader_views.rs` at 768 and `draws.rs` at 761 are read for the same before the batch that next
-   grows them. Settled at the commit.
 
 ## Decisions
 

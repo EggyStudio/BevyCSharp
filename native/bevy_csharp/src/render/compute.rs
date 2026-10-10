@@ -43,7 +43,7 @@ use bevy::render::gpu_readback::{Readback, ReadbackComplete};
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
     BindGroup, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
-    BufferBindingType, BufferUsages, CachedComputePipelineId, ComputePassDescriptor,
+    BufferBindingType, BufferUsages, ComputePassDescriptor,
     ComputePipelineDescriptor, PipelineCache, ShaderStages, ShaderType,
 };
 use bevy::render::diagnostic::RecordDiagnostics;
@@ -232,11 +232,16 @@ fn pipeline_for(
         groups.push(super::solari::scene_layout()?);
     }
 
-    // SPIR-V built here, with its entry point named, and anything else queued in Bevy's cache. A
-    // pipeline that could not be built is kept as one that never will be, so it is not tried again.
+    // SPIR-V built here, with its entry point named, and anything else queued in Bevy's cache.
     let pipeline = match &stage.spirv {
-        Some(spirv) => super::spirv_compute::build(device, cache, "bcs_compute", &groups, spirv, &stage.entry)
-            .map_or(ComputePipelineRef::Cached(CachedComputePipelineId::INVALID), ComputePipelineRef::Own),
+        Some(spirv) => ComputePipelineRef::Own(super::spirv_compute::build(
+            device,
+            cache,
+            "bcs_compute",
+            &groups,
+            spirv,
+            &stage.entry,
+        )),
         None => ComputePipelineRef::Cached(cache.queue_compute_pipeline(ComputePipelineDescriptor {
             label: Some("bcs_compute".into()),
             layout: groups,

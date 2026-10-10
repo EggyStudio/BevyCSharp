@@ -71,11 +71,8 @@ pub(super) fn build(
         return None;
     }
 
-    // No error scope around it, as there is around a SPIR-V compute pipeline. With one, a scope
-    // was popped out of the order it was pushed in, on the thread building the mesh pipeline and on
-    // Bevy's own threads loading shaders, a few runs in ten, which wgpu answers with a panic that
-    // ends the app, and with none, in every run since. An error building it is then a render error
-    // as any other, which closes the app unless `Shaders.KeepRenderingAfterErrors` says not to.
+    // No error scope around it, for the reason a SPIR-V compute pipeline has none
+    // (`spirv_compute::build`), and an error building it is a render error as any other.
     let task_module = task
         .as_ref()
         .map(|(spirv, entry)| spirv_compute::module(device, label, spirv, entry));

@@ -184,7 +184,9 @@ public sealed class ShaderProgramSettings
     /// <para>
     /// Nothing checks SPIR-V passed through this way before the GPU runs it. A shader reading
     /// past a buffer's end reads whatever is there rather than zero, and a declaration that does not
-    /// match what the bridge binds is undefined behavior rather than an error. The layout is built
+    /// match what the bridge binds is undefined behavior rather than an error. A pipeline wgpu refuses as
+    /// it is built, for an entry point the SPIR-V lacks, is a render error as any other, which
+    /// closes the app unless <see cref="Shaders.KeepRenderingAfterErrors"/> says not to. The layout is built
     /// from Slang's reflection, so what the shader declares is still set by name as it is for WGSL.
     /// The one difference is that a comparison sampler is bound as a plain one, since the reflection
     /// does not tell the two apart. On a backend other than Vulkan the SPIR-V is translated by naga

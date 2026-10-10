@@ -40,8 +40,15 @@ pub fn words(bytes: &[u8]) -> Vec<u32> {
         .collect()
 }
 
-/// Builds a compute pipeline from SPIR-V with its groups' layouts, or says why it could not, once,
-/// and answers nothing, as a pipeline Bevy's cache refuses draws nothing.
+/// Builds a compute pipeline from SPIR-V with its groups' layouts.
+///
+/// With no error scope around it, so an error building it is a render error as any other, which
+/// closes the app unless `Shaders.KeepRenderingAfterErrors` says not to. A scope would catch the
+/// error, and around a mesh pipeline built the same way (`views::mesh_draws`) a scope was popped
+/// out of the order it was pushed in a few runs in ten, on the thread building it or on one of
+/// Bevy's loading shaders, which wgpu answers with a panic that ends the app. wgpu keeps a stack of
+/// scopes for each thread, and how another scope came above this one's was not found, so neither
+/// builder has one.
 pub fn build(
     device: &RenderDevice,
     cache: &PipelineCache,
@@ -49,30 +56,18 @@ pub fn build(
     groups: &[BindGroupLayoutDescriptor],
     spirv: &[u32],
     entry: &str,
-) -> Option<ComputePipeline> {
-    let wgpu = device.wgpu_device();
-    let scope = wgpu.push_error_scope(wgpu::ErrorFilter::Validation);
-
+) -> ComputePipeline {
     let module = module(device, label, spirv, entry);
     let layout = pipeline_layout(device, cache, label, groups);
 
-    let pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+    device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
         label: Some(label),
         layout: Some(&layout),
         module: &module,
         entry_point: Some(entry),
         compilation_options: Default::default(),
         cache: None,
-    });
-
-    // Caught here rather than by Bevy's handler of uncaught errors, which ends the app, as a
-    // pipeline Bevy's cache could not build only goes unbuilt.
-    if let Some(Some(error)) = bevy::tasks::futures::now_or_never(scope.pop()) {
-        super::material::say_once(format!("A SPIR-V compute shader could not be built. {error}"));
-        return None;
-    }
-
-    Some(pipeline)
+    })
 }
 
 /// The layout of a pipeline whose groups are `groups`, in order.
