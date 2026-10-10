@@ -26,7 +26,7 @@ public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTone
         FramePoint.AfterTonemapping => 1,
         FramePoint.AfterOpaque => 2,
         _ => throw new ArgumentException(
-            "A pass runs on the picture, which does not exist yet after the prepass.", nameof(At)),
+            "A pass runs on the picture, which does not exist yet inside or after the prepass.", nameof(At)),
     };
 
     /// <summary>A pass that runs before tonemapping.</summary>

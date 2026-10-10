@@ -1,16 +1,16 @@
 // What a shader running on a camera sees of it: the picture drawn so far, time, the view and the
 // previous frame's, and the depth, normals and motion the camera's prepass drew.
 //
-// A full-screen pass and a compute shader dispatched on a camera both reach it with
-// `import bcs_pass;`, and everything in it is under the `bcs_pass` namespace. The shader itself
-// carries whatever it declares. Every global without a binding of its own belongs to it and is set
-// from C# by its name, and an image the camera owns is bound by the name the camera gave it. The
-// inputs below are in space 101, which the bridge moves to group one after the compile, so the
-// shader's own globals keep group zero to themselves whatever they are.
+// A full-screen pass, a compute shader dispatched on a camera and geometry a camera draws all reach
+// it with `import bcs_pass;`, and everything in it is under the `bcs_pass` namespace. The shader
+// itself carries whatever it declares. Every global without a binding of its own belongs to it and
+// is set from C# by its name, and an image the camera owns is bound by the name the camera gave
+// it. The inputs below are in space 101, which the bridge moves to group one after the compile, so
+// the shader's own globals keep group zero to themselves whatever they are.
 //
 // A pass's entry point is a fragment shader taking `bcs_pass::Input`, which Bevy's full-screen
 // triangle writes, and returning the pixel. A compute shader works in pixels, and the helpers
-// taking an `int2` are for it.
+// taking an `int2` are for it. A draw over the whole view places its triangle with `full_screen`.
 
 module bcs_pass;
 
@@ -477,6 +477,51 @@ public float2 previous_uv_of(float3 world)
     return float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
 }
 
+/// The depth Bevy keeps for a point in the world as the view sees it, which a draw that finds its
+/// own surface returns through `SV_Depth`, and which is the shadow map's where the view is a
+/// light's.
+public float depth_of(float3 world)
+{
+    let clip = transform(view.clip_from_world, float4(world, 1.0));
+    return clip.z / clip.w;
+}
+
+/// Whether the view is orthographic, as a directional light's shadow cascades are.
+public bool orthographic()
+{
+    return view.clip_from_view[3].w == 1.0;
+}
+
+/// Where the ray through the pixel at `uv` starts: at the camera for a perspective view, and on
+/// the near plane for an orthographic one.
+public float3 ray_origin(float2 uv)
+{
+    if (orthographic())
+        return world_position(uv, 1.0);
+
+    return view.world_position;
+}
+
+/// Which way the ray through the pixel at `uv` goes from `ray_origin`, for a shader that finds a
+/// surface by marching along it.
+public float3 ray_direction(float2 uv)
+{
+    if (orthographic())
+        return normalize(-view.world_from_view[2].xyz);
+
+    return normalize(world_position(uv, 1.0) - view.world_position);
+}
+
+/// A corner of one triangle covering the whole view, for a draw over every pixel of it with three
+/// vertices, the triangle Bevy draws a pass with.
+public Input full_screen(uint vertex)
+{
+    Input output;
+    output.uv = float2(float(vertex >> 1), float(vertex & 1)) * 2.0;
+    output.position = float4(output.uv * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
+    return output;
+}
+
 /// What Bevy's G-buffer says about the surface at a pixel.
 ///
 /// Only there on a camera drawing deferred (`Render.SetDeferredRendering`), where a shader reads it
@@ -502,6 +547,8 @@ public struct Surface
     public bool unlit;
     /// Whether the mesh receives shadows.
     public bool shadow_receiver;
+    /// Whether the camera's fog covers it, as it covers a standard material by default.
+    public bool fog;
 };
 
 float4 unpack_unorm4x8(uint v)
@@ -533,6 +580,7 @@ public Surface surface_of(uint4 texel)
 
     let flags = (texel.w >> 24) & 0xFF;
     surface.unlit = (flags & 1) != 0;
+    surface.fog = (flags & 2) != 0;
     surface.shadow_receiver = (flags & 4) != 0;
 
     let base_rough = unpack_unorm4x8(texel.x);
@@ -553,6 +601,145 @@ public Surface surface_of(uint4 texel)
     surface.normal = octahedral_decode(normal);
 
     return surface;
+}
+
+// -- Drawing into the deferred buffers
+//
+// A draw at `FramePoint.InPrepass` with `Targets = ["gbuffer", "lighting_pass"]` writes a surface
+// of its own into a camera's deferred buffers, which Bevy's deferred lighting then lights as it
+// lights a standard material, shadows, ambient occlusion and screen-space reflections with it. A
+// surface found by marching a ray from each pixel is drawn this way, as Bevy's deferred_raymarch
+// example draws one.
+
+/// The deferred lighting pass Bevy lights a standard material with, which `lighting_pass` holds
+/// for each pixel it lights.
+public static const uint STANDARD_LIGHTING = 1u;
+
+/// A surface as Bevy's default standard material describes one facing `normal`: white, rough by
+/// half, not metal, reflecting half the light head on, receiving shadows and covered by fog.
+public Surface surface(float3 normal)
+{
+    Surface output;
+    output.base_color = float3(1.0);
+    output.perceptual_roughness = 0.5;
+    output.metallic = 0.0;
+    output.reflectance = 0.5;
+    output.diffuse_occlusion = 1.0;
+    output.emissive = float3(0.0);
+    output.normal = normal;
+    output.unlit = false;
+    output.shadow_receiver = true;
+    output.fog = true;
+    return output;
+}
+
+uint pack_unorm4x8(float4 values)
+{
+    let v = uint4(saturate(values) * 255.0 + 0.5);
+    return (v.w << 24) | (v.z << 16) | (v.y << 8) | v.x;
+}
+
+/// Three numbers sharing one exponent, as Bevy's `vec3_to_rgb9e5_` packs them, which keeps what
+/// the decoder above reads exact.
+uint pack_rgb9e5(float3 color)
+{
+    let rgb = clamp(color, float3(0.0), float3(65408.0));
+    let largest = max(rgb.r, max(rgb.g, rgb.b));
+    let floor_log2 = int((asuint(largest) & 0x7F800000u) >> 23) - 127;
+
+    var exponent = max(-16, floor_log2) + 1 + 15;
+    var scale = exp2(float(exponent - 15 - 9));
+
+    if (int(floor(largest / scale + 0.5)) == 512)
+    {
+        scale *= 2.0;
+        exponent += 1;
+    }
+
+    let n = uint3(floor(rgb / scale + 0.5));
+    return (uint(exponent) << 27) | (n.b << 18) | (n.g << 9) | n.r;
+}
+
+float2 octahedral_encode(float3 v)
+{
+    let n = v / (abs(v.x) + abs(v.y) + abs(v.z));
+    let wrapped = (1.0 - abs(n.yx)) * select(n.xy >= 0.0, float2(1.0), float2(-1.0));
+    let folded = n.z >= 0.0 ? n.xy : wrapped;
+    return folded * 0.5 + 0.5;
+}
+
+/// Packs a surface into a texel of Bevy's G-buffer, as Bevy's `deferred_gbuffer_from_pbr_input`
+/// packs a standard material's outside WebGL, which `surface_of` unpacks again.
+///
+/// An unlit surface's color is its `emissive`, as `surface_of` gives it back, and its `base_color`
+/// is not kept. A standard material's clearcoat and a lightmap's light are not written, so a
+/// surface drawn this way has neither.
+///
+/// Written here rather than reached through Bevy's own function as a material's deferred stage
+/// reaches it, since Bevy's reads the view's uniform in group zero for the lightmap's light, and
+/// group zero is where a draw on a camera keeps its own values.
+public uint4 gbuffer_of(Surface surface)
+{
+    var flags = 0u;
+    if (surface.unlit)
+        flags |= 1u;
+    if (surface.fog)
+        flags |= 2u;
+    if (surface.shadow_receiver)
+        flags |= 4u;
+
+    // Kept as a gamma of 2.2 for precision in eight bits, which `surface_of` and Bevy's lighting
+    // undo.
+    let base_color = surface.unlit ? float3(0.0) : pow(max(surface.base_color, float3(0.0)), float3(1.0 / 2.2));
+    let normal = octahedral_encode(normalize(surface.normal));
+    let x = uint(saturate(normal.x) * 4095.0 + 0.5);
+    let y = uint(saturate(normal.y) * 4095.0 + 0.5);
+
+    return uint4(
+        pack_unorm4x8(float4(base_color, surface.perceptual_roughness)),
+        pack_rgb9e5(surface.emissive),
+        pack_unorm4x8(float4(surface.reflectance, surface.metallic, surface.diffuse_occlusion, 0.0)),
+        (x & 0xFFF) | ((y & 0xFFF) << 12) | ((flags & 0xFF) << 24));
+}
+
+/// What a draw writes into the deferred buffers: the packed surface, the lighting pass that
+/// lights it, and its depth, which tests it against Bevy's geometry and hides it behind what is
+/// nearer.
+public struct Deferred
+{
+    public uint4 gbuffer : SV_Target0;
+    public uint lighting_pass : SV_Target1;
+    public float depth : SV_Depth;
+};
+
+/// A surface at a point in the world as the deferred buffers hold it, lit by Bevy's lighting for
+/// a standard material.
+public Deferred deferred(Surface surface, float3 world)
+{
+    Deferred output;
+    output.gbuffer = gbuffer_of(surface);
+    output.lighting_pass = STANDARD_LIGHTING;
+    output.depth = depth_of(world);
+    return output;
+}
+
+/// What a draw's shadow stage returns, the depth of the surface it found as the light's view keeps
+/// it.
+///
+/// A struct, because slangc writes a depth given as a function's own return (`float shadow(...)
+/// : SV_Depth`) as a color when it writes WGSL, which the shadow map has no target for, so the
+/// triangle's own depth would be kept instead. A member marked `SV_Depth` is written as the depth.
+public struct ShadowDepth
+{
+    public float depth : SV_Depth;
+};
+
+/// The depth of a point in the world, for a shadow stage to return.
+public ShadowDepth shadow_depth(float3 world)
+{
+    ShadowDepth output;
+    output.depth = depth_of(world);
+    return output;
 }
 
 /// Whether the camera is lit by an environment map, which `SetSkyLighting`, `SetImageLighting` and

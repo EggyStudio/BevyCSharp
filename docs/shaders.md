@@ -212,6 +212,10 @@ The surface is packed as Bevy packs a standard material's, by WESL the bridge pu
 compiled stage over Bevy's own deferred functions, and the normal and motion a camera's prepass
 draws are written beside it.
 
+Geometry a camera draws itself writes into the same buffers from inside the prepass, which is how
+a surface found by marching a ray rather than drawn from a mesh is lit by Bevy (see the deferred
+buffers under [Compute on a camera](compute.md#compute-on-a-camera)).
+
 ### Clustered decals
 
 Bevy projects a clustered decal onto whatever lies inside its box, and its standard material lays

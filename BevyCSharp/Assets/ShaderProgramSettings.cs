@@ -82,6 +82,31 @@ public sealed class ShaderProgramSettings
     /// <summary>The fragment shader of geometry drawn on a camera. Required with <see cref="DrawVertex"/>.</summary>
     public ShaderStage DrawFragment { get; init; }
 
+    /// <summary>
+    /// The fragment shader geometry drawn on a camera is drawn into shadow maps with, where a draw
+    /// casts shadows (<see cref="ViewDraw.CastsShadows"/>). Its entry point is called
+    /// <c>shadow</c> unless it is named.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Without it a draw casts the shadow of the triangles its vertex shader places, depth alone.
+    /// With it each fragment of those triangles writes its own depth, or discards to cast nothing
+    /// there, which is how geometry its vertex shader does not place casts a shadow: a surface a
+    /// fragment shader finds by marching a ray from each pixel of a triangle covering the whole
+    /// view, as Bevy's deferred_raymarch example draws one. It runs once for each shadow view with
+    /// that view in <c>bcs_pass::view</c>, so the ray from a pixel (<c>bcs_pass::ray_origin</c>,
+    /// <c>bcs_pass::ray_direction</c>) is the light's, and <c>bcs_pass::shadow_depth</c> returns
+    /// the depth the shadow map holds for a point.
+    /// </para>
+    /// <para>
+    /// The depth goes in a struct member marked <c>SV_Depth</c>, as <c>bcs_pass::ShadowDepth</c>
+    /// holds it. Given as the function's own return (<c>float shadow(...) : SV_Depth</c>) slangc
+    /// writes it as a color, which the shadow map has no target for, and the triangle's own depth
+    /// is kept instead.
+    /// </para>
+    /// </remarks>
+    public ShaderStage DrawShadow { get; init; }
+
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
@@ -110,7 +135,7 @@ public sealed class ShaderProgramSettings
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred }
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow }
             .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>

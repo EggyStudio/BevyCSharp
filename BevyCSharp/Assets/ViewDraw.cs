@@ -43,8 +43,10 @@ public readonly record struct ViewDraw
     /// each of the camera's directional cascades, each spot light, and each face of each point
     /// light's cube. Its vertex shader runs with that view in <c>bcs_pass::view</c>, so placing
     /// geometry from the view as it always does places it as the light sees it, and its fragment
-    /// shader does not run. A spot or point light's map is shared by every camera, so every camera's
-    /// casting draws are drawn into it.
+    /// shader does not run. A program with a <see cref="ShaderProgramSettings.DrawShadow"/> stage
+    /// runs that there instead, which writes the depth itself, for geometry its fragment shader
+    /// finds rather than its vertex shader places. A spot or point light's map is shared by every
+    /// camera, so every camera's casting draws are drawn into it.
     /// </remarks>
     public bool CastsShadows { get; init; }
 
@@ -74,10 +76,20 @@ public readonly record struct ViewDraw
     /// outputs in order, instead of <see cref="Into"/>.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// For a draw writing more than one thing a pixel, such as a visibility buffer's ids and the
     /// barycentrics beside them, or a G-buffer of its own. Every image is drawn once a pixel; they
     /// are tested against the camera's depth only where all of them are the picture's size, and
     /// none is blended where any is an integer image.
+    /// </para>
+    /// <para>
+    /// The camera's prepass is drawn into by the same names: <c>normals</c> and <c>motion</c>
+    /// where it draws them, and on a camera drawing deferred, the G-buffer as <c>gbuffer</c> and
+    /// which lighting pass lights each pixel as <c>lighting_pass</c>. A draw into those two runs
+    /// at <see cref="FramePoint.InPrepass"/>, and Bevy's deferred lighting then lights what it
+    /// wrote as it lights a standard material. <c>bcs_pass::deferred</c> returns both and the
+    /// depth, packed as Bevy packs its own.
+    /// </para>
     /// </remarks>
     public IReadOnlyList<string>? Targets { get; init; }
 

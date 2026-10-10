@@ -322,6 +322,7 @@ internal static class Catalog
         new("compute_mesh", ComputeMesh.Build),
         new("custom_post_processing", CustomPostProcessing.Build),
         new("custom_shader_instancing", CustomShaderInstancing.Build),
+        new("deferred_raymarch", DeferredRaymarch.Build),
         new("fullscreen_material", FullscreenMaterial.Build),
         new("texture_binding_array", TextureBindingArray.Build),
 

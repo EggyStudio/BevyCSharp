@@ -21,10 +21,14 @@ pub enum Role {
     /// draws deferred, which writes the surface Bevy's deferred lighting pass lights rather than a
     /// color.
     Deferred = 8,
+    /// The fragment shader geometry drawn on a camera is drawn into shadow maps with, writing its
+    /// depth itself, for geometry its vertex shader does not place, such as a surface its fragment
+    /// shader finds by marching a ray.
+    DrawShadow = 9,
 }
 
 /// How many roles a program has.
-pub const ROLE_COUNT: usize = 9;
+pub const ROLE_COUNT: usize = 10;
 
 impl Role {
     pub const ALL: [Role; ROLE_COUNT] = [
@@ -37,6 +41,7 @@ impl Role {
         Role::DrawVertex,
         Role::DrawFragment,
         Role::Deferred,
+        Role::DrawShadow,
     ];
 
     /// The roles a material is drawn with.
@@ -55,6 +60,7 @@ impl Role {
             Role::Vertex | Role::PrepassVertex | Role::DrawVertex => "vertex",
             Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment => "fragment",
             Role::Deferred => "deferred",
+            Role::DrawShadow => "shadow",
             Role::Compute => "main",
         }
     }
@@ -62,9 +68,12 @@ impl Role {
     pub(super) fn stage(self) -> slang::Stage {
         match self {
             Role::Vertex | Role::PrepassVertex | Role::DrawVertex => slang::Stage::Vertex,
-            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment | Role::Deferred => {
-                slang::Stage::Fragment
-            }
+            Role::Fragment
+            | Role::PrepassFragment
+            | Role::Pass
+            | Role::DrawFragment
+            | Role::Deferred
+            | Role::DrawShadow => slang::Stage::Fragment,
             Role::Compute => slang::Stage::Compute,
         }
     }
@@ -79,7 +88,7 @@ impl Role {
             | Role::Deferred => Family::Material,
             // Drawing on a camera reads what a pass does, the camera's inputs in group one and its
             // own values in group zero, so it is laid out the way a pass is.
-            Role::Pass | Role::DrawVertex | Role::DrawFragment => Family::Pass,
+            Role::Pass | Role::DrawVertex | Role::DrawFragment | Role::DrawShadow => Family::Pass,
             Role::Compute => Family::Compute,
         }
     }
@@ -95,6 +104,7 @@ impl Role {
             Role::DrawVertex => "draw vertex",
             Role::DrawFragment => "draw fragment",
             Role::Deferred => "deferred",
+            Role::DrawShadow => "draw shadow",
         }
     }
 }

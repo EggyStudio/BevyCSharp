@@ -694,9 +694,10 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
             spirv: unit.spirv.clone(),
         });
 
-        // Both stages of a material, and both of a draw, share one group, so their layouts merge.
+        // Every stage of a material, and every stage of a draw, share one group, so their layouts
+        // merge.
         let merged_into = match role {
-            Role::DrawVertex | Role::DrawFragment => Some(&mut draw),
+            Role::DrawVertex | Role::DrawFragment | Role::DrawShadow => Some(&mut draw),
             _ if role.family() == Family::Material => Some(&mut material),
             _ => None,
         };

@@ -1723,6 +1723,7 @@ enum Bevy.FramePoint : int
   AfterPrepass = 0
   AfterTonemapping = 3
   BeforeTonemapping = 2
+  InPrepass = 4
 static class Bevy.FrameProfile
   static FrameCosts Take(EcsWorld world)
   static bool On { get; }
@@ -2843,6 +2844,7 @@ struct Bevy.Interop.NativeShaderProgramConfig
   NativeShaderStage Compute
   NativeShaderStage Deferred
   NativeShaderStage DrawFragment
+  NativeShaderStage DrawShadow
   NativeShaderStage DrawVertex
   NativeShaderStage Fragment
   NativeShaderStage Pass
@@ -10353,6 +10355,7 @@ sealed class Bevy.ShaderProgramSettings
   ShaderStage Compute { get; init; }
   ShaderStage Deferred { get; init; }
   ShaderStage DrawFragment { get; init; }
+  ShaderStage DrawShadow { get; init; }
   ShaderStage DrawVertex { get; init; }
   ShaderStage Fragment { get; init; }
   ShaderStage Pass { get; init; }

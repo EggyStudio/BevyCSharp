@@ -112,8 +112,8 @@ pub unsafe extern "C" fn bcs_render_set_view_images(
                     return status::NULL_ARG;
                 }
 
-                // After the prepass there is no picture yet to copy, and an integer image cannot
-                // hold one, so both are refused rather than copied as zeros.
+                // Inside the prepass and at the point after it there is no picture yet to copy, and
+                // an integer image cannot hold one, so both are refused rather than copied as zeros.
                 let copy = match image.copy {
                     -1 => None,
                     1..=3 => super::views::FramePoint::from_number(image.copy),

@@ -544,6 +544,13 @@ fn {entry}(vertex_in: Vertex) -> VertexOutput {{
              return vec4<f32>(0.0, 0.0, 0.0, 1.0);\n}}\n"
         )),
 
+        // Discards every fragment, which leaves the shadow map as Bevy's own casters drew it,
+        // since where the geometry is cannot be known without the stage that finds it.
+        Role::DrawShadow => Source::Wgsl(format!(
+            "@fragment\nfn {entry}(@builtin(position) position: vec4<f32>) -> @builtin(frag_depth) f32 {{\n    \
+             discard;\n}}\n"
+        )),
+
         // Does nothing, which is the only thing a compute shader can safely do without knowing
         // what the buffers it was handed hold.
         Role::Compute => Source::Wgsl(format!("@compute @workgroup_size(1)\nfn {entry}() {{\n}}\n")),

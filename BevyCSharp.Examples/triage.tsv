@@ -429,7 +429,7 @@ mines	can
 mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types
 pipeline_constants	missing	pipeline-overridable constants, which a shader program does not set
 sprite_material	missing	a sprite drawn with a material of its own, which a Slang program does not draw as a sprite
-deferred_raymarch	missing	a pass writing the deferred buffers, which a pass over a camera's picture does not
+deferred_raymarch	can	as a draw over the whole view inside the camera's prepass, into the G-buffer and the lighting pass ids, with a shadow stage of its own
 mesh_shader_intro	missing	mesh shaders, which a Slang program reaches only through SPIR-V and a pipeline the bridge does not build
 many_meshlet_materials	can	needs a bridge built with --meshlet
 overflow_transform	can	through Bevy's reflected UiTransform

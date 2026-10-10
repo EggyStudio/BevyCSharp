@@ -17,7 +17,8 @@ namespace Bevy;
 /// <see cref="FramePoint.BeforeTonemapping"/> it is the lit picture in its own units, and at
 /// <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry, which needs a camera
 /// drawn once a pixel. Only a float or eight-bit format can hold it, and
-/// <see cref="FramePoint.AfterPrepass"/> is refused, since nothing is lit there yet.
+/// <see cref="FramePoint.AfterPrepass"/> and <see cref="FramePoint.InPrepass"/> are refused, since
+/// nothing is lit there yet.
 /// </param>
 public readonly record struct ViewImage(
     string Name,

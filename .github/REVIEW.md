@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2e7a1c2c`. Six commits, 38 more re-ports, 81 of the 95, and three of the 95 set
+Reviewed up to `a54dda9e`. Three commits, and the 95 re-ports are done but for six that wait on
+gaps: bevymark seeds each of its random sources apart as Bevy's does, standard_widgets_observers
+changed only in its observers' types, and ui_transform, tab_navigation, ui_texture_slice and
+ui_texture_atlas_slice with widget buttons styled by their press and hover, tab_navigation focusing
+by a click on a button and clearing by one on the page. Three more set aside with their reason:
+2d_gizmos and 3d_gizmos animate their dashes through the gizmo lines' animation offset and wireframe
+turns x-ray on through its config and a component, none of which the bridge carries, so they keep
+their 0.19.1 heads for the gaps that bring them, as the three before. Right. One thing left
+untraced, and rightly placed: a Tab sent by `input.key` to tab_navigation drawn offscreen moves the
+focus neither from a button nor from none, in the committed port as in this one, the focus plugin
+handing keys to the focused entity or else to the primary window, which an offscreen run has none
+of, so either the keys never reach tab navigation there or they do not come as the messages it
+reads; it belongs to the gap of keys observed as they reach a field and is traced there, a model
+with two readings being not yet a cause. The twenty built on Feathers wait on the owner's word for
+its crate (Decision 11), which comes after the other gaps, so item 4's first gap is next, the
+decal's tag and the volume's voxels through the WESL glue, as the Now list has it.
+
+Before it, six commits came to be read, 38 more re-ports, 81 of the 95, and three of the 95 set
 aside with their reason: multiline_text_input reads and moves the field's viewport against the text
 layout's size for a scrollbar of its own and opens a justify menu on a popover, context_menu lists
 its items in a `ListBox` Bevy does not reflect, and multiple_text_inputs sets a field's read-write
@@ -53,24 +70,6 @@ BUILDING.md's sentence mended. Pictures are captured again where a re-port chang
 eight of them. Right, each change said and the heads true, EXAMPLES.md following. Item 3's order is
 amended to the reply's. The remaining 52 and then the twenty with Feathers.
 
-Before it, one commit came to be read, and step g came to be whole. ReSTIR is on with ray-traced
-lighting, chosen by measurement as item 3 asked: a Cornell box lit by a panel at 1280 by 720 on the
-RTX 4070 took 0.42 ms of the GPU in Solari's passes with it off and 1.69 ms with it on, and the mean
-change of a pixel between two frames of the still box was 9.1 of 255 off and 4.5 on, the grain plain
-to see without it; Bevy leaves it off for a denoiser, and its denoiser is DLSS's, which the bridge
-does not build, so `bcs_render_set_ray_traced_lighting` turns it on, a test holding a traced camera
-to it, the remarks and `docs/ray-tracing.md` giving the numbers and an example. The reply disputes
-item 3's second half, the fields reaching `Config`, and is right: the light samples, the bounces and
-the world cache are Bevy's per camera, reached through the reflected `SolariLightingRef`, and a copy
-in `Config` would be a second home for what the camera holds; item 3 is amended. With it, g's list
-is read whole: the documents name 0.20, naga_oil is named nowhere in the bridge, BUILDING.md's
-package table has the weather and not the embedding, THIRD-PARTY-NOTICES.md names both, EXAMPLES.md
-is written from the lock with the 23 new examples in `triage.tsv`, and the release notes are the
-commits' sentences, as BUILDING.md has them, each change a game's author sees named in the commit
-that made it. Step h is the owner's: 29 commits since `c7f1cbc6` wait for a push, and the pack run
-for 0.4 follows a green run with Verdict 6's fix in it (Decision 8). Item 4 next, box_shadow's
-re-port first, while the push and the pack are the owner's.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -81,24 +80,23 @@ The owner asked that the work does not stop. A batch that ends is followed by th
 with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are taken
 from [SHARED.md](SHARED.md).
 
-1. **What the next page says.** The bump's run, `340639b1`, is green on Linux and Windows, 1,038
-   passing on Linux, and red on macOS by one test, `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`,
-   which `c7f1cbc6`'s run fails on Windows as well (Verdict 6, mended in `6715339c` and settled by
-   the run of the push that carries it); N 1.3 and the memory command's peak pass on every system
-   since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table check that failed
-   Linux at `e4c122e3` passed at the bump. Verdict 7 is settled at `b0fa935e`, the page removed
-   before the script starts, and `61f80bc6` asks whether it is there first, since the runtime's
-   Windows delete throws on a missing folder, a fresh checkout's first run. `SpawnedWindowTests`'
-   black capture is traced at `c46fd24e`, the window's image holding its zeros until the pass that
-   draws it has its pipeline, and the test captures once `Render.PipelinesReady()` holds;
-   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g. The page's
-   repeated lines carried 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
-   quieted at `37b2118f`, the harness adding `Screen` beside the behaviors it discovers, so the
-   warning shows once, from the test that asks for it, and the third repeated line is the 67 errors
-   `ShaderMaterialTests` asks for (Decision 7). Package 0.4 is packed on Bevy 0.20 (Decision 8) once
-   a push's run is green with Verdict 6's fix in it, item 3's steps being in at `c9c460df`, and
-   Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
-   session, and a failure it names comes first here.
+1. **What the next page says.** The run of `a54dda9e`, the first since `c7f1cbc6` and the first
+   green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
+   425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
+   test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, and the pack
+   job did not run, so Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start
+   (Decision 8). Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and
+   `61f80bc6` asks whether it is there first, since the runtime's Windows delete throws on a missing
+   folder, a fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at
+   `c46fd24e`, the window's image holding its zeros until the pass that draws it has its pipeline,
+   and the test captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a
+   window and `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
+   `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the harness adding
+   `Screen` beside the behaviors it discovers, so the warning shows once, from the test that asks
+   for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7).
+   Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps
+   in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by
+   the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -209,7 +207,9 @@ from [SHARED.md](SHARED.md).
    the twenty built on Feathers in 0.20 (`faecca0b`'s reply) going with Feathers after the other
    gaps, and multiline_text_input, context_menu and multiple_text_inputs going with the gap that
    brings what each reads, the text field's viewport, the list box and the field's edits
-   (`2e7a1c2c`'s reply).
+   (`2e7a1c2c`'s reply); 2d_gizmos, 3d_gizmos and wireframe the same, for the gizmo lines' animation
+   offset and the wireframe's x-ray, and tab_navigation's Tab, which moves no focus in an offscreen
+   run, is traced with the keys' gap (`a54dda9e`'s reply).
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
@@ -286,22 +286,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-6. **The macOS jobs of `e4c122e3`, `340639b1` and `c7f1cbc6` and the Windows jobs of the first and
-   the last fail `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`.** Read from the pages and modeled:
-   the test allocates 256 MB on the GC's heap, touches a byte a page, and holds the resident size to
-   have grown by more than 200 MB; it grew by 79 and 163 MB on Windows and by 196 to 202 MB on
-   macOS, and passed on every system through `6363357` and fails since `2ed99011`, the deferred
-   batch and the two mends. What changed is the suite around it, not the reading, and the GC
-   keeps memory it freed earlier in the process
-   committed and resident, so an array it places there adds nothing to the working set when touched,
-   and how much it had kept depends on what ran before, which the collection's order moved; the test
-   measures the GC's retention and not the guard. Two things. The memory touched is taken outside
-   the GC, `NativeMemory.Alloc` of 256 MB written a byte a page and freed after, so the pages must
-   be new to the process and the growth is the allocation's less what the system trims, held at
-   three quarters with the reason said, or the growth is held against what the GC had committed and
-   unused before the array, read from `GC.GetGCMemoryInfo`. And no looser bound on the heap's array
-   alone, which would pass by what ran before. Settled when the test passes on all three systems.
 
 ## Decisions
 
@@ -426,14 +410,17 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Three more of the 95 wait on what the bridge does not reach, and Tab moves no focus in an app with
-no window.** 2d_gizmos and 3d_gizmos animate the dashes of their round gizmos on L through
-`GizmoLineConfig::animation_offset`, which the bridge's gizmo configuration does not carry, and
-wireframe turns x-ray on and off through `WireframeConfig::xray_mode` and a `WireframeXray`
-component, neither of which has a row in the table, so the three keep their 0.19.1 heads for the
-gaps that bring them. Porting tab_navigation, a Tab sent by `input.key` to the example drawn
-offscreen moved the focus neither from a focused button nor from none, in the committed port as in
-this one, where a click focuses and a click on the page clears as they should. The input focus
-plugin hands keys to the focused entity or, with none, to the primary window, and an offscreen run
-has no window, so either the keys never reach tab navigation there or they never come as the
-messages it reads. It is untraced, and belongs to the gap of keys observed as they reach a field.
+**Item 4's first gap closed with the move to 0.20, so this batch is the second.** A decal's tag and
+a volume's voxels reach Bevy's WESL through the glue `340639b1` ported: `bcs_decal_tag` walks Bevy
+0.20's `ClusteredDecalIterator` and `bcs_irradiance_` calls its `irradiance_volume_light`, with
+`AShaderReadsTheTagOfTheDecalOverIt` and `AShaderReadsTheLightTheVolumeGivesEachFace` green on 0.20
+and irradiance_volumes headed v0.20.0. clustered_decals keeps its 0.19.1 head for Feathers alone,
+as one of the twenty. `deferred_raymarch` is written here on the deferred buffers.
+
+Shared: a draw on a camera writes Bevy's own G-buffer and lighting pass ids from inside the prepass
+(`FramePoint.InPrepass`, targets `gbuffer` and `lighting_pass`), packed in Slang as Bevy packs a
+standard material, and casts shadows from a fragment stage of its own, which is how a surface found
+by marching a ray is lit and shadowed with the rest of the scene. It sits beside the ledger's row
+on render targets of several images. slangc 2026.18.2 writes a function's own `SV_Depth` return as a color at
+location zero when it writes WGSL, and a struct member marked `SV_Depth` as the depth, which a
+sibling compiling Slang to WGSL meets as a shadow that never appears.

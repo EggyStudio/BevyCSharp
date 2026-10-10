@@ -182,6 +182,14 @@ public static unsafe partial class Shaders
                 nameof(settings));
         }
 
+        if (settings.DrawShadow.IsSet && !settings.DrawVertex.IsSet)
+        {
+            throw new ArgumentException(
+                "A draw shadow stage is the fragment shader of geometry drawn on a camera, drawn "
+                + "into shadow maps, so it needs the draw vertex and draw fragment shaders as well.",
+                nameof(settings));
+        }
+
         if (settings.DrawFragment.IsSet != settings.DrawVertex.IsSet)
         {
             throw new ArgumentException(
@@ -251,6 +259,7 @@ public static unsafe partial class Shaders
                     DrawFragment = Stage(settings.DrawFragment),
                     Flags = settings.ComputeTarget == ShaderTarget.SpirV ? 1 : 0,
                     Deferred = Stage(settings.Deferred),
+                    DrawShadow = Stage(settings.DrawShadow),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);

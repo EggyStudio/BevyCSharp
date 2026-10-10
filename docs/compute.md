@@ -297,6 +297,85 @@ cube, so it shadows Bevy's geometry and its own. Its vertex shader runs once for
 with that view in `bcs_pass::view`, so a shader placing geometry from the view places it as the
 light sees it without knowing it is drawing a shadow.
 
+**Into the deferred buffers.** A draw at `FramePoint.InPrepass` runs inside the camera's prepass,
+once Bevy's geometry has drawn depth, normals, motion and the G-buffer and before anything reads
+them, so everything after it sees what it drew as it sees Bevy's own geometry. It draws into
+targets, since the main pass clears the picture after it. On a camera drawing deferred,
+`Targets = ["gbuffer", "lighting_pass"]` writes a surface of its own into Bevy's G-buffer, and
+Bevy's deferred lighting lights it as it lights a standard material, with shadows, ambient
+occlusion and screen-space reflections. `bcs_pass::deferred(surface, world)` returns what both
+targets hold and the depth, packed as Bevy packs its own, from a `bcs_pass::surface(normal)` set as
+a standard material is set. The camera's depth is copied into the prepass's once the draws there
+are done, so the lighting finds each pixel where the draw put it, and the G-buffer can be drawn
+into at no other point, since by the next one the lighting has taken which pixels to light.
+
+A surface a shader finds by marching a ray from each pixel, as Bevy's deferred_raymarch example
+finds a signed distance field, is drawn this way over one triangle covering the view. It has no
+triangles to cast a shadow with, so the program's `DrawShadow` stage marches from each pixel of the
+light's view instead and returns the depth of what it meets:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+var field = Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+{
+    DrawVertex = "shaders/field.slang",
+    DrawFragment = "shaders/field.slang",
+    DrawShadow = "shaders/field.slang",               // its entry point is called shadow
+}));
+
+Shaders.SetPrepass(camera, depth: true, deferred: true);
+Shaders.SetViewDraws(camera, ViewDraw.Fixed(field, FramePoint.InPrepass, vertices: 3) with
+{
+    Targets = ["gbuffer", "lighting_pass"],
+    CastsShadows = true,
+});
+```
+
+```slang
+import bcs_pass;
+
+[shader("vertex")]
+bcs_pass::Input vertex(uint index : SV_VertexID)
+{
+    return bcs_pass::full_screen(index);
+}
+
+[shader("fragment")]
+bcs_pass::Deferred fragment(bcs_pass::Input input)
+{
+    let origin = bcs_pass::ray_origin(input.uv);
+    let direction = bcs_pass::ray_direction(input.uv);
+    let distance = march(origin, direction);          // the field's own, below zero for a miss
+    if (distance < 0.0)
+        discard;                                      // what Bevy drew there stays
+
+    let world = origin + direction * distance;
+    var surface = bcs_pass::surface(normal_at(world));
+    surface.base_color = float3(0.8, 0.3, 0.2);
+    return bcs_pass::deferred(surface, world);
+}
+
+[shader("fragment")]
+bcs_pass::ShadowDepth shadow(bcs_pass::Input input)
+{
+    let origin = bcs_pass::ray_origin(input.uv);
+    let direction = bcs_pass::ray_direction(input.uv);
+    let distance = march(origin, direction);
+    if (distance < 0.0)
+        discard;
+
+    return bcs_pass::shadow_depth(origin + direction * distance);
+}
+```
+
+The ray through a pixel starts at the camera, or on the near plane of an orthographic view, which
+a directional light's shadow cascades are, and `bcs_pass::depth_of` gives the depth the view keeps
+for a point, the shadow map's in a light's view. A shadow stage returns its depth in a struct
+member marked `SV_Depth`, as `bcs_pass::ShadowDepth` holds it, since slangc writes a depth given as
+the function's own return as a color, and the shadow map would keep the triangle's depth instead.
+
 **Watching what a camera keeps.** The images a chain writes live on the GPU in formats a picture
 cannot show, so `Shaders.Watch(camera, "occlusion", 320, 180, scale: 1f)` draws one, every frame
 once the camera is done, into an ordinary eight-bit image, each value times a scale plus an offset:

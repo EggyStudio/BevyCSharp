@@ -832,6 +832,9 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>The fragment shader a material draws into Bevy's deferred buffers with.</summary>
     public NativeShaderStage Deferred;
+
+    /// <summary>The fragment shader geometry drawn on a camera is drawn into shadow maps with.</summary>
+    public NativeShaderStage DrawShadow;
 }
 
 /// <summary>How a sampler reads. Mirrors <c>BcsSamplerConfig</c>.</summary>

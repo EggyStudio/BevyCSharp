@@ -104,8 +104,11 @@ public static unsafe partial class Shaders
     /// Whether to draw Bevy's G-buffer, the base color, roughness, metallic and normal of every
     /// pixel, which a shader reads as <c>gbuffer</c> and unpacks with <c>bcs_pass::surface_of</c>.
     /// It turns on <see cref="Render.SetDeferredRendering"/>, which stays on after the camera stops
-    /// asking, since other cameras may read it, and brings depth with it. Only Bevy's own materials
-    /// are in it, since one drawn by a Slang program is drawn forward and leaves its pixels empty.
+    /// asking, since other cameras may read it, and brings depth with it. Bevy's own materials are
+    /// in it, and a Slang program's where it has a deferred stage
+    /// (<see cref="ShaderProgramSettings.Deferred"/>) or draws into it at
+    /// <see cref="FramePoint.InPrepass"/>; any other Slang material is drawn forward and leaves its
+    /// pixels empty.
     /// </param>
     /// <param name="previous">
     /// Whether to keep the previous frame's depth and G-buffer as well, which a shader reads as

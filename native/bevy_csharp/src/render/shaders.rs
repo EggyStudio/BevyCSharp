@@ -69,6 +69,8 @@ pub struct BcsShaderProgramConfig {
     pub flags: i32,
     /// The fragment shader a material draws into Bevy's deferred buffers with.
     pub deferred: BcsShaderStage,
+    /// The fragment shader geometry drawn on a camera is drawn into shadow maps with.
+    pub draw_shadow: BcsShaderStage,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -171,6 +173,7 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.draw_vertex),
                     stage(config.draw_fragment),
                     stage(config.deferred),
+                    stage(config.draw_shadow),
                 ],
                 defines: Vec::new(),
                 compute_spirv: config.flags & 1 != 0,
@@ -763,7 +766,8 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_fragment), 184);
         assert_eq!(offset_of!(BcsShaderProgramConfig, flags), 208);
         assert_eq!(offset_of!(BcsShaderProgramConfig, deferred), 216);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 240);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, draw_shadow), 240);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 264);
     }
 
     #[test]

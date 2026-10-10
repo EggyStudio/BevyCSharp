@@ -52,6 +52,7 @@
 #![cfg(feature = "render")]
 
 mod dispatches;
+mod draw_shadows;
 mod draws;
 mod images;
 mod inputs;
@@ -64,9 +65,9 @@ pub use inputs::{
 };
 
 use dispatches::{ViewComputePipelines, forget_view_dispatches, prepare_view_dispatches, run_view_dispatches};
+use draw_shadows::{run_shared_draw_shadows, run_view_draw_shadows};
 use draws::{
-    ViewDrawPipelines, forget_view_draws, prepare_view_draws, run_shared_draw_shadows,
-    run_view_draw_shadows, run_view_draws,
+    ViewDrawPipelines, copy_prepass_depth, forget_view_draws, prepare_view_draws, run_view_draws,
 };
 use images::{
     PictureCopyPipelines, copy_pictures, forget_view_images, level_view, prepare_picture_copies,
@@ -77,6 +78,7 @@ use inputs::{extract_view_environments, init_inputs, prepare_blue_noise, prepare
 use bevy::app::App;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems};
 use bevy::core_pipeline::core_3d::{main_opaque_pass_3d, main_transparent_pass_3d};
+use bevy::core_pipeline::deferred::node::late_deferred_prepass;
 use bevy::core_pipeline::tonemapping::tonemapping;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::pbr::deferred::deferred_lighting;
@@ -158,9 +160,6 @@ pub fn install(app: &mut App) {
         .add_systems(
             Core3d,
             (
-                // At the start of the main pass rather than between it and the prepass, which is
-                // where Bevy's own ambient occlusion and shadows run, so a shader here sees them
-                // done and can replace what Bevy's lighting is about to read.
                 // Into the shadow maps once Bevy's own casters are in them, and before anything
                 // reads them.
                 run_view_draw_shadows
@@ -169,11 +168,26 @@ pub fn install(app: &mut App) {
                 run_shared_draw_shadows
                     .after(bevy::pbr::shared_shadow_pass::<{ bevy::pbr::LATE_SHADOW_PASS }>)
                     .before(Core3dSystems::MainPass),
+                // Before the first point of the frame, which is inside the prepass, so an image a
+                // draw there writes starts the frame empty too.
                 clear_view_images
-                    .in_set(Core3dSystems::MainPass)
-                    .before(run_view_dispatches::<0>)
-                    .before(run_view_draws::<0>)
-                    .before(copy_pictures::<1>),
+                    .in_set(Core3dSystems::Prepass)
+                    .before(run_view_dispatches::<4>)
+                    .before(run_view_draws::<4>),
+                // Inside the prepass, once Bevy's geometry is in it, and before Bevy copies which
+                // pixels its deferred lighting lights out of the buffers, which it does once the
+                // prepass's set is done so that what draws there lands in time.
+                run_view_dispatches::<4>
+                    .in_set(Core3dSystems::Prepass)
+                    .after(late_deferred_prepass),
+                (run_view_draws::<4>, copy_prepass_depth)
+                    .chain()
+                    .after(run_view_dispatches::<4>)
+                    .in_set(Core3dSystems::Prepass)
+                    .after(late_deferred_prepass),
+                // At the start of the main pass rather than between it and the prepass, which is
+                // where Bevy's own ambient occlusion and shadows run, so a shader here sees them
+                // done and can replace what Bevy's lighting is about to read.
                 run_view_dispatches::<0>
                     .in_set(Core3dSystems::MainPass)
                     .before(deferred_lighting)
@@ -234,6 +248,9 @@ pub fn install(app: &mut App) {
         .add_systems(
             Core2d,
             (
+                run_view_dispatches::<4>
+                    .after(Core2dSystems::Prepass)
+                    .before(run_view_dispatches::<0>),
                 run_view_dispatches::<0>
                     .after(Core2dSystems::Prepass)
                     .before(Core2dSystems::MainPass),
