@@ -166,9 +166,10 @@ internal static class Tools
         FetchSlang(!options.Json && !options.Quiet);
 
         // The page goes first, so a script that never started leaves none behind it, rather than an
-        // earlier run's to be read as this one's.
+        // earlier run's to be read as this one's. Asked after first, since Windows refuses to
+        // delete a file in a folder that is not there, as a checkout's first run has none.
         var page = Path.Combine(Repo.Root, "BevyCSharp.Tests", "TestResults", "digest.json");
-        File.Delete(page);
+        if (File.Exists(page)) File.Delete(page);
 
         var python = OperatingSystem.IsWindows() ? "python" : "python3";
         var ran = Shell.Run(python, line, Repo.Root, echo: !options.Json && !options.Quiet);

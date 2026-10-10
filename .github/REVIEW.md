@@ -10,7 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c46fd24e`. Two commits. Verdict 7 (`1f68fde8`): `./bcs test` runs the suite through
+Reviewed up to `b0fa935e`. One commit, Verdict 7's last line: `./bcs test` deletes `digest.json`
+before it starts the script, so a script that never started leaves no earlier page to be read as the
+run's, and with no `python3` on the PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote
+no page. Right, and the verdict is settled. One line on it, in item 1: `File.Delete` lets a missing
+file pass on every system and a missing folder pass on Linux and macOS alone, where the runtime's
+Windows delete returns on the file's error and throws the folder's, so a fresh checkout's first
+`./bcs test` on Windows, with no `TestResults` yet, throws before anything runs; `File.Exists`
+first, before the pack run. The suite as the reply left it, 1,284 through `./bcs test`. Steps f, g
+and h next.
+
+Before it, two commits came to be read. Verdict 7 (`1f68fde8`): `./bcs test` runs the suite through
 `build/test.py suite`, passing `--filter` on, and reads its counts from the page's `digest.json`,
 any lost host or listed test without a result TEST_RUN_ERROR, exit 6, whatever the tally said; the
 script says a lost host whose output holds the guard's line beside vstest's abort as stopped at its
@@ -63,36 +73,6 @@ compares captures and a black one is what it would compare, the capture racing t
 first presented frame the first thing to read. A cut run passing for a whole one is Verdict 7. Steps
 f, g and h remain.
 
-Before it, Bevy 0.20 came in, item 3's steps b to e in one commit of 393 files: the bridge, the
-vendored weather and the library on 0.20.0 with wgpu and naga 30, every profile compiling with
-warnings denied, the bridge's 116 tests passing with meshlets and Solari, the lock losing naga_oil
-and gaining WESL, `bevy/bevy_curve` named, ABI 232 on both sides; the moves as listed, lifecycle
-observers, flat pointer events, `bevy::curve` and `bevy::shape`, the typed `ShaderBuffer`,
-`constants` on every stage, `#[extract_app(RenderApp)]`, the depth and stencil types, extracted
-windows as render entities, the corner radius circular from one length; the glue WESL under 0.20's
-module paths with the volumes' import under both defines, a glued unit from `from_wesl` under a
-module path of its own and every other from `from_wgsl`, the spike's three mends in
-`reflect/mend.rs` with their tests; the weather's two shaders WESL and its Rust compiled unchanged;
-the four faults of 0.20's worked around where each is done, `spirv_compute.rs`, the empty curve
-list, `exposure.rs` and the ray scene's new group; the schema dumped again, the generator leaving a
-self-holding variant out of its union, and moved types given former paths from
-`bevy-former-paths.tsv` through `FormerPathsGenerator`, so a file written on 0.19 reads its
-tonemapper, Courtyard's left as it is with a test placing one by its old path; the examples' table
-from 0.20's list; the notices written again; `compared-with-bevy.md` and `how-it-works.md` on 0.20.
-Right throughout, and the interaction is a design of its own worth saying in the release notes: a
-node carries Bevy's `Button` and `Hovered`, and `Interaction` names a small component of the
-bridge's, `PointerOnNode`, kept from the two in `PreUpdate` after picking, since thirteen examples
-react through a change of it and `Hovered` does not change on a press; a hover counts the nodes
-inside a node, as Bevy's does, which a game that read the old answer sees. `SpriteMesh` is gone with
-the two stress examples Bevy dropped. The suite: 1,276 passed, 2 skipped and 1 failed, N 6.5 against
-a local package packed on 0.19, which passes against one packed from this tree and which the pack
-run proves. Steps f, g's captures and release notes, and h remain: the captures compared and each
-difference named, the feature test driven and soaked under the memory scope, Courtyard from the
-package, the shuffle-seed run, the crash file read against 0.20's panics, the release notes naming
-what a game's author sees, and the pack run for 0.4. The coder takes Decision 23 next, then the six
-listed files in move-only commits, then those steps. The norm's Annex B names the followed engine as
-Bevy 0.20.0 from this pass.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -108,18 +88,21 @@ from [SHARED.md](SHARED.md).
    which `c7f1cbc6`'s run fails on Windows as well (Verdict 6, mended in `6715339c` and settled by
    the run of the push that carries it); N 1.3 and the memory command's peak pass on every system
    since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table check that failed
-   Linux at `e4c122e3` passed at the bump. Verdict 7 is carried out at `1f68fde8` and holds on one
-   line, the page an earlier run left. `SpawnedWindowTests`' black capture is traced at `c46fd24e`,
-   the window's image holding its zeros until the pass that draws it has its pipeline, and the test
-   captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and
-   `docs/window.md` say so with step g. The page's repeated lines carry 116 warnings of
-   `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to a state no
-   other app adds and registered in every app by the module initializer, which drowns what else
-   repeats (Decision 7); they are quieted in the batch that next touches the tests, the test's
-   behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8)
-   once Verdict 6's run is green, Verdict 7 is settled and item 3's remaining steps are in, and
-   Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
-   session, and a failure it names comes first here.
+   Linux at `e4c122e3` passed at the bump. Verdict 7 is settled at `b0fa935e`, the page removed
+   before the script starts; `File.Delete` there lets a missing file pass on every system and a
+   missing folder pass on Linux and macOS alone, the runtime's Windows delete returning on the
+   file's error and throwing the folder's, so a fresh checkout's first `./bcs test` on Windows, with
+   no `TestResults` yet, throws before anything runs, and `File.Exists` goes first, before the pack
+   run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the window's image holding its
+   zeros until the pass that draws it has its pipeline, and the test captures once
+   `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and `docs/window.md`
+   say so with step g. The page's repeated lines carry 116 warnings of `Screen.Playing` in every run
+   since before `c70f17b`, StateTests' behaviors scoped to a state no other app adds and registered
+   in every app by the module initializer, which drowns what else repeats (Decision 7); they are
+   quieted in the batch that next touches the tests, the test's behaviors registered only where
+   their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and
+   item 3's remaining steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's
+   run is read by the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -315,23 +298,6 @@ from [SHARED.md](SHARED.md).
    unused before the array, read from `GC.GetGCMemoryInfo`. And no looser bound on the heap's array
    alone, which would pass by what ran before. Settled when the test passes on all three systems.
 
-7. **A test host the memory guard stopped passed for a whole run.** Read from the reply of
-   `4acec927`: the guard's stop ends the host through `Environment.Exit`, `dotnet test` printed its
-   Passed line for the tests that had run, and the suite's count fell by eight with nobody told,
-   which three replies carried before the trace. CI reads a run through `build/test.py`, whose page
-   counts the tests without a result against the listing and says a process lost to its memory
-   limit, which is why the bump's pages were whole; a run on the coder's machine through `dotnet
-   test` alone is not. Two things. The guard's stop in a test host is a failure that cannot read as
-   a pass: the host exits with a code vstest reports as a crashed host, the cap's line last in its
-   output, and the page says it as a loss to the cap. And `./bcs test` runs the suite through
-   `build/test.py`, so a local count is held to the listing as CI's is, and a reply's count is the
-   page's. `1f68fde8` does both, a stand-in ending as such a host does and the whole suite read
-   through `./bcs test`. One thing stays: `./bcs test` reads `digest.json` wherever it finds it, and
-   the script removes an earlier run's page only once it runs, so a run where the script did not
-   start, python missing or the script failing before its page, reads the earlier run's page as its
-   own, the one shape this verdict is about. The page is removed before the script starts, or its
-   time is read against the run's. Settled then.
-
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -455,7 +421,3 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Verdict 7's last line is in.** `./bcs test` removes the page before it starts the script, so a
-script that never started leaves none behind it to be read as the run's. With no `python3` on the
-PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote no page, and the earlier page was
-gone. The sentence on a window captured before `Render.PipelinesReady()` goes with step g.
