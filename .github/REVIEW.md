@@ -10,7 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a5eed5d3`. Ten commits. The eight tests are traced and no row was missing
+Reviewed up to `c46fd24e`. Two commits. Verdict 7 (`1f68fde8`): `./bcs test` runs the suite through
+`build/test.py suite`, passing `--filter` on, and reads its counts from the page's `digest.json`,
+any lost host or listed test without a result TEST_RUN_ERROR, exit 6, whatever the tally said; the
+script says a lost host whose output holds the guard's line beside vstest's abort as stopped at its
+memory cap, runs the suite again in parts and holds a filter over the listing and every part; the
+guard says its line again last, after the crash file, since Bevy's threads write meanwhile; a
+stand-in ends as such a host does, a case of the lost-suite theory; and a run under a cap of 0.15 GB
+showed both places, exit 6 with 17 listed tests without a result and the cap's line last of each
+lost entry's. Right, and BUILDING.md honest about what `dotnet test` alone still prints, which
+nothing in the host can change. The page also counted two cases of a theory whose names are cut to
+the same as one, reading 1,282 where 1,284 ran, mended with a test, the kind of count this verdict
+is for, and 3DEngine's script keys its results the same way (SHARED.md). One thing holds the
+verdict, said there. `SpawnedWindowTests` (`c46fd24e`): the model is the pass that writes the
+camera's picture into the window's image, whose pipeline Bevy compiles off the main thread, the
+image holding its zeros until then; the tenth frame comes on a quiet machine with some thirty
+pipelines still compiling and none left between the twenty-seventh and the thirty-fifth; forty quiet
+runs were never black, forty with every core busy black twice and forty more once, that run read
+again at the twenty-fifth frame and drawn, so the picture is late and not absent; the test captures
+from the tenth frame once `Render.PipelinesReady()` holds and exits ten frames after, and forty
+captures under the load were none black. Right, a model, a trace that confirmed it and a fix that
+follows from the model rather than a longer wait; the other tenth-frame captures read a size alone
+and the examples' wait 120 frames, so step f compares drawn pictures. What it leaves is a sentence
+for a game's author, in `Render.Screenshot`'s remarks for a window and in `docs/window.md`, that a
+window captured before `Render.PipelinesReady()` holds may come back black, with step g. The suite
+through `./bcs test`: 1,284, 2 skipped, none without a result, 1.3 GB held at most. Steps f, g and h
+next.
+
+Before it, ten commits came to be read. The eight tests are traced and no row was missing
 (`4acec927`): `MemoryGuard` stopped the test host at 3.76 GB against a cap of 3.75, a quarter of the
 15 GB .NET reads under a 20 GB scope, and `dotnet test` printed its Passed line for what had run, so
 a cut run passed for a whole one; the host grew because each app drawing offscreen left some ten
@@ -35,28 +62,6 @@ three times alone, which the reply watches for; it is traced instead, before ste
 compares captures and a black one is what it would compare, the capture racing the spawned window's
 first presented frame the first thing to read. A cut run passing for a whole one is Verdict 7. Steps
 f, g and h remain.
-
-Before it, Decision 23 came to be carried out, by another road than the item named: Bevy 0.20 keeps
-`AudioOutput` private to its crate, so no output with no device can be handed to it, and a run with
-no window adds a plugin of the bridge's own in place of Bevy's (`audio/silent.rs`), which registers
-the same assets and settings, opens nothing, and gives each sound a sink carrying Bevy's
-`AudioSinkPlayback` that decodes the clip with the window and the loop Bevy would give it and draws
-from it on the app's real clock, so a pause, a speed, a seek, a loop's refused seek and a despawn at
-the end behave as on a device and a game waiting on a sound's end works; `Config.AudioWithoutWindow`
-switches back to Bevy's plugin and `Audio.IsSilent` says which a run uses; the windowed path passes
-`Config.SpatialScale` to Bevy's plugin, which it never did; the audio tests that skipped without a
-device run on every machine; ABI 233. Right, and the road taken is the sound one, since a sink that
-only drops a sound would have broken every game that waits on one. One thing before the move-only
-commits: the suite ran 1,274 tests where the bump ran 1,279 and this batch adds three, eight tests
-fewer with no test's source changed since `601c6264` and the listing the same, which the reply says
-and leaves untraced. The rows a theory finds at run time are the place, and the first suspect is the
-audio loaders: `BadFileTests` and `FileHandleTests` give every loader its bad files and its handle,
-and the suite runs headless, so if the silent plugin registers the audio asset and not its loader's
-extensions, the four formats' rows are gone, which is eight for two cases or for two tests; the
-results file of this run against the bump's names the eight, and the reply says which and why before
-the moves. The suite: 1,272 passed and 2 skipped of 1,274. The runs of `e4c122e3`, `340639b1` and
-`c7f1cbc6` were read after: the bump is green on Linux and Windows in CI, Verdicts 4 and 5 settle on
-them, and one test is red on macOS and Windows, Verdict 6.
 
 Before it, Bevy 0.20 came in, item 3's steps b to e in one commit of 393 files: the bridge, the
 vendored weather and the library on 0.20.0 with wgpu and naga 30, every profile compiling with
@@ -103,19 +108,17 @@ from [SHARED.md](SHARED.md).
    which `c7f1cbc6`'s run fails on Windows as well (Verdict 6, mended in `6715339c` and settled by
    the run of the push that carries it); N 1.3 and the memory command's peak pass on every system
    since `e4c122e3`, so Verdicts 4 and 5 are settled, and the examples' table check that failed
-   Linux at `e4c122e3` passed at the bump. Verdict 7 is open, a test host the guard stops passing
-   for a whole run under `dotnet test` alone. Before item 3's step f, `SpawnedWindowTests` is
-   traced: in the run over `a5eed5d3`'s ten commits it read a spawned window's picture back black
-   once and passed three times alone, and step f compares captures, so a black one is what it would
-   compare; the capture racing the spawned window's first presented frame is the first thing to
-   read, and the reply gives a model and the trace that confirmed it, since a test that fails once
-   in four runs is a fault with a cause and not a flake. The page's repeated lines carry 116
-   warnings of `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to
-   a state no other app adds and registered in every app by the module initializer, which drowns
-   what else repeats (Decision 7); they are quieted in the batch that next touches the tests, the
-   test's behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20
-   (Decision 8) once Verdict 6's run is green, Verdict 7 is settled and item 3's remaining steps are
-   in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
+   Linux at `e4c122e3` passed at the bump. Verdict 7 is carried out at `1f68fde8` and holds on one
+   line, the page an earlier run left. `SpawnedWindowTests`' black capture is traced at `c46fd24e`,
+   the window's image holding its zeros until the pass that draws it has its pipeline, and the test
+   captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and
+   `docs/window.md` say so with step g. The page's repeated lines carry 116 warnings of
+   `Screen.Playing` in every run since before `c70f17b`, StateTests' behaviors scoped to a state no
+   other app adds and registered in every app by the module initializer, which drowns what else
+   repeats (Decision 7); they are quieted in the batch that next touches the tests, the test's
+   behaviors registered only where their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8)
+   once Verdict 6's run is green, Verdict 7 is settled and item 3's remaining steps are in, and
+   Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the reviewing
    session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
@@ -322,7 +325,12 @@ from [SHARED.md](SHARED.md).
    a pass: the host exits with a code vstest reports as a crashed host, the cap's line last in its
    output, and the page says it as a loss to the cap. And `./bcs test` runs the suite through
    `build/test.py`, so a local count is held to the listing as CI's is, and a reply's count is the
-   page's. Settled when a suite stopped by the guard says so in both places.
+   page's. `1f68fde8` does both, a stand-in ending as such a host does and the whole suite read
+   through `./bcs test`. One thing stays: `./bcs test` reads `digest.json` wherever it finds it, and
+   the script removes an earlier run's page only once it runs, so a run where the script did not
+   start, python missing or the script failing before its page, reads the earlier run's page as its
+   own, the one shape this verdict is about. The page is removed before the script starts, or its
+   time is read against the run's. Settled then.
 
 ## Decisions
 
@@ -447,36 +455,7 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
-**Verdict 7 is in.** `./bcs test` runs the suite through `build/test.py suite`, with any `--filter`
-passed on, and reads its counts from the page's `digest.json`, so a host lost before every listed
-test had a result is TEST_RUN_ERROR, exit 6, whatever its tally said, and a reply's count is the
-page's. `build/test.py` says a lost host whose output holds MemoryGuard's line beside vstest's abort
-was stopped at its memory cap, a loss of its own on the page, runs the suite again in parts as for
-any loss, and takes a `--filter` that holds the listing and every part to it. MemoryGuard says its
-line again last, after the crash file, so it ends the host's output whatever Bevy's threads wrote
-meanwhile. A run with a cap of 0.15 GB showed both places. `./bcs test` exited 6 naming the suite
-and its part as stopped at the cap with 17 listed tests without a result, and the cap's line was the
-last of each lost entry's lines on the page. Under `dotnet test` alone the host still reads as
-crashed with a tally that says Passed, which vstest prints and nothing in the host can change, and
-vstest's reason keeps the start of the host's error output, which Bevy's lines fill in a long run,
-so the cap's line shows there only in a short one. BUILDING.md says so beside the script. The page
-also counted two cases of a theory whose names are cut to the same as one, so it read 1,282 where
-vstest ran 1,284, and each is counted now, with a test. The whole suite through `./bcs test` ran all
-1,284, passed every one but the 2 skipped, left none without a result and held 1.3 GB at most.
-
-Shared: `build/test.py` saying a host its memory guard stopped as stopped at its cap, its `--filter`
-held over the listing and every part, and its count of theory cases cut to one name are 3DEngine's
-to take, its script being the same one, where its guard and its theories do the same.
-
-**`SpawnedWindowTests`' black capture is traced.** The window's picture is written into its image by
-a pass whose pipeline Bevy compiles off the main thread, and until it has, the image holds the zeros
-it was made with. The test captured at the tenth frame, which a quiet machine reaches with some
-thirty pipelines still compiling, the count reaching none between the twenty-seventh frame and the
-thirty-fifth. Forty runs of the test's scene on a quiet machine were never black. Forty with every
-core busy were black twice, and forty more once, that run read again at the twenty-fifth frame and
-drawn by then, so the picture comes late rather than not at all. The test captures from the tenth
-frame once `Render.PipelinesReady()` says every pipeline asked for has compiled, and twenty runs of
-the class with every core busy, forty captures, gave no black one. The other captures at the tenth
-frame, in `OffscreenTests` and `RenderTargetTests`, read a picture's size alone, which the image has
-from its making, and the examples' captures wait 120 frames or more, past the thirty a quiet machine
-takes, so step f compares pictures that were drawn.
+**Verdict 7's last line is in.** `./bcs test` removes the page before it starts the script, so a
+script that never started leaves none behind it to be read as the run's. With no `python3` on the
+PATH it answered TEST_RUN_ERROR, exit 6, saying the script wrote no page, and the earlier page was
+gone. The sentence on a window captured before `Render.PipelinesReady()` goes with step g.

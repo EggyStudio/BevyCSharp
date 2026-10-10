@@ -165,10 +165,14 @@ internal static class Tools
         // shaders were wrong.
         FetchSlang(!options.Json && !options.Quiet);
 
+        // The page goes first, so a script that never started leaves none behind it, rather than an
+        // earlier run's to be read as this one's.
+        var page = Path.Combine(Repo.Root, "BevyCSharp.Tests", "TestResults", "digest.json");
+        File.Delete(page);
+
         var python = OperatingSystem.IsWindows() ? "python" : "python3";
         var ran = Shell.Run(python, line, Repo.Root, echo: !options.Json && !options.Quiet);
 
-        var page = Path.Combine(Repo.Root, "BevyCSharp.Tests", "TestResults", "digest.json");
         JsonElement digest;
 
         try
