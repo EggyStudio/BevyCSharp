@@ -122,6 +122,7 @@ fn standard_material(
         3 => AlphaMode::Add,
         4 => AlphaMode::Multiply,
         5 => AlphaMode::Premultiplied,
+        6 => AlphaMode::AlphaToCoverage,
         _ => AlphaMode::Opaque,
     };
 
@@ -326,6 +327,7 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                     AlphaMode::Add => (3, 0.5),
                     AlphaMode::Multiply => (4, 0.5),
                     AlphaMode::Premultiplied => (5, 0.5),
+                    AlphaMode::AlphaToCoverage => (6, 0.5),
                     _ => (0, 0.5),
                 };
 

@@ -8,8 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // Demonstrates how to use transparency in 3D. Shows the effects of different blend modes. The
 // alpha_mode of each material is set to show how they behave, and the alpha of every material
 // fades in and out together.
-//
-// Bevy's cube on the left uses alpha to coverage, which the bridge has no mode for, so it blends.
 internal static class Transparency3d
 {
     private static readonly List<(AssetHandle Handle, MaterialSettings Settings)> Materials = [];
@@ -30,9 +28,10 @@ internal static class Transparency3d
             ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.5f }), Transform.At(1f, 0.5f, -1.5f));
             ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.2f, 0.7f, 0.1f, 0f), AlphaMode = AlphaMode.Mask, AlphaCutoff = 0.1f, Unlit = true }), Transform.At(-1f, 0.5f, -1.5f));
 
-            // A color with an alpha below one blends, as Bevy makes a material from one.
+            // A color with an alpha below one blends, as Bevy makes a material from one, and the
+            // cube on the left covers its pixels' samples by its alpha, fading in steps.
             ecs.SpawnMesh(cube, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 0.5f, 1f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(0f, 0.5f, 0f));
-            ecs.SpawnMesh(cube, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 1f, 0.5f, 0f), AlphaMode = AlphaMode.Blend }), Transform.At(-1.5f, 0.5f, 0f));
+            ecs.SpawnMesh(cube, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.5f, 1f, 0.5f, 0f), AlphaMode = AlphaMode.AlphaToCoverage }), Transform.At(-1.5f, 0.5f, 0f));
 
             ecs.SpawnMesh(sphere, Make(new MaterialSettings { BaseColor = Color.FromSrgb(0.7f, 0.2f, 0.1f) }), Transform.At(0f, 0.5f, -1.5f));
 

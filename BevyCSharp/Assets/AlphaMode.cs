@@ -35,4 +35,15 @@ public enum AlphaMode
     /// with color and zero alpha adds, and one with full alpha covers.
     /// </remarks>
     Premultiplied = 5,
+
+    /// <summary>
+    /// Cover a share of each pixel's samples as large as the alpha, under multisampling.
+    /// </summary>
+    /// <remarks>
+    /// Drawn with the opaque surfaces, so nothing is sorted and two such surfaces overlapping are
+    /// never drawn in the wrong order, which suits foliage. A surface fades in as many steps as
+    /// the camera takes samples, and with one sample, where multisampling is off, it is
+    /// <see cref="Mask"/> at half alpha.
+    /// </remarks>
+    AlphaToCoverage = 6,
 }

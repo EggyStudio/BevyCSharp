@@ -391,7 +391,8 @@ pub struct BcsMaterialConfig {
     /// Nothing here is drawn at all when `unlit` is set, because Bevy adds the emission inside
     /// the lighting it is skipping.
     pub emissive: [f32; 4],
-    /// `0` opaque, `1` cut out at `alpha_cutoff`, `2` blended, `3` added to what is behind.
+    /// `0` opaque, `1` cut out at `alpha_cutoff`, `2` blended, `3` added to what is behind, `4`
+    /// multiplied with it, `5` premultiplied and `6` alpha to coverage.
     pub alpha_mode: i32,
     /// Where a cut-out material stops drawing, used when `alpha_mode` is `1`.
     pub alpha_cutoff: f32,

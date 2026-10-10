@@ -41,7 +41,6 @@ solari	part	Bevy's path tracer and its scene of many lights, which its command l
 spherical_area_lights	can
 split_screen	can
 texture	can
-transparency_3d	part	its alpha to coverage cube, a mode the bridge's materials do not have
 transmission	can
 two_passes	can
 vertex_colors	can

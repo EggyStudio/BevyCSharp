@@ -88,6 +88,30 @@ public sealed class MaterialSurfaceTests
         Assert.False(read.ClearcoatTexture.IsValid);
     }
 
+    [SkippableFact]
+    public void EveryAlphaModeComesBackFromTheEngine()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        var read = new List<AlphaMode>();
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            foreach (var mode in Enum.GetValues<AlphaMode>())
+            {
+                var material = Render.CreateMaterial(new MaterialSettings { AlphaMode = mode });
+                Assert.True(Render.TryReadMaterial(material, out var settings));
+                read.Add(settings.AlphaMode);
+            }
+        });
+
+        harness.Run();
+
+        // A mode the bridge did not know would come back opaque.
+        Assert.Equal(Enum.GetValues<AlphaMode>(), read);
+    }
+
     [Fact]
     public void TheFinerSurfaceIsWrittenOnlyWhereItDiffers()
     {

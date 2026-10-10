@@ -11,7 +11,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 12 |
-| [3D Rendering](#3d-rendering) | 60 | 4 | 0 | 4 | 0 | 40 of 41 |
+| [3D Rendering](#3d-rendering) | 61 | 3 | 0 | 4 | 0 | 40 of 41 |
 | [Animation](#animation) | 12 | 1 | 0 | 0 | 0 | 9 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
 | [Assets](#assets) | 9 | 1 | 0 | 3 | 5 | 3 of 3 |
@@ -147,7 +147,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`texture`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/texture.rs) | Shows configuration of texture materials | [written](../BevyCSharp.Examples/3d/texture.cs) |
 | [`tonemapping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/tonemapping.rs) | Compares tonemapping options | [written](../BevyCSharp.Examples/3d/tonemapping.cs) |
 | [`transmission`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/transmission.rs) | Showcases light transmission in the PBR material | [written](../BevyCSharp.Examples/3d/transmission.cs) |
-| [`transparency_3d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/transparency_3d.rs) | Demonstrates transparency in 3d | [written in part](../BevyCSharp.Examples/3d/transparency_3d.cs), its alpha to coverage cube, a mode the bridge's materials do not have |
+| [`transparency_3d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/transparency_3d.rs) | Demonstrates transparency in 3d | [written](../BevyCSharp.Examples/3d/transparency_3d.cs) |
 | [`two_passes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/two_passes.rs) | Renders two 3d passes to the same window from different perspectives | [written](../BevyCSharp.Examples/3d/two_passes.cs) |
 | [`vertex_colors`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/vertex_colors.rs) | Shows the use of vertex colors | [written](../BevyCSharp.Examples/3d/vertex_colors.cs) |
 | [`visibility_range`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/visibility_range.rs) | Demonstrates visibility ranges | [written](../BevyCSharp.Examples/3d/visibility_range.cs) |

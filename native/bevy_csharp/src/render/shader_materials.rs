@@ -14,6 +14,7 @@ fn alpha_mode(alpha: i32, cutoff: f32) -> bevy::material::AlphaMode {
         3 => AlphaMode::Add,
         4 => AlphaMode::Multiply,
         5 => AlphaMode::Premultiplied,
+        6 => AlphaMode::AlphaToCoverage,
         _ => AlphaMode::Opaque,
     }
 }
@@ -26,8 +27,8 @@ pub(super) fn program_exists(program: i32) -> bool {
 
 /// Makes a material drawn by a program, and answers its asset key.
 ///
-/// `alpha` is `0` opaque, `1` masked at `cutoff`, `2` blended, `3` added, `4` multiplied and `5`
-/// premultiplied. `cull` is `0` back faces, `1` front faces, `2` neither.
+/// `alpha` is `0` opaque, `1` masked at `cutoff`, `2` blended, `3` added, `4` multiplied, `5`
+/// premultiplied and `6` alpha to coverage. `cull` is `0` back faces, `1` front faces, `2` neither.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_material_create(
     program: i32,

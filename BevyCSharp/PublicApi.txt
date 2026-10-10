@@ -54,6 +54,7 @@ sealed class Bevy.AfterAttribute : Attribute
   string System { get; }
 enum Bevy.AlphaMode : int
   Add = 3
+  AlphaToCoverage = 6
   Blend = 2
   Mask = 1
   Multiply = 4

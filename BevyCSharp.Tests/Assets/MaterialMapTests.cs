@@ -4,8 +4,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The standard material's specular tint, depth map and render method, drawn, so a setting that
-/// reads back right but never reaches Bevy's shader fails here.
+/// The standard material's specular tint, depth map, render method and alpha to coverage, drawn, so
+/// a setting that reads back right but never reaches Bevy's shader fails here.
 /// </summary>
 [Collection("engine")]
 public sealed class MaterialMapTests
@@ -61,6 +61,47 @@ public sealed class MaterialMapTests
         Assert.True(white.R > 20, $"the cube reflected nothing, at {white}");
         Assert.True(white.G > white.R * 0.7, $"an untinted reflection came out colored, at {white}");
         Assert.True(red.R > 20 && red.G < red.R * 0.5, $"a red tint left the reflection at {red}, from {white} untinted");
+    }
+
+    [SkippableFact]
+    public void AlphaToCoverageCoversPartOfEachPixel()
+    {
+        Needs.Renderer();
+
+        static MaterialSettings White(float alpha) => new()
+        {
+            BaseColor = (1f, 1f, 1f, alpha),
+            Unlit = true,
+            AlphaMode = AlphaMode.AlphaToCoverage,
+        };
+
+        var material = AssetHandle.None;
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                // Four samples a pixel, set rather than left to the default the test is about, with
+                // no curve to darken the white and no dither to move the means.
+                Render.SetPostProcessing(PictureRun.Camera(ecs), new PostSettings { Msaa = 4, Tonemapper = Tonemapper.None, Dither = false });
+                material = Render.CreateMaterial(White(1f));
+                PictureRun.Cube(ecs, material, 3f);
+            },
+        };
+
+        run.Wait(ShaderMaterialTests.Settled)
+            .Capture("whole")
+            .Do("part", _ => Render.WriteMaterial(material, White(0.4f)))
+            .Wait(10)
+            .Capture("part")
+            .Go();
+
+        var whole = Mean(run.Picture("whole"), 0.5f).R;
+        var part = Mean(run.Picture("part"), 0.5f).R;
+
+        // Masked at half alpha, as alpha to coverage is with one sample, an alpha of 0.4 draws
+        // nothing over the black, and drawn opaque it would be as bright as the whole.
+        Assert.True(whole > 200, $"the cube drew at {whole} with its alpha whole");
+        Assert.True(part > whole * 0.1 && part < whole * 0.9, $"an alpha of 0.4 drew at {part}, where its whole drew at {whole}");
     }
 
     [SkippableFact]
