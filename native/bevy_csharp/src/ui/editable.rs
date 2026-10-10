@@ -181,6 +181,169 @@ pub unsafe extern "C" fn bcs_ui_set_editable_value(entity: u64, text: *const cor
     })
 }
 
+/// A text field's cursor and selection as C# describes them, Bevy's `TextCursorStyle`, every color
+/// linear red, green, blue and alpha.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsTextCursor {
+    pub color: [f32; 4],
+    /// Behind the selected text while the field has the focus.
+    pub selection: [f32; 4],
+    /// Behind it while the field has not.
+    pub unfocused_selection: [f32; 4],
+    /// The selected text's own color, where `has_selected_text` is non-zero.
+    pub selected_text: [f32; 4],
+    pub has_selected_text: i32,
+    /// How round the selection's corners are, a fraction of its height up to a half.
+    pub selection_radius: f32,
+}
+
+/// Gives a text field the cursor and selection `cursor` describes.
+///
+/// Bevy does not reflect its cursor style, which no wrapper can then reach, so it is set here.
+/// Returns [`status::NOT_PRESENT`] for an entity that is no field.
+///
+/// # Safety
+/// `cursor` must point to a readable [`BcsTextCursor`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_set_text_cursor(entity: u64, cursor: *const BcsTextCursor) -> i32 {
+    crate::interop::guard(|| {
+        if cursor.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::text::{EditableText, TextCursorStyle};
+
+            let cursor = unsafe { *cursor };
+            let color = |rgba: [f32; 4]| bevy::color::Color::linear_rgba(rgba[0], rgba[1], rgba[2], rgba[3]);
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                if !entity_mut.contains::<EditableText>() {
+                    return status::NOT_PRESENT;
+                }
+
+                entity_mut.insert(TextCursorStyle {
+                    color: color(cursor.color),
+                    selection_color: color(cursor.selection),
+                    unfocused_selection_color: color(cursor.unfocused_selection),
+                    selected_text_color: (cursor.has_selected_text != 0).then(|| color(cursor.selected_text)),
+                    selection_radius: cursor.selection_radius.clamp(0.0, 0.5),
+                });
+                status::OK
+            })
+        }
+    })
+}
+
+/// Writes the part of a text field's text it shows, in the text's own layout units: where its top
+/// left corner is, across and down, then how wide and how tall it is. Returns
+/// [`status::NOT_PRESENT`] for an entity that is no field.
+///
+/// Bevy keeps a field's scroll as this viewport rather than as a node's scroll position, which a
+/// game drawing a scrollbar of its own for a field reads beside the text's laid out size.
+///
+/// # Safety
+/// `out` must be writable for four floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_editable_viewport(entity: u64, out: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = entity;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(editable) = entity_ref.get::<bevy::text::EditableText>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let viewport = &editable.viewport;
+                let values = [viewport.offset.x, viewport.offset.y, viewport.size.x, viewport.size.y];
+                unsafe { core::ptr::copy_nonoverlapping(values.as_ptr(), out, 4) };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Scrolls a text field to show its text from `x` across and `y` down, in the text's layout units.
+/// Returns [`status::NOT_PRESENT`] for an entity that is no field.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ui_scroll_editable(entity: u64, x: f32, y: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, x, y);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut editable) = entity_mut.get_mut::<bevy::text::EditableText>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                editable.viewport.offset = bevy::math::Vec2::new(x, y);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets how many lines tall a text field is, its text and cursor as they were, where setting the
+/// field again would replace its text. Returns [`status::NOT_PRESENT`] for an entity that is no
+/// field.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ui_set_editable_lines(entity: u64, lines: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, lines);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut editable) = entity_mut.get_mut::<bevy::text::EditableText>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                editable.visible_lines = Some(if lines > 0.0 { lines } else { 1.0 });
+                status::OK
+            })
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -191,5 +354,12 @@ mod tests {
         assert_eq!(core::mem::offset_of!(BcsEditableTextConfig, allow_newlines), 12);
         assert_eq!(core::mem::offset_of!(BcsEditableTextConfig, mode), 16);
         assert_eq!(core::mem::size_of::<BcsEditableTextConfig>(), 20);
+    }
+
+    #[test]
+    fn the_cursor_has_the_layout_the_managed_side_mirrors() {
+        assert_eq!(core::mem::offset_of!(BcsTextCursor, selected_text), 48);
+        assert_eq!(core::mem::offset_of!(BcsTextCursor, has_selected_text), 64);
+        assert_eq!(core::mem::size_of::<BcsTextCursor>(), 72);
     }
 }

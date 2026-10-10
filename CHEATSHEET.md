@@ -1153,6 +1153,10 @@ static void SetFontFeatures(Entity text, ReadOnlySpan<(string, uint)> features);
 static void SetFontVariations(Entity text, ReadOnlySpan<(string, float)> variations);  // Sets where a variable font sits on each of its axes for a run of text, replacing what it had
 static void SetEditableText(Entity node, UiEditableTextSettings settings);  // Makes a node a text field the player types into
 static string? EditableTextOf(Entity node);                     // What a text field holds, or null for a node that is no field
+static void SetTextCursor(Entity field, UiTextCursorSettings settings);  // Gives a text field a cursor and selection of its own
+static TextViewport? TextViewportOf(Entity field);              // The part of a text field's text it shows, or null for a node that is no field
+static void ScrollText(Entity field, Vec2 offset);              // Scrolls a text field to show its text from a point of its layout
+static void SetVisibleLines(Entity field, float lines);         // Sets how many lines tall a text field is, its text and cursor left as they are
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end
 static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
 ```

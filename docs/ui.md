@@ -344,6 +344,13 @@ Entity name = default, echo = default;
 ctx.Ecs.Observe<TextEditChange>(name, on => Ui.SetText(echo, Ui.EditableTextOf(on.Event.Entity) ?? ""));
 ```
 
+`Ui.SetTextCursor` colors a field's cursor and selection and rounds the selection's corners, Bevy's
+`TextCursorStyle`, and `Ui.SetVisibleLines` makes it taller or shorter with its text kept. A field
+of more lines than it shows scrolls by Bevy's own viewport rather than a node's scroll position, so
+a scrollbar of a game's own reads `Ui.TextViewportOf` beside the text's laid out size, its
+`TextLayoutInfoRef.Size`, and moves the text with `Ui.ScrollText`, as Bevy's multiline_text_input
+example does.
+
 Each key reaches the focused entity as Bevy's `FocusedInput<KeyboardInput>`, which goes on up its
 parents, so a game observes Enter in a field, or in any field of a row:
 

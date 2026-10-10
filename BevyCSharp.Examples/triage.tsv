@@ -372,7 +372,7 @@ image_node	can
 image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
 ime_support	missing	a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in
 letter_spacing	can
-multiline_text_input	can	Bevy's cursor colors, which no wrapper reaches, so the field draws Bevy's default cursor, and its lines set by setting the field again
+multiline_text_input	can
 multiple_text_inputs	can
 overflow_clip_margin	can
 overflow_debug	can

@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d6764154`. One commit, the cheat sheet on its own, and the 536 lines had three
+Reviewed up to `5bbbe1a5`. One commit, item 4's fourth gap, the keys observed as they reach a field,
+and the Tab traced to its cause: Bevy's focused input dispatches nothing unless there is exactly one
+primary window, and its tab navigation hangs its observer on that window at startup, so an offscreen
+run had neither. The bridge's offscreen dispatcher already sent a key to the focused entity; with
+nothing focused it sends it to the placeholder entity named as the window, where Bevy's propagation
+stops at an entity that does not exist, and a global observer runs Bevy's own tab navigation where a
+key reaches the placeholder, which only a windowless key does; the event is built with
+`FocusedInput::new`, public in 0.20, in place of reflection. Tab from no focus and from a clicked
+button both move the focus offscreen, held by a test of Tab, Tab and Shift with Tab giving the
+first, the second and the first, and tab_navigation driven with `input.key`. With it, a text field's
+read-write mode, Bevy's `TextReadWriteMode` as `UiEditableTextSettings.Mode`, and its edits as
+`TextEditChange`, a reported event of the seventh kind, the field's layout held on both sides at the
+same offsets; multiple_text_inputs written again on 0.20 with its four columns, six justifications
+and three read-write rows kept in step by the event's observer, driven offscreen with typing and
+Enter; ABI 236; and the housekeeping: `NormTests`' list of the sessions' documents names ASKS.md,
+which is in, `5a7f2c07` is on `build/norm/7.2.txt`, and NORM.md, SHARED.md and REVIEW.md as edited
+here. Right, a model that named Bevy's mechanism and a fix that used Bevy's own observer rather than
+a copy of it, with the test the untraced finding asked for. The suite: 1,298 passed and 2 skipped.
+multiline_text_input next as a batch of its own, the field's viewport for its scrollbar, the
+cursor's and selection's colors, selecting all on focus and the justify popover.
+
+Before it, one commit came to be read, the cheat sheet on its own, and the 536 lines had three
 causes, each said: lines added by hand in the writer's absence, which put `?` on returns the writer
 never printed and sat where a hand put them; the writer leaving a backtick after a generic method's
 name, stripping one of a method cref's two arity backticks; and summaries edited since the sheet was
@@ -43,33 +64,6 @@ the 65 validation errors on the page a test's own. The keys observed as they rea
 where typing into character_creation's name field offscreen belongs, `input.type` reaching the ImGui
 interface alone.
 
-Before it, one commit came to be read, item 4's second gap, the first having come with the bump: the
-decal's tag and the volume's voxels reach Bevy's WESL through the glue `340639b1` ported,
-`bcs_decal_tag` walking 0.20's decal iterator and the irradiance call its volume function, two tests
-holding them and irradiance_volumes headed 0.20. `deferred_raymarch` on the deferred buffers: a new
-point of the frame, `FramePoint.InPrepass`, runs a camera's dispatches and draws inside the prepass
-after Bevy's geometry has drawn its depth, normals, motion and deferred buffers and before anything
-reads them, where a draw may target `gbuffer` and `lighting_pass` and nowhere else, since by the
-next point the deferred lighting has taken which pixels it lights, refused with a line where it is
-asked elsewhere, the camera's depth copied into the prepass's once the draws there are done; a
-shadow stage of a draw's own, `DrawShadow`, writes each fragment's depth into the shadow maps, drawn
-into every directional cascade of the camera and into every point and spot light's shadow views,
-which are views of their own shared by every camera, the draw's vertex shader placing its geometry
-as each light sees it; and `bcs_pass` gains the full-screen triangle, a pixel's ray, a world point's
-depth, a surface, the G-buffer packed in Slang as Bevy packs a standard material, since Bevy's own
-packing reads the view in group zero, and the shadow map's depth for a point. Four tests hold it,
-the packed surface read back, the deferred lighting lighting the draw inside the prepass and nothing
-after it, the sphere's shadow darkening the floor, and a shadow stage refused without the draw's
-stages; the example matches bare Bevy's frame 120 but for its gyroid's motion; ABI 234, three lines
-on the public surface, the guide's compute page saying how, and `views/draws.rs` split into
-`draw_shadows.rs` for N 1.3. One trap found and written where a shader's author reads: slangc
-2026.18.2 writes a function's own `SV_Depth` return as a color at location zero in WGSL and a struct
-member marked `SV_Depth` as the depth, so the stage returns its depth in `bcs_pass::ShadowDepth`.
-Right, a gap bridged as Bevy does it rather than beside it, with the one copy of Bevy's packing held
-to Bevy by the lighting test; SHARED.md takes the row and the trap. The suite: 1,292 passed and 2
-skipped. The widgets' events as observers next, with headless_tabs and draggable_slider, as item 4
-has it.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -83,25 +77,22 @@ from [SHARED.md](SHARED.md).
 1. **What the next page says.** The run of `a54dda9e`, the first since `c7f1cbc6` and the first
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
    425 to 435 skipped where the runner draws nothing, and its page repeats only the five lines a
-   test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the run of
-   `7849ecf6` is green on all three as well, and the pack job did not run, so Verdicts 2 and 3
-   settle on the pack run's page, which is the owner's to start (Decision 8). Verdict 7 is settled
-   at `b0fa935e`, the page removed before the script starts, and `61f80bc6` asks whether it is there
-   first, since the runtime's Windows delete throws on a missing folder, a fresh checkout's first
-   run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the window's image holding its
-   zeros until the pass that draws it has its pipeline, and the test captures once
-   `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and `docs/window.md`
-   say so with step g. The page's repeated lines carried 116 warnings of `Screen.Playing` in every
-   run since before `c70f17b`, quieted at `37b2118f`, the harness adding `Screen` beside the
-   behaviors it discovers, so the warning shows once, from the test that asks for it, and the third
-   repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7). Package 0.4 is ready
-   to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps in at `c9c460df`,
-   and Verdicts 2 and 3 settle on that pack run's page. The cheat sheet is its writer's again at
-   `d6764154`. The commit `5a7f2c07`, three marks with no sentence, is the owner's, made with the
-   owner's tools at 11:05 and carrying the paragraph on ASKS.md in AGENTS.md, so it goes on
-   `build/norm/7.2.txt` with that reason with the next commit. N 4.7 names `.github/ASKS.md` among
-   the sessions' documents (Decision 24), so `NormTests`' list of them gains it with the next
-   commit, and ASKS.md is committed with that batch as REVIEW.md is. Each push's run is read by the
+   test prints and the two warnings a test asks for; Verdicts 4, 5 and 6 are settled, the runs of
+   `7849ecf6` and `d6764154` are green on all three as well, and the pack job did not run, so
+   Verdicts 2 and 3 settle on the pack run's page, which is the owner's to start (Decision 8).
+   Verdict 7 is settled at `b0fa935e`, the page removed before the script starts, and `61f80bc6`
+   asks whether it is there first, since the runtime's Windows delete throws on a missing folder, a
+   fresh checkout's first run. `SpawnedWindowTests`' black capture is traced at `c46fd24e`, the
+   window's image holding its zeros until the pass that draws it has its pipeline, and the test
+   captures once `Render.PipelinesReady()` holds; `Render.Screenshot`'s remarks for a window and
+   `docs/window.md` say so with step g. The page's repeated lines carried 116 warnings of
+   `Screen.Playing` in every run since before `c70f17b`, quieted at `37b2118f`, the harness adding
+   `Screen` beside the behaviors it discovers, so the warning shows once, from the test that asks
+   for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks for (Decision 7).
+   Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green and item 3's steps
+   in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The cheat sheet is its
+   writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which is in, and the
+   owner's `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. Each push's run is read by the
    reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
@@ -211,11 +202,11 @@ from [SHARED.md](SHARED.md).
    written again on 0.20 where step f named the difference as Bevy's, and each is ported to 0.20's
    code under item 4 in the order of how much Bevy changed it, its head and picture moving with it,
    the twenty built on Feathers in 0.20 (`faecca0b`'s reply) going with Feathers after the other
-   gaps, and multiline_text_input, context_menu and multiple_text_inputs going with the gap that
-   brings what each reads, the text field's viewport, the list box and the field's edits
-   (`2e7a1c2c`'s reply); 2d_gizmos, 3d_gizmos and wireframe the same, for the gizmo lines' animation
-   offset and the wireframe's x-ray, and tab_navigation's Tab, which moves no focus in an offscreen
-   run, is traced with the keys' gap (`a54dda9e`'s reply).
+   gaps, and multiline_text_input and context_menu going with the gap that brings what each reads,
+   the text field's viewport and the list box, multiple_text_inputs in at `5bbbe1a5` with the
+   field's edits (`2e7a1c2c`'s reply); 2d_gizmos, 3d_gizmos and wireframe the same, for the gizmo
+   lines' animation offset and the wireframe's x-ray, and tab_navigation's Tab, which moves no focus
+   in an offscreen run, is traced with the keys' gap (`a54dda9e`'s reply).
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
@@ -224,25 +215,26 @@ from [SHARED.md](SHARED.md).
    written in its batch: a decal's tag and a volume's voxels through the WESL glue (in with
    `340639b1`), `deferred_raymarch` on the deferred buffers (`7849ecf6`), the widgets' events as
    observers with `headless_tabs` and `draggable_slider` (`01b5ac3e`), keys observed as they reach a
-   field, `sprite_material` and `shader_material_2d_bindless` as 2D materials, `inline_image` and
-   `fixed_node` in the interface, `pipeline_constants` and `gpu_component_array_buffer` in shaders,
-   mesh shaders from Slang through SPIR-V on Vulkan (`mesh_shader_intro`) as a gap of its own, and
-   what the table then names most. When the captures have settled, they are compared whole with
-   checked-in references by the workflow, a small share of pixels allowed to differ between devices,
-   as 3DEngine does for its scenes. Transmission's glass spheres are missing from about one capture
-   in four with TAA on, before `6a84286` as after it, so the cause is found before that job is red
-   for them, or the example is compared with its spheres left out and the reason beside it.
-   `dragdrop_picking`'s pale preview draws over the words Bevy sorts it under (`b548987`'s reply),
-   untraced, and is traced before those captures are compared, as is the gallery's anisotropic
-   spheres drawing blown white under SSAO with forward rendering though they have tangents and draw
-   right under deferred, Bevy's prepass normal for an anisotropic material the suspect (`edd577c`'s
-   reply), and the camera's volumetric fog hazing the whole picture, the sky with it, once a depth
-   prepass is on the camera, which the hall works round by putting the fog on the camera only while
-   it is inside (`6a19213`'s reply). Feathers' three examples with `feathers_number_input` and the
-   three camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) on the
-   owner's word in the working session, and the four font examples stay missing (Decision 13).
-   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
-   with their mipmaps, less memory after the kill of 2026-10-08.
+   field (`5bbbe1a5`), `sprite_material` and `shader_material_2d_bindless` as 2D materials,
+   `inline_image` and `fixed_node` in the interface, `pipeline_constants` and
+   `gpu_component_array_buffer` in shaders, mesh shaders from Slang through SPIR-V on Vulkan
+   (`mesh_shader_intro`) as a gap of its own, and what the table then names most. When the captures
+   have settled, they are compared whole with checked-in references by the workflow, a small share
+   of pixels allowed to differ between devices, as 3DEngine does for its scenes. Transmission's
+   glass spheres are missing from about one capture in four with TAA on, before `6a84286` as after
+   it, so the cause is found before that job is red for them, or the example is compared with its
+   spheres left out and the reason beside it. `dragdrop_picking`'s pale preview draws over the words
+   Bevy sorts it under (`b548987`'s reply), untraced, and is traced before those captures are
+   compared, as is the gallery's anisotropic spheres drawing blown white under SSAO with forward
+   rendering though they have tangents and draw right under deferred, Bevy's prepass normal for an
+   anisotropic material the suspect (`edd577c`'s reply), and the camera's volumetric fog hazing the
+   whole picture, the sky with it, once a depth prepass is on the camera, which the hall works round
+   by putting the fog on the camera only while it is inside (`6a19213`'s reply). Feathers' three
+   examples with `feathers_number_input` and the three camera controllers follow the other gaps,
+   their crates allowed (Decisions 11 and 12) on the owner's word in the working session, and the
+   four font examples stay missing (Decision 13). `compressed_image_saver` comes last here, for the
+   scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after the kill of
+   2026-10-08.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

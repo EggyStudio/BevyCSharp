@@ -571,6 +571,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_set_editable_value(ulong entity, string text);
 
+    /// <summary>Gives a text field a cursor and selection of its own.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_set_text_cursor(ulong entity, NativeTextCursor* cursor);
+
+    /// <summary>Writes the part of a field's text it shows: offset across and down, then width and height.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_editable_viewport(ulong entity, float* output);
+
+    /// <summary>Scrolls a text field to show its text from a point of its layout.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_scroll_editable(ulong entity, float x, float y);
+
+    /// <summary>Sets how many lines tall a text field is, its text as it was.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_set_editable_lines(ulong entity, float lines);
+
     /// <summary>Makes one of Bevy's widgets keep its own state.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

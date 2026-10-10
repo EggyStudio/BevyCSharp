@@ -2909,6 +2909,21 @@ static class Bevy.Interop.NativeStatus
   const int Unsupported = -10
   static string Describe(int status)
   static void Throw(int status, string operation)
+struct Bevy.Interop.NativeTextCursor
+  NativeTextCursor.<Color>e__FixedBuffer Color
+  NativeTextCursor.<SelectedText>e__FixedBuffer SelectedText
+  NativeTextCursor.<Selection>e__FixedBuffer Selection
+  NativeTextCursor.<UnfocusedSelection>e__FixedBuffer UnfocusedSelection
+  float SelectionRadius
+  int HasSelectedText
+struct Bevy.Interop.NativeTextCursor.<Color>e__FixedBuffer
+  float FixedElementField
+struct Bevy.Interop.NativeTextCursor.<SelectedText>e__FixedBuffer
+  float FixedElementField
+struct Bevy.Interop.NativeTextCursor.<Selection>e__FixedBuffer
+  float FixedElementField
+struct Bevy.Interop.NativeTextCursor.<UnfocusedSelection>e__FixedBuffer
+  float FixedElementField
 struct Bevy.Interop.NativeTime
   double DeltaSeconds
   double ElapsedSeconds
@@ -10721,6 +10736,17 @@ enum Bevy.TextReadWriteMode : int
   Editable = 0
   ReadOnly = 1
   Static = 2
+readonly struct Bevy.TextViewport : IEquatable<TextViewport>
+  TextViewport(Vec2 Offset, Vec2 Size)
+  Vec2 Offset { get; init; }
+  Vec2 Size { get; init; }
+  bool Equals(TextViewport other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(TextViewport left, TextViewport right)
+  static bool op_Inequality(TextViewport left, TextViewport right)
+  void Deconstruct(out Vec2 Offset, out Vec2 Size)
 enum Bevy.TextWrap : int
   AnyCharacter = 1
   NoWrap = 3
@@ -10912,9 +10938,11 @@ static class Bevy.Ui
   static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f)
   static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float, float, float, float) color)
   static Entity? Navigate(NavAction action)
+  static TextViewport? TextViewportOf(Entity field)
   static UiInteraction InteractionOf(Entity entity)
   static string? EditableTextOf(Entity node)
   static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
+  static void ScrollText(Entity field, Vec2 offset)
   static void SelfUpdate(Entity widget, UiWidgetKind kind)
   static void SetEditableText(Entity node, UiEditableTextSettings settings)
   static void SetEditableValue(Entity node, string text)
@@ -10925,7 +10953,9 @@ static class Bevy.Ui
   static void SetScroll(Entity entity, float x, float y)
   static void SetStrikethrough(Entity text, bool struck = true)
   static void SetText(Entity entity, string text)
+  static void SetTextCursor(Entity field, UiTextCursorSettings settings)
   static void SetUnderline(Entity text, bool underlined = true)
+  static void SetVisibleLines(Entity field, float lines)
 enum Bevy.UiAlign : int
   Baseline = 6
   Center = 5
@@ -11050,6 +11080,13 @@ sealed class Bevy.UiSettings
   float ClipMargin { get; set; }
   float Grow { get; set; }
   float Shrink { get; set; }
+sealed class Bevy.UiTextCursorSettings
+  Color Color { get; set; }
+  Color Selection { get; set; }
+  Color UnfocusedSelection { get; set; }
+  Color? SelectedText { get; set; }
+  UiTextCursorSettings()
+  float SelectionRadius { get; set; }
 sealed class Bevy.UiTextSettings
   (float, float) ShadowOffset { get; set; }
   (float, float, float, float) ShadowColor { get; set; }

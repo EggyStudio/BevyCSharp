@@ -10,12 +10,15 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class EditableTextTests
 {
-    /// <summary>The field's settings sit where the bridge reads them.</summary>
+    /// <summary>The field's settings and its cursor's sit where the bridge reads them.</summary>
     [Fact]
     public void TheFieldsSettingsAreWhereTheBridgeReadsThem()
     {
         Assert.Equal(16, Marshal.OffsetOf<NativeEditableTextConfig>(nameof(NativeEditableTextConfig.Mode)).ToInt32());
         Assert.Equal(20, Marshal.SizeOf<NativeEditableTextConfig>());
+        Assert.Equal(48, Marshal.OffsetOf<NativeTextCursor>(nameof(NativeTextCursor.SelectedText)).ToInt32());
+        Assert.Equal(64, Marshal.OffsetOf<NativeTextCursor>(nameof(NativeTextCursor.HasSelectedText)).ToInt32());
+        Assert.Equal(72, Marshal.SizeOf<NativeTextCursor>());
     }
 
     /// <summary>
@@ -215,6 +218,69 @@ public sealed class EditableTextTests
         Assert.Equal("a", typed);
         Assert.True(edits > 0, "the field reported no edit");
         Assert.Equal("fixed", kept);
+    }
+
+    /// <summary>
+    /// A field of more lines than it shows has a viewport shorter than its text, which is scrolled
+    /// from C# and grows as the field is made taller, its text kept, and its cursor is styled; a
+    /// node that is no field has no viewport and takes no cursor.
+    /// </summary>
+    [SkippableFact]
+    public void AFieldsViewportIsReadScrolledAndGrownAndItsCursorStyled()
+    {
+        Needs.Renderer();
+
+        var (field, plain) = (Entity.None, Entity.None);
+        TextViewport? before = null, scrolled = null, taller = null, none = null;
+        float textHeight = 0f;
+        string? kept = null;
+        BevyNativeException? refused = null;
+        const string Lines = "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight";
+
+        var run = new PictureRun
+        {
+            Width = 320,
+            Height = 320,
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                field = Ui.SpawnNode(new UiSettings { Width = Length.Px(240f) });
+                Ui.SetEditableText(field, new UiEditableTextSettings { Text = Lines, VisibleLines = 2f, AllowNewlines = true });
+                Ui.SetTextCursor(field, new UiTextCursorSettings { Color = Color.White, SelectedText = Color.Black, SelectionRadius = 0.25f });
+                plain = Ui.SpawnNode(new UiSettings());
+            },
+        };
+
+        run.Wait(4)
+            .Do("reading the viewport", world =>
+            {
+                before = Ui.TextViewportOf(field);
+                textHeight = world.Resource<EcsWorld>().Get<TextLayoutInfoRef>(field)?.Size.Y ?? 0f;
+                Ui.ScrollText(field, new Vec2(0f, 10f));
+            })
+            .Wait(2)
+            .Do("reading it scrolled and making the field taller", _ =>
+            {
+                scrolled = Ui.TextViewportOf(field);
+                Ui.SetVisibleLines(field, 4f);
+            })
+            .Wait(4)
+            .Do("reading it taller", _ =>
+            {
+                taller = Ui.TextViewportOf(field);
+                kept = Ui.EditableTextOf(field);
+                none = Ui.TextViewportOf(plain);
+                refused = Assert.Throws<BevyNativeException>(() => Ui.SetTextCursor(plain, new UiTextCursorSettings()));
+            })
+            .Go();
+
+        Assert.NotNull(before);
+        Assert.True(before.Value.Size.Y > 0f && textHeight > before.Value.Size.Y * 2f, $"the text was {textHeight} tall in a viewport of {before}");
+        Assert.Equal(10f, scrolled!.Value.Offset.Y);
+        Assert.InRange(taller!.Value.Size.Y, before.Value.Size.Y * 1.8f, before.Value.Size.Y * 2.2f);
+        Assert.Equal(Lines, kept);
+        Assert.Null(none);
+        Assert.Equal(NativeStatus.NotPresent, refused!.Status);
     }
 
     /// <summary>
