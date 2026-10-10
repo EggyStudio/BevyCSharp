@@ -527,7 +527,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`anchor_layout`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/anchor_layout.rs) | Shows an 'anchor layout' style of ui layout | [written](../BevyCSharp.Examples/ui/anchor_layout.cs) |
-| [`borders`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/borders.rs) | Demonstrates how to create a node with a border | [written](../BevyCSharp.Examples/ui/borders.cs) |
+| [`borders`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/styling/borders.rs) | Demonstrates how to create a node with a border | [written](../BevyCSharp.Examples/ui/borders.cs) |
 | [`box_shadow`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/styling/box_shadow.rs) | Demonstrates how to create a node with a shadow | [written](../BevyCSharp.Examples/ui/box_shadow.cs), through Bevy's reflected BoxShadow |
 | [`button`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/button.rs) | Illustrates creating and updating a button | [written](../BevyCSharp.Examples/ui/button.cs), the input focus set through Bevy's reflected InputFocus, without the record of changes its own set keeps, which is a list no wrapper reaches |
 | [`directional_navigation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/navigation/directional_navigation.rs) | Demonstration of automatic directional navigation based on UI element positions | [written](../BevyCSharp.Examples/ui/directional_navigation.cs) |
