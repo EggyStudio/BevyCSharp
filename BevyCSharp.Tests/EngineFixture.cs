@@ -73,8 +73,9 @@ public sealed class EngineHarness : IDisposable
     /// <summary>Builds a headless engine that will run <paramref name="frames"/> ticks.</summary>
     /// <param name="frames">Number of frames to run, or 0 to run until a system asks to exit.</param>
     /// <param name="discoverBehaviors">
-    /// Whether to run the generated behavior registration. Off by default so a test that adds
-    /// its own systems is not perturbed by every <c>[Behavior]</c> struct in the test assembly.
+    /// Whether to run the generated behavior registration, with <see cref="Screen"/> at its menu
+    /// for the behaviors scoped to it. Off by default so a test that adds its own systems is not
+    /// perturbed by every <c>[Behavior]</c> struct in the test assembly.
     /// </param>
     /// <param name="fps">
     /// Frames per second, or 0 to run them back to back. A test waiting on work the engine does
@@ -118,7 +119,15 @@ public sealed class EngineHarness : IDisposable
         });
 
         _app.AddPlugin(new EnginePlugin());
-        if (discoverBehaviors) _app.AddPlugin(Behaviors());
+        if (!discoverBehaviors) return;
+
+        // Three of the tests' behaviors are scoped to Screen, and an app that takes them without
+        // the state says so once as the mistake it would be in a game, so every app given them
+        // has the state as well. A test that sets the state adds it again, which before the run
+        // replaces the value, and a test of the behaviors without their state adds Behaviors()
+        // itself.
+        _app.AddPlugin(Behaviors());
+        _app.AddState(Screen.Menu);
     }
 
     /// <summary>

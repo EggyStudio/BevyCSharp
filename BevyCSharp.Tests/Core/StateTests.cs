@@ -406,7 +406,9 @@ public sealed class StateTests
         // once per system per frame and buries the run in identical stack traces.
         PlayingOnly.Ticks = 0;
 
-        using var harness = new EngineHarness(frames: 5, discoverBehaviors: true);
+        // The behaviors without the state the harness gives them alongside.
+        using var harness = new EngineHarness(frames: 5);
+        harness.App.AddPlugin(EngineHarness.Behaviors());
         harness.Run();
 
         Assert.Equal(0, PlayingOnly.Ticks);

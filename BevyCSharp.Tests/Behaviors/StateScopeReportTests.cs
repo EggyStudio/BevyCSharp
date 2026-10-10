@@ -6,8 +6,7 @@ namespace Bevy.Tests;
 /// <summary>Covers what an app is told when a system is scoped to a state it never added.</summary>
 /// <remarks>
 /// The systems are the three <see cref="StateTests"/> declares scoped to <see cref="Screen.Playing"/>,
-/// which every app that discovers the tests' behaviors runs, and most such apps add no screen,
-/// since they test something else.
+/// in an app given the tests' behaviors without the state the harness adds beside them.
 /// </remarks>
 [Collection("engine")]
 public sealed class StateScopeReportTests
@@ -53,7 +52,8 @@ public sealed class StateScopeReportTests
     /// <summary>What an app with every test behavior and no screen writes to the error stream.</summary>
     private static string Reports() => Captured(() =>
     {
-        using var harness = new EngineHarness(frames: 3, discoverBehaviors: true);
+        using var harness = new EngineHarness(frames: 3);
+        harness.App.AddPlugin(EngineHarness.Behaviors());
         harness.Run();
     });
 

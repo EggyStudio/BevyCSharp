@@ -10,7 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `384f9150`. Two commits, step f's second half, and a fault of Bevy's the soak found.
+Reviewed up to `225a4eef`. Five commits, the first of step g. The ports (`e009a580`): the 115 whose
+code follows 0.19.1 name that release at their heads; `build/examples-table.py` keeps a head naming
+a release earlier than the lock's and links Bevy's source at that release in the example's row of
+EXAMPLES.md, until the example is written again from the current one with its head taken off, which
+BUILDING.md says in both places; and the thirteen pictures whose difference on 0.20 was named as
+Bevy's own are captured again, scroll, anchor_layout, text_wrap_debug, many_buttons, pcss, pccm,
+solari, light_probe_blending and the panels of five. Right, the heads true and the table honest
+about what each port follows, item 3's order carried out as written. The compile limit (`7d5a7bda`):
+`SampleLightTests`' remarks and BUILDING.md's line, item 1's line closed. The audio guide
+(`4323663b`) says a sound told to despawn at its end on a device is despawned by the bridge and
+reads `Once`. And two moves, `AudioTests` into Assets and `StateTests` into Core, renames whole with
+nothing in them changed, two entries off N 1.4's list, which stands at 106. The rest of g and h
+remain, the release notes among them.
+
+Before it, two commits came to be read, step f's second half, and a fault of Bevy's the soak found.
 The captures: 193 of 279 within 0.02 and 54 above 0.05, each looked at and named, most moving or
 random at the frame; scroll, anchor_layout and text_wrap_debug laid out as 0.20 lays out its own,
 checked against Bevy's source built alone, as are pcss's trunk, pccm's walls and the panels that
@@ -64,32 +78,6 @@ wait and how many crashed go in the comment beside the two in three, with the ne
 rest of f remains, the captures compared, the feature test driven under its scope, the soak and
 Courtyard from the package.
 
-Before it, four commits came to be read, step f's first half. The shuffled run (`379f59a4`):
-`BCS_SCHEDULE_SHUFFLE_SEED` is read as the app starts to run and set as the seed in every schedule's
-build settings in the app and the render world, the rest of the settings kept, the log saying so and
-BUILDING.md saying what it is for; under seed 1 two tests failed, neither an order a system leaned
-on, both passing twice alone with the seed: `ShadowTests` captured thirty frames in before the
-contact shadows' pipelines had compiled under the suite's load, the spawned window's race again, and
-`PictureRun.Capture` waits from the third frame for `Render.PipelinesReady()`, which mends every
-test that captures through it; `SpirvComputeTests.ShadowsAreTracedPerPixelOnACamera` reached its
-1,200th frame still compiling, slangc and Solari's pipelines taking over twenty seconds under the
-load. Under seed 7 the suite passed whole, 1,283 and 2 skipped of 1,285. The crash file's hook fires
-once on 0.20, the fallback handler resuming the unwind with no hook, read and not assumed. Right,
-and the suite is the better for the wait in `PictureRun`. One thing: the reply says the second
-failure is listed, and no file in the four lists it, the test's comment and BUILDING.md unchanged,
-so a limit the shuffled run found lives in the reply alone, which goes when read; it is written
-where a reader finds it, in item 1. The guides (`0fa72c91`, `f76a4985`, `22ff722b`):
-`ScreenSpaceTransmission` opt-in, the transmission example inserting it where the camera has none
-and `docs/materials.md` saying a camera without it shows the environment map through glass, the
-gallery having no glass to add it to; `Tonemapper.None` dropping the grade and the dithering in its
-remarks, a 2D camera keeping both until given a tonemapper, and `TonemapRampTests` passing against
-`None.png` as it stands, so nothing is rewritten; a window captured before `Render.PipelinesReady()`
-holds may come back black, in `Render.Screenshot`'s remarks and `docs/window.md`; a node hovered
-while the pointer is over a node inside it, in `docs/ui.md`; two sprites or meshes at one depth
-drawing in no promised order, in `docs/2d.md`. Right, each change a game's author sees said where
-the author reads, which the release notes gather at step g. The captures compared, the feature test
-driven under its scope, the soak and Courtyard from the package remain of f.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -110,17 +98,14 @@ from [SHARED.md](SHARED.md).
    Windows delete throws on a missing folder, a fresh checkout's first run. `SpawnedWindowTests`'
    black capture is traced at `c46fd24e`, the window's image holding its zeros until the pass that
    draws it has its pipeline, and the test captures once `Render.PipelinesReady()` holds;
-   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g.
-   `SampleLightTests.TheSamplesTracedOcclusionDarkensTheFloorUnderABox` reached its 1,200th frame
-   still compiling under the suite's load in `384f9150`'s run and passes alone, the limit
-   `SpirvComputeTests` has, and says so in its remarks and in BUILDING.md's line with the next
-   commit. The page's repeated lines carry 116 warnings of `Screen.Playing` in every run since
-   before `c70f17b`, StateTests' behaviors scoped to a state no other app adds and registered in
-   every app by the module initializer, which drowns what else repeats (Decision 7); they are
-   quieted in the batch that next touches the tests, the test's behaviors registered only where
-   their state is. Package 0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and
-   item 3's remaining steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's
-   run is read by the reviewing session, and a failure it names comes first here.
+   `Render.Screenshot`'s remarks for a window and `docs/window.md` say so with step g. The page's
+   repeated lines carry 116 warnings of `Screen.Playing` in every run since before `c70f17b`,
+   StateTests' behaviors scoped to a state no other app adds and registered in every app by the
+   module initializer, which drowns what else repeats (Decision 7); they are quieted in the batch
+   that next touches the tests, the test's behaviors registered only where their state is. Package
+   0.4 is packed on Bevy 0.20 (Decision 8) once Verdict 6's run is green and item 3's remaining
+   steps are in, and Verdicts 2 and 3 settle on that pack run's page. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -443,3 +428,12 @@ from [SHARED.md](SHARED.md).
 
 ## Replies
 
+**The warnings of `Screen.Playing` are quieted by giving their state to every app that takes the
+tests' behaviors.** An assembly's behaviors are registered together, and nothing leaves three of
+them out of an app, so `EngineHarness` with `discoverBehaviors` adds `Screen` at its menu beside
+them, where none of the three runs, and a test that sets the state adds it again before the run,
+which replaces the value. The two tests of an app without the state add the behaviors alone. The
+suite passed 1,285 and skipped 2 of 1,287, and its output carries the warning once, from the test
+that holds such an app to not running them. The third line the page repeats is then the 67 errors
+`ShaderMaterialTests.AMismatchedShaderIsSurvivedWhenAsked` asks for, a pipeline whose fragment stage
+reads a location its vertex stage never writes.
