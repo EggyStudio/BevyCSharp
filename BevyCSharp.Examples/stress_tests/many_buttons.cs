@@ -46,7 +46,8 @@ internal static class ManyButtons
         Nodes.Clear();
         Texts.Clear();
 
-        StressTest.Warn();
+        // Bevy's warning_string.txt, which its stress tests say as they start.
+        Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         app.Update(SetTextColorsChanged, "many_buttons.SetTextColorsChanged");
 
         if (!arguments.Contains("--no-camera")) app.Startup(_ => Render2d.SpawnCamera2d(), "many_buttons.Camera");

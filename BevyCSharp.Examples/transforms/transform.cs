@@ -17,8 +17,20 @@ internal static class TransformExample
 
         // Away from the sphere and turned so it flies around it rather than at it.
         var spawn = new Transform(new Vec3(0f, 0f, -10f), Quat.FromRotationY(MathF.PI / 2f), Vec3.One);
-        ecs.Add(CubeScene.Spawn(ecs, spawn), new CubeState { StartPos = spawn.Translation, MoveSpeed = 2f, TurnSpeed = 0.2f });
+        ecs.Add(SpawnScene(ecs, spawn), new CubeState { StartPos = spawn.Translation, MoveSpeed = 2f, TurnSpeed = 0.2f });
     }, "transform.Setup");
+
+    // A white cube at the middle seen from above and in front, under a directional light, the scene
+    // Bevy's transform examples each spawn, which returns the cube.
+    private static Entity SpawnScene(EcsWorld ecs, Transform at)
+    {
+        var cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial((1f, 1f, 1f, 1f)), at);
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10f, 20f), Vec3.Zero, Vec3.UnitY));
+
+        var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
+        ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 3f, 3f), Vec3.Zero, Vec3.UnitY));
+        return cube;
+    }
 }
 
 /// <summary>A cube that flies forward while it turns toward the centers, and so circles them.</summary>

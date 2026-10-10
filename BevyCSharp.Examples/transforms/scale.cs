@@ -10,8 +10,20 @@ namespace BevyCSharp.Examples.Transforms;
 internal static class ScaleExample
 {
     public static void Build(App app) => app.Startup(ctx => ctx.Ecs.Add(
-        CubeScene.Spawn(ctx.Ecs, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 4f), Vec3.One)),
+        SpawnScene(ctx.Ecs, new Transform(Vec3.Zero, Quat.FromRotationY(MathF.PI / 4f), Vec3.One)),
         new Scaling { ScaleDirection = Vec3.UnitX, ScaleSpeed = 2f, MaxElementSize = 5f, MinElementSize = 1f }), "scale.Setup");
+
+    // A white cube at the middle seen from above and in front, under a directional light, the scene
+    // Bevy's transform examples each spawn, which returns the cube.
+    private static Entity SpawnScene(EcsWorld ecs, Transform at)
+    {
+        var cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial((1f, 1f, 1f, 1f)), at);
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10f, 20f), Vec3.Zero, Vec3.UnitY));
+
+        var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
+        ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 3f, 3f), Vec3.Zero, Vec3.UnitY));
+        return cube;
+    }
 }
 
 /// <summary>A thing stretching along one axis at a time, between its smallest and largest size.</summary>

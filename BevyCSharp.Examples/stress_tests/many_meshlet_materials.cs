@@ -47,7 +47,8 @@ internal static class ManyMeshletMaterials
 
     private static void Setup(BehaviorContext ctx, int n, bool unique)
     {
-        StressTest.Warn();
+        // Bevy's warning_string.txt, which its stress tests say as they start.
+        Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         var ecs = ctx.Ecs;
 
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, n, n * 1.5f), Vec3.Zero, Vec3.UnitY));

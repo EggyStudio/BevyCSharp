@@ -15,11 +15,4 @@ internal static class KeyboardModifiers
         var ctrl = input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]);
         if (ctrl && shift && input.KeyPressed(Key.A)) Console.WriteLine("Just pressed Ctrl + Shift + A!");
     }, "keyboard_modifiers.KeyboardInput");
-
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Press(Key.ControlLeft)),
-        (3, () => SyntheticInput.Press(Key.ShiftRight)),
-        (4, () => SyntheticInput.Tap(Key.A, "A")),
-        (6, () => { SyntheticInput.Lift(Key.ShiftRight); SyntheticInput.Lift(Key.ControlLeft); }),
-        (8, () => SyntheticInput.Tap(Key.A, "a")));
 }

@@ -23,15 +23,4 @@ internal static class GamepadInput
             if (MathF.Abs(leftStickX) > 0.01f) Console.WriteLine(FormattableString.Invariant($"{pad.Entity} LeftStickX value is {leftStickX}"));
         }
     }, "gamepad_input.Gamepad");
-
-    public static void Drive(App app)
-    {
-        var pad = Entity.None;
-        app.Script(
-            (2, () => pad = SyntheticInput.ConnectGamepad()),
-            (4, () => SyntheticInput.SetGamepadButton(pad, GamepadButton.South)),
-            (6, () => SyntheticInput.SetGamepadButton(pad, GamepadButton.South, 0f)),
-            (8, () => SyntheticInput.SetGamepadAxis(pad, GamepadAxis.LeftX, 0.5f)),
-            (10, () => SyntheticInput.SetGamepadAxis(pad, GamepadAxis.LeftX, 0f)));
-    }
 }

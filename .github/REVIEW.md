@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c67c7981`. Two commits. Item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
+Reviewed up to `9d2f7e31`. One commit, after the home disk filled: at 21:05 it held 19 GB of 1.9 TB,
+this repository's build trees holding the room, `native/target` 213 GB of five profile and feature
+combinations over two Bevy versions, `build/target` 26 GB of stale and cross-compiled folders, and
+the bare Bevy comparison harness's 58 GB outside the repository, and a capture of the retake was
+lost to it at 20:20. Some 171 GB came back, every byte of it rebuildable, and the staged libraries,
+the portable build's cache, the artifacts, the package and the examples' binaries the lavapipe pass
+runs from were kept; the disk reads 190 GB free. The bounds: `build/trim-caches.sh`, run by
+`build-native.sh` before every native build and by hand after a long run of `cargo check` and `cargo
+test`, holds `native/target` to 80 GB and `build/target-portable` to 50, a cache past its bound
+losing its incremental state first and the whole of it only when that is not enough, and
+`build/target` to 2 GB with its staged libraries kept whatever the size, in `du -sk` and `find -exec
+rm {} +` that GNU's and BSD's tools both read; BUILDING.md's new section carries the table. Right,
+the bound held where the growth comes from and the cheapest state let go first; the lesson is a row
+of SHARED.md, since it was the machine's disk and not this repository's alone. Item 8 goes on as
+set: the drivers to one file, the warn and the cube scene written in, the opened size from
+`Window.Size()`, which answers offscreen, read once a frame in `PreUpdate` where a method may run
+off the main thread, and `FreeCamera` and `RadioButtons` on the script's list with their decisions.
+
+Before it, two commits came to be read, item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
 `RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
 system last asked, oldest first, as Bevy's `RemovedComponents<T>` gives a Rust system; each C#
 system's closure holds a cursor a component, which `removals.rs` makes the running one in a
@@ -60,31 +78,6 @@ and which the owner's word allows, the package being theirs to pack and publish 
 item 6 had it, so it moves to the template with the next batch, the cube's two files removed as the
 page's first step or an empty-window template beside the first, 3DEngine's two templates read for
 the shape. `NormTests.cs` stands at 794. The capture run is a third through.
-
-Before it, one commit came to be read, item 4's four faults traced before the captures are compared.
-Transmission's missing spheres do not reproduce on Bevy 0.20, 32 captures on the laptop's GPU on the
-machine's clock and 6 on lavapipe at a fixed frame time all with their spheres, where one in four
-lacked them before, so 38 clean would come once in 55,000; and eight lavapipe captures on the
-machine's clock showed the paper from behind, lavapipe compiling slowly so the turning camera had
-gone half round by frame 120, which is the clock and bears on the comparison. `dragdrop_picking`'s
-pale preview over the words is Bevy's own on 0.20, the same scene on bare Bevy drawing the ghost at
-the square's depth over the text at z 1, so the reading that Bevy sorts it under was 0.19's and
-nothing changes. The gallery's anisotropic spheres blown white under ambient occlusion are Bevy's
-shader: with a normal prepass the forward shader loads the prepass normal and skips the block that
-builds the tangent frame, where anisotropy's setup lives, so the stretch's tangent and bitangent
-stay zero while the material still takes the anisotropic highlight, whose distribution then has no
-falloff, 5,026 white pixels of a 96 by 96 picture under a normal prepass or occlusion and none
-forward or deferred; two tests pin it, right forward and deferred and blown white under a normal
-prepass as Bevy draws it, the second failing once Bevy mends its shader, the remarks and the guide
-saying a deferred camera draws it right, and a bridge-side patch of Bevy's shader source at load
-left out as fragile across versions, rightly; no upstream report is filed from here, as the owner
-has it, and the finding is theirs to carry. The fog's haze under a depth prepass is gone on 0.20, a
-test holding the fog to its volume under none, a depth prepass and occlusion, and the hall's fog
-stays the hall's with its remark saying why it was. Right, each fault measured on bare Bevy before
-it was called Bevy's, and the two that stand pinned so Bevy's mend is noticed. One slip, told to the
-owner: driving the feature test, the coder set its saved hour to 8 without reading it first. The
-suite: 1,344 passed and 2 skipped. The comparison job's plan is taken as the coder proposes, with
-the conditions item 4 carries.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

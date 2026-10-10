@@ -10,7 +10,19 @@ namespace BevyCSharp.Examples.Transforms;
 internal static class Rotation3d
 {
     public static void Build(App app) =>
-        app.Startup(ctx => ctx.Ecs.Add(CubeScene.Spawn(ctx.Ecs, Transform.Identity), new Rotatable { Speed = 0.3f }), "3d_rotation.Setup");
+        app.Startup(ctx => ctx.Ecs.Add(SpawnScene(ctx.Ecs, Transform.Identity), new Rotatable { Speed = 0.3f }), "3d_rotation.Setup");
+
+    // A white cube at the middle seen from above and in front, under a directional light, the scene
+    // Bevy's transform examples each spawn, which returns the cube.
+    private static Entity SpawnScene(EcsWorld ecs, Transform at)
+    {
+        var cube = ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid), Render.CreateMaterial((1f, 1f, 1f, 1f)), at);
+        ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 10f, 20f), Vec3.Zero, Vec3.UnitY));
+
+        var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false });
+        ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 3f, 3f), Vec3.Zero, Vec3.UnitY));
+        return cube;
+    }
 }
 
 /// <summary>A thing turning about Y at its own speed.</summary>

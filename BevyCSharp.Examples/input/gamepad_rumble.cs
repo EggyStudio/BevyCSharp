@@ -43,18 +43,4 @@ internal static class GamepadRumble
             }
         }
     }, "gamepad_rumble.Gamepad");
-
-    public static void Drive(App app)
-    {
-        var pad = Entity.None;
-        var step = 2;
-        var script = new List<(int, Action)> { (step, () => pad = SyntheticInput.ConnectGamepad()) };
-        foreach (var button in new[] { GamepadButton.North, GamepadButton.East, GamepadButton.South, GamepadButton.West, GamepadButton.Start })
-        {
-            script.Add((step += 2, () => SyntheticInput.SetGamepadButton(pad, button)));
-            script.Add((step += 2, () => SyntheticInput.SetGamepadButton(pad, button, 0f)));
-        }
-
-        app.Script([.. script]);
-    }
 }

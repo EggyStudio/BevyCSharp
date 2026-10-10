@@ -19,10 +19,4 @@ internal static class MouseInputEvents
         foreach (var rotationGesture in ctx.Read<RotationGesture>()) Console.WriteLine(rotationGesture);
         foreach (var doubleTapGesture in ctx.Read<DoubleTapGesture>()) Console.WriteLine(doubleTapGesture);
     }, "mouse_input_events.PrintMouseEventsSystem");
-
-    // The wheel alone, forward and to the side, since a capture runs with no window and nothing
-    // drawn for a pretended button to press on, which refuses it.
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Wheel(1f)),
-        (4, () => SyntheticInput.Wheel(0f, 1f)));
 }

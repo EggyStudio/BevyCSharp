@@ -13,9 +13,4 @@ internal static class CharInputEvents
     {
         foreach (var character in ctx.Input.Text) Console.WriteLine($"'{character}'");
     }, "char_input_events.PrintCharEvents");
-
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Tap(Key.H, "h")),
-        (4, () => SyntheticInput.Tap(Key.I, "i")),
-        (6, () => SyntheticInput.Tap(Key.Digit1, "!")));
 }

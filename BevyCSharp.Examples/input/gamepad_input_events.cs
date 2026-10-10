@@ -35,14 +35,4 @@ internal static class GamepadInputEvents
             else if (gamepadEvent.Axis is { } axisEvent) Console.WriteLine(axisEvent);
         }
     }
-
-    public static void Drive(App app)
-    {
-        var pad = Entity.None;
-        app.Script(
-            (2, () => pad = SyntheticInput.ConnectGamepad()),
-            (4, () => SyntheticInput.SetGamepadButton(pad, GamepadButton.South)),
-            (6, () => SyntheticInput.SetGamepadButton(pad, GamepadButton.South, 0f)),
-            (8, () => SyntheticInput.SetGamepadAxis(pad, GamepadAxis.LeftX, 0.5f)));
-    }
 }

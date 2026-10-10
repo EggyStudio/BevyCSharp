@@ -14,9 +14,4 @@ internal static class KeyboardInputEvents
     {
         foreach (var keyboardInput in ctx.Read<KeyboardInput>()) Console.WriteLine(keyboardInput);
     }, "keyboard_input_events.PrintKeyboardEventSystem");
-
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Tap(Key.H, "h")),
-        (4, () => SyntheticInput.Tap(Key.ShiftLeft)),
-        (6, () => SyntheticInput.Tap(Key.Enter)));
 }

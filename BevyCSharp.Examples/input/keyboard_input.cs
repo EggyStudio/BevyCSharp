@@ -28,10 +28,4 @@ internal static class KeyboardInputExample
         if (input.KeyPressed(key)) Console.WriteLine("'?' just pressed");
         if (input.KeyReleased(key)) Console.WriteLine("'?' just released");
     }
-
-    // A held for two frames, then the key that types '?' tapped.
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Press(Key.A, "a")),
-        (4, () => SyntheticInput.Lift(Key.A)),
-        (6, () => SyntheticInput.Tap(Key.Slash, "?")));
 }

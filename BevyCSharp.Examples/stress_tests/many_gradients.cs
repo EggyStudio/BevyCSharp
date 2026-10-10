@@ -39,7 +39,8 @@ internal static class ManyGradients
         Console.WriteLine($"Gradient stress test with {_gradientCount} gradients");
         Console.WriteLine($"Color space: {(ColorSpace == InterpolationColorSpace.Srgba ? "sRGB" : ColorSpace == InterpolationColorSpace.Hsla ? "HSL" : "OkLab (default)")}");
 
-        StressTest.Warn();
+        // Bevy's warning_string.txt, which its stress tests say as they start.
+        Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         app.Startup(Setup, "many_gradients.Setup");
     }
 

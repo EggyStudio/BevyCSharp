@@ -32,7 +32,6 @@ if (!Catalog.TryFind(args[0], out var example))
 
 var offscreen = args.Contains("--offscreen");
 var (width, height) = Size(args);
-Scene.Size = (width, height);
 var config = example.Prints > 0 && !args.Contains("--window")
     ? new Config { Headless = true, HeadlessFrames = Frames(args) is > 0 and var frames ? frames : example.Prints, HeadlessFps = 60 }
     : offscreen

@@ -54,7 +54,8 @@ internal static class ManyText
 
         app.Startup(_ =>
         {
-            StressTest.Warn();
+            // Bevy's warning_string.txt, which its stress tests say as they start.
+            Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
             Render2d.SpawnCamera2d();
         }, "many_text.SetupCamera");
         app.Startup(SetupText, "many_text.SetupText");

@@ -25,7 +25,8 @@ internal static class ManyCamerasLights
 
     public static void Build(App app)
     {
-        StressTest.Warn();
+        // Bevy's warning_string.txt, which its stress tests say as they start.
+        Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         Cameras.Clear();
         app.Startup(Setup, "many_cameras_lights.Setup");
         app.Update(RotateCameras, "many_cameras_lights.RotateCameras");

@@ -23,12 +23,23 @@ mkdir -p "$work/Examples"
 (cd BevyCSharp.Examples && find . -name '*.cs' -not -path './bin/*' -not -path './obj/*' -print0 | tar --null -cf - --files-from=-) \
   | (cd "$work/Examples" && tar -xf -)
 
+# Without what runs the examples, which a reader copying one into a game has none of: the catalog,
+# the program that opens one by name, the record it keeps them in and the input a capture pretends,
+# so an example reaching into any of them fails to build here.
+rm "$work/Examples/Catalog.cs" "$work/Examples/Program.cs" "$work/Examples/Example.cs" "$work/Examples/Drives.cs"
+
+# The helpers an example may still lean on, each with why, which only gets shorter. Each stands in
+# for something Bevy's examples take from a crate the bridge does not compile in, and goes when it
+# can be asked for.
+#   FreeCamera.cs  the free camera of Bevy's camera controller crate
+#   Widgets.cs     the radio buttons Bevy's examples share by path, which Feathers' replace
+
 # What the repository's Directory.Build.props sets that the examples read, written into their own
 # project, which takes the package in place of the library's project and its generator.
 cat > "$work/Examples/BevyCSharp.Examples.csproj" <<EOF
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <RootNamespace>BevyCSharp.Examples</RootNamespace>
         <LangVersion>latest</LangVersion>
@@ -61,4 +72,4 @@ cat > "$work/Examples/nuget.config" <<EOF
 EOF
 
 dotnet build "$work/Examples"
-echo "every example builds on the package alone"
+echo "every example builds on the package alone, beside the two helpers listed"

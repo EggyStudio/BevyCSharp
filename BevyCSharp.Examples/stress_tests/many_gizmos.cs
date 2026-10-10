@@ -80,7 +80,8 @@ internal static class ManyGizmos
 
     private static void Setup(BehaviorContext ctx)
     {
-        StressTest.Warn();
+        // Bevy's warning_string.txt, which its stress tests say as they start.
+        Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(3f, 1f, 5f), Vec3.Zero, Vec3.UnitY));
         _text = Ui.SpawnText("", new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }

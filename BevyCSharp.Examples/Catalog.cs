@@ -195,7 +195,7 @@ internal static class Catalog
 
         // ECS (Entity Component System)
         new("callbacks", Callbacks.Build, Prints: 2),
-        new("component_hooks", ComponentHooksExample.Build, Prints: 12, Drive: ComponentHooksExample.Drive),
+        new("component_hooks", ComponentHooksExample.Build, Prints: 12, Drive: Drives.ComponentHooks),
         new("delayed_commands", DelayedCommands.Build),
         new("ecs_guide", EcsGuide.Build, Prints: 20),
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
@@ -241,16 +241,16 @@ internal static class Catalog
         new("text_gizmos_font", TextGizmosFont.Build),
 
         // Input
-        new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: CharInputEvents.Drive),
-        new("gamepad_input", GamepadInput.Build, Prints: 12, Drive: GamepadInput.Drive),
-        new("gamepad_input_events", GamepadInputEvents.Build, Prints: 12, Drive: GamepadInputEvents.Drive),
-        new("gamepad_rumble", GamepadRumble.Build, Prints: 24, Drive: GamepadRumble.Drive),
-        new("keyboard_input", KeyboardInputExample.Build, Prints: 10, Drive: KeyboardInputExample.Drive),
-        new("keyboard_input_events", KeyboardInputEvents.Build, Prints: 10, Drive: KeyboardInputEvents.Drive),
-        new("keyboard_modifiers", KeyboardModifiers.Build, Prints: 10, Drive: KeyboardModifiers.Drive),
+        new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: Drives.CharInputEvents),
+        new("gamepad_input", GamepadInput.Build, Prints: 12, Drive: Drives.GamepadInput),
+        new("gamepad_input_events", GamepadInputEvents.Build, Prints: 12, Drive: Drives.GamepadInputEvents),
+        new("gamepad_rumble", GamepadRumble.Build, Prints: 24, Drive: Drives.GamepadRumble),
+        new("keyboard_input", KeyboardInputExample.Build, Prints: 10, Drive: Drives.KeyboardInput),
+        new("keyboard_input_events", KeyboardInputEvents.Build, Prints: 10, Drive: Drives.KeyboardInputEvents),
+        new("keyboard_modifiers", KeyboardModifiers.Build, Prints: 10, Drive: Drives.KeyboardModifiers),
         new("mouse_grab", MouseGrab.Build),
         new("mouse_input", MouseInput.Build, Prints: 3),
-        new("mouse_input_events", MouseInputEvents.Build, Prints: 10, Drive: MouseInputEvents.Drive),
+        new("mouse_input_events", MouseInputEvents.Build, Prints: 10, Drive: Drives.MouseInputEvents),
         new("touch_input", TouchInput.Build, Prints: 3),
         new("touch_input_events", TouchInputEvents.Build, Prints: 3),
 

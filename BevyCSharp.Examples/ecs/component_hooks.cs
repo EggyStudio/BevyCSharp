@@ -33,13 +33,6 @@ internal static class ComponentHooksExample
         app.Update(TriggerHooks, "component_hooks.TriggerHooks");
     }
 
-    // A key held over a few frames and another over them in part, for a capture to print.
-    public static void Drive(App app) => app.Script(
-        (2, () => SyntheticInput.Press(Key.A, "a")),
-        (4, () => SyntheticInput.Press(Key.B, "b")),
-        (6, () => SyntheticInput.Lift(Key.A)),
-        (8, () => SyntheticInput.Lift(Key.B)));
-
     // Bevy's trigger_hooks, the component taken off for each key let go and put on a new entity for
     // each key pressed.
     private static void TriggerHooks(BehaviorContext ctx)

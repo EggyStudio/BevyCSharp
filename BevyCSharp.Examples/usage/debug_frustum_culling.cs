@@ -50,7 +50,7 @@ internal static class DebugFrustumCulling
         ecs.Add(_freeCamera, new FreeCamera());
 
         // A third of the window, in its bottom right corner, drawn over the big camera's picture.
-        var (width, height) = Scene.Size;
+        var (width, height) = Window.Size();
         var myCamera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, 0f), new Vec3(1f, 1.5f, 0f), Vec3.UnitY), new CameraSettings
         {
             Order = 1,
