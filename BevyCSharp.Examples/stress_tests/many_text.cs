@@ -1,4 +1,4 @@
-// Bevy's many_text example, examples/stress_tests/many_text.rs at v0.19.1, by Bevy's contributors
+// Bevy's many_text example, examples/stress_tests/many_text.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -6,11 +6,15 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.StressTests;
 
-// Interface text in four fonts, every way of justifying and breaking it, its paragraphs swapped and
-// its digits counted on every frame, so it is laid out again every frame. --set-font-changed has
-// every font written again each frame, and --respawn the whole tree spawned again.
+// Interface text in four fonts, every way of justifying and breaking it. --animate has its
+// paragraphs swapped and its digits counted on every frame, so it is laid out again every frame,
+// --set-font-changed every font written again each frame, and --respawn the whole tree spawned
+// again.
 internal static class ManyText
 {
+    // Bevy's --animate, which runs the systems that change the text each frame.
+    internal static bool Animate;
+
     internal const string LoremText1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
     internal const string LoremText2 = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
@@ -44,6 +48,7 @@ internal static class ManyText
     public static void Build(App app)
     {
         var arguments = Environment.GetCommandLineArgs();
+        Animate = arguments.Contains("--animate");
         Texts.Clear();
         NumberSpan.Count = 0;
 
@@ -143,7 +148,7 @@ public partial struct Lorem
     [OnUpdate]
     public void UpdateLoremText(BehaviorContext ctx)
     {
-        if (ctx.Ecs.Get<TextRef>(ctx.Entity) is null) return;
+        if (!ManyText.Animate || ctx.Ecs.Get<TextRef>(ctx.Entity) is null) return;
 
         Ui.SetText(ctx.Entity, Second ? ManyText.LoremText1 : ManyText.LoremText2);
         Second = !Second;
@@ -161,6 +166,8 @@ public partial struct NumberSpan
     [OnUpdate]
     public static void UpdateNumberText(BehaviorContext ctx)
     {
+        if (!ManyText.Animate) return;
+
         foreach (var row in ctx.Ecs.Query<NumberSpan>(markChanged: false))
         {
             var span = ctx.Ecs.Wrap<TextSpanRef>(row.Entity);

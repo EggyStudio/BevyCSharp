@@ -1,12 +1,12 @@
-// Bevy's 2d_text_gizmos example, examples/gizmos/2d_text_gizmos.rs at v0.19.1, by Bevy's
+// Bevy's 2d_text_gizmos example, examples/gizmos/2d_text_gizmos.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
 
 namespace BevyCSharp.Examples.Gizmo;
 
-// Draws many text gizmos at once, fifty labels, the frame rate, a large line and every glyph, as a
-// measure of what they cost. Bevy's opens a window of 1920 by 1080, and in a window of the size
+// Draws many text gizmos at once, fifty labels, the frame rate, a large line, a line of tabs and
+// every glyph, as a measure of what they cost. Bevy's opens a window of 1920 by 1080, and in a window of the size
 // the examples here open, the labels toward its edges run past them.
 internal static class TextGizmos2d
 {
@@ -33,6 +33,7 @@ internal static class TextGizmos2d
             Gizmos.Text2d(FormattableString.Invariant($"fps: {ctx.Time.SmoothedFps:0.0}"), (600f, StartY + 150f), 0f, 25f, (0f, 0f), (1f, 1f, 1f, 1f));
             Gizmos.Text2d("lxgh", (-300f, StartY + 200f), 0f, 150f, (0f, 0f), (1f, 1f, 1f, 1f));
             Gizmos.Text2d(TextGizmosFont.AllGlyphs, (600f, 0f), 0f, 30f, (0f, 0f), (1f, 1f, 1f, 1f));
+            Gizmos.Text2d("a\tb\tcd\tef", (-300f, StartY - TextCount / 5f * YStep - 100f), 0f, 50f, (0f, 0f), (1f, 1f, 1f, 1f));
         }, "2d_text_gizmos.Draw");
     }
 }
