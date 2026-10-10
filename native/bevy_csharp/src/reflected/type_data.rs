@@ -19,4 +19,17 @@ pub(crate) fn register(app: &mut App) {
         app.register_type_data::<core::ops::Range<f32>, ReflectSerialize>();
         app.register_type_data::<core::ops::Range<f32>, ReflectDeserialize>();
     }
+
+    // Bevy's switch for skipping the transforms of trees that have not moved, which it reflects
+    // without the resource's data, so neither the schema nor a C# program would find it, and the
+    // stress tests that turn it off could not. A resource here is a component on an entity of its own,
+    // found and written through the component's data, which registering the resource's data alone
+    // leaves out, so it is given both, as `#[reflect(Resource)]` gives a resource Bevy reflects.
+    {
+        use bevy::ecs::reflect::{ReflectComponent, ReflectResource};
+        use bevy::transform::StaticTransformOptimizations;
+        app.register_type::<StaticTransformOptimizations>();
+        app.register_type_data::<StaticTransformOptimizations, ReflectResource>();
+        app.register_type_data::<StaticTransformOptimizations, ReflectComponent>();
+    }
 }

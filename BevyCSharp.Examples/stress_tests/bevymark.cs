@@ -13,9 +13,6 @@ namespace BevyCSharp.Examples.StressTests;
 // same time each frame, --vary-per-instance gives each a color or material of its own,
 // --material-texture-count draws them from more textures, --ordered-z stacks them in order, and
 // --alpha-mode opaque, blend or alpha_mask sets how they blend.
-//
-// Bevy's example also turns off its static transform optimizations, a resource Bevy reflects but
-// not as a resource, which the bridge cannot set, so here they are left on.
 internal static class Bevymark
 {
     private const int BirdsPerSecond = 10_000;
@@ -88,6 +85,10 @@ internal static class Bevymark
         // Bevy's warning_string.txt, which its stress tests say as they start.
         Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         var ecs = ctx.Ecs;
+
+        // Every bird moves every frame, so Bevy's skipping of trees that have not moved costs more
+        // than it saves, and the example turns it off.
+        (ecs.Resource<StaticTransformOptimizationsRef>() ?? ecs.InsertResource<StaticTransformOptimizationsRef>()).Value = StaticTransformOptimizationsRef.ValueVariant.Disabled;
 
         List<AssetHandle> textures = [];
         if (_mode == "sprite" || _materialTextureCount > 0) textures.Add(AssetServer.Load(AssetKind.Image, "branding/icon.png"));

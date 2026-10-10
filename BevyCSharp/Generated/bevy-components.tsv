@@ -843,6 +843,8 @@ field	bevy_transform::components::transform::Transform	translation	.translation	
 field	bevy_transform::components::transform::Transform	rotation	.rotation	Quat	glam::Quat	
 field	bevy_transform::components::transform::Transform	scale	.scale	Vec3	glam::Vec3	
 component	bevy_transform::components::transform::TransformTreeChanged	TransformTreeChanged
+component	bevy_transform::systems::StaticTransformOptimizations	StaticTransformOptimizations
+field	bevy_transform::systems::StaticTransformOptimizations	value		Enum	StaticTransformOptimizations	Enabled,Disabled
 component	bevy_ui::UiScale	UiScale
 field	bevy_ui::UiScale	0	.0	Float	f32	
 component	bevy_ui::accessibility::AccessibleLabel	AccessibleLabel

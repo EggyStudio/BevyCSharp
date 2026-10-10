@@ -8812,6 +8812,14 @@ readonly struct Bevy.Reflected.StarConfigRef : IReflectedComponent<StarConfigRef
   float Size { get; set; }
   float TwinkleAmount { get; set; }
   float TwinkleSpeed { get; set; }
+readonly struct Bevy.Reflected.StaticTransformOptimizationsRef : IReflectedComponent<StaticTransformOptimizationsRef>, IReflectedWrapper<StaticTransformOptimizationsRef>
+  Entity Entity { get; }
+  StaticTransformOptimizationsRef.ValueVariant Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_transform::systems::StaticTransformOptimizations"
+enum Bevy.Reflected.StaticTransformOptimizationsRef.ValueVariant : int
+  Disabled = 1
+  Enabled = 0
 readonly struct Bevy.Reflected.StrikethroughColorRef : IReflectedComponent<StrikethroughColorRef>, IReflectedWrapper<StrikethroughColorRef>
   Color Value { get; set; }
   Entity Entity { get; }

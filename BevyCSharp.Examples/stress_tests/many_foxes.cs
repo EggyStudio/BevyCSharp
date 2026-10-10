@@ -11,9 +11,8 @@ namespace BevyCSharp.Examples.StressTests;
 // blurs them. Space pauses them, Up and Down change their speed, Left and Right seek, and Return
 // moves them on to their next animation.
 //
-// Bevy's example also turns off its static transform optimizations, a resource Bevy reflects but
-// not as a resource, which the bridge cannot set, so here they are left on, and its
-// --mesh-compression sets the glTF plugin's compression, which the bridge does not reach.
+// Bevy's example's --mesh-compression sets the glTF plugin's compression, which the bridge does
+// not reach.
 internal static class ManyFoxes
 {
     private const float RingSpacing = 2f, FoxSpacing = 2f;
@@ -63,6 +62,10 @@ internal static class ManyFoxes
         // Bevy's warning_string.txt, which its stress tests say as they start.
         Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         var ecs = ctx.Ecs;
+
+        // Every fox's bones move every frame, so Bevy's skipping of trees that have not moved costs more
+        // than it saves, and the example turns it off.
+        (ecs.Resource<StaticTransformOptimizationsRef>() ?? ecs.InsertResource<StaticTransformOptimizationsRef>()).Value = StaticTransformOptimizationsRef.ValueVariant.Disabled;
         _fox = AssetServer.LoadGltfScene(Path, 0);
 
         // Rings two apart, their foxes at least two apart around each, the rings turning opposite
