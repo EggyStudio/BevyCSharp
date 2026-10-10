@@ -85,12 +85,22 @@ internal sealed class PictureRun
     }
 
     /// <summary>Adds a step that takes a picture and waits for it to come back.</summary>
+    /// <remarks>
+    /// Taken once every pipeline the run asked for has compiled, since what is drawn with one still
+    /// compiling is left out of the picture. A wait of thirty frames before a capture came, under
+    /// the load of the whole suite, before the pipelines of a camera's contact shadows, so the
+    /// picture with them was the picture without. Not in the first three frames, when nothing has
+    /// been asked for yet and none is waiting.
+    /// </remarks>
     public PictureRun Capture(string name)
     {
         Bevy.Capture? ticket = null;
 
-        return Until($"capturing {name}", _ =>
+        return Until($"capturing {name}", world =>
         {
+            if (ticket is null && (world.Resource<Time>().FrameCount < 3 || !Render.PipelinesReady()))
+                return false;
+
             ticket ??= Render.BeginCapture();
 
             if (!Render.TryReadCapture(ticket.Value, out var picture) || picture is null)

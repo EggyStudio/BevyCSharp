@@ -69,3 +69,42 @@ pub(crate) enum BcsSet {
     ExitCheck,
     Cleanup,
 }
+
+/// The variable naming a seed every schedule's order of systems is shuffled by.
+pub const SHUFFLE_SEED_VARIABLE: &str = "BCS_SCHEDULE_SHUFFLE_SEED";
+
+/// Shuffles the order every schedule of the app and its render world runs its systems in, within
+/// what their constraints allow, where [`SHUFFLE_SEED_VARIABLE`] names a seed.
+///
+/// For finding a system that leans on an order nothing states, which another order breaks, as a
+/// run of the suite with a seed does. Bevy's own `ScheduleBuildSettings::shuffle_seed`, which the
+/// `debug` feature every profile carries offers. Set as the app starts to run, once the managed
+/// side has added its systems and its states, and only the seed is changed of each schedule's
+/// settings, so what else a schedule was built with stays.
+pub(crate) fn shuffle_from_environment(app: &mut bevy::app::App) {
+    let Some(seed) = std::env::var(SHUFFLE_SEED_VARIABLE)
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+    else {
+        return;
+    };
+
+    let seeded = |world: &mut bevy::ecs::world::World| {
+        if let Some(mut schedules) = world.get_resource_mut::<bevy::ecs::schedule::Schedules>() {
+            for (_, schedule) in schedules.iter_mut() {
+                let mut settings = schedule.get_build_settings();
+                settings.shuffle_seed = Some(seed);
+                schedule.set_build_settings(settings);
+            }
+        }
+    };
+
+    seeded(app.world_mut());
+
+    #[cfg(feature = "render")]
+    if let Some(render) = app.get_sub_app_mut(bevy::render::RenderApp) {
+        seeded(render.world_mut());
+    }
+
+    bevy::log::info!("Every schedule runs its systems in an order shuffled by the seed {seed}.");
+}

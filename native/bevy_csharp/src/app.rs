@@ -743,6 +743,8 @@ pub unsafe extern "C" fn bcs_app_run(handle: *mut BcsApp) -> i32 {
         }
         app.running = true;
 
+        crate::stages::shuffle_from_environment(&mut app.app);
+
         // `App::run` moves the app out of `app.app`, leaving an empty one behind. Everything
         // that needs the real world (the `Cleanup` stage included) has to happen inside the
         // loop, which is why cleanup is a system rather than something done here.

@@ -31,6 +31,11 @@ always did, and a host the cap stopped prints a tally of the tests that ran befo
 were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during
 which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
 
+`BCS_SCHEDULE_SHUFFLE_SEED` set to a number shuffles the order every schedule of an app and its
+render world runs its systems in, within what their constraints allow, as Bevy's
+`ScheduleBuildSettings::shuffle_seed` does, so a run of the suite with a seed finds a system that
+leans on an order nothing states. An app with a seed says so in its log as it starts.
+
 Everything generated lands in `build/`, cargo's target directory, the staged per-RID artifacts,
 and the packed `.nupkg`. The repository root stays clean.
 
