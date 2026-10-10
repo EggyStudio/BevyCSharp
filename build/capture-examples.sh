@@ -24,13 +24,21 @@ printing=$("$program" --printing)
 # touch, which a capture has none of, so their capture is not held to saying something.
 empty="audio drag_and_drop empty empty_defaults mouse_grab mouse_input soundtrack touch_input touch_input_events"
 
+# Examples whose picture is a color or two by their design, as Bevy's is, which the count of colors
+# below would take for one that drew nothing: a clear color alone (clear_color,
+# persisting_window_settings, window_settings), one square of one color on another (mesh2d,
+# fixed_node), and nothing drawn, gpu_readback spawning no camera and transform_hierarchy building a
+# hierarchy of entities with nothing on them to draw. Each is still compared with its checked-in
+# picture.
+flat="clear_color fixed_node gpu_readback mesh2d persisting_window_settings transform_hierarchy window_settings"
+
 for example in $("$program" --list); do
     if ! build/capture-example.sh "$example" "$into/$example.webp"; then
         failed+=("$example (did not start or could not be captured)")
         continue
     fi
 
-    if [[ " $empty " == *" $example "* ]]; then
+    if [[ " $empty " == *" $example "* || " $flat " == *" $example "* ]]; then
         continue
     fi
 

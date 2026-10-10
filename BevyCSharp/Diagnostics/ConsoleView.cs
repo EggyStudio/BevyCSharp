@@ -126,7 +126,7 @@ public sealed class ConsoleView
         if (ConsoleHost.Pending is { } poll)
         {
             var name = typed.Split(' ', 2)[0];
-            Waiting.Add((name, poll, ConsoleLog.Frame + ConsoleHost.LaterFrames));
+            Waiting.Add((name, poll, ConsoleHost.GiveUpAt(ConsoleLog.Frame)));
         }
     }
 

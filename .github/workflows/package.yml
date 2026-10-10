@@ -391,8 +391,9 @@ jobs:
           if-no-files-found: ignore
 
   # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does
-  # not start or draws nothing, on the Linux bridge the native job built. The captures are kept as
-  # the run's artifact, to be compared with the ones in .github/assets/examples.
+  # not start or draws nothing, on the Linux bridge the native job built, then each capture compared
+  # with the one in .github/assets/examples, failing on one that differs by more than devices do
+  # (build/compare-captures.py). The captures are kept as the run's artifact.
   examples:
     name: capture the examples
     if: ${{ inputs.pack }}
@@ -426,6 +427,11 @@ jobs:
 
       - name: Capture every example
         run: build/capture-examples.sh "${{ runner.temp }}/examples"
+
+      # Even where a capture failed, so a run names every example that went wrong, of both kinds.
+      - name: Compare the captures with the checked-in ones
+        if: ${{ !cancelled() }}
+        run: python3 build/compare-captures.py "${{ runner.temp }}/examples"
 
       - uses: actions/upload-artifact@v7
         if: always()

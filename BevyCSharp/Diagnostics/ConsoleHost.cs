@@ -35,6 +35,15 @@ public static class ConsoleHost
     public static Func<string?>? Pending { get; private set; }
 
     /// <summary>
+    /// The frame from which a runner counts <see cref="LaterFrames"/> before giving
+    /// <see cref="Pending"/> up, or null to count from the frame the command ran in.
+    /// </summary>
+    internal static ulong? PendingFrom { get; private set; }
+
+    /// <summary>The frame a runner gives <see cref="Pending"/> up at, counted from <paramref name="now"/> or a later frame the command named.</summary>
+    internal static ulong GiveUpAt(ulong now) => Math.Max(now, PendingFrom ?? now) + LaterFrames;
+
+    /// <summary>
     /// How many frames a runner asks <see cref="Later"/>'s question before answering that it gave up.
     /// </summary>
     public const ulong LaterFrames = 600;
@@ -96,6 +105,20 @@ public static class ConsoleHost
     public static void Later(Func<string?> poll) => Pending = poll ?? throw new ArgumentNullException(nameof(poll));
 
     /// <summary>
+    /// <see cref="Later"/> for a command whose answer waits on a frame it names,
+    /// which a runner gives as long as <see cref="LaterFrames"/> past that frame rather than past now.
+    /// </summary>
+    /// <remarks>
+    /// For a capture taken at a frame further off than a runner would otherwise wait, such as a
+    /// scene that settles over fifteen seconds of its clock.
+    /// </remarks>
+    internal static void LaterFrom(Func<string?> poll, ulong from)
+    {
+        Later(poll);
+        PendingFrom = from;
+    }
+
+    /// <summary>
     /// Lends the world to commands run inside the returned scope.
     /// </summary>
     /// <example>
@@ -111,6 +134,7 @@ public static class ConsoleHost
         Failure = null;
         Held = null;
         Pending = null;
+        PendingFrom = null;
     }
 
     /// <summary>The loan, which ends when it is disposed.</summary>

@@ -96,11 +96,13 @@ internal static class Verbs
             options, CliClient.Send(session, "run", Line(arguments), options.Timeout));
     }
 
-    /// <summary>Captures the window, and waits for the file to appear.</summary>
+    /// <summary>Captures the window, at a frame where one is given, and waits for the file to appear.</summary>
     /// <remarks>
     /// The capture is read back off the GPU over the frames after the request, so asking for it and
     /// looking for the file in the same breath finds nothing. This waits for the file rather than
-    /// for a number of frames, and says so when it never arrives.
+    /// for a number of frames, and says so when it never arrives. A frame given is counted from the
+    /// app's first, and the app holds the request until then, so the picture is of that frame
+    /// however long the call took to arrive.
     /// </remarks>
     public static int Shot(Options options, string[] arguments)
     {
@@ -115,10 +117,21 @@ internal static class Verbs
             return Output.Print(options, refusal);
         }
 
+        var frame = 0L;
+        if (arguments.Length > 1 && (!long.TryParse(arguments[1], out frame) || frame <= 0))
+        {
+            return Output.Refuse(
+                options,
+                "shot",
+                "BAD_ARGUMENT",
+                $"A frame is a count from the app's first, and '{arguments[1]}' is not one. bcs shot <path> [frame]");
+        }
+
         var path = Path.GetFullPath(arguments[0]);
         var was = File.Exists(path) ? File.GetLastWriteTimeUtc(path) : DateTime.MinValue;
 
-        var answer = CliClient.Send(session, "run", $"shot \"{path}\"", options.Timeout);
+        var line = frame > 0 ? $"shot \"{path}\" {frame}" : $"shot \"{path}\"";
+        var answer = CliClient.Send(session, "run", line, options.Timeout);
 
         using (var document = JsonDocument.Parse(answer))
         {

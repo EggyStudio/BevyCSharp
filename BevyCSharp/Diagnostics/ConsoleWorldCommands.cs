@@ -201,13 +201,22 @@ internal static partial class ConsoleWorldCommands
         return $"{which} carries no {field}";
     }
 
-    /// <summary>Writes the window to a PNG.</summary>
+    /// <summary>Writes the window to a PNG, now or at a frame to come.</summary>
     /// <remarks>
+    /// <para>
     /// The file appears a frame or two later, because the picture comes back off the GPU. Wait for
     /// it with <c>frames.wait 3</c> rather than reading it the moment this answers.
+    /// </para>
+    /// <para>
+    /// A frame given is counted from the app's first, and the picture is asked for in that frame,
+    /// with the answer held until then. A caller's own wait lands on whatever frame the app has
+    /// reached when it next hears from it, which a fast device puts many frames later than a slow
+    /// one, so a capture compared across devices names its frame. On a set clock, with
+    /// <c>bcs open --frame-time</c>, that frame is the same moment of the scene on any device.
+    /// </para>
     /// </remarks>
-    [Command("shot", "Captures the window to a PNG: shot <path>")]
-    internal static string Shot(string path)
+    [Command("shot", "Captures the window to a PNG, at a frame if one is given: shot <path> [frame]")]
+    internal static string Shot(string path, int frame = 0)
     {
         if (path.Length == 0)
         {
@@ -239,8 +248,31 @@ internal static partial class ConsoleWorldCommands
             return "headless, so nothing is being drawn to capture";
         }
 
-        Render.Screenshot(path);
-        return $"capturing to {path}";
+        if (frame <= 0)
+        {
+            Render.Screenshot(path);
+            return $"capturing to {path}";
+        }
+
+        var at = (ulong)frame;
+        var now = ConsoleHost.Time.FrameCount;
+        if (now > at)
+        {
+            ConsoleHost.Fail("FRAME_PASSED", $"Frame {at} has passed, and the app is at frame {now}.");
+            return $"frame {at} has passed";
+        }
+
+        string? Take()
+        {
+            if (ConsoleHost.Time.FrameCount < at) return null;
+            Render.Screenshot(path);
+            return $"capturing frame {at} to {path}";
+        }
+
+        if (Take() is { } taken) return taken;
+
+        ConsoleHost.LaterFrom(Take, at);
+        return $"waiting for frame {at}";
     }
 
     /// <summary>Lists the app's windows, each by its index and title, the first marked.</summary>

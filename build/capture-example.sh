@@ -16,12 +16,19 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Run as the workflow runs them, where Bevy's examples that roll dice seed them, as
+# alien_cake_addict does, and contributors takes its fixed list of names rather than this
+# checkout's history, so a capture taken here and one taken there are of the same scene.
+export GITHUB_ACTIONS=true
+
 program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 if "$program" --printing | grep -qx "$1"; then
     out="${2:-.github/assets/examples/$1.webp}"
     mkdir -p "$(dirname "$out")"
     text="${out%.webp}.txt"
-    "$program" "$1" --drive > "$text" 2> "$text.log"
+    # On the set clock a picture is taken on, so what it prints of time, and which of its fixed
+    # steps falls between which frames, is the same on every run.
+    BCS_FRAME_TIME=0.0166667 "$program" "$1" --drive > "$text" 2> "$text.log"
     sed -E 's/\x1b\[[0-9;]*m//g' "$text.log" | grep -E '^[^ ]+Z +[A-Z]+ (csharp|bevy_diagnostic): ' | sed -E 's/^[^ ]+Z +//' >> "$text" || true
     rm -f "$text.log"
     exit 0
@@ -63,7 +70,12 @@ case "$example" in
   bevymark|bevymark_3d) arguments=(--benchmark --waves 20 --per-wave 1000) ;;
   *) ;;
 esac
-./bcs open --example "$example" --offscreen --quiet -- --size 1280x720 "${arguments[@]}"
+# Each frame a sixtieth of a second of the example's clock however long the device takes to draw it,
+# so what moves by the clock stands at the same place in a capture on any device, which a capture
+# compared with its checked-in picture asks. A device drawing on the CPU, as the workflow's does,
+# compiles for seconds, and on the machine's clock an example turning its camera has gone half
+# round by the frame its capture is taken at.
+./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}"
 
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in
@@ -87,7 +99,8 @@ case "$example" in
   *) ;;
 esac
 
-# Long enough for pipelines to compile and a scene that moves to be under way. One where things
+# The frame the picture is taken in, counted from the app's first, late enough for a scene that
+# moves to be under way and what it loads to have arrived at sixty frames a second. One where things
 # fall or fade in is given longer by name.
 frames=120
 case "$example" in
@@ -101,15 +114,17 @@ case "$example" in
   clustered_decal_maps) frames=600 ;;
   # Lighting that gathers over frames, and a robot that has walked out from behind the console.
   solari) frames=400 ;;
+  # Thousands of meshes, which a device drawing on the CPU takes seconds a frame over, taken as
+  # soon as they stand, which they do by the thirtieth.
+  multi_asset_sync|many_morph_targets) frames=30 ;;
   *) ;;
 esac
-./bcs command frames.wait "$frames" --quiet --timeout 600
-# And until every pipeline asked for has compiled, which no count of frames promises, since what is
-# drawn with one still compiling is left out of the picture.
-./bcs command pipelines.wait --quiet --timeout 120
-
+# Taken in that frame, which the app holds the request for, rather than in whichever frame it has
+# reached when a wait ends, which a fast device puts many frames later than a slow one. On the set
+# clock every pipeline compiles in the frame that asks for it, so that frame is the same moment of
+# the scene, drawn whole, on any device.
 shot="${out%.webp}.shot.png"
-./bcs shot "$shot" --quiet --timeout 120
+./bcs shot "$shot" "$frames" --quiet --timeout 600
 
 # A flat capture is lossless WebP, which is smaller than a palette PNG and keeps text sharp. A 3D
 # one is WebP at quality 85, a fraction of full color PNG with no banding in a sky, fog or bloom,

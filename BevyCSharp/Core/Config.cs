@@ -192,6 +192,12 @@ public sealed class Config
     /// them. The first frame reads no time gone, as Bevy's first frame always does.
     /// </para>
     /// <para>
+    /// An app begun on a set clock also compiles each pipeline in the frame that asks for it, where
+    /// Bevy otherwise compiles off the main thread over however long the device takes, so a frame
+    /// draws the same scene on a device compiling in seconds as on a fast one. That frame takes
+    /// longer, which a run on a set clock is not there to measure.
+    /// </para>
+    /// <para>
     /// <see cref="Time.FrameSeconds"/> changes it while the app runs, as for one slow frame made on
     /// purpose, and <see cref="FrameTimeVariable"/> sets it from outside. <see cref="Time.Step"/> is
     /// another thing, running frames of the length the machine gives them while the game is paused.

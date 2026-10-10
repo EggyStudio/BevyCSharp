@@ -193,6 +193,110 @@ public sealed class CliServerTests : IDisposable
     /// The queue is never drained, as an app that stopped running frames leaves it, so the answer
     /// is the one the wait ran out with, which names how long it was.
     /// </remarks>
+    /// <summary>
+    /// A shot naming a frame is taken in that frame, which a scene changing its color between two
+    /// frames shows, and one naming a frame gone by is refused.
+    /// </summary>
+    /// <remarks>
+    /// The red runs to frame 59 and the green from 60, so a picture asked for at 60 and taken a frame
+    /// early is red. Each request is sent long before its frame, as a capture's is.
+    /// </remarks>
+    [SkippableFact]
+    public void AShotNamingAFrameIsTakenInThatFrame()
+    {
+        Needs.Renderer();
+
+        var folder = Path.Combine(_mine, "shots");
+        Directory.CreateDirectory(folder);
+
+        var running = Start(() =>
+        {
+            var app = Serving(new Config
+            {
+                Offscreen = true,
+                Width = 32,
+                Height = 32,
+                HeadlessFps = 60,
+                FrameSeconds = 1.0 / 60.0,
+            });
+            app.AddSystem(Stage.Update, new SystemDescriptor(
+                static world =>
+                {
+                    if (world.Resource<Time>().FrameCount is 1 or 60)
+                        Render.SetClearColor(world.Resource<Time>().FrameCount < 60 ? (1f, 0f, 0f, 1f) : (0f, 1f, 0f, 1f));
+                },
+                "Test.Colors"));
+            app.AddSystem(Stage.Startup, new SystemDescriptor(static _ => Render2d.SpawnCamera2d(), "Test.Camera"));
+            return app;
+        });
+        var session = Ready();
+
+        try
+        {
+            var red = Path.Combine(folder, "red.png");
+            var green = Path.Combine(folder, "green.png");
+
+            var early = Ask(session, "run", $"shot {red} 30");
+            Assert.True(early.GetProperty("success").GetBoolean(), early.GetRawText());
+            Assert.Equal(30ul, early.GetProperty("data").GetProperty("frame").GetUInt64());
+
+            var late = Ask(session, "run", $"shot {green} 60");
+            Assert.True(late.GetProperty("success").GetBoolean(), late.GetRawText());
+            Assert.Equal(60ul, late.GetProperty("data").GetProperty("frame").GetUInt64());
+
+            var passed = Ask(session, "run", $"shot {red} 1");
+            Assert.Equal("FRAME_PASSED", passed.GetProperty("errors")[0].GetProperty("code").GetString());
+
+            var (r, g, _) = FirstPixel(Written(red));
+            Assert.True(r > 200 && g < 60, $"the picture at frame 30 is {(r, g)}, where the clear color was red");
+            (r, g, _) = FirstPixel(Written(green));
+            Assert.True(g > 200 && r < 60, $"the picture at frame 60 is {(r, g)}, where the clear color turned green");
+        }
+        finally
+        {
+            Stop(session, running);
+        }
+    }
+
+    // A capture's file, once the picture has come back off the GPU and been written whole.
+    private static string Written(string path)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (File.Exists(path) && new FileInfo(path).Length > 0)
+            {
+                var size = new FileInfo(path).Length;
+                Thread.Sleep(120);
+                if (new FileInfo(path).Length == size) return path;
+            }
+
+            Thread.Sleep(50);
+        }
+
+        throw new Xunit.Sdk.XunitException($"no picture was written to {path}");
+    }
+
+    // The first pixel of an eight-bit PNG, which every filter leaves as it is, since each guesses
+    // zero for a byte with nothing before it or above it.
+    private static (int R, int G, int B) FirstPixel(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        using var data = new MemoryStream();
+        for (var at = 8; at + 8 <= bytes.Length;)
+        {
+            var length = (int)System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(at, 4));
+            if (Encoding.ASCII.GetString(bytes, at + 4, 4) == "IDAT") data.Write(bytes, at + 8, length);
+            at += 12 + length;
+        }
+
+        data.Position = 0;
+        using var inflated = new MemoryStream();
+        using (var zlib = new System.IO.Compression.ZLibStream(data, System.IO.Compression.CompressionMode.Decompress)) zlib.CopyTo(inflated);
+        var pixels = inflated.ToArray();
+        return (pixels[1], pixels[2], pixels[3]);
+    }
+
     [Fact]
     public void ARequestIsWaitedOnAsLongAsItsCallerSays()
     {
@@ -205,19 +309,19 @@ public sealed class CliServerTests : IDisposable
         Assert.StartsWith("The app did not answer within 1 second.", error.GetProperty("message").GetString());
     }
 
-    /// <summary>A headless engine with the server on, and a backstop so nothing can hang.</summary>
-    private static App Serving()
+    /// <summary>
+    /// A headless engine with the server on, or one drawing as <paramref name="config"/> says, and a
+    /// backstop so nothing can hang.
+    /// </summary>
+    private static App Serving(Config? config = null)
     {
-        var app = new App(new Config
-        {
-            Headless = true,
-            HeadlessFps = 60,
+        config ??= new Config { Headless = true, HeadlessFps = 60 };
 
-            // Until something asks it to stop, as a session does.
-            HeadlessFrames = 0,
-            Serve = true,
-            AssetRoot = EngineHarness.AssetDirectory,
-        });
+        // Until something asks it to stop, as a session does.
+        config.HeadlessFrames = 0;
+        config.Serve = true;
+        config.AssetRoot = EngineHarness.AssetDirectory;
+        var app = new App(config);
 
         app.AddPlugin(new EnginePlugin());
         app.AddPlugin(new CliPlugin());
@@ -238,6 +342,22 @@ public sealed class CliServerTests : IDisposable
     private static Thread Start(App app)
     {
         var thread = new Thread(() => app.Run()) { IsBackground = true, Name = "test-app" };
+
+        thread.Start();
+        return thread;
+    }
+
+    /// <summary>
+    /// Makes an app on a thread of its own and runs it there, for one that draws, which answers
+    /// nothing when run on a thread other than the one it was made on.
+    /// </summary>
+    private static Thread Start(Func<App> make)
+    {
+        var thread = new Thread(() =>
+        {
+            using var app = make();
+            app.Run();
+        }) { IsBackground = true, Name = "test-app" };
 
         thread.Start();
         return thread;

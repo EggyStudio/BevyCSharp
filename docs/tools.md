@@ -207,6 +207,7 @@ and asks it things:
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition
 ./bcs command memory.collect           # what it holds, after a full collection
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
+./bcs shot /tmp/settled.png 300        # in the app's 300th frame, the same moment on any device on a set clock
 ./bcs command window.list              # the windows past the first a game spawned, by #index
 ./bcs command window.shot '#402 /tmp/second.png'   # one of them, offscreen as well
 ```

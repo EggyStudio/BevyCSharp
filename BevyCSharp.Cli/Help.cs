@@ -22,7 +22,8 @@ internal static class Help
                 [--frame-time <seconds>] Each frame advances the clock by that much, not the machine's
               list                       Every command the connected app offers, with its arguments
               command <name> [args]      Run one against the live world
-              shot <path>                Capture the window and wait for the file
+              shot <path> [frame]        Capture the window, at a frame counted from the first if
+                                         one is given, and wait for the file
               logs [-n N] [--follow]     What a launched app has been saying
               stop                       Ask it to close
 

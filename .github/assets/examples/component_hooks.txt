@@ -1,6 +1,6 @@
-ComponentId(135) added to Entity(121v0) with value A
-Current Index: MyComponentIndex({A: Entity(121v0)})
-ComponentId(135) added to Entity(122v0) with value B
-Current Index: MyComponentIndex({A: Entity(121v0), B: Entity(122v0)})
-ComponentId(135) removed from Entity(121v0) with value A
-ComponentId(135) removed from Entity(122v0) with value B
+ComponentId(137) added to Entity(123v0) with value A
+Current Index: MyComponentIndex({A: Entity(123v0)})
+ComponentId(137) added to Entity(124v0) with value B
+Current Index: MyComponentIndex({A: Entity(123v0), B: Entity(124v0)})
+ComponentId(137) removed from Entity(123v0) with value A
+ComponentId(137) removed from Entity(124v0) with value B

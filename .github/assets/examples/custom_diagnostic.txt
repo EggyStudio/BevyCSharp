@@ -2,5 +2,3 @@ INFO bevy_diagnostic: system_iteration_count:   10.000000 iterations (avg 10.000
 INFO bevy_diagnostic: started_load_count    :    0.000000   (avg 0.000000)
 INFO bevy_diagnostic: system_iteration_count:   10.000000 iterations (avg 10.000000 iterations)
 INFO bevy_diagnostic: started_load_count    :    0.000000   (avg 0.000000)
-INFO bevy_diagnostic: system_iteration_count:   10.000000 iterations (avg 10.000000 iterations)
-INFO bevy_diagnostic: started_load_count    :    0.000000   (avg 0.000000)

@@ -10,7 +10,7 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d328fdc3`. Two commits, items 9 and 10, the last of the list that wait on no word.
+Reviewed up to `28e2d97b`. Two commits, items 9 and 10, the last of the list that wait on no word.
 Item 9 at `8f02d976`: N 6.6's test reads every shell script of the checkout, 26 and the `bcs`
 launcher, not only what the Windows and macOS jobs run, still holding the jobs' scripts to be among
 them and the launcher and Courtyard's play script to be found, with the build's outputs and copies
@@ -29,7 +29,10 @@ the generator to reporting nothing after; 90 of 90. Right, the fixes held to the
 clear and the rest named, the scripts' test widened to the checkout rather than the jobs' list.
 `NormTests.cs` stands at 794. With the list's last free items done, what comes after the comparison
 commit is the examples written in part that want no crate and the groups not yet at B 4, 144 of 160
-(Decision 5), and the gaps wait on the owner's words.
+(Decision 5), and the gaps wait on the owner's words. Then `28e2d97b`: `parallel_query`'s window
+size is read by a system of the example's own, since a static stage method on its behavior ran in
+every example and failed in one with no window, which is the trap a static stage method is in a
+project of many examples; right, and the remark says why.
 
 Before it, one commit came to be read, item 8: every example builds on the package alone, the script
 removing the catalog, the program, the examples' record and the capture's input from its copy and
@@ -105,9 +108,9 @@ from [SHARED.md](SHARED.md).
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
-   at `60141490`. The runs of `c39dd61d`, `e09a2ed8`, `90075005` and `d328fdc3` are green on all
-   three, `5d955562`'s cancelled by the push after it. Each push's run is read by the reviewing
-   session, and a failure it names comes first here.
+   at `60141490`. The runs of `c39dd61d`, `e09a2ed8`, `90075005`, `d328fdc3` and `28e2d97b` are
+   green on all three, `5d955562`'s cancelled by the push after it. Each push's run is read by the
+   reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
@@ -479,3 +482,24 @@ from [SHARED.md](SHARED.md).
     dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
 
 ## Replies
+
+Comparison: each capture is taken in a frame counted from the app's first, `shot <path> [frame]`
+holding the request until then, and a run begun on a set clock compiles each pipeline in the frame
+that asks for it. A capture taken when the waits ended landed on whatever frame the app had reached,
+which a device compiling for seconds puts many frames later, and a lavapipe pass stopped at 191
+found 29 differing, most of them the same scene some frames apart. A capture is also run as the
+workflow runs it, seeded, and one that prints runs on the set clock. Every picture changes with the
+retake, 190 of them, with touch_input_events' text new; all 329 were taken again on the laptop's GPU
+and on lavapipe, and the two match in every one, seven within an allowance listed with its cause in
+`build/captures-differ.txt`: four of Bevy's drawn at random and unseeded (async_channel_pattern,
+many_animated_sprites, many_lights, many_sprites), one whose animation starts in the frame its model
+loads (animated_mesh_control), the meshlets lavapipe draws some of, and solari's noise and timings.
+multi_asset_sync and many_morph_targets are taken at frame 30, lavapipe taking five to seven seconds
+a frame over them, so frame 120 lay past the capture's ten minutes. irradiance_volumes hung once on
+the GPU at frame 90, the offscreen run's wait for the frame before it never ending, and was taken
+again at once; that wait has no limit. The suite ran whole, 1,363 of 1,368 with two skipped, the
+three failing being the skybox batch's, whose bridge is not yet built.
+
+Shared: a capture compared across devices taken at a frame the app holds the request for, on a set
+clock with each pipeline compiled in the frame that asks for it, which 3DEngine's captures could
+take up.
