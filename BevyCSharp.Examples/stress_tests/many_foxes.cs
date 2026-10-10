@@ -1,4 +1,4 @@
-// Bevy's many_foxes example, examples/stress_tests/many_foxes.rs at v0.19.1, by Bevy's contributors
+// Bevy's many_foxes example, examples/stress_tests/many_foxes.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -12,7 +12,8 @@ namespace BevyCSharp.Examples.StressTests;
 // moves them on to their next animation.
 //
 // Bevy's example also turns off its static transform optimizations, a resource Bevy reflects but
-// not as a resource, which the bridge cannot set, so here they are left on.
+// not as a resource, which the bridge cannot set, so here they are left on, and its
+// --mesh-compression sets the glTF plugin's compression, which the bridge does not reach.
 internal static class ManyFoxes
 {
     private const float RingSpacing = 2f, FoxSpacing = 2f;

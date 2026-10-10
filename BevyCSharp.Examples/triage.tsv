@@ -326,7 +326,7 @@ many_buttons	can
 many_cameras_lights	can
 many_components	n/a	registers components dynamically in Rust
 many_cubes	part	--no-automatic-batching, --no-indirect-drawing and --no-cpu-culling, whose components Bevy does not reflect, and --mesh-compression, whose compression the bridge does not reach
-many_foxes	part	its static transform optimizations turned off, a resource Bevy reflects but not as a resource, which the bridge cannot set
+many_foxes	part	its static transform optimizations turned off, a resource Bevy reflects but not as a resource, which the bridge cannot set, and --mesh-compression, whose compression the bridge does not reach
 many_gizmos	can
 many_glyphs	can
 many_gradients	can	through Bevy's reflected BackgroundGradient

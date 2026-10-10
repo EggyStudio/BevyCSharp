@@ -1,4 +1,4 @@
-// Bevy's many_cameras_lights example, examples/stress_tests/many_cameras_lights.rs at v0.19.1, by
+// Bevy's many_cameras_lights example, examples/stress_tests/many_cameras_lights.rs at v0.20.0, by
 // Bevy's contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -14,16 +14,18 @@ internal static class ManyCamerasLights
     private static readonly List<Entity> Cameras = [];
 
     // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
-    // sync, drawn as fast as it can, and, as Bevy's leaves them out, no frame times logged.
+    // sync, drawn as fast as it can, its frame times logged as Bevy's diagnostics log them.
     public static void Configure(Config config)
     {
         (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
         config.Vsync = false;
         config.HeadlessFps = 0;
+        config.LogFrameTimes = true;
     }
 
     public static void Build(App app)
     {
+        StressTest.Warn();
         Cameras.Clear();
         app.Startup(Setup, "many_cameras_lights.Setup");
         app.Update(RotateCameras, "many_cameras_lights.RotateCameras");
