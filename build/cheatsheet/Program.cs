@@ -106,12 +106,27 @@ string Default(ParameterInfo p)
     return " = " + text;
 }
 
+// A parameter's or a return's type as the source wrote it, a reference that may be null marked as
+// it was, which only the compiler's nullability attributes say, the type itself being the same.
+var nullability = new NullabilityInfoContext();
+string Typed(ParameterInfo p)
+{
+    var type = p.ParameterType.IsByRef ? p.ParameterType.GetElementType()! : p.ParameterType;
+    var text = Named(type, p.GetCustomAttribute<System.Runtime.CompilerServices.TupleElementNamesAttribute>());
+    // A type parameter is marked only where it is held to classes, since reflection reads any other
+    // the same whether its source marked it or not.
+    var reference = type.IsGenericParameter
+        ? type.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint)
+        : !type.IsValueType && type != typeof(void);
+    var mayBeNull = reference && nullability.Create(p).ReadState == NullabilityState.Nullable;
+    return mayBeNull && !text.EndsWith('?') ? text + "?" : text;
+}
+
 string Parameter(ParameterInfo p)
 {
     var prefix = p.ParameterType.IsByRef ? (p.IsOut ? "out " : p.IsIn ? "in " : "ref ") : "";
     if (p.GetCustomAttribute<ParamArrayAttribute>() is not null) prefix = "params ";
-    var type = p.ParameterType.IsByRef ? p.ParameterType.GetElementType()! : p.ParameterType;
-    return prefix + Named(type, p.GetCustomAttribute<System.Runtime.CompilerServices.TupleElementNamesAttribute>()) + " " + p.Name + Default(p);
+    return prefix + Typed(p) + " " + p.Name + Default(p);
 }
 
 string XmlType(Type t)
@@ -167,7 +182,8 @@ string Summary(MethodInfo m)
     var text = string.Concat(summary.Nodes().Select(n => n switch
     {
         XText x => x.Value,
-        XElement e when e.Name == "see" || e.Name == "seealso" => ((string?)e.Attribute("cref") ?? (string?)e.Attribute("langword") ?? e.Value).Split(':').Last().Split('(')[0].Split('.').Last().Replace("`1", "").Replace("`2", ""),
+        // A generic type's arity follows one backtick and a generic method's two, so both go whole.
+        XElement e when e.Name == "see" || e.Name == "seealso" => Regex.Replace(((string?)e.Attribute("cref") ?? (string?)e.Attribute("langword") ?? e.Value).Split(':').Last().Split('(')[0].Split('.').Last(), @"`+\d+", ""),
         XElement e when e.Name == "paramref" || e.Name == "typeparamref" => (string)e.Attribute("name")!,
         XElement e when e.Name == "c" => e.Value,
         XElement e => e.Value,
@@ -208,7 +224,7 @@ void Write(string title, string page, IEnumerable<string> keys)
         foreach (var m in Methods(type))
         {
             var generic = m.IsGenericMethod ? "<" + string.Join(", ", m.GetGenericArguments().Select(a => a.Name)) + ">" : "";
-            var declaration = $"{(m.IsStatic && !type.IsInterface ? "static " : "")}{Named(m.ReturnType, m.ReturnParameter.GetCustomAttribute<System.Runtime.CompilerServices.TupleElementNamesAttribute>())} {m.Name}{generic}({string.Join(", ", m.GetParameters().Select(Parameter))});";
+            var declaration = $"{(m.IsStatic && !type.IsInterface ? "static " : "")}{Typed(m.ReturnParameter)} {m.Name}{generic}({string.Join(", ", m.GetParameters().Select(Parameter))});";
             var summary = Summary(m);
             output.AppendLine(summary == "" ? declaration : declaration.PadRight(Math.Max(64, declaration.Length + 2)) + "// " + summary);
         }
