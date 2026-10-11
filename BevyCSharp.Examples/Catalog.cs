@@ -204,6 +204,7 @@ internal static class Catalog
         new("hierarchy", Hierarchy.Build),
         new("hotpatching_systems", HotpatchingSystems.Build),
         new("iter_combinations", IterCombinations.Build),
+        new("message", MessageExample.Build, Prints: 130),
         new("observer_propagation", ObserverPropagation.Build, Prints: 1800),
         new("observers", Observers.Build),
         new("one_shot_systems", OneShotSystems.Build),

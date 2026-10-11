@@ -192,7 +192,6 @@ hierarchy	can
 hotpatching_systems	can	through .NET's own hot reload, under dotnet watch
 immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
-message	missing	a message changed in place by a later system and read by a later one the same frame
 nondeterministic_system_order	missing	the schedule reporting systems whose order is ambiguous
 observer_propagation	can
 observers	can

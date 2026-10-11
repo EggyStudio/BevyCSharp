@@ -20,9 +20,11 @@ namespace Bevy;
 /// sent during a frame is not readable until the next one, including by the sender.
 /// </para>
 /// <para>
-/// This differs from Bevy's own messages, which give each reader a cursor and let it catch up
-/// within the frame. A cursor needs a stable identity per reader, and a C# system has none the
-/// engine can see, so the swap makes "exactly once" true here instead.
+/// A reader that keeps its own place reads as Bevy's do instead. <see cref="MessageReader{T}"/>
+/// and <see cref="MessageMutator{T}"/> each hold a cursor, and read the messages they have not read
+/// yet, the last frame's and this frame's sent so far, so a system ordered after the sender reads
+/// in the same frame, and the mutator changes them in place for the systems after it. A message is
+/// kept for two frames, as Bevy keeps one, so a reader that runs less often misses what is older.
 /// </para>
 /// <para>
 /// <b>Threading.</b> <see cref="Send{T}"/> is safe from a parallel behavior method, like
@@ -77,6 +79,19 @@ public sealed class MessageBus
     /// asked for it rather than holding on to it.
     /// </remarks>
     public ReadOnlySpan<T> Read<T>() where T : notnull => ChannelFor<T>().Readable;
+
+    /// <summary>
+    /// The messages of type <typeparamref name="T"/> past <paramref name="cursor"/>, the last
+    /// frame's and this frame's in the order they were sent, and the cursor moved past them.
+    /// </summary>
+    internal T[] ReadPast<T>(ref long cursor) where T : notnull => ChannelFor<T>().ReadPast(ref cursor);
+
+    /// <summary>
+    /// The same messages as <see cref="ReadPast{T}"/>, in place, the last frame's and this frame's
+    /// apart, since they are kept in two lists.
+    /// </summary>
+    internal void MutatePast<T>(ref long cursor, out Span<T> older, out Span<T> newer) where T : notnull =>
+        ChannelFor<T>().MutatePast(ref cursor, out older, out newer);
 
     /// <summary>How many messages of type <typeparamref name="T"/> are readable this frame.</summary>
     public int Count<T>() where T : notnull => ChannelFor<T>().Readable.Length;
@@ -134,6 +149,10 @@ public sealed class MessageBus
         private List<T> _incoming = [];
         private List<T> _readable = [];
 
+        // How many messages were sent before the oldest kept, which numbers every message from
+        // the first, so a cursor is a count of what its reader has seen.
+        private long _dropped;
+
         public ReadOnlySpan<T> Readable => CollectionsMarshal.AsSpan(_readable);
 
         public int PendingCount
@@ -155,6 +174,7 @@ public sealed class MessageBus
             {
                 // The list just read is reused for the incoming side rather than allocated
                 // again, so a steady stream of messages settles into two lists and stays there.
+                _dropped += _readable.Count;
                 (_readable, _incoming) = (_incoming, _readable);
                 _incoming.Clear();
             }
@@ -164,8 +184,28 @@ public sealed class MessageBus
         {
             lock (_gate)
             {
+                _dropped += _readable.Count + _incoming.Count;
                 _incoming.Clear();
                 _readable.Clear();
+            }
+        }
+
+        public T[] ReadPast(ref long cursor)
+        {
+            MutatePast(ref cursor, out var older, out var newer);
+            return [.. older, .. newer];
+        }
+
+        public void MutatePast(ref long cursor, out Span<T> older, out Span<T> newer)
+        {
+            lock (_gate)
+            {
+                var start = Math.Max(cursor, _dropped);
+                var newerStart = _dropped + _readable.Count;
+                cursor = newerStart + _incoming.Count;
+
+                older = CollectionsMarshal.AsSpan(_readable)[(int)Math.Min(start - _dropped, _readable.Count)..];
+                newer = CollectionsMarshal.AsSpan(_incoming)[(int)Math.Max(start - newerStart, 0)..];
             }
         }
     }

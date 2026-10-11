@@ -358,6 +358,18 @@ void Swap();                                                    // Makes this fr
 void Clear();                                                   // Discards everything, sent and readable alike
 ```
 
+### `MessageReader<T>`
+
+```csharp
+T[] Read(BehaviorContext ctx);                                  // The messages this reader has not read yet, oldest first, and the reader moved past them
+```
+
+### `MessageMutator<T>`
+
+```csharp
+MessageMutator.Unread Read(BehaviorContext ctx);                // The messages this mutator has not read yet, oldest first, in place, and the mutator moved past them
+```
+
 ### `On<TEvent>`
 
 ```csharp

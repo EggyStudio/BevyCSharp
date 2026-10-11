@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9dcd97ec`. One commit, custom_transitions whole: a game's own schedule is a label
+Reviewed up to `d14e8416`. One commit, solari whole: Bevy's path tracer is asked for with
+`Config.PathTracer`, a bit of the ray tracing word the config already carried, and drawn on a camera
+with `Render.SetPathTraced`, the camera holding the path tracer or the real-time lighting as Bevy's
+example inserts one or the other, refused where the app did not ask for it, the meaning of an
+argument changed so the ABI moved to 256; the world cache's cell count was measured first and found
+in the diagnostics store already, so nothing was added for it; the panel reads 0.20's three passes
+from the store where it listed 0.19's five; the example draws Bevy's many-lights scene, 8,000 boxes
+and 441 glowing spheres on a plane whose texture coordinates are scaled in the mesh since the ray
+traced materials ignore a material's transform, seeded from .NET's generator as its triage says, and
+the path tracer removes the raster meshes as Bevy's does. One fix shared by every example: the path
+tracer came out grainy at frame 900 because Bevy restarts its gathering whenever a camera's
+transform is marked changed, and the free camera took its transform by `ref`, which marks it every
+frame; it takes it `in` on the main thread since and writes through the world only when it moves or
+turns, as Bevy's controller does, the ten free-camera captures matching as before; that lesson
+belongs in the behaviors guide, a component taken by `ref` being marked changed every frame the
+system runs whether written or not, which the next batch says. Two tests light a floor by the path
+tracer's rays alone and refuse where not asked, six of six on the laptop's GPU;
+`docs/ray-tracing.md` has its paragraph. Right, the count measured before anything was built, the
+panel brought to 0.20's passes, and the grain's cause found in the example's own camera rather than
+in Bevy. EXAMPLES.md reads 329 written, one in part for `sysinfo` and 52 missing. The suite: 1,381
+passed and 2 skipped of 1,384; cargo's 142. Every item of the Now list is done or waits on the
+owner's word, so next are the missing rows that want no crate, TODO.md's eight: message and
+change_detection first, which a game meets first, then the ambiguity report of
+nondeterministic_system_order from the managed side over the systems' declared reads and writes, the
+rest after, and compressed_image_saver only where it pulls no crate.
+
+Before it, one commit came to be read, custom_transitions whole: a game's own schedule is a label
 keyed by a name the game chooses, since C# declares no Rust type, which can carry a value as
 `OnReenter(InGame)` does, made by the first system put in it and run to its end when a system asks
 through `TryRunSchedule`, as Bevy's `try_run_schedule`, answering nothing for a schedule holding no
@@ -53,18 +79,6 @@ the order known a frame early with the reason said. EXAMPLES.md reads 327 writte
 missing. The suite: 1,379, the three that failed, the cheat sheet, the surface and N 1.2 for a type
 in another's file, mended before the commit; cargo's 140. Next custom_transitions, a schedule of a
 game's own and a C# system in Bevy's transition schedule, then solari.
-
-Before it, two commits more came to be read, of the examples in part. `f9416e59`:
-`Window.SetCursorImage` makes the pointer an image of the game's own with its hotspot, as Bevy's
-window_settings shows one, through Bevy's `custom_cursor` feature, which pulls no crate, the lock
-gaining six lines of edges among its 594 packages, so Decision 25 allows it; a native test, ABI 252.
-`98fb48f1`: `MeshShape.Ring` carries a ring's thickness in its name so a shape is pushed out into a
-tube, and `Render.CreateExtrusion` pushes a convex polygon out by a depth, which fills 3d_shapes'
-third row as Bevy's does, with native tests, ABI 253. Right, each the call the example reaches for,
-the feature read for what it pulls before it was turned on. Next Bevy's system stepping through its
-`bevy_debug_stepping` feature, which pulls no crate either and serves breakout's helper and
-system_stepping both, then custom_transitions and solari; `render/assets.rs` at 799 and
-`NormTests.cs` at 794 split before a batch touches them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

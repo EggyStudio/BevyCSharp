@@ -338,4 +338,72 @@ public sealed class MessageTests
         Assert.Equal([new ImeComposing("日本", 1, 2)], composing);
         Assert.Equal([new ImeCommit("日本語")], committed);
     }
+
+    /// <summary>
+    /// A reader keeping its own place reads in the frame the message was sent when it runs after the
+    /// sender, each message once, and a second reader reads them all again, as Bevy's readers do.
+    /// </summary>
+    [Fact]
+    public void AReaderAfterTheSenderReadsTheSameFrameEachMessageOnce()
+    {
+        using var harness = new EngineHarness(frames: 4);
+        var frame = 0;
+        var (first, second) = (new MessageReader<Scored>(), new MessageReader<Scored>());
+        var (read, again) = (new List<(int Frame, int Points)>(), new List<int>());
+
+        harness.OnContext(Stage.PreUpdate, ctx => ctx.Send(new Scored(++frame)));
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            foreach (var scored in first.Read(ctx)) read.Add((frame, scored.Points));
+        });
+
+        // Every other frame, the messages of the frame it missed still there.
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            if (frame % 2 == 0) again.AddRange(second.Read(ctx).Select(scored => scored.Points));
+        });
+        harness.Run();
+
+        Assert.Equal([(1, 1), (2, 2), (3, 3), (4, 4)], read);
+        Assert.Equal([1, 2, 3, 4], again);
+    }
+
+    /// <summary>
+    /// A mutator changes the messages in place, so a reader after it in the frame reads them
+    /// changed, and a message sent after the mutator read is read by it on its next call.
+    /// </summary>
+    [Fact]
+    public void AMutatorsChangeIsReadByTheReaderAfterIt()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        var frame = 0;
+        var halve = new MessageMutator<Scored>();
+        var reader = new MessageReader<Scored>();
+        var (halved, read) = (new List<int>(), new List<int>());
+
+        harness.App.Chain(Stage.Update,
+            new SystemDescriptor(world =>
+            {
+                if (++frame == 1) new BehaviorContext(world).Send(new Scored(10));
+            }, "Tests.Send"),
+            new SystemDescriptor(world =>
+            {
+                var ctx = new BehaviorContext(world);
+                foreach (ref var scored in halve.Read(ctx))
+                {
+                    scored = scored with { Points = scored.Points / 2 };
+                    halved.Add(scored.Points);
+                }
+
+                // Sent after the mutator read, so its next call reads it.
+                if (frame == 1) ctx.Send(new Scored(4));
+            }, "Tests.Halve"),
+            new SystemDescriptor(world => read.AddRange(reader.Read(new BehaviorContext(world)).Select(scored => scored.Points)), "Tests.Read"));
+        harness.Run();
+
+        // The first message halved in the frame it was sent, and the one sent after the read in
+        // the next, which the reader had read as it was sent, before the mutator came to it.
+        Assert.Equal([5, 2], halved);
+        Assert.Equal([5, 4], read);
+    }
 }

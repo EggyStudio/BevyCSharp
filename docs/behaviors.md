@@ -68,6 +68,25 @@ entities' transforms in a few calls into the engine whatever their number, where
 through `ctx.Ecs` is a call an entity. One taken `in` is not marked changed, so what watches it for
 changes sees only real ones.
 
+One taken `ref` is marked changed every frame the system runs, whether it was written or not, where
+Bevy marks one only when it is written through. What watches for changes then sees one every
+frame: a `[Changed]` filter passes, a transform is propagated again, and Bevy's path tracer starts
+its picture over for a camera it reads as moved. A behavior that reads every frame and writes
+seldom takes the component `in` and writes through the world when it changes:
+
+```csharp
+[OnUpdate]
+[MainThread]
+public void Follow(BehaviorContext ctx, in Transform transform)
+{
+    var moved = transform;
+    moved.Translation += new Vec3(0f, 0f, 1f) * ctx.Time.Delta;
+    if (moved.Translation != transform.Translation) ctx.Ecs.Set(ctx.Entity, moved);
+}
+```
+
+`[MainThread]` keeps the method on the thread that holds the world, which `ctx.Ecs` needs.
+
 Above ~4096 entities the per-entity loop is automatically split across the thread pool, where the
 method can read and write its own component and the ones it takes, and not the world.
 

@@ -27,10 +27,34 @@ so every reader sees the same complete set, exactly once, whatever stage it runs
 order the systems happen to run in. The cost is a frame of latency, since a message is not readable in
 the frame it was sent, including by the sender.
 
-Bevy's own messages instead give each reader a cursor, which lets it catch up within the frame. A
-cursor needs a stable identity per reader, and a C# system has none the engine can see, so the swap
-makes "exactly once" true here. `ctx.Send` is safe from a parallel behavior method, like `ctx.Cmd`;
-reading is main-thread only.
+A reader that keeps its own place reads as Bevy's do instead, catching up within the frame. A
+`MessageReader<T>` is made for the system that reads with it and kept there, and reads the
+messages it has not read yet, the last frame's and this frame's sent so far, so a system ordered
+after the sender reads them in the same frame. A `MessageMutator<T>` reads the same way and changes
+them in place, so the systems after it read them changed:
+
+<!-- compiled with:
+public record struct DealDamage(int Amount);
+-->
+```csharp
+var armor = new MessageMutator<DealDamage>();
+var health = new MessageReader<DealDamage>();
+
+app.Chain(Stage.Update,
+    new SystemDescriptor(world =>
+    {
+        foreach (ref var dealt in armor.Read(new BehaviorContext(world))) dealt.Amount -= 1;
+    }, "ApplyArmor"),
+    new SystemDescriptor(world =>
+    {
+        foreach (var dealt in health.Read(new BehaviorContext(world)))
+            Console.WriteLine($"Applying {dealt.Amount} damage");
+    }, "ApplyDamage"));
+```
+
+A message is kept for two frames, as Bevy keeps one, so a reader that runs less often than that
+misses what is older. `ctx.Send` is safe from a parallel behavior method, like `ctx.Cmd`; reading is
+main-thread only.
 
 What the window reports arrives on the same bus, so an engine message is read exactly like one
 another system sent:

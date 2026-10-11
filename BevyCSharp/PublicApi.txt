@@ -3721,6 +3721,18 @@ sealed class Bevy.MessageBus
   void Send<T>(T message)
   void SendAll<T>(ReadOnlySpan<T> messages)
   void Swap()
+sealed class Bevy.MessageMutator<T>
+  MessageMutator()
+  MessageMutator<T>.Unread Read(BehaviorContext ctx)
+struct Bevy.MessageMutator<T>.Enumerator
+  T Current { get; }
+  bool MoveNext()
+readonly struct Bevy.MessageMutator<T>.Unread
+  MessageMutator<T>.Enumerator GetEnumerator()
+  int Length { get; }
+sealed class Bevy.MessageReader<T>
+  MessageReader()
+  T[] Read(BehaviorContext ctx)
 sealed class Bevy.MethodHints : IEquatable<MethodHints>
   ButtonLine Line { get; init; }
   MethodHints(string? Label = null, string? Tooltip = null, bool Hidden = false, ButtonLine Line = ButtonLine.Alone, double Weight = 1d, bool Space = false, bool Separator = false, string? Header = null, string? Foldout = null, bool FoldoutOpen = true, string? Note = null, NoteKind NoteKind = NoteKind.Info, int Order = 0)

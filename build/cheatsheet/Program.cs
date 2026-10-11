@@ -22,7 +22,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Running an app", "running-a-game.md", ["BevyApp", "App", "Config", "World", "IPlugin", "IPluginGroup", "DefaultPlugins", "EnginePlugin", "BehaviorsPlugin", "Time", "FrameProfile"]),
     ("Behaviors and systems", "behaviors.md", ["BehaviorContext", "BehaviorConditions", "BehaviorRegistry", "BehaviorRunners", "SystemDescriptor", "StageOrder", "SystemToggleRegistry", "SystemRegistrationSourceScope", "Stepping", "EcsWorld", "EcsCommands", "ChunkSet`1", "ReloadedComponents"]),
     ("States", "states.md", ["StateRegistry"]),
-    ("Messages", "messages-and-hierarchy.md", ["MessageBus", "On`1"]),
+    ("Messages", "messages-and-hierarchy.md", ["MessageBus", "MessageReader`1", "MessageMutator`1", "On`1"]),
     ("Components", "components.md", ["ComponentHooks", "ComponentSchema", "ComponentSchemas", "ComponentField", "ItemFields", "EcsList`1", "EcsMap`2", "IInlineList`1", "InlineList4`1", "InlineList8`1", "InlineList16`1", "InlineList32`1", "InlineList64`1", "ListValue", "MapValue", "IReflectedComponent`1"]),
     ("Scenes and saves", "scenes-and-saves.md", ["DataAssets", "SceneFile", "SceneInstances", "SceneReferences", "SceneValue", "SaveGame", "SaveId", "Persistent`1", "IPersistentValue", "ProjectSettings", "UserData"]),
     ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "IAnimationEvent", "MeshFiles", "MaterialFiles"]),
@@ -74,8 +74,10 @@ string Name(Type t)
     if (t.IsGenericType && t.FullName?.StartsWith("System.ValueTuple") == true || (t.IsGenericType && t.Name.StartsWith("ValueTuple")))
         return "(" + string.Join(", ", t.GetGenericArguments().Select(Name)) + ")";
     var name = t.Name;
-    if (t.IsGenericType)
-        name = name[..name.IndexOf('`')] + "<" + string.Join(", ", t.GetGenericArguments().Select(Name)) + ">";
+    // A type nested in a generic one is generic through it alone, with no arguments of its own to
+    // name, as MessageMutator<T>.Unread is.
+    if (t.IsGenericType && name.IndexOf('`') is > 0 and var tick)
+        name = name[..tick] + "<" + string.Join(", ", t.GetGenericArguments().Select(Name)) + ">";
     return t.DeclaringType is { } outer && !t.IsGenericParameter ? Name(outer).Split('<')[0] + "." + name : name;
 }
 
