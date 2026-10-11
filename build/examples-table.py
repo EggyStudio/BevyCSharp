@@ -12,7 +12,10 @@ Bevy's own, in the order its examples/README.md lists them, and the examples it 
 list come last.
 
 The README's gallery shows every written example's capture, each picture opening the C# program
-that drew it, so a reader goes from what an example draws to the code that draws it.
+that drew it, so a reader goes from what an example draws to the code that draws it. It is a table
+a group under a heading naming it, in the groups' order, each table one row of the group's examples
+in the order Bevy's README lists them, which scrolls sideways on GitHub where it is wider than the
+page.
 
 Each written example says at its head which of Bevy's it is written from, at which version and
 under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
@@ -82,6 +85,18 @@ def read_examples(source):
     return examples
 
 
+def readme_places(source, examples):
+    """Each example's place in Bevy's examples/README.md, found by the source path its row links."""
+    by_path = {example["path"]: example["name"] for example in examples if example["path"]}
+    places = {}
+    with open(os.path.join(source, "examples", "README.md"), encoding="utf-8") as readme:
+        for line in readme:
+            match = re.match(r"\[[^\]]*\]\(\.\./(examples/[^)]+)\)", line)
+            if match and by_path.get(match.group(1)) not in (None, *places):
+                places[by_path[match.group(1)]] = len(places)
+    return places
+
+
 def group_order(source):
     """The groups in the order Bevy's examples/README.md lists them."""
     order = []
@@ -137,6 +152,9 @@ def on_behaviors(path):
 
 
 def build(version, examples, order, triage, written, source, followed):
+    # Read before the rows below take the name for each row's link.
+    places = readme_places(source, examples)
+
     unknown = sorted(set(triage) - {example["name"] for example in examples})
     if unknown:
         sys.exit("triage.tsv names examples Bevy does not have: " + ", ".join(unknown))
@@ -248,19 +266,25 @@ def build(version, examples, order, triage, written, source, followed):
 
     table = "\n".join(out) + "\n"
 
-    # Every written example's capture, four to a row, for the README, each opening the C# file
-    # that drew it.
-    shown = [example for example in examples if example["state"] in ("written", "part")
-             and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))]
-    gallery = []
-    for start in range(0, len(shown), 4):
+    # Every written example's capture for the README, a table a group in the order of the groups
+    # above, each one row of the group's examples in the order Bevy's examples/README.md lists them,
+    # so a group wider than the page scrolls sideways rather than wrapping onto rows of its own. Each
+    # picture opens the C# file that drew it.
+    sections = []
+    for group in groups:
+        shown = sorted(
+            (example for example in examples if example["group"] == group and example["state"] in ("written", "part")
+             and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))),
+            key=lambda example: (places.get(example["name"], len(places)), example["name"]))
+        if not shown:
+            continue
         cells = []
-        for example in shown[start:start + 4]:
+        for example in shown:
             picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200"/>'
             picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
             cells.append(f'<td>{picture}<br><code>{example["name"]}</code></td>')
-        gallery.append("<tr>" + "".join(cells) + "</tr>")
-    gallery = "<table>\n" + "\n".join(gallery) + "\n</table>" if gallery else ""
+        sections.append(f"### {group}\n\n<table>\n<tr>" + "".join(cells) + "</tr>\n</table>")
+    gallery = "\n\n".join(sections)
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
         f"{total['part']} more in part, {total['can']} more can be with what is bridged, {total['missing']} wait on something "

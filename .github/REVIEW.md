@@ -10,36 +10,64 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ac2817aa`. Two commits, unpushed with the six before them. `6729361f` writes the
-components table again from the editor build, which has carried Bevy's custom cursors since
-`f9416e59` while the table dated from `6c6b5593`, so four cursor records gain their custom variant
-and the public surface 137 lines, split from the typing since the dump brought it along, and
-building alone. `ac2817aa` types what TODO.md's first item left on string paths, after reading that
-the item's own words were stale, an enum inside a variant having been typed since `5f2d3d02`: a
-duration in a component is a `TimeSpan`, read and written whole as the seconds and nanoseconds
-Rust's serde gives, the nanoseconds past a tick dropped as the remark says, and an integer that
-holds no zero is an `int` whose zero is refused naming the field and its type, before an optional
-field holding nothing is switched to some, so a refused zero leaves the field as it was; the bridge
-reads and writes the ten non-zero types and refuses a zero as it refuses a number past a width, and
-chooses one as the placeholder when some is chosen, since they reflect no default. Typed so: a
-sound's start and duration, a node's six grid lines, a window's frame latency, the four clocks'
-delta, elapsed and wrap period, the fixed clock's step and overstep, the virtual clock's longest
-step, the picking settings' multi-click interval and the delayed queue's submit time; left on string
-paths and said by kind in the components guide and the narrower TODO item: the tuple options, the
-real clock's two instants and the animation transitions' node index. A native test chooses a
-non-zero line at one, writes minus three and refuses zero naming the field; `ReflectedWrapperTests`
-sets and reads the grid lines, refuses a zero over a held line and over an empty one, clears one
-with null, and reads the virtual clock's longest step at Bevy's 250 ms, writes 100.5 and sets and
-clears a sound's start. The suite: 1,415 passed and 2 skipped of 1,417; cargo's 88 and 150, every
-profile clean, the guide compiled on the package. Right, the stale item read before it was worked,
-the zero refused before a field is switched rather than after, and what is left said by its kinds
-rather than by a vague line. Next in TODO.md's order, custom_cursor_image: its triage line still
-says the feature is not compiled in, where the table since `6729361f` has it; the wrapper reaches
-the flips, the rectangle and the atlas's frame but not the atlas's layout handle, whose kind the
-bridge does not load, nor the hotspot, a tuple, so a small bridge call puts an atlas layout, a frame
-and the hotspot on a window's custom cursor, the hotspot with it since it is the same struct and the
-one thing the wrapper cannot type, and the example animates the frame and toggles the flips and the
-rectangle through the wrapper.
+Reviewed up to `69fca4bb`. Two commits, unpushed with the eight before them. `f55c722b` moves code
+alone, the pointer's three calls and the image's test from `window.rs` into `window/cursor.rs`, 758
+lines to 580 before the atlas call is added. `69fca4bb`, custom_cursor_image, ABI 263:
+`Window.SetCursorAtlas` cuts the pointer's image to a frame of an atlas with that frame's hotspot,
+the hotspot taken with it as asked since Bevy holds it as a pair the wrapper cannot type, clears the
+atlas for no layout, and refuses a pointer that is no image yet and a key that is no layout, typed
+without a panic; the frame, the flips and the rectangle are written through the window's cursor
+wrapper. One generator change the example needed, and a right one for every wrapper: a union written
+through a wrapper switches its variant only where the field holds another, as an option was switched
+to some only from none, since switching makes the variant again at its defaults and a field the
+record does not hold, the hotspot and the atlas's layout here, was lost on every write. The example
+steps a crosshair sheet's two hundred frames at four a second through a behavior kept on the
+window's entity (B 4, 158 of 166), takes the atlas away and puts it back on T, flips on X and Y and
+cycles the frame's quarters on C, and offscreen, with no window and no pointer, shows the
+instructions alone, its capture matching Bevy's text and clear color; Kenney's sheet joins the asset
+list. A native test cuts, clears and refuses both ways; `SpawnedWindowTests` marks a window of its
+own as the first, is refused the atlas before an image, sets the image, the atlas and a hotspot of
+32 by 16, writes a frame and a flip through the wrapper and reads the hotspot back whole, which
+without the generator change read zeros. EXAMPLES.md reads 337 written, 2 in part and 43 missing,
+the triage line corrected; the window guide has its paragraph and block. The suite: 1,416 passed and
+2 skipped of 1,418; cargo's 88 and 151, every profile checked. Right, the hotspot carried with the
+call that owns the struct, and the generator's loss found by the hotspot reading zeros and mended
+for every union rather than for this one. The example counts as written: a pointer is the platform's
+to draw and no capture shows it, so its look on a window is the owner's whenever they run it, and
+nothing waits on that. The owner asked at 16:05 for the README's gallery as one scrolling row of
+pictures a group, in Bevy's order of its groups, which is item 13 (Decision 27), a batch of its own
+before low_power. Then low_power in TODO.md's order, winit's update modes, which the bridge leaves
+at Bevy's default and which pulls no crate.
+
+Before it, `ac2817aa` and `6729361f` came. `6729361f` writes the components table again from the
+editor build, which has carried Bevy's custom cursors since `f9416e59` while the table dated from
+`6c6b5593`, so four cursor records gain their custom variant and the public surface 137 lines, split
+from the typing since the dump brought it along, and building alone. `ac2817aa` types what TODO.md's
+first item left on string paths, after reading that the item's own words were stale, an enum inside
+a variant having been typed since `5f2d3d02`: a duration in a component is a `TimeSpan`, read and
+written whole as the seconds and nanoseconds Rust's serde gives, the nanoseconds past a tick dropped
+as the remark says, and an integer that holds no zero is an `int` whose zero is refused naming the
+field and its type, before an optional field holding nothing is switched to some, so a refused zero
+leaves the field as it was; the bridge reads and writes the ten non-zero types and refuses a zero as
+it refuses a number past a width, and chooses one as the placeholder when some is chosen, since they
+reflect no default. Typed so: a sound's start and duration, a node's six grid lines, a window's
+frame latency, the four clocks' delta, elapsed and wrap period, the fixed clock's step and overstep,
+the virtual clock's longest step, the picking settings' multi-click interval and the delayed queue's
+submit time; left on string paths and said by kind in the components guide and the narrower TODO
+item: the tuple options, the real clock's two instants and the animation transitions' node index. A
+native test chooses a non-zero line at one, writes minus three and refuses zero naming the field;
+`ReflectedWrapperTests` sets and reads the grid lines, refuses a zero over a held line and over an
+empty one, clears one with null, and reads the virtual clock's longest step at Bevy's 250 ms, writes
+100.5 and sets and clears a sound's start. The suite: 1,415 passed and 2 skipped of 1,417; cargo's
+88 and 150, every profile clean, the guide compiled on the package. Right, the stale item read
+before it was worked, the zero refused before a field is switched rather than after, and what is
+left said by its kinds rather than by a vague line. Next in TODO.md's order, custom_cursor_image:
+its triage line still says the feature is not compiled in, where the table since `6729361f` has it;
+the wrapper reaches the flips, the rectangle and the atlas's frame but not the atlas's layout
+handle, whose kind the bridge does not load, nor the hotspot, a tuple, so a small bridge call puts
+an atlas layout, a frame and the hotspot on a window's custom cursor, the hotspot with it since it
+is the same struct and the one thing the wrapper cannot type, and the example animates the frame and
+toggles the flips and the rectangle through the wrapper.
 
 Before it, four commits came, `c3aaacac` to `09e3b339`. `c3aaacac`, item 11: the CLI server's
 dispose cancels the waits first, so a request answered in the app's last frame keeps its answer
@@ -68,40 +96,6 @@ nullable `int` with a zero written refused naming the field, the dump, the gener
 giving them kinds, while the tuples, an instant and a node index stay on string paths with the
 reason said, both documents rewritten around what is left. The examples that wait on the owner's
 word stay where they are.
-
-Before it, `28ba2698` and `e1a32283` came, ABI 262. First `e1a32283`, item 12 with a bridge fault
-its test found: an insert from nothing over a resource the world holds, of a type that reflects
-neither Bevy's default nor its from-world, throws naming `Resource<T>` and the JSON way, and the
-plugin's resource stays as it was, while a world holding none still gets the field-by-field build,
-an enum at its root taken at its first empty variant as one inside a field already was; the fault:
-Bevy keeps a resource's entity, still marked as the resource's, after the resource is taken off it,
-and the bridge answered that entity as the resource held, so a wrapper over it threw on read and the
-new rule refused an insert into a world holding none, mended by the held answer asking whether the
-entity carries the component and a second finder giving the kept entity for the insert, since a
-second entity beside it would have the resource stripped by Bevy's hook with a warning. The count,
-from an editor build: 68 reflected resources, 8 without a default, 7 of them in from the first
-frame, which the remark names, and the seven inserts from nothing in the examples and the guides
-each guarded by `Resource<T>()`, so nothing written breaks; native tests hold the default answer,
-the held, taken-off and kept answers and the root enum, and `ResourceTests` the refusal over the
-default filters with the filters intact and the static transforms' switch taken off, read absent and
-put back on the same entity at enabled; the components guide has its paragraph. The commit carries
-`ff467a5f` on N 7.2's list with its fault, the list's header widened as the rule is, and
-BUILDING.md's line that the subject's marks are copied from COMMITS.md's line and not typed. Then
-`28ba2698`: `EcsWorld.All<T>()` answers a wrapper over each entity carrying one of Bevy's
-components, found by a query built on the component's id so Bevy's default filters hide a disabled
-entity as they hide it from a system, with a native test and `ReflectedWrapperTests` over two
-carrying, one plain and one disabled; monitor_info reads its monitors so in place of asking every
-entity, and the window and components guides and the cheat sheet say it, the cheat sheet gaining the
-fullscreen call `ff467a5f` left out. The suite: 1,411 passed and 2 skipped of 1,414 before the list
-line, N 7.2 its one failure, 18 of 18 in `NormTests` after; cargo's 87 headless and 149 with the
-larger profiles, every profile checked with warnings denied, both guides compiled on the package,
-monitor_info offscreen exiting 0. Right, the fault found by the rule's own test and mended at its
-cause in Bevy's kept entity rather than papered in C#, the eight named by a count and not a guess,
-and the listing built as a Bevy query so what a system would not see a game does not see either.
-`compressed_image_saver` joins the examples that wait on the owner's word, its Bevy feature pulling
-the `ctt` crate the lock does not hold. Next item 11 as a batch of its own, since every free gap is
-done, then the three move-only splits, then TODO.md's order, the examples that wait on the owner's
-word staying where they are.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -311,8 +305,9 @@ from [SHARED.md](SHARED.md).
    25), and its universal twin is basis-universal, already on that list. With every free gap done,
    item 11 and the three move-only splits are in at `c3aaacac` to `09e3b339`, and the working
    session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
-   the tuples, the instants and a node index, said by kind, and custom_cursor_image follows with a
-   bridge call for the cursor's atlas, frame and hotspot.
+   the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
+   `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, the table at 337 written
+   and 43 missing; low_power follows.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -380,6 +375,19 @@ from [SHARED.md](SHARED.md).
     asked: the count 68, 8 and 7, the seven inserts in the examples and guides each guarded, the
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
+
+13. **The README's gallery as one scrolling row of pictures a group (Decision 27).** The owner asked
+    on 2026-10-11 at 16:05, as for 3DEngine's README. `build/examples-table.py` writes the gallery
+    between its markers as one table of four pictures a row over every written example; it writes
+    instead one table a group in the order Bevy's `examples/README.md` lists the groups, which the
+    script already reads, each a single row holding the group's written examples in that order, the
+    picture opening the program and the name under it as today, with a heading line naming the group
+    before each table, and the examples Bevy keeps out of its list in a last row of their own; a row
+    wider than the page scrolls sideways on GitHub, which is the point, so no row is wrapped. The
+    script's check reads the result as it reads the table today, so the workflow's table check and
+    the README's walk run on it, and the raw links keep their form for the package's page. A batch
+    of its own before low_power, since it is small and the owner asked; the owner's eye judges the
+    look.
 
 ## Verdicts
 
@@ -554,5 +562,10 @@ from [SHARED.md](SHARED.md).
     the field-by-field build stays for a component and for a resource the world lacks, since every
     example sets fields after it, and only the replace of a living resource with zeros is refused, a
     zeroed copy over the plugin's being never meant. The owner may overrule it as any decision here.
+
+27. **The README's gallery is one scrolling row of pictures a group, in Bevy's order of its
+    groups.** The owner asked at 16:05 on 2026-10-11, after asking the same of 3DEngine's README,
+    which is item 13: the written examples' pictures in one-row tables that scroll sideways rather
+    than the grid of four, one a group of Bevy's examples.
 
 ## Replies
