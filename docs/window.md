@@ -166,6 +166,24 @@ gauntlet or a painting program's brush:
 Window.SetCursorImage(AssetServer.Load(AssetKind.Image, "ui/hand.png"), hotspotX: 4, hotspotY: 2);
 ```
 
+A sheet of pointers is cut to one frame of an atlas by `Window.SetCursorAtlas`, with that frame's
+hotspot, and stepping through the frames animates the pointer, as Bevy's `custom_cursor_image` does
+with its crosshairs. The frame, the image flipped either way and a rectangle of the frame are
+written through the window's `CursorIconRef`, and a write there keeps the atlas and the hotspot:
+
+<!-- compiled with:
+EcsWorld ecs = null!;
+AssetHandle sheet = default;
+-->
+```csharp
+Window.SetCursorImage(sheet);
+Window.SetCursorAtlas(Render2d.CreateAtlas(64, 64, columns: 20, rows: 10), index: 0, hotspotX: 32, hotspotY: 32);
+
+var icon = ecs.Wrap<CursorIconRef>(Window.Entity());
+if (icon.Value is CursorIcon.Custom { Value: CustomCursor.Image image })
+    icon.Value = new CursorIcon.Custom(image with { TextureAtlas = new OptionTextureAtlas.Some(1), FlipX = true });
+```
+
 On GNOME under Wayland, winit draws a title bar of its own that imitates an older GNOME rather than
 the libadwaita one the desktop's other windows have, because GNOME leaves drawing it to the app.
 `Config.DesktopTitleBar` opens the window through XWayland there instead, where GNOME draws its

@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 262;
+    internal const int ExpectedAbiVersion = 263;
 
     static Native() => NativeLoader.Initialize();
 
@@ -398,6 +398,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_cursor_image(int image, uint x, uint y);
+
+    /// <summary>Cuts the pointer's image to one frame of an atlas, with that frame's hotspot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_cursor_atlas(int layout, uint index, uint x, uint y);
 
     /// <summary>Makes a window a game spawned fill a monitor named by its entity.</summary>
     [LibraryImport(Library)]

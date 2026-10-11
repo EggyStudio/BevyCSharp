@@ -317,6 +317,34 @@ public static unsafe class Window
     public static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0) =>
         Native.Check(Native.bcs_window_set_cursor_image(image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
 
+    /// <summary>
+    /// Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the
+    /// frame's top left corner, or shows the whole image again with no layout.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The pointer is the image <see cref="SetCursorImage"/> set, a sheet of frames the layout cuts,
+    /// as <see cref="Render2d.CreateAtlas"/> makes one, so a pointer can be animated as Bevy's
+    /// custom_cursor_image animates its crosshairs. The hotspot is set here beside the frame because
+    /// a frame's tip is where the frame has it.
+    /// </para>
+    /// <para>
+    /// Another frame, the image flipped either way and a rectangle of it are written through the
+    /// window's <c>CursorIconRef</c>, whose <c>CustomCursor.Image</c> holds them, and writing the
+    /// frame there keeps the layout set here.
+    /// </para>
+    /// </remarks>
+    /// <param name="layout">The atlas's layout, or <see langword="null"/> for the whole image.</param>
+    /// <param name="index">Which frame of the layout.</param>
+    /// <param name="hotspotX">How far across the frame the hotspot is.</param>
+    /// <param name="hotspotY">How far down.</param>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, its pointer is no image, the layout names no atlas layout, or this build
+    /// has no windows.
+    /// </exception>
+    public static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0) =>
+        Native.Check(Native.bcs_window_set_cursor_atlas(layout?.Key ?? -1, index, hotspotX, hotspotY), "Window.SetCursorAtlas");
+
     /// <summary>Minimizes the window to the taskbar or dock.</summary>
     /// <remarks>
     /// A window made without the platform's title bar (<see cref="SetStyle"/> with

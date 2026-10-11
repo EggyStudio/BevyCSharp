@@ -15,6 +15,7 @@ https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/spe
 https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/specular_room2.ktx2
 https://github.com/bevyengine/bevy_asset_files/raw/main/light_probe_blending/two_rooms.glb
 branding/bevy_logo_light.png
+cursors/kenney_crosshairPack/Tilesheet/crosshairs_tilesheet_white.png
 environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2
 environment_maps/pisa_specular_rgb9e5_zstd.ktx2
 models/cubes/Cubes.glb

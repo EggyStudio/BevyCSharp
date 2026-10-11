@@ -167,6 +167,58 @@ public sealed class SpawnedWindowTests : IDisposable
         Assert.Contains("Centered", position);
     }
 
+    /// <summary>
+    /// A pointer cut to a frame of an atlas takes that frame's hotspot, and a frame and a flip
+    /// written through the window's wrapper keep it, the variant written over rather than made again.
+    /// A pointer that is no image yet is refused an atlas.
+    /// </summary>
+    /// <remarks>
+    /// The window is one the test marks as the first, since an offscreen run has none, and is never
+    /// opened, so only the pointer's settings change. Bevy holds the hotspot as a pair a wrapper
+    /// cannot type, so a variant made again would have put it back at the corner.
+    /// </remarks>
+    [SkippableFact]
+    public void APointerFromAnAtlasKeepsItsHotspotAsItsFrameIsWritten()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        int notImage = NativeStatus.Ok;
+        ulong? frame = null;
+        var flipped = false;
+        string? hotspot = null;
+
+        harness.On(Stage.Update, world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            if (frame is not null) return;
+
+            var window = ecs.Spawn();
+            ecs.Insert<WindowRef>(window);
+            ecs.Insert<PrimaryWindowRef>(window);
+            var layout = Render2d.CreateAtlas(64, 64, 20, 10);
+
+            notImage = Assert.Throws<BevyNativeException>(() => Window.SetCursorAtlas(layout, 3, 32, 16)).Status;
+            Window.SetCursorImage(AssetServer.Load(AssetKind.Image, "textures/checker.png"));
+            Window.SetCursorAtlas(layout, 3, 32, 16);
+
+            var icon = ecs.Wrap<CursorIconRef>(window);
+            var image = (CustomCursor.Image)((CursorIcon.Custom)icon.Value).Value;
+            icon.Value = new CursorIcon.Custom(image with { TextureAtlas = new OptionTextureAtlas.Some(4), FlipX = true });
+
+            var after = (CustomCursor.Image)((CursorIcon.Custom)icon.Value).Value;
+            (frame, flipped) = ((after.TextureAtlas as OptionTextureAtlas.Some)?.Index, after.FlipX);
+            hotspot = ecs.GetReflected(window, CursorIconRef.TypePath, ".0.0.hotspot");
+        });
+
+        harness.Run();
+
+        Assert.Equal(NativeStatus.NotPresent, notImage);
+        Assert.Equal(4ul, frame);
+        Assert.True(flipped);
+        Assert.Equal("[32,16]", hotspot);
+    }
+
     // Whether every pixel of an eight-bit PNG is zero, read from its image data inflated, each row
     // after the byte that says how it was filtered. A filter writes each byte as its difference from
     // a guess made from the bytes before it, and from zeros alone every filter guesses zero, so the

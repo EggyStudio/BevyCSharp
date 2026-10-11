@@ -338,7 +338,7 @@ public sealed partial class ReflectedGenerator
         foreach (var c in part.Cases!)
         {
             text.Append($"case global::Bevy.Reflected.{union.Name}.{c.Record} {held}: ");
-            text.Append($"_world.SetVariant(Entity, TypePath, {path}, \"{c.Variant}\"); ");
+            text.Append($"if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path}) != \"{c.Variant}\") _world.SetVariant(Entity, TypePath, {path}, \"{c.Variant}\"); ");
             foreach (var p in c.Parts) text.Append(Write(p, held + "." + p.Name, depth + 1, prefix)).Append(' ');
             text.Append("break; ");
         }
@@ -558,11 +558,16 @@ public sealed partial class ReflectedGenerator
         var union = scope.Unions.Add(field.Rust, cases, isStruct: false);
         var reads = string.Join("\n", cases.Select(c =>
             $"            \"{c.Variant}\" => new global::Bevy.Reflected.{union.Name}.{c.Record}({string.Join(", ", c.Parts.Select(p => Read(p, null)))}),"));
+        // A variant is switched to only where the field holds another, as an Option is switched to
+        // Some only from None, since switching makes the variant again with every field at its
+        // default, and a field the record does not hold, as a cursor image's hotspot and its atlas's
+        // layout, would be lost each time the record is written.
         var writes = string.Join("\n", cases.Select(c =>
         {
             var body = new StringBuilder();
             body.Append($"                case global::Bevy.Reflected.{union.Name}.{c.Record} held:\n");
-            body.Append($"                    _world.SetVariant(Entity, TypePath, \"{path}\", \"{c.Variant}\");\n");
+            body.Append($"                    if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, \"{path}\") != \"{c.Variant}\")\n");
+            body.Append($"                        _world.SetVariant(Entity, TypePath, \"{path}\", \"{c.Variant}\");\n");
             foreach (var p in c.Parts)
                 body.Append($"                    {Write(p, "held." + p.Name, 1, null)}\n");
             body.Append("                    break;");

@@ -11692,6 +11692,7 @@ static class Bevy.Window
   static string MonitorName(int index)
   static void Minimize()
   static void SetCursor(CursorGrab grab, bool visible)
+  static void SetCursorAtlas(AssetHandle? layout, uint index = 0u, uint hotspotX = 0u, uint hotspotY = 0u)
   static void SetCursorImage(AssetHandle image, uint hotspotX = 0u, uint hotspotY = 0u)
   static void SetCursorShape(CursorShape shape)
   static void SetFullscreenOn(Entity window, Entity monitor)

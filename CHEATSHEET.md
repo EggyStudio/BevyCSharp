@@ -1507,6 +1507,7 @@ static void SetIme(bool enabled, float x = 0f, float y = 0f);   // Turns the pla
 static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false);  // Sets whether the window has a title bar and border, whether it can be resized by dragging, and whether it stays above other windows
 static void SetCursorShape(CursorShape shape);                  // Sets the shape of the pointer while it is over the window
 static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over the window to an image, its hotspot, the pixel that points, given in pixels across and down from the image's top left corner
+static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0);  // Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the frame's top left corner, or shows the whole image again with no layout
 static void Minimize();                                         // Minimizes the window to the taskbar or dock
 static void SetMaximized(bool maximized);                       // Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had
 static WindowPlace Place();                                     // Where the window is, how large, and whether it is maximized
