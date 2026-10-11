@@ -114,6 +114,45 @@ pub unsafe extern "C" fn bcs_render_mesh_info(handle: i32, out: *mut BcsMeshInfo
     })
 }
 
+/// Writes the names a mesh gives its morph targets into `out`, a line each in their order, and
+/// answers the length in bytes, nothing where it names none.
+///
+/// Answers [`status::NOT_PRESENT`] for a mesh still loading and [`status::INVALID_STATE`] for a key
+/// that names something else. A glTF file names its targets in its extras, which Bevy reads.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_morph_target_names(mesh: i32, out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        // Every profile has meshes, as for the counts above.
+        crate::state::with_world(|world| {
+            use bevy::asset::Assets;
+            use bevy::mesh::Mesh;
+
+            let Some(handle) = crate::assets::clone_handle(world, mesh) else {
+                return status::NOT_PRESENT;
+            };
+            let Ok(handle) = handle.try_typed::<Mesh>() else {
+                return status::INVALID_STATE;
+            };
+            let Some(mesh) = world.get_resource::<Assets<Mesh>>().and_then(|meshes| meshes.get(&handle)) else {
+                return status::NOT_PRESENT;
+            };
+
+            // Bevy builds morph targets where it draws, so a headless build's meshes have none.
+            #[cfg(feature = "render")]
+            let names = mesh.morph_target_names().map_or_else(String::new, |names| names.join("\n"));
+            #[cfg(not(feature = "render"))]
+            let names = {
+                let _ = mesh;
+                String::new()
+            };
+            unsafe { crate::interop::write_text(&names, out, capacity) }
+        })
+    })
+}
+
 /// Works out tangents for a mesh that has none, from its normals and texture coordinates, which
 /// a normal map and anisotropy read, as Bevy's `with_generated_tangents` does for a primitive.
 ///

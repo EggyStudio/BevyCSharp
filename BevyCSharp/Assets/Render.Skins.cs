@@ -5,6 +5,29 @@ namespace Bevy;
 public static unsafe partial class Render
 {
     /// <summary>
+    /// The names a mesh gives its morph targets, in their order, empty where it names none, or
+    /// <see langword="null"/> while it loads. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A glTF file names a mesh's targets in its extras, which Bevy reads, so a weight can be set
+    /// by the shape it moves toward rather than by its place, as Bevy's morph_targets prints them
+    /// as each mesh arrives.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The handle names something other than a mesh.</exception>
+    public static string[]? MorphTargetNames(AssetHandle mesh)
+    {
+        var length = Native.bcs_render_morph_target_names(mesh.Key, null, 0);
+        if (length == NativeStatus.NotPresent) return null;
+        Native.Check(length, $"reading the morph targets of {mesh}");
+        if (length == 0) return [];
+
+        var names = Native.ReadText(
+            (buffer, capacity) => Native.bcs_render_morph_target_names(mesh.Key, buffer, capacity),
+            $"reading the morph targets of {mesh}");
+        return names.Split('\n');
+    }
+
+    /// <summary>
     /// Gives a mesh made in code the joints each vertex follows and how much each of them moves it,
     /// which a skin then bends it by.
     /// </summary>

@@ -10081,6 +10081,7 @@ static class Bevy.Render
   static bool WriteMaterial(AssetHandle material, MaterialSettings settings)
   static string MaterialPathOf(Entity entity)
   static string MeshPathOf(Entity entity)
+  static string[]? MorphTargetNames(AssetHandle mesh)
   static void ClearAtmosphere(Entity camera)
   static void ClearSkyLighting(Entity camera)
   static void MakeCubemap(AssetHandle image)

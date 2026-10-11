@@ -227,6 +227,10 @@ console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor 
 plays at a time, fading from the last, so masks, additive layers and a state machine over clips
 are left to the game.
 
+A mesh's morph targets, the shapes its vertices blend toward as a clip moves their weights, are
+named in the file, and `Render.MorphTargetNames` gives a mesh's names in their order once it has
+arrived, so a weight is set by the shape it moves toward rather than by its place.
+
 A clip is also made in code, as Bevy's examples make one, a curve for each property it moves,
 aimed at an entity by the names on the path down to it. A curve is values sampled at times, or two
 values eased between by one of Bevy's easing functions, and moves a transform's translation,

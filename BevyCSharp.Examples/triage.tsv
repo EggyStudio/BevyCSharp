@@ -112,7 +112,6 @@ color_animation	can	the conversions between color spaces written in the example 
 custom_skinned_mesh	can	the strips' colors drawn from .NET's generator seeded as Bevy seeds its ChaCha8Rng, so they are other colors than Bevy's
 eased_motion	can
 easing_functions	can	Bevy's easing functions written in the examples' Ease as bevy_math writes them
-morph_targets	part	the names of each mesh's morph targets, printed as it arrives, which no call reads
 custom_loop	n/a	replaces Bevy's runner, which the bridge owns
 drag_and_drop	can
 empty	can

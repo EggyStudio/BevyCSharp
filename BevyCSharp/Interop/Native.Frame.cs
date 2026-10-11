@@ -93,6 +93,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static unsafe partial int bcs_asset_path(int handle, byte* buffer, int capacity);
 
+    /// <summary>Writes the names of a mesh's morph targets into a buffer, a line each.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static unsafe partial int bcs_render_morph_target_names(int mesh, byte* buffer, int capacity);
+
     /// <summary>Reports how far along a load is.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
