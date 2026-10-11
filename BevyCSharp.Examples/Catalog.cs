@@ -190,6 +190,7 @@ internal static class Catalog
         new("2d_screen_shake", ScreenShake2d.Build),
         new("2d_top_down_camera", TopDownCamera2d.Build),
         new("camera_orbit", CameraOrbit.Build),
+        new("custom_projection", CustomProjection.Build),
         new("first_person_view_model", FirstPersonViewModel.Build),
         new("projection_zoom", ProjectionZoom.Build),
 

@@ -45,6 +45,7 @@ pub mod post;
 pub mod primitives;
 pub mod probes;
 pub mod programs;
+pub mod projection;
 pub mod rays;
 pub mod reflect;
 pub mod render_errors;

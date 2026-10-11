@@ -37,6 +37,18 @@ top-down view. `Order` decides which camera draws over which, and `ClearMode.Kee
 another. A light is aimed by its `Transform`, since a directional or spot light shines down its own
 negative Z, which `Transform.LookingAt` produces.
 
+A projection of the game's own is Bevy's perspective with entries of its matrix written over it,
+by their column and row. An oblique projection, which shears the view toward a side as a portal or
+a reflection in water draws, writes the first two rows of column 2, as Bevy's custom_projection
+does, and the perspective keeps following the window's aspect:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetAdjustedPerspective(camera, [(2, 0, 0.2f), (2, 1, 0.6f)]);
+```
+
 `Viewport` gives a camera part of the window instead of all of it, for splitscreen, and `Layers`
 decides what a camera can see at all, for a minimap:
 

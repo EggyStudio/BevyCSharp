@@ -559,6 +559,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_camera_target(ulong entity, int image, int layer);
 
+    /// <summary>Gives a camera Bevy's perspective with entries of its matrix written over it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_adjusted_perspective(ulong camera, float fov, float near, float far, float* entries, int count);
+
     /// <summary>Points a camera at a window a game spawned.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

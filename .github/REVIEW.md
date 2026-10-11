@@ -10,23 +10,43 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7a6cbf16`. One commit, load_gltf_extras, unpushed with the decal, and its triage
-line was stale, glTF's four kinds of extras being reflected with their JSON as a string already: the
-example gathers the four through the listing by component each frame and prints every entity holding
-any in Bevy's format, each value escaped as Rust's debug writes a string, the capture showing the
-cube, its geometry's material and the scene as Bevy prints them, the entities in index order rather
-than Bevy's query order, which the triage note says; the model joins the asset list, the assets
-guide has its paragraph and block; no library change, so no suite, the norm, document and path tests
-20 of 20, the prose at 299. EXAMPLES.md reads 343 written, 2 in part and 37 missing. Right, the
-stale line read first and the listing used for what it was built for. The working session takes
-error_handling before the depth to a texture, since it needs no bridge work either, the mesh's
-triangles read back and sampled by area in C# as Bevy's sampler does, a throwing system logged with
-the app running on as Bevy's warn handler has it and the fail-fast setting as the panic, a system
-catching its own error for Bevy's pipe, a refused command on a missing entity for its failing
-commands and a pointer-move observer for the sphere; then the depth to a texture, a system copying a
-depth-only camera's depth into an image in the render graph and a material sampling it with a
-comparison sampler, and a custom projection, a projection type the bridge declares set by a matrix
-from C#, which both take bridge work.
+Reviewed up to `6641dbcc`. One commit, error_handling, unpushed with the two before it and with no
+bridge work: the ten thousand points come from the icosphere's triangles read back through
+`Render.TryReadMesh`, each triangle picked by its cumulative area with a binary search and a point
+picked evenly within it by the folded pair, red emissive spheres parented to the sphere; the errors
+map onto what C# has, a pointer-move observer sliding the sphere and throwing where there is no
+transform with mesh picking on, a system catching a resource never inserted and logging the captured
+error, a system catching the refused add to an entity that never was and logging it as an error with
+its context, and Bevy's spawn at an id left out for having no counterpart; the run logs both as
+Bevy's does and the capture shows the dotted sphere over the green plane; the running guide says the
+engine's handling is Bevy's warn handler, the fail-fast setting its panic, and that a system dealing
+with its own error catches it. The norm, document and path tests 20 of 20, the prose at 299.
+EXAMPLES.md reads 344 written, 2 in part and 36 missing. Right, the sampling done as Bevy's sampler
+does it from the mesh the engine already reads back, and the one thing without a counterpart left
+out and said. custom_projection is under way at ABI 267: a projection type the bridge declares,
+Bevy's perspective with entries written over its clip matrix and its sub-view, the update, the far
+plane and the frustum's corners the perspective's so it follows the window, set from C# with the
+field of view, the near and far planes and the entries, a column or row past three refused on both
+sides, with a native test of the entries landing and the rest staying the perspective's, a managed
+test reading the variant back as custom with both refusals, the example Bevy's scene with its two
+entries, and the cameras guide's paragraph and block.
+
+Before it, `7a6cbf16` came, load_gltf_extras, and its triage line was stale, glTF's four kinds of
+extras being reflected with their JSON as a string already: the example gathers the four through the
+listing by component each frame and prints every entity holding any in Bevy's format, each value
+escaped as Rust's debug writes a string, the capture showing the cube, its geometry's material and
+the scene as Bevy prints them, the entities in index order rather than Bevy's query order, which the
+triage note says; the model joins the asset list, the assets guide has its paragraph and block; no
+library change, so no suite, the norm, document and path tests 20 of 20, the prose at 299.
+EXAMPLES.md reads 343 written, 2 in part and 37 missing. Right, the stale line read first and the
+listing used for what it was built for. The working session takes error_handling before the depth to
+a texture, since it needs no bridge work either, the mesh's triangles read back and sampled by area
+in C# as Bevy's sampler does, a throwing system logged with the app running on as Bevy's warn
+handler has it and the fail-fast setting as the panic, a system catching its own error for Bevy's
+pipe, a refused command on a missing entity for its failing commands and a pointer-move observer for
+the sphere; then the depth to a texture, a system copying a depth-only camera's depth into an image
+in the render graph and a material sampling it with a comparison sampler, and a custom projection, a
+projection type the bridge declares set by a matrix from C#, which both take bridge work.
 
 Before it, `c16f67e5` came, decal, ABI 266: `Render.CreateDecalMaterial` builds a standard material
 from the usual settings and wraps it in Bevy's forward decal material with a depth fade and a depth
@@ -46,31 +66,6 @@ passed and 2 skipped of 1,422; cargo's 89 and 154; the prose at 299. Right, the 
 kept apart as Bevy keeps them, the private mesh tested through Bevy's own plugin, and the headless
 case told what it needs. Next the depth to a texture, then a custom projection, the mesh sampling's
 error handling and the glTF extras.
-
-Before it, three commits came, `4fcba199` to `c447a370`, pushed by the owner at 17:36 with the three
-before them. `4fcba199` sets the version, `build/version.txt` alone, the owner's. `d91665d9`,
-ghost_nodes: Bevy's feature is in the render profile, adding no crate, the lock byte for byte the
-same (Decision 25), and the components table written again from an editor run on the new bridge
-gains the ghost node alone; `GhostNodeRef` puts a node the layout passes through as though its
-children were its parent's, the example built entity by entity against Bevy's scene notation, its
-capture showing the text at the top left and three buttons in one row, two of them a ghost's
-children, and driven offscreen three clicks on the ghost's first button and one on the third
-counting 3, 3 and 1; `UiTests` lays two boxes under a ghost and one beside it and reads them in one
-row, the file at 575 lines; the interface guide has its paragraph and block. `c447a370`, item 15:
-the development machine's GPU is named nowhere a user reads, the pipeline remark speaking of the
-development machine's laptop GPU, the running guide's sample adapter line of the GPU's name and
-vendor, and the comparison with Bevy of a laptop with a 32-thread CPU and a discrete laptop GPU on
-Vulkan, the CPU's model gone with the GPU's since it names the same machine, which is right; one
-comment in the bridge's Solari module still names it and goes with the next commit, the bridge's
-code being code a reader sees. EXAMPLES.md reads 341 written, 2 in part and 39 missing. The suite:
-1,419 passed and 2 skipped of 1,421, the norm tests 18 of 18; cargo's 89 and 153. Right, the feature
-read from the lock before it was turned on, the ghost's layout held by a test of positions rather
-than a picture, and the machine's name taken out of the user's documents whole. Found on the way and
-taken as item 16: offscreen, `./bcs`'s click loses a click at a point the pointer has not moved to,
-the button example counting two of three clicks at one spot and every one once the pointer has been
-moved there a few frames first, picking wanting the hover a frame before the press. Next the forward
-decal, then the depth to a texture, a custom projection, the mesh sampling's error handling and the
-glTF extras.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -288,9 +283,9 @@ from [SHARED.md](SHARED.md).
    `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
    `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
    bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), and the
-   forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, the table at 343 written and 37
-   missing; the rows that need no crate and no word follow in TODO.md's order, error_handling next,
-   then the depth to a texture and a custom projection.
+   forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and error_handling at `6641dbcc`,
+   the table at 344 written and 36 missing; the rows that need no crate and no word follow in
+   TODO.md's order, a custom projection under way, then the depth to a texture.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from

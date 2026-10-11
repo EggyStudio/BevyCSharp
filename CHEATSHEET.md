@@ -875,6 +875,7 @@ static void SetPostProcessing(Entity camera, PostSettings settings);  // Sets wh
 static void SetEffects(Entity camera, EffectSettings settings);  // Sets the lens a camera draws through
 static void SetAtmosphere(Entity camera, AtmosphereSettings settings);  // Draws the sky the air scatters, seen from a camera
 static void ClearAtmosphere(Entity camera);                     // Stops a camera drawing the sky
+static void SetAdjustedPerspective(Entity camera, ReadOnlySpan<(int, int, float)> entries, float fieldOfView = 0.7853982f, float near = 0.1f, float far = 1000f);  // Gives a camera Bevy's perspective with some entries of its clip-from-view matrix written over it, a projection of the game's own, as Bevy's custom_projection declares one
 static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a mesh primitive and returns a handle to it
 static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and measures a mesh was made from, or null for one that was not made by CreateMesh
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle

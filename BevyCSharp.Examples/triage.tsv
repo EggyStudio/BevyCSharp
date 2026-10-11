@@ -160,7 +160,7 @@ spatial_audio_3d	can
 2d_screen_shake	can
 2d_top_down_camera	can	through Bevy's reflected Bloom
 camera_orbit	can
-custom_projection	missing	custom camera projections
+custom_projection	can	its oblique projection Bevy's perspective with two entries written over through Render.SetAdjustedPerspective, where Bevy's declares a projection type
 first_person_view_model	can
 free_camera_controller	missing	Bevy's free camera controller, its plugin and its settings
 pan_camera_controller	missing	Bevy's pan camera controller, its plugin and its settings

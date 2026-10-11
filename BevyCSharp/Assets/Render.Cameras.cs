@@ -567,4 +567,52 @@ public static unsafe partial class Render
             Native.bcs_render_set_atmosphere(camera.Bits, &native),
             $"clearing the atmosphere on {camera}");
     }
+
+    /// <summary>
+    /// Gives a camera Bevy's perspective with some entries of its clip-from-view matrix written
+    /// over it, a projection of the game's own, as Bevy's custom_projection declares one. Only
+    /// valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy takes a projection of a game's own as a Rust type, which C# cannot declare, and what one
+    /// most often is, Bevy's example among them, is its perspective with some of its matrix changed.
+    /// An oblique projection writes the first two rows of column 2, which shears the view toward a
+    /// side as a portal or a reflection in water does, and an off-axis one does the same for a
+    /// screen seen from aside. The perspective keeps following the window's aspect, and the entries
+    /// are written over it each time.
+    /// </para>
+    /// <para>
+    /// A projection read through the camera's <c>ProjectionRef</c> afterward is Bevy's custom one,
+    /// whose matrix reflection does not reach, and one set there again replaces this.
+    /// </para>
+    /// </remarks>
+    /// <param name="camera">The camera.</param>
+    /// <param name="entries">Each entry's column and row, zero to three, and its value.</param>
+    /// <param name="fieldOfView">The vertical field of view, in radians, Bevy's default an eighth of a turn.</param>
+    /// <param name="near">The nearest distance drawn.</param>
+    /// <param name="far">The farthest distance drawn.</param>
+    /// <exception cref="ArgumentOutOfRangeException">A column or row is past three.</exception>
+    /// <exception cref="BevyNativeException">The entity is no camera, or this build has no renderer.</exception>
+    public static void SetAdjustedPerspective(
+        Entity camera,
+        ReadOnlySpan<(int Column, int Row, float Value)> entries,
+        float fieldOfView = MathF.PI / 4f,
+        float near = 0.1f,
+        float far = 1000f)
+    {
+        var flat = new float[entries.Length * 3];
+        for (var i = 0; i < entries.Length; i++)
+        {
+            var (column, row, value) = entries[i];
+            ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)column, 3u, nameof(entries));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)row, 3u, nameof(entries));
+            (flat[3 * i], flat[3 * i + 1], flat[3 * i + 2]) = (column, row, value);
+        }
+
+        fixed (float* raw = flat)
+            Native.Check(
+                Native.bcs_render_set_adjusted_perspective(camera.Bits, fieldOfView, near, far, raw, entries.Length),
+                $"giving camera {camera} an adjusted perspective");
+    }
 }

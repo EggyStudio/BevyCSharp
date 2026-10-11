@@ -149,8 +149,8 @@ table also answers whether the two agree.
 |---|---|---|
 | A test that cannot run is reported as skipped with its reason | has (`e857326`) | has (`939ba258`) |
 | Examples picked by name as an argument, each with a capture CI takes | taken at `661682e`, measured against Bevy's own 421 examples in EXAMPLES.md | has (`3DEngine.Examples`, `048c072c`) |
-| Behaviors registered by a module initializer the generator writes, so a game published trimmed or as native AOT keeps them | has | has (`425ffc31`), with Pusher published native |
-| A game published as native AOT and run by CI | has (`build/play-native.sh`), Courtyard published native and played by the pack workflow | has (`build/play-native.sh`, `f2abc4f0`), Pusher drawn for 300 frames under the validation layer |
+| Behaviors registered by a module initializer the generator writes, so a game published trimmed or as native AOT keeps them | has | has (`425ffc31`), with Slide published native |
+| A game published as native AOT and run by CI | has (`build/play-native.sh`), Courtyard published native and played by the pack workflow | has (`build/play-native.sh`, `f2abc4f0`), Slide drawn for 300 frames under the validation layer |
 | Whole pictures compared with checked-in references, a small share of pixels allowed to differ between devices | to take, for the examples' captures | has (`771f10e9`, `fd5bcc84`) |
 | Seven games of different kinds built from the package, the later ones finding nothing new | has one, Courtyard | has (`games/`, to `7a8360ae`) |
 | A game written in behaviors alone, with hundreds of entities, played by CI and profiled | taken at `109711a`, `games/Swarm` | has (`games/Swarm`, `3c9c7ac8`) |

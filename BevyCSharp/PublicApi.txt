@@ -10292,6 +10292,7 @@ static class Bevy.Render
   static void Screenshot(string path)
   static void Screenshot(string path, AssetHandle target)
   static void Screenshot(string path, Entity window)
+  static void SetAdjustedPerspective(Entity camera, ReadOnlySpan<(int, int, float)> entries, float fieldOfView = 0.7853982f, float near = 0.1f, float far = 1000f)
   static void SetAmbientLight((float, float, float) color, float brightness)
   static void SetAmbientLight(Entity camera, (float, float, float)? color, float brightness = 80f)
   static void SetAmbientOcclusion(Entity camera, AmbientOcclusionQuality? quality, float thickness = 0f)
