@@ -7,11 +7,14 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Windowing;
 
-// A window of 500 by 300 whose scale factor is overridden to one, shown in its title and beside a
+// A window of 512 by 288 whose scale factor is overridden to one, shown in its title and beside a
 // panel. Enter turns the override off and on, and the up and down arrows raise and lower it.
+//
+// Bevy's opens a window of 500 by 300, and this one the sixteen by nine nearest it, so its picture
+// is the shape of every other one, where cutting Bevy's to that shape would cut its text.
 internal static class ScaleFactorOverride
 {
-    public static void Configure(Config config) => (config.Width, config.Height) = (500, 300);
+    public static void Configure(Config config) => (config.Width, config.Height) = (512, 288);
 
     public static void Build(App app)
     {

@@ -350,7 +350,7 @@ font_weights	can
 generic_font_families	missing	Bevy's system font discovery, which the bridge does not compile in, and the family each generic one stands for, which Bevy's FontCx answers
 ghost_nodes	missing	ghost nodes (GhostNode)
 gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
-grid	can
+grid	can	its window Bevy's default of 1280 by 720 rather than the 800 by 600 Bevy's opens, so its picture is sixteen by nine
 image_node	can
 ime_support	missing	a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in
 letter_spacing	can
@@ -398,7 +398,7 @@ custom_cursor_image	can	the sheet's atlas and its hotspot set through Window.Set
 low_power	missing	Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default
 monitor_info	part	a run on a display, whose monitors its windows fill, where an offscreen run reports none and opens nothing
 multiple_windows	can
-scale_factor_override	can	through the resolution of Bevy's reflected Window
+scale_factor_override	can	through the resolution of Bevy's reflected Window, its window 512 by 288 rather than Bevy's 500 by 300, so its picture is sixteen by nine
 screenshot	can	the pictures saved beside the program
 transparent_window	can
 window_drag_move	can

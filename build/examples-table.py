@@ -241,9 +241,9 @@ def build(version, examples, order, triage, written, source, followed):
         "picture of what it draws or, for one with nothing to draw, the text it prints. Every "
         "picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and "
         "kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a "
-        "3D one, so a label reads as Bevy draws it and a sky does not band. A size of another shape "
-        "than sixteen by nine is padded around its middle with nothing to that shape, so the README "
-        "shows every picture at one size.")
+        "3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another "
+        "shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the "
+        "README shows every picture whole in a box of one shape.")
 
     for group in groups:
         out.append("")

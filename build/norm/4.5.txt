@@ -4,7 +4,6 @@
 
 bevymark 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 bevymark_3d 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
-grid 800x600	its example asks for this window, as Bevy's does
 headless_renderer 1920x1080	its example renders at this size, as Bevy's does
 many_animated_sprites 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_buttons 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
@@ -21,7 +20,5 @@ many_morph_targets 1920x1080	a stress test, drawn at the window Bevy's stress te
 many_sprites 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_text 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
 many_text2d 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
-resizing 401x401	its example asks for this window, as Bevy's test does
-scale_factor_override 500x300	its example asks for this window, as Bevy's does
+scale_factor_override 512x288	its example asks for this window, the sixteen by nine nearest Bevy's
 text_pipeline 1920x1080	a stress test, drawn at the window Bevy's stress tests ask for
-window_settings 500x300	its example asks for this window, as Bevy's does

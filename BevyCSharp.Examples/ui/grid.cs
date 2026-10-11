@@ -7,11 +7,12 @@ namespace BevyCSharp.Examples.Interface;
 
 // Demonstrates grid layout, a header across the top, a square of sixteen colored cells, a sidebar
 // of wrapped text and a footer, with a hidden panel laid over them.
+//
+// Bevy's opens a window of 800 by 600, and this one Bevy's default of 1280 by 720, so its picture
+// is the shape of every other one, where cutting Bevy's to that shape would cut its header and its
+// footer.
 internal static class Grid
 {
-    // Bevy's window for it, 800 by 600, which its square of cells is sized to fill.
-    public static void Configure(Config config) => (config.Width, config.Height) = (800u, 600u);
-
     public static void Build(App app) => app.Startup(ctx =>
     {
         var ecs = ctx.Ecs;

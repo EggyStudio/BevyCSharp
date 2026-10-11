@@ -129,16 +129,14 @@ esac
 shot="${out%.webp}.shot.png"
 ./bcs shot "$shot" "$frames" --quiet --timeout 600
 
-# Every picture sixteen by nine, as the README's gallery shows each at one size, so one taken at a
-# window of another shape the example opens, as Bevy's grid opens one of 800 by 600, is padded out
-# around its middle with nothing, rather than drawn at another size than Bevy's or stretched by the
-# page. The smallest such shape that holds it is sixteen and nine times a whole number.
+# Every picture sixteen by nine, as the README's gallery shows each in a box of that shape, so a
+# shot of another shape, as the square window Bevy's resizing test opens, is scaled until it fills
+# 1280 by 720 and cut around its middle. An example whose cut would lose what it shows opens a
+# window of that shape instead, as grid and scale_factor_override do.
 if [ -n "$magick" ]; then
     read -r width height < <("$magick" "$shot" -format '%w %h\n' info:)
     if [ $((width * 9)) -ne $((height * 16)) ]; then
-        scale=$(( (width + 15) / 16 ))
-        [ $(( (height + 8) / 9 )) -gt "$scale" ] && scale=$(( (height + 8) / 9 ))
-        "$magick" "$shot" -background none -gravity center -extent "$((scale * 16))x$((scale * 9))" "$shot"
+        "$magick" "$shot" -resize '1280x720^' -gravity center -extent 1280x720 "$shot"
     fi
 fi
 
