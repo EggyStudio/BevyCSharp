@@ -38,6 +38,9 @@ public sealed class GizmoShapeTests
     [InlineData("rounded rect")]
     [InlineData("rounded cuboid")]
     [InlineData("double arrow")]
+    [InlineData("plane")]
+    [InlineData("endless line")]
+    [InlineData("turned sphere")]
     public void AShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -92,6 +95,14 @@ public sealed class GizmoShapeTests
     [InlineData("ellipse")]
     [InlineData("rounded rect")]
     [InlineData("double arrow")]
+    [InlineData("plane")]
+    [InlineData("endless line")]
+    [InlineData("capsule")]
+    [InlineData("annulus")]
+    [InlineData("sector")]
+    [InlineData("segment")]
+    [InlineData("regular polygon")]
+    [InlineData("polyline")]
     public void AFlatShapeIsDrawn(string shape)
     {
         Needs.Renderer();
@@ -403,6 +414,18 @@ public sealed class GizmoShapeTests
                         Gizmos.Arrow(new Vec3(-2f, -1f, 0f), new Vec3(2f, 1f, 0f), green, tipLength: 0.8f, doubleEnd: true);
                         break;
 
+                    case "plane":
+                        Gizmos.Plane(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitX, 1f), 1.5f, 1.5f, green, inFront: true);
+                        break;
+
+                    case "endless line":
+                        Gizmos.EndlessLine(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitZ, 0.4f), green, inFront: true);
+                        break;
+
+                    case "turned sphere":
+                        Gizmos.Sphere(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitX, 0.6f), 1.8f, green, resolution: 10);
+                        break;
+
                     default:
                         Gizmos.Box(Vec3.Zero, Quat.Identity, new Vec3(2f, 2f, 2f), green);
                         break;
@@ -492,6 +515,38 @@ public sealed class GizmoShapeTests
 
                     case "double arrow":
                         Gizmos.Arrow2d((-30f, -10f), (30f, 10f), green, tipLength: 12f, doubleEnd: true);
+                        break;
+
+                    case "plane":
+                        Gizmos.Plane2d((0f, 0f), green, angle: 0.3f);
+                        break;
+
+                    case "endless line":
+                        Gizmos.EndlessLine2d((0f, 0f), green, angle: 0.3f);
+                        break;
+
+                    case "capsule":
+                        Gizmos.Capsule2d((0f, 0f), 12f, 16f, green);
+                        break;
+
+                    case "annulus":
+                        Gizmos.Annulus2d((0f, 0f), 12f, 24f, green);
+                        break;
+
+                    case "sector":
+                        Gizmos.CircularSector2d((0f, 0f), 30f, 0.8f, green);
+                        break;
+
+                    case "segment":
+                        Gizmos.CircularSegment2d((0f, 0f), 30f, 0.8f, green);
+                        break;
+
+                    case "regular polygon":
+                        Gizmos.RegularPolygon2d((0f, 0f), 24f, 5, green);
+                        break;
+
+                    case "polyline":
+                        Gizmos.Polyline2d([(-30f, -10f), (-10f, 10f), (10f, -10f), (30f, 10f)], green);
                         break;
 
                     default:

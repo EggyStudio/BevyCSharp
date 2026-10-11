@@ -264,6 +264,7 @@ internal static class Catalog
         new("bounding_2d", Bounding2d.Build),
         new("cubic_splines", CubicSplines.Build),
         new("random_sampling", RandomSampling.Build),
+        new("render_primitives", RenderPrimitives.Build),
 
         // Transforms
         new("3d_rotation", Rotation3d.Build),

@@ -10,7 +10,7 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d351ba13`. One commit, nondeterministic_system_order: `App.DetectAmbiguities`
+Reviewed up to `1ee62fca`. One commit, nondeterministic_system_order: `App.DetectAmbiguities`
 reports the pairs of a stage's systems whose declared access conflicts, one writing what the other
 reads or writes, and whose order nothing states, through `After`, `Before` or `Chain` directly or
 through other systems of the stage, a system declaring nothing left out and `AmbiguousWith` excusing
@@ -26,9 +26,19 @@ exclusions by order through a third system, by two readers, by `AmbiguousWith` a
 system, the error refusing to start and the warning running; the behaviors guide's section on order
 has it. Right, the report where the knowledge is and the narrowing said for what it is. EXAMPLES.md
 reads 332 written, one in part and 49 missing; the suite 1,390 passed, 2 skipped and one failed of
-1,393, a flake of the CLI's stop, which is Verdict 11; cargo's 142. Next render_primitives, then
-texture_atlas, image_node_resizing, whose `bevy_ui_debug` feature pulls no crate, monitor_info and
-relationships.
+1,393, a flake of the CLI's stop, which is Verdict 11; cargo's 142. Then `1ee62fca`, Verdict 11: the
+CLI's own stop verb already judged by the session ending, so the race was the tests' helper, which
+sends `app.quit` through a quit helper since that gives the answer or nothing where the connection
+closed first, the quit judged by the loop's end alone, with a test standing up a listener that reads
+the quit and hangs up, the class run twenty times at eight of eight; the cause read, the server
+completing the answer inside the frame, the exit ending the app at the frame's end and the server's
+dispose shutting both directions of every socket, so a connection thread that had not yet written
+the answer wrote nothing and the client read the end. Verdict 11 is settled; the server's side,
+shutting the receive side alone, joining the connection threads and then closing so an answered
+request is always written, is item 11, taken with the batch that next touches the server, since it
+changes shutdown on three platforms and no client of ours reads the answer. Next render_primitives,
+then texture_atlas, image_node_resizing, whose `bevy_ui_debug` feature pulls no crate, monitor_info
+and relationships.
 
 Before it, one commit came to be read, change_detection, as the shape taken with two things more. A
 component says whether it was added and a resource whether it was added or changed since the running
@@ -312,6 +322,15 @@ from [SHARED.md](SHARED.md).
     fixing the five diagnostics with one clear mend and naming the seven without, packed beside the
     generator.
 
+11. **The CLI server writes an answered request before it closes.** `app.quit`'s answer is completed
+    inside the frame, the app ends at the frame's end, and the server's dispose shuts both
+    directions of every open socket, so a connection thread that had not yet written the answer
+    writes nothing and the client reads the end of the stream, which Verdict 11 found through a
+    test's stop and the CLI's own verb copes with by judging by the session's end. The dispose shuts
+    the receive side alone, joins the connection threads within a bound, then closes, so a request
+    answered is a request written, with a test that reads `app.quit`'s answer; taken with the batch
+    that next touches the server, since it changes shutdown on three platforms.
+
 ## Verdicts
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
@@ -339,15 +358,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-11. **`CliServerTests.AWrongTokenIsRefused` failed once in the whole suite, the stop verb's
-    `app.quit` meeting a closed connection after 110 ms rather than an answer, and passed three of
-    three alone.** A race between the app answering `app.quit` and the app ending its loop, which
-    closes the connection; a test that fails once in a hundred reddens a run's page for nothing and
-    costs the run, so it is mended before the next batch of examples. The mend as the coder reads
-    it: the stop verb takes a connection closed after `app.quit` was sent as the app having quit,
-    judging by the loop's end and not the answer, and a test holds a quit that answers nothing;
-    measured by the class run twenty times. Settled with that commit.
 
 ## Decisions
 

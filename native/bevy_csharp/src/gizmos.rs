@@ -106,6 +106,7 @@ fn spacing(shape: &QueuedGizmo) -> bevy::math::Vec2 {
 #[cfg(feature = "render")]
 macro_rules! draw_shape {
     ($gizmos:expr, $shape:expr, $position:expr, $rotation:expr, $color:expr, $fades_to:expr) => {{
+        use bevy::gizmos::primitives::dim2::GizmoPrimitive2d;
         use bevy::shape::{Capsule3d, ConicalFrustum, Cone, Cuboid, Cylinder, Torus};
         use bevy::math::{Isometry2d, Isometry3d, Rot2, UVec2, Vec2, Vec3};
         use bevy::transform::components::Transform;
@@ -200,43 +201,41 @@ macro_rules! draw_shape {
             }
 
             // The rest of the primitives take a radius and one more number, which `end.x` carries
-            // for each of them.
+            // for each of them, and the segments a round edge is drawn with in `end.y`, zero for
+            // Bevy's own.
             10 => {
-                $gizmos.primitive_3d(
-                    &Capsule3d::new(shape.radius, far.x),
-                    at,
-                    $color,
-                );
+                let mut capsule = $gizmos.primitive_3d(&Capsule3d::new(shape.radius, far.x), at, $color);
+                if far.y >= 1.0 {
+                    capsule = capsule.resolution(far.y as u32);
+                }
+                drop(capsule);
             }
             11 => {
-                $gizmos.primitive_3d(
-                    &Cone {
-                        radius: shape.radius,
-                        height: far.x,
-                    },
-                    at,
-                    $color,
-                );
+                let mut cone = $gizmos.primitive_3d(&Cone { radius: shape.radius, height: far.x }, at, $color);
+                if far.y >= 1.0 {
+                    cone = cone.resolution(far.y as u32);
+                }
+                drop(cone);
             }
             12 => {
-                $gizmos.primitive_3d(
-                    &Cylinder::new(shape.radius, far.x),
-                    at,
-                    $color,
-                );
+                // Half its height, as the managed side names it, where Bevy's `Cylinder::new`
+                // takes the whole.
+                let mut cylinder = $gizmos.primitive_3d(&Cylinder { radius: shape.radius, half_height: far.x }, at, $color);
+                if far.y >= 1.0 {
+                    cylinder = cylinder.resolution(far.y as u32);
+                }
+                drop(cylinder);
             }
             13 => {
                 // The major radius is the ring's own, and the minor one is how thick the ring is,
                 // which is the number every other shape here spends on a length.
-                $gizmos.primitive_3d(
-                    &Torus {
-                        minor_radius: far.x,
-                        major_radius: shape.radius,
-                    },
-                    at,
-                    $color,
-                );
+                let mut torus = $gizmos.primitive_3d(&Torus { minor_radius: far.x, major_radius: shape.radius }, at, $color);
+                if far.y >= 1.0 {
+                    torus = torus.minor_resolution(far.y as u32).major_resolution(far.y as u32);
+                }
+                drop(torus);
             }
+
             20 => {
                 // A cone with its point cut off, which is the one remaining primitive whose
                 // numbers fit the queue: a radius at each end and a height between them.
@@ -345,6 +344,22 @@ macro_rules! draw_shape {
                 }
                 drop(rect);
             }
+            // Bevy's primitives as its own primitive_2d and primitive_3d draw them, each from the
+            // numbers it is made of, for what no shape above draws the same way: a plane's normal
+            // and the plane, an endless line's direction, and the flat shapes of a circle's parts.
+            28 => $gizmos.primitive_2d(&bevy::shape::Plane2d { normal: bevy::math::Dir2::Y }, turn, $color),
+            29 => drop($gizmos.primitive_3d(
+                &bevy::shape::Plane3d { normal: bevy::math::Dir3::Y, half_size: Vec2::new(far.x, far.y) },
+                at,
+                $color,
+            )),
+            30 => drop($gizmos.primitive_2d(&bevy::shape::Line2d { direction: bevy::math::Dir2::X }, turn, $color)),
+            31 => $gizmos.primitive_3d(&bevy::shape::Line3d { direction: bevy::math::Dir3::X }, at, $color),
+            32 => $gizmos.primitive_2d(&bevy::shape::Capsule2d { radius: shape.radius, half_length: far.x }, turn, $color),
+            33 => drop($gizmos.primitive_2d(&bevy::shape::Annulus::new(far.x, shape.radius), turn, $color)),
+            34 => $gizmos.primitive_2d(&bevy::shape::CircularSector::new(shape.radius, far.x), turn, $color),
+            35 => $gizmos.primitive_2d(&bevy::shape::CircularSegment::new(shape.radius, far.x), turn, $color),
+            36 => $gizmos.primitive_2d(&bevy::shape::RegularPolygon::new(shape.radius, (far.x as u32).max(3)), turn, $color),
             _ => {
                 $gizmos.line(position, far, $color);
             }

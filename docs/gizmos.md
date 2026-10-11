@@ -21,6 +21,17 @@ or a floor, `Box`, `RoundedCuboid`, `Capsule`, `Cone`, `Cylinder`, `Torus` and `
 a collider or a radius of effect usually is, and `Axes` an orientation. Everything but a line takes
 a `Quat`, because a shape with a flat side has to be told which way it faces.
 
+Bevy's math primitives are drawn as its `primitive_2d` and `primitive_3d` draw them, as Bevy's
+render_primitives shows them. `Plane` draws a plane with the arrow it faces along, `EndlessLine`
+a line with no ends, and for a 2D camera `Plane2d`, `EndlessLine2d`, `Capsule2d`, `Annulus2d`,
+`CircularSector2d`, `CircularSegment2d` and `RegularPolygon2d` the flat shapes, with `Polyline2d`
+for a polygon given by its corners:
+
+```csharp
+Gizmos.CircularSector2d((0f, 0f), radius: 100f, halfAngle: MathF.PI / 4f, (1f, 1f, 1f, 1f));
+Gizmos.Plane(Vec3.Zero, Quat.Identity, halfWidth: 1f, halfDepth: 1f, (1f, 1f, 1f, 1f));
+```
+
 <!-- compiled with:
 Vec3 joint = default;
 Quat facing = Quat.Identity;

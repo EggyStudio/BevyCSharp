@@ -224,8 +224,10 @@ pub struct BcsGizmoConfig {
     /// `5` circle, `6` arc, `7` arrow, `8` grid, `9` box, `10` capsule, `11` cone, `12` cylinder,
     /// `13` torus, `20` conical frustum. `14` to `19` are the flat rectangle, circle, fading line,
     /// arrow, arc and grid a 2D camera draws, which read the same numbers with the third one
-    /// dropped. What the fields below mean depends on this, because every shape is described by
-    /// the same handful of numbers.
+    /// dropped. `28` to `36` are Bevy's primitives as it draws them: a flat plane, a plane, a flat
+    /// endless line, an endless line, then a flat capsule, annulus, circular sector, circular
+    /// segment and regular polygon. What the fields below mean depends on this, because every
+    /// shape is described by the same handful of numbers.
     pub kind: i32,
     /// Where the shape sits: a line's start, or the center of everything else.
     pub start: [f32; 3],

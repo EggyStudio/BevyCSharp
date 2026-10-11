@@ -142,6 +142,22 @@ public static unsafe partial class Gizmos
             ColorA = color.A,
         });
 
+    /// <summary>Draws the outline of a sphere, turned, which turns its three circles with it.</summary>
+    /// <param name="center">Where it sits, in world space.</param>
+    /// <param name="rotation">Which way its circles face.</param>
+    /// <param name="radius">How large.</param>
+    /// <param name="color">Linear RGBA.</param>
+    /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments each circle is drawn with, or zero for Bevy's own.</param>
+    public static void Sphere(
+        Vec3 center,
+        Quat rotation,
+        float radius,
+        (float R, float G, float B, float A) color,
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(1, center, rotation, color, inFront, radius, new Vec3(resolution, 0f, 0f)));
+
     /// <summary>Draws a line with a head on its far end.</summary>
     /// <remarks>
     /// What a line cannot say. A velocity, a normal, a direction to a target. All of them are a
@@ -182,8 +198,9 @@ public static unsafe partial class Gizmos
     /// <summary>Draws the outline of a circle.</summary>
     /// <remarks>
     /// Flat, facing the way <paramref name="rotation"/> points, which is the difference between
-    /// this and <see cref="Sphere"/>. A circle says where a plane is, and a sphere says where a
-    /// point is and how far its influence reaches.
+    /// this and <see cref="Sphere(Vec3, float, ValueTuple{float, float, float, float}, bool, uint)"/>.
+    /// A circle says where a plane is, and a sphere says where a point is and how far its influence
+    /// reaches.
     /// </remarks>
     /// <param name="center">Where it sits, in world space.</param>
     /// <param name="rotation">Which way the circle faces. Unrotated is the XY plane.</param>
@@ -336,14 +353,16 @@ public static unsafe partial class Gizmos
     /// <param name="length">The straight part between the caps.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments a round edge is drawn with, or zero for Bevy's own.</param>
     public static void Capsule(
         Vec3 center,
         Quat rotation,
         float radius,
         float length,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(10, center, rotation, color, inFront, radius, new Vec3(length, 0f, 0f)));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(10, center, rotation, color, inFront, radius, new Vec3(length, resolution, 0f)));
 
     /// <summary>Draws the outline of a cone.</summary>
     /// <param name="center">Where it sits, in world space.</param>
@@ -352,14 +371,16 @@ public static unsafe partial class Gizmos
     /// <param name="height">How tall.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments a round edge is drawn with, or zero for Bevy's own.</param>
     public static void Cone(
         Vec3 center,
         Quat rotation,
         float radius,
         float height,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(11, center, rotation, color, inFront, radius, new Vec3(height, 0f, 0f)));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(11, center, rotation, color, inFront, radius, new Vec3(height, resolution, 0f)));
 
     /// <summary>Draws the outline of a cylinder.</summary>
     /// <param name="center">Where the middle of it sits, in world space.</param>
@@ -368,14 +389,16 @@ public static unsafe partial class Gizmos
     /// <param name="halfHeight">Half its height, which describes the shape.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments a round edge is drawn with, or zero for Bevy's own.</param>
     public static void Cylinder(
         Vec3 center,
         Quat rotation,
         float radius,
         float halfHeight,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(12, center, rotation, color, inFront, radius, new Vec3(halfHeight, 0f, 0f)));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(12, center, rotation, color, inFront, radius, new Vec3(halfHeight, resolution, 0f)));
 
     /// <summary>Draws the outline of a torus.</summary>
     /// <remarks>
@@ -388,14 +411,16 @@ public static unsafe partial class Gizmos
     /// <param name="minor">The thickness of the ring.</param>
     /// <param name="color">Linear RGBA.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
+    /// <param name="resolution">How many segments the ring and its thickness are each drawn with, or zero for Bevy's own.</param>
     public static void Torus(
         Vec3 center,
         Quat rotation,
         float major,
         float minor,
         (float R, float G, float B, float A) color,
-        bool inFront = true) =>
-        Draw(Shape(13, center, rotation, color, inFront, major, new Vec3(minor, 0f, 0f)));
+        bool inFront = true,
+        uint resolution = 0) =>
+        Draw(Shape(13, center, rotation, color, inFront, major, new Vec3(minor, resolution, 0f)));
 
     /// <summary>Draws a flat grid of lines.</summary>
     /// <remarks>
