@@ -299,6 +299,7 @@ bool RemoveReflected(Entity entity, string typePath);           // Takes one of 
 T? Get<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components on an entity, or null when the entity does not carry it
 T Wrap<T>(Entity entity);                                       // A typed wrapper over one of Bevy's components an entity is known to carry
 T Insert<T>(Entity entity, string? json = null);                // Puts one of Bevy's components on an entity, from JSON or at its default, and returns a typed wrapper over it
+T[] All<T>();                                                   // A typed wrapper over one of Bevy's components on each entity carrying it
 Entity? ResourceEntity(string typePath);                        // The entity holding one of Bevy's resources, or null when the world has none of it
 T? Resource<T>();                                               // A typed wrapper over one of Bevy's resources, or null when the world has none of it
 T InsertResource<T>(string? json = null);                       // Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it has, and returns a typed wrapper over it
@@ -1511,7 +1512,7 @@ static void SetMaximized(bool maximized);                       // Maximizes the
 static WindowPlace Place();                                     // Where the window is, how large, and whether it is maximized
 static void StartDragMove();                                    // Hands the window to the platform to be moved by the pointer, until the button held now is let go
 static void StartDragResize(WindowEdge edge);                   // Hands the window to the platform to be resized by the pointer from one edge or corner, until the button held now is let go
-static void SetFullscreenOn(Entity window, Entity monitor);     // Makes a window a game spawned fill the monitor monitor names, at the mode the monitor shows, and centers it there for when it leaves fullscreen
+static void SetFullscreenOn(Entity window, Entity monitor);     // Makes a window a game spawned fill a monitor, at the mode the monitor shows, and centers it there for when it leaves fullscreen
 static int MonitorCount();                                      // How many monitors the platform reports
 static MonitorInfo Monitor(int index);                          // Describes one monitor, by an index below MonitorCount
 static string MonitorName(int index);                           // The name the platform gives a monitor, by an index below MonitorCount

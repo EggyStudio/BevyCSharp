@@ -77,7 +77,13 @@ if (ctx.Ecs.Get<PointLightRef>(lamp) is { } found)        // or null when the la
     Console.WriteLine($"range {found.Range}");
 
 ctx.Ecs.Wrap<TextColorRef>(label).Value = Color.White;    // one the program put there itself
+
+foreach (var each in ctx.Ecs.All<PointLightRef>())       // every entity carrying one
+    each.Intensity *= 0.5f;
 ```
+
+`All<T>` finds the entities as a Bevy query over the component does, so a disabled entity is left
+out as a system's query leaves it out, and each wrapper names its entity as `Entity`.
 
 A number crosses as a number and a color as a linear `Color` whatever space Bevy holds it in, and a
 handle inside a component, such as the image a sprite draws, is an `AssetHandle`. An enum whose

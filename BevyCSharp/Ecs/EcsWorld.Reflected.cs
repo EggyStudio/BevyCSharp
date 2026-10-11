@@ -367,6 +367,37 @@ public sealed unsafe partial class EcsWorld
     }
 
     /// <summary>
+    /// A typed wrapper over one of Bevy's components on each entity carrying it. Only valid inside
+    /// a system.
+    /// </summary>
+    /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.MonitorRef</c>.</typeparam>
+    /// <remarks>
+    /// <para>
+    /// The entities are found as a Bevy query over the component finds them, so Bevy's default
+    /// filters hide a disabled entity here as they hide it from a system, where walking
+    /// <see cref="All()"/> and asking each entity with <see cref="Get{T}"/> would find it, and would
+    /// ask the bridge once an entity rather than once.
+    /// </para>
+    /// <para>
+    /// Each wrapper carries its entity, so <c>foreach (var monitor in ecs.All&lt;MonitorRef&gt;())</c>
+    /// reads a monitor's fields and <c>monitor.Entity</c> names it. A component of the game's own is
+    /// found with <see cref="EntitiesWith{T}"/> instead, which reads it in place.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The type is not a reflected component.</exception>
+    public T[] All<T>() where T : struct, IReflectedComponent<T>
+    {
+        var count = Native.bcs_reflect_entities(T.TypePath, null, 0);
+        ReflectedCheck(count, $"Finding the entities carrying {T.TypePath}");
+        if (count == 0) return [];
+
+        var entities = new ulong[count];
+        fixed (ulong* written = entities)
+            ReflectedCheck(Native.bcs_reflect_entities(T.TypePath, written, count), $"Finding the entities carrying {T.TypePath}");
+        return [.. entities.Select(bits => T.Create(this, new Entity(bits)))];
+    }
+
+    /// <summary>
     /// The entity holding one of Bevy's resources, or <see langword="null"/> when the world has none
     /// of it.
     /// </summary>

@@ -45,6 +45,34 @@ public sealed class ReflectedWrapperTests
         harness.Run();
     }
 
+    /// <summary>
+    /// The entities carrying one of Bevy's components are answered as wrappers, as a Bevy query
+    /// finds them, an entity without it left out and a disabled one hidden.
+    /// </summary>
+    [Fact]
+    public void TheEntitiesCarryingAComponentAreFoundAsABevyQueryFindsThem()
+    {
+        using var harness = new EngineHarness(frames: 1);
+        Entity[] found = [];
+        var (first, second, plain, disabled) = (Entity.None, Entity.None, Entity.None, Entity.None);
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var ecs = ctx.Ecs;
+            (first, second, plain, disabled) = (ecs.Spawn(), ecs.Spawn(), ecs.Spawn(), ecs.Spawn());
+            foreach (var carrying in new[] { first, second, disabled }) ecs.Insert<TransformRef>(carrying);
+            ecs.Insert<DisabledRef>(disabled);
+
+            found = [.. ecs.All<TransformRef>().Select(transform => transform.Entity)];
+        });
+        harness.Run();
+
+        Assert.Contains(first, found);
+        Assert.Contains(second, found);
+        Assert.DoesNotContain(plain, found);
+        Assert.DoesNotContain(disabled, found);
+    }
+
     [Fact]
     public void AWrapperOverAComponentTakenOffThrowsRatherThanReadingNothing()
     {

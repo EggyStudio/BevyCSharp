@@ -49,6 +49,7 @@ use crate::interop::{cstr_to_string, status, write_text};
 use crate::state::with_world;
 
 mod describe;
+mod entities;
 mod lists;
 mod resources;
 pub(crate) mod type_data;

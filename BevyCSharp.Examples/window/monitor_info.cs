@@ -31,11 +31,12 @@ internal static class MonitorInfoExample
     private static void Update(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
-        var monitors = ecs.All().Where(entity => ecs.Get<MonitorRef>(entity) is not null).ToHashSet();
+        var found = ecs.All<MonitorRef>();
+        var monitors = found.Select(monitor => monitor.Entity).ToHashSet();
 
-        foreach (var entity in monitors.Where(entity => !Opened.ContainsKey(entity)))
+        foreach (var monitor in found.Where(monitor => !Opened.ContainsKey(monitor.Entity)))
         {
-            var monitor = ecs.Wrap<MonitorRef>(entity);
+            var entity = monitor.Entity;
             var name = monitor.Name ?? "<no name>";
             var size = $"{monitor.PhysicalHeight}x{monitor.PhysicalWidth}px";
             var hz = monitor.RefreshRateMillihertz is { } milli ? FormattableString.Invariant($"{milli / 1000f}Hz") : "<unknown>";

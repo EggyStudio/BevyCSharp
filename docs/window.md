@@ -209,8 +209,9 @@ what it draws waits for that.
 
 A game that opens every window itself, one on each screen as Bevy's `monitor_info` does, starts
 with `Config.PrimaryWindow` false, which leaves the run without a first window and keeps it running
-with none open. Bevy keeps a `Monitor` on an entity of its own for each display it finds, read
-through `MonitorRef`, and `Window.SetFullscreenOn` makes a window fill the one an entity names:
+with none open. Bevy keeps a `Monitor` on an entity of its own for each display it finds,
+`ecs.All<MonitorRef>()` answers a wrapper over each, and `Window.SetFullscreenOn` makes a window
+fill the one an entity names:
 
 <!-- compiled with:
 Config config = new();
@@ -219,11 +220,11 @@ EcsWorld ecs = null!;
 ```csharp
 config.PrimaryWindow = false;                     // before the app is built
 
-foreach (var monitor in ecs.All().Where(entity => ecs.Get<MonitorRef>(entity) is not null))
+foreach (var monitor in ecs.All<MonitorRef>())
 {
     var window = ecs.Spawn();
-    ecs.Insert<WindowRef>(window).Title = ecs.Wrap<MonitorRef>(monitor).Name ?? "Display";
-    Window.SetFullscreenOn(window, monitor);
+    ecs.Insert<WindowRef>(window).Title = monitor.Name ?? "Display";
+    Window.SetFullscreenOn(window, monitor.Entity);
 }
 ```
 

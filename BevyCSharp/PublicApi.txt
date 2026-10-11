@@ -1537,6 +1537,7 @@ sealed class Bevy.EcsWorld
   T Wrap<T>(Entity entity) where T : struct, IReflectedComponent<T>
   T? Get<T>(Entity entity) where T : struct, IReflectedComponent<T>
   T? Resource<T>() where T : struct, IReflectedComponent<T>
+  T[] All<T>() where T : struct, IReflectedComponent<T>
   bool Added<T>(Entity entity) where T : unmanaged
   bool Changed<T>(Entity entity) where T : unmanaged
   bool ChangedById(Entity entity, int componentId)

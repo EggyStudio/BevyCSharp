@@ -1,5 +1,6 @@
 use super::*;
 use super::describe::*;
+use super::entities::*;
 use super::lists::*;
 use super::resources::*;
 use super::values::*;
@@ -245,6 +246,23 @@ fn a_component_is_inserted_at_its_default_and_removed() {
         assert_eq!(status::NOT_PRESENT, remove(), "a second removal finds nothing");
     });
     assert!(app.world().get::<Probe>(entity).is_none());
+}
+
+/// The entities carrying a component are found by its path as Bevy's query finds them, a disabled
+/// one hidden by Bevy's default filters and one without the component left out.
+#[test]
+fn the_entities_carrying_a_component_are_found_with_a_disabled_one_hidden() {
+    let (mut app, carrying) = probe_app();
+    app.world_mut().spawn((Probe::default(), bevy::ecs::entity_disabling::Disabled));
+    app.world_mut().spawn_empty();
+    loan_world(app.world_mut(), || {
+        let path = c(PROBE);
+        let mut out = [0u64; 4];
+        assert_eq!(1, unsafe { bcs_reflect_entities(path.as_ptr(), core::ptr::null_mut(), 0) });
+        assert_eq!(1, unsafe { bcs_reflect_entities(path.as_ptr(), out.as_mut_ptr(), 4) });
+        assert_eq!(carrying.to_bits(), out[0]);
+        assert_eq!(status::NO_COMPONENT, unsafe { bcs_reflect_entities(c("bevy_csharp::reflected::tests::Nothing").as_ptr(), out.as_mut_ptr(), 4) });
+    });
 }
 
 /// A resource is held while the entity Bevy keeps for it carries it, and once taken off it is held

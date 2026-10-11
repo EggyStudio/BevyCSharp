@@ -87,6 +87,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_reflect_resource_place(string typePath, ulong* entity);
 
+    /// <summary>Lists the entities carrying a reflected component, answering how many there are.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_entities(string typePath, ulong* entities, int capacity);
+
     /// <summary>Whether a reflected type has a default to insert from nothing, as one or zero.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
