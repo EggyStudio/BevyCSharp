@@ -10,7 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2fbd2860`. ui_material, ABI 268, the interface material: a node drawn by a Slang
+Reviewed up to `6c491f7c`. dynamic_mip_generation, ABI 269: mipmaps made on the GPU from an image's
+top level each frame, as Bevy's jobs make them, through one call that keeps a set of images, puts
+each into Bevy's jobs under a phase of the bridge's own as the frame is extracted and runs that
+phase once a frame in the graph before the cameras draw, so every camera samples levels made from
+what the top holds that frame; an image of one level turned on gets every level its size has, its
+bytes grown with zeros below the top and the storage usage added as Bevy's example makes its image,
+a format the downsampler cannot write refused, every sRGB one among them, which C# turns into the
+exception saying to make the image with `srgb: false`; dropped images leave the set in Last, and a
+native test counts the levels. `Render.SetMipGeneration` with its paragraph and block in the window
+guide beside `CreateImage`; a test reading level 3 of two red images through a one-level 2D
+material, red where generation is on, clear where it was turned on and off before a frame, and the
+sRGB image refused. The example is Bevy's with the examples' own radio buttons and a plain button
+for Bevy's Feathers, the colors from .NET's generator seeded as Bevy's is, both said in the triage
+note, captured at frame 150 since at 120 Bevy's wave has the image at nothing, the script's comment
+saying so, the picture the image at half size and its ten levels in their column. With it bsn's row
+as not applying, Bevy 0.20 loading the notation from no file, and the cheat sheet's two warnings
+gone, `IAnimationEvent` and `UpdateSettings` out of its groups since neither has a method to list.
+The suite 1,426 passed and 2 skipped of 1,428; cargo 157 and 89; the three profiles clean; the norm
+tests 19 of 19, the prose at 302; the window guide's 14 blocks build. EXAMPLES.md reads 348 written,
+2 in part and 31 missing, the 2D heading 28 of 29. Right, Bevy's own downsampler driven through its
+jobs under a phase of the bridge's rather than a pass written again, and the sRGB refusal said with
+the way out. One thing to read: the bytes are grown at their end, and Bevy hands the GPU an image's
+data layer-major, each layer's levels together, so an image of more than one layer would have its
+second layer's top land where the first layer's second level is; lay the bytes out so or refuse such
+an image with the reason, with item 18's batch. The run waits on the push. Item 18 is under way at
+ABI 270, as its item and the plan have it, then the rows in the order given.
+
+Before it, `2fbd2860` came, ui_material, ABI 268, the interface material: a node drawn by a Slang
 program of the game's own through Bevy's `UiMaterialPlugin`, the bridge's type handing Bevy an empty
 layout and its own shaders once and its specialize putting the program's layout and interface stages
 in their place, the key carrying the version they were read from, so a program edited since makes a
@@ -60,34 +87,6 @@ a mismatch it returns Bevy's retry, Bevy keeps the previous bind group and both 
 version the next frame; the choice is a pure function of the version handed and the current one,
 packed, stale or missing, with a native test over each case, and the thread-local's remark says why
 it exists. Then ui_material's commit, and the rows in the order given.
-
-Before it, `b134dd4d` and `6e28c3cc` came. `6e28c3cc`, custom_projection, ABI 267: a projection type
-the bridge declares, Bevy's perspective with entries of its matrix written over its clip matrix and
-its sub-view, the update, the far plane and the frustum's corners the perspective's so it follows
-the window, set from C# with the field of view, the near and far planes and the entries by column,
-row and value, a column or row past three refused on both sides and a non-camera refused; a native
-test reads the two entries landing and every other entry staying the perspective's,
-`ProjectionTests` the variant read back as custom with both refusals; the example is Bevy's scene
-with its two entries, its capture sheared down and to the left as Bevy's; the cameras guide has its
-paragraph and block. `b134dd4d`, render_depth_to_texture, which needed no bridge work after all, its
-triage line stale: a depth-only camera at order minus one drawing into no target of 256 by 256 with
-a depth prepass and no multisampling, a watch of its depth giving an eight-bit image each frame
-shown on an unlit rectangle, the turning cube, the light, the main camera, the instructions, the
-cone gizmo at the depth camera and the keys by Bevy's spherical coordinates with the inclination
-clamped, the capture showing the cube's depth on the plane as Bevy's, the triage note saying the
-depth is shown through the watch's image where Bevy's material reads a depth texture of its own, and
-the compute guide saying a camera can draw its depth alone into no target and be watched. The suite:
-1,421 passed and 2 skipped of 1,423; cargo's 89 and 155; the norm, document and path tests 20 of 20,
-the prose at 299. EXAMPLES.md reads 346 written, 2 in part and 34 missing. Right, the projection's
-one new type kept to what C# cannot say, and the depth reached through the watch the engine already
-had rather than a texture copy built for one example. The owner asked at 19:35 for the examples'
-counts under the Examples heading and a count on each group's heading, which is item 17 (Decision
-30), a batch of its own with ui_material's commit or right after. The rows that need no crate and no
-word go on in the order given: the interface material, a custom vertex attribute, mip generation,
-occlusion culling, the world's serialization, the transform gizmo, picking's debug, the pitch and
-the decodable, then the atmosphere's Mars medium, render recovery, Solari's reflections and Bevy's
-scene notation, each of those four read against the lock first, since a crate waits on the owner's
-word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

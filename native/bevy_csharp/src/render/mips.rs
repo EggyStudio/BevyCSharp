@@ -57,8 +57,9 @@ fn full_mip_count(width: u32, height: u32) -> u32 {
 /// Turned on, an image of one level is given every level its size has, those below the top zero
 /// until they are made, and is made writable by Bevy's downsampler, as Bevy's own example makes
 /// its image. Answers [`status::INVALID_STATE`] for a format the downsampler cannot write, every
-/// sRGB format among them, [`status::NO_COMPONENT`] for a key that names no image, and
-/// [`status::NOT_PRESENT`] for one still loading.
+/// sRGB format among them, and for an image of more than one layer (see [`needs_room`]),
+/// [`status::NO_COMPONENT`] for a key that names no image, and [`status::NOT_PRESENT`] for one
+/// still loading.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_mip_generation(image: i32, on: i32) -> i32 {
     crate::interop::guard(|| {
@@ -70,9 +71,6 @@ pub extern "C" fn bcs_render_set_mip_generation(image: i32, on: i32) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::image::TextureFormatPixelInfo;
-            use bevy::render::render_resource::TextureUsages;
-
             crate::state::with_world(|world| {
                 let handle = match super::image_handle(world, image) {
                     Ok(Some(handle)) => handle,
@@ -94,35 +92,17 @@ pub extern "C" fn bcs_render_set_mip_generation(image: i32, on: i32) -> i32 {
                     return status::NOT_PRESENT;
                 };
 
-                let format = found.texture_descriptor.format;
-                if !DownsamplePipeline::supports_texture_format(format) {
-                    return status::INVALID_STATE;
-                }
-
-                // Written through what into_inner hands back, since Bevy marks an asset changed
-                // only where it is written, and an image on the GPU already would keep one level.
-                let descriptor = &found.texture_descriptor;
-                let (width, height) = (descriptor.size.width, descriptor.size.height);
-                let levels = full_mip_count(width, height);
-                let wants_storage = !descriptor.usage.contains(TextureUsages::STORAGE_BINDING);
-
-                if descriptor.mip_level_count < levels || wants_storage {
-                    let Some(image) = images.get_mut(&handle) else {
-                        return status::NOT_PRESENT;
-                    };
-                    let image = image.into_inner();
-                    let layers = image.texture_descriptor.size.depth_or_array_layers.max(1) as usize;
-
-                    image.texture_descriptor.mip_level_count = levels;
-                    image.texture_descriptor.usage |= TextureUsages::STORAGE_BINDING | TextureUsages::TEXTURE_BINDING;
-
-                    // Bevy hands the GPU every level of every layer from the image's bytes, so the
-                    // levels below the top are there as zeros, the top's bytes kept where they are.
-                    if let (Some(data), Ok(pixel)) = (image.data.as_mut(), format.pixel_size()) {
-                        let size: usize = (0..levels)
-                            .map(|level| ((width >> level).max(1) * (height >> level).max(1)) as usize * pixel)
-                            .sum();
-                        data.resize(size * layers, 0);
+                match needs_room(found) {
+                    Err(refusal) => return refusal,
+                    Ok(false) => {}
+                    Ok(true) => {
+                        // Written through what into_inner hands back, since Bevy marks an asset
+                        // changed only where it is written, and an image on the GPU already would
+                        // keep its one level.
+                        let Some(image) = images.get_mut(&handle) else {
+                            return status::NOT_PRESENT;
+                        };
+                        make_room(image.into_inner());
                     }
                 }
 
@@ -131,6 +111,51 @@ pub extern "C" fn bcs_render_set_mip_generation(image: i32, on: i32) -> i32 {
             })
         }
     })
+}
+
+/// Whether `image` has to be given its levels before Bevy can make them, or why it cannot be.
+///
+/// Refused with [`status::INVALID_STATE`] for a format Bevy's downsampler cannot write, and for an
+/// image of more than one layer or a 3D one, since the downsampler as Bevy's jobs drive it reads and
+/// writes one 2D layer, which would leave every other layer's levels zero.
+#[cfg(feature = "render")]
+fn needs_room(image: &Image) -> Result<bool, i32> {
+    use bevy::render::render_resource::{TextureDimension, TextureUsages};
+
+    let descriptor = &image.texture_descriptor;
+    if !DownsamplePipeline::supports_texture_format(descriptor.format)
+        || descriptor.dimension != TextureDimension::D2
+        || descriptor.size.depth_or_array_layers > 1
+    {
+        return Err(status::INVALID_STATE);
+    }
+
+    let levels = full_mip_count(descriptor.size.width, descriptor.size.height);
+    Ok(descriptor.mip_level_count < levels || !descriptor.usage.contains(TextureUsages::STORAGE_BINDING))
+}
+
+/// Gives a one-layer `image` every level its size has, those it lacks zero after the ones it has,
+/// and lets the downsampler write it, as Bevy's own example makes its image.
+///
+/// Bevy hands the GPU every level from the image's bytes, one after another from the top, so the
+/// levels are added at the end and the ones the image has keep their bytes.
+#[cfg(feature = "render")]
+fn make_room(image: &mut Image) {
+    use bevy::image::TextureFormatPixelInfo;
+    use bevy::render::render_resource::TextureUsages;
+
+    let descriptor = &mut image.texture_descriptor;
+    let (width, height) = (descriptor.size.width, descriptor.size.height);
+    descriptor.mip_level_count = full_mip_count(width, height);
+    descriptor.usage |= TextureUsages::STORAGE_BINDING | TextureUsages::TEXTURE_BINDING;
+
+    let levels = descriptor.mip_level_count;
+    if let (Some(data), Ok(pixel)) = (image.data.as_mut(), descriptor.format.pixel_size()) {
+        let size: usize = (0..levels)
+            .map(|level| ((width >> level).max(1) * (height >> level).max(1)) as usize * pixel)
+            .sum();
+        data.resize(size, 0);
+    }
 }
 
 /// Forgets the images that were dropped, so the set holds only images that are still there.
@@ -187,6 +212,36 @@ pub(super) fn install(app: &mut bevy::app::App) {
 
 #[cfg(all(test, feature = "render"))]
 mod tests {
+    use bevy::asset::RenderAssetUsages;
+    use bevy::image::Image;
+    use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+    fn image(layers: u32, format: TextureFormat) -> Image {
+        let size = Extent3d { width: 4, height: 4, depth_or_array_layers: layers };
+        let bytes: Vec<u8> = (0..4 * 4 * 4 * layers).map(|byte| byte as u8 + 1).collect();
+        Image::new(size, TextureDimension::D2, bytes, format, RenderAssetUsages::default())
+    }
+
+    /// A 4 by 4 image of one layer keeps its sixteen pixels at the start and gains its 2 by 2 and
+    /// 1 by 1 levels after them as zeros, and one of two layers is refused, since Bevy's jobs
+    /// downsample one layer and would leave the second's levels empty. So is an sRGB one.
+    #[test]
+    fn a_one_layer_image_gains_its_levels_after_its_own_and_two_layers_are_refused() {
+        let mut one = image(1, TextureFormat::Rgba8Unorm);
+        assert_eq!(super::needs_room(&one), Ok(true));
+        super::make_room(&mut one);
+
+        let data = one.data.as_ref().expect("the image keeps its bytes");
+        assert_eq!(one.texture_descriptor.mip_level_count, 3);
+        assert_eq!(data.len(), (16 + 4 + 1) * 4);
+        assert!(data[..64].iter().enumerate().all(|(at, byte)| *byte == at as u8 + 1));
+        assert!(data[64..].iter().all(|byte| *byte == 0));
+        assert_eq!(super::needs_room(&one), Ok(false));
+
+        assert_eq!(super::needs_room(&image(2, TextureFormat::Rgba8Unorm)), Err(crate::interop::status::INVALID_STATE));
+        assert_eq!(super::needs_room(&image(1, TextureFormat::Rgba8UnormSrgb)), Err(crate::interop::status::INVALID_STATE));
+    }
+
     /// An image has a level for each halving of its longer side down to one pixel, as Bevy's
     /// example counts them.
     #[test]

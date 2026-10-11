@@ -624,6 +624,9 @@ pub unsafe extern "C" fn bcs_app_create(config: *const BcsConfig) -> *mut BcsApp
         // The last app's component callbacks, by ids this app gives to components of its own.
         crate::lifecycle::forget();
 
+        // The last app's vertex streams, whose names this app may give other shapes.
+        crate::render::streams::forget_all();
+
         // A new app, whose panics are crashes again until it, too, begins ending.
         crate::crash::ending(false);
 

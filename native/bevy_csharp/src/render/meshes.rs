@@ -21,7 +21,8 @@ pub struct BcsMeshInfo {
     /// `0` triangles, `1` a triangle strip, `2` lines, `3` a line strip, `4` points.
     pub topology: u32,
     /// Which attributes it has, one bit each: `1` normals, `2` tangents, `4` UVs, `8` a second UV
-    /// set, `16` vertex colors, `32` joint indices, `64` joint weights.
+    /// set, `16` vertex colors, `32` joint indices, `64` joint weights, `128` a stream of the game's
+    /// own.
     pub attributes: u32,
     /// The corner of its bounds with the smallest coordinates.
     pub min: [f32; 3],
@@ -91,6 +92,9 @@ pub unsafe extern "C" fn bcs_render_mesh_info(handle: i32, out: *mut BcsMeshInfo
                 if mesh.contains_attribute(attribute) {
                     info.attributes |= bit;
                 }
+            }
+            if super::streams::all().iter().any(|stream| mesh.contains_attribute(stream.attribute)) {
+                info.attributes |= 128;
             }
 
             let positions = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3());
@@ -222,6 +226,9 @@ pub struct BcsMeshData {
     pub index_count: i32,
     /// `0` triangles, `1` lines, `2` points, `3` a line strip, `4` a triangle strip.
     pub topology: i32,
+    /// Streams of the game's own (see [`super::streams`]), `stream_count` of them, or null.
+    pub streams: *const super::streams::BcsMeshStream,
+    pub stream_count: i32,
 }
 
 /// Builds a mesh from vertices and answers its asset key.
@@ -277,11 +284,14 @@ unsafe fn mesh_from(data: *const BcsMeshData) -> Result<bevy::mesh::Mesh, i32> {
         || data.positions.is_null()
         || data.index_count < 0
         || (data.indices.is_null() && data.index_count > 0)
+        || data.stream_count < 0
+        || (data.streams.is_null() && data.stream_count > 0)
     {
         return Err(status::NULL_ARG);
     }
 
     let count = data.vertex_count as usize;
+    let streams = unsafe { streams_of(&data, count)? };
 
     let floats = |pointer: *const f32, width: usize| -> Option<&[f32]> {
         (!pointer.is_null())
@@ -337,6 +347,10 @@ unsafe fn mesh_from(data: *const BcsMeshData) -> Result<bevy::mesh::Mesh, i32> {
         mesh.insert_indices(Indices::U32(indices.to_vec()));
     }
 
+    for (stream, bytes) in streams {
+        mesh.insert_attribute(stream.attribute, stream.format.values(bytes));
+    }
+
     if data.normals.is_null() && topology == PrimitiveTopology::TriangleList {
         // Smooth normals need indices, and flat ones need there to be none, so the mesh is
         // asked for whichever its shape allows.
@@ -348,6 +362,52 @@ unsafe fn mesh_from(data: *const BcsMeshData) -> Result<bevy::mesh::Mesh, i32> {
     }
 
     Ok(mesh)
+}
+
+/// The streams of the game's own `data` carries, each registered (see [`super::streams`]) with the
+/// bytes it brings, `count` vertices of its format.
+///
+/// [`status::NULL_ARG`] for a stream with no name or no bytes, of a format there is not, at a
+/// location outside the streams' range or at one another stream of the mesh takes, and
+/// [`status::INVALID_STATE`] for a name the running app gave another format or location.
+///
+/// # Safety
+/// `data.streams` must hold `data.stream_count` streams whose names and bytes hold what they say.
+unsafe fn streams_of<'a>(
+    data: &BcsMeshData,
+    count: usize,
+) -> Result<Vec<(super::streams::Stream, &'a [u8])>, i32> {
+    use super::streams::{FIRST_LOCATION, Format, LAST_LOCATION, register};
+
+    if data.stream_count == 0 {
+        return Ok(Vec::new());
+    }
+
+    let given = unsafe { core::slice::from_raw_parts(data.streams, data.stream_count as usize) };
+    let mut taken = 0u32;
+    let mut streams = Vec::with_capacity(given.len());
+
+    for stream in given {
+        let format = Format::from_code(stream.format).ok_or(status::NULL_ARG)?;
+        let location = stream.location;
+
+        if stream.name.is_null() || stream.name_len <= 0 || stream.data.is_null() {
+            return Err(status::NULL_ARG);
+        }
+        if !(FIRST_LOCATION..=LAST_LOCATION).contains(&location) || taken & (1 << location) != 0 {
+            return Err(status::NULL_ARG);
+        }
+        taken |= 1 << location;
+
+        let name = unsafe { core::slice::from_raw_parts(stream.name, stream.name_len as usize) };
+        let name = core::str::from_utf8(name).map_err(|_| status::NULL_ARG)?;
+
+        // Read while the call lasts, which the caller's pinned arrays outlive.
+        let bytes: &'a [u8] = unsafe { core::slice::from_raw_parts(stream.data, count * format.size()) };
+        streams.push((register(name, format, location)?, bytes));
+    }
+
+    Ok(streams)
 }
 
 /// Writes vertices over the mesh a handle names, so everything drawn with it changes without being
@@ -380,12 +440,38 @@ pub unsafe extern "C" fn bcs_mesh_write(handle: i32, data: *const BcsMeshData) -
                 return status::UNSUPPORTED;
             };
 
+            // A skin's joints were given apart from the vertices, so a write of the same count of
+            // vertices keeps them rather than leaving the mesh unskinned.
+            let mut mesh = mesh;
+            carry_joints(meshes.get(&handle), &mut mesh);
+
             match meshes.insert(&handle, mesh) {
                 Ok(_) => status::OK,
                 Err(_) => status::INVALID_STATE,
             }
         })
     })
+}
+
+/// Gives `mesh` the joints and weights of the mesh it is written over, where it has none of its own
+/// and the same number of vertices, with the bounds a skinned mesh is culled by.
+fn carry_joints(old: Option<&bevy::mesh::Mesh>, mesh: &mut bevy::mesh::Mesh) {
+    use bevy::mesh::Mesh;
+
+    let Some(old) = old else {
+        return;
+    };
+    if mesh.contains_attribute(Mesh::ATTRIBUTE_JOINT_INDEX) || old.count_vertices() != mesh.count_vertices() {
+        return;
+    }
+
+    if let (Some(joints), Some(weights)) =
+        (old.attribute(Mesh::ATTRIBUTE_JOINT_INDEX), old.attribute(Mesh::ATTRIBUTE_JOINT_WEIGHT))
+    {
+        mesh.insert_attribute(Mesh::ATTRIBUTE_JOINT_INDEX, joints.clone());
+        mesh.insert_attribute(Mesh::ATTRIBUTE_JOINT_WEIGHT, weights.clone());
+        let _ = mesh.generate_skinned_mesh_bounds();
+    }
 }
 
 /// Copies a mesh's triangles out: its positions, three floats each, and its indices, three a
@@ -612,5 +698,67 @@ mod tests {
             let length = (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
             assert!((length - 1.0).abs() < 1e-5);
         }
+    }
+
+    /// The managed mirror is checked against these same numbers, which stops the two drifting apart
+    /// one field at a time.
+    #[test]
+    fn the_mesh_data_has_the_layout_the_managed_side_mirrors() {
+        use core::mem::{offset_of, size_of};
+
+        use crate::render::streams::BcsMeshStream;
+
+        assert_eq!(offset_of!(BcsMeshData, topology), 52);
+        assert_eq!(offset_of!(BcsMeshData, streams), 56);
+        assert_eq!(offset_of!(BcsMeshData, stream_count), 64);
+        assert_eq!(size_of::<BcsMeshData>(), 72);
+        assert_eq!(offset_of!(BcsMeshStream, format), 12);
+        assert_eq!(offset_of!(BcsMeshStream, location), 16);
+        assert_eq!(offset_of!(BcsMeshStream, data), 24);
+        assert_eq!(size_of::<BcsMeshStream>(), 32);
+    }
+
+    /// A mesh made with a stream of the game's own holds the registered attribute with the values
+    /// given, and a second mesh bringing the same name in another format is refused.
+    #[test]
+    fn a_stream_lands_as_its_registered_attribute_and_another_shape_is_refused() {
+        use crate::render::streams::{BcsMeshStream, Format, lookup};
+
+        let positions = [0.0f32, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0];
+        let words: Vec<u8> = [3u32, 5, 8].iter().flat_map(|word| word.to_ne_bytes()).collect();
+        let name = "TestStreamMesh";
+
+        let stream = |format: i32| BcsMeshStream {
+            name: name.as_ptr(),
+            name_len: name.len() as i32,
+            format,
+            location: 9,
+            data: words.as_ptr(),
+        };
+        let data = |stream: &BcsMeshStream| BcsMeshData {
+            positions: positions.as_ptr(),
+            vertex_count: 3,
+            normals: core::ptr::null(),
+            uvs: core::ptr::null(),
+            colors: core::ptr::null(),
+            indices: core::ptr::null(),
+            index_count: 0,
+            topology: 0,
+            streams: stream,
+            stream_count: 1,
+        };
+
+        let uint = stream(Format::UInt.code());
+        let mesh = unsafe { mesh_from(&data(&uint)) }.unwrap_or_else(|code| panic!("refused with {code}"));
+        let registered = lookup(name).expect("the name is registered");
+
+        assert_eq!(registered.location, 9);
+        assert!(matches!(
+            mesh.attribute(registered.attribute),
+            Some(bevy::mesh::VertexAttributeValues::Uint32(values)) if values == &[3, 5, 8]
+        ));
+
+        let float = stream(Format::Float.code());
+        assert!(matches!(unsafe { mesh_from(&data(&float)) }, Err(status::INVALID_STATE)));
     }
 }

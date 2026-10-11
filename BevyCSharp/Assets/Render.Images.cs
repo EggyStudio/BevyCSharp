@@ -210,7 +210,9 @@ public static unsafe partial class Render
     /// Turning it on gives an image of one level every level its size has, those below the top
     /// black and clear until they are made. Bevy's downsampler writes the levels as a storage image,
     /// which no sRGB format can be, so an image made here is made with <c>srgb: false</c>, its
-    /// numbers then read as they are.
+    /// numbers then read as they are. It makes the levels of one layer, so an image of several, an
+    /// array or a cube, is refused rather than left with every layer but the first empty below
+    /// its top.
     /// </para>
     /// </remarks>
     /// <example>
@@ -220,7 +222,8 @@ public static unsafe partial class Render
     /// </code>
     /// </example>
     /// <exception cref="InvalidOperationException">
-    /// The image's format is one Bevy's downsampler cannot write, an sRGB one among them.
+    /// The image's format is one Bevy's downsampler cannot write, an sRGB one among them, or the
+    /// image has more than one layer.
     /// </exception>
     /// <exception cref="BevyNativeException">
     /// The handle names no image, the image is still loading, or this build has no renderer.
@@ -232,9 +235,9 @@ public static unsafe partial class Render
         if (status == NativeStatus.InvalidState)
         {
             throw new InvalidOperationException(
-                $"The mipmaps of {image} cannot be made on the GPU, because Bevy's downsampler "
-                + "writes them as a storage image and the image's format cannot be one, as no sRGB "
-                + "format can. Make the image with srgb: false.");
+                $"The mipmaps of {image} cannot be made on the GPU. Bevy's downsampler writes the "
+                + "levels of one layer as a storage image, so the image has one layer and a format "
+                + "a storage image can have, which no sRGB format is. Make it with srgb: false.");
         }
 
         Native.Check(status, $"making the mipmaps of {image}");

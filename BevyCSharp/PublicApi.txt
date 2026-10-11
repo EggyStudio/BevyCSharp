@@ -2849,11 +2849,13 @@ struct Bevy.Interop.NativeMaterialConfig
   int Unlit
   uint ReliefSteps
 struct Bevy.Interop.NativeMeshData
+  NativeMeshStream* Streams
   float* Colors
   float* Normals
   float* Positions
   float* Uvs
   int IndexCount
+  int StreamCount
   int Topology
   int VertexCount
   uint* Indices
@@ -2869,6 +2871,12 @@ struct Bevy.Interop.NativeMeshInfo
   uint Indices
   uint Topology
   uint Vertices
+struct Bevy.Interop.NativeMeshStream
+  byte* Data
+  byte* Name
+  int Format
+  int NameLength
+  uint Location
 struct Bevy.Interop.NativeMonitor
   float ScaleFactor
   int X
@@ -3657,11 +3665,13 @@ enum Bevy.MeshAttributes : uint
   None = 0
   Normals = 1
   SecondUvs = 8
+  Streams = 128
   Tangents = 2
   Uvs = 4
   Weights = 64
 sealed class Bevy.MeshData
   MeshData()
+  MeshStream[]? Streams { get; set; }
   MeshTopology Topology { get; set; }
   Vec3[] Positions { get; set; }
   Vec3[]? Normals { get; set; }
@@ -3741,6 +3751,29 @@ static class Bevy.MeshShape
   static string Ring(string outline)
   static string Ring(string outline, float thickness)
   static string UvAngle(string arc)
+sealed class Bevy.MeshStream : IEquatable<MeshStream>
+  MeshStream(string Name, MeshStreamFormat Format, uint Location, byte[] Data)
+  MeshStreamFormat Format { get; init; }
+  bool Equals(MeshStream? other)
+  byte[] Data { get; init; }
+  const uint FirstLocation = 8u
+  const uint LastLocation = 15u
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static MeshStream From<T>(string name, MeshStreamFormat format, uint location, ReadOnlySpan<T> values) where T : unmanaged
+  static bool op_Equality(MeshStream? left, MeshStream? right)
+  static bool op_Inequality(MeshStream? left, MeshStream? right)
+  static int SizeOf(MeshStreamFormat format)
+  string Name { get; init; }
+  uint Location { get; init; }
+  void Deconstruct(out string Name, out MeshStreamFormat Format, out uint Location, out byte[] Data)
+enum Bevy.MeshStreamFormat : int
+  Float = 2
+  Float4 = 3
+  UInt = 0
+  UInt2 = 1
+  UNorm8x4 = 4
 enum Bevy.MeshTopology : int
   LineStrip = 3
   Lines = 1

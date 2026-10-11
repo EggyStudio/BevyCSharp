@@ -115,4 +115,34 @@ public sealed class SkinTests
         Assert.IsType<ArgumentException>(noPose);
         Assert.IsType<ArgumentException>(noJoint);
     }
+
+    /// <summary>
+    /// Vertices written over a skinned mesh keep its joints and weights where they are as many as
+    /// before, since the joints were given apart from the vertices, and a mesh of another count
+    /// loses them.
+    /// </summary>
+    [SkippableFact]
+    public void AWriteOfAsManyVerticesKeepsTheJoints()
+    {
+        Needs.Renderer();
+
+        MeshInfo kept = default, other = default;
+        using var app = new App(Config.OffscreenFor(64, 64, frames: 2));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ =>
+        {
+            var mesh = Render.CreateMesh(Strip());
+            Render.SetMeshJoints(mesh, Joints, Weights);
+            Render.WriteMesh(mesh, Strip());
+            Render.TryGetMeshInfo(mesh, out kept);
+
+            Render.WriteMesh(mesh, new MeshData { Positions = Positions[..3] });
+            Render.TryGetMeshInfo(mesh, out other);
+        }, "Test.Rewrite"));
+        Assert.Equal(0, app.Run());
+
+        var skinned = MeshAttributes.Joints | MeshAttributes.Weights;
+        Assert.Equal(skinned, kept.Attributes & skinned);
+        Assert.Equal(MeshAttributes.None, other.Attributes & skinned);
+    }
 }

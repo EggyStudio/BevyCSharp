@@ -318,16 +318,21 @@ impl ErasedRenderAsset for BcsMeshMaterial2d {
     }
 }
 
-/// Hands each stage of a 2D material's pipeline the pipeline constants it declares.
+/// Hands each stage of a 2D material's pipeline the pipeline constants it declares, and a 2D vertex
+/// shader of the program's own the streams of the game's own its mesh carries.
 fn user_specialize(
     _pipeline: &dyn std::any::Any,
     descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
-    _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+    layout: &bevy::mesh::MeshVertexBufferLayoutRef,
     key: bevy::material::key::ErasedMaterialPipelineKey,
 ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
     let material: BcsMaterialKey = key.material_key.to_key();
 
     if let Some(program) = programs::lookup(material.program) {
+        // A sprite is drawn with the sprite's own vertex shader, which reads no stream.
+        if !material.sprite && program.stages[Role::Vertex2d as usize].is_some() && super::streams::held(layout) {
+            descriptor.vertex.buffers = vec![layout.0.get_layout(&super::streams::main_2d(layout))?];
+        }
         super::constants::apply(descriptor, &program, &material.constants);
     }
 

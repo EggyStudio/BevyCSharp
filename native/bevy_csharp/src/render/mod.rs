@@ -61,6 +61,7 @@ pub mod solari;
 pub mod spirv_compute;
 pub mod sprite_frames;
 pub mod sprite_material;
+pub mod streams;
 pub mod tilemaps;
 pub mod timings;
 pub mod ui_material;

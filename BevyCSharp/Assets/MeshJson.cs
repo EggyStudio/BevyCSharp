@@ -31,7 +31,8 @@ internal static class MeshJson
 
     /// <summary>
     /// Writes geometry as flat arrays of numbers, three a position or a normal, two a UV and
-    /// four a color, which is how the mesh holds them and the shortest way to write them.
+    /// four a color, which is how the mesh holds them and the shortest way to write them, and its
+    /// streams of the game's own each as its name, format, location and bytes.
     /// </summary>
     internal static void WriteGeometry(Utf8JsonWriter json, MeshData geometry)
     {
@@ -71,6 +72,24 @@ internal static class MeshJson
             json.WriteEndArray();
         }
 
+        // A stream's bytes as Base64, since a packed word written as a number would be read back as
+        // whatever number a float of its bits is.
+        if (geometry.Streams is { Length: > 0 } streams)
+        {
+            json.WriteStartArray("streams");
+            foreach (var stream in streams)
+            {
+                json.WriteStartObject();
+                json.WriteString("name", stream.Name);
+                json.WriteString("format", stream.Format.ToString());
+                json.WriteNumber("location", stream.Location);
+                json.WriteBase64String("data", stream.Data);
+                json.WriteEndObject();
+            }
+
+            json.WriteEndArray();
+        }
+
         json.WriteEndObject();
 
         static void Numbers(Utf8JsonWriter json, string name, float[]? values)
@@ -96,12 +115,24 @@ internal static class MeshJson
             Uvs = json.TryGetProperty("uvs", out var uvs) ? [.. uvs.EnumerateArray().Select(value => value.GetSingle())] : null,
             Colors = json.TryGetProperty("colors", out var colors) ? [.. colors.EnumerateArray().Select(value => value.GetSingle())] : null,
             Indices = json.TryGetProperty("indices", out var indices) ? [.. indices.EnumerateArray().Select(value => value.GetUInt32())] : null,
+            Streams = json.TryGetProperty("streams", out var streams) && streams.ValueKind == JsonValueKind.Array
+                ? [.. streams.EnumerateArray().Select(Stream).OfType<MeshStream>()]
+                : null,
         };
 
         if (json.TryGetProperty("topology", out var topology) && Enum.TryParse<MeshTopology>(topology.GetString(), out var shape))
             data.Topology = shape;
 
         return data.Positions.Length > 0 ? data : null;
+
+        // A stream of a format this build does not know is left out rather than read as another.
+        static MeshStream? Stream(JsonElement json) =>
+            json.TryGetProperty("name", out var name) && name.GetString() is { Length: > 0 } named
+            && json.TryGetProperty("format", out var format) && Enum.TryParse<MeshStreamFormat>(format.GetString(), out var kind)
+            && json.TryGetProperty("location", out var location) && location.TryGetUInt32(out var at)
+            && json.TryGetProperty("data", out var data) && data.TryGetBytesFromBase64(out var bytes)
+                ? new MeshStream(named, kind, at, bytes)
+                : null;
 
         static Vec3[] Vectors(JsonElement flat)
         {

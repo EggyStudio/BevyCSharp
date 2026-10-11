@@ -503,6 +503,11 @@ fn user_specialize(
     };
 
     if !prepass {
+        // A stream of the game's own reaches the program's own vertex shader only where the
+        // buffers are built again with it (see [`super::streams::main_3d`]).
+        if program.stages[Role::Vertex as usize].is_some() && super::streams::held(layout) {
+            descriptor.vertex.buffers = vec![layout.0.get_layout(&super::streams::main_3d(layout))?];
+        }
         super::constants::apply(descriptor, &program, &material.constants);
         return Ok(());
     }
@@ -532,7 +537,8 @@ fn user_specialize(
     Ok(())
 }
 
-/// The attributes a prepass vertex shader of a program's own is handed, where the mesh has them.
+/// The attributes a prepass vertex shader of a program's own is handed, where the mesh has them,
+/// streams of the game's own among them.
 fn prepass_attributes(
     layout: &MeshVertexBufferLayoutRef,
 ) -> Vec<bevy::mesh::VertexAttributeDescriptor> {
@@ -552,6 +558,7 @@ fn prepass_attributes(
         }
     }
 
+    super::streams::append(layout, &mut attributes);
     attributes
 }
 

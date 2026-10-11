@@ -884,8 +884,6 @@ static MeshData? DataOf(AssetHandle mesh);                      // The geometry 
 static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of: its counts, its attributes and its bounds, read without copying its vertices
 static bool GenerateTangents(AssetHandle mesh);                 // Works out tangents for a mesh that has none, from its normals and texture coordinates, as a normal map and anisotropy read them, which Bevy's primitives are made without
 static bool TryReadMaterial(AssetHandle material, out MaterialSettings? settings);  // A standard material's settings, read back from the engine, whether code made the material or a glTF file brought it
-static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
-static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
 static bool TryReadImage(AssetHandle image, out ImagePixels? pixels);  // Reads an image's texels from the copy the app keeps of it, or answers false while it is loading or where no copy is kept
 static bool TryImageSize(AssetHandle image, out uint width, out uint height, out uint depth);  // Reads how large an image is in texels, once it has loaded
 static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels);  // Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given them again and everything showing the image changes
@@ -945,6 +943,8 @@ static bool TryGetBounds(Entity entity, out Vec3 min, out Vec3 max);  // The box
 static void SetWireframe(Entity entity, bool on, (float R, float G, float B, float A) color = default);  // Draws an entity's mesh as its own edges in an app that asked for wireframes with Wireframes, or stops drawing them
 static void SetShadowMapSize(uint directional = 0, uint point = 0);  // Sets how large a shadow map each kind of light gets, in pixels on a side
 static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an entity on a set of render layers, as a bit per layer
+static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
+static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
@@ -1895,6 +1895,13 @@ static void Once(Action work, string file = "", int line = 0);  // Runs work the
 static long ResidentBytes();                                    // How many bytes of the machine's memory the process holds now
 static void Watch(double gigabytes);                            // Holds the process to a cap from here on, starting the watch the first time, or with zero lifts the cap
 static double DefaultTheEnvironment();                          // Gives the environment the default cap where it names none, for a tool to call before it starts an app or makes one, so the app holds to it
+```
+
+### `MeshStream`
+
+```csharp
+static MeshStream From<T>(string name, MeshStreamFormat format, uint location, ReadOnlySpan<T> values);  // A stream from values laid out as the format's bytes, such as a uint a vertex for UInt or a Vector4 a vertex for Float4
+static int SizeOf(MeshStreamFormat format);                     // Bytes a vertex of format
 ```
 
 ### `Navigation`

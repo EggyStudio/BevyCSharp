@@ -526,6 +526,12 @@ public unsafe struct NativeMeshData
 
     /// <summary>0 triangles, 1 lines, 2 points, 3 a line strip, 4 a triangle strip.</summary>
     public int Topology;
+
+    /// <summary>Streams of the game's own, or null.</summary>
+    public NativeMeshStream* Streams;
+
+    /// <summary>How many streams there are.</summary>
+    public int StreamCount;
 }
 
 /// <summary>What <see cref="Animation.StateOf"/> reads, in the bridge's layout.</summary>

@@ -130,6 +130,52 @@ string generated = "";
 material.Program = Shaders.CreateProgram(ShaderStage.Slang(generated));
 ```
 
+### A vertex stream of the game's own
+
+A mesh's stream of the game's own (`MeshStream`, which the [drawing guide](drawing.md#a-mesh-of-your-own)
+covers) is read by a vertex stage of the program's own, declared in its own vertex struct at its
+location's `TEXCOORDn` beside the attributes it reads of Bevy's at theirs, as every input here is
+declared by location, and Slang's `vk::location` is not read. The Slang type's class is the stream's,
+`uint` or `uint2` for a stream of integers and a float type for the rest, or wgpu refuses the
+pipeline. The stage hands on what the fragment stage needs at an output of its own, here a color
+unpacked from one word a vertex:
+
+```slang
+import bcs;
+
+struct Vertex
+{
+    float3 position : TEXCOORD0;
+    uint word : TEXCOORD8;
+    uint instance_index : SV_InstanceID;
+};
+
+struct Shaded
+{
+    float4 position : SV_Position;
+    float4 color : TEXCOORD0;
+};
+
+[shader("vertex")]
+Shaded vertex(Vertex v)
+{
+    Shaded output;
+    output.position = bcs::local_to_clip(v.instance_index, v.position);
+    output.color = float4(v.word & 0xff, (v.word >> 8) & 0xff, (v.word >> 16) & 0xff, 255) / 255.0;
+    return output;
+}
+
+[shader("fragment")]
+float4 fragment(Shaded input) : SV_Target
+{
+    return input.color;
+}
+```
+
+A prepass vertex stage of the program's own reads the mesh's streams the same way, and so does a 2D
+vertex stage on a 2D mesh. Bevy's own vertex shaders read none, so a material with no vertex stage of
+its own draws the mesh as though it carried none.
+
 ### Pipeline constants
 
 A constant the shader declares with `[SpecializationConstant]` is compiled into the material's

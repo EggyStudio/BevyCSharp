@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**348 written, 2 written in part, 0 can be written, 31 missing and 57 do not apply.** Of the 381 that apply, 350 can be written with what is bridged, 2 of them leaving something out.
+**349 written, 2 written in part, 0 can be written, 30 missing and 57 do not apply.** Of the 381 that apply, 351 can be written with what is bridged, 2 of them leaving something out.
 
 **161 of the 171 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -31,7 +31,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
 | [Scene](#scene) | 0 | 0 | 0 | 1 | 1 |  |
-| [Shaders](#shaders) | 23 | 0 | 0 | 1 | 3 | 8 of 9 |
+| [Shaders](#shaders) | 24 | 0 | 0 | 0 | 3 | 8 of 9 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [State](#state) | 4 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 19 | 0 | 0 | 0 | 1 | 9 of 9 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **348** | **2** | **0** | **31** | **57** | **161 of 171** |
+| **All** | **349** | **2** | **0** | **30** | **57** | **161 of 171** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -435,7 +435,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`custom_post_processing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/custom_post_processing.rs) | A custom post processing effect, using a custom render pass that runs after the main pass | [written](../BevyCSharp.Examples/shader_advanced/custom_post_processing.cs), as a pass the camera runs |
 | [`custom_render_phase`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/custom_render_phase.rs) | Shows how to make a complete render phase | does not apply, builds a render phase in Rust |
 | [`custom_shader_instancing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/custom_shader_instancing.rs) | A shader that renders a mesh multiple times in one draw call using low level rendering api | [written](../BevyCSharp.Examples/shader_advanced/custom_shader_instancing.cs), as a draw on the camera, its cube's corners worked out from the vertex number, since such a draw reads buffers rather than a mesh |
-| [`custom_vertex_attribute`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/custom_vertex_attribute.rs) | A shader that reads a mesh's custom vertex attribute | missing, vertex attributes a game defines |
+| [`custom_vertex_attribute`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader_advanced/custom_vertex_attribute.rs) | A shader that reads a mesh's custom vertex attribute | [written](../BevyCSharp.Examples/shader_advanced/custom_vertex_attribute.cs) |
 | [`extended_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/extended_material.rs) | A custom shader that builds on the standard material | [written](../BevyCSharp.Examples/shader/extended_material.cs), the extension a Slang shader lighting its surface through bcs::light and bcs::finish |
 | [`extended_material_bindless`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/extended_material_bindless.rs) | Demonstrates bindless `ExtendedMaterial` | [written](../BevyCSharp.Examples/shader/extended_material_bindless.cs), the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays |
 | [`gpu_component_array_buffer`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/shader/gpu_component_array_buffer.rs) | Shows how to expose per-mesh-instance data to the GPU | [written](../BevyCSharp.Examples/shader/gpu_component_array_buffer.cs), its cubes placed by .NET's random numbers from Bevy's seed rather than by ChaCha8, so they fall in other places |

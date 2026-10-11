@@ -24,4 +24,12 @@ public sealed class MeshData
 
     /// <summary>How the vertices join up.</summary>
     public MeshTopology Topology { get; set; } = MeshTopology.Triangles;
+
+    /// <summary>Vertex streams of the game's own, each a value a vertex at a location of its own, or null.</summary>
+    /// <remarks>
+    /// Read by a vertex shader of the program's own, which declares each at its location's
+    /// <c>TEXCOORDn</c> (see <see cref="MeshStream"/>). Bevy's own vertex shader reads none, so a
+    /// material without a vertex stage of its own draws the mesh as though it had none.
+    /// </remarks>
+    public MeshStream[]? Streams { get; set; }
 }

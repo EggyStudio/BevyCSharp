@@ -402,6 +402,14 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_mesh_create_from(NativeMeshData* data);
 
+    /// <summary>
+    /// Reads the format and location a vertex stream's name was first given, for a refusal's
+    /// message.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_stream_of(byte* name, int nameLength, int* format, uint* location);
+
     /// <summary>Says how an entity's mesh is treated beyond what it looks like.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

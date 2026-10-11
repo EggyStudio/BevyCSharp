@@ -16,6 +16,13 @@
 // backend numbers stage inputs and outputs by semantic index and ignores the attribute. The index
 // is therefore the location, and the structs below line up with the ones Bevy's own WGSL declares.
 //
+// A vertex stream of the game's own, a `MeshStream` in C#, is read at the location the mesh gives
+// it, 8 to 15, declared in the shader's own vertex struct at that location's `TEXCOORDn` beside the
+// attributes `Vertex` declares at theirs, and handed on to the fragment shader at an output of the
+// shader's own, 0 to 2 and 6 being `VertexOutput`'s. The Slang type's class is the stream's, a
+// `uint` or `uint2` for a stream of integers and a float type for the rest, or wgpu refuses the
+// pipeline and nothing is drawn.
+//
 // Bevy's matrices are declared as arrays of columns and multiplied out by hand. Which way Slang
 // lays a matrix out depends on the target and on flags, and an array of `float4` has one layout
 // everywhere, so the question never arises.

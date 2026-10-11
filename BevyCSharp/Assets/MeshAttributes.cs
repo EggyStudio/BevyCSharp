@@ -27,4 +27,7 @@ public enum MeshAttributes : uint
 
     /// <summary>How much each of those joints does.</summary>
     Weights = 64,
+
+    /// <summary>A vertex stream of the game's own (<see cref="MeshStream"/>).</summary>
+    Streams = 128,
 }

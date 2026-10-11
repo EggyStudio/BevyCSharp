@@ -53,6 +53,31 @@ shares a mesh and a material with, and leave it to the GPU's culling alone, and
 `Render.SetCameraFlags` turns a camera's indirect drawing and CPU culling off, the paths Bevy draws
 a crowd quickly by, which a stress test turns off to measure what they save.
 
+A vertex can carry a value of the game's own beside its position, a stream as Bevy's
+`custom_vertex_attribute` carries one, for a vertex shader of the program's own to read: a voxel's
+face and texture packed into one word, a blend weight, a wind phase. Each stream is a name, one of
+five formats (`UInt`, `UInt2`, `Float`, `Float4` and `UNorm8x4`, four bytes read as 0 to 1), a
+location from 8 to 15, and its values:
+
+<!-- compiled with:
+using System.Numerics;
+Vec3[] corners = [];
+uint[] words = [];
+-->
+```csharp
+var chunk = Render.CreateMesh(new MeshData
+{
+    Positions = corners,
+    Streams = [MeshStream.From<uint>("Voxel", MeshStreamFormat.UInt, 8, words)],
+});
+```
+
+A name is one stream for the running app, so every mesh carrying it carries it in one format at one
+location, and a name given again in another shape is refused. Positions stay, since Bevy places and
+culls a mesh by them, and the shader declares the stream at its location as the
+[shaders guide](shaders.md#a-vertex-stream-of-the-games-own) shows. A scene file keeps a mesh's
+streams with it.
+
 ### Meshlets
 
 A mesh of millions of triangles can be drawn as Bevy's meshlets instead, which cut it into small
