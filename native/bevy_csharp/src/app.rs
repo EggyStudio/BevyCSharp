@@ -189,12 +189,20 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 })
                 .set(RenderPlugin {
                     render_creation: RenderCreation::Automatic(Box::new(wgpu)),
+                    // Bevy's indirect draw buffers made copyable, so the counts of meshes the GPU
+                    // drew can be read back (see `render::drawn`). A usage flag on buffers Bevy
+                    // makes anyway, which copies nothing until a game asks.
+                    debug_flags: bevy::render::RenderDebugFlags::ALLOW_COPIES_FROM_INDIRECT_PARAMETERS,
                     // A run begun on a set clock compiles each pipeline in the frame that asks for
                     // it, so what a frame draws is the same on a device that compiles in seconds as
                     // on one that compiles at once, and a capture taken at a frame shows the same
                     // scene on either. The frame that compiles takes longer, which such a run does
                     // not measure.
                     synchronous_pipeline_compilation: crate::sync::frame_strategy(config.frame_seconds).is_some(),
+                    ..default()
+                })
+                .set(bevy::pbr::PbrPlugin {
+                    debug_flags: bevy::render::RenderDebugFlags::ALLOW_COPIES_FROM_INDIRECT_PARAMETERS,
                     ..default()
                 })
                 .set(asset_plugin(&asset_root))

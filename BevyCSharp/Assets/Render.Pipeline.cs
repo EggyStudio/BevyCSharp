@@ -159,6 +159,59 @@ public static unsafe partial class Render
     public static bool MeshletsActive => Native.bcs_render_meshlets_active() != 0;
 
     /// <summary>
+    /// Starts or stops reading back how many meshes the opaque pass draws, which
+    /// <see cref="DrawnMeshes"/> then answers. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy culls on the GPU where it can, by the view and, on a camera with Bevy's
+    /// <c>OcclusionCulling</c> and a depth prepass, by what the depth of the last frame hides, and
+    /// writes what is left into the draws themselves, so the CPU never learns what was culled.
+    /// Counting copies those draws after the main pass and reads them back, as Bevy's
+    /// occlusion_culling example does, which costs two copies and a readback a frame and is why it
+    /// is asked for rather than always on.
+    /// </para>
+    /// <para>
+    /// The count is the opaque pass's alone, the last camera's where several draw, and arrives a
+    /// frame or two after the frame it counts. Nothing is drawn with a material whose pipeline is
+    /// still compiling, so the first frames of a run count less than they will.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void CountDrawnMeshes(bool on)
+    {
+        var status = Native.bcs_render_count_drawn(on ? 1 : 0);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Counting the meshes drawn");
+        Native.Check(status, "counting the meshes drawn");
+    }
+
+    /// <summary>
+    /// How many meshes the opaque pass drew in a recent frame, while <see cref="CountDrawnMeshes"/>
+    /// is on. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Answers <see cref="DrawnMeshCount.Known"/> with the count once one has come back, and says
+    /// otherwise why there is none: still on its way, a GPU whose culling cannot be counted, or one
+    /// that does not cull at all.
+    /// </remarks>
+    /// <param name="drawn">The meshes drawn, where the answer is <see cref="DrawnMeshCount.Known"/>.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static DrawnMeshCount DrawnMeshes(out uint drawn)
+    {
+        uint count = 0;
+        var status = Native.bcs_render_drawn_meshes(&count);
+        drawn = count;
+
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Counting the meshes drawn");
+        if (status == 1) return DrawnMeshCount.Known;
+        if (status == NativeStatus.InvalidState) return DrawnMeshCount.NoGpuCulling;
+        if (status == NativeStatus.NotPresent) return DrawnMeshCount.Uncountable;
+
+        Native.Check(status, "reading the meshes drawn");
+        return DrawnMeshCount.Pending;
+    }
+
+    /// <summary>
     /// Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of
     /// detail for on the GPU, and answers the meshlet mesh at once. Only valid inside a system.
     /// </summary>

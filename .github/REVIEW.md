@@ -10,7 +10,43 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6c491f7c`. dynamic_mip_generation, ABI 269: mipmaps made on the GPU from an image's
+Reviewed up to `32ae29fb`. Item 18, ABI 270, a vertex stream of the game's own: a registry by name
+in `streams.rs`, process-wide as the programs' table and emptied as an app is built, each name kept
+once for Bevy's static string, its attribute's id a one in bit 48 over the name's hash so it sorts
+after Bevy's own and is the same on every run, a name returning in another format or at another
+location refused; the stream travels in the mesh's own struct, 32 bytes a stream and 72 for the mesh
+data with the streams at 56 and their count at 64, asserted on both sides, so a write keeps the
+streams, and the write carries a skin's joints over too where the vertex count matches, with the
+skinned bounds made again; `mesh_from` checks each stream, a known format, a name, a location from 8
+to 15 taken once, registers it and inserts its values, and the mesh info gains bit 128. In the main
+pass a program with a vertex stage of its own drawing a mesh whose layout holds a stream has its
+buffers built again from Bevy's attributes at Bevy's locations and the streams after, the prepass
+attributes gaining the streams and a 2D vertex stage the same on a 2D mesh, sprites excluded;
+`bcs.slang`'s header says how a stream is declared, its class and the free outputs. In C#
+`MeshStream` with `From<T>` and `SizeOf`, `MeshStreamFormat`'s five, `MeshData.Streams` and the
+attributes' bit, every refusal checked before the call and a reshaped name answered with the earlier
+and the new format and location by name; the scene file keeps streams in base64 and its reader skips
+a format it does not know; N 1.3 moved the vertex-built meshes out of Render.cs into
+Render.Meshes.cs, 652 and 238. Tests: native, the registry keeping an attribute and refusing another
+shape, the formats' values, a mesh from one `UInt` stream and the same name as `Float` refused, and
+the layout's numbers; managed, two quads whose word a vertex the vertex stage unpacks, green and
+blue, the info's bit, the reshaped name's message, the short stream, location 1, a shared location
+and a ragged `From`, a stream through the scene file's round trip bytes equal, and a skin kept on a
+write of as many vertices and lost on one of fewer. The example is Bevy's, the cuboid read back with
+a `Float4` blend color at 8, its triage row gone, the capture Bevy's red cube; the drawing guide's
+paragraph with the scene file's note and the shaders guide's section with the unpacking stage. The
+mip generation's layers, read in the pass before: Bevy's job path makes one 2D layer's levels, so an
+image of more than one layer or a 3D one is refused rather than re-laid, the room's two functions
+pure with a native test over 4 by 4 images, and the message and guide say one layer. The suite 1,430
+passed and 2 skipped of 1,432; cargo 162 and 93; the three profiles clean; the norm and path tests
+19 of 19; the two guides' blocks build. EXAMPLES.md reads 349 written, 2 in part and 30 missing.
+Right, as the item and the plan have it, the one attribute a name through the registry and every
+refusal before the call. Two files stand near the rule's 800 lines, material.rs at 776 and meshes.rs
+at 764, so the next batch that touches either plans its split first. The runs of `6c491f7c` and this
+wait on the push. Next occlusion_culling, then world_serialization, transform_gizmo, debug_picking,
+pitch, decodable, then the four read against the lock as the working session read them.
+
+Before it, `6c491f7c` came, dynamic_mip_generation, ABI 269: mipmaps made on the GPU from an image's
 top level each frame, as Bevy's jobs make them, through one call that keeps a set of images, puts
 each into Bevy's jobs under a phase of the bridge's own as the frame is extracted and runs that
 phase once a frame in the graph before the cameras draw, so every camera samples levels made from
@@ -69,24 +105,6 @@ world_serialization, transform_gizmo, debug_picking, pitch, decodable, then the 
 the lock as the working session read them: atmosphere with its Mars medium and no camera controller,
 render_recovery with its causes reachable and none pressed, solari_reflections with a C# camera, and
 bsn as not applying, its triage line saying Bevy 0.20 loads the notation from no file.
-
-Before it, `02598971` came, item 17: the count's markers sit under the Examples heading after its
-paragraph and before the gallery, the status section pointing to them in one sentence, and each
-group's heading in the gallery carries its count, `27 of 29`, `all 13`, `1 of 1`, which the script
-writes so the check reads them; the heading counts the group's examples written whole, not the
-pictures in its row, since an example that prints has nothing to draw and no picture, which would
-have read the input group as one of twelve with all twelve written, and one written in part is not
-counted, as the prose count counts, the paragraph above the gallery saying so and that an example
-which prints stands in EXAMPLES.md rather than the row. The prose at 302, the norm, document and
-path tests passing in a worktree at the commit, the README's walk run after ui_material on the
-package packed then. Right, the count that means something chosen over the literal one and said
-where the reader meets it. On ui_material's handoff, the working session corrected the reviewing
-session's ask: a second call that re-read the table on a mismatch would pack a bind group against
-the new layout for the key Bevy had already stored from the first read, which the GPU refuses, so on
-a mismatch it returns Bevy's retry, Bevy keeps the previous bind group and both calls read the new
-version the next frame; the choice is a pure function of the version handed and the current one,
-packed, stale or missing, with a native test over each case, and the thread-local's remark says why
-it exists. Then ui_material's commit, and the rows in the order given.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -498,36 +516,37 @@ from [SHARED.md](SHARED.md).
     gallery.
 
 18. **A vertex stream of the game's own on a mesh, Bevy's `custom_vertex_attribute` reached from C#
-    (Decision 31).** The owner put a packed-vertex game in 3DEngine's `.ref` on 2026-10-11 at 20:05,
-    one float a vertex unpacked in the shader, and asked for the same in both engines; the plan was
-    approved at 20:40 and its full text is kept by the reviewing session, this item being what it
-    asks of the bridge. `MeshData` gains `Streams`, each a name, a format of five, `UInt`, `UInt2`,
-    `Float`, `Float4` and four bytes read as 0 to 1, a location from 8 to 15 and its bytes, the
-    shader declaring the input at that location's `TEXCOORDn` as every input here is, so the game
-    writes one number twice and they agree; positions stay required, since Bevy's mesh pipeline
-    places them at location 0 before the bridge's specialize runs and its prepass, culling, meshlets
-    and Solari read them, a voxel vertex then 16 bytes of position and word where 48. The streams
-    travel in the mesh's own call, appended to `BcsMeshData` and its C# mirror in lockstep with a
-    size assertion, so `WriteMesh` keeps them, where a side call as the joints' would lose them on
-    the next write, and the joints are carried over in that write too, one line; a registry by name
-    of the attribute Bevy wants, the name interned once and the id a hash of it set above Bevy's own
-    so it sorts the same on every run, refusing a name that returns in another format or location or
-    two streams of one mesh at one location, which C# turns into the exception with both values;
-    `mesh_from` inserting each stream as Bevy's values of its format; the mesh info's bitmask
-    gaining a bit for a stream of the game's own. In `user_specialize`, where a program has a vertex
-    stage of its own and the mesh's layout holds a registered stream, the vertex buffers are built
-    again from Bevy's attributes at Bevy's locations plus each registered stream the layout holds at
-    its own, the prepass attributes gaining the same, and the 2D material the same rebuild; the
-    layout already keys Bevy's pipelines. `bcs.slang`'s header says how a stream is declared and
-    carried on, that the Slang class must match the format and that `vk::location` is ignored, the
-    drawing and shaders guides their sections, and the scene file keeps streams with the mesh. The
-    example is Bevy's `custom_vertex_attribute`, a cube with a `Float4` stream at location 8 blended
-    toward red, written in C#, its row leaving triage as written examples do, the counts moving by
-    one. Tests: native, a mesh from one stream holding the registered id and its values and the same
-    name in another format refused; managed, a quad with a `UInt` stream of a color a vertex drawn
-    by a program reading `TEXCOORD8` to the pixel, the exception for a wrong length, a location
-    outside 8 to 15 and a reused name, and a stream in the scene file's round trip. ABI 269 to 270.
-    After the row under way.
+    (Decision 31), done at `32ae29fb`.** The owner put a packed-vertex game in 3DEngine's `.ref` on
+    2026-10-11 at 20:05, one float a vertex unpacked in the shader, and asked for the same in both
+    engines; the plan was approved at 20:40 and its full text is kept by the reviewing session, this
+    item being what it asks of the bridge. `MeshData` gains `Streams`, each a name, a format of
+    five, `UInt`, `UInt2`, `Float`, `Float4` and four bytes read as 0 to 1, a location from 8 to 15
+    and its bytes, the shader declaring the input at that location's `TEXCOORDn` as every input here
+    is, so the game writes one number twice and they agree; positions stay required, since Bevy's
+    mesh pipeline places them at location 0 before the bridge's specialize runs and its prepass,
+    culling, meshlets and Solari read them, a voxel vertex then 16 bytes of position and word where
+    48. The streams travel in the mesh's own call, appended to `BcsMeshData` and its C# mirror in
+    lockstep with a size assertion, so `WriteMesh` keeps them, where a side call as the joints'
+    would lose them on the next write, and the joints are carried over in that write too, one line;
+    a registry by name of the attribute Bevy wants, the name interned once and the id a hash of it
+    set above Bevy's own so it sorts the same on every run, refusing a name that returns in another
+    format or location or two streams of one mesh at one location, which C# turns into the exception
+    with both values; `mesh_from` inserting each stream as Bevy's values of its format; the mesh
+    info's bitmask gaining a bit for a stream of the game's own. In `user_specialize`, where a
+    program has a vertex stage of its own and the mesh's layout holds a registered stream, the
+    vertex buffers are built again from Bevy's attributes at Bevy's locations plus each registered
+    stream the layout holds at its own, the prepass attributes gaining the same, and the 2D material
+    the same rebuild; the layout already keys Bevy's pipelines. `bcs.slang`'s header says how a
+    stream is declared and carried on, that the Slang class must match the format and that
+    `vk::location` is ignored, the drawing and shaders guides their sections, and the scene file
+    keeps streams with the mesh. The example is Bevy's `custom_vertex_attribute`, a cube with a
+    `Float4` stream at location 8 blended toward red, written in C#, its row leaving triage as
+    written examples do, the counts moving by one. Tests: native, a mesh from one stream holding the
+    registered id and its values and the same name in another format refused; managed, a quad with a
+    `UInt` stream of a color a vertex drawn by a program reading `TEXCOORD8` to the pixel, the
+    exception for a wrong length, a location outside 8 to 15 and a reused name, and a stream in the
+    scene file's round trip. ABI 269 to 270. Done at `32ae29fb` as written, the mip generation's
+    layers refused with it.
 
 ## Verdicts
 

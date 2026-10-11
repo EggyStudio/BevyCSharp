@@ -26,6 +26,7 @@ bloom_3d	can
 decal	can	its cubes turned by .NET's generator rather than Bevy's ChaCha8
 deferred_rendering	can	compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred
 motion_blur	can
+occlusion_culling	can	its choice drawn as the examples' own buttons, where Bevy draws it with Feathers
 order_independent_transparency	can
 tonemapping	can
 orthographic	can
@@ -65,7 +66,6 @@ mixed_lighting	can	through Bevy's reflected Lightmap
 specular_tint	can	its two choices drawn as the examples' own radio buttons, where Bevy draws them with Feathers
 clustered_decals	can
 light_textures	can
-occlusion_culling	missing	the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers
 clustered_decal_maps	can
 mirror	can	the mirror a Slang shader lighting its surface through bcs::lit, and the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
 pccm	can

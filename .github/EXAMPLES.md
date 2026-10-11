@@ -4,14 +4,14 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**349 written, 2 written in part, 0 can be written, 30 missing and 57 do not apply.** Of the 381 that apply, 351 can be written with what is bridged, 2 of them leaving something out.
+**350 written, 2 written in part, 0 can be written, 29 missing and 57 do not apply.** Of the 381 that apply, 352 can be written with what is bridged, 2 of them leaving something out.
 
-**161 of the 171 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**161 of the 172 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 28 | 0 | 0 | 0 | 1 | 10 of 13 |
-| [3D Rendering](#3d-rendering) | 65 | 0 | 0 | 3 | 0 | 40 of 41 |
+| [3D Rendering](#3d-rendering) | 66 | 0 | 0 | 2 | 0 | 40 of 42 |
 | [Animation](#animation) | 13 | 0 | 0 | 0 | 0 | 9 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
 | [Assets](#assets) | 11 | 0 | 0 | 2 | 5 | 3 of 3 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **349** | **2** | **0** | **30** | **57** | **161 of 171** |
+| **All** | **350** | **2** | **0** | **29** | **57** | **161 of 172** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -119,7 +119,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`mirror`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mirror.rs) | Demonstrates how to create a mirror with a second camera | [written](../BevyCSharp.Examples/3d/mirror.cs), the mirror a Slang shader lighting its surface through bcs::lit, and the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode |
 | [`mixed_lighting`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/mixed_lighting.rs) | Demonstrates how to combine baked and dynamic lighting | [written](../BevyCSharp.Examples/3d/mixed_lighting.cs), through Bevy's reflected Lightmap |
 | [`motion_blur`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/motion_blur.rs) | Demonstrates per-pixel motion blur | [written](../BevyCSharp.Examples/3d/motion_blur.cs) |
-| [`occlusion_culling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/occlusion_culling.rs) | Demonstration of Occlusion Culling | missing, the counts of meshes drawn and culled, which it reads back from the render world's indirect draw buffers |
+| [`occlusion_culling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/occlusion_culling.rs) | Demonstration of Occlusion Culling | [written](../BevyCSharp.Examples/3d/occlusion_culling.cs), its choice drawn as the examples' own buttons, where Bevy draws it with Feathers |
 | [`order_independent_transparency`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/order_independent_transparency.rs) | Demonstrates how to use OIT | [written](../BevyCSharp.Examples/3d/order_independent_transparency.cs) |
 | [`orthographic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/orthographic.rs) | Shows how to create a 3D orthographic view (for isometric-look in games or CAD applications) | [written](../BevyCSharp.Examples/3d/orthographic.cs) |
 | [`parallax_mapping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/parallax_mapping.rs) | Demonstrates use of a normal map and depth map for parallax mapping | [written](../BevyCSharp.Examples/3d/parallax_mapping.cs) |

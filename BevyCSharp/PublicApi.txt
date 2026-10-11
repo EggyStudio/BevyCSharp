@@ -1363,6 +1363,11 @@ enum Bevy.DrawBlend : int
   Add = 2
   Alpha = 1
   Opaque = 0
+enum Bevy.DrawnMeshCount : int
+  Known = 0
+  NoGpuCulling = 3
+  Pending = 1
+  Uncountable = 2
 struct Bevy.EaseFunction : IEquatable<EaseFunction>
   EaseFunction(EaseKind kind)
   EaseKind Kind
@@ -10288,6 +10293,7 @@ static class Bevy.Render
   static Capture BeginCapture()
   static Capture BeginCapture(AssetHandle target)
   static CompressedImageFormats CompressedFormats { get; }
+  static DrawnMeshCount DrawnMeshes(out uint drawn)
   static Entity SpawnCamera3d()
   static Entity SpawnCamera3d(CameraSettings settings)
   static Entity SpawnLight(LightKind kind, float intensity)
@@ -10319,6 +10325,7 @@ static class Bevy.Render
   static string[]? MorphTargetNames(AssetHandle mesh)
   static void ClearAtmosphere(Entity camera)
   static void ClearSkyLighting(Entity camera)
+  static void CountDrawnMeshes(bool on)
   static void MakeCubemap(AssetHandle image)
   static void MakeTextureArray(AssetHandle image, int layers)
   static void MakeVolume(AssetHandle image, int slices)

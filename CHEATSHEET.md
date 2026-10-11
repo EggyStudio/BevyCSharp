@@ -950,6 +950,8 @@ static bool PipelinesReady();                                   // True once the
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
 static void SetPathTraced(Entity camera, bool on);              // Draws a camera's picture with Bevy's path tracer, or with on false the usual way again
 static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
+static void CountDrawnMeshes(bool on);                          // Starts or stops reading back how many meshes the opaque pass draws, which DrawnMeshes then answers
+static DrawnMeshCount DrawnMeshes(out uint drawn);              // How many meshes the opaque pass drew in a recent frame, while CountDrawnMeshes is on
 static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string? saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
 static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had
 static AssetHandle CreateClusterMaterial();                     // Makes a material that draws each cluster of a meshlet mesh in a color of its own

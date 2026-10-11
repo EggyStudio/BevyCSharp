@@ -125,6 +125,7 @@ internal static class Catalog
         new("post_processing", PostProcessing.Build),
         new("auto_exposure", AutoExposure.Build),
         new("clearcoat", Clearcoat.Build),
+        new("occlusion_culling", OcclusionCullingExample.Build),
         new("order_independent_transparency", OrderIndependentTransparency.Build),
         new("motion_blur", MotionBlur.Build),
         new("lightmaps", Lightmaps.Build),

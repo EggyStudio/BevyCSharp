@@ -53,6 +53,28 @@ shares a mesh and a material with, and leave it to the GPU's culling alone, and
 `Render.SetCameraFlags` turns a camera's indirect drawing and CPU culling off, the paths Bevy draws
 a crowd quickly by, which a stress test turns off to measure what they save.
 
+A camera with Bevy's `OcclusionCulling` and a depth prepass also leaves out on the GPU what the last
+frame's depth says is hidden, as behind a wall. The GPU writes what is left into the draws
+themselves, so the CPU never learns how much was culled, and `Render.CountDrawnMeshes(true)` reads
+the opaque pass's draws back, as Bevy's occlusion_culling example does, for a count a frame or two
+old:
+
+<!-- compiled with:
+Entity camera = default, status = default;
+-->
+```csharp
+ctx.Ecs.Insert<DepthPrepassRef>(camera);
+ctx.Ecs.Insert<OcclusionCullingRef>(camera);
+Render.CountDrawnMeshes(true);
+
+if (Render.DrawnMeshes(out var drawn) == DrawnMeshCount.Known)
+    Ui.SetText(status, $"{drawn} meshes drawn");
+```
+
+Counting costs two copies and a readback a frame, so it is asked for. `DrawnMeshes` says too why
+there is no count: one still on its way, a GPU whose culling cannot be counted, or one that does not
+cull, where every mesh in view is drawn.
+
 A vertex can carry a value of the game's own beside its position, a stream as Bevy's
 `custom_vertex_attribute` carries one, for a vertex shader of the program's own to read: a voxel's
 face and texture packed into one word, a blend weight, a wind phase. Each stream is a name, one of

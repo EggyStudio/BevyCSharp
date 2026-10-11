@@ -70,6 +70,7 @@ pub mod views;
 pub mod watch;
 pub mod weather;
 pub mod corners;
+pub mod drawn;
 pub mod exposure;
 pub mod images;
 
