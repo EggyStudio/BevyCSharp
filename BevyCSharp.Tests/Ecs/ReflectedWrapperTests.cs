@@ -364,6 +364,82 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// A grid line a node is placed on, one of Rust's integers that hold no zero, is a nullable int,
+    /// and a zero written is refused naming the field and leaves it as it was, holding a line or
+    /// holding none.
+    /// </summary>
+    [SkippableFact]
+    public void AGridLineHoldsNoZeroAndIsClearedWithNull()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        int? start = null, span = null, kept = null, end = 1, cleared = 1;
+        ArgumentOutOfRangeException? refused = null, refusedEmpty = null;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var node = ctx.Ecs.Insert<NodeRef>(ctx.Ecs.Spawn());
+            node.GridRowStart = -2;
+            node.GridColumnSpan = 3;
+            (start, span) = (node.GridRowStart, node.GridColumnSpan);
+
+            refused = Assert.Throws<ArgumentOutOfRangeException>(() => node.GridRowStart = 0);
+            kept = node.GridRowStart;
+            refusedEmpty = Assert.Throws<ArgumentOutOfRangeException>(() => node.GridRowEnd = 0);
+            end = node.GridRowEnd;
+
+            node.GridRowStart = null;
+            cleared = node.GridRowStart;
+        });
+
+        harness.Run();
+
+        Assert.Equal(-2, start);
+        Assert.Equal(3, span);
+        Assert.Contains("grid_row.start", refused!.Message);
+        Assert.Contains("NonZeroI16", refused.Message);
+        Assert.Equal(-2, kept);
+        Assert.NotNull(refusedEmpty);
+        Assert.Null(end);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
+    /// A duration is a <see cref="TimeSpan"/>, Bevy's clock's longest step read at its default and
+    /// written, and an optional one, where a sound starts in its clip, a nullable one.
+    /// </summary>
+    [SkippableFact]
+    public void ADurationIsATimeSpan()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        TimeSpan? longest = null, written = null, start = null, cleared = TimeSpan.Zero;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var time = ctx.Ecs.Resource<TimeVirtualRef>()!.Value;
+            longest = time.ContextMaxDelta;
+            time.ContextMaxDelta = TimeSpan.FromMilliseconds(100.5);
+            written = time.ContextMaxDelta;
+
+            var playback = ctx.Ecs.Insert<PlaybackSettingsRef>(ctx.Ecs.Spawn());
+            playback.StartPosition = TimeSpan.FromSeconds(1.5);
+            start = playback.StartPosition;
+            playback.StartPosition = null;
+            cleared = playback.StartPosition;
+        });
+
+        harness.Run();
+
+        Assert.Equal(TimeSpan.FromMilliseconds(250), longest);
+        Assert.Equal(TimeSpan.FromMilliseconds(100.5), written);
+        Assert.Equal(TimeSpan.FromSeconds(1.5), start);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
     /// An <c>Option</c> of a record written while it is already <c>Some</c> keeps what the record
     /// does not hold, as a sprite's texture atlas keeps its layout when its frame is written.
     /// </summary>

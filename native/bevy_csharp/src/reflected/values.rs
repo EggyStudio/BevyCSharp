@@ -331,6 +331,19 @@ fn integer_of(value: &dyn PartialReflect) -> Option<i64> {
         )*};
     }
     widen!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize);
+
+    // Rust's integers that hold no zero, as a grid line a node is placed on, read as the number
+    // they hold.
+    macro_rules! widen_nonzero {
+        ($($t:ty),*) => {$(
+            if let Some(v) = value.try_downcast_ref::<$t>() {
+                return Some(v.get() as i64);
+            }
+        )*};
+    }
+    use core::num::*;
+    widen_nonzero!(NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroIsize, NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize);
+
     value.try_downcast_ref::<bool>().map(|on| i64::from(*on))
 }
 
@@ -353,6 +366,22 @@ fn reintegered(held: &dyn PartialReflect, whole: i64) -> Option<Box<dyn PartialR
         )*};
     }
     narrow!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize);
+
+    // One that holds no zero refuses a zero as it refuses a number past its width, which the
+    // caller reports as the field being unable to hold it.
+    macro_rules! narrow_nonzero {
+        ($($t:ty => $p:ty),*) => {$(
+            if held.try_downcast_ref::<$t>().is_some() {
+                return <$p>::try_from(whole).ok().and_then(<$t>::new).map(|v| Box::new(v) as Box<dyn PartialReflect>);
+            }
+        )*};
+    }
+    use core::num::*;
+    narrow_nonzero!(
+        NonZeroI8 => i8, NonZeroI16 => i16, NonZeroI32 => i32, NonZeroI64 => i64, NonZeroIsize => isize,
+        NonZeroU8 => u8, NonZeroU16 => u16, NonZeroU32 => u32, NonZeroU64 => u64, NonZeroUsize => usize
+    );
+
     held.try_downcast_ref::<bool>().map(|_| Box::new(whole != 0) as Box<dyn PartialReflect>)
 }
 

@@ -268,6 +268,50 @@ internal static class ReflectedValue
         return Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
 
+    /// <summary>Reads a duration a wrapper names, which Bevy reflects whole as its seconds and nanoseconds.</summary>
+    internal static TimeSpan Duration(EcsWorld world, Entity entity, string type, string path) =>
+        DecodeDuration(world.GetReflected(entity, type, path) ?? throw Absent(type, entity));
+
+    /// <summary>Writes a duration a wrapper names, whole.</summary>
+    internal static void SetDuration(EcsWorld world, Entity entity, string type, string path, TimeSpan value) =>
+        world.SetReflected(entity, type, path, EncodeDuration(value));
+
+    /// <summary>A duration from the object of whole seconds and nanoseconds Rust's serde writes.</summary>
+    /// <remarks>
+    /// A <see cref="TimeSpan"/> counts in ticks of a hundred nanoseconds, so the nanoseconds past the
+    /// last tick are dropped, which no duration a game sets is fine enough to notice.
+    /// </remarks>
+    internal static TimeSpan DecodeDuration(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        var value = document.RootElement;
+        return TimeSpan.FromSeconds(value.GetProperty("secs").GetInt64()) + TimeSpan.FromTicks(value.GetProperty("nanos").GetInt64() / 100);
+    }
+
+    /// <summary>A duration as the object of whole seconds and nanoseconds Rust's serde reads.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The duration is negative, which Rust's cannot be.</exception>
+    internal static string EncodeDuration(TimeSpan value)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(value, TimeSpan.Zero);
+
+        var seconds = value.Ticks / TimeSpan.TicksPerSecond;
+        var nanos = value.Ticks % TimeSpan.TicksPerSecond * 100;
+        return FormattableString.Invariant($"{{\"secs\":{seconds},\"nanos\":{nanos}}}");
+    }
+
+    /// <summary>
+    /// A value for a field of one of Rust's integers that hold no zero, refused where it is zero.
+    /// </summary>
+    /// <remarks>
+    /// Checked before anything is written, so an optional one that held nothing is not left
+    /// holding the one it is chosen at when its variant is switched to <c>Some</c>.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The value is zero.</exception>
+    internal static T NonZero<T>(T value, string field, string type) where T : System.Numerics.INumberBase<T> =>
+        T.IsZero(value)
+            ? throw new ArgumentOutOfRangeException(nameof(value), $"'{field}' is a {type}, which holds no zero. An optional one is cleared with null.")
+            : value;
+
     /// <summary>Reads how many items a list a wrapper names has.</summary>
     internal static int Count(EcsWorld world, Entity entity, string type, string path) =>
         world.ReflectedLength(entity, type, path) ?? throw Absent(type, entity);

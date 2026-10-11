@@ -251,6 +251,14 @@ internal static class ReflectedSchemas
                 return;
             }
 
+            // A duration is one value with no fields a path reaches as well, its whole seconds and
+            // its nanoseconds, so it is read and written whole and drawn as seconds.
+            if (type == "core::time::Duration")
+            {
+                fields.Add(Lasting(at, label));
+                return;
+            }
+
             var registered = described.ValueKind == JsonValueKind.Object
                 && described.GetProperty("registered").GetBoolean();
             var kind = registered ? described.GetProperty("kind").GetString() : null;
@@ -467,6 +475,28 @@ internal static class ReflectedSchemas
             };
         }
 
+        /// <summary>A row holding a duration, drawn as its seconds.</summary>
+        private ComponentField Lasting(At at, string label)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.Double,
+                "Duration",
+                (world, entity) => Holds(world, entity, owner, within)
+                    && Guarded(() => world.GetReflected(entity, owner, path)) is { } json
+                    ? ReflectedValue.DecodeDuration(json).TotalSeconds
+                    : null,
+                (world, entity, value) => ComponentSchemas.TryCoerce<double>(value, out var seconds)
+                    && seconds >= 0 && seconds <= TimeSpan.MaxValue.TotalSeconds
+                    && Holds(world, entity, owner, within)
+                    && Sent(() => world.SetReflected(entity, owner, path, ReflectedValue.EncodeDuration(TimeSpan.FromSeconds(seconds)))),
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
+            };
+        }
+
         /// <summary>A row holding a range of numbers, drawn as its start and its end.</summary>
         private ComponentField Spanning(At at, string label)
         {
@@ -589,6 +619,12 @@ internal static class ReflectedSchemas
         "bool" => FieldKind.Bool,
         "u8" or "u16" or "u32" or "u64" or "usize"
             or "i8" or "i16" or "i32" or "i64" or "isize" => FieldKind.Int,
+
+        // Rust's integers that hold no zero, as the grid line a node is placed on, are numbers to
+        // read and write, a zero refused by the bridge as one past a field's width is.
+        "core::num::NonZeroU8" or "core::num::NonZeroU16" or "core::num::NonZeroU32" or "core::num::NonZeroU64"
+            or "core::num::NonZeroUsize" or "core::num::NonZeroI8" or "core::num::NonZeroI16"
+            or "core::num::NonZeroI32" or "core::num::NonZeroI64" or "core::num::NonZeroIsize" => FieldKind.Int,
         "alloc::string::String" => FieldKind.String,
         "glam::Vec2" => FieldKind.Vec2,
         "glam::Vec3" or "glam::Vec3A" => FieldKind.Vec3,

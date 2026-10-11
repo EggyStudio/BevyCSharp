@@ -99,6 +99,12 @@ enum Switch {
     Off,
 }
 
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Placed {
+    line: Option<core::num::NonZeroI16>,
+}
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 struct Spanned {
@@ -300,6 +306,33 @@ fn an_enum_component_with_no_default_is_inserted_at_its_first_empty_variant() {
         assert_eq!(status::OK, unsafe { bcs_reflect_insert(entity.to_bits(), path.as_ptr(), core::ptr::null(), 0) });
     });
     assert_eq!(Some(&Switch::On), app.world().get::<Switch>(entity));
+}
+
+/// An optional integer that holds no zero, as the grid line a node is placed on, is chosen at one
+/// and written and read as a number, and a zero is refused naming the field.
+#[test]
+fn an_integer_that_holds_no_zero_is_written_and_a_zero_refused() {
+    let (mut app, _) = probe_app();
+    app.register_type::<Placed>();
+    let entity = app.world_mut().spawn(Placed::default()).id();
+    loan_world(app.world_mut(), || {
+        let (type_path, line, some) = (c("bevy_csharp::reflected::tests::Placed"), c(".line"), c("Some"));
+        let held = c(".line.0");
+        let bits = entity.to_bits();
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_variant(bits, type_path.as_ptr(), line.as_ptr(), some.as_ptr()) });
+
+        let mut read = 0i64;
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_integer(bits, type_path.as_ptr(), held.as_ptr(), &mut read) });
+        assert_eq!(1, read);
+
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_integer(bits, type_path.as_ptr(), held.as_ptr(), -3) });
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_integer(bits, type_path.as_ptr(), held.as_ptr(), &mut read) });
+        assert_eq!(-3, read);
+
+        assert_eq!(status::INVALID_STATE, unsafe { bcs_reflect_set_integer(bits, type_path.as_ptr(), held.as_ptr(), 0) });
+        assert!(last_error().contains("'.line.0' cannot hold 0"), "{}", last_error());
+    });
+    assert_eq!(Some(core::num::NonZeroI16::new(-3).unwrap()), app.world().get::<Placed>(entity).unwrap().line);
 }
 
 /// A type says whether an insert from nothing has a default to start from, which a type reflecting

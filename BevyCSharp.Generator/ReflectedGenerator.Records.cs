@@ -324,9 +324,10 @@ public sealed partial class ReflectedGenerator
         {
             // Switched to Some only from None, since switching makes the variant again at its default.
             var present = "some" + depth;
+            var named = some with { Field = some.Field with { Name = part.Field.Name } };
             return $"if ({value} is not {{ }} {present}) _world.SetVariant(Entity, TypePath, {path}, \"None\"); "
-                + $"else {{ if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path}) != \"Some\") _world.SetVariant(Entity, TypePath, {path}, \"Some\"); "
-                + Write(some, present, depth + 1, prefix) + " }";
+                + $"else {{ {CheckedFirst(named.Field, present, " ")}if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path}) != \"Some\") _world.SetVariant(Entity, TypePath, {path}, \"Some\"); "
+                + Write(named, present, depth + 1, prefix) + " }";
         }
 
         if (part.Union is not { } union) return Writing(part.Field, path, value);
@@ -498,7 +499,8 @@ public sealed partial class ReflectedGenerator
 
             if (some.Parts.Count == 1 && some.Parts[0].Field.Name.Length == 0)
             {
-                var part = some.Parts[0];
+                // Named by the field, since the one value Some wraps has no name of its own.
+                var part = some.Parts[0] with { Field = some.Parts[0].Field with { Name = field.Name } };
                 text.Append($$"""
                         public {{part.Type}}? {{unique}}
                         {
@@ -513,7 +515,7 @@ public sealed partial class ReflectedGenerator
                                     return;
                                 }
 
-                                if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
+                                {{CheckedFirst(part.Field, "held", "\n            ")}}if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, "{{path}}") != "Some")
                                     _world.SetVariant(Entity, TypePath, "{{path}}", "Some");
                                 {{Write(part, "held", 1, null)}}
                             }

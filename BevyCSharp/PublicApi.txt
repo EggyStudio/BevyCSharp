@@ -5438,6 +5438,7 @@ readonly struct Bevy.Reflected.DeferredPrepassRef : IReflectedComponent<Deferred
   const string TypePath = "bevy_core_pipeline::prepass::DeferredPrepass"
 readonly struct Bevy.Reflected.DelayedCommandQueueRef : IReflectedComponent<DelayedCommandQueueRef>, IReflectedWrapper<DelayedCommandQueueRef>
   Entity Entity { get; }
+  TimeSpan SubmitAt { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::delayed_commands::DelayedCommandQueue"
 readonly struct Bevy.Reflected.DenoiseCasRef : IReflectedComponent<DenoiseCasRef>, IReflectedWrapper<DenoiseCasRef>
@@ -7397,12 +7398,6 @@ readonly struct Bevy.Reflected.NodeRef : IReflectedComponent<NodeRef>, IReflecte
   NodeRef.FlexDirectionVariant FlexDirection { get; set; }
   NodeRef.FlexWrapVariant FlexWrap { get; set; }
   NodeRef.GridAutoFlowVariant GridAutoFlow { get; set; }
-  NodeRef.GridColumnEndVariant GridColumnEnd { get; set; }
-  NodeRef.GridColumnSpanVariant GridColumnSpan { get; set; }
-  NodeRef.GridColumnStartVariant GridColumnStart { get; set; }
-  NodeRef.GridRowEndVariant GridRowEnd { get; set; }
-  NodeRef.GridRowSpanVariant GridRowSpan { get; set; }
-  NodeRef.GridRowStartVariant GridRowStart { get; set; }
   NodeRef.JustifyContentVariant JustifyContent { get; set; }
   NodeRef.JustifyItemsVariant JustifyItems { get; set; }
   NodeRef.JustifySelfVariant JustifySelf { get; set; }
@@ -7450,6 +7445,12 @@ readonly struct Bevy.Reflected.NodeRef : IReflectedComponent<NodeRef>, IReflecte
   float OverflowClipMarginMargin { get; set; }
   float ScrollbarWidth { get; set; }
   float? AspectRatio { get; set; }
+  int? GridColumnEnd { get; set; }
+  int? GridColumnSpan { get; set; }
+  int? GridColumnStart { get; set; }
+  int? GridRowEnd { get; set; }
+  int? GridRowSpan { get; set; }
+  int? GridRowStart { get; set; }
 enum Bevy.Reflected.NodeRef.AlignContentVariant : int
   Center = 9
   CenterSafe = 10
@@ -7519,24 +7520,6 @@ enum Bevy.Reflected.NodeRef.GridAutoFlowVariant : int
   ColumnDense = 3
   Row = 0
   RowDense = 2
-enum Bevy.Reflected.NodeRef.GridColumnEndVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.NodeRef.GridColumnSpanVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.NodeRef.GridColumnStartVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.NodeRef.GridRowEndVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.NodeRef.GridRowSpanVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.NodeRef.GridRowStartVariant : int
-  None = 0
-  Some = 1
 enum Bevy.Reflected.NodeRef.JustifyContentVariant : int
   Center = 9
   CenterSafe = 10
@@ -7818,6 +7801,7 @@ enum Bevy.Reflected.PickingInteractionRef.ValueVariant : int
   Pressed = 0
 readonly struct Bevy.Reflected.PickingSettingsRef : IReflectedComponent<PickingSettingsRef>, IReflectedWrapper<PickingSettingsRef>
   Entity Entity { get; }
+  TimeSpan MultiClickInterval { get; set; }
   bool IsEnabled { get; set; }
   bool IsHoverEnabled { get; set; }
   bool IsInputEnabled { get; set; }
@@ -7826,9 +7810,9 @@ readonly struct Bevy.Reflected.PickingSettingsRef : IReflectedComponent<PickingS
   const string TypePath = "bevy_picking::PickingSettings"
 readonly struct Bevy.Reflected.PlaybackSettingsRef : IReflectedComponent<PlaybackSettingsRef>, IReflectedWrapper<PlaybackSettingsRef>
   Entity Entity { get; }
-  PlaybackSettingsRef.DurationVariant Duration { get; set; }
   PlaybackSettingsRef.ModeVariant Mode { get; set; }
-  PlaybackSettingsRef.StartPositionVariant StartPosition { get; set; }
+  TimeSpan? Duration { get; set; }
+  TimeSpan? StartPosition { get; set; }
   Vec3? SpatialScale { get; set; }
   Volume Volume { get; set; }
   bool Muted { get; set; }
@@ -7837,17 +7821,11 @@ readonly struct Bevy.Reflected.PlaybackSettingsRef : IReflectedComponent<Playbac
   bool Spatial { get; set; }
   const string TypePath = "bevy_audio::audio::PlaybackSettings"
   float Speed { get; set; }
-enum Bevy.Reflected.PlaybackSettingsRef.DurationVariant : int
-  None = 0
-  Some = 1
 enum Bevy.Reflected.PlaybackSettingsRef.ModeVariant : int
   Despawn = 2
   Loop = 1
   Once = 0
   Remove = 3
-enum Bevy.Reflected.PlaybackSettingsRef.StartPositionVariant : int
-  None = 0
-  Some = 1
 readonly struct Bevy.Reflected.PointLightRef : IReflectedComponent<PointLightRef>, IReflectedWrapper<PointLightRef>
   Color Color { get; set; }
   Entity Entity { get; }
@@ -9311,6 +9289,12 @@ readonly struct Bevy.Reflected.TilemapChunkTileDataRef : IReflectedComponent<Til
   const string TypePath = "bevy_sprite_render::tilemap_chunk::TilemapChunkTileData"
 readonly struct Bevy.Reflected.TimeFixedRef : IReflectedComponent<TimeFixedRef>, IReflectedWrapper<TimeFixedRef>
   Entity Entity { get; }
+  TimeSpan ContextOverstep { get; set; }
+  TimeSpan ContextTimestep { get; set; }
+  TimeSpan Delta { get; set; }
+  TimeSpan Elapsed { get; set; }
+  TimeSpan ElapsedWrapped { get; set; }
+  TimeSpan WrapPeriod { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::time::Time<bevy_time::fixed::Fixed>"
   double DeltaSecsF64 { get; set; }
@@ -9323,6 +9307,10 @@ readonly struct Bevy.Reflected.TimeRealRef : IReflectedComponent<TimeRealRef>, I
   Entity Entity { get; }
   TimeRealRef.ContextFirstUpdateVariant ContextFirstUpdate { get; set; }
   TimeRealRef.ContextLastUpdateVariant ContextLastUpdate { get; set; }
+  TimeSpan Delta { get; set; }
+  TimeSpan Elapsed { get; set; }
+  TimeSpan ElapsedWrapped { get; set; }
+  TimeSpan WrapPeriod { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::time::Time<bevy_time::real::Real>"
   double DeltaSecsF64 { get; set; }
@@ -9339,6 +9327,10 @@ enum Bevy.Reflected.TimeRealRef.ContextLastUpdateVariant : int
   Some = 1
 readonly struct Bevy.Reflected.TimeRef : IReflectedComponent<TimeRef>, IReflectedWrapper<TimeRef>
   Entity Entity { get; }
+  TimeSpan Delta { get; set; }
+  TimeSpan Elapsed { get; set; }
+  TimeSpan ElapsedWrapped { get; set; }
+  TimeSpan WrapPeriod { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::time::Time<()>"
   double DeltaSecsF64 { get; set; }
@@ -9349,6 +9341,11 @@ readonly struct Bevy.Reflected.TimeRef : IReflectedComponent<TimeRef>, IReflecte
   float ElapsedSecsWrapped { get; set; }
 readonly struct Bevy.Reflected.TimeVirtualRef : IReflectedComponent<TimeVirtualRef>, IReflectedWrapper<TimeVirtualRef>
   Entity Entity { get; }
+  TimeSpan ContextMaxDelta { get; set; }
+  TimeSpan Delta { get; set; }
+  TimeSpan Elapsed { get; set; }
+  TimeSpan ElapsedWrapped { get; set; }
+  TimeSpan WrapPeriod { get; set; }
   bool ContextPaused { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::time::Time<bevy_time::virt::Virtual>"
@@ -10004,7 +10001,6 @@ readonly struct Bevy.Reflected.WindowRef : IReflectedComponent<WindowRef>, IRefl
   WindowModeValue Mode { get; set; }
   WindowPosition Position { get; set; }
   WindowRef.CompositeAlphaModeVariant CompositeAlphaMode { get; set; }
-  WindowRef.DesiredMaximumFrameLatencyVariant DesiredMaximumFrameLatency { get; set; }
   WindowRef.PreferredScreenEdgesDeferringSystemGesturesVariant PreferredScreenEdgesDeferringSystemGestures { get; set; }
   WindowRef.PresentModeVariant PresentMode { get; set; }
   WindowRef.RecognizePanGestureVariant RecognizePanGesture { get; set; }
@@ -10047,6 +10043,7 @@ readonly struct Bevy.Reflected.WindowRef : IReflectedComponent<WindowRef>, IRefl
   float ResizeConstraintsMinWidth { get; set; }
   float ResolutionScaleFactor { get; set; }
   float? ResolutionScaleFactorOverride { get; set; }
+  int? DesiredMaximumFrameLatency { get; set; }
   string Title { get; set; }
   string? Canvas { get; set; }
   string? Name { get; set; }
@@ -10058,9 +10055,6 @@ enum Bevy.Reflected.WindowRef.CompositeAlphaModeVariant : int
   Opaque = 1
   PostMultiplied = 3
   PreMultiplied = 2
-enum Bevy.Reflected.WindowRef.DesiredMaximumFrameLatencyVariant : int
-  None = 0
-  Some = 1
 enum Bevy.Reflected.WindowRef.PreferredScreenEdgesDeferringSystemGesturesVariant : int
   All = 5
   Bottom = 3

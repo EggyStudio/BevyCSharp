@@ -214,8 +214,11 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     /// <summary>The Rust type Bevy reflects as one value with no fields, read and written whole as its two ends.</summary>
     private const string Range = "Range<f32>";
 
+    /// <summary>Rust's duration, which Bevy reflects as one value with no fields, read and written whole.</summary>
+    private const string Duration = "Duration";
+
     /// <summary>The C# type a field's property has, or nothing for a kind a wrapper does not type.</summary>
-    private static string? TypeOf(FieldModel field) => field.Rust == Range ? "global::Bevy.FloatRange" : field.Kind switch
+    private static string? TypeOf(FieldModel field) => field.Rust == Range ? "global::Bevy.FloatRange" : field.Rust == Duration ? "global::System.TimeSpan" : field.Kind switch
     {
         "Float" => "float",
         "Double" => "double",
@@ -261,6 +264,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     private static string Reading(FieldModel field, string path) => field.Kind switch
     {
         _ when field.Rust == Range => $"global::Bevy.ReflectedValue.Range(_world, Entity, TypePath, {path})",
+        _ when field.Rust == Duration => $"global::Bevy.ReflectedValue.Duration(_world, Entity, TypePath, {path})",
         "Color" => $"global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, {path})",
         "Asset" => $"global::Bevy.ReflectedValue.Asset(_world, Entity, TypePath, {path})",
         _ => $"global::Bevy.ReflectedValue.Get<{TypeOf(field)}>(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind})",
@@ -270,10 +274,31 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     private static string Writing(FieldModel field, string path, string value) => field.Kind switch
     {
         _ when field.Rust == Range => $"global::Bevy.ReflectedValue.SetRange(_world, Entity, TypePath, {path}, {value});",
+        _ when field.Rust == Duration => $"global::Bevy.ReflectedValue.SetDuration(_world, Entity, TypePath, {path}, {value});",
         "Color" => $"_world.SetReflectedColor(Entity, TypePath, {path}, {value});",
         "Asset" => $"_world.SetReflectedAsset(Entity, TypePath, {path}, {value});",
-        _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind}, {value});",
+        _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind}, {Checked(field, value)});",
     };
+
+    /// <summary>
+    /// A value written to a field, checked first where the field is one of Rust's integers that hold
+    /// no zero, as the grid line a node is placed on, so a zero is refused naming the field.
+    /// </summary>
+    private static string Checked(FieldModel field, string value) =>
+        NoZero(field)
+            ? $"global::Bevy.ReflectedValue.NonZero({value}, \"{Quoted(field.Name)}\", \"{Last(field.Rust)}\")"
+            : value;
+
+    /// <summary>Whether a field is one of Rust's integers that hold no zero, <c>core::num::NonZeroI16</c> and its kin.</summary>
+    private static bool NoZero(FieldModel field) => field.Kind == "Int" && Last(field.Rust).StartsWith("NonZero", StringComparison.Ordinal);
+
+    /// <summary>
+    /// The statement checking a value before an optional field holding nothing is switched to
+    /// <c>Some</c>, or nothing where the field takes any value, so a zero refused leaves it as it
+    /// was rather than holding the one it was switched to.
+    /// </summary>
+    private static string CheckedFirst(FieldModel field, string value, string after) =>
+        NoZero(field) ? $"_ = {Checked(field, value)};{after}" : "";
 
     /// <summary>A reflect path as it stands inside a C# string.</summary>
     private static string Quoted(string path) => path.Replace("\\", "\\\\").Replace("\"", "\\\"");
@@ -432,10 +457,8 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
                     text.Append($$"""
                             public {{property}} {{unique}}
                             {
-                                get => global::Bevy.ReflectedValue.Get<{{property}}>(
-                                    _world, Entity, TypePath, "{{path}}", global::Bevy.FieldKind.{{field.Kind}});
-                                set => global::Bevy.ReflectedValue.Set(
-                                    _world, Entity, TypePath, "{{path}}", global::Bevy.FieldKind.{{field.Kind}}, value);
+                                get => {{Reading(field, $"\"{path}\"")}};
+                                set => {{Writing(field, $"\"{path}\"", "value")}}
                             }
 
                         """);

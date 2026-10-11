@@ -116,7 +116,8 @@ silent failure rather than a compile error.
   the library names as an additional file, and emits `Bevy.Reflected.PointLightRef` and the rest:
   a readonly struct over an entity with a typed property per field (`float Intensity`,
   `bool ShadowMapsEnabled`, a nested enum for an enum whose variants hold nothing, `AssetHandle` for
-  a handle) and a `Remove()`. An enum whose variants hold values is an abstract record with a
+  a handle, `TimeSpan` for a duration, and `int` for one of Rust's integers that hold no zero, a
+  zero written refused naming the field) and a `Remove()`. An enum whose variants hold values is an abstract record with a
   record a variant (`FogFalloff.Linear(float Start, float End)`, `Val.Px(float Value)`), from the
   `variant` lines the description gives each variant's fields, and an `Option` is a nullable. A
   record is emitted once for each Rust type, so `Val` serves every length of a node.
@@ -128,9 +129,12 @@ silent failure rather than a compile error.
   examples to the wrappers wherever one reaches.
 - **No reflection on this side.** The wrappers are generated code, so trimming and AOT are
   unaffected, as for every other schema the generator emits.
-- **What a wrapper leaves out.** A field shown only as JSON, such as a list, and an enum one of
-  whose variants holds a value a wrapper does not type, such as another enum, which keeps its
-  variant names alone. Those stay on the string paths of tier 1.
+- **What a wrapper leaves out.** An enum one of whose variants holds a value the description gives
+  no kind, which keeps its variant names alone and stays on the string paths of tier 1. A tuple,
+  as a text layout's cursor and a window's pan gesture hold, has no field names a record could
+  take, an `Instant`, as the real clock keeps its first and last update in, is a point on the
+  machine's clock that means nothing once read on this side, and a graph's node index, as
+  animation transitions keep their main animation by, names a node only to the graph it indexes.
 
 ### Tier 3: byte mirrors, generated
 

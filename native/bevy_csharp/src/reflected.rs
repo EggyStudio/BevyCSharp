@@ -181,6 +181,20 @@ fn default_of(
         return Ok(Box::new(made));
     }
 
+    // An integer that holds no zero has no default, and an optional one, as the grid line a node
+    // is placed on, is chosen as one for the caller to write the real number over.
+    macro_rules! one {
+        ($($t:ty),*) => {$(
+            if type_id == TypeId::of::<$t>() {
+                return Ok(Box::new(<$t>::new(1).unwrap()));
+            }
+        )*};
+    }
+    {
+        use core::num::*;
+        one!(NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroIsize, NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize);
+    }
+
     // A range of numbers registers no default, though Rust's is the empty range at zero, which a
     // struct holding one, as a visibility range holds its margins, is made with for the caller to
     // write the real ones over.

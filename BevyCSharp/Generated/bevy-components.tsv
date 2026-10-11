@@ -43,7 +43,9 @@ field	bevy_audio::audio::PlaybackSettings	spatial	.spatial	Bool	bool
 field	bevy_audio::audio::PlaybackSettings	spatial_scale	.spatial_scale	Enum	Option<SpatialScale>	None,Some
 variant	bevy_audio::audio::PlaybackSettings	spatial_scale	Some		.spatial_scale.0.0	Vec3	glam::Vec3	
 field	bevy_audio::audio::PlaybackSettings	start_position	.start_position	Enum	Option<Duration>	None,Some
+variant	bevy_audio::audio::PlaybackSettings	start_position	Some		.start_position.0	Double	Duration	
 field	bevy_audio::audio::PlaybackSettings	duration	.duration	Enum	Option<Duration>	None,Some
+variant	bevy_audio::audio::PlaybackSettings	duration	Some		.duration.0	Double	Duration	
 component	bevy_audio::audio::SpatialListener	SpatialListener
 field	bevy_audio::audio::SpatialListener	left_ear_offset	.left_ear_offset	Vec3	glam::Vec3	
 field	bevy_audio::audio::SpatialListener	right_ear_offset	.right_ear_offset	Vec3	glam::Vec3	
@@ -529,6 +531,7 @@ field	bevy_picking::PickingSettings	is_enabled	.is_enabled	Bool	bool
 field	bevy_picking::PickingSettings	is_input_enabled	.is_input_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	is_hover_enabled	.is_hover_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	is_window_picking_enabled	.is_window_picking_enabled	Bool	bool	
+field	bevy_picking::PickingSettings	multi_click_interval	.multi_click_interval	Double	Duration	
 component	bevy_picking::backend::ray::RayMap	RayMap
 component	bevy_picking::cursor::DefaultCursor	DefaultCursor
 field	bevy_picking::cursor::DefaultCursor	0	.0	Enum	EntityCursor	Custom,System
@@ -836,37 +839,57 @@ field	bevy_text::text::TextSpan	0	.0	String	alloc::string::String
 component	bevy_text::text::UnderlineColor	UnderlineColor
 field	bevy_text::text::UnderlineColor	0	.0	Color	Color	
 component	bevy_time::delayed_commands::DelayedCommandQueue	DelayedCommandQueue
+field	bevy_time::delayed_commands::DelayedCommandQueue	submit_at	.submit_at	Double	Duration	
 component	bevy_time::time::Time<()>	Time<()>
+field	bevy_time::time::Time<()>	wrap_period	.wrap_period	Double	Duration	
+field	bevy_time::time::Time<()>	delta	.delta	Double	Duration	
 field	bevy_time::time::Time<()>	delta_secs	.delta_secs	Float	f32	
 field	bevy_time::time::Time<()>	delta_secs_f64	.delta_secs_f64	Double	f64	
+field	bevy_time::time::Time<()>	elapsed	.elapsed	Double	Duration	
 field	bevy_time::time::Time<()>	elapsed_secs	.elapsed_secs	Float	f32	
 field	bevy_time::time::Time<()>	elapsed_secs_f64	.elapsed_secs_f64	Double	f64	
+field	bevy_time::time::Time<()>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<()>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<()>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
 component	bevy_time::time::Time<bevy_time::fixed::Fixed>	Time<Fixed>
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	context.timestep	.context.timestep	Double	Duration	
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	context.overstep	.context.overstep	Double	Duration	
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	wrap_period	.wrap_period	Double	Duration	
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	delta	.delta	Double	Duration	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	delta_secs	.delta_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	delta_secs_f64	.delta_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed	.elapsed	Double	Duration	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs	.elapsed_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_f64	.elapsed_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
 component	bevy_time::time::Time<bevy_time::real::Real>	Time<Real>
 field	bevy_time::time::Time<bevy_time::real::Real>	context.first_update	.context.first_update	Enum	Option<Instant>	None,Some
 field	bevy_time::time::Time<bevy_time::real::Real>	context.last_update	.context.last_update	Enum	Option<Instant>	None,Some
+field	bevy_time::time::Time<bevy_time::real::Real>	wrap_period	.wrap_period	Double	Duration	
+field	bevy_time::time::Time<bevy_time::real::Real>	delta	.delta	Double	Duration	
 field	bevy_time::time::Time<bevy_time::real::Real>	delta_secs	.delta_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::real::Real>	delta_secs_f64	.delta_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::real::Real>	elapsed	.elapsed	Double	Duration	
 field	bevy_time::time::Time<bevy_time::real::Real>	elapsed_secs	.elapsed_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::real::Real>	elapsed_secs_f64	.elapsed_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::real::Real>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<bevy_time::real::Real>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::real::Real>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
 component	bevy_time::time::Time<bevy_time::virt::Virtual>	Time<Virtual>
+field	bevy_time::time::Time<bevy_time::virt::Virtual>	context.max_delta	.context.max_delta	Double	Duration	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	context.paused	.context.paused	Bool	bool	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	context.relative_speed	.context.relative_speed	Double	f64	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	context.effective_speed	.context.effective_speed	Double	f64	
+field	bevy_time::time::Time<bevy_time::virt::Virtual>	wrap_period	.wrap_period	Double	Duration	
+field	bevy_time::time::Time<bevy_time::virt::Virtual>	delta	.delta	Double	Duration	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	delta_secs	.delta_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	delta_secs_f64	.delta_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed	.elapsed	Double	Duration	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs	.elapsed_secs	Float	f32	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_f64	.elapsed_secs_f64	Double	f64	
+field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
 component	bevy_transform::components::global_transform::GlobalTransform	GlobalTransform
@@ -1284,11 +1307,17 @@ field	bevy_ui::ui_node::Node	grid_template_columns	.grid_template_columns	List	V
 field	bevy_ui::ui_node::Node	grid_auto_rows	.grid_auto_rows	List	Vec<GridTrack>	bevy_ui::ui_node::GridTrack
 field	bevy_ui::ui_node::Node	grid_auto_columns	.grid_auto_columns	List	Vec<GridTrack>	bevy_ui::ui_node::GridTrack
 field	bevy_ui::ui_node::Node	grid_row.start	.grid_row.start	Enum	Option<NonZeroI16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_row.start	Some		.grid_row.start.0	Int	core::num::NonZeroI16	
 field	bevy_ui::ui_node::Node	grid_row.span	.grid_row.span	Enum	Option<NonZeroU16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_row.span	Some		.grid_row.span.0	Int	core::num::NonZeroU16	
 field	bevy_ui::ui_node::Node	grid_row.end	.grid_row.end	Enum	Option<NonZeroI16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_row.end	Some		.grid_row.end.0	Int	core::num::NonZeroI16	
 field	bevy_ui::ui_node::Node	grid_column.start	.grid_column.start	Enum	Option<NonZeroI16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_column.start	Some		.grid_column.start.0	Int	core::num::NonZeroI16	
 field	bevy_ui::ui_node::Node	grid_column.span	.grid_column.span	Enum	Option<NonZeroU16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_column.span	Some		.grid_column.span.0	Int	core::num::NonZeroU16	
 field	bevy_ui::ui_node::Node	grid_column.end	.grid_column.end	Enum	Option<NonZeroI16>	None,Some
+variant	bevy_ui::ui_node::Node	grid_column.end	Some		.grid_column.end.0	Int	core::num::NonZeroI16	
 component	bevy_ui::ui_node::OuterColor	OuterColor
 field	bevy_ui::ui_node::OuterColor	0	.0	Color	Color	
 component	bevy_ui::ui_node::Outline	Outline
@@ -1979,6 +2008,7 @@ field	bevy_window::window::Window	visible	.visible	Bool	bool
 field	bevy_window::window::Window	skip_taskbar	.skip_taskbar	Bool	bool	
 field	bevy_window::window::Window	clip_children	.clip_children	Bool	bool	
 field	bevy_window::window::Window	desired_maximum_frame_latency	.desired_maximum_frame_latency	Enum	Option<NonZeroU32>	None,Some
+variant	bevy_window::window::Window	desired_maximum_frame_latency	Some		.desired_maximum_frame_latency.0	Int	core::num::NonZeroU32	
 field	bevy_window::window::Window	recognize_pinch_gesture	.recognize_pinch_gesture	Bool	bool	
 field	bevy_window::window::Window	recognize_rotation_gesture	.recognize_rotation_gesture	Bool	bool	
 field	bevy_window::window::Window	recognize_doubletap_gesture	.recognize_doubletap_gesture	Bool	bool	

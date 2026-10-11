@@ -86,7 +86,9 @@ foreach (var each in ctx.Ecs.All<PointLightRef>())       // every entity carryin
 out as a system's query leaves it out, and each wrapper names its entity as `Entity`.
 
 A number crosses as a number and a color as a linear `Color` whatever space Bevy holds it in, and a
-handle inside a component, such as the image a sprite draws, is an `AssetHandle`. An enum whose
+handle inside a component, such as the image a sprite draws, is an `AssetHandle`. A duration is a
+`TimeSpan`, and one of Rust's integers that hold no zero, as the grid line a node is placed on, is
+an `int`, a zero written to it refused naming the field. An enum whose
 variants hold nothing is a C# enum named after its property, `NodeRef.DisplayVariant` for a node's
 `Display`. One whose variants hold values is a record, with a record for each variant, so writing
 one sets the variant and its values together and reading one is a `switch` on its type:
