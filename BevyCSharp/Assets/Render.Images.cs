@@ -195,6 +195,52 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Has the GPU make an image's mipmaps from its top level each frame, as Bevy's
+    /// <c>MipGenerationJobs</c> does, or stop.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// An image drawn far smaller than it is needs its smaller levels to keep from shimmering, and
+    /// one whose top level changes, written by the game or drawn by a camera, needs them made again.
+    /// While this is on, Bevy downsamples the top level into each level below it once a frame,
+    /// before the cameras draw, so every camera samples levels made from what the top holds then.
+    /// Turned off, the levels made last are kept as they are.
+    /// </para>
+    /// <para>
+    /// Turning it on gives an image of one level every level its size has, those below the top
+    /// black and clear until they are made. Bevy's downsampler writes the levels as a storage image,
+    /// which no sRGB format can be, so an image made here is made with <c>srgb: false</c>, its
+    /// numbers then read as they are.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var picture = Render.CreateImage(pixels, 640, 480, srgb: false);
+    /// Render.SetMipGeneration(picture, true);
+    /// </code>
+    /// </example>
+    /// <exception cref="InvalidOperationException">
+    /// The image's format is one Bevy's downsampler cannot write, an sRGB one among them.
+    /// </exception>
+    /// <exception cref="BevyNativeException">
+    /// The handle names no image, the image is still loading, or this build has no renderer.
+    /// </exception>
+    public static void SetMipGeneration(AssetHandle image, bool on)
+    {
+        var status = Native.bcs_render_set_mip_generation(image.Key, on ? 1 : 0);
+        if (status == NativeStatus.Unsupported) throw NoRenderer("Making an image's mipmaps");
+        if (status == NativeStatus.InvalidState)
+        {
+            throw new InvalidOperationException(
+                $"The mipmaps of {image} cannot be made on the GPU, because Bevy's downsampler "
+                + "writes them as a storage image and the image's format cannot be one, as no sRGB "
+                + "format can. Make the image with srgb: false.");
+        }
+
+        Native.Check(status, $"making the mipmaps of {image}");
+    }
+
+    /// <summary>
     /// Gives an image how it repeats past its edges and how it is filtered.
     /// </summary>
     /// <remarks>

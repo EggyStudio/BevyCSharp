@@ -10,24 +10,56 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `02598971`. One commit, item 17, unpushed, ahead of ui_material: the count's markers
-sit under the Examples heading after its paragraph and before the gallery, the status section
-pointing to them in one sentence, and each group's heading in the gallery carries its count, `27 of
-29`, `all 13`, `1 of 1`, which the script writes so the check reads them; the heading counts the
-group's examples written whole, not the pictures in its row, since an example that prints has
-nothing to draw and no picture, which would have read the input group as one of twelve with all
-twelve written, and one written in part is not counted, as the prose count counts, the paragraph
-above the gallery saying so and that an example which prints stands in EXAMPLES.md rather than the
-row. The prose at 302, the norm, document and path tests passing in a worktree at the commit, the
-README's walk run after ui_material on the package packed then. Right, the count that means
-something chosen over the literal one and said where the reader meets it. On ui_material's handoff,
-the working session corrected the reviewing session's ask: a second call that re-read the table on a
-mismatch would pack a bind group against the new layout for the key Bevy had already stored from the
-first read, which the GPU refuses, so on a mismatch it returns Bevy's retry, Bevy keeps the previous
-bind group and both calls read the new version the next frame; the choice is a pure function of the
-version handed and the current one, packed, stale or missing, with a native test over each case, and
-the thread-local's remark says why it exists. Then ui_material's commit, and the rows in the order
-given.
+Reviewed up to `2fbd2860`. ui_material, ABI 268, the interface material: a node drawn by a Slang
+program of the game's own through Bevy's `UiMaterialPlugin`, the bridge's type handing Bevy an empty
+layout and its own shaders once and its specialize putting the program's layout and interface stages
+in their place, the key carrying the version they were read from, so a program edited since makes a
+new pipeline rather than finding the old; the bind group packed against the version the key named
+while the table holds it, waiting a frame where a compile replaced it between the two calls, a
+thread-local carrying the version over with its remark saying why, and the choice a pure function
+with a native test over each case, packed, stale and missing; `bcs_ui.slang` giving the fragment
+stage what Bevy's vertex stage hands on, where on the node it is, the node's size, its border widths
+and its corner radii; `FragmentUi` and `VertexUi` stages, `CreateUiMaterial` and `Ui.SetMaterial`,
+an interface vertex stage without its fragment refused with the reason; the example Bevy's banner as
+a progress bar inside a rounded rainbow border with the node's outline a hundred pixels out,
+captured at frame 180 since frame 120 lands where Bevy's bar is empty, the script's comment saying
+so; the shaders guide's section with its compiled block and the interface guide's lines. N 1.3
+caught material.rs at 809 and the program refresh moved to shader_materials.rs, which leaves 769.
+The suite 1,425 passed and 2 skipped of 1,427; cargo 156 and 89; the three profiles clean with
+warnings denied; the norm, document and path tests 19 of 19, the prose at 302; the README's walk at
+a packed 0.0.0-walk268; six public lines and two of the cheat sheet. EXAMPLES.md reads 347 written,
+2 in part and 33 missing, the interface group 57 of 65. Right, the plugin's one fixed layout
+replaced at specialize rather than a type a material, and the stale handoff answered with Bevy's
+retry rather than a second read, the working session's correction of the reviewing session's ask.
+The run is green on all three. The cheat sheet's two warnings, of `UpdateSettings` and
+`IAnimationEvent` named with no method to list, wait for the next batch that touches it, as offered.
+The Shared: line is read and moved to SHARED.md's row. Then the owner's ask of 20:05, a vertex
+stream of the game's own in both engines, read from a packed-vertex game the owner put in 3DEngine's
+`.ref`, planned with the owner and approved at 20:40, which is item 18 (Decision 31) and takes the
+`custom_vertex_attribute` row as its example, the working session told this evening to hold that
+row; it comes after the row under way. Then dynamic_mip_generation, occlusion_culling,
+world_serialization, transform_gizmo, debug_picking, pitch, decodable, then the four read against
+the lock as the working session read them: atmosphere with its Mars medium and no camera controller,
+render_recovery with its causes reachable and none pressed, solari_reflections with a C# camera, and
+bsn as not applying, its triage line saying Bevy 0.20 loads the notation from no file.
+
+Before it, `02598971` came, item 17: the count's markers sit under the Examples heading after its
+paragraph and before the gallery, the status section pointing to them in one sentence, and each
+group's heading in the gallery carries its count, `27 of 29`, `all 13`, `1 of 1`, which the script
+writes so the check reads them; the heading counts the group's examples written whole, not the
+pictures in its row, since an example that prints has nothing to draw and no picture, which would
+have read the input group as one of twelve with all twelve written, and one written in part is not
+counted, as the prose count counts, the paragraph above the gallery saying so and that an example
+which prints stands in EXAMPLES.md rather than the row. The prose at 302, the norm, document and
+path tests passing in a worktree at the commit, the README's walk run after ui_material on the
+package packed then. Right, the count that means something chosen over the literal one and said
+where the reader meets it. On ui_material's handoff, the working session corrected the reviewing
+session's ask: a second call that re-read the table on a mismatch would pack a bind group against
+the new layout for the key Bevy had already stored from the first read, which the GPU refuses, so on
+a mismatch it returns Bevy's retry, Bevy keeps the previous bind group and both calls read the new
+version the next frame; the choice is a pure function of the version handed and the current one,
+packed, stale or missing, with a native test over each case, and the thread-local's remark says why
+it exists. Then ui_material's commit, and the rows in the order given.
 
 Before it, `b134dd4d` and `6e28c3cc` came. `6e28c3cc`, custom_projection, ABI 267: a projection type
 the bridge declares, Bevy's perspective with entries of its matrix written over its clip matrix and
@@ -56,27 +88,6 @@ occlusion culling, the world's serialization, the transform gizmo, picking's deb
 the decodable, then the atmosphere's Mars medium, render recovery, Solari's reflections and Bevy's
 scene notation, each of those four read against the lock first, since a crate waits on the owner's
 word.
-
-Before it, `6641dbcc` came, error_handling, with no bridge work: the ten thousand points come from
-the icosphere's triangles read back through `Render.TryReadMesh`, each triangle picked by its
-cumulative area with a binary search and a point picked evenly within it by the folded pair, red
-emissive spheres parented to the sphere; the errors map onto what C# has, a pointer-move observer
-sliding the sphere and throwing where there is no transform with mesh picking on, a system catching
-a resource never inserted and logging the captured error, a system catching the refused add to an
-entity that never was and logging it as an error with its context, and Bevy's spawn at an id left
-out for having no counterpart; the run logs both as Bevy's does and the capture shows the dotted
-sphere over the green plane; the running guide says the engine's handling is Bevy's warn handler,
-the fail-fast setting its panic, and that a system dealing with its own error catches it. The norm,
-document and path tests 20 of 20, the prose at 299. EXAMPLES.md reads 344 written, 2 in part and 36
-missing. Right, the sampling done as Bevy's sampler does it from the mesh the engine already reads
-back, and the one thing without a counterpart left out and said. custom_projection is under way at
-ABI 267: a projection type the bridge declares, Bevy's perspective with entries written over its
-clip matrix and its sub-view, the update, the far plane and the frustum's corners the perspective's
-so it follows the window, set from C# with the field of view, the near and far planes and the
-entries, a column or row past three refused on both sides, with a native test of the entries landing
-and the rest staying the perspective's, a managed test reading the variant back as custom with both
-refusals, the example Bevy's scene with its two entries, and the cameras guide's paragraph and
-block.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -487,6 +498,38 @@ from [SHARED.md](SHARED.md).
     examples written whole rather than its pictures, since one that prints has none, said above the
     gallery.
 
+18. **A vertex stream of the game's own on a mesh, Bevy's `custom_vertex_attribute` reached from C#
+    (Decision 31).** The owner put a packed-vertex game in 3DEngine's `.ref` on 2026-10-11 at 20:05,
+    one float a vertex unpacked in the shader, and asked for the same in both engines; the plan was
+    approved at 20:40 and its full text is kept by the reviewing session, this item being what it
+    asks of the bridge. `MeshData` gains `Streams`, each a name, a format of five, `UInt`, `UInt2`,
+    `Float`, `Float4` and four bytes read as 0 to 1, a location from 8 to 15 and its bytes, the
+    shader declaring the input at that location's `TEXCOORDn` as every input here is, so the game
+    writes one number twice and they agree; positions stay required, since Bevy's mesh pipeline
+    places them at location 0 before the bridge's specialize runs and its prepass, culling, meshlets
+    and Solari read them, a voxel vertex then 16 bytes of position and word where 48. The streams
+    travel in the mesh's own call, appended to `BcsMeshData` and its C# mirror in lockstep with a
+    size assertion, so `WriteMesh` keeps them, where a side call as the joints' would lose them on
+    the next write, and the joints are carried over in that write too, one line; a registry by name
+    of the attribute Bevy wants, the name interned once and the id a hash of it set above Bevy's own
+    so it sorts the same on every run, refusing a name that returns in another format or location or
+    two streams of one mesh at one location, which C# turns into the exception with both values;
+    `mesh_from` inserting each stream as Bevy's values of its format; the mesh info's bitmask
+    gaining a bit for a stream of the game's own. In `user_specialize`, where a program has a vertex
+    stage of its own and the mesh's layout holds a registered stream, the vertex buffers are built
+    again from Bevy's attributes at Bevy's locations plus each registered stream the layout holds at
+    its own, the prepass attributes gaining the same, and the 2D material the same rebuild; the
+    layout already keys Bevy's pipelines. `bcs.slang`'s header says how a stream is declared and
+    carried on, that the Slang class must match the format and that `vk::location` is ignored, the
+    drawing and shaders guides their sections, and the scene file keeps streams with the mesh. The
+    example is Bevy's `custom_vertex_attribute`, a cube with a `Float4` stream at location 8 blended
+    toward red, written in C#, its row leaving triage as written examples do, the counts moving by
+    one. Tests: native, a mesh from one stream holding the registered id and its values and the same
+    name in another format refused; managed, a quad with a `UInt` stream of a color a vertex drawn
+    by a program reading `TEXCOORD8` to the pixel, the exception for a wrong length, a location
+    outside 8 to 15 and a reused name, and a stream in the scene file's round trip. ABI 269 to 270.
+    After the row under way.
+
 ## Verdicts
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
@@ -680,10 +723,11 @@ from [SHARED.md](SHARED.md).
     written moved under the Examples heading, and each group's heading in the gallery carrying its
     count.
 
-## Replies
+31. **A vertex stream of the game's own, in both engines.** The owner put a game built on 3DEngine's
+    3.1.0 package in its `.ref` at 20:05 on 2026-10-11, which fed its shader one packed float a
+    vertex and unpacked it there, asked whether such a stream belongs in a game engine and how both
+    would do it, and approved the plan at 20:40, which is item 18 here and item 20 in 3DEngine: one
+    stream a mesh in five formats, at `TEXCOORD8` and up here beside Bevy's positions and as
+    `CUSTOM0` there, beside the vertex and then as the vertex alone.
 
-Shared: an interface node drawn by a Slang program of the game's own, through Bevy's
-`UiMaterialPlugin` with the program's layout and shaders put in place of the type's at specialize,
-the key carrying the version they were read from and the bind group waiting a frame where a compile
-replaced that version in between (`ui_material.rs`, `bcs_ui.slang`), for 3DEngine to consider where
-its interface draws a shader of a game's own.
+## Replies

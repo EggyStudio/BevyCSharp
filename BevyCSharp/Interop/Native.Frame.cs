@@ -76,6 +76,14 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_sampler(int key, NativeImageConfig* config);
 
+    /// <summary>
+    /// Has the GPU make an image's mipmaps from its top level each frame while <paramref name="on"/>
+    /// is non-zero.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_mip_generation(int key, int on);
+
     /// <summary>Starts loading an image with an explicit sampler.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

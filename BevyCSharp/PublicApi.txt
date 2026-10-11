@@ -10322,6 +10322,7 @@ static class Bevy.Render
   static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags)
   static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights)
   static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet)
+  static void SetMipGeneration(AssetHandle image, bool on)
   static void SetPathTraced(Entity camera, bool on)
   static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
   static void SetPostProcessing(Entity camera, PostSettings settings)

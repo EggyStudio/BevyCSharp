@@ -4,13 +4,13 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**347 written, 2 written in part, 0 can be written, 33 missing and 56 do not apply.** Of the 382 that apply, 349 can be written with what is bridged, 2 of them leaving something out.
+**348 written, 2 written in part, 0 can be written, 31 missing and 57 do not apply.** Of the 381 that apply, 350 can be written with what is bridged, 2 of them leaving something out.
 
-**161 of the 170 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**161 of the 171 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
-| [2D Rendering](#2d-rendering) | 27 | 0 | 0 | 1 | 1 | 10 of 12 |
+| [2D Rendering](#2d-rendering) | 28 | 0 | 0 | 0 | 1 | 10 of 13 |
 | [3D Rendering](#3d-rendering) | 65 | 0 | 0 | 3 | 0 | 40 of 41 |
 | [Animation](#animation) | 13 | 0 | 0 | 0 | 0 | 9 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
@@ -30,7 +30,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 4 of 4 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
-| [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
+| [Scene](#scene) | 0 | 0 | 0 | 1 | 1 |  |
 | [Shaders](#shaders) | 23 | 0 | 0 | 1 | 3 | 8 of 9 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [State](#state) | 4 | 0 | 0 | 0 | 0 | 1 of 1 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **347** | **2** | **0** | **33** | **56** | **161 of 170** |
+| **All** | **348** | **2** | **0** | **31** | **57** | **161 of 171** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -55,7 +55,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`2d_viewport_to_world`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/2d_viewport_to_world.rs) | Demonstrates how to use the `Camera::viewport_to_world_2d` method with a dynamic viewport and camera. | [written](../BevyCSharp.Examples/2d/2d_viewport_to_world.cs), zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types |
 | [`bloom_2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/bloom_2d.rs) | Illustrates bloom post-processing in 2d | [written](../BevyCSharp.Examples/2d/bloom_2d.cs), through Bevy's reflected Bloom |
 | [`cpu_draw`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/cpu_draw.rs) | Manually read/write the pixels of a texture | [written](../BevyCSharp.Examples/2d/cpu_draw.cs) |
-| [`dynamic_mip_generation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/dynamic_mip_generation.rs) | Demonstrates use of the mipmap generation plugin to generate mipmaps for a texture | missing, generating an image's mipmaps on the GPU |
+| [`dynamic_mip_generation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/dynamic_mip_generation.rs) | Demonstrates use of the mipmap generation plugin to generate mipmaps for a texture | [written](../BevyCSharp.Examples/2d/dynamic_mip_generation.cs), its colors drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's, and its choices drawn as the examples' own buttons, where Bevy draws them with Feathers |
 | [`mesh2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/mesh2d.rs) | Renders a 2d mesh | [written](../BevyCSharp.Examples/2d/mesh2d.cs) |
 | [`mesh2d_alpha_mode`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/mesh2d_alpha_mode.rs) | Used to test alpha modes with mesh2d | [written](../BevyCSharp.Examples/2d/mesh2d_alpha_mode.cs) |
 | [`mesh2d_arcs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/2d/mesh2d_arcs.rs) | Demonstrates UV-mapping of the circular segment and sector primitives | [written](../BevyCSharp.Examples/2d/mesh2d_arcs.cs) |
@@ -419,7 +419,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`bsn`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/scene/bsn.rs) | Demonstrates how to use BSN to compose scenes | missing, BSN scene notation |
+| [`bsn`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/scene/bsn.rs) | Demonstrates how to use BSN to compose scenes | does not apply, writes a scene in BSN, a Rust macro, which Bevy 0.20 loads from no file |
 | [`world_serialization`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/scene/world_serialization.rs) | Demonstrates loading from and saving world to files | missing, a component holding a string, a field a scene file leaves out, and a resource written with the entities |
 
 ## Shaders

@@ -74,7 +74,7 @@ light_probe_blending	can
 2d_viewport_to_world	can	zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types
 bloom_2d	can	through Bevy's reflected Bloom
 cpu_draw	can
-dynamic_mip_generation	missing	generating an image's mipmaps on the GPU
+dynamic_mip_generation	can	its colors drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's, and its choices drawn as the examples' own buttons, where Bevy draws them with Feathers
 mesh2d_alpha_mode	can
 mesh2d_arcs	can
 mesh2d_manual	n/a	writes a render pipeline in Rust with the mid-level render API
@@ -278,7 +278,7 @@ app_under_test	missing	Bevy's remote protocol, where bcs is this engine's own
 client	n/a	a Rust client of Bevy's remote protocol
 integration_test	missing	Bevy's remote protocol, where bcs is this engine's own
 server	missing	Bevy's remote protocol, where bcs is this engine's own
-bsn	missing	BSN scene notation
+bsn	n/a	writes a scene in BSN, a Rust macro, which Bevy 0.20 loads from no file
 world_serialization	missing	a component holding a string, a field a scene file leaves out, and a resource written with the entities
 fullscreen_material	can	as a pass the camera runs
 manual_material	n/a	writes a material with Rust's mid-level render API

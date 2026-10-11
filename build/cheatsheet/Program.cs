@@ -25,7 +25,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Messages", "messages-and-hierarchy.md", ["MessageBus", "MessageReader`1", "MessageMutator`1", "On`1"]),
     ("Components", "components.md", ["ComponentHooks", "ComponentSchema", "ComponentSchemas", "ComponentField", "ItemFields", "EcsList`1", "EcsMap`2", "IInlineList`1", "InlineList4`1", "InlineList8`1", "InlineList16`1", "InlineList32`1", "InlineList64`1", "ListValue", "MapValue", "IReflectedComponent`1"]),
     ("Scenes and saves", "scenes-and-saves.md", ["DataAssets", "SceneFile", "SceneInstances", "SceneReferences", "SceneValue", "SaveGame", "SaveId", "Persistent`1", "IPersistentValue", "ProjectSettings", "UserData"]),
-    ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "IAnimationEvent", "MeshFiles", "MaterialFiles"]),
+    ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "MeshFiles", "MaterialFiles"]),
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
     ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw", "ComponentArray`1"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),
@@ -33,7 +33,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Audio", "audio.md", ["Audio"]),
     ("Physics", "physics.md", ["Physics.PhysicsWorld", "Physics.PhysicsPlugin", "Physics.PhysicsShape", "Physics.Joint", "Physics.Colliders"]),
     ("Input", "input.md", ["Input", "LogicalKey", "Gamepad", "SyntheticInput", "KeyTable"]),
-    ("The window", "window.md", ["Window", "UpdateSettings", "UpdateMode"]),
+    ("The window", "window.md", ["Window", "UpdateMode"]),
     ("Math", "", ["Vec3", "Quat", "Color", "Transform", "GlobalTransform", "EaseFunction"]),
     ("The tools", "tools.md", ["ConsoleCommands", "Diagnostics", "ConsoleHost", "ConsoleHost+Scope", "ConsoleLog", "CliClient", "CliJson", "CliPlugin", "CliSessionFile"]),
 };

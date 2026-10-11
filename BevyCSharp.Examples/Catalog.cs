@@ -45,6 +45,7 @@ internal static class Catalog
         new("2d_viewport_to_world", Example2dViewportToWorld.Build),
         new("bloom_2d", Bloom2d.Build),
         new("cpu_draw", CpuDraw.Build, CpuDraw.Configure),
+        new("dynamic_mip_generation", DynamicMipGeneration.Build),
         new("mesh2d", Mesh2dExample.Build),
         new("mesh2d_alpha_mode", Mesh2dAlphaMode.Build),
         new("mesh2d_arcs", Mesh2dArcs.Build),

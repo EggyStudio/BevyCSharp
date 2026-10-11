@@ -105,6 +105,20 @@ one does with no settings given, and `Render.SetSampler(image, TextureSettings.T
 that afterward, for a small pattern repeated across a floor. The settings are the ones `AssetServer.LoadImage` takes, and
 an image still loading is refused, since there is nothing yet to give them to.
 
+An image written in code or drawn by a camera has no smaller levels of its own, and one drawn far
+smaller than it is shimmers without them. `Render.SetMipGeneration(image, true)` has the GPU
+make them from the top level once a frame, before the cameras draw, as Bevy's `MipGenerationJobs`
+does, until it is turned off, the levels made last then kept. Bevy's downsampler writes them as a
+storage image, which no sRGB format can be, so such an image is made with `srgb: false`:
+
+<!-- compiled with:
+byte[] pixels = new byte[640 * 480 * 4];
+-->
+```csharp
+var picture = Render.CreateImage(pixels, 640, 480, srgb: false);
+Render.SetMipGeneration(picture, true);
+```
+
 ### The window
 
 The window can be driven while the app runs:

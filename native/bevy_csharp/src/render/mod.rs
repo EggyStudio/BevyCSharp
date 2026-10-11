@@ -37,6 +37,7 @@ pub mod material2d;
 pub mod materials2d;
 pub mod meshes;
 pub mod meshlets;
+pub mod mips;
 pub mod options;
 pub mod passes;
 pub mod pipelines;

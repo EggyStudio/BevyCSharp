@@ -120,6 +120,9 @@ case "$example" in
   # A bar that fills over two seconds and empties over two more, so empty at the second second and
   # half full at the third.
   ui_material) frames=180 ;;
+  # An image that shrinks to nothing and grows again every two seconds, gone at the second second
+  # and at half its size a quarter of a period later.
+  dynamic_mip_generation) frames=150 ;;
   # Thousands of meshes, which a device drawing on the CPU takes seconds a frame over, taken as
   # soon as they stand, which they do by the thirtieth.
   multi_asset_sync|many_morph_targets) frames=30 ;;
