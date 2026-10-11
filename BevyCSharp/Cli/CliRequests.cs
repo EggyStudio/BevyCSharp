@@ -67,6 +67,9 @@ internal sealed class CliQueue
     /// <summary>Adds one, from whichever thread took the call.</summary>
     public void Add(CliRequest request) => _arrived.Enqueue(request);
 
+    /// <summary>How many have arrived and wait for a frame, for a test to see a request has come.</summary>
+    internal int Arrived => _arrived.Count;
+
     /// <summary>
     /// Answers everything that arrived, and releases anything whose frame has come.
     /// </summary>

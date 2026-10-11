@@ -227,7 +227,11 @@ internal sealed class CliServer : IDisposable
         }
         catch (OperationCanceledException)
         {
-            return CliJson.Fail(operation, "SESSION_CLOSING", "The app is shutting down.", id);
+            // The answer can be completed in the same instant the server stops, as app.quit's is in
+            // the frame that ends the app, and the answer is the one to give.
+            return request.Answer.IsCompletedSuccessfully
+                ? request.Answer.Result
+                : CliJson.Fail(operation, "SESSION_CLOSING", "The app is shutting down.", id);
         }
 
         return answered
@@ -240,18 +244,41 @@ internal sealed class CliServer : IDisposable
                 id);
     }
 
-    /// <summary>Stops listening, closes the connections still open, and waits for their threads to end.</summary>
+    /// <summary>
+    /// How long stopping waits for the connections' threads to write the answers they hold before
+    /// it closes their sockets.
+    /// </summary>
     /// <remarks>
+    /// An answer is written in microseconds, so the bound is reached only on a platform where
+    /// shutting a socket's receive side does not end a read already waiting on it, and there it is
+    /// the delay an idle caller adds to the app's end.
+    /// </remarks>
+    public static readonly TimeSpan Linger = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// Stops listening, lets each connection write the answer it holds, closes the connections
+    /// still open, and waits for their threads to end.
+    /// </summary>
+    /// <remarks>
+    /// <para>
     /// A connection's thread waits on its read for as long as the caller keeps it open, so one left
-    /// alone would outlive the app, which is how 3DEngine found the same leak on macOS. Closing the
-    /// socket ends the read, a request still waiting on a frame is told the app is shutting down,
-    /// and every thread the server started has ended by the time this returns.
+    /// alone would outlive the app, which is how 3DEngine found the same leak on macOS. Every thread
+    /// the server started has ended by the time this returns.
+    /// </para>
+    /// <para>
+    /// A request answered in the app's last frame, as <c>app.quit</c>'s is, may not be written yet
+    /// when this runs, so the connections are not closed outright. Each request still waiting is
+    /// told the app is shutting down, and only the receive side of each socket is shut, which ends
+    /// a read waiting for the next request on Linux and macOS and leaves the answer's way out
+    /// open. The threads are given <see cref="Linger"/> to write and end, and a socket whose thread
+    /// still reads after it, as one can on Windows, where the shutdown does not end a waiting read,
+    /// is closed then.
+    /// </para>
     /// </remarks>
     public void Dispose()
     {
         if (_stopping) return;
         _stopping = true;
-        _stop.Cancel();
 
         try
         {
@@ -265,16 +292,29 @@ internal sealed class CliServer : IDisposable
         KeyValuePair<TcpClient, Thread>[] open;
         lock (_gate) open = [.. _open];
 
+        _stop.Cancel();
+
         foreach (var (caller, _) in open)
         {
+            // A connection whose thread wrote its answer and ended since the copy was taken has let
+            // its socket go, which leaves the client holding none.
+            if (caller.Client is not { } socket) continue;
+
             try
             {
-                caller.Client.Shutdown(SocketShutdown.Both);
+                socket.Shutdown(SocketShutdown.Receive);
             }
             catch (Exception error) when (error is SocketException or ObjectDisposedException)
             {
-                // The caller hung up already.
+                // The caller hung up already, or the thread let the socket go in the meantime.
             }
+        }
+
+        var until = DateTime.UtcNow + Linger;
+        foreach (var (caller, serving) in open)
+        {
+            var left = until - DateTime.UtcNow;
+            if (left > TimeSpan.Zero && serving.Join(left)) continue;
 
             caller.Close();
         }

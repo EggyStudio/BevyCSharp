@@ -383,16 +383,19 @@ public sealed class CliServerTests : IDisposable
             "The app never wrote a ready session file, so nothing could have connected to it.");
     }
 
-    /// <summary>Asks it to stop, and waits for the loop to end.</summary>
+    /// <summary>Asks it to stop, reads the answer, and waits for the loop to end.</summary>
     /// <remarks>
-    /// The quit is judged by the loop's end rather than by its answer, as <c>bcs stop</c> judges it,
-    /// since the app may close the connection as it shuts down, before the answer is written.
+    /// The answer is completed in the frame that ends the app, and the server writes it before it
+    /// closes the connection, so every app these tests stop reads <c>app.quit</c>'s answer back.
     /// </remarks>
     private static void Stop(CliSession session, Thread running)
     {
-        Quit(session.Port, session.Token);
+        var answer = Quit(session.Port, session.Token);
 
         Assert.True(running.Join(TimeSpan.FromSeconds(15)), "the app did not shut down");
+        Assert.NotNull(answer);
+        using var document = JsonDocument.Parse(answer);
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean(), answer);
     }
 
     /// <summary>Sends <c>app.quit</c>, and answers what came back, or null where the connection closed first.</summary>
@@ -482,6 +485,63 @@ public sealed class CliServerTests : IDisposable
         // Cloned, because the document owns the buffer the element points into and this outlives it.
         using var document = JsonDocument.Parse(answer);
         return document.RootElement.Clone();
+    }
+
+    /// <summary>
+    /// A request answered as the server stops is written before the connection closes, as
+    /// <c>app.quit</c>'s answer is completed in the frame that ends the app.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The answer is given the way an app gives its last ones on the way down, and the server is
+    /// stopped straight after on the same thread, while the connection's thread may still be
+    /// waking to write it.
+    /// </para>
+    /// <para>
+    /// The race is narrow, so it is run many times over. A server that closed both ways at once
+    /// lost the answer in some ten rounds of three hundred, the caller reading the end of the stream,
+    /// and the chance of all three hundred passing by luck against it is some two in a hundred
+    /// thousand. Each round is a millisecond or so.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void ARequestAnsweredAsTheServerStopsIsStillWritten()
+    {
+        var lost = 0;
+        for (var round = 0; round < 300; round++)
+        {
+            var queue = new CliQueue();
+            var server = new CliServer(queue);
+            using var caller = new TcpClient();
+            caller.ReceiveTimeout = 15_000;
+            caller.Connect(IPAddress.Loopback, server.Port);
+            using var stream = caller.GetStream();
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" };
+
+            writer.WriteLine($$"""{"op":"run","token":"{{server.Token}}","line":"app.quit"}""");
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (queue.Arrived == 0 && DateTime.UtcNow < deadline) Thread.Sleep(0);
+            Assert.Equal(1, queue.Arrived);
+
+            queue.Abandon();
+            server.Dispose();
+
+            string? answer;
+            try
+            {
+                answer = reader.ReadLine();
+            }
+            catch (IOException)
+            {
+                answer = null;
+            }
+
+            if (answer is null) lost++;
+            else Assert.Contains("SESSION_CLOSING", answer);
+        }
+
+        Assert.Equal(0, lost);
     }
 
     /// <summary>
