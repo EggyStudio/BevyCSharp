@@ -219,7 +219,7 @@ anchored_text_gizmos	can
 axes	can	reading each cube's bounding box through Bevy's reflected Aabb
 light_gizmos	can
 text_gizmos_font	can
-transform_gizmo	missing	Bevy's interactive transform gizmo
+transform_gizmo	can	its choices and slider drawn as the examples' own, where Bevy draws them with Feathers
 custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material
 edit_material_on_gltf	can	each helmet changed once its parts carry their material names and those have loaded, where Bevy changes them as its scene is ready
 gltf_extension_animation_graph	n/a	writes a Rust glTF extension handler

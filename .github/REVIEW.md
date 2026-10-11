@@ -10,7 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `32ae29fb`. Item 18, ABI 270, a vertex stream of the game's own: a registry by name
+Reviewed up to `7bc0af69`. occlusion_culling, ABI 271: how many meshes the GPU drew in the opaque
+pass, read back from Bevy's indirect draw buffers as Bevy's example reads them, behind the debug
+flag the app's render plugins are built with, which adds a copy source to buffers Bevy makes anyway;
+while a game counts, staging buffers sized to the opaque pass's indirect data and batch sets are
+made as the resources are flushed, the parameters copied after the main pass and the copies of the
+frame before mapped at extraction into counts both worlds hold; `Render.DrawnMeshes` sums the first
+batch set's draws' instance counts and says why there is no count, pending, uncountable where the
+GPU cannot say how many draws there are, or no GPU culling, the parsing in pure functions with a
+native test. The test puts four cubes in view and four behind the camera and reads 4 where the GPU
+can count, skipped with the reason elsewhere, waiting as a capture waits, since pipelines read as
+ready at frame 1 before any was asked for and the four arrived at frame 21, so a fixed short wait
+read 0. The example is Bevy's with the examples' buttons for Bevy's Feathers, said in the triage
+note, its capture reading 338 of 363 meshes drawn; the drawing guide's paragraph and block after the
+camera flags. The suite 1,431 passed and 2 skipped of 1,433; cargo 163 and 93; the norm tests 19 of
+19, the prose at 302; the guide's six blocks build. EXAMPLES.md reads 350 written, 2 in part and 29
+missing. Right, the readback asked for rather than always on, and the count's absence told apart by
+its cause. world_serialization is more than a row, the working session read, its triage line naming
+three gaps the engine has, and it is item 19 with the shape the session proposed: a component's
+text, a field a scene leaves out, and a resource of the game's own in the scene file. The owner
+refined the stream's plan at 22:55, approved at 22:58 (Decision 32): a position is every mesh's, as
+this engine had it, and the packed data a stream beside it, which is what `32ae29fb` gives; one
+thing is left for the sixteen bytes a voxel vertex can be, a switch that leaves the worked-out
+normals out, which is item 20, small, with the row under way or right after. The owner asked at
+23:05 that four bytes be called four bytes and never a word, which this file does from here and item
+18's guides, remarks and shader comments do with item 20, their `word` names `packed`. The run of
+`7bc0af69` is green on all three, read at 23:10, which reads `6c491f7c` and `32ae29fb` with it,
+their own run cancelled by the later push. Next transform_gizmo, read for whether anything short of
+Feathers and the camera controller reaches it, debug_picking, pitch, decodable, then item 19, then
+the three read against the lock as the working session read them.
+
+Before it, `32ae29fb` came, item 18, ABI 270, a vertex stream of the game's own: a registry by name
 in `streams.rs`, process-wide as the programs' table and emptied as an app is built, each name kept
 once for Bevy's static string, its attribute's id a one in bit 48 over the name's hash so it sorts
 after Bevy's own and is the same on every run, a name returning in another format or at another
@@ -29,22 +59,23 @@ and the new format and location by name; the scene file keeps streams in base64 
 a format it does not know; N 1.3 moved the vertex-built meshes out of Render.cs into
 Render.Meshes.cs, 652 and 238. Tests: native, the registry keeping an attribute and refusing another
 shape, the formats' values, a mesh from one `UInt` stream and the same name as `Float` refused, and
-the layout's numbers; managed, two quads whose word a vertex the vertex stage unpacks, green and
-blue, the info's bit, the reshaped name's message, the short stream, location 1, a shared location
-and a ragged `From`, a stream through the scene file's round trip bytes equal, and a skin kept on a
-write of as many vertices and lost on one of fewer. The example is Bevy's, the cuboid read back with
-a `Float4` blend color at 8, its triage row gone, the capture Bevy's red cube; the drawing guide's
-paragraph with the scene file's note and the shaders guide's section with the unpacking stage. The
-mip generation's layers, read in the pass before: Bevy's job path makes one 2D layer's levels, so an
-image of more than one layer or a 3D one is refused rather than re-laid, the room's two functions
-pure with a native test over 4 by 4 images, and the message and guide say one layer. The suite 1,430
-passed and 2 skipped of 1,432; cargo 162 and 93; the three profiles clean; the norm and path tests
-19 of 19; the two guides' blocks build. EXAMPLES.md reads 349 written, 2 in part and 30 missing.
-Right, as the item and the plan have it, the one attribute a name through the registry and every
-refusal before the call. Two files stand near the rule's 800 lines, material.rs at 776 and meshes.rs
-at 764, so the next batch that touches either plans its split first. The runs of `6c491f7c` and this
-wait on the push. Next occlusion_culling, then world_serialization, transform_gizmo, debug_picking,
-pitch, decodable, then the four read against the lock as the working session read them.
+the layout's numbers; managed, two quads whose four bytes a vertex the vertex stage unpacks, green
+and blue, the info's bit, the reshaped name's message, the short stream, location 1, a shared
+location and a ragged `From`, a stream through the scene file's round trip bytes equal, and a skin
+kept on a write of as many vertices and lost on one of fewer. The example is Bevy's, the cuboid read
+back with a `Float4` blend color at 8, its triage row gone, the capture Bevy's red cube; the drawing
+guide's paragraph with the scene file's note and the shaders guide's section with the unpacking
+stage. The mip generation's layers, read in the pass before: Bevy's job path makes one 2D layer's
+levels, so an image of more than one layer or a 3D one is refused rather than re-laid, the room's
+two functions pure with a native test over 4 by 4 images, and the message and guide say one layer.
+The suite 1,430 passed and 2 skipped of 1,432; cargo 162 and 93; the three profiles clean; the norm
+and path tests 19 of 19; the two guides' blocks build. EXAMPLES.md reads 349 written, 2 in part and
+30 missing. Right, as the item and the plan have it, the one attribute a name through the registry
+and every refusal before the call. Two files stand near the rule's 800 lines, material.rs at 776 and
+meshes.rs at 764, so the next batch that touches either plans its split first. The runs of
+`6c491f7c` and this wait on the push. Next occlusion_culling, then world_serialization,
+transform_gizmo, debug_picking, pitch, decodable, then the four read against the lock as the working
+session read them.
 
 Before it, `6c491f7c` came, dynamic_mip_generation, ABI 269: mipmaps made on the GPU from an image's
 top level each frame, as Bevy's jobs make them, through one call that keeps a set of images, puts
@@ -72,39 +103,6 @@ data layer-major, each layer's levels together, so an image of more than one lay
 second layer's top land where the first layer's second level is; lay the bytes out so or refuse such
 an image with the reason, with item 18's batch. The run waits on the push. Item 18 is under way at
 ABI 270, as its item and the plan have it, then the rows in the order given.
-
-Before it, `2fbd2860` came, ui_material, ABI 268, the interface material: a node drawn by a Slang
-program of the game's own through Bevy's `UiMaterialPlugin`, the bridge's type handing Bevy an empty
-layout and its own shaders once and its specialize putting the program's layout and interface stages
-in their place, the key carrying the version they were read from, so a program edited since makes a
-new pipeline rather than finding the old; the bind group packed against the version the key named
-while the table holds it, waiting a frame where a compile replaced it between the two calls, a
-thread-local carrying the version over with its remark saying why, and the choice a pure function
-with a native test over each case, packed, stale and missing; `bcs_ui.slang` giving the fragment
-stage what Bevy's vertex stage hands on, where on the node it is, the node's size, its border widths
-and its corner radii; `FragmentUi` and `VertexUi` stages, `CreateUiMaterial` and `Ui.SetMaterial`,
-an interface vertex stage without its fragment refused with the reason; the example Bevy's banner as
-a progress bar inside a rounded rainbow border with the node's outline a hundred pixels out,
-captured at frame 180 since frame 120 lands where Bevy's bar is empty, the script's comment saying
-so; the shaders guide's section with its compiled block and the interface guide's lines. N 1.3
-caught material.rs at 809 and the program refresh moved to shader_materials.rs, which leaves 769.
-The suite 1,425 passed and 2 skipped of 1,427; cargo 156 and 89; the three profiles clean with
-warnings denied; the norm, document and path tests 19 of 19, the prose at 302; the README's walk at
-a packed 0.0.0-walk268; six public lines and two of the cheat sheet. EXAMPLES.md reads 347 written,
-2 in part and 33 missing, the interface group 57 of 65. Right, the plugin's one fixed layout
-replaced at specialize rather than a type a material, and the stale handoff answered with Bevy's
-retry rather than a second read, the working session's correction of the reviewing session's ask.
-The run is green on all three. The cheat sheet's two warnings, of `UpdateSettings` and
-`IAnimationEvent` named with no method to list, wait for the next batch that touches it, as offered.
-The Shared: line is read and moved to SHARED.md's row. Then the owner's ask of 20:05, a vertex
-stream of the game's own in both engines, read from a packed-vertex game the owner put in 3DEngine's
-`.ref`, planned with the owner and approved at 20:40, which is item 18 (Decision 31) and takes the
-`custom_vertex_attribute` row as its example, the working session told this evening to hold that
-row; it comes after the row under way. Then dynamic_mip_generation, occlusion_culling,
-world_serialization, transform_gizmo, debug_picking, pitch, decodable, then the four read against
-the lock as the working session read them: atmosphere with its Mars medium and no camera controller,
-render_recovery with its causes reachable and none pressed, solari_reflections with a C# camera, and
-bsn as not applying, its triage line saying Bevy 0.20 loads the notation from no file.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -524,29 +522,73 @@ from [SHARED.md](SHARED.md).
     and its bytes, the shader declaring the input at that location's `TEXCOORDn` as every input here
     is, so the game writes one number twice and they agree; positions stay required, since Bevy's
     mesh pipeline places them at location 0 before the bridge's specialize runs and its prepass,
-    culling, meshlets and Solari read them, a voxel vertex then 16 bytes of position and word where
-    48. The streams travel in the mesh's own call, appended to `BcsMeshData` and its C# mirror in
-    lockstep with a size assertion, so `WriteMesh` keeps them, where a side call as the joints'
-    would lose them on the next write, and the joints are carried over in that write too, one line;
-    a registry by name of the attribute Bevy wants, the name interned once and the id a hash of it
-    set above Bevy's own so it sorts the same on every run, refusing a name that returns in another
-    format or location or two streams of one mesh at one location, which C# turns into the exception
-    with both values; `mesh_from` inserting each stream as Bevy's values of its format; the mesh
-    info's bitmask gaining a bit for a stream of the game's own. In `user_specialize`, where a
-    program has a vertex stage of its own and the mesh's layout holds a registered stream, the
-    vertex buffers are built again from Bevy's attributes at Bevy's locations plus each registered
-    stream the layout holds at its own, the prepass attributes gaining the same, and the 2D material
-    the same rebuild; the layout already keys Bevy's pipelines. `bcs.slang`'s header says how a
-    stream is declared and carried on, that the Slang class must match the format and that
-    `vk::location` is ignored, the drawing and shaders guides their sections, and the scene file
-    keeps streams with the mesh. The example is Bevy's `custom_vertex_attribute`, a cube with a
-    `Float4` stream at location 8 blended toward red, written in C#, its row leaving triage as
-    written examples do, the counts moving by one. Tests: native, a mesh from one stream holding the
-    registered id and its values and the same name in another format refused; managed, a quad with a
-    `UInt` stream of a color a vertex drawn by a program reading `TEXCOORD8` to the pixel, the
-    exception for a wrong length, a location outside 8 to 15 and a reused name, and a stream in the
-    scene file's round trip. ABI 269 to 270. Done at `32ae29fb` as written, the mip generation's
-    layers refused with it.
+    culling, meshlets and Solari read them, a voxel vertex then 16 bytes, 12 of position and 4
+    packed, where 48. The streams travel in the mesh's own call, appended to `BcsMeshData` and its
+    C# mirror in lockstep with a size assertion, so `WriteMesh` keeps them, where a side call as the
+    joints' would lose them on the next write, and the joints are carried over in that write too,
+    one line; a registry by name of the attribute Bevy wants, the name interned once and the id a
+    hash of it set above Bevy's own so it sorts the same on every run, refusing a name that returns
+    in another format or location or two streams of one mesh at one location, which C# turns into
+    the exception with both values; `mesh_from` inserting each stream as Bevy's values of its
+    format; the mesh info's bitmask gaining a bit for a stream of the game's own. In
+    `user_specialize`, where a program has a vertex stage of its own and the mesh's layout holds a
+    registered stream, the vertex buffers are built again from Bevy's attributes at Bevy's locations
+    plus each registered stream the layout holds at its own, the prepass attributes gaining the
+    same, and the 2D material the same rebuild; the layout already keys Bevy's pipelines.
+    `bcs.slang`'s header says how a stream is declared and carried on, that the Slang class must
+    match the format and that `vk::location` is ignored, the drawing and shaders guides their
+    sections, and the scene file keeps streams with the mesh. The example is Bevy's
+    `custom_vertex_attribute`, a cube with a `Float4` stream at location 8 blended toward red,
+    written in C#, its row leaving triage as written examples do, the counts moving by one. Tests:
+    native, a mesh from one stream holding the registered id and its values and the same name in
+    another format refused; managed, a quad with a `UInt` stream of a color a vertex drawn by a
+    program reading `TEXCOORD8` to the pixel, the exception for a wrong length, a location outside 8
+    to 15 and a reused name, and a stream in the scene file's round trip. ABI 269 to 270. Done at
+    `32ae29fb` as written, the mip generation's layers refused with it.
+
+19. **A world a scene file saves whole: a component's text, a field left out and a resource of the
+    game's own, Bevy's `world_serialization` reached from C#.** The row's triage line names three
+    gaps, each real, read by the working session at `7bc0af69`. First, a component struct holds no
+    string, strings being allowed only on managed types and a component's strings living in
+    `EcsList<string>` and `EcsMap`: an `EcsText` handle into the same managed store, as `EcsList`
+    is, converting to and from `string` implicitly, freed by the same removal and despawn hook,
+    given its own copy by `Clone`, written to a scene as a JSON string and drawn by the inspector as
+    a text field. Second, nothing marks a field a scene file leaves out: `[NotSaved]` on a
+    component's field, Bevy's skip of serializing, which the schema marks, the scene file skips on a
+    write and a load leaves at the value the type starts with. Third, a scene file writes no
+    resources of the world, its resources being meshes and materials: a resource struct of the
+    game's own marked `[SceneResource]` gets a generated schema as a component does,
+    `SceneFile.Save` writes those present in a `worldResources` array and `Load` inserts them. The
+    example is then Bevy's in shape, a component of two numbers, one of a text and a time since
+    start left out, and a resource of a score, the scene saved under the user's folder and its JSON
+    printed, and a checked-in JSON scene loaded with the helmet and the log of what was added, since
+    Bevy's RON scene names Rust types a C# app cannot load. Generator, scene format, inspector and
+    docs work, with the generator's tests for the text and the attribute, a scene round trip of
+    each, the inspector's field, and a scene from before reading as before. After decodable and
+    before the three rows read against the lock.
+
+20. **A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32).** `mesh_from`
+    works normals out for every triangle mesh given none, 12 bytes a vertex that a shader unpacking
+    its normal from a stream's four bytes never reads, so a packed voxel vertex is 28 bytes where it
+    could be 16. `MeshData.ComputeNormals`, true by default so every mesh is as it was, false with
+    `Normals` null leaving the mesh without them, the remark on `Normals` gaining the switch; Bevy's
+    mesh pipeline places the normal only where the layout holds it and a prepass reads the position
+    alone, so such a mesh draws and casts its shadow, and a lit material of Bevy's own on it reads a
+    zero normal, said in the remark and the drawing guide's stream paragraph with the sixteen bytes.
+    A `flags` field of four bytes appended to `BcsMeshData` and its mirror in lockstep, bit 0 the
+    switch, the layout test gaining its offset and the new size, the ABI bumped or folded into the
+    row under way's bump; a native test that a mesh with the flag and no normals holds none. The
+    shaders guide's stream section says, with this item, why the packed bytes are a vertex stream
+    and not a storage buffer read by the vertex id, which the owner asked at 23:15: a stream travels
+    with the mesh, uploaded once with its positions and indices and read by every draw of it with
+    nothing else bound, where a buffer is bound to the shader or the material, so thousands of
+    chunks would each need a binding a draw or one giant buffer with an offset a chunk; meshes
+    sharing a shader keep drawing in one batch; the GPU fetches the attribute by the vertex index as
+    it fetches the position, where a buffer read needs the vertex id by hand and an offset an
+    instance when instanced; the fetch is about as fast either way, so the gain is the binding
+    model; and a buffer stays the right tool for what is not per vertex, a palette or atlas table
+    every chunk shares, per-chunk constants, or what a compute pass also reads. With the row under
+    way or right after it.
 
 ## Verdicts
 
@@ -747,5 +789,12 @@ from [SHARED.md](SHARED.md).
     would do it, and approved the plan at 20:40, which is item 18 here and item 20 in 3DEngine: one
     stream a mesh in five formats, at `TEXCOORD8` and up here beside Bevy's positions and as
     `CUSTOM0` there, beside the vertex and then as the vertex alone.
+
+32. **A position is every mesh's, and the packed data a stream beside it.** The owner refined
+    Decision 31 at 22:55 on 2026-10-11, approved at 22:58: a position is mandatory in both engines,
+    as Bevy has it, since shadows, motion vectors and everything around a mesh read it, and a game's
+    packed four bytes ride in a stream beside it, which is what item 18 gave; 3DEngine's second
+    stage becomes a vertex of positions alone, and here the worked-out normals can be left out, item
+    20.
 
 ## Replies

@@ -249,6 +249,7 @@ public sealed unsafe partial class App : IDisposable
                 Weather = Config.Weather ? 1u : 0u,
                 AudioWithoutWindow = Config.AudioWithoutWindow ? 1u : 0u,
                 NoPrimaryWindow = Config.PrimaryWindow ? 0u : 1u,
+                TransformGizmo = Config.TransformGizmo ? 1u : 0u,
             };
             _handle = Native.bcs_app_create(&native);
         }

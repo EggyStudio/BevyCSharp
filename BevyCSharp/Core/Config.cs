@@ -218,6 +218,19 @@ public sealed class Config
     public bool MeshPicking { get; set; }
 
     /// <summary>
+    /// Add Bevy's interactive transform gizmo, the arrows, rings and handles that move, turn and
+    /// scale the entity carrying <c>TransformGizmoFocus</c>.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>TransformGizmoPlugin</c>, which its default plugins leave out. Once it is there
+    /// Bevy spawns the gizmo's handles, hidden until an entity has the focus, and a camera that
+    /// draws them over the scene, as the app starts, which an app without a gizmo would carry for
+    /// nothing. Selecting by a click needs <see cref="MeshPicking"/> as well, and a bridge with the
+    /// renderer is needed.
+    /// </remarks>
+    public bool TransformGizmo { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>

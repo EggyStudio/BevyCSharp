@@ -139,6 +139,30 @@ bottom edge there. The font has the printable ASCII characters and a line break 
 Its lines are as thick as every gizmo's, so text a player reads belongs in `Ui` or on a `Text2d`
 entity instead, which a real font shapes.
 
+Bevy's transform gizmo is the editor's arrows, rings and handles, drawn on the entity carrying
+`TransformGizmoFocus` and moving, turning or scaling it as the pointer drags them, through the
+camera carrying `TransformGizmoCamera` or the only one. An app asks for it with
+`Config.TransformGizmo`, since Bevy spawns its handles and a camera to draw them as the app starts.
+Its settings, what it does, along whose axes and by what steps, are a resource:
+
+<!-- compiled with:
+Entity crate = default, camera = default;
+-->
+```csharp
+ctx.Ecs.Insert<TransformGizmoFocusRef>(crate);
+ctx.Ecs.Insert<TransformGizmoCameraRef>(camera);
+
+if (ctx.Ecs.Resource<TransformGizmoSettingsRef>() is { } gizmo)
+{
+    gizmo.Mode = TransformGizmoSettingsRef.ModeVariant.Rotate;
+    gizmo.Space = TransformGizmoSettingsRef.SpaceVariant.Local;
+}
+```
+
+One entity carries the focus at a time, so selecting another takes it off the first, as a click
+observer does in Bevy's transform_gizmo example. The gizmo follows the window's pointer, so it does
+nothing in a run with no window.
+
 Gizmos are drawn by a plugin that comes with the window, so a windowless run refuses rather than
 collecting shapes nothing will draw. Guard with `App.HasRenderer`.
 

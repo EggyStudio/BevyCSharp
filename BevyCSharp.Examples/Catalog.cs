@@ -255,6 +255,7 @@ internal static class Catalog
         new("axes", Axes.Build),
         new("light_gizmos", LightGizmos.Build),
         new("text_gizmos_font", TextGizmosFont.Build),
+        new("transform_gizmo", TransformGizmoExample.Build, TransformGizmoExample.Configure),
 
         // Input
         new("char_input_events", CharInputEvents.Build, Prints: 10, Drive: Drives.CharInputEvents),

@@ -352,6 +352,15 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             app.init_gizmo_group::<crate::gizmos::FrontGizmos>();
             app.add_systems(bevy::app::Startup, crate::gizmos::draw_in_front);
 
+            // Bevy's interactive transform gizmo, the arrows, rings and handles that move, turn and
+            // scale the entity carrying `TransformGizmoFocus`, seen through the camera carrying
+            // `TransformGizmoCamera` or through the only one, where the app asks for it. Bevy leaves
+            // it out of its defaults, and once its settings exist Bevy's gizmo render plugin spawns
+            // the handles and a camera drawing them over the scene as the app starts.
+            if config.transform_gizmo != 0 {
+                app.add_plugins(bevy::gizmos::transform_gizmo::TransformGizmoPlugin);
+            }
+
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();
             app.init_resource::<crate::events::FileDrops>();

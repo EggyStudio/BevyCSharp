@@ -67,12 +67,13 @@ internal static class ConsoleSchemaCommands
     /// kind <c>List</c> naming its items' type, which an <c>item</c> line after the components
     /// describes with its own rows, their paths from the item, as a box shadow's list names its
     /// shadow style. The bridge's own components are left out, being its business rather than a
-    /// game's.
+    /// game's, and so is one of Bevy's made for a type of the bridge's, as Bevy's interface
+    /// material node is for the bridge's shader material.
     /// </remarks>
     internal static List<string> Describe(string description)
     {
         var schemas = ReflectedSchemas.Build(description, new HashSet<int>(), new HashSet<string>())
-            .Where(schema => !schema.QualifiedName.StartsWith("bevy_csharp::", StringComparison.Ordinal))
+            .Where(schema => !schema.QualifiedName.Contains("bevy_csharp::", StringComparison.Ordinal))
             .OrderBy(schema => schema.QualifiedName, StringComparer.Ordinal);
 
         var lines = new List<string>();

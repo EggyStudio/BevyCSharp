@@ -926,6 +926,7 @@ sealed class Bevy.Config
   bool RememberWindow { get; set; }
   bool Serve { get; set; }
   bool TrackChangeLocations { get; set; }
+  bool TransformGizmo { get; set; }
   bool Transparent { get; set; }
   bool Vsync { get; set; }
   bool WatchAssets { get; set; }
@@ -2506,6 +2507,7 @@ struct Bevy.Interop.NativeConfig
   uint NoPrimaryWindow
   uint Offscreen
   uint RayTracedLighting
+  uint TransformGizmo
   uint Transparent
   uint Vsync
   uint WatchAssets

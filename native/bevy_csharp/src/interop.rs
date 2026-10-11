@@ -282,6 +282,10 @@ pub struct BcsConfig {
     /// `primary_window` out, and to keep running with no window open, where a run otherwise ends
     /// with its first window. The windows a game spawns are drawn as usual.
     pub no_primary_window: u32,
+    /// Non-zero to add Bevy's interactive transform gizmo. Needs the `render` feature. Kept out
+    /// otherwise, since Bevy spawns its handles and a camera to draw them over the scene as an app
+    /// starts, which every other app would carry for nothing.
+    pub transform_gizmo: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

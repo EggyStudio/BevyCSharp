@@ -98,4 +98,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to open no window of the app's own and run on with no window open.</summary>
     public uint NoPrimaryWindow;
+
+    /// <summary>Non-zero to add Bevy's interactive transform gizmo.</summary>
+    public uint TransformGizmo;
 }

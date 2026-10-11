@@ -39,7 +39,10 @@ internal sealed class RadioButtons<T> where T : notnull
     {
         var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center });
         ecs.SetParent(row, column);
-        ecs.SetParent(Ui.SpawnText(title, new UiSettings { Width = Length.Px(150f) }, 18f), row);
+
+        // A row with no title has no column for one, as Bevy's untitled rows have none.
+        if (title.Length > 0)
+            ecs.SetParent(Ui.SpawnText(title, new UiSettings { Width = Length.Px(150f) }, 18f), row);
 
         for (var i = 0; i < options.Length; i++)
         {
