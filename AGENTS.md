@@ -21,7 +21,7 @@ about a running app (what is in the world, what a click does, what the window lo
 ```
 
 The full workflow, the envelope, the exit codes and the failure modes are in
-`.claude/skills/bcs-cli/SKILL.md`. Read it before driving a session.
+[.github/BCS.md](.github/BCS.md). Read it before driving a session.
 
 ## Build order matters
 

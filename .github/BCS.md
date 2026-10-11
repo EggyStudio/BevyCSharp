@@ -1,10 +1,3 @@
----
-name: bcs-cli
-description: Use when working in the BevyCSharp repository, to drive a running BevyCSharp app or editor from the terminal (inspect entities, change components, click and type, capture the window, read the log, evaluate C#), or to build the native bridge, run the tests, or work out why nothing is starting. Prefer it over launching an app per question, and over editing a scene file or assets by hand while an app is running.
-allowed-tools:
-  - Bash
----
-
 # Driving a running BevyCSharp app with bcs
 
 ## Check for a live session first

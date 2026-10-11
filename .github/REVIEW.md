@@ -10,23 +10,48 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b06ff120`. One commit, item 13, unpushed with the ten before it:
-`build/examples-table.py` writes the README's gallery as a heading naming each group and one table
-of one row under it, in the order Bevy's examples list gives its groups, which the script already
-read, each row holding the group's written examples in the order that list gives them, read by a new
-pass that maps each row's link to the example by its cargo path, an example the list leaves out
-following by name, and the examples Bevy keeps out of its list in a last row of their own; each cell
-as before, the picture through the raw link opening the program and the name under it; 28 groups
-with captures, the script's check reading the result and passing, EXAMPLES.md unchanged, the README
-written in a worktree at the commit so nothing of low_power rides along. The headings are third
-level under the Examples heading, so each group has an anchor, where the contents list names the
-second level alone, which is right as it stands; the owner's eye judges the look. Right, the order
-taken from Bevy's own list rather than the alphabet, the kept-out examples given a row rather than
-dropped, and the check kept on the result. At 16:30 the owner asked for the bcs skill out of the
-`.claude` folder, which is item 14, and at 16:35 for the gallery's pictures at one size, which item
-13 takes (Decision 28), both before low_power. Then low_power in TODO.md's order, with a bridge mend
-on the way: a redraw request is written only where its messages are registered, since the headless
-harness logged a send to none (N 3.7).
+Reviewed up to `21d08b44`. Two commits, and first the page: the owner pushed the eleven through
+`b06ff120` at 15:46, and that commit broke N 4.2 unseen, its gallery spending a heading, two blank
+lines and the table's two lines on each of 28 groups, the README at 355 lines of prose against the
+320 the rule allows, which the working session counted only after the commit; `d0e638d7` mends it,
+each group its heading and its table on a line each with a blank line between, 299 lines, the
+script's comment saying why, and the owner pushed it with `21d08b44` at 15:55, which cancelled
+`b06ff120`'s run before it could go red, so the page never showed the slip. `21d08b44` is item 13's
+size: every picture 200 by 113, the half pixel of sixteen by nine the only distortion, and the
+capture script pads a shot of another shape around its middle with nothing to the smallest sixteen
+by nine that holds it, read with ImageMagick's info, so four captures are taken again, the grid's
+800 by 600 to 1072 by 603, the resizing's square to 720 by 405 and two of 500 by 300 to 544 by 306,
+each example keeping Bevy's window; EXAMPLES.md's header says a capture of another shape is padded,
+the checked-in captures being the comparison's references, so they follow; on the way a read under
+the shell's strict mode failed on info's output lacking a newline, mended, and the shot files the
+failed runs left are gone. Right, the slip caught and mended before its page could show it, and the
+padding done once in the capture rather than by the page's stretching. The suite as at `b06ff120`
+with the norm tests on the result. Item 13 is done. Item 14, the skill's move, the working session
+takes only on the owner's word typed in its own session, since it changes AGENTS.md and the tool's
+own folder, and it has asked the owner there; the reviewing session holds that right and the owner
+is told. The owner looked at the pushed README at 17:10 and the pictures still read as different
+sizes: GitHub's own style gives every tag one box, so it is the padding of the four captures that
+reads as smaller pictures, and item 13 keeps the fit, the capture scaled to fill its box and cut
+around the middle rather than padded, a batch of its own before low_power's commit. Next low_power,
+its suite running, its README written again on top of these with the norm tests run before its
+commit.
+
+Before it, `b06ff120` came, item 13: `build/examples-table.py` writes the README's gallery as a
+heading naming each group and one table of one row under it, in the order Bevy's examples list gives
+its groups, which the script already read, each row holding the group's written examples in the
+order that list gives them, read by a new pass that maps each row's link to the example by its cargo
+path, an example the list leaves out following by name, and the examples Bevy keeps out of its list
+in a last row of their own; each cell as before, the picture through the raw link opening the
+program and the name under it; 28 groups with captures, the script's check reading the result and
+passing, EXAMPLES.md unchanged, the README written in a worktree at the commit so nothing of
+low_power rides along. The headings are third level under the Examples heading, so each group has an
+anchor, where the contents list names the second level alone, which is right as it stands; the
+owner's eye judges the look. Right, the order taken from Bevy's own list rather than the alphabet,
+the kept-out examples given a row rather than dropped, and the check kept on the result. At 16:30
+the owner asked for the bcs skill out of the `.claude` folder, which is item 14, and at 16:35 for
+the gallery's pictures at one size, which item 13 takes (Decision 28), both before low_power. Then
+low_power in TODO.md's order, with a bridge mend on the way: a redraw request is written only where
+its messages are registered, since the headless harness logged a send to none (N 3.7).
 
 Before it, `69fca4bb` and `f55c722b` came. `f55c722b` moves code alone, the pointer's three calls
 and the image's test from `window.rs` into `window/cursor.rs`, 758 lines to 580 before the atlas
@@ -56,36 +81,6 @@ at 16:05 for the README's gallery as one scrolling row of pictures a group, in B
 groups, which is item 13 (Decision 27), a batch of its own before low_power. Then low_power in
 TODO.md's order, winit's update modes, which the bridge leaves at Bevy's default and which pulls no
 crate.
-
-Before it, `ac2817aa` and `6729361f` came. `6729361f` writes the components table again from the
-editor build, which has carried Bevy's custom cursors since `f9416e59` while the table dated from
-`6c6b5593`, so four cursor records gain their custom variant and the public surface 137 lines, split
-from the typing since the dump brought it along, and building alone. `ac2817aa` types what TODO.md's
-first item left on string paths, after reading that the item's own words were stale, an enum inside
-a variant having been typed since `5f2d3d02`: a duration in a component is a `TimeSpan`, read and
-written whole as the seconds and nanoseconds Rust's serde gives, the nanoseconds past a tick dropped
-as the remark says, and an integer that holds no zero is an `int` whose zero is refused naming the
-field and its type, before an optional field holding nothing is switched to some, so a refused zero
-leaves the field as it was; the bridge reads and writes the ten non-zero types and refuses a zero as
-it refuses a number past a width, and chooses one as the placeholder when some is chosen, since they
-reflect no default. Typed so: a sound's start and duration, a node's six grid lines, a window's
-frame latency, the four clocks' delta, elapsed and wrap period, the fixed clock's step and overstep,
-the virtual clock's longest step, the picking settings' multi-click interval and the delayed queue's
-submit time; left on string paths and said by kind in the components guide and the narrower TODO
-item: the tuple options, the real clock's two instants and the animation transitions' node index. A
-native test chooses a non-zero line at one, writes minus three and refuses zero naming the field;
-`ReflectedWrapperTests` sets and reads the grid lines, refuses a zero over a held line and over an
-empty one, clears one with null, and reads the virtual clock's longest step at Bevy's 250 ms, writes
-100.5 and sets and clears a sound's start. The suite: 1,415 passed and 2 skipped of 1,417; cargo's
-88 and 150, every profile clean, the guide compiled on the package. Right, the stale item read
-before it was worked, the zero refused before a field is switched rather than after, and what is
-left said by its kinds rather than by a vague line. Next in TODO.md's order, custom_cursor_image:
-its triage line still says the feature is not compiled in, where the table since `6729361f` has it;
-the wrapper reaches the flips, the rectangle and the atlas's frame but not the atlas's layout
-handle, whose kind the bridge does not load, nor the hotspot, a tuple, so a small bridge call puts
-an atlas layout, a frame and the hotspot on a window's custom cursor, the hotspot with it since it
-is the same struct and the one thing the wrapper cannot type, and the example animates the frame and
-toggles the flips and the rectangle through the wrapper.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -366,26 +361,38 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120` but for the
-    pictures' size (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
-    README. `build/examples-table.py` writes the gallery between its markers as one table of four
-    pictures a row over every written example; it writes instead one table a group in the order
-    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
-    holding the group's written examples in that order, the picture opening the program and the name
-    under it as today, with a heading line naming the group before each table, and the examples Bevy
-    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
-    GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
-    reads the table today, so the workflow's table check and the README's walk run on it, and the
-    raw links keep their form for the package's page. A batch of its own before low_power, since it
-    is small and the owner asked; the owner's eye judges the look. Done at `b06ff120`: a heading and
-    a one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives
-    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 16:35 that the
-    pictures be one size, where they differ today: every picture carries the same width and height
-    on its tag, 200 wide as now and the height of sixteen by nine, and the captures that are not of
-    that shape, four of 304, a square, a four by three and two of five by three, are taken again at
-    it where the example's window allows or padded to it by the capture script, so the tag distorts
-    nothing; the table check and the captures' comparison read the result, the comparison's
-    references following the captures.
+13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120` and
+    `21d08b44` but for the pictures' fit (Decision 27).** The owner asked on 2026-10-11 at 16:05, as
+    for 3DEngine's README. `build/examples-table.py` writes the gallery between its markers as one
+    table of four pictures a row over every written example; it writes instead one table a group in
+    the order Bevy's `examples/README.md` lists the groups, which the script already reads, each a
+    single row holding the group's written examples in that order, the picture opening the program
+    and the name under it as today, with a heading line naming the group before each table, and the
+    examples Bevy keeps out of its list in a last row of their own; a row wider than the page
+    scrolls sideways on GitHub, which is the point, so no row is wrapped. The script's check reads
+    the result as it reads the table today, so the workflow's table check and the README's walk run
+    on it, and the raw links keep their form for the package's page. A batch of its own before
+    low_power, since it is small and the owner asked; the owner's eye judges the look. Done at
+    `b06ff120`: a heading and a one-row table a group in Bevy's order, the examples in each in the
+    order Bevy's list gives them, the kept-out ones last, 28 groups, the check passing. The owner
+    asked at 16:35 that the pictures be one size, where they differ today: every picture carries the
+    same width and height on its tag, 200 wide as before and the height of sixteen by nine, and the
+    captures that are not of that shape, four of 304, a square, a four by three and two of five by
+    three, are taken again at it where the example's window allows or padded to it by the capture
+    script, so the tag distorts nothing; the table check and the captures' comparison read the
+    result, the comparison's references following the captures. Done at `21d08b44`: every tag 200 by
+    113, four captures padded to sixteen by nine by the capture script, which pads any capture that
+    needs it; `b06ff120`'s gallery had passed N 4.2's 320 lines, mended at `d0e638d7` before its
+    page could show it. The owner looked at the pushed page at 17:10 and the pictures still read as
+    different sizes. GitHub renders every tag at one box, its own style giving each the full width
+    of its cell, an automatic height and the tag's aspect, so the box is uniform; what differs is
+    the picture inside it, since a capture of another shape was padded with nothing to sixteen by
+    nine and the page fills the padding with its muted color, which reads as a smaller picture. The
+    fit fills instead: the capture script scales a shot of another shape so its shorter side fills
+    sixteen by nine and cuts the rest around the middle, or the example's window is opened at
+    sixteen by nine where the cut would lose something that matters, so every picture fills its box
+    edge to edge; the four captures are taken again so, the comparison's references following, and
+    the page is read after the push.
 
 14. **The bcs skill leaves the `.claude` folder (Decision 28).** The owner asked on 2026-10-11 at
     16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the `.claude` folder
@@ -394,7 +401,10 @@ from [SHARED.md](SHARED.md).
     means nothing outside that folder, its body as it is; AGENTS.md's line on driving a session and
     its documents table name the new place, which the owner's ask is the word for, as does
     STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins `.gitignore`
-    so the tool's own lock file there never enters the tree. A batch of its own with item 13's size.
+    so the tool's own lock file there never enters the tree. A batch of its own, taken when the
+    owner types the ask in the working session, which changes AGENTS.md and the tool's own folder
+    only on the owner's word given there and has asked the owner for it, a right the reviewing
+    session holds.
 
 ## Verdicts
 

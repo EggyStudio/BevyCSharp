@@ -1,3 +1,7 @@
+# Claude Code's own folder, which it writes a lock file and its settings in. Nothing of the
+# repository's lives there, the document on driving a session being .github/BCS.md.
+.claude/
+
 # .NET build output
 # Unanchored on purpose: every project directory has its own pair.
 bin/
