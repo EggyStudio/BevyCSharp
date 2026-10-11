@@ -241,7 +241,9 @@ def build(version, examples, order, triage, written, source, followed):
         "picture of what it draws or, for one with nothing to draw, the text it prints. Every "
         "picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and "
         "kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a "
-        "3D one, so a label reads as Bevy draws it and a sky does not band.")
+        "3D one, so a label reads as Bevy draws it and a sky does not band. A size of another shape "
+        "than sixteen by nine is padded around its middle with nothing to that shape, so the README "
+        "shows every picture at one size.")
 
     for group in groups:
         out.append("")
@@ -280,7 +282,7 @@ def build(version, examples, order, triage, written, source, followed):
             continue
         cells = []
         for example in shown:
-            picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200"/>'
+            picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200" height="113"/>'
             picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
             cells.append(f'<td>{picture}<br><code>{example["name"]}</code></td>')
         # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the

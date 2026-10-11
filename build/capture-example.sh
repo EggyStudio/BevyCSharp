@@ -129,6 +129,19 @@ esac
 shot="${out%.webp}.shot.png"
 ./bcs shot "$shot" "$frames" --quiet --timeout 600
 
+# Every picture sixteen by nine, as the README's gallery shows each at one size, so one taken at a
+# window of another shape the example opens, as Bevy's grid opens one of 800 by 600, is padded out
+# around its middle with nothing, rather than drawn at another size than Bevy's or stretched by the
+# page. The smallest such shape that holds it is sixteen and nine times a whole number.
+if [ -n "$magick" ]; then
+    read -r width height < <("$magick" "$shot" -format '%w %h\n' info:)
+    if [ $((width * 9)) -ne $((height * 16)) ]; then
+        scale=$(( (width + 15) / 16 ))
+        [ $(( (height + 8) / 9 )) -gt "$scale" ] && scale=$(( (height + 8) / 9 ))
+        "$magick" "$shot" -background none -gravity center -extent "$((scale * 16))x$((scale * 9))" "$shot"
+    fi
+fi
+
 # A flat capture is lossless WebP, which is smaller than a palette PNG and keeps text sharp. A 3D
 # one is WebP at quality 85, a fraction of full color PNG with no banding in a sky, fog or bloom,
 # where a palette rings them.

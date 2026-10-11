@@ -45,7 +45,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
 | **All** | **337** | **2** | **0** | **43** | **56** | **158 of 166** |
 
-A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
+A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A size of another shape than sixteen by nine is padded around its middle with nothing to that shape, so the README shows every picture at one size.
 
 ## 2D Rendering
 

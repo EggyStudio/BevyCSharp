@@ -10,34 +10,52 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `69fca4bb`. Two commits, unpushed with the eight before them. `f55c722b` moves code
-alone, the pointer's three calls and the image's test from `window.rs` into `window/cursor.rs`, 758
-lines to 580 before the atlas call is added. `69fca4bb`, custom_cursor_image, ABI 263:
-`Window.SetCursorAtlas` cuts the pointer's image to a frame of an atlas with that frame's hotspot,
-the hotspot taken with it as asked since Bevy holds it as a pair the wrapper cannot type, clears the
-atlas for no layout, and refuses a pointer that is no image yet and a key that is no layout, typed
-without a panic; the frame, the flips and the rectangle are written through the window's cursor
-wrapper. One generator change the example needed, and a right one for every wrapper: a union written
-through a wrapper switches its variant only where the field holds another, as an option was switched
-to some only from none, since switching makes the variant again at its defaults and a field the
-record does not hold, the hotspot and the atlas's layout here, was lost on every write. The example
-steps a crosshair sheet's two hundred frames at four a second through a behavior kept on the
-window's entity (B 4, 158 of 166), takes the atlas away and puts it back on T, flips on X and Y and
-cycles the frame's quarters on C, and offscreen, with no window and no pointer, shows the
-instructions alone, its capture matching Bevy's text and clear color; Kenney's sheet joins the asset
-list. A native test cuts, clears and refuses both ways; `SpawnedWindowTests` marks a window of its
-own as the first, is refused the atlas before an image, sets the image, the atlas and a hotspot of
-32 by 16, writes a frame and a flip through the wrapper and reads the hotspot back whole, which
-without the generator change read zeros. EXAMPLES.md reads 337 written, 2 in part and 43 missing,
-the triage line corrected; the window guide has its paragraph and block. The suite: 1,416 passed and
-2 skipped of 1,418; cargo's 88 and 151, every profile checked. Right, the hotspot carried with the
-call that owns the struct, and the generator's loss found by the hotspot reading zeros and mended
-for every union rather than for this one. The example counts as written: a pointer is the platform's
-to draw and no capture shows it, so its look on a window is the owner's whenever they run it, and
-nothing waits on that. The owner asked at 16:05 for the README's gallery as one scrolling row of
-pictures a group, in Bevy's order of its groups, which is item 13 (Decision 27), a batch of its own
-before low_power. Then low_power in TODO.md's order, winit's update modes, which the bridge leaves
-at Bevy's default and which pulls no crate.
+Reviewed up to `b06ff120`. One commit, item 13, unpushed with the ten before it:
+`build/examples-table.py` writes the README's gallery as a heading naming each group and one table
+of one row under it, in the order Bevy's examples list gives its groups, which the script already
+read, each row holding the group's written examples in the order that list gives them, read by a new
+pass that maps each row's link to the example by its cargo path, an example the list leaves out
+following by name, and the examples Bevy keeps out of its list in a last row of their own; each cell
+as before, the picture through the raw link opening the program and the name under it; 28 groups
+with captures, the script's check reading the result and passing, EXAMPLES.md unchanged, the README
+written in a worktree at the commit so nothing of low_power rides along. The headings are third
+level under the Examples heading, so each group has an anchor, where the contents list names the
+second level alone, which is right as it stands; the owner's eye judges the look. Right, the order
+taken from Bevy's own list rather than the alphabet, the kept-out examples given a row rather than
+dropped, and the check kept on the result. At 16:30 the owner asked for the bcs skill out of the
+`.claude` folder, which is item 14, and at 16:35 for the gallery's pictures at one size, which item
+13 takes (Decision 28), both before low_power. Then low_power in TODO.md's order, with a bridge mend
+on the way: a redraw request is written only where its messages are registered, since the headless
+harness logged a send to none (N 3.7).
+
+Before it, `69fca4bb` and `f55c722b` came. `f55c722b` moves code alone, the pointer's three calls
+and the image's test from `window.rs` into `window/cursor.rs`, 758 lines to 580 before the atlas
+call is added. `69fca4bb`, custom_cursor_image, ABI 263: `Window.SetCursorAtlas` cuts the pointer's
+image to a frame of an atlas with that frame's hotspot, the hotspot taken with it as asked since
+Bevy holds it as a pair the wrapper cannot type, clears the atlas for no layout, and refuses a
+pointer that is no image yet and a key that is no layout, typed without a panic; the frame, the
+flips and the rectangle are written through the window's cursor wrapper. One generator change the
+example needed, and a right one for every wrapper: a union written through a wrapper switches its
+variant only where the field holds another, as an option was switched to some only from none, since
+switching makes the variant again at its defaults and a field the record does not hold, the hotspot
+and the atlas's layout here, was lost on every write. The example steps a crosshair sheet's two
+hundred frames at four a second through a behavior kept on the window's entity (B 4, 158 of 166),
+takes the atlas away and puts it back on T, flips on X and Y and cycles the frame's quarters on C,
+and offscreen, with no window and no pointer, shows the instructions alone, its capture matching
+Bevy's text and clear color; Kenney's sheet joins the asset list. A native test cuts, clears and
+refuses both ways; `SpawnedWindowTests` marks a window of its own as the first, is refused the atlas
+before an image, sets the image, the atlas and a hotspot of 32 by 16, writes a frame and a flip
+through the wrapper and reads the hotspot back whole, which without the generator change read zeros.
+EXAMPLES.md reads 337 written, 2 in part and 43 missing, the triage line corrected; the window guide
+has its paragraph and block. The suite: 1,416 passed and 2 skipped of 1,418; cargo's 88 and 151,
+every profile checked. Right, the hotspot carried with the call that owns the struct, and the
+generator's loss found by the hotspot reading zeros and mended for every union rather than for this
+one. The example counts as written: a pointer is the platform's to draw and no capture shows it, so
+its look on a window is the owner's whenever they run it, and nothing waits on that. The owner asked
+at 16:05 for the README's gallery as one scrolling row of pictures a group, in Bevy's order of its
+groups, which is item 13 (Decision 27), a batch of its own before low_power. Then low_power in
+TODO.md's order, winit's update modes, which the bridge leaves at Bevy's default and which pulls no
+crate.
 
 Before it, `ac2817aa` and `6729361f` came. `6729361f` writes the components table again from the
 editor build, which has carried Bevy's custom cursors since `f9416e59` while the table dated from
@@ -68,34 +86,6 @@ handle, whose kind the bridge does not load, nor the hotspot, a tuple, so a smal
 an atlas layout, a frame and the hotspot on a window's custom cursor, the hotspot with it since it
 is the same struct and the one thing the wrapper cannot type, and the example animates the frame and
 toggles the flips and the rectangle through the wrapper.
-
-Before it, four commits came, `c3aaacac` to `09e3b339`. `c3aaacac`, item 11: the CLI server's
-dispose cancels the waits first, so a request answered in the app's last frame keeps its answer
-where the cancel races its completion and one still waiting is told the session is closing, then
-shuts the receive side alone and joins the connection threads within a linger of two seconds across
-them all, closing a socket whose thread still reads after it, as on Windows where shutting the
-receive side does not end a waiting read, and joins the rest; a thread that wrote and ended between
-the copy and the close has let its client go, which the old code was open to as well and is guarded.
-The test sends `app.quit`, abandons the queue and disposes at once, three hundred rounds, and reads
-every answer where the old server lost ten or eleven in each of three runs; the app tests' stop
-reads `app.quit`'s answer and asserts it, its remark no longer saying the answer may be lost. Then
-three commits that move code alone, as N 1.3 asks: `render/assets.rs` from 799 to 557 lines with
-attaching meshes and materials in `render/attached.rs`, `NormTests.cs` from 794 to 588 with N 2.10's
-reading of the IL in a second file of the class, which holds no test, and `UiTests.cs` from 794 to
-535 with its seven text tests in `UiTextTests.cs` beside it; cargo's 87 and 149, every profile
-checked, the norm and interface tests 40 passed and 1 skipped. The suite: 1,413 passed and 2 skipped
-of 1,415. A flake seen once, `AudioTests`' part of a clip failing in one filtered run and passing in
-seven since and in the suite, named here if it recurs. Right, the answer's loss measured before and
-after rather than reasoned about, the linger said with its cost on the one platform that pays it,
-and each split a commit of its own that moves code alone. Item 11 is done and the three watches of
-item 2 are cleared. With the Now list's free items done, TODO.md's order: its first item, an enum
-inside a variant without a typed property, has been done since `5f2d3d02` and the components guide
-says the same stale thing; what is left is fifteen option fields over types the description gives no
-kind, and the batch types a duration as a nullable `TimeSpan` and the non-zero integers as a
-nullable `int` with a zero written refused naming the field, the dump, the generator and the bridge
-giving them kinds, while the tuples, an instant and a node index stay on string paths with the
-reason said, both documents rewritten around what is left. The examples that wait on the owner's
-word stay where they are.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -376,18 +366,35 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group (Decision 27).** The owner asked
-    on 2026-10-11 at 16:05, as for 3DEngine's README. `build/examples-table.py` writes the gallery
-    between its markers as one table of four pictures a row over every written example; it writes
-    instead one table a group in the order Bevy's `examples/README.md` lists the groups, which the
-    script already reads, each a single row holding the group's written examples in that order, the
-    picture opening the program and the name under it as today, with a heading line naming the group
-    before each table, and the examples Bevy keeps out of its list in a last row of their own; a row
-    wider than the page scrolls sideways on GitHub, which is the point, so no row is wrapped. The
-    script's check reads the result as it reads the table today, so the workflow's table check and
-    the README's walk run on it, and the raw links keep their form for the package's page. A batch
-    of its own before low_power, since it is small and the owner asked; the owner's eye judges the
-    look.
+13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120` but for the
+    pictures' size (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
+    README. `build/examples-table.py` writes the gallery between its markers as one table of four
+    pictures a row over every written example; it writes instead one table a group in the order
+    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
+    holding the group's written examples in that order, the picture opening the program and the name
+    under it as today, with a heading line naming the group before each table, and the examples Bevy
+    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
+    GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
+    reads the table today, so the workflow's table check and the README's walk run on it, and the
+    raw links keep their form for the package's page. A batch of its own before low_power, since it
+    is small and the owner asked; the owner's eye judges the look. Done at `b06ff120`: a heading and
+    a one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives
+    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 16:35 that the
+    pictures be one size, where they differ today: every picture carries the same width and height
+    on its tag, 200 wide as now and the height of sixteen by nine, and the captures that are not of
+    that shape, four of 304, a square, a four by three and two of five by three, are taken again at
+    it where the example's window allows or padded to it by the capture script, so the tag distorts
+    nothing; the table check and the captures' comparison read the result, the comparison's
+    references following the captures.
+
+14. **The bcs skill leaves the `.claude` folder (Decision 28).** The owner asked on 2026-10-11 at
+    16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the `.claude` folder
+    and long subfolders holding nothing else being unwanted, as for 3DEngine's. The document becomes
+    `.github/BCS.md`, beside the other documents a session reads, its skill header dropped since it
+    means nothing outside that folder, its body as it is; AGENTS.md's line on driving a session and
+    its documents table name the new place, which the owner's ask is the word for, as does
+    STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins `.gitignore`
+    so the tool's own lock file there never enters the tree. A batch of its own with item 13's size.
 
 ## Verdicts
 
@@ -567,5 +574,10 @@ from [SHARED.md](SHARED.md).
     groups.** The owner asked at 16:05 on 2026-10-11, after asking the same of 3DEngine's README,
     which is item 13: the written examples' pictures in one-row tables that scroll sideways rather
     than the grid of four, one a group of Bevy's examples.
+
+28. **The bcs skill leaves `.claude` for `.github/BCS.md`, and the gallery's pictures are one
+    size.** The owner asked at 16:30 and 16:35 on 2026-10-11, as of 3DEngine: the skill document out
+    of the `.claude` folder and its empty subfolders, which is item 14 with AGENTS.md's line changed
+    on that word; and every picture in the README's rows the same size, which item 13 takes.
 
 ## Replies
