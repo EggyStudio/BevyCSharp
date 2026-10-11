@@ -236,6 +236,34 @@ public void Tick(BehaviorContext ctx) { }
 `[Changed]` skips entities whose listed components did not change this frame. It is a per-entity
 test against Bevy's change ticks, so a method carrying it runs sequentially.
 
+A system asks the same of one entity with `ctx.Ecs.Changed<T>(entity)`, and whether the component
+was put on with `ctx.Ecs.Added<T>(entity)`, each since the running system last ran, as Bevy's `Ref`
+answers them. `ctx.Ecs.SetIfNeq` writes only a value that differs from the one held, as Bevy's
+`set_if_neq` does, so what watches sees a change only when there is one. Reading a component with
+`TryGet` or `GetOrDefault` marks nothing, where `GetRef` and `Mutate` mark it changed.
+
+A resource is a C# object the world cannot watch a field of, so it keeps when it was inserted and
+last marked changed, and `ctx.World.IsChanged<T>()` and `IsAdded<T>()` weigh those against the
+running system's last run in the same way. `InsertResource`, `SetResource` and `SetResourceIfNeq`
+mark it, and `MarkChanged<T>()` does after a field of it is written:
+
+<!-- compiled with:
+public sealed record Score(int Value);
+-->
+```csharp
+[OnUpdate]
+public static void Report(BehaviorContext ctx)
+{
+    ctx.World.SetResourceIfNeq(new Score(3));
+    if (ctx.World.IsChanged<Score>()) Console.WriteLine($"changed by {ctx.World.ChangedBy<Score>()}");
+}
+```
+
+`ChangedBy` names the file and line of the call that last changed it, which
+`Config.TrackChangeLocations` keeps for resources and for components put on with `Add`, `Set` or
+`SetIfNeq`, as Bevy keeps it under its `track_location` feature. It is off by default, and a change
+made with no call to name, a behavior's `ref` among them, names none.
+
 What lost a component is no longer there to filter, so a system asks for it. `ctx.Ecs.Removed<T>()`
 lists the entities that lost `T`, by a removal or a despawn, since the running system last asked,
 as Bevy's `RemovedComponents<T>` gives a Rust system. Each system keeps its own place, so each

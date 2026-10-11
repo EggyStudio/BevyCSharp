@@ -48,14 +48,12 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Eight more, one example each.** A resource's change ticks and when a component was added
-  (`change_detection`), relationships of a game's own (`relationships`), an atlas built from a
-  folder of images as the app runs (`texture_atlas`), gizmos of Bevy's primitive shapes
+- **Six more, one example each.** Relationships of a game's own (`relationships`), an atlas built
+  from a folder of images as the app runs (`texture_atlas`), gizmos of Bevy's primitive shapes
   (`render_primitives`), Bevy's outlines of interface nodes for debugging, a feature the bridge does
   not build (`image_node_resizing`), a window made fullscreen on a monitor named by its entity, in a
-  run that opens no first window (`monitor_info`), the schedule reporting systems whose order is
-  ambiguous (`nondeterministic_system_order`), and a message changed in place by a later system and
-  read the same frame, where a C# message is read the frame after it is sent (`message`).
+  run that opens no first window (`monitor_info`), and the schedule reporting systems whose order
+  is ambiguous (`nondeterministic_system_order`).
 
 One example is written in part, leaving out a feature named in its row.
 

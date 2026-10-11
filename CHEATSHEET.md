@@ -71,7 +71,13 @@ static Config Windowed(string title, uint width = 1280, uint height = 720, Graph
 ### `World`
 
 ```csharp
-void InsertResource<T>(T value);                                // Adds or replaces the resource of type T
+bool IsChanged<T>();                                            // Whether the resource of type T was changed since the running system last ran, as Bevy's Res::is_changed answers, inserting it among the changes
+bool IsAdded<T>();                                              // Whether the resource of type T was inserted since the running system last ran, as Bevy's Res::is_added answers
+string? ChangedBy<T>();                                         // The file and line of the call that last changed the resource of type T, as Bevy's changed_by gives it, or null where TrackChangeLocations is off or the resource was never changed
+void SetResource<T>(T value, string file = "", int line = 0);   // Replaces the resource of type T, marked changed, and added as well where there was none
+bool SetResourceIfNeq<T>(T value, string file = "", int line = 0);  // Replaces the resource of type T only where it differs from the one held, as Bevy's set_if_neq does, and answers whether it did
+void MarkChanged<T>(string file = "", int line = 0);            // Marks the resource of type T changed, after a field of the object it holds was written, which the world cannot see, as Bevy's ResMut marks it when written through
+void InsertResource<T>(T value, string file = "", int line = 0);  // Adds or replaces the resource of type T, marked added and changed
 T GetOrInsertResource<T>(T value);                              // Returns the existing resource, or inserts and returns value
 T GetOrInsertResource<T>(Func<T> factory);                      // Returns the existing resource, or inserts one built by factory
 T InitResource<T>();                                            // Returns the existing resource, or inserts a default-constructed one
@@ -230,6 +236,9 @@ static string? Describe();                                      // Bevy's own ac
 ### `EcsWorld`
 
 ```csharp
+bool Added<T>(Entity entity);                                   // Whether an entity's component was added since the running system last ran, as Bevy's Ref::is_added answers
+bool SetIfNeq<T>(Entity entity, T component, string file = "", int line = 0);  // Overwrites a component's value only where it differs from the one held, as Bevy's set_if_neq does, so what watches for changes sees a change only when there is one, and answers whether it wrote
+string? ChangedBy<T>(Entity entity);                            // The file and line of the call that last changed an entity's component, as Bevy's changed_by gives it, or null where it is not known
 Entity Spawn();                                                 // Spawns an entity with no components
 Entity Spawn(Action<Entity, EcsWorld> build);                   // Spawns an entity and applies build to it
 void SpawnBatch(int count, Action<Entity, EcsWorld> build);     // Spawns count entities, applying build to each
@@ -241,8 +250,8 @@ void DespawnOnExit<TState>(Entity entity, TState state);        // Despawns an e
 void DespawnOnEnter<TState>(Entity entity, TState state);       // Despawns entity as TState enters state, Bevy's DespawnOnEnter
 void DespawnWhen<TState>(Entity entity, Func<StateTransitionEvent<TState>, bool> rule);  // Despawns entity at the first transition of TStaterule answers true for, Bevy's DespawnWhen
 bool IsAlive(Entity entity);                                    // True when the handle still refers to a live entity
-void Add<T>(Entity entity, T component);                        // Adds or replaces a component on an entity
-void Set<T>(Entity entity, T component);                        // Overwrites a component's value
+void Add<T>(Entity entity, T component, string file = "", int line = 0);  // Adds or replaces a component on an entity
+void Set<T>(Entity entity, T component, string file = "", int line = 0);  // Overwrites a component's value
 bool Remove<T>(Entity entity);                                  // Removes a component
 bool Has<T>(Entity entity);                                     // True when an entity carries a component
 bool TryGet<T>(Entity entity, out T component);                 // Reads a component, reporting whether it was present

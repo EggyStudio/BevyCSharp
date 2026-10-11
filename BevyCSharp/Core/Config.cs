@@ -529,6 +529,18 @@ public sealed class Config
     public bool PathTracer { get; set; }
 
     /// <summary>
+    /// Keep the file and line of the call that last changed each resource and each component put on
+    /// with <see cref="EcsWorld.Add{T}"/> or <see cref="EcsWorld.Set{T}"/>, which <see cref="World.ChangedBy{T}"/> and
+    /// <see cref="EcsWorld.ChangedBy{T}"/> give, as Bevy's <c>track_location</c> feature keeps them.
+    /// </summary>
+    /// <remarks>
+    /// Off by default, as Bevy's feature is, since the place of every entity ever set is kept while
+    /// it is on. A change made with no call to name, a behavior's <c>ref</c> among them, is given no
+    /// place.
+    /// </remarks>
+    public bool TrackChangeLocations { get; set; }
+
+    /// <summary>
     /// The folder the run's log and a crash's report are written in, or nothing for <c>logs</c>
     /// beside the executable, or an empty string for neither.
     /// </summary>

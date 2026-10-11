@@ -29,7 +29,10 @@ if "$program" --printing | grep -qx "$1"; then
     # On the set clock a picture is taken on, so what it prints of time, and which of its fixed
     # steps falls between which frames, is the same on every run.
     BCS_FRAME_TIME=0.0166667 "$program" "$1" --drive > "$text" 2> "$text.log"
-    sed -E 's/\x1b\[[0-9;]*m//g' "$text.log" | grep -E '^[^ ]+Z +[A-Z]+ (csharp|bevy_diagnostic): ' | sed -E 's/^[^ ]+Z +//' >> "$text" || true
+    # A message of several lines is kept whole, its lines after the first carrying no time.
+    sed -E 's/\x1b\[[0-9;]*m//g' "$text.log" \
+        | awk '/^[^ ]+Z +[A-Z]+ / { keep = ($0 ~ /^[^ ]+Z +[A-Z]+ (csharp|bevy_diagnostic): /) } keep' \
+        | sed -E 's/^[^ ]+Z +//' >> "$text" || true
     rm -f "$text.log"
     exit 0
 fi

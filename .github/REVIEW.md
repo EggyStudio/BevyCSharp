@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d14e8416`. One commit, solari whole: Bevy's path tracer is asked for with
+Reviewed up to `800eaaab`. One commit, the first of the eight, Bevy's message example: the bus
+numbers its messages, and a `MessageReader<T>` keeps its own place among them, giving on each read a
+copy of what it has not read, this frame's sent so far and the last frame's, so a reader after the
+sender reads in the same frame and one reading every other frame still gets every message; a
+`MessageMutator<T>` gives a ref struct walked with `foreach (ref var m in ...)` over the two lists,
+so a later system changes a message in place and the reader after it reads the change; `ctx.Read`
+stays the last frame's messages whole. The example runs Bevy's chain, the timer, the extra damage,
+the armor's mutator and the health, with two unordered readers, printing Bevy's four lines once a
+second over a capture of 130 frames, and says why the extra damage is a reader and a send here where
+Bevy's is a mutator, Rust's borrows forbidding a reader and a writer of one type in one system. Two
+tests hold the reader's frame and the mutator's change; the messages guide replaces the sentence
+that a C# system has no identity for a cursor; the behaviors guide has the free camera's lesson, a
+`ref` component marked changed every frame the system runs where Bevy marks one only when written
+through, and the `in` and the write through the world when it changes; and the cheat sheet's
+generator names a type generic only through its outer type as it is, where it crashed. Right, the
+reader's place its own as Bevy's cursor is, the two lists read by span, and the lesson in the guide.
+The suite: 1,384 passed and 2 skipped of 1,386; the docs' 33 blocks build. The ambiguity report
+started before the order came is set aside as a patch, uncommitted, and comes after
+change_detection, whose shape the coder laid out and this session took: a component's added flag
+beside its changed one on the existing path, both against the running system's last run; resources
+given ticks, a run tick a system kept by the trampoline and an added and a changed tick a resource
+set by insert, set, set-if-not-equal and mark-changed, read as changed or added against the system's
+last run; and the place a value was last set from as the C# call site, since Bevy's own would name
+the bridge's lines and a Rust location cannot be made from C#, kept only under a config switch so
+the table costs nothing by default, a write through a behavior's `ref` saying none.
+
+Before it, one commit came to be read, solari whole: Bevy's path tracer is asked for with
 `Config.PathTracer`, a bit of the ray tracing word the config already carried, and drawn on a camera
 with `Render.SetPathTraced`, the camera holding the path tracer or the real-time lighting as Bevy's
 example inserts one or the other, refused where the app did not ask for it, the meaning of an
@@ -56,29 +82,6 @@ reads 328 written and 2 in part, solari and log_diagnostics for `sysinfo`. The s
 and 2 skipped of 1,382; cargo's 142. Next solari, the path tracer behind a config switch, its
 many-lights scene and the world cache's cell count, which Bevy records as a render diagnostic the
 store may already reach.
-
-Before it, one commit came to be read, Bevy's system stepping: `Stepping` and `SteppedSystem` add
-and remove a stage, turn stepping on and off, step a system or the rest of the frame, have a system
-always run, never run or stop the frame before it by its name, and list the stepped systems with the
-cursor and Bevy's own account, through `bevy_debug_stepping`, a feature of two crates already in the
-tree, the lock unchanged, a schedule with no stepping paying one lookup a run. Read: every C# system
-was one closure type to Bevy, so a system carries since the name it was added under through
-`with_name`, which names it in a trace's spans and an order's warning as well as here, a gain beyond
-the example; a schedule is taken out of its resource while it runs and a C# system always runs in
-one, so what C# asks by name is given to Bevy by node in Bevy's `Main` after the frame's schedules
-have run, and the stepped schedules are read again only where a system count changed; the bridge
-knows the six stages' order from the start, so the list stands the frame after a stage is added and
-a game can leave part of a stage running before its first step, where Bevy learns the order only
-once stepping is on. system_stepping prints Bevy's script frame for frame, leaving the other systems
-of Update to run since this app's Update holds every example's behaviors, said in its triage;
-breakout takes Bevy's panel and hint in `games/stepping.cs`, stepping the four systems the game
-names, checked live; both captures match on lavapipe; TODO.md's list of the examples in part is
-brought to the three that remain, solari, custom_transitions and log_diagnostics for `sysinfo`.
-Right, the schedule's lifetime respected rather than reached into, the names a gain everywhere, and
-the order known a frame early with the reason said. EXAMPLES.md reads 327 written, 3 in part and 52
-missing. The suite: 1,379, the three that failed, the cheat sheet, the surface and N 1.2 for a type
-in another's file, mended before the commit; cargo's 140. Next custom_transitions, a schedule of a
-game's own and a C# system in Bevy's transition schedule, then solari.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

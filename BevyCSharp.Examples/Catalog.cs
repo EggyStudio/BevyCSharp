@@ -5,6 +5,7 @@ using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
 using BevyCSharp.Examples.Ecs;
+using BevyCSharp.Examples.Ecs.Changes;
 using BevyCSharp.Examples.Ecs.Hooks;
 using BevyCSharp.Examples.Games;
 using BevyCSharp.Examples.Gltf;
@@ -196,6 +197,7 @@ internal static class Catalog
 
         // ECS (Entity Component System)
         new("callbacks", Callbacks.Build, Prints: 2),
+        new("change_detection", ChangeDetection.Build, ChangeDetection.Configure, Prints: 130),
         new("component_hooks", ComponentHooksExample.Build, Prints: 12, Drive: Drives.ComponentHooks),
         new("delayed_commands", DelayedCommands.Build),
         new("ecs_guide", EcsGuide.Build, Prints: 20),

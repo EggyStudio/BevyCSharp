@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace Bevy;
 
@@ -17,8 +18,15 @@ namespace Bevy;
 /// <see cref="Time"/> and <see cref="Input"/> are resources like any other, refreshed from
 /// Bevy once per frame before user systems run.
 /// </para>
+/// <para>
+/// A resource keeps when it was added and last changed, as Bevy's do, which
+/// <see cref="IsChanged{T}"/> and <see cref="IsAdded{T}"/> read. Inserting it marks both, and a
+/// change made to the object it holds is marked with <see cref="SetResource{T}"/>,
+/// <see cref="SetResourceIfNeq{T}"/> or <see cref="MarkChanged{T}"/>, since the world cannot see
+/// a field written on it.
+/// </para>
 /// </remarks>
-public sealed class World : IDisposable
+public sealed partial class World : IDisposable
 {
     private readonly ConcurrentDictionary<Type, object> _resources = new();
     private bool _disposed;
@@ -38,27 +46,37 @@ public sealed class World : IDisposable
     {
         foreach (var type in _resources.Keys)
         {
-            if (Retired.Names(type, assembly)) _resources.TryRemove(type, out _);
+            if (!Retired.Names(type, assembly)) continue;
+            _resources.TryRemove(type, out _);
+            _ticks.TryRemove(type, out _);
         }
     }
 
-    /// <summary>Adds or replaces the resource of type <typeparamref name="T"/>.</summary>
-    public void InsertResource<T>(T value) where T : notnull => _resources[typeof(T)] = value;
+    /// <summary>Adds or replaces the resource of type <typeparamref name="T"/>, marked added and changed.</summary>
+    public void InsertResource<T>(T value, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) where T : notnull
+    {
+        _resources[typeof(T)] = value;
+        Marked(typeof(T), added: true, file, line);
+    }
 
     /// <summary>Returns the existing resource, or inserts and returns <paramref name="value"/>.</summary>
     public T GetOrInsertResource<T>(T value) where T : notnull =>
-        (T)_resources.GetOrAdd(typeof(T), value);
+        (T)_resources.GetOrAdd(typeof(T), type => Added(type, value));
 
     /// <summary>Returns the existing resource, or inserts one built by <paramref name="factory"/>.</summary>
     public T GetOrInsertResource<T>(Func<T> factory) where T : notnull =>
-        (T)_resources.GetOrAdd(typeof(T), _ => factory());
+        (T)_resources.GetOrAdd(typeof(T), type => Added(type, factory()));
 
     /// <summary>Returns the existing resource, or inserts a default-constructed one.</summary>
     public T InitResource<T>() where T : notnull, new() =>
-        (T)_resources.GetOrAdd(typeof(T), _ => new T());
+        (T)_resources.GetOrAdd(typeof(T), type => Added(type, new T()));
 
     /// <summary>Removes the resource of type <typeparamref name="T"/>.</summary>
-    public bool RemoveResource<T>() where T : notnull => _resources.TryRemove(typeof(T), out _);
+    public bool RemoveResource<T>() where T : notnull
+    {
+        _ticks.TryRemove(typeof(T), out _);
+        return _resources.TryRemove(typeof(T), out _);
+    }
 
     /// <summary>True when a resource of type <typeparamref name="T"/> is registered.</summary>
     public bool ContainsResource<T>() where T : notnull => _resources.ContainsKey(typeof(T));
@@ -109,6 +127,7 @@ public sealed class World : IDisposable
         }
 
         _resources.Clear();
+        _ticks.Clear();
     }
 
     /// <inheritdoc/>

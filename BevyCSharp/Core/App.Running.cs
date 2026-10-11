@@ -247,6 +247,10 @@ public sealed unsafe partial class App : IDisposable
         /// <summary>The number the bridge gave it, which orders it, or -1 for one Bevy does not schedule as a stage's.</summary>
         internal int NativeId { get; set; } = -1;
 
+        // The tick of its last run, which the world weighs a resource's change against, before
+        // every change on its first run as in Bevy.
+        private long _lastRun = -1;
+
         internal RegisteredSystem(App owner, SystemDescriptor descriptor, Stage stage)
         {
             Owner = owner;
@@ -280,7 +284,18 @@ public sealed unsafe partial class App : IDisposable
             {
                 if (GCHandle.FromIntPtr(user).Target is not RegisteredSystem system) return;
                 if (system.IsRemoved) return;
-                system.Descriptor.Invoke(system.Owner.World);
+
+                var world = system.Owner.World;
+                var outer = world.EnterSystem(system._lastRun, out var tick);
+                try
+                {
+                    system.Descriptor.Invoke(world);
+                }
+                finally
+                {
+                    world.LeaveSystem(outer);
+                    system._lastRun = tick;
+                }
             }
             catch (Exception ex)
             {

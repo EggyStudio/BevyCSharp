@@ -276,6 +276,7 @@ public sealed unsafe partial class App : IDisposable
         // A game in progress is one app's, and its entities would name others in the next.
         SaveGame.Forget();
 
+        World.TrackChangeLocations = Config.TrackChangeLocations;
         World.InsertResource(Config);
         World.InsertResource(Project);
         World.InsertResource(new Time());

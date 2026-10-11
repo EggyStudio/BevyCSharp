@@ -184,7 +184,31 @@ pub extern "C" fn bcs_ecs_has(entity: u64, component: i32) -> i32 {
     })
 }
 
-/// Returns a writable pointer to an entity's component data, or null.
+/// Returns a pointer to an entity's component data for reading, or null, which marks nothing
+/// changed, where [`bcs_ecs_get_ptr`] marks the component changed as Bevy marks one written through.
+///
+/// The pointer is valid until the next structural change to the world.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_ecs_read_ptr(entity: u64, component: i32) -> *const u8 {
+    crate::interop::guard_with(core::ptr::null(), || {
+        let Some(component) = component_from(component) else {
+            return core::ptr::null();
+        };
+        with_world_opt(|world| {
+            let Ok(entity_ref) = world.get_entity(entity_from(entity)) else {
+                return core::ptr::null();
+            };
+            match entity_ref.get_by_id(component) {
+                Ok(value) => value.as_ptr(),
+                Err(_) => core::ptr::null(),
+            }
+        })
+        .unwrap_or(core::ptr::null())
+    })
+}
+
+/// Returns a writable pointer to an entity's component data, or null, and marks the component
+/// changed, as Bevy marks one written through.
 ///
 /// The pointer is valid until the next structural change to the world.
 #[unsafe(no_mangle)]
@@ -221,6 +245,51 @@ pub extern "C" fn bcs_ecs_changed(entity: u64, component: i32) -> i32 {
                 Ok(value) => i32::from(value.is_changed()),
                 Err(_) => status::NOT_PRESENT,
             }
+        })
+    })
+}
+
+/// When Bevy marks a component added and last changed, its ticks, as [`bcs_ecs_change_ticks`] hands
+/// them out.
+#[repr(C)]
+pub struct BcsChangeTicks {
+    /// The tick it was added at.
+    pub added: u32,
+    /// The tick it last changed at.
+    pub changed: u32,
+    /// 1 where it changed since the running system last ran, and 2 where it was added since, as
+    /// Bevy's `is_changed` and `is_added` answer for a system.
+    pub flags: u32,
+}
+
+/// Writes when a component was added and last changed, and whether either was since the running
+/// system last ran, as Bevy's `Ref` says them.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ecs_change_ticks(entity: u64, component: i32, out: *mut BcsChangeTicks) -> i32 {
+    use bevy::ecs::change_detection::DetectChanges;
+
+    crate::interop::guard(|| {
+        let Some(component) = component_from(component) else {
+            return status::NO_COMPONENT;
+        };
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+        with_world(|world| {
+            let Ok(mut entity_mut) = world.get_entity_mut(entity_from(entity)) else {
+                return status::NO_ENTITY;
+            };
+            // Reached mutably for its ticks alone, and not written through, so nothing is marked.
+            let Ok(value) = entity_mut.get_mut_by_id(component) else {
+                return status::NOT_PRESENT;
+            };
+            let flags = u32::from(value.is_changed()) | (u32::from(value.is_added()) << 1);
+            let ticks = BcsChangeTicks { added: value.added().get(), changed: value.last_changed().get(), flags };
+            unsafe { out.write(ticks) };
+            status::OK
         })
     })
 }

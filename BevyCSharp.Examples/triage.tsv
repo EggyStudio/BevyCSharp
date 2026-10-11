@@ -173,7 +173,7 @@ custom_diagnostic	can
 enabling_disabling_diagnostic	can
 log_diagnostics	part	Bevy's system information diagnostics, the process's and the machine's CPU and memory, whose crate the bridge does not compile in
 callbacks	can
-change_detection	missing	a resource's change ticks, and when a component was added and by what
+change_detection	can	its changes named by the C# file and line that made them, and its chances drawn from a generator the captures seed
 component_hooks	can	the hooks' change of the world queued on the app's commands, applied after the frame's systems, where Bevy's apply as the hook's command ends
 contiguous_query	n/a	about a Rust query's memory layout
 custom_executor	n/a	replaces Bevy's system executor, which is Rust

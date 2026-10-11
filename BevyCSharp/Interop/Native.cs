@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 256;
+    internal const int ExpectedAbiVersion = 257;
 
     static Native() => NativeLoader.Initialize();
 
@@ -654,15 +654,25 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_has(ulong entity, int component);
 
-    /// <summary>Returns a writable pointer to a component, or null.</summary>
+    /// <summary>Returns a writable pointer to a component, or null, marking it changed.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial void* bcs_ecs_get_ptr(ulong entity, int component);
+
+    /// <summary>Returns a pointer to a component for reading, or null, marking nothing.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial void* bcs_ecs_read_ptr(ulong entity, int component);
 
     /// <summary>Reports whether a component changed since the previous frame.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_changed(ulong entity, int component);
+
+    /// <summary>Writes when a component was added and last changed, and whether either was since the running system last ran.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_change_ticks(ulong entity, int component, NativeChangeTicks* ticks);
 
     /// <summary>Counts entities carrying a component.</summary>
     [LibraryImport(Library)]

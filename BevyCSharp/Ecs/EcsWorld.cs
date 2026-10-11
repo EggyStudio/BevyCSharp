@@ -222,7 +222,9 @@ public sealed unsafe partial class EcsWorld
     /// <typeparamref name="T"/> may be an ordinary C# struct, which Bevy learns from its layout,
     /// or one of Bevy's own components such as <see cref="Bevy.Transform"/>, which implements
     /// <see cref="INativeComponent"/> and so resolves to the engine's existing component. Both
-    /// go through the same call; nothing here has to know which is which.
+    /// go through the same call; nothing here has to know which is which. Where
+    /// <see cref="Config.TrackChangeLocations"/> is on, the call's place is kept for
+    /// <see cref="ChangedBy{T}"/>.
     /// </remarks>
     /// <example>
     /// <code>
@@ -230,13 +232,18 @@ public sealed unsafe partial class EcsWorld
     /// ctx.Ecs.Add(entity, Transform.At(0f, 5f, 0f));                // Bevy's own Transform
     /// </code>
     /// </example>
-    public void Add<T>(Entity entity, T component) where T : unmanaged =>
+    public void Add<T>(Entity entity, T component, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        where T : unmanaged
+    {
         Native.Check(
             Native.bcs_ecs_insert(entity.Bits, ComponentType<T>.ValueId, &component),
             $"Add<{typeof(T).Name}>");
+        Wrote<T>(entity, file, line);
+    }
 
     /// <summary>Overwrites a component's value. Identical to <see cref="Add{T}"/>.</summary>
-    public void Set<T>(Entity entity, T component) where T : unmanaged => Add(entity, component);
+    public void Set<T>(Entity entity, T component, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        where T : unmanaged => Add(entity, component, file, line);
 
     /// <summary>Removes a component. Succeeds whether or not it was present.</summary>
     public bool Remove<T>(Entity entity) where T : unmanaged
@@ -255,9 +262,10 @@ public sealed unsafe partial class EcsWorld
     }
 
     /// <summary>Reads a component, reporting whether it was present.</summary>
+    /// <remarks>A read marks nothing changed, where <see cref="GetRef{T}"/> and <see cref="Mutate{T}"/> do.</remarks>
     public bool TryGet<T>(Entity entity, out T component) where T : unmanaged
     {
-        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
+        var pointer = Native.bcs_ecs_read_ptr(entity.Bits, ComponentType<T>.ValueId);
         if (pointer is null)
         {
             component = default;
