@@ -10,7 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `800eaaab`. One commit, the first of the eight, Bevy's message example: the bus
+Reviewed up to `88a42cd9`. One commit, change_detection, as the shape taken with two things more. A
+component says whether it was added and a resource whether it was added or changed since the running
+system last ran: a new entry point gives a component's added and changed ticks and the flags against
+the system's last run, since the last setter's check wants the changed tick as well; `Added<T>`,
+`SetIfNeq<T>` by the equality comparer as Bevy's partial equality, and `ChangedBy<T>`, the place a
+value was last set from kept with the tick Bevy marked then and named only while that tick stands,
+so a later `ref` write or one of Bevy's systems gives nothing rather than an older call; the C#
+resources take ticks, a run tick a system in the trampoline starting at minus one so a first run
+sees everything, kept across a schedule a system runs, and an added and a changed tick a resource
+set by insert, set, set-if-not-equal and mark-changed and dropped with the resource; the place is
+kept only under `Config.TrackChangeLocations`, off by default, as a file name and a line so a
+capture prints the same anywhere. The thing found on the way, a fault of weight: `TryGet` and
+`GetOrDefault` read a component through the pointer that takes it mutably, so every read marked it
+changed, which would have defeated every `[Changed]` filter whose system read the component and the
+new set-if-not-equal; a read pointer that marks nothing serves them since, `GetRef` and `Mutate`
+keep the marking one, and the docs say which marks, which SHARED.md's row on reads that mark nothing
+had this engine down as having from Bevy and has as of this commit. The example prints Bevy's blocks
+with the setter's file and line; the capture script keeps a message's continuation lines, every
+other printed capture byte-identical after; four tests hold the resource's first run and its set,
+the component added once and changed by a different value only, the setter named and cleared by a
+`ref` write, and nothing named with the switch off; the behaviors guide's filters section covers it,
+23 blocks built. Right, the ticks Bevy's where Bevy has them and the bridge's own where it does not,
+the setter's place cleared by its tick rather than trusted, and the marking read found and parted
+from the reading one. EXAMPLES.md reads 331 written, one in part and 50 missing. The suite: 1,388
+passed and 2 skipped of 1,390; cargo's 142. Next the ambiguity report from its patch with
+nondeterministic_system_order, then the five left of TODO.md's group, each read for a crate first.
+
+Before it, one commit came to be read, the first of the eight, Bevy's message example: the bus
 numbers its messages, and a `MessageReader<T>` keeps its own place among them, giving on each read a
 copy of what it has not read, this frame's sent so far and the last frame's, so a reader after the
 sender reads in the same frame and one reading every other frame still gets every message; a
@@ -61,27 +88,6 @@ owner's word, so next are the missing rows that want no crate, TODO.md's eight: 
 change_detection first, which a game meets first, then the ambiguity report of
 nondeterministic_system_order from the managed side over the systems' declared reads and writes, the
 rest after, and compressed_image_saver only where it pulls no crate.
-
-Before it, one commit came to be read, custom_transitions whole: a game's own schedule is a label
-keyed by a name the game chooses, since C# declares no Rust type, which can carry a value as
-`OnReenter(InGame)` does, made by the first system put in it and run to its end when a system asks
-through `TryRunSchedule`, as Bevy's `try_run_schedule`, answering nothing for a schedule holding no
-system or one already running, as one that would run itself is; and `OnStateTransition` puts a C#
-system in Bevy's transition schedule among a state's exits, moves or entries, run with the move the
-state made that frame and not in a frame it made none, as Bevy's identity transitions plugin orders
-them, the move held in a thread-local while the system runs and the outer move restored after, since
-such a system can run a schedule holding another. One constructor makes every C# system, its name,
-its world loan and its removal cursors, shared by the stages and the schedules of a game's own; a
-system that asks to be ordered in a schedule of its own stops the app as it starts, the message
-naming the case. Two native tests and `GameScheduleTests` hold the step's three values, a schedule
-run and refused, and the refused ordering; the example runs its two schedules from inside the
-transition, checked live through Play and Restart, its capture matching the checked-in one;
-`docs/states.md` has the section, its 36 blocks building on a packed package. Right, the label a
-name where a type cannot be, the move restored for nesting, and the one constructor. EXAMPLES.md
-reads 328 written and 2 in part, solari and log_diagnostics for `sysinfo`. The suite: 1,380 passed
-and 2 skipped of 1,382; cargo's 142. Next solari, the path tracer behind a config switch, its
-many-lights scene and the world cache's cell count, which Bevy records as a render diagnostic the
-store may already reach.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

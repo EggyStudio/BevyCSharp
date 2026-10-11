@@ -1,0 +1,10 @@
+WARN csharp: Update schedule built successfully, however: 3 pairs of systems with conflicting data access have indeterminate execution order. Consider adding `After`, `Before`, or `AmbiguousWith` relationships between these:
+ -- NondeterministicSystemOrder.ReadsA and NondeterministicSystemOrder.WritesA
+    conflict on: ["A"]
+ -- NondeterministicSystemOrder.WritesA and NondeterministicSystemOrder.ReadsAAndB
+    conflict on: ["A"]
+ -- NondeterministicSystemOrder.DoublesB and NondeterministicSystemOrder.ReadsAAndB
+    conflict on: ["B"]
+INFO csharp: 1, 1
+INFO csharp: 2, 3
+INFO csharp: 3, 7

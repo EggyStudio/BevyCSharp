@@ -28,6 +28,7 @@ public sealed class SystemDescriptor
     private readonly HashSet<Type> _writes = [];
     private readonly List<string> _after = [];
     private readonly List<string> _before = [];
+    private readonly List<string> _ambiguousWith = [];
 
     /// <summary>A human-readable name, used in diagnostics and hot-reload bookkeeping.</summary>
     public string Name { get; }
@@ -52,6 +53,12 @@ public sealed class SystemDescriptor
 
     /// <summary>The names of the systems in its stage this one runs before.</summary>
     public IReadOnlyList<string> RunsBefore => _before;
+
+    /// <summary>
+    /// The names of the systems in its stage this one may run either side of, which
+    /// <see cref="App.AmbiguitiesIn"/> leaves out.
+    /// </summary>
+    public IReadOnlyList<string> AmbiguousWithNames => _ambiguousWith;
 
     /// <summary>True when the system declared any access at all.</summary>
     public bool HasExplicitAccess => _reads.Count > 0 || _writes.Count > 0;
@@ -127,6 +134,22 @@ public sealed class SystemDescriptor
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         _before.Add(name);
+        return this;
+    }
+
+    /// <summary>
+    /// Says this system may run either side of every system in its stage named
+    /// <paramref name="name"/>, though their declared access conflicts.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>.ambiguous_with</c>, for a pair whose order changes nothing a game cares about,
+    /// which <see cref="App.DetectAmbiguities"/> then does not report. The order is left to Bevy as
+    /// before.
+    /// </remarks>
+    public SystemDescriptor AmbiguousWith(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        _ambiguousWith.Add(name);
         return this;
     }
 

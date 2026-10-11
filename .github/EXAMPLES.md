@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**331 written, 1 written in part, 0 can be written, 50 missing and 56 do not apply.** Of the 382 that apply, 332 can be written with what is bridged, 1 of them leaving something out.
+**332 written, 1 written in part, 0 can be written, 49 missing and 56 do not apply.** Of the 382 that apply, 333 can be written with what is bridged, 1 of them leaving something out.
 
 **157 of the 162 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -20,7 +20,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 6 | 0 | 0 | 6 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 22 | 0 | 0 | 4 | 9 | 13 of 13 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 23 | 0 | 0 | 3 | 9 | 13 of 13 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 7 | 0 | 0 | 0 | 0 | 6 of 6 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **331** | **1** | **0** | **50** | **56** | **157 of 162** |
+| **All** | **332** | **1** | **0** | **49** | **56** | **157 of 162** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -298,7 +298,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`immutable_components`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/immutable_components.rs) | Demonstrates the creation and utility of immutable components | does not apply, about Rust's component mutability |
 | [`iter_combinations`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/iter_combinations.rs) | Shows how to iterate over combinations of query results | [written](../BevyCSharp.Examples/ecs/iter_combinations.cs) |
 | [`message`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/message.rs) | Illustrates message creation, activation, and reception | [written](../BevyCSharp.Examples/ecs/message.cs), prints [its output](assets/examples/message.txt) |
-| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | missing, the schedule reporting systems whose order is ambiguous |
+| [`nondeterministic_system_order`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/nondeterministic_system_order.rs) | Systems run in parallel, but their order isn't always deterministic. Here's how to detect and fix this. | [written](../BevyCSharp.Examples/ecs/nondeterministic_system_order.cs), prints [its output](assets/examples/nondeterministic_system_order.txt), its report made from what its systems declare and narrowed to them by name, since C# systems take the whole world and this app's Update holds every example's behaviors |
 | [`observer_propagation`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/observer_propagation.rs) | Demonstrates event propagation with observers | [written](../BevyCSharp.Examples/ecs/observer_propagation.cs), prints [its output](assets/examples/observer_propagation.txt) |
 | [`observers`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | [written](../BevyCSharp.Examples/ecs/observers.cs) |
 | [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | [written](../BevyCSharp.Examples/ecs/one_shot_systems.cs) |

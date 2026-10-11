@@ -69,6 +69,10 @@ enum Bevy.AmbientOcclusionQuality : int
   Low = 0
   Medium = 1
   Ultra = 3
+enum Bevy.AmbiguityReport : int
+  Error = 2
+  Ignore = 0
+  Warn = 1
 enum Bevy.AnimatedProperty : int
   Rotation = 1
   Scale = 2
@@ -190,6 +194,7 @@ sealed class Bevy.App : IDisposable
   App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition)
   App AddTransitionSystem<TState>(TState from, TState to, SystemDescriptor descriptor) where TState : struct, Enum
   App Chain(Stage stage, params SystemDescriptor[] systems)
+  App DetectAmbiguities(Stage stage, AmbiguityReport report = AmbiguityReport.Warn, Func<string, bool>? among = null)
   App EnableDynamicSystems()
   App On(Stage stage, Action<BehaviorContext> run, string name, Func<World, bool>? runIf = null)
   App OnAdd<T>(ComponentHook<T> hook) where T : unmanaged
@@ -204,6 +209,7 @@ sealed class Bevy.App : IDisposable
   ComponentArray<T> AddComponentArray<T>() where T : unmanaged
   Config Config { get; }
   IReadOnlyCollection<Type> Plugins { get; }
+  IReadOnlyList<SystemAmbiguity> AmbiguitiesIn(Stage stage, Func<string, bool>? among = null)
   IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage)
   ProjectSettings Project { get; }
   World World { get; }
@@ -10863,13 +10869,27 @@ static class Bevy.SyntheticInput
   static void Tap(Key key, string typed = "")
   static void Type(string text)
   static void Wheel(float lines, float sideways = 0f)
+readonly struct Bevy.SystemAmbiguity : IEquatable<SystemAmbiguity>
+  IReadOnlyList<Type> Conflicts { get; init; }
+  SystemAmbiguity(string First, string Second, IReadOnlyList<Type> Conflicts)
+  bool Equals(SystemAmbiguity other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(SystemAmbiguity left, SystemAmbiguity right)
+  static bool op_Inequality(SystemAmbiguity left, SystemAmbiguity right)
+  string First { get; init; }
+  string Second { get; init; }
+  void Deconstruct(out string First, out string Second, out IReadOnlyList<Type> Conflicts)
 sealed class Bevy.SystemDescriptor
   Func<World, bool>? RunCondition { get; }
   IReadOnlyCollection<Type> Reads { get; }
   IReadOnlyCollection<Type> Writes { get; }
+  IReadOnlyList<string> AmbiguousWithNames { get; }
   IReadOnlyList<string> RunsAfter { get; }
   IReadOnlyList<string> RunsBefore { get; }
   SystemDescriptor After(string name)
+  SystemDescriptor AmbiguousWith(string name)
   SystemDescriptor Before(string name)
   SystemDescriptor Read<T>()
   SystemDescriptor RunIf(Func<World, bool> condition)

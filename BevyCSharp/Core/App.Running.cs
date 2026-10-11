@@ -74,6 +74,7 @@ public sealed unsafe partial class App : IDisposable
         }
 
         ApplyOrder();
+        ReportAmbiguities();
 
         IsRunning = true;
         Running = this;

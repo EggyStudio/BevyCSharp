@@ -20,6 +20,8 @@ static App Build(Config? config = null);                        // Builds an app
 ### `App`
 
 ```csharp
+App DetectAmbiguities(Stage stage, AmbiguityReport report = AmbiguityReport.Warn, Func<string, bool>? among = null);  // Reports, as the app starts, the systems of stage whose declared access conflicts and whose order nothing states, as Bevy's ambiguity_detection in a schedule's build settings does
+IReadOnlyList<SystemAmbiguity> AmbiguitiesIn(Stage stage, Func<string, bool>? among = null);  // The pairs of systems of stage whose declared access conflicts and whose order nothing states, in the order they were added, which DetectAmbiguities reports
 ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
 App OnAdd<T>(ComponentHook<T> hook);                            // Runs hook the first time a T is put on an entity, Bevy's on_add
 App OnInsert<T>(ComponentHook<T> hook);                         // Runs hook each time a T is put on an entity, after OnAdd the first time, Bevy's on_insert
@@ -189,6 +191,7 @@ static void Run<T, T1, T2>(World world, BehaviorRunner<T, T1, T2> body, ReadOnly
 SystemDescriptor RunIf(Func<World, bool> condition);            // Attaches a run condition
 SystemDescriptor After(string name);                            // Runs this system after every system in its stage named name
 SystemDescriptor Before(string name);                           // Runs this system before every system in its stage named name
+SystemDescriptor AmbiguousWith(string name);                    // Says this system may run either side of every system in its stage named name, though their declared access conflicts
 SystemDescriptor Read<T>();                                     // Declares a read of resource type T
 SystemDescriptor Write<T>();                                    // Declares a write of resource type T
 bool ConflictsWith(SystemDescriptor other);                     // True when this system's declared access overlaps other's in a way that would prevent the two running concurrently

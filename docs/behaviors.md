@@ -182,6 +182,26 @@ Names are looked up as the app starts, so the other system may be added later, a
 nothing in its stage, or a system in another stage, stops the app with a message saying which. A
 system added while the app runs is ordered among the others added that way to its stage.
 
+Two systems where one writes what the other reads give different results by whichever runs first,
+and an order nobody stated may change between builds. `App.DetectAmbiguities` lists each such pair
+in the log as the app starts, as Bevy's `ambiguity_detection` does, from what the systems declare
+with `Read<T>` and `Write<T>`. A pair whose order does not matter says so with `AmbiguousWith`, and
+`AmbiguityReport.Error` refuses to start instead:
+
+<!-- compiled with:
+public sealed class Score { public int Value; }
+private static void Count(World world) { }
+private static void Show(World world) { }
+-->
+```csharp
+app.DetectAmbiguities(Stage.Update);
+app.AddSystem(Stage.Update, new SystemDescriptor(Count, "Count").Write<Score>());
+app.AddSystem(Stage.Update, new SystemDescriptor(Show, "Show").Read<Score>());   // reported
+```
+
+A system that declares nothing is left out, since nothing is known of what it touches, and
+`among` narrows the report to a game's own systems where its stage holds what plugins added too.
+
 ## The fixed timestep
 
 Every stage above except one runs exactly once a frame, so anything integrated in them advances

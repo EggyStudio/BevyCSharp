@@ -192,7 +192,7 @@ hierarchy	can
 hotpatching_systems	can	through .NET's own hot reload, under dotnet watch
 immutable_components	n/a	about Rust's component mutability
 iter_combinations	can
-nondeterministic_system_order	missing	the schedule reporting systems whose order is ambiguous
+nondeterministic_system_order	can	its report made from what its systems declare and narrowed to them by name, since C# systems take the whole world and this app's Update holds every example's behaviors
 observer_propagation	can
 observers	can
 one_shot_systems	can
