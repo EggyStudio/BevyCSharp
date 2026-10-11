@@ -133,6 +133,30 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Compresses a mesh as Bevy's regular compression does, in place, so everything drawn with it
+    /// holds a fraction of the memory. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Its positions, normals, tangents and texture coordinates are kept in sixteen bits apiece, its
+    /// colors in eight and its indices in sixteen where they fit, which Bevy's own materials decode
+    /// as they draw. A shader of the program's own reads the attributes as they are kept, so a mesh
+    /// one draws is left uncompressed. A model is compressed as it loads, with
+    /// <see cref="AssetServer.LoadGltfSceneCompressed"/>.
+    /// </remarks>
+    /// <returns>
+    /// Whether the mesh was there to compress, false for one still loading. An attribute Bevy
+    /// cannot compress is kept as it was and named in the log, the rest compressed.
+    /// </returns>
+    /// <exception cref="BevyNativeException">The handle names something other than a mesh.</exception>
+    public static bool CompressMesh(AssetHandle mesh)
+    {
+        var answer = Native.bcs_render_compress_mesh(mesh.Key);
+        if (answer is NativeStatus.NotPresent) return false;
+        Native.Check(answer, $"compressing {mesh}");
+        return true;
+    }
+
+    /// <summary>
     /// The geometry a mesh was built from, or <see langword="null"/> for one that was not made by
     /// <see cref="CreateMesh(MeshData)"/>.
     /// </summary>

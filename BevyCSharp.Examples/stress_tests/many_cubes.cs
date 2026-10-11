@@ -16,10 +16,8 @@ namespace BevyCSharp.Examples.StressTests;
 //
 // --no-automatic-batching draws each cube alone, --no-indirect-drawing has the camera draw with a
 // call a batch, and --no-cpu-culling leaves the culling to the GPU, on the sphere's cubes and
-// camera and, for the culling, the other layouts' cubes, as Bevy's put them.
-//
-// Bevy's --mesh-compression compresses each mesh through a call of Bevy's the bridge has no
-// counterpart of, so it is left out.
+// camera and, for the culling, the other layouts' cubes, as Bevy's put them. --mesh-compression
+// compresses each of the meshes the cubes are drawn from, as Bevy's does.
 internal static class ManyCubes
 {
     private const int Width = 200, Height = 200;
@@ -27,7 +25,7 @@ internal static class ManyCubes
     // Bevy's Args, read from the command line.
     private static string _layout = "sphere";
     private static bool _benchmark, _varyMaterialDataPerInstance, _noFrustumCulling, _shadows, _rotateCubes, _animateMaterials, _motionBlur;
-    private static bool _noAutomaticBatching, _noIndirectDrawing, _noCpuCulling;
+    private static bool _noAutomaticBatching, _noIndirectDrawing, _noCpuCulling, _meshCompression;
     private static int _materialTextureCount, _meshCount = 1, _instanceCount = 1_600_000;
 
     private static Entity _camera;
@@ -52,8 +50,9 @@ internal static class ManyCubes
         (_benchmark, _varyMaterialDataPerInstance, _noFrustumCulling, _shadows, _rotateCubes, _animateMaterials, _motionBlur) = (
             arguments.Contains("--benchmark"), arguments.Contains("--vary-material-data-per-instance"), arguments.Contains("--no-frustum-culling"),
             arguments.Contains("--shadows"), arguments.Contains("--rotate-cubes"), arguments.Contains("--animate-materials"), arguments.Contains("--motion-blur"));
-        (_noAutomaticBatching, _noIndirectDrawing, _noCpuCulling) = (
-            arguments.Contains("--no-automatic-batching"), arguments.Contains("--no-indirect-drawing"), arguments.Contains("--no-cpu-culling"));
+        (_noAutomaticBatching, _noIndirectDrawing, _noCpuCulling, _meshCompression) = (
+            arguments.Contains("--no-automatic-batching"), arguments.Contains("--no-indirect-drawing"), arguments.Contains("--no-cpu-culling"),
+            arguments.Contains("--mesh-compression"));
         _materialTextureCount = int.TryParse(Option(arguments, "--material-texture-count"), out var textures) ? textures : 0;
         _meshCount = int.TryParse(Option(arguments, "--mesh-count"), out var meshes) ? meshes : 1;
         _instanceCount = int.TryParse(Option(arguments, "--instance-count"), out var instances) ? instances : 1_600_000;
@@ -244,6 +243,9 @@ internal static class ManyCubes
                 13 => (Render.CreateMesh(MeshShape.Torus, 0.5f * radius, 1.5f * radius), new Transform(Vec3.Zero, Quat.FromRotationX(MathF.PI / 2f), Vec3.One)),
                 _ => (Render.CreateMesh(MeshShape.Capsule2d, radius, 2f * radius), facing),
             };
+
+            // Compressed as Bevy compresses each of its meshes before adding it.
+            if (_meshCompression) Render.CompressMesh(meshes[variant].Item1);
         }
 
         return meshes;

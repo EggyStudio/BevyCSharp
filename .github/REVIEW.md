@@ -10,7 +10,7 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `30e0e528`. Seven commits, each small and right. `f64b089b` brings twelve examples to
+Reviewed up to `e5af8eb8`. Seven commits, each small and right. `f64b089b` brings twelve examples to
 B 4, 156 of the 161 whose Bevy example keeps state in a component of its own (Decision 5); of the
 five left, three follow 0.19.1 and come with Feathers, whose checkboxes and radio are the components
 counted, one keeps its instances in the camera's draw's buffer and no static field, and one keeps
@@ -37,7 +37,12 @@ and no request held; and irradiance_volumes was captured a hundred times on the 
 matching its picture and none hanging, so the hang is shown not to repeat. Verdict 10 is settled.
 EXAMPLES.md reads 315 written, 14 in part and 53 missing. Right, each gap closed as Bevy has it and
 the wait's object read rather than the limit alone. `NormTests.cs` at 794 and `app.rs` at 788 split
-with their next addition. Next the examples written in part that want no crate.
+with their next addition. Then `e5af8eb8`, the first of the examples in part: a mesh takes
+`NoAutomaticBatching` and `NoCpuCulling` beside its frustum flag, and a camera `CameraFlags`, no
+indirect drawing and no CPU culling, the flags the whole answer so a flag left out puts Bevy's path
+back, which many_cubes' three switches set as Bevy's do, its triage down to the mesh compression the
+bridge does not reach; right, the switches a stress test wants and a game seldom does, said so in
+the remarks. Next the rest of the examples in part that want no crate.
 
 Before it, one commit came to be read, item 4's comparison of the captures, as proposed and taken on
 its terms. Each capture is taken in a frame counted from the app's first, `shot <path> [frame]`

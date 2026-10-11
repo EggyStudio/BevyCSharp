@@ -656,6 +656,7 @@ static AssetHandle LoadGltfMesh(string path, int mesh = 0, int primitive = 0);  
 static AssetHandle LoadImage(string path, TextureSettings settings);  // Starts loading an image with the sampler it should be drawn with
 static AssetHandle LoadGltfMaterial(string path, int material = 0);  // Starts loading one material out of a glTF file, as the renderer's own material type
 static AssetHandle LoadGltfScene(string path, int scene = 0);   // Starts loading one scene out of a glTF file
+static AssetHandle LoadGltfSceneCompressed(string path, int scene = 0);  // Starts loading one scene out of a glTF file with the file's meshes compressed as they load, as Bevy's glTF loader does given its regular compression
 static string? PathOf(AssetHandle handle);                      // The path an asset was loaded from, or null when it has none
 static AssetHandle Load(string kind, string path);              // Starts loading an asset and returns a handle to it
 static AssetLoadState StateOf(AssetHandle handle);              // How far along an asset's load is
@@ -825,6 +826,7 @@ static void ClearAtmosphere(Entity camera);                     // Stops a camer
 static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a mesh primitive and returns a handle to it
 static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and measures a mesh was made from, or null for one that was not made by CreateMesh
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle
+static bool CompressMesh(AssetHandle mesh);                     // Compresses a mesh as Bevy's regular compression does, in place, so everything drawn with it holds a fraction of the memory
 static MeshData? DataOf(AssetHandle mesh);                      // The geometry a mesh was built from, or null for one that was not made by CreateMesh
 static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of: its counts, its attributes and its bounds, read without copying its vertices
 static bool GenerateTangents(AssetHandle mesh);                 // Works out tangents for a mesh that has none, from its normals and texture coordinates, as a normal map and anisotropy read them, which Bevy's primitives are made without

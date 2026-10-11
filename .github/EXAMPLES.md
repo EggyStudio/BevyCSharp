@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**315 written, 14 written in part, 0 can be written, 53 missing and 56 do not apply.** Of the 382 that apply, 329 can be written with what is bridged, 14 of them leaving something out.
+**318 written, 11 written in part, 0 can be written, 53 missing and 56 do not apply.** Of the 382 that apply, 329 can be written with what is bridged, 11 of them leaving something out.
 
 **156 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -34,7 +34,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Shaders](#shaders) | 22 | 0 | 0 | 2 | 3 | 7 of 8 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
-| [Stress Tests](#stress-tests) | 13 | 6 | 0 | 0 | 1 | 9 of 9 |
+| [Stress Tests](#stress-tests) | 16 | 3 | 0 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 7 | 1 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **315** | **14** | **0** | **53** | **56** | **156 of 161** |
+| **All** | **318** | **11** | **0** | **53** | **56** | **156 of 161** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -482,15 +482,15 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`many_buttons`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_buttons.rs) | Test rendering of many UI elements | [written](../BevyCSharp.Examples/stress_tests/many_buttons.cs) |
 | [`many_cameras_lights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_cameras_lights.rs) | Test rendering of many cameras and lights | [written](../BevyCSharp.Examples/stress_tests/many_cameras_lights.cs) |
 | [`many_components`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_components.rs) | Test large ECS systems | does not apply, registers components dynamically in Rust |
-| [`many_cubes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_cubes.rs) | Simple benchmark to test per-entity draw overhead. Run with the `sphere` argument to test frustum culling | [written in part](../BevyCSharp.Examples/stress_tests/many_cubes.cs), --mesh-compression, whose compression the bridge does not reach |
-| [`many_foxes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_foxes.rs) | Loads an animated fox model and spawns lots of them. Good for testing skinned mesh performance. Takes an unsigned integer argument for the number of foxes to spawn. Defaults to 1000 | [written in part](../BevyCSharp.Examples/stress_tests/many_foxes.cs), --mesh-compression, whose compression the bridge does not reach |
+| [`many_cubes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_cubes.rs) | Simple benchmark to test per-entity draw overhead. Run with the `sphere` argument to test frustum culling | [written](../BevyCSharp.Examples/stress_tests/many_cubes.cs) |
+| [`many_foxes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_foxes.rs) | Loads an animated fox model and spawns lots of them. Good for testing skinned mesh performance. Takes an unsigned integer argument for the number of foxes to spawn. Defaults to 1000 | [written](../BevyCSharp.Examples/stress_tests/many_foxes.cs) |
 | [`many_gizmos`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_gizmos.rs) | Test rendering of many gizmos | [written](../BevyCSharp.Examples/stress_tests/many_gizmos.cs) |
 | [`many_glyphs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_glyphs.rs) | Simple benchmark to test text rendering. | [written](../BevyCSharp.Examples/stress_tests/many_glyphs.cs) |
 | [`many_gradients`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_gradients.rs) | Stress test for gradient rendering performance | [written](../BevyCSharp.Examples/stress_tests/many_gradients.cs), through Bevy's reflected BackgroundGradient |
 | [`many_lights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_lights.rs) | Simple benchmark to test rendering many point lights. Run with `WGPU_SETTINGS_PRIO=webgl2` to restrict to uniform buffers and max 256 lights | [written in part](../BevyCSharp.Examples/stress_tests/many_lights.cs), the lights its render world saw and drew, counted in its log, which no wrapper reaches there, and its sphere subdivided as Bevy subdivides one by default rather than nine times |
 | [`many_materials`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_materials.rs) | Benchmark to test rendering many animated materials | [written](../BevyCSharp.Examples/stress_tests/many_materials.cs) |
 | [`many_meshlet_materials`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_meshlet_materials.rs) | Benchmark to test rendering many meshlet materials (experimental) | [written](../BevyCSharp.Examples/stress_tests/many_meshlet_materials.cs), needs a bridge built with --meshlet |
-| [`many_morph_targets`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_morph_targets.rs) | Simple benchmark to test rendering many meshes with animated morph targets. | [written in part](../BevyCSharp.Examples/stress_tests/many_morph_targets.cs), --mesh-compression, whose compression the bridge does not reach, the weights set through Bevy's reflected MorphWeights |
+| [`many_morph_targets`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_morph_targets.rs) | Simple benchmark to test rendering many meshes with animated morph targets. | [written](../BevyCSharp.Examples/stress_tests/many_morph_targets.cs), the weights set through Bevy's reflected MorphWeights |
 | [`many_sprites`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_sprites.rs) | Displays many sprites in a grid arrangement! Used for performance testing. Use `--colored` to enable color tinted sprites. | [written](../BevyCSharp.Examples/stress_tests/many_sprites.cs) |
 | [`many_text`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_text.rs) | Displays many UI Text nodes. Used for performance testing. | [written in part](../BevyCSharp.Examples/stress_tests/many_text.cs), --clear-font-atlases, which empties Bevy's FontAtlasSet, which no wrapper reaches |
 | [`many_text2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/stress_tests/many_text2d.rs) | Displays many Text2d! Used for performance testing. | [written in part](../BevyCSharp.Examples/stress_tests/many_text2d.cs), the font atlases' count and bytes in its log, which Bevy's FontAtlasSet holds and no wrapper reaches |

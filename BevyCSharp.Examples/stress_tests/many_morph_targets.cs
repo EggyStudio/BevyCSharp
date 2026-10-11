@@ -11,8 +11,8 @@ namespace BevyCSharp.Examples.StressTests;
 // animations of its weights, to measure how morph targets are blended. --weights one, zero or tiny
 // sets every weight still rather than animating it, --camera far zooms out so the vertices rather
 // than the pixels cost, --spawning gradual, regular-cycle, random-cycle or random-steady spawns and
-// despawns them a frame at a time, and --motion-blur blurs them. Bevy's --mesh-compression sets the
-// glTF plugin's compression, which the bridge does not reach, and is left out.
+// despawns them a frame at a time, --motion-blur blurs them, and --mesh-compression loads the
+// model's meshes compressed, as Bevy's sets its glTF plugin to.
 internal static class ManyMorphTargets
 {
     private const string Path = "models/animated/MorphStressTest.gltf";
@@ -92,7 +92,9 @@ internal static class ManyMorphTargets
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, distance), Vec3.Zero, Vec3.UnitY));
         if (_motionBlur) ecs.Insert<MotionBlurRef>(camera).ShutterAngle = 3f;
 
-        _scene = AssetServer.LoadGltfScene(Path, 0);
+        _scene = Environment.GetCommandLineArgs().Contains("--mesh-compression")
+            ? AssetServer.LoadGltfSceneCompressed(Path, 0)
+            : AssetServer.LoadGltfScene(Path, 0);
     }
 
     // Some to take at random out of a list, each taken out as it is chosen.

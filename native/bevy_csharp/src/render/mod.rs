@@ -25,6 +25,7 @@
 
 pub mod adapter;
 pub mod assets;
+pub mod compression;
 pub mod compute;
 pub mod constants;
 pub mod instances;

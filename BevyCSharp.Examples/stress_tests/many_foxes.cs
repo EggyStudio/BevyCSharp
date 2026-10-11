@@ -11,8 +11,7 @@ namespace BevyCSharp.Examples.StressTests;
 // blurs them. Space pauses them, Up and Down change their speed, Left and Right seek, and Return
 // moves them on to their next animation.
 //
-// Bevy's example's --mesh-compression sets the glTF plugin's compression, which the bridge does
-// not reach.
+// --mesh-compression loads the fox's meshes compressed, as Bevy's sets its glTF plugin to.
 internal static class ManyFoxes
 {
     private const float RingSpacing = 2f, FoxSpacing = 2f;
@@ -66,7 +65,9 @@ internal static class ManyFoxes
         // Every fox's bones move every frame, so Bevy's skipping of trees that have not moved costs more
         // than it saves, and the example turns it off.
         (ecs.Resource<StaticTransformOptimizationsRef>() ?? ecs.InsertResource<StaticTransformOptimizationsRef>()).Value = StaticTransformOptimizationsRef.ValueVariant.Disabled;
-        _fox = AssetServer.LoadGltfScene(Path, 0);
+        _fox = Environment.GetCommandLineArgs().Contains("--mesh-compression")
+            ? AssetServer.LoadGltfSceneCompressed(Path, 0)
+            : AssetServer.LoadGltfScene(Path, 0);
 
         // Rings two apart, their foxes at least two apart around each, the rings turning opposite
         // ways. The model faces along Z.

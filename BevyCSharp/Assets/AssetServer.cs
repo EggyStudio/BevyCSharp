@@ -138,6 +138,37 @@ public static unsafe class AssetServer
     }
 
     /// <summary>
+    /// Starts loading one scene out of a glTF file with the file's meshes compressed as they load,
+    /// as Bevy's glTF loader does given its regular compression.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Each mesh's positions, normals, tangents and texture coordinates are kept in sixteen bits
+    /// apiece, its colors in eight and its indices in sixteen where they fit, a fraction of the
+    /// memory a crowd of models holds, which Bevy's own materials decode as they draw. A shader of
+    /// the program's own reads the attributes as they are kept, so a model one draws is loaded
+    /// with <see cref="LoadGltfScene(string, int)"/> instead.
+    /// </para>
+    /// <para>
+    /// The compression is the file's, so the file loaded both ways is two loads of it, as Bevy has
+    /// it, each keeping its own meshes. <see cref="Render.CompressMesh"/> compresses a mesh made in
+    /// code the same way.
+    /// </para>
+    /// </remarks>
+    /// <param name="path">The file, relative to the asset root.</param>
+    /// <param name="scene">Which scene in it, from zero.</param>
+    /// <exception cref="BevyNativeException">This build has no renderer, or no asset server is running.</exception>
+    public static AssetHandle LoadGltfSceneCompressed(string path, int scene = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(scene);
+
+        var key = Native.bcs_asset_load_compressed("Scene", $"{path}#Scene{scene}");
+        Native.Check(key, $"loading '{path}' with its meshes compressed");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
     /// The path an asset was loaded from, or <see langword="null"/> when it has none.
     /// </summary>
     /// <remarks>

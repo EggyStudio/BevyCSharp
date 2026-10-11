@@ -149,6 +149,12 @@ app.SpawnGltf("models/ship.gltf", (ctx, root) =>
 });
 ```
 
+`AssetServer.LoadGltfSceneCompressed` loads the file's meshes compressed as Bevy's glTF loader
+compresses them, their positions, normals and texture coordinates kept in sixteen bits apiece and
+their indices in sixteen where they fit, a fraction of the memory a crowd of the model holds, which
+Bevy's materials decode as they draw. `Render.CompressMesh` does the same to a mesh made in code.
+A mesh a shader of the game's own draws is left uncompressed, since that shader reads what is kept.
+
 A mesh, a material and a place make one entity in one call, as Bevy's bundle of the three does:
 
 ```csharp
