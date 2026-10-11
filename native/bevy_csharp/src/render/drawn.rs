@@ -114,7 +114,7 @@ pub unsafe extern "C" fn bcs_render_drawn_meshes(drawn: *mut u32) -> i32 {
 }
 
 /// Each indexed draw's instance count, out of the bytes of Bevy's `IndirectParametersIndexed`, five
-/// words a draw with the instance count the second of them.
+/// uints a draw with the instance count the second of them.
 #[cfg(feature = "render")]
 fn instance_counts(bytes: &[u8]) -> Vec<u32> {
     bytes
@@ -280,7 +280,7 @@ mod tests {
         let bytes: Vec<u8> = [[36u32, 3, 0, 0, 0], [6, 1, 36, 0, 3], [6, 9, 0, 0, 0]]
             .iter()
             .flatten()
-            .flat_map(|word| word.to_ne_bytes())
+            .flat_map(|value| value.to_ne_bytes())
             .collect();
 
         let instances = super::instance_counts(&bytes);

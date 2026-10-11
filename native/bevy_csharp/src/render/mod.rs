@@ -35,6 +35,7 @@ pub mod light_counts;
 pub mod material;
 pub mod material2d;
 pub mod materials2d;
+pub mod mesh_data;
 pub mod meshes;
 pub mod meshlets;
 pub mod mips;

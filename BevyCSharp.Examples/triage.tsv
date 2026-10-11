@@ -151,7 +151,6 @@ external_source_external_thread	can	with a .NET thread and channel
 audio_control	can
 audio	can
 decodable	missing	audio sources a game generates (Decodable)
-pitch	missing	a generated tone (Pitch)
 play_sound_effect	can
 soundtrack	can
 spatial_audio_2d	can

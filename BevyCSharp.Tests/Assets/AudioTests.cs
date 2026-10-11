@@ -391,6 +391,44 @@ public sealed class AudioTests
 
     private static AssetHandle _clip;
     /// <summary>
+    /// A tone made with <see cref="Audio.CreatePitch"/> plays as a clip does and ends when it has
+    /// lasted its length, a fifth of a second gone long before a whole one, and a frequency of
+    /// nothing is refused.
+    /// </summary>
+    [SkippableFact]
+    public void AToneEndsWhenItHasLastedItsLength()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 40, frameSeconds: 1.0 / 60);
+
+        var shortTone = Entity.None;
+        var longTone = Entity.None;
+        bool? shortGone = null, longGone = null;
+        Exception? silent = null;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            shortTone = Audio.Play(Audio.CreatePitch(220f, TimeSpan.FromSeconds(0.2)), new AudioSettings { Mode = PlaybackMode.Despawn, Volume = 0f });
+            longTone = Audio.Play(Audio.CreatePitch(220f, TimeSpan.FromSeconds(1)), new AudioSettings { Mode = PlaybackMode.Despawn, Volume = 0f });
+            silent = Record.Exception(() => Audio.CreatePitch(0f, TimeSpan.FromSeconds(1)));
+        });
+
+        // Half a second in on a clock that moves a sixtieth a frame.
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ctx.Time.FrameCount != 30) return;
+            (shortGone, longGone) = (!ctx.Ecs.IsAlive(shortTone), !ctx.Ecs.IsAlive(longTone));
+        });
+
+        harness.Run();
+
+        Assert.True(shortGone, "the tone of a fifth of a second was still playing");
+        Assert.False(longGone, "the tone of a second ended early");
+        Assert.IsType<ArgumentOutOfRangeException>(silent);
+    }
+
+    /// <summary>
     /// A sound can be told to play part of a clip rather than all of it.
     /// </summary>
     /// <remarks>

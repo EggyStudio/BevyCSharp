@@ -138,7 +138,7 @@ location's `TEXCOORDn` beside the attributes it reads of Bevy's at theirs, as ev
 declared by location, and Slang's `vk::location` is not read. The Slang type's class is the stream's,
 `uint` or `uint2` for a stream of integers and a float type for the rest, or wgpu refuses the
 pipeline. The stage hands on what the fragment stage needs at an output of its own, here a color
-unpacked from one word a vertex:
+unpacked from four bytes a vertex:
 
 ```slang
 import bcs;
@@ -146,7 +146,7 @@ import bcs;
 struct Vertex
 {
     float3 position : TEXCOORD0;
-    uint word : TEXCOORD8;
+    uint packed : TEXCOORD8;
     uint instance_index : SV_InstanceID;
 };
 
@@ -161,7 +161,7 @@ Shaded vertex(Vertex v)
 {
     Shaded output;
     output.position = bcs::local_to_clip(v.instance_index, v.position);
-    output.color = float4(v.word & 0xff, (v.word >> 8) & 0xff, (v.word >> 16) & 0xff, 255) / 255.0;
+    output.color = float4(v.packed & 0xff, (v.packed >> 8) & 0xff, (v.packed >> 16) & 0xff, 255) / 255.0;
     return output;
 }
 
@@ -175,6 +175,16 @@ float4 fragment(Shaded input) : SV_Target
 A prepass vertex stage of the program's own reads the mesh's streams the same way, and so does a 2D
 vertex stage on a 2D mesh. Bevy's own vertex shaders read none, so a material with no vertex stage of
 its own draws the mesh as though it carried none.
+
+A stream rather than a storage buffer the vertex shader indexes, because a stream travels with its
+mesh, uploaded once with the positions and indices and read by every draw of it with nothing else
+bound, so meshes sharing a program still draw in one batch and the GPU fetches the value by the
+vertex's index as it fetches the position. A storage buffer is a material's binding, so each mesh
+would need a material of its own or a share of one large buffer at an offset, either of which breaks
+the batch, and a buffer read takes the vertex's number and an instance's offset by hand. The fetch
+costs about the same either way, and what a stream gains is the binding. A buffer is the right tool
+for what is not one value a vertex: a palette or an atlas table every mesh shares, a mesh's own
+constants, or what a compute pass reads as well.
 
 ### Pipeline constants
 

@@ -18,7 +18,8 @@ public static unsafe partial class Render
     /// <para>
     /// A triangle mesh given no normals has them worked out, smooth where it is indexed and flat
     /// where it is not, because every lit material and every shader reading a normal would
-    /// otherwise read zeros. The attributes land where Bevy's shaders look for them, with positions
+    /// otherwise read zeros, unless <see cref="MeshData.ComputeNormals"/> says not to. The attributes
+    /// land where Bevy's shaders look for them, with positions
     /// at location zero, normals at one, UVs at two and colors at five, and each stream of the
     /// game's own at the location it names, for a vertex shader of the program's own to read.
     /// </para>
@@ -122,6 +123,7 @@ public static unsafe partial class Render
                     Topology = (int)mesh.Topology,
                     Streams = streams.Length > 0 ? streamsAt : null,
                     StreamCount = streams.Length,
+                    Flags = mesh.ComputeNormals ? 0u : 1u,
                 };
 
                 var status = into == AssetHandle.None
@@ -231,6 +233,7 @@ public static unsafe partial class Render
             Indices = mesh.Indices is { } i ? [.. i] : null,
             Topology = mesh.Topology,
             Streams = mesh.Streams is { } s ? [.. s.Select(stream => stream with { Data = [.. stream.Data] })] : null,
+            ComputeNormals = mesh.ComputeNormals,
         };
         lock (Built) Built[key] = kept;
         lock (Recipes) Recipes.Remove(key);

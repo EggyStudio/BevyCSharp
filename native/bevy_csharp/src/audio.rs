@@ -123,11 +123,24 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
                     ..Default::default()
                 };
 
-                let mut entity = world.spawn((
-                    AudioPlayer(handle.typed::<AudioSource>()),
-                    settings,
-                    OwnVolume(config.volume),
-                ));
+                let mut entity = world.spawn((settings, OwnVolume(config.volume)));
+
+                // A clip a file holds, or a tone made with `bcs_audio_create_pitch`, which Bevy plays
+                // through a player of its own type. A key naming neither plays nothing.
+                match handle.clone().try_typed::<AudioSource>() {
+                    Ok(clip) => {
+                        entity.insert(AudioPlayer(clip));
+                    }
+                    Err(_) => match handle.try_typed::<bevy::audio::Pitch>() {
+                        Ok(pitch) => {
+                            entity.insert(AudioPlayer(pitch));
+                        }
+                        Err(_) => {
+                            entity.despawn();
+                            return 0;
+                        }
+                    },
+                }
 
                 // A spatial sound is placed by its transform, so it is given one to write into.
                 // A plain sound has no position and is not burdened with a component that would
@@ -139,6 +152,39 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
                 entity.id().to_bits()
             })
             .unwrap_or(0)
+        }
+    })
+}
+
+/// Makes a tone of one frequency, `frequency` hertz for `seconds`, as Bevy's `Pitch` is, and
+/// answers its asset key, which [`bcs_audio_play`] plays as it plays a clip.
+///
+/// Answers [`status::NULL_ARG`] for a frequency that is not above zero or a length below zero, and
+/// [`status::UNSUPPORTED`] where the app has no audio.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_audio_create_pitch(frequency: f32, seconds: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (frequency, seconds);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if !(frequency.is_finite() && frequency > 0.0) || !(seconds.is_finite() && seconds >= 0.0) {
+                return status::NULL_ARG;
+            }
+
+            crate::state::with_world(|world| {
+                let Some(mut pitches) = world.get_resource_mut::<bevy::asset::Assets<bevy::audio::Pitch>>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                let pitch = bevy::audio::Pitch::new(frequency, core::time::Duration::from_secs_f32(seconds));
+                let handle = pitches.add(pitch).untyped();
+                crate::assets::insert_handle(world, handle)
+            })
         }
     })
 }

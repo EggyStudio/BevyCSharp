@@ -8,10 +8,10 @@ namespace Bevy;
 /// </remarks>
 public enum MeshStreamFormat
 {
-    /// <summary>One unsigned 32-bit integer a vertex, a Slang <c>uint</c>, for a vertex packed into one word.</summary>
+    /// <summary>One <c>uint</c> a vertex, four bytes, for a vertex packed into four bytes.</summary>
     UInt = 0,
 
-    /// <summary>Two, a <c>uint2</c>, for a packed vertex one word does not hold.</summary>
+    /// <summary>Two, a <c>uint2</c> of eight bytes, for a packed vertex four bytes do not hold.</summary>
     UInt2 = 1,
 
     /// <summary>One float a vertex, a <c>float</c>.</summary>

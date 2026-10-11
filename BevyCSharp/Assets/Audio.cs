@@ -92,13 +92,42 @@ public static unsafe class Audio
         }
     }
 
+    /// <summary>
+    /// Makes a tone of one frequency, as Bevy's <c>Pitch</c> is, for <see cref="Play(AssetHandle)"/>
+    /// to play as it plays a clip. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A sine wave of <paramref name="frequency"/> hertz for <paramref name="duration"/>, worked out
+    /// as it plays rather than read from a file, for a beep, a tuner or a note a game composes. Each
+    /// tone is an asset of its own, so a game playing many keeps the ones it plays again rather than
+    /// making each anew, and a semitone is the frequency times the twelfth root of two.
+    /// </remarks>
+    /// <param name="frequency">How high it is, in hertz, 440 for the A above middle C.</param>
+    /// <param name="duration">How long it lasts.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The frequency is not above zero, or the length is below it.</exception>
+    /// <exception cref="BevyNativeException">This build has no audio.</exception>
+    public static AssetHandle CreatePitch(float frequency, TimeSpan duration)
+    {
+        if (!float.IsFinite(frequency) || frequency <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(frequency), frequency, "A tone's frequency is above zero hertz.");
+        if (duration < TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, "A tone lasts no less than nothing.");
+
+        var key = Native.bcs_audio_create_pitch(frequency, (float)duration.TotalSeconds);
+        if (key == NativeStatus.Unsupported)
+            throw new BevyNativeException(NativeStatus.Unsupported, "Making a tone needs audio, which this build or this app has none of.");
+
+        return new AssetHandle(Native.Check(key, $"making a tone of {frequency} Hz"));
+    }
+
     /// <summary>Plays a sound and returns the entity playing it.</summary>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
     public static Entity Play(AssetHandle clip) => Play(clip, new AudioSettings());
 
     /// <summary>Plays a sound as <paramref name="settings"/> describes.</summary>
     /// <remarks>
-    /// The sound need not have finished loading; playback begins when it has.
+    /// A clip loaded from a file or a tone from <see cref="CreatePitch"/>. A clip need not have
+    /// finished loading, since playback begins when it has.
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
     public static Entity Play(AssetHandle clip, AudioSettings settings)

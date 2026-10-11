@@ -15,16 +15,17 @@ public sealed class VertexStreamTests
     private const uint Green = 0xFF00FF00, Blue = 0xFFFF0000;
 
     /// <summary>
-    /// Two quads carrying one word a vertex at location 8, a color's bytes, are drawn in those
-    /// colors by a vertex stage that unpacks them, the mesh's info says it carries a stream, and the
-    /// stream's name given again in another format is refused with both shapes said.
+    /// Two quads carrying a uint a vertex at location 8, a color's four bytes, are drawn in those
+    /// colors by a vertex stage that unpacks them, the mesh's info says it carries a stream, one asked
+    /// to leave its normals out holds none, and the stream's name given again in another format is
+    /// refused with both shapes said.
     /// </summary>
     [SkippableFact]
     public void AStreamReachesTheProgramsOwnVertexStage()
     {
         Needs.Shaders();
 
-        var info = default(MeshInfo);
+        MeshInfo info = default, bare = default;
         ArgumentException? reshaped = null;
 
         var run = new PictureRun
@@ -41,12 +42,17 @@ public sealed class VertexStreamTests
                 });
                 var material = Shaders.CreateMaterial(program);
 
-                foreach (var (x, word) in new[] { (-0.8f, Green), (0.8f, Blue) })
+                foreach (var (x, packed) in new[] { (-0.8f, Green), (0.8f, Blue) })
                 {
-                    var quad = Render.CreateMesh(Quad(MeshStream.From<uint>("TestColor", MeshStreamFormat.UInt, 8, [word, word, word, word])));
+                    var quad = Render.CreateMesh(Quad(MeshStream.From<uint>("TestColor", MeshStreamFormat.UInt, 8, [packed, packed, packed, packed])));
                     ecs.SpawnMesh(quad, material, Transform.At(x, 0f, 0f));
                     Render.TryGetMeshInfo(quad, out info);
                 }
+
+                // A quad asked to leave its normals out holds none for a lit material to read.
+                var noNormals = Quad(MeshStream.From<uint>("TestColor", MeshStreamFormat.UInt, 8, [Green, Green, Green, Green]));
+                noNormals.ComputeNormals = false;
+                Render.TryGetMeshInfo(Render.CreateMesh(noNormals), out bare);
 
                 reshaped = Assert.Throws<ArgumentException>(() =>
                     Render.CreateMesh(Quad(MeshStream.From<float>("TestColor", MeshStreamFormat.Float, 8, [0f, 0f, 0f, 0f]))));
@@ -58,7 +64,8 @@ public sealed class VertexStreamTests
         var picture = run.Picture("picture");
         Assert.True(picture.At(25, 48) is { G: > 200, R: < 40, B: < 40 }, $"the green quad was {picture.At(25, 48)}");
         Assert.True(picture.At(71, 48) is { B: > 200, R: < 40, G: < 40 }, $"the blue quad was {picture.At(71, 48)}");
-        Assert.True(info.Attributes.HasFlag(MeshAttributes.Streams), $"the mesh's attributes were {info.Attributes}");
+        Assert.True(info.Attributes.HasFlag(MeshAttributes.Streams | MeshAttributes.Normals), $"the mesh's attributes were {info.Attributes}");
+        Assert.False(bare.Attributes.HasFlag(MeshAttributes.Normals), $"the mesh without normals had {bare.Attributes}");
         Assert.NotNull(reshaped);
         Assert.Contains("UInt at location 8", reshaped.Message, StringComparison.Ordinal);
         Assert.Contains("Float at location 8", reshaped.Message, StringComparison.Ordinal);
@@ -91,6 +98,7 @@ public sealed class VertexStreamTests
     {
         Assert.Equal(56, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.Streams)).ToInt32());
         Assert.Equal(64, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.StreamCount)).ToInt32());
+        Assert.Equal(68, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.Flags)).ToInt32());
         Assert.Equal(72, Marshal.SizeOf<NativeMeshData>());
         Assert.Equal(12, Marshal.OffsetOf<NativeMeshStream>(nameof(NativeMeshStream.Format)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeMeshStream>(nameof(NativeMeshStream.Location)).ToInt32());

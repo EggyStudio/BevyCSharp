@@ -362,6 +362,7 @@ sealed class Bevy.AtmosphereSettings
   float HazeDistance { get; set; }
   float Scale { get; set; }
 static class Bevy.Audio
+  static AssetHandle CreatePitch(float frequency, TimeSpan duration)
   static Entity Play(AssetHandle clip)
   static Entity Play(AssetHandle clip, AudioSettings settings)
   static bool HasStarted(Entity playing)
@@ -2865,6 +2866,7 @@ struct Bevy.Interop.NativeMeshData
   int StreamCount
   int Topology
   int VertexCount
+  uint Flags
   uint* Indices
 struct Bevy.Interop.NativeMeshInfo
   float MaxX
@@ -3682,6 +3684,7 @@ sealed class Bevy.MeshData
   MeshTopology Topology { get; set; }
   Vec3[] Positions { get; set; }
   Vec3[]? Normals { get; set; }
+  bool ComputeNormals { get; set; }
   float[]? Colors { get; set; }
   float[]? Uvs { get; set; }
   uint[]? Indices { get; set; }

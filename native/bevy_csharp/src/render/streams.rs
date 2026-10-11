@@ -101,14 +101,14 @@ impl Format {
 
     /// Bevy's values for `bytes`, a whole number of vertices of this format.
     pub fn values(self, bytes: &[u8]) -> VertexAttributeValues {
-        let words = || bytes.chunks_exact(4).map(|word| u32::from_ne_bytes([word[0], word[1], word[2], word[3]]));
-        let floats = || words().map(f32::from_bits);
+        let uints = || bytes.chunks_exact(4).map(|four| u32::from_ne_bytes([four[0], four[1], four[2], four[3]]));
+        let floats = || uints().map(f32::from_bits);
 
         match self {
-            Format::UInt => VertexAttributeValues::Uint32(words().collect()),
+            Format::UInt => VertexAttributeValues::Uint32(uints().collect()),
             Format::UInt2 => {
-                let words: Vec<u32> = words().collect();
-                VertexAttributeValues::Uint32x2(words.chunks_exact(2).map(|w| [w[0], w[1]]).collect())
+                let uints: Vec<u32> = uints().collect();
+                VertexAttributeValues::Uint32x2(uints.chunks_exact(2).map(|pair| [pair[0], pair[1]]).collect())
             }
             Format::Float => VertexAttributeValues::Float32(floats().collect()),
             Format::Float4 => {
@@ -319,10 +319,10 @@ mod tests {
         assert!(register("TestStreamKept", Format::UInt, 9).is_err());
     }
 
-    /// Four bytes a vertex in each of the one-word formats, read as Bevy's values of that format.
+    /// Four bytes a vertex in each of the four-byte formats, read as Bevy's values of that format.
     #[test]
     fn bytes_become_the_formats_values() {
-        let bytes: Vec<u8> = [7u32, 9].iter().flat_map(|word| word.to_ne_bytes()).collect();
+        let bytes: Vec<u8> = [7u32, 9].iter().flat_map(|value| value.to_ne_bytes()).collect();
 
         assert!(matches!(Format::UInt.values(&bytes), bevy::mesh::VertexAttributeValues::Uint32(v) if v == [7, 9]));
         assert!(matches!(Format::UInt2.values(&bytes), bevy::mesh::VertexAttributeValues::Uint32x2(v) if v == [[7, 9]]));

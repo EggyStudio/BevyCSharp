@@ -9,6 +9,20 @@ public sealed class MeshData
     /// <summary>Which way each vertex faces, or null to have them worked out for triangles.</summary>
     public Vec3[]? Normals { get; set; }
 
+    /// <summary>
+    /// Whether a triangle mesh given no <see cref="Normals"/> has them worked out, which it does
+    /// unless this is false.
+    /// </summary>
+    /// <remarks>
+    /// False leaves the mesh without normals, for one whose vertex shader finds its normal in a
+    /// <see cref="MeshStream"/> of its own, such as a voxel's face packed into four bytes, and never
+    /// reads the twelve bytes a vertex worked-out normals would add. A position and four packed
+    /// bytes make such a vertex sixteen bytes. Bevy places a normal only where the mesh has one and
+    /// its prepass reads the position alone, so the mesh draws and casts its shadow, and a lit
+    /// material of Bevy's own on it reads a normal of zero, which lights nothing.
+    /// </remarks>
+    public bool ComputeNormals { get; set; } = true;
+
     /// <summary>Texture coordinates, two floats a vertex, or null.</summary>
     public float[]? Uvs { get; set; }
 

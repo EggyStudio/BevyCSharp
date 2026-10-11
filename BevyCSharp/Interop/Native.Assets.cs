@@ -547,6 +547,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial ulong bcs_audio_play(int clip, NativeAudioConfig* config);
 
+    /// <summary>Makes a tone of one frequency for a length of time, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_create_pitch(float frequency, float seconds);
+
     /// <summary>Reads a playing sound's volume and whether it is paused.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

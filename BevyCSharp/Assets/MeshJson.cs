@@ -39,6 +39,9 @@ internal static class MeshJson
         json.WriteStartObject();
         json.WriteString("topology", geometry.Topology.ToString());
 
+        // Written only where it is false, so a file from before reads as the meshes it made then.
+        if (!geometry.ComputeNormals) json.WriteBoolean("computeNormals", false);
+
         json.WriteStartArray("positions");
         foreach (var at in geometry.Positions)
         {
@@ -72,7 +75,7 @@ internal static class MeshJson
             json.WriteEndArray();
         }
 
-        // A stream's bytes as Base64, since a packed word written as a number would be read back as
+        // A stream's bytes as Base64, since packed bytes written as a number would be read back as
         // whatever number a float of its bits is.
         if (geometry.Streams is { Length: > 0 } streams)
         {
@@ -122,6 +125,9 @@ internal static class MeshJson
 
         if (json.TryGetProperty("topology", out var topology) && Enum.TryParse<MeshTopology>(topology.GetString(), out var shape))
             data.Topology = shape;
+
+        if (json.TryGetProperty("computeNormals", out var compute) && compute.ValueKind == JsonValueKind.False)
+            data.ComputeNormals = false;
 
         return data.Positions.Length > 0 ? data : null;
 

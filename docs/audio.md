@@ -24,6 +24,15 @@ Played to a device, such a sound is played once and despawned at its end by the 
 by Bevy, whose despawn of it never gives the entity's index back to the world, so its
 `PlaybackSettings` read through the reflected wrappers say `Once`.
 
+A tone needs no file. `Audio.CreatePitch` makes one of a frequency and a length, as Bevy's `Pitch`
+is, worked out as it plays, and `Play` plays it as it plays a clip, a semitone up being the
+frequency times the twelfth root of two:
+
+```csharp
+var a = Audio.CreatePitch(440f, TimeSpan.FromSeconds(0.5));
+Audio.Play(a, AudioSettings.Effect);
+```
+
 A run with no window, headless or offscreen, as a test or a soak is, plays to no device unless
 `Config.AudioWithoutWindow` asks for one. Its sounds are given a sink of the bridge's own, which
 draws from each on the game's clock as a device would, so everything below answers as it would in a

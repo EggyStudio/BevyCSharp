@@ -77,26 +77,29 @@ cull, where every mesh in view is drawn.
 
 A vertex can carry a value of the game's own beside its position, a stream as Bevy's
 `custom_vertex_attribute` carries one, for a vertex shader of the program's own to read: a voxel's
-face and texture packed into one word, a blend weight, a wind phase. Each stream is a name, one of
+face and texture packed into four bytes, a blend weight, a wind phase. Each stream is a name, one of
 five formats (`UInt`, `UInt2`, `Float`, `Float4` and `UNorm8x4`, four bytes read as 0 to 1), a
 location from 8 to 15, and its values:
 
 <!-- compiled with:
 using System.Numerics;
 Vec3[] corners = [];
-uint[] words = [];
+uint[] packed = [];
 -->
 ```csharp
 var chunk = Render.CreateMesh(new MeshData
 {
     Positions = corners,
-    Streams = [MeshStream.From<uint>("Voxel", MeshStreamFormat.UInt, 8, words)],
+    Streams = [MeshStream.From<uint>("Voxel", MeshStreamFormat.UInt, 8, packed)],
 });
 ```
 
 A name is one stream for the running app, so every mesh carrying it carries it in one format at one
 location, and a name given again in another shape is refused. Positions stay, since Bevy places and
-culls a mesh by them, and the shader declares the stream at its location as the
+culls a mesh by them. `ComputeNormals = false` leaves a mesh given no normals without them, for a
+shader that unpacks its normal from the stream, so a position and four packed bytes make a vertex
+sixteen bytes. Such a mesh draws and casts its shadow, and a lit material of Bevy's own on it reads
+a normal of zero. The shader declares the stream at its location as the
 [shaders guide](shaders.md#a-vertex-stream-of-the-games-own) shows. A scene file keeps a mesh's
 streams with it.
 

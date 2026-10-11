@@ -182,6 +182,7 @@ internal static class Catalog
         // Audio
         new("audio", AudioExample.Build),
         new("audio_control", AudioControl.Build),
+        new("pitch", PitchExample.Build),
         new("play_sound_effect", PlaySoundEffect.Build),
         new("soundtrack", Soundtrack.Build),
         new("spatial_audio_2d", SpatialAudio2d.Build, SpatialAudio2d.Configure),

@@ -40,7 +40,8 @@ public sealed class MeshFileTests : IDisposable
             Positions = [new Vec3(0f, 0f, 0f), new Vec3(2f, 0f, 0f), new Vec3(2f, 1f, 0f)],
             Uvs = [0f, 0f, 1f, 0f, 1f, 1f],
             Indices = [0, 1, 2],
-            Streams = [MeshStream.From<uint>("RampWord", MeshStreamFormat.UInt, 9, [7u, 8u, uint.MaxValue])],
+            Streams = [MeshStream.From<uint>("RampPacked", MeshStreamFormat.UInt, 9, [7u, 8u, uint.MaxValue])],
+            ComputeNormals = false,
         };
 
         using (var saving = new EngineHarness(frames: 2))
@@ -92,9 +93,10 @@ public sealed class MeshFileTests : IDisposable
             Assert.Equal(ramp.Positions, built.Positions);
             Assert.Equal(ramp.Uvs, built.Uvs);
 
-            // A stream comes back with its name, format, location and every bit of its words.
+            // A stream comes back with its name, format, location and every bit of its packed bytes.
             var stream = Assert.Single(built.Streams!);
-            Assert.Equal(("RampWord", MeshStreamFormat.UInt, 9u), (stream.Name, stream.Format, stream.Location));
+            Assert.Equal(("RampPacked", MeshStreamFormat.UInt, 9u), (stream.Name, stream.Format, stream.Location));
+            Assert.False(built.ComputeNormals);
             Assert.Equal(ramp.Streams![0].Data, stream.Data);
             ran = true;
         });
