@@ -353,7 +353,6 @@ ghost_nodes	missing	ghost nodes (GhostNode)
 gradients	can	through Bevy's reflected BackgroundGradient and BorderGradient
 grid	can
 image_node	can
-image_node_resizing	missing	Bevy's outlines of interface nodes for debugging, which the bridge does not build
 ime_support	missing	a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in
 letter_spacing	can
 multiline_text_input	can

@@ -373,6 +373,7 @@ internal static class Catalog
         new("render_ui_to_texture", RenderUiToTexture.Build),
         new("gradients", Gradients.Build),
         new("image_node", ImageNode.Build),
+        new("image_node_resizing", ImageNodeResizing.Build),
         new("letter_spacing", LetterSpacingExample.Build),
         new("overflow", OverflowExample.Build),
         new("overflow_clip_margin", OverflowClipMargin.Build),

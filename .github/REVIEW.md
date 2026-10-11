@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b3ac2a0e`. One commit, render_primitives: the gizmos draw Bevy's planes, endless
+Reviewed up to `c11c63d4`. One commit, texture_atlas: `Render2d.PackAtlas` packs loaded images into
+one atlas as the app runs through Bevy's own builder with a padding between them, answering the
+packed image, its layout and each image's frame in the order the images were given, or nothing while
+an image still loads, and throwing for a handle that names no image or for images past the largest
+atlas Bevy packs, the packed image a copy as the remark says; ABI 259. The native side is a module
+of its own under `assets`, 146 lines, with a test that packs a wide and a tall image four pixels
+apart and reads both rectangles, their gap and the packed image's size, so `assets.rs` grew by a
+line to 752 and `render/assets.rs` stands at 799 untouched. `AtlasPackingTests` packs a red and a
+blue image on the GPU and reads both colors and the size from the packed image, and reads nothing
+back for an image still loading in a one-frame run, which Bevy's schedule makes certain, a load
+asked for in an update reaching its assets no earlier than the next frame. The example loads Bevy's
+rpg folder whole, packs it four ways, unpadded and padded six pixels, sampled linearly and by
+nearest, shows both atlases and the vendor from each with labels, and its capture shows Bevy's
+point, a stray line on the unpadded linear vendor and none on the padded one; the folder's 157 files
+beyond the 18 the list held are added, listed from Bevy's tree at v0.20.0, and fetched by the
+script. Right, Bevy's builder reached and not rewritten, the two answers a caller acts on kept apart
+from the ones that throw, and the frames handed back in the caller's order. One thing read and left:
+a frame the layout does not place is written as minus one and cast to an unsigned frame on the
+managed side, which cannot happen while the build succeeds, so it stays. The 2D guide has its
+paragraph and block, the cheat sheet its line, EXAMPLES.md reads 334 written, 1 in part and 47
+missing, TODO.md's group three. The suite: 1,405 passed and 2 skipped of 1,407; cargo's 143. The
+owner pushed `b3ac2a0e`: its run is in flight, Linux green in 4 m 40 s with 1,138 passed and 487
+skipped where the runner draws nothing, its page carrying the five lines and two warnings
+`28e2d97b`'s carried, Windows and macOS running; the captures' comparison, the README's walk and
+Courtyard run on the pack run alone, as the workflow has them. Next image_node_resizing, whose
+`bevy_ui_debug` is a feature of a crate the tree builds and pulls none (Decision 25), the lock read
+to confirm it, the components table written again from an editor build and the example; then
+monitor_info and relationships.
+
+Before it, one commit came to be read, render_primitives: the gizmos draw Bevy's planes, endless
 lines, capsules, annuli, circular sectors and segments and regular polygons through Bevy's own
 primitive drawing, nine kinds more, the round shapes taking a resolution as the sphere and the
 circle did, a sphere taking a rotation, and Bevy's arc drawn as the existing arc with its span
@@ -58,33 +87,6 @@ changes shutdown on three platforms and no client of ours reads the answer. Next
 then texture_atlas, image_node_resizing, whose `bevy_ui_debug` feature pulls no crate, monitor_info
 and relationships.
 
-Before it, one commit came to be read, change_detection, as the shape taken with two things more. A
-component says whether it was added and a resource whether it was added or changed since the running
-system last ran: a new entry point gives a component's added and changed ticks and the flags against
-the system's last run, since the last setter's check wants the changed tick as well; `Added<T>`,
-`SetIfNeq<T>` by the equality comparer as Bevy's partial equality, and `ChangedBy<T>`, the place a
-value was last set from kept with the tick Bevy marked then and named only while that tick stands,
-so a later `ref` write or one of Bevy's systems gives nothing rather than an older call; the C#
-resources take ticks, a run tick a system in the trampoline starting at minus one so a first run
-sees everything, kept across a schedule a system runs, and an added and a changed tick a resource
-set by insert, set, set-if-not-equal and mark-changed and dropped with the resource; the place is
-kept only under `Config.TrackChangeLocations`, off by default, as a file name and a line so a
-capture prints the same anywhere. The thing found on the way, a fault of weight: `TryGet` and
-`GetOrDefault` read a component through the pointer that takes it mutably, so every read marked it
-changed, which would have defeated every `[Changed]` filter whose system read the component and the
-new set-if-not-equal; a read pointer that marks nothing serves them since, `GetRef` and `Mutate`
-keep the marking one, and the docs say which marks, which SHARED.md's row on reads that mark nothing
-had this engine down as having from Bevy and has as of this commit. The example prints Bevy's blocks
-with the setter's file and line; the capture script keeps a message's continuation lines, every
-other printed capture byte-identical after; four tests hold the resource's first run and its set,
-the component added once and changed by a different value only, the setter named and cleared by a
-`ref` write, and nothing named with the switch off; the behaviors guide's filters section covers it,
-23 blocks built. Right, the ticks Bevy's where Bevy has them and the bridge's own where it does not,
-the setter's place cleared by its tick rather than trusted, and the marking read found and parted
-from the reading one. EXAMPLES.md reads 331 written, one in part and 50 missing. The suite: 1,388
-passed and 2 skipped of 1,390; cargo's 142. Next the ambiguity report from its patch with
-nondeterministic_system_order, then the five left of TODO.md's group, each read for a crate first.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -119,9 +121,11 @@ from [SHARED.md](SHARED.md).
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
    at `60141490`. The runs of `c39dd61d`, `e09a2ed8`, `90075005`, `d328fdc3` and `28e2d97b` are
-   green on all three, `5d955562`'s cancelled by the push after it. Each push's run is read by the
-   reviewing session, and a failure it names comes first here.
-
+   green on all three, `5d955562`'s cancelled by the push after it; `b3ac2a0e`'s run is in flight,
+   Linux green in 4 m 40 s with 1,138 passed and 487 skipped, Windows and macOS running. The
+   captures' comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`),
+   so the comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each
+   push's run is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review

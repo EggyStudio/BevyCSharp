@@ -417,9 +417,17 @@ public sealed unsafe partial class EcsWorld
     /// <typeparam name="T">The wrapper, such as <c>Bevy.Reflected.ClearColorRef</c>.</typeparam>
     /// <param name="json">The whole resource as JSON, or <see langword="null"/> for its default.</param>
     /// <remarks>
+    /// <para>
     /// A resource the world lacks is inserted on a new entity, which Bevy makes the resource's own.
     /// One the world has is replaced where it is, since Bevy refuses a second entity holding the
     /// same resource, and removes the newer with a warning.
+    /// </para>
+    /// <para>
+    /// Its default is Bevy's where Bevy reflects one, and otherwise each field's own, which can
+    /// differ from what Bevy's code starts it at, as <c>GlobalUiDebugOptionsRef</c>'s line width of
+    /// zero does. A resource a plugin made is changed through <see cref="Resource{T}"/> instead,
+    /// which keeps the rest of it as it is.
+    /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">As <see cref="InsertReflected"/>, or the type is no resource.</exception>
     public T InsertResource<T>(string? json = null) where T : struct, IReflectedComponent<T>

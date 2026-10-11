@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**334 written, 1 written in part, 0 can be written, 47 missing and 56 do not apply.** Of the 382 that apply, 335 can be written with what is bridged, 1 of them leaving something out.
+**335 written, 1 written in part, 0 can be written, 46 missing and 56 do not apply.** Of the 382 that apply, 336 can be written with what is bridged, 1 of them leaving something out.
 
-**157 of the 163 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**157 of the 164 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 54 | 0 | 0 | 11 | 0 | 21 of 22 |
+| [UI (User Interface)](#ui-user-interface) | 55 | 0 | 0 | 10 | 0 | 21 of 23 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **334** | **1** | **0** | **47** | **56** | **157 of 163** |
+| **All** | **335** | **1** | **0** | **46** | **56** | **157 of 164** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -550,7 +550,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`grid`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/grid.rs) | An example for CSS Grid layout | [written](../BevyCSharp.Examples/ui/grid.cs) |
 | [`headless_tabs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/headless_tabs.rs) | Demonstrates controlled and self-updating headless tab lists | [written](../BevyCSharp.Examples/ui/headless_tabs.cs), through Bevy's reflected TabList, Tab and SelectedTab, a tab's selection read from its list since Bevy does not reflect Selected |
 | [`image_node`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/image_node.rs) | Demonstrates how to create an image node | [written](../BevyCSharp.Examples/ui/image_node.cs) |
-| [`image_node_resizing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/image_node_resizing.rs) | Demonstrates how to resize an image node | missing, Bevy's outlines of interface nodes for debugging, which the bridge does not build |
+| [`image_node_resizing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/image_node_resizing.rs) | Demonstrates how to resize an image node | [written](../BevyCSharp.Examples/ui/image_node_resizing.cs) |
 | [`ime_support`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/ime_support.rs) | Demonstrates IME (Input Method Editor) support for text input | missing, a system font chosen by its generic family, sans-serif, which needs Bevy's system font discovery, not compiled in |
 | [`inline_image`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/inline_image.rs) | Demonstrates how to display images inline with text | [written](../BevyCSharp.Examples/ui/inline_image.cs), through Bevy's reflected InlineImage |
 | [`letter_spacing`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/letter_spacing.rs) | Demonstrates the letter spacing feature | [written](../BevyCSharp.Examples/ui/letter_spacing.cs) |

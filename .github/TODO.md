@@ -48,10 +48,9 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **Three more, one example each.** Relationships of a game's own (`relationships`), Bevy's
-  outlines of interface nodes for debugging, a feature the bridge does not build
-  (`image_node_resizing`), and a window made fullscreen on a monitor named by its entity, in a run
-  that opens no first window (`monitor_info`).
+- **Two more, one example each.** Relationships of a game's own (`relationships`), and a window
+  made fullscreen on a monitor named by its entity, in a run that opens no first window
+  (`monitor_info`).
 
 One example is written in part, leaving out a feature named in its row.
 

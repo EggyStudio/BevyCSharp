@@ -241,6 +241,19 @@ Since the tracks are lists and the rest of the layout arrives as a flat struct, 
 node that already exists rather than passed with one. `UiGrid.Set` also switches the node to
 `UiDisplay.Grid`, so nothing has to say that twice.
 
+Bevy outlines every node where its `GlobalUiDebugOptions` is on, each box in a color of its own, to
+show where a layout put it, as Bevy's image_node_resizing does. A node given a `UiDebugOptionsRef`
+of its own is left out, since one inserted from nothing is off, and Bevy reads it before the
+resource:
+
+<!-- compiled with:
+Entity label = default;
+-->
+```csharp
+if (ctx.Ecs.Resource<GlobalUiDebugOptionsRef>() is { } outlines) outlines.Enabled = true;
+ctx.Ecs.Insert<UiDebugOptionsRef>(label).Enabled = false;
+```
+
 `Corners` rounds the node, clockwise from the top left, and a single `Length` assigned to it is the
 same radius on all four. The background, the border and anything the node clips follow the same
 curve, and a percentage is read against the node's own size, so fifty percent everywhere is an
