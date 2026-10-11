@@ -283,7 +283,9 @@ def build(version, examples, order, triage, written, source, followed):
             picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200"/>'
             picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
             cells.append(f'<td>{picture}<br><code>{example["name"]}</code></td>')
-        sections.append(f"### {group}\n\n<table>\n<tr>" + "".join(cells) + "</tr>\n</table>")
+        # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the
+        # README but a table's rows as prose, and four lines a group would take the gallery past it.
+        sections.append(f"### {group}\n<table><tr>" + "".join(cells) + "</tr></table>")
     gallery = "\n\n".join(sections)
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
