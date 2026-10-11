@@ -32,6 +32,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     private const string AttributeNamespace = RecognizedAttributes.Namespace;
     private const string BehaviorAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.Behavior;
     private const string DataAssetAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.DataAsset;
+    private const string SceneResourceAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.SceneResource;
     private const string DataVersionAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.DataVersion;
 
     /// <inheritdoc/>
@@ -105,6 +106,35 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         {
             if (SchemaEmitter.EmitDataAssets([.. found.OfType<BehaviorModel>()]) is { } registration)
                 spc.AddSource("DataAssetRegistration.g.cs", registration);
+        });
+
+        // A resource a scene writes is described as a data asset is, since the world holds it on
+        // the managed side, and registered so a scene can name it.
+        var resources = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                SceneResourceAttribute,
+                predicate: static (node, _) => node is StructDeclarationSyntax or ClassDeclarationSyntax,
+                transform: static (ctx, _) => ctx.TargetSymbol is INamedTypeSymbol type
+                    ? new BehaviorModel
+                    {
+                        Namespace = type.ContainingNamespace.IsGlobalNamespace
+                            ? null
+                            : type.ContainingNamespace.ToDisplayString(),
+                        Name = type.Name,
+                        QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        Fields = ReadFields(type, managed: true),
+                        FormerNames = FormerNamesOf(type),
+                        Version = VersionOf(type),
+                        Migrates = Migration(type) is not null,
+                    }
+                    : null)
+            .Where(static model => model is not null)
+            .Collect();
+
+        context.RegisterSourceOutput(resources, static (spc, found) =>
+        {
+            if (SchemaEmitter.EmitSceneResources([.. found.OfType<BehaviorModel>()]) is { } registration)
+                spc.AddSource("SceneResourceRegistration.g.cs", registration);
         });
 
         // A version past the first with no Migrate method reads an older file as if it were the new
@@ -505,6 +535,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 },
                 RecognizedAttributes.Step => hints with { Step = Number(attribute, 0) },
                 RecognizedAttributes.ReadOnly => hints with { ReadOnly = true },
+                RecognizedAttributes.NotSaved => hints with { NotSaved = true },
                 RecognizedAttributes.Hidden => hints with { Hidden = true },
                 RecognizedAttributes.Space => hints with { Space = true },
                 RecognizedAttributes.Separator => hints with { Separator = true },
@@ -811,7 +842,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// holding it goes.
     /// </summary>
     private static bool IsStored(ITypeSymbol type) =>
-        type is INamedTypeSymbol { Name: "EcsList" or "EcsMap" } named
+        type is INamedTypeSymbol { Name: "EcsList" or "EcsMap" or "EcsText" } named
         && named.ContainingNamespace?.ToDisplayString() == "Bevy";
 
     /// <summary>
@@ -853,6 +884,8 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
             "Bevy.Quat" => FieldKind.Quat,
             "Bevy.Entity" => FieldKind.Entity,
             "Bevy.AssetHandle" => FieldKind.Asset,
+            // Text in the managed store, read and written as a string as a data asset's text is.
+            "Bevy.EcsText" => FieldKind.String,
             _ => FieldKind.Opaque,
         },
     };

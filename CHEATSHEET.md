@@ -466,6 +466,14 @@ EcsMap<TKey, TValue> Copy();                                    // A handle to a
 bool Free();                                                    // Frees the dictionary, after which this handle and every copy of it name nothing
 ```
 
+### `EcsText`
+
+```csharp
+static EcsText New(string text);                                // Makes text holding text
+EcsText Copy();                                                 // A handle to new text the same as this, or a handle to nothing when this names none
+bool Free();                                                    // Frees the text, after which this handle and every copy of it name nothing
+```
+
 ### `IInlineList<T>`
 
 ```csharp
@@ -631,6 +639,12 @@ bool WriteAsset(Utf8JsonWriter json, AssetHandle asset);        // Writes a refe
 object? ReadAsset(JsonElement json, string kind);               // Reads a reference to an asset by loading its file as the kind of asset given
 void WriteFile(Utf8JsonWriter json, string path);               // Writes a reference to a file under the asset root as its id and its path, or as its path alone when it has no id
 static string? ReadFile(JsonElement json);                      // The path a file reference names: where the file holding its id is now, with the label the reference gave, or the path it recorded when no file holds the id
+```
+
+### `SceneResources`
+
+```csharp
+static void Register<T>(string name, Func<T> create, Func<DataBox<T>, IReadOnlyList<ComponentField>> fields, IReadOnlyList<string>? formerNames = null, int version = 0, Func<int, JsonObject, JsonObject>? migrate = null);  // Registers a resource type a scene writes
 ```
 
 ### `SceneValue`

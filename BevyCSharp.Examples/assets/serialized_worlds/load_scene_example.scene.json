@@ -1,0 +1,24 @@
+{
+  "format": "bevycsharp.scene.2",
+  "entities": [
+    {
+      "id": 1,
+      "name": "joe",
+      "instance": { "path": "models/FlightHelmet/FlightHelmet.gltf#Scene0" },
+      "components": {
+        "Bevy.Transform": { "Translation": [0, 0, 0], "Rotation": [0, 0, 0, 1], "Scale": [1, 1, 1] },
+        "BevyCSharp.Examples.Scenes.ComponentA": { "X": 1, "Y": 2 },
+        "BevyCSharp.Examples.Scenes.ComponentB": { "Value": "hello" }
+      }
+    },
+    {
+      "id": 2,
+      "components": {
+        "BevyCSharp.Examples.Scenes.ComponentA": { "X": 3, "Y": 4 }
+      }
+    }
+  ],
+  "worldResources": [
+    { "type": "BevyCSharp.Examples.Scenes.ResourceA", "fields": { "Score": 1 } }
+  ]
+}

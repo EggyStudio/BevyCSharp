@@ -38,6 +38,12 @@ public static class RecognizedAttributes
     /// <summary>A name a type or a field had before, which its files may still use.</summary>
     public const string FormerName = "FormerNameAttribute";
 
+    /// <summary>A field no file is written with.</summary>
+    public const string NotSaved = "NotSavedAttribute";
+
+    /// <summary>A resource of the game's own a scene file writes with its entities.</summary>
+    public const string SceneResource = "SceneResourceAttribute";
+
     /// <summary>A component a save game writes.</summary>
     public const string Persist = "PersistAttribute";
 
@@ -185,7 +191,7 @@ public static class RecognizedAttributes
     /// <summary>Every name above, in the order they are declared.</summary>
     public static IReadOnlyList<string> All { get; } =
     [
-        Behavior, DataAsset, DataVersion, FormerName, Persist, InitialState, Command,
+        Behavior, DataAsset, DataVersion, FormerName, NotSaved, SceneResource, Persist, InitialState, Command,
         OnStartup, OnFirst, OnPreUpdate, OnFixedUpdate, OnUpdate, OnPostUpdate, OnRender, OnLast, OnCleanup, OnEnter, OnExit, OnTransition,
         With, Without, Changed, MainThread, InState, RunIf, ToggleKey, After, Before,
         Label, Tooltip, Header, Unit, Range, Step, ReadOnly, Hidden, Space, Separator, Color, Wide, Inline,

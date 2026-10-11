@@ -277,7 +277,8 @@ internal sealed record FieldHintModel(
     int Order = 0,
     string? Asset = null,
     string? Extensions = null,
-    EquatableArray<string> FormerNames = default)
+    EquatableArray<string> FormerNames = default,
+    bool NotSaved = false)
 {
     /// <summary>A field with no attributes on it.</summary>
     internal static readonly FieldHintModel None = new();

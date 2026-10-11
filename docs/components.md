@@ -260,6 +260,32 @@ An item can be a struct or a class with fields of its own, such as an `InlineLis
 `List<LootEntry>` in a data asset. Each is drawn as a fold of its fields, named by its first text,
 and written as an object.
 
+## Text in a component
+
+A `string` cannot sit in a component either, so a field of text is an `EcsText`, a handle to text
+of any length in the same store:
+
+```csharp
+[Behavior]
+public partial struct Signpost
+{
+    public EcsText Caption;
+    public float Distance;
+
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx)
+    {
+        if (Distance < 1f) Caption.Value = "Here";
+    }
+}
+```
+
+It converts to and from `string`, so `new Signpost { Caption = "To the harbor" }` makes the text
+and `string shown = post.Caption` reads it. Setting `Value` changes the text the handle names,
+where assigning a string makes new text. It goes with its component as a list does, a cloned
+entity gets text of its own, and a scene writes it as a JSON string and the inspector draws it as a
+text field.
+
 ## Visibility
 
 Whether an entity is drawn. Render builds only, since a headless bridge has no such component and

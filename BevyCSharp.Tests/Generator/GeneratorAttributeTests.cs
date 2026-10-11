@@ -155,6 +155,16 @@ public sealed class GeneratorAttributeTests
             }
         }
 
+        [Behavior]
+        public partial struct Labeled
+        {
+            public EcsText Text;
+            [NotSaved] public float Since;
+        }
+
+        [SceneResource]
+        public sealed class Tallied { public int Score; }
+
         [DataAsset]
         public sealed class Stats
         {
@@ -419,6 +429,17 @@ public sealed class GeneratorAttributeTests
             Assert.Equal(2, schema.Version);
             var migrated = schema.Migrate!(1, new JsonObject { ["Current"] = 2f });
             Assert.Equal(20f, (float)migrated["Current"]!);
+        },
+        [RecognizedAttributes.NotSaved] = () =>
+        {
+            Assert.True(Schema("Labeled").Field("Since")!.Hints.NotSaved);
+            Assert.False(Schema("Labeled").Field("Text")!.Hints.NotSaved);
+            Assert.Equal(FieldKind.String, Schema("Labeled").Field("Text")!.Kind);
+        },
+        [RecognizedAttributes.SceneResource] = () =>
+        {
+            _ = Probes.Value;
+            Assert.Contains("Probes.Tallied", SceneResources.Types);
         },
         [RecognizedAttributes.DataAsset] = () =>
         {

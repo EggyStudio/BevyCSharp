@@ -1515,6 +1515,18 @@ struct Bevy.EcsMap<TKey, TValue> : IEquatable<EcsMap<TKey, TValue>>
   static EcsMap<TKey, TValue?> New()
   void Clear()
   void Set(TKey key, TValue? value)
+struct Bevy.EcsText : IEquatable<EcsText>
+  EcsText Copy()
+  bool Equals(EcsText other)
+  bool Free()
+  bool IsCreated { get; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static EcsText New(string text)
+  static EcsText op_Implicit(string text)
+  static string op_Implicit(EcsText text)
+  string Value { get; set; }
 sealed class Bevy.EcsWorld
   AssetHandle? GetReflectedAsset(Entity entity, string typePath, string path)
   ChunkSet<T> Chunks<T>(ReadOnlySpan<int> with = default, ReadOnlySpan<int> without = default, bool markChanged = true) where T : unmanaged
@@ -1666,7 +1678,7 @@ readonly struct Bevy.FieldCondition : IEquatable<FieldCondition>
   string? Value { get; init; }
   void Deconstruct(out string Field, out string? Value, out bool Not)
 sealed class Bevy.FieldHints : IEquatable<FieldHints>
-  FieldHints(string? Label = null, string? Tooltip = null, string? Header = null, string? Unit = null, double? Minimum = null, double? Maximum = null, double? Step = null, SliderReadout Readout = SliderReadout.Number, bool ReadOnly = false, bool Hidden = false, bool Space = false, bool Separator = false, bool Color = false, bool Wide = false, bool Inline = false, string? Foldout = null, bool FoldoutOpen = true, string? Note = null, NoteKind NoteKind = NoteKind.Info, IReadOnlyList<FieldCondition>? Conditions = null, IReadOnlyList<string>? Changed = null, int Order = 0, string? Asset = null, string? Extensions = null, IReadOnlyList<string>? FormerNames = null)
+  FieldHints(string? Label = null, string? Tooltip = null, string? Header = null, string? Unit = null, double? Minimum = null, double? Maximum = null, double? Step = null, SliderReadout Readout = SliderReadout.Number, bool ReadOnly = false, bool Hidden = false, bool Space = false, bool Separator = false, bool Color = false, bool Wide = false, bool Inline = false, string? Foldout = null, bool FoldoutOpen = true, string? Note = null, NoteKind NoteKind = NoteKind.Info, IReadOnlyList<FieldCondition>? Conditions = null, IReadOnlyList<string>? Changed = null, int Order = 0, string? Asset = null, string? Extensions = null, IReadOnlyList<string>? FormerNames = null, bool NotSaved = false)
   IReadOnlyList<FieldCondition> Conditions { get; init; }
   IReadOnlyList<string> Changed { get; init; }
   IReadOnlyList<string> FormerNames { get; init; }
@@ -1678,6 +1690,7 @@ sealed class Bevy.FieldHints : IEquatable<FieldHints>
   bool HasRange { get; }
   bool Hidden { get; init; }
   bool Inline { get; init; }
+  bool NotSaved { get; init; }
   bool ReadOnly { get; init; }
   bool Separator { get; init; }
   bool Space { get; init; }
@@ -1700,7 +1713,7 @@ sealed class Bevy.FieldHints : IEquatable<FieldHints>
   string? Note { get; init; }
   string? Tooltip { get; init; }
   string? Unit { get; init; }
-  void Deconstruct(out string? Label, out string? Tooltip, out string? Header, out string? Unit, out double? Minimum, out double? Maximum, out double? Step, out SliderReadout Readout, out bool ReadOnly, out bool Hidden, out bool Space, out bool Separator, out bool Color, out bool Wide, out bool Inline, out string? Foldout, out bool FoldoutOpen, out string? Note, out NoteKind NoteKind, out IReadOnlyList<FieldCondition>? Conditions, out IReadOnlyList<string>? Changed, out int Order, out string? Asset, out string? Extensions, out IReadOnlyList<string>? FormerNames)
+  void Deconstruct(out string? Label, out string? Tooltip, out string? Header, out string? Unit, out double? Minimum, out double? Maximum, out double? Step, out SliderReadout Readout, out bool ReadOnly, out bool Hidden, out bool Space, out bool Separator, out bool Color, out bool Wide, out bool Inline, out string? Foldout, out bool FoldoutOpen, out string? Note, out NoteKind NoteKind, out IReadOnlyList<FieldCondition>? Conditions, out IReadOnlyList<string>? Changed, out int Order, out string? Asset, out string? Extensions, out IReadOnlyList<string>? FormerNames, out bool NotSaved)
 enum Bevy.FieldKind : int
   Asset = 8
   Bool = 1
@@ -3929,6 +3942,8 @@ static class Bevy.Navigation
   static void BlockEdge(Entity node, CompassOctant direction, Entity other = default)
   static void Clear()
   static void Forget(Entity node)
+sealed class Bevy.NotSavedAttribute : Attribute
+  NotSavedAttribute()
 enum Bevy.NoteKind : int
   Error = 3
   Heading = 0
@@ -10582,6 +10597,11 @@ class Bevy.SceneReferences
   void Name(Entity entity, int id)
   void Spawned(int id, Entity entity)
   void WriteFile(Utf8JsonWriter json, string path)
+sealed class Bevy.SceneResourceAttribute : Attribute
+  SceneResourceAttribute()
+static class Bevy.SceneResources
+  static IReadOnlyList<string> Types { get; }
+  static void Register<T>(string name, Func<T> create, Func<DataBox<T>, IReadOnlyList<ComponentField>> fields, IReadOnlyList<string>? formerNames = null, int version = 0, Func<int, JsonObject, JsonObject>? migrate = null)
 static class Bevy.SceneValue
   const string VersionName = "$version"
   static IReadOnlyList<KeyValuePair<string, string>> Unread(JsonElement json, ComponentSchema schema)

@@ -182,7 +182,7 @@ public static partial class SceneFile
         var buffer = new ArrayBufferWriter<byte>();
         int written;
         using (var json = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = true }))
-            written = Write(world, json, include, giveIds);
+            written = WriteDocument(world, json, include, giveIds, worldResources: true);
 
         var full = Resolve(path);
         Directory.CreateDirectory(Path.GetDirectoryName(full)!);
@@ -197,8 +197,18 @@ public static partial class SceneFile
 
     /// <summary>Writes entities as a scene document.</summary>
     /// <returns>How many entities were written.</returns>
+    /// <remarks>
+    /// The entities alone. <see cref="Save"/> writes the world's <see cref="SceneResourceAttribute"/>
+    /// resources beside them, which a document kept to put entities back, as an editor's undo keeps
+    /// one, would otherwise roll back as well.
+    /// </remarks>
     public static int Write(
-        EcsWorld world, Utf8JsonWriter json, Func<Entity, bool>? include = null, bool giveIds = false)
+        EcsWorld world, Utf8JsonWriter json, Func<Entity, bool>? include = null, bool giveIds = false) =>
+        WriteDocument(world, json, include, giveIds, worldResources: false);
+
+    /// <summary>Writes entities as a scene document, and the world's resources where asked.</summary>
+    private static int WriteDocument(
+        EcsWorld world, Utf8JsonWriter json, Func<Entity, bool>? include, bool giveIds, bool worldResources)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(json);
@@ -300,6 +310,9 @@ public static partial class SceneFile
 
         json.WriteEndArray();
         made.Write(json);
+
+        // The world's resources of the game's own, beside its entities, as Bevy writes a world's.
+        if (worldResources) SceneResources.Write(json, world.Owner);
         json.WriteEndObject();
         return ordered.Count;
     }

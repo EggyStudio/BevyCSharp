@@ -61,6 +61,30 @@ in a `.uid` sidecar as it saves, so renaming a model in the asset browser, which
 sidecar along, leaves the scene pointing at it.
 `scene.save` and `scene.load` do the same from the console and from `./bcs`.
 
+```csharp
+[Behavior]
+public partial struct Fuse
+{
+    public float Length;
+    [NotSaved] public float LitAt;   // this run's clock, which means nothing to the next
+}
+
+[SceneResource]
+public sealed class Standings
+{
+    public int Points;
+    public string Leader = "";
+}
+```
+
+A field marked `[NotSaved]` is left out of a scene file, a saved game and a data asset, and a load
+leaves it at the value the type starts with, as Bevy's `skip_serializing` leaves one out. A type
+marked `[SceneResource]` is a resource a scene carries. A scene saved while the world holds one
+writes it beside the entities, under `worldResources`, and loading the scene sets it into the
+world, over any the world held. Its fields are written as a data asset's are, and `[FormerName]`
+and `[DataVersion]` work on it as on a component. `SceneFile.Write` and `SceneFile.Read`, which
+put entities back without a file, as the editor's undo of a delete does, leave resources out.
+
 A file that is missing, cut short or not a scene spawns nothing, and `loaded.Problem` says why,
 naming it, as the log does for a game that does not look. So does one that places an instance of
 itself, directly or through another scene, which would never finish.

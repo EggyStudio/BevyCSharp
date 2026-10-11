@@ -218,6 +218,8 @@ internal static class SchemaEmitter
             {
                 FieldKind.List => "global::Bevy.ListValue.From(component." + field.Name + ".Items)",
                 FieldKind.Map => "global::Bevy.MapValue.From(component." + field.Name + ".Entries)",
+                // Text in the store is read as the string it names, which a scene writes and a tool draws.
+                FieldKind.String when field.IsHandle => "component." + field.Name + ".Value",
                 _ => "component." + field.Name,
             })
             .Append(" : null")
@@ -367,6 +369,7 @@ internal static class SchemaEmitter
         if (hints.FormerNames.Items.Count > 0)
             parts.Add("FormerNames: [" + string.Join(", ", hints.FormerNames.Items.Select(Quote)) + "]");
         if (hints.Extensions is not null) parts.Add("Extensions: " + Quote(hints.Extensions));
+        if (hints.NotSaved) parts.Add("NotSaved: true");
 
         for (var i = 0; i < parts.Count; i++)
         {
@@ -463,6 +466,22 @@ internal static class SchemaEmitter
                 + ">(entity, out var component)) return false;\n\n"
                 + DataCoerce(field.Type, "                        ")
                 + "                        component." + field.Name + " = coerced;\n"
+                + "                        world.Set(entity, component);\n"
+                + "                        return true;\n"
+                + "                    }";
+        }
+
+        if (field.Kind == FieldKind.String && field.IsHandle)
+        {
+            // Text in the store is set in place, so the handle and every copy of it read the new
+            // text, and text never made is made here, its new handle written back with the component.
+            return ",\n"
+                + "                    static (world, entity, value) =>\n"
+                + "                    {\n"
+                + "                        if (value is not string text) return false;\n"
+                + "                        if (!world.TryGet<" + model.QualifiedName
+                + ">(entity, out var component)) return false;\n\n"
+                + "                        component." + field.Name + ".Value = text;\n"
                 + "                        world.Set(entity, component);\n"
                 + "                        return true;\n"
                 + "                    }";
@@ -587,14 +606,25 @@ internal static class SchemaEmitter
     /// entity, so the same rows, hints and scene writer serve both. The world and entity a field is
     /// called with are ignored.
     /// </remarks>
-    internal static string? EmitDataAssets(IReadOnlyList<BehaviorModel> models)
+    internal static string? EmitDataAssets(IReadOnlyList<BehaviorModel> models) =>
+        EmitBoxed(models, "data asset types", "DataAssetRegistration", "global::Bevy.DataAssets.Register");
+
+    /// <summary>
+    /// Emits the registration of this assembly's resources a scene writes, or null when it has none,
+    /// their fields read and written through a box as a data asset's are.
+    /// </summary>
+    internal static string? EmitSceneResources(IReadOnlyList<BehaviorModel> models) =>
+        EmitBoxed(models, "resources a scene writes", "SceneResourceRegistration", "global::Bevy.SceneResources.Register");
+
+    /// <summary>Emits a registration of types whose fields read and write a box holding a value.</summary>
+    private static string? EmitBoxed(IReadOnlyList<BehaviorModel> models, string what, string className, string register)
     {
         if (models.Count == 0) return null;
 
         var source = new StringBuilder(Header)
             .Append("\nnamespace Bevy.Generated;\n\n")
-            .Append("/// <summary>Registers this assembly's data asset types.</summary>\n")
-            .Append("internal static class DataAssetRegistration\n")
+            .Append("/// <summary>Registers this assembly's ").Append(what).Append(".</summary>\n")
+            .Append("internal static class ").Append(className).Append("\n")
             .Append("{\n")
             .Append("    /// <summary>Runs when the assembly loads, so a file names its type to a registered one.</summary>\n")
             .Append("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n")
@@ -603,7 +633,7 @@ internal static class SchemaEmitter
 
         foreach (var model in models.OrderBy(model => model.QualifiedName, System.StringComparer.Ordinal))
         {
-            source.Append("        global::Bevy.DataAssets.Register<").Append(model.QualifiedName).Append(">(\n")
+            source.Append("        ").Append(register).Append('<').Append(model.QualifiedName).Append(">(\n")
                 .Append("            \"").Append(FullName(model)).Append("\",\n")
                 .Append("            static () => new ").Append(model.QualifiedName).Append("(),\n")
                 .Append("            static box =>\n")

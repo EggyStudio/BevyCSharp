@@ -10,9 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7f42cf40`. Two commits. `a612ab27`, transform_gizmo, ABI 272: Bevy's own gizmo, its
-rendering already there wherever PBR is, so no crate and no owner's word, Feathers being only its
-interface and the camera controller only its camera; its plugin is opt-in by
+Reviewed up to `2aaaef58`. decodable, ABI 274, as shaped: a sample stream the game fills, an asset
+of the bridge's with its rate, channels and a shared queue of samples, its decoder taking up to 512
+samples at a time into a buffer of its own so the audio thread meets the game's writes once a
+stretch and giving silence on an underrun so the source never ends, registered with the audio
+sources where a device plays and in the silent plugin's start and finish beside the tone, the play
+call trying a clip, then a tone, then a stream; three calls, to make a stream, to queue samples,
+refusing a count that is not whole frames and answering the length, and to ask how many wait, and
+`Audio.CreateSampleStream`, `QueueSamples` and `QueuedSamples` in C#; the example Bevy's sine at 440
+Hz at a fifth of the volume, written each frame to keep a tenth of a second queued with Bevy's phase
+step, its capture an empty window as audio's is; tests native, the decoder playing the queue, then
+silence, then a sample queued later, and managed, 4,410 samples drained by frame 30 on the set
+clock, the entity alive after the underrun and three samples to a stereo stream refused; the audio
+guide's paragraph and block. debug_picking's note reads that the overlay is in a crate the bridge
+does not compile in, the owner's word kept out of EXAMPLES.md's row by N 4.7 and said here instead.
+The suite 1,434 passed and 2 skipped of 1,436; cargo 165 and 94; the norm tests 19 of 19; the audio
+guide's seven blocks build. EXAMPLES.md reads 353 written, 2 in part and 26 missing, Audio all
+eight. Right, the one honest counterpart of a decoder C# cannot run, and the underrun silence rather
+than an end. Next item 19, the world a scene file saves whole, then the three rows read against the
+lock.
+
+Before it, `a612ab27` and `7f42cf40` came. `a612ab27`, transform_gizmo, ABI 272: Bevy's own gizmo,
+its rendering already there wherever PBR is, so no crate and no owner's word, Feathers being only
+its interface and the camera controller only its camera; its plugin is opt-in by
 `Config.TransformGizmo`, since once its settings exist Bevy spawns the handles and a camera of order
 1 in every app at startup, which fourteen view shader tests caught when the plugin first went in
 unconditionally, four bytes appended to the config on both sides and the remark saying why it is
@@ -82,43 +102,6 @@ normals out, which is item 20, small, with the row under way or right after. The
 their own run cancelled by the later push. Next transform_gizmo, read for whether anything short of
 Feathers and the camera controller reaches it, debug_picking, pitch, decodable, then item 19, then
 the three read against the lock as the working session read them.
-
-Before it, `32ae29fb` came, item 18, ABI 270, a vertex stream of the game's own: a registry by name
-in `streams.rs`, process-wide as the programs' table and emptied as an app is built, each name kept
-once for Bevy's static string, its attribute's id a one in bit 48 over the name's hash so it sorts
-after Bevy's own and is the same on every run, a name returning in another format or at another
-location refused; the stream travels in the mesh's own struct, 32 bytes a stream and 72 for the mesh
-data with the streams at 56 and their count at 64, asserted on both sides, so a write keeps the
-streams, and the write carries a skin's joints over too where the vertex count matches, with the
-skinned bounds made again; `mesh_from` checks each stream, a known format, a name, a location from 8
-to 15 taken once, registers it and inserts its values, and the mesh info gains bit 128. In the main
-pass a program with a vertex stage of its own drawing a mesh whose layout holds a stream has its
-buffers built again from Bevy's attributes at Bevy's locations and the streams after, the prepass
-attributes gaining the streams and a 2D vertex stage the same on a 2D mesh, sprites excluded;
-`bcs.slang`'s header says how a stream is declared, its class and the free outputs. In C#
-`MeshStream` with `From<T>` and `SizeOf`, `MeshStreamFormat`'s five, `MeshData.Streams` and the
-attributes' bit, every refusal checked before the call and a reshaped name answered with the earlier
-and the new format and location by name; the scene file keeps streams in base64 and its reader skips
-a format it does not know; N 1.3 moved the vertex-built meshes out of Render.cs into
-Render.Meshes.cs, 652 and 238. Tests: native, the registry keeping an attribute and refusing another
-shape, the formats' values, a mesh from one `UInt` stream and the same name as `Float` refused, and
-the layout's numbers; managed, two quads whose four bytes a vertex the vertex stage unpacks, green
-and blue, the info's bit, the reshaped name's message, the short stream, location 1, a shared
-location and a ragged `From`, a stream through the scene file's round trip bytes equal, and a skin
-kept on a write of as many vertices and lost on one of fewer. The example is Bevy's, the cuboid read
-back with a `Float4` blend color at 8, its triage row gone, the capture Bevy's red cube; the drawing
-guide's paragraph with the scene file's note and the shaders guide's section with the unpacking
-stage. The mip generation's layers, read in the pass before: Bevy's job path makes one 2D layer's
-levels, so an image of more than one layer or a 3D one is refused rather than re-laid, the room's
-two functions pure with a native test over 4 by 4 images, and the message and guide say one layer.
-The suite 1,430 passed and 2 skipped of 1,432; cargo 162 and 93; the three profiles clean; the norm
-and path tests 19 of 19; the two guides' blocks build. EXAMPLES.md reads 349 written, 2 in part and
-30 missing. Right, as the item and the plan have it, the one attribute a name through the registry
-and every refusal before the call. Two files stand near the rule's 800 lines, material.rs at 776 and
-meshes.rs at 764, so the next batch that touches either plans its split first. The runs of
-`6c491f7c` and this wait on the push. Next occlusion_culling, then world_serialization,
-transform_gizmo, debug_picking, pitch, decodable, then the four read against the lock as the working
-session read them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

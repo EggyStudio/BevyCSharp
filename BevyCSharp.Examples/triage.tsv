@@ -278,7 +278,6 @@ client	n/a	a Rust client of Bevy's remote protocol
 integration_test	missing	Bevy's remote protocol, where bcs is this engine's own
 server	missing	Bevy's remote protocol, where bcs is this engine's own
 bsn	n/a	writes a scene in BSN, a Rust macro, which Bevy 0.20 loads from no file
-world_serialization	missing	a component holding a string, a field a scene file leaves out, and a resource written with the entities
 fullscreen_material	can	as a pass the camera runs
 manual_material	n/a	writes a material with Rust's mid-level render API
 animate_shader	can

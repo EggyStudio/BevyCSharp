@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 namespace Bevy;
 
 /// <summary>
-/// The managed store an <see cref="EcsList{T}"/> keeps its items in, a slot per list.
+/// The managed store an <see cref="EcsList{T}"/>, an <see cref="EcsMap{TKey, TValue}"/> and an
+/// <see cref="EcsText"/> keep what they hold in, a slot each.
 /// </summary>
 /// <remarks>
 /// <para>

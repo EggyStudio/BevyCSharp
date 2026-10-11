@@ -16,6 +16,7 @@ using BevyCSharp.Examples.Maths;
 using BevyCSharp.Examples.Measuring;
 using BevyCSharp.Examples.Movement;
 using BevyCSharp.Examples.Pointers;
+using BevyCSharp.Examples.Scenes;
 using BevyCSharp.Examples.Shading;
 using BevyCSharp.Examples.Sound;
 using BevyCSharp.Examples.States;
@@ -301,6 +302,9 @@ internal static class Catalog
         new("sprite_picking", SpritePicking.Build),
         new("dragdrop_picking", DragdropPicking.Build, DragdropPicking.Configure),
         new("draggable_slider", DraggableSlider.Build),
+
+        // Scene
+        new("world_serialization", WorldSerialization.Build),
 
         // State
         new("computed_states", ComputedStatesExample.Build),

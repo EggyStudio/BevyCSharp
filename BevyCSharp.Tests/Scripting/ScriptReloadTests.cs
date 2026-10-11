@@ -82,7 +82,10 @@ public sealed class ScriptReloadTests : IDisposable
         Assert.Contains("second", named);
     }
 
-    /// <summary>A component that counts, by one before the reload and by a thousand after it.</summary>
+    /// <summary>
+    /// A component that counts, by one before the reload and by a thousand after it, twice, the
+    /// second count one a scene leaves out and a reload keeps all the same.
+    /// </summary>
     private void WriteCounter(int step, string extra = "") => File.WriteAllText(Path.Combine(_folder, "Counter.cs"), $$"""
         using Bevy;
 
@@ -93,10 +96,15 @@ public sealed class ScriptReloadTests : IDisposable
         {
             public int Count;
             public Entity Target;
+            [NotSaved] public int Unsaved;
             {{extra}}
 
             [OnUpdate]
-            public void Tick(BehaviorContext ctx) => Count += {{step}};
+            public void Tick(BehaviorContext ctx)
+            {
+                Count += {{step}};
+                Unsaved += {{step}};
+            }
         }
         """);
 
@@ -114,6 +122,7 @@ public sealed class ScriptReloadTests : IDisposable
         var target = Entity.None;
         var before = -1;
         var after = -1;
+        var unsaved = -1;
         object? pointed = null;
 
         harness.OnContext(Stage.Startup, ctx =>
@@ -145,6 +154,7 @@ public sealed class ScriptReloadTests : IDisposable
 
             schema = ComponentSchemas.For("Reloaded.Counter")!;
             after = (int)schema.Read(ctx.Ecs, counted, "Count")!;
+            unsaved = (int)schema.Read(ctx.Ecs, counted, "Unsaved")!;
             pointed = schema.Read(ctx.Ecs, counted, "Target");
         });
 
@@ -155,6 +165,7 @@ public sealed class ScriptReloadTests : IDisposable
         Assert.InRange(before, 1, 999);
         Assert.True(after > 1000, $"the count went from {before} to {after}");
         Assert.Equal(before, after % 1000);
+        Assert.Equal(after, unsaved);
         Assert.Equal(target, pointed);
     }
 

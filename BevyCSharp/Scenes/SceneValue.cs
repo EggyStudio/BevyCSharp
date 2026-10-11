@@ -394,7 +394,7 @@ public static class SceneValue
         var root = new Node(string.Empty);
         foreach (var field in schema.Fields)
         {
-            if (field.Derived) continue;
+            if (field.Derived || (field.Hints.NotSaved && references is not { SameRun: true })) continue;
             if (field.Read(world, entity) is not { } value) continue;
 
             var node = root;
@@ -478,7 +478,9 @@ public static class SceneValue
         var written = 0;
         foreach (var field in schema.Fields)
         {
-            if (field.Derived) continue;
+            // A field no file is written with is left as the type starts it, even where a file
+            // from before it was marked holds it.
+            if (field.Derived || (field.Hints.NotSaved && references is not { SameRun: true })) continue;
             if ((Find(json, field.Name) ?? Former(json, field)) is not { } found) continue;
             if (found.ValueKind == JsonValueKind.Null) continue;
             if (Read(found, field, references) is not { } value) continue;
@@ -704,6 +706,13 @@ public class SceneReferences
     /// it cannot write. The editor asks for it, so a scene saved there refers to every file by id.
     /// </remarks>
     public bool GiveIds { get; init; }
+
+    /// <summary>
+    /// Whether what is written is read back in this same run, as a component moved to the type a
+    /// script reload made of it is, so a field marked <see cref="NotSavedAttribute"/> goes along
+    /// rather than starting over.
+    /// </summary>
+    internal bool SameRun { get; init; }
 
     /// <summary>Writes a reference to an asset by its file, reporting whether it has one.</summary>
     public virtual bool WriteAsset(Utf8JsonWriter json, AssetHandle asset)

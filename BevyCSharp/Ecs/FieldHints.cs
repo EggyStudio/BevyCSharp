@@ -59,6 +59,7 @@ public readonly record struct FieldCondition(string Field, string? Value = null,
 /// asset type.
 /// </param>
 /// <param name="FormerNames">The names the field had before, which an old file may still use.</param>
+/// <param name="NotSaved">Whether no file is written with it (<see cref="NotSavedAttribute"/>).</param>
 public sealed record FieldHints(
     string? Label = null,
     string? Tooltip = null,
@@ -84,7 +85,8 @@ public sealed record FieldHints(
     int Order = 0,
     string? Asset = null,
     string? Extensions = null,
-    IReadOnlyList<string>? FormerNames = null)
+    IReadOnlyList<string>? FormerNames = null,
+    bool NotSaved = false)
 {
     /// <summary>What a field with no attributes on it asked for, which is nothing.</summary>
     public static readonly FieldHints None = new();

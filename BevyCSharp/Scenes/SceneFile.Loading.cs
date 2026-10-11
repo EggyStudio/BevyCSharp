@@ -19,7 +19,7 @@ public static partial class SceneFile
         ArgumentNullException.ThrowIfNull(world);
 
         using var document = AssetFiles.TryReadJson(Resolve(path), "a scene", out var problem);
-        return document is null ? SceneLoad.Unread(problem!) : Read(world, document.RootElement, parent, path);
+        return document is null ? SceneLoad.Unread(problem!) : Read(world, document.RootElement, parent, path, worldResources: true);
     }
 
     /// <summary>Spawns everything a scene document holds.</summary>
@@ -27,12 +27,18 @@ public static partial class SceneFile
     /// What was spawned, or nothing and why for a document that is not a scene in this format
     /// (<see cref="SceneLoad.Problem"/>).
     /// </returns>
-    public static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default) => Read(world, scene, parent, "The document");
+    /// <remarks>
+    /// The entities alone, as <see cref="Write"/> writes them. <see cref="Load"/> puts the
+    /// resources a scene file was saved with into the world as well.
+    /// </remarks>
+    public static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default) =>
+        Read(world, scene, parent, "The document", worldResources: false);
 
     /// <summary>
-    /// Spawns everything a scene document holds, naming where it came from in a problem.
+    /// Spawns everything a scene document holds, naming where it came from in a problem, and puts
+    /// its resources into the world where asked.
     /// </summary>
-    private static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent, string from)
+    private static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent, string from, bool worldResources)
     {
         ArgumentNullException.ThrowIfNull(world);
 
@@ -46,7 +52,7 @@ public static partial class SceneFile
         Depth++;
         try
         {
-            return Spawn(world, scene, parent, spawned);
+            return Spawn(world, scene, parent, spawned, worldResources);
         }
         catch (InvalidDataException error)
         {
@@ -75,9 +81,13 @@ public static partial class SceneFile
     /// <summary>
     /// Spawns everything a scene document holds, adding each entity to a list as it is spawned.
     /// </summary>
-    private static SceneLoad Spawn(EcsWorld world, JsonElement scene, Entity parent, List<Entity> spawned)
+    private static SceneLoad Spawn(EcsWorld world, JsonElement scene, Entity parent, List<Entity> spawned, bool worldResources)
     {
         var entries = scene.TryGetProperty("entities", out var listed) && listed.ValueKind == JsonValueKind.Array ? listed.EnumerateArray().ToArray() : [];
+
+        // The resources of the game's own the scene was saved with, put into the world first, so a
+        // system reading one as the entities arrive finds the scene's.
+        if (worldResources) SceneResources.Read(scene, world.Owner);
 
         // The meshes and materials made in memory, each made once and shared by what refers to it,
         // as it was when the scene was written.

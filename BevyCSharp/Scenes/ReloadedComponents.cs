@@ -140,7 +140,7 @@ public static class ReloadedComponents
     /// <summary>References written as the entity or the asset itself, which stay in the same world.</summary>
     private sealed class InPlace : SceneReferences
     {
-        public static readonly InPlace Instance = new();
+        public static readonly InPlace Instance = new() { SameRun = true };
 
         public override bool WriteEntity(Utf8JsonWriter json, Entity entity)
         {
