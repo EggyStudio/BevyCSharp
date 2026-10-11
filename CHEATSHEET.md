@@ -1442,6 +1442,7 @@ static void SetPosition(int x, int y);                          // Moves the win
 static void SetIme(bool enabled, float x = 0f, float y = 0f);   // Turns the platform's input method on or off, and says where the text being composed is
 static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false);  // Sets whether the window has a title bar and border, whether it can be resized by dragging, and whether it stays above other windows
 static void SetCursorShape(CursorShape shape);                  // Sets the shape of the pointer while it is over the window
+static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over the window to an image, its hotspot, the pixel that points, given in pixels across and down from the image's top left corner
 static void Minimize();                                         // Minimizes the window to the taskbar or dock
 static void SetMaximized(bool maximized);                       // Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had
 static WindowPlace Place();                                     // Where the window is, how large, and whether it is maximized

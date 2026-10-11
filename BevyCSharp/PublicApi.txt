@@ -11442,6 +11442,7 @@ static class Bevy.Window
   static string MonitorName(int index)
   static void Minimize()
   static void SetCursor(CursorGrab grab, bool visible)
+  static void SetCursorImage(AssetHandle image, uint hotspotX = 0u, uint hotspotY = 0u)
   static void SetCursorShape(CursorShape shape)
   static void SetIme(bool enabled, float x = 0f, float y = 0f)
   static void SetMaximized(bool maximized)

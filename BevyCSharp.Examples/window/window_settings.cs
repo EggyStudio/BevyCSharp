@@ -9,15 +9,13 @@ namespace BevyCSharp.Examples.Windowing;
 // The settings of a window changed as it runs. Its title counts the seconds, V turns vertical sync
 // off and on, T moves it below, among and above other windows, 1, 2 and 3 take away and give back
 // its minimize, maximize and close buttons, Space hides and grabs the pointer, F swaps its light and
-// dark theme, and the left and right buttons step through pointers. It opens hidden and shows itself
-// on the third frame.
-//
-// Bevy's pointers include an image of its own, which needs its custom_cursor feature, and it logs
-// its frame time each second. Neither is here, the first since the bridge does not compile that
-// feature in.
+// dark theme, and the left and right buttons step through pointers, the last of them Bevy's icon.
+// It opens hidden and shows itself on the third frame, and logs its frame time each second.
 internal static class WindowSettings
 {
-    private static readonly CursorShape[] Cursors = [CursorShape.Default, CursorShape.Pointer, CursorShape.Wait, CursorShape.Text];
+    // Bevy's CursorIcons, the platform's four shapes and then Bevy's icon, pointing from its middle.
+    private static readonly CursorShape[] Shapes = [CursorShape.Default, CursorShape.Pointer, CursorShape.Wait, CursorShape.Text];
+    private static AssetHandle _icon;
 
     private static int _cursor;
     private static bool _cursorFree;
@@ -26,6 +24,13 @@ internal static class WindowSettings
     {
         config.Title = "I am a window!";
         (config.Width, config.Height) = (500, 300);
+        config.DiagnosticPlugins = DiagnosticPlugins.Log | DiagnosticPlugins.FrameTime;
+    }
+
+    private static void ShowCursor(int index)
+    {
+        if (index < Shapes.Length) Window.SetCursorShape(Shapes[index]);
+        else Window.SetCursorImage(_icon, 128, 128);
     }
 
     public static void Build(App app)
@@ -33,6 +38,7 @@ internal static class WindowSettings
         app.Startup(ctx =>
         {
             (_cursor, _cursorFree) = (0, true);
+            _icon = AssetServer.Load(AssetKind.Image, "branding/icon.png");
             var window = Window.Entity();
             if (window == Entity.None) return;
 
@@ -42,7 +48,7 @@ internal static class WindowSettings
             settings.EnabledButtonsMaximize = false;
             settings.Visible = false;
             settings.WindowTheme = WindowTheme.Dark;
-            Window.SetCursorShape(Cursors[0]);
+            ShowCursor(0);
         }, "window_settings.InitCursorIcons");
 
         app.Update(Settings, "window_settings.Settings");
@@ -91,8 +97,9 @@ internal static class WindowSettings
         if (input.KeyPressed(Key.F) && settings.WindowTheme is { } theme)
             settings.WindowTheme = theme == WindowTheme.Light ? WindowTheme.Dark : WindowTheme.Light;
 
-        if (input.MousePressed(MouseButton.Left)) _cursor = (_cursor + 1) % Cursors.Length;
-        else if (input.MousePressed(MouseButton.Right)) _cursor = (_cursor + Cursors.Length - 1) % Cursors.Length;
-        if (input.MousePressed(MouseButton.Left) || input.MousePressed(MouseButton.Right)) Window.SetCursorShape(Cursors[_cursor]);
+        var cursors = Shapes.Length + 1;
+        if (input.MousePressed(MouseButton.Left)) _cursor = (_cursor + 1) % cursors;
+        else if (input.MousePressed(MouseButton.Right)) _cursor = (_cursor + cursors - 1) % cursors;
+        if (input.MousePressed(MouseButton.Left) || input.MousePressed(MouseButton.Right)) ShowCursor(_cursor);
     }
 }

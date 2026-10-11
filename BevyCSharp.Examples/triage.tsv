@@ -410,7 +410,6 @@ screenshot	can	the pictures saved beside the program
 transparent_window	can
 window_drag_move	can
 window_resizing	can	the size read each frame and shown when it changes, where Bevy reads its resize messages
-window_settings	part	the custom cursor image among its pointers, Bevy's custom_cursor feature, which the bridge does not compile in, and the frame time it logs
 inline_image	can	through Bevy's reflected InlineImage
 solari_reflections	missing	the settings of Solari's reflections its panel sets, which Config.RayTracedLighting does not reach
 compressed_image_saver	missing	Bevy's asset processor and its compressing image saver, which the bridge does not run

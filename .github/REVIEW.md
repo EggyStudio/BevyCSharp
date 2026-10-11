@@ -10,8 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9e941884`. Three commits of the examples in part. `82e012f6`: a mesh made in code is
-compressed in place as Bevy's regular compression does, positions, normals, tangents and texture
+Reviewed up to `e5b2c76d`. Three commits more of the examples in part. `6b5ada32`: `Ui.FontAtlases`
+counts Bevy's font atlases and the bytes they hold and `ClearFontAtlases` empties them, as Bevy's
+text stress tests count and empty them, so many_text and many_text2d take their switch, with a test,
+ABI 249. `4f478f6b`: `AssetServer.LoadFolder` loads every asset in a folder at once and
+`TryReadFolder` gives their handles once it has, so asset_loading loads as Bevy's does, with a test,
+ABI 250, the native side in a new `assets/folders.rs`. `e5b2c76d`: `Render.MorphTargetNames` gives
+the names a mesh gives its morph targets once it has arrived, so morph_targets prints each as Bevy's
+does, with a small model of two named targets and a test, ABI 251. Right, each the call Bevy's
+example reaches for and no more, each with its test. `render/assets.rs` stands at 799 lines of N
+1.3's 800, grown since the 783 noted here, so the batch that next touches it splits it first, as
+item 2 asks; `NormTests.cs` at 794 the same. Still in part: 3d_shapes, solari, breakout's stepping,
+custom_transitions and window_settings, which the coder takes next, and log_diagnostics, waiting on
+the owner's word for `sysinfo`.
+
+Before it, three commits came to be read, of the examples in part. `82e012f6`: a mesh made in code
+is compressed in place as Bevy's regular compression does, positions, normals, tangents and texture
 coordinates in sixteen bits, colors in eight and indices in sixteen where they fit, and a glTF scene
 is loaded with its meshes compressed as they load, two loads of a file being two sets of meshes as
 Bevy has it, with the warning that a shader of one's own reads attributes as they are kept, so a
@@ -62,32 +76,6 @@ back, which many_cubes' three switches set as Bevy's do, its triage down to the 
 bridge does not reach; right, the switches a stress test wants and a game seldom does, said so in
 the remarks. Next the rest of the examples in part that want no crate.
 
-Before it, one commit came to be read, item 4's comparison of the captures, as proposed and taken on
-its terms. Each capture is taken in a frame counted from the app's first, `shot <path> [frame]`
-holding the request until then, on a clock of a sixtieth a frame, and an app begun on a set clock
-compiles each pipeline in the frame that asks for it, so a frame is the same moment of the scene,
-drawn whole, on a device compiling for seconds as on a fast one; before, a capture taken when the
-waits ended landed on whatever frame the app had reached, and a lavapipe pass found 29 of 191
-differing, most the same scene some frames apart. A capture runs as the workflow runs it, seeded,
-and one that prints runs on the set clock with its numbers set apart in the comparison. Every
-picture was taken again on the laptop's GPU and on lavapipe, 190 changed and one text new, and the
-two devices match in all 329, seven within an allowance listed with its cause in
-`build/captures-differ.txt`, four of Bevy's drawn at random and unseeded, one whose animation starts
-in the frame its model loads, the meshlets lavapipe draws some of, and solari's noise and timings,
-the list's head saying a fault is never listed and the list only gets shorter; two heavy scenes are
-taken at frame 30, lavapipe taking seconds a frame over them; seven examples flat by their design
-are named so the blank check passes them and they are still compared. `build/compare-captures.py`
-holds a pixel to 24 in a channel and a capture to 2% of its pixels or lines, names a failure's share
-and the box its differing pixels lie in, passes a new example with nothing checked in, and the
-examples job runs it after capturing under `!cancelled()`. Right, every term met and the clock's
-cause found and said rather than the tolerance widened. One thing found on the way, which is Verdict
-10: `irradiance_volumes` hung once on the GPU at frame 90, the offscreen run's wait for the frame
-before it never ending, and that wait has no limit. The suite ran whole, 1,363 of 1,368 with two
-skipped, the three failing the tree's unbuilt skybox batch's and not this commit's. Every picture
-changes with the retake, which the owner is told. Next, as the coder has them: B 4's twelve
-examples, alpha to coverage, canceled touches, the static transform optimizations reflected, and the
-skybox's compressed formats.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -132,7 +120,7 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs` at 783 lines and `NormTests.cs` at 794 split with their next addition;
+   `render/assets.rs` at 799 lines and `NormTests.cs` at 794 split before their next addition;
    `app.rs` is at 709 since `c5b6d1d3`.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is

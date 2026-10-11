@@ -300,6 +300,23 @@ public static unsafe class Window
     public static void SetCursorShape(CursorShape shape) =>
         Native.Check(Native.bcs_window_set_cursor_shape((int)shape), "Window.SetCursorShape");
 
+    /// <summary>
+    /// Sets the pointer over the window to an image, its hotspot, the pixel that points, given in
+    /// pixels across and down from the image's top left corner.
+    /// </summary>
+    /// <remarks>
+    /// The image is shown at the size it is, so a pointer is drawn at the size it should appear,
+    /// and needs eight bits a channel of color and alpha, as a PNG gives. Nothing changes until it
+    /// has loaded. <see cref="SetCursorShape"/> gives the platform's own shapes back, and the
+    /// interface sets those as the pointer crosses what it draws.
+    /// </remarks>
+    /// <param name="image">The picture, loaded or made.</param>
+    /// <param name="hotspotX">How far across the hotspot is.</param>
+    /// <param name="hotspotY">How far down.</param>
+    /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
+    public static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0) =>
+        Native.Check(Native.bcs_window_set_cursor_image(image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
+
     /// <summary>Minimizes the window to the taskbar or dock.</summary>
     /// <remarks>
     /// A window made without the platform's title bar (<see cref="SetStyle"/> with

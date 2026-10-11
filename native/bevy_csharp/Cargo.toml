@@ -187,6 +187,10 @@ render = [
     "bevy/bevy_picking",
     "bevy/sprite_picking",
     "bevy/mesh_picking",
+    # A pointer drawn from an image of the game's own, as Bevy's window_settings shows one. The
+    # image and asset crates and wgpu's types it reaches are in the profile already, so it adds
+    # nothing to the build.
+    "bevy/custom_cursor",
     "bevy/bevy_gizmos",
     "bevy/bevy_gizmos_render",
     # Sound. Unlike everything else here this needs a system library at build time: cpal, which

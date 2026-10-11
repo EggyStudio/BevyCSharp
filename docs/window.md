@@ -158,6 +158,14 @@ window is maximized, so a button that toggles it keeps that itself. The ImGui ru
 cursor shape as the pointer crosses a field or an edge, whenever the shape it asks for changes, and
 the editor draws its own frame this way.
 
+`Window.SetCursorImage` makes the pointer a picture of the game's own, shown at the size it is,
+with the pixel that points given across and down from its top left corner, as a strategy game's
+gauntlet or a painting program's brush:
+
+```csharp
+Window.SetCursorImage(AssetServer.Load(AssetKind.Image, "ui/hand.png"), hotspotX: 4, hotspotY: 2);
+```
+
 On GNOME under Wayland, winit draws a title bar of its own that imitates an older GNOME rather than
 the libadwaita one the desktop's other windows have, because GNOME leaves drawing it to the app.
 `Config.DesktopTitleBar` opens the window through XWayland there instead, where GNOME draws its
