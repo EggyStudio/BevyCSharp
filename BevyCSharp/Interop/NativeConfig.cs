@@ -95,4 +95,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to play sound to the machine's device in a run with no window.</summary>
     public uint AudioWithoutWindow;
+
+    /// <summary>Non-zero to open no window of the app's own and run on with no window open.</summary>
+    public uint NoPrimaryWindow;
 }

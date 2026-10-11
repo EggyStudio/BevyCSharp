@@ -207,6 +207,29 @@ written into the window by a pass whose pipeline compiles over the first frames,
 captured before `Render.PipelinesReady()` holds may come back black, and a capture meant to show
 what it draws waits for that.
 
+A game that opens every window itself, one on each screen as Bevy's `monitor_info` does, starts
+with `Config.PrimaryWindow` false, which leaves the run without a first window and keeps it running
+with none open. Bevy keeps a `Monitor` on an entity of its own for each display it finds, read
+through `MonitorRef`, and `Window.SetFullscreenOn` makes a window fill the one an entity names:
+
+<!-- compiled with:
+Config config = new();
+EcsWorld ecs = null!;
+-->
+```csharp
+config.PrimaryWindow = false;                     // before the app is built
+
+foreach (var monitor in ecs.All().Where(entity => ecs.Get<MonitorRef>(entity) is not null))
+{
+    var window = ecs.Spawn();
+    ecs.Insert<WindowRef>(window).Title = ecs.Wrap<MonitorRef>(monitor).Name ?? "Display";
+    Window.SetFullscreenOn(window, monitor);
+}
+```
+
+A run with no display finds no monitors, so a game written this way opens nothing offscreen, and
+one that has to run there opens a window of its own when it finds none.
+
 `Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
 `WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The

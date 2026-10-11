@@ -920,6 +920,7 @@ sealed class Bevy.Config
   bool MeshPicking { get; set; }
   bool Offscreen { get; set; }
   bool PathTracer { get; set; }
+  bool PrimaryWindow { get; set; }
   bool RayTracedLighting { get; set; }
   bool RememberWindow { get; set; }
   bool Serve { get; set; }
@@ -2495,6 +2496,7 @@ struct Bevy.Interop.NativeConfig
   uint Height
   uint MeshPicking
   uint MeshletClusters
+  uint NoPrimaryWindow
   uint Offscreen
   uint RayTracedLighting
   uint Transparent
@@ -11560,6 +11562,7 @@ static class Bevy.Window
   static void SetCursor(CursorGrab grab, bool visible)
   static void SetCursorImage(AssetHandle image, uint hotspotX = 0u, uint hotspotY = 0u)
   static void SetCursorShape(CursorShape shape)
+  static void SetFullscreenOn(Entity window, Entity monitor)
   static void SetIme(bool enabled, float x = 0f, float y = 0f)
   static void SetMaximized(bool maximized)
   static void SetMode(WindowMode mode)

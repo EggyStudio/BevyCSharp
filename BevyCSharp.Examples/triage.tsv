@@ -396,7 +396,7 @@ debug_frustum_culling	can	each shape's box tested against the small camera's fru
 clear_color	can
 custom_cursor_image	missing	custom cursor images, Bevy's custom_cursor feature, which the bridge does not compile in
 low_power	missing	Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default
-monitor_info	missing	a window made fullscreen on a monitor named by its entity, which reflection cannot name, and a run that opens no first window
+monitor_info	part	a run on a display, whose monitors its windows fill, where an offscreen run reports none and opens nothing
 multiple_windows	can
 scale_factor_override	can	through the resolution of Bevy's reflected Window
 screenshot	can	the pictures saved beside the program

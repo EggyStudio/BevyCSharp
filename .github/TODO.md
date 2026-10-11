@@ -48,14 +48,14 @@ the most examples, and the largest is taken between groups of examples. The coun
 - **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
   settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
   free camera of its own written as a behavior.
-- **One more.** A window made fullscreen on a monitor named by its entity, in a run that opens no
-  first window (`monitor_info`).
-
-One example is written in part, leaving out a feature named in its row.
+Two examples are written in part, leaving out a feature named in each row.
 
 - **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
   memory of the process and of the machine. Bevy reads them through `sysinfo`, a crate the bridge
   does not build.
+- **A run on a display**, which `monitor_info` has not had. It opens a window filling each monitor
+  the platform reports, and an offscreen run reports none, so its test fills a monitor it made
+  itself, and only a run with monitors shows each window on its screen.
 
 ## Content
 

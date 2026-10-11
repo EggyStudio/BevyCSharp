@@ -171,6 +171,46 @@ pub unsafe extern "C" fn bcs_window_screenshot(path: *const core::ffi::c_char, w
     })
 }
 
+/// Makes a window fill the monitor `monitor` names, at the mode the monitor shows, and centers it
+/// there for when it leaves fullscreen, Bevy's `WindowMode::Fullscreen` and `WindowPosition::Centered`
+/// with `MonitorSelection::Entity`, as Bevy's monitor_info opens one on each monitor.
+///
+/// The monitor is one of the entities Bevy keeps a `Monitor` on for each display it finds, which a
+/// run with no display has none of. Reflection cannot name the entity inside the selection, so this
+/// is a call of its own. Answers [`status::NOT_PRESENT`] for an entity that is no monitor.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_fullscreen_on(window: u64, monitor: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (window, monitor);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::window::{Monitor, MonitorSelection, VideoModeSelection, Window, WindowMode, WindowPosition};
+
+            let (window, monitor) = (Entity::from_bits(window), Entity::from_bits(monitor));
+
+            with_world(|world| {
+                if let Some(refusal) = refuse_unless_window(world, window) {
+                    return refusal;
+                }
+                if !world.get_entity(monitor).is_ok_and(|found| found.contains::<Monitor>()) {
+                    return status::NOT_PRESENT;
+                }
+
+                let mut settings = world.get_mut::<Window>(window).expect("refused above where there is none");
+                settings.mode = WindowMode::Fullscreen(MonitorSelection::Entity(monitor), VideoModeSelection::Current);
+                settings.position = WindowPosition::Centered(MonitorSelection::Entity(monitor));
+                status::OK
+            })
+        }
+    })
+}
+
 /// Why `entity` is not a window, or `None` when it is one.
 #[cfg(feature = "render")]
 fn refuse_unless_window(world: &bevy::ecs::world::World, entity: bevy::ecs::entity::Entity) -> Option<i32> {
@@ -178,5 +218,45 @@ fn refuse_unless_window(world: &bevy::ecs::world::World, entity: bevy::ecs::enti
         Err(_) => Some(status::NO_ENTITY),
         Ok(found) if !found.contains::<bevy::window::Window>() => Some(status::NO_COMPONENT),
         Ok(_) => None,
+    }
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use bevy::ecs::world::World;
+    use bevy::math::IVec2;
+    use bevy::window::{Monitor, MonitorSelection, VideoModeSelection, Window, WindowMode, WindowPosition};
+
+    use crate::interop::status;
+    use crate::state::loan_world;
+
+    /// A window made to fill a monitor named by its entity, as Bevy's monitor_info makes each, and
+    /// an entity that is no monitor refused.
+    #[test]
+    fn a_window_fills_the_monitor_its_entity_names() {
+        let mut world = World::new();
+        let monitor = world
+            .spawn(Monitor {
+                name: Some("Test".into()),
+                physical_height: 1080,
+                physical_width: 1920,
+                physical_position: IVec2::ZERO,
+                refresh_rate_millihertz: Some(60_000),
+                scale_factor: 1.0,
+                video_modes: Vec::new(),
+            })
+            .id();
+        let window = world.spawn(Window::default()).id();
+        let other = world.spawn_empty().id();
+
+        let fill = |world: &mut World, on: bevy::ecs::entity::Entity| {
+            loan_world(world, || super::bcs_window_fullscreen_on(window.to_bits(), on.to_bits()))
+        };
+        assert_eq!(fill(&mut world, other), status::NOT_PRESENT);
+        assert_eq!(fill(&mut world, monitor), status::OK);
+
+        let settings = world.get::<Window>(window).unwrap();
+        assert_eq!(settings.mode, WindowMode::Fullscreen(MonitorSelection::Entity(monitor), VideoModeSelection::Current));
+        assert_eq!(settings.position, WindowPosition::Centered(MonitorSelection::Entity(monitor)));
     }
 }

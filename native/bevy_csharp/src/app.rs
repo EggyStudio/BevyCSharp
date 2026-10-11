@@ -144,7 +144,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             let plugins = DefaultPlugins
                 .set(WindowPlugin {
-                    primary_window: if offscreen {
+                    primary_window: if offscreen || config.no_primary_window != 0 {
                         None
                     } else {
                         Some(Window {
@@ -177,9 +177,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                         })
                     },
 
-                    // A windowless run has no window to close, and the default condition ends an
-                    // app the moment the last one is gone, which here is immediately.
-                    exit_condition: if offscreen {
+                    // A windowless run, or one with no window of its own, has no first window to
+                    // close, and the default condition ends an app the moment the last one is
+                    // gone, which here is immediately.
+                    exit_condition: if offscreen || config.no_primary_window != 0 {
                         ExitCondition::DontExit
                     } else {
                         ExitCondition::OnPrimaryClosed

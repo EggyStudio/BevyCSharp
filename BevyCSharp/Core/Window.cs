@@ -387,6 +387,32 @@ public static unsafe class Window
     public static void StartDragResize(WindowEdge edge) =>
         Native.Check(Native.bcs_window_start_drag_resize((int)edge), "Window.StartDragResize");
 
+    /// <summary>
+    /// Makes a window a game spawned fill a monitor, at the mode the monitor shows, and centers it
+    /// there for when it leaves fullscreen. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The monitor is one of the entities Bevy keeps a <c>MonitorRef</c> on for each display it
+    /// finds, as Bevy's monitor_info opens one window on each, and a run with no display has none.
+    /// Bevy's <c>MonitorSelection::Entity</c> holds the entity where reflection cannot reach it, so
+    /// this is a call of its own beside the window's other settings, which its <c>WindowRef</c>
+    /// holds.
+    /// </para>
+    /// <para>
+    /// The window is any entity carrying Bevy's <c>Window</c>, which a game spawns through
+    /// <c>ecs.Insert&lt;WindowRef&gt;</c>, and <see cref="Config.PrimaryWindow"/> false leaves the
+    /// run without one of its own for a game that opens all of them.
+    /// </para>
+    /// </remarks>
+    /// <param name="window">The entity carrying the window.</param>
+    /// <param name="monitor">The entity carrying the monitor, one Bevy found.</param>
+    /// <exception cref="BevyNativeException">
+    /// The window is no window, the monitor no monitor, or this build has no windows.
+    /// </exception>
+    public static void SetFullscreenOn(Entity window, Entity monitor) =>
+        Native.Check(Native.bcs_window_fullscreen_on(window.Bits, monitor.Bits), $"filling monitor {monitor} with window {window}");
+
     /// <summary>How many monitors the platform reports.</summary>
     /// <returns>Zero on a windowless run, which has no monitors to report.</returns>
     public static int MonitorCount()

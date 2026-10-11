@@ -20,9 +20,10 @@ program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
 printing=$("$program" --printing)
 
 # Examples that show and print nothing by design, Bevy's two empty applications and its two that
-# play music in a window with no camera, and those that wait for a file dropped, the mouse or a
-# touch, which a capture has none of, so their capture is not held to saying something.
-empty="audio drag_and_drop empty empty_defaults mouse_grab mouse_input soundtrack touch_input touch_input_events"
+# play music in a window with no camera, those that wait for a file dropped, the mouse or a touch,
+# which a capture has none of, and monitor_info, which opens a window on each monitor and finds none
+# in a run with no display, so their capture is not held to saying something.
+empty="audio drag_and_drop empty empty_defaults monitor_info mouse_grab mouse_input soundtrack touch_input touch_input_events"
 
 # Examples whose picture is a color or two by their design, as Bevy's is, which the count of colors
 # below would take for one that drew nothing: a clear color alone (clear_color,

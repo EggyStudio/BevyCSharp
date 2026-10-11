@@ -316,6 +316,20 @@ public sealed class Config
     public bool AudioWithoutWindow { get; set; }
 
     /// <summary>
+    /// Whether a run with a window opens one of its own, true unless a game opens every window it
+    /// has itself.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>WindowPlugin</c> with no <c>primary_window</c>, as Bevy's monitor_info leaves it
+    /// out to open one window on each monitor. Closing the first window ends a run that has one,
+    /// and a run without keeps running when every window is closed, so it ends where a game asks
+    /// with <see cref="App.RequestExit()"/>. The calls of
+    /// <see cref="Window"/> that speak of the first window have none to speak of, and the windows a
+    /// game spawns are reached through their entities.
+    /// </remarks>
+    public bool PrimaryWindow { get; set; } = true;
+
+    /// <summary>
     /// How many meshlet clusters the GPU keeps room for at once, which turns Bevy's meshlets on.
     /// Zero, the default, leaves them off.
     /// </summary>

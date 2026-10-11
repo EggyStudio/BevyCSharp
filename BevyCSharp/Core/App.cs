@@ -248,6 +248,7 @@ public sealed unsafe partial class App : IDisposable
                 MeshPicking = Config.MeshPicking ? 1u : 0u,
                 Weather = Config.Weather ? 1u : 0u,
                 AudioWithoutWindow = Config.AudioWithoutWindow ? 1u : 0u,
+                NoPrimaryWindow = Config.PrimaryWindow ? 0u : 1u,
             };
             _handle = Native.bcs_app_create(&native);
         }

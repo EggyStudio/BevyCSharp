@@ -1511,6 +1511,7 @@ static void SetMaximized(bool maximized);                       // Maximizes the
 static WindowPlace Place();                                     // Where the window is, how large, and whether it is maximized
 static void StartDragMove();                                    // Hands the window to the platform to be moved by the pointer, until the button held now is let go
 static void StartDragResize(WindowEdge edge);                   // Hands the window to the platform to be resized by the pointer from one edge or corner, until the button held now is let go
+static void SetFullscreenOn(Entity window, Entity monitor);     // Makes a window a game spawned fill the monitor monitor names, at the mode the monitor shows, and centers it there for when it leaves fullscreen
 static int MonitorCount();                                      // How many monitors the platform reports
 static MonitorInfo Monitor(int index);                          // Describes one monitor, by an index below MonitorCount
 static string MonitorName(int index);                           // The name the platform gives a monitor, by an index below MonitorCount

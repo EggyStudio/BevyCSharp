@@ -278,6 +278,10 @@ pub struct BcsConfig {
     /// Non-zero to play sound to the machine's device in a run with no window, headless or
     /// offscreen, which otherwise plays every sound to none. See `audio::silent`.
     pub audio_without_window: u32,
+    /// Non-zero to open no window of the app's own, as Bevy's monitor_info leaves its
+    /// `primary_window` out, and to keep running with no window open, where a run otherwise ends
+    /// with its first window. The windows a game spawns are drawn as usual.
+    pub no_primary_window: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

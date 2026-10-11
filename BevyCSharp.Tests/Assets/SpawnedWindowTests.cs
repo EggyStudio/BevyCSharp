@@ -122,6 +122,51 @@ public sealed class SpawnedWindowTests : IDisposable
         harness.Run();
     }
 
+    /// <summary>
+    /// A spawned window made to fill a monitor holds the monitor's entity in its mode and its
+    /// position, and an entity that is no monitor, or no window, is refused.
+    /// </summary>
+    /// <remarks>
+    /// A run with no display has no monitors, so the monitor here is Bevy's <c>Monitor</c> put on an
+    /// entity of the test's own, which the bridge cannot tell from one the platform reported. The
+    /// window is never opened, so nothing is filled but the settings.
+    /// </remarks>
+    [SkippableFact]
+    public void AWindowFillsTheMonitorItsEntityNames()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        string? mode = null, position = null;
+        int notMonitor = NativeStatus.Ok, notWindow = NativeStatus.Ok;
+
+        harness.On(Stage.Update, world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            if (mode is not null) return;
+
+            var monitor = ecs.Spawn();
+            ecs.Insert<MonitorRef>(monitor).Name = "Test";
+            var window = ecs.Spawn();
+            ecs.Insert<WindowRef>(window);
+            var plain = ecs.Spawn();
+
+            notMonitor = Assert.Throws<BevyNativeException>(() => Window.SetFullscreenOn(window, plain)).Status;
+            notWindow = Assert.Throws<BevyNativeException>(() => Window.SetFullscreenOn(plain, monitor)).Status;
+
+            Window.SetFullscreenOn(window, monitor);
+            mode = ecs.GetReflected(window, WindowRef.TypePath, "mode");
+            position = ecs.GetReflected(window, WindowRef.TypePath, "position");
+        });
+
+        harness.Run();
+
+        Assert.Equal(NativeStatus.NotPresent, notMonitor);
+        Assert.Equal(NativeStatus.NoComponent, notWindow);
+        Assert.Contains("Fullscreen", mode);
+        Assert.Contains("Centered", position);
+    }
+
     // Whether every pixel of an eight-bit PNG is zero, read from its image data inflated, each row
     // after the byte that says how it was filtered. A filter writes each byte as its difference from
     // a guess made from the bytes before it, and from zeros alone every filter guesses zero, so the

@@ -10,11 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7ffd96c6`. Verdict 12's mend in a commit of its own: the atlas builder's test module
-names no type of the renderer, its image helper taking the size, the dimension and the format from
-Bevy's default image, one pixel of the format wanted, and writing its own width and height into the
-size, so the bridge's tests build in the headless profile the workflow runs them in; `cargo test`
-with no feature, the workflow's profile, passes 83, and the larger profile passed 143 before.
+Reviewed up to `9d3e2e5f`. Two commits, and first the page: the owner pushed `7ffd96c6` at 11:06 and
+its run is green on Linux, Windows and macOS with the bridge's tests built and passed, so Verdict 12
+is settled; `68aa5dd5`'s run before it is red on all three by the same step, as foreseen. Then
+`062d3f18`, relationships, ABI 260: a relationship of a game's own is any type naming it, and the
+bridge declares eight pairs of Bevy's relationship and target components through a macro, as the
+state slots are declared, each type of the game's taking a slot the first time it is used, for the
+process, with running out thrown naming the types that hold them; `Relate`, `Unrelate`,
+`RelationOf`, `RelatedTo` and `RelationAncestors` on the world, the last lazy and endless on a cycle
+as Bevy's `iter_ancestors` is, which the example guards as Bevy's does; Bevy's own hooks keep each
+target's list and take a relation away when either end is despawned, which a native test and
+`RelationshipTests` hold, with the order, a move, two relationships apart and the chain. The example
+runs Bevy's steps in order in one frame and prints as Bevy's does, its text the capture; the
+hierarchy guide has its paragraph and block, the cheat sheet its five lines, EXAMPLES.md reads 336
+written and 45 missing, TODO.md's group one. The suite's one failure on the way was B 3, the slot
+count answered outside the guard, mended before the commit; 1,408 passed and 2 skipped; cargo's 83
+headless and 144 with the larger profiles. Right, Bevy's relationship kept whole behind a fixed set
+rather than imitated in managed lists, the cap named to the caller with its holders, and despawn's
+two sides tested. `9d3e2e5f` puts BUILDING.md's sentence on logged errors back in the managed
+suite's paragraph and the cargo paragraph within its width. Next monitor_info's bridge part with the
+example in part, its live run the owner's; item 12 with the next touch of `EcsWorld.Reflected.cs`.
+
+Before it, `7ffd96c6` came, Verdict 12's mend in a commit of its own: the atlas builder's test
+module names no type of the renderer, its image helper taking the size, the dimension and the format
+from Bevy's default image, one pixel of the format wanted, and writing its own width and height into
+the size, so the bridge's tests build in the headless profile the workflow runs them in; `cargo
+test` with no feature, the workflow's profile, passes 83, and the larger profile passed 143 before.
 BUILDING.md says where it names `cargo test` that no feature means the headless profile without the
 renderer's crates, that a test reaching them sits under `render` or behind the feature, and that
 `cargo test` runs in the default profile before a commit as well; its new paragraph took the
@@ -60,35 +81,6 @@ in part, its capture and its live check the owner's run on their own screens, wh
 owner's word (item 4); relationships begun meanwhile, relation slots as the state slots are. Next
 Verdict 12's mend, then relationships.
 
-Before it, one commit came to be read, texture_atlas: `Render2d.PackAtlas` packs loaded images into
-one atlas as the app runs through Bevy's own builder with a padding between them, answering the
-packed image, its layout and each image's frame in the order the images were given, or nothing while
-an image still loads, and throwing for a handle that names no image or for images past the largest
-atlas Bevy packs, the packed image a copy as the remark says; ABI 259. The native side is a module
-of its own under `assets`, 146 lines, with a test that packs a wide and a tall image four pixels
-apart and reads both rectangles, their gap and the packed image's size, so `assets.rs` grew by a
-line to 752 and `render/assets.rs` stands at 799 untouched. `AtlasPackingTests` packs a red and a
-blue image on the GPU and reads both colors and the size from the packed image, and reads nothing
-back for an image still loading in a one-frame run, which Bevy's schedule makes certain, a load
-asked for in an update reaching its assets no earlier than the next frame. The example loads Bevy's
-rpg folder whole, packs it four ways, unpadded and padded six pixels, sampled linearly and by
-nearest, shows both atlases and the vendor from each with labels, and its capture shows Bevy's
-point, a stray line on the unpadded linear vendor and none on the padded one; the folder's 157 files
-beyond the 18 the list held are added, listed from Bevy's tree at v0.20.0, and fetched by the
-script. Right, Bevy's builder reached and not rewritten, the two answers a caller acts on kept apart
-from the ones that throw, and the frames handed back in the caller's order. One thing read and left:
-a frame the layout does not place is written as minus one and cast to an unsigned frame on the
-managed side, which cannot happen while the build succeeds, so it stays. The 2D guide has its
-paragraph and block, the cheat sheet its line, EXAMPLES.md reads 334 written, 1 in part and 47
-missing, TODO.md's group three. The suite: 1,405 passed and 2 skipped of 1,407; cargo's 143. The
-owner pushed `b3ac2a0e`: its run is in flight, Linux green in 4 m 40 s with 1,138 passed and 487
-skipped where the runner draws nothing, its page carrying the five lines and two warnings
-`28e2d97b`'s carried, Windows and macOS running; the captures' comparison, the README's walk and
-Courtyard run on the pack run alone, as the workflow has them. Next image_node_resizing, whose
-`bevy_ui_debug` is a feature of a crate the tree builds and pulls none (Decision 25), the lock read
-to confirm it, the components table written again from an editor build and the example; then
-monitor_info and relationships.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -127,11 +119,11 @@ from [SHARED.md](SHARED.md).
    in 4 m 40 s with 1,138 passed and 487 skipped and cancelled on Windows and macOS by the push of
    `c11c63d4` at 10:02, whose run is red on all three systems, the bridge's tests not building
    (Verdict 12), the managed tests green, 1,059, 916 and 909. The run of `68aa5dd5`, pushed at 10:47
-   before the mend, is in flight; Verdict 12's mend is `7ffd96c6`, and a run carrying it settles the
-   verdict when its bridge step is green. The captures' comparison, the README's walk and Courtyard
-   run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97` is read on the
-   owner's pack run's page (Decision 8). Each push's run is read by the reviewing session, and a
-   failure it names comes first here.
+   before the mend, is red on all three by the same step, and the run of `7ffd96c6`, pushed at
+   11:06, is green on all three with the bridge's tests built, so Verdict 12 is settled. The
+   captures' comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`),
+   so the comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each
+   push's run is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -376,21 +368,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-12. **The run of `c11c63d4` is red on Linux, Windows and macOS by one thing: the bridge's tests do
-    not build.** Read from the three pages: the managed tests pass, 1,059, 916 and 909, and the step
-    that runs the bridge's own tests ends after 37 s, 2 m 31 s and 1 m 57 s with exit code 101 and
-    `error[E0433]: cannot find render in bevy` at `atlas_builder.rs:89`, the test module's `use
-    bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat}`. The workflow builds
-    the bridge's tests in the headless profile, the default, which has no `bevy::render`; the six
-    other modules that import that path lie under `render` and build with that feature alone, and
-    `cargo test` passed 143 in the working session under a profile that has it. Two things: the
-    module takes the types from where the headless profile has them, or its tests build with the
-    render feature alone as the others do, in a commit of its own before anything else, since
-    `68aa5dd5` carries the same file; and `cargo test` before a commit runs as the workflow runs it,
-    in the default profile, said in BUILDING.md where it names `cargo test`. Mended at `7ffd96c6`,
-    the test's types taken from Bevy's default image and BUILDING.md saying the profile; the run of
-    `68aa5dd5` went before it. Settled when a run carrying the mend has its bridge step green.
 
 ## Decisions
 
