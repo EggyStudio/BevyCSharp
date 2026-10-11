@@ -20,7 +20,7 @@ var docs = xml.Descendants("member").ToDictionary(m => (string)m.Attribute("name
 var groups = new (string Title, string Page, string[] Types)[]
 {
     ("Running an app", "running-a-game.md", ["BevyApp", "App", "Config", "World", "IPlugin", "IPluginGroup", "DefaultPlugins", "EnginePlugin", "BehaviorsPlugin", "Time", "FrameProfile"]),
-    ("Behaviors and systems", "behaviors.md", ["BehaviorContext", "BehaviorConditions", "BehaviorRegistry", "BehaviorRunners", "SystemDescriptor", "StageOrder", "SystemToggleRegistry", "SystemRegistrationSourceScope", "EcsWorld", "EcsCommands", "ChunkSet`1", "ReloadedComponents"]),
+    ("Behaviors and systems", "behaviors.md", ["BehaviorContext", "BehaviorConditions", "BehaviorRegistry", "BehaviorRunners", "SystemDescriptor", "StageOrder", "SystemToggleRegistry", "SystemRegistrationSourceScope", "Stepping", "EcsWorld", "EcsCommands", "ChunkSet`1", "ReloadedComponents"]),
     ("States", "states.md", ["StateRegistry"]),
     ("Messages", "messages-and-hierarchy.md", ["MessageBus", "On`1"]),
     ("Components", "components.md", ["ComponentHooks", "ComponentSchema", "ComponentSchemas", "ComponentField", "ItemFields", "EcsList`1", "EcsMap`2", "IInlineList`1", "InlineList4`1", "InlineList8`1", "InlineList16`1", "InlineList32`1", "InlineList64`1", "ListValue", "MapValue", "IReflectedComponent`1"]),

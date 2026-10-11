@@ -214,6 +214,7 @@ internal static class Catalog
         new("startup_system", StartupSystem.Build, Prints: 1),
         new("state_scoped", StateScoped.Build),
         new("system_closure", SystemClosure.Build, Prints: 3),
+        new("system_stepping", SystemStepping.Build, Prints: 19),
 
         // Games
         new("alien_cake_addict", AlienCakeAddict.Build),

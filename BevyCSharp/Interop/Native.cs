@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 253;
+    internal const int ExpectedAbiVersion = 254;
 
     static Native() => NativeLoader.Initialize();
 
@@ -123,14 +123,55 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_panic_on_purpose(int guarded);
 
-    /// <summary>Registers a C# system callback into a Bevy schedule.</summary>
-    [LibraryImport(Library)]
+    /// <summary>Registers a C# system callback into a Bevy schedule, under the name Bevy reports it by.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_add_system(
         IntPtr app,
         int stage,
+        string name,
         delegate* unmanaged[Cdecl]<IntPtr, void> callback,
         IntPtr user);
+
+    /// <summary>Steps the systems of a stage from the next frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_add(int stage);
+
+    /// <summary>Stops stepping the systems of a stage.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_remove(int stage);
+
+    /// <summary>Turns stepping off or on, or steps a system or the rest of the frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_act(int action);
+
+    /// <summary>Answers 1 while stepping is on.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_enabled();
+
+    /// <summary>Sets how stepping treats every system of a stage with a name.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_set_behavior(int stage, string name, int behavior);
+
+    /// <summary>Writes the stepped systems into a buffer, a stage and a name a line.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_systems(byte* buffer, int capacity);
+
+    /// <summary>Answers the place in the stepped systems of the one stepping runs next.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_cursor();
+
+    /// <summary>Writes Bevy's account of the stepping into a buffer.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_stepping_describe(byte* buffer, int capacity);
 
     /// <summary>Orders one C# system of a stage before another, by the numbers registration gave them.</summary>
     [LibraryImport(Library)]

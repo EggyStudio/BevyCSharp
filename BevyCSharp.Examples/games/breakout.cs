@@ -7,8 +7,8 @@ using Bevy.Reflected;
 namespace BevyCSharp.Examples.Games;
 
 // A simplified Breakout game. The arrow keys move the paddle, the ball bounces off the walls, the
-// paddle and the bricks, and every brick it breaks is a point. Bevy's helper for stepping through
-// the systems one at a time is left out, since stepping is not offered here.
+// paddle and the bricks, and every brick it breaks is a point. ` steps through the game's systems
+// one at a time, with Bevy's helper in stepping.cs.
 internal static class Breakout
 {
     internal static readonly (float X, float Y) PaddleSize = (120f, 20f);
@@ -38,7 +38,10 @@ internal static class Breakout
     internal static int Score;
     internal static AssetHandle CollisionSound;
 
-    public static void Build(App app) => app.Startup(Setup, "breakout.Setup");
+    public static void Build(App app) => app
+        .AddSteppingPanel([Stage.Update], Length.Percent(35f), Length.Percent(50f),
+            name => name is "Velocity.ApplyVelocity" or "Paddle.MovePaddle" or "Ball.CheckForCollisions" or "ScoreboardUi.UpdateScoreboard")
+        .Startup(Setup, "breakout.Setup");
 
     private static void Setup(BehaviorContext ctx)
     {

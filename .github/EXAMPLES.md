@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**325 written, 4 written in part, 0 can be written, 53 missing and 56 do not apply.** Of the 382 that apply, 329 can be written with what is bridged, 4 of them leaving something out.
+**327 written, 3 written in part, 0 can be written, 52 missing and 56 do not apply.** Of the 382 that apply, 330 can be written with what is bridged, 3 of them leaving something out.
 
 **156 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -20,9 +20,9 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 6 | 0 | 0 | 6 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 19 | 0 | 0 | 7 | 9 | 12 of 12 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 20 | 0 | 0 | 6 | 9 | 12 of 12 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
-| [Games](#games) | 6 | 1 | 0 | 0 | 0 | 6 of 6 |
+| [Games](#games) | 7 | 0 | 0 | 0 | 0 | 6 of 6 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
 | [Input](#input) | 12 | 0 | 0 | 0 | 0 |  |
 | [Math](#math) | 4 | 0 | 0 | 1 | 1 | 4 of 4 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **325** | **4** | **0** | **53** | **56** | **156 of 161** |
+| **All** | **327** | **3** | **0** | **52** | **56** | **156 of 161** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -311,7 +311,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`system_closure`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_closure.rs) | Show how to use closures as systems, and how to configure `Local` variables by capturing external state | [written](../BevyCSharp.Examples/ecs/system_closure.cs), prints [its output](assets/examples/system_closure.txt) |
 | [`system_param`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_param.rs) | Illustrates creating custom system parameters with `SystemParam` | does not apply, derives a Rust SystemParam |
 | [`system_piping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_piping.rs) | Pipe the output of one system into a second, allowing you to handle any errors gracefully | does not apply, pipes Rust system outputs |
-| [`system_stepping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_stepping.rs) | Demonstrate stepping through systems in order of execution. | missing, stepping through systems one at a time |
+| [`system_stepping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_stepping.rs) | Demonstrate stepping through systems in order of execution. | [written](../BevyCSharp.Examples/ecs/system_stepping.cs), the other systems of Update, which here are every example's behaviors, left to run so a step runs one of its four, and its stage added a frame before stepping is on so they are known |
 
 ## Embedded
 
@@ -324,7 +324,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`alien_cake_addict`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/alien_cake_addict.rs) | Eat the cakes. Eat them all. An example 3D game | [written](../BevyCSharp.Examples/games/alien_cake_addict.cs) |
-| [`breakout`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/breakout.rs) | An implementation of the classic game "Breakout". | [written in part](../BevyCSharp.Examples/games/breakout.cs), the helper that steps through the systems one at a time, which is system_stepping, missing here |
+| [`breakout`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/breakout.rs) | An implementation of the classic game "Breakout". | [written](../BevyCSharp.Examples/games/breakout.cs), its stepping panel steps the four systems the game names, since every example's behaviors are in this app's Update, where Bevy's steps all of Update but Bevy's own |
 | [`contributors`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/contributors.rs) | Displays each contributor as a bouncy bevy-ball! | [written](../BevyCSharp.Examples/games/contributors.cs), its birds hold a place in a list for the name, since a component here holds no string |
 | [`desk_toy`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/desk_toy.rs) | Bevy logo as a desk toy using transparent windows! Now with Googly Eyes! | [written](../BevyCSharp.Examples/games/desk_toy.cs), through Bevy's reflected CursorOptions on Window.Entity for the pointer passing through |
 | [`game_menu`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/showcase/game_menu.rs) | A simple game menu | [written](../BevyCSharp.Examples/games/game_menu.cs) |

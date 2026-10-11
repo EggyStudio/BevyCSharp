@@ -288,6 +288,38 @@ public static bool ChordHeld(World world) =>
 `Input` mirrors Bevy's `ButtonInput` here: `AnyKeyDown`, `AllKeysDown`, `AnyKeyPressed` and
 `AnyKeyReleased` take a span of keys, like `any_pressed` / `all_pressed` / `any_just_pressed`.
 
+## Stepping through a stage
+
+`Stepping` holds back the systems of the stages added to it and runs them one at a time on request,
+as Bevy's `Stepping` resource does, to watch a frame's work happen system by system. While it is
+on, the systems of those stages wait, frame after frame, and every other stage runs as before, so
+the app keeps drawing and reading keys. It is driven from a system in a stage that is not stepped:
+
+```csharp
+[OnPostUpdate]
+public static void Step(BehaviorContext ctx)
+{
+    if (ctx.Input.KeyPressed(Key.Backquote))
+    {
+        Stepping.Add(Stage.Update);
+        if (Stepping.IsEnabled) Stepping.Disable();
+        else Stepping.Enable();
+    }
+
+    if (ctx.Input.KeyPressed(Key.S)) Stepping.StepFrame();
+    if (ctx.Input.KeyPressed(Key.Space)) Stepping.ContinueFrame();
+}
+```
+
+`StepFrame` runs the next waiting system and `ContinueFrame` the rest of them, and each call takes
+effect at the start of the next frame, as Bevy's does. `AlwaysRun`, `NeverRun` and `SetBreakpoint`
+name a system of a stage by its name, `Behavior.Method` for a behavior's, and `ClearBreakpoint`
+clears whichever of the three was set. `Stepping.Systems` lists the stepped systems in the order a
+stepping frame runs them, from the frame after a stage is added, and `Stepping.Cursor` is the place
+in it of the one that runs next. Bevy's own systems in an added stage are stepped with the game's,
+so a game that steps only its own sets the rest to always run, as Bevy's helper does in `breakout`
+and `BevyCSharp.Examples` does in its copy.
+
 ## Copying an entity
 
 <!-- compiled with:

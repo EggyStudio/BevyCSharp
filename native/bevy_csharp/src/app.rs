@@ -378,6 +378,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // log, so a program measured beside Bevy's logs by the same code.
     crate::diagnostics::install(&mut app, config.diagnostics);
 
+    // What C# asks of stepping through a schedule, answered once the frame's schedules have run.
+    crate::stepping::install(&mut app);
+
     // Bevy refuses to allocate a handle for an asset type it has not been told about, and says
     // so by panicking rather than failing the load. `DefaultPlugins` registers these three, so
     // only the minimal profile has to ask.

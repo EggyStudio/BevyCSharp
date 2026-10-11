@@ -43,6 +43,7 @@ public sealed unsafe partial class App : IDisposable
             Native.bcs_app_add_system(
                 _handle,
                 (int)stage,
+                descriptor.Name,
                 &RegisteredSystem.Trampoline,
                 registration.UserData),
             $"registering system '{descriptor.Name}'");

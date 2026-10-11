@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e5b2c76d`. Three commits more of the examples in part. `6b5ada32`: `Ui.FontAtlases`
+Reviewed up to `98fb48f1`. Two commits more of the examples in part. `f9416e59`:
+`Window.SetCursorImage` makes the pointer an image of the game's own with its hotspot, as Bevy's
+window_settings shows one, through Bevy's `custom_cursor` feature, which pulls no crate, the lock
+gaining six lines of edges among its 594 packages, so Decision 25 allows it; a native test, ABI 252.
+`98fb48f1`: `MeshShape.Ring` carries a ring's thickness in its name so a shape is pushed out into a
+tube, and `Render.CreateExtrusion` pushes a convex polygon out by a depth, which fills 3d_shapes'
+third row as Bevy's does, with native tests, ABI 253. Right, each the call the example reaches for,
+the feature read for what it pulls before it was turned on. Next Bevy's system stepping through its
+`bevy_debug_stepping` feature, which pulls no crate either and serves breakout's helper and
+system_stepping both, then custom_transitions and solari; `render/assets.rs` at 799 and
+`NormTests.cs` at 794 split before a batch touches them.
+
+Before it, three commits more came to be read, of the examples in part. `6b5ada32`: `Ui.FontAtlases`
 counts Bevy's font atlases and the bytes they hold and `ClearFontAtlases` empties them, as Bevy's
 text stress tests count and empty them, so many_text and many_text2d take their switch, with a test,
 ABI 249. `4f478f6b`: `AssetServer.LoadFolder` loads every asset in a folder at once and
@@ -41,40 +53,6 @@ it was, which the reply says and is right, a share raised with its cause being t
 not a line added. Right, the compression Bevy's and its warning said, the file's loads kept apart as
 Bevy keeps them, and the module split before the line was crossed. Next the rest of the examples in
 part that want no crate.
-
-Before it, seven commits came to be read, each small and right. `f64b089b` brings twelve examples to
-B 4, 156 of the 161 whose Bevy example keeps state in a component of its own (Decision 5); of the
-five left, three follow 0.19.1 and come with Feathers, whose checkboxes and radio are the components
-counted, one keeps its instances in the camera's draw's buffer and no static field, and one keeps
-its buttons' state in another example's behaviors, which the table's test, reading one file, does
-not see; a click on a text field focuses nothing offscreen, Bevy's focusing asking for a primary
-window an offscreen run lacks, the same gap as tab_navigation's Tab under item 4. `1ee315b6`: a
-material takes alpha to coverage, Bevy's sixth alpha mode, which covers a share of a pixel's samples
-by its alpha among the opaque surfaces and is Mask at half alpha with one sample, drawn and
-round-tripped in tests, transparency_3d drawn whole, ABI 244. `d9d6a0e9`: a touch the platform
-cancels is reported once with its own phase, as Bevy reports it, a Rust test running Bevy's own
-touch system frame by frame. `27482870`: a range's reflection registration moves alone into
-`reflected/type_data.rs`, `app.rs` at 788 lines since. `6c6b5593`: Bevy's static transform
-optimizations, which Bevy reflects without their resource's data, are registered with it and as a
-component's, since a resource here is a component on an entity of its own, so bevymark and
-many_foxes turn them off as Bevy's do. `549c57c0`: `Render.CompressedFormats` says which compressed
-texture formats the device decodes, Bevy's flags bit for bit, so skybox cycles through the copies
-the device takes, with a test, ABI 245. `30e0e528`, Verdict 10: the offscreen run's wait for the
-frame before takes a limit of sixty seconds, long beside lavapipe's heaviest frames and short beside
-a capture's ten minutes, past which the run says which frame the GPU did not finish and exits 87
-beside the memory cap's 86, with a native test; the wait's object was read, wgpu signaling a
-submission's fence even when nothing was submitted and the mark submitted after the frame's work by
-the one system, so a fence never signaled is a GPU that never finished the frame, no frame skipped
-and no request held; and irradiance_volumes was captured a hundred times on the laptop's GPU, each
-matching its picture and none hanging, so the hang is shown not to repeat. Verdict 10 is settled.
-EXAMPLES.md reads 315 written, 14 in part and 53 missing. Right, each gap closed as Bevy has it and
-the wait's object read rather than the limit alone. `NormTests.cs` at 794 and `app.rs` at 788 split
-with their next addition. Then `e5af8eb8`, the first of the examples in part: a mesh takes
-`NoAutomaticBatching` and `NoCpuCulling` beside its frustum flag, and a camera `CameraFlags`, no
-indirect drawing and no CPU culling, the flags the whole answer so a flag left out puts Bevy's path
-back, which many_cubes' three switches set as Bevy's do, its triage down to the mesh compression the
-bridge does not reach; right, the switches a stress test wants and a game seldom does, said so in
-the remarks. Next the rest of the examples in part that want no crate.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

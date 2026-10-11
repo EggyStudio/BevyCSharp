@@ -4,6 +4,7 @@ use core::ffi::c_void;
 
 use bevy::app::{First, FixedUpdate, Last, PostUpdate, PreUpdate, Startup, Update};
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
+use bevy::ecs::system::IntoSystem;
 use bevy::ecs::world::World;
 
 use crate::app::{BcsSet, Stage};
@@ -17,14 +18,21 @@ use crate::state::{app_mut, loan_world, BcsApp, SystemReg};
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 struct BcsSystem(u32);
 
-/// Registers a C# system in `stage`, and returns the number it was given, for ordering it.
+/// Registers a C# system in `stage` under `name`, and returns the number it was given, for ordering
+/// it.
+///
+/// The name is the one Bevy reports the system by, in a trace's spans, a warning about order and
+/// the list of a schedule's systems that stepping walks, where every C# system would otherwise be
+/// the one closure here and none could be told from another.
 ///
 /// # Safety
-/// `handle` must be a live app; `func` must remain callable until the app is destroyed.
+/// `handle` must be a live app; `name` must be a NUL-terminated UTF-8 string or null for Bevy's own
+/// name; `func` must remain callable until the app is destroyed.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_app_add_system(
     handle: *mut BcsApp,
     stage: i32,
+    name: *const core::ffi::c_char,
     func: extern "C" fn(*mut c_void),
     user: *mut c_void,
 ) -> i32 {
@@ -39,14 +47,21 @@ pub unsafe extern "C" fn bcs_app_add_system(
             return status::NULL_ARG;
         };
 
+        let name = unsafe { crate::interop::cstr_to_string(name) };
         let reg = SystemReg { func, user };
         let id = app.next_system;
         app.next_system += 1;
         // The system's cursors over the components' removals, its own from one run to the next,
         // which it makes the running ones while it runs (`removals`).
         let mut cursors = crate::removals::RemovalCursors::default();
-        let run = (move |world: &mut World| crate::removals::running(&mut cursors, || loan_world(world, || reg.invoke())))
-            .in_set(BcsSystem(id));
+        let run = IntoSystem::into_system(move |world: &mut World| {
+            crate::removals::running(&mut cursors, || loan_world(world, || reg.invoke()))
+        });
+        let run = match name {
+            Some(name) => run.with_name(name),
+            None => run,
+        }
+        .in_set(BcsSystem(id));
 
         match stage {
             Stage::Startup => {

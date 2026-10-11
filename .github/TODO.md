@@ -57,45 +57,21 @@ the most examples, and the largest is taken between groups of examples. The coun
   ambiguous (`nondeterministic_system_order`), and a message changed in place by a later system and
   read the same frame, where a C# message is read the frame after it is sent (`message`).
 
-Sixteen examples are written in part, each leaving out a feature named in its row. Six are stress
-tests, which leave out switches and counts that no wrapper reaches, and the other ten each leave
-out one of these.
+Three examples are written in part, each leaving out a feature named in its row.
 
-- **Line meshes and extruded rings**, which `3d_shapes` leaves out of its rows: Bevy's segment,
-  polyline and convex polygon, and the extrusion of a ring around a flat shape. `MeshShape`
-  extrudes the flat shapes, and an extruded ring is a recipe of a shape, its band's width and a
-  depth, one number more than a recipe holds.
-- **Which compressed formats the GPU decodes**, which `skybox` cycles through in Bevy, so ASTC and
-  ETC2 are left out here. Bevy reads them from the render device's features, and a call saying
-  which a GPU has would let a game pick the cubemap it loads as Bevy's example does.
 - **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
   its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
   added, and the cell count is one of Bevy's render diagnostics that is a number rather than a
   time, which `Render.Timings()` does not carry. Its scene of many lights, which Bevy's command line
   chooses, is left out too, though everything it draws is bridged.
-- **A folder loaded at once**, which `asset_loading` loads its models without. Bevy's
-  `load_folder` answers one asset holding a handle to each file in a folder, loaded in parallel,
-  which the asset server here would need a call for, answering the handles it holds.
-- **A mesh's morph target names**, which `morph_targets` prints in Bevy as each mesh arrives. A
-  call reading a mesh's `morph_target_names` would answer them.
-- **A canceled touch**, which `touch_input` never prints, since the touches the frame reports are
-  those that started, moved and ended, and Bevy's own set of canceled ones is left out.
-- **Stepping through the systems one at a time**, which `breakout` adds in Bevy as a panel that
-  pauses its schedule and runs the next system on a key, and which `system_stepping` shows alone.
-  Bevy's `Stepping` resource works on a schedule's systems by their ids, and the bridge would need
-  to add it and say which system is the one a C# delegate runs as.
-- **A cursor of an image**, which `window_settings` leaves out of the pointers it steps through
-  and `custom_cursor_image` is about. Bevy's `CursorIcon::Custom` is behind its `custom_cursor`
-  feature, which the bridge does not compile in, so the component reflects with its system
-  cursors alone.
+- **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
+  memory of the process and of the machine. Bevy reads them through `sysinfo`, a crate the bridge
+  does not build.
 - **Schedules of a game's own**, which `custom_transitions` runs at a transition in Bevy, its
   `OnReenter` and `OnReexit` run from a system in Bevy's `StateTransition` schedule. Here the
   state's own entering and leaving take their place, which Bevy runs on a value set again as on any
   other move. A schedule is a Rust type, so the bridge would need a label holding a number, and a
   C# system run inside the transition with the transition it reads.
-- **Alpha to coverage**, which `transparency_3d`'s left cube is drawn without, blending instead.
-  `AlphaMode` has Bevy's other modes, and this one needs the multisampled target it resolves
-  against.
 
 ## Content
 

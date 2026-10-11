@@ -95,6 +95,10 @@ headless = [
     # Radiance's format, which stores light brighter than white, as a baked lightmap or a sky is.
     "bevy/hdr",
     "bevy/bevy_state",
+    # Stepping through a schedule's systems one at a time, as Bevy's breakout and system_stepping
+    # do. Two flags in crates the profile has, so it adds nothing to the build, and a schedule with
+    # no `Stepping` resource to ask pays one lookup each time it runs.
+    "bevy/bevy_debug_stepping",
     "bevy/bevy_world_serialization",
     # Every reflected type Bevy has, registered at startup without a plugin naming it. The bridge
     # reads components through that registry, so a headless run and the test suite see the same

@@ -10762,6 +10762,32 @@ readonly struct Bevy.StateTransitionEvent<TState> : IEquatable<StateTransitionEv
 sealed class Bevy.StepAttribute : Attribute
   StepAttribute(double amount)
   double Amount { get; }
+readonly struct Bevy.SteppedSystem : IEquatable<SteppedSystem>
+  Stage Stage { get; init; }
+  SteppedSystem(Stage Stage, string Name)
+  bool Equals(SteppedSystem other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(SteppedSystem left, SteppedSystem right)
+  static bool op_Inequality(SteppedSystem left, SteppedSystem right)
+  string Name { get; init; }
+  void Deconstruct(out Stage Stage, out string Name)
+static class Bevy.Stepping
+  static SteppedSystem[]? Systems { get; }
+  static bool IsEnabled { get; }
+  static int? Cursor { get; }
+  static string? Describe()
+  static void Add(Stage stage)
+  static void AlwaysRun(Stage stage, string system)
+  static void ClearBreakpoint(Stage stage, string system)
+  static void ContinueFrame()
+  static void Disable()
+  static void Enable()
+  static void NeverRun(Stage stage, string system)
+  static void Remove(Stage stage)
+  static void SetBreakpoint(Stage stage, string system)
+  static void StepFrame()
 readonly struct Bevy.StreamRead : IEquatable<StreamRead>
   StreamRead(long Ticket)
   bool Equals(StreamRead other)

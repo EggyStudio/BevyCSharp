@@ -208,6 +208,22 @@ void Flip(string id, bool defaultEnabled = true);               // Flips the sta
 void Dispose();                                                 // Releases what it holds
 ```
 
+### `Stepping`
+
+```csharp
+static void Add(Stage stage);                                   // Steps the systems of stage, from the next frame, while stepping is on
+static void Remove(Stage stage);                                // Runs stage whole again, and forgets what was set for its systems
+static void Enable();                                           // Turns stepping on, so the systems of the added stages wait for a step
+static void Disable();                                          // Turns stepping off, so every system runs every frame again
+static void StepFrame();                                        // Runs the next stepped system in the next frame
+static void ContinueFrame();                                    // Runs the stepped systems from the next one to the end of the stepping frame, or to the next breakpoint, in the next frame
+static void AlwaysRun(Stage stage, string system);              // Runs the systems of stage called system every frame while stepping is on
+static void NeverRun(Stage stage, string system);               // Runs the systems of stage called system in no frame while stepping is on
+static void SetBreakpoint(Stage stage, string system);          // Stops a continued frame before the systems of stage called system, which the next step or continue then runs
+static void ClearBreakpoint(Stage stage, string system);        // Steps the systems of stage called system as the rest are stepped, clearing a breakpoint or AlwaysRun or NeverRun, as Bevy's clear_breakpoint clears whichever was set
+static string? Describe();                                      // Bevy's own account of the stepping, its action, stages, order and cursor, as Bevy's helper prints it, or null where nothing has asked for stepping
+```
+
 ### `EcsWorld`
 
 ```csharp
