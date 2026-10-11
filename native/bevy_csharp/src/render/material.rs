@@ -24,7 +24,7 @@ use std::any::TypeId;
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
-use bevy::asset::{AsAssetId, Asset, AssetApp, AssetId, Assets, Handle};
+use bevy::asset::{AsAssetId, Asset, AssetApp, AssetId, Handle};
 use bevy::camera::visibility::ViewVisibility;
 use bevy::core_pipeline::core_3d::{AlphaMask3d, Opaque3d, Transparent3d};
 use bevy::core_pipeline::deferred::{AlphaMask3dDeferred, Opaque3dDeferred};
@@ -95,9 +95,21 @@ pub struct BcsMaterial {
     pub alpha_given: bool,
     pub cull: Option<Face>,
     pub depth_bias: f32,
-    /// Drawn on a 2D mesh, held in a [`super::material2d::BcsMaterial2d`], whose values are checked
-    /// against the program's 2D stages rather than its 3D ones.
-    pub flat: bool,
+    /// What it is drawn on, which decides the stages its values are checked against.
+    pub surface: Surface,
+}
+
+/// What a material is drawn on.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Surface {
+    /// A mesh, by a 3D camera.
+    Mesh,
+    /// A 2D mesh or a sprite, held in a [`super::material2d::BcsMaterial2d`], whose values are
+    /// checked against the program's 2D stages rather than its 3D ones.
+    Flat,
+    /// An interface node, held in a [`super::ui_material::BcsUiMaterial`], whose values are checked
+    /// against the program's interface stages.
+    Node,
 }
 
 impl BcsMaterial {
@@ -110,7 +122,7 @@ impl BcsMaterial {
             alpha_given: false,
             cull: Some(Face::Back),
             depth_bias: 0.0,
-            flat: false,
+            surface: Surface::Mesh,
         }
     }
 }
@@ -594,46 +606,6 @@ fn mark_meshes_as_changed_if_their_materials_changed(
     }
 }
 
-/// Marks every material of a program whose shaders were replaced as changed, so each builds its
-/// bind group again in the new layout, keeping its values by name, 2D materials among them.
-fn refresh_materials_of_changed_programs(
-    mut programs: ResMut<programs::ShaderPrograms>,
-    mut materials: ResMut<Assets<BcsMaterial>>,
-    mut flat: ResMut<Assets<super::material2d::BcsMaterial2d>>,
-) {
-    let changed = programs.take_changed();
-
-    if changed.is_empty() {
-        return;
-    }
-
-    let stale_flat: Vec<_> = flat
-        .iter()
-        .filter(|(_, material)| changed.contains(&material.material.program))
-        .map(|(id, _)| id)
-        .collect();
-
-    for id in stale_flat {
-        if let Some(material) = flat.get_mut(id) {
-            material.into_inner();
-        }
-    }
-
-    let stale: Vec<AssetId<BcsMaterial>> = materials
-        .iter()
-        .filter(|(_, material)| changed.contains(&material.program))
-        .map(|(id, _)| id)
-        .collect();
-
-    for id in stale {
-        // `into_inner` rather than only asking for it mutably, because the guard `get_mut` hands
-        // back reports a change only when it is written through, and nothing here writes.
-        if let Some(material) = materials.get_mut(id) {
-            material.into_inner();
-        }
-    }
-}
-
 fn extract_materials(
     mut instances: ResMut<RenderMaterialInstances>,
     changed: Extract<
@@ -741,7 +713,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
         )
         .add_systems(
             First,
-            (programs::update, refresh_materials_of_changed_programs).chain(),
+            (programs::update, super::shader_materials::refresh_materials_of_changed_programs).chain(),
         )
         .add_systems(PostUpdate, super::post::match_samples_per_target)
         .add_systems(
@@ -783,6 +755,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
     }
 
     super::material2d::install(app);
+    super::ui_material::install(app);
     super::views::install(app);
     super::probes::install(app);
     super::watch::install(app);

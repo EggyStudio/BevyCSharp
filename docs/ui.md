@@ -325,6 +325,11 @@ size. `SliceTiling` makes the edges or the middle repeat rather than stretch, as
 needs. `Auto` keeps the picture's own size, which a node with no width or height of its own then
 takes.
 
+A node can also be drawn by a shader of the game's own, a material from `Shaders.CreateUiMaterial`
+given to it with `Ui.SetMaterial`, as Bevy's `MaterialNode` draws a `UiMaterial`. Its fragment shader
+is handed the node's size, borders and rounded corners, and its values are set by name as any shader
+material's are, which the [shaders guide](shaders.md#on-an-interface-node) covers.
+
 A node can be asked to report the pointer, which makes it a button:
 
 ```csharp

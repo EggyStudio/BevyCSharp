@@ -2962,11 +2962,13 @@ struct Bevy.Interop.NativeShaderProgramConfig
   NativeShaderStage DrawVertex
   NativeShaderStage Fragment
   NativeShaderStage Fragment2d
+  NativeShaderStage FragmentUi
   NativeShaderStage Pass
   NativeShaderStage PrepassFragment
   NativeShaderStage PrepassVertex
   NativeShaderStage Vertex
   NativeShaderStage Vertex2d
+  NativeShaderStage VertexUi
   int DefineCount
   int Flags
 struct Bevy.Interop.NativeShaderStage
@@ -10705,11 +10707,13 @@ sealed class Bevy.ShaderProgramSettings
   ShaderStage DrawVertex { get; init; }
   ShaderStage Fragment { get; init; }
   ShaderStage Fragment2d { get; init; }
+  ShaderStage FragmentUi { get; init; }
   ShaderStage Pass { get; init; }
   ShaderStage PrepassFragment { get; init; }
   ShaderStage PrepassVertex { get; init; }
   ShaderStage Vertex { get; init; }
   ShaderStage Vertex2d { get; init; }
+  ShaderStage VertexUi { get; init; }
   ShaderTarget ComputeTarget { get; init; }
 enum Bevy.ShaderProgramState : int
   Compiling = 0
@@ -10809,6 +10813,7 @@ static class Bevy.Shaders
   static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings)
   static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque)
   static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d? alpha = null, float cutoff = 0.5f)
+  static ShaderMaterial CreateUiMaterial(ShaderProgram program)
   static ShaderMaterial MaterialOn(Entity entity)
   static ShaderProgram CreateProgram(ShaderProgramSettings settings)
   static ShaderProgram CreateProgram(ShaderStage fragment)
@@ -11329,6 +11334,7 @@ static class Bevy.Ui
   static void SetFontVariations(Entity text, ReadOnlySpan<(string, float)> variations)
   static void SetImage(Entity entity, AssetHandle image)
   static void SetImage(Entity entity, UiImageSettings settings)
+  static void SetMaterial(Entity entity, AssetHandle material)
   static void SetScroll(Entity entity, float x, float y)
   static void SetStrikethrough(Entity text, bool struck = true)
   static void SetText(Entity entity, string text)

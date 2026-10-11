@@ -62,6 +62,7 @@ pub mod sprite_frames;
 pub mod sprite_material;
 pub mod tilemaps;
 pub mod timings;
+pub mod ui_material;
 pub mod values;
 pub mod views;
 pub mod watch;

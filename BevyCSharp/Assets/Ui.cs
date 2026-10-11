@@ -266,6 +266,22 @@ public static unsafe partial class Ui
         SetImage(entity, new UiImageSettings { Image = image });
 
     /// <summary>
+    /// Draws a node with a material a shader program draws, from
+    /// <see cref="Shaders.CreateUiMaterial"/>, or replaces the one it draws.
+    /// </summary>
+    /// <remarks>
+    /// Drawn over the node's background, border and image and under its text, across the whole
+    /// node, its border included, which the material's fragment shader reads the widths of and
+    /// draws itself where it is to have one. Every node drawn with the same material draws its values, so a
+    /// value set on it changes all of them.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone, the handle names no interface material, or this build has no renderer.
+    /// </exception>
+    public static void SetMaterial(Entity entity, AssetHandle material) =>
+        Render.Attach(entity, "MaterialNode", material, "an interface material");
+
+    /// <summary>
     /// Draws an image inside a node, tinted, cut down or sliced.
     /// </summary>
     /// <remarks>

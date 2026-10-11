@@ -10,6 +10,9 @@ pub enum Family {
     /// Drawn on a 2D mesh, in Bevy's 2D pipeline, whose view is group zero, mesh group one and
     /// material group two. Its own globals are group two.
     Material2d,
+    /// Drawn on an interface node, in Bevy's interface material pipeline, whose view is group zero
+    /// and material group one. Its own globals are group one.
+    MaterialUi,
     /// Run over a camera's picture. Its own globals are group zero, the bridge's inputs group one.
     Pass,
     /// Dispatched over buffers and images. Group zero is its own, group one the bridge's.
@@ -22,6 +25,7 @@ impl Family {
         match self {
             Family::Material => 3,
             Family::Material2d => 2,
+            Family::MaterialUi => 1,
             Family::Pass | Family::Compute => 0,
         }
     }
@@ -31,12 +35,14 @@ impl Family {
     /// Space zero is the shader's own. Spaces 100 to 102 are Bevy's groups zero to two, which only a
     /// material has. A 2D material's view and mesh are spaces 100 and 101, groups zero and one, and
     /// what a sprite says is space 102, the material's own group two at bindings past the shader's
-    /// own ([`SPRITE_BINDINGS`]). Space 101 is also where the pass and compute modules put the
-    /// bridge's inputs, which are group one there.
+    /// own ([`SPRITE_BINDINGS`]). An interface material's view is space 100, group zero. Space 101
+    /// is also where the pass and compute modules put the bridge's inputs, which are group one
+    /// there.
     pub fn remap(self, group: u32) -> u32 {
         match (self, group) {
             (_, 0) => self.own_group(),
             (Family::Material | Family::Material2d, 100..=102) => group - 100,
+            (Family::MaterialUi, 100) => 0,
             (Family::Pass | Family::Compute, 101) => 1,
             (_, other) => other,
         }
@@ -50,7 +56,7 @@ impl Family {
         match self {
             Family::Material => &[0, 1, 2, 3],
             Family::Material2d => &[0, 1, 2],
-            Family::Pass | Family::Compute => &[0, 1],
+            Family::MaterialUi | Family::Pass | Family::Compute => &[0, 1],
         }
     }
 }

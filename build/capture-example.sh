@@ -117,6 +117,9 @@ case "$example" in
   clustered_decal_maps) frames=600 ;;
   # Lighting that gathers over frames, and a robot that has walked out from behind the console.
   solari) frames=400 ;;
+  # A bar that fills over two seconds and empties over two more, so empty at the second second and
+  # half full at the third.
+  ui_material) frames=180 ;;
   # Thousands of meshes, which a device drawing on the CPU takes seconds a frame over, taken as
   # soon as they stand, which they do by the thirtieth.
   multi_asset_sync|many_morph_targets) frames=30 ;;

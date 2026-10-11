@@ -84,6 +84,8 @@ pub struct PipelineProgram {
     pub draw: Option<Arc<Layout>>,
     /// The layout of a 2D material's own group, merged from both of its stages.
     pub material2d: Option<Arc<Layout>>,
+    /// The layout of an interface material's own group, merged from both of its stages.
+    pub material_ui: Option<Arc<Layout>>,
     /// Moves on every time a stage is replaced, and a pipeline or a bind group made from an older
     /// version checks itself against it.
     pub generation: u32,
@@ -333,12 +335,20 @@ fn fingerprint(path: &Path) -> Option<u64> {
 /// Makes a program, or finds the one already made from the same description.
 ///
 /// Returns the program's number, or a negative status where the description names none of a
-/// fragment shader, a deferred stage, a pass, a compute shader, a draw's fragment shader or a 2D
-/// fragment shader, or names a file that is not Slang.
+/// fragment shader, a deferred stage, a pass, a compute shader, a draw's fragment shader, a 2D
+/// fragment shader or an interface one, or names a file that is not Slang.
 pub fn create(world: &mut World, description: ProgramDescription) -> i32 {
-    let usable = [Role::Fragment, Role::Compute, Role::Pass, Role::DrawFragment, Role::Deferred, Role::Fragment2d]
-        .iter()
-        .any(|role| description.stages[*role as usize].is_some());
+    let usable = [
+        Role::Fragment,
+        Role::Compute,
+        Role::Pass,
+        Role::DrawFragment,
+        Role::Deferred,
+        Role::Fragment2d,
+        Role::FragmentUi,
+    ]
+    .iter()
+    .any(|role| description.stages[*role as usize].is_some());
 
     if !usable {
         return status::NULL_ARG;
@@ -685,6 +695,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
     let mut material: Option<Layout> = None;
     let mut draw: Option<Layout> = None;
     let mut material2d: Option<Layout> = None;
+    let mut material_ui: Option<Layout> = None;
     let mut problem = String::new();
 
     for role in Role::ALL {
@@ -719,6 +730,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
             }
             _ if role.family() == Family::Material => Some(&mut material),
             _ if role.family() == Family::Material2d => Some(&mut material2d),
+            _ if role.family() == Family::MaterialUi => Some(&mut material_ui),
             _ => None,
         };
 
@@ -742,6 +754,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
         entry.material = material.map(Arc::new);
         entry.draw = draw.map(Arc::new);
         entry.material2d = material2d.map(Arc::new);
+        entry.material_ui = material_ui.map(Arc::new);
     } else {
         bevy::log::error!("{}: {problem}", program.description);
     }

@@ -167,6 +167,27 @@ public sealed class ShaderProgramSettings
     /// </summary>
     public ShaderStage Vertex2d { get; init; }
 
+    /// <summary>
+    /// The fragment shader of a material drawn on an interface node
+    /// (<see cref="Shaders.CreateUiMaterial"/>). Its entry point is called <c>fragment</c> unless
+    /// it is named.
+    /// </summary>
+    /// <remarks>
+    /// It reaches Bevy's view through <c>import bcs_ui;</c> and takes the <c>bcs_ui::VertexOutput</c>
+    /// Bevy's own interface material vertex shader hands on: where on the node the fragment is, the
+    /// node's size in pixels, its borders and how its corners are rounded, which is enough to draw
+    /// a border or a rounded edge of the material's own. The material's own values are declared and
+    /// set by name as a 3D material's are.
+    /// </remarks>
+    public ShaderStage FragmentUi { get; init; }
+
+    /// <summary>
+    /// The vertex shader of a material drawn on an interface node. Unset, Bevy's own places the
+    /// node's quad where the layout put it. Its entry point is called <c>vertex</c> unless it is
+    /// named.
+    /// </summary>
+    public ShaderStage VertexUi { get; init; }
+
     /// <summary>Names the shaders are compiled with defined.</summary>
     public Dictionary<string, ShaderDefine> Defines { get; init; } = new(StringComparer.Ordinal);
 
@@ -197,10 +218,10 @@ public sealed class ShaderProgramSettings
 
     /// <summary>The stages that were set.</summary>
     internal IEnumerable<ShaderStage> Stages() =>
-        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow, Vertex2d, Fragment2d, DrawTask, DrawMesh }
+        new[] { Vertex, Fragment, PrepassVertex, PrepassFragment, Compute, Pass, DrawVertex, DrawFragment, Deferred, DrawShadow, Vertex2d, Fragment2d, DrawTask, DrawMesh, VertexUi, FragmentUi }
             .Where(stage => stage.IsSet);
 
     /// <summary>The stage a message names the program by.</summary>
     internal ShaderStage Main() =>
-        Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment.IsSet ? DrawFragment : Fragment2d;
+        Fragment.IsSet ? Fragment : Pass.IsSet ? Pass : Compute.IsSet ? Compute : DrawFragment.IsSet ? DrawFragment : Fragment2d.IsSet ? Fragment2d : FragmentUi;
 }

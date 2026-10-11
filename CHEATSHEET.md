@@ -1057,6 +1057,7 @@ static ShaderProgram CreateProgram(ShaderProgramSettings settings);  // Makes a 
 static ShaderMaterial CreateMaterial(ShaderProgram program, AlphaMode alpha = AlphaMode.Opaque);  // Makes a material drawn by a program
 static ShaderMaterial CreateMaterial(ShaderMaterialSettings settings);  // Makes a material drawn by a program
 static ShaderMaterial CreateMaterial2d(ShaderProgram program, AlphaMode2d? alpha = null, float cutoff = 0.5f);  // Makes a material a program draws a 2D mesh or a sprite with
+static ShaderMaterial CreateUiMaterial(ShaderProgram program);  // Makes a material a program draws an interface node with
 static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
 static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
 static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs
@@ -1229,6 +1230,7 @@ static void SetText(Entity entity, string text);                // Replaces what
 static void ClearFontAtlases();                                 // Empties the font atlases, which Bevy fills again with the glyphs drawn after
 static UiInteraction InteractionOf(Entity entity);              // Reports how the pointer stands on an interactive node
 static void SetImage(Entity entity, AssetHandle image);         // Draws an image inside a node, or replaces the one it draws
+static void SetMaterial(Entity entity, AssetHandle material);   // Draws a node with a material a shader program draws, from CreateUiMaterial, or replaces the one it draws
 static void SetImage(Entity entity, UiImageSettings settings);  // Draws an image inside a node, tinted, cut down or sliced
 static void SetScroll(Entity entity, float x, float y);         // Moves a scrolling node's contents inside it
 static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated);  // Gives entity the input focus, so the keys go to it

@@ -163,14 +163,15 @@ public static unsafe partial class Shaders
         ArgumentNullException.ThrowIfNull(settings);
 
         if (!settings.Fragment.IsSet && !settings.Compute.IsSet && !settings.Pass.IsSet
-            && !settings.DrawFragment.IsSet && !settings.Deferred.IsSet && !settings.Fragment2d.IsSet)
+            && !settings.DrawFragment.IsSet && !settings.Deferred.IsSet && !settings.Fragment2d.IsSet
+            && !settings.FragmentUi.IsSet)
         {
             throw new ArgumentException(
                 "A shader program needs a fragment shader to draw with, a pass to run over a "
                 + "camera's picture, a compute shader to dispatch, a draw fragment shader to draw "
-                + "on a camera with, or a 2D fragment shader to draw a 2D mesh with. Bevy's own "
-                + "fragment shader reads a material laid out differently, so there is no default "
-                + "to fall back on.",
+                + "on a camera with, a 2D fragment shader to draw a 2D mesh with, or an interface "
+                + "fragment shader to draw a node with. Bevy's own fragment shader reads a material "
+                + "laid out differently, so there is no default to fall back on.",
                 nameof(settings));
         }
 
@@ -179,6 +180,14 @@ public static unsafe partial class Shaders
             throw new ArgumentException(
                 "A 2D vertex shader draws a 2D material with the 2D fragment shader beside it, so "
                 + "it needs one.",
+                nameof(settings));
+        }
+
+        if (settings.VertexUi.IsSet && !settings.FragmentUi.IsSet)
+        {
+            throw new ArgumentException(
+                "An interface vertex shader draws an interface material with the interface fragment "
+                + "shader beside it, so it needs one.",
                 nameof(settings));
         }
 
@@ -290,6 +299,8 @@ public static unsafe partial class Shaders
                     Fragment2d = Stage(settings.Fragment2d),
                     DrawTask = Stage(settings.DrawTask),
                     DrawMesh = Stage(settings.DrawMesh),
+                    VertexUi = Stage(settings.VertexUi),
+                    FragmentUi = Stage(settings.FragmentUi),
                 };
 
                 var id = Native.bcs_shader_program_create(&config);
@@ -399,6 +410,39 @@ public static unsafe partial class Shaders
 
         ThrowIfNoProgram(key, program);
         Native.Check(key, $"making a 2D material drawn by shader program {program.Id}");
+        return new ShaderMaterial(new AssetHandle(key));
+    }
+
+    /// <summary>
+    /// Makes a material a program draws an interface node with. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The program's <see cref="ShaderProgramSettings.FragmentUi"/> draws it, with its
+    /// <see cref="ShaderProgramSettings.VertexUi"/> where it has one. Its values are set by name on
+    /// what this returns as a 3D material's are, starting at zero, its textures at a stand-in of
+    /// the right shape. It goes on a node with <see cref="Ui.SetMaterial"/>, and the interface
+    /// draws it as Bevy draws a <c>UiMaterial</c>, over the node's background, border and image
+    /// and under its text, clipped as the node is and taking an outline or a shadow as any node
+    /// does.
+    /// </para>
+    /// <para>
+    /// It is blended by its alpha with what is behind, as everything an interface draws is, so it
+    /// takes no alpha mode.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentException">No program was given.</exception>
+    /// <exception cref="BevyNativeException">
+    /// The program does not exist, or there is no renderer or no interface.
+    /// </exception>
+    public static ShaderMaterial CreateUiMaterial(ShaderProgram program)
+    {
+        RequireProgram(program, nameof(program));
+
+        var key = Native.bcs_shader_material_ui_create(program.Id);
+
+        ThrowIfNoProgram(key, program);
+        Native.Check(key, $"making an interface material drawn by shader program {program.Id}");
         return new ShaderMaterial(new AssetHandle(key));
     }
 

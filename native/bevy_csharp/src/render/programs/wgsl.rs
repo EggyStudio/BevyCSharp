@@ -454,7 +454,7 @@ pub(super) fn fallback_source(role: Role, entry: &str) -> Source {
     match role {
         // Magenta, reading nothing but the position, so it is valid after any vertex shader and
         // in a pass as well as in a material.
-        Role::Fragment | Role::Pass | Role::DrawFragment | Role::Fragment2d => Source::Wgsl(format!(
+        Role::Fragment | Role::Pass | Role::DrawFragment | Role::Fragment2d | Role::FragmentUi => Source::Wgsl(format!(
             "@fragment\nfn {entry}(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {{\n    \
              let checker = (u32(position.x / 8.0) + u32(position.y / 8.0)) % 2u;\n    \
              return select(vec4<f32>(1.0, 0.0, 1.0, 1.0), vec4<f32>(0.1, 0.0, 0.1, 1.0), checker == 1u);\n}}\n"
@@ -563,6 +563,38 @@ fn {entry}(vertex_in: Vertex) -> VertexOutput {{
         out.color = vertex.color;
     }}
     out.instance_index = vertex.instance_index;
+    return out;
+}}
+"#
+        )),
+
+        // Bevy's own interface material vertex shader, which places the node's quad and hands on
+        // its size, borders and corners.
+        Role::VertexUi => Source::Wesl(format!(
+            r#"import bevy_render::{{view::View, globals::Globals}};
+import bevy_ui_render::ui_vertex_output::UiVertexOutput;
+
+@group(0) @binding(0)
+var<uniform> view: View;
+@group(0) @binding(1)
+var<uniform> globals: Globals;
+
+@vertex
+fn {entry}(
+    @location(0) vertex_position: vec3<f32>,
+    @location(1) vertex_uv: vec2<f32>,
+    @location(2) size: vec2<f32>,
+    @location(3) border_widths: vec4<f32>,
+    @location(4) border_radius_x: vec4<f32>,
+    @location(5) border_radius_y: vec4<f32>,
+) -> UiVertexOutput {{
+    var out: UiVertexOutput;
+    out.uv = vertex_uv;
+    out.position = view.clip_from_world * vec4<f32>(vertex_position, 1.0);
+    out.size = size;
+    out.border_widths = border_widths;
+    out.border_radius_x = border_radius_x;
+    out.border_radius_y = border_radius_y;
     return out;
 }}
 "#

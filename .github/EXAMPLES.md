@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**346 written, 2 written in part, 0 can be written, 34 missing and 56 do not apply.** Of the 382 that apply, 348 can be written with what is bridged, 2 of them leaving something out.
+**347 written, 2 written in part, 0 can be written, 33 missing and 56 do not apply.** Of the 382 that apply, 349 can be written with what is bridged, 2 of them leaving something out.
 
 **161 of the 170 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 56 | 0 | 0 | 9 | 0 | 22 of 24 |
+| [UI (User Interface)](#ui-user-interface) | 57 | 0 | 0 | 8 | 0 | 22 of 24 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **346** | **2** | **0** | **34** | **56** | **161 of 170** |
+| **All** | **347** | **2** | **0** | **33** | **56** | **161 of 170** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -578,7 +578,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`text_wrap_debug`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/text_wrap_debug.rs) | Demonstrates text wrapping | [written](../BevyCSharp.Examples/ui/text_wrap_debug.cs) |
 | [`transparency_ui`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/styling/transparency_ui.rs) | Demonstrates transparency for UI | [written](../BevyCSharp.Examples/ui/transparency_ui.cs) |
 | [`ui_drag_and_drop`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/ui_drag_and_drop.rs) | Demonstrates dragging and dropping UI nodes | [written](../BevyCSharp.Examples/ui/ui_drag_and_drop.cs) |
-| [`ui_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/ui_material.rs) | Demonstrates creating and using custom Ui materials | missing, interface materials (UiMaterial) |
+| [`ui_material`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/ui_material.rs) | Demonstrates creating and using custom Ui materials | [written](../BevyCSharp.Examples/ui/ui_material.cs) |
 | [`ui_scaling`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/ui_scaling.rs) | Illustrates how to scale the UI | [written](../BevyCSharp.Examples/ui/ui_scaling.cs) |
 | [`ui_target_camera`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/ui_target_camera.rs) | Demonstrates how to use `UiTargetCamera` and camera ordering. | [written](../BevyCSharp.Examples/ui/ui_target_camera.cs) |
 | [`ui_texture_atlas`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/images/ui_texture_atlas.rs) | Illustrates how to use TextureAtlases in UI | [written](../BevyCSharp.Examples/ui/ui_texture_atlas.cs) |

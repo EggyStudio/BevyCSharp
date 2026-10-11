@@ -35,10 +35,14 @@ pub enum Role {
     /// The mesh shader of the same, which writes the vertices and triangles a draw's fragment
     /// shader colors, in place of a draw vertex stage, compiled to SPIR-V.
     DrawMesh = 13,
+    /// The vertex shader of a material drawn on an interface node.
+    VertexUi = 14,
+    /// The fragment shader of the same.
+    FragmentUi = 15,
 }
 
 /// How many roles a program has.
-pub const ROLE_COUNT: usize = 14;
+pub const ROLE_COUNT: usize = 16;
 
 impl Role {
     pub const ALL: [Role; ROLE_COUNT] = [
@@ -56,6 +60,8 @@ impl Role {
         Role::Fragment2d,
         Role::DrawTask,
         Role::DrawMesh,
+        Role::VertexUi,
+        Role::FragmentUi,
     ];
 
     /// The roles a material is drawn with.
@@ -71,10 +77,13 @@ impl Role {
     /// use.
     pub(super) fn default_entry(self) -> &'static str {
         match self {
-            Role::Vertex | Role::PrepassVertex | Role::DrawVertex | Role::Vertex2d => "vertex",
-            Role::Fragment | Role::PrepassFragment | Role::Pass | Role::DrawFragment | Role::Fragment2d => {
-                "fragment"
-            }
+            Role::Vertex | Role::PrepassVertex | Role::DrawVertex | Role::Vertex2d | Role::VertexUi => "vertex",
+            Role::Fragment
+            | Role::PrepassFragment
+            | Role::Pass
+            | Role::DrawFragment
+            | Role::Fragment2d
+            | Role::FragmentUi => "fragment",
             Role::Deferred => "deferred",
             Role::DrawShadow => "shadow",
             Role::Compute => "main",
@@ -85,14 +94,17 @@ impl Role {
 
     pub(super) fn stage(self) -> slang::Stage {
         match self {
-            Role::Vertex | Role::PrepassVertex | Role::DrawVertex | Role::Vertex2d => slang::Stage::Vertex,
+            Role::Vertex | Role::PrepassVertex | Role::DrawVertex | Role::Vertex2d | Role::VertexUi => {
+                slang::Stage::Vertex
+            }
             Role::Fragment
             | Role::PrepassFragment
             | Role::Pass
             | Role::DrawFragment
             | Role::Deferred
             | Role::DrawShadow
-            | Role::Fragment2d => slang::Stage::Fragment,
+            | Role::Fragment2d
+            | Role::FragmentUi => slang::Stage::Fragment,
             Role::Compute => slang::Stage::Compute,
             Role::DrawTask => slang::Stage::Task,
             Role::DrawMesh => slang::Stage::Mesh,
@@ -117,6 +129,7 @@ impl Role {
             | Role::DrawMesh => Family::Pass,
             Role::Compute => Family::Compute,
             Role::Vertex2d | Role::Fragment2d => Family::Material2d,
+            Role::VertexUi | Role::FragmentUi => Family::MaterialUi,
         }
     }
 
@@ -136,6 +149,8 @@ impl Role {
             Role::Fragment2d => "2D fragment",
             Role::DrawTask => "draw task",
             Role::DrawMesh => "draw mesh",
+            Role::VertexUi => "interface vertex",
+            Role::FragmentUi => "interface fragment",
         }
     }
 }

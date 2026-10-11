@@ -657,7 +657,15 @@ public static unsafe partial class Render
         string described)
     {
         ArgumentNullException.ThrowIfNull(world);
+        Attach(entity, component, handle, described);
+    }
 
+    /// <summary>
+    /// Attaches a handle through one of the components that carry one, for a call that takes no
+    /// world, as the interface's do.
+    /// </summary>
+    internal static void Attach(Entity entity, string component, AssetHandle handle, string described)
+    {
         var status = Native.bcs_ecs_insert_asset(entity.Bits, component, handle.Key);
         if (status == NativeStatus.Unsupported) throw NoRenderer($"Attaching {described}");
         if (status == NativeStatus.NoEntity)

@@ -48,6 +48,9 @@ pub const PRELUDE: &str = include_str!("bcs.slang");
 /// What a Slang shader drawing a 2D mesh can import as `bcs2d`.
 pub const PRELUDE_2D: &str = include_str!("bcs2d.slang");
 
+/// What a Slang shader drawing an interface node can import as `bcs_ui`.
+pub const UI_PRELUDE: &str = include_str!("bcs_ui.slang");
+
 /// What a Slang shader drawing a sprite can import as `bcs_sprite`: the sprite's image, color and
 /// cutting, with Bevy's functions for them.
 pub const SPRITE_PRELUDE: &str = include_str!("bcs_sprite.slang");
@@ -67,9 +70,10 @@ pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 pub const RAY_PRELUDE: &str = include_str!("bcs_ray.slang");
 
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 7] = [
+const MODULES: [(&str, &str); 8] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
+    ("bcs_ui.slang", UI_PRELUDE),
     ("bcs_sprite.slang", SPRITE_PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
     ("bcs_compute.slang", COMPUTE_PRELUDE),

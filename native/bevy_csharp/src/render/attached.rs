@@ -8,9 +8,10 @@ use crate::state::with_world;
 
 /// Attaches an asset to an entity through one of the components that carry a handle.
 ///
-/// `component` is `Mesh3d` or `MeshMaterial3d`. These go through Bevy's own insert rather than a
-/// byte copy, both because the handle has to be retyped and because inserting them pulls in the
-/// components Bevy requires alongside, such as `Transform` and `Visibility`.
+/// `component` is `Mesh3d`, `MeshMaterial3d`, `Mesh2d`, `MeshMaterial2d` or `MaterialNode`. These
+/// go through Bevy's own insert rather than a byte copy, both because the handle has to be retyped
+/// and because inserting them pulls in the components Bevy requires alongside, such as `Transform`
+/// and `Visibility`.
 ///
 /// # Safety
 /// `component` must be a NUL-terminated UTF-8 string.
@@ -76,6 +77,10 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                         Err(_) if crate::render::shaders::attach_2d(&mut entity_mut, &untyped) => status::OK,
                         Err(_) => status::NO_COMPONENT,
                     },
+                    // A node drawn by a shader the caller wrote, the one kind of interface
+                    // material there is from C#.
+                    "MaterialNode" if crate::render::ui_material::attach(&mut entity_mut, &untyped) => status::OK,
+                    "MaterialNode" => status::NO_COMPONENT,
                     #[cfg(feature = "meshlet")]
                     "MeshletMesh3d" => match untyped
                         .try_typed::<bevy::pbr::experimental::meshlet::MeshletMesh>()

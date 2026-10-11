@@ -297,6 +297,47 @@ keeps them in one batch, and a value set on the material reaches them in the nex
 in Bevy. A program reading `bcs_sprite` draws only sprites, and one with a 2D vertex shader of its
 own draws none.
 
+### On an interface node
+
+A program draws an interface node with its interface stages, and the interface draws the material as
+Bevy draws a `UiMaterial`, across the whole node over its background, border and image and under
+its text. Its fragment shader imports `bcs_ui` and takes the `bcs_ui::VertexOutput` Bevy's own
+vertex shader hands on: where on the node the fragment is, the node's size in pixels, its border
+widths and how far its corners are rounded, enough to draw a border or a rounded edge of its own.
+Its own values are declared and set by name as a 3D material's are:
+
+<!-- compiled with:
+Entity bar = default;
+AssetHandle banner = default;
+-->
+```csharp
+var program = Shaders.CreateProgram(new ShaderProgramSettings { FragmentUi = "shaders/progress.slang" });
+var progress = Shaders.CreateUiMaterial(program)
+    .Set("filled", 0.5f)
+    .SetTexture("picture", banner);
+Ui.SetMaterial(bar, progress);
+```
+
+```slang
+import bcs_ui;
+
+uniform float filled;
+Texture2D picture;
+SamplerState picture_sampler;
+
+[shader("fragment")]
+float4 fragment(bcs_ui::VertexOutput node) : SV_Target
+{
+    let color = picture.Sample(picture_sampler, node.uv);
+    return node.uv.x < filled ? color : float4(0.0);
+}
+```
+
+An interface material is blended by its alpha with what is behind, as everything an interface draws
+is, and a node drawn with one is laid out, clipped and stacked as any node is and takes an outline
+or a shadow the same way. An interface vertex shader of the program's own, taking `bcs_ui::Vertex`,
+places the node's quad where Bevy's would leave it.
+
 ### Lit by Bevy
 
 A material's fragment shader writes the color drawn, and is lit by nothing unless it lights itself.

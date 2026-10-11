@@ -53,4 +53,10 @@ public unsafe struct NativeShaderProgramConfig
 
     /// <summary>The mesh shader of the same.</summary>
     public NativeShaderStage DrawMesh;
+
+    /// <summary>The vertex shader of a material drawn on an interface node.</summary>
+    public NativeShaderStage VertexUi;
+
+    /// <summary>The fragment shader of the same.</summary>
+    public NativeShaderStage FragmentUi;
 }

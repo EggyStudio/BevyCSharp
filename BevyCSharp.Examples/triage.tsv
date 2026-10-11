@@ -377,7 +377,7 @@ text_input	can
 text_wrap_debug	can
 transparency_ui	can
 ui_drag_and_drop	can
-ui_material	missing	interface materials (UiMaterial)
+ui_material	can
 ui_scaling	can
 ui_target_camera	can
 ui_texture_atlas	can

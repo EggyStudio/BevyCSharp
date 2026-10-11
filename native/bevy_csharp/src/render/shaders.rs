@@ -80,6 +80,9 @@ pub struct BcsShaderProgramConfig {
     /// fragment shader.
     pub draw_task: BcsShaderStage,
     pub draw_mesh: BcsShaderStage,
+    /// The vertex and fragment shaders of a material drawn on an interface node.
+    pub vertex_ui: BcsShaderStage,
+    pub fragment_ui: BcsShaderStage,
 }
 
 /// How a sampler reads. Mirrors [`super::values::SamplerSettings`].
@@ -187,6 +190,8 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
                     stage(config.fragment_2d),
                     stage(config.draw_task),
                     stage(config.draw_mesh),
+                    stage(config.vertex_ui),
+                    stage(config.fragment_ui),
                 ],
                 defines: Vec::new(),
                 compute_spirv: config.flags & 1 != 0,
@@ -612,7 +617,9 @@ mod tests {
         assert_eq!(offset_of!(BcsShaderProgramConfig, fragment_2d), 288);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_task), 312);
         assert_eq!(offset_of!(BcsShaderProgramConfig, draw_mesh), 336);
-        assert_eq!(size_of::<BcsShaderProgramConfig>(), 360);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, vertex_ui), 360);
+        assert_eq!(offset_of!(BcsShaderProgramConfig, fragment_ui), 384);
+        assert_eq!(size_of::<BcsShaderProgramConfig>(), 408);
     }
 
     #[test]

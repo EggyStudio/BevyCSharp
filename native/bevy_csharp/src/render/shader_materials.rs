@@ -1,8 +1,13 @@
-//! Materials a program draws, on a mesh or on a 2D mesh: made, changed and put on an entity.
+//! Materials a program draws, on a mesh, a 2D mesh or an interface node: made, changed and put on
+//! an entity.
 
 use crate::interop::status;
 #[cfg(feature = "render")]
 use super::shader_targets::{Target, TARGET_MATERIAL, read_target, with_target};
+#[cfg(feature = "render")]
+use bevy::asset::{Asset, AssetId, Assets};
+#[cfg(feature = "render")]
+use bevy::ecs::system::ResMut;
 
 #[cfg(feature = "render")]
 fn alpha_mode(alpha: i32, cutoff: f32) -> bevy::material::AlphaMode {
@@ -106,7 +111,7 @@ pub extern "C" fn bcs_shader_material_2d_create(program: i32, alpha: i32, cutoff
             material.alpha = alpha_mode(alpha, cutoff);
             material.alpha_given = alpha >= 0;
             material.cull = None;
-            material.flat = true;
+            material.surface = super::material::Surface::Flat;
 
             crate::state::with_world(|world| {
                 let Some(mut assets) = world.get_resource_mut::<bevy::asset::Assets<BcsMaterial2d>>() else {
@@ -114,6 +119,45 @@ pub extern "C" fn bcs_shader_material_2d_create(program: i32, alpha: i32, cutoff
                 };
 
                 let handle = assets.add(BcsMaterial2d { material, sprite: None });
+                crate::assets::insert_handle(world, handle.untyped())
+            })
+        }
+    })
+}
+
+/// Makes a material a program draws an interface node with, and answers its asset key.
+///
+/// Blended as everything an interface draws is, so it takes no alpha, and answers
+/// [`status::UNSUPPORTED`] where the app draws no interface.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_material_ui_create(program: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = program;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::material::{BcsMaterial, Surface};
+            use super::ui_material::BcsUiMaterial;
+
+            if !program_exists(program) {
+                return status::INVALID_STATE;
+            }
+
+            let mut material = BcsMaterial::new(program as u32);
+            material.alpha = bevy::material::AlphaMode::Blend;
+            material.cull = None;
+            material.surface = Surface::Node;
+
+            crate::state::with_world(|world| {
+                let Some(mut assets) = world.get_resource_mut::<bevy::asset::Assets<BcsUiMaterial>>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                let handle = assets.add(BcsUiMaterial { material });
                 crate::assets::insert_handle(world, handle.untyped())
             })
         }
@@ -241,5 +285,48 @@ pub fn attach(
             true
         }
         Err(_) => false,
+    }
+}
+
+/// Marks every material of a program whose shaders were replaced as changed, so each builds its
+/// bind group again in the new layout, keeping its values by name, 2D and interface materials among
+/// them.
+#[cfg(feature = "render")]
+pub(super) fn refresh_materials_of_changed_programs(
+    mut programs: ResMut<super::programs::ShaderPrograms>,
+    mut materials: ResMut<Assets<super::material::BcsMaterial>>,
+    mut flat: ResMut<Assets<super::material2d::BcsMaterial2d>>,
+    nodes: Option<ResMut<Assets<super::ui_material::BcsUiMaterial>>>,
+) {
+    let changed = programs.take_changed();
+
+    if changed.is_empty() {
+        return;
+    }
+
+    touch(&mut materials, |material| material.program, &changed);
+    touch(&mut flat, |flat| flat.material.program, &changed);
+
+    // Only where the app draws an interface, which is where the type was added.
+    if let Some(mut nodes) = nodes {
+        touch(&mut nodes, |node| node.material.program, &changed);
+    }
+}
+
+/// Marks every material in `assets` whose program, as `program` reads it, is one of `changed`.
+#[cfg(feature = "render")]
+fn touch<A: Asset>(assets: &mut Assets<A>, program: fn(&A) -> u32, changed: &[u32]) {
+    let stale: Vec<AssetId<A>> = assets
+        .iter()
+        .filter(|(_, material)| changed.contains(&program(material)))
+        .map(|(id, _)| id)
+        .collect();
+
+    for id in stale {
+        // `into_inner` rather than only asking for it mutably, because the guard `get_mut` hands
+        // back reports a change only when it is written through, and nothing here writes.
+        if let Some(material) = assets.get_mut(id) {
+            material.into_inner();
+        }
     }
 }

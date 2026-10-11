@@ -26,6 +26,11 @@ fn each_role_puts_its_globals_where_its_pipeline_binds_them() {
     assert_eq!(Role::PrepassVertex.family().own_group(), 3);
     assert_eq!(Role::Pass.family().own_group(), 0);
     assert_eq!(Role::Compute.family().own_group(), 0);
+
+    // An interface material's own are group one, past the view Bevy binds in group zero.
+    assert_eq!(Role::FragmentUi.family().own_group(), 1);
+    assert_eq!(Role::VertexUi.family().remap(100), 0);
+    assert_eq!(Role::VertexUi.family().remap(0), 1);
 }
 
 #[test]

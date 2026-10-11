@@ -413,6 +413,7 @@ internal static class Catalog
         new("ui_texture_atlas_slice", UiTextureAtlasSlice.Build),
         new("ui_texture_slice", UiTextureSlice.Build),
         new("ui_texture_slice_flip_and_tile", UiTextureSliceFlipAndTile.Build),
+        new("ui_material", UiMaterialExample.Build),
         new("vertical_slider", VerticalSliderExample.Build),
         new("standard_widgets", StandardWidgets.Build),
         new("standard_widgets_observers", StandardWidgetsObservers.Build),

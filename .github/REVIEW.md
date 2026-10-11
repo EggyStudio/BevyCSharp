@@ -10,33 +10,52 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b134dd4d`. Two commits, unpushed with the three before them. `6e28c3cc`,
-custom_projection, ABI 267: a projection type the bridge declares, Bevy's perspective with entries
-of its matrix written over its clip matrix and its sub-view, the update, the far plane and the
-frustum's corners the perspective's so it follows the window, set from C# with the field of view,
-the near and far planes and the entries by column, row and value, a column or row past three refused
-on both sides and a non-camera refused; a native test reads the two entries landing and every other
-entry staying the perspective's, `ProjectionTests` the variant read back as custom with both
-refusals; the example is Bevy's scene with its two entries, its capture sheared down and to the left
-as Bevy's; the cameras guide has its paragraph and block. `b134dd4d`, render_depth_to_texture, which
-needed no bridge work after all, its triage line stale: a depth-only camera at order minus one
-drawing into no target of 256 by 256 with a depth prepass and no multisampling, a watch of its depth
-giving an eight-bit image each frame shown on an unlit rectangle, the turning cube, the light, the
-main camera, the instructions, the cone gizmo at the depth camera and the keys by Bevy's spherical
-coordinates with the inclination clamped, the capture showing the cube's depth on the plane as
-Bevy's, the triage note saying the depth is shown through the watch's image where Bevy's material
-reads a depth texture of its own, and the compute guide saying a camera can draw its depth alone
-into no target and be watched. The suite: 1,421 passed and 2 skipped of 1,423; cargo's 89 and 155;
-the norm, document and path tests 20 of 20, the prose at 299. EXAMPLES.md reads 346 written, 2 in
-part and 34 missing. Right, the projection's one new type kept to what C# cannot say, and the depth
-reached through the watch the engine already had rather than a texture copy built for one example.
-The owner asked at 19:35 for the examples' counts under the Examples heading and a count on each
-group's heading, which is item 17 (Decision 30), a batch of its own with ui_material's commit or
-right after. The rows that need no crate and no word go on in the order given: the interface
-material, a custom vertex attribute, mip generation, occlusion culling, the world's serialization,
-the transform gizmo, picking's debug, the pitch and the decodable, then the atmosphere's Mars
-medium, render recovery, Solari's reflections and Bevy's scene notation, each of those four read
-against the lock first, since a crate waits on the owner's word.
+Reviewed up to `02598971`. One commit, item 17, unpushed, ahead of ui_material: the count's markers
+sit under the Examples heading after its paragraph and before the gallery, the status section
+pointing to them in one sentence, and each group's heading in the gallery carries its count, `27 of
+29`, `all 13`, `1 of 1`, which the script writes so the check reads them; the heading counts the
+group's examples written whole, not the pictures in its row, since an example that prints has
+nothing to draw and no picture, which would have read the input group as one of twelve with all
+twelve written, and one written in part is not counted, as the prose count counts, the paragraph
+above the gallery saying so and that an example which prints stands in EXAMPLES.md rather than the
+row. The prose at 302, the norm, document and path tests passing in a worktree at the commit, the
+README's walk run after ui_material on the package packed then. Right, the count that means
+something chosen over the literal one and said where the reader meets it. On ui_material's handoff,
+the working session corrected the reviewing session's ask: a second call that re-read the table on a
+mismatch would pack a bind group against the new layout for the key Bevy had already stored from the
+first read, which the GPU refuses, so on a mismatch it returns Bevy's retry, Bevy keeps the previous
+bind group and both calls read the new version the next frame; the choice is a pure function of the
+version handed and the current one, packed, stale or missing, with a native test over each case, and
+the thread-local's remark says why it exists. Then ui_material's commit, and the rows in the order
+given.
+
+Before it, `b134dd4d` and `6e28c3cc` came. `6e28c3cc`, custom_projection, ABI 267: a projection type
+the bridge declares, Bevy's perspective with entries of its matrix written over its clip matrix and
+its sub-view, the update, the far plane and the frustum's corners the perspective's so it follows
+the window, set from C# with the field of view, the near and far planes and the entries by column,
+row and value, a column or row past three refused on both sides and a non-camera refused; a native
+test reads the two entries landing and every other entry staying the perspective's,
+`ProjectionTests` the variant read back as custom with both refusals; the example is Bevy's scene
+with its two entries, its capture sheared down and to the left as Bevy's; the cameras guide has its
+paragraph and block. `b134dd4d`, render_depth_to_texture, which needed no bridge work after all, its
+triage line stale: a depth-only camera at order minus one drawing into no target of 256 by 256 with
+a depth prepass and no multisampling, a watch of its depth giving an eight-bit image each frame
+shown on an unlit rectangle, the turning cube, the light, the main camera, the instructions, the
+cone gizmo at the depth camera and the keys by Bevy's spherical coordinates with the inclination
+clamped, the capture showing the cube's depth on the plane as Bevy's, the triage note saying the
+depth is shown through the watch's image where Bevy's material reads a depth texture of its own, and
+the compute guide saying a camera can draw its depth alone into no target and be watched. The suite:
+1,421 passed and 2 skipped of 1,423; cargo's 89 and 155; the norm, document and path tests 20 of 20,
+the prose at 299. EXAMPLES.md reads 346 written, 2 in part and 34 missing. Right, the projection's
+one new type kept to what C# cannot say, and the depth reached through the watch the engine already
+had rather than a texture copy built for one example. The owner asked at 19:35 for the examples'
+counts under the Examples heading and a count on each group's heading, which is item 17 (Decision
+30), a batch of its own with ui_material's commit or right after. The rows that need no crate and no
+word go on in the order given: the interface material, a custom vertex attribute, mip generation,
+occlusion culling, the world's serialization, the transform gizmo, picking's debug, the pitch and
+the decodable, then the atmosphere's Mars medium, render recovery, Solari's reflections and Bevy's
+scene notation, each of those four read against the lock first, since a crate waits on the owner's
+word.
 
 Before it, `6641dbcc` came, error_handling, with no bridge work: the ten thousand points come from
 the icosphere's triangles read back through `Render.TryReadMesh`, each triangle picked by its
@@ -58,23 +77,6 @@ entries, a column or row past three refused on both sides, with a native test of
 and the rest staying the perspective's, a managed test reading the variant back as custom with both
 refusals, the example Bevy's scene with its two entries, and the cameras guide's paragraph and
 block.
-
-Before it, `7a6cbf16` came, load_gltf_extras, and its triage line was stale, glTF's four kinds of
-extras being reflected with their JSON as a string already: the example gathers the four through the
-listing by component each frame and prints every entity holding any in Bevy's format, each value
-escaped as Rust's debug writes a string, the capture showing the cube, its geometry's material and
-the scene as Bevy prints them, the entities in index order rather than Bevy's query order, which the
-triage note says; the model joins the asset list, the assets guide has its paragraph and block; no
-library change, so no suite, the norm, document and path tests 20 of 20, the prose at 299.
-EXAMPLES.md reads 343 written, 2 in part and 37 missing. Right, the stale line read first and the
-listing used for what it was built for. The working session takes error_handling before the depth to
-a texture, since it needs no bridge work either, the mesh's triangles read back and sampled by area
-in C# as Bevy's sampler does, a throwing system logged with the app running on as Bevy's warn
-handler has it and the fail-fast setting as the panic, a system catching its own error for Bevy's
-pipe, a refused command on a missing entity for its failing commands and a pointer-move observer for
-the sphere; then the depth to a texture, a system copying a depth-only camera's depth into an image
-in the render graph and a material sampling it with a comparison sampler, and a custom projection, a
-projection type the bridge declares set by a matrix from C#, which both take bridge work.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -472,16 +474,18 @@ from [SHARED.md](SHARED.md).
     not hovered loses nothing, measured by the example's three of three, with a test. With the batch
     that next touches the CLI's input.
 
-17. **The examples' counts under the Examples heading, and a count on each group's heading (Decision
-    30).** The owner asked on 2026-10-11 at 19:35. The line the table script writes between its
-    markers, of Bevy's 438 examples how many are written here, in part, waiting on the bridge and
-    about Rust itself, stands under the status heading today and moves under the Examples heading,
-    after its paragraph and before the gallery, the markers with it, so a reader sees the count
-    where the pictures are; and each group's heading in the gallery carries its count, the written
-    examples in its row and, where Bevy's group holds more, Bevy's count beside it, as `### 2D
-    Rendering, 26 of 27`, the form the working session finds reads best and the owner's eye judges.
-    The script writes both, so the check reads them, with the prose count kept and the README walk
-    run on the result.
+17. **The examples' counts under the Examples heading, and a count on each group's heading, done at
+    `02598971` (Decision 30).** The owner asked on 2026-10-11 at 19:35. The line the table script
+    writes between its markers, of Bevy's 438 examples how many are written here, in part, waiting
+    on the bridge and about Rust itself, stands under the status heading today and moves under the
+    Examples heading, after its paragraph and before the gallery, the markers with it, so a reader
+    sees the count where the pictures are; and each group's heading in the gallery carries its
+    count, the written examples in its row and, where Bevy's group holds more, Bevy's count beside
+    it, as `### 2D Rendering, 26 of 27`, the form the working session finds reads best and the
+    owner's eye judges. The script writes both, so the check reads them, with the prose count kept
+    and the README walk run on the result. Done at `02598971`, the heading counting the group's
+    examples written whole rather than its pictures, since one that prints has none, said above the
+    gallery.
 
 ## Verdicts
 
@@ -677,3 +681,9 @@ from [SHARED.md](SHARED.md).
     count.
 
 ## Replies
+
+Shared: an interface node drawn by a Slang program of the game's own, through Bevy's
+`UiMaterialPlugin` with the program's layout and shaders put in place of the type's at specialize,
+the key carrying the version they were read from and the bind group waiting a frame where a compile
+replaced that version in between (`ui_material.rs`, `bcs_ui.slang`), for 3DEngine to consider where
+its interface draws a shader of a game's own.
