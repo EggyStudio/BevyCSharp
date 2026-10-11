@@ -8,12 +8,12 @@ namespace BevyCSharp.Examples.ThreeD;
 // Here we use shape primitives to generate meshes for 3d objects as well as attaching a runtime-
 // generated patterned texture to each 3d object.
 //
-// Bevy's front row of solids and middle row of extrusions are here, and Tab moves every shape back
-// a row. Its segment and polyline, the convex polygon at the end of its extrusions and its rear
-// row of extruded rings are shapes the bridge does not build.
+// A front row of solids ending in a segment and a line through three points, a middle row of flat
+// shapes pushed out into solids, and a rear row of their rings pushed out into tubes, and Tab moves
+// every shape back a row.
 internal static class Example3dShapes
 {
-    private const float ShapesXExtent = 14f, ExtrusionXExtent = 14f, ZExtent = 8f;
+    private const float ShapesXExtent = 14f, ExtrusionXExtent = 14f, ZExtent = 8f, Thickness = 0.1f;
 
     // Bevy's wireframe plugin, which Bevy's example adds for Space to draw the shapes' edges.
     public static void Configure(Config config) => config.Wireframes = true;
@@ -35,6 +35,11 @@ internal static class Example3dShapes
                 Render.CreateMesh(MeshShape.ConicalFrustum, 0.25f, 0.5f, 0.5f),
                 Render.CreateMesh(MeshShape.Sphere, 0.5f),
                 Render.CreateMesh(MeshShape.UvSphere, 0.5f, 32f, 18f),
+
+                // A segment and a line through three points are lines rather than solids, so they
+                // are built point by point as Bevy builds them.
+                Render.CreateMesh(new MeshData { Positions = [new(-0.5f, 0f, 0f), new(0.5f, 0f, 0f)], Topology = MeshTopology.Lines }),
+                Render.CreateMesh(new MeshData { Positions = [new(-0.5f, 0f, 0f), new(0.5f, 0f, 0f), new(0f, 0.5f, 0f)], Topology = MeshTopology.LineStrip }),
             };
 
             // Bevy's default of each flat shape, a unit deep.
@@ -47,6 +52,21 @@ internal static class Example3dShapes
                 Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ellipse), 1f, 0.5f, 1f),
                 Render.CreateMesh(MeshShape.Extrusion(MeshShape.RegularPolygon), 0.5f, 6f, 1f),
                 Render.CreateMesh(MeshShape.Extrusion(MeshShape.Triangle), 1f, 1f, 1f),
+                Render.CreateExtrusion([new(0f, 0.8f), new(-0.47f, 0.25f), new(-0.47f, -0.65f), new(0.47f, -0.65f), new(0.47f, 0.25f)], 1f),
+            };
+
+            // Each one's ring, a tenth thick, pushed out a unit deep, the circle's ring of a circle
+            // twice the size, a half thick, and the ellipse's inner ellipse smaller on each axis, as
+            // Bevy's are.
+            var ringExtrusions = new[]
+            {
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Rectangle, Thickness)), 1f, 1f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Capsule2d, Thickness)), 0.5f, 1f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Circle, 0.5f)), 1f, 1f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Circle, Thickness)), 0.5f, 1f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Ellipse, Thickness)), 1f, 0.5f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.RegularPolygon, Thickness)), 0.5f, 6f, 1f),
+                Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Triangle, Thickness)), 1f, 1f, 1f),
             };
 
             void Row(AssetHandle[] meshes, float extent, int row)
@@ -61,6 +81,7 @@ internal static class Example3dShapes
 
             Row(shapes, ShapesXExtent, 0);
             Row(extrusions, ExtrusionXExtent, 1);
+            Row(ringExtrusions, ExtrusionXExtent, 2);
 
             var light = Render.SpawnLight(new LightSettings
             {

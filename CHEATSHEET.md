@@ -903,6 +903,7 @@ static string MaterialPathOf(Entity entity);                    // Where an enti
 static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an entity is drawn with, or None when it has none
 static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
 static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
+static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth);  // Builds a convex polygon pushed out into a solid depth deep along Z, centered on its middle, from its corners in order around it
 static string[]? MorphTargetNames(AssetHandle mesh);            // The names a mesh gives its morph targets, in their order, empty where it names none, or null while it loads
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with
@@ -913,6 +914,7 @@ static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints
 
 ```csharp
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
+static string Ring(string outline, float thickness);            // A band along the inside of another flat shape's outline, as Ring, its width given here rather than as the third measure, which leaves that free for an Extrusion of the band to take as its depth
 static string Extrusion(string outline);                        // A flat shape pushed out into a solid along Z, sized by that shape's measures and, third, how deep it is, centered on its middle
 static string UvAngle(string arc);                              // A sector or a segment whose image is mapped at an angle, sized by its radius, the half angle it spans and, third, the angle in radians
 ```

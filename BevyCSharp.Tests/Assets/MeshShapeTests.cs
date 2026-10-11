@@ -74,4 +74,39 @@ public sealed class MeshShapeTests
         Assert.Equal((362, 1002), (counts.Five, counts.Nine));
         Assert.Equal(counts.Default, counts.Refused);
     }
+
+    /// <summary>
+    /// A convex polygon pushed out into a solid, a dented one refused, and a ring's tube whose
+    /// recipe keeps the thickness its name gives.
+    /// </summary>
+    [SkippableFact]
+    public void APolygonAndARingArePushedOutIntoSolids()
+    {
+        Needs.Renderer();
+
+        var ran = false;
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            var house = Render.CreateExtrusion([new(0f, 0.8f), new(-0.47f, 0.25f), new(-0.47f, -0.65f), new(0.47f, -0.65f), new(0.47f, 0.25f)], 1f);
+            Assert.True(Render.TryGetMeshInfo(house, out var info));
+            Assert.True(info.Triangles >= 2 * 3 + 5 * 2, $"the house's end pushed out has {info.Triangles} triangles");
+            Assert.Equal(1f, info.Size.Z, 4);
+
+            var refused = Assert.Throws<BevyNativeException>(() =>
+                Render.CreateExtrusion([new(0f, 0f), new(1f, 1f), new(0f, 0.5f), new(-1f, 1f)], 1f));
+            Assert.Equal(NativeStatus.InvalidState, refused.Status);
+
+            var shape = MeshShape.Extrusion(MeshShape.Ring(MeshShape.Rectangle, 0.1f));
+            var tube = Render.CreateMesh(shape, 1f, 1f, 2f);
+            Assert.Equal("Extrusion(Ring(Rectangle, 0.1))", shape);
+            Assert.Equal(new MeshRecipe(shape, 1f, 1f, 2f), Render.RecipeOf(tube));
+            Assert.True(Render.TryGetMeshInfo(tube, out var walls));
+            Assert.Equal(2f, walls.Size.Z, 4);
+            ran = true;
+        });
+
+        harness.Run();
+        Assert.True(ran);
+    }
 }

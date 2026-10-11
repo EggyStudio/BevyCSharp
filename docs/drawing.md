@@ -23,6 +23,12 @@ Handles are references, so one mesh and one material can be shared by any number
 Attaching a mesh goes through Bevy's own insert rather than a byte copy, which pulls in the
 components Bevy requires alongside it, so an entity needs nothing further to be drawn.
 
+`MeshShape` names Bevy's primitives, what the three numbers mean depending on the shape, as each
+constant's documentation says. `MeshShape.Ring` makes a band along the inside of a flat shape's
+outline and `MeshShape.Extrusion` pushes a flat shape out into a solid, so
+`MeshShape.Extrusion(MeshShape.Ring(MeshShape.Rectangle, 0.1f))` is a square tube, its walls a
+tenth thick. `Render.CreateExtrusion` pushes out a convex polygon from corners the game gives.
+
 ### A mesh of your own
 
 A shape no primitive describes is built from its vertices, in any

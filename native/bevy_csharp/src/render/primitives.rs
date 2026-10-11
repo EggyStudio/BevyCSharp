@@ -57,6 +57,52 @@ pub unsafe extern "C" fn bcs_mesh_create(
     })
 }
 
+/// Builds a convex polygon pushed out into a solid `depth` deep along Z, centered on its middle,
+/// from `count` corners of two numbers each in order around it, and returns an asset handle for it.
+///
+/// Bevy's `Extrusion` of a `ConvexPolygon`. Corners that do not go around a convex shape in one
+/// direction are refused with [`status::INVALID_STATE`], as Bevy refuses them, since a concave one
+/// would fill across its dent.
+///
+/// # Safety
+/// `corners` must be readable for `count * 2` floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_mesh_create_convex_extrusion(corners: *const f32, count: i32, depth: f32) -> i32 {
+    crate::interop::guard(|| {
+        if corners.is_null() || count < 3 {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = depth;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::math::Vec2;
+            use bevy::mesh::{Mesh, Meshable};
+            use bevy::shape::{ConvexPolygon, Extrusion};
+
+            let numbers = unsafe { core::slice::from_raw_parts(corners, count as usize * 2) };
+            let Ok(polygon) = ConvexPolygon::new(numbers.chunks_exact(2).map(|corner| Vec2::new(corner[0], corner[1]))) else {
+                return status::INVALID_STATE;
+            };
+            let mesh: Mesh = Extrusion::new(polygon, depth).mesh().into();
+
+            with_world(|world| {
+                let Some(mut meshes) = world.get_resource_mut::<Assets<Mesh>>() else {
+                    return status::UNSUPPORTED;
+                };
+                let handle = meshes.add(mesh).untyped();
+                crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
+}
+
 /// One of Bevy's primitives as a mesh, by its name and up to three measures, or nothing for a name
 /// that is none of them.
 #[cfg(feature = "render")]
@@ -179,27 +225,58 @@ fn turned_image(arc: &str, radius: f32, half_angle: f32, angle: f32) -> Option<b
 /// examples give them, the same sector of a smaller radius and an ellipse smaller on each axis.
 #[cfg(feature = "render")]
 fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mesh> {
+    let (outline, thickness) = ring_outline(outline, thickness);
+    ring_of(outline, a, b, thickness, None)
+}
+
+/// A ring's outline and its thickness, where the name gives one after a comma, as
+/// `Ring(Rectangle, 0.1)` does inside an extrusion whose third measure is its depth, or the
+/// thickness given.
+#[cfg(feature = "render")]
+fn ring_outline(outline: &str, thickness: f32) -> (&str, f32) {
+    match outline.split_once(',') {
+        Some((name, given)) => (name.trim(), given.trim().parse().unwrap_or(thickness)),
+        None => (outline, thickness),
+    }
+}
+
+/// The band along the inside of a flat shape's outline, `thickness` wide, flat or, given a depth,
+/// pushed out into a solid that deep, as Bevy extrudes a ring.
+#[cfg(feature = "render")]
+fn ring_of(outline: &str, a: f32, b: f32, thickness: f32, depth: Option<f32>) -> Option<bevy::mesh::Mesh> {
     use bevy::shape::{
-        Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Rectangle, RegularPolygon,
-        Rhombus, Ring, ToRing, Triangle2d,
+        Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Extrusion, Rectangle,
+        RegularPolygon, Rhombus, Ring, ToRing, Triangle2d,
     };
+    use bevy::mesh::{Extrudable, Meshable};
+    use bevy::shape::Primitive2d;
+
+    fn made<P>(ring: Ring<P>, depth: Option<f32>) -> bevy::mesh::Mesh
+    where
+        P: Primitive2d + Meshable + Clone,
+        P::Output: Extrudable,
+        Ring<P>: Primitive2d,
+    {
+        match depth {
+            Some(depth) => Extrusion::new(ring, depth).mesh().into(),
+            None => ring.mesh().into(),
+        }
+    }
 
     let mesh = match outline {
-        "Circle" => Circle::new(a).to_ring(thickness).into(),
-        "CircularSector" => {
-            Ring::new(CircularSector::new(a, b), CircularSector::new(a - thickness, b)).into()
-        }
-        "CircularSegment" => CircularSegment::new(a, b).to_ring(thickness).into(),
-        "Ellipse" => Ring::new(Ellipse::new(a, b), Ellipse::new(a - thickness, b - thickness)).into(),
-        "Capsule2d" => Capsule2d::new(a, b).to_ring(thickness).into(),
-        "Rhombus" => Rhombus::new(a, b).to_ring(thickness).into(),
-        "Rectangle" => Rectangle::new(a, b).to_ring(thickness).into(),
-        "RegularPolygon" => RegularPolygon::new(a, (b.max(3.0)) as u32).to_ring(thickness).into(),
+        "Circle" => made(Circle::new(a).to_ring(thickness), depth),
+        "CircularSector" => made(Ring::new(CircularSector::new(a, b), CircularSector::new(a - thickness, b)), depth),
+        "CircularSegment" => made(CircularSegment::new(a, b).to_ring(thickness), depth),
+        "Ellipse" => made(Ring::new(Ellipse::new(a, b), Ellipse::new(a - thickness, b - thickness)), depth),
+        "Capsule2d" => made(Capsule2d::new(a, b).to_ring(thickness), depth),
+        "Rhombus" => made(Rhombus::new(a, b).to_ring(thickness), depth),
+        "Rectangle" => made(Rectangle::new(a, b).to_ring(thickness), depth),
+        "RegularPolygon" => made(RegularPolygon::new(a, (b.max(3.0)) as u32).to_ring(thickness), depth),
         // Bevy's default flat triangle stands where its default triangle in space does, so this is
         // the band around the one Triangle draws.
         "Triangle" => {
             let [first, second, third] = Triangle2d::default().vertices;
-            Triangle2d::new(first * a, second * a, third * a).to_ring(thickness).into()
+            made(Triangle2d::new(first * a, second * a, third * a).to_ring(thickness), depth)
         }
         _ => return None,
     };
@@ -211,6 +288,13 @@ fn ring(outline: &str, a: f32, b: f32, thickness: f32) -> Option<bevy::mesh::Mes
 /// measures `a` and `b` give the flat shape, or nothing for a shape Bevy does not extrude.
 #[cfg(feature = "render")]
 fn extrusion(outline: &str, a: f32, b: f32, depth: f32) -> Option<bevy::mesh::Mesh> {
+    // A ring pushed out into a tube, its thickness in its name since the third measure is the
+    // depth, as Bevy's 3d_shapes extrudes each flat shape's ring.
+    if let Some(ring) = outline.strip_prefix("Ring(").and_then(|rest| rest.strip_suffix(')')) {
+        let (ring, thickness) = ring_outline(ring, 0.1);
+        return ring_of(ring, a, b, thickness, Some(depth));
+    }
+
     use bevy::shape::{
         Annulus, Capsule2d, Circle, CircularSector, CircularSegment, Ellipse, Extrusion, Rectangle,
         RegularPolygon, Rhombus, Triangle2d,
@@ -337,5 +421,38 @@ mod tests {
         assert_eq!(status::OK, code);
         assert_eq!([-2.0, -1.0, -3.0], info.min);
         assert_eq!([2.0, 1.0, 3.0], info.max);
+    }
+
+    #[test]
+    fn a_ring_is_extruded_with_the_thickness_its_name_gives() {
+        let flat = super::primitive("Ring(Rectangle)", 1.0, 1.0, 0.1).expect("a flat ring");
+        let named = super::primitive("Ring(Rectangle, 0.1)", 1.0, 1.0, 0.5).expect("a ring named with its thickness");
+        let tube = super::primitive("Extrusion(Ring(Rectangle, 0.1))", 1.0, 1.0, 1.0).expect("an extruded ring");
+
+        // The thickness the name gives stands for the third measure, which an extrusion spends on
+        // its depth, so the flat ring is the same either way and the tube has its sides as well.
+        assert_eq!(flat.count_vertices(), named.count_vertices());
+        assert!(tube.count_vertices() > 2 * flat.count_vertices(), "{} beside {}", tube.count_vertices(), flat.count_vertices());
+        assert!(super::primitive("Extrusion(Ring(Tetrahedron, 0.1))", 1.0, 1.0, 1.0).is_none());
+    }
+
+    #[test]
+    fn a_convex_polygon_is_extruded_and_a_concave_one_refused() {
+        let mut world = bevy::prelude::World::new();
+        world.init_resource::<Assets<Mesh>>();
+
+        let pentagon = [0.0, 0.8, -0.47, 0.25, -0.47, -0.65, 0.47, -0.65, 0.47, 0.25];
+        let dented = [0.0, 0.0, 1.0, 1.0, 0.0, 0.5, -1.0, 1.0];
+
+        let (made, refused) = crate::state::loan_world(&mut world, || unsafe {
+            (
+                super::bcs_mesh_create_convex_extrusion(pentagon.as_ptr(), 5, 1.0),
+                super::bcs_mesh_create_convex_extrusion(dented.as_ptr(), 4, 1.0),
+            )
+        });
+
+        assert!(made > 0, "the pentagon was answered {made}");
+        assert_eq!(refused, crate::interop::status::INVALID_STATE);
+        assert_eq!(world.resource::<Assets<Mesh>>().len(), 1);
     }
 }

@@ -103,6 +103,22 @@ public static class MeshShape
     public static string Ring(string outline) => $"Ring({outline})";
 
     /// <summary>
+    /// A band along the inside of another flat shape's outline, as <see cref="Ring(string)"/>, its
+    /// width given here rather than as the third measure, which leaves that free for an
+    /// <see cref="Extrusion"/> of the band to take as its depth.
+    /// </summary>
+    /// <param name="outline">One of the shapes <see cref="Ring(string)"/> takes.</param>
+    /// <param name="thickness">How wide the band is.</param>
+    /// <example>
+    /// <code>
+    /// // A square tube a unit deep, its walls a tenth thick, as Bevy's 3d_shapes draws one.
+    /// var tube = Render.CreateMesh(MeshShape.Extrusion(MeshShape.Ring(MeshShape.Rectangle, 0.1f)), 1f, 1f, 1f);
+    /// </code>
+    /// </example>
+    public static string Ring(string outline, float thickness) =>
+        $"Ring({outline}, {thickness.ToString(System.Globalization.CultureInfo.InvariantCulture)})";
+
+    /// <summary>
     /// A flat shape pushed out into a solid along Z, sized by that shape's measures and, third,
     /// how deep it is, centered on its middle.
     /// </summary>

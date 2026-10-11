@@ -26,7 +26,7 @@ public static unsafe partial class Render
     /// </summary>
     /// <param name="shape">
     /// One of the constants on <see cref="MeshShape"/>, a band around a flat one from
-    /// <see cref="MeshShape.Ring"/>, a flat one made solid by <see cref="MeshShape.Extrusion"/>, or a
+    /// <see cref="MeshShape.Ring(string)"/>, a flat one made solid by <see cref="MeshShape.Extrusion"/>, or a
     /// sector or a segment with its image turned by <see cref="MeshShape.UvAngle"/>.
     /// </param>
     /// <param name="a">

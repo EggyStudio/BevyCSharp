@@ -3699,6 +3699,7 @@ static class Bevy.MeshShape
   const string UvSphere = "UvSphere"
   static string Extrusion(string outline)
   static string Ring(string outline)
+  static string Ring(string outline, float thickness)
   static string UvAngle(string arc)
 enum Bevy.MeshTopology : int
   LineStrip = 3
@@ -10038,6 +10039,7 @@ readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedE
 static class Bevy.Render
   static (int, int) PointLightsDrawn { get; }
   static AssetHandle CreateClusterMaterial()
+  static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth)
   static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true)
   static AssetHandle CreateMaterial((float, float, float, float) color)
   static AssetHandle CreateMaterial(MaterialSettings settings)

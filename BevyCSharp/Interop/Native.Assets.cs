@@ -12,6 +12,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_mesh_create(string kind, float a, float b, float c);
 
+    /// <summary>Builds a convex polygon pushed out into a solid and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_mesh_create_convex_extrusion(float* corners, int count, float depth);
+
     /// <summary>Builds a primitive again with new measures in place of an existing mesh.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

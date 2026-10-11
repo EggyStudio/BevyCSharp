@@ -8,7 +8,6 @@
 # the feature of Bevy's it leaves out.
 3d_scene	can
 rect_light	can	through Bevy's reflected RectLight
-3d_shapes	part	the segment, the polyline, the convex polygon's extrusion and the extruded rings, which are shapes the bridge does not build
 3d_viewport_to_world	can
 animated_material	can
 generate_custom_mesh	can
