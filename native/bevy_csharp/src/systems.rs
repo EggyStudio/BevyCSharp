@@ -2,7 +2,7 @@
 
 use core::ffi::c_void;
 
-use bevy::app::{First, FixedUpdate, Last, PostUpdate, PreUpdate, Startup, Update};
+use bevy::app::{First, FixedUpdate, Last, PostUpdate, PreStartup, PreUpdate, Startup, Update};
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::{IntoSystem, ScheduleSystem};
 use bevy::ecs::world::World;
@@ -67,6 +67,9 @@ pub unsafe extern "C" fn bcs_app_add_system(
         let run = csharp_system(name, reg).in_set(BcsSystem(id));
 
         match stage {
+            Stage::PreStartup => {
+                app.app.add_systems(PreStartup, run);
+            }
             Stage::Startup => {
                 app.app.add_systems(Startup, run);
             }

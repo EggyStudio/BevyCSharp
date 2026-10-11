@@ -200,6 +200,7 @@ internal static class Catalog
         new("callbacks", Callbacks.Build, Prints: 2),
         new("change_detection", ChangeDetection.Build, ChangeDetection.Configure, Prints: 130),
         new("component_hooks", ComponentHooksExample.Build, Prints: 12, Drive: Drives.ComponentHooks),
+        new("custom_schedule", CustomSchedule.Build, Prints: 2),
         new("delayed_commands", DelayedCommands.Build),
         new("ecs_guide", EcsGuide.Build, Prints: 20),
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),

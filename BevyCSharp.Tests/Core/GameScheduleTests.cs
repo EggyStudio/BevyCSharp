@@ -27,6 +27,34 @@ public sealed class GameScheduleTests
     }
 
     /// <summary>
+    /// A schedule placed after a frame's stage runs in every frame right after it, one placed after
+    /// Bevy's pre-startup runs once before the startup stage, a single-threaded one as well, and a
+    /// stage that is no schedule of Bevy's, or a second placing, is refused.
+    /// </summary>
+    [Fact]
+    public void APlacedScheduleRunsInItsPlaceInTheMainOrder()
+    {
+        var order = new List<string>();
+
+        using var harness = new EngineHarness(frames: 2);
+        var app = harness.App;
+        app.AddSchedule(new ScheduleLabel("Tests.AfterUpdate"), Stage.Update, singleThreaded: true);
+        app.AddSchedule(new ScheduleLabel("Tests.CustomStartup"), Stage.PreStartup);
+        app.AddSystem(new ScheduleLabel("Tests.AfterUpdate"), new SystemDescriptor(_ => order.Add("AfterUpdate"), "Tests.InAfterUpdate"));
+        app.AddSystem(new ScheduleLabel("Tests.CustomStartup"), new SystemDescriptor(_ => order.Add("CustomStartup"), "Tests.InCustomStartup"));
+        app.AddSystem(Stage.PreStartup, new SystemDescriptor(_ => order.Add("PreStartup"), "Tests.PreStartup"));
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ => order.Add("Startup"), "Tests.Startup"));
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ => order.Add("Update"), "Tests.Update"));
+        app.AddSystem(Stage.Last, new SystemDescriptor(_ => order.Add("Last"), "Tests.Last"));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => app.AddSchedule(new ScheduleLabel("Tests.Fixed"), Stage.FixedUpdate));
+        Assert.Throws<InvalidOperationException>(() => app.AddSchedule(new ScheduleLabel("Tests.AfterUpdate"), Stage.Last));
+        harness.Run();
+
+        Assert.Equal(["PreStartup", "CustomStartup", "Startup", "Update", "AfterUpdate", "Last", "Update", "AfterUpdate", "Last"], order);
+    }
+
+    /// <summary>
     /// A system among a state's entries sees the first value entered from none, a move, and a value
     /// set again, and runs a schedule named for the value it entered, inside the transition, so
     /// what that schedule does is there before the frame's Update.

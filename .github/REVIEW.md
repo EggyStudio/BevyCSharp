@@ -10,23 +10,45 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f60bc166`. One commit, unpushed with the three before it: every cell the gallery
-script writes is `<td width="200">`, with the comment saying why, since GitHub squeezes a table to
-the page before it lets it scroll and a cell would shrink to its name, the picture with it; the
-README's prose stays at 299 and the check passes. One thing the change would have hidden, caught by
-the working session: N 4.5's test read the cells by a pattern that began at a bare `<td>`, which
-with the width would have matched nothing and passed without looking, and reads a cell with any
-attributes since, finding all 304 pictures, 18 of 18. Right, the width given where the squeeze acts,
-and the rule's own reader checked against the new shape rather than trusted. The owner looked at the
-pushed page at 18:55 and the pictures still differ: the cell's width survives but the browser treats
-it as a preference and shrinks a cell to its name when the table is wider than the page, so item 13
-keeps the fallback, each name padded with non-breaking spaces in its code tag to thirty characters,
-a batch of its own before custom_schedule's commit. custom_schedule is under way at ABI 265: a
-pre-startup stage on both sides, a call placing a named schedule in Bevy's main order after an
-update or a startup stage by the concrete label types, since the order compares by type and an
-interned label never matched, with the single-threaded executor set through an edit that keeps the
-systems already in it, a second placing and a stage that is no schedule of its own refused, and a
-native test reading the placement back in both orders.
+Reviewed up to `e92591dd`. Item 13's padding: the name under each gallery picture is padded with
+non-breaking spaces, the character itself, to thirty characters inside its code tag, the cell's
+width kept as the preference and the script's comment saying why; all 304 names read here at thirty
+or more, three longer names carrying none, the longest `shader_material_screenspace_texture` at 35,
+so no cell can shrink below its picture; the prose stays at 299 and the check passes, N 4.5's reader
+taking its source from the picture and not the name, and the README written in a worktree at the
+commit since custom_schedule's triage line moves the count. Right, the minimum put in content where
+the browser's layout reads it. The owner looked at the pushed pages at 20:05: right, and on a phone
+the caption outruns the picture by a tenth to a fifth, so item 13 keeps the caption's width, the
+picture nominally wider than the caption can render so the caption sets the cell and the picture
+fills it, the caption in a small code tag padded to the longest name, 35, every tag 260 by 146,
+which the owner chose at 20:35 on a phone over a padding of 28 with the longer names broken, a batch
+of its own next. Between them stands `a0c8b1b0`, one line of the README, the showcase's caption
+naming the editor in place of the feature test, with the subject's form and no description, the
+owner's own and pushed, the working session having made nothing at that minute, so it goes on N
+7.2's list as the owner's with custom_schedule's commit, as the rule has it, the norm tests run
+again before that commit. custom_schedule is done and in its suite: a game's schedule placed in
+Bevy's main order after an update or a startup stage with a single-threaded executor,
+`App.AddSchedule` and a pre-startup stage on the surface, the example printing Bevy's order exactly
+and its text the capture, twenty schedule tests, the behaviors guide with its paragraph and block;
+committed once the suite and both cargo profiles pass.
+
+Before it, `f60bc166` came: every cell the gallery script writes is `<td width="200">`, with the
+comment saying why, since GitHub squeezes a table to the page before it lets it scroll and a cell
+would shrink to its name, the picture with it; the README's prose stays at 299 and the check passes.
+One thing the change would have hidden, caught by the working session: N 4.5's test read the cells
+by a pattern that began at a bare `<td>`, which with the width would have matched nothing and passed
+without looking, and reads a cell with any attributes since, finding all 304 pictures, 18 of 18.
+Right, the width given where the squeeze acts, and the rule's own reader checked against the new
+shape rather than trusted. The owner looked at the pushed page at 18:55 and the pictures still
+differ: the cell's width survives but the browser treats it as a preference and shrinks a cell to
+its name when the table is wider than the page, so item 13 keeps the fallback, each name padded with
+non-breaking spaces in its code tag to thirty characters, a batch of its own before
+custom_schedule's commit. custom_schedule is under way at ABI 265: a pre-startup stage on both
+sides, a call placing a named schedule in Bevy's main order after an update or a startup stage by
+the concrete label types, since the order compares by type and an interned label never matched, with
+the single-threaded executor set through an edit that keeps the systems already in it, a second
+placing and a stage that is no schedule of its own refused, and a native test reading the placement
+back in both orders.
 
 Before it, three commits came, `53fd0c3f` to `ea5e1532`. `53fd0c3f`, item 14 on the owner's word
 typed in the working session: the bcs guide is `.github/BCS.md`, moved with its history and its
@@ -65,32 +87,6 @@ its name, so the script gives every cell `width="200"`, which the sanitizer keep
 own first. Then custom_schedule in TODO.md's order, a game's schedule placed in Bevy's main order
 after an update or a startup with a single-threaded executor, the triage line half stale since the
 schedule label exists.
-
-Before it, `21d08b44` and `d0e638d7` came, and first the page: the owner pushed the eleven through
-`b06ff120` at 15:46, and that commit broke N 4.2 unseen, its gallery spending a heading, two blank
-lines and the table's two lines on each of 28 groups, the README at 355 lines of prose against the
-320 the rule allows, which the working session counted only after the commit; `d0e638d7` mends it,
-each group its heading and its table on a line each with a blank line between, 299 lines, the
-script's comment saying why, and the owner pushed it with `21d08b44` at 15:55, which cancelled
-`b06ff120`'s run before it could go red, so the page never showed the slip. `21d08b44` is item 13's
-size: every picture 200 by 113, the half pixel of sixteen by nine the only distortion, and the
-capture script pads a shot of another shape around its middle with nothing to the smallest sixteen
-by nine that holds it, read with ImageMagick's info, so four captures are taken again, the grid's
-800 by 600 to 1072 by 603, the resizing's square to 720 by 405 and two of 500 by 300 to 544 by 306,
-each example keeping Bevy's window; EXAMPLES.md's header says a capture of another shape is padded,
-the checked-in captures being the comparison's references, so they follow; on the way a read under
-the shell's strict mode failed on info's output lacking a newline, mended, and the shot files the
-failed runs left are gone. Right, the slip caught and mended before its page could show it, and the
-padding done once in the capture rather than by the page's stretching. The suite as at `b06ff120`
-with the norm tests on the result. Item 13 is done. Item 14, the skill's move, the working session
-takes only on the owner's word typed in its own session, since it changes AGENTS.md and the tool's
-own folder, and it has asked the owner there; the reviewing session holds that right and the owner
-is told. The owner looked at the pushed README at 17:10 and the pictures still read as different
-sizes: GitHub's own style gives every tag one box, so it is the padding of the four captures that
-reads as smaller pictures, and item 13 keeps the fit, the capture scaled to fill its box and cut
-around the middle rather than padded, a batch of its own before low_power's commit. Next low_power,
-its suite running, its README written again on top of these with the norm tests run before its
-commit.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -150,7 +146,8 @@ from [SHARED.md](SHARED.md).
    at `88a75e54`, `f68bd192` and `09e3b339` to 557, 588 and 535, each a commit that moves code
    alone; `app.rs` is at 709 since `c5b6d1d3`. N 7.2's list takes `ff467a5f`, the subject's marks
    run together and pushed before the suite read them, beside the owner's `5a7f2c07`, and the list
-   only gets shorter from there.
+   only gets shorter from there; `a0c8b1b0`, the owner's own one-line commit of the showcase's
+   caption, pushed, joins it as the owner's with custom_schedule's commit, three left out.
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
@@ -374,8 +371,8 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done through `f60bc166` but for
-    the names' padding (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
+13. **The README's gallery as one scrolling row of pictures a group, done through `e92591dd` but for
+    the caption's width (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
     README. `build/examples-table.py` writes the gallery between its markers as one table of four
     pictures a row over every written example; it writes instead one table a group in the order
     Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
@@ -426,7 +423,22 @@ from [SHARED.md](SHARED.md).
     at some 246 pixels, past the picture's 200 on every platform's monospace and past the longest
     name, so no cell can shrink below its picture and the name reads as a caption bar; the cell's
     width stays as the preference, N 4.5's reader and the prose count checked, and the rendered page
-    read after the push.
+    read after the push. Done at `e92591dd`: every name at thirty characters or more, the page read
+    after the push. The owner looked at the pushed pages at 20:05: the look is right, and on a phone
+    the caption under each picture is a tenth to a fifth wider than the picture, on a desktop a
+    little wider. The caption's padded text sets the cell's width while the picture fills no more
+    than its own size, so on a font that draws text wider, as a phone's does, the text overshoots
+    the picture. The caption sets the width on purpose and the picture fills it exactly: each
+    picture's tag and cell take a nominal width past the caption's widest rendering, so the cell is
+    the caption's width on every device and the picture, no wider than its cell by the page's rule,
+    fills it edge to edge; and the caption shrinks to the small tag, `<small><code>`, which the page
+    keeps, since the padding cannot go below the longest name and the font is the other knob: the
+    names padded to 35 characters, the longest, in a small code caption, every tag 260 by 146 and
+    every cell 260, so the pictures come out about 260 wide and the same width as their captions;
+    the owner tried a padding of 28 with the longer names broken by a `<wbr>` tag and the tags at
+    220 on 3DEngine's page at 20:35 and prefers this form, its pictures filling up to the caption's
+    width where the other's fell short, the names being Bevy's and the table's keys, so none is
+    renamed; the rendered page read after the push on a desktop and a phone.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
     on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the

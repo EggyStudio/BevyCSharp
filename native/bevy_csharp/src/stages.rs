@@ -7,6 +7,8 @@ use bevy::ecs::schedule::SystemSet;
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum Stage {
+    /// Once, before the loop starts, ahead of `Startup`, as Bevy's `PreStartup` runs.
+    PreStartup = 11,
     /// Once, before the loop starts.
     Startup = 0,
     /// Top of each frame.
@@ -35,6 +37,7 @@ impl Stage {
     /// Converts the discriminant C# sent, rejecting anything out of range.
     pub fn from_i32(value: i32) -> Option<Stage> {
         Some(match value {
+            11 => Stage::PreStartup,
             0 => Stage::Startup,
             1 => Stage::First,
             2 => Stage::PreUpdate,

@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 264;
+    internal const int ExpectedAbiVersion = 265;
 
     static Native() => NativeLoader.Initialize();
 
@@ -618,6 +618,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_step_transition(NativeStateTransition* transition);
+
+    /// <summary>Places a schedule of the game's own in Bevy's main order, after a stage.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_app_place_schedule(IntPtr app, string schedule, int after, uint singleThreaded);
 
     /// <summary>Registers a C# system in a schedule of the game's own, by the schedule's name.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

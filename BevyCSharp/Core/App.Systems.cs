@@ -401,7 +401,7 @@ public sealed unsafe partial class App : IDisposable
     {
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
-        if (stage == Stage.Startup)
+        if (stage is Stage.PreStartup or Stage.Startup)
         {
             descriptor.Invoke(World);
             return this;

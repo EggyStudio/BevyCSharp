@@ -48,6 +48,49 @@ public sealed unsafe partial class App
     }
 
     /// <summary>
+    /// Places a schedule of the game's own in Bevy's main order, run once a frame right after
+    /// <paramref name="after"/>, or once at startup where <paramref name="after"/> is
+    /// <see cref="Stage.PreStartup"/> or <see cref="Stage.Startup"/>, as Bevy's custom_schedule
+    /// places its own.
+    /// </summary>
+    /// <param name="schedule">The schedule, whose systems are put in with <see cref="AddSystem(ScheduleLabel, SystemDescriptor)"/>, before or after.</param>
+    /// <param name="after">The stage it runs right after.</param>
+    /// <param name="singleThreaded">
+    /// Whether its systems run one after another on one thread, as Bevy's
+    /// <c>SingleThreadedExecutor</c> runs them, rather than side by side where they can.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// A schedule not placed runs only when a system asks with
+    /// <see cref="BehaviorContext.TryRunSchedule"/>, and one placed runs on its own in its place, a
+    /// system may still ask for it besides. Its systems run in an order Bevy picks, as a stage's do.
+    /// </para>
+    /// <para>
+    /// The stage is one that is a schedule of Bevy's, so <see cref="Stage.FixedUpdate"/>, which runs
+    /// inside the frame's own loop of fixed steps, and <see cref="Stage.Render"/> and the engine's own
+    /// stages, which are sets within one, are refused.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The app is already running, or the schedule is placed already.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The stage is no schedule of Bevy's own.</exception>
+    public App AddSchedule(ScheduleLabel schedule, Stage after, bool singleThreaded = false)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(schedule.Name);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (after is not (Stage.PreStartup or Stage.Startup or Stage.First or Stage.PreUpdate or Stage.Update or Stage.PostUpdate or Stage.Last))
+            throw new ArgumentOutOfRangeException(nameof(after), after, $"Schedule '{schedule.Name}' can only follow a stage that is a schedule of Bevy's own.");
+        if (IsRunning)
+            throw new InvalidOperationException($"Cannot place schedule '{schedule.Name}': the app is already running. Place it from a plugin's Build method or before calling Run.");
+
+        var status = Native.bcs_app_place_schedule(_handle, schedule.Name, (int)after, singleThreaded ? 1u : 0u);
+        if (status == NativeStatus.InvalidState)
+            throw new InvalidOperationException($"Schedule '{schedule.Name}' is placed already, and runs once where it is.");
+        Native.Check(status, $"placing schedule '{schedule.Name}' after {after}");
+        return this;
+    }
+
+    /// <summary>
     /// Runs <paramref name="run"/> in Bevy's transition of <typeparamref name="TState"/>, at
     /// <paramref name="step"/>, with the move the state made, in every frame it makes one.
     /// </summary>

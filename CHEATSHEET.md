@@ -36,6 +36,7 @@ static void RequestExit(int code);                              // Asks the engi
 static string? DescribeAdapter();                               // Describes the graphics adapter the renderer actually chose, or null in a headless run
 void Dispose();                                                 // Releases what it holds
 App AddSystem(ScheduleLabel schedule, SystemDescriptor descriptor);  // Puts a system in a schedule of the game's own, which runs it when a system asks with TryRunSchedule, as Bevy's add_systems with a label of the game's does
+App AddSchedule(ScheduleLabel schedule, Stage after, bool singleThreaded = false);  // Places a schedule of the game's own in Bevy's main order, run once a frame right after after, or once at startup where after is PreStartup or Startup, as Bevy's custom_schedule places its own
 App OnStateTransition<TState>(TransitionStep step, Action<BehaviorContext, StateTransitionEvent<TState>> run, string name);  // Runs run in Bevy's transition of TState, at step, with the move the state made, in every frame it makes one
 App AddState<TState>(TState initial);                           // Adds a state machine over TState, starting at initial
 App AddSubState<TState>(TState initial);                        // Adds a sub-state over TState, which exists only while its parent holds the value its SubStateOfAttribute names

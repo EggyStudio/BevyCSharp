@@ -48,6 +48,70 @@ pub unsafe extern "C" fn bcs_app_add_schedule_system(
     })
 }
 
+/// Places the game's schedule called `schedule` in Bevy's main order, run once a frame right after
+/// the stage `after` names, or once at startup where `after` is a startup stage, as Bevy's
+/// custom_schedule places its own with `MainScheduleOrder`. A non-zero `single_threaded` runs its
+/// systems one after another on one thread, as Bevy's `SingleThreadedExecutor` does.
+///
+/// Its systems are put in before or after, the placing keeping them. A stage that is no schedule of
+/// its own, as the fixed step or the bridge's sets within a schedule, is refused with
+/// [`status::NULL_ARG`], and a schedule placed already with [`status::INVALID_STATE`].
+///
+/// # Safety
+/// `handle` must be a live app and `schedule` a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_app_place_schedule(handle: *mut BcsApp, schedule: *const c_char, after: i32, single_threaded: u32) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+        let Some(schedule) = (unsafe { crate::interop::cstr_to_string(schedule) }) else {
+            return status::NULL_ARG;
+        };
+
+        place(&mut app.app, schedule, after, single_threaded != 0)
+    })
+}
+
+/// [`bcs_app_place_schedule`] on a Bevy app.
+fn place(app: &mut bevy::app::App, schedule: String, after: i32, single_threaded: bool) -> i32 {
+    use bevy::app::{First, Last, MainScheduleOrder, PostUpdate, PreStartup, PreUpdate, Startup, Update};
+    use crate::stages::Stage;
+
+    let Some(after) = Stage::from_i32(after) else {
+        return status::NULL_ARG;
+    };
+
+    let named = Named(schedule);
+    let label = named.clone().intern();
+    let mut order = app.world_mut().resource_mut::<MainScheduleOrder>();
+    if order.labels.contains(&label) || order.startup_labels.contains(&label) {
+        return status::INVALID_STATE;
+    }
+
+    // Each by its own type, which the order tells its labels apart by.
+    match after {
+        Stage::PreStartup => order.insert_startup_after(PreStartup, named),
+        Stage::Startup => order.insert_startup_after(Startup, named),
+        Stage::First => order.insert_after(First, named),
+        Stage::PreUpdate => order.insert_after(PreUpdate, named),
+        Stage::Update => order.insert_after(Update, named),
+        Stage::PostUpdate => order.insert_after(PostUpdate, named),
+        Stage::Last => order.insert_after(Last, named),
+        _ => return status::NULL_ARG,
+    }
+
+    app.edit_schedule(label, |placed| {
+        if single_threaded {
+            placed.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        }
+    });
+    status::OK
+}
+
 /// Runs the game's schedule called `schedule` to its end, as Bevy's `World::try_run_schedule`
 /// does, and answers 1, or 0 where no system was put in it or it is running already, as one that
 /// would run itself is.
@@ -89,5 +153,31 @@ mod tests {
         assert_eq!(loan_world(&mut world, || unsafe { super::bcs_schedule_run(own.as_ptr()) }), 1);
         assert_eq!(loan_world(&mut world, || unsafe { super::bcs_schedule_run(unknown.as_ptr()) }), 0);
         assert_eq!(world.resource::<Ran>().0, 1);
+    }
+
+    /// A schedule placed after a stage takes its place in Bevy's main order, one placed after a
+    /// startup stage in the startup order, a second placing is refused, and so is a stage that is
+    /// no schedule of its own.
+    #[test]
+    fn a_schedule_takes_its_place_in_the_main_order() {
+        use bevy::app::{MainScheduleOrder, PreStartup, Startup, Update};
+        use bevy::ecs::schedule::ScheduleLabel;
+
+        use crate::interop::status;
+        use crate::stages::Stage;
+
+        let mut app = bevy::app::App::new();
+        assert_eq!(super::place(&mut app, "Tests.Frame".into(), Stage::Update as i32, true), status::OK);
+        assert_eq!(super::place(&mut app, "Tests.Start".into(), Stage::PreStartup as i32, false), status::OK);
+        assert_eq!(super::place(&mut app, "Tests.Frame".into(), Stage::Last as i32, false), status::INVALID_STATE);
+        assert_eq!(super::place(&mut app, "Tests.Fixed".into(), Stage::FixedUpdate as i32, false), status::NULL_ARG);
+
+        let order = app.world().resource::<MainScheduleOrder>();
+        let at = |labels: &[bevy::ecs::schedule::InternedScheduleLabel], label: bevy::ecs::schedule::InternedScheduleLabel| {
+            labels.iter().position(|held| *held == label).unwrap()
+        };
+        assert_eq!(at(&order.labels, Named("Tests.Frame".into()).intern()), at(&order.labels, Update.intern()) + 1);
+        assert_eq!(at(&order.startup_labels, Named("Tests.Start".into()).intern()), at(&order.startup_labels, PreStartup.intern()) + 1);
+        assert!(at(&order.startup_labels, Startup.intern()) > at(&order.startup_labels, Named("Tests.Start".into()).intern()));
     }
 }

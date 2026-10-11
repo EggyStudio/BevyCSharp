@@ -154,6 +154,21 @@ app.Update(ctx => score.Tick(ctx.Time.Delta), "Score");
 app.On(Stage.FixedUpdate, Step, "Step", runIf: world => !world.Resource<Time>().Paused);
 ```
 
+`Stage.PreStartup` runs once ahead of the startup stage, for what every startup system leans on,
+and has no attribute, being a stage a plugin sets things up in rather than a behavior. A schedule of
+the game's own, a `ScheduleLabel` taking systems as a stage does, runs in a place of its own in the
+frame once `App.AddSchedule` puts it right after one of Bevy's, and runs its systems one after
+another on one thread where it is asked to, as Bevy's custom_schedule shows:
+
+<!-- compiled with:
+private static void Settle(BehaviorContext ctx) { }
+-->
+```csharp
+var settle = new ScheduleLabel("SingleThreadedUpdate");
+app.AddSchedule(settle, after: Stage.Update, singleThreaded: true);
+app.AddSystem(settle, new SystemDescriptor(world => Settle(new BehaviorContext(world)), "Settle"));
+```
+
 ## Order within a stage
 
 Systems in one stage run in an order Bevy picks as it builds the schedule, which is not the order

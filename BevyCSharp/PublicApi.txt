@@ -185,6 +185,7 @@ sealed class Bevy.App : IDisposable
   App AddObserver<TEvent>(Action<On<TEvent?>> observer)
   App AddPlugin(IPlugin plugin)
   App AddPlugins(IPluginGroup group)
+  App AddSchedule(ScheduleLabel schedule, Stage after, bool singleThreaded = false)
   App AddState<TState>(TState initial) where TState : struct, Enum
   App AddStateSystem<TState>(TState value, bool entering, SystemDescriptor descriptor) where TState : struct, Enum
   App AddSubState<TState>(TState initial) where TState : struct, Enum
@@ -10932,6 +10933,7 @@ enum Bevy.Stage : int
   FrameSync = 8
   Last = 6
   PostUpdate = 4
+  PreStartup = 11
   PreUpdate = 2
   Render = 5
   Startup = 0
