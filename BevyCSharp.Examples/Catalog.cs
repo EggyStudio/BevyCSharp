@@ -205,6 +205,7 @@ internal static class Catalog
         new("custom_schedule", CustomSchedule.Build, Prints: 2),
         new("delayed_commands", DelayedCommands.Build),
         new("ecs_guide", EcsGuide.Build, Prints: 20),
+        new("error_handling", ErrorHandling.Build, ErrorHandling.Configure),
         new("fixed_timestep", FixedTimestep.Build, FixedTimestep.Configure, Prints: 64),
         new("generic_system", GenericSystem.Build, Prints: 130),
         new("hierarchy", Hierarchy.Build),

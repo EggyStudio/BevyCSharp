@@ -182,7 +182,7 @@ delayed_commands	can	the delays counted by the app's own clock, as Bevy's defaul
 dynamic	n/a	builds components from raw layouts in Rust
 ecs_guide	can
 entity_disabling	can
-error_handling	missing	points sampled over a mesh's surface
+error_handling	can	a throwing system logged by the engine where Bevy's returns its error to a handler, its points sampled from the sphere's triangles read back
 extraction	n/a	writes render world extraction in Rust
 fallible_params	n/a	about Rust system parameters that fail validation, where a C# system checks what it needs itself
 fixed_timestep	can

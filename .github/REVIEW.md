@@ -10,8 +10,45 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c447a370`. Three commits, pushed by the owner at 17:36 with the three before them,
-their run queued. `4fcba199` sets the version, `build/version.txt` alone, the owner's. `d91665d9`,
+Reviewed up to `7a6cbf16`. One commit, load_gltf_extras, unpushed with the decal, and its triage
+line was stale, glTF's four kinds of extras being reflected with their JSON as a string already: the
+example gathers the four through the listing by component each frame and prints every entity holding
+any in Bevy's format, each value escaped as Rust's debug writes a string, the capture showing the
+cube, its geometry's material and the scene as Bevy prints them, the entities in index order rather
+than Bevy's query order, which the triage note says; the model joins the asset list, the assets
+guide has its paragraph and block; no library change, so no suite, the norm, document and path tests
+20 of 20, the prose at 299. EXAMPLES.md reads 343 written, 2 in part and 37 missing. Right, the
+stale line read first and the listing used for what it was built for. The working session takes
+error_handling before the depth to a texture, since it needs no bridge work either, the mesh's
+triangles read back and sampled by area in C# as Bevy's sampler does, a throwing system logged with
+the app running on as Bevy's warn handler has it and the fail-fast setting as the panic, a system
+catching its own error for Bevy's pipe, a refused command on a missing entity for its failing
+commands and a pointer-move observer for the sphere; then the depth to a texture, a system copying a
+depth-only camera's depth into an image in the render graph and a material sampling it with a
+comparison sampler, and a custom projection, a projection type the bridge declares set by a matrix
+from C#, which both take bridge work.
+
+Before it, `c16f67e5` came, decal, ABI 266: `Render.CreateDecalMaterial` builds a standard material
+from the usual settings and wraps it in Bevy's forward decal material with a depth fade and a depth
+bias, the bias set on the base since the config carries none, and `Render.SetForwardDecal` makes an
+entity a decal, refusing a key that is no decal material; a native test runs with Bevy's own decal
+plugin, its mesh being private, and reads the fade, the bias, the color and both answers, the long
+config literal of the round-trip test moved into a helper both use; where the build has the renderer
+a headless run is told it must draw, windowed or offscreen, rather than given the advice to rebuild;
+`DecalTests` runs offscreen, the decal given Bevy's box mesh and a standard material refused. The
+example lays three checker decals, opaque, blended and added at biases of 0, 2 and 4, over a white
+floor and a hundred cubes turned by a seeded random, under a depth prepass and a shadowed point
+light, its capture matching Bevy's; the materials guide has a decals section and block, the cheat
+sheet and the surface their lines. With it the Solari comment speaks of the development machine's
+laptop GPU, so nothing outside `.github` names the model, and item 15 is done. `render/assets.rs`
+stands at 651 lines. EXAMPLES.md reads 342 written, 2 in part and 38 missing. The suite: 1,420
+passed and 2 skipped of 1,422; cargo's 89 and 154; the prose at 299. Right, the decal's two halves
+kept apart as Bevy keeps them, the private mesh tested through Bevy's own plugin, and the headless
+case told what it needs. Next the depth to a texture, then a custom projection, the mesh sampling's
+error handling and the glTF extras.
+
+Before it, three commits came, `4fcba199` to `c447a370`, pushed by the owner at 17:36 with the three
+before them. `4fcba199` sets the version, `build/version.txt` alone, the owner's. `d91665d9`,
 ghost_nodes: Bevy's feature is in the render profile, adding no crate, the lock byte for byte the
 same (Decision 25), and the components table written again from an editor run on the new bridge
 gains the ghost node alone; `GhostNodeRef` puts a node the layout passes through as though its
@@ -34,37 +71,6 @@ the button example counting two of three clicks at one spot and every one once t
 moved there a few frames first, picking wanting the hover a frame before the press. Next the forward
 decal, then the depth to a texture, a custom projection, the mesh sampling's error handling and the
 glTF extras.
-
-Before it, `83b371cc` came, item 13's padding of 32, as 3DEngine's: every caption padded with the
-non-breaking space to 32, the one name longer than that left unpadded with its cell a little wider,
-which the script's comment says with why the picture shrinks to the caption; 305 pictures, 304
-captions at 32 and the one at 35 read here, the README written in a worktree at the commit so
-ghost_nodes' state stays out of it, the check passing, the prose at 299 and the norm tests 18 of 18.
-Right, the two galleries one form. Item 13 is done, the owner's eye on the push. ghost_nodes next,
-its bridge building, then the components table and the suite. The owner asked at 17:26 that the
-development machine's GPU be named nowhere a user reads, which is item 15 (Decision 29), three files
-here, with ghost_nodes' commit.
-
-Before it, `4ea63186` came, asset_settings, and its triage line was stale: `AssetServer.LoadImage`
-already loads through Bevy's builder with settings, and Bevy's default reads a meta file beside an
-image, so no bridge work was needed; the example shows the same picture of pixels three times,
-blurred as an image loads unless told otherwise, sharp with a meta file beside it asking the nearest
-sampler, and sharp with the settings given at the load, its capture as Bevy's. Its four files live
-beside Bevy's source rather than in its assets folder, so the asset list names them by addresses
-into Bevy's repository, which the fetch script stores under the example's folder beneath the assets,
-the list's header saying such an address may name the repository itself; the materials guide says a
-meta file beside an image sets its settings and the load's settings write over them; the triage note
-says the images read from their folder under the assets rather than from a root of their own. The
-norm, document and path tests pass, 20 of 20, the prose at 299. EXAMPLES.md reads 340 written, 2 in
-part and 40 missing. Right, the stale line read before anything was built and the files fetched from
-where Bevy keeps them rather than copied in. The owner looked at both pushed galleries at 16:58 and
-finds 3DEngine's the better, its captions of 32 narrower than the picture so the picture shrinks to
-them, where 35 draws past it, so item 13 keeps the padding of 32 with the one longer name unpadded,
-a batch of its own before ghost_nodes' commit. ghost_nodes next: Bevy's feature for it adds no
-crate, the lock byte for byte the same with it on, so it is the working session's to turn on under
-Decision 25, in the render profile beside the interface's crate with a comment, the components table
-written again from an editor run for the ghost node, the example's roots, buttons and observers
-walking parent, siblings and labels as Bevy's do.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -281,9 +287,10 @@ from [SHARED.md](SHARED.md).
    the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
    `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
    `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
-   bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), the table
-   at 341 written and 39 missing; the rows that need no crate and no word follow in TODO.md's order,
-   the forward decal next.
+   bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), and the
+   forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, the table at 343 written and 37
+   missing; the rows that need no crate and no word follow in TODO.md's order, error_handling next,
+   then the depth to a texture and a custom projection.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -440,15 +447,14 @@ from [SHARED.md](SHARED.md).
     reviewing session holds. Done at `53fd0c3f` on the owner's word typed there: `.github/BCS.md`,
     every reference moved, the folder gone and ignored.
 
-15. **The development machine's GPU is named nowhere a user reads, done at `c447a370` but for one
-    comment (Decision 29).** The owner asked on 2026-10-11 at 17:26, as of 3DEngine, that the
-    mention of their machine, the RTX 4070, leave the code and comments a user sees: here
-    `Render.Pipeline.cs`, the running guide and the comparison with Bevy name it, each where a
-    measurement was taken; the measurement stays and the device becomes a plain phrase, the
-    development machine's GPU or a laptop GPU of its class. The documents under `.github` keep the
-    name unless the owner says otherwise. Done at `c447a370` in the three files, the CPU's model
-    gone with the GPU's; one comment in the bridge's Solari module still names it and goes with the
-    next commit.
+15. **The development machine's GPU is named nowhere a user reads, done at `c447a370` and `c16f67e5`
+    (Decision 29).** The owner asked on 2026-10-11 at 17:26, as of 3DEngine, that the mention of
+    their machine, the RTX 4070, leave the code and comments a user sees: here `Render.Pipeline.cs`,
+    the running guide and the comparison with Bevy name it, each where a measurement was taken; the
+    measurement stays and the device becomes a plain phrase, the development machine's GPU or a
+    laptop GPU of its class. The documents under `.github` keep the name unless the owner says
+    otherwise. Done at `c447a370` in the three files, the CPU's model gone with the GPU's; the
+    Solari comment at `c16f67e5`, so nothing outside `.github` names the model.
 
 16. **An offscreen click lands only where the pointer has been.** Found at `d91665d9`: driven
     offscreen through `./bcs`, a click at a point the pointer has not moved to is lost, the button

@@ -156,7 +156,10 @@ errors, as Bevy's own are.
 
 A system that throws is logged and the app runs on, where a Rust system's panic ends Bevy's app. A
 game that cannot go on ends the run with a code instead, `ctx.Exit(1)`, which `App.Run` answers, as
-Bevy's `AppExit::Error` is answered.
+Bevy's `AppExit::Error` is answered. That is Bevy's app with its error handler set to warn, as
+Bevy's error_handling sets it, each kind of exception a system throws logged the first time and
+again at each power of ten, and `Config.FailFastOnSystemException` ends the run at the first, as
+Bevy's default handler panics. A system that deals with its own error catches it.
 
 A game on a player's machine has no console anybody reads, so the run writes what it says to
 `logs/latest.log` beside the executable, C#'s lines and Bevy's, with the last five runs' logs kept
