@@ -10,7 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e92591dd`. Item 13's padding: the name under each gallery picture is padded with
+Reviewed up to `bbb7de81`. Two commits, unpushed with the five before them. `bb4cb09f`,
+custom_schedule, ABI 265: `App.AddSchedule` places a schedule of the game's own in Bevy's main order
+after a stage, single-threaded where asked, the bridge placing by the concrete label types since the
+order compares by type and an interned label never matched, the executor set through an edit that
+keeps the systems already in it, and refused in managed code for a stage that is no schedule of
+Bevy's, a second placing or a running app, and in the bridge the same; a pre-startup stage joins
+both sides, before startup in the stage order, a system added while running in it running once on
+the spot as startup's does. `GameScheduleTests` reads the order, pre-startup, the custom startup,
+startup, then update, the schedule after update and last each frame, and both refusals, a native
+test the placement in both orders and both refusals; the example prints Bevy's order exactly, its
+text the capture, its triage line can with no note; the behaviors guide has its paragraph and block
+under the stages, and `a0c8b1b0` is on N 7.2's list as the owner's. `bbb7de81`, item 13 in the form
+the owner chose on a phone: every caption padded to 35 with the non-breaking space in a small code
+tag, all 304 read here so, every tag 260 by 146 and every cell 260, no break tag since the other
+form was never committed; the prose stays at 299 and the check and N 4.5's reader pass on the new
+cell. EXAMPLES.md reads 339 written, 2 in part and 41 missing. The suite: 1,418 passed and 2 skipped
+of 1,420, the norm tests 18 of 18 after the list's line; cargo's 89 and 153. Right, the placement by
+the concrete types where the interned label failed, the refusals on both sides, and the caption form
+built as chosen. Items 13 and 14 are done, the rendered page read after the push. Next the missing
+rows that need no crate and no word, asset_settings first, its triage line read for staleness as the
+others were, then ghost_nodes, the forward decal, the depth to a texture, a custom projection, the
+mesh sampling's error handling, the glTF extras, the interface material, a custom vertex attribute,
+mip generation, occlusion culling, the world's serialization, the transform gizmo, picking's debug,
+the pitch and the decodable.
+
+Before it, `e92591dd` came, item 13's padding: the name under each gallery picture is padded with
 non-breaking spaces, the character itself, to thirty characters inside its code tag, the cell's
 width kept as the preference and the script's comment saying why; all 304 names read here at thirty
 or more, three longer names carrying none, the longest `shader_material_screenspace_texture` at 35,
@@ -49,44 +74,6 @@ the concrete label types, since the order compares by type and an interned label
 the single-threaded executor set through an edit that keeps the systems already in it, a second
 placing and a stage that is no schedule of its own refused, and a native test reading the placement
 back in both orders.
-
-Before it, three commits came, `53fd0c3f` to `ea5e1532`. `53fd0c3f`, item 14 on the owner's word
-typed in the working session: the bcs guide is `.github/BCS.md`, moved with its history and its
-header dropped, AGENTS.md's line and STYLE.md's scope point to it, `.claude/` is in `.gitignore`
-with its reason and the folder is gone with the lock file the tool kept there; no reference to the
-old path is left outside this file. `04cefc8e`, item 13's fit: the capture script scales a shot of
-another shape to cover 1280 by 720 and cuts it around the middle in place of the padding, the
-resizing and window settings examples filled so, the grid example, whose header and footer the cut
-would lose, opened at Bevy's default window instead of its own, and the scale factor example, whose
-label the cut would lose, at 512 by 288, the sixteen by nine nearest Bevy's 500 by 300, each said in
-the triage notes and the files' heads; and a second slip of the working session's found on the way,
-`21d08b44`'s padded sizes not on N 4.5's list, which the pushed head carries and whose run reads red
-on that test, mended here with the three off the list and the scale factor's line at its new size,
-the norm tests on the commit's own tree 17 passed and 1 skipped. `ea5e1532`, low_power, ABI 264:
-`Window.SetUpdateSettings` sets winit's two modes, focused and not, each continuous or reactive with
-a wait and the events it wakes for, a negative or non-numeric wait refused naming the field, from
-Bevy's four presets by its names or a mode of the game's own; `Window.RequestRedraw` writes Bevy's
-message only where it is registered, since the headless harness logged a send to none, and
-`Window.WakeUp` sends winit's wake where its loop's proxy exists and nothing otherwise, an offscreen
-run having no winit and never waiting, which the remarks say with the one trap, that a request from
-`./bcs` to a reactive app is answered on its next update. The example cycles the four modes on Space
-with the cube turning while the app updates and the count of updates shown, the state on the cube's
-entity (B 4), vertical sync off as Bevy's; a native test holds the settings, their refusal and both
-no-ops, and `SpawnedWindowTests` the run with no window updating every frame under the desktop
-preset and a negative wait refused naming its field; the window guide has its paragraph, the cheat
-sheet its lines. EXAMPLES.md reads 338 written, 2 in part and 42 missing. The suite: 1,416 passed
-and 2 skipped, its one failure the README before `d0e638d7`, the norm, document and window tests 25
-of 25 after the regeneration; cargo's 88 and 152. Right, the fill done once in the file and the two
-examples whose cut would lose their point given a window instead, the slip in N 4.5's list found by
-the working session before a page named it, and winit's three ways of updating given their limits
-where they have none. N 4.5's list stands at 20, which NORM.md says since this pass. The working
-session notes for itself that the norm tests run before any commit touching the README, the captures
-or a listed file. Item 13 keeps one thing from the owner's look at 18:20: each picture is as wide as
-the name under it, since GitHub squeezes a table to the page before it scrolls and a cell shrinks to
-its name, so the script gives every cell `width="200"`, which the sanitizer keeps, a batch of its
-own first. Then custom_schedule in TODO.md's order, a game's schedule placed in Bevy's main order
-after an update or a startup with a single-threaded executor, the triage line half stale since the
-schedule label exists.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -302,7 +289,8 @@ from [SHARED.md](SHARED.md).
    session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
    the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
    `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
-   `ea5e1532`, the table at 338 written and 42 missing; custom_schedule follows.
+   `ea5e1532`, custom_schedule at `bb4cb09f`, the table at 339 written and 41 missing; the rows that
+   need no crate and no word follow in TODO.md's order, asset_settings first.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -371,14 +359,14 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done through `e92591dd` but for
-    the caption's width (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
-    README. `build/examples-table.py` writes the gallery between its markers as one table of four
-    pictures a row over every written example; it writes instead one table a group in the order
-    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
-    holding the group's written examples in that order, the picture opening the program and the name
-    under it as today, with a heading line naming the group before each table, and the examples Bevy
-    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
+13. **The README's gallery as one scrolling row of pictures a group, done through `bbb7de81`
+    (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's README.
+    `build/examples-table.py` writes the gallery between its markers as one table of four pictures a
+    row over every written example; it writes instead one table a group in the order Bevy's
+    `examples/README.md` lists the groups, which the script already reads, each a single row holding
+    the group's written examples in that order, the picture opening the program and the name under
+    it as today, with a heading line naming the group before each table, and the examples Bevy keeps
+    out of its list in a last row of their own; a row wider than the page scrolls sideways on
     GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
     reads the table today, so the workflow's table check and the README's walk run on it, and the
     raw links keep their form for the package's page. A batch of its own before low_power, since it
@@ -438,7 +426,8 @@ from [SHARED.md](SHARED.md).
     the owner tried a padding of 28 with the longer names broken by a `<wbr>` tag and the tags at
     220 on 3DEngine's page at 20:35 and prefers this form, its pictures filling up to the caption's
     width where the other's fell short, the names being Bevy's and the table's keys, so none is
-    renamed; the rendered page read after the push on a desktop and a phone.
+    renamed; the rendered page read after the push on a desktop and a phone. Done at `bbb7de81`:
+    captions of 35 set small, every tag and cell 260.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
     on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the

@@ -2,7 +2,12 @@
 # downloads into BevyCSharp.Examples/bevy-assets at the release the bridge builds, a path to a line.
 # They are Bevy's and stay out of this repository, so a written example that loads one names it
 # here. A full address is a file from Bevy's asset_files repository, which an example of Bevy's
-# loads over the network and one here loads from the path after the branch.
+# loads over the network and one here loads from the path after the branch, or one of Bevy's own
+# repository outside its assets folder, as asset_settings loads its images from beside its source.
+https://github.com/bevyengine/bevy/raw/v0.20.0/examples/asset/files/bevy_pixel_dark.png
+https://github.com/bevyengine/bevy/raw/v0.20.0/examples/asset/files/bevy_pixel_dark_with_meta.png
+https://github.com/bevyengine/bevy/raw/v0.20.0/examples/asset/files/bevy_pixel_dark_with_meta.png.meta
+https://github.com/bevyengine/bevy/raw/v0.20.0/examples/asset/files/bevy_pixel_dark_with_settings.png
 https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/env_diffuse.ktx2
 https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/env_specular.ktx2
 https://github.com/bevyengine/bevy_asset_files/raw/main/pccm_example/outer_cube.glb

@@ -164,6 +164,12 @@ rather than as sRGB, as a normal, roughness or occlusion map needs. Individual s
 for anything else, including anisotropy, which is dropped rather than refused if the filters are not
 all linear, because the graphics API treats that pair as a validation failure.
 
+The settings can sit beside the file instead, in a `.meta` file of Bevy's form named for it, as
+`tiles.png.meta`, which Bevy's loader reads whenever it loads the image, so a plain
+`AssetServer.Load` keeps a pixel-art sprite's pixels sharp without the code saying so. Settings
+given to `LoadImage` are written over the file's, as Bevy's `with_settings` writes them, and Bevy's
+`asset_settings` shows both.
+
 Tiling takes both halves. A mesh's UVs run from zero to one however large it is, so a repeating
 texture still shows one stretched copy until the material scales them with `UvScale = (12f, 12f)`.
 PNG, JPEG, WebP, BMP, TGA and Radiance's `.hdr` decode in every build, headless included, because

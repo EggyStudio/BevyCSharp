@@ -167,6 +167,7 @@ internal static class Catalog
         new("alter_mesh", AlterMesh.Build),
         new("alter_sprite", AlterSprite.Build),
         new("asset_loading", AssetLoading.Build),
+        new("asset_settings", AssetSettings.Build),
         new("custom_asset", CustomAssetExample.Build, Prints: 30),
         new("embedded_asset", EmbeddedAsset.Build),
         new("extra_asset_source", ExtraSource.Build, ExtraSource.Configure),
