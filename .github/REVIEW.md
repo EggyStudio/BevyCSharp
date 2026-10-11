@@ -10,27 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4ea63186`. One commit, asset_settings, unpushed with the seven before it, and its
-triage line was stale: `AssetServer.LoadImage` already loads through Bevy's builder with settings,
-and Bevy's default reads a meta file beside an image, so no bridge work was needed; the example
-shows the same picture of pixels three times, blurred as an image loads unless told otherwise, sharp
-with a meta file beside it asking the nearest sampler, and sharp with the settings given at the
-load, its capture as Bevy's. Its four files live beside Bevy's source rather than in its assets
-folder, so the asset list names them by addresses into Bevy's repository, which the fetch script
-stores under the example's folder beneath the assets, the list's header saying such an address may
-name the repository itself; the materials guide says a meta file beside an image sets its settings
-and the load's settings write over them; the triage note says the images read from their folder
-under the assets rather than from a root of their own. The norm, document and path tests pass, 20 of
-20, the prose at 299. EXAMPLES.md reads 340 written, 2 in part and 40 missing. Right, the stale line
-read before anything was built and the files fetched from where Bevy keeps them rather than copied
-in. The owner looked at both pushed galleries at 21:25 and finds 3DEngine's the better, its captions
-of 32 narrower than the picture so the picture shrinks to them, where 35 draws past it, so item 13
-keeps the padding of 32 with the one longer name unpadded, a batch of its own before ghost_nodes'
-commit. ghost_nodes next: Bevy's feature for it adds no crate, the lock byte for byte the same with
-it on, so it is the working session's to turn on under Decision 25, in the render profile beside the
-interface's crate with a comment, the components table written again from an editor run for the
-ghost node, the example's roots, buttons and observers walking parent, siblings and labels as Bevy's
-do.
+Reviewed up to `83b371cc`. Item 13's padding of 32, as 3DEngine's: every caption padded with the
+non-breaking space to 32, the one name longer than that left unpadded with its cell a little wider,
+which the script's comment says with why the picture shrinks to the caption; 305 pictures, 304
+captions at 32 and the one at 35 read here, the README written in a worktree at the commit so
+ghost_nodes' state stays out of it, the check passing, the prose at 299 and the norm tests 18 of 18.
+Right, the two galleries one form. Item 13 is done, the owner's eye on the push. ghost_nodes next,
+its bridge building, then the components table and the suite. The owner asked at 22:15 that the
+development machine's GPU be named nowhere a user reads, which is item 15 (Decision 29), three files
+here, with ghost_nodes' commit.
+
+Before it, `4ea63186` came, asset_settings, and its triage line was stale: `AssetServer.LoadImage`
+already loads through Bevy's builder with settings, and Bevy's default reads a meta file beside an
+image, so no bridge work was needed; the example shows the same picture of pixels three times,
+blurred as an image loads unless told otherwise, sharp with a meta file beside it asking the nearest
+sampler, and sharp with the settings given at the load, its capture as Bevy's. Its four files live
+beside Bevy's source rather than in its assets folder, so the asset list names them by addresses
+into Bevy's repository, which the fetch script stores under the example's folder beneath the assets,
+the list's header saying such an address may name the repository itself; the materials guide says a
+meta file beside an image sets its settings and the load's settings write over them; the triage note
+says the images read from their folder under the assets rather than from a root of their own. The
+norm, document and path tests pass, 20 of 20, the prose at 299. EXAMPLES.md reads 340 written, 2 in
+part and 40 missing. Right, the stale line read before anything was built and the files fetched from
+where Bevy keeps them rather than copied in. The owner looked at both pushed galleries at 21:25 and
+finds 3DEngine's the better, its captions of 32 narrower than the picture so the picture shrinks to
+them, where 35 draws past it, so item 13 keeps the padding of 32 with the one longer name unpadded,
+a batch of its own before ghost_nodes' commit. ghost_nodes next: Bevy's feature for it adds no
+crate, the lock byte for byte the same with it on, so it is the working session's to turn on under
+Decision 25, in the render profile beside the interface's crate with a comment, the components table
+written again from an editor run for the ghost node, the example's roots, buttons and observers
+walking parent, siblings and labels as Bevy's do.
 
 Before it, `bbb7de81` and `bb4cb09f` came. `bb4cb09f`, custom_schedule, ABI 265: `App.AddSchedule`
 places a schedule of the game's own in Bevy's main order after a stage, single-threaded where asked,
@@ -56,28 +65,6 @@ ghost_nodes, the forward decal, the depth to a texture, a custom projection, the
 error handling, the glTF extras, the interface material, a custom vertex attribute, mip generation,
 occlusion culling, the world's serialization, the transform gizmo, picking's debug, the pitch and
 the decodable.
-
-Before it, `e92591dd` came, item 13's padding: the name under each gallery picture is padded with
-non-breaking spaces, the character itself, to thirty characters inside its code tag, the cell's
-width kept as the preference and the script's comment saying why; all 304 names read here at thirty
-or more, three longer names carrying none, the longest `shader_material_screenspace_texture` at 35,
-so no cell can shrink below its picture; the prose stays at 299 and the check passes, N 4.5's reader
-taking its source from the picture and not the name, and the README written in a worktree at the
-commit since custom_schedule's triage line moves the count. Right, the minimum put in content where
-the browser's layout reads it. The owner looked at the pushed pages at 20:05: right, and on a phone
-the caption outruns the picture by a tenth to a fifth, so item 13 keeps the caption's width, the
-picture nominally wider than the caption can render so the caption sets the cell and the picture
-fills it, the caption in a small code tag padded to the longest name, 35, every tag 260 by 146,
-which the owner chose at 20:35 on a phone over a padding of 28 with the longer names broken, a batch
-of its own next. Between them stands `a0c8b1b0`, one line of the README, the showcase's caption
-naming the editor in place of the feature test, with the subject's form and no description, the
-owner's own and pushed, the working session having made nothing at that minute, so it goes on N
-7.2's list as the owner's with custom_schedule's commit, as the rule has it, the norm tests run
-again before that commit. custom_schedule is done and in its suite: a game's schedule placed in
-Bevy's main order after an update or a startup stage with a single-threaded executor,
-`App.AddSchedule` and a pre-startup stage on the surface, the example printing Bevy's order exactly
-and its text the capture, twenty schedule tests, the behaviors guide with its paragraph and block;
-committed once the suite and both cargo profiles pass.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -364,14 +351,14 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done through `bbb7de81` but for
-    the padding of 32 (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
-    README. `build/examples-table.py` writes the gallery between its markers as one table of four
-    pictures a row over every written example; it writes instead one table a group in the order
-    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
-    holding the group's written examples in that order, the picture opening the program and the name
-    under it as today, with a heading line naming the group before each table, and the examples Bevy
-    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
+13. **The README's gallery as one scrolling row of pictures a group, done through `83b371cc`
+    (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's README.
+    `build/examples-table.py` writes the gallery between its markers as one table of four pictures a
+    row over every written example; it writes instead one table a group in the order Bevy's
+    `examples/README.md` lists the groups, which the script already reads, each a single row holding
+    the group's written examples in that order, the picture opening the program and the name under
+    it as today, with a heading line naming the group before each table, and the examples Bevy keeps
+    out of its list in a last row of their own; a row wider than the page scrolls sideways on
     GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
     reads the table today, so the workflow's table check and the README's walk run on it, and the
     raw links keep their form for the package's page. A batch of its own before low_power, since it
@@ -437,7 +424,7 @@ from [SHARED.md](SHARED.md).
     of 260, so the picture shrinks to the caption and the two match edge to edge, where BevyCSharp's
     35 draws past the picture. The padding goes to 32 as 3DEngine's, the one name longer than that,
     `shader_material_screenspace_texture`, left unpadded with its cell a little wider, the tags and
-    cells unchanged, so the two galleries read alike.
+    cells unchanged, so the two galleries read alike. Done at `83b371cc`.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
     on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
@@ -451,6 +438,14 @@ from [SHARED.md](SHARED.md).
     folder only on the owner's word given there and has asked the owner for it, a right the
     reviewing session holds. Done at `53fd0c3f` on the owner's word typed there: `.github/BCS.md`,
     every reference moved, the folder gone and ignored.
+
+15. **The development machine's GPU is named nowhere a user reads (Decision 29).** The owner asked
+    on 2026-10-11 at 22:15, as of 3DEngine, that the mention of their machine, the RTX 4070, leave
+    the code and comments a user sees: here `Render.Pipeline.cs`, the running guide and the
+    comparison with Bevy name it, each where a measurement was taken; the measurement stays and the
+    device becomes a plain phrase, the development machine's GPU or a laptop GPU of its class. The
+    documents under `.github` keep the name unless the owner says otherwise. With ghost_nodes'
+    commit.
 
 ## Verdicts
 
@@ -635,5 +630,9 @@ from [SHARED.md](SHARED.md).
     size.** The owner asked at 16:30 and 16:35 on 2026-10-11, as of 3DEngine: the skill document out
     of the `.claude` folder and its empty subfolders, which is item 14 with AGENTS.md's line changed
     on that word; and every picture in the README's rows the same size, which item 13 takes.
+
+29. **The development machine's GPU is named nowhere a user reads.** The owner asked at 22:15 on
+    2026-10-11, as of 3DEngine, which is item 15: the machine's name out of the code and comments a
+    user sees, the measurements kept with the device a plain phrase.
 
 ## Replies

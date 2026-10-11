@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**340 written, 2 written in part, 0 can be written, 40 missing and 56 do not apply.** Of the 382 that apply, 342 can be written with what is bridged, 2 of them leaving something out.
+**341 written, 2 written in part, 0 can be written, 39 missing and 56 do not apply.** Of the 382 that apply, 343 can be written with what is bridged, 2 of them leaving something out.
 
-**159 of the 167 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**160 of the 168 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 55 | 0 | 0 | 10 | 0 | 21 of 23 |
+| [UI (User Interface)](#ui-user-interface) | 56 | 0 | 0 | 9 | 0 | 22 of 24 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **340** | **2** | **0** | **40** | **56** | **159 of 167** |
+| **All** | **341** | **2** | **0** | **39** | **56** | **160 of 168** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -545,7 +545,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`font_variations`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_variations.rs) | Demonstrates how to use OpenType font variations. | [written](../BevyCSharp.Examples/ui/font_variations.cs) |
 | [`font_weights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_weights.rs) | Demonstrates how to use font weights. | [written](../BevyCSharp.Examples/ui/font_weights.cs) |
 | [`generic_font_families`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/generic_font_families.rs) | Demonstrates how to use generic font families | missing, Bevy's system font discovery, which the bridge does not compile in, and the family each generic one stands for, which Bevy's FontCx answers |
-| [`ghost_nodes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/ghost_nodes.rs) | Demonstrates the use of Ghost Nodes to skip entities in the UI layout hierarchy | missing, ghost nodes (GhostNode) |
+| [`ghost_nodes`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/ghost_nodes.rs) | Demonstrates the use of Ghost Nodes to skip entities in the UI layout hierarchy | [written](../BevyCSharp.Examples/ui/ghost_nodes.cs), its scene spawned entity by entity, where Bevy's writes it in BSN |
 | [`gradients`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/styling/gradients.rs) | An example demonstrating gradients | [written](../BevyCSharp.Examples/ui/gradients.cs), through Bevy's reflected BackgroundGradient and BorderGradient |
 | [`grid`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/grid.rs) | An example for CSS Grid layout | [written](../BevyCSharp.Examples/ui/grid.cs), its window Bevy's default of 1280 by 720 rather than the 800 by 600 Bevy's opens, so its picture is sixteen by nine |
 | [`headless_tabs`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/headless_tabs.rs) | Demonstrates controlled and self-updating headless tab lists | [written](../BevyCSharp.Examples/ui/headless_tabs.cs), through Bevy's reflected TabList, Tab and SelectedTab, a tab's selection read from its list since Bevy does not reflect Selected |

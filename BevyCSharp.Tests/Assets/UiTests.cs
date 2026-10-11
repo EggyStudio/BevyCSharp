@@ -508,6 +508,46 @@ public sealed class UiTests
     }
 
     /// <summary>
+    /// A ghost node's children are laid out as its parent's, in one row with the parent's other
+    /// child as though the ghost were not there, Bevy's ghost_nodes feature being built in.
+    /// </summary>
+    [SkippableFact]
+    public void AGhostNodesChildrenAreLaidOutAsItsParents()
+    {
+        Needs.Renderer();
+
+        Entity[] boxes = [];
+        float[] lefts = [];
+
+        using var app = new App(Config.OffscreenFor(640, 360, frames: 4));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+            var row = Ui.SpawnNode(new UiSettings());
+            var ghost = ecs.Spawn();
+            ecs.Insert<Bevy.Reflected.GhostNodeRef>(ghost);
+            ecs.SetParent(ghost, row);
+
+            boxes = [.. Enumerable.Range(0, 3).Select(_ => Ui.SpawnNode(new UiSettings { Width = Length.Px(100f), Height = Length.Px(50f) }))];
+            ecs.SetParent(boxes[0], ghost);
+            ecs.SetParent(boxes[1], ghost);
+            ecs.SetParent(boxes[2], row);
+        }, "Test.Scene"));
+        app.AddSystem(Stage.Last, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            lefts = [.. boxes.Select(box => ecs.Wrap<Bevy.Reflected.UiGlobalTransformRef>(box).Item0Translation.X)];
+        }, "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+        Assert.Equal(3, lefts.Length);
+        Assert.Equal(100f, lefts[1] - lefts[0], 0.5f);
+        Assert.Equal(100f, lefts[2] - lefts[1], 0.5f);
+    }
+
+    /// <summary>
     /// A windowless run's camera spawned at startup draws the interface from the first frame, the
     /// mark chosen once the camera is pointed at the run's image. Chosen before, the interface was
     /// laid out that frame against no camera at no size, where a node with a margin inside one that

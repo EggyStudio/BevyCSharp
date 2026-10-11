@@ -241,6 +241,23 @@ Since the tracks are lists and the rest of the layout arrives as a flat struct, 
 node that already exists rather than passed with one. `UiGrid.Set` also switches the node to
 `UiDisplay.Grid`, so nothing has to say that twice.
 
+A ghost node groups nodes for a game's own reasons, a counter its buttons share or a part of the
+interface spawned and despawned whole, without a box of its own in the layout: its children are laid
+out as though they were its parent's, in the parent's row or grid beside the parent's other
+children. It is Bevy's `GhostNode`, put on an entity of its own, as Bevy's ghost_nodes shows:
+
+<!-- compiled with:
+EcsWorld ecs = null!;
+Entity row = default, first = default, second = default;
+-->
+```csharp
+var group = ecs.Spawn();
+ecs.Insert<GhostNodeRef>(group);
+ecs.SetParent(group, row);
+ecs.SetParent(first, group);                      // laid out in row, beside row's other children
+ecs.SetParent(second, group);
+```
+
 Bevy outlines every node where its `GlobalUiDebugOptions` is on, each box in a color of its own, to
 show where a layout put it, as Bevy's image_node_resizing does. A node given a `UiDebugOptionsRef`
 of its own is left out, since one inserted from nothing is off, and Bevy reads it before the

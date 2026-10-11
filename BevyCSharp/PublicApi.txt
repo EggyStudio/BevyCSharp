@@ -5995,6 +5995,10 @@ enum Bevy.Reflected.GenericFontFamily : int
   UiRounded = 9
   UiSansSerif = 7
   UiSerif = 6
+readonly struct Bevy.Reflected.GhostNodeRef : IReflectedComponent<GhostNodeRef>, IReflectedWrapper<GhostNodeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_ui::experimental::ghost_hierarchy::GhostNode"
 readonly struct Bevy.Reflected.GizmoConfigStoreRef : IReflectedComponent<GizmoConfigStoreRef>, IReflectedWrapper<GizmoConfigStoreRef>
   Entity Entity { get; }
   bool Remove()

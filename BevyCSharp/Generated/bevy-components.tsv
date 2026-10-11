@@ -910,6 +910,7 @@ component	bevy_ui::accessibility::AccessibleLabel	AccessibleLabel
 field	bevy_ui::accessibility::AccessibleLabel	0	.0	String	alloc::string::String	
 component	bevy_ui::auto_directional_navigation::AutoDirectionalNavigation	AutoDirectionalNavigation
 field	bevy_ui::auto_directional_navigation::AutoDirectionalNavigation	respect_tab_order	.respect_tab_order	Bool	bool	
+component	bevy_ui::experimental::ghost_hierarchy::GhostNode	GhostNode
 component	bevy_ui::focus::DeprecatedInteraction	DeprecatedInteraction
 field	bevy_ui::focus::DeprecatedInteraction	value		Enum	DeprecatedInteraction	Pressed,Hovered,None
 component	bevy_ui::focus::FocusPolicy	FocusPolicy

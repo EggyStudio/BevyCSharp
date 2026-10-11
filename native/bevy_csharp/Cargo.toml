@@ -177,6 +177,10 @@ render = [
     "bevy/bevy_text",
     "bevy/bevy_ui",
     "bevy/bevy_ui_render",
+    # A node the layout passes through to its children as though they were its parent's, which
+    # groups nodes for a game's own bookkeeping without a box of its own, as Bevy's ghost_nodes
+    # shows. A feature of the interface crate already built, which adds no crate.
+    "bevy/ghost_nodes",
     # Bevy's own widgets: its headless buttons, checkboxes, sliders, scroll bars and menus, and the
     # editable text a text field is, which lives with them because typing into one is input a
     # widget handles. They are added with the rest of Bevy's defaults. The interface's picking

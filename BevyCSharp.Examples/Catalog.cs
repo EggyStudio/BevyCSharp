@@ -366,6 +366,7 @@ internal static class Catalog
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("editable_text_filter", EditableTextFilter.Build),
         new("flex_layout", FlexLayout.Build),
+        new("ghost_nodes", GhostNodes.Build),
         new("grid", Grid.Build),
         new("fixed_node", FixedNodeExample.Build),
         new("ui_drag_and_drop", UiDragAndDrop.Build),
