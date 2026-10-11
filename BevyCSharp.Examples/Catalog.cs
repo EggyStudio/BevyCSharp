@@ -182,6 +182,7 @@ internal static class Catalog
         // Audio
         new("audio", AudioExample.Build),
         new("audio_control", AudioControl.Build),
+        new("decodable", DecodableExample.Build),
         new("pitch", PitchExample.Build),
         new("play_sound_effect", PlaySoundEffect.Build),
         new("soundtrack", Soundtrack.Build),

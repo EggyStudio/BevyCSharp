@@ -552,6 +552,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_audio_create_pitch(float frequency, float seconds);
 
+    /// <summary>Makes a stream of samples the game writes, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_create_samples(uint rate, uint channels);
+
+    /// <summary>Writes samples after a stream's, returning how many it then holds.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_queue_samples(int key, float* samples, int count);
+
+    /// <summary>How many samples a stream holds that have not been played.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_audio_queued_samples(int key);
+
     /// <summary>Reads a playing sound's volume and whether it is paused.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

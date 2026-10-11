@@ -47,7 +47,8 @@ impl Plugin for SilentAudio {
             .insert_resource(SilentOutput)
             .init_asset::<AudioSource>()
             .init_asset_loader::<AudioLoader>()
-            .init_asset::<Pitch>();
+            .init_asset::<Pitch>()
+            .init_asset::<super::samples::BcsSamples>();
 
         // Sounds playing move on before this frame's are started, so a new sound starts at its
         // first sample, and one that runs out is despawned in the frame it did. After transforms
@@ -57,8 +58,8 @@ impl Plugin for SilentAudio {
             PostUpdate,
             (
                 advance,
-                (start::<AudioSource>, start::<Pitch>),
-                (finish::<AudioSource>, finish::<Pitch>),
+                (start::<AudioSource>, start::<Pitch>, start::<super::samples::BcsSamples>),
+                (finish::<AudioSource>, finish::<Pitch>, finish::<super::samples::BcsSamples>),
             )
                 .chain()
                 .after(bevy::transform::TransformSystems::Propagate),

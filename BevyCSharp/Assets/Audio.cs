@@ -120,14 +120,82 @@ public static unsafe class Audio
         return new AssetHandle(Native.Check(key, $"making a tone of {frequency} Hz"));
     }
 
+    /// <summary>
+    /// Makes a stream of samples the game writes as it plays, as a <c>Decodable</c> of Bevy's makes
+    /// them, for <see cref="Play(AssetHandle)"/> to play as it plays a clip. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy plays a sound of a game's own through a decoder that makes each sample on the audio
+    /// thread as the device asks for it, which C# cannot run on. So the game writes its samples ahead
+    /// with <see cref="QueueSamples"/>, enough to last until it writes again, and the stream plays
+    /// them in order. Where the game falls behind the stream plays silence and goes on, rather than
+    /// ending, so it plays for as long as it is played.
+    /// </para>
+    /// <para>
+    /// A frame is a sample for each channel, the channels of a frame one after another, and a
+    /// stream played by one player at a time, since two would take turns at its samples. A tenth of
+    /// a second queued ahead, refilled each frame by what <see cref="QueuedSamples"/> says is left,
+    /// outlasts any frame a game takes and is heard a tenth of a second after it is written.
+    /// </para>
+    /// </remarks>
+    /// <param name="sampleRate">Frames a second, 44100 as most recordings are.</param>
+    /// <param name="channels">Samples a frame, one for mono and two for stereo.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The rate or the channels are zero or fewer.</exception>
+    /// <exception cref="BevyNativeException">This build has no audio.</exception>
+    public static AssetHandle CreateSampleStream(int sampleRate = 44_100, int channels = 1)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sampleRate);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(channels);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(channels, ushort.MaxValue);
+
+        var key = Native.bcs_audio_create_samples((uint)sampleRate, (uint)channels);
+        if (key == NativeStatus.Unsupported)
+            throw new BevyNativeException(NativeStatus.Unsupported, "Making a stream of samples needs audio, which this build or this app has none of.");
+
+        return new AssetHandle(Native.Check(key, "making a stream of samples"));
+    }
+
+    /// <summary>
+    /// Writes samples after those a stream from <see cref="CreateSampleStream"/> holds, and returns
+    /// how many it then holds. Only valid inside a system.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="samples">Whole frames, a sample for each channel, from -1 to 1.</param>
+    /// <exception cref="ArgumentException">The samples are not whole frames of the stream's channels.</exception>
+    /// <exception cref="BevyNativeException">The handle names no stream, or this build has no audio.</exception>
+    public static int QueueSamples(AssetHandle stream, ReadOnlySpan<float> samples)
+    {
+        int held;
+        fixed (float* at = samples)
+        {
+            held = Native.bcs_audio_queue_samples(stream.Key, at, samples.Length);
+        }
+
+        if (held == NativeStatus.NullArgument)
+            throw new ArgumentException($"{samples.Length} samples are not whole frames of the stream's channels.", nameof(samples));
+
+        return Native.Check(held, $"writing samples to {stream}");
+    }
+
+    /// <summary>
+    /// How many samples a stream from <see cref="CreateSampleStream"/> holds that have not been
+    /// played. Only valid inside a system.
+    /// </summary>
+    /// <exception cref="BevyNativeException">The handle names no stream, or this build has no audio.</exception>
+    public static int QueuedSamples(AssetHandle stream) =>
+        Native.Check(Native.bcs_audio_queued_samples(stream.Key), $"reading what {stream} holds");
+
     /// <summary>Plays a sound and returns the entity playing it.</summary>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
     public static Entity Play(AssetHandle clip) => Play(clip, new AudioSettings());
 
     /// <summary>Plays a sound as <paramref name="settings"/> describes.</summary>
     /// <remarks>
-    /// A clip loaded from a file or a tone from <see cref="CreatePitch"/>. A clip need not have
-    /// finished loading, since playback begins when it has.
+    /// A clip loaded from a file, a tone from <see cref="CreatePitch"/> or a stream from
+    /// <see cref="CreateSampleStream"/>. A clip need not have finished loading, since playback
+    /// begins when it has.
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
     public static Entity Play(AssetHandle clip, AudioSettings settings)

@@ -505,6 +505,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     #[cfg(feature = "render")]
     crate::audio::checked::install(&mut app);
 
+    // A sound the game writes as it plays, played to the device or to none as the rest are.
+    #[cfg(feature = "render")]
+    crate::audio::samples::install(&mut app);
+
     // A rate of zero means "leave Bevy's own", which is 64 Hz. A negative or non-finite one is
     // meaningless rather than merely unusual, so it is ignored the same way.
     if config.fixed_hz.is_finite() && config.fixed_hz > 0.0 {

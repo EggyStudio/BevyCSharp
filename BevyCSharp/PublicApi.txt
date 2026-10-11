@@ -363,6 +363,7 @@ sealed class Bevy.AtmosphereSettings
   float Scale { get; set; }
 static class Bevy.Audio
   static AssetHandle CreatePitch(float frequency, TimeSpan duration)
+  static AssetHandle CreateSampleStream(int sampleRate = 44100, int channels = 1)
   static Entity Play(AssetHandle clip)
   static Entity Play(AssetHandle clip, AudioSettings settings)
   static bool HasStarted(Entity playing)
@@ -375,6 +376,8 @@ static class Bevy.Audio
   static float SpeedOf(Entity playing)
   static float VolumeFromDecibels(float decibels)
   static float VolumeOf(Entity playing)
+  static int QueueSamples(AssetHandle stream, ReadOnlySpan<float> samples)
+  static int QueuedSamples(AssetHandle stream)
   static void Pause(Entity playing, float volume = 1f)
   static void Resume(Entity playing, float volume = 1f)
   static void Seek(Entity playing, float seconds)

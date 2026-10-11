@@ -1322,6 +1322,9 @@ The guide's page is [audio.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 static float BusVolume(string? bus);                            // A bus's volume, which is one for a bus nobody has set and for no bus at all
 static void SetBusVolume(string bus, float volume);             // Sets a bus's volume, which every sound on it is heard at times its own
 static AssetHandle CreatePitch(float frequency, TimeSpan duration);  // Makes a tone of one frequency, as Bevy's Pitch is, for Play to play as it plays a clip
+static AssetHandle CreateSampleStream(int sampleRate = 44100, int channels = 1);  // Makes a stream of samples the game writes as it plays, as a Decodable of Bevy's makes them, for Play to play as it plays a clip
+static int QueueSamples(AssetHandle stream, ReadOnlySpan<float> samples);  // Writes samples after those a stream from CreateSampleStream holds, and returns how many it then holds
+static int QueuedSamples(AssetHandle stream);                   // How many samples a stream from CreateSampleStream holds that have not been played
 static Entity Play(AssetHandle clip);                           // Plays a sound and returns the entity playing it
 static Entity Play(AssetHandle clip, AudioSettings settings);   // Plays a sound as settings describes
 static void SetVolume(Entity playing, float volume);            // Sets a playing sound's volume

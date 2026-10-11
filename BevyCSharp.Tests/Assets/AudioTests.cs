@@ -391,6 +391,47 @@ public sealed class AudioTests
 
     private static AssetHandle _clip;
     /// <summary>
+    /// A stream of samples from <see cref="Audio.CreateSampleStream"/> is played on the game's clock,
+    /// a tenth of a second written drained by half a second in, and the sound goes on once it has
+    /// run out, playing silence; samples that are not whole frames are refused.
+    /// </summary>
+    [SkippableFact]
+    public void AStreamOfSamplesDrainsAndGoesOnWhenItRunsOut()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 40, frameSeconds: 1.0 / 60);
+
+        var stream = AssetHandle.None;
+        var playing = Entity.None;
+        int written = 0, left = -1;
+        bool alive = false;
+        Exception? ragged = null;
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            stream = Audio.CreateSampleStream(44_100);
+            written = Audio.QueueSamples(stream, new float[4_410]);
+            playing = Audio.Play(stream, new AudioSettings { Volume = 0f });
+            ragged = Record.Exception(() => Audio.QueueSamples(Audio.CreateSampleStream(44_100, 2), new float[3]));
+        });
+
+        // Half a second in on a clock that moves a sixtieth a frame.
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ctx.Time.FrameCount != 30) return;
+            (left, alive) = (Audio.QueuedSamples(stream), ctx.Ecs.IsAlive(playing));
+        });
+
+        harness.Run();
+
+        Assert.Equal(4_410, written);
+        Assert.Equal(0, left);
+        Assert.True(alive, "the stream ended when it ran out");
+        Assert.IsType<ArgumentException>(ragged);
+    }
+
+    /// <summary>
     /// A tone made with <see cref="Audio.CreatePitch"/> plays as a clip does and ends when it has
     /// lasted its length, a fifth of a second gone long before a whole one, and a frequency of
     /// nothing is refused.

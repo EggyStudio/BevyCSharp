@@ -10,7 +10,50 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7bc0af69`. occlusion_culling, ABI 271: how many meshes the GPU drew in the opaque
+Reviewed up to `7f42cf40`. Two commits. `a612ab27`, transform_gizmo, ABI 272: Bevy's own gizmo, its
+rendering already there wherever PBR is, so no crate and no owner's word, Feathers being only its
+interface and the camera controller only its camera; its plugin is opt-in by
+`Config.TransformGizmo`, since once its settings exist Bevy spawns the handles and a camera of order
+1 in every app at startup, which fourteen view shader tests caught when the plugin first went in
+unconditionally, four bytes appended to the config on both sides and the remark saying why it is
+kept out; the dump's filter drops the bridge's own paths so the listing is unchanged; the examples'
+radio buttons skip an empty title rather than leave a blank column, light_textures' capture byte for
+byte the same; the example with the examples' buttons, a slider for the sensitivity shown in Scale
+and the examples' free camera, its capture the table with its arrows and ring; a test at 320 by 320
+sees the green arrow over a focused cube and none once the focus is removed and reads the mode as
+translate; the gizmos guide's section. `7f42cf40`, pitch with item 20 and the wording: a tone of one
+frequency for a length, refused where the frequency is not above zero or the length below it, played
+by the same call as a clip, which tries the clip and then the tone and despawns the half-made entity
+for a key naming neither, the silent plugin already playing tones, the example Bevy's keys and logs
+with an empty window's capture, a test of a 0.2 s tone gone and a 1 s one still playing at frame 30
+on a set clock and a frequency of zero thrown, the audio guide's paragraph. Item 20, meshes.rs split
+first as asked, the vertex-built path in `mesh_data.rs` at 372 lines and meshes.rs at 438:
+`BcsMeshData` gains four bytes of flags at 68, 72 in all, bit 0 leaving the normals out so zero
+keeps every mesh as it was, `MeshData.ComputeNormals` true by default with the remark, the bit set
+on send, copied on keep and written to the scene file only when false; tests native and managed, the
+layout test with the flags, a quad without normals reporting none and the ramp keeping the switch
+through the round trip; the drawing guide says the sixteen bytes and the shaders guide why a stream
+and not a storage buffer. The wording: every place named and the format's remarks, the scene file's
+comment, the registry's closures, the drawn count's and the test stream's name, the input and the
+variables `packed`, the rule kept by the working session for later batches. The suite 1,433 passed
+and 2 skipped of 1,435; cargo 164 and 94; the norm tests 19 of 19; the three guides' blocks build.
+EXAMPLES.md reads 352 written, 2 in part and 27 missing. The run of `a612ab27` is green on all
+three. Right, the gizmo kept out of every app that does not ask, caught by the suite rather than by
+a user, and the normals left out only where asked. decodable next, as the working session shaped it
+and this session agrees: C# cannot run on the audio thread, so its counterpart is a sample stream
+the game fills, an asset of the bridge's with a rate, channels and a shared queue of samples, its
+decoder taking a sample or giving silence on an underrun so the source never ends, registered with
+the audio sources and in the silent plugin; a call to make it, one to queue samples and one
+answering how many wait; `Audio.CreateSampleStream`, `Audio.QueueSamples` and `Audio.QueuedSamples`;
+the example Bevy's sine at a fifth of the volume, generated in C# each frame to keep a tenth of a
+second queued; a test that the silent sink drains the queue on the game's clock and an underrun
+keeps the sound alive. debug_picking is read as waiting on a crate: its whole point is the dev
+tools' picking overlay, and bevy_dev_tools is not in the lock and waits on the owner's word with the
+other crates (Decisions 11 and 12), a C# imitation of the overlay being another tool and not Bevy's
+example, so its row stays missing with a note saying so, written in decodable's batch. Then item 19,
+and the three rows read against the lock.
+
+Before it, `7bc0af69` came, occlusion_culling, ABI 271: how many meshes the GPU drew in the opaque
 pass, read back from Bevy's indirect draw buffers as Bevy's example reads them, behind the debug
 flag the app's render plugins are built with, which adds a copy source to buffers Bevy makes anyway;
 while a game counts, staging buffers sized to the opaque pass's indirect data and batch sets are
@@ -76,33 +119,6 @@ meshes.rs at 764, so the next batch that touches either plans its split first. T
 `6c491f7c` and this wait on the push. Next occlusion_culling, then world_serialization,
 transform_gizmo, debug_picking, pitch, decodable, then the four read against the lock as the working
 session read them.
-
-Before it, `6c491f7c` came, dynamic_mip_generation, ABI 269: mipmaps made on the GPU from an image's
-top level each frame, as Bevy's jobs make them, through one call that keeps a set of images, puts
-each into Bevy's jobs under a phase of the bridge's own as the frame is extracted and runs that
-phase once a frame in the graph before the cameras draw, so every camera samples levels made from
-what the top holds that frame; an image of one level turned on gets every level its size has, its
-bytes grown with zeros below the top and the storage usage added as Bevy's example makes its image,
-a format the downsampler cannot write refused, every sRGB one among them, which C# turns into the
-exception saying to make the image with `srgb: false`; dropped images leave the set in Last, and a
-native test counts the levels. `Render.SetMipGeneration` with its paragraph and block in the window
-guide beside `CreateImage`; a test reading level 3 of two red images through a one-level 2D
-material, red where generation is on, clear where it was turned on and off before a frame, and the
-sRGB image refused. The example is Bevy's with the examples' own radio buttons and a plain button
-for Bevy's Feathers, the colors from .NET's generator seeded as Bevy's is, both said in the triage
-note, captured at frame 150 since at 120 Bevy's wave has the image at nothing, the script's comment
-saying so, the picture the image at half size and its ten levels in their column. With it bsn's row
-as not applying, Bevy 0.20 loading the notation from no file, and the cheat sheet's two warnings
-gone, `IAnimationEvent` and `UpdateSettings` out of its groups since neither has a method to list.
-The suite 1,426 passed and 2 skipped of 1,428; cargo 157 and 89; the three profiles clean; the norm
-tests 19 of 19, the prose at 302; the window guide's 14 blocks build. EXAMPLES.md reads 348 written,
-2 in part and 31 missing, the 2D heading 28 of 29. Right, Bevy's own downsampler driven through its
-jobs under a phase of the bridge's rather than a pass written again, and the sRGB refusal said with
-the way out. One thing to read: the bytes are grown at their end, and Bevy hands the GPU an image's
-data layer-major, each layer's levels together, so an image of more than one layer would have its
-second layer's top land where the first layer's second level is; lay the bytes out so or refuse such
-an image with the reason, with item 18's batch. The run waits on the push. Item 18 is under way at
-ABI 270, as its item and the plan have it, then the rows in the order given.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -567,28 +583,28 @@ from [SHARED.md](SHARED.md).
     each, the inspector's field, and a scene from before reading as before. After decodable and
     before the three rows read against the lock.
 
-20. **A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32).** `mesh_from`
-    works normals out for every triangle mesh given none, 12 bytes a vertex that a shader unpacking
-    its normal from a stream's four bytes never reads, so a packed voxel vertex is 28 bytes where it
-    could be 16. `MeshData.ComputeNormals`, true by default so every mesh is as it was, false with
-    `Normals` null leaving the mesh without them, the remark on `Normals` gaining the switch; Bevy's
-    mesh pipeline places the normal only where the layout holds it and a prepass reads the position
-    alone, so such a mesh draws and casts its shadow, and a lit material of Bevy's own on it reads a
-    zero normal, said in the remark and the drawing guide's stream paragraph with the sixteen bytes.
-    A `flags` field of four bytes appended to `BcsMeshData` and its mirror in lockstep, bit 0 the
-    switch, the layout test gaining its offset and the new size, the ABI bumped or folded into the
-    row under way's bump; a native test that a mesh with the flag and no normals holds none. The
-    shaders guide's stream section says, with this item, why the packed bytes are a vertex stream
-    and not a storage buffer read by the vertex id, which the owner asked at 23:15: a stream travels
-    with the mesh, uploaded once with its positions and indices and read by every draw of it with
-    nothing else bound, where a buffer is bound to the shader or the material, so thousands of
-    chunks would each need a binding a draw or one giant buffer with an offset a chunk; meshes
-    sharing a shader keep drawing in one batch; the GPU fetches the attribute by the vertex index as
-    it fetches the position, where a buffer read needs the vertex id by hand and an offset an
-    instance when instanced; the fetch is about as fast either way, so the gain is the binding
-    model; and a buffer stays the right tool for what is not per vertex, a palette or atlas table
-    every chunk shares, per-chunk constants, or what a compute pass also reads. With the row under
-    way or right after it.
+20. **A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32), done at
+    `7f42cf40`.** `mesh_from` works normals out for every triangle mesh given none, 12 bytes a
+    vertex that a shader unpacking its normal from a stream's four bytes never reads, so a packed
+    voxel vertex is 28 bytes where it could be 16. `MeshData.ComputeNormals`, true by default so
+    every mesh is as it was, false with `Normals` null leaving the mesh without them, the remark on
+    `Normals` gaining the switch; Bevy's mesh pipeline places the normal only where the layout holds
+    it and a prepass reads the position alone, so such a mesh draws and casts its shadow, and a lit
+    material of Bevy's own on it reads a zero normal, said in the remark and the drawing guide's
+    stream paragraph with the sixteen bytes. A `flags` field of four bytes appended to `BcsMeshData`
+    and its mirror in lockstep, bit 0 the switch, the layout test gaining its offset and the new
+    size, the ABI bumped or folded into the row under way's bump; a native test that a mesh with the
+    flag and no normals holds none. The shaders guide's stream section says, with this item, why the
+    packed bytes are a vertex stream and not a storage buffer read by the vertex id, which the owner
+    asked at 23:15: a stream travels with the mesh, uploaded once with its positions and indices and
+    read by every draw of it with nothing else bound, where a buffer is bound to the shader or the
+    material, so thousands of chunks would each need a binding a draw or one giant buffer with an
+    offset a chunk; meshes sharing a shader keep drawing in one batch; the GPU fetches the attribute
+    by the vertex index as it fetches the position, where a buffer read needs the vertex id by hand
+    and an offset an instance when instanced; the fetch is about as fast either way, so the gain is
+    the binding model; and a buffer stays the right tool for what is not per vertex, a palette or
+    atlas table every chunk shares, per-chunk constants, or what a compute pass also reads. Done at
+    `7f42cf40`, meshes.rs split first into mesh_data.rs.
 
 ## Verdicts
 

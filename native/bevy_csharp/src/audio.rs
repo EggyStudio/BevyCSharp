@@ -14,6 +14,7 @@ use crate::interop::BcsConfig;
 
 #[cfg(feature = "render")]
 pub mod checked;
+pub mod samples;
 #[cfg(feature = "render")]
 pub mod silent;
 #[cfg(feature = "render")]
@@ -125,20 +126,26 @@ pub unsafe extern "C" fn bcs_audio_play(clip: i32, config: *const BcsAudioConfig
 
                 let mut entity = world.spawn((settings, OwnVolume(config.volume)));
 
-                // A clip a file holds, or a tone made with `bcs_audio_create_pitch`, which Bevy plays
-                // through a player of its own type. A key naming neither plays nothing.
+                // A clip a file holds, a tone made with `bcs_audio_create_pitch` or a stream of
+                // samples from `samples`, each played through a player of its own type. A key
+                // naming none of them plays nothing.
                 match handle.clone().try_typed::<AudioSource>() {
                     Ok(clip) => {
                         entity.insert(AudioPlayer(clip));
                     }
-                    Err(_) => match handle.try_typed::<bevy::audio::Pitch>() {
+                    Err(_) => match handle.clone().try_typed::<bevy::audio::Pitch>() {
                         Ok(pitch) => {
                             entity.insert(AudioPlayer(pitch));
                         }
-                        Err(_) => {
-                            entity.despawn();
-                            return 0;
-                        }
+                        Err(_) => match handle.try_typed::<samples::BcsSamples>() {
+                            Ok(stream) => {
+                                entity.insert(AudioPlayer(stream));
+                            }
+                            Err(_) => {
+                                entity.despawn();
+                                return 0;
+                            }
+                        },
                     },
                 }
 

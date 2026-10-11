@@ -33,6 +33,22 @@ var a = Audio.CreatePitch(440f, TimeSpan.FromSeconds(0.5));
 Audio.Play(a, AudioSettings.Effect);
 ```
 
+A sound the game makes as it plays, as a decoder of Bevy's makes one, is a stream of samples the game
+writes ahead, since C# does not run on the audio thread that asks for them. It plays what it holds in
+order and silence once it runs out, going on until it is stopped, so a game keeps it ahead of the
+device, here by a tenth of a second written each frame:
+
+<!-- compiled with:
+float[] next = new float[4_410];
+-->
+```csharp
+var stream = Audio.CreateSampleStream(sampleRate: 44_100, channels: 1);
+Audio.Play(stream);
+
+var wanted = 4_410 - Audio.QueuedSamples(stream);    // a tenth of a second ahead
+if (wanted > 0) Audio.QueueSamples(stream, next.AsSpan(0, wanted));
+```
+
 A run with no window, headless or offscreen, as a test or a soak is, plays to no device unless
 `Config.AudioWithoutWindow` asks for one. Its sounds are given a sink of the bridge's own, which
 draws from each on the game's clock as a device would, so everything below answers as it would in a

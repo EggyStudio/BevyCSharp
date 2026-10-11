@@ -150,7 +150,7 @@ async_compute	can	with .NET's tasks
 external_source_external_thread	can	with a .NET thread and channel
 audio_control	can
 audio	can
-decodable	missing	audio sources a game generates (Decodable)
+decodable	can	its samples written ahead into a stream each frame, where Bevy's decoder makes each one on the audio thread
 play_sound_effect	can
 soundtrack	can
 spatial_audio_2d	can
@@ -259,7 +259,7 @@ testbed_ui	n/a	Bevy's visual regression scenes, hidden from its list
 test_invalid_skinned_mesh	n/a	a test of skinned mesh validation, hidden from Bevy's list
 test_skinned_mesh_bounds	n/a	a test of skinned mesh bounds, hidden from Bevy's list
 custom_hit_data	n/a	writes a Rust picking backend
-debug_picking	missing	Bevy's picking debug overlay
+debug_picking	missing	Bevy's picking debug overlay, in bevy_dev_tools, a crate the bridge does not compile in
 dragdrop_picking	can
 mesh_picking	can	the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps
 simple_picking	can
