@@ -12,9 +12,9 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Nothing here is stood in for. The app is an ordinary headless engine with the plugin on, the
-/// requests go over loopback the way the command line sends them, and the answers come back from a
-/// system inside the frame. The only thing worth asserting about this machinery is that it works
+/// Nothing here is stood in for but a server that hangs up, which one test of how a quit is sent
+/// needs. The app is an ordinary headless engine with the plugin on, the requests go over loopback
+/// the way the command line sends them, and the answers come back from a system inside the frame. The only thing worth asserting about this machinery is that it works
 /// end to end, because every part of it exists to cross a boundary.
 /// </para>
 /// <para>
@@ -384,11 +384,66 @@ public sealed class CliServerTests : IDisposable
     }
 
     /// <summary>Asks it to stop, and waits for the loop to end.</summary>
+    /// <remarks>
+    /// The quit is judged by the loop's end rather than by its answer, as <c>bcs stop</c> judges it,
+    /// since the app may close the connection as it shuts down, before the answer is written.
+    /// </remarks>
     private static void Stop(CliSession session, Thread running)
     {
-        Ask(session, "run", "app.quit");
+        Quit(session.Port, session.Token);
 
         Assert.True(running.Join(TimeSpan.FromSeconds(15)), "the app did not shut down");
+    }
+
+    /// <summary>Sends <c>app.quit</c>, and answers what came back, or null where the connection closed first.</summary>
+    private static string? Quit(int port, string token)
+    {
+        try
+        {
+            using var caller = new TcpClient();
+            caller.SendTimeout = 15_000;
+            caller.ReceiveTimeout = 15_000;
+            caller.Connect("127.0.0.1", port);
+
+            using var stream = caller.GetStream();
+            using var writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" };
+            writer.WriteLine($$"""{"op":"run","token":"{{token}}","line":"app.quit"}""");
+
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            return reader.ReadLine();
+        }
+        catch (Exception error) when (error is IOException or SocketException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// A quit whose connection closes before anything is answered is taken as sent, which is how an
+    /// app shutting down at the end of the frame that ran it may leave it.
+    /// </summary>
+    [Fact]
+    public void AQuitThatIsAnsweredWithNothingIsStillSent()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        // A server that reads the quit and hangs up, as one disposed in the meantime does.
+        string? heard = null;
+        var closing = new Thread(() =>
+        {
+            using var caller = listener.AcceptTcpClient();
+            using var reader = new StreamReader(caller.GetStream(), Encoding.UTF8);
+            heard = reader.ReadLine();
+        });
+        closing.Start();
+
+        var answer = Quit(port, new string('0', 32));
+        Assert.True(closing.Join(TimeSpan.FromSeconds(15)), "the stand-in server never heard the quit");
+
+        Assert.Null(answer);
+        Assert.Contains("app.quit", heard);
     }
 
     /// <summary>One request, with this session's token on it.</summary>

@@ -10,7 +10,27 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `88a42cd9`. One commit, change_detection, as the shape taken with two things more. A
+Reviewed up to `d351ba13`. One commit, nondeterministic_system_order: `App.DetectAmbiguities`
+reports the pairs of a stage's systems whose declared access conflicts, one writing what the other
+reads or writes, and whose order nothing states, through `After`, `Before` or `Chain` directly or
+through other systems of the stage, a system declaring nothing left out and `AmbiguousWith` excusing
+a pair; `Error` throws as the run starts and `Warn` logs Bevy's message in Bevy's form with the C#
+names, `AmbiguitiesIn` giving the records. Since every C# system is exclusive to Bevy, Bevy's own
+check would report every pair, so the report is the managed side's over the systems' declarations,
+which is right; and since the generator declares each behavior's access to its own component, the
+whole Update of the examples' app reports twenty pairs of other examples' behaviors, real
+ambiguities and not this example's, so `among` narrows a report by system name, which a game whose
+stage holds its plugins' systems can use too, said in the triage. The example reports Bevy's three
+pairs and prints Bevy's three lines the same on three runs; four tests hold a pair found, the
+exclusions by order through a third system, by two readers, by `AmbiguousWith` and by an undeclared
+system, the error refusing to start and the warning running; the behaviors guide's section on order
+has it. Right, the report where the knowledge is and the narrowing said for what it is. EXAMPLES.md
+reads 332 written, one in part and 49 missing; the suite 1,390 passed, 2 skipped and one failed of
+1,393, a flake of the CLI's stop, which is Verdict 11; cargo's 142. Next render_primitives, then
+texture_atlas, image_node_resizing, whose `bevy_ui_debug` feature pulls no crate, monitor_info and
+relationships.
+
+Before it, one commit came to be read, change_detection, as the shape taken with two things more. A
 component says whether it was added and a resource whether it was added or changed since the running
 system last ran: a new entry point gives a component's added and changed ticks and the flags against
 the system's last run, since the last setter's check wants the changed tick as well; `Added<T>`,
@@ -62,32 +82,6 @@ set by insert, set, set-if-not-equal and mark-changed, read as changed or added 
 last run; and the place a value was last set from as the C# call site, since Bevy's own would name
 the bridge's lines and a Rust location cannot be made from C#, kept only under a config switch so
 the table costs nothing by default, a write through a behavior's `ref` saying none.
-
-Before it, one commit came to be read, solari whole: Bevy's path tracer is asked for with
-`Config.PathTracer`, a bit of the ray tracing word the config already carried, and drawn on a camera
-with `Render.SetPathTraced`, the camera holding the path tracer or the real-time lighting as Bevy's
-example inserts one or the other, refused where the app did not ask for it, the meaning of an
-argument changed so the ABI moved to 256; the world cache's cell count was measured first and found
-in the diagnostics store already, so nothing was added for it; the panel reads 0.20's three passes
-from the store where it listed 0.19's five; the example draws Bevy's many-lights scene, 8,000 boxes
-and 441 glowing spheres on a plane whose texture coordinates are scaled in the mesh since the ray
-traced materials ignore a material's transform, seeded from .NET's generator as its triage says, and
-the path tracer removes the raster meshes as Bevy's does. One fix shared by every example: the path
-tracer came out grainy at frame 900 because Bevy restarts its gathering whenever a camera's
-transform is marked changed, and the free camera took its transform by `ref`, which marks it every
-frame; it takes it `in` on the main thread since and writes through the world only when it moves or
-turns, as Bevy's controller does, the ten free-camera captures matching as before; that lesson
-belongs in the behaviors guide, a component taken by `ref` being marked changed every frame the
-system runs whether written or not, which the next batch says. Two tests light a floor by the path
-tracer's rays alone and refuse where not asked, six of six on the laptop's GPU;
-`docs/ray-tracing.md` has its paragraph. Right, the count measured before anything was built, the
-panel brought to 0.20's passes, and the grain's cause found in the example's own camera rather than
-in Bevy. EXAMPLES.md reads 329 written, one in part for `sysinfo` and 52 missing. The suite: 1,381
-passed and 2 skipped of 1,384; cargo's 142. Every item of the Now list is done or waits on the
-owner's word, so next are the missing rows that want no crate, TODO.md's eight: message and
-change_detection first, which a game meets first, then the ambiguity report of
-nondeterministic_system_order from the managed side over the systems' declared reads and writes, the
-rest after, and compressed_image_saver only where it pulls no crate.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -345,6 +339,15 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
+
+11. **`CliServerTests.AWrongTokenIsRefused` failed once in the whole suite, the stop verb's
+    `app.quit` meeting a closed connection after 110 ms rather than an answer, and passed three of
+    three alone.** A race between the app answering `app.quit` and the app ending its loop, which
+    closes the connection; a test that fails once in a hundred reddens a run's page for nothing and
+    costs the run, so it is mended before the next batch of examples. The mend as the coder reads
+    it: the stop verb takes a connection closed after `app.quit` was sent as the app having quit,
+    judging by the loop's end and not the answer, and a test holds a quit that answers nothing;
+    measured by the class run twenty times. Settled with that commit.
 
 ## Decisions
 
