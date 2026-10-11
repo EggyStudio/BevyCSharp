@@ -656,6 +656,8 @@ static AssetHandle LoadGltfMesh(string path, int mesh = 0, int primitive = 0);  
 static AssetHandle LoadImage(string path, TextureSettings settings);  // Starts loading an image with the sampler it should be drawn with
 static AssetHandle LoadGltfMaterial(string path, int material = 0);  // Starts loading one material out of a glTF file, as the renderer's own material type
 static AssetHandle LoadGltfScene(string path, int scene = 0);   // Starts loading one scene out of a glTF file
+static AssetHandle LoadFolder(string path);                     // Starts loading every asset in a folder and the folders inside it, and answers the folder's handle
+static bool TryReadFolder(AssetHandle folder, out AssetHandle[] assets);  // The handles of the assets a folder holds, once it and they have loaded
 static AssetHandle LoadGltfSceneCompressed(string path, int scene = 0);  // Starts loading one scene out of a glTF file with the file's meshes compressed as they load, as Bevy's glTF loader does given its regular compression
 static string? PathOf(AssetHandle handle);                      // The path an asset was loaded from, or null when it has none
 static AssetHandle Load(string kind, string path);              // Starts loading an asset and returns a handle to it

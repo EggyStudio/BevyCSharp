@@ -24,6 +24,11 @@ in their `Problem`, and so does a `Persistent<T>`. Each that answers with a hand
 `Try` form beside it that says why as it returns (`MeshFiles.TryLoad`, `DataAssets.TryGet`,
 `AssetPack.TryOpen`), and `DataAssets.Get` throws, for a game that asks.
 
+`AssetServer.LoadFolder` loads every file in a folder and the folders inside it at once, each as
+its extension says, and the folder's handle reads `Loaded` once the whole of it has arrived, when
+`AssetServer.TryReadFolder` gives the handles of what it holds. A file of it asked for by its path
+is the one the folder holds, loaded once.
+
 Paths resolve against `Config.AssetRoot`, and it is worth setting. Left unset, Bevy looks for an
 `assets` directory beside the running executable, which for a .NET app is whichever host launched
 it, so under `dotnet test` or `dotnet exec` that is the host rather than the assembly and assets

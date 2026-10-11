@@ -18,6 +18,7 @@ use bevy::ecs::world::World;
 use crate::interop::status;
 use crate::state::{with_world, with_world_opt};
 
+pub mod folders;
 pub mod unused;
 
 /// Registers an asset type unless the app already has one, and reports whether it did.

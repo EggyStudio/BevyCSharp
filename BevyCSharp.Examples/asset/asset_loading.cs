@@ -5,11 +5,8 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows how to load meshes from glTF files, which happens in parallel without blocking, and how a
-// material made in code is put in Bevy's assets beside them.
-//
-// Bevy's also loads a whole folder in one call, which the asset server here has no call for, so
-// this is written in part, the torus loaded by its path as Bevy's loads it after the folder.
+// Shows how to load meshes from glTF files, which happens in parallel without blocking, a whole
+// folder of them in one call, and how a material made in code is put in Bevy's assets beside them.
 internal static class AssetLoading
 {
     public static void Build(App app) => app.Startup(ctx =>
@@ -22,6 +19,9 @@ internal static class AssetLoading
         // Loading has only begun, so the sphere is not there yet, as Bevy's says.
         Console.WriteLine(AssetServer.StateOf(sphere) == AssetLoadState.Loaded ? "sphere has loaded" : "sphere hasn't loaded yet");
 
+        // Every asset in the folder, loading in parallel, the folder holding their handles once they
+        // have. One of them is asked for by its path, which loads it once, folder or not.
+        AssetServer.LoadFolder("models/torus");
         var torus = AssetServer.LoadGltfMesh("models/torus/torus.gltf");
         var material = Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f));
 

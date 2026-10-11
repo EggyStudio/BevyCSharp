@@ -138,6 +138,59 @@ public static unsafe class AssetServer
     }
 
     /// <summary>
+    /// Starts loading every asset in a folder and the folders inside it, and answers the folder's
+    /// handle. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy's <c>load_folder</c>. The files load in parallel, each as its extension says, and the
+    /// folder is an asset of its own holding their handles, loaded once every one of them is, so
+    /// <see cref="StateOf"/> of the folder says when the whole of it has arrived.
+    /// <see cref="TryReadFolder"/> then gives their handles. Holding the folder's handle keeps all
+    /// of them loaded.
+    /// </para>
+    /// <para>
+    /// A handle to one of them by its path is the one the folder holds, loaded once, so a game
+    /// that needs a particular file asks for it by name, as Bevy's asset_loading does after
+    /// loading its folder.
+    /// </para>
+    /// </remarks>
+    /// <param name="path">The folder, relative to the asset root.</param>
+    /// <exception cref="BevyNativeException">No asset server is running.</exception>
+    public static AssetHandle LoadFolder(string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        var key = Native.bcs_asset_load_folder(path);
+        Native.Check(key, $"loading the folder '{path}'");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
+    /// The handles of the assets a folder holds, once it and they have loaded. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <returns>Whether the folder had loaded, and so whether <paramref name="assets"/> holds them.</returns>
+    /// <exception cref="BevyNativeException">The handle names something other than a folder.</exception>
+    public static bool TryReadFolder(AssetHandle folder, out AssetHandle[] assets)
+    {
+        assets = [];
+        var count = Native.bcs_asset_folder_handles(folder.Key, null, 0);
+        if (count == NativeStatus.NotPresent) return false;
+        Native.Check(count, $"reading the folder {folder}");
+
+        var keys = new int[count];
+        fixed (int* written = keys)
+        {
+            // Asked again for as many as it said, which the same frame keeps it holding.
+            Native.Check(Native.bcs_asset_folder_handles(folder.Key, written, count), $"reading the folder {folder}");
+        }
+
+        assets = [.. keys.Select(key => new AssetHandle(key))];
+        return true;
+    }
+
+    /// <summary>
     /// Starts loading one scene out of a glTF file with the file's meshes compressed as they load,
     /// as Bevy's glTF loader does given its regular compression.
     /// </summary>

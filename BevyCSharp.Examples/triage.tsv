@@ -135,7 +135,6 @@ without_winit	n/a	takes winit out of Bevy's plugins, which the bridge chooses
 alter_mesh	can
 alter_sprite	can
 asset_decompression	n/a	writes a Rust asset loader
-asset_loading	part	loading a whole folder at once, which the asset server has no call for
 asset_processing	n/a	writes Rust asset processors
 asset_saving	n/a	writes a Rust asset saver
 asset_saving_with_subassets	n/a	writes a Rust asset saver

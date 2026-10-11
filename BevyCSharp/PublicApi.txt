@@ -330,6 +330,7 @@ sealed class Bevy.AssetPack : IDisposable
   void Dispose()
 static class Bevy.AssetServer
   static AssetHandle Load(string kind, string path)
+  static AssetHandle LoadFolder(string path)
   static AssetHandle LoadGltfMaterial(string path, int material = 0)
   static AssetHandle LoadGltfMesh(string path, int mesh = 0, int primitive = 0)
   static AssetHandle LoadGltfScene(string path, int scene = 0)
@@ -340,6 +341,7 @@ static class Bevy.AssetServer
   static bool IsAlive(AssetHandle handle)
   static bool Release(AssetHandle handle)
   static bool ReleaseWhenUnused(AssetHandle handle)
+  static bool TryReadFolder(AssetHandle folder, out AssetHandle[] assets)
   static int LiveHandleCount { get; }
   static string? PathOf(AssetHandle handle)
 readonly struct Bevy.Atmosphere : INativeComponent
