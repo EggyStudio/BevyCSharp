@@ -913,6 +913,7 @@ static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an e
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
+static void SetPathTraced(Entity camera, bool on);              // Draws a camera's picture with Bevy's path tracer, or with on false the usual way again
 static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
 static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string? saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
 static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had

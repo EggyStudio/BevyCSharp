@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -77,9 +78,46 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
-    /// The floor's color beside the wall, or null where ray tracing is not running. A bare wall is
-    /// a single face built point by point, with normals and no texture coordinates.
+    /// A camera drawn by Bevy's path tracer, in an app that asked for it, sees the glowing wall light
+    /// the floor red from its rays alone, the raster meshes taken away as Bevy's solari example
+    /// takes them.
     /// </summary>
+    [SkippableFact]
+    public void ThePathTracerLightsTheFloorFromItsRaysAlone()
+    {
+        Needs.Renderer();
+
+        var traced = Floor(traced: true, pathTraced: true);
+        Needs.RayTracing(traced is not null);
+        var lit = traced!.Value;
+
+        Assert.True(lit.R > 40 && lit.R > lit.G + 20, $"the floor by the wall was {lit} with the path tracer");
+    }
+
+    /// <summary>A camera is refused the path tracer in an app that did not ask for it.</summary>
+    [SkippableFact]
+    public void ThePathTracerIsRefusedWhereTheAppDidNotAskForIt()
+    {
+        Needs.Renderer();
+
+        var active = false;
+        Exception? refused = null;
+        var run = new PictureRun
+        {
+            Configure = config => config.RayTracedLighting = true,
+            Scene = ecs =>
+            {
+                active = Render.RayTracingActive;
+                if (active) refused = Record.Exception(() => Render.SetPathTraced(PictureRun.Camera(ecs), true));
+            },
+        };
+
+        run.Wait(2).Go();
+        Needs.RayTracing(active);
+
+        Assert.Equal(NativeStatus.Unsupported, Assert.IsType<BevyNativeException>(refused).Status);
+    }
+
     /// <summary>
     /// A lens and occlusion set after the rays are turned on leave the rays lighting the floor,
     /// though taking motion blur and occlusion off takes away prepasses of their own.
@@ -100,13 +138,17 @@ public sealed class RayTracingTests
         Assert.True(lit.R > 40 && lit.R > lit.G + 20, $"the floor by the wall was {lit} with effects set after the rays");
     }
 
-    private static (byte R, byte G, byte B, byte A)? Floor(bool traced, bool bareWall = false, bool effectsAfter = false)
+    /// <summary>
+    /// The floor's color beside the wall, or null where ray tracing is not running. A bare wall is
+    /// a single face built point by point, with normals and no texture coordinates.
+    /// </summary>
+    private static (byte R, byte G, byte B, byte A)? Floor(bool traced, bool bareWall = false, bool effectsAfter = false, bool pathTraced = false)
     {
         var active = false;
 
         var run = new PictureRun
         {
-            Configure = config => config.RayTracedLighting = true,
+            Configure = config => (config.RayTracedLighting, config.PathTracer) = (true, pathTraced),
             Scene = ecs =>
             {
                 active = Render.RayTracingActive;
@@ -115,7 +157,8 @@ public sealed class RayTracingTests
                 var camera = PictureRun.Camera(ecs, new Vec3(0f, 3f, 6f));
                 Render.SetAmbientLight(camera, (0f, 0f, 0f), 0f);
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
-                if (traced) Render.SetRayTracedLighting(camera, true);
+                if (pathTraced) Render.SetPathTraced(camera, true);
+                else if (traced) Render.SetRayTracedLighting(camera, true);
 
                 // A lens with no motion blur and occlusion put on and taken off, each of which
                 // takes off prepasses of its own as it goes.
@@ -153,6 +196,12 @@ public sealed class RayTracingTests
                 {
                     Render.SetRayTraced(floor, floorMesh);
                     Render.SetRayTraced(wall, wallMesh);
+                }
+
+                if (pathTraced)
+                {
+                    ecs.Wrap<Bevy.Reflected.Mesh3dRef>(floor).Remove();
+                    ecs.Wrap<Bevy.Reflected.Mesh3dRef>(wall).Remove();
                 }
             },
         };

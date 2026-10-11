@@ -913,6 +913,7 @@ sealed class Bevy.Config
   bool LogFrameTimes { get; set; }
   bool MeshPicking { get; set; }
   bool Offscreen { get; set; }
+  bool PathTracer { get; set; }
   bool RayTracedLighting { get; set; }
   bool RememberWindow { get; set; }
   bool Serve { get; set; }
@@ -10123,6 +10124,7 @@ static class Bevy.Render
   static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags)
   static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights)
   static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet)
+  static void SetPathTraced(Entity camera, bool on)
   static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
   static void SetPostProcessing(Entity camera, PostSettings settings)
   static void SetProbeCapture(Entity probe, ProbeCaptureSettings? settings)

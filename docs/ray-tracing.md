@@ -47,6 +47,32 @@ lighting.MaxBounces = 2;                          // fewer bounces, a cheaper fr
 lighting.Restir = false;                          // the grain back, for a quarter of the rays' time
 ```
 
+Bevy's path tracer draws a camera's whole picture from rays, following each pixel's light to its
+end with no rasterizing and adding every frame's samples to the last, so a still view clears up over
+seconds into the reference the lighting above is weighed against. It is for comparing rather than
+for play, and an app asks for it beside the lighting:
+
+<!-- compiled with:
+Config config = new();
+EcsWorld ecs = null!;
+Entity camera = default, wall = default;
+AssetHandle wallMesh = default;
+-->
+```csharp
+config.RayTracedLighting = true;                  // when the app is made
+config.PathTracer = true;
+
+Render.SetPathTraced(camera, true);               // in the lighting's place
+Render.SetRayTraced(wall, wallMesh);
+ecs.Wrap<Mesh3dRef>(wall).Remove();              // drawn by the rays alone
+```
+
+Its rays meet only the meshes given to `SetRayTraced`, and what is rasterized under its picture is
+drawn for nothing, so Bevy's solari example takes the raster meshes away, as the last line does.
+Solari's passes and the cells its world cache holds are among Bevy's diagnostics,
+`render/solari_lighting/lighting/elapsed_gpu` and `render/solari_lighting/world_cache_active_cells_count`
+among them, which `Diagnostics.TryRead` reads where `Config.GpuTimings` is on.
+
 ### Tracing rays of your own
 
 A compute shader can trace rays against the same scene, for shadows, reflections or global

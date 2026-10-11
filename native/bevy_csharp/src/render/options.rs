@@ -35,7 +35,7 @@ pub(crate) fn install(
     #[cfg(feature = "solari")]
     if config.ray_traced_lighting != 0 {
         let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));
-        crate::render::solari::install(app, backends);
+        crate::render::solari::install(app, backends, config.ray_traced_lighting & 2 != 0);
     }
 
     #[cfg(not(feature = "solari"))]

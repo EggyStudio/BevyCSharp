@@ -57,13 +57,8 @@ the most examples, and the largest is taken between groups of examples. The coun
   ambiguous (`nondeterministic_system_order`), and a message changed in place by a later system and
   read the same frame, where a C# message is read the frame after it is sent (`message`).
 
-Two examples are written in part, each leaving out a feature named in its row.
+One example is written in part, leaving out a feature named in its row.
 
-- **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
-  its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
-  added, and the cell count is one of Bevy's render diagnostics that is a number rather than a
-  time, which `Render.Timings()` does not carry. Its scene of many lights, which Bevy's command line
-  chooses, is left out too, though everything it draws is bridged.
 - **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
   memory of the process and of the machine. Bevy reads them through `sysinfo`, a crate the bridge
   does not build.

@@ -232,8 +232,9 @@ pub struct BcsConfig {
     /// Non-zero to measure how long every render pass takes. Costs timestamps written around each
     /// pass and read back every frame.
     pub gpu_timings: u32,
-    /// Non-zero to light with Bevy's Solari where a camera asks, which needs a build with the
-    /// `solari` feature and an adapter that traces rays.
+    /// Bit 1 to light with Bevy's Solari where a camera asks, which needs a build with the
+    /// `solari` feature and an adapter that traces rays, and bit 2 to add Bevy's path tracer beside
+    /// it, which a camera draws with in its place.
     pub ray_traced_lighting: u32,
     /// Non-zero to make the window see-through where what is drawn has no alpha, where the
     /// platform allows it. Ignored without a window.

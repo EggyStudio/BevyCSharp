@@ -106,6 +106,33 @@ public static unsafe partial class Render
             $"setting ray-traced lighting on {camera}");
 
     /// <summary>
+    /// Draws a camera's picture with Bevy's path tracer, or with <paramref name="on"/> false the
+    /// usual way again. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The path tracer writes every pixel of the picture from the rays alone, adding each frame's
+    /// samples to the last, so a still view clears up over seconds and one that moves starts over.
+    /// Its rays meet only the meshes given to <see cref="SetRayTraced"/>, and what is rasterized
+    /// beneath its picture is drawn for nothing, so Bevy's solari example takes the raster meshes
+    /// away in this mode. The camera's <c>PathtracerRef</c> holds Bevy's switch that starts the
+    /// gathering over.
+    /// </para>
+    /// <para>
+    /// It takes the place of <see cref="SetRayTracedLighting"/> on the camera, and that the place of
+    /// this, since a camera is drawn one way or the other.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The path tracer is not running, because <see cref="Config.PathTracer"/> was not asked for or
+    /// <see cref="RayTracingActive"/> is false, or the entity is not a camera.
+    /// </exception>
+    public static void SetPathTraced(Entity camera, bool on) =>
+        Native.Check(
+            Native.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 2 : 0),
+            $"setting the path tracer on {camera}");
+
+    /// <summary>
     /// Makes an entity's mesh one the rays of ray-traced lighting meet. Only valid inside a system.
     /// </summary>
     /// <remarks>

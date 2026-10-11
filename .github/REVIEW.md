@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1f7cc448`. One commit, Bevy's system stepping: `Stepping` and `SteppedSystem` add
+Reviewed up to `9dcd97ec`. One commit, custom_transitions whole: a game's own schedule is a label
+keyed by a name the game chooses, since C# declares no Rust type, which can carry a value as
+`OnReenter(InGame)` does, made by the first system put in it and run to its end when a system asks
+through `TryRunSchedule`, as Bevy's `try_run_schedule`, answering nothing for a schedule holding no
+system or one already running, as one that would run itself is; and `OnStateTransition` puts a C#
+system in Bevy's transition schedule among a state's exits, moves or entries, run with the move the
+state made that frame and not in a frame it made none, as Bevy's identity transitions plugin orders
+them, the move held in a thread-local while the system runs and the outer move restored after, since
+such a system can run a schedule holding another. One constructor makes every C# system, its name,
+its world loan and its removal cursors, shared by the stages and the schedules of a game's own; a
+system that asks to be ordered in a schedule of its own stops the app as it starts, the message
+naming the case. Two native tests and `GameScheduleTests` hold the step's three values, a schedule
+run and refused, and the refused ordering; the example runs its two schedules from inside the
+transition, checked live through Play and Restart, its capture matching the checked-in one;
+`docs/states.md` has the section, its 36 blocks building on a packed package. Right, the label a
+name where a type cannot be, the move restored for nesting, and the one constructor. EXAMPLES.md
+reads 328 written and 2 in part, solari and log_diagnostics for `sysinfo`. The suite: 1,380 passed
+and 2 skipped of 1,382; cargo's 142. Next solari, the path tracer behind a config switch, its
+many-lights scene and the world cache's cell count, which Bevy records as a render diagnostic the
+store may already reach.
+
+Before it, one commit came to be read, Bevy's system stepping: `Stepping` and `SteppedSystem` add
 and remove a stage, turn stepping on and off, step a system or the rest of the frame, have a system
 always run, never run or stop the frame before it by its name, and list the stepped systems with the
 cursor and Bevy's own account, through `bevy_debug_stepping`, a feature of two crates already in the
@@ -44,20 +65,6 @@ the feature read for what it pulls before it was turned on. Next Bevy's system s
 `bevy_debug_stepping` feature, which pulls no crate either and serves breakout's helper and
 system_stepping both, then custom_transitions and solari; `render/assets.rs` at 799 and
 `NormTests.cs` at 794 split before a batch touches them.
-
-Before it, three commits more came to be read, of the examples in part. `6b5ada32`: `Ui.FontAtlases`
-counts Bevy's font atlases and the bytes they hold and `ClearFontAtlases` empties them, as Bevy's
-text stress tests count and empty them, so many_text and many_text2d take their switch, with a test,
-ABI 249. `4f478f6b`: `AssetServer.LoadFolder` loads every asset in a folder at once and
-`TryReadFolder` gives their handles once it has, so asset_loading loads as Bevy's does, with a test,
-ABI 250, the native side in a new `assets/folders.rs`. `e5b2c76d`: `Render.MorphTargetNames` gives
-the names a mesh gives its morph targets once it has arrived, so morph_targets prints each as Bevy's
-does, with a small model of two named targets and a test, ABI 251. Right, each the call Bevy's
-example reaches for and no more, each with its test. `render/assets.rs` stands at 799 lines of N
-1.3's 800, grown since the 783 noted here, so the batch that next touches it splits it first, as
-item 2 asks; `NormTests.cs` at 794 the same. Still in part: 3d_shapes, solari, breakout's stepping,
-custom_transitions and window_settings, which the coder takes next, and log_diagnostics, waiting on
-the owner's word for `sysinfo`.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

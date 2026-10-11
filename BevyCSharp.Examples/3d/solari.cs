@@ -9,12 +9,12 @@ namespace BevyCSharp.Examples.ThreeD;
 
 // Demonstrates realtime dynamic raytraced lighting using Bevy Solari, in the pica pica diorama with
 // a robot patrolling it, its own light lit or dark, the sun on or off, and how long each of
-// Solari's passes takes in the corner.
+// Solari's passes takes and how many cells its world cache holds in the corner. --many-lights
+// draws a plain of eight thousand boxes under four hundred glowing spheres instead, and
+// --pathtracer draws either with Bevy's reference path tracer in the lighting's place.
 //
-// Needs a bridge built with --solari and a GPU with ray queries. Bevy's example also has a path
-// tracer and a scene of many lights behind its command line, which are left out here, as is the
-// count of the world cache's cells its panel ends with, a number the bridge's timings do not
-// carry.
+// Needs a bridge built with --solari and a GPU with ray queries. The boxes and the spheres' colors
+// are drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's.
 internal static class Solari
 {
     private static readonly Quat SunRotation = new(-0.13334629f, -0.86597735f, -0.3586996f, 0.3219264f);
@@ -36,9 +36,15 @@ internal static class Solari
     private static Entity _sun, _camera;
     private static AssetHandle _robotLight;
 
+    // Bevy's command line, the reference path tracer in place of the realtime lighting and the
+    // scene of many lights in place of the diorama.
+    private static bool PathTracer => Environment.GetCommandLineArgs().Contains("--pathtracer");
+    internal static bool ManyLights => Environment.GetCommandLineArgs().Contains("--many-lights");
+
     public static void Configure(Config config)
     {
         config.RayTracedLighting = true;
+        config.PathTracer = PathTracer;
         config.GpuTimings = true;
     }
 
@@ -48,37 +54,127 @@ internal static class Solari
         Traced.Clear();
         (_sun, _robotLight) = (Entity.None, AssetHandle.None);
 
-        app.Startup(Setup, "solari.Setup");
-        app.SpawnGltf("pica_pica/mini_diorama_01.glb", (ctx, root) =>
+        if (ManyLights)
         {
-            ctx.Ecs.Set(root, new Transform(Vec3.Zero, Quat.Identity, new Vec3(10f)));
-            Roots.Add(root);
-        });
-        app.SpawnGltf("pica_pica/robot_01.glb", (ctx, root) =>
+            app.Startup(SetupManyLights, "solari.SetupManyLights");
+        }
+        else
         {
-            ctx.Ecs.Set(root, new Transform(Path[0].At, Path[0].Facing, new Vec3(2f)));
-            ctx.Ecs.Add(root, new PatrolPath());
-            Roots.Add(root);
-        });
-        app.Update(AddRaytracingMeshes, "solari.AddRaytracingMeshes");
+            app.Startup(SetupPicaPica, "solari.SetupPicaPica");
+            app.SpawnGltf("pica_pica/mini_diorama_01.glb", (ctx, root) =>
+            {
+                ctx.Ecs.Set(root, new Transform(Vec3.Zero, Quat.Identity, new Vec3(10f)));
+                Roots.Add(root);
+            });
+            app.SpawnGltf("pica_pica/robot_01.glb", (ctx, root) =>
+            {
+                ctx.Ecs.Set(root, new Transform(Path[0].At, Path[0].Facing, new Vec3(2f)));
+                if (!PathTracer) ctx.Ecs.Add(root, new PatrolPath());
+                Roots.Add(root);
+            });
+            app.Update(AddRaytracingMeshes, "solari.AddRaytracingMeshes");
+        }
+
+        // The path tracer changes nothing as it runs and says nothing, as in Bevy's.
+        if (PathTracer) return;
+        app.Update(ToggleRestir, "solari.ToggleRestir");
+        if (ManyLights) return;
         app.Update(PauseScene, "solari.PauseScene");
         app.Update(ToggleLights, "solari.ToggleLights");
-        app.Update(ToggleRestir, "solari.ToggleRestir");
-
     }
 
-    private static void Setup(BehaviorContext ctx)
+    private static void SetupPicaPica(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
         _sun = SpawnSun(ecs);
 
-        var camera = _camera = ecs.SpawnCamera3d(
-            new Transform(new Vec3(0.219417f, 2.5764852f, 6.9718704f), new Quat(-0.1466768f, 0.013738206f, 0.002037309f, 0.989087f), Vec3.One),
-            new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
-        ecs.Add(camera, new FreeCamera { Speed = 3f });
-        if (Render.RayTracingActive) Render.SetRayTracedLighting(camera, true);
+        _camera = SpawnCamera(ecs, new Transform(new Vec3(0.219417f, 2.5764852f, 6.9718704f), new Quat(-0.1466768f, 0.013738206f, 0.002037309f, 0.989087f), Vec3.One));
+        SpawnTexts(ecs);
+    }
 
-        ecs.Add(Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) }), new ControlText());
+    // Bevy's setup_many_lights, a plain of boxes of every color and roughness under a grid of
+    // spheres glowing in every color, from a camera high above, its bloom a little lower than
+    // Bevy's own.
+    private static void SetupManyLights(BehaviorContext ctx)
+    {
+        var ecs = ctx.Ecs;
+        var random = new Random(42);
+        float Between(float low, float high) => low + random.NextSingle() * (high - low);
+
+        // A plane 400 across whose texture repeats three times along each side, its texture
+        // coordinates scaled as Bevy's are, since the rays read a mesh's coordinates and not a
+        // material's scale of them.
+        var plane = Render.CreateMesh(new MeshData
+        {
+            Positions = [new Vec3(-200f, 0f, -200f), new Vec3(200f, 0f, -200f), new Vec3(-200f, 0f, 200f), new Vec3(200f, 0f, 200f)],
+            Normals = [Vec3.UnitY, Vec3.UnitY, Vec3.UnitY, Vec3.UnitY],
+            Uvs = [0f, 0f, 3f, 0f, 0f, 3f, 3f, 3f],
+            Indices = [3, 1, 2, 0, 2, 1],
+        });
+        var checker = AssetServer.LoadImage("textures/uv_checker_bw.png", new TextureSettings { Wrap = TextureWrap.Repeat });
+        SpawnTraced(ecs, plane, Render.CreateMaterial(new MaterialSettings { BaseColorTexture = checker, Roughness = 0f }), Transform.Identity);
+
+        var cube = Render.CreateMesh(MeshShape.Cuboid);
+        for (var i = 0; i < 8000; i++)
+        {
+            var material = Render.CreateMaterial(new MaterialSettings
+            {
+                BaseColor = Color.FromSrgb(random.NextSingle(), random.NextSingle(), random.NextSingle()),
+                Roughness = random.NextSingle(),
+            });
+            var scale = new Vec3(Between(0.2f, 2f), Between(0.2f, 2f), Between(0.2f, 2f));
+            var at = new Vec3(Between(-180f, 180f), 0.2f, Between(-180f, 180f));
+            SpawnTraced(ecs, cube, material, new Transform(at, Quat.Identity, scale));
+        }
+
+        var sphere = Render.CreateMesh(MeshShape.Sphere);
+        for (var x = -10; x <= 10; x++)
+        {
+            for (var y = -10; y <= 10; y++)
+            {
+                var glow = (random.NextSingle() * 60000f, random.NextSingle() * 60000f, random.NextSingle() * 60000f, 1f);
+                var material = Render.CreateMaterial(new MaterialSettings { Emissive = glow });
+                SpawnTraced(ecs, sphere, material, new Transform(new Vec3(x * 20f, 7f, y * 20f), Quat.Identity, Vec3.One));
+            }
+        }
+
+        _camera = SpawnCamera(ecs, new Transform(new Vec3(6.11329f, 166.74896f, 451.8226f), new Quat(-0.183938f, 0.009093744f, 0.0017017953f, 0.9828943f), Vec3.One));
+        ecs.Insert<BloomRef>(_camera).Intensity = 0.1f;
+        SpawnTexts(ecs);
+    }
+
+    // An entity drawing a mesh the rays meet, drawn by the rays alone where the path tracer draws.
+    private static void SpawnTraced(EcsWorld ecs, AssetHandle mesh, AssetHandle material, Transform transform)
+    {
+        var entity = ecs.Spawn();
+        ecs.Add(entity, transform);
+        Render.SetMesh(ecs, entity, mesh);
+        Render.SetMaterial(ecs, entity, material);
+        if (!Render.RayTracingActive) return;
+        Render.SetRayTraced(entity, mesh);
+        if (PathTracer) ecs.Wrap<Mesh3dRef>(entity).Remove();
+    }
+
+    // The camera, lit by Solari or drawn by the path tracer where the GPU traces rays.
+    private static Entity SpawnCamera(EcsWorld ecs, Transform transform)
+    {
+        var camera = ecs.SpawnCamera3d(transform, new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+        ecs.Add(camera, new FreeCamera { Speed = 3f });
+        if (Render.RayTracingActive)
+        {
+            if (PathTracer) Render.SetPathTraced(camera, true);
+            else Render.SetRayTracedLighting(camera, true);
+        }
+
+        return camera;
+    }
+
+    // The controls in the bottom corner and the passes' times in the top one, which the path
+    // tracer leaves empty, as Bevy's does.
+    private static void SpawnTexts(EcsWorld ecs)
+    {
+        var controls = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Bottom = Length.Px(12f), Left = Length.Px(12f) });
+        if (!PathTracer) ecs.Add(controls, new ControlText());
 
         var panel = Ui.SpawnNode(new UiSettings
         {
@@ -90,7 +186,7 @@ internal static class Solari
         });
         var performance = Ui.SpawnText(string.Empty, new UiSettings(), new UiTextSettings { FontSize = 8f });
         ecs.SetParent(performance, panel);
-        ecs.Add(performance, new PerformanceText());
+        if (!PathTracer) ecs.Add(performance, new PerformanceText());
     }
 
     // Solari replaces shadow maps, so the sun casts none of its own.
@@ -102,9 +198,9 @@ internal static class Solari
     }
 
     // Each mesh of the two models is given to the rays once it has loaded, as Bevy's observer does
-    // when a scene is ready, and three of their materials are changed by name: the diorama's
-    // lamps off, the robot's lamp lit, and its dark glass made opaque, since the rays do not pass
-    // through what transmits light.
+    // when a scene is ready, and drawn by the rays alone where the path tracer draws, and three of
+    // their materials are changed by name: the diorama's lamps off, the robot's lamp lit, and its
+    // dark glass made opaque, since the rays do not pass through what transmits light.
     private static void AddRaytracingMeshes(BehaviorContext ctx)
     {
         if (!Render.RayTracingActive) return;
@@ -119,6 +215,7 @@ internal static class Solari
                 if (mesh == AssetHandle.None || AssetServer.StateOf(mesh) != AssetLoadState.Loaded) continue;
 
                 Render.SetRayTraced(entity, mesh);
+                if (PathTracer) ecs.Wrap<Mesh3dRef>(entity).Remove();
                 Traced.Add(entity);
 
                 var material = Render.MaterialOf(ecs, entity);
@@ -174,14 +271,20 @@ internal static class Solari
         }
     }
 
-    // The controls as they stand, the pause, the sun and the robot's lamp.
+    // The controls as they stand, the pause, the sun and the robot's lamp in the diorama, and the
+    // reuse of samples in either scene.
     internal static string Controls(BehaviorContext ctx)
     {
-        var controls = new StringBuilder(ctx.Time.Paused ? "(Space): Resume" : "(Space): Pause");
-        controls.Append(_sun != Entity.None ? "\n(1): Disable directional light" : "\n(1): Enable directional light");
-        controls.Append(Render.TryReadMaterial(_robotLight, out var settings) && RobotLightOn(settings!)
-            ? "\n(2): Disable robot emissive light"
-            : "\n(2): Enable robot emissive light");
+        var controls = new StringBuilder();
+        if (!ManyLights)
+        {
+            controls.Append(ctx.Time.Paused ? "(Space): Resume" : "(Space): Pause");
+            controls.Append(_sun != Entity.None ? "\n(1): Disable directional light" : "\n(1): Enable directional light");
+            controls.Append(Render.TryReadMaterial(_robotLight, out var settings) && RobotLightOn(settings!)
+                ? "\n(2): Disable robot emissive light"
+                : "\n(2): Enable robot emissive light");
+        }
+
         controls.Append("\nDenoising: App not compiled with DLSS support");
         controls.Append(ctx.Ecs.Get<SolariLightingRef>(_camera)?.Restir == true ? "\n(R): Disable ReSTIR" : "\n(R): Enable ReSTIR");
         return controls.ToString();
@@ -193,27 +296,30 @@ internal static class Solari
         if (ctx.Input.KeyPressed(Key.R) && ctx.Ecs.Get<SolariLightingRef>(_camera) is { } lighting) lighting.Restir = !lighting.Restir;
     }
 
-    // Each of Solari's passes as the GPU timed it, smoothed over the last frames.
+    // Each of Solari's passes as the GPU timed it, and how many of the world cache's cells are in
+    // use, each smoothed over the last frames as Bevy reads them from its store of diagnostics.
     internal static string Performance()
     {
-        var timings = Render.Timings();
         var performance = new StringBuilder();
         var total = 0.0;
-        foreach (var (label, pass) in new[]
+        foreach (var (label, path) in new[]
         {
-            ("Light tiles", "solari_lighting/presample_light_tiles"),
-            ("World cache", "solari_lighting/world_cache"),
-            ("Direct lighting", "solari_lighting/direct_lighting"),
-            ("Diffuse indirect", "solari_lighting/diffuse_indirect_lighting"),
-            ("Specular indirect", "solari_lighting/specular_indirect_lighting"),
+            ("Light tiles", "render/solari_lighting/presample_light_tiles/elapsed_gpu"),
+            ("World cache", "render/solari_lighting/world_cache/elapsed_gpu"),
+            ("Lighting", "render/solari_lighting/lighting/elapsed_gpu"),
         })
         {
-            if (timings.FirstOrDefault(timing => timing.Name == pass).GpuMilliseconds is not { } milliseconds) continue;
+            if (!Diagnostics.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
             performance.Append(FormattableString.Invariant($"{label,-17}  {milliseconds:0.00} ms\n"));
             total += milliseconds;
         }
 
         performance.Append(FormattableString.Invariant($"{"Total",-17}  {total:0.00} ms\n"));
+
+        // Out of the cache's two to the twentieth.
+        if (Diagnostics.TryRead("render/solari_lighting/world_cache_active_cells_count", out var cells) && cells.Smoothed is { } count)
+            performance.Append(FormattableString.Invariant($"\nWorld cache cells {(uint)count} ({count * 100.0 / (1 << 20):0}%)"));
+
         return performance.ToString();
     }
 

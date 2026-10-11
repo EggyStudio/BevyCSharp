@@ -7,7 +7,9 @@
 //! deferred, and it is added only where the adapter has ray queries and binding arrays, which the
 //! bridge asks first. A camera draws with it once `bcs_render_set_ray_traced_lighting` turns it on,
 //! and a mesh takes part once `bcs_render_set_ray_traced` has made it the shape the ray tracing
-//! structures are built from.
+//! structures are built from. Bevy's path tracer, which traces the whole picture with no
+//! rasterizing and gathers samples frame after frame toward the reference Solari is weighed against,
+//! is added beside it where the app asks, and a camera draws with it in Solari's place.
 
 use crate::interop::status;
 #[cfg(feature = "solari")]
@@ -16,6 +18,10 @@ use crate::state::with_world;
 /// Whether Solari is running in this app.
 #[cfg(feature = "solari")]
 static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Whether Bevy's path tracer is running beside it.
+#[cfg(feature = "solari")]
+static PATH_TRACER: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 /// Solari's scene in the render world, which a dispatch of a shader importing `bcs_ray` binds as
 /// its group two.
@@ -72,14 +78,19 @@ fn keep_layout(bindings: Option<bevy::ecs::system::Res<SceneBindings>>) {
 #[cfg(feature = "solari")]
 pub fn forget() {
     ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
+    PATH_TRACER.store(false, std::sync::atomic::Ordering::Relaxed);
     if let Ok(mut layout) = LAYOUT.lock() {
         *layout = None;
     }
 }
 
-/// Adds Solari, if the adapter Bevy would choose can run it.
+/// Adds Solari, if the adapter Bevy would choose can run it, and Bevy's path tracer beside it
+/// where `path_tracer` asks.
+///
+/// The path tracer is a plugin of its own, as Bevy's solari example adds it, since it makes its
+/// pipelines as the renderer starts, whether a camera draws with it or not.
 #[cfg(feature = "solari")]
-pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>) {
+pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>, path_tracer: bool) {
     use bevy::ecs::lifecycle::Insert;
     use bevy::ecs::observer::On;
     use bevy::ecs::system::Query;
@@ -96,6 +107,10 @@ pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>) {
     }
 
     app.add_plugins(bevy::solari::SolariPlugins);
+    if path_tracer {
+        app.add_plugins(bevy::solari::pathtracer::PathtracingPlugin);
+        PATH_TRACER.store(true, std::sync::atomic::Ordering::Relaxed);
+    }
 
     if let Some(renderer) = app.get_sub_app_mut(bevy::render::RenderApp) {
         use bevy::ecs::schedule::IntoScheduleConfigs;
@@ -105,11 +120,17 @@ pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>) {
         );
     }
 
-    // A camera traced with Solari draws once a pixel, which is kept by setting it on every insert
-    // rather than refusing a post-processing setting that arrives later.
+    // A camera traced with Solari or the path tracer draws once a pixel, which is kept by setting
+    // it on every insert rather than refusing a post-processing setting that arrives later.
     app.add_observer(
         |insert: On<Insert<Msaa>>,
-         mut cameras: Query<&mut Msaa, bevy::ecs::query::With<bevy::solari::realtime::SolariLighting>>| {
+         mut cameras: Query<
+            &mut Msaa,
+            bevy::ecs::query::Or<(
+                bevy::ecs::query::With<bevy::solari::realtime::SolariLighting>,
+                bevy::ecs::query::With<bevy::solari::pathtracer::Pathtracer>,
+            )>,
+        >| {
             if let Ok(mut msaa) = cameras.get_mut(insert.entity)
                 && *msaa != Msaa::Off
             {
@@ -135,12 +156,14 @@ pub extern "C" fn bcs_render_ray_tracing_active() -> i32 {
     }
 }
 
-/// Lights a camera with Solari, or with `on` zero the usual way again.
+/// Lights a camera with Solari, with `on` 1, draws it with Bevy's path tracer, with `on` 2, or with
+/// `on` zero lights it the usual way again.
 ///
 /// Solari reads the G-buffer, depth, motion and the previous frame's of each, which it asks the
 /// camera for itself, and writes the picture from compute, so the camera's picture is made
-/// writable by compute and drawn once a pixel. ReSTIR is on, where Bevy leaves it off. Returns
-/// [`status::UNSUPPORTED`] where Solari is not running.
+/// writable by compute and drawn once a pixel. ReSTIR is on, where Bevy leaves it off. The path
+/// tracer writes the whole picture from compute in the same way. Returns [`status::UNSUPPORTED`]
+/// where Solari is not running, or for the path tracer where the app did not ask for it.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i32 {
     crate::interop::guard(|| {
@@ -155,10 +178,16 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
             use bevy::camera::CameraMainTextureUsages;
             use bevy::render::render_resource::TextureUsages;
             use bevy::render::view::Msaa;
+            use bevy::solari::pathtracer::Pathtracer;
             use bevy::solari::realtime::SolariLighting;
 
-            if !ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
+            if !ACTIVE.load(std::sync::atomic::Ordering::Relaxed)
+                || (on == 2 && !PATH_TRACER.load(std::sync::atomic::Ordering::Relaxed))
+            {
                 return status::UNSUPPORTED;
+            }
+            if !(0..=2).contains(&on) {
+                return status::NULL_ARG;
             }
 
             let entity = bevy::ecs::entity::Entity::from_bits(camera);
@@ -170,9 +199,19 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
 
                 let mut camera = world.entity_mut(entity);
 
-                if on == 0 {
-                    camera.remove::<SolariLighting>();
-                    return status::OK;
+                // One or the other, as Bevy's example inserts one or the other.
+                camera.remove::<(SolariLighting, Pathtracer)>();
+                let usage = (
+                    CameraMainTextureUsages::default().with(TextureUsages::STORAGE_BINDING),
+                    Msaa::Off,
+                );
+                match on {
+                    0 => return status::OK,
+                    2 => {
+                        camera.insert((Pathtracer::default(), usage));
+                        return status::OK;
+                    }
+                    _ => {}
                 }
 
                 // ReSTIR reuses samples between pixels and frames, and Bevy leaves it off for a
@@ -180,11 +219,7 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
                 // bridge does not build, and without one ReSTIR halved the noise between two
                 // frames of a Cornell box lit by a panel, for 1.3 ms more of the GPU at 1280 by
                 // 720 on a laptop's RTX 4070.
-                camera.insert((
-                    SolariLighting { restir: true, ..SolariLighting::default() },
-                    CameraMainTextureUsages::default().with(TextureUsages::STORAGE_BINDING),
-                    Msaa::Off,
-                ));
+                camera.insert((SolariLighting { restir: true, ..SolariLighting::default() }, usage));
 
                 status::OK
             })

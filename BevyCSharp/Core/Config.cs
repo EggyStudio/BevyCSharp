@@ -515,6 +515,20 @@ public sealed class Config
     public bool RayTracedLighting { get; set; }
 
     /// <summary>
+    /// Make Bevy's path tracer available beside its ray-traced lighting, which a camera then draws
+    /// with in the lighting's place through <see cref="Render.SetPathTraced"/>.
+    /// </summary>
+    /// <remarks>
+    /// The path tracer follows each pixel's light to its end and adds every frame's samples to the
+    /// last, with no rasterizing, so a still view clears up over seconds into the reference
+    /// <see cref="RayTracedLighting"/> is weighed against, as Bevy's solari example shows it with
+    /// <c>--pathtracer</c>. It is for comparing rather than for play. It brings the ray-traced
+    /// lighting's plugins with it, needs what they need, and makes its own pipelines as the
+    /// renderer starts, which is why it is asked for here.
+    /// </remarks>
+    public bool PathTracer { get; set; }
+
+    /// <summary>
     /// The folder the run's log and a crash's report are written in, or nothing for <c>logs</c>
     /// beside the executable, or an empty string for neither.
     /// </summary>

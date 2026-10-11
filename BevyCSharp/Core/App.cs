@@ -234,7 +234,7 @@ public sealed unsafe partial class App : IDisposable
                 SpatialScale = Config.SpatialScale,
                 MeshletClusters = Config.MeshletClusters,
                 GpuTimings = Config.GpuTimings ? 1u : 0u,
-                RayTracedLighting = Config.RayTracedLighting ? 1u : 0u,
+                RayTracedLighting = (Config.RayTracedLighting ? 1u : 0u) | (Config.PathTracer ? 2u : 0u),
                 Transparent = Config.Transparent ? 1u : 0u,
                 DesktopTitleBar = Config.DesktopTitleBar ? 1u : 0u,
                 UserRoot = userRoot,

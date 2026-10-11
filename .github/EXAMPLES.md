@@ -4,14 +4,14 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**328 written, 2 written in part, 0 can be written, 52 missing and 56 do not apply.** Of the 382 that apply, 330 can be written with what is bridged, 2 of them leaving something out.
+**329 written, 1 written in part, 0 can be written, 52 missing and 56 do not apply.** Of the 382 that apply, 330 can be written with what is bridged, 1 of them leaving something out.
 
 **156 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 26 | 0 | 0 | 2 | 1 | 10 of 12 |
-| [3D Rendering](#3d-rendering) | 63 | 1 | 0 | 4 | 0 | 40 of 41 |
+| [3D Rendering](#3d-rendering) | 64 | 0 | 0 | 4 | 0 | 40 of 41 |
 | [Animation](#animation) | 13 | 0 | 0 | 0 | 0 | 9 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
 | [Assets](#assets) | 10 | 0 | 0 | 3 | 5 | 3 of 3 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **328** | **2** | **0** | **52** | **56** | **156 of 161** |
+| **All** | **329** | **1** | **0** | **52** | **56** | **156 of 161** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -136,7 +136,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`shadow_biases`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/shadow_biases.rs) | Demonstrates how shadow biases affect shadows in a 3d scene | [written](../BevyCSharp.Examples/3d/shadow_biases.cs) |
 | [`shadow_caster_receiver`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/shadow_caster_receiver.rs) | Demonstrates how to prevent meshes from casting/receiving shadows in a 3d scene | [written](../BevyCSharp.Examples/3d/shadow_caster_receiver.cs) |
 | [`skybox`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/skybox.rs) | Load a cubemap texture onto a cube like a skybox and cycle through different compressed texture formats. | [written](../BevyCSharp.Examples/3d/skybox.cs) |
-| [`solari`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | [written in part](../BevyCSharp.Examples/3d/solari.cs), Bevy's path tracer and its scene of many lights, which its command line chooses, and the count of the world cache's cells its panel ends with; needs a bridge built with --solari and an adapter with ray queries |
+| [`solari`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/solari.rs) | Demonstrates realtime dynamic raytraced lighting using Bevy Solari. | [written](../BevyCSharp.Examples/3d/solari.cs), its boxes and the spheres' colors drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's; needs a bridge built with --solari and an adapter with ray queries |
 | [`solari_reflections`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/solari_reflections.rs) | Test bed for Solari reflections. | missing, the settings of Solari's reflections its panel sets, which Config.RayTracedLighting does not reach |
 | [`specular_tint`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/specular_tint.rs) | Demonstrates specular tints and maps | [written](../BevyCSharp.Examples/3d/specular_tint.cs), its two choices drawn as the examples' own radio buttons, where Bevy draws them with Feathers |
 | [`spherical_area_lights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/spherical_area_lights.rs) | Demonstrates how point light radius values affect light behavior | [written](../BevyCSharp.Examples/3d/spherical_area_lights.cs) |

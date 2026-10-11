@@ -12,8 +12,15 @@ namespace BevyCSharp.Examples;
 /// run, and the mouse turning it while its left button is held.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Bevy grabs the cursor while the button is held, which an example here leaves to the platform,
 /// and an offscreen run, with no pointer, turns it not at all.
+/// </para>
+/// <para>
+/// The transform is written only in a frame the camera moves or turns, as Bevy's controller writes
+/// it, since a write marks it changed whatever it holds, and Bevy's path tracer reads a changed
+/// transform as a moved view and starts its gathering of samples over.
+/// </para>
 /// </remarks>
 [Behavior]
 public partial struct FreeCamera
@@ -26,7 +33,8 @@ public partial struct FreeCamera
     private bool _started;
 
     [OnUpdate]
-    public void Fly(BehaviorContext ctx, ref Transform transform)
+    [MainThread]
+    public void Fly(BehaviorContext ctx, in Transform transform)
     {
         if (!_started)
         {
@@ -44,10 +52,11 @@ public partial struct FreeCamera
             _pitch = Math.Clamp(_pitch - input.MouseDeltaY * Sensitivity, -MathF.PI / 2f, MathF.PI / 2f);
         }
 
-        transform.Rotation = Quat.FromRotationY(_yaw) * Quat.FromRotationX(_pitch);
+        var moved = transform;
+        moved.Rotation = Quat.FromRotationY(_yaw) * Quat.FromRotationX(_pitch);
 
-        var forward = transform.Rotation * -Vec3.UnitZ;
-        var right = transform.Rotation * Vec3.UnitX;
+        var forward = moved.Rotation * -Vec3.UnitZ;
+        var right = moved.Rotation * Vec3.UnitX;
         var move = Vec3.Zero;
         if (input.KeyDown(Key.W)) move += forward;
         if (input.KeyDown(Key.S)) move -= forward;
@@ -57,6 +66,8 @@ public partial struct FreeCamera
         if (input.KeyDown(Key.Q)) move -= Vec3.UnitY;
 
         var speed = Speed * (input.KeyDown(Key.ShiftLeft) ? 3f : 1f);
-        transform.Translation += move * (speed * ctx.Time.Delta);
+        moved.Translation += move * (speed * ctx.Time.Delta);
+
+        if (moved.Rotation != transform.Rotation || moved.Translation != transform.Translation) ctx.Ecs.Set(ctx.Entity, moved);
     }
 }
