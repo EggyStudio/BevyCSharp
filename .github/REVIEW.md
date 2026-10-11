@@ -10,26 +10,54 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6641dbcc`. One commit, error_handling, unpushed with the two before it and with no
-bridge work: the ten thousand points come from the icosphere's triangles read back through
-`Render.TryReadMesh`, each triangle picked by its cumulative area with a binary search and a point
-picked evenly within it by the folded pair, red emissive spheres parented to the sphere; the errors
-map onto what C# has, a pointer-move observer sliding the sphere and throwing where there is no
-transform with mesh picking on, a system catching a resource never inserted and logging the captured
-error, a system catching the refused add to an entity that never was and logging it as an error with
-its context, and Bevy's spawn at an id left out for having no counterpart; the run logs both as
-Bevy's does and the capture shows the dotted sphere over the green plane; the running guide says the
-engine's handling is Bevy's warn handler, the fail-fast setting its panic, and that a system dealing
-with its own error catches it. The norm, document and path tests 20 of 20, the prose at 299.
-EXAMPLES.md reads 344 written, 2 in part and 36 missing. Right, the sampling done as Bevy's sampler
-does it from the mesh the engine already reads back, and the one thing without a counterpart left
-out and said. custom_projection is under way at ABI 267: a projection type the bridge declares,
-Bevy's perspective with entries written over its clip matrix and its sub-view, the update, the far
-plane and the frustum's corners the perspective's so it follows the window, set from C# with the
-field of view, the near and far planes and the entries, a column or row past three refused on both
-sides, with a native test of the entries landing and the rest staying the perspective's, a managed
-test reading the variant back as custom with both refusals, the example Bevy's scene with its two
-entries, and the cameras guide's paragraph and block.
+Reviewed up to `b134dd4d`. Two commits, unpushed with the three before them. `6e28c3cc`,
+custom_projection, ABI 267: a projection type the bridge declares, Bevy's perspective with entries
+of its matrix written over its clip matrix and its sub-view, the update, the far plane and the
+frustum's corners the perspective's so it follows the window, set from C# with the field of view,
+the near and far planes and the entries by column, row and value, a column or row past three refused
+on both sides and a non-camera refused; a native test reads the two entries landing and every other
+entry staying the perspective's, `ProjectionTests` the variant read back as custom with both
+refusals; the example is Bevy's scene with its two entries, its capture sheared down and to the left
+as Bevy's; the cameras guide has its paragraph and block. `b134dd4d`, render_depth_to_texture, which
+needed no bridge work after all, its triage line stale: a depth-only camera at order minus one
+drawing into no target of 256 by 256 with a depth prepass and no multisampling, a watch of its depth
+giving an eight-bit image each frame shown on an unlit rectangle, the turning cube, the light, the
+main camera, the instructions, the cone gizmo at the depth camera and the keys by Bevy's spherical
+coordinates with the inclination clamped, the capture showing the cube's depth on the plane as
+Bevy's, the triage note saying the depth is shown through the watch's image where Bevy's material
+reads a depth texture of its own, and the compute guide saying a camera can draw its depth alone
+into no target and be watched. The suite: 1,421 passed and 2 skipped of 1,423; cargo's 89 and 155;
+the norm, document and path tests 20 of 20, the prose at 299. EXAMPLES.md reads 346 written, 2 in
+part and 34 missing. Right, the projection's one new type kept to what C# cannot say, and the depth
+reached through the watch the engine already had rather than a texture copy built for one example.
+The owner asked at 19:35 for the examples' counts under the Examples heading and a count on each
+group's heading, which is item 17 (Decision 30), a batch of its own with ui_material's commit or
+right after. The rows that need no crate and no word go on in the order given: the interface
+material, a custom vertex attribute, mip generation, occlusion culling, the world's serialization,
+the transform gizmo, picking's debug, the pitch and the decodable, then the atmosphere's Mars
+medium, render recovery, Solari's reflections and Bevy's scene notation, each of those four read
+against the lock first, since a crate waits on the owner's word.
+
+Before it, `6641dbcc` came, error_handling, with no bridge work: the ten thousand points come from
+the icosphere's triangles read back through `Render.TryReadMesh`, each triangle picked by its
+cumulative area with a binary search and a point picked evenly within it by the folded pair, red
+emissive spheres parented to the sphere; the errors map onto what C# has, a pointer-move observer
+sliding the sphere and throwing where there is no transform with mesh picking on, a system catching
+a resource never inserted and logging the captured error, a system catching the refused add to an
+entity that never was and logging it as an error with its context, and Bevy's spawn at an id left
+out for having no counterpart; the run logs both as Bevy's does and the capture shows the dotted
+sphere over the green plane; the running guide says the engine's handling is Bevy's warn handler,
+the fail-fast setting its panic, and that a system dealing with its own error catches it. The norm,
+document and path tests 20 of 20, the prose at 299. EXAMPLES.md reads 344 written, 2 in part and 36
+missing. Right, the sampling done as Bevy's sampler does it from the mesh the engine already reads
+back, and the one thing without a counterpart left out and said. custom_projection is under way at
+ABI 267: a projection type the bridge declares, Bevy's perspective with entries written over its
+clip matrix and its sub-view, the update, the far plane and the frustum's corners the perspective's
+so it follows the window, set from C# with the field of view, the near and far planes and the
+entries, a column or row past three refused on both sides, with a native test of the entries landing
+and the rest staying the perspective's, a managed test reading the variant back as custom with both
+refusals, the example Bevy's scene with its two entries, and the cameras guide's paragraph and
+block.
 
 Before it, `7a6cbf16` came, load_gltf_extras, and its triage line was stale, glTF's four kinds of
 extras being reflected with their JSON as a string already: the example gathers the four through the
@@ -47,25 +75,6 @@ pipe, a refused command on a missing entity for its failing commands and a point
 the sphere; then the depth to a texture, a system copying a depth-only camera's depth into an image
 in the render graph and a material sampling it with a comparison sampler, and a custom projection, a
 projection type the bridge declares set by a matrix from C#, which both take bridge work.
-
-Before it, `c16f67e5` came, decal, ABI 266: `Render.CreateDecalMaterial` builds a standard material
-from the usual settings and wraps it in Bevy's forward decal material with a depth fade and a depth
-bias, the bias set on the base since the config carries none, and `Render.SetForwardDecal` makes an
-entity a decal, refusing a key that is no decal material; a native test runs with Bevy's own decal
-plugin, its mesh being private, and reads the fade, the bias, the color and both answers, the long
-config literal of the round-trip test moved into a helper both use; where the build has the renderer
-a headless run is told it must draw, windowed or offscreen, rather than given the advice to rebuild;
-`DecalTests` runs offscreen, the decal given Bevy's box mesh and a standard material refused. The
-example lays three checker decals, opaque, blended and added at biases of 0, 2 and 4, over a white
-floor and a hundred cubes turned by a seeded random, under a depth prepass and a shadowed point
-light, its capture matching Bevy's; the materials guide has a decals section and block, the cheat
-sheet and the surface their lines. With it the Solari comment speaks of the development machine's
-laptop GPU, so nothing outside `.github` names the model, and item 15 is done. `render/assets.rs`
-stands at 651 lines. EXAMPLES.md reads 342 written, 2 in part and 38 missing. The suite: 1,420
-passed and 2 skipped of 1,422; cargo's 89 and 154; the prose at 299. Right, the decal's two halves
-kept apart as Bevy keeps them, the private mesh tested through Bevy's own plugin, and the headless
-case told what it needs. Next the depth to a texture, then a custom projection, the mesh sampling's
-error handling and the glTF extras.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -110,10 +119,12 @@ from [SHARED.md](SHARED.md).
    `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The owner pushed
    the eleven through `b06ff120` at 15:46 and `21d08b44` at 15:55, whose run cancelled the first's;
    `21d08b44`'s run reads red on `NormTests.N_4_5`, its padded capture sizes not on the rule's list,
-   mended at `04cefc8e` before the page named it. The captures' comparison, the README's walk and
-   Courtyard run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97` is read
-   on the owner's pack run's page (Decision 8). Each push's run is read by the reviewing session,
-   and a failure it names comes first here.
+   mended at `04cefc8e` before the page named it. The run of `6641dbcc`, pushed at 18:21, is green
+   on all three with N 4.5 cleared, 1,165 passed and 497 skipped on Linux in 4 m 12 s; the runs
+   between were cancelled by the pushes after them, and `b134dd4d`'s runs at 19:30. The captures'
+   comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`), so the
+   comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each push's run
+   is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -284,8 +295,9 @@ from [SHARED.md](SHARED.md).
    `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
    bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), and the
    forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and error_handling at `6641dbcc`,
-   the table at 344 written and 36 missing; the rows that need no crate and no word follow in
-   TODO.md's order, a custom projection under way, then the depth to a texture.
+   the custom projection at `6e28c3cc` and the depth to a texture at `b134dd4d`, the table at 346
+   written and 34 missing; the rows that need no crate and no word follow in TODO.md's order, the
+   interface material next, the last four of the list read against the lock first.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -459,6 +471,17 @@ from [SHARED.md](SHARED.md).
     verb or in the harness that drives the examples, so a session or a test clicking a place it has
     not hovered loses nothing, measured by the example's three of three, with a test. With the batch
     that next touches the CLI's input.
+
+17. **The examples' counts under the Examples heading, and a count on each group's heading (Decision
+    30).** The owner asked on 2026-10-11 at 19:35. The line the table script writes between its
+    markers, of Bevy's 438 examples how many are written here, in part, waiting on the bridge and
+    about Rust itself, stands under the status heading today and moves under the Examples heading,
+    after its paragraph and before the gallery, the markers with it, so a reader sees the count
+    where the pictures are; and each group's heading in the gallery carries its count, the written
+    examples in its row and, where Bevy's group holds more, Bevy's count beside it, as `### 2D
+    Rendering, 26 of 27`, the form the working session finds reads best and the owner's eye judges.
+    The script writes both, so the check reads them, with the prose count kept and the README walk
+    run on the result.
 
 ## Verdicts
 
@@ -647,5 +670,10 @@ from [SHARED.md](SHARED.md).
 29. **The development machine's GPU is named nowhere a user reads.** The owner asked at 17:26 on
     2026-10-11, as of 3DEngine, which is item 15: the machine's name out of the code and comments a
     user sees, the measurements kept with the device a plain phrase.
+
+30. **The examples' counts stand under the Examples heading and on each group's heading.** The owner
+    asked at 19:35 on 2026-10-11, which is item 17: the line of how many of Bevy's examples are
+    written moved under the Examples heading, and each group's heading in the gallery carrying its
+    count.
 
 ## Replies

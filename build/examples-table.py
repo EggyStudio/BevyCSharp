@@ -293,9 +293,17 @@ def build(version, examples, order, triage, written, source, followed):
             # name is longer, which is a little wider.
             name = example["name"] + "\u00a0" * max(0, 32 - len(example["name"]))
             cells.append(f'<td width="260">{picture}<br><small><code>{name}</code></small></td>')
+        # The heading says how many of the group's examples are written, and how many Bevy's group
+        # holds where that is more, so a reader sees how far each group has come without counting
+        # pictures across a row wider than the page. Written ones rather than the pictures in the
+        # row, since one with nothing to draw prints instead and has no picture there, and a group
+        # of those would read as barely begun.
+        rows = [example for example in examples if example["group"] == group]
+        done = sum(1 for example in rows if example["state"] == "written")
+        count = f"{done} of {len(rows)}" if len(rows) > done or done == 1 else f"all {done}"
         # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the
         # README but a table's rows as prose, and four lines a group would take the gallery past it.
-        sections.append(f"### {group}\n<table><tr>" + "".join(cells) + "</tr></table>")
+        sections.append(f"### {group}, {count}\n<table><tr>" + "".join(cells) + "</tr></table>")
     gallery = "\n\n".join(sections)
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
