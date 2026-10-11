@@ -327,8 +327,6 @@ many_gradients	can	through Bevy's reflected BackgroundGradient
 many_materials	can
 many_morph_targets	can	the weights set through Bevy's reflected MorphWeights
 many_sprites	can
-many_text2d	part	the font atlases' count and bytes in its log, which Bevy's FontAtlasSet holds and no wrapper reaches
-many_text	part	--clear-font-atlases, which empties Bevy's FontAtlasSet, which no wrapper reaches
 text_pipeline	can
 transform_hierarchy	can
 time	n/a	replaces Bevy's runner with one stepping the app from the console, and the bridge owns the runner

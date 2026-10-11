@@ -112,8 +112,7 @@ internal static class ManyText2d
         ctx.Ecs.Set(_camera, camera);
     }
 
-    // The texts and those a camera saw, once a second. Bevy also counts the font atlases and their
-    // bytes from its FontAtlasSet, which no wrapper reaches, so those two are left out.
+    // The texts, those a camera saw, and the font atlases with the bytes they hold, once a second.
     private static void PrintCounts(BehaviorContext ctx)
     {
         _printing += ctx.Time.Delta;
@@ -121,7 +120,8 @@ internal static class ManyText2d
 
         _printing -= 1f;
         var visible = Texts.Count(text => ctx.Ecs.TryGet<ViewVisibility>(text, out var seen) && seen.IsVisible);
-        Console.WriteLine($"Texts: {Texts.Count} Visible: {visible}");
+        var (atlases, bytes) = Ui.FontAtlases;
+        Console.WriteLine($"Texts: {Texts.Count} Visible: {visible} Atlases: {atlases} Bytes: {bytes}");
     }
 
     // Each text marked changed, which Bevy does by reaching it mutably, and here by writing it

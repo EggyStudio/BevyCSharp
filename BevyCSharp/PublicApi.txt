@@ -11048,6 +11048,7 @@ readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>
   static bool op_Inequality(Triangle2d left, Triangle2d right)
   void Deconstruct(out Vec2 A, out Vec2 B, out Vec2 C)
 static class Bevy.Ui
+  static (int, long) FontAtlases { get; }
   static Entity SpawnNode(UiSettings settings)
   static Entity SpawnText(string text, UiSettings settings, UiTextSettings style)
   static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f)
@@ -11056,6 +11057,7 @@ static class Bevy.Ui
   static TextViewport? TextViewportOf(Entity field)
   static UiInteraction InteractionOf(Entity entity)
   static string? EditableTextOf(Entity node)
+  static void ClearFontAtlases()
   static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
   static void ScrollText(Entity field, Vec2 offset)
   static void SelfUpdate(Entity widget, UiWidgetKind kind)

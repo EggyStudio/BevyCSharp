@@ -14,6 +14,7 @@ use crate::state::with_world;
 #[cfg(feature = "render")]
 use crate::state::with_world_opt;
 
+mod atlases;
 mod editable;
 mod grid;
 mod text;

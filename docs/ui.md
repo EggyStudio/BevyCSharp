@@ -179,6 +179,10 @@ negative value pulls them together and `LetterSpacingInPixels` switches the unit
 makes it look blurred. `ShadowOffset` and `ShadowColor` put a shadow behind the glyphs, which keeps
 light text readable over a picture that might be light too.
 
+Bevy draws each glyph of each font at each size into a font atlas the first time it is shown, so the
+atlases grow with the sizes text is drawn at. `Ui.FontAtlases` says how many there are and the bytes
+they hold, and `Ui.ClearFontAtlases` empties them, as Bevy's text stress tests measure them.
+
 `Ui.SpawnTextSpan` adds a run to a text that already exists, in its own font, size and color, such
 as a bold word inside a sentence. The spans read in the order they were added, after whatever the
 parent itself says, and the whole is broken and aligned as one block by the settings the parent was

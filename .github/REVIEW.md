@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e5af8eb8`. Seven commits, each small and right. `f64b089b` brings twelve examples to
+Reviewed up to `9e941884`. Three commits of the examples in part. `82e012f6`: a mesh made in code is
+compressed in place as Bevy's regular compression does, positions, normals, tangents and texture
+coordinates in sixteen bits, colors in eight and indices in sixteen where they fit, and a glTF scene
+is loaded with its meshes compressed as they load, two loads of a file being two sets of meshes as
+Bevy has it, with the warning that a shader of one's own reads attributes as they are kept, so a
+mesh one draws is left plain; two tests, a cube's indices from thirty-two bits to sixteen with the
+rest unchanged and a compressed scene spawning what the plain one does; many_cubes, many_foxes and
+many_morph_targets take their compression switch, ABI 247. `c5b6d1d3`: the drawing parts an app asks
+for move from `app.rs` into `render/options.rs`, `app.rs` at 709 lines and off the watch.
+`9e941884`: `Render.PointLightsDrawn` reads the point lights the render world held and drew, and a
+sphere is subdivided as many times as asked, so many_lights draws Bevy's sphere of lights, with
+tests; its lights' unseeded colors cover 33% of its pixels on lavapipe where they covered 6%, so its
+line in `build/captures-differ.txt` keeps its cause with the share raised, the list no longer than
+it was, which the reply says and is right, a share raised with its cause being the list's rule and
+not a line added. Right, the compression Bevy's and its warning said, the file's loads kept apart as
+Bevy keeps them, and the module split before the line was crossed. Next the rest of the examples in
+part that want no crate.
+
+Before it, seven commits came to be read, each small and right. `f64b089b` brings twelve examples to
 B 4, 156 of the 161 whose Bevy example keeps state in a component of its own (Decision 5); of the
 five left, three follow 0.19.1 and come with Feathers, whose checkboxes and radio are the components
 counted, one keeps its instances in the camera's draw's buffer and no static field, and one keeps
@@ -70,31 +88,6 @@ changes with the retake, which the owner is told. Next, as the coder has them: B
 examples, alpha to coverage, canceled touches, the static transform optimizations reflected, and the
 skybox's compressed formats.
 
-Before it, two commits came to be read, item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
-`RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
-system last asked, oldest first, as Bevy's `RemovedComponents<T>` gives a Rust system; each C#
-system's closure holds a cursor a component, which `removals.rs` makes the running one in a
-thread-local while the system runs and gives back whatever the body does, and the call reads Bevy's
-removal messages from the cursor or the oldest kept up to the newest and moves the cursor on only
-when the entities fitted, so a caller with too small a buffer asks again; outside a system it is
-refused, Bevy keeps a removal two frames, which the remarks and the behaviors guide say, and ABI
-243. Two Rust tests see a removal and a despawn once each and another system's cursor see both, a
-too-small buffer moving nothing; `RemovedTests` runs two systems that each see the stripped and the
-gone exactly once and throws outside a system. Right, the cursor the system's own, the retry on a
-small buffer, and the two frames said. Then `c67c7981`: a second template, `bevycsharp-empty`, makes
-the first game's first step with the project's name as the window's title, so the guide's step one
-is the two install and new commands as 3DEngine's are, held by `FirstGameTests` against
-`steps/01.cs`, both templates' placeholders and defaults checked; `pack-templates.sh` writes the
-version beside each template's `template.json` and moves it over, since macOS's `sed` reads `-i`
-otherwise, the thing item 9's wider test would have found. The suite before the two: 1,348 passed
-and 2 skipped, the bridge's 131. Item 4's retake on the fixed clock is done, 185 pictures changed in
-bytes and one text capture new, so every picture changes when it is committed, which the owner is
-told; `many_cubes` lost its capture to a full disk at 20:20, said to be another session's copies,
-and was retaken; seven examples flat by their design and byte-identical to their pictures fail the
-blank check and go on a list with that reason; the lavapipe run began at 20:58 under its own
-sessions and runs some hours, the comparison commit after it. Item 8 meanwhile, every example on the
-package alone.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -139,8 +132,8 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs` at 783 lines, `app.rs` at 790 and `NormTests.cs` at 794 split with their next
-   addition.
+   `render/assets.rs` at 783 lines and `NormTests.cs` at 794 split with their next addition;
+   `app.rs` is at 709 since `c5b6d1d3`.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
@@ -492,7 +485,3 @@ from [SHARED.md](SHARED.md).
     dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
 
 ## Replies
-
-many_lights: its sphere is subdivided nine times as Bevy's is, so its lights cover most of it, and
-the unseeded random colors that were 5.7% of its pixels on lavapipe are 32.7%; its line in
-`build/captures-differ.txt` keeps its cause with the share raised to 0.40, the list no longer.

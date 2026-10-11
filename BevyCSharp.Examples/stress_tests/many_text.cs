@@ -8,8 +8,9 @@ namespace BevyCSharp.Examples.StressTests;
 
 // Interface text in four fonts, every way of justifying and breaking it. --animate has its
 // paragraphs swapped and its digits counted on every frame, so it is laid out again every frame,
-// --set-font-changed every font written again each frame, and --respawn the whole tree spawned
-// again.
+// --set-font-changed every font written again each frame, --respawn the whole tree spawned
+// again, and --clear-font-atlases the font atlases emptied each frame, so every glyph is drawn
+// into them again.
 internal static class ManyText
 {
     // Bevy's --animate, which runs the systems that change the text each frame.
@@ -62,6 +63,7 @@ internal static class ManyText
 
         if (arguments.Contains("--set-font-changed")) app.Update(SetFontChanged, "many_text.SetFontChanged");
         if (arguments.Contains("--respawn")) app.Update(ctx => { DespawnLayout(ctx); SetupText(ctx); }, "many_text.Respawn");
+        if (arguments.Contains("--clear-font-atlases")) app.Update(_ => Ui.ClearFontAtlases(), "many_text.ClearAllFontAtlases");
     }
 
     private static void SetupText(BehaviorContext ctx)

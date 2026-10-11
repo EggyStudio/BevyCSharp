@@ -1155,6 +1155,7 @@ static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f);
 static Entity SpawnText(string text, UiSettings settings, UiTextSettings style);  // Spawns a run of text, set as style describes
 static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float R, float G, float B, float A) color);  // Adds a run of text to an existing one, set in its own font and color
 static void SetText(Entity entity, string text);                // Replaces what a text entity says
+static void ClearFontAtlases();                                 // Empties the font atlases, which Bevy fills again with the glyphs drawn after
 static UiInteraction InteractionOf(Entity entity);              // Reports how the pointer stands on an interactive node
 static void SetImage(Entity entity, AssetHandle image);         // Draws an image inside a node, or replaces the one it draws
 static void SetImage(Entity entity, UiImageSettings settings);  // Draws an image inside a node, tinted, cut down or sliced

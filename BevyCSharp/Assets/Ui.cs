@@ -186,6 +186,37 @@ public static unsafe partial class Ui
     }
 
     /// <summary>
+    /// How many font atlases Bevy holds, and the bytes their images take. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Bevy draws each glyph of each size of each font into an atlas the first time it is needed,
+    /// so the atlases grow with the sizes a game draws text at, which Bevy's many_text2d logs as
+    /// it draws texts at many sizes. Both are zero where no text has been drawn.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static (int Count, long Bytes) FontAtlases
+    {
+        get
+        {
+            var counts = stackalloc ulong[2];
+            Native.Check(Native.bcs_ui_font_atlases(counts), "counting the font atlases");
+            return ((int)counts[0], (long)counts[1]);
+        }
+    }
+
+    /// <summary>
+    /// Empties the font atlases, which Bevy fills again with the glyphs drawn after. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <remarks>
+    /// For measuring what drawing glyphs into the atlases costs, as Bevy's many_text does every
+    /// frame. A game has no reason to, since every glyph it shows is drawn again.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static void ClearFontAtlases() =>
+        Native.Check(Native.bcs_ui_clear_font_atlases(), "emptying the font atlases");
+
+    /// <summary>
     /// Reports how the pointer stands on an interactive node.
     /// </summary>
     /// <remarks>
