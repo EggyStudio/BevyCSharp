@@ -3949,6 +3949,18 @@ enum Bevy.OverrideKind : int
   Remove = 2
   Rename = 4
   Set = 0
+sealed class Bevy.PackedAtlas : IEquatable<PackedAtlas>
+  AssetHandle Image { get; init; }
+  AssetHandle Layout { get; init; }
+  PackedAtlas(AssetHandle Image, AssetHandle Layout, uint[] Indices)
+  bool Equals(PackedAtlas? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(PackedAtlas? left, PackedAtlas? right)
+  static bool op_Inequality(PackedAtlas? left, PackedAtlas? right)
+  uint[] Indices { get; init; }
+  void Deconstruct(out AssetHandle Image, out AssetHandle Layout, out uint[] Indices)
 enum Bevy.ParallaxMethod : int
   Occlusion = 0
   Relief = 1
@@ -10187,6 +10199,7 @@ static class Bevy.Render2d
   static AssetHandle CreateAtlas(uint tileWidth, uint tileHeight, uint columns, uint rows, (uint, uint) padding = default, (uint, uint) offset = default)
   static AssetHandle CreateMaterial(ColorMaterialSettings settings)
   static Entity SpawnCamera2d(int order = 0)
+  static PackedAtlas? PackAtlas(ReadOnlySpan<AssetHandle> images, (uint, uint) padding = default)
   static TileData? TileAt(EcsWorld world, Entity entity, int index)
   static int SetSpriteFrames(ReadOnlySpan<Entity> sprites, ReadOnlySpan<uint> frames)
   static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material)

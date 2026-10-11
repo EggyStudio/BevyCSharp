@@ -94,7 +94,6 @@ sprite_sheet	can
 sprite_slice	can
 sprite_tile	can
 text2d	can
-texture_atlas	missing	an atlas built from a folder of images as the app runs
 tilemap_chunk_orientation	can	the pale blue behind the chunk its camera's clear color rather than Bevy's ClearColor resource
 tilemap_chunk	can	its random tiles from .NET's generator seeded with 42, as Bevy seeds ChaCha, so other tiles than Bevy's
 transparency_2d	can

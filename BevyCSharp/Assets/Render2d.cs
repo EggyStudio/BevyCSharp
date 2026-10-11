@@ -84,6 +84,50 @@ public static unsafe partial class Render2d
         return new AssetHandle(key);
     }
 
+    /// <summary>
+    /// Packs images into one atlas as the app runs, as Bevy's <c>TextureAtlasBuilder</c> does, or
+    /// answers <see langword="null"/> while any of them is still loading. Only valid inside a
+    /// system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For sprites drawn as separate files and packed into one image, so they are drawn from one
+    /// texture, as Bevy's texture_atlas packs a folder of them. The packed image is a copy, kept
+    /// as an asset of its own, and each image's frame in it is
+    /// <see cref="PackedAtlas.Indices"/>, in the order they were given, for
+    /// <see cref="SpriteSettings.Frame"/>.
+    /// </para>
+    /// <para>
+    /// <paramref name="padding"/> leaves a gap of pixels between neighboring images, which keeps a
+    /// sprite sampled between pixels, as one drawn scaled with linear filtering is, from taking
+    /// color from its neighbor's edge.
+    /// </para>
+    /// </remarks>
+    /// <param name="images">The images to pack.</param>
+    /// <param name="padding">The gap between neighboring images, in pixels.</param>
+    /// <exception cref="BevyNativeException">
+    /// A handle names no image, or the images do not fit the largest atlas Bevy packs.
+    /// </exception>
+    public static PackedAtlas? PackAtlas(ReadOnlySpan<AssetHandle> images, (uint X, uint Y) padding = default)
+    {
+        if (images.IsEmpty) throw new ArgumentException("An atlas packs one image at least.", nameof(images));
+
+        var keys = new int[images.Length];
+        for (var i = 0; i < keys.Length; i++) keys[i] = images[i].Key;
+        var indices = new int[images.Length];
+        int packed, layout;
+
+        fixed (int* given = keys)
+        fixed (int* placed = indices)
+        {
+            var answer = Native.bcs_atlas_build(given, keys.Length, padding.X, padding.Y, &packed, &layout, placed);
+            if (answer == NativeStatus.NotPresent) return null;
+            Native.Check(answer, $"packing {keys.Length} images into an atlas");
+        }
+
+        return new PackedAtlas(new AssetHandle(packed), new AssetHandle(layout), [.. indices.Select(index => (uint)index)]);
+    }
+
     /// <summary>Attaches a sprite to an entity, or replaces the one it has.</summary>
     /// <exception cref="BevyNativeException">The handle names no image, or the entity is gone.</exception>
     public static void SetSprite(EcsWorld world, Entity entity, AssetHandle image) =>

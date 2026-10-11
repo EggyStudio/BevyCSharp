@@ -968,6 +968,7 @@ static string UvAngle(string arc);                              // A sector or a
 ```csharp
 static Entity SpawnCamera2d(int order = 0);                     // Spawns a 2D camera and returns it
 static AssetHandle CreateAtlas(uint tileWidth, uint tileHeight, uint columns, uint rows, (uint X, uint Y) padding = default, (uint X, uint Y) offset = default);  // Builds an atlas layout over a grid of equal tiles and returns it
+static PackedAtlas? PackAtlas(ReadOnlySpan<AssetHandle> images, (uint X, uint Y) padding = default);  // Packs images into one atlas as the app runs, as Bevy's TextureAtlasBuilder does, or answers null while any of them is still loading
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image);  // Attaches a sprite to an entity, or replaces the one it has
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image, SpriteSettings settings);  // Attaches a sprite drawn as settings describes
 static int SetSpriteFrames(ReadOnlySpan<Entity> sprites, ReadOnlySpan<uint> frames);  // Moves sprites and sprite meshes to frames of their sheets, each to the frame beside it, in one call

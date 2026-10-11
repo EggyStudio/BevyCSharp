@@ -88,6 +88,12 @@ internal static unsafe partial class Native
         uint tileWidth, uint tileHeight, uint columns, uint rows,
         uint paddingX, uint paddingY, uint offsetX, uint offsetY);
 
+    /// <summary>Packs images into one atlas, writing the packed image, its layout and each image's frame.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static unsafe partial int bcs_atlas_build(
+        int* images, int count, uint paddingX, uint paddingY, int* image, int* layout, int* indices);
+
     /// <summary>Writes the path an asset was loaded from into a buffer.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

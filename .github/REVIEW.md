@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1ee62fca`. One commit, nondeterministic_system_order: `App.DetectAmbiguities`
+Reviewed up to `b3ac2a0e`. One commit, render_primitives: the gizmos draw Bevy's planes, endless
+lines, capsules, annuli, circular sectors and segments and regular polygons through Bevy's own
+primitive drawing, nine kinds more, the round shapes taking a resolution as the sphere and the
+circle did, a sphere taking a rotation, and Bevy's arc drawn as the existing arc with its span
+doubled and its start turned back, so no kind was added for it; the example switches its 2D and 3D
+cameras and steps through the primitives with meshes where Bevy's sizes fit and mesh data for the
+lines, the polygons and the tetrahedron, the header following the active camera, Bevy's rotation
+from one direction to another written in the example; ABI 258. A fault found and fixed on the way:
+the cylinder gizmo passed the managed half height to Bevy's constructor that takes the whole, so
+every cylinder gizmo drew at half height, the physics colliders' gizmos and the feature test's
+bodies among them, which the port's own eye against Bevy's picture caught. `GizmoShapeTests` draws
+eight flat shapes and the plane, the endless line and the turned sphere, 44 of 44 on the GPU; the
+gizmos guide has its paragraph and block. Right, Bevy's own drawing reached rather than redrawn, the
+arc seen as the arc it already was, and the half height read from Bevy's signature. EXAMPLES.md
+reads 333 written, one in part and 48 missing, TODO.md's group four. The suite: 1,403 passed and 2
+skipped of 1,405; cargo's 142. Next texture_atlas, a native atlas built over loaded images with
+Bevy's builder and its padding, giving the image, its layout and each source's index.
+
+Before it, two commits came to be read, nondeterministic_system_order: `App.DetectAmbiguities`
 reports the pairs of a stage's systems whose declared access conflicts, one writing what the other
 reads or writes, and whose order nothing states, through `After`, `Before` or `Chain` directly or
 through other systems of the stage, a system declaring nothing left out and `AmbiguousWith` excusing
@@ -66,32 +84,6 @@ the setter's place cleared by its tick rather than trusted, and the marking read
 from the reading one. EXAMPLES.md reads 331 written, one in part and 50 missing. The suite: 1,388
 passed and 2 skipped of 1,390; cargo's 142. Next the ambiguity report from its patch with
 nondeterministic_system_order, then the five left of TODO.md's group, each read for a crate first.
-
-Before it, one commit came to be read, the first of the eight, Bevy's message example: the bus
-numbers its messages, and a `MessageReader<T>` keeps its own place among them, giving on each read a
-copy of what it has not read, this frame's sent so far and the last frame's, so a reader after the
-sender reads in the same frame and one reading every other frame still gets every message; a
-`MessageMutator<T>` gives a ref struct walked with `foreach (ref var m in ...)` over the two lists,
-so a later system changes a message in place and the reader after it reads the change; `ctx.Read`
-stays the last frame's messages whole. The example runs Bevy's chain, the timer, the extra damage,
-the armor's mutator and the health, with two unordered readers, printing Bevy's four lines once a
-second over a capture of 130 frames, and says why the extra damage is a reader and a send here where
-Bevy's is a mutator, Rust's borrows forbidding a reader and a writer of one type in one system. Two
-tests hold the reader's frame and the mutator's change; the messages guide replaces the sentence
-that a C# system has no identity for a cursor; the behaviors guide has the free camera's lesson, a
-`ref` component marked changed every frame the system runs where Bevy marks one only when written
-through, and the `in` and the write through the world when it changes; and the cheat sheet's
-generator names a type generic only through its outer type as it is, where it crashed. Right, the
-reader's place its own as Bevy's cursor is, the two lists read by span, and the lesson in the guide.
-The suite: 1,384 passed and 2 skipped of 1,386; the docs' 33 blocks build. The ambiguity report
-started before the order came is set aside as a patch, uncommitted, and comes after
-change_detection, whose shape the coder laid out and this session took: a component's added flag
-beside its changed one on the existing path, both against the running system's last run; resources
-given ticks, a run tick a system kept by the trampoline and an added and a changed tick a resource
-set by insert, set, set-if-not-equal and mark-changed, read as changed or added against the system's
-last run; and the place a value was last set from as the C# call site, since Bevy's own would name
-the bridge's lines and a Rust location cannot be made from C#, kept only under a config switch so
-the table costs nothing by default, a write through a behavior's `ref` saying none.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

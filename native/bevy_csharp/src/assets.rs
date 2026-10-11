@@ -18,6 +18,7 @@ use bevy::ecs::world::World;
 use crate::interop::status;
 use crate::state::{with_world, with_world_opt};
 
+pub mod atlas_builder;
 pub mod folders;
 pub mod unused;
 

@@ -62,6 +62,7 @@ internal static class Catalog
         new("sprite_slice", SpriteSlice.Build),
         new("sprite_tile", SpriteTile.Build),
         new("text2d", Text2dExample.Build),
+        new("texture_atlas", TextureAtlas.Build),
         new("tilemap_chunk", TilemapChunkExample.Build),
         new("tilemap_chunk_orientation", TilemapChunkOrientation.Build),
         new("transparency_2d", Transparency2d.Build),
