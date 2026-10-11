@@ -10,7 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c11c63d4`. One commit, texture_atlas: `Render2d.PackAtlas` packs loaded images into
+Reviewed up to `68aa5dd5`. First the page: the owner pushed `c11c63d4` at 10:02, which cancelled
+`b3ac2a0e`'s Windows and macOS jobs, and its run is red on all three systems by one thing, the
+bridge's tests do not build: `atlas_builder.rs`'s test module imports
+`bevy::render::render_resource` for the texture's extent, dimension and format, which the headless
+profile the workflow builds the bridge's tests in does not have, where the six other modules that
+import that path lie under `render` and build with that feature alone; the managed tests passed,
+1,059 on Linux, 916 on Windows and 909 on macOS (Verdict 12), and `68aa5dd5` carries the same file
+and reddens the same way when pushed, so the mend comes first in a commit of its own. The commit
+read, image_node_resizing: Bevy's outlines of interface nodes, which the bridge always built,
+`bevy_ui_debug` being on through `bevy_ui_render`'s defaults, read from cargo's feature tree with
+the line added and taken away, the lock and the manifest unchanged, so TODO.md's feature the bridge
+does not build was wrong and is gone with the row; the example draws Bevy's grid of an auto row and
+a stretch row resized by the held arrows within Bevy's limits, the text node opting out with options
+of its own, its capture matching lavapipe; `UiDebugOutlineTests` reads the edge of a node that draws
+nothing with the outlines on and off; no native change, ABI 259. Found on the way: `InsertResource`
+from nothing builds a type that reflects no default field by field, so the debug options came with a
+line width of zero and the outline off where Bevy starts them at one and on, and the example reaches
+the plugin's resource through `Resource<T>` instead, the remark saying so; the trap is item 12
+(Decision 26). The test went first into `UiTests.cs`, which reached 802 lines and failed N 1.3, and
+moved to a file of its own before the commit, `UiTests.cs` unchanged at 794, which item 2 watches;
+the file lies under the tests' `Assets` folder and moves to `Ui` with its next touch. The interface
+guide has its paragraph and block, EXAMPLES.md reads 335 written, 1 in part and 46 missing,
+TODO.md's group two. The suite: 1,405 passed and 2 skipped; cargo's 143 here, under a profile that
+has `bevy::render`, which the page's does not. Right, the feature read from the tree rather than
+believed, the plugin's resource reached rather than replaced, and the norm's failure mended before
+the commit. monitor_info opens a fullscreen window on every monitor and its point needs a real
+display, which an offscreen run has none of: the bridge's part, no first window, a run that does not
+end with its last window, monitor entities, a window fullscreen on a monitor named by its entity and
+a camera aimed at that window, is built with headless tests, and the example is written and listed
+in part, its capture and its live check the owner's run on their own screens, which waits on the
+owner's word (item 4); relationships begun meanwhile, relation slots as the state slots are. Next
+Verdict 12's mend, then relationships.
+
+Before it, one commit came to be read, texture_atlas: `Render2d.PackAtlas` packs loaded images into
 one atlas as the app runs through Bevy's own builder with a padding between them, answering the
 packed image, its layout and each image's frame in the order the images were given, or nothing while
 an image still loads, and throwing for a handle that names no image or for images past the largest
@@ -57,36 +90,6 @@ reads 333 written, one in part and 48 missing, TODO.md's group four. The suite: 
 skipped of 1,405; cargo's 142. Next texture_atlas, a native atlas built over loaded images with
 Bevy's builder and its padding, giving the image, its layout and each source's index.
 
-Before it, two commits came to be read, nondeterministic_system_order: `App.DetectAmbiguities`
-reports the pairs of a stage's systems whose declared access conflicts, one writing what the other
-reads or writes, and whose order nothing states, through `After`, `Before` or `Chain` directly or
-through other systems of the stage, a system declaring nothing left out and `AmbiguousWith` excusing
-a pair; `Error` throws as the run starts and `Warn` logs Bevy's message in Bevy's form with the C#
-names, `AmbiguitiesIn` giving the records. Since every C# system is exclusive to Bevy, Bevy's own
-check would report every pair, so the report is the managed side's over the systems' declarations,
-which is right; and since the generator declares each behavior's access to its own component, the
-whole Update of the examples' app reports twenty pairs of other examples' behaviors, real
-ambiguities and not this example's, so `among` narrows a report by system name, which a game whose
-stage holds its plugins' systems can use too, said in the triage. The example reports Bevy's three
-pairs and prints Bevy's three lines the same on three runs; four tests hold a pair found, the
-exclusions by order through a third system, by two readers, by `AmbiguousWith` and by an undeclared
-system, the error refusing to start and the warning running; the behaviors guide's section on order
-has it. Right, the report where the knowledge is and the narrowing said for what it is. EXAMPLES.md
-reads 332 written, one in part and 49 missing; the suite 1,390 passed, 2 skipped and one failed of
-1,393, a flake of the CLI's stop, which is Verdict 11; cargo's 142. Then `1ee62fca`, Verdict 11: the
-CLI's own stop verb already judged by the session ending, so the race was the tests' helper, which
-sends `app.quit` through a quit helper since that gives the answer or nothing where the connection
-closed first, the quit judged by the loop's end alone, with a test standing up a listener that reads
-the quit and hangs up, the class run twenty times at eight of eight; the cause read, the server
-completing the answer inside the frame, the exit ending the app at the frame's end and the server's
-dispose shutting both directions of every socket, so a connection thread that had not yet written
-the answer wrote nothing and the client read the end. Verdict 11 is settled; the server's side,
-shutting the receive side alone, joining the connection threads and then closing so an answered
-request is always written, is item 11, taken with the batch that next touches the server, since it
-changes shutdown on three platforms and no client of ours reads the answer. Next render_primitives,
-then texture_atlas, image_node_resizing, whose `bevy_ui_debug` feature pulls no crate, monitor_info
-and relationships.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -121,11 +124,13 @@ from [SHARED.md](SHARED.md).
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
    alone, which the captures job compares as it draws them, the lit cube alone. Verdict 9 is settled
    at `60141490`. The runs of `c39dd61d`, `e09a2ed8`, `90075005`, `d328fdc3` and `28e2d97b` are
-   green on all three, `5d955562`'s cancelled by the push after it; `b3ac2a0e`'s run is in flight,
-   Linux green in 4 m 40 s with 1,138 passed and 487 skipped, Windows and macOS running. The
-   captures' comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`),
-   so the comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each
-   push's run is read by the reviewing session, and a failure it names comes first here.
+   green on all three, `5d955562`'s cancelled by the push after it, and `b3ac2a0e`'s green on Linux
+   in 4 m 40 s with 1,138 passed and 487 skipped and cancelled on Windows and macOS by the push of
+   `c11c63d4` at 10:02, whose run is red on all three systems, the bridge's tests not building
+   (Verdict 12), the managed tests green, 1,059, 916 and 909. The captures' comparison, the README's
+   walk and Courtyard run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97`
+   is read on the owner's pack run's page (Decision 8). Each push's run is read by the reviewing
+   session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -133,9 +138,8 @@ from [SHARED.md](SHARED.md).
    shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs` at 799 lines and `NormTests.cs` at 794 split before their next addition;
-   `app.rs` is at 709 since `c5b6d1d3`.
-
+   `render/assets.rs` at 799 lines, `NormTests.cs` at 794 and `UiTests.cs` at 794 since `68aa5dd5`
+   split before their next addition; `app.rs` is at 709 since `c5b6d1d3`.
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
@@ -275,9 +279,13 @@ from [SHARED.md](SHARED.md).
    pixels and naming the share and the box. Feathers' three examples with `feathers_number_input`
    and the three camera controllers follow the other gaps, their crates allowed (Decisions 11 and
    12) on the owner's word in the working session, and the four font examples stay missing (Decision
-   13). `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or
-   ASTC with their mipmaps, less memory after the kill of 2026-10-08.
-
+   13). monitor_info opens a fullscreen window on every monitor of the machine, so its bridge part,
+   no first window, a run that does not end with its last window, monitor entities, a window
+   fullscreen on a monitor named by its entity and a camera aimed at that window, is built with
+   headless tests, and the example is written and listed in part until the owner runs it on their
+   own screens and gives its capture, which waits on the owner's word. `compressed_image_saver`
+   comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
+   memory after the kill of 2026-10-08.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -327,6 +335,19 @@ from [SHARED.md](SHARED.md).
     answered is a request written, with a test that reads `app.quit`'s answer; taken with the batch
     that next touches the server, since it changes shutdown on three platforms.
 
+12. **A resource inserted from nothing replaces the plugin's with a zeroed one (Decision 26).**
+    `InsertResource<T>()` with no JSON builds a type that reflects no default field by field, so
+    `GlobalUiDebugOptionsRef` came with a line width of zero and the outline off where Bevy starts
+    it at one and on, as `68aa5dd5` found, and the same holds for every reflected type without a
+    default, uncounted; the examples and the tests insert seven resources from nothing today, five
+    kinds. Measured first: the reflected resources without a default counted from the components
+    table, and each insert from nothing in the examples and the tests read for whether it wants the
+    zeros. Then the rule: an insert from nothing over a resource the world already holds, of a type
+    without a default, throws and names `Resource<T>`, since a zeroed copy over the plugin's is
+    never meant, and an insert where the world holds none keeps the field-by-field build, the remark
+    saying what it gives; a test holds both. With the batch that next touches
+    `EcsWorld.Reflected.cs`.
+
 ## Verdicts
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
@@ -354,6 +375,20 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
+
+12. **The run of `c11c63d4` is red on Linux, Windows and macOS by one thing: the bridge's tests do
+    not build.** Read from the three pages: the managed tests pass, 1,059, 916 and 909, and the step
+    that runs the bridge's own tests ends after 37 s, 2 m 31 s and 1 m 57 s with exit code 101 and
+    `error[E0433]: cannot find render in bevy` at `atlas_builder.rs:89`, the test module's `use
+    bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat}`. The workflow builds
+    the bridge's tests in the headless profile, the default, which has no `bevy::render`; the six
+    other modules that import that path lie under `render` and build with that feature alone, and
+    `cargo test` passed 143 in the working session under a profile that has it. Two things: the
+    module takes the types from where the headless profile has them, or its tests build with the
+    render feature alone as the others do, in a commit of its own before anything else, since
+    `68aa5dd5` carries the same file; and `cargo test` before a commit runs as the workflow runs it,
+    in the default profile, said in BUILDING.md where it names `cargo test`. Settled when a run's
+    bridge step is green.
 
 ## Decisions
 
@@ -493,5 +528,12 @@ from [SHARED.md](SHARED.md).
     by review on 2026-10-10 from the rule that nothing else is added, asked over Bevy's
     `pbr_specular_textures`, which turns on code in a crate the tree builds, where Feathers' and the
     dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
+
+26. **An insert from nothing over a resource a plugin made, of a type that reflects no default, is
+    refused and names `Resource<T>`.** Read by review on 2026-10-11 from the working session's
+    question at `68aa5dd5`, where the debug options inserted from nothing came zeroed over Bevy's:
+    the field-by-field build stays for a component and for a resource the world lacks, since every
+    example sets fields after it, and only the replace of a living resource with zeros is refused, a
+    zeroed copy over the plugin's being never meant. The owner may overrule it as any decision here.
 
 ## Replies

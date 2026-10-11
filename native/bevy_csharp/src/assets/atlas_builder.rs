@@ -86,17 +86,21 @@ mod tests {
     use bevy::asset::{Assets, RenderAssetUsages};
     use bevy::ecs::world::World;
     use bevy::image::{Image, TextureAtlasLayout};
-    use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 
     use crate::interop::status;
     use crate::state::loan_world;
 
+    // Bevy's default image is one pixel of the format and the dimension wanted here, and lends
+    // them, since the headless profile, which the workflow tests in, has no path naming the types.
     fn image(width: u32, height: u32) -> Image {
+        let plain = Image::default();
+        let mut size = plain.texture_descriptor.size;
+        (size.width, size.height) = (width, height);
         Image::new_fill(
-            Extent3d { width, height, depth_or_array_layers: 1 },
-            TextureDimension::D2,
+            size,
+            plain.texture_descriptor.dimension,
             &[255, 0, 0, 255],
-            TextureFormat::Rgba8UnormSrgb,
+            plain.texture_descriptor.format,
             RenderAssetUsages::default(),
         )
     }
