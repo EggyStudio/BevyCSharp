@@ -61,8 +61,8 @@ shows each written example's capture beside Bevy's to compare.
 
 ## What was measured
 
-On one machine, an Intel Core i9-14900HX with an NVIDIA GeForce RTX 4070 Laptop GPU on Vulkan,
-under Linux. [PERFORMANCE.md](../.github/PERFORMANCE.md) holds the full tables, how each run is
+On one machine, the development machine, a laptop with a 32-thread CPU and a discrete laptop GPU
+on Vulkan, under Linux. [PERFORMANCE.md](../.github/PERFORMANCE.md) holds the full tables, how each run is
 made and what was changed because of them.
 
 The same drawn scene of a thousand cubes under three lights, written once against Bevy alone and

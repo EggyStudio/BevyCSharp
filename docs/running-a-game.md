@@ -123,7 +123,7 @@ so naming it is about making the choice explicit and failing loudly rather than 
 silently. `App.DescribeAdapter()` reports what you actually got, which is how you check:
 
 ```
-[Renderer] adapter: Vulkan | NVIDIA GeForce RTX 4070 Laptop GPU | DiscreteGpu | NVIDIA
+[Renderer] adapter: Vulkan | <the GPU's name> | DiscreteGpu | <its vendor>
 [Renderer]  245.7 fps   frame    840   spinners 3
 ```
 

@@ -89,10 +89,10 @@ public static unsafe partial class Render
     /// <para>
     /// Bevy's ReSTIR is on, which reuses samples between pixels and frames. Bevy leaves it off for
     /// a denoiser to clean the picture instead, and its denoiser is DLSS's, which the bridge does
-    /// not build, so without ReSTIR the picture stays grainy. On a laptop's RTX 4070 it halved the
-    /// noise between frames of a Cornell box for 1.3 ms more of the GPU at 1280 by 720. Every
-    /// setting Bevy gives the lighting, ReSTIR, the light samples, the bounces and the world cache
-    /// among them, is on the camera's <c>SolariLightingRef</c>, reached with
+    /// not build, so without ReSTIR the picture stays grainy. On the development machine's laptop
+    /// GPU it halved the noise between frames of a Cornell box for 1.3 ms more of the GPU at 1280
+    /// by 720. Every setting Bevy gives the lighting, ReSTIR, the light samples, the bounces and
+    /// the world cache among them, is on the camera's <c>SolariLightingRef</c>, reached with
     /// <c>ecs.Wrap&lt;SolariLightingRef&gt;(camera)</c> once this has turned it on.
     /// </para>
     /// </remarks>
