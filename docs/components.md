@@ -169,6 +169,13 @@ config.Global = true;                                     // every 2D mesh drawn
 `ResourceEntity` gives the entity itself, for the string calls below. A resource is found afresh
 each time rather than kept, since a plugin may take one away and put it back on another entity.
 
+`InsertResource<T>` with no JSON starts from Bevy's default, and a type that reflects none is built
+field by field, a zero, an empty list or an enum's first variant in each, which is not always where
+Bevy's code starts it. Over a resource a plugin already put in, that build is refused, since it
+would undo what the plugin set, so the one there is changed through `Resource<T>` or given whole as
+JSON. Where the world has none, the build goes in as it is, so the line above asks for the world's
+own first.
+
 What a wrapper adds over a string path is the compiler, because a field Bevy renames stops
 compiling once the description is regenerated after an upgrade, rather than failing on the day the
 line runs. It goes through the same reflection, so it costs what a string path costs.

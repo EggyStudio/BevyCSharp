@@ -1,11 +1,13 @@
 use super::*;
 use super::describe::*;
 use super::lists::*;
+use super::resources::*;
 use super::values::*;
 use std::ffi::CString;
 
 use bevy::app::App;
 use bevy::ecs::component::Component;
+use bevy::ecs::reflect::ReflectResource;
 use bevy::ecs::entity::Entity;
 use bevy::math::Vec3;
 use bevy::reflect::Reflect;
@@ -88,11 +90,23 @@ struct Listed {
     fills: Vec<Filled>,
 }
 
+#[derive(Component, Reflect, PartialEq, Debug)]
+#[reflect(Component)]
+enum Switch {
+    Dimmed(f32),
+    On,
+    Off,
+}
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 struct Spanned {
     margin: core::ops::Range<f32>,
 }
+
+#[derive(bevy::ecs::resource::Resource, Reflect, Default)]
+#[reflect(Resource, Default)]
+struct Setting(f32);
 
 const PROBE: &str = "bevy_csharp::reflected::tests::Probe";
 const TEXTURED: &str = "bevy_csharp::reflected::tests::Textured";
@@ -231,6 +245,57 @@ fn a_component_is_inserted_at_its_default_and_removed() {
         assert_eq!(status::NOT_PRESENT, remove(), "a second removal finds nothing");
     });
     assert!(app.world().get::<Probe>(entity).is_none());
+}
+
+/// A resource is held while the entity Bevy keeps for it carries it, and once taken off it is held
+/// no more and its entity is still found, where an insert puts the next.
+#[test]
+fn a_resource_taken_off_is_not_held_and_its_entity_is_kept_for_the_next() {
+    const SETTING: &str = "bevy_csharp::reflected::tests::Setting";
+    let mut app = App::new();
+    app.register_type::<Setting>();
+    app.world_mut().insert_resource(Setting(1.0));
+    let id = app.world().component_id::<Setting>().unwrap();
+    let kept = app.world().resource_entities().get(id).unwrap();
+
+    let find = |app: &mut App, call: unsafe extern "C" fn(*const core::ffi::c_char, *mut u64) -> i32| {
+        let mut out = 0u64;
+        let code = loan_world(app.world_mut(), || unsafe { call(c(SETTING).as_ptr(), &mut out) });
+        (code, out)
+    };
+    assert_eq!((status::OK, kept.to_bits()), find(&mut app, bcs_reflect_resource_entity));
+
+    app.world_mut().remove_resource::<Setting>();
+    assert_eq!(status::NOT_PRESENT, find(&mut app, bcs_reflect_resource_entity).0);
+    assert_eq!((status::OK, kept.to_bits()), find(&mut app, bcs_reflect_resource_place));
+}
+
+/// A component that is an enum with no default is inserted from nothing at its first variant
+/// holding nothing, as an enum inside a field is made.
+#[test]
+fn an_enum_component_with_no_default_is_inserted_at_its_first_empty_variant() {
+    let (mut app, _) = probe_app();
+    app.register_type::<Switch>();
+    let entity = app.world_mut().spawn_empty().id();
+    loan_world(app.world_mut(), || {
+        let path = c("bevy_csharp::reflected::tests::Switch");
+        assert_eq!(status::OK, unsafe { bcs_reflect_insert(entity.to_bits(), path.as_ptr(), core::ptr::null(), 0) });
+    });
+    assert_eq!(Some(&Switch::On), app.world().get::<Switch>(entity));
+}
+
+/// A type says whether an insert from nothing has a default to start from, which a type reflecting
+/// none lacks, as a resource a C# insert would otherwise replace with zeros.
+#[test]
+fn a_type_says_whether_it_has_a_default_to_insert_from_nothing() {
+    let (mut app, _) = probe_app();
+    app.register_type::<Spanned>();
+    loan_world(app.world_mut(), || {
+        let has = |path: &str| unsafe { bcs_reflect_has_default(c(path).as_ptr()) };
+        assert_eq!(1, has(PROBE));
+        assert_eq!(0, has("bevy_csharp::reflected::tests::Spanned"));
+        assert_eq!(status::NO_COMPONENT, has("bevy_csharp::reflected::tests::Nothing"));
+    });
 }
 
 #[test]

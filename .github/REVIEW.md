@@ -10,11 +10,48 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9d3e2e5f`. Two commits, and first the page: the owner pushed `7ffd96c6` at 11:06 and
-its run is green on Linux, Windows and macOS with the bridge's tests built and passed, so Verdict 12
-is settled; `68aa5dd5`'s run before it is red on all three by the same step, as foreseen. Then
-`062d3f18`, relationships, ABI 260: a relationship of a game's own is any type naming it, and the
-bridge declares eight pairs of Bevy's relationship and target components through a macro, as the
+Reviewed up to `ff467a5f`. One commit, monitor_info written in part, ABI 261: a run opens no window
+of its own and runs on with none open where `Config.PrimaryWindow` is false, Bevy's window plugin
+given no primary window and the exit condition that does not exit, as the offscreen run already had
+them; and `Window.SetFullscreenOn` makes a window a game spawned fill a monitor named by its entity
+and centers it there, Bevy's fullscreen mode and centered position with the monitor's entity, a call
+of its own since reflection cannot name an entity inside the selection, refusing an entity that is
+no window and one that is no monitor. A render-gated native test holds the mode, the position and
+the refusal, and `SpawnedWindowTests` the same headless on a monitor the test puts on an entity of
+its own, which the bridge cannot tell from one the platform reported, reading the mode and the
+position back through reflection. The example opens a window on each monitor met, titled with its
+name, with a camera aimed at it and the monitor's text drawn there, closes a monitor's window when
+it is unplugged and the focused one on Escape, and offscreen finds no monitor and opens nothing,
+exiting 0 after sixty frames, which the capture script lists with the empty ones; its run on a
+display is the owner's, with `dotnet run --project BevyCSharp.Examples -- monitor_info`, which fills
+every monitor of the machine and runs on when its windows are closed. One thing for its next touch:
+it finds the monitors by walking every entity and asking each for the component, where
+`EntitiesWith<MonitorRef>` asks the world once, which a game author copying it should see. The
+window guide has its paragraph and block, EXAMPLES.md reads 336 written, 2 in part and 44 missing,
+TODO.md's group gone and its in-part list naming it. The suite: 1,410 passed and 2 skipped of 1,412;
+cargo's 83 headless and 145 with the larger profiles, every profile checked with warnings denied.
+Right, the two bridge parts the example needs added and nothing more, the monitor case tested where
+no monitor is, and the example honest about what an offscreen run can show. The runs of `9d3e2e5f`
+and `ff467a5f`, pushed at 11:33 and 12:07, are green on Linux, Windows and macOS. Found after the
+push: `ff467a5f`'s subject has its three marks run together with no space between, typed and not
+pasted, which `NormTests.N_7_2` fails on and the push has fixed in the history; the rule's list
+takes a commit of a working session's pushed before its fault was seen, with the fault as its
+reason, so the commit goes on `build/norm/7.2.txt` with that line and N 7.2 says so in both
+repositories, the subject pasted from COMMITS.md and not typed, which BUILDING.md says with the
+batch that lists it. Item 12 is measured as it asked: the seven inserts from nothing in the examples
+and the guides are each guarded by `Resource<T>()` and insert only where the world holds none, the
+tests insert none, so the rule breaks nothing; next the rule as the item has it, a reading of
+whether a type reflects a default, the throw naming `Resource<T>` where the world holds the
+resource, the field-by-field build kept where it holds none, a test of both, and the reflected
+resources without a default counted from an editor run before it is written. Then the owner's word
+on Feathers, the dev tools, the system information and the camera controllers (Decisions 11 and 12),
+and the remaining 44 as the table names them.
+
+Before it, `9d3e2e5f` and `062d3f18` came, and first the page: the owner pushed `7ffd96c6` at 11:06
+and its run is green on Linux, Windows and macOS with the bridge's tests built and passed, so
+Verdict 12 is settled; `68aa5dd5`'s run before it is red on all three by the same step, as foreseen.
+Then `062d3f18`, relationships, ABI 260: a relationship of a game's own is any type naming it, and
+the bridge declares eight pairs of Bevy's relationship and target components through a macro, as the
 state slots are declared, each type of the game's taking a slot the first time it is used, for the
 process, with running out thrown naming the types that hold them; `Relate`, `Unrelate`,
 `RelationOf`, `RelatedTo` and `RelationAncestors` on the world, the last lazy and endless on a cycle
@@ -47,39 +84,6 @@ relationships batch in progress stays out of the commit. The owner pushed `68aa5
 without the mend, so its run reads the bridge step as `c11c63d4`'s did and the mend's push settles
 Verdict 12 on its page. Next relationships, then monitor_info's bridge part with the example in
 part, item 12 with the next touch of `EcsWorld.Reflected.cs`.
-
-Before it, `68aa5dd5` came, image_node_resizing, and first the page: the owner pushed `c11c63d4` at
-10:02, which cancelled `b3ac2a0e`'s Windows and macOS jobs, and its run is red on all three systems
-by one thing, the bridge's tests do not build: `atlas_builder.rs`'s test module imports
-`bevy::render::render_resource` for the texture's extent, dimension and format, which the headless
-profile the workflow builds the bridge's tests in does not have, where the six other modules that
-import that path lie under `render` and build with that feature alone; the managed tests passed,
-1,059 on Linux, 916 on Windows and 909 on macOS (Verdict 12), and `68aa5dd5` carries the same file
-and reddens the same way when pushed, so the mend comes first in a commit of its own. The commit
-read, image_node_resizing: Bevy's outlines of interface nodes, which the bridge always built,
-`bevy_ui_debug` being on through `bevy_ui_render`'s defaults, read from cargo's feature tree with
-the line added and taken away, the lock and the manifest unchanged, so TODO.md's feature the bridge
-does not build was wrong and is gone with the row; the example draws Bevy's grid of an auto row and
-a stretch row resized by the held arrows within Bevy's limits, the text node opting out with options
-of its own, its capture matching lavapipe; `UiDebugOutlineTests` reads the edge of a node that draws
-nothing with the outlines on and off; no native change, ABI 259. Found on the way: `InsertResource`
-from nothing builds a type that reflects no default field by field, so the debug options came with a
-line width of zero and the outline off where Bevy starts them at one and on, and the example reaches
-the plugin's resource through `Resource<T>` instead, the remark saying so; the trap is item 12
-(Decision 26). The test went first into `UiTests.cs`, which reached 802 lines and failed N 1.3, and
-moved to a file of its own before the commit, `UiTests.cs` unchanged at 794, which item 2 watches;
-the file lies under the tests' `Assets` folder and moves to `Ui` with its next touch. The interface
-guide has its paragraph and block, EXAMPLES.md reads 335 written, 1 in part and 46 missing,
-TODO.md's group two. The suite: 1,405 passed and 2 skipped; cargo's 143 here, under a profile that
-has `bevy::render`, which the page's does not. Right, the feature read from the tree rather than
-believed, the plugin's resource reached rather than replaced, and the norm's failure mended before
-the commit. monitor_info opens a fullscreen window on every monitor and its point needs a real
-display, which an offscreen run has none of: the bridge's part, no first window, a run that does not
-end with its last window, monitor entities, a window fullscreen on a monitor named by its entity and
-a camera aimed at that window, is built with headless tests, and the example is written and listed
-in part, its capture and its live check the owner's run on their own screens, which waits on the
-owner's word (item 4); relationships begun meanwhile, relation slots as the state slots are. Next
-Verdict 12's mend, then relationships.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -120,10 +124,11 @@ from [SHARED.md](SHARED.md).
    `c11c63d4` at 10:02, whose run is red on all three systems, the bridge's tests not building
    (Verdict 12), the managed tests green, 1,059, 916 and 909. The run of `68aa5dd5`, pushed at 10:47
    before the mend, is red on all three by the same step, and the run of `7ffd96c6`, pushed at
-   11:06, is green on all three with the bridge's tests built, so Verdict 12 is settled. The
-   captures' comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`),
-   so the comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each
-   push's run is read by the reviewing session, and a failure it names comes first here.
+   11:06, is green on all three with the bridge's tests built, so Verdict 12 is settled. The runs of
+   `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The captures'
+   comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`), so the
+   comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each push's run
+   is read by the reviewing session, and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -132,7 +137,9 @@ from [SHARED.md](SHARED.md).
    its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
    list, split into ten files named for their structs, and those ten types off N 1.2's.
    `render/assets.rs` at 799 lines, `NormTests.cs` at 794 and `UiTests.cs` at 794 since `68aa5dd5`
-   split before their next addition; `app.rs` is at 709 since `c5b6d1d3`.
+   split before their next addition; `app.rs` is at 709 since `c5b6d1d3`. N 7.2's list takes
+   `ff467a5f`, the subject's marks run together and pushed before the suite read them, beside the
+   owner's `5a7f2c07`, and the list only gets shorter from there.
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
@@ -274,11 +281,11 @@ from [SHARED.md](SHARED.md).
    12) on the owner's word in the working session, and the four font examples stay missing (Decision
    13). monitor_info opens a fullscreen window on every monitor of the machine, so its bridge part,
    no first window, a run that does not end with its last window, monitor entities, a window
-   fullscreen on a monitor named by its entity and a camera aimed at that window, is built with
-   headless tests, and the example is written and listed in part until the owner runs it on their
-   own screens and gives its capture, which waits on the owner's word. `compressed_image_saver`
-   comes last here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less
-   memory after the kill of 2026-10-08.
+   fullscreen on a monitor named by its entity and a camera aimed at that window, is in at
+   `ff467a5f` with headless tests, and the example is written and listed in part until the owner
+   runs it on their own screens and gives its capture, which waits on the owner's word.
+   `compressed_image_saver` comes last here, for the scene packs' textures as KTX2 in BCn or ASTC
+   with their mipmaps, less memory after the kill of 2026-10-08.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from

@@ -422,6 +422,10 @@ The package's release notes are those same commits, the sentence of each a line 
 first, which `build/release-notes.sh` reads from the history and the pack job puts in the package.
 A version raised in `build/version.txt` starts them again.
 
+Each message's first line is the three marks with a space between each, copied from the `printf`
+line in [COMMITS.md](COMMITS.md) and not typed, since marks typed run together look no different in
+a log and fail N 7.2, which a commit already pushed cannot be amended to keep.
+
 ### The public surface
 
 `BevyCSharp/PublicApi.txt` lists every public type of the library and every member a game can

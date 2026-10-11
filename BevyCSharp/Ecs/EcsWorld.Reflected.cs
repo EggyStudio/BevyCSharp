@@ -376,7 +376,9 @@ public sealed unsafe partial class EcsWorld
     /// In this Bevy a resource is a component on an entity of its own, so once that entity is
     /// found, every call here that reads or writes a component reads or writes the resource, and
     /// <see cref="Resource{T}"/> gives its wrapper. A resource is found afresh each time rather
-    /// than kept, since a plugin may take one away and insert it again on another entity.
+    /// than kept, since a plugin may take one away and insert it again on another entity. One
+    /// taken off its entity is answered with <see langword="null"/> as well, as Bevy reads the
+    /// world as holding none, though Bevy keeps the entity for the next.
     /// </para>
     /// <para>
     /// A type that is a component and no resource is refused rather than answered with
@@ -418,22 +420,65 @@ public sealed unsafe partial class EcsWorld
     /// <param name="json">The whole resource as JSON, or <see langword="null"/> for its default.</param>
     /// <remarks>
     /// <para>
-    /// A resource the world lacks is inserted on a new entity, which Bevy makes the resource's own.
     /// One the world has is replaced where it is, since Bevy refuses a second entity holding the
-    /// same resource, and removes the newer with a warning.
+    /// same resource, and removes the newer with a warning. One taken off goes back on the entity
+    /// Bevy kept for it, and one the world never had goes on a new entity, which Bevy makes the
+    /// resource's own.
     /// </para>
     /// <para>
-    /// Its default is Bevy's where Bevy reflects one, and otherwise each field's own, which can
+    /// Its default is Bevy's where Bevy reflects one. A type that reflects none is built field by
+    /// field, each at its own default, a zero, an empty list or an enum's first variant, which can
     /// differ from what Bevy's code starts it at, as <c>GlobalUiDebugOptionsRef</c>'s line width of
-    /// zero does. A resource a plugin made is changed through <see cref="Resource{T}"/> instead,
-    /// which keeps the rest of it as it is.
+    /// zero does. Where the world has none of it, an insert from nothing gives that build.
+    /// Where a plugin already put one in, replacing it with that build is refused, since it would
+    /// undo what the plugin set, as <c>DefaultQueryFiltersRef</c> built so holds no filter and
+    /// disabled entities would reappear in every query. Change that one through
+    /// <see cref="Resource{T}"/>, which keeps the rest of it as it is, or give the whole of it as
+    /// JSON.
+    /// </para>
+    /// <para>
+    /// Of the 68 resources an editor build of Bevy 0.20 reflects, eight reflect no default, and
+    /// their plugins put seven of them in before the first frame: <c>DefaultQueryFilters</c>,
+    /// <c>LineGizmoEntities</c>, <c>AutoNavigationConfig</c>, <c>InputFocusVisible</c>,
+    /// <c>StaticTransformOptimizations</c>, <c>GlobalUiDebugOptions</c> and
+    /// <c>QueuedSelectAll</c>. The eighth, <c>TransformGizmoSettings</c>, starts absent and is
+    /// built field by field when inserted from nothing.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">As <see cref="InsertReflected"/>, or the type is no resource.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// No JSON was given for a resource the world already has, of a type that reflects no default.
+    /// </exception>
     public T InsertResource<T>(string? json = null) where T : struct, IReflectedComponent<T>
     {
-        var entity = ResourceEntity(T.TypePath) ?? Spawn();
-        return Insert<T>(entity, json);
+        if (json is null && ResourceEntity(T.TypePath) is not null && !HasDefault(T.TypePath))
+            throw new InvalidOperationException(
+                $"{T.TypePath} reflects no default, so inserting it from nothing would replace the world's with each field at " +
+                $"its own default, a zero or an empty list. Change the world's through Resource<{typeof(T).Name}>(), or give the whole of it as JSON.");
+
+        return Insert<T>(ResourcePlace(T.TypePath) ?? Spawn(), json);
+    }
+
+    /// <summary>
+    /// The entity Bevy keeps for a resource, whether it holds the resource now or had it taken off,
+    /// or <see langword="null"/> where the world never had one.
+    /// </summary>
+    private static Entity? ResourcePlace(string typePath)
+    {
+        ulong bits;
+        var status = Native.bcs_reflect_resource_place(typePath, &bits);
+        if (status == NativeStatus.NotPresent) return null;
+
+        ReflectedCheck(status, $"Finding where the resource {typePath} goes");
+        return new Entity(bits);
+    }
+
+    /// <summary>Whether a reflected type has a default of Bevy's to insert from nothing.</summary>
+    private static bool HasDefault(string typePath)
+    {
+        var answer = Native.bcs_reflect_has_default(typePath);
+        ReflectedCheck(answer, $"Reading whether {typePath} has a default");
+        return answer == 1;
     }
 
     /// <summary>Describes every reflected component and the types its fields reach, as JSON.</summary>

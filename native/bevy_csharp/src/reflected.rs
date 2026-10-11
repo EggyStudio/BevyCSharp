@@ -187,17 +187,6 @@ fn default_of(
         return Ok(Box::new(0.0f32..0.0));
     }
 
-    // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
-    // holds nothing, or where every variant holds something, as a gradient's, its first made from
-    // its values' defaults, which a caller choosing a variant then writes over.
-    if let Some(TypeInfo::Enum(info)) = registry.get_type_info(type_id)
-        && let Some(chosen) = info.iter().find(|variant| matches!(variant, VariantInfo::Unit(_))).or_else(|| info.iter().next())
-    {
-        let mut made = DynamicEnum::new(chosen.name(), values_of(registry, chosen)?);
-        made.set_represented_type(Some(registry.get_type_info(type_id).unwrap()));
-        return Ok(Box::new(made));
-    }
-
     if let Some(built) = registry.get_type_info(type_id).and_then(|info| from_fields(registry, info)) {
         return built;
     }
@@ -231,7 +220,8 @@ fn values_of(registry: &TypeRegistry, chosen: &VariantInfo) -> Result<DynamicVar
 
 /// A struct with no default of its own made from each field's default, a handle's included, for
 /// the caller to write over, as a component holding a handle is inserted and a sprite's slicer is
-/// made for its variant, or nothing for a type that is no struct.
+/// made for its variant, or an enum with none chosen at a variant, or nothing for a type that is
+/// neither.
 fn from_fields(registry: &TypeRegistry, info: &'static TypeInfo) -> Option<Result<Box<dyn PartialReflect>, i32>> {
     let built = match info {
         TypeInfo::Struct(named) => named
@@ -255,6 +245,22 @@ fn from_fields(registry: &TypeRegistry, info: &'static TypeInfo) -> Option<Resul
                 made.set_represented_type(Some(info));
                 Box::new(made) as Box<dyn PartialReflect>
             }),
+        // An enum with no default of its own, as a cubemap's layout is, takes its first variant that
+        // holds nothing, or where every variant holds something, as a gradient's, its first made
+        // from its values' defaults, which a caller choosing a variant then writes over. One that is
+        // a component or a resource itself, as Bevy's switch for static transforms is, is inserted
+        // from nothing the same way.
+        TypeInfo::Enum(variants) => {
+            let chosen = variants
+                .iter()
+                .find(|variant| matches!(variant, VariantInfo::Unit(_)))
+                .or_else(|| variants.iter().next())?;
+            values_of(registry, chosen).map(|values| {
+                let mut made = DynamicEnum::new(chosen.name(), values);
+                made.set_represented_type(Some(info));
+                Box::new(made) as Box<dyn PartialReflect>
+            })
+        }
         _ => return None,
     };
 
