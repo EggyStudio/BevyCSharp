@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**337 written, 2 written in part, 0 can be written, 43 missing and 56 do not apply.** Of the 382 that apply, 339 can be written with what is bridged, 2 of them leaving something out.
+**338 written, 2 written in part, 0 can be written, 42 missing and 56 do not apply.** Of the 382 that apply, 340 can be written with what is bridged, 2 of them leaving something out.
 
-**158 of the 166 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**159 of the 167 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -40,10 +40,10 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
 | [UI (User Interface)](#ui-user-interface) | 55 | 0 | 0 | 10 | 0 | 21 of 23 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
-| [Window](#window) | 9 | 1 | 0 | 1 | 0 | 3 of 3 |
+| [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **337** | **2** | **0** | **43** | **56** | **158 of 166** |
+| **All** | **338** | **2** | **0** | **42** | **56** | **159 of 167** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -607,7 +607,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`clear_color`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/clear_color.rs) | Creates a solid color window | [written](../BevyCSharp.Examples/window/clear_color.cs) |
 | [`custom_cursor_image`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/custom_cursor_image.rs) | Demonstrates creating an animated custom cursor from an image | [written](../BevyCSharp.Examples/window/custom_cursor_image.cs), the sheet's atlas and its hotspot set through Window.SetCursorAtlas, and the frame, the flips and the quarter written through Bevy's reflected CursorIcon |
-| [`low_power`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/low_power.rs) | Demonstrates settings to reduce power use for bevy applications | missing, Bevy's winit update modes, continuous and reactive, which the bridge leaves at Bevy's default |
+| [`low_power`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/low_power.rs) | Demonstrates settings to reduce power use for bevy applications | [written](../BevyCSharp.Examples/window/low_power.cs), the modes set through Window.SetUpdateSettings, and a redraw asked for and the loop woken through Window.RequestRedraw and Window.WakeUp |
 | [`monitor_info`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/monitor_info.rs) | Displays information about available monitors (displays). | [written in part](../BevyCSharp.Examples/window/monitor_info.cs), a run on a display, whose monitors its windows fill, where an offscreen run reports none and opens nothing |
 | [`multiple_windows`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/multiple_windows.rs) | Demonstrates creating multiple windows, and rendering to them | [written](../BevyCSharp.Examples/window/multiple_windows.cs) |
 | [`scale_factor_override`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/scale_factor_override.rs) | Illustrates how to customize the default window settings | [written](../BevyCSharp.Examples/window/scale_factor_override.cs), through the resolution of Bevy's reflected Window, its window 512 by 288 rather than Bevy's 500 by 300, so its picture is sixteen by nine |

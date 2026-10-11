@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 263;
+    internal const int ExpectedAbiVersion = 264;
 
     static Native() => NativeLoader.Initialize();
 
@@ -403,6 +403,23 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_cursor_atlas(int layout, uint index, uint x, uint y);
+
+    /// <summary>Sets how often the app updates with its window focused and without.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_update_modes(
+        uint focusedContinuous, double focusedWait, uint focusedReacts,
+        uint unfocusedContinuous, double unfocusedWait, uint unfocusedReacts);
+
+    /// <summary>Asks for one more update, as Bevy's <c>RequestRedraw</c>.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_request_redraw();
+
+    /// <summary>Wakes winit's loop for one more update.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_wake_up();
 
     /// <summary>Makes a window a game spawned fill a monitor named by its entity.</summary>
     [LibraryImport(Library)]

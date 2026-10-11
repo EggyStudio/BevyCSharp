@@ -33,7 +33,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Audio", "audio.md", ["Audio"]),
     ("Physics", "physics.md", ["Physics.PhysicsWorld", "Physics.PhysicsPlugin", "Physics.PhysicsShape", "Physics.Joint", "Physics.Colliders"]),
     ("Input", "input.md", ["Input", "LogicalKey", "Gamepad", "SyntheticInput", "KeyTable"]),
-    ("The window", "window.md", ["Window"]),
+    ("The window", "window.md", ["Window", "UpdateSettings", "UpdateMode"]),
     ("Math", "", ["Vec3", "Quat", "Color", "Transform", "GlobalTransform", "EaseFunction"]),
     ("The tools", "tools.md", ["ConsoleCommands", "Diagnostics", "ConsoleHost", "ConsoleHost+Scope", "ConsoleLog", "CliClient", "CliJson", "CliPlugin", "CliSessionFile"]),
 };

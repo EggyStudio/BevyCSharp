@@ -11482,6 +11482,36 @@ enum Bevy.UiWrap : int
 sealed class Bevy.UnitAttribute : Attribute
   UnitAttribute(string suffix)
   string Suffix { get; }
+readonly struct Bevy.UpdateMode : IEquatable<UpdateMode>
+  TimeSpan Wait { get; init; }
+  bool Equals(UpdateMode other)
+  bool IsContinuous { get; init; }
+  bool ReactToDeviceEvents { get; init; }
+  bool ReactToUserEvents { get; init; }
+  bool ReactToWindowEvents { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static UpdateMode Continuous { get; }
+  static UpdateMode Reactive(TimeSpan wait)
+  static UpdateMode ReactiveLowPower(TimeSpan wait)
+  static bool op_Equality(UpdateMode left, UpdateMode right)
+  static bool op_Inequality(UpdateMode left, UpdateMode right)
+readonly struct Bevy.UpdateSettings : IEquatable<UpdateSettings>
+  UpdateMode Focused { get; init; }
+  UpdateMode Unfocused { get; init; }
+  UpdateSettings(UpdateMode Focused, UpdateMode Unfocused)
+  bool Equals(UpdateSettings other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static UpdateSettings Continuous { get; }
+  static UpdateSettings DesktopApp { get; }
+  static UpdateSettings Game { get; }
+  static UpdateSettings Mobile { get; }
+  static bool op_Equality(UpdateSettings left, UpdateSettings right)
+  static bool op_Inequality(UpdateSettings left, UpdateSettings right)
+  void Deconstruct(out UpdateMode Focused, out UpdateMode Unfocused)
 static class Bevy.UserData
   const string Prefix = "user://"
   static string Name { get; set; }
@@ -11691,6 +11721,7 @@ static class Bevy.Window
   static int MonitorCount()
   static string MonitorName(int index)
   static void Minimize()
+  static void RequestRedraw()
   static void SetCursor(CursorGrab grab, bool visible)
   static void SetCursorAtlas(AssetHandle? layout, uint index = 0u, uint hotspotX = 0u, uint hotspotY = 0u)
   static void SetCursorImage(AssetHandle image, uint hotspotX = 0u, uint hotspotY = 0u)
@@ -11703,9 +11734,11 @@ static class Bevy.Window
   static void SetSize(uint width, uint height)
   static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false)
   static void SetTitle(string title)
+  static void SetUpdateSettings(UpdateSettings settings)
   static void SetVideoMode(int monitor, int mode)
   static void StartDragMove()
   static void StartDragResize(WindowEdge edge)
+  static void WakeUp()
 readonly struct Bevy.WindowCloseRequested : IEquatable<WindowCloseRequested>
   bool Equals(WindowCloseRequested other)
   override bool Equals(object obj)

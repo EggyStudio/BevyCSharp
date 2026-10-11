@@ -219,6 +219,37 @@ public sealed class SpawnedWindowTests : IDisposable
         Assert.Equal("[32,16]", hotspot);
     }
 
+    /// <summary>
+    /// The update settings, a redraw asked for and the loop woken are taken in a run with no
+    /// window, which keeps updating every frame as before, and a reactive mode waiting less than
+    /// nothing is refused before it reaches the bridge.
+    /// </summary>
+    [SkippableFact]
+    public void UpdateSettingsChangeNothingWithoutAWindowAndANegativeWaitIsRefused()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 3);
+        var updates = 0;
+        ArgumentOutOfRangeException? refused = null;
+
+        harness.On(Stage.Update, _ =>
+        {
+            if (updates++ > 0) return;
+
+            Window.SetUpdateSettings(UpdateSettings.DesktopApp);
+            Window.RequestRedraw();
+            Window.WakeUp();
+            refused = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                Window.SetUpdateSettings(new UpdateSettings(UpdateMode.Reactive(TimeSpan.FromSeconds(-1)), UpdateMode.Continuous)));
+        });
+
+        harness.Run();
+
+        Assert.Equal(3, updates);
+        Assert.Contains("Focused.Wait", refused!.Message);
+    }
+
     // Whether every pixel of an eight-bit PNG is zero, read from its image data inflated, each row
     // after the byte that says how it was filtered. A filter writes each byte as its difference from
     // a guess made from the bytes before it, and from zeros alone every filter guesses zero, so the

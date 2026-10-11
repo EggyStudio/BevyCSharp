@@ -345,6 +345,67 @@ public static unsafe class Window
     public static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0) =>
         Native.Check(Native.bcs_window_set_cursor_atlas(layout?.Key ?? -1, index, hotspotX, hotspotY), "Window.SetCursorAtlas");
 
+    /// <summary>
+    /// Sets how often the app updates while its window has focus and while it does not, as
+    /// inserting Bevy's <c>WinitSettings</c> does. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// An app updates continuously while focused unless it sets otherwise, as a game is played.
+    /// A tool updates when something happens, with <see cref="UpdateSettings.DesktopApp"/>, and
+    /// asks for an update the events would not give with <see cref="RequestRedraw"/> from inside
+    /// or <see cref="WakeUp"/>, as Bevy's low_power shows each.
+    /// </para>
+    /// <para>
+    /// Everything that answers on an update waits for one, so a request from <c>./bcs</c> to an app
+    /// in a reactive mode is answered once the app next updates, after its wait at the longest.
+    /// An offscreen run has no window and runs its own loop, so the settings are kept and change
+    /// nothing there.
+    /// </para>
+    /// </remarks>
+    /// <param name="settings">The two modes, focused and not, or one of Bevy's presets.</param>
+    /// <exception cref="ArgumentOutOfRangeException">A reactive mode waits less than nothing.</exception>
+    /// <exception cref="BevyNativeException">This build has no windows.</exception>
+    public static void SetUpdateSettings(UpdateSettings settings)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(settings.Focused.Wait, TimeSpan.Zero, "settings.Focused.Wait");
+        ArgumentOutOfRangeException.ThrowIfLessThan(settings.Unfocused.Wait, TimeSpan.Zero, "settings.Unfocused.Wait");
+
+        Native.Check(
+            Native.bcs_window_set_update_modes(
+                settings.Focused.IsContinuous ? 1u : 0u, settings.Focused.Wait.TotalSeconds, Reacts(settings.Focused),
+                settings.Unfocused.IsContinuous ? 1u : 0u, settings.Unfocused.Wait.TotalSeconds, Reacts(settings.Unfocused)),
+            "Window.SetUpdateSettings");
+
+        // The kinds of event a reactive mode wakes for, a bit a kind, as the bridge reads them.
+        static uint Reacts(UpdateMode mode) =>
+            (mode.ReactToDeviceEvents ? 1u : 0u) | (mode.ReactToUserEvents ? 2u : 0u) | (mode.ReactToWindowEvents ? 4u : 0u);
+    }
+
+    /// <summary>
+    /// Asks for one more update, as Bevy's <c>RequestRedraw</c> does, for an app in a reactive mode
+    /// with something still moving that no event would wake it for. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// Asked every update, it keeps a reactive app updating as a continuous one does, so an
+    /// animation plays out, and stopping lets it rest again. A run with no window never waits, so
+    /// this does nothing there.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no windows.</exception>
+    public static void RequestRedraw() => Native.Check(Native.bcs_window_request_redraw(), "Window.RequestRedraw");
+
+    /// <summary>
+    /// Wakes winit's loop for one more update, as Bevy's <c>WinitUserEvent::WakeUp</c> does. Only
+    /// valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The event an app's own work sends where it finishes outside the updates, and which wakes a
+    /// reactive mode reacting to the app's own events. A run with no window never waits, so this
+    /// does nothing there.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no windows.</exception>
+    public static void WakeUp() => Native.Check(Native.bcs_window_wake_up(), "Window.WakeUp");
+
     /// <summary>Minimizes the window to the taskbar or dock.</summary>
     /// <remarks>
     /// A window made without the platform's title bar (<see cref="SetStyle"/> with

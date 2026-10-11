@@ -1508,6 +1508,9 @@ static void SetStyle(bool decorations = true, bool resizable = true, bool always
 static void SetCursorShape(CursorShape shape);                  // Sets the shape of the pointer while it is over the window
 static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over the window to an image, its hotspot, the pixel that points, given in pixels across and down from the image's top left corner
 static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0);  // Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the frame's top left corner, or shows the whole image again with no layout
+static void SetUpdateSettings(UpdateSettings settings);         // Sets how often the app updates while its window has focus and while it does not, as inserting Bevy's WinitSettings does
+static void RequestRedraw();                                    // Asks for one more update, as Bevy's RequestRedraw does, for an app in a reactive mode with something still moving that no event would wake it for
+static void WakeUp();                                           // Wakes winit's loop for one more update, as Bevy's WinitUserEvent::WakeUp does
 static void Minimize();                                         // Minimizes the window to the taskbar or dock
 static void SetMaximized(bool maximized);                       // Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had
 static WindowPlace Place();                                     // Where the window is, how large, and whether it is maximized
@@ -1520,6 +1523,13 @@ static string MonitorName(int index);                           // The name the 
 static VideoMode[] MonitorModes(int index);                     // Every video mode a monitor can be driven at, by an index below MonitorCount
 static void SetVideoMode(int monitor, int mode);                // Takes the screen over in exclusive fullscreen at one of a monitor's own video modes
 static void SetCursor(CursorGrab grab, bool visible);           // Sets whether the cursor is confined or hidden
+```
+
+### `UpdateMode`
+
+```csharp
+static UpdateMode Reactive(TimeSpan wait);                      // Updates after wait, or sooner for any event
+static UpdateMode ReactiveLowPower(TimeSpan wait);              // Updates after wait, or sooner for the window's events and the app's own, but not for the devices' own, as a mouse moved where the window is not
 ```
 
 ## Math

@@ -184,6 +184,25 @@ if (icon.Value is CursorIcon.Custom { Value: CustomCursor.Image image })
     icon.Value = new CursorIcon.Custom(image with { TextureAtlas = new OptionTextureAtlas.Some(1), FlipX = true });
 ```
 
+An app updates as fast as it can while its window has focus, as a game is played. A tool has
+nothing to show until something happens, so `Window.SetUpdateSettings(UpdateSettings.DesktopApp)`
+updates it only for an event, a key pressed or the pointer moved over it, or once its wait has
+passed, which saves the machine's power. Something still moving that no event would wake it for, as
+an animation playing out, asks for each next update with `Window.RequestRedraw`, and work finishing
+outside the updates wakes the loop with `Window.WakeUp`, as Bevy's `low_power` shows each:
+
+```csharp
+Window.SetUpdateSettings(UpdateSettings.DesktopApp);     // update only when something happens
+Window.SetUpdateSettings(new UpdateSettings(
+    UpdateMode.Continuous,                                // as fast as it can while focused
+    UpdateMode.ReactiveLowPower(TimeSpan.FromSeconds(1))));  // once a second at most without focus
+Window.RequestRedraw();                                   // one more update, for an animation still playing
+```
+
+A request from `./bcs` is answered on the app's next update too, so an app resting in a reactive
+mode answers once its wait has passed at the longest. An offscreen run has no window and runs its
+own loop, so it updates every frame whatever the settings say.
+
 On GNOME under Wayland, winit draws a title bar of its own that imitates an older GNOME rather than
 the libadwaita one the desktop's other windows have, because GNOME leaves drawing it to the app.
 `Config.DesktopTitleBar` opens the window through XWayland there instead, where GNOME draws its

@@ -420,6 +420,7 @@ internal static class Catalog
         // Window
         new("clear_color", ClearColor.Build),
         new("custom_cursor_image", CustomCursorImageExample.Build),
+        new("low_power", LowPower.Build, LowPower.Configure),
         new("monitor_info", MonitorInfoExample.Build, MonitorInfoExample.Configure),
         new("multi_window_text", MultiWindowText.Build, MultiWindowText.Configure),
         new("multiple_windows", MultipleWindows.Build),

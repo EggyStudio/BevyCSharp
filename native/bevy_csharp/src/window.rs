@@ -19,6 +19,7 @@ use crate::state::with_world;
 
 pub mod cursor;
 pub mod monitors;
+pub mod updates;
 #[cfg(feature = "render")]
 mod alpha;
 
