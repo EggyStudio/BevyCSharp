@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d17f0d97`. One commit, item 4's comparison of the captures, as proposed and taken on
+Reviewed up to `30e0e528`. Seven commits, each small and right. `f64b089b` brings twelve examples to
+B 4, 156 of the 161 whose Bevy example keeps state in a component of its own (Decision 5); of the
+five left, three follow 0.19.1 and come with Feathers, whose checkboxes and radio are the components
+counted, one keeps its instances in the camera's draw's buffer and no static field, and one keeps
+its buttons' state in another example's behaviors, which the table's test, reading one file, does
+not see; a click on a text field focuses nothing offscreen, Bevy's focusing asking for a primary
+window an offscreen run lacks, the same gap as tab_navigation's Tab under item 4. `1ee315b6`: a
+material takes alpha to coverage, Bevy's sixth alpha mode, which covers a share of a pixel's samples
+by its alpha among the opaque surfaces and is Mask at half alpha with one sample, drawn and
+round-tripped in tests, transparency_3d drawn whole, ABI 244. `d9d6a0e9`: a touch the platform
+cancels is reported once with its own phase, as Bevy reports it, a Rust test running Bevy's own
+touch system frame by frame. `27482870`: a range's reflection registration moves alone into
+`reflected/type_data.rs`, `app.rs` at 788 lines since. `6c6b5593`: Bevy's static transform
+optimizations, which Bevy reflects without their resource's data, are registered with it and as a
+component's, since a resource here is a component on an entity of its own, so bevymark and
+many_foxes turn them off as Bevy's do. `549c57c0`: `Render.CompressedFormats` says which compressed
+texture formats the device decodes, Bevy's flags bit for bit, so skybox cycles through the copies
+the device takes, with a test, ABI 245. `30e0e528`, Verdict 10: the offscreen run's wait for the
+frame before takes a limit of sixty seconds, long beside lavapipe's heaviest frames and short beside
+a capture's ten minutes, past which the run says which frame the GPU did not finish and exits 87
+beside the memory cap's 86, with a native test; the wait's object was read, wgpu signaling a
+submission's fence even when nothing was submitted and the mark submitted after the frame's work by
+the one system, so a fence never signaled is a GPU that never finished the frame, no frame skipped
+and no request held; and irradiance_volumes was captured a hundred times on the laptop's GPU, each
+matching its picture and none hanging, so the hang is shown not to repeat. Verdict 10 is settled.
+EXAMPLES.md reads 315 written, 14 in part and 53 missing. Right, each gap closed as Bevy has it and
+the wait's object read rather than the limit alone. `NormTests.cs` at 794 and `app.rs` at 788 split
+with their next addition. Next the examples written in part that want no crate.
+
+Before it, one commit came to be read, item 4's comparison of the captures, as proposed and taken on
 its terms. Each capture is taken in a frame counted from the app's first, `shot <path> [frame]`
 holding the request until then, on a clock of a sixtieth a frame, and an app begun on a set clock
 compiles each pipeline in the frame that asks for it, so a frame is the same moment of the scene,
@@ -35,30 +64,6 @@ skipped, the three failing the tree's unbuilt skybox batch's and not this commit
 changes with the retake, which the owner is told. Next, as the coder has them: B 4's twelve
 examples, alpha to coverage, canceled touches, the static transform optimizations reflected, and the
 skybox's compressed formats.
-
-Before it, two commits came to be read, items 9 and 10, the last of the list that wait on no word.
-Item 9 at `8f02d976`: N 6.6's test reads every shell script of the checkout, 26 and the `bcs`
-launcher, not only what the Windows and macOS jobs run, still holding the jobs' scripts to be among
-them and the launcher and Courtyard's play script to be found, with the build's outputs and copies
-left out; three bash-4 forms join the seven, `declare -A` and its kin, `|&` and `&>>`, each with a
-found and a not-found case, and none is found in any script, the `sed -i` of the templates' pack
-script already gone at `c67c7981`; 22 of 22. Item 10 at `d328fdc3`: `BevyCSharp.CodeFixes`, a
-netstandard2.0 project on the generator's compiler version, ported from 3DEngine's, fixes the five
-diagnostics with one clear mend, a behavior made partial, a stage method given its context first and
-up to two components kept, one stage kept of several, a command made static or internal, and names
-in its remarks the seven that have none, what was meant being the program's to say; it is built
-before the package through a project reference that references no assembly and packed into the
-analyzers' slot beside the generator, which N 6.4 expects and a fresh pack holds, every example
-building on it with no warning; N 2.8 reads its project, AGENTS.md has its row, the solution and the
-behaviors guide name it, and six tests apply each fix through a workspace as an editor does and hold
-the generator to reporting nothing after; 90 of 90. Right, the fixes held to the mends that are
-clear and the rest named, the scripts' test widened to the checkout rather than the jobs' list.
-`NormTests.cs` stands at 794. With the list's last free items done, what comes after the comparison
-commit is the examples written in part that want no crate and the groups not yet at B 4, 144 of 160
-(Decision 5), and the gaps wait on the owner's words. Then `28e2d97b`: `parallel_query`'s window
-size is read by a system of the example's own, since a static stage method on its behavior ran in
-every example and failed in one with no window, which is the trap a static stage method is in a
-project of many examples; right, and the remark says why.
 
 Before it, two commits came to be read, item 7 at `7a2a99ac`: `EcsWorld.Removed<T>()` and
 `RemovedById` list the entities that lost a component, by a removal or a despawn, since the running
@@ -342,18 +347,6 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
-10. **The offscreen run's wait for the frame before it has no limit, and `irradiance_volumes` hung
-    in it once on the laptop's GPU at frame 90 while its capture was taken.** Taken again at once it
-    passed, so the cause is a race the wait meets seldom, and a wait with no limit turns it into a
-    hang, which in the examples job would stand until the step's timeout with the example unnamed.
-    Two things: the wait takes a limit, some seconds of the machine's clock, past which the run ends
-    with a line naming the frame it waited for and what it waited on, so a page names the example
-    and the frame; and the frame before's wait is read for what it waits on and what can leave that
-    undone, a fence never signaled, a frame skipped by the swapchain's offscreen stand-in, or a
-    request held past the frame it named, and the race mended where it is found. Settled when the
-    limit is in with its test and the cause is named or shown not to repeat in a hundred captures of
-    the example.
-
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -494,23 +487,3 @@ from [SHARED.md](SHARED.md).
     dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
 
 ## Replies
-
-B 4: twelve brought over, 156 of 161, each driven offscreen as before. 2d_shapes, wireframe_2d and
-order_independent_transparency follow 0.19.1, whose examples keep nothing in a component of their
-own, the components the table counts being 0.20's Feathers checkboxes and radio, so they come with
-Feathers (Decision 11); custom_shader_instancing keeps nothing in a static field, its instances being
-the camera's draw's buffer; directional_navigation_overrides keeps its buttons' state in
-directional_navigation's behaviors, which the table's test, reading the one file, does not see. A
-click on a text field focuses nothing offscreen, Bevy's `click_to_focus` asking for the primary
-window an offscreen run has none of, the same gap as tab_navigation's Tab under item 4.
-
-Verdict 10: the offscreen run's wait for the frame before it takes a limit of sixty seconds, long
-beside lavapipe's heaviest frames of some seconds and short beside a capture's ten minutes, past
-which the run logs that the GPU has not finished frame N, as Bevy counts it, and exits with code 87,
-beside the memory cap's 86; a native test holds the line to naming the frame, the limit and the
-code. What the wait waits on was read: wgpu signals a submission's fence even when nothing was
-submitted, and the mark is submitted in the frame's Cleanup after its work, so a fence never
-signaled is a GPU that never finished the frame's work, with no frame skipped and no request held,
-since an offscreen run has no swapchain and the mark is taken and waited on by the one system.
-irradiance_volumes was then captured a hundred times on the laptop's GPU, each matching its
-checked-in picture and none hanging, so the hang is shown not to repeat.

@@ -817,6 +817,7 @@ static void SetShadowCascades(Entity light, int cascades = 0, float minimum = 0f
 static void SetLightCookie(Entity light, AssetHandle cookie);   // Shapes a spot light's beam with a picture, the way a gobo shapes a stage light
 static void SetSoftShadows(Entity light, float size);           // Softens a light's shadow the farther it falls from what casts it, as a light size world units across does
 static void SetShadowFiltering(Entity camera, ShadowFiltering filtering);  // Sets how a camera filters the shadow maps it reads
+static void SetCameraFlags(Entity camera, CameraFlags flags);   // Says how a camera draws beyond what it looks at
 static void SetPostProcessing(Entity camera, PostSettings settings);  // Sets what a camera does to the picture after the scene has been drawn
 static void SetEffects(Entity camera, EffectSettings settings);  // Sets the lens a camera draws through
 static void SetAtmosphere(Entity camera, AtmosphereSettings settings);  // Draws the sky the air scatters, seen from a camera

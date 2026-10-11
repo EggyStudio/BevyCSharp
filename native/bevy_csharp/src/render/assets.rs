@@ -586,9 +586,10 @@ pub unsafe extern "C" fn bcs_render_asset_path(
 
 /// Says how an entity's mesh is treated beyond what it looks like.
 ///
-/// A bit each: `1` is never culled for being out of view, `2` casts no shadow, `4` receives none.
-/// A bit left clear takes that behavior off again, so the flags are the whole answer rather than
-/// additions to it.
+/// A bit each: `1` is never culled for being out of view, `2` casts no shadow, `4` receives none,
+/// `8` is drawn alone rather than batched with the meshes it shares a mesh and a material with, and
+/// `16` is left out of the CPU's culling for the GPU's alone. A bit left clear takes that behavior
+/// off again, so the flags are the whole answer rather than additions to it.
 ///
 /// A mesh drawn somewhere its own bounds do not say needs to escape culling, which covers any mesh
 /// a vertex shader moves far from where it was built, and one whose vertices a buffer places. Bevy
@@ -605,8 +606,9 @@ pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::camera::visibility::NoFrustumCulling;
+            use bevy::camera::visibility::{NoCpuCulling, NoFrustumCulling};
             use bevy::light::{NotShadowCaster, NotShadowReceiver};
+            use bevy::render::batching::NoAutomaticBatching;
 
             with_world(|world| {
                 let Ok(mut entity) = world.get_entity_mut(bevy::ecs::entity::Entity::from_bits(entity))
@@ -630,6 +632,18 @@ pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
                     entity.insert(NotShadowReceiver);
                 } else {
                     entity.remove::<NotShadowReceiver>();
+                }
+
+                if flags & 8 != 0 {
+                    entity.insert(NoAutomaticBatching);
+                } else {
+                    entity.remove::<NoAutomaticBatching>();
+                }
+
+                if flags & 16 != 0 {
+                    entity.insert(NoCpuCulling);
+                } else {
+                    entity.remove::<NoCpuCulling>();
                 }
 
                 status::OK

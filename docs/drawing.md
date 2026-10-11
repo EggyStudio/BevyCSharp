@@ -42,7 +42,10 @@ is not. `Topology` also takes lines, points and strips. A mesh whose vertices a 
 from where they were built, such as ten thousand squares a vertex shader places from a buffer, needs
 `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, because Bevy culls by the bounds
 it worked out from the mesh and those say nothing about where the shader put it. The same flags turn
-a mesh's shadow casting and receiving off.
+a mesh's shadow casting and receiving off, draw it alone rather than batched with the meshes it
+shares a mesh and a material with, and leave it to the GPU's culling alone, and
+`Render.SetCameraFlags` turns a camera's indirect drawing and CPU culling off, the paths Bevy draws
+a crowd quickly by, which a stress test turns off to measure what they save.
 
 ### Meshlets
 

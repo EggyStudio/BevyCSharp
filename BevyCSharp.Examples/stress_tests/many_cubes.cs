@@ -10,13 +10,16 @@ namespace BevyCSharp.Examples.StressTests;
 // turning camera, on the faces of a cube with --layout cube, or packed tight with --layout dense,
 // to measure culling, batching and drawing. --mesh-count and --material-texture-count draw them
 // from more meshes and textures, --vary-material-data-per-instance gives each a material of its
-// own, --no-frustum-culling draws them all, --shadows has the light cast shadows, --rotate-cubes
-// and --animate-materials change them every frame, --motion-blur blurs them, and --benchmark
-// turns the camera by the same step each frame.
+// own, --no-frustum-culling draws all of the sphere's, --shadows has the light cast shadows,
+// --rotate-cubes and --animate-materials change them every frame, --motion-blur blurs them, and
+// --benchmark turns the camera by the same step each frame.
 //
-// Bevy's --no-automatic-batching, --no-indirect-drawing and --no-cpu-culling put on components
-// Bevy does not reflect, which the bridge cannot reach, and --mesh-compression compresses each mesh
-// through a call of Bevy's the bridge has no counterpart of, so all four are left out.
+// --no-automatic-batching draws each cube alone, --no-indirect-drawing has the camera draw with a
+// call a batch, and --no-cpu-culling leaves the culling to the GPU, on the sphere's cubes and
+// camera and, for the culling, the other layouts' cubes, as Bevy's put them.
+//
+// Bevy's --mesh-compression compresses each mesh through a call of Bevy's the bridge has no
+// counterpart of, so it is left out.
 internal static class ManyCubes
 {
     private const int Width = 200, Height = 200;
@@ -24,6 +27,7 @@ internal static class ManyCubes
     // Bevy's Args, read from the command line.
     private static string _layout = "sphere";
     private static bool _benchmark, _varyMaterialDataPerInstance, _noFrustumCulling, _shadows, _rotateCubes, _animateMaterials, _motionBlur;
+    private static bool _noAutomaticBatching, _noIndirectDrawing, _noCpuCulling;
     private static int _materialTextureCount, _meshCount = 1, _instanceCount = 1_600_000;
 
     private static Entity _camera;
@@ -48,6 +52,8 @@ internal static class ManyCubes
         (_benchmark, _varyMaterialDataPerInstance, _noFrustumCulling, _shadows, _rotateCubes, _animateMaterials, _motionBlur) = (
             arguments.Contains("--benchmark"), arguments.Contains("--vary-material-data-per-instance"), arguments.Contains("--no-frustum-culling"),
             arguments.Contains("--shadows"), arguments.Contains("--rotate-cubes"), arguments.Contains("--animate-materials"), arguments.Contains("--motion-blur"));
+        (_noAutomaticBatching, _noIndirectDrawing, _noCpuCulling) = (
+            arguments.Contains("--no-automatic-batching"), arguments.Contains("--no-indirect-drawing"), arguments.Contains("--no-cpu-culling"));
         _materialTextureCount = int.TryParse(Option(arguments, "--material-texture-count"), out var textures) ? textures : 0;
         _meshCount = int.TryParse(Option(arguments, "--mesh-count"), out var meshes) ? meshes : 1;
         _instanceCount = int.TryParse(Option(arguments, "--instance-count"), out var instances) ? instances : 1_600_000;
@@ -95,10 +101,10 @@ internal static class ManyCubes
                     for (var y = 0; y < up; y++)
                     {
                         if (x % 10 == 0 || y % 10 == 0) continue;
-                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, y * Scale, 0f));
-                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, up * Scale, y * Scale));
-                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, 0f, y * Scale));
-                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(0f, x * Scale, y * Scale));
+                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, y * Scale, 0f), Culling);
+                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, up * Scale, y * Scale), Culling);
+                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Scale, 0f, y * Scale), Culling);
+                        Cube(ecs, PickMesh(), PickMaterial(), Transform.At(0f, x * Scale, y * Scale), Culling);
                     }
                 }
 
@@ -115,7 +121,7 @@ internal static class ManyCubes
                 for (var i = 0; i < _instanceCount; i++)
                 {
                     var (x, y, z) = (i % size, i / size % size, i / (size * size));
-                    Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Gap, y * Gap, z * Gap));
+                    Cube(ecs, PickMesh(), PickMaterial(), Transform.At(x * Gap, y * Gap, z * Gap), Culling);
                 }
 
                 _camera = Camera(ecs, Transform.LookingAt(new Vec3(100f, 90f, 100f), new Vec3(0f, -10f, 0f), Vec3.UnitY));
@@ -136,10 +142,12 @@ internal static class ManyCubes
                     var at = new Vec3((float)(Math.Cos(theta) * Math.Sin(phi) * radius), (float)(Math.Sin(theta) * Math.Sin(phi) * radius), (float)(Math.Cos(phi) * radius));
                     var (mesh, shape) = PickMesh();
                     var place = Transform.LookingAt(at, Vec3.Zero, Vec3.UnitY);
-                    Cube(ecs, (mesh, shape), PickMaterial(), new Transform(place.Translation, place.Rotation * shape.Rotation, shape.Scale));
+                    Cube(ecs, (mesh, shape), PickMaterial(), new Transform(place.Translation, place.Rotation * shape.Rotation, shape.Scale), SphereFlags);
                 }
 
                 _camera = Camera(ecs, Transform.Identity);
+                Render.SetCameraFlags(_camera,
+                    (_noIndirectDrawing ? CameraFlags.NoIndirectDrawing : CameraFlags.None) | (_noCpuCulling ? CameraFlags.NoCpuCulling : CameraFlags.None));
                 Box(ecs, white, new Vec3((float)(radius * 2.2)), Vec3.Zero);
                 break;
             }
@@ -164,10 +172,18 @@ internal static class ManyCubes
         _meshes++;
     }
 
-    private static void Cube(EcsWorld ecs, (AssetHandle Mesh, Transform Shape) mesh, AssetHandle material, Transform at)
+    // What the sphere's cubes are drawn with, which the other layouts' take only the culling of.
+    private static MeshFlags SphereFlags =>
+        (_noFrustumCulling ? MeshFlags.NoFrustumCulling : MeshFlags.None)
+        | (_noAutomaticBatching ? MeshFlags.NoAutomaticBatching : MeshFlags.None)
+        | Culling;
+
+    private static MeshFlags Culling => _noCpuCulling ? MeshFlags.NoCpuCulling : MeshFlags.None;
+
+    private static void Cube(EcsWorld ecs, (AssetHandle Mesh, Transform Shape) mesh, AssetHandle material, Transform at, MeshFlags flags)
     {
         var cube = ecs.SpawnMesh(mesh.Mesh, material, at);
-        if (_noFrustumCulling) ecs.Insert<NoFrustumCullingRef>(cube);
+        if (flags != MeshFlags.None) Render.SetMeshFlags(ecs, cube, flags);
         if (_rotateCubes) ecs.Add(cube, new Spinning());
         _meshes++;
     }

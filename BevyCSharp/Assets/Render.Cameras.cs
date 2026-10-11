@@ -278,6 +278,19 @@ public static unsafe partial class Render
         Native.Check(Native.bcs_render_set_shadow_filtering(camera.Bits, (int)filtering), $"filtering {camera}'s shadows");
 
     /// <summary>
+    /// Says how a camera draws beyond what it looks at. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The flags are the whole answer rather than additions, so a flag left out takes that behavior
+    /// off again and <see cref="CameraFlags.None"/> puts everything back as Bevy has it. Each turns
+    /// off one of the paths Bevy draws a crowd of meshes quickly by, which a stress test does to
+    /// measure what the path saves, and which a game seldom has reason to.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The entity is not a camera, or there is no renderer.</exception>
+    public static void SetCameraFlags(Entity camera, CameraFlags flags) =>
+        Native.Check(Native.bcs_render_set_camera_flags(camera.Bits, (uint)flags), $"setting how {camera} draws");
+
+    /// <summary>
     /// Sets what a camera does to the picture after the scene has been drawn.
     /// </summary>
     /// <remarks>

@@ -496,6 +496,10 @@ enum Bevy.ButtonLine : int
 enum Bevy.ButtonState : int
   Pressed = 0
   Released = 1
+enum Bevy.CameraFlags : uint
+  NoCpuCulling = 2
+  NoIndirectDrawing = 1
+  None = 0
 enum Bevy.CameraProjection : int
   Orthographic = 1
   Perspective = 0
@@ -3631,6 +3635,8 @@ static class Bevy.MeshFiles
   static string? PathOf(AssetHandle mesh)
   static void SaveAs(AssetHandle mesh, string path)
 enum Bevy.MeshFlags : uint
+  NoAutomaticBatching = 8
+  NoCpuCulling = 16
   NoFrustumCulling = 1
   NoShadowCasting = 2
   NoShadowReceiving = 4
@@ -10083,6 +10089,7 @@ static class Bevy.Render
   static void SetAmbientLight(Entity camera, (float, float, float)? color, float brightness = 80f)
   static void SetAmbientOcclusion(Entity camera, AmbientOcclusionQuality? quality, float thickness = 0f)
   static void SetAtmosphere(Entity camera, AtmosphereSettings settings)
+  static void SetCameraFlags(Entity camera, CameraFlags flags)
   static void SetCameraTarget(Entity camera, AssetHandle target)
   static void SetCameraTarget(Entity camera, AssetHandle target, int layer)
   static void SetCameraTarget(Entity camera, Entity window)

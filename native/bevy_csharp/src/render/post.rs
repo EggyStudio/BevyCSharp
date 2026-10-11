@@ -210,6 +210,54 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
     })
 }
 
+/// Says how a camera draws beyond what it looks at.
+///
+/// A bit each: `1` draws each batch with its own call rather than Bevy's indirect draws from a
+/// buffer the GPU fills, and `2` leaves its view out of the CPU's culling, for the GPU's alone. A
+/// bit left clear takes that behavior off again, so the flags are the whole answer rather than
+/// additions to it.
+///
+/// Both measure what Bevy's own paths save, as its many_cubes stress test turns them off to.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_camera_flags(camera: u64, flags: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, flags);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::visibility::NoCpuCulling;
+            use bevy::render::view::NoIndirectDrawing;
+
+            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                let mut camera = world.entity_mut(entity);
+                if flags & 1 != 0 {
+                    camera.insert(NoIndirectDrawing);
+                } else {
+                    camera.remove::<NoIndirectDrawing>();
+                }
+
+                if flags & 2 != 0 {
+                    camera.insert(NoCpuCulling);
+                } else {
+                    camera.remove::<NoCpuCulling>();
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Sets what a camera does to the picture after the scene has been drawn.
 ///
 /// Every effect is applied on every call, so a config describes the whole pipeline rather than
@@ -471,6 +519,45 @@ mod tests {
         assert_eq!(*world.get::<Msaa>(overlay).unwrap(), Msaa::Off);
         assert_eq!(*world.get::<Msaa>(scene).unwrap(), Msaa::Off);
         assert_eq!(*world.get::<Msaa>(alone).unwrap(), Msaa::Sample8);
+    }
+
+    #[test]
+    fn flags_put_on_and_take_off_the_markers_bevy_reads() {
+        use crate::interop::status;
+        use bevy::camera::visibility::NoCpuCulling;
+        use bevy::render::batching::NoAutomaticBatching;
+        use bevy::render::view::NoIndirectDrawing;
+
+        let mut world = World::new();
+        let camera = world.spawn(bevy::camera::Camera::default()).id();
+        let cube = world.spawn_empty().id();
+
+        let set = |world: &mut World, camera_flags: u32, mesh_flags: u32| {
+            crate::state::loan_world(world, || {
+                (
+                    super::bcs_render_set_camera_flags(camera.to_bits(), camera_flags),
+                    crate::render::assets::bcs_render_set_mesh_flags(cube.to_bits(), mesh_flags),
+                )
+            })
+        };
+
+        assert_eq!(set(&mut world, 1 | 2, 8 | 16), (status::OK, status::OK));
+        assert!(world.entity(camera).contains::<NoIndirectDrawing>());
+        assert!(world.entity(camera).contains::<NoCpuCulling>());
+        assert!(world.entity(cube).contains::<NoAutomaticBatching>());
+        assert!(world.entity(cube).contains::<NoCpuCulling>());
+
+        // A flag left clear takes its marker off again.
+        assert_eq!(set(&mut world, 0, 0), (status::OK, status::OK));
+        assert!(!world.entity(camera).contains::<NoIndirectDrawing>());
+        assert!(!world.entity(camera).contains::<NoCpuCulling>());
+        assert!(!world.entity(cube).contains::<NoAutomaticBatching>());
+        assert!(!world.entity(cube).contains::<NoCpuCulling>());
+
+        // A camera's flags on something that is no camera are refused rather than put on it.
+        let refused = crate::state::loan_world(&mut world, || super::bcs_render_set_camera_flags(cube.to_bits(), 1));
+        assert_eq!(refused, status::NOT_PRESENT);
+        assert!(!world.entity(cube).contains::<NoIndirectDrawing>());
     }
 }
 

@@ -15,4 +15,16 @@ public enum MeshFlags : uint
 
     /// <summary>Has no shadow cast on it.</summary>
     NoShadowReceiving = 4,
+
+    /// <summary>
+    /// Drawn alone rather than batched with the meshes it shares a mesh and a material with, as a
+    /// stress test does to measure what batching saves.
+    /// </summary>
+    NoAutomaticBatching = 8,
+
+    /// <summary>
+    /// Left out of the CPU's culling for the GPU's alone, for a mesh whose place the GPU writes,
+    /// where the CPU's idea of it is stale.
+    /// </summary>
+    NoCpuCulling = 16,
 }

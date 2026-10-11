@@ -321,7 +321,7 @@ many_animated_sprites	can
 many_buttons	can
 many_cameras_lights	can
 many_components	n/a	registers components dynamically in Rust
-many_cubes	part	--no-automatic-batching, --no-indirect-drawing and --no-cpu-culling, whose components Bevy does not reflect, and --mesh-compression, whose compression the bridge does not reach
+many_cubes	part	--mesh-compression, whose compression the bridge does not reach
 many_foxes	part	--mesh-compression, whose compression the bridge does not reach
 many_gizmos	can
 many_glyphs	can
