@@ -295,7 +295,7 @@ custom_vertex_attribute	missing	vertex attributes a game defines
 extended_material	can	the extension a Slang shader lighting its surface through bcs::light and bcs::finish
 extended_material_bindless	can	the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays
 gpu_readback	can	the buffer read whole and its range taken from it, and each read asked for again as it arrives
-render_depth_to_texture	missing	depth-only cameras rendered to a texture
+render_depth_to_texture	can	the depth camera's prepass shown through Shaders.Watch's image on an unlit material, where Bevy's copies it into a depth texture its own material reads
 shader_defs	can	a program compiled with the define and one without, where Bevy's material sets it as its pipeline is specialized
 shader_material_2d	can
 shader_material	can

@@ -443,6 +443,11 @@ answers the names a watch would find, as of the last frame drawn. The editor's F
 scene camera's names, dims the ones it does not draw with what turns each on, and watches the one
 picked, which is where a broken link in a chain shows.
 
+A camera can draw its depth alone, into no window and no image, where its `RenderTargetRef` is
+Bevy's `RenderTarget.None` with a size and it has a `DepthPrepassRef`, and a watch of its `depth`
+is then a picture of what it sees by distance, which a material can show, as Bevy's
+render_depth_to_texture shows one on a plane.
+
 **How long each pass takes.** An app made with `Config.GpuTimings` measures every render pass on the
 CPU that records it and the GPU that runs it, and `Render.Timings()` answers the last frames' times,
 smoothed. Bevy's own passes are there under Bevy's names, and every dispatch, pass and draw a shader
