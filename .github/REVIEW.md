@@ -10,32 +10,63 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `09e3b339`. Four commits, unpushed with the two before them. `c3aaacac`, item 11: the
-CLI server's dispose cancels the waits first, so a request answered in the app's last frame keeps
-its answer where the cancel races its completion and one still waiting is told the session is
-closing, then shuts the receive side alone and joins the connection threads within a linger of two
-seconds across them all, closing a socket whose thread still reads after it, as on Windows where
-shutting the receive side does not end a waiting read, and joins the rest; a thread that wrote and
-ended between the copy and the close has let its client go, which the old code was open to as well
-and is guarded. The test sends `app.quit`, abandons the queue and disposes at once, three hundred
-rounds, and reads every answer where the old server lost ten or eleven in each of three runs; the
-app tests' stop reads `app.quit`'s answer and asserts it, its remark no longer saying the answer may
-be lost. Then three commits that move code alone, as N 1.3 asks: `render/assets.rs` from 799 to 557
-lines with attaching meshes and materials in `render/attached.rs`, `NormTests.cs` from 794 to 588
-with N 2.10's reading of the IL in a second file of the class, which holds no test, and `UiTests.cs`
-from 794 to 535 with its seven text tests in `UiTextTests.cs` beside it; cargo's 87 and 149, every
-profile checked, the norm and interface tests 40 passed and 1 skipped. The suite: 1,413 passed and 2
-skipped of 1,415. A flake seen once, `AudioTests`' part of a clip failing in one filtered run and
-passing in seven since and in the suite, named here if it recurs. Right, the answer's loss measured
-before and after rather than reasoned about, the linger said with its cost on the one platform that
-pays it, and each split a commit of its own that moves code alone. Item 11 is done and the three
-watches of item 2 are cleared. With the Now list's free items done, TODO.md's order: its first item,
-an enum inside a variant without a typed property, has been done since `5f2d3d02` and the components
-guide says the same stale thing; what is left is fifteen option fields over types the description
-gives no kind, and the batch types a duration as a nullable `TimeSpan` and the non-zero integers as
-a nullable `int` with a zero written refused naming the field, the dump, the generator and the
-bridge giving them kinds, while the tuples, an instant and a node index stay on string paths with
-the reason said, both documents rewritten around what is left. The examples that wait on the owner's
+Reviewed up to `ac2817aa`. Two commits, unpushed with the six before them. `6729361f` writes the
+components table again from the editor build, which has carried Bevy's custom cursors since
+`f9416e59` while the table dated from `6c6b5593`, so four cursor records gain their custom variant
+and the public surface 137 lines, split from the typing since the dump brought it along, and
+building alone. `ac2817aa` types what TODO.md's first item left on string paths, after reading that
+the item's own words were stale, an enum inside a variant having been typed since `5f2d3d02`: a
+duration in a component is a `TimeSpan`, read and written whole as the seconds and nanoseconds
+Rust's serde gives, the nanoseconds past a tick dropped as the remark says, and an integer that
+holds no zero is an `int` whose zero is refused naming the field and its type, before an optional
+field holding nothing is switched to some, so a refused zero leaves the field as it was; the bridge
+reads and writes the ten non-zero types and refuses a zero as it refuses a number past a width, and
+chooses one as the placeholder when some is chosen, since they reflect no default. Typed so: a
+sound's start and duration, a node's six grid lines, a window's frame latency, the four clocks'
+delta, elapsed and wrap period, the fixed clock's step and overstep, the virtual clock's longest
+step, the picking settings' multi-click interval and the delayed queue's submit time; left on string
+paths and said by kind in the components guide and the narrower TODO item: the tuple options, the
+real clock's two instants and the animation transitions' node index. A native test chooses a
+non-zero line at one, writes minus three and refuses zero naming the field; `ReflectedWrapperTests`
+sets and reads the grid lines, refuses a zero over a held line and over an empty one, clears one
+with null, and reads the virtual clock's longest step at Bevy's 250 ms, writes 100.5 and sets and
+clears a sound's start. The suite: 1,415 passed and 2 skipped of 1,417; cargo's 88 and 150, every
+profile clean, the guide compiled on the package. Right, the stale item read before it was worked,
+the zero refused before a field is switched rather than after, and what is left said by its kinds
+rather than by a vague line. Next in TODO.md's order, custom_cursor_image: its triage line still
+says the feature is not compiled in, where the table since `6729361f` has it; the wrapper reaches
+the flips, the rectangle and the atlas's frame but not the atlas's layout handle, whose kind the
+bridge does not load, nor the hotspot, a tuple, so a small bridge call puts an atlas layout, a frame
+and the hotspot on a window's custom cursor, the hotspot with it since it is the same struct and the
+one thing the wrapper cannot type, and the example animates the frame and toggles the flips and the
+rectangle through the wrapper.
+
+Before it, four commits came, `c3aaacac` to `09e3b339`. `c3aaacac`, item 11: the CLI server's
+dispose cancels the waits first, so a request answered in the app's last frame keeps its answer
+where the cancel races its completion and one still waiting is told the session is closing, then
+shuts the receive side alone and joins the connection threads within a linger of two seconds across
+them all, closing a socket whose thread still reads after it, as on Windows where shutting the
+receive side does not end a waiting read, and joins the rest; a thread that wrote and ended between
+the copy and the close has let its client go, which the old code was open to as well and is guarded.
+The test sends `app.quit`, abandons the queue and disposes at once, three hundred rounds, and reads
+every answer where the old server lost ten or eleven in each of three runs; the app tests' stop
+reads `app.quit`'s answer and asserts it, its remark no longer saying the answer may be lost. Then
+three commits that move code alone, as N 1.3 asks: `render/assets.rs` from 799 to 557 lines with
+attaching meshes and materials in `render/attached.rs`, `NormTests.cs` from 794 to 588 with N 2.10's
+reading of the IL in a second file of the class, which holds no test, and `UiTests.cs` from 794 to
+535 with its seven text tests in `UiTextTests.cs` beside it; cargo's 87 and 149, every profile
+checked, the norm and interface tests 40 passed and 1 skipped. The suite: 1,413 passed and 2 skipped
+of 1,415. A flake seen once, `AudioTests`' part of a clip failing in one filtered run and passing in
+seven since and in the suite, named here if it recurs. Right, the answer's loss measured before and
+after rather than reasoned about, the linger said with its cost on the one platform that pays it,
+and each split a commit of its own that moves code alone. Item 11 is done and the three watches of
+item 2 are cleared. With the Now list's free items done, TODO.md's order: its first item, an enum
+inside a variant without a typed property, has been done since `5f2d3d02` and the components guide
+says the same stale thing; what is left is fifteen option fields over types the description gives no
+kind, and the batch types a duration as a nullable `TimeSpan` and the non-zero integers as a
+nullable `int` with a zero written refused naming the field, the dump, the generator and the bridge
+giving them kinds, while the tuples, an instant and a node index stay on string paths with the
+reason said, both documents rewritten around what is left. The examples that wait on the owner's
 word stay where they are.
 
 Before it, `28ba2698` and `e1a32283` came, ABI 262. First `e1a32283`, item 12 with a bridge fault
@@ -71,43 +102,6 @@ and the listing built as a Bevy query so what a system would not see a game does
 the `ctt` crate the lock does not hold. Next item 11 as a batch of its own, since every free gap is
 done, then the three move-only splits, then TODO.md's order, the examples that wait on the owner's
 word staying where they are.
-
-Before it, `ff467a5f` came, monitor_info written in part, ABI 261: a run opens no window of its own
-and runs on with none open where `Config.PrimaryWindow` is false, Bevy's window plugin given no
-primary window and the exit condition that does not exit, as the offscreen run already had them; and
-`Window.SetFullscreenOn` makes a window a game spawned fill a monitor named by its entity and
-centers it there, Bevy's fullscreen mode and centered position with the monitor's entity, a call of
-its own since reflection cannot name an entity inside the selection, refusing an entity that is no
-window and one that is no monitor. A render-gated native test holds the mode, the position and the
-refusal, and `SpawnedWindowTests` the same headless on a monitor the test puts on an entity of its
-own, which the bridge cannot tell from one the platform reported, reading the mode and the position
-back through reflection. The example opens a window on each monitor met, titled with its name, with
-a camera aimed at it and the monitor's text drawn there, closes a monitor's window when it is
-unplugged and the focused one on Escape, and offscreen finds no monitor and opens nothing, exiting 0
-after sixty frames, which the capture script lists with the empty ones; its run on a display is the
-owner's, with `dotnet run --project BevyCSharp.Examples -- monitor_info`, which fills every monitor
-of the machine and runs on when its windows are closed. One thing for its next touch: it finds the
-monitors by walking every entity and asking each for the component, where `EntitiesWith<MonitorRef>`
-asks the world once, which a game author copying it should see. The window guide has its paragraph
-and block, EXAMPLES.md reads 336 written, 2 in part and 44 missing, TODO.md's group gone and its
-in-part list naming it. The suite: 1,410 passed and 2 skipped of 1,412; cargo's 83 headless and 145
-with the larger profiles, every profile checked with warnings denied. Right, the two bridge parts
-the example needs added and nothing more, the monitor case tested where no monitor is, and the
-example honest about what an offscreen run can show. The runs of `9d3e2e5f` and `ff467a5f`, pushed
-at 11:33 and 12:07, are green on Linux, Windows and macOS. Found after the push: `ff467a5f`'s
-subject has its three marks run together with no space between, typed and not pasted, which
-`NormTests.N_7_2` fails on and the push has fixed in the history; the rule's list takes a commit of
-a working session's pushed before its fault was seen, with the fault as its reason, so the commit
-goes on `build/norm/7.2.txt` with that line and N 7.2 says so in both repositories, the subject
-pasted from COMMITS.md and not typed, which BUILDING.md says with the batch that lists it. Item 12
-is measured as it asked: the seven inserts from nothing in the examples and the guides are each
-guarded by `Resource<T>()` and insert only where the world holds none, the tests insert none, so the
-rule breaks nothing; next the rule as the item has it, a reading of whether a type reflects a
-default, the throw naming `Resource<T>` where the world holds the resource, the field-by-field build
-kept where it holds none, a test of both, and the reflected resources without a default counted from
-an editor run before it is written. Then the owner's word on Feathers, the dev tools, the system
-information and the camera controllers (Decisions 11 and 12), and the remaining 44 as the table
-names them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -316,7 +310,9 @@ from [SHARED.md](SHARED.md).
    the lock does not hold, so it takes the owner's word as Feathers' crates do (Decisions 11 and
    25), and its universal twin is basis-universal, already on that list. With every free gap done,
    item 11 and the three move-only splits are in at `c3aaacac` to `09e3b339`, and the working
-   session follows TODO.md's order, the fifteen option fields without a kind first.
+   session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
+   the tuples, the instants and a node index, said by kind, and custom_cursor_image follows with a
+   bridge call for the cursor's atlas, frame and hotspot.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
