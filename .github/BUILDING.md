@@ -28,13 +28,13 @@ one crash costs only its own part's tests, and every listed test without a resul
 `--filter` holds the suite and its parts to a filter, as `dotnet test` takes one. `./bcs test` runs
 the suite this way, so a count there is the page's. `dotnet test` and `cargo test` still run as they
 always did, and a host the cap stopped prints a tally of the tests that ran before it as though they
-were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart.
+were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during
+which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
 
 `cargo test` with no feature named builds the default profile, the headless one, which is the one
 the workflow tests the bridge in, and it has none of the renderer's crates. A test reaching them
 sits under `render/` or behind the `render` feature, as the rest of that code does, and `cargo test`
-is run in the default profile before a commit as well as with the profiles that add to it. A test during
-which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
+is run in the default profile before a commit as well as with the profiles that add to it.
 
 `BCS_SCHEDULE_SHUFFLE_SEED` set to a number shuffles the order every schedule of an app and its
 render world runs its systems in, within what their constraints allow, as Bevy's
