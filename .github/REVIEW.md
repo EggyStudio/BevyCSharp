@@ -10,16 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ea5e1532`. Three commits, unpushed. `53fd0c3f`, item 14 on the owner's word typed in
-the working session: the bcs guide is `.github/BCS.md`, moved with its history and its header
-dropped, AGENTS.md's line and STYLE.md's scope point to it, `.claude/` is in `.gitignore` with its
-reason and the folder is gone with the lock file the tool kept there; no reference to the old path
-is left outside this file. `04cefc8e`, item 13's fit: the capture script scales a shot of another
-shape to cover 1280 by 720 and cuts it around the middle in place of the padding, the resizing and
-window settings examples filled so, the grid example, whose header and footer the cut would lose,
-opened at Bevy's default window instead of its own, and the scale factor example, whose label the
-cut would lose, at 512 by 288, the sixteen by nine nearest Bevy's 500 by 300, each said in the
-triage notes and the files' heads; and a second slip of the working session's found on the way,
+Reviewed up to `f60bc166`. One commit, unpushed with the three before it: every cell the gallery
+script writes is `<td width="200">`, with the comment saying why, since GitHub squeezes a table to
+the page before it lets it scroll and a cell would shrink to its name, the picture with it; the
+README's prose stays at 299 and the check passes. One thing the change would have hidden, caught by
+the working session: N 4.5's test read the cells by a pattern that began at a bare `<td>`, which
+with the width would have matched nothing and passed without looking, and reads a cell with any
+attributes since, finding all 304 pictures, 18 of 18. Right, the width given where the squeeze acts,
+and the rule's own reader checked against the new shape rather than trusted. The owner looked at the
+pushed page at 18:55 and the pictures still differ: the cell's width survives but the browser treats
+it as a preference and shrinks a cell to its name when the table is wider than the page, so item 13
+keeps the fallback, each name padded with non-breaking spaces in its code tag to thirty characters,
+a batch of its own before custom_schedule's commit. custom_schedule is under way at ABI 265: a
+pre-startup stage on both sides, a call placing a named schedule in Bevy's main order after an
+update or a startup stage by the concrete label types, since the order compares by type and an
+interned label never matched, with the single-threaded executor set through an edit that keeps the
+systems already in it, a second placing and a stage that is no schedule of its own refused, and a
+native test reading the placement back in both orders.
+
+Before it, three commits came, `53fd0c3f` to `ea5e1532`. `53fd0c3f`, item 14 on the owner's word
+typed in the working session: the bcs guide is `.github/BCS.md`, moved with its history and its
+header dropped, AGENTS.md's line and STYLE.md's scope point to it, `.claude/` is in `.gitignore`
+with its reason and the folder is gone with the lock file the tool kept there; no reference to the
+old path is left outside this file. `04cefc8e`, item 13's fit: the capture script scales a shot of
+another shape to cover 1280 by 720 and cuts it around the middle in place of the padding, the
+resizing and window settings examples filled so, the grid example, whose header and footer the cut
+would lose, opened at Bevy's default window instead of its own, and the scale factor example, whose
+label the cut would lose, at 512 by 288, the sixteen by nine nearest Bevy's 500 by 300, each said in
+the triage notes and the files' heads; and a second slip of the working session's found on the way,
 `21d08b44`'s padded sizes not on N 4.5's list, which the pushed head carries and whose run reads red
 on that test, mended here with the three off the list and the scale factor's line at its new size,
 the norm tests on the commit's own tree 17 passed and 1 skipped. `ea5e1532`, low_power, ABI 264:
@@ -73,23 +91,6 @@ reads as smaller pictures, and item 13 keeps the fit, the capture scaled to fill
 around the middle rather than padded, a batch of its own before low_power's commit. Next low_power,
 its suite running, its README written again on top of these with the norm tests run before its
 commit.
-
-Before it, `b06ff120` came, item 13: `build/examples-table.py` writes the README's gallery as a
-heading naming each group and one table of one row under it, in the order Bevy's examples list gives
-its groups, which the script already read, each row holding the group's written examples in the
-order that list gives them, read by a new pass that maps each row's link to the example by its cargo
-path, an example the list leaves out following by name, and the examples Bevy keeps out of its list
-in a last row of their own; each cell as before, the picture through the raw link opening the
-program and the name under it; 28 groups with captures, the script's check reading the result and
-passing, EXAMPLES.md unchanged, the README written in a worktree at the commit so nothing of
-low_power rides along. The headings are third level under the Examples heading, so each group has an
-anchor, where the contents list names the second level alone, which is right as it stands; the
-owner's eye judges the look. Right, the order taken from Bevy's own list rather than the alphabet,
-the kept-out examples given a row rather than dropped, and the check kept on the result. At 16:30
-the owner asked for the bcs skill out of the `.claude` folder, which is item 14, and at 16:35 for
-the gallery's pictures at one size, which item 13 takes (Decision 28), both before low_power. Then
-low_power in TODO.md's order, with a bridge mend on the way: a redraw request is written only where
-its messages are registered, since the headless harness logged a send to none (N 3.7).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -373,34 +374,34 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120`, `21d08b44`
-    and `04cefc8e` but for the cells' width (Decision 27).** The owner asked on 2026-10-11 at 16:05,
-    as for 3DEngine's README. `build/examples-table.py` writes the gallery between its markers as
-    one table of four pictures a row over every written example; it writes instead one table a group
-    in the order Bevy's `examples/README.md` lists the groups, which the script already reads, each
-    a single row holding the group's written examples in that order, the picture opening the program
-    and the name under it as today, with a heading line naming the group before each table, and the
-    examples Bevy keeps out of its list in a last row of their own; a row wider than the page
-    scrolls sideways on GitHub, which is the point, so no row is wrapped. The script's check reads
-    the result as it reads the table today, so the workflow's table check and the README's walk run
-    on it, and the raw links keep their form for the package's page. A batch of its own before
-    low_power, since it is small and the owner asked; the owner's eye judges the look. Done at
-    `b06ff120`: a heading and a one-row table a group in Bevy's order, the examples in each in the
-    order Bevy's list gives them, the kept-out ones last, 28 groups, the check passing. The owner
-    asked at 16:35 that the pictures be one size, where they differ today: every picture carries the
-    same width and height on its tag, 200 wide as before and the height of sixteen by nine, and the
-    captures that are not of that shape, four of 304, a square, a four by three and two of five by
-    three, are taken again at it where the example's window allows or padded to it by the capture
-    script, so the tag distorts nothing; the table check and the captures' comparison read the
-    result, the comparison's references following the captures. Done at `21d08b44`: every tag 200 by
-    113, four captures padded to sixteen by nine by the capture script, which pads any capture that
-    needs it; `b06ff120`'s gallery had passed N 4.2's 320 lines, mended at `d0e638d7` before its
-    page could show it. The owner looked at the pushed page at 17:10 and the pictures still read as
-    different sizes. GitHub renders every tag at one box, its own style giving each the full width
-    of its cell, an automatic height and the tag's aspect, so the box is uniform; what differs is
-    the picture inside it, since a capture of another shape was padded with nothing to sixteen by
-    nine and the page fills the padding with its muted color, which reads as a smaller picture. The
-    fit fills instead: the capture script scales a shot of another shape so its shorter side fills
+13. **The README's gallery as one scrolling row of pictures a group, done through `f60bc166` but for
+    the names' padding (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
+    README. `build/examples-table.py` writes the gallery between its markers as one table of four
+    pictures a row over every written example; it writes instead one table a group in the order
+    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
+    holding the group's written examples in that order, the picture opening the program and the name
+    under it as today, with a heading line naming the group before each table, and the examples Bevy
+    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
+    GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
+    reads the table today, so the workflow's table check and the README's walk run on it, and the
+    raw links keep their form for the package's page. A batch of its own before low_power, since it
+    is small and the owner asked; the owner's eye judges the look. Done at `b06ff120`: a heading and
+    a one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives
+    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 16:35 that the
+    pictures be one size, where they differ today: every picture carries the same width and height
+    on its tag, 200 wide as before and the height of sixteen by nine, and the captures that are not
+    of that shape, four of 304, a square, a four by three and two of five by three, are taken again
+    at it where the example's window allows or padded to it by the capture script, so the tag
+    distorts nothing; the table check and the captures' comparison read the result, the comparison's
+    references following the captures. Done at `21d08b44`: every tag 200 by 113, four captures
+    padded to sixteen by nine by the capture script, which pads any capture that needs it;
+    `b06ff120`'s gallery had passed N 4.2's 320 lines, mended at `d0e638d7` before its page could
+    show it. The owner looked at the pushed page at 17:10 and the pictures still read as different
+    sizes. GitHub renders every tag at one box, its own style giving each the full width of its
+    cell, an automatic height and the tag's aspect, so the box is uniform; what differs is the
+    picture inside it, since a capture of another shape was padded with nothing to sixteen by nine
+    and the page fills the padding with its muted color, which reads as a smaller picture. The fit
+    fills instead: the capture script scales a shot of another shape so its shorter side fills
     sixteen by nine and cuts the rest around the middle, or the example's window is opened at
     sixteen by nine where the cut would lose something that matters, so every picture fills its box
     edge to edge; the four captures are taken again so, the comparison's references following, and
@@ -413,7 +414,19 @@ from [SHARED.md](SHARED.md).
     cell. The script gives each cell a width of its own, `width="200"` on every `td`, which the
     page's sanitizer keeps as it keeps a picture's, so no column goes below it and the row keeps its
     full width and scrolls; a header row of non-breaking spaces is the fallback should the attribute
-    be stripped, which the rendered page says after the push.
+    be stripped, which the rendered page says after the push. Done at `f60bc166`: every cell 200
+    wide, N 4.5's reader widened to a cell with attributes, the rendered page read after the push.
+    The owner looked at the pushed page at 18:55 and the pictures still differ. The rendered page
+    keeps the cell's width, read here, so the squeeze is the browser's table layout: a cell's width
+    is a preference, and when a table is wider than the page the browser shrinks each cell to its
+    narrowest unbreakable content, the name, the picture with it, GitHub's table being a block
+    capped at the page's width that scrolls only past that minimum. So the minimum comes from
+    content: the script pads the run name under each picture, in its code tag, with non-breaking
+    spaces, the character itself and not the entity, to thirty characters, which the code font draws
+    at some 246 pixels, past the picture's 200 on every platform's monospace and past the longest
+    name, so no cell can shrink below its picture and the name reads as a caption bar; the cell's
+    width stays as the preference, N 4.5's reader and the prose count checked, and the rendered page
+    read after the push.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
     on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
