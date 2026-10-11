@@ -282,15 +282,16 @@ def build(version, examples, order, triage, written, source, followed):
             continue
         cells = []
         for example in shown:
-            picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="200" height="113"/>'
+            picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="260" height="146"/>'
             picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
-            # Each cell its picture's width, and its name padded with spaces that do not break to
-            # thirty characters, wider than the picture in any monospace font. A browser laying out a
-            # table wider than the page shrinks each cell to the widest thing in it that cannot
-            # break, a width given or not, and GitHub lets a table scroll only past that, so a short
-            # name would take its picture down with it.
-            name = example["name"] + "\u00a0" * max(0, 30 - len(example["name"]))
-            cells.append(f'<td width="200">{picture}<br><code>{name}</code></td>')
+            # The caption sets each cell's width, its name padded with spaces that do not break to
+            # the longest name's thirty-five characters and drawn small, and the picture asks to be
+            # wider than any font draws that, so GitHub, which keeps a picture no wider than its
+            # cell, has it fill the cell exactly on every device. A browser laying out a table wider
+            # than the page shrinks each cell to the widest thing in it that cannot break, a width
+            # given or not, so the caption is that thing, the same in every cell.
+            name = example["name"] + "\u00a0" * max(0, 35 - len(example["name"]))
+            cells.append(f'<td width="260">{picture}<br><small><code>{name}</code></small></td>')
         # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the
         # README but a table's rows as prose, and four lines a group would take the gallery past it.
         sections.append(f"### {group}\n<table><tr>" + "".join(cells) + "</tr></table>")
