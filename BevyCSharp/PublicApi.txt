@@ -1518,13 +1518,16 @@ sealed class Bevy.EcsWorld
   Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at)
   Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f)
   Entity SpawnScene(AssetHandle scene)
+  Entity? RelationOf<TRelation>(Entity source)
   Entity? ResourceEntity(string typePath)
   Entity[] All()
   Entity[] ChildrenOf(Entity entity)
   Entity[] EntitiesWith<T>() where T : unmanaged
+  Entity[] RelatedTo<TRelation>(Entity target)
   IDisposable Observe<TEvent>(Action<On<TEvent?>> observer)
   IDisposable Observe<TEvent>(Entity entity, Action<On<TEvent?>> observer)
   IEnumerable<Entity> Descendants(Entity root)
+  IEnumerable<Entity> RelationAncestors<TRelation>(Entity entity)
   List<Entity> Removed<T>() where T : unmanaged
   List<Entity> RemovedById(int componentId)
   T GetOrDefault<T>(Entity entity) where T : unmanaged
@@ -1565,6 +1568,7 @@ sealed class Bevy.EcsWorld
   void DespawnWhen<TState>(Entity entity, Func<StateTransitionEvent<TState>, bool> rule) where TState : struct, Enum
   void InsertReflected(Entity entity, string typePath, string? json = null)
   void Patch<T>(Entity entity, PatchOf<T> change) where T : unmanaged
+  void Relate<TRelation>(Entity source, Entity target)
   void Set<T>(Entity entity, T component, string file = "", int line = 0) where T : unmanaged
   void SetName(Entity entity, string? name)
   void SetReflected(Entity entity, string typePath, string path, string json)
@@ -1574,6 +1578,7 @@ sealed class Bevy.EcsWorld
   void SpawnBatch(int count, Action<Entity, EcsWorld> build)
   void SpawnBatch<T>(int count, Func<int, T> factory) where T : unmanaged
   void Trigger<TEvent>(TEvent? value)
+  void Unrelate<TRelation>(Entity source)
 sealed class Bevy.EffectSettings
   (float, float) DistortionAxes { get; set; }
   (float, float) DistortionCenter { get; set; }

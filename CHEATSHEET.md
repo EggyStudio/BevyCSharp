@@ -302,6 +302,11 @@ T Insert<T>(Entity entity, string? json = null);                // Puts one of B
 Entity? ResourceEntity(string typePath);                        // The entity holding one of Bevy's resources, or null when the world has none of it
 T? Resource<T>();                                               // A typed wrapper over one of Bevy's resources, or null when the world has none of it
 T InsertResource<T>(string? json = null);                       // Puts one of Bevy's resources in the world, from JSON or at its default, replacing the one it has, and returns a typed wrapper over it
+void Relate<TRelation>(Entity source, Entity target);           // Makes source relate to target by TRelation, in place of what it related to by it before, as inserting one of Bevy's relationship components does
+void Unrelate<TRelation>(Entity source);                        // Takes source's relation by TRelation away, as removing Bevy's relationship component does
+Entity? RelationOf<TRelation>(Entity source);                   // What source relates to by TRelation, or null where it relates to nothing by it
+Entity[] RelatedTo<TRelation>(Entity target);                   // The entities relating to target by TRelation, in the order they came to, as Bevy's relationship target lists them
+IEnumerable<Entity> RelationAncestors<TRelation>(Entity entity);  // What entity relates to by TRelation, what that relates to, and on, as Bevy's iter_ancestors follows a relationship
 List<Entity> Removed<T>();                                      // The entities that lost T, by a removal or a despawn, since the running system last asked, oldest first
 List<Entity> RemovedById(int componentId);                      // The entities that lost the component with this id since the running system last asked, as Removed lists them
 Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spawns an entity drawn with a mesh and a material, placed by a transform, as Bevy's (Mesh3d(mesh), MeshMaterial3d(material), transform) bundle does

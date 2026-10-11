@@ -196,7 +196,6 @@ observer_propagation	can
 observers	can
 one_shot_systems	can
 parallel_query	can
-relationships	missing	relationships of a game's own between entities
 removal_detection	can
 run_conditions	can
 startup_system	can

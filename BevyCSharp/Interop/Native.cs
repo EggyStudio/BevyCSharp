@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 259;
+    internal const int ExpectedAbiVersion = 260;
 
     static Native() => NativeLoader.Initialize();
 
@@ -668,6 +668,31 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_changed(ulong entity, int component);
+
+    /// <summary>How many relationship slots the bridge provides.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_relation_slots();
+
+    /// <summary>Makes an entity relate to another in a slot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_relation_set(int slot, ulong source, ulong target);
+
+    /// <summary>Takes an entity's relation in a slot away.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_relation_remove(int slot, ulong source);
+
+    /// <summary>Writes what an entity relates to in a slot.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_relation_target(int slot, ulong source, ulong* target);
+
+    /// <summary>Writes the entities relating to an entity in a slot, answering how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_relation_sources(int slot, ulong target, ulong* sources, int capacity);
 
     /// <summary>Writes when a component was added and last changed, and whether either was since the running system last ran.</summary>
     [LibraryImport(Library)]

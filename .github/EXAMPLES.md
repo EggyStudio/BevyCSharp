@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**335 written, 1 written in part, 0 can be written, 46 missing and 56 do not apply.** Of the 382 that apply, 336 can be written with what is bridged, 1 of them leaving something out.
+**336 written, 1 written in part, 0 can be written, 45 missing and 56 do not apply.** Of the 382 that apply, 337 can be written with what is bridged, 1 of them leaving something out.
 
-**157 of the 164 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**157 of the 165 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -20,7 +20,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Camera](#camera) | 6 | 0 | 0 | 6 | 0 | 3 of 3 |
 | [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
 | [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
-| [ECS (Entity Component System)](#ecs-entity-component-system) | 23 | 0 | 0 | 3 | 9 | 13 of 13 |
+| [ECS (Entity Component System)](#ecs-entity-component-system) | 24 | 0 | 0 | 2 | 9 | 13 of 14 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 7 | 0 | 0 | 0 | 0 | 6 of 6 |
 | [Gizmos](#gizmos) | 8 | 0 | 0 | 1 | 0 | 2 of 2 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **335** | **1** | **0** | **46** | **56** | **157 of 164** |
+| **All** | **336** | **1** | **0** | **45** | **56** | **157 of 165** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -303,7 +303,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`observers`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/observers.rs) | Demonstrates observers that react to events (both built-in life-cycle events and custom events) | [written](../BevyCSharp.Examples/ecs/observers.cs) |
 | [`one_shot_systems`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/one_shot_systems.rs) | Shows how to flexibly run systems without scheduling them | [written](../BevyCSharp.Examples/ecs/one_shot_systems.cs) |
 | [`parallel_query`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/parallel_query.rs) | Illustrates parallel queries with `ParallelIterator` | [written](../BevyCSharp.Examples/ecs/parallel_query.cs) |
-| [`relationships`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/relationships.rs) | Define and work with custom relationships between entities | missing, relationships of a game's own between entities |
+| [`relationships`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/relationships.rs) | Define and work with custom relationships between entities | [written](../BevyCSharp.Examples/ecs/relationships.cs), prints [its output](assets/examples/relationships.txt) |
 | [`removal_detection`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/removal_detection.rs) | Query for entities that had a specific component removed earlier in the current frame | [written](../BevyCSharp.Examples/ecs/removal_detection.cs) |
 | [`run_conditions`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/run_conditions.rs) | Run systems only when one or multiple conditions are met | [written](../BevyCSharp.Examples/ecs/run_conditions.cs), prints [its output](assets/examples/run_conditions.txt) |
 | [`startup_system`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/startup_system.rs) | Demonstrates a startup system (one that runs once when the app starts up) | [written](../BevyCSharp.Examples/ecs/startup_system.cs), prints [its output](assets/examples/startup_system.txt) |

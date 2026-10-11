@@ -213,6 +213,7 @@ internal static class Catalog
         new("observers", Observers.Build),
         new("one_shot_systems", OneShotSystems.Build),
         new("parallel_query", ParallelQueryExample.Build),
+        new("relationships", Relationships.Build, Prints: 1),
         new("removal_detection", RemovalDetection.Build),
         new("entity_disabling", EntityDisabling.Build, EntityDisabling.Configure),
         new("run_conditions", RunConditions.Build, Prints: 160),

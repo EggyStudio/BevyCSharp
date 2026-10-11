@@ -150,6 +150,26 @@ chain of arbitrary transforms cannot always be expressed as one, so `Scale`, `Ro
 
 Parenting is a structural change, so queue it on `ctx.Cmd` when calling from inside a loop.
 
+A relationship of the game's own works the way parenting does, named by a type of the game's, as
+Bevy's relationships example makes its `Targeting`. An entity relates to one other at a time and is
+related to by any number, which Bevy keeps a list of, and despawning either end takes the relation
+away:
+
+<!-- compiled with:
+public readonly struct Targeting;
+Entity bob = default, alice = default;
+-->
+```csharp
+ctx.Ecs.Relate<Targeting>(bob, alice);                   // Bob targets Alice
+var targets = ctx.Ecs.RelationOf<Targeting>(bob);        // Alice
+var targetedBy = ctx.Ecs.RelatedTo<Targeting>(alice);    // [Bob]
+foreach (var next in ctx.Ecs.RelationAncestors<Targeting>(bob)) { }
+ctx.Ecs.Unrelate<Targeting>(bob);
+```
+
+Bevy's relationships are Rust types, which C# cannot declare, so the bridge declares a set of them
+and each type of the game's takes one the first time it is used.
+
 ## Observers
 
 A message waits for a system to read it the next frame. An observer runs the moment its event is

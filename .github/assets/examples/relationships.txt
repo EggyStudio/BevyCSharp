@@ -1,0 +1,40 @@
+Alice is targeting Charlie, and is targeted by Bob
+Bob is targeting Alice, and is targeted by Charlie
+Charlie is targeting Bob, and is targeted by James, Devon, Alice
+James is targeting Charlie, and is targeted by nobody
+Devon is targeting Charlie, and is targeted by nobody
+
+Making Devon target Alice.
+
+Alice is targeting Charlie, and is targeted by Bob, Devon
+Bob is targeting Alice, and is targeted by Charlie
+Charlie is targeting Bob, and is targeted by James, Alice
+James is targeting Charlie, and is targeted by nobody
+Devon is targeting Alice, and is targeted by nobody
+
+Checking for cycles starting at Alice
+Alice is targeting Charlie
+Charlie is targeting Bob
+Bob is targeting Alice
+Alice is targeting Charlie
+Err(TargetingCycle { initial_entity: 121v0, visited: {123v0, 122v0, 121v0} }) 
+
+Removing Charlie's targeting relationship.
+
+Alice is targeting Charlie, and is targeted by Bob, Devon
+Bob is targeting Alice, and is targeted by nobody
+James is targeting Charlie, and is targeted by nobody
+Devon is targeting Alice, and is targeted by nobody
+
+Checking for cycles starting at Alice
+Alice is targeting Charlie
+Checking for cycles starting at Bob
+Bob is targeting Alice
+Alice is targeting Charlie
+Checking for cycles starting at James
+James is targeting Charlie
+Checking for cycles starting at Devon
+Devon is targeting Alice
+Alice is targeting Charlie
+Ok(()) 
+

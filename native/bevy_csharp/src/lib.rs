@@ -61,6 +61,7 @@ pub mod pick;
 pub mod pointer;
 pub mod profile;
 pub mod reflected;
+pub mod relations;
 pub mod render;
 pub mod schedules;
 pub mod state;
@@ -78,4 +79,4 @@ pub mod imgui;
 
 /// Version of the C ABI. C# checks this at load time and refuses a mismatch, so a stale
 /// native library next to a newer managed assembly fails loudly instead of corrupting memory.
-pub const ABI_VERSION: i32 = 259;
+pub const ABI_VERSION: i32 = 260;

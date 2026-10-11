@@ -10,9 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `68aa5dd5`. First the page: the owner pushed `c11c63d4` at 10:02, which cancelled
-`b3ac2a0e`'s Windows and macOS jobs, and its run is red on all three systems by one thing, the
-bridge's tests do not build: `atlas_builder.rs`'s test module imports
+Reviewed up to `7ffd96c6`. Verdict 12's mend in a commit of its own: the atlas builder's test module
+names no type of the renderer, its image helper taking the size, the dimension and the format from
+Bevy's default image, one pixel of the format wanted, and writing its own width and height into the
+size, so the bridge's tests build in the headless profile the workflow runs them in; `cargo test`
+with no feature, the workflow's profile, passes 83, and the larger profile passed 143 before.
+BUILDING.md says where it names `cargo test` that no feature means the headless profile without the
+renderer's crates, that a test reaching them sits under `render` or behind the feature, and that
+`cargo test` runs in the default profile before a commit as well; its new paragraph took the
+sentence after it, the one on a test during which the engine logs an error, which belongs to the
+paragraph before on the managed suite, and its last line runs to 104 columns, both put right with
+the next touch of the file. Right, the types borrowed from what the headless profile holds rather
+than a feature gate added for one test, and the rule written where the next session reads it. The
+relationships batch in progress stays out of the commit. The owner pushed `68aa5dd5` at 10:47
+without the mend, so its run reads the bridge step as `c11c63d4`'s did and the mend's push settles
+Verdict 12 on its page. Next relationships, then monitor_info's bridge part with the example in
+part, item 12 with the next touch of `EcsWorld.Reflected.cs`.
+
+Before it, `68aa5dd5` came, image_node_resizing, and first the page: the owner pushed `c11c63d4` at
+10:02, which cancelled `b3ac2a0e`'s Windows and macOS jobs, and its run is red on all three systems
+by one thing, the bridge's tests do not build: `atlas_builder.rs`'s test module imports
 `bevy::render::render_resource` for the texture's extent, dimension and format, which the headless
 profile the workflow builds the bridge's tests in does not have, where the six other modules that
 import that path lie under `render` and build with that feature alone; the managed tests passed,
@@ -72,24 +89,6 @@ Courtyard run on the pack run alone, as the workflow has them. Next image_node_r
 to confirm it, the components table written again from an editor build and the example; then
 monitor_info and relationships.
 
-Before it, one commit came to be read, render_primitives: the gizmos draw Bevy's planes, endless
-lines, capsules, annuli, circular sectors and segments and regular polygons through Bevy's own
-primitive drawing, nine kinds more, the round shapes taking a resolution as the sphere and the
-circle did, a sphere taking a rotation, and Bevy's arc drawn as the existing arc with its span
-doubled and its start turned back, so no kind was added for it; the example switches its 2D and 3D
-cameras and steps through the primitives with meshes where Bevy's sizes fit and mesh data for the
-lines, the polygons and the tetrahedron, the header following the active camera, Bevy's rotation
-from one direction to another written in the example; ABI 258. A fault found and fixed on the way:
-the cylinder gizmo passed the managed half height to Bevy's constructor that takes the whole, so
-every cylinder gizmo drew at half height, the physics colliders' gizmos and the feature test's
-bodies among them, which the port's own eye against Bevy's picture caught. `GizmoShapeTests` draws
-eight flat shapes and the plane, the endless line and the turned sphere, 44 of 44 on the GPU; the
-gizmos guide has its paragraph and block. Right, Bevy's own drawing reached rather than redrawn, the
-arc seen as the arc it already was, and the half height read from Bevy's signature. EXAMPLES.md
-reads 333 written, one in part and 48 missing, TODO.md's group four. The suite: 1,403 passed and 2
-skipped of 1,405; cargo's 142. Next texture_atlas, a native atlas built over loaded images with
-Bevy's builder and its padding, giving the image, its layout and each source's index.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -127,10 +126,12 @@ from [SHARED.md](SHARED.md).
    green on all three, `5d955562`'s cancelled by the push after it, and `b3ac2a0e`'s green on Linux
    in 4 m 40 s with 1,138 passed and 487 skipped and cancelled on Windows and macOS by the push of
    `c11c63d4` at 10:02, whose run is red on all three systems, the bridge's tests not building
-   (Verdict 12), the managed tests green, 1,059, 916 and 909. The captures' comparison, the README's
-   walk and Courtyard run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97`
-   is read on the owner's pack run's page (Decision 8). Each push's run is read by the reviewing
-   session, and a failure it names comes first here.
+   (Verdict 12), the managed tests green, 1,059, 916 and 909. The run of `68aa5dd5`, pushed at 10:47
+   before the mend, is in flight; Verdict 12's mend is `7ffd96c6`, and a run carrying it settles the
+   verdict when its bridge step is green. The captures' comparison, the README's walk and Courtyard
+   run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97` is read on the
+   owner's pack run's page (Decision 8). Each push's run is read by the reviewing session, and a
+   failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -387,8 +388,9 @@ from [SHARED.md](SHARED.md).
     module takes the types from where the headless profile has them, or its tests build with the
     render feature alone as the others do, in a commit of its own before anything else, since
     `68aa5dd5` carries the same file; and `cargo test` before a commit runs as the workflow runs it,
-    in the default profile, said in BUILDING.md where it names `cargo test`. Settled when a run's
-    bridge step is green.
+    in the default profile, said in BUILDING.md where it names `cargo test`. Mended at `7ffd96c6`,
+    the test's types taken from Bevy's default image and BUILDING.md saying the profile; the run of
+    `68aa5dd5` went before it. Settled when a run carrying the mend has its bridge step green.
 
 ## Decisions
 
