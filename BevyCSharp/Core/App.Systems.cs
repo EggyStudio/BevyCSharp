@@ -173,8 +173,8 @@ public sealed unsafe partial class App : IDisposable
 
     /// <summary>Hands Bevy the order each system asked for, by the systems' names, as the app starts.</summary>
     /// <exception cref="InvalidOperationException">
-    /// A system names one its stage has none of, or one that runs on a state's transition, which
-    /// is not in any stage to be ordered within.
+    /// A system names one its stage has none of, or one that runs on a state's transition or in a
+    /// schedule of the game's own, which is not in any stage to be ordered within.
     /// </exception>
     private void ApplyOrder()
     {
@@ -185,8 +185,8 @@ public sealed unsafe partial class App : IDisposable
 
             if (system.NativeId < 0 || system.Stage is Stage.Cleanup)
                 throw new InvalidOperationException(
-                    $"System '{descriptor.Name}' asks to be ordered, and it runs on a state's transition "
-                    + "or on the way out, where there is no stage to order it within.");
+                    $"System '{descriptor.Name}' asks to be ordered, and it runs on a state's transition, "
+                    + "in a schedule of the game's own or on the way out, where there is no stage to order it within.");
 
             foreach (var name in descriptor.RunsAfter) Order(system, name, after: true);
             foreach (var name in descriptor.RunsBefore) Order(system, name, after: false);

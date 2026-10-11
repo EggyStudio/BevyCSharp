@@ -10,7 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `98fb48f1`. Two commits more of the examples in part. `f9416e59`:
+Reviewed up to `1f7cc448`. One commit, Bevy's system stepping: `Stepping` and `SteppedSystem` add
+and remove a stage, turn stepping on and off, step a system or the rest of the frame, have a system
+always run, never run or stop the frame before it by its name, and list the stepped systems with the
+cursor and Bevy's own account, through `bevy_debug_stepping`, a feature of two crates already in the
+tree, the lock unchanged, a schedule with no stepping paying one lookup a run. Read: every C# system
+was one closure type to Bevy, so a system carries since the name it was added under through
+`with_name`, which names it in a trace's spans and an order's warning as well as here, a gain beyond
+the example; a schedule is taken out of its resource while it runs and a C# system always runs in
+one, so what C# asks by name is given to Bevy by node in Bevy's `Main` after the frame's schedules
+have run, and the stepped schedules are read again only where a system count changed; the bridge
+knows the six stages' order from the start, so the list stands the frame after a stage is added and
+a game can leave part of a stage running before its first step, where Bevy learns the order only
+once stepping is on. system_stepping prints Bevy's script frame for frame, leaving the other systems
+of Update to run since this app's Update holds every example's behaviors, said in its triage;
+breakout takes Bevy's panel and hint in `games/stepping.cs`, stepping the four systems the game
+names, checked live; both captures match on lavapipe; TODO.md's list of the examples in part is
+brought to the three that remain, solari, custom_transitions and log_diagnostics for `sysinfo`.
+Right, the schedule's lifetime respected rather than reached into, the names a gain everywhere, and
+the order known a frame early with the reason said. EXAMPLES.md reads 327 written, 3 in part and 52
+missing. The suite: 1,379, the three that failed, the cheat sheet, the surface and N 1.2 for a type
+in another's file, mended before the commit; cargo's 140. Next custom_transitions, a schedule of a
+game's own and a C# system in Bevy's transition schedule, then solari.
+
+Before it, two commits more came to be read, of the examples in part. `f9416e59`:
 `Window.SetCursorImage` makes the pointer an image of the game's own with its hotspot, as Bevy's
 window_settings shows one, through Bevy's `custom_cursor` feature, which pulls no crate, the lock
 gaining six lines of edges among its 594 packages, so Decision 25 allows it; a native test, ABI 252.
@@ -35,24 +58,6 @@ example reaches for and no more, each with its test. `render/assets.rs` stands a
 item 2 asks; `NormTests.cs` at 794 the same. Still in part: 3d_shapes, solari, breakout's stepping,
 custom_transitions and window_settings, which the coder takes next, and log_diagnostics, waiting on
 the owner's word for `sysinfo`.
-
-Before it, three commits came to be read, of the examples in part. `82e012f6`: a mesh made in code
-is compressed in place as Bevy's regular compression does, positions, normals, tangents and texture
-coordinates in sixteen bits, colors in eight and indices in sixteen where they fit, and a glTF scene
-is loaded with its meshes compressed as they load, two loads of a file being two sets of meshes as
-Bevy has it, with the warning that a shader of one's own reads attributes as they are kept, so a
-mesh one draws is left plain; two tests, a cube's indices from thirty-two bits to sixteen with the
-rest unchanged and a compressed scene spawning what the plain one does; many_cubes, many_foxes and
-many_morph_targets take their compression switch, ABI 247. `c5b6d1d3`: the drawing parts an app asks
-for move from `app.rs` into `render/options.rs`, `app.rs` at 709 lines and off the watch.
-`9e941884`: `Render.PointLightsDrawn` reads the point lights the render world held and drew, and a
-sphere is subdivided as many times as asked, so many_lights draws Bevy's sphere of lights, with
-tests; its lights' unseeded colors cover 33% of its pixels on lavapipe where they covered 6%, so its
-line in `build/captures-differ.txt` keeps its cause with the share raised, the list no longer than
-it was, which the reply says and is right, a share raised with its cause being the list's rule and
-not a line added. Right, the compression Bevy's and its warning said, the file's loads kept apart as
-Bevy keeps them, and the module split before the line was crossed. Next the rest of the examples in
-part that want no crate.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

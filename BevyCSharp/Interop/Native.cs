@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 254;
+    internal const int ExpectedAbiVersion = 255;
 
     static Native() => NativeLoader.Initialize();
 
@@ -576,6 +576,36 @@ internal static unsafe partial class Native
         int to,
         delegate* unmanaged[Cdecl]<IntPtr, void> callback,
         IntPtr user);
+
+    /// <summary>Registers a system among a state's exits, moves or entries, run with the move it made.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_add_step(
+        IntPtr app,
+        int slot,
+        int step,
+        delegate* unmanaged[Cdecl]<IntPtr, void> callback,
+        IntPtr user);
+
+    /// <summary>Reads the move a state made, while a system among its exits, moves or entries runs.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_state_step_transition(NativeStateTransition* transition);
+
+    /// <summary>Registers a C# system in a schedule of the game's own, by the schedule's name.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_app_add_schedule_system(
+        IntPtr app,
+        string schedule,
+        string name,
+        delegate* unmanaged[Cdecl]<IntPtr, void> callback,
+        IntPtr user);
+
+    /// <summary>Runs a schedule of the game's own, answering 1 where it ran.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_schedule_run(string schedule);
 
     /// <summary>Reads a slot's current value.</summary>
     [LibraryImport(Library)]

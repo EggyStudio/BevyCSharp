@@ -112,6 +112,26 @@ Setting the value the state already holds is a transition from it to itself, as 
 `[OnTransition]` from the value to itself, which is how a level restarts without a second state to
 pass through.
 
+A system can run inside the transition itself, among the state's exits, its moves or its entries,
+handed the move as it happens rather than the frame after. Bevy's custom_transitions runs a
+schedule of its own from there, one for each value, which is a `ScheduleLabel` here, named as the
+game likes, taking systems as a stage does and running them when a system asks:
+
+<!-- compiled with:
+public enum Screen { Menu, Playing, Paused }
+-->
+```csharp
+app.OnStateTransition<Screen>(TransitionStep.Enter, (ctx, move) =>
+{
+    if (move.Entered is { } entered) ctx.TryRunSchedule(new ScheduleLabel($"OnReenter({entered})"));
+}, "RunReenter");
+
+app.AddSystem(new ScheduleLabel("OnReenter(Playing)"), new SystemDescriptor(_ => { }, "BuildLevel"));
+```
+
+`TryRunSchedule` runs the schedule's systems before it returns and answers false for a schedule
+nothing was put in, so asking for every value's is harmless.
+
 A mode that only means anything inside another one is a sub-state. A pause outside a run is not
 "off", it is nothing, and saying so keeps a pause from being held when the next run starts:
 

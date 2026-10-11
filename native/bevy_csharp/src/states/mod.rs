@@ -20,7 +20,12 @@ use core::sync::atomic::{AtomicI32, Ordering};
 use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::state::app::AppExtStates;
-use bevy::state::state::{NextState, OnEnter, OnExit, OnTransition, State, States};
+use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::system::{In, IntoSystem};
+use bevy::state::state::{
+    last_transition, EnterSchedules, ExitSchedules, NextState, OnEnter, OnExit, OnTransition, State, StateTransition,
+    StateTransitionEvent, States, TransitionSchedules,
+};
 use bevy::state::state_scoped::{DespawnOnEnter, DespawnOnExit};
 
 use crate::interop::status;
@@ -323,6 +328,104 @@ pub unsafe extern "C" fn bcs_state_add_transition(
     })
 }
 
+/// Registers a C# system in Bevy's `StateTransition` schedule among `slot`'s exits (`step` 0), moves
+/// (1) or entries (2), run with the move the slot made that frame, which
+/// [`bcs_state_step_transition`] reads, and not in a frame it made none.
+///
+/// Bevy's custom_transitions runs schedules of its own from such a system, `OnReenter` and
+/// `OnReexit`, where Bevy's own `OnEnter` and `OnExit` are keyed by a value and run on every move
+/// to or from it. Among the exits it runs after every system leaving a value of a state that
+/// depends on this one, and among the entries before every system entering one, as Bevy orders
+/// the three sets.
+///
+/// # Safety
+/// `handle` must be a live app; `func` must remain callable until the app is destroyed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_state_add_step(
+    handle: *mut BcsApp,
+    slot: i32,
+    step: i32,
+    func: extern "C" fn(*mut core::ffi::c_void),
+    user: *mut core::ffi::c_void,
+) -> i32 {
+    crate::interop::guard(|| {
+        let Some(app) = (unsafe { app_mut(handle) }) else {
+            return status::NULL_ARG;
+        };
+        if app.running {
+            return status::ALREADY_RUNNING;
+        }
+
+        add_step(&mut app.app, slot, step, SystemReg { func, user })
+    })
+}
+
+thread_local! {
+    /// The move a state slot made, while a system [`bcs_state_add_step`] added runs.
+    static STEP_TRANSITION: core::cell::Cell<Option<BcsStateTransition>> = const { core::cell::Cell::new(None) };
+}
+
+/// Writes the move the slot made to `out` while a system [`bcs_state_add_step`] added runs, the
+/// innermost where one runs another's from a schedule, and answers [`status::NOT_PRESENT`] at any
+/// other time.
+///
+/// # Safety
+/// `out` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_state_step_transition(out: *mut BcsStateTransition) -> i32 {
+    crate::interop::guard(|| {
+        if out.is_null() {
+            return status::NULL_ARG;
+        }
+        match STEP_TRANSITION.with(core::cell::Cell::get) {
+            Some(transition) => {
+                unsafe { out.write(transition) };
+                status::OK
+            }
+            None => status::NOT_PRESENT,
+        }
+    })
+}
+
+/// Adds the system [`bcs_state_add_step`] registers for the state `S` in `slot`, Bevy's
+/// `last_transition` piped into it, as Bevy's custom_transitions pipes it into its own.
+fn add_step_for<S: States>(app: &mut App, slot: i32, step: i32, reg: SystemReg, value: fn(&S) -> i32) -> i32 {
+    let run = move |In(transition): In<Option<StateTransitionEvent<S>>>, world: &mut World| {
+        let Some(transition) = transition else {
+            return;
+        };
+        let mut made = BcsStateTransition { slot, flags: 0, exited: 0, entered: 0 };
+        if let Some(exited) = &transition.exited {
+            made.flags |= 1;
+            made.exited = value(exited);
+        }
+        if let Some(entered) = &transition.entered {
+            made.flags |= 2;
+            made.entered = value(entered);
+        }
+
+        // The outer move back afterward, whatever the system does, since one of these can run a
+        // schedule holding another.
+        struct Restore(Option<BcsStateTransition>);
+        impl Drop for Restore {
+            fn drop(&mut self) {
+                STEP_TRANSITION.with(|cell| cell.set(self.0));
+            }
+        }
+        let _restore = Restore(STEP_TRANSITION.with(|cell| cell.replace(Some(made))));
+        loan_world(world, || reg.invoke());
+    };
+
+    let system = last_transition::<S>.pipe(run);
+    match step {
+        0 => app.add_systems(StateTransition, system.in_set(ExitSchedules::<S>::default())),
+        1 => app.add_systems(StateTransition, system.in_set(TransitionSchedules::<S>::default())),
+        2 => app.add_systems(StateTransition, system.in_set(EnterSchedules::<S>::default())),
+        _ => return status::NULL_ARG,
+    };
+    status::OK
+}
+
 /// Marks an entity to be despawned when `slot` leaves `value`.
 ///
 /// What removes a level without a teardown system listing everything it spawned. The entities a
@@ -502,4 +605,52 @@ pub unsafe extern "C" fn bcs_computed_add_rule(handle: *mut BcsApp, slot: i32) -
 
         insert_computed(&mut app.app, slot, &[], &[], true)
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Mutex;
+
+    use bevy::app::App;
+    use bevy::state::app::{AppExtStates, StatesPlugin};
+    use bevy::state::state::{NextState, States};
+
+    use super::{BcsStateTransition, SystemReg};
+    use crate::interop::status;
+
+    #[derive(States, Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    struct Tested(i32);
+
+    /// Each move the system was run with, as it read it.
+    static SEEN: Mutex<Vec<(u32, i32, i32)>> = Mutex::new(Vec::new());
+
+    extern "C" fn record(_: *mut core::ffi::c_void) {
+        let mut made = BcsStateTransition { slot: 0, flags: 0, exited: 0, entered: 0 };
+        assert_eq!(unsafe { super::bcs_state_step_transition(&mut made) }, status::OK);
+        assert_eq!(made.slot, 5);
+        SEEN.lock().unwrap().push((made.flags, made.exited, made.entered));
+    }
+
+    /// Bevy's custom_transitions in small, a system among a state's entries run with each move,
+    /// one to the value the state holds among them, and with none in a frame that made none.
+    #[test]
+    fn a_step_system_runs_with_each_move_a_state_makes() {
+        let mut app = App::new();
+        app.add_plugins(StatesPlugin).insert_state(Tested(0));
+        let reg = SystemReg { func: record, user: core::ptr::null_mut() };
+        assert_eq!(super::add_step_for::<Tested>(&mut app, 5, 2, reg, |s| s.0), status::OK);
+        assert_eq!(super::add_step_for::<Tested>(&mut app, 5, 3, reg, |s| s.0), status::NULL_ARG);
+
+        // The state's first value is entered from nothing.
+        app.update();
+        app.update();
+        app.world_mut().resource_mut::<NextState<Tested>>().set(Tested(1));
+        app.update();
+        app.world_mut().resource_mut::<NextState<Tested>>().set(Tested(1));
+        app.update();
+
+        assert_eq!(*SEEN.lock().unwrap(), [(2, 0, 0), (3, 0, 1), (3, 1, 1)]);
+        let mut made = BcsStateTransition { slot: 0, flags: 0, exited: 0, entered: 0 };
+        assert_eq!(unsafe { super::bcs_state_step_transition(&mut made) }, status::NOT_PRESENT);
+    }
 }

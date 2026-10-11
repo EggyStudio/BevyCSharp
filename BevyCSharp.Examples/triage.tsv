@@ -310,7 +310,6 @@ specialized_mesh_pipeline	n/a	writes a mesh pipeline in Rust
 storage_buffer	can
 texture_binding_array	can	without Bevy's check that the GPU indexes such an array by a value that differs from pixel to pixel
 computed_states	can	InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number
-custom_transitions	part	schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does
 states	can
 sub_states	can
 bevymark_3d	can

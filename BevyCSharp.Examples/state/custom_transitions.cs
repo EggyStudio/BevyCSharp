@@ -8,10 +8,9 @@ using AppState = BevyCSharp.Examples.States.StatesExample.AppState;
 namespace BevyCSharp.Examples.States;
 
 // Transitions to the same state, the game of the states example started again by its Restart Game
-// button. Bevy's adds schedules of its own run on such a transition, OnReenter and OnReexit, which
-// take the game down and build it again. Here the state's leaving and entering do that, since
-// Bevy's NextState::set, which setting a state calls, runs them on a value set again as on any
-// other move.
+// button. Two schedules of the example's own, OnReenter and OnReexit, run on every move of the
+// state, one to the value it holds among them, from systems inside the state's transition that
+// read the move, and they take the game down and build it again.
 internal static class CustomTransitions
 {
     public static void Build(App app)
@@ -33,14 +32,25 @@ internal static class CustomTransitions
         app.AddStateSystem(AppState.Menu, entering: true, new SystemDescriptor(world => StatesExample.SetupMenu(new BehaviorContext(world)), "custom_transitions.SetupMenu"));
         app.AddStateSystem(AppState.Menu, entering: false, new SystemDescriptor(world => StatesExample.CleanupMenu(new BehaviorContext(world)), "custom_transitions.CleanupMenu"));
 
-        // Bevy's OnReenter and OnReexit, run as the game is entered or left, a restart among them.
-        app.AddStateSystem(AppState.InGame, entering: true, new SystemDescriptor(world =>
+        // Bevy's IdentityTransitionsPlugin, the state's move run into the schedule of the value it
+        // entered among the transition's entries, and of the one it left among its exits.
+        app.OnStateTransition<AppState>(TransitionStep.Enter, (ctx, move) =>
+        {
+            if (move.Entered is { } entered) ctx.TryRunSchedule(OnReenter(entered));
+        }, "custom_transitions.RunReenter");
+        app.OnStateTransition<AppState>(TransitionStep.Exit, (ctx, move) =>
+        {
+            if (move.Exited is { } exited) ctx.TryRunSchedule(OnReexit(exited));
+        }, "custom_transitions.RunReexit");
+
+        // The game started again every time it is entered, a restart among them.
+        app.AddSystem(OnReenter(AppState.InGame), new SystemDescriptor(world =>
         {
             StatesExample.SetupGame(new BehaviorContext(world));
             SetupInterface(world.Resource<EcsWorld>());
             Console.WriteLine("Setup game");
         }, "custom_transitions.SetupGame"));
-        app.AddStateSystem(AppState.InGame, entering: false, new SystemDescriptor(world =>
+        app.AddSystem(OnReexit(AppState.InGame), new SystemDescriptor(world =>
         {
             world.Resource<EcsWorld>().Despawn(StatesExample.Logo);
             Console.WriteLine("Teardown game");
@@ -56,6 +66,11 @@ internal static class CustomTransitions
                 Console.WriteLine($"AppState transition: {(t.Exited is { } from ? $"Some({from})" : "None")} => {(t.Entered is { } to ? $"Some({to})" : "None")}");
         }, "custom_transitions.LogTransitions");
     }
+
+    // Bevy's OnReenter and OnReexit, a schedule of the example's own for each value of the state,
+    // which Bevy keys by a label holding the value and this by a name holding it.
+    private static ScheduleLabel OnReenter(AppState state) => new($"OnReenter({state})");
+    private static ScheduleLabel OnReexit(AppState state) => new($"OnReexit({state})");
 
     // The interface of Bevy's setup_game, the hint and the Restart Game button, a button of Bevy's
     // widgets green while it is pressed. Spawned again on each restart over the last, as Bevy's

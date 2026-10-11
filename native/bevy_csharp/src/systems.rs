@@ -4,7 +4,7 @@ use core::ffi::c_void;
 
 use bevy::app::{First, FixedUpdate, Last, PostUpdate, PreUpdate, Startup, Update};
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
-use bevy::ecs::system::IntoSystem;
+use bevy::ecs::system::{IntoSystem, ScheduleSystem};
 use bevy::ecs::world::World;
 
 use crate::app::{BcsSet, Stage};
@@ -18,12 +18,25 @@ use crate::state::{app_mut, loan_world, BcsApp, SystemReg};
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 struct BcsSystem(u32);
 
-/// Registers a C# system in `stage` under `name`, and returns the number it was given, for ordering
-/// it.
+/// A C# system as Bevy runs it, called `name` where one is given, with the world on loan to it and
+/// cursors over the components' removals of its own from one run to the next (`removals`).
 ///
 /// The name is the one Bevy reports the system by, in a trace's spans, a warning about order and
 /// the list of a schedule's systems that stepping walks, where every C# system would otherwise be
 /// the one closure here and none could be told from another.
+pub(crate) fn csharp_system(name: Option<String>, reg: SystemReg) -> ScheduleSystem {
+    let mut cursors = crate::removals::RemovalCursors::default();
+    let run = IntoSystem::into_system(move |world: &mut World| {
+        crate::removals::running(&mut cursors, || loan_world(world, || reg.invoke()))
+    });
+    match name {
+        Some(name) => Box::new(run.with_name(name)),
+        None => Box::new(run),
+    }
+}
+
+/// Registers a C# system in `stage` under `name`, and returns the number it was given, for ordering
+/// it.
 ///
 /// # Safety
 /// `handle` must be a live app; `name` must be a NUL-terminated UTF-8 string or null for Bevy's own
@@ -51,17 +64,7 @@ pub unsafe extern "C" fn bcs_app_add_system(
         let reg = SystemReg { func, user };
         let id = app.next_system;
         app.next_system += 1;
-        // The system's cursors over the components' removals, its own from one run to the next,
-        // which it makes the running ones while it runs (`removals`).
-        let mut cursors = crate::removals::RemovalCursors::default();
-        let run = IntoSystem::into_system(move |world: &mut World| {
-            crate::removals::running(&mut cursors, || loan_world(world, || reg.invoke()))
-        });
-        let run = match name {
-            Some(name) => run.with_name(name),
-            None => run,
-        }
-        .in_set(BcsSystem(id));
+        let run = csharp_system(name, reg).in_set(BcsSystem(id));
 
         match stage {
             Stage::Startup => {

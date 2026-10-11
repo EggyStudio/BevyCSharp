@@ -431,6 +431,22 @@ macro_rules! define_slots {
             }
         }
 
+        /// Adds a system to Bevy's `StateTransition` schedule among a slot's exits, moves or
+        /// entries, run with the move the slot made that frame. See [`super::add_step_for`].
+        pub(super) fn add_step(app: &mut App, slot: i32, step: i32, reg: SystemReg) -> i32 {
+            match slot {
+                $($slot => add_step_for::<$ty>(app, slot, step, reg, |s| s.0),)+
+                $(_ if slot == SLOT_COUNT + $subslot => add_step_for::<$sub>(app, slot, step, reg, |s| s.0),)+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + $cslot =>
+                    add_step_for::<$derived>(app, slot, step, reg, |s| s.0),)+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + $jslot =>
+                    add_step_for::<$joint>(app, slot, step, reg, |s| s.0),)+
+                $(_ if slot == SLOT_COUNT + SUB_COUNT + COMPUTED_COUNT + JOINT_COUNT + $jsslot =>
+                    add_step_for::<$jsub>(app, slot, step, reg, |s| s.0),)+
+                _ => status::NULL_ARG,
+            }
+        }
+
         /// Marks an entity to be despawned when a slot leaves a value, or as it enters the value
         /// where `on_enter` is set, Bevy's `DespawnOnEnter`.
         ///

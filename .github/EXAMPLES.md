@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**327 written, 3 written in part, 0 can be written, 52 missing and 56 do not apply.** Of the 382 that apply, 330 can be written with what is bridged, 3 of them leaving something out.
+**328 written, 2 written in part, 0 can be written, 52 missing and 56 do not apply.** Of the 382 that apply, 330 can be written with what is bridged, 2 of them leaving something out.
 
 **156 of the 161 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -33,7 +33,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Scene](#scene) | 0 | 0 | 0 | 2 | 0 |  |
 | [Shaders](#shaders) | 22 | 0 | 0 | 2 | 3 | 7 of 8 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
-| [State](#state) | 3 | 1 | 0 | 0 | 0 | 1 of 1 |
+| [State](#state) | 4 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 19 | 0 | 0 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 8 | 0 | 0 | 3 | 0 | 2 of 2 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **327** | **3** | **0** | **52** | **56** | **156 of 161** |
+| **All** | **328** | **2** | **0** | **52** | **56** | **156 of 161** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band.
 
@@ -311,7 +311,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`system_closure`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_closure.rs) | Show how to use closures as systems, and how to configure `Local` variables by capturing external state | [written](../BevyCSharp.Examples/ecs/system_closure.cs), prints [its output](assets/examples/system_closure.txt) |
 | [`system_param`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_param.rs) | Illustrates creating custom system parameters with `SystemParam` | does not apply, derives a Rust SystemParam |
 | [`system_piping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_piping.rs) | Pipe the output of one system into a second, allowing you to handle any errors gracefully | does not apply, pipes Rust system outputs |
-| [`system_stepping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_stepping.rs) | Demonstrate stepping through systems in order of execution. | [written](../BevyCSharp.Examples/ecs/system_stepping.cs), the other systems of Update, which here are every example's behaviors, left to run so a step runs one of its four, and its stage added a frame before stepping is on so they are known |
+| [`system_stepping`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ecs/system_stepping.rs) | Demonstrate stepping through systems in order of execution. | [written](../BevyCSharp.Examples/ecs/system_stepping.cs), prints [its output](assets/examples/system_stepping.txt), the other systems of Update, which here are every example's behaviors, left to run so a step runs one of its four, and its stage added a frame before stepping is on so they are known |
 
 ## Embedded
 
@@ -468,7 +468,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`computed_states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/computed_states.rs) | Advanced state patterns using Computed States. | [written](../BevyCSharp.Examples/state/computed_states.cs), InGame { paused, turbo } the bits of a [Flags] enum, since a state here holds one number |
-| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written in part](../BevyCSharp.Examples/state/custom_transitions.cs), schedules of a game's own run at a transition, which here are the state's own entering and leaving, since setting a value again runs them as Bevy's NextState::set does |
+| [`custom_transitions`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/custom_transitions.rs) | Creating and working with custom state transition schedules. | [written](../BevyCSharp.Examples/state/custom_transitions.cs) |
 | [`states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/states.rs) | Illustrates how to use States to control transitioning from a Menu state to an InGame state. | [written](../BevyCSharp.Examples/state/states.cs) |
 | [`sub_states`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/state/sub_states.rs) | Using Sub States for hierarchical state handling. | [written](../BevyCSharp.Examples/state/sub_states.cs) |
 

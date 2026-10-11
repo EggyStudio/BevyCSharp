@@ -57,7 +57,7 @@ the most examples, and the largest is taken between groups of examples. The coun
   ambiguous (`nondeterministic_system_order`), and a message changed in place by a later system and
   read the same frame, where a C# message is read the frame after it is sent (`message`).
 
-Three examples are written in part, each leaving out a feature named in its row.
+Two examples are written in part, each leaving out a feature named in its row.
 
 - **Solari's path tracer, and the count of its world cache's cells**, which `solari` leaves out of
   its picture and its panel. Bevy's `PathtracingPlugin` and its `Pathtracer` component are not
@@ -67,11 +67,6 @@ Three examples are written in part, each leaving out a feature named in its row.
 - **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
   memory of the process and of the machine. Bevy reads them through `sysinfo`, a crate the bridge
   does not build.
-- **Schedules of a game's own**, which `custom_transitions` runs at a transition in Bevy, its
-  `OnReenter` and `OnReexit` run from a system in Bevy's `StateTransition` schedule. Here the
-  state's own entering and leaving take their place, which Bevy runs on a value set again as on any
-  other move. A schedule is a Rust type, so the bridge would need a label holding a number, and a
-  C# system run inside the transition with the transition it reads.
 
 ## Content
 

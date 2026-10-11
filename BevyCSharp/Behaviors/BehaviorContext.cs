@@ -112,6 +112,22 @@ public sealed class BehaviorContext
     public ReadOnlySpan<TMessage> Read<TMessage>() where TMessage : notnull =>
         Messages.Read<TMessage>();
 
+    /// <summary>
+    /// Runs the systems of a schedule of the game's own to their end, before this call returns, as
+    /// Bevy's <c>World::try_run_schedule</c> does, and answers whether it ran. Main thread only.
+    /// </summary>
+    /// <remarks>
+    /// A schedule nothing was put in with <see cref="App.AddSystem(ScheduleLabel, SystemDescriptor)"/>
+    /// does not run, nor one already running, as a schedule that asks for itself is, so a game asks
+    /// for a schedule of each value of a state whether or not the value has systems, as Bevy's
+    /// custom_transitions does.
+    /// </remarks>
+    public bool TryRunSchedule(ScheduleLabel schedule)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(schedule.Name);
+        return Interop.Native.Check(Interop.Native.bcs_schedule_run(schedule.Name), $"running schedule '{schedule.Name}'") == 1;
+    }
+
     /// <summary>Asks the engine to shut down after this frame.</summary>
     public void Exit() => App.RequestExit();
 

@@ -33,6 +33,8 @@ static void RequestExit();                                      // Asks the engi
 static void RequestExit(int code);                              // Asks the engine to shut down after the current frame, the run ending with code
 static string? DescribeAdapter();                               // Describes the graphics adapter the renderer actually chose, or null in a headless run
 void Dispose();                                                 // Releases what it holds
+App AddSystem(ScheduleLabel schedule, SystemDescriptor descriptor);  // Puts a system in a schedule of the game's own, which runs it when a system asks with TryRunSchedule, as Bevy's add_systems with a label of the game's does
+App OnStateTransition<TState>(TransitionStep step, Action<BehaviorContext, StateTransitionEvent<TState>> run, string name);  // Runs run in Bevy's transition of TState, at step, with the move the state made, in every frame it makes one
 App AddState<TState>(TState initial);                           // Adds a state machine over TState, starting at initial
 App AddSubState<TState>(TState initial);                        // Adds a sub-state over TState, which exists only while its parent holds the value its SubStateOfAttribute names
 App AddComputedState<TState, TSource>(params (TSource, TState)[] table);  // Adds a state worked out from another rather than set
@@ -142,6 +144,7 @@ TState State<TState>();                                         // The current v
 void SetState<TState>(TState value);                            // Asks Bevy to move TState to value
 void Send<TMessage>(TMessage message);                          // Broadcasts a message for every reader to see next frame
 ReadOnlySpan<TMessage> Read<TMessage>();                        // The messages of type TMessage sent during the previous frame
+bool TryRunSchedule(ScheduleLabel schedule);                    // Runs the systems of a schedule of the game's own to their end, before this call returns, as Bevy's World::try_run_schedule does, and answers whether it ran
 void Exit();                                                    // Asks the engine to shut down after this frame
 void Exit(int code);                                            // Asks the engine to shut down after this frame, the run ending with code, as RequestExit does
 ```

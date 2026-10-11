@@ -184,6 +184,7 @@ sealed class Bevy.App : IDisposable
   App AddState<TState>(TState initial) where TState : struct, Enum
   App AddStateSystem<TState>(TState value, bool entering, SystemDescriptor descriptor) where TState : struct, Enum
   App AddSubState<TState>(TState initial) where TState : struct, Enum
+  App AddSystem(ScheduleLabel schedule, SystemDescriptor descriptor)
   App AddSystem(Stage stage, SystemDescriptor descriptor)
   App AddSystem(Stage stage, SystemFn system)
   App AddSystem(Stage stage, SystemFn system, Func<World, bool> runCondition)
@@ -195,6 +196,7 @@ sealed class Bevy.App : IDisposable
   App OnDiscard<T>(ComponentHook<T> hook) where T : unmanaged
   App OnInsert<T>(ComponentHook<T> hook) where T : unmanaged
   App OnRemove<T>(ComponentHook<T> hook) where T : unmanaged
+  App OnStateTransition<TState>(TransitionStep step, Action<BehaviorContext, StateTransitionEvent<TState>> run, string name) where TState : struct, Enum
   App SpawnGltf(string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0)
   App Startup(Action<BehaviorContext> setup, string name = "Startup")
   App Update(Action<BehaviorContext> update, string name = "Update")
@@ -417,6 +419,7 @@ sealed class Bevy.BehaviorContext
   Time Time { get; }
   World World { get; }
   bool TryRes<T>(out T value)
+  bool TryRunSchedule(ScheduleLabel schedule)
   void Exit()
   void Exit(int code)
   void Send<TMessage>(TMessage message)
@@ -10337,6 +10340,16 @@ static class Bevy.SceneValue
   static int ReadComponent(JsonElement json, ComponentSchema schema, EcsWorld world, Entity entity, SceneReferences? references = null)
   static int WriteComponent(Utf8JsonWriter json, ComponentSchema schema, EcsWorld world, Entity entity, SceneReferences? references = null, IReadOnlyList<KeyValuePair<string, string>>? kept = null)
   static object? Read(JsonElement json, ComponentField field, SceneReferences? references = null)
+readonly struct Bevy.ScheduleLabel : IEquatable<ScheduleLabel>
+  ScheduleLabel(string Name)
+  bool Equals(ScheduleLabel other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(ScheduleLabel left, ScheduleLabel right)
+  static bool op_Inequality(ScheduleLabel left, ScheduleLabel right)
+  string Name { get; init; }
+  void Deconstruct(out string Name)
 enum Bevy.SchemaOrigin : int
   Declared = 0
   Mirrored = 1
@@ -11063,6 +11076,10 @@ struct Bevy.Transform : INativeComponent
   static Transform At(float x, float y, float z)
   static Transform Identity { get; }
   static Transform LookingAt(Vec3 eye, Vec3 target, Vec3 up)
+enum Bevy.TransitionStep : int
+  Enter = 2
+  Exit = 0
+  Transition = 1
 readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>
   (Vec2, float) Circumcircle()
   Aabb2d AabbAt(Isometry2d isometry)

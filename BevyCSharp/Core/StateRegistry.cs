@@ -302,7 +302,7 @@ public static unsafe class StateRegistry
     }
 
     /// <summary>The enum value a slot's number stands for.</summary>
-    private static TState FromInt<TState>(int value) where TState : struct, Enum => Unsafe.As<int, TState>(ref value);
+    internal static TState FromInt<TState>(int value) where TState : struct, Enum => Unsafe.As<int, TState>(ref value);
 
     /// <summary>
     /// The same, for a type known only at runtime.
