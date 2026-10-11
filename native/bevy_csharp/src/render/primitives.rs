@@ -83,6 +83,16 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
     let mesh: Mesh = match kind {
         "Cuboid" => Cuboid::new(a, b, c).mesh().into(),
         "Sphere" => Sphere::new(a).mesh().into(),
+        // Bevy's default sphere subdivided as many times as asked rather than its five, which
+        // Bevy refuses at eighty and over for the vertices it would take, as Bevy's many_lights
+        // subdivides its sphere nine times to light its inside evenly.
+        "IcoSphere" => match Sphere::new(a).mesh().ico(b as u32) {
+            Ok(mesh) => mesh,
+            Err(error) => {
+                bevy::log::warn!("{error}, so the sphere is subdivided five times, as Bevy's default is");
+                Sphere::new(a).mesh().into()
+            }
+        },
         // A sphere of rings and slices rather than Bevy's default of subdivided triangles, which
         // maps an image around it the way a globe is drawn: the radius, then how many slices go
         // around it and how many rings from pole to pole, at least three and two.

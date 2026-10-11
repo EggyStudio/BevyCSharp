@@ -324,7 +324,6 @@ many_components	n/a	registers components dynamically in Rust
 many_gizmos	can
 many_glyphs	can
 many_gradients	can	through Bevy's reflected BackgroundGradient
-many_lights	part	the lights its render world saw and drew, counted in its log, which no wrapper reaches there, and its sphere subdivided as Bevy subdivides one by default rather than nine times
 many_materials	can
 many_morph_targets	can	the weights set through Bevy's reflected MorphWeights
 many_sprites	can

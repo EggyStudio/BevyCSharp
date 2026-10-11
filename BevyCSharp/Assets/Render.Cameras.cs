@@ -147,6 +147,26 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// The point lights the render world held as it prepared the last frame it drew, and of those
+    /// the ones the view's clusters held, which the frame lit with. Both zero before a frame has
+    /// been drawn, or where nothing draws.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's many_lights stress test logs the two as its visible and its rendered lights, to show
+    /// how many of a hundred thousand lights the clusters kept. The render world runs a frame behind
+    /// the game's, so the counts are of the frame before.
+    /// </remarks>
+    public static (int Visible, int Rendered) PointLightsDrawn
+    {
+        get
+        {
+            var counts = stackalloc uint[2];
+            Native.Check(Native.bcs_render_point_lights_drawn(counts), "reading the point lights drawn");
+            return ((int)counts[0], (int)counts[1]);
+        }
+    }
+
+    /// <summary>
     /// Spawns a light and returns it.
     /// </summary>
     /// <param name="kind">Which light to spawn.</param>

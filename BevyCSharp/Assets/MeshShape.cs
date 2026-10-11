@@ -20,6 +20,19 @@ public static class MeshShape
     /// </remarks>
     public const string UvSphere = "UvSphere";
 
+    /// <summary>
+    /// A sphere of subdivided triangles, sized by radius, then how many times its icosahedron is
+    /// subdivided.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Sphere"/> is this subdivided five times, Bevy's default, of 362 vertices. More
+    /// make more and smaller triangles, ten times the square of one more than the subdivisions and
+    /// two more vertices, so a sphere lit from inside, as Bevy's many_lights subdivides nine times,
+    /// is even under its lights. Bevy refuses eighty and over for the vertices it would take, and
+    /// the sphere is then subdivided five times with a warning.
+    /// </remarks>
+    public const string IcoSphere = "IcoSphere";
+
     /// <summary>A flat plane on the XZ axes, sized by width and depth.</summary>
     public const string Plane = "Plane";
 

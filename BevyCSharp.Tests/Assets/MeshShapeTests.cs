@@ -4,7 +4,10 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>Covers a sector and a segment whose image is mapped at an angle, <see cref="MeshShape.UvAngle"/>.</summary>
+/// <summary>
+/// Covers a sector and a segment whose image is mapped at an angle, <see cref="MeshShape.UvAngle"/>,
+/// and a sphere subdivided as many times as asked, <see cref="MeshShape.IcoSphere"/>.
+/// </summary>
 /// <remarks>
 /// The angle turns the texture coordinates alone, which nothing reads back here, so Bevy's
 /// <c>mesh2d_arcs</c> shows them. What is pinned down is the rest, that the shape is the sector or
@@ -42,5 +45,33 @@ public sealed class MeshShapeTests
 
         harness.Run();
         Assert.True(ran);
+    }
+
+    /// <summary>
+    /// A sphere subdivided five times is Bevy's default one, nine times has the vertices Bevy's
+    /// icosphere of nine has, and eighty, which Bevy refuses, falls back to the default.
+    /// </summary>
+    [SkippableFact]
+    public void ASphereIsSubdividedAsManyTimesAsAsked()
+    {
+        Needs.Renderer();
+
+        int Vertices(AssetHandle mesh) => Render.TryGetMeshInfo(mesh, out var info) ? info.Vertices : -1;
+
+        (int Default, int Five, int Nine, int Refused) counts = default;
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Startup, _ => counts = (
+            Vertices(Render.CreateMesh(MeshShape.Sphere, 1f)),
+            Vertices(Render.CreateMesh(MeshShape.IcoSphere, 1f, 5f)),
+            Vertices(Render.CreateMesh(MeshShape.IcoSphere, 1f, 9f)),
+            Vertices(Render.CreateMesh(MeshShape.IcoSphere, 1f, 80f))));
+
+        harness.Run();
+
+        Assert.True(counts.Default > 0, $"the default sphere read {counts.Default} vertices");
+        Assert.Equal(counts.Default, counts.Five);
+        // Ten times the square of one more than the subdivisions, and two.
+        Assert.Equal((362, 1002), (counts.Five, counts.Nine));
+        Assert.Equal(counts.Default, counts.Refused);
     }
 }

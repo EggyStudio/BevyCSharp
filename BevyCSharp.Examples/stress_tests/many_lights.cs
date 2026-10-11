@@ -45,7 +45,7 @@ internal static class ManyLights
 
         // The sphere they light, turned inside out so its inside faces the camera. Bevy subdivides
         // it nine times where the bridge's sphere is subdivided Bevy's default five.
-        ecs.SpawnMesh(Render.CreateMesh(MeshShape.Sphere, Radius), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.Identity, new Vec3(-1f)));
+        ecs.SpawnMesh(Render.CreateMesh(MeshShape.IcoSphere, Radius, 9f), Render.CreateMaterial((1f, 1f, 1f, 1f)), new Transform(Vec3.Zero, Quat.Identity, new Vec3(-1f)));
 
         // A spiral over the sphere, which gives about as many lights in view whichever way the
         // camera looks, in doubles so the spread has no seams.
@@ -90,8 +90,8 @@ internal static class ManyLights
         ctx.Ecs.Set(_camera, camera);
     }
 
-    // The lights once a second. Bevy also counts, in its render world, the lights a view saw and the
-    // lights drawn, which no wrapper reaches.
+    // The lights once a second, and those the render world held and drew, as Bevy counts them in
+    // its render world, a frame behind.
     private static void PrintLightCount(BehaviorContext ctx)
     {
         _printing += ctx.Time.Delta;
@@ -99,5 +99,7 @@ internal static class ManyLights
 
         _printing -= 1f;
         Console.WriteLine($"Lights: {NLights}");
+        var (visible, rendered) = Render.PointLightsDrawn;
+        Console.WriteLine($"Visible Lights: {visible}, Rendered Lights: {rendered}");
     }
 }

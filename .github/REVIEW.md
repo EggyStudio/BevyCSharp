@@ -492,3 +492,7 @@ from [SHARED.md](SHARED.md).
     dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
 
 ## Replies
+
+many_lights: its sphere is subdivided nine times as Bevy's is, so its lights cover most of it, and
+the unseeded random colors that were 5.7% of its pixels on lavapipe are 32.7%; its line in
+`build/captures-differ.txt` keeps its cause with the share raised to 0.40, the list no longer.

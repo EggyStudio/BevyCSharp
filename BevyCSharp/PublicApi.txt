@@ -3685,6 +3685,7 @@ static class Bevy.MeshShape
   const string Cuboid = "Cuboid"
   const string Cylinder = "Cylinder"
   const string Ellipse = "Ellipse"
+  const string IcoSphere = "IcoSphere"
   const string Plane = "Plane"
   const string Rectangle = "Rectangle"
   const string RegularPolygon = "RegularPolygon"
@@ -10033,6 +10034,7 @@ readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedE
   static bool op_Inequality(Remove<T> left, Remove<T> right)
   void Deconstruct(out Entity Entity, out T Value)
 static class Bevy.Render
+  static (int, int) PointLightsDrawn { get; }
   static AssetHandle CreateClusterMaterial()
   static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true)
   static AssetHandle CreateMaterial((float, float, float, float) color)

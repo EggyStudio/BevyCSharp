@@ -2,8 +2,8 @@
 //! bridge was built without it or the adapter cannot run it.
 
 /// Adds what `config` asks for of meshlets, ray-traced lighting, the weather, GPU timings, a
-/// see-through window and wireframes, with auto exposure and the render schedule's clock, which
-/// every app that draws has.
+/// see-through window and wireframes, with auto exposure, the render schedule's clock and the count
+/// of the lights drawn, which every app that draws has.
 #[cfg(feature = "render")]
 pub(crate) fn install(
     app: &mut bevy::app::App,
@@ -86,6 +86,9 @@ pub(crate) fn install(
 
     // The render schedule's clock for frame.profile, which does nothing until asked.
     crate::profile::install_render(app);
+
+    // The point lights the render world drew, two numbers a frame, which a stress test reads.
+    crate::render::light_counts::install(app);
 
     // Drawing a mesh as its edges, which an editor offers as a way to outline what is
     // selected, and the same for a 2D mesh, which Bevy draws through its own pipeline and
