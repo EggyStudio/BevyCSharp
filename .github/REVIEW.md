@@ -10,7 +10,45 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `21d08b44`. Two commits, and first the page: the owner pushed the eleven through
+Reviewed up to `ea5e1532`. Three commits, unpushed. `53fd0c3f`, item 14 on the owner's word typed in
+the working session: the bcs guide is `.github/BCS.md`, moved with its history and its header
+dropped, AGENTS.md's line and STYLE.md's scope point to it, `.claude/` is in `.gitignore` with its
+reason and the folder is gone with the lock file the tool kept there; no reference to the old path
+is left outside this file. `04cefc8e`, item 13's fit: the capture script scales a shot of another
+shape to cover 1280 by 720 and cuts it around the middle in place of the padding, the resizing and
+window settings examples filled so, the grid example, whose header and footer the cut would lose,
+opened at Bevy's default window instead of its own, and the scale factor example, whose label the
+cut would lose, at 512 by 288, the sixteen by nine nearest Bevy's 500 by 300, each said in the
+triage notes and the files' heads; and a second slip of the working session's found on the way,
+`21d08b44`'s padded sizes not on N 4.5's list, which the pushed head carries and whose run reads red
+on that test, mended here with the three off the list and the scale factor's line at its new size,
+the norm tests on the commit's own tree 17 passed and 1 skipped. `ea5e1532`, low_power, ABI 264:
+`Window.SetUpdateSettings` sets winit's two modes, focused and not, each continuous or reactive with
+a wait and the events it wakes for, a negative or non-numeric wait refused naming the field, from
+Bevy's four presets by its names or a mode of the game's own; `Window.RequestRedraw` writes Bevy's
+message only where it is registered, since the headless harness logged a send to none, and
+`Window.WakeUp` sends winit's wake where its loop's proxy exists and nothing otherwise, an offscreen
+run having no winit and never waiting, which the remarks say with the one trap, that a request from
+`./bcs` to a reactive app is answered on its next update. The example cycles the four modes on Space
+with the cube turning while the app updates and the count of updates shown, the state on the cube's
+entity (B 4), vertical sync off as Bevy's; a native test holds the settings, their refusal and both
+no-ops, and `SpawnedWindowTests` the run with no window updating every frame under the desktop
+preset and a negative wait refused naming its field; the window guide has its paragraph, the cheat
+sheet its lines. EXAMPLES.md reads 338 written, 2 in part and 42 missing. The suite: 1,416 passed
+and 2 skipped, its one failure the README before `d0e638d7`, the norm, document and window tests 25
+of 25 after the regeneration; cargo's 88 and 152. Right, the fill done once in the file and the two
+examples whose cut would lose their point given a window instead, the slip in N 4.5's list found by
+the working session before a page named it, and winit's three ways of updating given their limits
+where they have none. N 4.5's list stands at 20, which NORM.md says since this pass. The working
+session notes for itself that the norm tests run before any commit touching the README, the captures
+or a listed file. Item 13 keeps one thing from the owner's look at 18:20: each picture is as wide as
+the name under it, since GitHub squeezes a table to the page before it scrolls and a cell shrinks to
+its name, so the script gives every cell `width="200"`, which the sanitizer keeps, a batch of its
+own first. Then custom_schedule in TODO.md's order, a game's schedule placed in Bevy's main order
+after an update or a startup with a single-threaded executor, the triage line half stale since the
+schedule label exists.
+
+Before it, `21d08b44` and `d0e638d7` came, and first the page: the owner pushed the eleven through
 `b06ff120` at 15:46, and that commit broke N 4.2 unseen, its gallery spending a heading, two blank
 lines and the table's two lines on each of 28 groups, the README at 355 lines of prose against the
 320 the rule allows, which the working session counted only after the commit; `d0e638d7` mends it,
@@ -53,35 +91,6 @@ the gallery's pictures at one size, which item 13 takes (Decision 28), both befo
 low_power in TODO.md's order, with a bridge mend on the way: a redraw request is written only where
 its messages are registered, since the headless harness logged a send to none (N 3.7).
 
-Before it, `69fca4bb` and `f55c722b` came. `f55c722b` moves code alone, the pointer's three calls
-and the image's test from `window.rs` into `window/cursor.rs`, 758 lines to 580 before the atlas
-call is added. `69fca4bb`, custom_cursor_image, ABI 263: `Window.SetCursorAtlas` cuts the pointer's
-image to a frame of an atlas with that frame's hotspot, the hotspot taken with it as asked since
-Bevy holds it as a pair the wrapper cannot type, clears the atlas for no layout, and refuses a
-pointer that is no image yet and a key that is no layout, typed without a panic; the frame, the
-flips and the rectangle are written through the window's cursor wrapper. One generator change the
-example needed, and a right one for every wrapper: a union written through a wrapper switches its
-variant only where the field holds another, as an option was switched to some only from none, since
-switching makes the variant again at its defaults and a field the record does not hold, the hotspot
-and the atlas's layout here, was lost on every write. The example steps a crosshair sheet's two
-hundred frames at four a second through a behavior kept on the window's entity (B 4, 158 of 166),
-takes the atlas away and puts it back on T, flips on X and Y and cycles the frame's quarters on C,
-and offscreen, with no window and no pointer, shows the instructions alone, its capture matching
-Bevy's text and clear color; Kenney's sheet joins the asset list. A native test cuts, clears and
-refuses both ways; `SpawnedWindowTests` marks a window of its own as the first, is refused the atlas
-before an image, sets the image, the atlas and a hotspot of 32 by 16, writes a frame and a flip
-through the wrapper and reads the hotspot back whole, which without the generator change read zeros.
-EXAMPLES.md reads 337 written, 2 in part and 43 missing, the triage line corrected; the window guide
-has its paragraph and block. The suite: 1,416 passed and 2 skipped of 1,418; cargo's 88 and 151,
-every profile checked. Right, the hotspot carried with the call that owns the struct, and the
-generator's loss found by the hotspot reading zeros and mended for every union rather than for this
-one. The example counts as written: a pointer is the platform's to draw and no capture shows it, so
-its look on a window is the owner's whenever they run it, and nothing waits on that. The owner asked
-at 16:05 for the README's gallery as one scrolling row of pictures a group, in Bevy's order of its
-groups, which is item 13 (Decision 27), a batch of its own before low_power. Then low_power in
-TODO.md's order, winit's update modes, which the bridge leaves at Bevy's default and which pulls no
-crate.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -122,10 +131,13 @@ from [SHARED.md](SHARED.md).
    (Verdict 12), the managed tests green, 1,059, 916 and 909. The run of `68aa5dd5`, pushed at 10:47
    before the mend, is red on all three by the same step, and the run of `7ffd96c6`, pushed at
    11:06, is green on all three with the bridge's tests built, so Verdict 12 is settled. The runs of
-   `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The captures'
-   comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`), so the
-   comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each push's run
-   is read by the reviewing session, and a failure it names comes first here.
+   `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The owner pushed
+   the eleven through `b06ff120` at 15:46 and `21d08b44` at 15:55, whose run cancelled the first's;
+   `21d08b44`'s run reads red on `NormTests.N_4_5`, its padded capture sizes not on the rule's list,
+   mended at `04cefc8e` before the page named it. The captures' comparison, the README's walk and
+   Courtyard run on the pack run alone (`inputs.pack`), so the comparison since `d17f0d97` is read
+   on the owner's pack run's page (Decision 8). Each push's run is read by the reviewing session,
+   and a failure it names comes first here.
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -291,8 +303,8 @@ from [SHARED.md](SHARED.md).
    item 11 and the three move-only splits are in at `c3aaacac` to `09e3b339`, and the working
    session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
    the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
-   `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, the table at 337 written
-   and 43 missing; low_power follows.
+   `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
+   `ea5e1532`, the table at 338 written and 42 missing; custom_schedule follows.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -361,12 +373,12 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120` and
-    `21d08b44` but for the pictures' fit (Decision 27).** The owner asked on 2026-10-11 at 16:05, as
-    for 3DEngine's README. `build/examples-table.py` writes the gallery between its markers as one
-    table of four pictures a row over every written example; it writes instead one table a group in
-    the order Bevy's `examples/README.md` lists the groups, which the script already reads, each a
-    single row holding the group's written examples in that order, the picture opening the program
+13. **The README's gallery as one scrolling row of pictures a group, done at `b06ff120`, `21d08b44`
+    and `04cefc8e` but for the cells' width (Decision 27).** The owner asked on 2026-10-11 at 16:05,
+    as for 3DEngine's README. `build/examples-table.py` writes the gallery between its markers as
+    one table of four pictures a row over every written example; it writes instead one table a group
+    in the order Bevy's `examples/README.md` lists the groups, which the script already reads, each
+    a single row holding the group's written examples in that order, the picture opening the program
     and the name under it as today, with a heading line naming the group before each table, and the
     examples Bevy keeps out of its list in a last row of their own; a row wider than the page
     scrolls sideways on GitHub, which is the point, so no row is wrapped. The script's check reads
@@ -392,19 +404,29 @@ from [SHARED.md](SHARED.md).
     sixteen by nine and cuts the rest around the middle, or the example's window is opened at
     sixteen by nine where the cut would lose something that matters, so every picture fills its box
     edge to edge; the four captures are taken again so, the comparison's references following, and
-    the page is read after the push.
+    the page is read after the push. Done at `04cefc8e`: the capture script fills and cuts around
+    the middle, two examples filled so and two opened at a sixteen by nine window where the cut
+    would lose their point. The owner looked again at 18:20: each picture is as wide as the name
+    under it, a short name's tiny and a long name's large. GitHub squeezes a table to the page's
+    width before it lets it scroll, and a cell shrinks to the one thing in it that cannot wrap, the
+    name, the picture shrinking with it under the page's own rule of a picture no wider than its
+    cell. The script gives each cell a width of its own, `width="200"` on every `td`, which the
+    page's sanitizer keeps as it keeps a picture's, so no column goes below it and the row keeps its
+    full width and scrolls; a header row of non-breaking spaces is the fallback should the attribute
+    be stripped, which the rendered page says after the push.
 
-14. **The bcs skill leaves the `.claude` folder (Decision 28).** The owner asked on 2026-10-11 at
-    16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the `.claude` folder
-    and long subfolders holding nothing else being unwanted, as for 3DEngine's. The document becomes
-    `.github/BCS.md`, beside the other documents a session reads, its skill header dropped since it
-    means nothing outside that folder, its body as it is; AGENTS.md's line on driving a session and
-    its documents table name the new place, which the owner's ask is the word for, as does
-    STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins `.gitignore`
-    so the tool's own lock file there never enters the tree. A batch of its own, taken when the
-    owner types the ask in the working session, which changes AGENTS.md and the tool's own folder
-    only on the owner's word given there and has asked the owner for it, a right the reviewing
-    session holds.
+14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
+    on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
+    `.claude` folder and long subfolders holding nothing else being unwanted, as for 3DEngine's. The
+    document becomes `.github/BCS.md`, beside the other documents a session reads, its skill header
+    dropped since it means nothing outside that folder, its body as it is; AGENTS.md's line on
+    driving a session and its documents table name the new place, which the owner's ask is the word
+    for, as does STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins
+    `.gitignore` so the tool's own lock file there never enters the tree. A batch of its own, taken
+    when the owner types the ask in the working session, which changes AGENTS.md and the tool's own
+    folder only on the owner's word given there and has asked the owner for it, a right the
+    reviewing session holds. Done at `53fd0c3f` on the owner's word typed there: `.github/BCS.md`,
+    every reference moved, the folder gone and ignored.
 
 ## Verdicts
 

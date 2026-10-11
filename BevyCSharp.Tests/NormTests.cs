@@ -229,7 +229,7 @@ public sealed partial class NormTests
 
         // Each picture in the README's gallery opens the program that drew it.
         var readme = Text("README.md");
-        foreach (Match picture in Regex.Matches(readme, @"<td>(?:<a href=""([^""]*)"">)?<img src=""[^""]*/examples/([^""/]+)\.webp"""))
+        foreach (Match picture in Regex.Matches(readme, @"<td[^>]*>(?:<a href=""([^""]*)"">)?<img src=""[^""]*/examples/([^""/]+)\.webp"""))
         {
             var (link, name) = (picture.Groups[1].Value, picture.Groups[2].Value);
             if (!link.EndsWith("/" + name + ".cs", StringComparison.Ordinal)) found.Add($"README.md {name}");
