@@ -238,6 +238,7 @@ internal static class Catalog
         new("edit_material_on_gltf", EditMaterialOnGltf.Build),
         new("gltf_skinned_mesh", GltfSkinnedMesh.Build),
         new("load_gltf", LoadGltf.Build),
+        new("load_gltf_extras", LoadGltfExtras.Build),
         new("query_gltf_primitives", QueryGltfPrimitives.Build),
         new("update_gltf_scene", UpdateGltfScene.Build),
 

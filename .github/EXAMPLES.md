@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**342 written, 2 written in part, 0 can be written, 38 missing and 56 do not apply.** Of the 382 that apply, 344 can be written with what is bridged, 2 of them leaving something out.
+**343 written, 2 written in part, 0 can be written, 37 missing and 56 do not apply.** Of the 382 that apply, 345 can be written with what is bridged, 2 of them leaving something out.
 
-**160 of the 168 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**160 of the 169 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -41,9 +41,9 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [UI (User Interface)](#ui-user-interface) | 56 | 0 | 0 | 9 | 0 | 22 of 24 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
-| [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
+| [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **342** | **2** | **0** | **38** | **56** | **160 of 168** |
+| **All** | **343** | **2** | **0** | **37** | **56** | **160 of 169** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -627,7 +627,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`gltf_extension_mesh_2d`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/gltf_extension_mesh_2d.rs) | Uses glTF extension data to convert incoming Mesh3d/MeshMaterial3d assets to 2d | does not apply, writes a Rust glTF extension handler |
 | [`gltf_skinned_mesh`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/gltf_skinned_mesh.rs) | Skinned mesh example with mesh and joints data loaded from a glTF file | [written](../BevyCSharp.Examples/gltf/gltf_skinned_mesh.cs) |
 | [`load_gltf`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/load_gltf.rs) | Loads and renders a glTF file as a scene | [written](../BevyCSharp.Examples/gltf/load_gltf.cs) |
-| [`load_gltf_extras`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/load_gltf_extras.rs) | Loads and renders a glTF file as a scene, including the gltf extras | missing, a glTF node's extras |
+| [`load_gltf_extras`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/load_gltf_extras.rs) | Loads and renders a glTF file as a scene, including the gltf extras | [written](../BevyCSharp.Examples/gltf/load_gltf_extras.cs), the entities listed in the order of their indices rather than of Bevy's query |
 | [`query_gltf_primitives`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/query_gltf_primitives.rs) | Query primitives in a glTF scene | [written](../BevyCSharp.Examples/gltf/query_gltf_primitives.cs) |
 | [`update_gltf_scene`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/gltf/update_gltf_scene.rs) | Update a scene from a glTF file, either by spawning the scene as a child of another entity, or by accessing the entities of the scene | [written](../BevyCSharp.Examples/gltf/update_gltf_scene.cs) |
 

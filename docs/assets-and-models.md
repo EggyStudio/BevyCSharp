@@ -154,6 +154,19 @@ app.SpawnGltf("models/ship.gltf", (ctx, root) =>
 });
 ```
 
+What a modelling tool writes beside what glTF describes, a property of the game's own on a node, a
+mesh, a material or the scene, arrives as JSON text on the entity it belongs to, in
+`GltfExtrasRef` for a node, `GltfMeshExtrasRef`, `GltfMaterialExtrasRef` and `GltfSceneExtrasRef`,
+as Bevy's load_gltf_extras lists them:
+
+<!-- compiled with:
+EcsWorld ecs = null!;
+-->
+```csharp
+foreach (var node in ecs.All<GltfExtrasRef>())
+    Console.WriteLine($"{ecs.NameOf(node.Entity)}: {node.Value}");   // {"my_custom_object_property":39}
+```
+
 `AssetServer.LoadGltfSceneCompressed` loads the file's meshes compressed as Bevy's glTF loader
 compresses them, their positions, normals and texture coordinates kept in sixteen bits apiece and
 their indices in sixteen where they fit, a fraction of the memory a crowd of the model holds, which

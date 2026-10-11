@@ -32,6 +32,7 @@ models/AnisotropyBarnLamp/AnisotropyBarnLamp_basecolor.jpeg
 models/AnisotropyBarnLamp/AnisotropyBarnLamp_normalbump.ktx2
 models/AnisotropyBarnLamp/AnisotropyBarnLamp_occlusionroughnessmetal.ktx2
 models/animated/Fox.glb
+models/extras/gltf_extras.glb
 textures/array_texture.png
 branding/bevy_logo_dark_big.png
 models/terrain/Mountains.gltf

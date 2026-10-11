@@ -225,7 +225,7 @@ edit_material_on_gltf	can	each helmet changed once its parts carry their materia
 gltf_extension_animation_graph	n/a	writes a Rust glTF extension handler
 gltf_extension_mesh_2d	n/a	writes a Rust glTF extension handler
 gltf_skinned_mesh	can
-load_gltf_extras	missing	a glTF node's extras
+load_gltf_extras	can	the entities listed in the order of their indices rather than of Bevy's query
 load_gltf	can
 query_gltf_primitives	can
 update_gltf_scene	can
