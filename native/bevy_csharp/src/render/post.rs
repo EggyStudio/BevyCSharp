@@ -536,7 +536,7 @@ mod tests {
             crate::state::loan_world(world, || {
                 (
                     super::bcs_render_set_camera_flags(camera.to_bits(), camera_flags),
-                    crate::render::assets::bcs_render_set_mesh_flags(cube.to_bits(), mesh_flags),
+                    crate::render::attached::bcs_render_set_mesh_flags(cube.to_bits(), mesh_flags),
                 )
             })
         };
