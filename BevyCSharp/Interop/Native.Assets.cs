@@ -57,6 +57,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create(NativeMaterialConfig* config);
 
+    /// <summary>Builds Bevy's forward decal material over a standard one and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_create_forward_decal(NativeMaterialConfig* config, float depthFadeFactor, float depthBias);
+
+    /// <summary>Makes an entity a forward decal drawn with a forward decal material.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_forward_decal(ulong entity, int material);
+
     /// <summary>Reads a mesh's counts, attributes and bounds.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

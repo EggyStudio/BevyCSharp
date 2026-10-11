@@ -897,6 +897,8 @@ static AssetHandle CreateMaterial(MaterialSettings settings);   // Builds a mate
 static bool WriteMaterial(AssetHandle material, MaterialSettings settings);  // Writes settings over a standard material in place, so everything drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh to draw
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a material to draw its mesh with
+static AssetHandle CreateDecalMaterial(MaterialSettings settings, float depthFadeFactor = 1f, float depthBias = 0f);  // Builds Bevy's forward decal material from settings and returns a handle to it, for an entity made a decal with SetForwardDecal
+static void SetForwardDecal(Entity entity, AssetHandle material);  // Makes entity a forward decal drawn with material, its box the entity's transform, as Bevy's ForwardDecal with its material does
 static void Screenshot(string path);                            // Writes what is being drawn to a PNG file
 static void Screenshot(string path, AssetHandle target);        // Writes what a camera drew into an image to a PNG file
 static void Screenshot(string path, Entity window);             // Writes what a window the game spawned shows to a PNG file

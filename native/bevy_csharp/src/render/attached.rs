@@ -115,6 +115,41 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
     })
 }
 
+/// Makes `entity` a forward decal drawn with the forward decal material `material` names, as Bevy's
+/// `ForwardDecal` with its material does, the decal's box from the entity's transform.
+///
+/// Answers [`status::NO_COMPONENT`] where the key names no forward decal material, as a standard
+/// material, which would draw the decal's box rather than what is behind it.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_forward_decal(entity: u64, material: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, material);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::pbr::decal::{ForwardDecal, ForwardDecalMaterial};
+            use bevy::pbr::{MeshMaterial3d, StandardMaterial};
+
+            with_world(|world| {
+                let Some(Ok(handle)) = crate::assets::clone_handle(world, material)
+                    .map(|untyped| untyped.try_typed::<ForwardDecalMaterial<StandardMaterial>>())
+                else {
+                    return status::NO_COMPONENT;
+                };
+                let Ok(mut decal) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                decal.insert((ForwardDecal, MeshMaterial3d(handle)));
+                status::OK
+            })
+        }
+    })
+}
+
 /// Writes where an entity's mesh or material was loaded from, and returns its length in bytes.
 ///
 /// `which` is `0` for the mesh and `1` for the material. The answer is the asset path, which an

@@ -10236,6 +10236,7 @@ readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedE
 static class Bevy.Render
   static (int, int) PointLightsDrawn { get; }
   static AssetHandle CreateClusterMaterial()
+  static AssetHandle CreateDecalMaterial(MaterialSettings settings, float depthFadeFactor = 1f, float depthBias = 0f)
   static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth)
   static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true)
   static AssetHandle CreateMaterial((float, float, float, float) color)
@@ -10306,6 +10307,7 @@ static class Bevy.Render
   static void SetEffects(Entity camera, EffectSettings settings)
   static void SetEnvironmentMap(Entity camera, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Quat? rotation = null)
   static void SetExposure(Entity camera, float ev100)
+  static void SetForwardDecal(Entity entity, AssetHandle material)
   static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null)
   static void SetIrradianceVolume(Entity probe, AssetHandle voxels, float intensity = 1000f, Vec3? falloff = null)
   static void SetLayers(EcsWorld world, Entity entity, uint layers)

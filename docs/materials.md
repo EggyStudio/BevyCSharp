@@ -184,6 +184,32 @@ names, BC on a desktop GPU and ASTC or ETC2 on a phone:
 var sky = Render.CompressedFormats.HasFlag(CompressedImageFormats.Bc) ? "sky_bc7.ktx2" : "sky.png";
 ```
 
+### Decals
+
+A forward decal draws a material onto whatever surfaces its box meets, a scorch mark on a wall or
+paint on the ground, laid over the cubes and slopes inside it as over the floor. Its material is a
+standard one's settings made into a decal's, faded from the box's middle by its depth fade, and two
+decals laid over each other are told apart by their depth bias. The camera needs a depth prepass,
+which the decal reads the surfaces from, as Bevy's decal example shows:
+
+<!-- compiled with:
+EcsWorld ecs = null!;
+Entity camera = default;
+AssetHandle checker = default;
+-->
+```csharp
+ecs.Insert<DepthPrepassRef>(camera);
+
+var paint = Render.CreateDecalMaterial(new MaterialSettings { BaseColorTexture = checker }, depthFadeFactor: 1f);
+var decal = ecs.Spawn();
+ecs.Add(decal, new Transform(Vec3.Zero, Quat.Identity, new Vec3(4f)));   // the box, four units a side
+Render.SetForwardDecal(decal, paint);
+```
+
+Bevy's clustered decals, a `ClusteredDecalRef` on an entity, are the other kind, drawn in the
+lighting pass by every material Bevy lights and cheap many at a time, where a forward decal is a draw
+of its own over any surface.
+
 ---
 
 Before this, [Drawing](drawing.md).

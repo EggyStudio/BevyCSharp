@@ -58,6 +58,59 @@ pub unsafe extern "C" fn bcs_material_create(config: *const BcsMaterialConfig) -
     })
 }
 
+/// Builds Bevy's forward decal material over a standard one made from `config`, and returns an
+/// asset handle for it.
+///
+/// A forward decal is drawn on the surfaces behind its box, faded where it is far from them by
+/// `depth_fade_factor`, and `depth_bias` sets which of two overlapping decals is drawn over the
+/// other, as Bevy's decal example lays three of them over each other. The camera drawing it needs
+/// a depth prepass, which the decal reads the surfaces from.
+///
+/// # Safety
+/// `config` must point to a readable [`BcsMaterialConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_material_create_forward_decal(
+    config: *const BcsMaterialConfig,
+    depth_fade_factor: f32,
+    depth_bias: f32,
+) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (config, depth_fade_factor, depth_bias);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::Assets;
+            use bevy::pbr::decal::{ForwardDecalMaterial, ForwardDecalMaterialExt};
+            use bevy::pbr::StandardMaterial;
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let config = unsafe { *config };
+
+            with_world(|world| {
+                let mut base = match standard_material(world, &config) {
+                    Ok(material) => material,
+                    Err(status) => return status,
+                };
+                base.depth_bias = depth_bias;
+                let material = ForwardDecalMaterial { base, extension: ForwardDecalMaterialExt { depth_fade_factor } };
+
+                let Some(mut materials) = world.get_resource_mut::<Assets<ForwardDecalMaterial<StandardMaterial>>>() else {
+                    return status::UNSUPPORTED;
+                };
+                let handle = materials.add(material).untyped();
+
+                crate::assets::insert_handle(world, handle)
+            })
+        }
+    })
+}
+
 /// A standard material built from the settings a material is made with, its textures resolved
 /// from the keys the program holds, or the status a key that names no image gives.
 #[cfg(feature = "render")]
@@ -445,16 +498,9 @@ mod tests {
         app
     }
 
-    #[cfg(feature = "render")]
-    #[test]
-    fn a_material_is_read_back_as_it_was_made() {
-        use bevy::pbr::StandardMaterial;
-
-        let mut app = app();
-        crate::assets::init_asset_once::<StandardMaterial>(&mut app);
-        crate::assets::init_asset_once::<bevy::image::Image>(&mut app);
-
-        let made = BcsMaterialConfig {
+    /// A material's settings with every field away from its default, each texture none.
+    fn a_config() -> BcsMaterialConfig {
+        BcsMaterialConfig {
             base_color: [0.25, 0.5, 0.75, 1.0],
             metallic: 0.8,
             roughness: 0.3,
@@ -499,7 +545,55 @@ mod tests {
             specular_texture: -1,
             specular_tint_texture: -1,
             opaque_render_method: 1,
-        };
+        }
+    }
+
+    /// A forward decal material keeps its standard base, its fade and its depth bias, an entity
+    /// made a decal with it carries Bevy's marker and the material, and a standard material is
+    /// refused, since it would draw the decal's box rather than what is behind it.
+    #[test]
+    fn a_forward_decal_is_made_with_its_own_material() {
+        use bevy::pbr::decal::{ForwardDecal, ForwardDecalMaterial};
+        use bevy::pbr::{MeshMaterial3d, StandardMaterial};
+
+        // Bevy's plugin for them, which holds the box mesh a decal is drawn on, as the app has.
+        let mut app = app();
+        crate::assets::init_asset_once::<StandardMaterial>(&mut app);
+        crate::assets::init_asset_once::<bevy::image::Image>(&mut app);
+        crate::assets::init_asset_once::<bevy::shader::Shader>(&mut app);
+        app.add_plugins(bevy::pbr::decal::ForwardDecalPlugin);
+        let decal = app.world_mut().spawn_empty().id().to_bits();
+        let config = a_config();
+
+        loan_world(app.world_mut(), || {
+            let key = unsafe { bcs_material_create_forward_decal(&config, 0.5, 2.0) };
+            assert!(key >= 0, "making the decal material failed with {key}");
+            let standard = unsafe { bcs_material_create(&config) };
+
+            assert_eq!(crate::render::attached::bcs_render_set_forward_decal(decal, standard), status::NO_COMPONENT);
+            assert_eq!(crate::render::attached::bcs_render_set_forward_decal(decal, key), status::OK);
+        });
+
+        let world = app.world();
+        let entity = bevy::ecs::entity::Entity::from_bits(decal);
+        assert!(world.get::<ForwardDecal>(entity).is_some());
+        let handle = &world.get::<MeshMaterial3d<ForwardDecalMaterial<StandardMaterial>>>(entity).unwrap().0;
+        let material = world.resource::<bevy::asset::Assets<ForwardDecalMaterial<StandardMaterial>>>().get(handle).unwrap();
+        assert_eq!((material.extension.depth_fade_factor, material.base.depth_bias), (0.5, 2.0));
+        let color = material.base.base_color.to_linear();
+        assert_eq!([color.red, color.green, color.blue, color.alpha], config.base_color);
+    }
+
+    #[cfg(feature = "render")]
+    #[test]
+    fn a_material_is_read_back_as_it_was_made() {
+        use bevy::pbr::StandardMaterial;
+
+        let mut app = app();
+        crate::assets::init_asset_once::<StandardMaterial>(&mut app);
+        crate::assets::init_asset_once::<bevy::image::Image>(&mut app);
+
+        let made = a_config();
 
         loan_world(app.world_mut(), || {
             let key = unsafe { bcs_material_create(&made) };

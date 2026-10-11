@@ -4,14 +4,14 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**341 written, 2 written in part, 0 can be written, 39 missing and 56 do not apply.** Of the 382 that apply, 343 can be written with what is bridged, 2 of them leaving something out.
+**342 written, 2 written in part, 0 can be written, 38 missing and 56 do not apply.** Of the 382 that apply, 344 can be written with what is bridged, 2 of them leaving something out.
 
 **160 of the 168 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
 | [2D Rendering](#2d-rendering) | 27 | 0 | 0 | 1 | 1 | 10 of 12 |
-| [3D Rendering](#3d-rendering) | 64 | 0 | 0 | 4 | 0 | 40 of 41 |
+| [3D Rendering](#3d-rendering) | 65 | 0 | 0 | 3 | 0 | 40 of 41 |
 | [Animation](#animation) | 13 | 0 | 0 | 0 | 0 | 9 of 9 |
 | [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
 | [Assets](#assets) | 11 | 0 | 0 | 2 | 5 | 3 of 3 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 5 | 0 | 0 | 1 | 3 | 2 of 2 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **341** | **2** | **0** | **39** | **56** | **160 of 168** |
+| **All** | **342** | **2** | **0** | **38** | **56** | **160 of 168** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -102,7 +102,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`clustered_decals`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/clustered_decals.rs) | Demonstrates clustered decals | [written](../BevyCSharp.Examples/3d/clustered_decals.cs) |
 | [`color_grading`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/color_grading.rs) | Demonstrates color grading | [written](../BevyCSharp.Examples/3d/color_grading.cs) |
 | [`contact_shadows`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/3d/contact_shadows.rs) | Showcases how contact shadows add shadow detail | [written](../BevyCSharp.Examples/3d/contact_shadows.cs), its model spun by a press over it found with a ray, where Bevy observes picking's drag |
-| [`decal`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/decal.rs) | Decal rendering | missing, forward decals (ForwardDecal) |
+| [`decal`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/decal.rs) | Decal rendering | [written](../BevyCSharp.Examples/3d/decal.cs), its cubes turned by .NET's generator rather than Bevy's ChaCha8 |
 | [`deferred_rendering`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/deferred_rendering.rs) | Renders meshes with both forward and deferred pipelines | [written](../BevyCSharp.Examples/3d/deferred_rendering.cs), compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred |
 | [`depth_of_field`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/depth_of_field.rs) | Demonstrates depth of field | [written](../BevyCSharp.Examples/3d/depth_of_field.cs) |
 | [`fog`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/3d/fog.rs) | A scene showcasing the distance fog effect | [written](../BevyCSharp.Examples/3d/fog.cs), through Bevy's reflected DistanceFog |

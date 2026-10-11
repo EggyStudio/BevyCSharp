@@ -23,7 +23,7 @@ lines	can
 ssao	can
 spotlight	can	its cubes scattered by .NET's generator rather than Bevy's
 bloom_3d	can
-decal	missing	forward decals (ForwardDecal)
+decal	can	its cubes turned by .NET's generator rather than Bevy's ChaCha8
 deferred_rendering	can	compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred
 motion_blur	can
 order_independent_transparency	can

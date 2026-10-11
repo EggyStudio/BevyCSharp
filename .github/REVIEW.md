@@ -10,13 +10,38 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `83b371cc`. Item 13's padding of 32, as 3DEngine's: every caption padded with the
+Reviewed up to `c447a370`. Three commits, pushed by the owner at 17:36 with the three before them,
+their run queued. `4fcba199` sets the version, `build/version.txt` alone, the owner's. `d91665d9`,
+ghost_nodes: Bevy's feature is in the render profile, adding no crate, the lock byte for byte the
+same (Decision 25), and the components table written again from an editor run on the new bridge
+gains the ghost node alone; `GhostNodeRef` puts a node the layout passes through as though its
+children were its parent's, the example built entity by entity against Bevy's scene notation, its
+capture showing the text at the top left and three buttons in one row, two of them a ghost's
+children, and driven offscreen three clicks on the ghost's first button and one on the third
+counting 3, 3 and 1; `UiTests` lays two boxes under a ghost and one beside it and reads them in one
+row, the file at 575 lines; the interface guide has its paragraph and block. `c447a370`, item 15:
+the development machine's GPU is named nowhere a user reads, the pipeline remark speaking of the
+development machine's laptop GPU, the running guide's sample adapter line of the GPU's name and
+vendor, and the comparison with Bevy of a laptop with a 32-thread CPU and a discrete laptop GPU on
+Vulkan, the CPU's model gone with the GPU's since it names the same machine, which is right; one
+comment in the bridge's Solari module still names it and goes with the next commit, the bridge's
+code being code a reader sees. EXAMPLES.md reads 341 written, 2 in part and 39 missing. The suite:
+1,419 passed and 2 skipped of 1,421, the norm tests 18 of 18; cargo's 89 and 153. Right, the feature
+read from the lock before it was turned on, the ghost's layout held by a test of positions rather
+than a picture, and the machine's name taken out of the user's documents whole. Found on the way and
+taken as item 16: offscreen, `./bcs`'s click loses a click at a point the pointer has not moved to,
+the button example counting two of three clicks at one spot and every one once the pointer has been
+moved there a few frames first, picking wanting the hover a frame before the press. Next the forward
+decal, then the depth to a texture, a custom projection, the mesh sampling's error handling and the
+glTF extras.
+
+Before it, `83b371cc` came, item 13's padding of 32, as 3DEngine's: every caption padded with the
 non-breaking space to 32, the one name longer than that left unpadded with its cell a little wider,
 which the script's comment says with why the picture shrinks to the caption; 305 pictures, 304
 captions at 32 and the one at 35 read here, the README written in a worktree at the commit so
 ghost_nodes' state stays out of it, the check passing, the prose at 299 and the norm tests 18 of 18.
 Right, the two galleries one form. Item 13 is done, the owner's eye on the push. ghost_nodes next,
-its bridge building, then the components table and the suite. The owner asked at 22:15 that the
+its bridge building, then the components table and the suite. The owner asked at 17:26 that the
 development machine's GPU be named nowhere a user reads, which is item 15 (Decision 29), three files
 here, with ghost_nodes' commit.
 
@@ -32,7 +57,7 @@ meta file beside an image sets its settings and the load's settings write over t
 says the images read from their folder under the assets rather than from a root of their own. The
 norm, document and path tests pass, 20 of 20, the prose at 299. EXAMPLES.md reads 340 written, 2 in
 part and 40 missing. Right, the stale line read before anything was built and the files fetched from
-where Bevy keeps them rather than copied in. The owner looked at both pushed galleries at 21:25 and
+where Bevy keeps them rather than copied in. The owner looked at both pushed galleries at 16:58 and
 finds 3DEngine's the better, its captions of 32 narrower than the picture so the picture shrinks to
 them, where 35 draws past it, so item 13 keeps the padding of 32 with the one longer name unpadded,
 a batch of its own before ghost_nodes' commit. ghost_nodes next: Bevy's feature for it adds no
@@ -40,31 +65,6 @@ crate, the lock byte for byte the same with it on, so it is the working session'
 Decision 25, in the render profile beside the interface's crate with a comment, the components table
 written again from an editor run for the ghost node, the example's roots, buttons and observers
 walking parent, siblings and labels as Bevy's do.
-
-Before it, `bbb7de81` and `bb4cb09f` came. `bb4cb09f`, custom_schedule, ABI 265: `App.AddSchedule`
-places a schedule of the game's own in Bevy's main order after a stage, single-threaded where asked,
-the bridge placing by the concrete label types since the order compares by type and an interned
-label never matched, the executor set through an edit that keeps the systems already in it, and
-refused in managed code for a stage that is no schedule of Bevy's, a second placing or a running
-app, and in the bridge the same; a pre-startup stage joins both sides, before startup in the stage
-order, a system added while running in it running once on the spot as startup's does.
-`GameScheduleTests` reads the order, pre-startup, the custom startup, startup, then update, the
-schedule after update and last each frame, and both refusals, a native test the placement in both
-orders and both refusals; the example prints Bevy's order exactly, its text the capture, its triage
-line can with no note; the behaviors guide has its paragraph and block under the stages, and
-`a0c8b1b0` is on N 7.2's list as the owner's. `bbb7de81`, item 13 in the form the owner chose on a
-phone: every caption padded to 35 with the non-breaking space in a small code tag, all 304 read here
-so, every tag 260 by 146 and every cell 260, no break tag since the other form was never committed;
-the prose stays at 299 and the check and N 4.5's reader pass on the new cell. EXAMPLES.md reads 339
-written, 2 in part and 41 missing. The suite: 1,418 passed and 2 skipped of 1,420, the norm tests 18
-of 18 after the list's line; cargo's 89 and 153. Right, the placement by the concrete types where
-the interned label failed, the refusals on both sides, and the caption form built as chosen. Items
-13 and 14 are done, the rendered page read after the push. Next the missing rows that need no crate
-and no word, asset_settings first, its triage line read for staleness as the others were, then
-ghost_nodes, the forward decal, the depth to a texture, a custom projection, the mesh sampling's
-error handling, the glTF extras, the interface material, a custom vertex attribute, mip generation,
-occlusion culling, the world's serialization, the transform gizmo, picking's debug, the pitch and
-the decodable.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -281,8 +281,9 @@ from [SHARED.md](SHARED.md).
    the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
    `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
    `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
-   bridge work, the table at 340 written and 40 missing; the rows that need no crate and no word
-   follow in TODO.md's order, ghost_nodes next, its feature pulling no crate (Decision 25).
+   bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), the table
+   at 341 written and 39 missing; the rows that need no crate and no word follow in TODO.md's order,
+   the forward decal next.
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -352,7 +353,7 @@ from [SHARED.md](SHARED.md).
     it, a resource taken off its entity answered as held.
 
 13. **The README's gallery as one scrolling row of pictures a group, done through `83b371cc`
-    (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's README.
+    (Decision 27).** The owner asked on 2026-10-11 at 15:36, as for 3DEngine's README.
     `build/examples-table.py` writes the gallery between its markers as one table of four pictures a
     row over every written example; it writes instead one table a group in the order Bevy's
     `examples/README.md` lists the groups, which the script already reads, each a single row holding
@@ -364,7 +365,7 @@ from [SHARED.md](SHARED.md).
     raw links keep their form for the package's page. A batch of its own before low_power, since it
     is small and the owner asked; the owner's eye judges the look. Done at `b06ff120`: a heading and
     a one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives
-    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 16:35 that the
+    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 15:52 that the
     pictures be one size, where they differ today: every picture carries the same width and height
     on its tag, 200 wide as before and the height of sixteen by nine, and the captures that are not
     of that shape, four of 304, a square, a four by three and two of five by three, are taken again
@@ -373,7 +374,7 @@ from [SHARED.md](SHARED.md).
     references following the captures. Done at `21d08b44`: every tag 200 by 113, four captures
     padded to sixteen by nine by the capture script, which pads any capture that needs it;
     `b06ff120`'s gallery had passed N 4.2's 320 lines, mended at `d0e638d7` before its page could
-    show it. The owner looked at the pushed page at 17:10 and the pictures still read as different
+    show it. The owner looked at the pushed page at 16:04 and the pictures still read as different
     sizes. GitHub renders every tag at one box, its own style giving each the full width of its
     cell, an automatic height and the tag's aspect, so the box is uniform; what differs is the
     picture inside it, since a capture of another shape was padded with nothing to sixteen by nine
@@ -384,7 +385,7 @@ from [SHARED.md](SHARED.md).
     edge to edge; the four captures are taken again so, the comparison's references following, and
     the page is read after the push. Done at `04cefc8e`: the capture script fills and cuts around
     the middle, two examples filled so and two opened at a sixteen by nine window where the cut
-    would lose their point. The owner looked again at 18:20: each picture is as wide as the name
+    would lose their point. The owner looked again at 16:12: each picture is as wide as the name
     under it, a short name's tiny and a long name's large. GitHub squeezes a table to the page's
     width before it lets it scroll, and a cell shrinks to the one thing in it that cannot wrap, the
     name, the picture shrinking with it under the page's own rule of a picture no wider than its
@@ -393,7 +394,7 @@ from [SHARED.md](SHARED.md).
     full width and scrolls; a header row of non-breaking spaces is the fallback should the attribute
     be stripped, which the rendered page says after the push. Done at `f60bc166`: every cell 200
     wide, N 4.5's reader widened to a cell with attributes, the rendered page read after the push.
-    The owner looked at the pushed page at 18:55 and the pictures still differ. The rendered page
+    The owner looked at the pushed page at 16:20 and the pictures still differ. The rendered page
     keeps the cell's width, read here, so the squeeze is the browser's table layout: a cell's width
     is a preference, and when a table is wider than the page the browser shrinks each cell to its
     narrowest unbreakable content, the name, the picture with it, GitHub's table being a block
@@ -404,7 +405,7 @@ from [SHARED.md](SHARED.md).
     name, so no cell can shrink below its picture and the name reads as a caption bar; the cell's
     width stays as the preference, N 4.5's reader and the prose count checked, and the rendered page
     read after the push. Done at `e92591dd`: every name at thirty characters or more, the page read
-    after the push. The owner looked at the pushed pages at 20:05: the look is right, and on a phone
+    after the push. The owner looked at the pushed pages at 16:30: the look is right, and on a phone
     the caption under each picture is a tenth to a fifth wider than the picture, on a desktop a
     little wider. The caption's padded text sets the cell's width while the picture fills no more
     than its own size, so on a font that draws text wider, as a phone's does, the text overshoots
@@ -416,18 +417,18 @@ from [SHARED.md](SHARED.md).
     names padded to 35 characters, the longest, in a small code caption, every tag 260 by 146 and
     every cell 260, so the pictures come out about 260 wide and the same width as their captions;
     the owner tried a padding of 28 with the longer names broken by a `<wbr>` tag and the tags at
-    220 on 3DEngine's page at 20:35 and prefers this form, its pictures filling up to the caption's
+    220 on 3DEngine's page at 16:38 and prefers this form, its pictures filling up to the caption's
     width where the other's fell short, the names being Bevy's and the table's keys, so none is
     renamed; the rendered page read after the push on a desktop and a phone. Done at `bbb7de81`:
     captions of 35 set small, every tag and cell 260. The owner looked at both pushed galleries at
-    21:25 and finds 3DEngine's the better: its captions are padded to 32, narrower than the picture
+    16:58 and finds 3DEngine's the better: its captions are padded to 32, narrower than the picture
     of 260, so the picture shrinks to the caption and the two match edge to edge, where BevyCSharp's
     35 draws past the picture. The padding goes to 32 as 3DEngine's, the one name longer than that,
     `shader_material_screenspace_texture`, left unpadded with its cell a little wider, the tags and
     cells unchanged, so the two galleries read alike. Done at `83b371cc`.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
-    on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
+    on 2026-10-11 at 15:50 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
     `.claude` folder and long subfolders holding nothing else being unwanted, as for 3DEngine's. The
     document becomes `.github/BCS.md`, beside the other documents a session reads, its skill header
     dropped since it means nothing outside that folder, its body as it is; AGENTS.md's line on
@@ -439,13 +440,24 @@ from [SHARED.md](SHARED.md).
     reviewing session holds. Done at `53fd0c3f` on the owner's word typed there: `.github/BCS.md`,
     every reference moved, the folder gone and ignored.
 
-15. **The development machine's GPU is named nowhere a user reads (Decision 29).** The owner asked
-    on 2026-10-11 at 22:15, as of 3DEngine, that the mention of their machine, the RTX 4070, leave
-    the code and comments a user sees: here `Render.Pipeline.cs`, the running guide and the
-    comparison with Bevy name it, each where a measurement was taken; the measurement stays and the
-    device becomes a plain phrase, the development machine's GPU or a laptop GPU of its class. The
-    documents under `.github` keep the name unless the owner says otherwise. With ghost_nodes'
-    commit.
+15. **The development machine's GPU is named nowhere a user reads, done at `c447a370` but for one
+    comment (Decision 29).** The owner asked on 2026-10-11 at 17:26, as of 3DEngine, that the
+    mention of their machine, the RTX 4070, leave the code and comments a user sees: here
+    `Render.Pipeline.cs`, the running guide and the comparison with Bevy name it, each where a
+    measurement was taken; the measurement stays and the device becomes a plain phrase, the
+    development machine's GPU or a laptop GPU of its class. The documents under `.github` keep the
+    name unless the owner says otherwise. Done at `c447a370` in the three files, the CPU's model
+    gone with the GPU's; one comment in the bridge's Solari module still names it and goes with the
+    next commit.
+
+16. **An offscreen click lands only where the pointer has been.** Found at `d91665d9`: driven
+    offscreen through `./bcs`, a click at a point the pointer has not moved to is lost, the button
+    example counting two of three clicks at one spot and every one once the pointer has been moved
+    there a few frames first, since picking wants the hover a frame before the press. The click
+    moves the pointer there and gives the frames the hover takes before it presses, in the CLI's
+    verb or in the harness that drives the examples, so a session or a test clicking a place it has
+    not hovered loses nothing, measured by the example's three of three, with a test. With the batch
+    that next touches the CLI's input.
 
 ## Verdicts
 
@@ -622,16 +634,16 @@ from [SHARED.md](SHARED.md).
     zeroed copy over the plugin's being never meant. The owner may overrule it as any decision here.
 
 27. **The README's gallery is one scrolling row of pictures a group, in Bevy's order of its
-    groups.** The owner asked at 16:05 on 2026-10-11, after asking the same of 3DEngine's README,
+    groups.** The owner asked at 15:36 on 2026-10-11, after asking the same of 3DEngine's README,
     which is item 13: the written examples' pictures in one-row tables that scroll sideways rather
     than the grid of four, one a group of Bevy's examples.
 
 28. **The bcs skill leaves `.claude` for `.github/BCS.md`, and the gallery's pictures are one
-    size.** The owner asked at 16:30 and 16:35 on 2026-10-11, as of 3DEngine: the skill document out
+    size.** The owner asked at 15:50 and 15:52 on 2026-10-11, as of 3DEngine: the skill document out
     of the `.claude` folder and its empty subfolders, which is item 14 with AGENTS.md's line changed
     on that word; and every picture in the README's rows the same size, which item 13 takes.
 
-29. **The development machine's GPU is named nowhere a user reads.** The owner asked at 22:15 on
+29. **The development machine's GPU is named nowhere a user reads.** The owner asked at 17:26 on
     2026-10-11, as of 3DEngine, which is item 15: the machine's name out of the code and comments a
     user sees, the measurements kept with the device a plain phrase.
 

@@ -89,6 +89,7 @@ internal static class Catalog
         new("irradiance_volumes", IrradianceVolumes.Build),
         new("color_grading", ColorGrading.Build),
         new("contact_shadows", ContactShadows.Build),
+        new("decal", DecalExample.Build),
         new("pccm", Pccm.Build),
         new("shadow_biases", ShadowBiases.Build),
         new("tonemapping", TonemappingExample.Build),
