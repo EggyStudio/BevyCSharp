@@ -531,14 +531,50 @@ field	bevy_picking::PickingSettings	is_hover_enabled	.is_hover_enabled	Bool	bool
 field	bevy_picking::PickingSettings	is_window_picking_enabled	.is_window_picking_enabled	Bool	bool	
 component	bevy_picking::backend::ray::RayMap	RayMap
 component	bevy_picking::cursor::DefaultCursor	DefaultCursor
-field	bevy_picking::cursor::DefaultCursor	0	.0	Enum	EntityCursor	System
+field	bevy_picking::cursor::DefaultCursor	0	.0	Enum	EntityCursor	Custom,System
+variant	bevy_picking::cursor::DefaultCursor	0	Custom		.0.0	Enum	CustomCursor	Image,Url
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	handle	.0.0.0.handle	Asset	Handle<Image>	Image
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	texture_atlas	.0.0.0.texture_atlas	Enum	Option<TextureAtlas>	None,Some
+variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.texture_atlas	Some	index	.0.0.0.texture_atlas.0.index	Int	usize	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	flip_x	.0.0.0.flip_x	Bool	bool	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	flip_y	.0.0.0.flip_y	Bool	bool	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	rect	.0.0.0.rect	Enum	Option<URect>	None,Some
+variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	min.x	.0.0.0.rect.0.min.x	Int	u32	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	min.y	.0.0.0.rect.0.min.y	Int	u32	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	max.x	.0.0.0.rect.0.max.x	Int	u32	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	max.y	.0.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Url	url	.0.0.0.url	String	alloc::string::String	
 variant	bevy_picking::cursor::DefaultCursor	0	System		.0.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::cursor::EntityCursor	EntityCursor
-field	bevy_picking::cursor::EntityCursor	value		Enum	EntityCursor	System
+field	bevy_picking::cursor::EntityCursor	value		Enum	EntityCursor	Custom,System
+variant	bevy_picking::cursor::EntityCursor	value	Custom		.0	Enum	CustomCursor	Image,Url
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	handle	.0.0.handle	Asset	Handle<Image>	Image
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	texture_atlas	.0.0.texture_atlas	Enum	Option<TextureAtlas>	None,Some
+variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.texture_atlas	Some	index	.0.0.texture_atlas.0.index	Int	usize	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	flip_x	.0.0.flip_x	Bool	bool	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	flip_y	.0.0.flip_y	Bool	bool	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	rect	.0.0.rect	Enum	Option<URect>	None,Some
+variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	min.x	.0.0.rect.0.min.x	Int	u32	
+variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	min.y	.0.0.rect.0.min.y	Int	u32	
+variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	max.x	.0.0.rect.0.max.x	Int	u32	
+variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	max.y	.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Url	url	.0.0.url	String	alloc::string::String	
 variant	bevy_picking::cursor::EntityCursor	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::cursor::OverrideCursor	OverrideCursor
 field	bevy_picking::cursor::OverrideCursor	0	.0	Enum	Option<EntityCursor>	None,Some
-variant	bevy_picking::cursor::OverrideCursor	0	Some		.0.0	Enum	EntityCursor	System
+variant	bevy_picking::cursor::OverrideCursor	0	Some		.0.0	Enum	EntityCursor	Custom,System
+variant	bevy_picking::cursor::OverrideCursor	0.Some	Custom		.0.0.0	Enum	CustomCursor	Image,Url
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	handle	.0.0.0.0.handle	Asset	Handle<Image>	Image
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	texture_atlas	.0.0.0.0.texture_atlas	Enum	Option<TextureAtlas>	None,Some
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.texture_atlas	Some	index	.0.0.0.0.texture_atlas.0.index	Int	usize	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	flip_x	.0.0.0.0.flip_x	Bool	bool	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	flip_y	.0.0.0.0.flip_y	Bool	bool	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	rect	.0.0.0.0.rect	Enum	Option<URect>	None,Some
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	min.x	.0.0.0.0.rect.0.min.x	Int	u32	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	min.y	.0.0.0.0.rect.0.min.y	Int	u32	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	max.x	.0.0.0.0.rect.0.max.x	Int	u32	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	max.y	.0.0.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Url	url	.0.0.0.0.url	String	alloc::string::String	
 variant	bevy_picking::cursor::OverrideCursor	0.Some	System		.0.0.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::events::PointerState	PointerState
 component	bevy_picking::hover::DirectlyHovered	DirectlyHovered
@@ -1849,7 +1885,19 @@ field	bevy_weather::wind::Wind	offset	.offset	Vec2	glam::Vec2
 field	bevy_weather::wind::Wind	seed	.seed	Int	u32	
 field	bevy_weather::wind::Wind	offset_wrap	.offset_wrap	Float	f32	
 component	bevy_window::cursor::CursorIcon	CursorIcon
-field	bevy_window::cursor::CursorIcon	value		Enum	CursorIcon	System
+field	bevy_window::cursor::CursorIcon	value		Enum	CursorIcon	Custom,System
+variant	bevy_window::cursor::CursorIcon	value	Custom		.0	Enum	CustomCursor	Image,Url
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	handle	.0.0.handle	Asset	Handle<Image>	Image
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	texture_atlas	.0.0.texture_atlas	Enum	Option<TextureAtlas>	None,Some
+variant	bevy_window::cursor::CursorIcon	value.Custom.Image.texture_atlas	Some	index	.0.0.texture_atlas.0.index	Int	usize	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	flip_x	.0.0.flip_x	Bool	bool	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	flip_y	.0.0.flip_y	Bool	bool	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	rect	.0.0.rect	Enum	Option<URect>	None,Some
+variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	min.x	.0.0.rect.0.min.x	Int	u32	
+variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	min.y	.0.0.rect.0.min.y	Int	u32	
+variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	max.x	.0.0.rect.0.max.x	Int	u32	
+variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	max.y	.0.0.rect.0.max.y	Int	u32	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Url	url	.0.0.url	String	alloc::string::String	
 variant	bevy_window::cursor::CursorIcon	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_window::monitor::Monitor	Monitor
 field	bevy_window::monitor::Monitor	name	.name	Enum	Option<String>	None,Some

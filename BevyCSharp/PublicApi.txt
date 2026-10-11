@@ -5293,6 +5293,19 @@ abstract class Bevy.Reflected.CursorIcon : IEquatable<CursorIcon>
   static bool op_Equality(CursorIcon? left, CursorIcon? right)
   static bool op_Inequality(CursorIcon? left, CursorIcon? right)
   virtual bool Equals(CursorIcon? other)
+sealed class Bevy.Reflected.CursorIcon.Custom : CursorIcon, IEquatable<CursorIcon.Custom>, IEquatable<CursorIcon>
+  Custom(CustomCursor Value)
+  CustomCursor Value { get; init; }
+  bool Equals(CursorIcon.Custom? other)
+  bool Equals(CursorIcon? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CursorIcon.Custom? left, CursorIcon.Custom? right)
+  static bool op_Inequality(CursorIcon.Custom? left, CursorIcon.Custom? right)
+  void Deconstruct(out CustomCursor Value)
 sealed class Bevy.Reflected.CursorIcon.System : CursorIcon, IEquatable<CursorIcon.System>, IEquatable<CursorIcon>
   System(SystemCursorIcon Value)
   SystemCursorIcon Value { get; init; }
@@ -5322,6 +5335,46 @@ enum Bevy.Reflected.CursorOptionsRef.GrabModeVariant : int
   Confined = 1
   Locked = 2
   None = 0
+abstract class Bevy.Reflected.CustomCursor : IEquatable<CustomCursor>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected CustomCursor(CustomCursor original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CustomCursor? left, CustomCursor? right)
+  static bool op_Inequality(CustomCursor? left, CustomCursor? right)
+  virtual bool Equals(CustomCursor? other)
+sealed class Bevy.Reflected.CustomCursor.Image : CustomCursor, IEquatable<CustomCursor.Image>, IEquatable<CustomCursor>
+  AssetHandle Handle { get; init; }
+  Image(AssetHandle Handle, OptionTextureAtlas TextureAtlas, bool FlipX, bool FlipY, OptionURect Rect)
+  OptionTextureAtlas TextureAtlas { get; init; }
+  OptionURect Rect { get; init; }
+  bool Equals(CustomCursor.Image? other)
+  bool Equals(CustomCursor? other)
+  bool FlipX { get; init; }
+  bool FlipY { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CustomCursor.Image? left, CustomCursor.Image? right)
+  static bool op_Inequality(CustomCursor.Image? left, CustomCursor.Image? right)
+  void Deconstruct(out AssetHandle Handle, out OptionTextureAtlas TextureAtlas, out bool FlipX, out bool FlipY, out OptionURect Rect)
+sealed class Bevy.Reflected.CustomCursor.Url : CustomCursor, IEquatable<CustomCursor.Url>, IEquatable<CustomCursor>
+  Url(string UrlValue)
+  bool Equals(CustomCursor.Url? other)
+  bool Equals(CustomCursor? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CustomCursor.Url? left, CustomCursor.Url? right)
+  static bool op_Inequality(CustomCursor.Url? left, CustomCursor.Url? right)
+  string UrlValue { get; init; }
+  void Deconstruct(out string UrlValue)
 sealed class Bevy.Reflected.DVec2 : IEquatable<DVec2>
   DVec2(double X, double Y)
   bool Equals(DVec2? other)
@@ -5508,6 +5561,19 @@ abstract class Bevy.Reflected.EntityCursor : IEquatable<EntityCursor>
   static bool op_Equality(EntityCursor? left, EntityCursor? right)
   static bool op_Inequality(EntityCursor? left, EntityCursor? right)
   virtual bool Equals(EntityCursor? other)
+sealed class Bevy.Reflected.EntityCursor.Custom : EntityCursor, IEquatable<EntityCursor.Custom>, IEquatable<EntityCursor>
+  Custom(CustomCursor Value)
+  CustomCursor Value { get; init; }
+  bool Equals(EntityCursor.Custom? other)
+  bool Equals(EntityCursor? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(EntityCursor.Custom? left, EntityCursor.Custom? right)
+  static bool op_Inequality(EntityCursor.Custom? left, EntityCursor.Custom? right)
+  void Deconstruct(out CustomCursor Value)
 sealed class Bevy.Reflected.EntityCursor.System : EntityCursor, IEquatable<EntityCursor.System>, IEquatable<EntityCursor>
   System(SystemCursorIcon Value)
   SystemCursorIcon Value { get; init; }
@@ -7551,6 +7617,40 @@ enum Bevy.Reflected.OptionBlendState : int
 enum Bevy.Reflected.OptionEntityFocusCause : int
   None = 0
   Some = 1
+abstract class Bevy.Reflected.OptionTextureAtlas : IEquatable<OptionTextureAtlas>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected OptionTextureAtlas(OptionTextureAtlas original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionTextureAtlas? left, OptionTextureAtlas? right)
+  static bool op_Inequality(OptionTextureAtlas? left, OptionTextureAtlas? right)
+  virtual bool Equals(OptionTextureAtlas? other)
+sealed class Bevy.Reflected.OptionTextureAtlas.None : OptionTextureAtlas, IEquatable<OptionTextureAtlas.None>, IEquatable<OptionTextureAtlas>
+  None()
+  bool Equals(OptionTextureAtlas.None? other)
+  bool Equals(OptionTextureAtlas? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionTextureAtlas.None? left, OptionTextureAtlas.None? right)
+  static bool op_Inequality(OptionTextureAtlas.None? left, OptionTextureAtlas.None? right)
+sealed class Bevy.Reflected.OptionTextureAtlas.Some : OptionTextureAtlas, IEquatable<OptionTextureAtlas.Some>, IEquatable<OptionTextureAtlas>
+  Some(ulong Index)
+  bool Equals(OptionTextureAtlas.Some? other)
+  bool Equals(OptionTextureAtlas? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionTextureAtlas.Some? left, OptionTextureAtlas.Some? right)
+  static bool op_Inequality(OptionTextureAtlas.Some? left, OptionTextureAtlas.Some? right)
+  ulong Index { get; init; }
+  void Deconstruct(out ulong Index)
 abstract class Bevy.Reflected.OptionTileData : IEquatable<OptionTileData>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -7588,6 +7688,43 @@ sealed class Bevy.Reflected.OptionTileData.Some : OptionTileData, IEquatable<Opt
   static bool op_Inequality(OptionTileData.Some? left, OptionTileData.Some? right)
   ushort TilesetIndex { get; init; }
   void Deconstruct(out ushort TilesetIndex, out Color Color, out bool Visible, out TileOrientationValue Orientation)
+abstract class Bevy.Reflected.OptionURect : IEquatable<OptionURect>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected OptionURect(OptionURect original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionURect? left, OptionURect? right)
+  static bool op_Inequality(OptionURect? left, OptionURect? right)
+  virtual bool Equals(OptionURect? other)
+sealed class Bevy.Reflected.OptionURect.None : OptionURect, IEquatable<OptionURect.None>, IEquatable<OptionURect>
+  None()
+  bool Equals(OptionURect.None? other)
+  bool Equals(OptionURect? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionURect.None? left, OptionURect.None? right)
+  static bool op_Inequality(OptionURect.None? left, OptionURect.None? right)
+sealed class Bevy.Reflected.OptionURect.Some : OptionURect, IEquatable<OptionURect.Some>, IEquatable<OptionURect>
+  Some(uint MinX, uint MinY, uint MaxX, uint MaxY)
+  bool Equals(OptionURect.Some? other)
+  bool Equals(OptionURect? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OptionURect.Some? left, OptionURect.Some? right)
+  static bool op_Inequality(OptionURect.Some? left, OptionURect.Some? right)
+  uint MaxX { get; init; }
+  uint MaxY { get; init; }
+  uint MinX { get; init; }
+  uint MinY { get; init; }
+  void Deconstruct(out uint MinX, out uint MinY, out uint MaxX, out uint MaxY)
 readonly struct Bevy.Reflected.OuterColorRef : IReflectedComponent<OuterColorRef>, IReflectedWrapper<OuterColorRef>
   Color Value { get; set; }
   Entity Entity { get; }
