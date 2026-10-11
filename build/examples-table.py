@@ -285,12 +285,13 @@ def build(version, examples, order, triage, written, source, followed):
             picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="260" height="146"/>'
             picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
             # The caption sets each cell's width, its name padded with spaces that do not break to
-            # the longest name's thirty-five characters and drawn small, and the picture asks to be
-            # wider than any font draws that, so GitHub, which keeps a picture no wider than its
-            # cell, has it fill the cell exactly on every device. A browser laying out a table wider
+            # thirty-two characters and drawn small, and the picture asks to be wider than any font
+            # draws that, so GitHub, which keeps a picture no wider than its cell, has it fill the
+            # cell edge to edge with the caption on every device. A browser laying out a table wider
             # than the page shrinks each cell to the widest thing in it that cannot break, a width
-            # given or not, so the caption is that thing, the same in every cell.
-            name = example["name"] + "\u00a0" * max(0, 35 - len(example["name"]))
+            # given or not, so the caption is that thing, the same in every cell but the one whose
+            # name is longer, which is a little wider.
+            name = example["name"] + "\u00a0" * max(0, 32 - len(example["name"]))
             cells.append(f'<td width="260">{picture}<br><small><code>{name}</code></small></td>')
         # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the
         # README but a table's rows as prose, and four lines a group would take the gallery past it.

@@ -10,30 +10,52 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `bbb7de81`. Two commits, unpushed with the five before them. `bb4cb09f`,
-custom_schedule, ABI 265: `App.AddSchedule` places a schedule of the game's own in Bevy's main order
-after a stage, single-threaded where asked, the bridge placing by the concrete label types since the
-order compares by type and an interned label never matched, the executor set through an edit that
-keeps the systems already in it, and refused in managed code for a stage that is no schedule of
-Bevy's, a second placing or a running app, and in the bridge the same; a pre-startup stage joins
-both sides, before startup in the stage order, a system added while running in it running once on
-the spot as startup's does. `GameScheduleTests` reads the order, pre-startup, the custom startup,
-startup, then update, the schedule after update and last each frame, and both refusals, a native
-test the placement in both orders and both refusals; the example prints Bevy's order exactly, its
-text the capture, its triage line can with no note; the behaviors guide has its paragraph and block
-under the stages, and `a0c8b1b0` is on N 7.2's list as the owner's. `bbb7de81`, item 13 in the form
-the owner chose on a phone: every caption padded to 35 with the non-breaking space in a small code
-tag, all 304 read here so, every tag 260 by 146 and every cell 260, no break tag since the other
-form was never committed; the prose stays at 299 and the check and N 4.5's reader pass on the new
-cell. EXAMPLES.md reads 339 written, 2 in part and 41 missing. The suite: 1,418 passed and 2 skipped
-of 1,420, the norm tests 18 of 18 after the list's line; cargo's 89 and 153. Right, the placement by
-the concrete types where the interned label failed, the refusals on both sides, and the caption form
-built as chosen. Items 13 and 14 are done, the rendered page read after the push. Next the missing
-rows that need no crate and no word, asset_settings first, its triage line read for staleness as the
-others were, then ghost_nodes, the forward decal, the depth to a texture, a custom projection, the
-mesh sampling's error handling, the glTF extras, the interface material, a custom vertex attribute,
-mip generation, occlusion culling, the world's serialization, the transform gizmo, picking's debug,
-the pitch and the decodable.
+Reviewed up to `4ea63186`. One commit, asset_settings, unpushed with the seven before it, and its
+triage line was stale: `AssetServer.LoadImage` already loads through Bevy's builder with settings,
+and Bevy's default reads a meta file beside an image, so no bridge work was needed; the example
+shows the same picture of pixels three times, blurred as an image loads unless told otherwise, sharp
+with a meta file beside it asking the nearest sampler, and sharp with the settings given at the
+load, its capture as Bevy's. Its four files live beside Bevy's source rather than in its assets
+folder, so the asset list names them by addresses into Bevy's repository, which the fetch script
+stores under the example's folder beneath the assets, the list's header saying such an address may
+name the repository itself; the materials guide says a meta file beside an image sets its settings
+and the load's settings write over them; the triage note says the images read from their folder
+under the assets rather than from a root of their own. The norm, document and path tests pass, 20 of
+20, the prose at 299. EXAMPLES.md reads 340 written, 2 in part and 40 missing. Right, the stale line
+read before anything was built and the files fetched from where Bevy keeps them rather than copied
+in. The owner looked at both pushed galleries at 21:25 and finds 3DEngine's the better, its captions
+of 32 narrower than the picture so the picture shrinks to them, where 35 draws past it, so item 13
+keeps the padding of 32 with the one longer name unpadded, a batch of its own before ghost_nodes'
+commit. ghost_nodes next: Bevy's feature for it adds no crate, the lock byte for byte the same with
+it on, so it is the working session's to turn on under Decision 25, in the render profile beside the
+interface's crate with a comment, the components table written again from an editor run for the
+ghost node, the example's roots, buttons and observers walking parent, siblings and labels as Bevy's
+do.
+
+Before it, `bbb7de81` and `bb4cb09f` came. `bb4cb09f`, custom_schedule, ABI 265: `App.AddSchedule`
+places a schedule of the game's own in Bevy's main order after a stage, single-threaded where asked,
+the bridge placing by the concrete label types since the order compares by type and an interned
+label never matched, the executor set through an edit that keeps the systems already in it, and
+refused in managed code for a stage that is no schedule of Bevy's, a second placing or a running
+app, and in the bridge the same; a pre-startup stage joins both sides, before startup in the stage
+order, a system added while running in it running once on the spot as startup's does.
+`GameScheduleTests` reads the order, pre-startup, the custom startup, startup, then update, the
+schedule after update and last each frame, and both refusals, a native test the placement in both
+orders and both refusals; the example prints Bevy's order exactly, its text the capture, its triage
+line can with no note; the behaviors guide has its paragraph and block under the stages, and
+`a0c8b1b0` is on N 7.2's list as the owner's. `bbb7de81`, item 13 in the form the owner chose on a
+phone: every caption padded to 35 with the non-breaking space in a small code tag, all 304 read here
+so, every tag 260 by 146 and every cell 260, no break tag since the other form was never committed;
+the prose stays at 299 and the check and N 4.5's reader pass on the new cell. EXAMPLES.md reads 339
+written, 2 in part and 41 missing. The suite: 1,418 passed and 2 skipped of 1,420, the norm tests 18
+of 18 after the list's line; cargo's 89 and 153. Right, the placement by the concrete types where
+the interned label failed, the refusals on both sides, and the caption form built as chosen. Items
+13 and 14 are done, the rendered page read after the push. Next the missing rows that need no crate
+and no word, asset_settings first, its triage line read for staleness as the others were, then
+ghost_nodes, the forward decal, the depth to a texture, a custom projection, the mesh sampling's
+error handling, the glTF extras, the interface material, a custom vertex attribute, mip generation,
+occlusion culling, the world's serialization, the transform gizmo, picking's debug, the pitch and
+the decodable.
 
 Before it, `e92591dd` came, item 13's padding: the name under each gallery picture is padded with
 non-breaking spaces, the character itself, to thirty characters inside its code tag, the cell's
@@ -56,24 +78,6 @@ Bevy's main order after an update or a startup stage with a single-threaded exec
 `App.AddSchedule` and a pre-startup stage on the surface, the example printing Bevy's order exactly
 and its text the capture, twenty schedule tests, the behaviors guide with its paragraph and block;
 committed once the suite and both cargo profiles pass.
-
-Before it, `f60bc166` came: every cell the gallery script writes is `<td width="200">`, with the
-comment saying why, since GitHub squeezes a table to the page before it lets it scroll and a cell
-would shrink to its name, the picture with it; the README's prose stays at 299 and the check passes.
-One thing the change would have hidden, caught by the working session: N 4.5's test read the cells
-by a pattern that began at a bare `<td>`, which with the width would have matched nothing and passed
-without looking, and reads a cell with any attributes since, finding all 304 pictures, 18 of 18.
-Right, the width given where the squeeze acts, and the rule's own reader checked against the new
-shape rather than trusted. The owner looked at the pushed page at 18:55 and the pictures still
-differ: the cell's width survives but the browser treats it as a preference and shrinks a cell to
-its name when the table is wider than the page, so item 13 keeps the fallback, each name padded with
-non-breaking spaces in its code tag to thirty characters, a batch of its own before
-custom_schedule's commit. custom_schedule is under way at ABI 265: a pre-startup stage on both
-sides, a call placing a named schedule in Bevy's main order after an update or a startup stage by
-the concrete label types, since the order compares by type and an interned label never matched, with
-the single-threaded executor set through an edit that keeps the systems already in it, a second
-placing and a stage that is no schedule of its own refused, and a native test reading the placement
-back in both orders.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -289,8 +293,9 @@ from [SHARED.md](SHARED.md).
    session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
    the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
    `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
-   `ea5e1532`, custom_schedule at `bb4cb09f`, the table at 339 written and 41 missing; the rows that
-   need no crate and no word follow in TODO.md's order, asset_settings first.
+   `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
+   bridge work, the table at 340 written and 40 missing; the rows that need no crate and no word
+   follow in TODO.md's order, ghost_nodes next, its feature pulling no crate (Decision 25).
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
    is handed over, and each is mended to report it instead, so no exception crosses the bridge from
@@ -359,14 +364,14 @@ from [SHARED.md](SHARED.md).
     refusal only over a resource the world holds, and a fault of the bridge found and mended with
     it, a resource taken off its entity answered as held.
 
-13. **The README's gallery as one scrolling row of pictures a group, done through `bbb7de81`
-    (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's README.
-    `build/examples-table.py` writes the gallery between its markers as one table of four pictures a
-    row over every written example; it writes instead one table a group in the order Bevy's
-    `examples/README.md` lists the groups, which the script already reads, each a single row holding
-    the group's written examples in that order, the picture opening the program and the name under
-    it as today, with a heading line naming the group before each table, and the examples Bevy keeps
-    out of its list in a last row of their own; a row wider than the page scrolls sideways on
+13. **The README's gallery as one scrolling row of pictures a group, done through `bbb7de81` but for
+    the padding of 32 (Decision 27).** The owner asked on 2026-10-11 at 16:05, as for 3DEngine's
+    README. `build/examples-table.py` writes the gallery between its markers as one table of four
+    pictures a row over every written example; it writes instead one table a group in the order
+    Bevy's `examples/README.md` lists the groups, which the script already reads, each a single row
+    holding the group's written examples in that order, the picture opening the program and the name
+    under it as today, with a heading line naming the group before each table, and the examples Bevy
+    keeps out of its list in a last row of their own; a row wider than the page scrolls sideways on
     GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
     reads the table today, so the workflow's table check and the README's walk run on it, and the
     raw links keep their form for the package's page. A batch of its own before low_power, since it
@@ -427,7 +432,12 @@ from [SHARED.md](SHARED.md).
     220 on 3DEngine's page at 20:35 and prefers this form, its pictures filling up to the caption's
     width where the other's fell short, the names being Bevy's and the table's keys, so none is
     renamed; the rendered page read after the push on a desktop and a phone. Done at `bbb7de81`:
-    captions of 35 set small, every tag and cell 260.
+    captions of 35 set small, every tag and cell 260. The owner looked at both pushed galleries at
+    21:25 and finds 3DEngine's the better: its captions are padded to 32, narrower than the picture
+    of 260, so the picture shrinks to the caption and the two match edge to edge, where BevyCSharp's
+    35 draws past the picture. The padding goes to 32 as 3DEngine's, the one name longer than that,
+    `shader_material_screenspace_texture`, left unpadded with its cell a little wider, the tags and
+    cells unchanged, so the two galleries read alike.
 
 14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
     on 2026-10-11 at 16:30 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
