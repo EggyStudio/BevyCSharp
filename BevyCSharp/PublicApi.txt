@@ -91,7 +91,9 @@ static class Bevy.Animation
   static bool AddEvent<TEvent>(AssetHandle clip, float time, TEvent value) where TEvent : IAnimationEvent
   static bool Play(Entity scene, string clip, AnimationSettings? settings = null)
   static bool SetNodeWeight(Entity player, uint node, float weight)
+  static bool StopMachine(Entity scene)
   static bool TryClips(Entity scene, out IReadOnlyList<string> clips)
+  static string? MachineStateOf(Entity scene)
   static uint AddBlend(AssetHandle graph, float weight, uint parent, bool additive = false)
   static uint AddClip(AssetHandle graph, AssetHandle clip, float weight, uint parent, ulong mask = 0UL)
   static void AddCurve(AssetHandle clip, AnimationTarget target, AnimationCurve curve)
@@ -101,13 +103,24 @@ static class Bevy.Animation
   static void PlayGraph(Entity player, AssetHandle graph, uint node, bool repeat = false)
   static void PlayNode(Entity player, uint node, bool repeat = false)
   static void Resume(Entity scene)
+  static void Run(Entity scene, AnimationStateMachine machine)
   static void Seek(Entity scene, float seconds)
   static void SetClipDuration(AssetHandle clip, float seconds)
   static void SetGraph(Entity player, AssetHandle graph)
   static void SetNodeMask(AssetHandle graph, uint node, ulong mask)
+  static void SetParameter(Entity scene, string name, bool value)
+  static void SetParameter(Entity scene, string name, float value)
   static void SetRepeat(Entity scene, uint times)
   static void SetSpeed(Entity scene, float speed)
   static void Stop(Entity scene)
+  static void Trigger(Entity scene, string name)
+enum Bevy.AnimationCondition : int
+  Above = 3
+  Below = 4
+  False = 2
+  Finished = 0
+  Triggered = 5
+  True = 1
 sealed class Bevy.AnimationCurve
   AnimatedProperty Property { get; }
   AnimationCurve PingPong()
@@ -134,6 +147,20 @@ readonly struct Bevy.AnimationFinished : IEquatable<AnimationFinished>
   static bool op_Inequality(AnimationFinished left, AnimationFinished right)
   string Clip { get; init; }
   void Deconstruct(out Entity Scene, out string Clip)
+sealed class Bevy.AnimationMachineState
+  AnimationMachineState()
+  bool Repeat
+  float Speed
+  string Clip
+  string Name
+sealed class Bevy.AnimationMachineTransition
+  AnimationCondition When
+  AnimationMachineTransition()
+  float Blend
+  float Value
+  string From
+  string Parameter
+  string To
 sealed class Bevy.AnimationSettings
   AnimationSettings()
   bool Repeat { get; set; }
@@ -155,6 +182,11 @@ readonly struct Bevy.AnimationState : IEquatable<AnimationState>
   string? Clip { get; init; }
   uint Completions { get; init; }
   void Deconstruct(out string? Clip, out float Seconds, out float Speed, out bool Paused, out bool Finished, out uint Completions)
+sealed class Bevy.AnimationStateMachine
+  AnimationStateMachine()
+  List<AnimationMachineState> States
+  List<AnimationMachineTransition> Transitions
+  string Start
 readonly struct Bevy.AnimationTarget : IEquatable<AnimationTarget>
   AnimationTarget(ulong High, ulong Low)
   bool Equals(AnimationTarget other)

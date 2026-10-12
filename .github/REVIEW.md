@@ -10,7 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7effdb05`, a documents batch from reading TODO.md before its next item: its list of
+Reviewed up to `a99eceb3`, the scenes' two items from TODO.md. `ae26e39b`: a scene file or a data
+asset from a newer build keeps its version among the values no field read, so an older build's save
+writes the newer version back and the newer build reads the file as its own rather than migrating it
+a second time, a value the older build changed written in the older shape under the newer version,
+which the attribute's remark says; two tests, a file and a data asset from a newer build saved at
+their own version, and the scenes document's section moved to built. `a99eceb3`: a save of the
+scenes' entities writes the fields play changed alone, comparing with the values as loaded, which
+the save's beginning records, a component play took off as null, one put on whole, an entity play
+left alone skipped and one spawned during play whole; a test that a save holds only the fields play
+changed so a level fixed in an update still reaches a player's save; the scenes document and the
+guide say both. Right, the version kept rather than migrated twice, and the save as the difference
+play made rather than the world. Verdict 13 stands at one whole suite of ten. Next TODO.md's order
+as before, the animation state machine under way in the tree with a Shared line waiting on its
+commit.
+
+Before it, `7effdb05` came, a documents batch from reading TODO.md before its next item: its list of
 what Bevy's examples wait on named two groups written since, the deferred buffers from Slang and a
 2D mesh drawn by a shader, and left out four of the 18 missing, and lists the 18 in six groups from
 the triage, the camera controllers, Feathers, the dev tools, the system fonts, HTTP assets, which
@@ -39,27 +54,6 @@ through it, and under the same load 15 runs of 15 pass; the first of the ten who
 verdict asks runs, each later batch's counting. Right, the flake reproduced on purpose under load
 rather than waited for, and the fix in the one place every picture passes through. Next TODO.md's
 order as before, with this file read before each batch.
-
-Before it, `2381bc58` came, nine commits more: `732faf4c` makes the soft shadow test's failure say
-each picture's dark and light counts, Verdict 13's next read, and eight commits, one a folder, empty
-N 3.4's list of 39 places, each test class holding a test folder and disposing it in place of a
-string under the temp path and its own delete, the asset id tests' export copy taking a second
-folder and losing its try and finally, the editor world tests no longer leaking their files on a
-failure, and the picture run's temporary assets wrapping the folder, whose dispose had swallowed a
-held file's error and which fails with the holders named after two seconds, N 3.4's point; the 109
-tests of the converted classes pass with the norm tests, and the suite over the N 1.2 splits passed
-whole, 1,452 and 2 skipped of 1,454, the shadow test among them, so the diagnostic has not fired.
-The lists left all stand by design with their reasons: N 3.3's six, deadlines on the asset server's
-own threads, the file watcher, the socket server and the folder's retry; N 4.1's four files that
-name the forbidden marks or quote others; N B3's fifteen functions, each returning a constant, an
-atomic flag or the main-thread test; N 4.5's twenty, the stress tests at Bevy's 1920 by 1080 and the
-scale override at its size; N 1.4's 28 tests of what is not a library area; and N 7.2's commits
-already made. Right, one type for every test's folder, failing loud where a file is held, and the
-lists emptied or explained. Item 2 stands at entries by design alone. Next Verdict 13, the flake's
-cause, read by the diagnostic as each whole suite runs and by which classes run before the shadow
-tests for one that leaves state behind process-wide, the ambient light, a shadow map's size or a
-setting among them; then TODO.md's order as before, this file read before each batch, the 18 rows
-opening with the owner's word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -784,3 +778,12 @@ from [SHARED.md](SHARED.md).
     20.
 
 ## Replies
+
+Shared: an animation state machine, in the commit carrying this line, for the Animation section's
+table. `AnimationStateMachine` is a data asset of states, each a clip and how it plays, and
+transitions tried in order, each on a parameter above or below a value, a flag, a trigger used up
+as it is taken, or the state's clip ending, with an empty `From` for any state; `Animation.Run`
+starts it on a model and plays each state through `Play`, so the fade, `StateOf` and
+`AnimationFinished` are unchanged, and the editor's data asset inspector edits it as two lists with
+no code of its own. A scene naming the machine a placed model runs, a graph drawing of it and a
+state blending clips by a parameter are left in TODO.md.

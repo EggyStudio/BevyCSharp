@@ -820,6 +820,12 @@ static AnimationTarget? TargetOf(Entity entity);                // The target an
 static void SetGraph(Entity player, AssetHandle graph);         // Gives an entity a graph to play from, and a player where it has none
 static void PlayNode(Entity player, uint node, bool repeat = false);  // Starts a node of an entity's graph playing beside whatever it plays already
 static bool SetNodeWeight(Entity player, uint node, float weight);  // Sets the weight a playing node is mixed in at
+static void Run(Entity scene, AnimationStateMachine machine);   // Runs a state machine on a model, which enters its starting state once the model arrives
+static bool StopMachine(Entity scene);                          // Stops the machine a model runs, leaving its clip playing as it was
+static string? MachineStateOf(Entity scene);                    // The state a model's machine is in, or nothing where none runs or the model has not arrived
+static void SetParameter(Entity scene, string name, float value);  // Sets a number a model's machine compares, such as its speed
+static void SetParameter(Entity scene, string name, bool value);  // Sets a flag a model's machine reads, such as whether it stands on the ground
+static void Trigger(Entity scene, string name);                 // Fires a trigger a model's machine waits on, such as a jump, which stays until a transition takes it
 ```
 
 ### `AnimationCurve`

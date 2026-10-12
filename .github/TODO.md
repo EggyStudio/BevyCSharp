@@ -155,14 +155,16 @@ does and be authorable without recompiling the bridge, which is the part worth h
 `bevy_animation` is compiled into the render profile, and `Animation` plays a glTF file's clips by
 name on the entity its scene was spawned under, once or over and over, at a speed, held, moved to a
 time, stopped, and faded from one clip to the next over a time, with `AnimationFinished` posted when
-a clip that plays once ends. A graph built node by node blends clips by weight, with masks and
-additive layers, clips are made in code from curves, and an event placed on a clip triggers
-observers as the clip passes it. The console's `anim.*` commands reach it from the editor. What is
-left:
+a clip that plays once ends. An `AnimationStateMachine`, a data asset the editor edits as lists,
+chooses the clip from parameters the game sets, triggers it fires and clips ending. A graph built
+node by node blends clips by weight, with masks and additive layers, clips are made in code from
+curves, and an event placed on a clip triggers observers as the clip passes it. The console's
+`anim.*` commands reach it from the editor. What is left:
 
-- **No state machine.** Which clip follows which, on what condition, is the game's code, read off
-  `StateOf` and `AnimationFinished`. A table of states and transitions the editor could draw would
-  sit over this.
+- **A state machine is run from code.** `Animation.Run` starts one on a model, and nothing in a
+  scene file names the machine a placed model runs, nor draws its states as a graph in the editor.
+  A state plays one clip, rather than a blend of clips by a parameter as a walk turning into a run
+  by speed would.
 - **A clip made in code moves a few properties.** A curve moves a transform's translation, rotation
   or scale, an interface node's scale or rotation, or a text's color. A field of another component,
   which Bevy's animated fields reach through reflection, has no curve of its own.

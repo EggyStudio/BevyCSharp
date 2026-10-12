@@ -21,12 +21,13 @@ namespace Bevy;
 /// with an exception rather than waited on.
 /// </para>
 /// <para>
-/// One clip plays at a time, with a fade from one to the next (<see cref="AnimationSettings.Blend"/>).
-/// Masks that play a clip on part of a body, additive layers and a state machine choosing between
-/// clips are not here yet.
+/// <see cref="Play"/> plays one clip at a time, with a fade from one to the next
+/// (<see cref="AnimationSettings.Blend"/>), and <see cref="Run"/> chooses between them by an
+/// <see cref="AnimationStateMachine"/>. A graph built with <see cref="CreateGraph"/> blends clips
+/// by weight, with masks that play a clip on part of a body and additive layers.
 /// </para>
 /// </remarks>
-public static unsafe class Animation
+public static unsafe partial class Animation
 {
     /// <summary>The names of a model's clips, or false while it has not arrived.</summary>
     /// <remarks>

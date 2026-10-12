@@ -237,8 +237,46 @@ number of times before it holds its last pose, and `SetRepeat` changes that whil
 starting it over, zero being for ever. A clip that does not repeat posts `AnimationFinished` when
 it reaches its end. The
 console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor or `bcs`. `Play`
-plays one clip at a time, fading from the last. A graph built node by node, below, blends clips by
-weight with masks and additive layers, and a state machine over clips is left to the game.
+plays one clip at a time, fading from the last, a state machine, next, chooses which, and a graph
+built node by node, further on, blends clips by weight with masks and additive layers.
+
+A state machine chooses the clip from what the game says the model is doing. Each state names a
+clip, and each transition a condition on a parameter the game sets, a trigger it fires, or the
+state's clip ending. The machine moves once a frame, taking the first transition listed whose
+condition holds, and one with no `From` is taken from any state, as a jump interrupts whatever a
+character was doing. It is a data asset, so it is kept in a `*.data.json` file and edited in the
+editor as a list of states and one of transitions, or made in code:
+
+<!-- compiled with:
+Entity fox = default;
+float speed = 0f;
+-->
+```csharp
+var machine = new AnimationStateMachine
+{
+    States =
+    [
+        new() { Name = "Idle", Clip = "Survey" },
+        new() { Name = "Walking", Clip = "Walk" },
+        new() { Name = "Jumping", Clip = "Jump", Repeat = false },
+    ],
+    Transitions =
+    [
+        new() { To = "Jumping", When = AnimationCondition.Triggered, Parameter = "Jump" },
+        new() { From = "Idle", To = "Walking", When = AnimationCondition.Above, Parameter = "Speed", Value = 0.1f },
+        new() { From = "Walking", To = "Idle", When = AnimationCondition.Below, Parameter = "Speed", Value = 0.1f },
+        new() { From = "Jumping", To = "Idle", When = AnimationCondition.Finished },
+    ],
+};
+
+Animation.Run(fox, machine);                     // or a file's, through DataAssets.Get
+Animation.SetParameter(fox, "Speed", speed);     // each frame, read at the start of the next
+Animation.Trigger(fox, "Jump");                  // kept until the transition it fires uses it up
+```
+
+`MachineStateOf` names the state a model is in. A machine naming a state it does not have is
+refused when it is run, and one naming a clip the model does not have is stopped once the model
+arrives, with why on the log.
 
 A mesh's morph targets, the shapes its vertices blend toward as a clip moves their weights, are
 named in the file, and `Render.MorphTargetNames` gives a mesh's names in their order once it has

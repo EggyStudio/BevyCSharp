@@ -277,6 +277,7 @@ public sealed unsafe partial class App : IDisposable
 
         // A game in progress is one app's, and its entities would name others in the next.
         SaveGame.Forget();
+        Animation.ForgetMachines();
 
         World.TrackChangeLocations = Config.TrackChangeLocations;
         World.InsertResource(Config);
@@ -376,7 +377,12 @@ public sealed unsafe partial class App : IDisposable
             // The handles a scene made for its entities that none of them draws with any more.
             AssetServer.Sweep();
 
-            if (HasRenderer) Animation.PostFinished(world.Resource<MessageBus>());
+            if (HasRenderer)
+            {
+                Animation.PostFinished(world.Resource<MessageBus>());
+                Animation.AdvanceMachines(world.Resource<EcsWorld>());
+            }
+
             DataAssets.PostChanges(world.Resource<MessageBus>());
             SaveGame.PostLoaded(world.Resource<MessageBus>());
             MaterialFiles.ReloadTouched();
