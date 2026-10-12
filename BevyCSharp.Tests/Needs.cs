@@ -39,6 +39,31 @@ internal static class Needs
     internal static void NoRenderer() =>
         Skip.If(App.HasRenderer, "is about a headless bridge");
 
+    /// <summary>The variable a run sets to have a window opened, resized, minimized and moved.</summary>
+    internal const string WindowStormVariable = "BCS_WINDOW_STORM";
+
+    /// <summary>
+    /// A window this test may open and storm, which the run asked for with
+    /// <see cref="WindowStormVariable"/> set to 1, on a display that gives a minimized window back:
+    /// X11 on Linux, which <c>xvfb-run</c> gives off any desktop, Windows or macOS.
+    /// </summary>
+    /// <remarks>
+    /// Asked for rather than taken wherever there is a display, since the window is minimized and
+    /// moved about whatever desktop the run has, which on a desk is somebody's. Wayland gives no
+    /// program its minimized window back, so a run there is skipped as one with no display is.
+    /// </remarks>
+    internal static void WindowStorm()
+    {
+        Renderer();
+        Skip.IfNot(
+            Environment.GetEnvironmentVariable(WindowStormVariable) == "1",
+            $"opens a window and storms it, which a run asks for with {WindowStormVariable}=1, under xvfb-run where it should stay off a desktop");
+        Skip.If(
+            OperatingSystem.IsLinux() && (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY"))
+                || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"))),
+            "needs an X11 display, which gives a minimized window back where Wayland does not, as xvfb-run gives one");
+    }
+
     /// <summary>A bridge that draws and a Slang compiler to compile shaders with.</summary>
     internal static void Shaders()
     {

@@ -232,7 +232,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 app.add_plugins(runner);
                 crate::offscreen::install_offscreen_target(&mut app, config.width.max(1), config.height.max(1));
             } else {
-                app.add_plugins(plugins);
+                // Winit's loop on whichever thread the app is built on, where winit allows it,
+                // Linux and Windows. A game's app is built on its main thread and loses nothing,
+                // and one a test host builds on a worker thread, as a test of a real window does,
+                // opens its window rather than panicking that it is not the main thread. macOS
+                // keeps the rule whatever is asked.
+                app.add_plugins(plugins.set(WinitPlugin { run_on_any_thread: true }));
             }
 
             // What the app asks for of drawing beyond the default plugins.

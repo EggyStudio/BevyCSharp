@@ -552,6 +552,12 @@ and leaves silhouettes alone. These need a GPU, so they are skipped on the headl
 test workflow builds, each through `Needs` in the tests with the profile, tool or device it lacks
 as the reason, so a run's summary counts what did not run there rather than passing it.
 
+A real window is put through a storm of resizes, minimizes and moves while it draws, and must
+draw at the size last asked for with nothing logged (`WindowStormTests`). It runs where a run asks
+with `BCS_WINDOW_STORM=1` on a display that gives a minimized window back, which `xvfb-run` gives
+off any desktop, on a GPU or on lavapipe alike, and is skipped with that reason elsewhere, the test
+workflow's jobs having no display.
+
 Every attribute the generators act on is compiled and run by `GeneratorAttributeTests`, from the
 generators' own table (`RecognizedAttributes`), so an attribute added there with no case fails by
 name, and one that stops compiling fails its case.
