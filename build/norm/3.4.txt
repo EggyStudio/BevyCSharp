@@ -10,8 +10,8 @@ BevyCSharp.Tests/ChangingTypeTests.cs Directory.Delete
 BevyCSharp.Tests/ChangingTypeTests.cs Path.GetTempPath
 BevyCSharp.Tests/Cli/CliServerTests.cs Directory.Delete
 BevyCSharp.Tests/Cli/CliServerTests.cs Path.GetTempPath
-BevyCSharp.Tests/CliSessionTests.cs Directory.Delete
-BevyCSharp.Tests/CliSessionTests.cs Path.GetTempPath
+BevyCSharp.Tests/Cli/CliSessionTests.cs Directory.Delete
+BevyCSharp.Tests/Cli/CliSessionTests.cs Path.GetTempPath
 BevyCSharp.Tests/DataReferenceCountTests.cs Directory.Delete
 BevyCSharp.Tests/DataReferenceCountTests.cs Path.GetTempPath
 BevyCSharp.Tests/Editor/EditorWorldTests.cs Path.GetTempPath
