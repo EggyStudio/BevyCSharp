@@ -19,7 +19,6 @@ BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of t
 BevyCSharp.Tests/Docs/FirstGameTests.cs	tests a document and the game it makes, which are no area of the library
 BevyCSharp.Tests/Docs/PublicSurfaceTests.cs	tests a listing of the whole library, which is no one area of it
 BevyCSharp.Tests/DrawnTests.cs
-BevyCSharp.Tests/DynamicSystemTests.cs
 BevyCSharp.Tests/EcsListTests.cs
 BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
@@ -47,7 +46,6 @@ BevyCSharp.Tests/GltfMaterialDrawnTests.cs
 BevyCSharp.Tests/GradingTests.cs
 BevyCSharp.Tests/InlineListTests.cs
 BevyCSharp.Tests/InstanceTests.cs
-BevyCSharp.Tests/IntrospectionTests.cs
 BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/LensTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
@@ -56,11 +54,9 @@ BevyCSharp.Tests/MaterialTests.cs
 BevyCSharp.Tests/Mesh2dTests.cs
 BevyCSharp.Tests/MeshFileTests.cs
 BevyCSharp.Tests/MeshTagTests.cs
-BevyCSharp.Tests/MessageTests.cs
 BevyCSharp.Tests/NativeComponentTests.cs
 BevyCSharp.Tests/NativeInputLayoutTests.cs
 BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
-BevyCSharp.Tests/OffscreenTests.cs
 BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
 BevyCSharp.Tests/PngTests.cs
@@ -89,9 +85,6 @@ BevyCSharp.Tests/SparseComponentTests.cs
 BevyCSharp.Tests/SpirvComputeTests.cs
 BevyCSharp.Tests/SpriteTests.cs
 BevyCSharp.Tests/StreamingTests.cs
-BevyCSharp.Tests/SubStateTests.cs
-BevyCSharp.Tests/SystemOrderTests.cs
 BevyCSharp.Tests/TextConventionTests.cs
 BevyCSharp.Tests/TimingTests.cs
 BevyCSharp.Tests/UiPixelTests.cs
-BevyCSharp.Tests/WindowMemoryTests.cs
