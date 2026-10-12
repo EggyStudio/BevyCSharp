@@ -138,6 +138,61 @@ public sealed class GamepadTests
         Assert.Equal(0.85f, past!.Value, 3);
     }
 
+    /// <summary>
+    /// A pad command naming a pad past the last connects console pads up to it, so a second
+    /// player's button is pressed on a machine with none attached, and one past the fourth is
+    /// refused.
+    /// </summary>
+    [Fact]
+    public void APadCommandConnectsConsolePadsUpToThePadItNames()
+    {
+        string? answer = null, refused = null;
+        Func<string?>? waiting = null;
+        var names = new List<string>();
+        var secondDown = false;
+        var frame = 0;
+
+        using var app = new App(new Config { Headless = true, HeadlessFrames = 30 });
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            frame++;
+            var pads = world.Resource<Input>().Gamepads;
+            if (pads.Count > 1 && pads[1].Down(GamepadButton.South)) secondDown = true;
+            if (frame == 25) names.AddRange(pads.Select(pad => pad.Name));
+
+            using (ConsoleHost.Lend(world))
+            {
+                if (waiting is { } poll)
+                {
+                    if (poll() is { } said)
+                    {
+                        answer = said;
+                        waiting = null;
+                    }
+
+                    return;
+                }
+
+                if (frame != 3) return;
+
+                ConsoleHost.Reset();
+                refused = ConsoleCommands.Run("input.button 4 South 5");
+                ConsoleHost.Reset();
+                ConsoleCommands.Run("input.button 1 South 5");
+                waiting = ConsoleHost.Pending;
+            }
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.Contains("made up to pad 3", refused);
+        Assert.Equal("held South on pad 1 for 5 frames", answer);
+        Assert.True(secondDown, "the second pad's button was not held");
+        Assert.Equal(["Console pad", "Console pad 2"], names);
+    }
+
     [Fact]
     public void ARumbleIsTakenByAPadThatCannotRumble()
     {

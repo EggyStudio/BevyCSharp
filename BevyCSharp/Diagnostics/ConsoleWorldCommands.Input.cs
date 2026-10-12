@@ -179,7 +179,7 @@ internal static partial class ConsoleWorldCommands
     {
         var pads = PadsNow();
         return pads.Count == 0
-            ? "no gamepad is connected; input.button and input.axis connect a console pad"
+            ? $"no gamepad is connected; input.button and input.axis connect console pads up to the one they name, pad {MaxConsolePads - 1} at most"
             : string.Join("\n", pads.Select((pad, index) => $"{index}: {pad.Name} ({pad.Entity})"));
     }
 
@@ -188,11 +188,11 @@ internal static partial class ConsoleWorldCommands
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Pads are numbered as <c>input.pads</c> lists them. Naming the number after the last, which
-    /// is 0 on a machine with none, connects a pretended pad there first, so a script presses a
-    /// button where no pad is attached. A pad connected that way is a pad from the next frame,
-    /// which is when the button goes down, and the answer comes once it is let go, as
-    /// <c>input.hold</c> answers for keys.
+    /// Pads are numbered as <c>input.pads</c> lists them. Naming a number past the last, up to
+    /// <see cref="MaxConsolePads"/> pads in all, connects pretended pads up to it first, so a
+    /// script presses a button where no pad is attached, and a second player's where one is. A pad
+    /// connected that way is a pad from the next frame, which is when the button goes down, and the
+    /// answer comes once it is let go, as <c>input.hold</c> answers for keys.
     /// </para>
     /// <para>
     /// The button is a <see cref="GamepadButton"/> by name, South for A or Cross, and the
@@ -287,7 +287,16 @@ internal static partial class ConsoleWorldCommands
     /// <summary>The pads as this frame reads them.</summary>
     private static IReadOnlyList<Gamepad> PadsNow() => ConsoleHost.World?.Resource<Input>().Gamepads ?? [];
 
-    /// <summary>The pad a number names, connecting a console pad where it is the number after the last.</summary>
+    /// <summary>
+    /// The most pads the pad commands connect console pads up to, as many as players around one
+    /// screen usually are.
+    /// </summary>
+    internal const int MaxConsolePads = 4;
+
+    /// <summary>
+    /// The pad a number names, connecting console pads from the last up to it where it is past the
+    /// last, <see cref="MaxConsolePads"/> at most in all.
+    /// </summary>
     private static bool TryPad(int index, out Entity pad, out string problem)
     {
         var pads = PadsNow();
@@ -300,13 +309,18 @@ internal static partial class ConsoleWorldCommands
             return true;
         }
 
-        if (index == pads.Count)
+        if (index >= pads.Count && index < MaxConsolePads)
         {
-            pad = SyntheticInput.ConnectGamepad();
+            // Each named by its place, the first as a lone console pad always was.
+            for (var next = pads.Count; next <= index; next++)
+                pad = SyntheticInput.ConnectGamepad(next == 0 ? "Console pad" : $"Console pad {next + 1}");
+
             return true;
         }
 
-        problem = $"There is no pad {index}. {pads.Count} {(pads.Count == 1 ? "is" : "are")} connected, and {pads.Count} would connect a console pad.";
+        problem = index < 0
+            ? $"There is no pad {index}, since pads are numbered from 0."
+            : $"There is no pad {index}. {pads.Count} {(pads.Count == 1 ? "is" : "are")} connected, and console pads are made up to pad {MaxConsolePads - 1}.";
         return false;
     }
 

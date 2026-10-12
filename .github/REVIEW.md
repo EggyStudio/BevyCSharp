@@ -10,7 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c5873eef`, the pack run's storm: a job of the pack run alone, after the native job,
+Reviewed up to `daa653ad`, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines over
+the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it counts
+the C# and the Rust, and found the pass module over the line, so its deferred part, the G-buffer's
+surface and a shadow stage's depth, is a module of its own, `bcs_pass_deferred.slang` at 230 lines,
+which `bcs_pass.slang` includes at 588, the bridge's module list nine where eight. `daa653ad`, the
+click command's count: `input.click <x> <y> [count]`, from the first press a press on each even step
+and a release on each odd one, a frame apart, so the clicks fall within the double-click time and
+each is heard with its place in the run, four at most, a triple click the most anything asks for
+with one to spare; `ClickCommandTests.AClickGivenACountIsHeardAsThatManyInARun` beside the one that
+hears a click where the pointer has not been; BCS.md's row says the count. Both right. SHARED.md's
+two rows read has. The push's run, the first with the storm job, skips it as the job's condition
+says, and the Linux suite passed in eleven minutes; the macOS and Windows suites, and 3DEngine's
+four jobs on `ee85866f`, were running at 16:32. Next the console pads made up to the index a command
+names, under way, then the shuffled suite, then the weak orderings.
+
+Before it, `c5873eef` came, the pack run's storm: a job of the pack run alone, after the native job,
 which downloads its linux-x64 render bridge, builds the tests on it with the freshness check off,
 installs a software Vulkan, ALSA and Xvfb, and runs the storm's filter under `xvfb-run -a` on a 1920
 by 1080 screen with `BCS_WINDOW_STORM=1` and `WAYLAND_DISPLAY` unset, each step through
@@ -51,28 +66,6 @@ the job a quarter of an hour cold; the pack run holds the native job's linux-x64
 artifact, so a step there puts it in the test bin and runs the storm under `xvfb-run -a` with the
 variable set, `xvfb` among the packages, its failure an `::error::` naming it, as 3DEngine's storm
 runs in its whole run and not on each push.
-
-Before it, `220aa7b0` came, the project file's window title and icon: `ProjectSettings.Title` and
-`Icon`, two rows on the Project page; an app's window takes the title where its config leaves the
-default, `App.TitleFor` tested, and the player prefers it to the scene's file name, so an export
-opens under it; the icon through `bcs_window_set_icon` at ABI 281, `window/icon.rs`, which keeps the
-request until the image has loaded and winit's window exists and puts it on from a `Last` system
-pinned to the main thread by `NonSendMarker`, a second request replacing the first, not installed
-offscreen and refused there; `Window.SetIcon` for the primary and a spawned window; a startup system
-wearing the project's icon where a window exists; Windows and X11 show it, Wayland and macOS take
-theirs from the desktop file and the bundle, said in the remarks, and the executable's and the
-bundle's icons said under the export's entry as not made. Not seen by eye, which this Wayland
-desktop could not show. Right; an image that will not load keeps its request pending, one entry
-retained a frame with the asset server's error the only word, enough. Verdict 13 is settled at ten
-whole suites since `7f18b684`, 1,454 to 1,470 tests each, the one suite that failed on an
-uncommitted test counted for neither side, and its paragraph is out; Verdicts 2 and 3 wait on the
-pack run. TODO.md's order and the Now list hold nothing a coder can take without a word, so
-SHARED.md's rows are next, two in order: the shader cache's key following every form an import
-takes, which the bridge has by the compiler's dependency file deciding whether a cached result
-applies, every file a compile read in it, wanting the test 3DEngine's row has, a module one module
-exports edited and the importer of the exporter recompiled, `__exported import` the form, after
-which the row's column reads has; then a window resized, minimized and moved by commands while it
-draws, as a storm a test runs where the job has a window to open and says where it has none.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
