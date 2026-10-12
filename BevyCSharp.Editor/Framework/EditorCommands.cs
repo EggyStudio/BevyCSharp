@@ -205,15 +205,31 @@ public static class EditorCommands
             21,
             personal: false);
 
+        EditorSettings.Text(
+            "Project",
+            "Window title",
+            static () => EditorProjectFile.Settings.Title ?? string.Empty,
+            static value => EditorProjectFile.Change(project => project.Title = value.Trim() is { Length: > 0 } title ? title : null),
+            22,
+            personal: false);
+
+        EditorSettings.Text(
+            "Project",
+            "Window icon",
+            static () => EditorProjectFile.Settings.Icon ?? string.Empty,
+            static value => EditorProjectFile.Change(project => project.Icon = value.Trim() is { Length: > 0 } icon ? icon : null),
+            23,
+            personal: false);
+
         EditorSettings.Number(
             "Project",
             "Fixed step per second",
             static () => (float)EditorProjectFile.Settings.FixedHz,
             static value => EditorProjectFile.Change(project => project.FixedHz = Math.Max(0d, value)),
-            22,
+            24,
             personal: false);
 
-        EditorSettings.Fact("Project", "Project file", static () => EditorProjectFile.Path, 23);
+        EditorSettings.Fact("Project", "Project file", static () => EditorProjectFile.Path, 25);
 
         // What the editor is made of, which is every table something registered itself in. A count
         // that reads as zero is a table nothing reached, which is worth knowing.

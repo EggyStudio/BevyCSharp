@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 280;
+    internal const int ExpectedAbiVersion = 281;
 
     /// <summary>
     /// The window the <c>bcs_window_*</c> calls address for the primary one, which no entity's
@@ -409,6 +409,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_cursor_image(ulong window, int image, uint x, uint y);
+
+    /// <summary>Asks for a window to be shown by an image as its icon, put on once both have arrived.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_icon(ulong window, int image);
 
     /// <summary>Cuts the pointer's image to one frame of an atlas, with that frame's hotspot.</summary>
     [LibraryImport(Library)]

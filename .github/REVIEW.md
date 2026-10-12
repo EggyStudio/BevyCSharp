@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7c5fb903`, a documents commit: the shadows' 2 ms said and left. Bevy's `trace`
+Reviewed up to `bfe27ddd`, the machine player: `AnimationMachinePlayer`, a behavior holding a
+`DataRef<AnimationStateMachine>`, which the per-frame advance starts on an entity carrying it, the
+machine entering its first state once the model arrives as one run from code does, starts again when
+the reference names another machine or its file is read again, and stops when the component is taken
+off or the entity is gone; a reference that will not read, or a machine whose names do not hold
+together, is said once on the log by the id it named and the model left as it is until the reference
+changes. Tests run it from a machine file in an asset root of the test's own, stop it by taking the
+component off, log a missing file once, and save a placed instance with it and load the scene to a
+running machine; the guide's state machine section names it beside `Animation.Run` with a compiled
+block; the public API gains its two lines and TODO.md's item keeps what stays, the graph drawing and
+a state's blend by a parameter. Right; the set and the list the start builds each frame while a
+player is present are a level's few characters' worth and left. Verdict 13 at nine of ten with the
+suite over it. Next the project file's window title and icon from Interface's editor items: the
+title whole, a `ProjectSettings` field, a row on the Project page, the app's window wearing it at
+start and the export taking it; the icon's field and row with the window wearing it through one
+bridge call, since Bevy's `Window` carries no icon of its own and winit's is set by the
+`WinitWindows` under the primary window, an ABI step; the executable's and the bundle's icons, each
+platform's own, listed under the export and not taken.
+
+Before it, `7c5fb903` came, a documents commit: the shadows' 2 ms said and left. Bevy's `trace`
 feature, which puts the spans in, is not compiled into the bridge, and turning it on wants a new
 `native/Cargo.lock`, the locked metadata refusing it, the manifest restored and the lock
 byte-identical after, so placing them waits as the crates the lock lacks do, said under the shadows'
@@ -38,22 +57,6 @@ a bus's effects; on the owner, the 18 rows, the wgpu feature, publishing and the
 later ImGui bundle; and the deferred material's switches, with one the working session can take: the
 shadows' 2 ms placed by Bevy's tracing spans in a profile of the stress game's lights, without a
 crate where the trace feature Bevy has is compiled in, else said and left. Next that.
-
-Before it, `81ff10fe` came, the editor driven offscreen: a live offscreen editor showed the handle's
-drag worked already, the cube moving under the drag on the move tool's middle handle, and the right
-drag steered nothing, since the camera reads the mouse's accumulated motion, which no pretended
-pointer wrote; a pretended move writes that motion from where the pointer was, none for a first
-move, windowed and offscreen, pinned by an input test and seen turning the editor's camera live; the
-input guide follows and TODO.md loses the item. Verdict 13 stands at eight whole suites of ten, this
-one over the motion. Right, the editor read live before anything was written, and only what it
-lacked added. Next, the last testing item of TODO.md's order, a behavior's own component marked only
-on the rows its method changed, the runner listing rows unmarked, copying each before the method and
-comparing its bytes after, and stamping the changed ones through one bridge call a chunk, the first
-entity's row found once and a byte a row so parallel workers share none, the changed filter's mark
-folded into the same, at ABI 281. It is stricter than Bevy's own detection, which marks on access,
-so it is kept only on a measure: the stress game's frame before and after by its own script, kept
-where the frame grows by less than a twentieth, and the comparing written as a cost in the behaviors
-guide; where it costs more, the marking stays as `c8849d71` has it and TODO.md says why.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -595,11 +598,11 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; eight of ten so far, over
+    under the load. Settled when ten whole suites pass since `7f18b684`; nine of ten so far, over
     the save diff, the state machine, the field curve, the window calls, the scrollbar width, the
-    fit with the gamepad batch and the pointer's motion, each the listing and eleven with no
-    failure; one run between failed by a new test of a batch not yet committed, the shadow test
-    passing in it, and counts for neither side.
+    fit with the gamepad batch, the pointer's motion and the machine player, each the listing and
+    eleven with no failure; one run between failed by a new test of a batch not yet committed, the
+    shadow test passing in it, and counts for neither side.
 
 ## Decisions
 

@@ -384,12 +384,12 @@ language.
   stands for, so the edits recorded before the delete reach it. A reference inside a list's item
   is left as it was. A node of a placed model, and an entity drawn with a shader material or anything else a
   scene cannot describe, are deleted with no way back and a line in the console saying so.
-- **A project file holds four settings.** `assets/project.json` (`ProjectSettings`) keeps the
-  startup scene, the fixed step, the export's last choices and a theme asked to ship, and the
-  editor's Project page, export row and style tab write it, apart from the person's own
-  `user://settings.json`. An app takes its fixed step from it and the player its startup scene. A
-  setting the project should carry beyond those, such as its window title or icon, is a field and
-  a row to add.
+- **A project file holds six settings.** `assets/project.json` (`ProjectSettings`) keeps the
+  startup scene, the window's title and icon, the fixed step, the export's last choices and a theme
+  asked to ship, and the editor's Project page, export row and style tab write it, apart from the
+  person's own `user://settings.json`. An app takes its fixed step, its window's title where its
+  config leaves the default and its window's icon from it, and the player its startup scene and
+  title. A setting the project should carry beyond those is a field and a row to add.
 - **The scene is the camera's viewport rather than a texture.** Docked, `Render.SetViewport` gives
   the camera the rectangle the panels left. A texture would make the scene a panel of its own,
   dockable and tabbable, as a second view needs.
@@ -587,6 +587,7 @@ fails there.
   project with `dotnet publish`, self-contained, for a chosen platform, with the render bridge
   built for exports and its assets as files, in its assembly or in a pack. The bridge is built on
   this machine, so an export for another platform needs that platform's toolchain, as packing
-  does.
+  does. The project's icon is worn by the window as the game runs, and the executable's own icon
+  and a macOS bundle's, each platform's own format, are not made from it.
 - **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is
   done by hand.

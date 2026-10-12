@@ -79,6 +79,11 @@ pub(crate) fn install(
         crate::window::install(app);
     }
 
+    // A window's icon, which only a run with a window has one to show on.
+    if !offscreen {
+        crate::window::icon::install(app);
+    }
+
     // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since
     // it needs compute shaders and so cannot run everywhere the rest can. Every desktop
     // backend the bridge builds for has them.

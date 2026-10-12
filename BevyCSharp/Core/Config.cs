@@ -12,8 +12,16 @@ namespace Bevy;
 /// </remarks>
 public sealed class Config
 {
+    /// <summary>The title a run with no title of its own is given, which a project's title replaces.</summary>
+    public const string DefaultTitle = "BevyCSharp";
+
     /// <summary>Window title.</summary>
-    public string Title { get; set; } = "BevyCSharp";
+    /// <remarks>
+    /// Left at <see cref="DefaultTitle"/>, the window takes the project's own,
+    /// <see cref="ProjectSettings.Title"/>, where its <c>project.json</c> has one, so a game
+    /// shipped from the editor opens under the name given there.
+    /// </remarks>
+    public string Title { get; set; } = DefaultTitle;
 
     /// <summary>
     /// Which graphics API the renderer should use.

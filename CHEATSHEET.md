@@ -1551,6 +1551,7 @@ static void SetIme(bool enabled, float x = 0f, float y = 0f);   // Turns the pla
 static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false);  // Sets whether the window has a title bar and border, whether it can be resized by dragging, and whether it stays above other windows
 static void SetCursorShape(CursorShape shape);                  // Sets the shape of the pointer while it is over the window
 static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over the window to an image, its hotspot, the pixel that points, given in pixels across and down from the image's top left corner
+static void SetIcon(AssetHandle image);                         // Shows the window by an image, as the platform's icon for it in its title bar and task switcher
 static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0);  // Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the frame's top left corner, or shows the whole image again with no layout
 static void SetUpdateSettings(UpdateSettings settings);         // Sets how often the app updates while its window has focus and while it does not, as inserting Bevy's WinitSettings does
 static void RequestRedraw();                                    // Asks for one more update, as Bevy's RequestRedraw does, for an app in a reactive mode with something still moving that no event would wake it for
@@ -1578,6 +1579,7 @@ static void SetStyle(Entity window, bool decorations = true, bool resizable = tr
 static void SetCursorShape(Entity window, CursorShape shape);   // Sets the shape of the pointer while it is over a window
 static void SetCursorImage(Entity window, AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over a window to an image, with its hotspot from the image's top left
 static void SetCursorAtlas(Entity window, AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0);  // Cuts the pointer's image over a window to one frame of an atlas, or shows the whole image again with no layout
+static void SetIcon(Entity window, AssetHandle image);          // Shows a window by an image, as the platform's icon for it
 static void SetCursor(Entity window, CursorGrab grab, bool visible);  // Sets whether the cursor is confined to a window or hidden over it
 static void Minimize(Entity window);                            // Minimizes a window to the taskbar or dock
 static void SetMaximized(Entity window, bool maximized);        // Maximizes a window, or puts it back to the size it had

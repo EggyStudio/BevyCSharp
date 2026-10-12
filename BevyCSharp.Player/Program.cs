@@ -16,8 +16,9 @@ var assets = Path.GetFullPath(Value("--assets") ?? Path.Combine(AppContext.BaseD
 
 // The project's startup scene where none is named, from its project.json, which is under the
 // asset root as every file a scene names is.
+var project = ProjectSettings.ReadFrom(assets);
 var scene = Value("--scene")
-    ?? (ProjectSettings.ReadFrom(assets).StartupScene is { Length: > 0 } startup ? Path.Combine(assets, startup) : null);
+    ?? (project.StartupScene is { Length: > 0 } startup ? Path.Combine(assets, startup) : null);
 
 if (scene is null)
 {
@@ -36,7 +37,10 @@ var offscreen = args.Contains("--offscreen");
 
 var config = offscreen
     ? Config.OffscreenFor(width, height, uint.TryParse(Value("--frames"), out var frames) ? frames : 0u)
-    : Config.Windowed(Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(scene)), width, height);
+    : Config.Windowed(
+        project.Title is { Length: > 0 } title ? title : Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(scene)),
+        width,
+        height);
 
 config.AssetRoot = assets;
 config.GameName = "BevyCSharp Player";

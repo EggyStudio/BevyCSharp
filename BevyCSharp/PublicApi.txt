@@ -984,6 +984,7 @@ sealed class Bevy.Config
   bool WatchAssets { get; set; }
   bool Weather { get; set; }
   bool Wireframes { get; set; }
+  const string DefaultTitle = "BevyCSharp"
   const string FrameTimeVariable = "BCS_FRAME_TIME"
   const string FramesVariable = "BCS_FRAMES"
   const string OffscreenVariable = "BCS_OFFSCREEN"
@@ -4467,9 +4468,11 @@ sealed class Bevy.ProjectSettings
   static ProjectSettings ReadFrom(string assets)
   string? ExportAssets { get; set; }
   string? ExportTarget { get; set; }
+  string? Icon { get; set; }
   string? Problem { get; }
   string? StartupScene { get; set; }
   string? Theme { get; set; }
+  string? Title { get; set; }
   void Write(string path)
 struct Bevy.Quat : IEquatable<Quat>
   Quat Conjugate { get; }
@@ -11918,6 +11921,8 @@ static class Bevy.Window
   static void SetCursorShape(CursorShape shape)
   static void SetCursorShape(Entity window, CursorShape shape)
   static void SetFullscreenOn(Entity window, Entity monitor)
+  static void SetIcon(AssetHandle image)
+  static void SetIcon(Entity window, AssetHandle image)
   static void SetIme(Entity window, bool enabled, float x = 0f, float y = 0f)
   static void SetIme(bool enabled, float x = 0f, float y = 0f)
   static void SetMaximized(Entity window, bool maximized)

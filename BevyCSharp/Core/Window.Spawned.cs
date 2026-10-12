@@ -127,6 +127,13 @@ public static unsafe partial class Window
             Native.bcs_window_set_cursor_atlas(window.Bits, layout?.Key ?? -1, index, hotspotX, hotspotY),
             $"cutting the pointer's image over window {window}");
 
+    /// <summary>Shows a window by an image, as the platform's icon for it.</summary>
+    /// <param name="window">The entity carrying the window.</param>
+    /// <param name="image">The picture, loaded or made.</param>
+    /// <exception cref="BevyNativeException">The entity carries no window, the handle names no image, or this build has none.</exception>
+    public static void SetIcon(Entity window, AssetHandle image) =>
+        Native.Check(Native.bcs_window_set_icon(window.Bits, image.Key), $"setting the icon of window {window}");
+
     /// <summary>Sets whether the cursor is confined to a window or hidden over it.</summary>
     /// <param name="window">The entity carrying the window.</param>
     /// <param name="grab">How to restrict the cursor.</param>

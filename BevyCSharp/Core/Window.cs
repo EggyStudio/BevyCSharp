@@ -160,6 +160,18 @@ public static unsafe partial class Window
     public static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0) =>
         Native.Check(Native.bcs_window_set_cursor_image(Native.PrimaryWindow, image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
 
+    /// <summary>Shows the window by an image, as the platform's icon for it in its title bar and task switcher.</summary>
+    /// <remarks>
+    /// Put on once the image has loaded and the window has opened, so it can be asked for at
+    /// startup. Windows and X11 show it. Wayland takes an app's icon from its desktop file and macOS
+    /// from its bundle, so there it changes nothing. A project's <see cref="ProjectSettings.Icon"/>
+    /// is put on the window this way as an app starts.
+    /// </remarks>
+    /// <param name="image">The picture, loaded or made, eight bits a channel as a PNG gives.</param>
+    /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
+    public static void SetIcon(AssetHandle image) =>
+        Native.Check(Native.bcs_window_set_icon(Native.PrimaryWindow, image.Key), "Window.SetIcon");
+
     /// <summary>
     /// Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the
     /// frame's top left corner, or shows the whole image again with no layout.

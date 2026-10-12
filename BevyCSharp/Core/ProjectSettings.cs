@@ -9,9 +9,9 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A project has several scenes and one of each of these, so they are a file of their own beside
-/// the scenes rather than a part of one. They are which scene a game starts in, how fast its fixed
-/// step runs, how the editor last exported it, and the editor's look when it was asked to ship
-/// with the project. Read through <see cref="AssetFiles"/>, so a game carrying its assets in its assembly or
+/// the scenes rather than a part of one. They are which scene a game starts in, the title and the
+/// icon its window opens with, how fast its fixed step runs, how the editor last exported it, and the
+/// editor's look when it was asked to ship with the project. Read through <see cref="AssetFiles"/>, so a game carrying its assets in its assembly or
 /// a pack carries this too, and written by the editor's Project settings.
 /// </para>
 /// <para>
@@ -30,6 +30,24 @@ public sealed class ProjectSettings
 
     /// <summary>The scene a game starts in, relative to the assets, or nothing to leave it to the game.</summary>
     public string? StartupScene { get; set; }
+
+    /// <summary>The title the game's window opens with, or nothing to leave it to the game.</summary>
+    /// <remarks>
+    /// An app takes it where its <see cref="Config.Title"/> is left at <see cref="Config.DefaultTitle"/>,
+    /// and the player, which plays an exported game's scenes, in place of the scene's file name.
+    /// </remarks>
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// The image the game's window is shown by, relative to the assets, or nothing for the
+    /// platform's own.
+    /// </summary>
+    /// <remarks>
+    /// Put on the window as an app starts, where it has one (<see cref="Window.SetIcon(AssetHandle)"/>),
+    /// which Windows and X11 show. The executable's own icon and a macOS bundle's are each
+    /// platform's export to make, and are not made from this.
+    /// </remarks>
+    public string? Icon { get; set; }
 
     /// <summary>How many times a second the fixed step runs, or zero for Bevy's own sixty-four.</summary>
     /// <remarks>An app takes it where its <see cref="Config.FixedHz"/> is left at zero.</remarks>
@@ -115,6 +133,8 @@ public sealed class ProjectSettings
             return new ProjectSettings
             {
                 StartupScene = Text(root, "startupScene"),
+                Title = Text(root, "title"),
+                Icon = Text(root, "icon"),
                 FixedHz = root.TryGetProperty("fixedHz", out var hz) && hz.TryGetDouble(out var rate) ? rate : 0d,
                 ExportTarget = Text(root, "exportTarget"),
                 ExportAssets = Text(root, "exportAssets"),
@@ -143,6 +163,8 @@ public sealed class ProjectSettings
             json.WriteStartObject();
             json.WriteString("format", Format);
             if (StartupScene is { Length: > 0 }) json.WriteString("startupScene", StartupScene);
+            if (Title is { Length: > 0 }) json.WriteString("title", Title);
+            if (Icon is { Length: > 0 }) json.WriteString("icon", Icon);
             if (FixedHz > 0) json.WriteNumber("fixedHz", FixedHz);
             if (ExportTarget is { Length: > 0 }) json.WriteString("exportTarget", ExportTarget);
             if (ExportAssets is { Length: > 0 }) json.WriteString("exportAssets", ExportAssets);

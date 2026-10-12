@@ -164,7 +164,6 @@ public sealed unsafe partial class App : IDisposable
         if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)
             Config.FrameSeconds = Config.FrameSecondsAsked;
 
-        var titleBytes = Encoding.UTF8.GetBytes(Config.Title + "\0");
         var assetRootBytes = Config.AssetRoot is null
             ? null
             : Encoding.UTF8.GetBytes(Config.AssetRoot + "\0");
@@ -208,6 +207,7 @@ public sealed unsafe partial class App : IDisposable
             EngineLog.Error(this, "project", $"[BevyCSharp] {ProjectSettings.FileName} was not read, so every setting is at its default. {problem}");
 
         var fixedHz = Config.FixedHz > 0 ? Config.FixedHz : Project.FixedHz;
+        var titleBytes = Encoding.UTF8.GetBytes(TitleFor(Config, Project) + "\0");
 
         // Where the window was left, read before it opens, so it opens there.
         var opening = WindowMemory.Open(Config);
@@ -293,6 +293,14 @@ public sealed unsafe partial class App : IDisposable
     }
 
     /// <summary>
+    /// The window's title, the config's, or the project's where the config left its own at
+    /// <see cref="Config.DefaultTitle"/>, as the fixed step is the project's where the config left
+    /// it at zero.
+    /// </summary>
+    internal static string TitleFor(Config config, ProjectSettings project) =>
+        config.Title == Config.DefaultTitle && project.Title is { Length: > 0 } title ? title : config.Title;
+
+    /// <summary>
     /// The pack <see cref="Config.AssetPack"/> names, or the one beside the executable, or nothing
     /// where there is none or it does not open, the second said as an error.
     /// </summary>
@@ -346,6 +354,17 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>Wires the two internal systems that bracket every frame.</summary>
     private void RegisterEngineSystems()
     {
+        // The project's icon on the window it opens, where there is one. An offscreen or headless
+        // run has none to show it on.
+        if (HasRenderer && Project.Icon is { Length: > 0 } icon)
+        {
+            AddSystem(Stage.Startup, new SystemDescriptor(_ =>
+            {
+                if (Window.Entity().IsNone) return;
+                Window.SetIcon(AssetServer.Load(AssetKind.Image, icon));
+            }, "Engine.ProjectIcon"));
+        }
+
         // Refresh Time and Input from Bevy before any user system observes them.
         AddSystem(Stage.FrameSync, new SystemDescriptor(static world =>
         {
