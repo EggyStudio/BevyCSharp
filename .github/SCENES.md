@@ -298,7 +298,8 @@ and described with the type and the drawer in [COMPONENTS.md](COMPONENTS.md) §3
 
 A field renamed, a component renamed or moved to another namespace, or a value that changed its
 meaning would otherwise make every saved scene and save game read wrong. All three are built, for
-scenes and data assets alike (`BevyCSharp/Scenes/SceneAttributes.cs`, `SceneValue`).
+scenes and data assets alike (`BevyCSharp/Scenes/FormerNameAttribute.cs`,
+`DataVersionAttribute.cs`, `SceneValue`).
 
 - **`[FormerName("Hp")]`** on a field or a type, recorded in the schema (`ComponentSchema.FormerNames`,
   `FieldHints.FormerNames`), so a file written under the old name is read under the new one and
