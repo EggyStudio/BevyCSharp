@@ -2,13 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Input/Gamepad.cs GamepadAxis
-BevyCSharp/Input/Gamepad.cs GamepadButton
-BevyCSharp/Input/Gamepad.cs GamepadConnected
-BevyCSharp/Input/Gamepad.cs GamepadDisconnected
-BevyCSharp/Input/Key.cs KeyModifier
-BevyCSharp/Input/Key.cs KeyTable
-BevyCSharp/Input/Key.cs MouseButton
 BevyCSharp/Interop/NativeTypes.Audio.cs NativeAudioConfig
 BevyCSharp/Interop/NativeTypes.Ecs.cs NativeChunk
 BevyCSharp/Interop/NativeTypes.Frame.cs NativeFrameState
