@@ -2,10 +2,6 @@ using System.Collections.Concurrent;
 
 namespace Bevy;
 
-/// <summary>A read on its way from disk, from <see cref="Streaming.Read"/>.</summary>
-/// <param name="Ticket">What the read is known by.</param>
-public readonly record struct StreamRead(long Ticket);
-
 /// <summary>
 /// Reads parts of files on worker threads and hands them over a few at a time, within a budget of
 /// bytes a frame.

@@ -1001,13 +1001,13 @@ static PackedAtlas? PackAtlas(ReadOnlySpan<AssetHandle> images, (uint X, uint Y)
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image);  // Attaches a sprite to an entity, or replaces the one it has
 static void SetSprite(EcsWorld world, Entity entity, AssetHandle image, SpriteSettings settings);  // Attaches a sprite drawn as settings describes
 static int SetSpriteFrames(ReadOnlySpan<Entity> sprites, ReadOnlySpan<uint> frames);  // Moves sprites and sprite meshes to frames of their sheets, each to the frame beside it, in one call
-static void SetTilemap(EcsWorld world, Entity entity, TilemapChunk chunk, ReadOnlySpan<TileData?> tiles);  // Makes an entity a tilemap chunk with its tiles, Bevy's TilemapChunk and TilemapChunkTileData
-static void SetTiles(EcsWorld world, Entity entity, int start, ReadOnlySpan<TileData?> tiles);  // Writes tiles over a chunk's from start on, which Bevy draws from the next frame
-static TileData? TileAt(EcsWorld world, Entity entity, int index);  // A chunk's tile at index, or null for an empty cell
 static AssetHandle CreateMaterial(ColorMaterialSettings settings);  // Makes a 2D mesh's material and returns it
 static void WriteMaterial(AssetHandle material, ColorMaterialSettings settings);  // Writes settings over a 2D mesh's material in place, so every mesh drawn with it changes
 static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh);  // Gives an entity a mesh for a 2D camera to draw
 static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  // Gives an entity a 2D material to draw its mesh with, a color material from CreateMaterial or a shader material from CreateMaterial2d
+static void SetTilemap(EcsWorld world, Entity entity, TilemapChunk chunk, ReadOnlySpan<TileData?> tiles);  // Makes an entity a tilemap chunk with its tiles, Bevy's TilemapChunk and TilemapChunkTileData
+static void SetTiles(EcsWorld world, Entity entity, int start, ReadOnlySpan<TileData?> tiles);  // Writes tiles over a chunk's from start on, which Bevy draws from the next frame
+static TileData? TileAt(EcsWorld world, Entity entity, int index);  // A chunk's tile at index, or null for an empty cell
 ```
 
 ### `CapturedImage`

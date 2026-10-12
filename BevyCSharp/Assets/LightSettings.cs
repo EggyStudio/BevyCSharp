@@ -1,20 +1,5 @@
 namespace Bevy;
 
-/// <summary>Which of Bevy's lights to spawn.</summary>
-public enum LightKind
-{
-    /// <summary>Parallel rays, as from the sun. Intensity is illuminance in lux.</summary>
-    Directional = 0,
-
-    /// <summary>Rays from a point. Intensity is luminous power in lumens.</summary>
-    Point = 1,
-
-    /// <summary>
-    /// A cone of rays, aimed down the entity's negative Z. Intensity is luminous power in lumens.
-    /// </summary>
-    Spot = 2,
-}
-
 /// <summary>
 /// What kind of light to spawn and how it behaves.
 /// </summary>
@@ -83,26 +68,4 @@ public sealed class LightSettings
     /// and 0.6 for the others.
     /// </remarks>
     public float ShadowNormalBias { get; set; } = 0.6f;
-}
-
-/// <summary>How a camera traces contact shadows. See <see cref="Render.SetContactShadows"/>.</summary>
-/// <param name="Steps">How many steps a ray takes. More finds thinner gaps and costs more.</param>
-/// <param name="Thickness">How thick, in world units, a surface in the depth buffer is taken to be.</param>
-/// <param name="Length">How far, in world units, a ray goes toward the light.</param>
-public sealed record ContactShadowSettings(uint Steps = 16, float Thickness = 0.1f, float Length = 0.3f);
-
-/// <summary>How a camera filters the shadow maps it reads. See <see cref="Render.SetShadowFiltering"/>.</summary>
-public enum ShadowFiltering
-{
-    /// <summary>Two by two texels, filtered by the hardware. Cheapest and blockiest.</summary>
-    Hardware2x2 = 0,
-
-    /// <summary>A Gaussian over a wider area, which is Bevy's default.</summary>
-    Gaussian = 1,
-
-    /// <summary>
-    /// A pattern that changes every frame, for temporal antialiasing to average into a smooth
-    /// edge. The quietest with soft shadows, and noisy without temporal antialiasing.
-    /// </summary>
-    Temporal = 2,
 }

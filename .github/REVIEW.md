@@ -10,7 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `75024f77`. font_atlas_debug, ABI 277, read from the commit: a call answering the
+Reviewed up to `eb82688b`, fourteen commits of item 2's lists in ten minutes, each moving code
+alone: `cbba26c2` splits the scene file of 1,882 lines into captures, lights and sprites with the
+two image calls joining the images file, the scene file left at 696; `bffa7ce9` splits the view
+shader tests into the assets folder, `6fb0a312` the values file into its checks and tests, and
+`0ba830f4` the render control tests into the window's; and ten commits move the test files into
+folders matching the library's, N 1.4's list falling by them from the whole to 28 and N 3.4's lines
+following. N 1.3's list is empty for the first time. The run of `75024f77` is green on all three;
+the owner pushed again at 07:24 and `eb82688b`'s run is in flight. Right, each a commit that moves
+code alone and shortens a list, as item 2 asks. Four files stand within ten lines of the rule,
+programs.rs at 798, the scene value at 793, the console's world commands at 792 and values.rs at
+790, so the next batch that touches any of them splits it first. Next item 2's lists on, N 1.4's 28
+and N 1.2's; the 18 rows wait on the owner's word.
+
+Before it, `75024f77` came, font_atlas_debug, ABI 277, read from the commit: a call answering the
 picture of each font atlas Bevy holds and the size of the font drawn into it, the smaller sizes
 first and an atlas's of a size in the order Bevy opened them, `Ui.FontAtlasPictures`, each an image
 a node can be given, listed first by count and then into the caller's arrays; the example Bevy's,
@@ -45,27 +58,6 @@ system fonts it does not use: a bridge call answering the atlas pictures Bevy's 
 hold, each set by its size with its pictures as asset keys, and the example spawning an image node
 for each. Next font_atlas_debug, then the 18 rows wait on the owner's word; meanwhile item 2's
 lists, the four rules with places listed, paid down a commit at a time.
-
-Before it, `e2cecce6` came, the three remote-protocol rows set as not applying with the note that
-this engine's own command line stands in for Bevy's protocol, EXAMPLES.md reading 357 written, 2 in
-part, 19 missing and 60 not applying, and `b326b127`, solari_reflections, examples alone and no
-bridge change: Bevy's room of mirrors with the helmet reflected in its panel, run with the
-ray-traced lighting and the path tracer both, a key swapping the camera between them at runtime and
-the path tracer reset in any frame the scene changed as Bevy's is; the roughness slider the
-reflected slider widgets with the self-update and Bevy's two ticks, the presets writing its value;
-material changes through the material write, the planes Bevy's sizes turned to face each axis; seen
-live offscreen on the development machine's GPU, the room, the mirrors, the helmet's reflection and
-the timings drawn, the path tracer converging and no error logged, the capture Solari's picture
-without DLSS as Bevy's is, and the DLSS row saying the app is not compiled with it as Bevy's does;
-the norm and path tests 19 of 19, the last whole suite standing at `0da017e7`. EXAMPLES.md reads 357
-written, 2 in part and 22 missing. Right, Bevy's example reached whole on what the bridge already
-had. With it the three rows read against the lock are done, and the 22 missing wait on the owner's
-word for crates, Feathers, the dev tools, the camera controllers, the system fonts and the asset
-processor, or are Bevy's remote protocol, which this engine answers with its own command line, three
-rows to read as not applying with the triage note saying so. Next item 16, the offscreen click
-landing where the pointer has not been, with the CLI's input, then items 5 to 10 in their order, the
-parity items from 3DEngine, each read first for whether 0.20 already has it; the owner's word on the
-crates opens the rest.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
