@@ -51,13 +51,13 @@ public partial struct Patrol
 [Collection("engine")]
 public sealed class ItemFieldsTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-items-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-items-");
     private readonly string _was = Streaming.AssetRoot;
 
     public ItemFieldsTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
     }
@@ -67,7 +67,7 @@ public sealed class ItemFieldsTests : IDisposable
         Streaming.AssetRoot = _was;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class ItemFieldsTests : IDisposable
 
         DataAssets.Save(table.Id);
 
-        var text = File.ReadAllText(Path.Combine(_root, "loot.data.json"));
+        var text = File.ReadAllText(Path.Combine(_folder.Path, "loot.data.json"));
         using (var saved = JsonDocument.Parse(text))
         {
             var written = Assert.Single(saved.RootElement.GetProperty("fields").GetProperty("Entries").EnumerateArray());
@@ -116,7 +116,7 @@ public sealed class ItemFieldsTests : IDisposable
     [Fact]
     public void AComponentsListOfStructsGoesThroughASceneFile()
     {
-        var file = Path.Combine(_root, "patrol.scene.json");
+        var file = Path.Combine(_folder.Path, "patrol.scene.json");
 
         using (var saving = new EngineHarness(frames: 2))
         {
