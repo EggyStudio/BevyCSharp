@@ -72,7 +72,6 @@ BevyCSharp.Tests/PngTests.cs
 BevyCSharp.Tests/PointerDragTests.cs
 BevyCSharp.Tests/ReflectedComponentTests.cs
 BevyCSharp.Tests/ReflectionTests.cs
-BevyCSharp.Tests/RenderControlTests.cs
 BevyCSharp.Tests/RenderCornerTests.cs
 BevyCSharp.Tests/RenderReadTests.cs
 BevyCSharp.Tests/RenderTargetTests.cs
