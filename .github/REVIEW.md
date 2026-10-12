@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `969ac3bd`, nine commits of item 2's lists, one a library folder, each moving types
+Reviewed up to `2381bc58`, nine commits more: `732faf4c` makes the soft shadow test's failure say
+each picture's dark and light counts, Verdict 13's next read, and eight commits, one a folder, empty
+N 3.4's list of 39 places, each test class holding a test folder and disposing it in place of a
+string under the temp path and its own delete, the asset id tests' export copy taking a second
+folder and losing its try and finally, the editor world tests no longer leaking their files on a
+failure, and the picture run's temporary assets wrapping the folder, whose dispose had swallowed a
+held file's error and which fails with the holders named after two seconds, N 3.4's point; the 109
+tests of the converted classes pass with the norm tests, and the suite over the N 1.2 splits passed
+whole, 1,452 and 2 skipped of 1,454, the shadow test among them, so the diagnostic has not fired.
+The lists left all stand by design with their reasons: N 3.3's six, deadlines on the asset server's
+own threads, the file watcher, the socket server and the folder's retry; N 4.1's four files that
+name the forbidden marks or quote others; N B3's fifteen functions, each returning a constant, an
+atomic flag or the main-thread test; N 4.5's twenty, the stress tests at Bevy's 1920 by 1080 and the
+scale override at its size; N 1.4's 28 tests of what is not a library area; and N 7.2's commits
+already made. Right, one type for every test's folder, failing loud where a file is held, and the
+lists emptied or explained. Item 2 stands at entries by design alone. Next Verdict 13, the flake's
+cause, read by the diagnostic as each whole suite runs and by which classes run before the shadow
+tests for one that leaves state behind process-wide, the ambient light, a shadow map's size or a
+setting among them; then TODO.md's order as before, this file read before each batch, the 18 rows
+opening with the owner's word.
+
+Before it, `969ac3bd` came, nine commits of item 2's lists, one a library folder, each moving types
 alone within its folder so each compiles alone and checked line for line as a move: every public
 type that shared a file is in a file named for it, the partial classes in the type-and-part form,
 and N 1.2's list is empty; one mend inside the move, a file whose usings stood after its namespace
@@ -39,23 +60,6 @@ code alone and shortens a list, as item 2 asks. Four files stand within ten line
 programs.rs at 798, the scene value at 793, the console's world commands at 792 and values.rs at
 790, so the next batch that touches any of them splits it first. Next item 2's lists on, N 1.4's 28
 and N 1.2's; the 18 rows wait on the owner's word.
-
-Before it, `75024f77` came, font_atlas_debug, ABI 277, read from the commit: a call answering the
-picture of each font atlas Bevy holds and the size of the font drawn into it, the smaller sizes
-first and an atlas's of a size in the order Bevy opened them, `Ui.FontAtlasPictures`, each an image
-a node can be given, listed first by count and then into the caller's arrays; the example Bevy's,
-its characters drawn from .NET's generator seeded from Bevy's number, which deals other characters,
-said in the triage note, and each atlas shown as an image node as it fills; a test that text drawn
-fills an atlas, that the atlases empty, and that text drawn after fills one again; the interface
-guide's lines. The suite 1,452 passed and 2 skipped of 1,454; cargo 167 and 95; the example seen
-live offscreen for 200 frames, the atlas filling top left with white glyphs while the yellow text
-grows along the bottom as Bevy's picture does, no error logged; and the seed cut to four bytes,
-since .NET's generator takes no more, which the triage row and the example say. EXAMPLES.md reads
-358 written, 2 in part and 18 missing, every missing row waiting on the owner's word. Right, the
-atlases reached by a listing call and shown as the images they are. The owner pushed both
-repositories at 07:00, and the runs of `e424550c` here and of `75024f77` in BevyCSharp are in
-flight, read on the next tick. Next item 2's lists, the four rules with places listed, paid down a
-commit at a time, which the working session has begun with N 1.3's list.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

@@ -89,20 +89,33 @@ internal sealed class PictureRun
 
     /// <summary>Adds a step that takes a picture and waits for it to come back.</summary>
     /// <remarks>
+    /// <para>
     /// Taken once every pipeline the run asked for has compiled, since what is drawn with one still
     /// compiling is left out of the picture. A wait of thirty frames before a capture came, under
     /// the load of the whole suite, before the pipelines of a camera's contact shadows, so the
     /// picture with them was the picture without. Not in the first three frames, when nothing has
     /// been asked for yet and none is waiting.
+    /// </para>
+    /// <para>
+    /// Ready for <see cref="ReadyFrames"/> frames running, since a pipeline is asked for as the
+    /// frame that needs it is drawn, after the question was answered, so one frame's yes can come
+    /// before a pipeline the next frame waits on. The soft shadow test met it under load, its soft
+    /// picture taken with nothing drawn, every pixel dark, in two runs of ten beside other tests
+    /// drawing.
+    /// </para>
     /// </remarks>
     public PictureRun Capture(string name)
     {
         Bevy.Capture? ticket = null;
+        var ready = 0;
 
         return Until($"capturing {name}", world =>
         {
-            if (ticket is null && (world.Resource<Time>().FrameCount < 3 || !Render.PipelinesReady()))
-                return false;
+            if (ticket is null)
+            {
+                ready = world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady() ? ready + 1 : 0;
+                if (ready < ReadyFrames) return false;
+            }
 
             ticket ??= Render.BeginCapture();
 
@@ -113,6 +126,9 @@ internal sealed class PictureRun
             return true;
         });
     }
+
+    /// <summary>How many frames running every pipeline has to be ready before a picture is taken.</summary>
+    private const int ReadyFrames = 3;
 
     /// <summary>Runs the app until the steps are done, and raises whatever went wrong.</summary>
     public void Go()
