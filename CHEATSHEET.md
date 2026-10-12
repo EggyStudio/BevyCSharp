@@ -841,6 +841,14 @@ static AnimationCurve Scale(Vec3 from, Vec3 to, EaseFunction ease, float duratio
 static AnimationCurve UiScale(ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values);  // An interface node's scale through values at times
 static AnimationCurve UiRotation(ReadOnlySpan<float> times, ReadOnlySpan<float> radians);  // An interface node's rotation through values at times
 static AnimationCurve TextColor(ReadOnlySpan<float> times, ReadOnlySpan<Color> values);  // A text's color through values at times, interpolated in sRGB as Bevy's example does
+static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<float> values);  // A number in a field of a reflected component through values at times
+static AnimationCurve Field(string component, string path, float from, float to, EaseFunction ease, float duration);  // A number in a field of a reflected component eased from one value to another
+static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values);  // A two-component vector in a field of a reflected component through values at times
+static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values);  // A three-component vector in a field of a reflected component through values at times
+static AnimationCurve Field(string component, string path, Vec3 from, Vec3 to, EaseFunction ease, float duration);  // A three-component vector in a field of a reflected component eased from one value to another
+static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec4> values);  // A four-component vector in a field of a reflected component through values at times
+static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Quat> values);  // A rotation in a field of a reflected component through values at times, along the shorter arc
+static AnimationCurve Field(string component, string path, Quat from, Quat to, EaseFunction ease, float duration);  // A rotation in a field of a reflected component eased from one turn to another
 ```
 
 ### `AnimationTarget`

@@ -74,6 +74,7 @@ enum Bevy.AmbiguityReport : int
   Ignore = 0
   Warn = 1
 enum Bevy.AnimatedProperty : int
+  Field = 6
   Rotation = 1
   Scale = 2
   TextColor = 5
@@ -127,6 +128,14 @@ sealed class Bevy.AnimationCurve
   EaseFunction? Ease { get; }
   bool IsPingPong { get; }
   float Duration { get; }
+  static AnimationCurve Field(string component, string path, Quat from, Quat to, EaseFunction ease, float duration)
+  static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Quat> values)
+  static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values)
+  static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values)
+  static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec4> values)
+  static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<float> values)
+  static AnimationCurve Field(string component, string path, Vec3 from, Vec3 to, EaseFunction ease, float duration)
+  static AnimationCurve Field(string component, string path, float from, float to, EaseFunction ease, float duration)
   static AnimationCurve Rotation(Quat from, Quat to, EaseFunction ease, float duration)
   static AnimationCurve Rotation(ReadOnlySpan<float> times, ReadOnlySpan<Quat> values)
   static AnimationCurve Scale(ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values)
@@ -136,6 +145,8 @@ sealed class Bevy.AnimationCurve
   static AnimationCurve Translation(Vec3 from, Vec3 to, EaseFunction ease, float duration)
   static AnimationCurve UiRotation(ReadOnlySpan<float> times, ReadOnlySpan<float> radians)
   static AnimationCurve UiScale(ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values)
+  string? Component { get; }
+  string? FieldPath { get; }
 readonly struct Bevy.AnimationFinished : IEquatable<AnimationFinished>
   AnimationFinished(Entity Scene, string Clip)
   Entity Scene { get; init; }

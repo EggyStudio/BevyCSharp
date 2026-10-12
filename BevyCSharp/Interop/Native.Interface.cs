@@ -438,6 +438,15 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_clip_add_curve(int clip, ulong high, ulong low, NativeAnimationCurve* curve, float* times, float* values, int valueCount);
 
+    /// <summary>
+    /// Adds a described curve moving a field of a reflected component to a clip, aimed at a target,
+    /// leaving the reason for a failure for <see cref="bcs_reflect_error"/>.
+    /// </summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_animation_clip_add_field_curve(
+        int clip, ulong high, ulong low, NativeAnimationCurve* curve, float* times, float* values, int valueCount, string typePath, string path, int kind);
+
     /// <summary>Makes a graph of one clip, writing its key and the clip's node.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

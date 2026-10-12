@@ -10,7 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a99eceb3`, the scenes' two items from TODO.md. `ae26e39b`: a scene file or a data
+Reviewed up to `667ca9ac`, the animation state machine from TODO.md's animation section: a data
+asset of states, each a clip and how it plays, and transitions tried in order, each on a parameter
+above or below a value, a flag, a trigger used up as it is taken, or the state's clip ending, an
+empty from standing for any state; `Animation.Run` starts it on a model and plays each state through
+the existing play, so the fade, the state read and the finished event are unchanged, the parameters
+set and the trigger pulled by name, the state read back and the machine stopped; the editor's data
+asset inspector edits it as two lists with no code of its own; three tests, a machine naming a state
+it lacks refused, a machine in a file reading back with its states and transitions, and a machine
+moving on a trigger, a value and a clip's end; the assets guide's section and the cheat sheet's six
+lines. Left in TODO.md: a scene naming the machine a placed model runs, a graph drawing of it, and a
+state blending clips by a parameter. Right, the machine run through the play the engine had rather
+than beside it. The Shared line is read, a row of SHARED.md, and removed. Verdict 13 stands at three
+whole suites of ten, each the listing and eleven, no failure. Next the animation order on: a curve
+on a field of any reflected component, by type path and reflect path, each field its own evaluator
+keyed by the component and the path's hash, checked against a default when added, native at ABI 278.
+
+Before it, `a99eceb3` came, the scenes' two items from TODO.md. `ae26e39b`: a scene file or a data
 asset from a newer build keeps its version among the values no field read, so an older build's save
 writes the newer version back and the newer build reads the file as its own rather than migrating it
 a second time, a value the older build changed written in the older shape under the newer version,
@@ -41,19 +57,6 @@ purpose, and typing them means the describer, the schemas and the components tab
 from an editor build with Bevy's other changes read as its diff, so they wait; the scenes' two items
 come first, a newer scene file read by an older build, which a player of a shipped game meets, and
 then saves that diff whole components. Verdict 13's first whole suite runs.
-
-Before it, `7f18b684` came, Verdict 13's cause, found without a suite: the soft shadow test run ten
-times while another test process drew the SPIR-V compute, G-buffer and sample light tests in a loop
-failed twice, the diagnostic showing the soft picture all dark, 9,216 pixels of 9,216, with the hard
-one normal, so nothing was drawn, no hard edge and no neighbor's state; the picture run took its
-picture on the first frame the pipelines read ready, and a pipeline is asked for as the frame that
-needs it is drawn, after that question was answered, so under the parallel collections' load the
-soft picture's frame waited on one pipeline more than the answer saw. The picture run waits until
-the pipelines have read ready for three frames running, which covers every test that takes a picture
-through it, and under the same load 15 runs of 15 pass; the first of the ten whole suites the
-verdict asks runs, each later batch's counting. Right, the flake reproduced on purpose under load
-rather than waited for, and the fix in the one place every picture passes through. Next TODO.md's
-order as before, with this file read before each batch.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -595,8 +598,8 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; one of ten so far, 1,452
-    passed in 19 m 47 s with no failure.
+    under the load. Settled when ten whole suites pass since `7f18b684`; three of ten so far, over
+    the save diff and the state machine, each the listing and eleven with no failure.
 
 ## Decisions
 
@@ -778,12 +781,3 @@ from [SHARED.md](SHARED.md).
     20.
 
 ## Replies
-
-Shared: an animation state machine, in the commit carrying this line, for the Animation section's
-table. `AnimationStateMachine` is a data asset of states, each a clip and how it plays, and
-transitions tried in order, each on a parameter above or below a value, a flag, a trigger used up
-as it is taken, or the state's clip ending, with an empty `From` for any state; `Animation.Run`
-starts it on a model and plays each state through `Play`, so the fade, `StateOf` and
-`AnimationFinished` are unchanged, and the editor's data asset inspector edits it as two lists with
-no code of its own. A scene naming the machine a placed model runs, a graph drawing of it and a
-state blending clips by a parameter are left in TODO.md.

@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Bevy;
 using Bevy.Interop;
+using Bevy.Reflected;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -222,6 +223,83 @@ public sealed class AnimationClipTests
         Assert.Equal(10f, lifted!.Value, 2);
     }
 
+    /// <summary>
+    /// A clip moves two numbers in one reflected component of Bevy's, each by its own curve, and a
+    /// field curve naming a component Bevy does not reflect, a path that leads nowhere or a field
+    /// of another type is refused with the reason.
+    /// </summary>
+    [SkippableFact]
+    public void AClipMovesFieldsOfAReflectedComponentEachByItsOwnCurve()
+    {
+        Needs.Renderer();
+
+        const string Light = "bevy_light::point_light::PointLight";
+        var lamp = Entity.None;
+        var frame = 0;
+        (float Intensity, float Range)? midway = null, end = null;
+        var refusals = new List<string>();
+
+        var config = Config.OffscreenFor(64, 64, frames: 40);
+        config.FrameSeconds = 0.1;
+        using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render.SpawnCamera3d();
+
+            // Up to a thousand over two seconds, and the range eased from 1 to 21 over the same,
+            // two fields of one component that a shared curve would mix.
+            var clip = Animation.CreateClip();
+            var target = AnimationTarget.FromNames("lamp");
+            Animation.AddCurve(clip, target, AnimationCurve.Field(Light, "intensity", [0f, 2f], [0f, 1000f]));
+            Animation.AddCurve(clip, target, AnimationCurve.Field(Light, "range", 1f, 21f, EaseFunction.Linear, 2f));
+
+            foreach (var refused in new[]
+            {
+                AnimationCurve.Field("game::Nothing", "intensity", [0f], [1f]),
+                AnimationCurve.Field(Light, "brightness", [0f], [1f]),
+                AnimationCurve.Field(Light, "color", [0f], [1f]),
+            })
+            {
+                refusals.Add(Assert.Throws<BevyNativeException>(() => Animation.AddCurve(clip, target, refused)).Message);
+            }
+
+            var (graph, node) = Animation.GraphFromClip(clip);
+            lamp = ecs.Spawn();
+            ecs.Add(lamp, Transform.Identity);
+            ecs.Insert<PointLightRef>(lamp).Intensity = 0f;
+            Animation.PlayGraph(lamp, graph, node);
+            Animation.Animate(lamp, target, lamp);
+        }, "Test.Setup"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            frame++;
+
+            (float, float) Read() => (
+                float.Parse(ecs.GetReflected(lamp, Light, ".intensity")!, System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(ecs.GetReflected(lamp, Light, ".range")!, System.Globalization.CultureInfo.InvariantCulture));
+
+            if (frame == 11) midway = Read();
+            if (frame == 35) end = Read();
+        }, "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+
+        // About a second in, each about halfway, and each at its own end once the clip is over.
+        Assert.InRange(midway!.Value.Intensity, 350f, 650f);
+        Assert.InRange(midway.Value.Range, 7.5f, 14.5f);
+        Assert.Equal(1000f, end!.Value.Intensity, 1);
+        Assert.Equal(21f, end.Value.Range, 2);
+
+        Assert.Contains("game::Nothing", refusals[0]);
+        Assert.Contains("brightness", refusals[1]);
+        Assert.Contains("holds a bevy_color::color::Color", refusals[2]);
+    }
+
     /// <summary>A curve whose times do not rise, or whose times and values differ in number, is refused before it reaches Bevy.</summary>
     [Fact]
     public void ACurveWithTimesOutOfOrderOrOfAnotherCountIsRefused()
@@ -230,5 +308,6 @@ public sealed class AnimationClipTests
         Assert.Throws<ArgumentException>(() => AnimationCurve.Scale([0f, 1f], [Vec3.One]));
         Assert.Throws<ArgumentOutOfRangeException>(() => AnimationCurve.Rotation(Quat.Identity, Quat.Identity, EaseFunction.Linear, 0f));
         Assert.Throws<InvalidOperationException>(() => AnimationCurve.UiRotation([0f], [0f]).PingPong());
+        Assert.Throws<ArgumentException>(() => AnimationCurve.Field("bevy_light::point_light::PointLight", "", [0f], [0f]));
     }
 }

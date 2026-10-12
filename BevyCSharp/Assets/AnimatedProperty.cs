@@ -20,4 +20,10 @@ public enum AnimatedProperty
 
     /// <summary>A text's color, as Bevy's animated_ui example animates it.</summary>
     TextColor,
+
+    /// <summary>
+    /// A number, a vector or a rotation inside any component Bevy reflects, by the component's type
+    /// path and a reflect path to the field (<see cref="AnimationCurve.Field(string, string, ReadOnlySpan{float}, ReadOnlySpan{float})"/>).
+    /// </summary>
+    Field,
 }

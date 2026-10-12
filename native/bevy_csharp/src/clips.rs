@@ -17,7 +17,9 @@ use crate::interop::status;
 #[derive(Clone, Copy)]
 pub struct BcsAnimationCurve {
     /// What it moves, `0` a transform's translation, `1` its rotation, `2` its scale, `3` an
-    /// interface node's scale, `4` its rotation in radians and `5` a text's color.
+    /// interface node's scale, `4` its rotation in radians and `5` a text's color. A field of a
+    /// reflected component, `6`, goes through [`bcs_animation_clip_add_field_curve`], which names
+    /// the field and reads none of this.
     pub property: i32,
     /// `0` for values sampled at times and interpolated between, `1` for the first value eased to
     /// the second over `duration`.
@@ -36,7 +38,7 @@ pub struct BcsAnimationCurve {
 }
 
 #[cfg(feature = "render")]
-mod built {
+pub(crate) mod built {
     use super::*;
 
     use core::any::TypeId;
@@ -135,7 +137,7 @@ mod built {
     }
 
     /// Adds the curve a description asks for, its values already read in the property's type.
-    fn add_typed<P, T>(clip: &mut AnimationClip, target: AnimationTargetId, property: P, curve: &BcsAnimationCurve, times: &[f32], values: Vec<T>) -> i32
+    pub(crate) fn add_typed<P, T>(clip: &mut AnimationClip, target: AnimationTargetId, property: P, curve: &BcsAnimationCurve, times: &[f32], values: Vec<T>) -> i32
     where
         P: AnimatableProperty<Property = T> + Clone,
         T: bevy::animation::animatable::Animatable + Clone + core::fmt::Debug + bevy::reflect::Reflectable + bevy::reflect::FromReflect + Send + Sync,

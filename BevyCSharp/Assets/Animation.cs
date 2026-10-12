@@ -195,12 +195,17 @@ public static unsafe partial class Animation
     /// <summary>Adds a curve to a clip, moving one property of the entity <paramref name="target"/> names.</summary>
     /// <remarks>
     /// Bevy's <c>add_curve_to_target</c>. A target takes a curve for each of its properties, and
-    /// one curve of each property, a second replacing the first.
+    /// one curve of each property, a second replacing the first. A field of a reflected component
+    /// is a property of its own for each component and path.
     /// </remarks>
     /// <param name="clip">A clip from <see cref="CreateClip"/>.</param>
     /// <param name="target">What the curve moves.</param>
     /// <param name="curve">How it moves.</param>
-    /// <exception cref="BevyNativeException">The clip is gone, or this build has no renderer.</exception>
+    /// <exception cref="BevyNativeException">
+    /// The clip is gone, this build has no renderer, or a field curve names a component Bevy does
+    /// not reflect or a path that leads nowhere or to a field of another type, which the message
+    /// says.
+    /// </exception>
     public static void AddCurve(AssetHandle clip, AnimationTarget target, AnimationCurve curve)
     {
         ArgumentNullException.ThrowIfNull(curve);
@@ -219,8 +224,21 @@ public static unsafe partial class Animation
         int status;
         fixed (float* times = curve.Times)
         fixed (float* values = curve.Values)
-            status = Native.bcs_animation_clip_add_curve(clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length);
+        {
+            status = curve.Moved is { } field
+                ? Native.bcs_animation_clip_add_field_curve(
+                    clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length, field.Component, field.Path, (int)field.Value)
+                : Native.bcs_animation_clip_add_curve(clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length);
+        }
+
         if (status == NativeStatus.Unsupported) throw NoRenderer();
+
+        // A field that cannot be found leaves the bridge's account of why, which says more than the status.
+        if (curve.Moved is { } moved && status is NativeStatus.NoComponent or NativeStatus.InvalidState)
+            throw new BevyNativeException(
+                status,
+                $"Adding a curve on {moved.Component}'s {moved.Path} to clip {clip.Key} failed. {Native.ReadText(Native.bcs_reflect_error, "reading the reflection error")}");
+
         Native.Check(status, $"adding a {curve.Property} curve to clip {clip.Key}");
     }
 

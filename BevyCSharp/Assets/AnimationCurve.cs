@@ -18,7 +18,7 @@ namespace Bevy;
 /// </remarks>
 public sealed class AnimationCurve
 {
-    private AnimationCurve(AnimatedProperty property, float[]? times, float[] values, int count, EaseFunction? ease, float duration, bool pingPong)
+    private AnimationCurve(AnimatedProperty property, float[]? times, float[] values, int count, EaseFunction? ease, float duration, bool pingPong, FieldCurve? field = null)
     {
         Property = property;
         Times = times;
@@ -27,10 +27,20 @@ public sealed class AnimationCurve
         Ease = ease;
         Duration = duration;
         IsPingPong = pingPong;
+        Moved = field;
     }
 
     /// <summary>What it moves.</summary>
     public AnimatedProperty Property { get; }
+
+    /// <summary>The component a <see cref="AnimatedProperty.Field"/> curve moves a field of, by its type path, or null.</summary>
+    public string? Component => Moved?.Component;
+
+    /// <summary>The reflect path to the field a <see cref="AnimatedProperty.Field"/> curve moves, or null.</summary>
+    public string? FieldPath => Moved?.Path;
+
+    /// <summary>The field a <see cref="AnimatedProperty.Field"/> curve moves, with what its values are.</summary>
+    internal FieldCurve? Moved { get; }
 
     /// <summary>When each value is reached, for sampled values, or null for eased ones.</summary>
     internal float[]? Times { get; }
@@ -54,7 +64,7 @@ public sealed class AnimationCurve
     /// <exception cref="InvalidOperationException">The curve is sampled rather than eased.</exception>
     public AnimationCurve PingPong() => Ease is null
         ? throw new InvalidOperationException("Only an eased curve goes back and forth. A sampled one says each value it reaches.")
-        : new AnimationCurve(Property, null, Values, Count, Ease, Duration, true);
+        : new AnimationCurve(Property, null, Values, Count, Ease, Duration, true, Moved);
 
     /// <summary>A translation through values at times.</summary>
     /// <param name="times">When each value is reached, in seconds, rising.</param>
@@ -121,19 +131,90 @@ public sealed class AnimationCurve
         return Sampled(AnimatedProperty.TextColor, times, values.Length, flat);
     }
 
-    private static AnimationCurve Sampled(AnimatedProperty property, ReadOnlySpan<float> times, int count, float[] values)
+    /// <summary>A number in a field of a reflected component through values at times.</summary>
+    /// <param name="component">The component's type path, as <c>bevy_light::point_light::PointLight</c>.</param>
+    /// <param name="path">Bevy's reflect path to the field from the component's root, as <c>intensity</c>.</param>
+    /// <param name="times">When each value is reached, in seconds, rising.</param>
+    /// <param name="values">The field's value at each.</param>
+    /// <remarks>
+    /// <para>
+    /// For a field no other curve names, a light's intensity, a camera's field of view, a
+    /// material's value on a component of the game's own that Bevy reflects, as Bevy's
+    /// <c>animated_field!</c> reaches a field it is compiled against. The component and the path
+    /// are checked when the curve is added, against a default of the component where Bevy can make
+    /// one, so a path that leads nowhere or to a field of another type is refused then rather than
+    /// ignored as the clip plays.
+    /// </para>
+    /// <para>
+    /// A color's channels are reached through the variant it holds, as <c>color.0.red</c> while a
+    /// <c>bevy_color::color::Color</c> holds sRGB, each a number of its own, and a field inside a
+    /// variant moves only while the component holds that variant.
+    /// </para>
+    /// </remarks>
+    public static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<float> values) =>
+        Sampled(AnimatedProperty.Field, times, values.Length, values.ToArray(), new FieldCurve(component, path, FieldValue.Number));
+
+    /// <summary>A number in a field of a reflected component eased from one value to another.</summary>
+    /// <param name="component">The component's type path, as <c>bevy_light::point_light::PointLight</c>.</param>
+    /// <param name="path">Bevy's reflect path to the field from the component's root, as <c>intensity</c>.</param>
+    /// <param name="from">The value at the start.</param>
+    /// <param name="to">The value at the end.</param>
+    /// <param name="ease">How it eases between them.</param>
+    /// <param name="duration">How long it takes, in seconds.</param>
+    public static AnimationCurve Field(string component, string path, float from, float to, EaseFunction ease, float duration) =>
+        Eased(AnimatedProperty.Field, [from, to], ease, duration, new FieldCurve(component, path, FieldValue.Number));
+
+    /// <summary>A two-component vector in a field of a reflected component through values at times.</summary>
+    /// <inheritdoc cref="Field(string, string, ReadOnlySpan{float}, ReadOnlySpan{float})" path="/param"/>
+    public static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec2> values)
+    {
+        var flat = new float[values.Length * 2];
+        for (var i = 0; i < values.Length; i++) (flat[i * 2], flat[i * 2 + 1]) = (values[i].X, values[i].Y);
+        return Sampled(AnimatedProperty.Field, times, values.Length, flat, new FieldCurve(component, path, FieldValue.Vec2));
+    }
+
+    /// <summary>A three-component vector in a field of a reflected component through values at times.</summary>
+    /// <inheritdoc cref="Field(string, string, ReadOnlySpan{float}, ReadOnlySpan{float})" path="/param"/>
+    public static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values) =>
+        Sampled(AnimatedProperty.Field, times, values.Length, Flatten(values), new FieldCurve(component, path, FieldValue.Vec3));
+
+    /// <summary>A three-component vector in a field of a reflected component eased from one value to another.</summary>
+    /// <inheritdoc cref="Field(string, string, float, float, EaseFunction, float)" path="/param"/>
+    public static AnimationCurve Field(string component, string path, Vec3 from, Vec3 to, EaseFunction ease, float duration) =>
+        Eased(AnimatedProperty.Field, Flatten([from, to]), ease, duration, new FieldCurve(component, path, FieldValue.Vec3));
+
+    /// <summary>A four-component vector in a field of a reflected component through values at times.</summary>
+    /// <inheritdoc cref="Field(string, string, ReadOnlySpan{float}, ReadOnlySpan{float})" path="/param"/>
+    public static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec4> values)
+    {
+        var flat = new float[values.Length * 4];
+        for (var i = 0; i < values.Length; i++) (flat[i * 4], flat[i * 4 + 1], flat[i * 4 + 2], flat[i * 4 + 3]) = (values[i].X, values[i].Y, values[i].Z, values[i].W);
+        return Sampled(AnimatedProperty.Field, times, values.Length, flat, new FieldCurve(component, path, FieldValue.Vec4));
+    }
+
+    /// <summary>A rotation in a field of a reflected component through values at times, along the shorter arc.</summary>
+    /// <inheritdoc cref="Field(string, string, ReadOnlySpan{float}, ReadOnlySpan{float})" path="/param"/>
+    public static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Quat> values) =>
+        Sampled(AnimatedProperty.Field, times, values.Length, Flatten(values), new FieldCurve(component, path, FieldValue.Rotation));
+
+    /// <summary>A rotation in a field of a reflected component eased from one turn to another.</summary>
+    /// <inheritdoc cref="Field(string, string, float, float, EaseFunction, float)" path="/param"/>
+    public static AnimationCurve Field(string component, string path, Quat from, Quat to, EaseFunction ease, float duration) =>
+        Eased(AnimatedProperty.Field, Flatten([from, to]), ease, duration, new FieldCurve(component, path, FieldValue.Rotation));
+
+    private static AnimationCurve Sampled(AnimatedProperty property, ReadOnlySpan<float> times, int count, float[] values, FieldCurve? field = null)
     {
         if (count == 0) throw new ArgumentException("A curve has at least one value.", nameof(times));
         if (times.Length != count) throw new ArgumentException($"A curve has a time for each value, and {times.Length} times were given for {count} values.", nameof(times));
         for (var i = 1; i < times.Length; i++)
             if (!(times[i] > times[i - 1])) throw new ArgumentException($"A curve's times rise, and {times[i]} follows {times[i - 1]}.", nameof(times));
 
-        return new AnimationCurve(property, times.ToArray(), values, count, null, 0f, false);
+        return new AnimationCurve(property, times.ToArray(), values, count, null, 0f, false, field);
     }
 
-    private static AnimationCurve Eased(AnimatedProperty property, float[] values, EaseFunction ease, float duration) =>
+    private static AnimationCurve Eased(AnimatedProperty property, float[] values, EaseFunction ease, float duration, FieldCurve? field = null) =>
         duration > 0f
-            ? new AnimationCurve(property, null, values, 2, ease, duration, false)
+            ? new AnimationCurve(property, null, values, 2, ease, duration, false, field)
             : throw new ArgumentOutOfRangeException(nameof(duration), duration, "An eased curve takes some time.");
 
     private static float[] Flatten(ReadOnlySpan<Vec3> values)

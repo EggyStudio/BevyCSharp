@@ -65,13 +65,13 @@ thread_local! {
 }
 
 /// Records why a call failed and returns its status, so a failure is one expression.
-fn fail(code: i32, message: impl Into<String>) -> i32 {
+pub(crate) fn fail(code: i32, message: impl Into<String>) -> i32 {
     LAST_ERROR.with(|last| *last.borrow_mut() = message.into());
     code
 }
 
 /// Finds a reflected component by its type path.
-fn component_of<'r>(
+pub(crate) fn component_of<'r>(
     registry: &'r TypeRegistry,
     path: &str,
 ) -> Result<(&'r TypeRegistration, &'r ReflectComponent), i32> {
@@ -101,7 +101,7 @@ fn at<'a>(root: &'a dyn PartialReflect, path: &str) -> Result<&'a dyn PartialRef
 }
 
 /// Reports a reflect path that leads nowhere, with Bevy's account of where it stopped.
-fn unfollowed(path: &str, error: impl core::fmt::Display) -> i32 {
+pub(crate) fn unfollowed(path: &str, error: impl core::fmt::Display) -> i32 {
     fail(status::INVALID_STATE, format!("The path '{path}' cannot be followed. {error}"))
 }
 

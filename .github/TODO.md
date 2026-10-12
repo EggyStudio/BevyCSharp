@@ -158,16 +158,14 @@ time, stopped, and faded from one clip to the next over a time, with `AnimationF
 a clip that plays once ends. An `AnimationStateMachine`, a data asset the editor edits as lists,
 chooses the clip from parameters the game sets, triggers it fires and clips ending. A graph built
 node by node blends clips by weight, with masks and additive layers, clips are made in code from
-curves, and an event placed on a clip triggers observers as the clip passes it. The console's
-`anim.*` commands reach it from the editor. What is left:
+curves, a field of any reflected component among what a curve moves, and an event placed on a clip
+triggers observers as the clip passes it. The console's `anim.*` commands reach it from the editor.
+What is left:
 
 - **A state machine is run from code.** `Animation.Run` starts one on a model, and nothing in a
   scene file names the machine a placed model runs, nor draws its states as a graph in the editor.
   A state plays one clip, rather than a blend of clips by a parameter as a walk turning into a run
   by speed would.
-- **A clip made in code moves a few properties.** A curve moves a transform's translation, rotation
-  or scale, an interface node's scale or rotation, or a text's color. A field of another component,
-  which Bevy's animated fields reach through reflection, has no curve of its own.
 
 ### Textures and shaders
 

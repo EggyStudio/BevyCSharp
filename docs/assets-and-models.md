@@ -285,8 +285,11 @@ arrived, so a weight is set by the shape it moves toward rather than by its plac
 A clip is also made in code, as Bevy's examples make one, a curve for each property it moves,
 aimed at an entity by the names on the path down to it. A curve is values sampled at times, or two
 values eased between by one of Bevy's easing functions, and moves a transform's translation,
-rotation or scale, an interface node's scale or rotation, or a text's color. A player plays a graph
-made from the clip, and each entity a curve is aimed at carries its target and the player:
+rotation or scale, an interface node's scale or rotation, a text's color, or a number, a vector or a
+rotation in any component Bevy reflects, named by the component's type path and a reflect path to
+the field (`AnimationCurve.Field("bevy_light::point_light::PointLight", "intensity", times,
+values)`), which is checked when the curve is added. A player plays a graph made from the clip, and
+each entity a curve is aimed at carries its target and the player:
 
 <!-- compiled with:
 Entity doorEntity = default;
