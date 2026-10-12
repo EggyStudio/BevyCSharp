@@ -10,7 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `bfe27ddd`, the machine player: `AnimationMachinePlayer`, a behavior holding a
+Reviewed up to `220aa7b0`, the project file's window title and icon: `ProjectSettings.Title` and
+`Icon`, two rows on the Project page; an app's window takes the title where its config leaves the
+default, `App.TitleFor` tested, and the player prefers it to the scene's file name, so an export
+opens under it; the icon through `bcs_window_set_icon` at ABI 281, `window/icon.rs`, which keeps the
+request until the image has loaded and winit's window exists and puts it on from a `Last` system
+pinned to the main thread by `NonSendMarker`, a second request replacing the first, not installed
+offscreen and refused there; `Window.SetIcon` for the primary and a spawned window; a startup system
+wearing the project's icon where a window exists; Windows and X11 show it, Wayland and macOS take
+theirs from the desktop file and the bundle, said in the remarks, and the executable's and the
+bundle's icons said under the export's entry as not made. Not seen by eye, which this Wayland
+desktop could not show. Right; an image that will not load keeps its request pending, one entry
+retained a frame with the asset server's error the only word, enough. Verdict 13 is settled at ten
+whole suites since `7f18b684`, 1,454 to 1,470 tests each, the one suite that failed on an
+uncommitted test counted for neither side, and its paragraph is out; Verdicts 2 and 3 wait on the
+pack run. TODO.md's order and the Now list hold nothing a coder can take without a word, so
+SHARED.md's rows are next, two in order: the shader cache's key following every form an import
+takes, which the bridge has by the compiler's dependency file deciding whether a cached result
+applies, every file a compile read in it, wanting the test 3DEngine's row has, a module one module
+exports edited and the importer of the exporter recompiled, `__exported import` the form, after
+which the row's column reads has; then a window resized, minimized and moved by commands while it
+draws, as a storm a test runs where the job has a window to open and says where it has none.
+
+Before it, `bfe27ddd` came, the machine player: `AnimationMachinePlayer`, a behavior holding a
 `DataRef<AnimationStateMachine>`, which the per-frame advance starts on an entity carrying it, the
 machine entering its first state once the model arrives as one run from code does, starts again when
 the reference names another machine or its file is read again, and stops when the component is taken
@@ -42,21 +64,6 @@ off or the entity despawned, so a level saves which machine each placed characte
 inspector edits it as any data reference; managed alone, no ABI; a test saving a scene with the
 component and loading it to a running machine, and the animation guide's state machine section
 gaining the component. The graph drawing and the blend of clips by a parameter stay listed.
-
-Before it, `29f904fd` came, a documents commit: the marking by compared bytes measured over the
-twentieth and is out, TODO.md saying why. The stress game's movers by its own script, each side
-packed as its own version so the game built on that build alone: 100,000 from 3.61 to 4.12 ms, 14%
-more, 200,000 from 5.86 to 6.64, 300,000 from 7.85 to 8.74 and 400,000 from 9.82 to 11.17, the
-managed time at 100,000 from 0.70 to 1.14 ms, the copy and the comparison of the mover and its
-transform on every row with one mark call a run; the runners, the bridge call and the test reverted,
-the bridge back at ABI 280, the two packages and their cache entries removed and the stress game on
-its own package again, no whole suite run for a commit of documents alone. Right, the condition set
-before the work and kept when the measure went against it, the measure recorded. TODO.md's order has
-left items that wait on a device, the touch gestures; on the audio crate, a looping sound's seek and
-a bus's effects; on the owner, the 18 rows, the wgpu feature, publishing and the CI cache; on a
-later ImGui bundle; and the deferred material's switches, with one the working session can take: the
-shadows' 2 ms placed by Bevy's tracing spans in a profile of the stress game's lights, without a
-crate where the trace feature Bevy has is compiled in, else said and left. Next that.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -582,27 +589,6 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
-
-13. **The soft shadow test fails in two of the last four whole suites and passes alone.**
-    `ShadowTests.ASoftShadowFadesWhereAHardOneCuts` read no grays in the first whole run after
-    render_recovery and again in the suite over `eb82688b`, after a cause left pending from a
-    previous app was cleared as each app is built, which was therefore not its cause; it passed four
-    runs alone and three paired with the recovery tests, and its picture run already waits for the
-    pipelines to be ready. Its failure says each picture's dark and light counts since, so the next
-    tells a blank picture, a frame drawn before anything, from a hard edge, a soft shadow drawn
-    hard. Read on the next failure by those counts and by what ran before it in the suite's order,
-    since a test that passes alone and fails in the suite is carrying its neighbor's state or its
-    timing. Cause found at `7f18b684`, reproduced under load with no suite, the test run ten times
-    beside another process drawing three picture tests in a loop and failing twice with the soft
-    picture all dark and the hard one normal: the picture run took its picture on the first frame
-    the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
-    failure was timing under the parallel collections' load and not order; the picture run waits for
-    three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; nine of ten so far, over
-    the save diff, the state machine, the field curve, the window calls, the scrollbar width, the
-    fit with the gamepad batch, the pointer's motion and the machine player, each the listing and
-    eleven with no failure; one run between failed by a new test of a batch not yet committed, the
-    shadow test passing in it, and counts for neither side.
 
 ## Decisions
 
