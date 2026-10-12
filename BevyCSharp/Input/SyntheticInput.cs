@@ -22,7 +22,10 @@ namespace Bevy;
 /// <para>
 /// A pointer is written into Bevy as the window's own messages too, and in an offscreen run, which
 /// has no window, it is put on the image the run draws into, through Bevy's own pointer input, so
-/// picking finds what is drawn under it there as it would under a hand's pointer in a window.
+/// picking finds what is drawn under it there as it would under a hand's pointer in a window. A
+/// move is written as the mouse's motion as well, from where the pointer was, so what reads
+/// <see cref="Input.MouseDelta"/> rather than the pointer's place, a camera steered by dragging,
+/// turns with it.
 /// </para>
 /// <para>
 /// While anything here has been called, the pointer the interface sees is the one that was asked

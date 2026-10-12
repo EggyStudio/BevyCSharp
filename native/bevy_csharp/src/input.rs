@@ -87,6 +87,10 @@ pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
 /// the button, picking raycasts the meshes, and a gizmo takes hold. An offscreen run, which has no
 /// window, has the pointer put on the image it draws into, for picking (see [`offscreen_pointer`]).
 ///
+/// A move writes the mouse's own motion as well, the distance from where the pointer was, which a
+/// real mouse reports beside the cursor and which a camera steered by dragging reads rather than
+/// where the cursor is. A first move, with nowhere the pointer was, writes none.
+///
 /// `action` is 0 to move, 1 to press and 2 to release; `button` is 0 for left, 1 for right and 2
 /// for middle. The position is in logical pixels from the window's top left.
 #[unsafe(no_mangle)]
@@ -113,6 +117,9 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     return offscreen_pointer(world, Vec2::new(x, y), action, button);
                 };
 
+                // Where the pointer was, for the motion, before the window is told it moved.
+                let was = world.get::<Window>(window).and_then(Window::cursor_position);
+
                 // Moved first whatever the action is, because a press somewhere the pointer has
                 // never been is a press on whatever it was last over.
                 let moved = CursorMoved {
@@ -135,6 +142,9 @@ pub extern "C" fn bcs_input_pointer(x: f32, y: f32, action: i32, button: i32) ->
                     held.set_physical_cursor_position(Some(
                         (Vec2::new(x, y) * scale).as_dvec2(),
                     ));
+                }
+                if let Some(was) = was {
+                    write_motion(world, Vec2::new(x, y) - was);
                 }
 
                 let button = match button {
@@ -260,8 +270,12 @@ fn offscreen_pointer(world: &mut bevy::prelude::World, at: bevy::prelude::Vec2, 
         position: at,
     };
 
-    let was = world.get_resource_or_insert_with(OffscreenPointer::default).0;
-    world.resource_mut::<OffscreenPointer>().0 = at;
+    let was = world.get_resource::<OffscreenPointer>().map(|pointer| pointer.0);
+    world.insert_resource(OffscreenPointer(at));
+    if let Some(was) = was {
+        write_motion(world, at - was);
+    }
+    let was = was.unwrap_or(at);
 
     // Moved first whatever the action is, as a window's pointer is, so a press lands where it is.
     world.write_message(PointerInput::new(PointerId::Mouse, location.clone(), PointerAction::Move { delta: at - was }));
@@ -288,6 +302,16 @@ fn offscreen_pointer(world: &mut bevy::prelude::World, at: bevy::prelude::Vec2, 
     });
 
     crate::interop::status::OK
+}
+
+/// Writes the mouse's motion for a pretend pointer's move, as a real mouse reports it beside the
+/// cursor, which Bevy adds into the frame's `AccumulatedMouseMotion`. Nothing for a move that went
+/// nowhere, as a still mouse reports nothing.
+#[cfg(feature = "render")]
+fn write_motion(world: &mut bevy::prelude::World, delta: bevy::prelude::Vec2) {
+    if delta != bevy::prelude::Vec2::ZERO {
+        world.write_message(bevy::input::mouse::MouseMotion { delta });
+    }
 }
 
 /// Says something as the platform's input method would: `0` composing `text` with the caret over

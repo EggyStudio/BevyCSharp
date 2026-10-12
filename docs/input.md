@@ -175,6 +175,9 @@ programs add mesh picking only where they pick one. It all needs a bridge with t
 offscreen run has the pretend pointer of `SyntheticInput` put on the image it draws into, so a
 test or `./bcs command input.click` picks there as a hand would in a window, and its wheel,
 `SyntheticInput.Wheel` or `input.wheel`, scrolls whatever that pointer is over as `Pointer<Scroll>`.
+A pretend move is read as the mouse's motion too (`ctx.Input.MouseDelta`), as a real mouse reports
+one beside the cursor, so `input.drag` with the right button turns a camera steered by dragging, the
+editor's among them, windowed or not.
 
 A game can have pointers of its own, for an interface drawn into an image that a mesh in the scene
 wears, where no mouse is. `Picking.SpawnPointer()` makes one, and `Picking.MovePointer`,

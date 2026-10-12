@@ -493,12 +493,6 @@ places together as the joints made in code do.
   and `ImeComposing` and `ImeCommit` arrive as messages, so a field of the game's own can show a
   candidate before it is committed, and the editor's fields take what is committed. Bevy's UI has
   no text field of its own to hand them to.
-- **A synthetic pointer drags nothing in the scene without a window.** `SyntheticInput` writes a
-  window message and the interface's own event, and an offscreen run, which has no window, takes
-  the interface's half, so `bcs` clicks an offscreen editor's panels, buttons and fields, and a
-  left click on the scene is kept for the editor to answer with a ray from its camera, since
-  Bevy's picking finds nothing without a window. A drag on a transform handle and the camera's
-  steering read the window's pointer, so neither moves there.
 - **Touch.** Bridged as this frame's list, up to eight at once, and untested, because this machine
   has no touchscreen and only the empty case is covered. Gestures are not derived, and a touch that
   ends is reported once rather than lingering for a frame.

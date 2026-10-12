@@ -202,4 +202,38 @@ public sealed class InputTests
         Assert.Equal(0.5f, wheel.X);
         Assert.Equal(-2f, wheel.Y);
     }
+
+    /// <summary>
+    /// A pretended pointer's move is read as the mouse's motion as well as its place, as a real
+    /// mouse's is, in an offscreen run with no window, so a camera steered by dragging turns. Its
+    /// first move, from nowhere, moves the mouse by nothing.
+    /// </summary>
+    [SkippableFact]
+    public void APretendedPointersMoveIsReadAsTheMousesMotion()
+    {
+        Needs.Renderer();
+
+        var frame = 0;
+        var motions = new List<(int Frame, float X, float Y)>();
+        (float X, float Y) at = default;
+
+        using var app = new App(Config.OffscreenFor(200, 200, frames: 12));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            var input = world.Resource<Input>();
+            frame++;
+            if (input.MouseDeltaX != 0f || input.MouseDeltaY != 0f) motions.Add((frame, input.MouseDeltaX, input.MouseDeltaY));
+            if (frame == 2) SyntheticInput.MoveTo(10f, 10f);
+            if (frame == 5) SyntheticInput.MoveTo(30f, 25f);
+            if (frame == 10) at = input.MousePosition;
+        }, "Test.Move"));
+
+        Assert.Equal(0, app.Run());
+
+        var motion = Assert.Single(motions);
+        Assert.InRange(motion.Frame, 6, 7);
+        Assert.Equal((20f, 15f), (motion.X, motion.Y));
+        Assert.Equal((30f, 25f), at);
+    }
 }

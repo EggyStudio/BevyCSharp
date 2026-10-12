@@ -10,8 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b1d10ceb`, a node's scrollbar width as a setting, ABI 280: the field appended to the
-node's description with its end asserted at the same offsets on both sides, 336, 344 and 352, by
+Reviewed up to `0ad78d34`, two commits from TODO.md's order. `df8ace41`: a box, sphere or capsule
+left at zero on a placed model's root fits the model's parts, waiting until the scene instances have
+posted the root ready, a set they keep pruned of the despawned and forgotten as an app starts,
+rather than being a unit cube made once, as a hull waits already; its test read a unit cube under
+the suite's load when it waited on Bevy's instance alone, which can sit on the root a frame before
+the scene's entities, mended before the commit and then passed ten of ten beside a process drawing
+the shadow and animation tests in a loop; the physics guide follows, and TODO.md's physics notes
+lose the crouch and the joint's two bodies, in since, with the material card's item corrected.
+`0ad78d34`: a pad's dead zones set through the reflected settings on its entity, pinned by a test of
+a pretended pad, inside the zone reading zero and past it unscaled, as the default zone did already
+though Bevy's comments speak of rescaling; the input guide follows, and TODO.md's behavior item
+reads as `c8849d71` left it. Verdict 13 stands at seven whole suites of ten, this one over both.
+Right, the fit waiting on what the engine itself posts rather than on Bevy's instance, and a test's
+flake mended before it could be committed. Next TODO.md's order on: the synthetic pointer's drag on
+a handle and the camera's steering in an offscreen editor, which exercise the editor as a user does;
+touch gestures wait, having no device here to read them on.
+
+Before it, `b1d10ceb` came, a node's scrollbar width as a setting, ABI 280: the field appended to
+the node's description with its end asserted at the same offsets on both sides, 336, 344 and 352, by
 constant asserts in the bridge and by the interface tests, so a field added on one side alone fails
 a build; a test of a scrolling node keeping room for its scrollbar; the interface guide's lines.
 TODO.md's note that nothing draws one no longer held, Bevy's scrollbar widget being reachable.
@@ -33,18 +50,6 @@ whole suites of ten, this one over the window calls, 1,460 passed. Right, the pr
 no entity can collide with. Next TODO.md's order on: a node's scrollbar width as a setting, the
 item's note that nothing draws one no longer holding since Bevy's scrollbar widget is reachable, the
 node description's end asserted at the same offsets on both sides, at ABI 280.
-
-Before it, `be9b174f` came, the animation section's last item, ABI 278: a curve on a field of any
-reflected component, `AnimationCurve.Field` by the component's type path and Bevy's reflect path to
-the field, each field its own evaluator keyed by the component and the path's hash, the path and the
-value's kind checked when the curve is added against a default of the component where Bevy can make
-one, the property in a file of its own since the clips file would have passed the rule; a test moves
-two fields of a reflected component each by its own curve; the assets guide and the cheat sheet
-follow. Verdict 13 stands at four whole suites of ten, this one over the field curve, 1,459 passed.
-Right, the field reached by the paths Bevy already names rather than a table of its own. Next
-TODO.md's order on, the textures' and shaders' items being edges of wgpu, Slang and Bevy: the
-window's calls for a window past the first, each export taking the window's entity with zero the
-primary and the window's overloads taking an entity, at ABI 279.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -586,11 +591,11 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; six of ten so far, over the
-    save diff, the state machine, the field curve, the window calls and the scrollbar width, each
-    the listing and eleven with no failure; a seventh failed by one new test of a batch not yet
-    committed, the shadow test passing in it, and counts for neither side, the new test's own wait
-    on a scene's root mended before its commit.
+    under the load. Settled when ten whole suites pass since `7f18b684`; seven of ten so far, over
+    the save diff, the state machine, the field curve, the window calls, the scrollbar width and the
+    fit with the gamepad batch, each the listing and eleven with no failure; one run between failed
+    by a new test of a batch not yet committed, the shadow test passing in it, and counts for
+    neither side.
 
 ## Decisions
 
