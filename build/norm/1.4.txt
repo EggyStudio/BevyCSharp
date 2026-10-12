@@ -2,21 +2,13 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp.Tests/AnimationTests.cs
-BevyCSharp.Tests/AssetEditTests.cs
-BevyCSharp.Tests/AssetIdTests.cs
-BevyCSharp.Tests/AssetPackTests.cs
 BevyCSharp.Tests/Build/DocsScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
-BevyCSharp.Tests/CaptureTests.cs
-BevyCSharp.Tests/DataReferenceCountTests.cs
-BevyCSharp.Tests/DepthOfFieldTests.cs
 BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
 BevyCSharp.Tests/Docs/FirstGameTests.cs	tests a document and the game it makes, which are no area of the library
 BevyCSharp.Tests/Docs/PublicSurfaceTests.cs	tests a listing of the whole library, which is no one area of it
-BevyCSharp.Tests/DrawnTests.cs
 BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorHierarchyTests.cs	tests the editor, which is no area of the library
@@ -33,39 +25,8 @@ BevyCSharp.Tests/Editor/EditorWorldTests.cs	tests the editor, which is no area o
 BevyCSharp.Tests/Editor/LevelCameraTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/PreviewRendererTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
-BevyCSharp.Tests/GBufferTests.cs
 BevyCSharp.Tests/Generator/GeneratorAttributeTests.cs	tests the generators, which are no area of the library
-BevyCSharp.Tests/GizmoShapeTests.cs
-BevyCSharp.Tests/GizmoTests.cs
-BevyCSharp.Tests/GltfContentsTests.cs
-BevyCSharp.Tests/GltfMaterialDrawnTests.cs
-BevyCSharp.Tests/GradingTests.cs
-BevyCSharp.Tests/LensTests.cs
-BevyCSharp.Tests/LightTextureTests.cs
-BevyCSharp.Tests/MaterialFileTests.cs
-BevyCSharp.Tests/MaterialTests.cs
-BevyCSharp.Tests/Mesh2dTests.cs
-BevyCSharp.Tests/MeshFileTests.cs
-BevyCSharp.Tests/MeshTagTests.cs
 BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
-BevyCSharp.Tests/OverlayTests.cs
-BevyCSharp.Tests/PngTests.cs
-BevyCSharp.Tests/ReflectionTests.cs
-BevyCSharp.Tests/RenderCornerTests.cs
-BevyCSharp.Tests/RenderReadTests.cs
-BevyCSharp.Tests/RenderTargetTests.cs
-BevyCSharp.Tests/RenderTests.cs
-BevyCSharp.Tests/SampleLightTests.cs
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
-BevyCSharp.Tests/ShaderPassTests.cs
-BevyCSharp.Tests/ShaderValueTests.cs
-BevyCSharp.Tests/ShadowTests.cs
-BevyCSharp.Tests/SkyLightingTests.cs
-BevyCSharp.Tests/SkyboxTests.cs
-BevyCSharp.Tests/SpirvComputeTests.cs
-BevyCSharp.Tests/SpriteTests.cs
-BevyCSharp.Tests/StreamingTests.cs
-BevyCSharp.Tests/TimingTests.cs
-BevyCSharp.Tests/UiPixelTests.cs
