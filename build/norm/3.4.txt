@@ -6,8 +6,8 @@ BevyCSharp.Tests/AssetIdTests.cs Directory.Delete
 BevyCSharp.Tests/AssetIdTests.cs Path.GetTempPath
 BevyCSharp.Tests/AssetPackTests.cs Directory.Delete
 BevyCSharp.Tests/AssetPackTests.cs Path.GetTempPath
-BevyCSharp.Tests/ChangingTypeTests.cs Directory.Delete
-BevyCSharp.Tests/ChangingTypeTests.cs Path.GetTempPath
+BevyCSharp.Tests/Scenes/ChangingTypeTests.cs Directory.Delete
+BevyCSharp.Tests/Scenes/ChangingTypeTests.cs Path.GetTempPath
 BevyCSharp.Tests/Cli/CliServerTests.cs Directory.Delete
 BevyCSharp.Tests/Cli/CliServerTests.cs Path.GetTempPath
 BevyCSharp.Tests/Cli/CliSessionTests.cs Directory.Delete
@@ -21,8 +21,8 @@ BevyCSharp.Tests/GltfContentsTests.cs Directory.Delete
 BevyCSharp.Tests/GltfContentsTests.cs Path.GetTempPath
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs Directory.Delete
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs Path.GetTempPath
-BevyCSharp.Tests/InstanceTests.cs Directory.Delete
-BevyCSharp.Tests/InstanceTests.cs Path.GetTempPath
+BevyCSharp.Tests/Scenes/InstanceTests.cs Directory.Delete
+BevyCSharp.Tests/Scenes/InstanceTests.cs Path.GetTempPath
 BevyCSharp.Tests/ItemFieldsTests.cs Directory.Delete
 BevyCSharp.Tests/ItemFieldsTests.cs Path.GetTempPath
 BevyCSharp.Tests/MaterialFileTests.cs Directory.Delete
@@ -35,8 +35,8 @@ BevyCSharp.Tests/PictureRun.cs Directory.Delete
 BevyCSharp.Tests/PictureRun.cs Path.GetTempPath
 BevyCSharp.Tests/RenderTargetTests.cs Directory.Delete
 BevyCSharp.Tests/RenderTargetTests.cs Path.GetTempPath
-BevyCSharp.Tests/SaveGameTests.cs Directory.Delete
-BevyCSharp.Tests/SaveGameTests.cs Path.GetTempPath
+BevyCSharp.Tests/Scenes/SaveGameTests.cs Directory.Delete
+BevyCSharp.Tests/Scenes/SaveGameTests.cs Path.GetTempPath
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs Directory.Delete
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs Path.GetTempPath
 BevyCSharp.Tests/Core/WindowMemoryTests.cs Directory.Delete

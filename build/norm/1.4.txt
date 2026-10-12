@@ -11,7 +11,6 @@ BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
 BevyCSharp.Tests/CaptureTests.cs
-BevyCSharp.Tests/ChangingTypeTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
@@ -44,7 +43,6 @@ BevyCSharp.Tests/GltfContentsTests.cs
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs
 BevyCSharp.Tests/GradingTests.cs
 BevyCSharp.Tests/InlineListTests.cs
-BevyCSharp.Tests/InstanceTests.cs
 BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/LensTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
@@ -66,9 +64,7 @@ BevyCSharp.Tests/RenderTargetTests.cs
 BevyCSharp.Tests/RenderTests.cs
 BevyCSharp.Tests/ResourceTests.cs
 BevyCSharp.Tests/SampleLightTests.cs
-BevyCSharp.Tests/SaveGameTests.cs
 BevyCSharp.Tests/ScaleTests.cs
-BevyCSharp.Tests/SceneValueTests.cs
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
