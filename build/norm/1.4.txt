@@ -37,7 +37,6 @@ BevyCSharp.Tests/Editor/LevelCameraTests.cs	tests the editor, which is no area o
 BevyCSharp.Tests/Editor/PreviewRendererTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
 BevyCSharp.Tests/GBufferTests.cs
-BevyCSharp.Tests/GamepadTests.cs
 BevyCSharp.Tests/Generator/GeneratorAttributeTests.cs	tests the generators, which are no area of the library
 BevyCSharp.Tests/GizmoShapeTests.cs
 BevyCSharp.Tests/GizmoTests.cs
