@@ -131,10 +131,12 @@ SaveGame.Load(ctx.Ecs);                              // the scenes again, with t
 ```
 
 A save holds what play changed and nothing a scene already says. An entity is saved when it
-carries a `SaveId`, which the editor gives it with Add Component and code with `SaveId.New()`: its
-components marked `[Persist]` (or named in `SaveGame.Persisted`, for one such as `Bevy.Transform`)
-are written, an entity spawned during play is written whole, and one of the scene's that was
-despawned is written as deleted. `user://` is the platform's data directory under
+carries a `SaveId`, which the editor gives it with Add Component and code with `SaveId.New()`: the
+fields play changed of its components marked `[Persist]` (or named in `SaveGame.Persisted`, for
+one such as `Bevy.Transform`) are written, a component play took off is written as `null`, an
+entity spawned during play is written whole, and one of the scene's that was despawned is written
+as deleted. A field play left as the scene had it comes from the scene on a load, so a level fixed
+in an update reaches a save made before it. `user://` is the platform's data directory under
 `Config.GameName`, which Bevy loads from as well (`AssetServer.Load(AssetKind.Image,
 "user://shots/one.png")`), and a save is written through a temporary file renamed over the old
 one.

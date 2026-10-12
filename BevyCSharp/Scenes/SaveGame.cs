@@ -22,11 +22,14 @@ namespace Bevy;
 ///   "values": { "quests": { … } } }
 /// </code>
 /// <para>
-/// An entity the scenes hold has the components marked <see cref="PersistAttribute"/>, or named in
-/// <see cref="Persisted"/>, written. One spawned during play with a <see cref="SaveId"/> is written
-/// whole, as a scene writes an entity, and one of the scenes' that has been despawned is written as
-/// deleted. Loading reads the scenes again, then lays the save over them, so a scene's content
-/// comes from the scene and only the player's progress from the save.
+/// An entity the scenes hold has the fields play changed written, of the components marked
+/// <see cref="PersistAttribute"/> or named in <see cref="Persisted"/>, with a component play took
+/// off written as <c>null</c> and one play put on written whole. One spawned during play with a
+/// <see cref="SaveId"/> is written whole, as a scene writes an entity, and one of the scenes' that
+/// has been despawned is written as deleted. Loading reads the scenes again, then lays the save
+/// over them, so a scene's content comes from the scene and only the player's progress from the
+/// save, and a field of a level fixed in an update reaches a save from before it unless play
+/// changed that field.
 /// </para>
 /// <para>
 /// A load ends the game in progress first, despawning what its scenes spawned and every entity
@@ -86,6 +89,12 @@ public static class SaveGame
     private static readonly List<string> StartedFrom = [];
     private static readonly HashSet<SaveId> FromScenes = [];
 
+    /// <summary>
+    /// What each saved entity of the scenes held as they were loaded, as a save writes its
+    /// components, which a save compares with to write only what play changed.
+    /// </summary>
+    private static readonly Dictionary<SaveId, JsonElement> AsLoaded = [];
+
     /// <summary>What the scenes of the game in progress spawned, which a load despawns.</summary>
     private static readonly List<Entity> Spawned = [];
 
@@ -134,9 +143,17 @@ public static class SaveGame
         Spawned.Clear();
         Spawned.AddRange(world.All().Where(entity => world.Has<SceneId>(entity)));
 
-        // Every saved entity there is once the scenes are in, including the ones inside a subscene.
+        // Every saved entity there is once the scenes are in, including the ones inside a subscene,
+        // with what it holds, written as a save writes it so the two compare value for value.
         FromScenes.Clear();
-        foreach (var (_, id) in Ids(world)) FromScenes.Add(id);
+        AsLoaded.Clear();
+        var ids = Ids(world);
+        var references = new SaveReferences(ids);
+        foreach (var (entity, id) in ids)
+        {
+            FromScenes.Add(id);
+            AsLoaded[id] = Persistable(world, entity, references);
+        }
     }
 
     /// <summary>Writes what play changed over the scenes the game started from.</summary>
@@ -164,13 +181,27 @@ public static class SaveGame
             json.WriteStartArray("entities");
             foreach (var (entity, id) in ids)
             {
+                // What play changed on one of the scenes' entities, and nothing for one it left as
+                // the scene has it, which is not written, since a load leaves it as the scene has
+                // it either way.
+                string? changed = null;
+                if (FromScenes.Contains(id))
+                {
+                    var now = Persistable(world, entity, references);
+                    changed = AsLoaded.TryGetValue(id, out var loaded) ? Changes(now, loaded) : now.GetRawText();
+                    if (changed is null) continue;
+                }
+
                 json.WriteStartObject();
                 json.WriteString("save", id.ToString());
 
-                if (FromScenes.Contains(id))
+                if (changed is not null)
                 {
+                    // Parsed and written again rather than written raw, so it is indented as the
+                    // rest of the save is.
+                    using var components = JsonDocument.Parse(changed);
                     json.WritePropertyName("components");
-                    SceneFile.WriteComponents(world, entity, json, references, IsPersisted);
+                    components.RootElement.WriteTo(json);
                 }
                 else
                 {
@@ -319,6 +350,7 @@ public static class SaveGame
     {
         StartedFrom.Clear();
         FromScenes.Clear();
+        AsLoaded.Clear();
         Spawned.Clear();
         Loaded.Clear();
     }
@@ -348,6 +380,137 @@ public static class SaveGame
         }
 
         Spawned.Clear();
+    }
+
+    /// <summary>The components of an entity a save writes, as the object a save holds them in.</summary>
+    private static JsonElement Persistable(EcsWorld world, Entity entity, SceneReferences references)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        using (var json = new Utf8JsonWriter(buffer)) SceneFile.WriteComponents(world, entity, json, references, IsPersisted);
+
+        using var document = JsonDocument.Parse(buffer.WrittenMemory);
+        return document.RootElement.Clone();
+    }
+
+    /// <summary>
+    /// The components that differ between what an entity holds and what it held as the scenes
+    /// were loaded, as a components object, or nothing when none does.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A component of the game's own is compared field by field, along the paths its schema names,
+    /// and written with only the fields that differ, which a load lays over the scene's component
+    /// and leaves the rest of it as the scene has it. A value no field reads is compared the same
+    /// way, as one more field. A field holding an object, such as a reference to an asset, is
+    /// compared and written whole, since half of one names nothing.
+    /// </para>
+    /// <para>
+    /// One of Bevy's reflected components is compared and written whole, because Bevy reads its
+    /// JSON as a whole value. A component play put on is written whole, and one it took off is
+    /// written as <c>null</c>, which a load takes off the scene's entity.
+    /// </para>
+    /// </remarks>
+    private static string? Changes(JsonElement now, JsonElement loaded)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        var any = false;
+        using (var json = new Utf8JsonWriter(buffer))
+        {
+            json.WriteStartObject();
+
+            foreach (var component in now.EnumerateObject())
+            {
+                if (!loaded.TryGetProperty(component.Name, out var was))
+                {
+                    component.WriteTo(json);
+                    any = true;
+                    continue;
+                }
+
+                if (JsonElement.DeepEquals(component.Value, was)) continue;
+
+                var schema = ComponentSchemas.For(component.Name);
+                if (schema is null or { Origin: SchemaOrigin.Reflected }
+                    || component.Value.ValueKind != JsonValueKind.Object
+                    || was.ValueKind != JsonValueKind.Object)
+                {
+                    component.WriteTo(json);
+                    any = true;
+                    continue;
+                }
+
+                json.WritePropertyName(component.Name);
+                WriteChangedFields(json, component.Value, was, Nested(schema), string.Empty);
+                any = true;
+            }
+
+            foreach (var component in loaded.EnumerateObject())
+            {
+                if (now.TryGetProperty(component.Name, out _)) continue;
+
+                json.WriteNull(component.Name);
+                any = true;
+            }
+
+            json.WriteEndObject();
+        }
+
+        return any ? System.Text.Encoding.UTF8.GetString(buffer.WrittenSpan) : null;
+    }
+
+    /// <summary>
+    /// Writes the properties of an object that differ from what it held, going into a property only
+    /// where it is a struct the schema's fields lie under.
+    /// </summary>
+    /// <remarks>
+    /// The version a component records is written with the fields, whether or not it changed, so a
+    /// later build brings the fields up from the version they were written at.
+    /// </remarks>
+    private static void WriteChangedFields(Utf8JsonWriter json, JsonElement now, JsonElement was, HashSet<string> nested, string prefix)
+    {
+        json.WriteStartObject();
+        foreach (var property in now.EnumerateObject())
+        {
+            var path = prefix + property.Name;
+
+            if (path == SceneValue.VersionName)
+            {
+                property.WriteTo(json);
+                continue;
+            }
+
+            if (!was.TryGetProperty(property.Name, out var before))
+            {
+                property.WriteTo(json);
+                continue;
+            }
+
+            if (JsonElement.DeepEquals(property.Value, before)) continue;
+
+            if (nested.Contains(path) && property.Value.ValueKind == JsonValueKind.Object && before.ValueKind == JsonValueKind.Object)
+            {
+                json.WritePropertyName(property.Name);
+                WriteChangedFields(json, property.Value, before, nested, path + ".");
+                continue;
+            }
+
+            property.WriteTo(json);
+        }
+
+        json.WriteEndObject();
+    }
+
+    /// <summary>The dotted paths of a schema's structs, the parts of its fields' names before the last.</summary>
+    private static HashSet<string> Nested(ComponentSchema schema)
+    {
+        var nested = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var field in schema.Fields)
+        {
+            var parts = field.Name.Split('.');
+            for (var i = 1; i < parts.Length; i++) nested.Add(string.Join('.', parts[..i]));
+        }
+
+        return nested;
     }
 
     /// <summary>Whether a save writes a component of an entity the scenes hold.</summary>

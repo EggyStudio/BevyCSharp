@@ -336,9 +336,13 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
 `bevycsharp.save.1`), and `SaveGame.Load` reads the scenes again and lays the save over them.
 
 - **A diff over the scenes it names.** A level's static content is never written into a save, so a
-  save is small and a level fixed in an update reaches players with saves from before it. Each
-  saved entity's marked components are written whole rather than as overrides of single fields,
-  which keeps the save readable and costs a few bytes a component.
+  save is small and a level fixed in an update reaches players with saves from before it.
+  `SaveGame.Begin` writes what each saved entity of the scenes holds as they load, and a save
+  compares with that and writes only the fields of marked components that play changed, going into a
+  struct where the schema's fields lie under it, with a component play took off written as `null`
+  and one it put on written whole. An entity play left alone is not written. A field holding an
+  object, such as a reference to an asset, and one of Bevy's reflected components are compared and
+  written whole, since Bevy reads its JSON as a whole value.
 - **What is written is opted into.** An entity carries a `SaveId` (a stable id, set in the editor or
   when spawned) to be saved, and a component is marked `[Persist]` for its fields to be, or named
   in `SaveGame.Persisted` when it is declared elsewhere, as Bevy's transform is. Entities spawned

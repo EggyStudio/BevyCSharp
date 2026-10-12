@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Bevy;
 using Xunit;
 
@@ -123,6 +124,105 @@ public sealed class SaveGameTests : IDisposable
             var arrow = Assert.Single(loaded.Entities, entity => ctx.Ecs.NameOf(entity) == "Arrow");
             Assert.Equal(new Vec3(0f, 2f, 0f), ctx.Ecs.GetRef<Transform>(arrow).Translation);
             Assert.Equal(hero, ctx.Ecs.GetOrDefault<EveryKind>(arrow).Target);
+        });
+
+        loading.Run();
+    }
+
+    [Fact]
+    public void ASaveHoldsOnlyTheFieldsPlayChangedSoAFixedLevelStillReachesIt()
+    {
+        var level = Path.Combine(_folder.Path, "fixed.scene.json");
+
+        using (var making = new EngineHarness(frames: 2))
+        {
+            making.OnContext(Stage.Startup, ctx =>
+            {
+                var hero = ctx.Ecs.Spawn();
+                ctx.Ecs.SetName(hero, "Hero");
+                ctx.Ecs.Add(hero, Transform.Identity);
+                ctx.Ecs.Add(hero, new Vigor { Most = 5f, Rear = new Coil { Stiffness = 1f, Damping = 2f } });
+                ctx.Ecs.Add(hero, SaveId.New());
+
+                foreach (var (name, coins) in new[] { ("Chest", 7), ("Door", 3) })
+                {
+                    var holder = ctx.Ecs.Spawn();
+                    ctx.Ecs.SetName(holder, name);
+                    ctx.Ecs.Add(holder, new Wallet { Coins = coins });
+                    ctx.Ecs.Add(holder, SaveId.New());
+                }
+
+                SceneFile.Save(ctx.Ecs, level);
+            });
+
+            making.Run();
+        }
+
+        SaveGame.Persisted.Add("Bevy.Transform");
+        SaveGame.Persisted.Add("Bevy.Tests.Vigor");
+
+        using (var playing = new EngineHarness(frames: 2))
+        {
+            playing.OnContext(Stage.Startup, ctx =>
+            {
+                var spawned = SaveGame.Start(ctx.Ecs, level);
+                Entity Named(string name) => spawned.Single(entity => ctx.Ecs.NameOf(entity) == name);
+
+                ctx.Ecs.GetRef<Transform>(Named("Hero")).Translation = new Vec3(3f, 0f, 0f);
+                ctx.Ecs.GetRef<Vigor>(Named("Hero")).Rear.Damping = 4f;
+                ctx.Ecs.Remove<Wallet>(Named("Chest"));
+
+                // The hero and the emptied chest, and not the door, which play left alone.
+                Assert.Equal(2, SaveGame.Save(ctx.Ecs));
+            });
+
+            playing.Run();
+        }
+
+        var file = Path.Combine(_folder.Path, "user", "saves", "slot.save.json");
+        using (var saved = JsonDocument.Parse(File.ReadAllText(file)))
+        {
+            var components = saved.RootElement.GetProperty("entities").EnumerateArray()
+                .Select(entry => entry.GetProperty("components"))
+                .ToList();
+            Assert.Equal(2, components.Count);
+
+            // Each component with the one field that moved, down into the struct it lies in.
+            var hero = Assert.Single(components, entry => entry.TryGetProperty("Bevy.Tests.Vigor", out _));
+            Assert.Equal(["Translation"], hero.GetProperty("Bevy.Transform").EnumerateObject().Select(property => property.Name));
+            var vigor = hero.GetProperty("Bevy.Tests.Vigor");
+            Assert.Equal(["Rear"], vigor.EnumerateObject().Select(property => property.Name));
+            Assert.Equal(["Damping"], vigor.GetProperty("Rear").EnumerateObject().Select(property => property.Name));
+
+            var chest = Assert.Single(components, entry => entry.TryGetProperty("Bevy.Tests.Wallet", out _));
+            Assert.Equal(JsonValueKind.Null, chest.GetProperty("Bevy.Tests.Wallet").ValueKind);
+        }
+
+        // The level fixed in an update, in two fields play never changed beside one it did.
+        var scene = JsonNode.Parse(File.ReadAllText(level))!;
+        var held = scene["entities"]!.AsArray().Single(entry => (string?)entry!["name"] == "Hero")!["components"]!["Bevy.Tests.Vigor"]!;
+        held["Most"] = 8f;
+        held["Rear"]!["Stiffness"] = 6f;
+        held["Rear"]!["Damping"] = 9f;
+        File.WriteAllText(level, scene.ToJsonString());
+
+        using var loading = new EngineHarness(frames: 2);
+
+        loading.OnContext(Stage.Startup, ctx =>
+        {
+            var loaded = SaveGame.Load(ctx.Ecs);
+            Assert.Null(loaded.Problem);
+            Entity Named(string name) => loaded.Entities.Single(entity => ctx.Ecs.NameOf(entity) == name);
+
+            // The fix where play left the field, and the player's own where it did not.
+            var vigor = ctx.Ecs.GetOrDefault<Vigor>(Named("Hero"));
+            Assert.Equal(8f, vigor.Most);
+            Assert.Equal(6f, vigor.Rear.Stiffness);
+            Assert.Equal(4f, vigor.Rear.Damping);
+            Assert.Equal(new Vec3(3f, 0f, 0f), ctx.Ecs.GetRef<Transform>(Named("Hero")).Translation);
+
+            Assert.False(ctx.Ecs.Has<Wallet>(Named("Chest")));
+            Assert.Equal(3, ctx.Ecs.GetOrDefault<Wallet>(Named("Door")).Coins);
         });
 
         loading.Run();

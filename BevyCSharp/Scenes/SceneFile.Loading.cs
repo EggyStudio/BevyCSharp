@@ -176,7 +176,7 @@ public static partial class SceneFile
     /// <remarks>
     /// A component the entity carries already has the fields named written over it and the rest
     /// left, rather than being replaced by a default first, so a save laid over a scene's entity
-    /// changes what it holds and nothing else.
+    /// changes what it holds and nothing else. A component given as <c>null</c> is taken off.
     /// </remarks>
     internal static void ReadComponents(
         EcsWorld world,
@@ -190,6 +190,15 @@ public static partial class SceneFile
         foreach (var component in components.EnumerateObject().OrderBy(component => InsertedLast.Contains(component.Name) ? 1 : 0))
         {
             var schema = ComponentSchemas.For(component.Name);
+
+            // A component a save says play took off, taken off the scene's entity. One this build
+            // has no type for was never on it.
+            if (component.Value.ValueKind == JsonValueKind.Null)
+            {
+                if (schema is { Origin: SchemaOrigin.Reflected }) world.RemoveReflected(entity, schema.QualifiedName);
+                else schema?.Remove(world, entity);
+                continue;
+            }
 
             if (schema is { Origin: SchemaOrigin.Reflected })
             {

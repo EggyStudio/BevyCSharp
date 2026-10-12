@@ -101,10 +101,9 @@ file keeps, one inside another, with children added under its nodes and renames 
 editor records what is edited on one of its nodes, marks a changed field and reverts it, and puts
 a model dropped on the view on whatever is under the pointer (SCENES.md §5). What
 [SCENES.md](SCENES.md) has left:
-- **Saves are JSON and diff whole components.** `SaveGame` saves and loads what play changed over
-  the scenes a game started from, with the `Persistent<T>` values a slot carries, ends the game in
-  progress to load and sends `SaveLoaded` the frame after, and `user://` reaches both sides of the
-  bridge. A component changed in one field is written whole, and a save
+- **Saves are JSON.** `SaveGame` saves and loads the fields play changed over the scenes a game
+  started from, with the `Persistent<T>` values a slot carries, ends the game in progress to load
+  and sends `SaveLoaded` the frame after, and `user://` reaches both sides of the bridge. A save
   has no binary form for when one grows large (SCENES.md §8).
 - **Bevy's own components** have neither former names nor versions, and one Bevy refuses after
   an upgrade is kept rather than migrated (SCENES.md §7).
