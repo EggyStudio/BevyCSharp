@@ -16,14 +16,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class RenderTargetTests : IDisposable
 {
-    private readonly string _directory = Path.Combine(
-        Path.GetTempPath(), $"bcs-target-{Guid.NewGuid():N}");
+    private readonly TestFolder _folder = new("bcs-target-");
 
-    public RenderTargetTests() => Directory.CreateDirectory(_directory);
+    public RenderTargetTests() => Directory.CreateDirectory(_folder.Path);
 
     public void Dispose()
     {
-        if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+        _folder.Dispose();
     }
 
     [SkippableFact]
@@ -62,7 +61,7 @@ public sealed class RenderTargetTests : IDisposable
     {
         Needs.Renderer();
 
-        var path = Path.Combine(_directory, "target.png");
+        var path = Path.Combine(_folder.Path, "target.png");
 
         using var app = new App(Config.OffscreenFor(320, 180, frames: 90));
 

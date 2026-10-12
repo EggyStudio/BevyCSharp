@@ -12,7 +12,7 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class GltfContentsTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-gltf-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-gltf-");
     private readonly string _was = Streaming.AssetRoot;
 
     private const string Json = """
@@ -23,20 +23,20 @@ public sealed class GltfContentsTests : IDisposable
 
     public GltfContentsTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
     }
 
     public void Dispose()
     {
         Streaming.AssetRoot = _was;
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
     public void ATextFileListsEveryPrimitiveAndMaterialByItsLabel()
     {
-        File.WriteAllText(Path.Combine(_root, "ship.gltf"), Json);
+        File.WriteAllText(Path.Combine(_folder.Path, "ship.gltf"), Json);
 
         var parts = GltfContents.Read("ship.gltf");
 
@@ -66,7 +66,7 @@ public sealed class GltfContentsTests : IDisposable
         Encoding.ASCII.GetBytes("JSON").CopyTo(file, 16);
         json.CopyTo(file, 20);
         for (var i = 20 + json.Length; i < file.Length; i++) file[i] = (byte)' ';
-        File.WriteAllBytes(Path.Combine(_root, "ship.glb"), file);
+        File.WriteAllBytes(Path.Combine(_folder.Path, "ship.glb"), file);
 
         var parts = GltfContents.Read("ship.glb");
         Assert.NotNull(parts);
@@ -74,7 +74,7 @@ public sealed class GltfContentsTests : IDisposable
         Assert.Equal("Steel", parts[3].Name);
 
         // A file that is not glTF at all, or not there, lists nothing.
-        File.WriteAllText(Path.Combine(_root, "broken.gltf"), "{ not json");
+        File.WriteAllText(Path.Combine(_folder.Path, "broken.gltf"), "{ not json");
         Assert.Null(GltfContents.Read("broken.gltf"));
         Assert.Null(GltfContents.Read("missing.gltf"));
     }
@@ -82,8 +82,8 @@ public sealed class GltfContentsTests : IDisposable
     [Fact]
     public void ATextureInsideTheFileIsLabeledAndOneBesideItIsItsOwnFile()
     {
-        Directory.CreateDirectory(Path.Combine(_root, "ships"));
-        File.WriteAllText(Path.Combine(_root, "ships", "ship.gltf"), """
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "ships"));
+        File.WriteAllText(Path.Combine(_folder.Path, "ships", "ship.gltf"), """
             { "asset": { "version": "2.0" },
               "images": [ { "uri": "data:image/png;base64,AAAA" },
                           { "uri": "paint/hull%20color.png" },

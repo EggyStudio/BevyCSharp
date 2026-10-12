@@ -14,13 +14,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class MaterialFileTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-materials-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-materials-");
     private readonly string _was = Streaming.AssetRoot;
 
     public MaterialFileTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
         AssetIds.Reindex();
     }
 
@@ -29,7 +29,7 @@ public sealed class MaterialFileTests : IDisposable
         DataAssets.Watching = false;
         Streaming.AssetRoot = _was;
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [SkippableFact]
@@ -37,7 +37,7 @@ public sealed class MaterialFileTests : IDisposable
     {
         Needs.Renderer();
 
-        var scene = Path.Combine(_root, "room.scene.json");
+        var scene = Path.Combine(_folder.Path, "room.scene.json");
         var ran = false;
 
         using (var saving = new EngineHarness(frames: 2))
@@ -45,7 +45,7 @@ public sealed class MaterialFileTests : IDisposable
             saving.OnContext(Stage.Startup, ctx =>
             {
                 // The harness points the root at its own assets, and these files go in the test's.
-                Streaming.AssetRoot = _root;
+                Streaming.AssetRoot = _folder.Path;
 
                 var paint = Render.CreateMaterial(new MaterialSettings { BaseColor = (0.9f, 0.1f, 0.1f, 1f), Roughness = 0.2f });
                 MaterialFiles.SaveAs(paint, "paints/red.material.json");
@@ -70,12 +70,12 @@ public sealed class MaterialFileTests : IDisposable
         var text = File.ReadAllText(scene);
         Assert.Contains("paints/red.material.json", text);
         Assert.DoesNotContain("\"roughness\"", text);
-        Assert.True(File.Exists(Path.Combine(_root, "paints/red.material.json.uid")));
+        Assert.True(File.Exists(Path.Combine(_folder.Path, "paints/red.material.json.uid")));
 
         using var loading = new EngineHarness(frames: 2);
         loading.OnContext(Stage.Startup, ctx =>
         {
-            Streaming.AssetRoot = _root;
+            Streaming.AssetRoot = _folder.Path;
 
             var loaded = SceneFile.Load(ctx.Ecs, scene);
             var left = Render.MaterialOf(ctx.Ecs, loaded.Entities.Single(entity => ctx.Ecs.NameOf(entity) == "Left"));
@@ -100,11 +100,11 @@ public sealed class MaterialFileTests : IDisposable
         Needs.Renderer();
 
         var material = AssetHandle.None;
-        var file = Path.Combine(_root, "blue.material.json");
+        var file = Path.Combine(_folder.Path, "blue.material.json");
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            Streaming.AssetRoot = _root;
+            Streaming.AssetRoot = _folder.Path;
             DataAssets.Watching = true;
 
             var made = Render.CreateMaterial(new MaterialSettings { Roughness = 0.5f });

@@ -10,13 +10,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class MeshFileTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-meshes-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-meshes-");
     private readonly string _was = Streaming.AssetRoot;
 
     public MeshFileTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
         AssetIds.Reindex();
     }
 
@@ -24,7 +24,7 @@ public sealed class MeshFileTests : IDisposable
     {
         Streaming.AssetRoot = _was;
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [SkippableFact]
@@ -32,7 +32,7 @@ public sealed class MeshFileTests : IDisposable
     {
         Needs.Renderer();
 
-        var scene = Path.Combine(_root, "yard.scene.json");
+        var scene = Path.Combine(_folder.Path, "yard.scene.json");
         var ran = false;
 
         var ramp = new MeshData
@@ -48,7 +48,7 @@ public sealed class MeshFileTests : IDisposable
         {
             saving.OnContext(Stage.Startup, ctx =>
             {
-                Streaming.AssetRoot = _root;
+                Streaming.AssetRoot = _folder.Path;
 
                 var post = Render.CreateMesh(MeshShape.Cylinder, 0.1f, 2f);
                 var built = Render.CreateMesh(ramp);
@@ -79,7 +79,7 @@ public sealed class MeshFileTests : IDisposable
         using var loading = new EngineHarness(frames: 2);
         loading.OnContext(Stage.Startup, ctx =>
         {
-            Streaming.AssetRoot = _root;
+            Streaming.AssetRoot = _folder.Path;
 
             var loaded = SceneFile.Load(ctx.Ecs, scene);
             Entity Named(string name) => loaded.Entities.Single(entity => ctx.Ecs.NameOf(entity) == name);
@@ -115,7 +115,7 @@ public sealed class MeshFileTests : IDisposable
         using var harness = new EngineHarness(frames: 2);
         harness.OnContext(Stage.Startup, ctx =>
         {
-            Streaming.AssetRoot = _root;
+            Streaming.AssetRoot = _folder.Path;
 
             var box = Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f);
             MeshFiles.SaveAs(box, "box.mesh.json");
@@ -126,7 +126,7 @@ public sealed class MeshFileTests : IDisposable
             Assert.Equal(new Vec3(4f, 2f, 6f), info.Size);
 
             // Written back to the file it came from.
-            Assert.Contains("\"a\": 4", File.ReadAllText(Path.Combine(_root, "box.mesh.json")));
+            Assert.Contains("\"a\": 4", File.ReadAllText(Path.Combine(_folder.Path, "box.mesh.json")));
 
             Assert.False(Render.RebuildMesh(box, "Blob"));
             ran = true;

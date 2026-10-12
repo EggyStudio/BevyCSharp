@@ -18,13 +18,14 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class AssetIdTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-ids-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-ids-");
+    private readonly TestFolder _export = new("bcs-ids-export-");
     private readonly string _was = Streaming.AssetRoot;
 
     public AssetIdTests()
     {
-        Directory.CreateDirectory(Path.Combine(_root, "models"));
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "models"));
+        Streaming.AssetRoot = _folder.Path;
         AssetIds.Reindex();
     }
 
@@ -32,13 +33,14 @@ public sealed class AssetIdTests : IDisposable
     {
         Streaming.AssetRoot = _was;
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
+        _export.Dispose();
     }
 
     [Fact]
     public void AReferenceGivenAnIdFollowsTheFileWhenItMoves()
     {
-        File.WriteAllText(Path.Combine(_root, "models/ship.glb"), "not really a model");
+        File.WriteAllText(Path.Combine(_folder.Path, "models/ship.glb"), "not really a model");
 
         using var written = Written(new SceneReferences { GiveIds = true }, "models/ship.glb#Mesh0");
         var reference = written.RootElement;
@@ -46,26 +48,26 @@ public sealed class AssetIdTests : IDisposable
         // The id is the file's, so the label stays in the path, and the sidecar is beside the file.
         Assert.True(reference.TryGetProperty("uid", out _));
         Assert.Equal("models/ship.glb#Mesh0", reference.GetProperty("path").GetString());
-        Assert.True(File.Exists(Path.Combine(_root, "models/ship.glb.uid")));
+        Assert.True(File.Exists(Path.Combine(_folder.Path, "models/ship.glb.uid")));
 
         AssetIds.Move("models/ship.glb", "fleet/flagship.glb");
         Assert.Equal("fleet/flagship.glb#Mesh0", SceneReferences.ReadFile(reference));
 
         // Renamed outside the editor, with its sidecar carried along by hand, it is found again.
-        File.Move(Path.Combine(_root, "fleet/flagship.glb"), Path.Combine(_root, "hull.glb"));
-        File.Move(Path.Combine(_root, "fleet/flagship.glb.uid"), Path.Combine(_root, "hull.glb.uid"));
+        File.Move(Path.Combine(_folder.Path, "fleet/flagship.glb"), Path.Combine(_folder.Path, "hull.glb"));
+        File.Move(Path.Combine(_folder.Path, "fleet/flagship.glb.uid"), Path.Combine(_folder.Path, "hull.glb.uid"));
         Assert.Equal("hull.glb#Mesh0", SceneReferences.ReadFile(reference));
     }
 
     [Fact]
     public void WithoutAnIdAReferenceIsItsPath()
     {
-        File.WriteAllText(Path.Combine(_root, "models/rock.glb"), "not really a model");
+        File.WriteAllText(Path.Combine(_folder.Path, "models/rock.glb"), "not really a model");
 
         // Not asked to give ids, so no sidecar is written and the reference holds the path alone.
         using var written = Written(new SceneReferences(), "models/rock.glb");
         Assert.False(written.RootElement.TryGetProperty("uid", out _));
-        Assert.False(File.Exists(Path.Combine(_root, "models/rock.glb.uid")));
+        Assert.False(File.Exists(Path.Combine(_folder.Path, "models/rock.glb.uid")));
         Assert.Equal("models/rock.glb", SceneReferences.ReadFile(written.RootElement));
 
         // A file that is not there, or one from another source, is never given one.
@@ -86,20 +88,20 @@ public sealed class AssetIdTests : IDisposable
     [Fact]
     public void AShippedGameFindsFilesThroughTheIndexAlone()
     {
-        File.WriteAllText(Path.Combine(_root, "models/ship.glb"), "not really a model");
+        File.WriteAllText(Path.Combine(_folder.Path, "models/ship.glb"), "not really a model");
         var id = AssetIds.IdOf("models/ship.glb", create: true);
 
         Assert.Equal(1, AssetIds.WriteIndex());
 
         // What an export leaves, the index without the sidecars.
-        File.Delete(Path.Combine(_root, "models/ship.glb.uid"));
+        File.Delete(Path.Combine(_folder.Path, "models/ship.glb.uid"));
         AssetIds.Reindex();
 
         Assert.Equal("models/ship.glb", AssetIds.PathOf(id));
         Assert.Equal(id, AssetIds.IdOf("models/ship.glb"));
 
         // A file the index names that is not shipped is not answered with.
-        File.Delete(Path.Combine(_root, "models/ship.glb"));
+        File.Delete(Path.Combine(_folder.Path, "models/ship.glb"));
         AssetIds.Reindex();
         Assert.Null(AssetIds.PathOf(id));
     }
@@ -107,34 +109,27 @@ public sealed class AssetIdTests : IDisposable
     [Fact]
     public void AnExportsCopyIsIndexedAndLosesItsSidecarsWhileTheProjectKeepsThem()
     {
-        File.WriteAllText(Path.Combine(_root, "models/ship.glb"), "not really a model");
+        File.WriteAllText(Path.Combine(_folder.Path, "models/ship.glb"), "not really a model");
         var id = AssetIds.IdOf("models/ship.glb", create: true);
 
         // The folder an export copies the assets to, which is not the root this app reads.
-        var copy = _root + "-export";
-        try
-        {
-            Directory.CreateDirectory(Path.Combine(copy, "models"));
-            File.Copy(Path.Combine(_root, "models/ship.glb"), Path.Combine(copy, "models/ship.glb"));
-            File.Copy(Path.Combine(_root, "models/ship.glb.uid"), Path.Combine(copy, "models/ship.glb.uid"));
+        var copy = _export.Path;
+        Directory.CreateDirectory(Path.Combine(copy, "models"));
+        File.Copy(Path.Combine(_folder.Path, "models/ship.glb"), Path.Combine(copy, "models/ship.glb"));
+        File.Copy(Path.Combine(_folder.Path, "models/ship.glb.uid"), Path.Combine(copy, "models/ship.glb.uid"));
 
-            // A sidecar whose file is not shipped names nothing.
-            File.WriteAllText(Path.Combine(copy, "models/gone.glb.uid"), "00000000000000bb");
+        // A sidecar whose file is not shipped names nothing.
+        File.WriteAllText(Path.Combine(copy, "models/gone.glb.uid"), "00000000000000bb");
 
-            Assert.Equal(1, AssetIds.IndexForShipping(copy));
-            Assert.Empty(Directory.GetFiles(copy, "*.uid", SearchOption.AllDirectories));
+        Assert.Equal(1, AssetIds.IndexForShipping(copy));
+        Assert.Empty(Directory.GetFiles(copy, "*.uid", SearchOption.AllDirectories));
 
-            using var index = JsonDocument.Parse(File.ReadAllText(Path.Combine(copy, AssetIds.IndexName)));
-            Assert.Equal("models/ship.glb", index.RootElement.GetProperty("ids").GetProperty(id.ToString("x16")).GetString());
+        using var index = JsonDocument.Parse(File.ReadAllText(Path.Combine(copy, AssetIds.IndexName)));
+        Assert.Equal("models/ship.glb", index.RootElement.GetProperty("ids").GetProperty(id.ToString("x16")).GetString());
 
-            // The project keeps its own, and its own root is never stripped.
-            Assert.True(File.Exists(Path.Combine(_root, "models/ship.glb.uid")));
-            Assert.Throws<InvalidOperationException>(() => AssetIds.IndexForShipping(_root));
-        }
-        finally
-        {
-            if (Directory.Exists(copy)) Directory.Delete(copy, recursive: true);
-        }
+        // The project keeps its own, and its own root is never stripped.
+        Assert.True(File.Exists(Path.Combine(_folder.Path, "models/ship.glb.uid")));
+        Assert.Throws<InvalidOperationException>(() => AssetIds.IndexForShipping(_folder.Path));
     }
 
     /// <summary>A file reference as a scene would write it.</summary>

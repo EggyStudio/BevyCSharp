@@ -26,13 +26,13 @@ public sealed class Armory
 [Collection("engine")]
 public sealed class DataReferenceCountTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-refs-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-refs-");
     private readonly string _was = Streaming.AssetRoot;
 
     public DataReferenceCountTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
     }
@@ -42,7 +42,7 @@ public sealed class DataReferenceCountTests : IDisposable
         Streaming.AssetRoot = _was;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]

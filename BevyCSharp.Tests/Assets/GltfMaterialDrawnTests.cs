@@ -26,15 +26,15 @@ public sealed class GltfMaterialDrawnTests : IDisposable
 {
     private const ulong Settled = 150;
 
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-gltf-material-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-gltf-material-");
 
     public GltfMaterialDrawnTests()
     {
-        Directory.CreateDirectory(_root);
-        File.WriteAllText(Path.Combine(_root, "square.gltf"), Square());
+        Directory.CreateDirectory(_folder.Path);
+        File.WriteAllText(Path.Combine(_folder.Path, "square.gltf"), Square());
     }
 
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     [SkippableFact]
     public void AModelIsDrawnWithItsOwnMaterial()
@@ -45,7 +45,7 @@ public sealed class GltfMaterialDrawnTests : IDisposable
         Capture? ticket = null;
 
         var config = Config.OffscreenFor(64, 64, frames: (uint)Settled + 60);
-        config.AssetRoot = _root;
+        config.AssetRoot = _folder.Path;
 
         using var app = new App(config);
         app.AddPlugin(new EnginePlugin());

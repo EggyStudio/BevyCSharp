@@ -15,13 +15,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class AssetPackTests : IDisposable
 {
-    private readonly string _work = Path.Combine(Path.GetTempPath(), "bcs-pack-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-pack-");
     private readonly string _was = Streaming.AssetRoot;
 
     public AssetPackTests()
     {
-        Directory.CreateDirectory(Path.Combine(_work, "source", "carried"));
-        Directory.CreateDirectory(Path.Combine(_work, "root"));
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "source", "carried"));
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "root"));
     }
 
     public void Dispose()
@@ -29,10 +29,10 @@ public sealed class AssetPackTests : IDisposable
         AssetFiles.Use(null);
         Streaming.AssetRoot = _was;
         AssetIds.Reindex();
-        Directory.Delete(_work, recursive: true);
+        _folder.Dispose();
     }
 
-    private string Source(string path) => Path.Combine(_work, "source", path);
+    private string Source(string path) => Path.Combine(_folder.Path, "source", path);
 
     /// <summary>Writes a file under the source folder and returns its full path.</summary>
     private string Put(string path, string text)
@@ -44,8 +44,8 @@ public sealed class AssetPackTests : IDisposable
     /// <summary>Packs the source folder into a pack of its own.</summary>
     private string Pack(Func<string, bool>? include = null)
     {
-        var pack = Path.Combine(_work, AssetPack.DefaultName);
-        AssetPack.Write(Path.Combine(_work, "source"), pack, include);
+        var pack = Path.Combine(_folder.Path, AssetPack.DefaultName);
+        AssetPack.Write(Path.Combine(_folder.Path, "source"), pack, include);
         return pack;
     }
 
@@ -81,7 +81,7 @@ public sealed class AssetPackTests : IDisposable
     [Fact]
     public void AFileThatIsNotAWholePackIsRefused()
     {
-        var other = Path.Combine(_work, "other.pack");
+        var other = Path.Combine(_folder.Path, "other.pack");
         File.WriteAllText(other, "not a pack at all");
         Assert.Throws<InvalidDataException>(() => AssetPack.Open(other));
 
@@ -117,7 +117,7 @@ public sealed class AssetPackTests : IDisposable
         // Measured at one length and found at another when copied, as a file saved during an
         // export is, which would shift every offset after it.
         var file = Put("grown.txt", "longer than it was when it was measured");
-        var partial = Path.Combine(_work, "grown.pack");
+        var partial = Path.Combine(_folder.Path, "grown.pack");
 
         var refused = Assert.Throws<IOException>(() =>
             AssetPack.WriteTo(partial, [file], [Encoding.UTF8.GetBytes("grown.txt")], [5], 64));
@@ -130,14 +130,14 @@ public sealed class AssetPackTests : IDisposable
     {
         // The test assembly carries carried/note.json, saying it comes from the assembly.
         Put("carried/note.json", """{ "carried": "from the pack" }""");
-        Streaming.AssetRoot = Path.Combine(_work, "root");
+        Streaming.AssetRoot = Path.Combine(_folder.Path, "root");
         AssetFiles.Use(typeof(AssetPackTests).Assembly, AssetPack.Open(Pack()));
 
         Assert.True(AssetFiles.IsCarried("carried/note.json"));
         Assert.Contains("from the pack", AssetFiles.ReadAllText("carried/note.json"));
 
-        Directory.CreateDirectory(Path.Combine(_work, "root", "carried"));
-        File.WriteAllText(Path.Combine(_work, "root", "carried", "note.json"), """{ "carried": "from the folder" }""");
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "root", "carried"));
+        File.WriteAllText(Path.Combine(_folder.Path, "root", "carried", "note.json"), """{ "carried": "from the folder" }""");
         Assert.False(AssetFiles.IsCarried("carried/note.json"));
         Assert.Contains("from the folder", AssetFiles.ReadAllText("carried/note.json"));
     }
@@ -147,10 +147,10 @@ public sealed class AssetPackTests : IDisposable
     {
         Put("carried/ship.glb", "a model");
         Put("carried/ship.glb.uid", "00000000000000d2\n");
-        Assert.Equal(1, AssetIds.IndexForShipping(Path.Combine(_work, "source")));
+        Assert.Equal(1, AssetIds.IndexForShipping(Path.Combine(_folder.Path, "source")));
 
         // No folder at the root at all, as a packed game ships.
-        Streaming.AssetRoot = Path.Combine(_work, "nowhere");
+        Streaming.AssetRoot = Path.Combine(_folder.Path, "nowhere");
         AssetFiles.Use(null, AssetPack.Open(Pack()));
         AssetIds.Reindex();
 
