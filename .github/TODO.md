@@ -556,8 +556,13 @@ name, and one that stops compiling fails its case.
 - **A behavior's own component reads as changed on every row its method runs on.** A method per
   entity takes the component by reference, and the runner marks each row it hands to the method,
   so a system watching for changes to a behavior's component sees every row an unfiltered method
-  ran on change each frame, written or not. Marking only what a method wrote would need the runner
-  to compare or the method to say.
+  ran on change each frame, written or not, as Bevy's `&mut` marks a component reached for writing.
+  Comparing each row's bytes before and after the method, and marking the rows that differ in one
+  call a run, was measured at 11 to 14 percent more frame in `Stress movers` from 100,000 to
+  400,000 (3.61 to 4.12 ms and 9.82 to 11.17 ms), the copy and the comparison of the mover and its
+  transform on every row, so it was left out. A behavior that writes seldom takes the component
+  `in` and writes through the world when it changes, and a method saying what it wrote would mark
+  that alone at no such cost.
 
 A game is played whole as well. Where the workflow builds the bridges, a job packs the library
 with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on

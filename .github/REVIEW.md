@@ -10,7 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `0ad78d34`, two commits from TODO.md's order. `df8ace41`: a box, sphere or capsule
+Reviewed up to `81ff10fe`, the editor driven offscreen: a live offscreen editor showed the handle's
+drag worked already, the cube moving under the drag on the move tool's middle handle, and the right
+drag steered nothing, since the camera reads the mouse's accumulated motion, which no pretended
+pointer wrote; a pretended move writes that motion from where the pointer was, none for a first
+move, windowed and offscreen, pinned by an input test and seen turning the editor's camera live; the
+input guide follows and TODO.md loses the item. Verdict 13 stands at eight whole suites of ten, this
+one over the motion. Right, the editor read live before anything was written, and only what it
+lacked added. Next, the last testing item of TODO.md's order, a behavior's own component marked only
+on the rows its method changed, the runner listing rows unmarked, copying each before the method and
+comparing its bytes after, and stamping the changed ones through one bridge call a chunk, the first
+entity's row found once and a byte a row so parallel workers share none, the changed filter's mark
+folded into the same, at ABI 281. It is stricter than Bevy's own detection, which marks on access,
+so it is kept only on a measure: the stress game's frame before and after by its own script, kept
+where the frame grows by less than a twentieth, and the comparing written as a cost in the behaviors
+guide; where it costs more, the marking stays as `c8849d71` has it and TODO.md says why.
+
+Before it, `0ad78d34` came, two commits from TODO.md's order. `df8ace41`: a box, sphere or capsule
 left at zero on a placed model's root fits the model's parts, waiting until the scene instances have
 posted the root ready, a set they keep pruned of the despawned and forgotten as an app starts,
 rather than being a unit cube made once, as a hull waits already; its test read a unit cube under
@@ -39,17 +55,6 @@ only: a box, sphere or capsule left at zero on a placed model's root fits the me
 waiting while the scene has not spawned or a part is loading as a hull does, rather than being a
 unit cube made once; the material card's item corrected in the same batch, the card having the
 specular tint, the parallax and the drawing method already.
-
-Before it, `df06e9dd` came, the window's calls for a window past the first, ABI 279: every window
-export takes the window's entity bits, the primary named by the one value no entity has, since zero
-is C#'s none and could be Bevy's first entity, and the window class gains an entity overload of each
-call, the size, the place, the scale, minimizing, the cursor's grab, image, atlas and shape among
-them, the references to the overloaded calls pinned; a test sets a spawned window by its entity and
-reads a plain entity refused; the window guide and the cheat sheet follow. Verdict 13 stands at five
-whole suites of ten, this one over the window calls, 1,460 passed. Right, the primary given a handle
-no entity can collide with. Next TODO.md's order on: a node's scrollbar width as a setting, the
-item's note that nothing draws one no longer holding since Bevy's scrollbar widget is reachable, the
-node description's end asserted at the same offsets on both sides, at ABI 280.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -591,11 +596,11 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; seven of ten so far, over
-    the save diff, the state machine, the field curve, the window calls, the scrollbar width and the
-    fit with the gamepad batch, each the listing and eleven with no failure; one run between failed
-    by a new test of a batch not yet committed, the shadow test passing in it, and counts for
-    neither side.
+    under the load. Settled when ten whole suites pass since `7f18b684`; eight of ten so far, over
+    the save diff, the state machine, the field curve, the window calls, the scrollbar width, the
+    fit with the gamepad batch and the pointer's motion, each the listing and eleven with no
+    failure; one run between failed by a new test of a batch not yet committed, the shadow test
+    passing in it, and counts for neither side.
 
 ## Decisions
 
