@@ -4,5 +4,3 @@
 
 BevyCSharp.Tests/PictureRun.cs Directory.Delete
 BevyCSharp.Tests/PictureRun.cs Path.GetTempPath
-BevyCSharp.Tests/Scripting/ScriptReloadTests.cs Directory.Delete
-BevyCSharp.Tests/Scripting/ScriptReloadTests.cs Path.GetTempPath

@@ -17,14 +17,14 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class ScriptReloadTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "bcs-script-reload-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-script-reload-");
 
-    public ScriptReloadTests() => Directory.CreateDirectory(_folder);
+    public ScriptReloadTests() => Directory.CreateDirectory(_folder.Path);
 
-    public void Dispose() => Directory.Delete(_folder, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     /// <summary>A script whose system, while the state is B, names an entity after its version.</summary>
-    private void Write(string version) => File.WriteAllText(Path.Combine(_folder, "Phases.cs"), $$"""
+    private void Write(string version) => File.WriteAllText(Path.Combine(_folder.Path, "Phases.cs"), $$"""
         using Bevy;
 
         namespace Reloaded;
@@ -56,7 +56,7 @@ public sealed class ScriptReloadTests : IDisposable
         harness.App.EnableDynamicSystems();
 
         Write("first");
-        var host = new ScriptHost(harness.App, _folder);
+        var host = new ScriptHost(harness.App, _folder.Path);
         Assert.True(host.Reload(), host.LastError);
 
         var reloaded = false;
@@ -86,7 +86,7 @@ public sealed class ScriptReloadTests : IDisposable
     /// A component that counts, by one before the reload and by a thousand after it, twice, the
     /// second count one a scene leaves out and a reload keeps all the same.
     /// </summary>
-    private void WriteCounter(int step, string extra = "") => File.WriteAllText(Path.Combine(_folder, "Counter.cs"), $$"""
+    private void WriteCounter(int step, string extra = "") => File.WriteAllText(Path.Combine(_folder.Path, "Counter.cs"), $$"""
         using Bevy;
 
         namespace Reloaded;
@@ -115,7 +115,7 @@ public sealed class ScriptReloadTests : IDisposable
         harness.App.EnableDynamicSystems();
 
         WriteCounter(1);
-        var host = new ScriptHost(harness.App, _folder);
+        var host = new ScriptHost(harness.App, _folder.Path);
         Assert.True(host.Reload(), host.LastError);
 
         var counted = Entity.None;
@@ -172,7 +172,7 @@ public sealed class ScriptReloadTests : IDisposable
     [Fact]
     public void AComponentASceneHeldBeforeItsScriptLoadedIsPutOnItsEntity()
     {
-        var scene = Path.Combine(_folder, "level.scene.json");
+        var scene = Path.Combine(_folder.Path, "level.scene.json");
         File.WriteAllText(scene, """
             { "format": "bevycsharp.scene.2",
               "entities": [
@@ -180,7 +180,7 @@ public sealed class ScriptReloadTests : IDisposable
                 { "id": 2, "name": "Holder", "components": { "Reloaded.Later": { "Count": 5, "Target": { "entity": 1 } } } } ] }
             """);
 
-        File.WriteAllText(Path.Combine(_folder, "Later.cs"), """
+        File.WriteAllText(Path.Combine(_folder.Path, "Later.cs"), """
             using Bevy;
 
             namespace Reloaded;
@@ -196,7 +196,7 @@ public sealed class ScriptReloadTests : IDisposable
         using var harness = new EngineHarness(frames: 4);
         harness.App.EnableDynamicSystems();
 
-        var host = new ScriptHost(harness.App, _folder);
+        var host = new ScriptHost(harness.App, _folder.Path);
         var ran = false;
 
         harness.OnContext(Stage.Startup, ctx =>
