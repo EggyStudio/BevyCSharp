@@ -14,21 +14,42 @@ internal static partial class ConsoleWorldCommands
     }
 
     /// <summary>
-    /// Presses and releases at a point.
+    /// Clicks at a point, as a hand would, the pointer moved there and held still before the
+    /// button goes down and comes up.
     /// </summary>
     /// <remarks>
-    /// Both halves in one frame, which makes a click for an interface that reads the button's
-    /// state. Something that matches a release to the press that landed on it, such as picking a
-    /// mesh, needs the two on separate frames, so it gets <c>input.press</c> and
-    /// <c>input.release</c> instead.
+    /// Picking finds what is under the pointer as it moves, so a press at a point the pointer has
+    /// not been can find nothing under it, and three clicks at points the pointer had not visited
+    /// were heard twice, as Bevy's button example counted two of three. So the pointer is moved
+    /// there now, pressed <see cref="ClickHoverFrames"/> frames later, and released the frame after,
+    /// the press and the release on frames of their own as picking matches a release to its press.
+    /// The answer comes the frame after the release.
     /// </remarks>
     [Command("input.click", "Clicks a point: input.click <x> <y>")]
     internal static string Click(float x, float y)
     {
-        SyntheticInput.Press(x, y);
-        SyntheticInput.Release(x, y);
-        return $"clicked {x:0},{y:0}";
+        SyntheticInput.MoveTo(x, y);
+
+        var frame = 0;
+        ConsoleHost.Later(() =>
+        {
+            frame++;
+            if (frame == ClickHoverFrames) SyntheticInput.Press(x, y);
+            else if (frame == ClickHoverFrames + 1) SyntheticInput.Release(x, y);
+            else if (frame > ClickHoverFrames + 1) return $"clicked {x:0},{y:0}";
+
+            return null;
+        });
+
+        return $"clicking {x:0},{y:0}";
     }
+
+    /// <summary>
+    /// How many frames <c>input.click</c> holds the pointer still before it presses. One sufficed
+    /// for picking to find what is under it in the test of this, and the second is a frame to
+    /// spare, since a click lost costs more than a frame.
+    /// </summary>
+    internal const int ClickHoverFrames = 2;
 
     /// <summary>Holds the button down at a point.</summary>
     [Command("input.press", "Holds the button down: input.press <x> <y>")]
