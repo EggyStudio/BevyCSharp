@@ -2,30 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Behaviors/BehaviorAttributes.cs AfterAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs BeforeAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs BehaviorAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs ChangedAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs GeneratedBehaviorRegistrationAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs InStateAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnCleanupAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnEnterAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnExitAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnFirstAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnFixedUpdateAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnLastAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnPostUpdateAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnPreUpdateAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnRenderAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnStartupAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnTransitionAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs OnUpdateAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs RunIfAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs ToggleKeyAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs WithAttribute
-BevyCSharp/Behaviors/BehaviorAttributes.cs WithoutAttribute
-BevyCSharp/Behaviors/BehaviorRunner.Others.cs BehaviorRunners
-BevyCSharp/Behaviors/BehaviorRunner.cs BehaviorRunners
 BevyCSharp/Cli/CliClient.cs CliAnswer
 BevyCSharp/Cli/CliJson.cs CliError
 BevyCSharp/Cli/CliSession.cs CliSessionFile
