@@ -23,8 +23,8 @@ BevyCSharp.Tests/GltfMaterialDrawnTests.cs Directory.Delete
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs Path.GetTempPath
 BevyCSharp.Tests/Scenes/InstanceTests.cs Directory.Delete
 BevyCSharp.Tests/Scenes/InstanceTests.cs Path.GetTempPath
-BevyCSharp.Tests/ItemFieldsTests.cs Directory.Delete
-BevyCSharp.Tests/ItemFieldsTests.cs Path.GetTempPath
+BevyCSharp.Tests/Ecs/ItemFieldsTests.cs Directory.Delete
+BevyCSharp.Tests/Ecs/ItemFieldsTests.cs Path.GetTempPath
 BevyCSharp.Tests/MaterialFileTests.cs Directory.Delete
 BevyCSharp.Tests/MaterialFileTests.cs Path.GetTempPath
 BevyCSharp.Tests/MeshFileTests.cs Directory.Delete

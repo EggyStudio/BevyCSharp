@@ -11,14 +11,12 @@ BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
 BevyCSharp.Tests/CaptureTests.cs
-BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
 BevyCSharp.Tests/Docs/CheatsheetTests.cs	tests a document, which is no area of the library
 BevyCSharp.Tests/Docs/FirstGameTests.cs	tests a document and the game it makes, which are no area of the library
 BevyCSharp.Tests/Docs/PublicSurfaceTests.cs	tests a listing of the whole library, which is no one area of it
 BevyCSharp.Tests/DrawnTests.cs
-BevyCSharp.Tests/EcsListTests.cs
 BevyCSharp.Tests/Editor/ColorPickerTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorFieldTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/EditorHierarchyTests.cs	tests the editor, which is no area of the library
@@ -42,8 +40,6 @@ BevyCSharp.Tests/GizmoTests.cs
 BevyCSharp.Tests/GltfContentsTests.cs
 BevyCSharp.Tests/GltfMaterialDrawnTests.cs
 BevyCSharp.Tests/GradingTests.cs
-BevyCSharp.Tests/InlineListTests.cs
-BevyCSharp.Tests/ItemFieldsTests.cs
 BevyCSharp.Tests/LensTests.cs
 BevyCSharp.Tests/LightTextureTests.cs
 BevyCSharp.Tests/MaterialFileTests.cs
@@ -51,18 +47,15 @@ BevyCSharp.Tests/MaterialTests.cs
 BevyCSharp.Tests/Mesh2dTests.cs
 BevyCSharp.Tests/MeshFileTests.cs
 BevyCSharp.Tests/MeshTagTests.cs
-BevyCSharp.Tests/NativeComponentTests.cs
 BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
 BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
 BevyCSharp.Tests/PngTests.cs
-BevyCSharp.Tests/ReflectedComponentTests.cs
 BevyCSharp.Tests/ReflectionTests.cs
 BevyCSharp.Tests/RenderCornerTests.cs
 BevyCSharp.Tests/RenderReadTests.cs
 BevyCSharp.Tests/RenderTargetTests.cs
 BevyCSharp.Tests/RenderTests.cs
-BevyCSharp.Tests/ResourceTests.cs
 BevyCSharp.Tests/SampleLightTests.cs
 BevyCSharp.Tests/ScaleTests.cs
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
@@ -73,7 +66,6 @@ BevyCSharp.Tests/ShaderValueTests.cs
 BevyCSharp.Tests/ShadowTests.cs
 BevyCSharp.Tests/SkyLightingTests.cs
 BevyCSharp.Tests/SkyboxTests.cs
-BevyCSharp.Tests/SparseComponentTests.cs
 BevyCSharp.Tests/SpirvComputeTests.cs
 BevyCSharp.Tests/SpriteTests.cs
 BevyCSharp.Tests/StreamingTests.cs
