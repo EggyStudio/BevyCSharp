@@ -227,12 +227,10 @@ internal sealed class PictureRun
     /// <summary>A directory of assets a test writes and edits.</summary>
     internal sealed class TemporaryAssets : IDisposable
     {
-        /// <summary>The directory.</summary>
-        public string Root { get; } = Path.Combine(
-            Path.GetTempPath(),
-            "bcs-shader-test-" + Guid.NewGuid().ToString("N"));
+        private readonly TestFolder _folder = new("bcs-shader-test-");
 
-        public TemporaryAssets() => Directory.CreateDirectory(Root);
+        /// <summary>The directory.</summary>
+        public string Root => _folder.Path;
 
         /// <summary>Writes a file under the directory, making its parents.</summary>
         /// <remarks>
@@ -249,17 +247,6 @@ internal sealed class PictureRun
             File.Move(staging, path, overwrite: true);
         }
 
-        public void Dispose()
-        {
-            try
-            {
-                Directory.Delete(Root, recursive: true);
-            }
-            catch (IOException)
-            {
-                // Something still has a file open, which on Windows stops the delete. The
-                // directory is under the temporary path, so leaving it costs nothing.
-            }
-        }
+        public void Dispose() => _folder.Dispose();
     }
 }
