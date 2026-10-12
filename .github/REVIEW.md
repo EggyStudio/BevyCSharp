@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4074f045`, two commits from SHARED.md's rows. `530d0dc6`, the shader cache's
+Reviewed up to `c5873eef`, the pack run's storm: a job of the pack run alone, after the native job,
+which downloads its linux-x64 render bridge, builds the tests on it with the freshness check off,
+installs a software Vulkan, ALSA and Xvfb, and runs the storm's filter under `xvfb-run -a` on a 1920
+by 1080 screen with `BCS_WINDOW_STORM=1` and `WAYLAND_DISPLAY` unset, each step through
+`build/step.py`, with an `::error::` where the summary is not one passed and none skipped, since the
+test skips silently where it is not asked; the script passed here under `bash -e -o pipefail`;
+TODO.md's testing paragraph says the pack run storms a window and a push's headless job skips it as
+it skips every test that draws. Right; the job's first run is the pack run, read when it comes.
+SHARED.md's rows that read to take on this side where the work was done since read has, the code
+fixes, `Removed`, the template, the examples on the package, the script test, N 2.10 and the
+captures compared whole, and the storm's row loses its next. Next, in order: the rule of 800 lines
+counting the Slang shaders of the bridge and the examples in N 1.3's test, which item 2 described
+and the test does not do yet; then the two CLI rows, `input.click` taking a count within the
+double-click time and console pads made up to the index a command names, four at most; then the
+suite run once with the schedule's order shuffled by a seed, Bevy 0.20 being in, before the weak
+orderings it also brings, since a shuffled suite says which tests lean on an order before an
+ordering is made weak.
+
+Before it, `4074f045` came, two commits from SHARED.md's rows. `530d0dc6`, the shader cache's
 imports: `ShaderImportTests.AnEditToAModuleAnotherExportsRecompilesTheShaderImportingIt`, a tint
 module exported again by a gather module through `__exported import`, the shader importing gather
 alone, an edit to the tint turning the cube from green to red, so the compiler's dependency file,
@@ -55,25 +73,6 @@ applies, every file a compile read in it, wanting the test 3DEngine's row has, a
 exports edited and the importer of the exporter recompiled, `__exported import` the form, after
 which the row's column reads has; then a window resized, minimized and moved by commands while it
 draws, as a storm a test runs where the job has a window to open and says where it has none.
-
-Before it, `bfe27ddd` came, the machine player: `AnimationMachinePlayer`, a behavior holding a
-`DataRef<AnimationStateMachine>`, which the per-frame advance starts on an entity carrying it, the
-machine entering its first state once the model arrives as one run from code does, starts again when
-the reference names another machine or its file is read again, and stops when the component is taken
-off or the entity is gone; a reference that will not read, or a machine whose names do not hold
-together, is said once on the log by the id it named and the model left as it is until the reference
-changes. Tests run it from a machine file in an asset root of the test's own, stop it by taking the
-component off, log a missing file once, and save a placed instance with it and load the scene to a
-running machine; the guide's state machine section names it beside `Animation.Run` with a compiled
-block; the public API gains its two lines and TODO.md's item keeps what stays, the graph drawing and
-a state's blend by a parameter. Right; the set and the list the start builds each frame while a
-player is present are a level's few characters' worth and left. Verdict 13 at nine of ten with the
-suite over it. Next the project file's window title and icon from Interface's editor items: the
-title whole, a `ProjectSettings` field, a row on the Project page, the app's window wearing it at
-start and the export taking it; the icon's field and row with the window wearing it through one
-bridge call, since Bevy's `Window` carries no icon of its own and winit's is set by the
-`WinitWindows` under the primary window, an ABI step; the executable's and the bundle's icons, each
-platform's own, listed under the export and not taken.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -127,16 +126,17 @@ from [SHARED.md](SHARED.md).
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
-   since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test counts the Slang
-   shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does since
-   its `09419080`, none of them over 800 today. `60141490` takes `NativeTypes.Render.cs` off N 1.3's
-   list, split into ten files named for their structs, and those ten types off N 1.2's.
-   `render/assets.rs`, `NormTests.cs` and `UiTests.cs`, which stood at 799, 794 and 794, are split
-   at `88a75e54`, `f68bd192` and `09e3b339` to 557, 588 and 535, each a commit that moves code
-   alone; `app.rs` is at 709 since `c5b6d1d3`. N 7.2's list takes `ff467a5f`, the subject's marks
-   run together and pushed before the suite read them, beside the owner's `5a7f2c07`, and the list
-   only gets shorter from there; `a0c8b1b0`, the owner's own one-line commit of the showcase's
-   caption, pushed, joins it as the owner's with custom_schedule's commit, three left out.
+   since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test is to count the
+   Slang shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does
+   since its `09419080`, none of them over 800 today, which it does not yet (SHARED.md's row, taken
+   next). `60141490` takes `NativeTypes.Render.cs` off N 1.3's list, split into ten files named for
+   their structs, and those ten types off N 1.2's. `render/assets.rs`, `NormTests.cs` and
+   `UiTests.cs`, which stood at 799, 794 and 794, are split at `88a75e54`, `f68bd192` and `09e3b339`
+   to 557, 588 and 535, each a commit that moves code alone; `app.rs` is at 709 since `c5b6d1d3`. N
+   7.2's list takes `ff467a5f`, the subject's marks run together and pushed before the suite read
+   them, beside the owner's `5a7f2c07`, and the list only gets shorter from there; `a0c8b1b0`, the
+   owner's own one-line commit of the showcase's caption, pushed, joins it as the owner's with
+   custom_schedule's commit, three left out.
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5

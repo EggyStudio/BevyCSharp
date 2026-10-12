@@ -58,6 +58,10 @@ pub const SPRITE_PRELUDE: &str = include_str!("bcs_sprite.slang");
 /// What a Slang shader pass can import as `bcs_pass`.
 pub const PASS_PRELUDE: &str = include_str!("bcs_pass.slang");
 
+/// The part of the pass module about the deferred buffers and a shadow stage's depth, which
+/// `bcs_pass.slang` includes.
+pub const PASS_DEFERRED: &str = include_str!("bcs_pass_deferred.slang");
+
 /// What a Slang compute shader can import as `bcs_compute`.
 pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 
@@ -70,12 +74,13 @@ pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 pub const RAY_PRELUDE: &str = include_str!("bcs_ray.slang");
 
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 8] = [
+const MODULES: [(&str, &str); 9] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
     ("bcs_sprite.slang", SPRITE_PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
+    ("bcs_pass_deferred.slang", PASS_DEFERRED),
     ("bcs_compute.slang", COMPUTE_PRELUDE),
     ("bcs_scene.slang", SCENE_PRELUDE),
     ("bcs_ray.slang", RAY_PRELUDE),

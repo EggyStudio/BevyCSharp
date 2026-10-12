@@ -79,7 +79,8 @@ public sealed partial class NormTests
         var found = Sources("BevyCSharp/", ".cs")
             .Concat(Sources("BevyCSharp.Tests/", ".cs"))
             .Concat(Sources("BevyCSharp.Examples/", ".cs"))
-            .Concat(Sources("native/bevy_csharp/src/", ".rs"))
+            .Concat(Sources("native/bevy_csharp/src/", ".rs", ".slang"))
+            .Concat(Sources("BevyCSharp.Examples/", ".slang"))
             .Where(file => !file.EndsWith(".g.cs", StringComparison.Ordinal))
             .Where(file => File.ReadLines(Full(file)).Count() > 800);
         Hold("1.3", found, "a file of more than 800 lines");
