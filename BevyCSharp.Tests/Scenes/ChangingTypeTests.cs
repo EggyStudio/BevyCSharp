@@ -315,6 +315,74 @@ public sealed class ChangingTypeTests : IDisposable
     }
 
     [Fact]
+    public void AFileFromANewerBuildIsSavedAtItsOwnVersion()
+    {
+        // A Gauge from a fourth version, and a Vigor from a build that gave it a second.
+        var scene = """
+            { "format": "bevycsharp.scene.2",
+              "entities": [
+                { "id": 1, "name": "Gauge", "components": { "Bevy.Tests.Gauge": { "$version": 4, "Most": 50, "Current": 2, "Shine": 7 } } },
+                { "id": 2, "name": "Vigor", "components": { "Bevy.Tests.Vigor": { "$version": 2, "Most": 9 } } } ] }
+            """;
+        var file = Path.Combine(_folder.Path, "newer.scene.json");
+
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            using var document = JsonDocument.Parse(scene);
+            var loaded = SceneFile.Read(ctx.Ecs, document.RootElement);
+
+            // Read as it is, since no migration goes from a later version to an earlier one.
+            var gauge = ctx.Ecs.GetOrDefault<Gauge>(loaded.Entities.Single(entity => ctx.Ecs.NameOf(entity) == "Gauge"));
+            Assert.Equal(50f, gauge.Most);
+            Assert.Equal(2f, gauge.Current);
+            Assert.Equal(9f, ctx.Ecs.GetOrDefault<Vigor>(loaded.Entities.Single(entity => ctx.Ecs.NameOf(entity) == "Vigor")).Most);
+
+            SceneFile.Save(ctx.Ecs, file, entity => loaded.Entities.Contains(entity));
+        });
+
+        harness.Run();
+
+        using var saved = JsonDocument.Parse(File.ReadAllText(file));
+        JsonElement Named(string name) => saved.RootElement.GetProperty("entities").EnumerateArray()
+            .Single(entry => entry.GetProperty("name").GetString() == name)
+            .GetProperty("components");
+
+        var written = Named("Gauge").GetProperty("Bevy.Tests.Gauge");
+        Assert.Equal(SceneValue.VersionName, written.EnumerateObject().First().Name);
+        Assert.Single(written.EnumerateObject(), property => property.Name == SceneValue.VersionName);
+        Assert.Equal(4, written.GetProperty(SceneValue.VersionName).GetInt32());
+        Assert.Equal(50f, written.GetProperty("Most").GetSingle());
+        Assert.Equal(7, written.GetProperty("Shine").GetInt32());
+
+        var vigor = Named("Vigor").GetProperty("Bevy.Tests.Vigor");
+        Assert.Equal(2, vigor.GetProperty(SceneValue.VersionName).GetInt32());
+    }
+
+    [Fact]
+    public void ADataAssetFromANewerBuildIsSavedAtItsOwnVersion()
+    {
+        var path = Path.Combine(_folder.Path, "cake.data.json");
+        File.WriteAllText(
+            path,
+            """{ "format": "bevycsharp.data.1", "type": "Bevy.Tests.Recipe", "fields": { "$version": 3, "Yield": 4 } }""");
+        var id = AssetIds.IdOf("cake.data.json", create: true);
+
+        Assert.Equal(4, DataAssets.Get(new DataRef<Recipe>(id)).Yield);
+        DataAssets.Save(id);
+
+        // Still at the newer version, so it is read again as it was rather than doubled.
+        DataAssets.ReloadAll();
+        Assert.Equal(4, DataAssets.Get(new DataRef<Recipe>(id)).Yield);
+
+        using var saved = JsonDocument.Parse(File.ReadAllText(path));
+        var fields = saved.RootElement.GetProperty("fields");
+        Assert.Single(fields.EnumerateObject(), property => property.Name == SceneValue.VersionName);
+        Assert.Equal(3, fields.GetProperty(SceneValue.VersionName).GetInt32());
+    }
+
+    [Fact]
     public void ADataAssetAtAnEarlierVersionIsBroughtUpOnceAndSavedAtThisOne()
     {
         File.WriteAllText(

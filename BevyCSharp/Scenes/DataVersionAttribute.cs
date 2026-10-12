@@ -42,9 +42,11 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A file from a later version than this build's, such as one a newer build wrote, is read as far
-/// as the fields match. Saving it writes this build's version, with the values it did not read
-/// kept, so the newer build migrates it again from there. A migration that does nothing to a value
-/// already in the newer shape survives that.
+/// as the fields match and is not migrated. Saving it writes the later version back, with the
+/// values this build did not read, so the newer build reads the file as its own. A value this
+/// build changed is written in this build's shape under the later version, and the newer build
+/// reads it as its own shape, so a change of meaning that an older build may still save over is
+/// safer as a field under a new name.
 /// </para>
 /// </remarks>
 /// <param name="version">The version files of the type are written at, from 1.</param>

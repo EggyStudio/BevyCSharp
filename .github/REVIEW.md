@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7f18b684`. Verdict 13's cause, found without a suite: the soft shadow test run ten
+Reviewed up to `7effdb05`, a documents batch from reading TODO.md before its next item: its list of
+what Bevy's examples wait on named two groups written since, the deferred buffers from Slang and a
+2D mesh drawn by a shader, and left out four of the 18 missing, and lists the 18 in six groups from
+the triage, the camera controllers, Feathers, the dev tools, the system fonts, HTTP assets, which
+pull a crate, and the compressing image saver, each waiting on a crate the lock lacks or on the
+fonts' decision; its animation section said one clip at a time from files with no events, where the
+bridge blends clips with masks and additive layers, makes clips from curves and raises events, so
+two items remain there, no state machine and a curve that cannot move another component's reflected
+field; and the assets guide says the graph blends clips rather than leaving masks and layers to the
+game. The norm tests pass. Right, the list of what waits made true before the next thing was taken
+from it. On the order asked: the three tuple fields with no typed property, a text layout's cursor,
+a pan gesture's fingers and the input focus, are rarely used and were left as said by kind on
+purpose, and typing them means the describer, the schemas and the components table written again
+from an editor build with Bevy's other changes read as its diff, so they wait; the scenes' two items
+come first, a newer scene file read by an older build, which a player of a shipped game meets, and
+then saves that diff whole components. Verdict 13's first whole suite runs.
+
+Before it, `7f18b684` came, Verdict 13's cause, found without a suite: the soft shadow test run ten
 times while another test process drew the SPIR-V compute, G-buffer and sample light tests in a loop
 failed twice, the diagnostic showing the soft picture all dark, 9,216 pixels of 9,216, with the hard
 one normal, so nothing was drawn, no hard edge and no neighbor's state; the picture run took its
@@ -43,23 +60,6 @@ cause, read by the diagnostic as each whole suite runs and by which classes run 
 tests for one that leaves state behind process-wide, the ambient light, a shadow map's size or a
 setting among them; then TODO.md's order as before, this file read before each batch, the 18 rows
 opening with the owner's word.
-
-Before it, `969ac3bd` came, nine commits of item 2's lists, one a library folder, each moving types
-alone within its folder so each compiles alone and checked line for line as a move: every public
-type that shared a file is in a file named for it, the partial classes in the type-and-part form,
-and N 1.2's list is empty; one mend inside the move, a file whose usings stood after its namespace
-line and went with the first type into the new file, put back, no other file caught; the components
-and scenes documents name the new files where they named the old by path, the cheat sheet moves the
-three tile calls since it orders a partial class's methods by file, the public listing is unchanged,
-and the norm tests pass. N 1.4's 28 all carry reasons, the build scripts, the documents, the editor,
-the examples and the generator left out by design, so no move of its remains. The soft shadow test
-failed again in the suite over `eb82688b` after the pending cause's reset, which was not its cause,
-two of the last four whole suites against four runs alone and three paired with the recovery tests,
-so it is Verdict 13, its failure made to say each picture's dark and light counts so the next tells
-a blank picture from a hard edge. Right, the lists emptied by moves alone and the flake given a
-verdict rather than a retry. Next item 2's other lists in this order: N 3.4's 43 temp folders to the
-test folder across about twenty files, then N 3.3's 10 and N 4.1's 8, then N B3's 19 and N 4.5's 24
-read for which stand by design; the 18 rows wait on the owner's word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -601,7 +601,8 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`, the first running.
+    under the load. Settled when ten whole suites pass since `7f18b684`; one of ten so far, 1,452
+    passed in 19 m 47 s with no failure.
 
 ## Decisions
 

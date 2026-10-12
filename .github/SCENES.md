@@ -315,13 +315,14 @@ scenes and data assets alike (`BevyCSharp/Scenes/FormerNameAttribute.cs`,
   value no field reads are carried on the entity (`SceneKept`, a handle into the managed store,
   freed with the entity and copied with a clone) and written back where they were. A data asset
   keeps its unread values with its loaded value the same way.
+- **A newer file in an older build** is read as far as the fields match, without a migration, and
+  keeps its `"$version"` among the values it did not read, so a save writes the newer version back
+  and the newer build reads the file as its own rather than migrating it a second time. A value
+  the older build changed is written in the older shape under the newer version, which the
+  attribute's documentation says, and nothing checks it.
 
 Not built:
 
-- **A newer file in an older build** is read as far as the fields match and saved at the older
-  build's version, with what it did not read kept, so the newer build migrates it again. That is
-  safe for a migration that leaves a value already in the new shape alone, which the attribute's
-  documentation says, and nothing checks it.
 - **A reflected component of Bevy's** is written as Bevy's JSON and has neither former names nor a
   version, since Bevy's own types change with Bevy. One Bevy refuses after an upgrade is kept and
   reported in `SceneLoad.Refused` rather than migrated.

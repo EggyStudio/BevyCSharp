@@ -376,7 +376,8 @@ public static class SceneValue
     /// <param name="references">How to name entities and assets, or nothing for by path alone.</param>
     /// <param name="kept">
     /// Values a load found no field for, by dotted name with their JSON, written back where they
-    /// were so a file outlives a build that does not know them (<see cref="Unread"/>).
+    /// were so a file outlives a build that does not know them (<see cref="Unread"/>). A later
+    /// version among them is written in place of the schema's.
     /// </param>
     public static int WriteComponent(
         Utf8JsonWriter json,
@@ -403,6 +404,12 @@ public static class SceneValue
             node.Values.Add((parts[^1], field, value));
         }
 
+        // The version a newer build wrote, which Unread keeps among the values no field reads.
+        var newer = (kept ?? []).Where(pair => pair.Key == VersionName)
+            .Select(pair => int.TryParse(pair.Value, out var version) ? version : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+
         foreach (var (name, raw) in kept ?? [])
         {
             var node = root;
@@ -419,8 +426,9 @@ public static class SceneValue
         {
             json.WriteStartObject();
 
-            // The version first, so a reader sees it before the fields it says the shape of.
-            if (node == root && schema.Version > 1) json.WriteNumber(VersionName, schema.Version);
+            // The version first, so a reader sees it before the fields it says the shape of, and a
+            // newer build's version where the file came from one (see Unread).
+            if (node == root && Math.Max(schema.Version, newer) > 1) json.WriteNumber(VersionName, Math.Max(schema.Version, newer));
 
             foreach (var (name, field, value) in node.Values)
             {
@@ -437,6 +445,7 @@ public static class SceneValue
             // holds is the newer one, and JSON allows a name once per object.
             foreach (var (name, raw) in node.Kept)
             {
+                if (node == root && name == VersionName) continue;
                 if (node.Values.Exists(value => value.Name == name)) continue;
                 if (node.Children.Exists(child => child.Name == name)) continue;
 
@@ -507,6 +516,11 @@ public static class SceneValue
     /// The walk goes into a nested object only where a field's path does, so an object no field
     /// lies under is kept whole rather than taken apart.
     /// </para>
+    /// <para>
+    /// A <see cref="VersionName"/> later than the schema's is kept too, because the values beside
+    /// it are in the newer build's shape, and a save that wrote this build's version over them
+    /// would have the newer build bring them up a second time.
+    /// </para>
     /// </remarks>
     public static IReadOnlyList<KeyValuePair<string, string>> Unread(JsonElement json, ComponentSchema schema)
     {
@@ -534,7 +548,12 @@ public static class SceneValue
             foreach (var property in at.EnumerateObject())
             {
                 var path = prefix + property.Name;
-                if (read.Contains(path) || path == VersionName) continue;
+                if (read.Contains(path)) continue;
+
+                // The version a newer build wrote is kept, so a save writes it back in place of
+                // this build's older one and the newer build does not bring the values up again.
+                if (path == VersionName && !(property.Value.TryGetInt32(out var version) && version > schema.Version))
+                    continue;
 
                 if (above.Contains(path) && property.Value.ValueKind == JsonValueKind.Object)
                     Walk(property.Value, path + ".");

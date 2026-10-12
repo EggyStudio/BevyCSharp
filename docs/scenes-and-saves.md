@@ -213,7 +213,10 @@ warned about (BCS008).
 What a build cannot read is kept rather than dropped: a component whose type it lacks, one Bevy
 refuses, and a value no field reads all ride along on the entity as the JSON the file had and are
 written back where they were. A branch that deletes a type, or an older build opening a newer
-scene, then leaves that type's data in the file for the build that knows it.
+scene, then leaves that type's data in the file for the build that knows it. A newer file keeps
+its version through an older build's save too, so the newer build does not migrate it again, and a
+value the older build changed is then read in the newer shape, which a field under a new name
+avoids.
 
 ---
 

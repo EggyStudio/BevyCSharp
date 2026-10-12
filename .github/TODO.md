@@ -106,9 +106,8 @@ a model dropped on the view on whatever is under the pointer (SCENES.md §5). Wh
   progress to load and sends `SaveLoaded` the frame after, and `user://` reaches both sides of the
   bridge. A component changed in one field is written whole, and a save
   has no binary form for when one grows large (SCENES.md §8).
-- **A newer file in an older build** is read as far as its fields match and written back at the
-  older version, with what was not read kept, so the newer build migrates it a second time
-  (SCENES.md §7). Bevy's own components have neither former names nor versions.
+- **Bevy's own components** have neither former names nor versions, and one Bevy refuses after
+  an upgrade is kept rather than migrated (SCENES.md §7).
 
 ### Data assets
 
