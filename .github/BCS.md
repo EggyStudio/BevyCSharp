@@ -38,7 +38,7 @@ What is usually there:
 | `entity.list` | The named entities and what they carry |
 | `entity.get <name\|#index>` | Every described field on one entity |
 | `entity.set <name> <Component.Field> <value>` | Change one field; `0,2.5,0` for a vector |
-| `input.click <x> <y>` | Move the pointer there, hold it still two frames so picking finds what is under it, press, release the frame after, and answer then |
+| `input.click <x> <y> [count]` | Move the pointer there, hold it still two frames so picking finds what is under it, press, release the frame after, and answer then; a count of two or more clicks again a frame apart, within the double-click time, so a double tap is heard as one |
 | `input.press`/`input.release`, `input.move`, `input.wheel`, `input.type`, `input.key`, `input.uikey` | Real input through the window's own path, so picking and focus behave |
 | `input.hold <W\|W,D> <frames>` | Hold keys for exactly that many frames and answer once they are let go, for a game that acts while one is down |
 | `input.drag <x> <y> <dx> <dy> <frames> [Right\|Middle]` | Press at a point, move an equal step each frame for that many frames, release the frame after, and answer then, for a swipe, a handle or a slider dragged |

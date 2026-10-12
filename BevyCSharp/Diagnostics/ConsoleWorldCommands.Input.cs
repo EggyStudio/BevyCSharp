@@ -18,31 +18,52 @@ internal static partial class ConsoleWorldCommands
     /// button goes down and comes up.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Picking finds what is under the pointer as it moves, so a press at a point the pointer has
     /// not been can find nothing under it, and three clicks at points the pointer had not visited
     /// were heard twice, as Bevy's button example counted two of three. So the pointer is moved
     /// there now, pressed <see cref="ClickHoverFrames"/> frames later, and released the frame after,
     /// the press and the release on frames of their own as picking matches a release to its press.
-    /// The answer comes the frame after the release.
+    /// The answer comes the frame after the last release.
+    /// </para>
+    /// <para>
+    /// A count clicks that many times, each press and release a frame apart and the next press the
+    /// frame after, so the clicks fall within the double-click time and each is heard with its place
+    /// in the run, as <see cref="Click.Count"/> reads it, a double tap the second of two.
+    /// </para>
     /// </remarks>
-    [Command("input.click", "Clicks a point: input.click <x> <y>")]
-    internal static string Click(float x, float y)
+    [Command("input.click", "Clicks a point, a number of times within the double-click time: input.click <x> <y> [count]")]
+    internal static string Click(float x, float y, int count = 1)
     {
+        count = Math.Clamp(count, 1, MaxClicks);
         SyntheticInput.MoveTo(x, y);
 
         var frame = 0;
         ConsoleHost.Later(() =>
         {
             frame++;
-            if (frame == ClickHoverFrames) SyntheticInput.Press(x, y);
-            else if (frame == ClickHoverFrames + 1) SyntheticInput.Release(x, y);
-            else if (frame > ClickHoverFrames + 1) return $"clicked {x:0},{y:0}";
 
-            return null;
+            // From the first press, a press on each even step and a release on each odd one.
+            var step = frame - ClickHoverFrames;
+            if (step < 0) return null;
+            if (step < count * 2)
+            {
+                if (step % 2 == 0) SyntheticInput.Press(x, y);
+                else SyntheticInput.Release(x, y);
+                return null;
+            }
+
+            return count == 1 ? $"clicked {x:0},{y:0}" : $"clicked {x:0},{y:0} {count} times";
         });
 
         return $"clicking {x:0},{y:0}";
     }
+
+    /// <summary>
+    /// The most clicks one <c>input.click</c> makes, which a triple click is the most anything asks
+    /// for, with one to spare, and which keeps the run well inside a double-click time.
+    /// </summary>
+    internal const int MaxClicks = 4;
 
     /// <summary>
     /// How many frames <c>input.click</c> holds the pointer still before it presses. One sufficed

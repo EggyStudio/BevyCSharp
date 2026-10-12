@@ -80,4 +80,62 @@ public sealed class ClickCommandTests
             Assert.InRange(clicks[i].Position.Y, points[i].Y - 1f, points[i].Y + 1f);
         }
     }
+
+    /// <summary>
+    /// A click command given a count clicks that many times within the double-click time, each
+    /// heard with its place in the run, so the second of two is a double tap.
+    /// </summary>
+    [SkippableFact]
+    public void AClickGivenACountIsHeardAsThatManyInARun()
+    {
+        Needs.Renderer();
+
+        var counts = new List<int>();
+        string? answer = null;
+        Func<string?>? waiting = null;
+        var frame = 0;
+
+        using var app = new App(Config.OffscreenFor(200, 200, frames: 60));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+
+            var node = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(0f), Width = Length.Px(100f), Height = Length.Px(100f) });
+            ecs.Observe<Pointer<Click>>(node, on => counts.Add(on.Event.Event.Count));
+        }, "Test.Setup"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(world =>
+        {
+            frame++;
+            if (frame < 10) return;
+
+            using (ConsoleHost.Lend(world))
+            {
+                if (waiting is { } poll)
+                {
+                    if (poll() is { } said)
+                    {
+                        answer = said;
+                        waiting = null;
+                    }
+
+                    return;
+                }
+
+                if (frame != 10) return;
+
+                ConsoleHost.Reset();
+                ConsoleCommands.Run("input.click 40 40 2");
+                waiting = ConsoleHost.Pending;
+            }
+        }, "Test.Drive"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.Equal("clicked 40,40 2 times", answer);
+        Assert.Equal([1, 2], counts);
+    }
 }
