@@ -10,7 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c9b8728f`. Item 19, the world a scene file saves whole: `EcsText`, two numbers into
+Reviewed up to `a76577ac`. atmosphere, ABI 276, read against the lock as the working session read
+it, no crate: the sky a planet's air scatters, earth's or Mars's, Mars's dust scattering by a
+picture of its phase the caller loads, Bevy's own, a sky of Mars without one refused, and the
+rendering method chosen; one planet kept in the world and placed on every call so its ground sits at
+the origin, since Bevy places it on add alone and Mars after earth would keep earth's center, where
+the old path put the center at the origin by a scale; `Render.SetSunDisk` for the disk a directional
+light draws; the module moved to the post folder's atmosphere file, the lighting file shorter by 142
+lines; the example Bevy's with its terrain and the phase picture in the assets list, the deferred
+water, the fog volume, the anti-aliasing, the reflections, the sun disk and the bloom reached, the
+free camera left out as Bevy's is gated, and the water shader gaining a roughness the reflections
+example sets to 0.09; 128 lines of atmosphere tests; the sky guide's section. The suite 1,444 passed
+and 2 skipped of 1,446. Mars seen live offscreen through the CLI: a hazy, dusty tan sky with the sun
+high and a dim gray-brown at sunset where earth is orange at the same sun, so the planet's remark
+says a hazy tan by day and nothing of blue sunsets, which the render did not show; the phase picture
+is 1,024 by 1 of four floats, so loading it as a plain image decodes no sRGB; and the placement
+corrected from the first reading, the old path having inserted a scale alone so propagation set the
+planet's center at the origin and any scale but one drew from inside it, where the planet stands
+since at minus the radius times the scale on the vertical axis on every call, which a test reads for
+Mars at half size. EXAMPLES.md reads 355 written, 2 in part and 24 missing. Right, the planet placed
+every call rather than trusting the add, and Mars refused without the picture its dust needs. Next
+item 21, the changed filter, then render_recovery and solari_reflections as read against the lock.
+
+Before it, `c9b8728f` came, item 19, the world a scene file saves whole: `EcsText`, two numbers into
 the managed store `EcsList` keeps its lists in, so a component names text of any length, converting
 to and from `string`, freed by the hook the generator registers when the component leaves its
 entity, copied with a clone, a JSON string in the scene and a text field in the inspector, a handle
@@ -51,49 +73,6 @@ guide's seven blocks build. EXAMPLES.md reads 353 written, 2 in part and 26 miss
 eight. Right, the one honest counterpart of a decoder C# cannot run, and the underrun silence rather
 than an end. Next item 19, the world a scene file saves whole, then the three rows read against the
 lock.
-
-Before it, `a612ab27` and `7f42cf40` came. `a612ab27`, transform_gizmo, ABI 272: Bevy's own gizmo,
-its rendering already there wherever PBR is, so no crate and no owner's word, Feathers being only
-its interface and the camera controller only its camera; its plugin is opt-in by
-`Config.TransformGizmo`, since once its settings exist Bevy spawns the handles and a camera of order
-1 in every app at startup, which fourteen view shader tests caught when the plugin first went in
-unconditionally, four bytes appended to the config on both sides and the remark saying why it is
-kept out; the dump's filter drops the bridge's own paths so the listing is unchanged; the examples'
-radio buttons skip an empty title rather than leave a blank column, light_textures' capture byte for
-byte the same; the example with the examples' buttons, a slider for the sensitivity shown in Scale
-and the examples' free camera, its capture the table with its arrows and ring; a test at 320 by 320
-sees the green arrow over a focused cube and none once the focus is removed and reads the mode as
-translate; the gizmos guide's section. `7f42cf40`, pitch with item 20 and the wording: a tone of one
-frequency for a length, refused where the frequency is not above zero or the length below it, played
-by the same call as a clip, which tries the clip and then the tone and despawns the half-made entity
-for a key naming neither, the silent plugin already playing tones, the example Bevy's keys and logs
-with an empty window's capture, a test of a 0.2 s tone gone and a 1 s one still playing at frame 30
-on a set clock and a frequency of zero thrown, the audio guide's paragraph. Item 20, meshes.rs split
-first as asked, the vertex-built path in `mesh_data.rs` at 372 lines and meshes.rs at 438:
-`BcsMeshData` gains four bytes of flags at 68, 72 in all, bit 0 leaving the normals out so zero
-keeps every mesh as it was, `MeshData.ComputeNormals` true by default with the remark, the bit set
-on send, copied on keep and written to the scene file only when false; tests native and managed, the
-layout test with the flags, a quad without normals reporting none and the ramp keeping the switch
-through the round trip; the drawing guide says the sixteen bytes and the shaders guide why a stream
-and not a storage buffer. The wording: every place named and the format's remarks, the scene file's
-comment, the registry's closures, the drawn count's and the test stream's name, the input and the
-variables `packed`, the rule kept by the working session for later batches. The suite 1,433 passed
-and 2 skipped of 1,435; cargo 164 and 94; the norm tests 19 of 19; the three guides' blocks build.
-EXAMPLES.md reads 352 written, 2 in part and 27 missing. The run of `a612ab27` is green on all
-three. Right, the gizmo kept out of every app that does not ask, caught by the suite rather than by
-a user, and the normals left out only where asked. decodable next, as the working session shaped it
-and this session agrees: C# cannot run on the audio thread, so its counterpart is a sample stream
-the game fills, an asset of the bridge's with a rate, channels and a shared queue of samples, its
-decoder taking a sample or giving silence on an underrun so the source never ends, registered with
-the audio sources and in the silent plugin; a call to make it, one to queue samples and one
-answering how many wait; `Audio.CreateSampleStream`, `Audio.QueueSamples` and `Audio.QueuedSamples`;
-the example Bevy's sine at a fifth of the volume, generated in C# each frame to keep a tenth of a
-second queued; a test that the silent sink drains the queue on the game's clock and an underrun
-keeps the sound alive. debug_picking is read as waiting on a crate: its whole point is the dev
-tools' picking overlay, and bevy_dev_tools is not in the lock and waits on the owner's word with the
-other crates (Decisions 11 and 12), a C# imitation of the overlay being another tool and not Bevy's
-example, so its row stays missing with a note saying so, written in decodable's batch. Then item 19,
-and the three rows read against the lock.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

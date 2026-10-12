@@ -77,7 +77,13 @@ public static partial class BehaviorRunners
         ArgumentNullException.ThrowIfNull(body);
 
         var ecs = world.Resource<EcsWorld>();
-        using var chunks = ecs.Chunks<T>(with, without);
+
+        // A [Changed] filter has the rows left unmarked as they are listed and each marked as the
+        // method runs on it, since marking every row first would make each look changed to the
+        // filter, so a method watching its own component would run on every entity every frame.
+        // A row the filter skips is left unmarked, as Bevy leaves a row its query does not reach.
+        var hasChangedFilter = changed.Length > 0;
+        using var chunks = ecs.Chunks<T>(with, without, markChanged: !hasChangedFilter);
         if (chunks.IsEmpty) return;
 
         var commands = world.Resource<EcsCommands>();
@@ -86,7 +92,6 @@ public static partial class BehaviorRunners
 
         // A [Changed] filter reads Bevy's change ticks per entity, which only the main thread
         // may do, so it disables the parallel path rather than racing.
-        var hasChangedFilter = changed.Length > 0;
         var effectiveThreshold = hasChangedFilter ? 0 : parallelThreshold;
 
         for (var chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
@@ -121,7 +126,11 @@ public static partial class BehaviorRunners
         for (var i = 0; i < components.Length; i++)
         {
             var entity = entities[i];
-            if (changed.Length > 0 && !AnyChanged(ecs, entity, changed)) continue;
+            if (changed.Length > 0)
+            {
+                if (!AnyChanged(ecs, entity, changed)) continue;
+                ecs.MarkChanged(entity, ComponentType<T>.ChunkId);
+            }
 
             context.Entity = entity;
             body(ref components[i], entity, context);

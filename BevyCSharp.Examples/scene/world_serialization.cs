@@ -27,7 +27,7 @@ internal static class WorldSerialization
             LoadWorldSystem(ctx);
         }, "world_serialization.Setup");
         app.Startup(InfotextSystem, "world_serialization.InfotextSystem");
-        app.Update(LogSystem, "world_serialization.LogSystem");
+        app.Update(LogResource, "world_serialization.LogResource");
     }
 
     // Bevy's save_world_system, its world of entities made, saved and printed. Bevy builds them in a
@@ -67,19 +67,9 @@ internal static class WorldSerialization
         ecs.Add(light, Transform.LookingAt(Vec3.Zero, new Vec3(0f, -1f, -1f), Vec3.UnitY));
     }
 
-    // Bevy's log_system, each entity whose ComponentA arrived or changed since the last frame, and the
-    // resource the frame it was put in. The query leaves the rows unmarked, so a row is logged once
-    // for each change rather than every frame after.
-    private static void LogSystem(BehaviorContext ctx)
+    // Bevy's log_system's half for the resource, logged the frame it was put in.
+    private static void LogResource(BehaviorContext ctx)
     {
-        foreach (var row in ctx.Ecs.Query<ComponentA>(markChanged: false))
-        {
-            if (!ctx.Ecs.Changed<ComponentA>(row.Entity)) continue;
-
-            Log.Info($"  Entity({row.Entity.Index})");
-            Log.Info($"    ComponentA: {{ x: {row.Component.X} y: {row.Component.Y} }}\n");
-        }
-
         if (ctx.World.TryGetResource<ResourceA>(out var resource) && ctx.World.IsAdded<ResourceA>())
             Log.Info($"  New ResourceA: {{ score: {resource.Score} }}\n");
     }
@@ -89,12 +79,20 @@ internal static class WorldSerialization
         Ui.SpawnText("Check the console output for more!", new UiSettings { AlignSelf = UiAlignSelf.FlexEnd }, 42f);
 }
 
-/// <summary>Bevy's ComponentA, two numbers.</summary>
+/// <summary>Bevy's ComponentA, two numbers, each entity carrying it logged as it arrives or changes.</summary>
 [Behavior]
 public partial struct ComponentA
 {
     public float X;
     public float Y;
+
+    // Bevy's log_system's half for the components.
+    [OnUpdate, Changed(typeof(ComponentA))]
+    public void LogChanges(BehaviorContext ctx)
+    {
+        Log.Info($"  Entity({ctx.Entity.Index})");
+        Log.Info($"    ComponentA: {{ x: {X} y: {Y} }}\n");
+    }
 }
 
 /// <summary>Bevy's ComponentB, text, and a time a scene leaves out.</summary>

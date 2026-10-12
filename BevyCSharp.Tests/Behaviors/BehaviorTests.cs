@@ -55,6 +55,30 @@ public partial struct FilteredCounter
     public void Tick(BehaviorContext ctx) => Ticks++;
 }
 
+/// <summary>
+/// A behavior that runs on an entity in a frame its own component changed, noting which and when,
+/// as Bevy's <c>Query&lt;&amp;T, Changed&lt;T&gt;&gt;</c> reaches it.
+/// </summary>
+[Behavior]
+public partial struct SelfWatched
+{
+    /// <summary>Each frame the method ran and the entity it ran on.</summary>
+    internal static readonly List<(ulong Frame, Entity Entity)> Ran = [];
+
+    /// <summary>A value another system changes.</summary>
+    public int Value;
+
+    /// <summary>How many times the method ran here, which it writes, marking its own row.</summary>
+    public int Runs;
+
+    [OnUpdate, Changed(typeof(SelfWatched))]
+    public void Seen(BehaviorContext ctx)
+    {
+        Runs++;
+        Ran.Add((ctx.Time.FrameCount, ctx.Entity));
+    }
+}
+
 /// <summary>A behavior with only static methods, used to check scheduling order.</summary>
 [Behavior]
 public partial struct StageRecorder
@@ -193,6 +217,47 @@ public sealed class BehaviorTests
 
         var ticked = ticksByEntity.Values.Count(t => t > 0);
         Assert.Equal(1, ticked);
+    }
+
+    /// <summary>
+    /// A behavior watching its own component runs on all three entities as they arrive, then on
+    /// none while nothing changes them, though its method writes its own row each time it runs, and
+    /// on the one changed alone the frame after the change, where marking every row before the
+    /// filter was asked would make each look changed every frame.
+    /// </summary>
+    [Fact]
+    public void AChangedFilterOnItsOwnComponentRunsOnTheRowThatChangedAlone()
+    {
+        using var harness = new EngineHarness(frames: 9, discoverBehaviors: true);
+        SelfWatched.Ran.Clear();
+        var spawned = new List<Entity>();
+        ulong changedAt = 0;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var entity = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(entity, new SelfWatched());
+                spawned.Add(entity);
+            }
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            if (ctx.Time.FrameCount != 4) return;
+
+            changedAt = ctx.Time.FrameCount;
+            ctx.Ecs.Set(spawned[1], ctx.Ecs.GetOrDefault<SelfWatched>(spawned[1]) with { Value = 1 });
+        });
+
+        harness.Run();
+
+        var first = SelfWatched.Ran.Min(ran => ran.Frame);
+        var arriving = SelfWatched.Ran.Where(ran => ran.Frame == first).Select(ran => ran.Entity).ToList();
+        Assert.Equal(3, arriving.Count);
+        Assert.True(spawned.ToHashSet().SetEquals(arriving), "the method ran on each entity as it arrived");
+        Assert.Equal(new[] { (changedAt + 1, spawned[1]) }, SelfWatched.Ran.Where(ran => ran.Frame != first).ToArray());
     }
 
     [Fact]

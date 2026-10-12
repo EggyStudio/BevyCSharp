@@ -112,8 +112,8 @@ public sealed class GeneratorAttributeTests
 
             [OnUpdate, With(typeof(Marked))] public void Marked(BehaviorContext ctx) => Ran.Note("With:" + ctx.Ecs.NameOf(ctx.Entity));
             [OnUpdate, Without(typeof(Marked))] public void Plain(BehaviorContext ctx) => Ran.Note("Without:" + ctx.Ecs.NameOf(ctx.Entity));
-            // Another component's change, since a behavior's own methods take it by reference and
-            // so mark it changed every frame they run.
+            // Another component's change, since this behavior's unfiltered methods take its own by
+            // reference on every entity and so mark it changed every frame they run.
             [OnUpdate, Changed(typeof(Unkept))] public void Changed(BehaviorContext ctx) => Ran.Note("Changed:" + ctx.Ecs.NameOf(ctx.Entity));
         }
 

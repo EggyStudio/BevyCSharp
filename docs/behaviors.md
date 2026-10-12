@@ -269,7 +269,10 @@ public void Tick(BehaviorContext ctx) { }
 ```
 
 `[Changed]` skips entities whose listed components did not change this frame. It is a per-entity
-test against Bevy's change ticks, so a method carrying it runs sequentially.
+test against Bevy's change ticks, so a method carrying it runs sequentially. The entities it skips
+are left unmarked and those it runs on are marked, so a method watching its own component runs on
+an entity after something changed it rather than on every entity every frame, unless another method
+of the behavior runs on every entity without a filter and marks them all.
 
 A system asks the same of one entity with `ctx.Ecs.Changed<T>(entity)`, and whether the component
 was put on with `ctx.Ecs.Added<T>(entity)`, each since the running system last ran, as Bevy's `Ref`

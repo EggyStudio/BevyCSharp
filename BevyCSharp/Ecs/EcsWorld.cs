@@ -327,6 +327,16 @@ public sealed unsafe partial class EcsWorld
         return true;
     }
 
+    /// <summary>
+    /// Marks a component of an entity changed, as a write through a reference to it marks it, by
+    /// the id its storage is listed under.
+    /// </summary>
+    /// <remarks>
+    /// For a behavior runner whose rows were listed unmarked under a <c>[Changed]</c> filter, which
+    /// marks only the rows its method runs on.
+    /// </remarks>
+    internal void MarkChanged(Entity entity, int componentId) => Native.bcs_ecs_get_ptr(entity.Bits, componentId);
+
     /// <summary>True when a component changed since the previous frame.</summary>
     public bool Changed<T>(Entity entity) where T : unmanaged =>
         Native.bcs_ecs_changed(entity.Bits, ComponentType<T>.Id) > 0;

@@ -112,12 +112,15 @@ public static partial class BehaviorRunners
         all[with.Length] = own;
         others.CopyTo(all, with.Length + 1);
 
-        using var chunks = ecs.Chunks<T>(Except(all, own), without);
+        // Left unmarked under a [Changed] filter and marked a row at a time as the method runs on
+        // it, as the one-component form does, so the filter sees what changed before this ran.
+        var filtered = changed.Length > 0;
+        using var chunks = ecs.Chunks<T>(Except(all, own), without, markChanged: !filtered);
         if (chunks.IsEmpty) return;
 
-        using var firsts = ecs.Chunks<T1>(Except(all, others[0]), without, writes[0]);
+        using var firsts = ecs.Chunks<T1>(Except(all, others[0]), without, writes[0] && !filtered);
         var two = others.Length > 1;
-        using var seconds = two ? ecs.Chunks<T2>(Except(all, others[1]), without, writes[1]) : default;
+        using var seconds = two ? ecs.Chunks<T2>(Except(all, others[1]), without, writes[1] && !filtered) : default;
 
         var commands = world.Resource<EcsCommands>();
         var time = world.Resource<Time>();
@@ -149,7 +152,14 @@ public static partial class BehaviorRunners
             for (var i = 0; i < components.Length; i++)
             {
                 var entity = entities[i];
-                if (changed.Length > 0 && !AnyChanged(ecs, entity, changed)) continue;
+                if (filtered)
+                {
+                    if (!AnyChanged(ecs, entity, changed)) continue;
+
+                    ecs.MarkChanged(entity, own);
+                    if (writes[0]) ecs.MarkChanged(entity, others[0]);
+                    if (two && writes[1]) ecs.MarkChanged(entity, others[1]);
+                }
 
                 context.Entity = entity;
                 body(ref components[i], ref firstComponents[i], ref secondComponents[i], entity, context);
