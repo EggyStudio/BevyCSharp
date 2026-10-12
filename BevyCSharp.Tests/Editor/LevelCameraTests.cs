@@ -14,18 +14,18 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class LevelCameraTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-cameras-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-cameras-");
 
-    public LevelCameraTests() => Directory.CreateDirectory(_root);
+    public LevelCameraTests() => Directory.CreateDirectory(_folder.Path);
 
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     [SkippableFact]
     public void ALevelCameraIsHeldOffWhileEditedAndSavedOn()
     {
         Needs.Renderer();
 
-        var level = Path.Combine(_root, "camera.scene.json");
+        var level = Path.Combine(_folder.Path, "camera.scene.json");
         using var harness = new EngineHarness(frames: 2);
         var ran = false;
         bool? heldOff = null, offAfterSaving = null, savedOff = null;

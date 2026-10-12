@@ -4,9 +4,6 @@
 
 BevyCSharp.Tests/Scenes/ChangingTypeTests.cs Directory.Delete
 BevyCSharp.Tests/Scenes/ChangingTypeTests.cs Path.GetTempPath
-BevyCSharp.Tests/Editor/EditorWorldTests.cs Path.GetTempPath
-BevyCSharp.Tests/Editor/LevelCameraTests.cs Directory.Delete
-BevyCSharp.Tests/Editor/LevelCameraTests.cs Path.GetTempPath
 BevyCSharp.Tests/Scenes/InstanceTests.cs Directory.Delete
 BevyCSharp.Tests/Scenes/InstanceTests.cs Path.GetTempPath
 BevyCSharp.Tests/PictureRun.cs Directory.Delete

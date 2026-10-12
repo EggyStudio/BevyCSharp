@@ -25,12 +25,16 @@ public partial struct Saved
 /// only thing about them this side can name.
 /// </remarks>
 [Collection("engine")]
-public sealed class EditorWorldTests
+public sealed class EditorWorldTests : IDisposable
 {
+    private readonly TestFolder _folder = new("bcs-world-");
+
+    public void Dispose() => _folder.Dispose();
+
     [Fact]
     public void WhatWasSavedIsWhatComesBack()
     {
-        var file = Path.Combine(Path.GetTempPath(), $"bcs-world-{Guid.NewGuid():N}.json");
+        var file = _folder.File("world.json");
 
         using var harness = new EngineHarness(frames: 3);
 
@@ -55,8 +59,6 @@ public sealed class EditorWorldTests
         });
 
         harness.Run();
-
-        File.Delete(file);
     }
 
     /// <summary>A mesh loaded from a file is written by its path and pointed at again.</summary>
@@ -70,7 +72,7 @@ public sealed class EditorWorldTests
     {
         Needs.Renderer();
 
-        var file = Path.Combine(Path.GetTempPath(), $"bcs-world-{Guid.NewGuid():N}.json");
+        var file = _folder.File("world.json");
 
         using var harness = new EngineHarness(frames: 3);
 
@@ -96,8 +98,6 @@ public sealed class EditorWorldTests
         });
 
         harness.Run();
-
-        File.Delete(file);
     }
 
     /// <summary>An entity that is only drawn is still worth writing.</summary>
@@ -110,7 +110,7 @@ public sealed class EditorWorldTests
     {
         Needs.Renderer();
 
-        var file = Path.Combine(Path.GetTempPath(), $"bcs-world-{Guid.NewGuid():N}.json");
+        var file = _folder.File("world.json");
 
         using var harness = new EngineHarness(frames: 3);
 
@@ -129,7 +129,5 @@ public sealed class EditorWorldTests
         });
 
         harness.Run();
-
-        File.Delete(file);
     }
 }
