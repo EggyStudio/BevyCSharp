@@ -259,15 +259,14 @@ code already in the binary.
   that searches the right distance depends on the cascade, and the example's ten suits a scene
   the size of its palm tree. What is left is reading the cascade a slab like this one falls in
   and the depth range it covers, which decide both the search and the blur.
-- **Windows past the first, set through reflection.** Position, decorations, resizability,
-  always-on-top and exclusive fullscreen are bridged for the first window, the monitors are
-  readable by size, name and video mode, `Window.SetVideoMode` takes the screen over at one of
-  them, and `Config.RememberWindow` reopens the window where it was left, at its size and
-  maximized if it was. A further window is Bevy's `Window` spawned through reflection, a camera is
-  aimed at it with `Render.SetCameraTarget`, and an offscreen run draws it into an image of its
-  own. What is left is `Window`'s calls for a window past the first, which address the first
-  alone, and the monitor a window was on, which on Wayland is the one part of its place an app
-  could still be told.
+- **The monitor a window was on.** Position, decorations, resizability, always-on-top and
+  exclusive fullscreen are bridged, the monitors are readable by size, name and video mode,
+  `Window.SetVideoMode` takes the screen over at one of them, and `Config.RememberWindow` reopens
+  the window where it was left, at its size and maximized if it was. A further window is Bevy's
+  `Window` spawned through reflection, a camera is aimed at it with `Render.SetCameraTarget`, an
+  offscreen run draws it into an image of its own, and each call on `Window` has an overload taking
+  the window's entity. What is left is the monitor a window was on, which on Wayland is the one
+  part of its place an app could still be told.
 - **A capture reads back only what a shader image can be.** `Render.TryReadCaptureAsItIs` hands a
   picture over in the format it was drawn in, a half-float target as half floats, where
   `TryReadCapture` clamps it to eight-bit sRGB. An image in a format no shader image is made in,

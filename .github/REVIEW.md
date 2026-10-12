@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `667ca9ac`, the animation state machine from TODO.md's animation section: a data
+Reviewed up to `be9b174f`, the animation section's last item, ABI 278: a curve on a field of any
+reflected component, `AnimationCurve.Field` by the component's type path and Bevy's reflect path to
+the field, each field its own evaluator keyed by the component and the path's hash, the path and the
+value's kind checked when the curve is added against a default of the component where Bevy can make
+one, the property in a file of its own since the clips file would have passed the rule; a test moves
+two fields of a reflected component each by its own curve; the assets guide and the cheat sheet
+follow. Verdict 13 stands at four whole suites of ten, this one over the field curve, 1,459 passed.
+Right, the field reached by the paths Bevy already names rather than a table of its own. Next
+TODO.md's order on, the textures' and shaders' items being edges of wgpu, Slang and Bevy: the
+window's calls for a window past the first, each export taking the window's entity with zero the
+primary and the window's overloads taking an entity, at ABI 279.
+
+Before it, `667ca9ac` came, the animation state machine from TODO.md's animation section: a data
 asset of states, each a clip and how it plays, and transitions tried in order, each on a parameter
 above or below a value, a flag, a trigger used up as it is taken, or the state's clip ending, an
 empty from standing for any state; `Animation.Run` starts it on a model and plays each state through
@@ -40,23 +52,6 @@ guide say both. Right, the version kept rather than migrated twice, and the save
 play made rather than the world. Verdict 13 stands at one whole suite of ten. Next TODO.md's order
 as before, the animation state machine under way in the tree with a Shared line waiting on its
 commit.
-
-Before it, `7effdb05` came, a documents batch from reading TODO.md before its next item: its list of
-what Bevy's examples wait on named two groups written since, the deferred buffers from Slang and a
-2D mesh drawn by a shader, and left out four of the 18 missing, and lists the 18 in six groups from
-the triage, the camera controllers, Feathers, the dev tools, the system fonts, HTTP assets, which
-pull a crate, and the compressing image saver, each waiting on a crate the lock lacks or on the
-fonts' decision; its animation section said one clip at a time from files with no events, where the
-bridge blends clips with masks and additive layers, makes clips from curves and raises events, so
-two items remain there, no state machine and a curve that cannot move another component's reflected
-field; and the assets guide says the graph blends clips rather than leaving masks and layers to the
-game. The norm tests pass. Right, the list of what waits made true before the next thing was taken
-from it. On the order asked: the three tuple fields with no typed property, a text layout's cursor,
-a pan gesture's fingers and the input focus, are rarely used and were left as said by kind on
-purpose, and typing them means the describer, the schemas and the components table written again
-from an editor build with Bevy's other changes read as its diff, so they wait; the scenes' two items
-come first, a newer scene file read by an older build, which a player of a shipped game meets, and
-then saves that diff whole components. Verdict 13's first whole suite runs.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -598,8 +593,9 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; three of ten so far, over
-    the save diff and the state machine, each the listing and eleven with no failure.
+    under the load. Settled when ten whole suites pass since `7f18b684`; four of ten so far, over
+    the save diff, the state machine and the field curve, each the listing and eleven with no
+    failure.
 
 ## Decisions
 

@@ -12,7 +12,7 @@ namespace Bevy;
 /// committing anything.
 /// </para>
 /// <para>
-/// Only sent while the input method is on, which <see cref="Window.SetIme"/> does.
+/// Only sent while the input method is on, which <see cref="Window.SetIme(bool, float, float)"/> does.
 /// </para>
 /// </remarks>
 /// <param name="Text">What is being composed.</param>

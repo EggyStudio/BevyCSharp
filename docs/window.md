@@ -250,13 +250,14 @@ Ui.SpawnText("Second window", new UiSettings { Camera = camera });
 
 What one window alone shows goes on a render layer its camera alone sees (`Render.SetLayers`), as
 Bevy's `multi_window_text` keeps a line of text to each window. Closing the window despawns its
-entity. The calls on `Window` above address the first window alone, and a further one is changed
-through its `WindowRef`. An offscreen run opens no window, and draws each window the game spawns
-into an image of its own, at the window's size and scale, so the game runs the same with no display
-and `Render.Screenshot(path, second)` reads the picture each window would show. The picture is
-written into the window by a pass whose pipeline compiles over the first frames, so a window
-captured before `Render.PipelinesReady()` holds may come back black, and a capture meant to show
-what it draws waits for that.
+entity. Each call on `Window` above addresses the first window, and the same call with the window's
+entity first addresses that one instead (`Window.SetTitle(second, "Map")`, `Window.Place(second)`),
+refusing an entity that carries no window rather than changing the first. An offscreen run opens no
+window, and draws each window the game spawns into an image of its own, at the window's size and
+scale, so the game runs the same with no display and `Render.Screenshot(path, second)` reads the
+picture each window would show. The picture is written into the window by a pass whose pipeline
+compiles over the first frames, so a window captured before `Render.PipelinesReady()` holds may come
+back black, and a capture meant to show what it draws waits for that.
 
 A game that opens every window itself, one on each screen as Bevy's `monitor_info` does, starts
 with `Config.PrimaryWindow` false, which leaves the run without a first window and keeps it running

@@ -51,6 +51,55 @@ public sealed class SpawnedWindowTests : IDisposable
         Assert.False(AllBlack(path), "the window's picture came back black");
     }
 
+    /// <summary>
+    /// A window a game spawned is set by the calls that take its entity, each changing that window
+    /// alone, and an entity carrying no window is refused as a missing one rather than taken for
+    /// the first.
+    /// </summary>
+    [SkippableFact]
+    public void ASpawnedWindowIsSetByItsEntityAndAPlainEntityIsRefused()
+    {
+        Needs.Renderer();
+
+        var window = Entity.None;
+        string? title = null;
+        (bool Decorations, bool Resizable, WindowRef.WindowLevelVariant Level)? style = null;
+        (uint, uint)? size = null;
+        float? scale = null;
+        int? refused = null;
+
+        using var app = new App(Config.OffscreenFor(320, 180, frames: 3));
+        app.AddPlugin(new EnginePlugin());
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                window = ecs.Spawn();
+                ecs.Insert<WindowRef>(window);
+
+                Window.SetTitle(window, "Second");
+                Window.SetSize(window, 300, 200);
+                Window.SetStyle(window, decorations: false, resizable: false, alwaysOnTop: true);
+
+                var settings = ecs.Wrap<WindowRef>(window);
+                (title, style) = (settings.Title, (settings.Decorations, settings.Resizable, settings.WindowLevel));
+                (size, scale) = (Window.Size(window), Window.Scale(window));
+
+                var plain = ecs.Spawn();
+                refused = Assert.Throws<BevyNativeException>(() => Window.SetTitle(plain, "Plain")).Status;
+            },
+            "Test.SetTheSecondWindow"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.Equal("Second", title);
+        Assert.Equal((false, false, WindowRef.WindowLevelVariant.AlwaysOnTop), style);
+        Assert.Equal((300u, 200u), size);
+        Assert.Equal(1f, scale);
+        Assert.Equal(NativeStatus.NotPresent, refused);
+    }
+
     // An offscreen run with a window of 96 by 64 a camera clears to green, captured by the window
     // once every pipeline the run asked for has compiled. The window's picture is written into its
     // image by a pass whose pipeline Bevy compiles off the main thread, and until it has, the image

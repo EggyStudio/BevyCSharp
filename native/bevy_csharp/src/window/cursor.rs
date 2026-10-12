@@ -2,12 +2,10 @@
 //! movement, shown as one of the platform's shapes, or drawn from an image of the game's own.
 
 #[cfg(feature = "render")]
-use bevy::ecs::query::With;
-#[cfg(feature = "render")]
-use bevy::window::{CursorGrabMode, PrimaryWindow};
+use bevy::window::CursorGrabMode;
 
 #[cfg(feature = "render")]
-use super::with_window;
+use super::{window_entity, with_window};
 
 use crate::interop::status;
 #[cfg(feature = "render")]
@@ -23,11 +21,11 @@ use crate::state::with_world;
 /// other. Asking for one and getting the other is normal, and is why the cursor should be hidden
 /// while it is grabbed either way.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_cursor(grab: i32, visible: i32) -> i32 {
+pub extern "C" fn bcs_window_set_cursor(window: u64, grab: i32, visible: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (grab, visible);
+            let _ = (window, grab, visible);
             status::UNSUPPORTED
         }
 
@@ -40,7 +38,7 @@ pub extern "C" fn bcs_window_set_cursor(grab: i32, visible: i32) -> i32 {
                 _ => return status::NULL_ARG,
             };
 
-            with_window(|_, cursor| {
+            with_window(window, |_, cursor| {
                 cursor.grab_mode = requested;
                 cursor.visible = visible != 0;
                 status::OK
@@ -58,11 +56,11 @@ pub extern "C" fn bcs_window_set_cursor(grab: i32, visible: i32) -> i32 {
 /// shapes an interface asks for as the pointer crosses what it draws, which makes a field
 /// read as one to type in and an edge as one to drag, and the two a game shows while it is busy.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
+pub extern "C" fn bcs_window_set_cursor_shape(window: u64, shape: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = shape;
+            let _ = (window, shape);
             status::UNSUPPORTED
         }
 
@@ -88,9 +86,7 @@ pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
             };
 
             with_world(|world| {
-                let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
-
-                let Ok(window) = windows.single(world) else {
+                let Some(window) = window_entity(world, window) else {
                     return status::NOT_PRESENT;
                 };
 
@@ -115,11 +111,11 @@ pub extern "C" fn bcs_window_set_cursor_shape(shape: i32) -> i32 {
 /// bit floats, as a PNG gives, and draws nothing until the image has loaded. The platform shows it
 /// at the size it is, and a hotspot outside it is refused by the platform as the image arrives.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_cursor_image(image: i32, x: u32, y: u32) -> i32 {
+pub extern "C" fn bcs_window_set_cursor_image(window: u64, image: i32, x: u32, y: u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (image, x, y);
+            let _ = (window, image, x, y);
             status::UNSUPPORTED
         }
 
@@ -134,8 +130,7 @@ pub extern "C" fn bcs_window_set_cursor_image(image: i32, x: u32, y: u32) -> i32
                     Err(refusal) => return refusal,
                 };
 
-                let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
-                let Ok(window) = windows.single(world) else {
+                let Some(window) = window_entity(world, window) else {
                     return status::NOT_PRESENT;
                 };
 
@@ -168,11 +163,11 @@ pub extern "C" fn bcs_window_set_cursor_image(image: i32, x: u32, y: u32) -> i32
 /// written through the cursor's reflected component, as Bevy's custom_cursor_image moves through
 /// its frames. A layout key that names nothing, or something other than a layout, is refused.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_cursor_atlas(layout: i32, index: u32, x: u32, y: u32) -> i32 {
+pub extern "C" fn bcs_window_set_cursor_atlas(window: u64, layout: i32, index: u32, x: u32, y: u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (layout, index, x, y);
+            let _ = (window, layout, index, x, y);
             status::UNSUPPORTED
         }
 
@@ -191,8 +186,7 @@ pub extern "C" fn bcs_window_set_cursor_atlas(layout: i32, index: u32, x: u32, y
                     Some(TextureAtlas { layout, index: index as usize })
                 };
 
-                let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
-                let Ok(window) = windows.single(world) else {
+                let Some(window) = window_entity(world, window) else {
                     return status::NOT_PRESENT;
                 };
                 let Some(mut icon) = world.get_mut::<CursorIcon>(window) else {
@@ -227,11 +221,11 @@ mod tests {
         let key = crate::assets::key_for(&mut world, image.clone().untyped());
 
         // No window to put it on yet.
-        let answer = loan_world(&mut world, || super::bcs_window_set_cursor_image(key, 128, 64));
+        let answer = loan_world(&mut world, || super::bcs_window_set_cursor_image(super::super::PRIMARY, key, 128, 64));
         assert_eq!(answer, status::NOT_PRESENT);
 
         let window = world.spawn((Window::default(), PrimaryWindow)).id();
-        let answer = loan_world(&mut world, || super::bcs_window_set_cursor_image(key, 128, 64));
+        let answer = loan_world(&mut world, || super::bcs_window_set_cursor_image(super::super::PRIMARY, key, 128, 64));
         assert_eq!(answer, status::OK);
 
         match world.get::<CursorIcon>(window) {
@@ -256,10 +250,10 @@ mod tests {
         let layout_key = crate::assets::key_for(&mut world, layout.clone().untyped());
         let window = world.spawn((Window::default(), PrimaryWindow)).id();
 
-        let atlas = |world: &mut World, key, index, x, y| loan_world(world, || super::bcs_window_set_cursor_atlas(key, index, x, y));
+        let atlas = |world: &mut World, key, index, x, y| loan_world(world, || super::bcs_window_set_cursor_atlas(super::super::PRIMARY, key, index, x, y));
         assert_eq!(atlas(&mut world, layout_key, 3, 32, 32), status::NOT_PRESENT, "the pointer is no image yet");
 
-        assert_eq!(loan_world(&mut world, || super::bcs_window_set_cursor_image(image_key, 0, 0)), status::OK);
+        assert_eq!(loan_world(&mut world, || super::bcs_window_set_cursor_image(super::super::PRIMARY, image_key, 0, 0)), status::OK);
         assert_eq!(atlas(&mut world, image_key, 3, 32, 32), status::NO_COMPONENT, "an image is no layout");
         assert_eq!(atlas(&mut world, layout_key, 3, 32, 16), status::OK);
 

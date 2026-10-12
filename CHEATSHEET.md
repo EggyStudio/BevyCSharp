@@ -1567,6 +1567,24 @@ static string MonitorName(int index);                           // The name the 
 static VideoMode[] MonitorModes(int index);                     // Every video mode a monitor can be driven at, by an index below MonitorCount
 static void SetVideoMode(int monitor, int mode);                // Takes the screen over in exclusive fullscreen at one of a monitor's own video modes
 static void SetCursor(CursorGrab grab, bool visible);           // Sets whether the cursor is confined or hidden
+static void SetTitle(Entity window, string title);              // Sets a window's title
+static void SetSize(Entity window, uint width, uint height);    // Resizes a window, in logical pixels
+static (uint Width, uint Height) Size(Entity window);           // A window's current size, in logical pixels
+static float Scale(Entity window);                              // How many physical pixels a logical one is in a window, which may differ by monitor
+static void SetMode(Entity window, WindowMode mode);            // Sets how a window fills the screen
+static void SetPosition(Entity window, int x, int y);           // Moves a window, in physical pixels from the desktop's top-left corner
+static void SetIme(Entity window, bool enabled, float x = 0f, float y = 0f);  // Turns the platform's input method on or off for a window, and says where in it the text being composed is
+static void SetStyle(Entity window, bool decorations = true, bool resizable = true, bool alwaysOnTop = false);  // Sets whether a window has a title bar and border, whether it can be resized by dragging, and whether it stays above other windows
+static void SetCursorShape(Entity window, CursorShape shape);   // Sets the shape of the pointer while it is over a window
+static void SetCursorImage(Entity window, AssetHandle image, uint hotspotX = 0, uint hotspotY = 0);  // Sets the pointer over a window to an image, with its hotspot from the image's top left
+static void SetCursorAtlas(Entity window, AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0);  // Cuts the pointer's image over a window to one frame of an atlas, or shows the whole image again with no layout
+static void SetCursor(Entity window, CursorGrab grab, bool visible);  // Sets whether the cursor is confined to a window or hidden over it
+static void Minimize(Entity window);                            // Minimizes a window to the taskbar or dock
+static void SetMaximized(Entity window, bool maximized);        // Maximizes a window, or puts it back to the size it had
+static WindowPlace Place(Entity window);                        // Where a window is, how large, and whether it is maximized
+static void StartDragMove(Entity window);                       // Hands a window to the platform to be moved by the pointer, until the button held now is let go
+static void StartDragResize(Entity window, WindowEdge edge);    // Hands a window to the platform to be resized by the pointer from one edge or corner, until the button held now is let go
+static void SetVideoMode(Entity window, int monitor, int mode);  // Takes the screen over with a window in exclusive fullscreen at one of a monitor's own video modes
 ```
 
 ### `UpdateMode`

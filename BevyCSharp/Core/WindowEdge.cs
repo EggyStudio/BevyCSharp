@@ -3,7 +3,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>An edge or corner of the window, counted clockwise from the top.</summary>
-/// <remarks>What <see cref="Window.StartDragResize"/> resizes from.</remarks>
+/// <remarks>What <see cref="Window.StartDragResize(WindowEdge)"/> resizes from.</remarks>
 public enum WindowEdge
 {
     /// <summary>The top edge.</summary>

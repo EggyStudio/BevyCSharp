@@ -471,7 +471,7 @@ public sealed class Config
     /// differently from an opaque one. What is left clear is then clear: the world's clear color
     /// where it has no alpha (<see cref="Render.SetClearColor"/>), the part of a window a camera's
     /// viewport leaves out, and the corners <see cref="Render.SetRoundedCorners"/> takes off. A
-    /// window without a frame (<see cref="Window.SetStyle"/>) and with this on can be any shape.
+    /// window without a frame (<see cref="Window.SetStyle(bool, bool, bool)"/>) and with this on can be any shape.
     /// </para>
     /// <para>
     /// Not every platform can. Where the window's surface cannot be composited with alpha, which

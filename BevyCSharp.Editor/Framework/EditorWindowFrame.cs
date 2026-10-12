@@ -51,7 +51,7 @@ public static class EditorWindowFrame
 
     /// <summary>Whether the window is maximized.</summary>
     /// <remarks>
-    /// Read from the platform each frame (<see cref="Window.Place"/>), so a window maximized with
+    /// Read from the platform each frame (<see cref="Window.Place()"/>), so a window maximized with
     /// a key the platform owns, or by the editor reopening as it was left, squares its corners and
     /// turns its button the right way as one maximized from the title row does. Set at once when
     /// the button is pressed, since the platform answers a frame or two later, and a corner that

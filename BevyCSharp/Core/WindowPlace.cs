@@ -5,7 +5,7 @@ namespace Bevy;
 /// <summary>Where the window is, how large, and whether it is maximized.</summary>
 /// <remarks>
 /// What a game keeps to reopen where it was closed (<see cref="Config.RememberWindow"/>), read
-/// with <see cref="Window.Place"/>. Wayland never tells an app where its window is, so there
+/// with <see cref="Window.Place()"/>. Wayland never tells an app where its window is, so there
 /// <see cref="HasPosition"/> is false and the place is the size alone.
 /// </remarks>
 /// <param name="HasPosition">Whether <see cref="X"/> and <see cref="Y"/> say anything.</param>

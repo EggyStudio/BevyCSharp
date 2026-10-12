@@ -73,7 +73,7 @@ internal static unsafe partial class Native
     /// <summary>Writes how many physical pixels a logical one is.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_scale(float* scale);
+    internal static partial int bcs_window_scale(ulong window, float* scale);
 
     /// <summary>Hands over this frame's triangles.</summary>
     [LibraryImport(Library)]

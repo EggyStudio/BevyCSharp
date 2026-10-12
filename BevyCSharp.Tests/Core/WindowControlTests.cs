@@ -174,8 +174,8 @@ public sealed class WindowControlTests
         harness.OnContext(Stage.Update, _ =>
         {
             // Straight at the bridge, because the managed enums cannot express these.
-            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_mode(9)));
-            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_cursor(9, 1)));
+            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_mode(Native.PrimaryWindow, 9)));
+            Assert.Equal(NativeStatus.NullArgument, WorstCase(Native.bcs_window_set_cursor(Native.PrimaryWindow, 9, 1)));
         });
 
         harness.Run();

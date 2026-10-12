@@ -221,11 +221,11 @@ pub unsafe extern "C" fn bcs_monitor_mode(
 /// Returns [`status::NO_ENTITY`] where there is no such monitor and [`status::NOT_PRESENT`] where
 /// it has no such mode.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_video_mode(index: i32, mode: i32) -> i32 {
+pub extern "C" fn bcs_window_set_video_mode(window: u64, index: i32, mode: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (index, mode);
+            let _ = (window, index, mode);
             status::UNSUPPORTED
         }
 
@@ -255,7 +255,7 @@ pub extern "C" fn bcs_window_set_video_mode(index: i32, mode: i32) -> i32 {
                 Some(Some(Some(chosen))) => chosen,
             };
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.mode = WindowMode::Fullscreen(
                     MonitorSelection::Index(index),
                     VideoModeSelection::Specific(chosen),

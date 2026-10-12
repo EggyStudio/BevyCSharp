@@ -505,7 +505,7 @@ internal static unsafe partial class Native
     /// <summary>Turns the input method on or off, and places its candidate list.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_ime(int enabled, float x, float y);
+    internal static partial int bcs_window_set_ime(ulong window, int enabled, float x, float y);
 
     /// <summary>Says something as the input method would.</summary>
     [LibraryImport(Library)]

@@ -3,8 +3,9 @@
 //! `BcsConfig` decides how the window is created; everything here changes it while the app runs.
 //! The pointer over it is [`cursor`]'s.
 //!
-//! Every entry point addresses the primary window. A headless run has none, and says so rather
-//! than silently doing nothing.
+//! Every entry point takes the window it addresses, as the bits of the entity carrying Bevy's
+//! `Window`, or [`PRIMARY`] for the primary window, which C#'s calls naming no window pass. A
+//! headless run has none, and says so rather than silently doing nothing.
 
 #[cfg(feature = "render")]
 use bevy::ecs::query::With;
@@ -26,15 +27,36 @@ mod alpha;
 #[cfg(feature = "render")]
 pub use alpha::{install, pick_alpha};
 
-/// Runs `f` against the primary window, or reports why it could not.
+/// The bits C# passes for the primary window, which no entity has, since an entity's index never
+/// fills a whole `u32`. Zero would not do, because it is C#'s `Entity.None` and Bevy's first
+/// entity alike.
+pub const PRIMARY: u64 = u64::MAX;
+
+/// The entity of the window C# named, the primary one for [`PRIMARY`], or nothing where the entity
+/// carries no `Window`.
 #[cfg(feature = "render")]
-fn with_window<F>(f: F) -> i32
+pub(crate) fn window_entity(world: &mut bevy::ecs::world::World, window: u64) -> Option<bevy::ecs::entity::Entity> {
+    if window == PRIMARY {
+        let mut query = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
+        return query.single(world).ok();
+    }
+
+    let entity = crate::ecs::entity_from(window);
+    world.get_entity(entity).ok()?.contains::<Window>().then_some(entity)
+}
+
+/// Runs `f` against the window C# named, or reports why it could not.
+#[cfg(feature = "render")]
+fn with_window<F>(window: u64, f: F) -> i32
 where
     F: FnOnce(&mut Window, &mut CursorOptions) -> i32,
 {
     with_world(|world| {
-        let mut query = world.query_filtered::<(&mut Window, &mut CursorOptions), With<PrimaryWindow>>();
-        match query.single_mut(world) {
+        let Some(entity) = window_entity(world, window) else {
+            return status::NOT_PRESENT;
+        };
+        let mut query = world.query::<(&mut Window, &mut CursorOptions)>();
+        match query.get_mut(world, entity) {
             Ok((mut window, mut cursor)) => f(&mut window, &mut cursor),
             Err(_) => status::NOT_PRESENT,
         }
@@ -46,11 +68,11 @@ where
 /// # Safety
 /// `title` must be a NUL-terminated UTF-8 string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_window_set_title(title: *const core::ffi::c_char) -> i32 {
+pub unsafe extern "C" fn bcs_window_set_title(window: u64, title: *const core::ffi::c_char) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = title;
+            let _ = (window, title);
             status::UNSUPPORTED
         }
 
@@ -60,7 +82,7 @@ pub unsafe extern "C" fn bcs_window_set_title(title: *const core::ffi::c_char) -
                 return status::NULL_ARG;
             };
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.title = title.clone();
                 status::OK
             })
@@ -70,11 +92,11 @@ pub unsafe extern "C" fn bcs_window_set_title(title: *const core::ffi::c_char) -
 
 /// Resizes the window, in logical pixels.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_size(width: u32, height: u32) -> i32 {
+pub extern "C" fn bcs_window_set_size(window: u64, width: u32, height: u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (width, height);
+            let _ = (window, width, height);
             status::UNSUPPORTED
         }
 
@@ -84,7 +106,7 @@ pub extern "C" fn bcs_window_set_size(width: u32, height: u32) -> i32 {
                 return status::NULL_ARG;
             }
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.resolution.set(width as f32, height as f32);
                 status::OK
             })
@@ -100,11 +122,11 @@ pub extern "C" fn bcs_window_set_size(width: u32, height: u32) -> i32 {
 /// # Safety
 /// `scale` must point to a writable float.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
+pub unsafe extern "C" fn bcs_window_scale(window: u64, scale: *mut f32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = scale;
+            let _ = (window, scale);
             status::UNSUPPORTED
         }
 
@@ -115,24 +137,20 @@ pub unsafe extern "C" fn bcs_window_scale(scale: *mut f32) -> i32 {
             }
 
             crate::state::with_world(|world| {
-                use bevy::window::{PrimaryWindow, Window};
-
-                let mut windows =
-                    world.query_filtered::<&Window, bevy::prelude::With<PrimaryWindow>>();
-
-                let Ok(window) = windows.single(world) else {
+                let Some(found) = window_entity(world, window).and_then(|entity| world.get::<Window>(entity)) else {
                     // An offscreen run draws into an image, and an image has pixels rather than a
                     // desktop's opinion about how big a pixel is. Bevy says the same by giving
-                    // `ImageRenderTarget` a scale factor of 1.0.
-                    if world.contains_resource::<crate::app::OffscreenTarget>() {
+                    // `ImageRenderTarget` a scale factor of 1.0. A window C# named is not that
+                    // image, so one that is missing is missing.
+                    if window == PRIMARY && world.contains_resource::<crate::app::OffscreenTarget>() {
                         unsafe { scale.write(1.0) };
                         return status::OK;
                     }
 
-                    return status::INVALID_STATE;
+                    return if window == PRIMARY { status::INVALID_STATE } else { status::NOT_PRESENT };
                 };
 
-                unsafe { scale.write(window.resolution.scale_factor()) };
+                unsafe { scale.write(found.resolution.scale_factor()) };
                 status::OK
             })
         }
@@ -184,11 +202,11 @@ pub unsafe extern "C" fn bcs_window_entity(out: *mut u64) -> i32 {
 /// # Safety
 /// `width` and `height` must be writable, or null to skip that output.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i32 {
+pub unsafe extern "C" fn bcs_window_size(window: u64, width: *mut u32, height: *mut u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (width, height);
+            let _ = (window, width, height);
             status::UNSUPPORTED
         }
 
@@ -198,7 +216,7 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
             // offscreen run draws into instead, and everything that lays out an interface needs an
             // answer rather than needing to know which kind of run this is. The rest of this
             // module is about a window and has nothing to say without one.
-            let answered = with_window(|window, _| {
+            let answered = with_window(window, |window, _| {
                 if !width.is_null() {
                     unsafe { width.write(window.resolution.width() as u32) };
                 }
@@ -208,7 +226,7 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
                 status::OK
             });
 
-            if answered != status::NOT_PRESENT {
+            if answered != status::NOT_PRESENT || window != PRIMARY {
                 return answered;
             }
 
@@ -251,11 +269,11 @@ pub unsafe extern "C" fn bcs_window_size(width: *mut u32, height: *mut u32) -> i
 /// asking for a different resolution, which avoids a mode switch the compositor has to undo on
 /// every alt-tab.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
+pub extern "C" fn bcs_window_set_mode(window: u64, mode: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = mode;
+            let _ = (window, mode);
             status::UNSUPPORTED
         }
 
@@ -271,7 +289,7 @@ pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
                 _ => return status::NULL_ARG,
             };
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.mode = requested;
                 status::OK
             })
@@ -281,11 +299,11 @@ pub extern "C" fn bcs_window_set_mode(mode: i32) -> i32 {
 
 /// Moves the window, in physical pixels from the desktop's top-left corner.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_position(x: i32, y: i32) -> i32 {
+pub extern "C" fn bcs_window_set_position(window: u64, x: i32, y: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (x, y);
+            let _ = (window, x, y);
             status::UNSUPPORTED
         }
 
@@ -293,7 +311,7 @@ pub extern "C" fn bcs_window_set_position(x: i32, y: i32) -> i32 {
         {
             use bevy::window::WindowPosition;
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.position = WindowPosition::At(bevy::math::IVec2::new(x, y));
                 status::OK
             })
@@ -307,11 +325,11 @@ pub extern "C" fn bcs_window_set_position(x: i32, y: i32) -> i32 {
 /// The three travel together because each is one flag, and a call that set only one would have to
 /// read the other two back first to leave them alone.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_on_top: i32) -> i32 {
+pub extern "C" fn bcs_window_set_style(window: u64, decorations: i32, resizable: i32, always_on_top: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (decorations, resizable, always_on_top);
+            let _ = (window, decorations, resizable, always_on_top);
             status::UNSUPPORTED
         }
 
@@ -319,7 +337,7 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
         {
             use bevy::window::WindowLevel;
 
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.decorations = decorations != 0;
                 window.resizable = resizable != 0;
                 window.window_level = if always_on_top != 0 {
@@ -338,16 +356,17 @@ pub extern "C" fn bcs_window_set_style(decorations: i32, resizable: i32, always_
 /// A window without the platform's title bar has no button of its own for this, so an app that
 /// draws its own title bar calls this from one.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_minimize() -> i32 {
+pub extern "C" fn bcs_window_minimize(window: u64) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
+            let _ = window;
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.set_minimized(true);
                 status::OK
             })
@@ -361,17 +380,17 @@ pub extern "C" fn bcs_window_minimize() -> i32 {
 /// Apart from borderless fullscreen, which covers the taskbar too and is a mode rather than a size.
 /// The platform does the work and remembers the size to go back to, so nothing here keeps one.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_maximized(maximized: i32) -> i32 {
+pub extern "C" fn bcs_window_set_maximized(window: u64, maximized: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = maximized;
+            let _ = (window, maximized);
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.set_maximized(maximized != 0);
                 status::OK
             })
@@ -389,7 +408,7 @@ pub extern "C" fn bcs_window_set_maximized(maximized: i32) -> i32 {
 /// # Safety
 /// `place` must be writable.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_window_place(place: *mut crate::interop::BcsWindowPlace) -> i32 {
+pub unsafe extern "C" fn bcs_window_place(window: u64, place: *mut crate::interop::BcsWindowPlace) -> i32 {
     crate::interop::guard(|| {
         if place.is_null() {
             return status::NULL_ARG;
@@ -397,6 +416,7 @@ pub unsafe extern "C" fn bcs_window_place(place: *mut crate::interop::BcsWindowP
 
         #[cfg(not(feature = "render"))]
         {
+            let _ = window;
             status::UNSUPPORTED
         }
 
@@ -407,8 +427,10 @@ pub unsafe extern "C" fn bcs_window_place(place: *mut crate::interop::BcsWindowP
             with_world(|world| {
                 // Read without `mut`, so asking every frame does not mark the window changed and
                 // send it back through Bevy's window sync for nothing.
-                let mut query = world.query_filtered::<(bevy::ecs::entity::Entity, &Window), With<PrimaryWindow>>();
-                let Ok((entity, window)) = query.single(world) else {
+                let Some(entity) = window_entity(world, window) else {
+                    return status::NOT_PRESENT;
+                };
+                let Some(window) = world.get::<Window>(entity) else {
                     return status::NOT_PRESENT;
                 };
 
@@ -445,22 +467,23 @@ pub unsafe extern "C" fn bcs_window_place(place: *mut crate::interop::BcsWindowP
 /// only the platform knows where the window may go, and on Wayland an app is not told where its
 /// window is at all. Called on the press, while the button is down, or the platform ignores it.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_start_drag_move() -> i32 {
+pub extern "C" fn bcs_window_start_drag_move(window: u64) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
+            let _ = window;
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            let started = with_window(|window, _| {
+            let started = with_window(window, |window, _| {
                 window.start_drag_move();
                 status::OK
             });
 
             if started == status::OK {
-                release_after_drag();
+                release_after_drag(window);
             }
 
             started
@@ -476,11 +499,11 @@ pub extern "C" fn bcs_window_start_drag_move() -> i32 {
 /// has no edge the platform will resize it by, so an app that draws its own frame calls this from
 /// the edges of it. Called on the press, like a drag move.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_start_drag_resize(edge: i32) -> i32 {
+pub extern "C" fn bcs_window_start_drag_resize(window: u64, edge: i32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = edge;
+            let _ = (window, edge);
             status::UNSUPPORTED
         }
 
@@ -500,13 +523,13 @@ pub extern "C" fn bcs_window_start_drag_resize(edge: i32) -> i32 {
                 _ => return status::NULL_ARG,
             };
 
-            let started = with_window(|window, _| {
+            let started = with_window(window, |window, _| {
                 window.start_drag_resize(direction);
                 status::OK
             });
 
             if started == status::OK {
-                release_after_drag();
+                release_after_drag(window);
             }
 
             started
@@ -524,15 +547,13 @@ pub extern "C" fn bcs_window_start_drag_resize(edge: i32) -> i32 {
 /// pointer shape after the drag is over. A release the platform does deliver later lands on a
 /// button already up and changes nothing.
 #[cfg(feature = "render")]
-fn release_after_drag() {
+fn release_after_drag(window: u64) {
     use bevy::input::ButtonState;
     use bevy::input::mouse::{MouseButton, MouseButtonInput};
     use bevy::prelude::ButtonInput;
 
     with_world(|world| {
-        let mut windows = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>();
-
-        let Ok(window) = windows.single(world) else {
+        let Some(window) = window_entity(world, window) else {
             return status::NOT_PRESENT;
         };
 
@@ -561,21 +582,58 @@ fn release_after_drag() {
 /// it on the keys a game reads as movement are taken by the input method instead. The position
 /// places the platform's candidate list beside the field being typed into rather than in a corner.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_ime(enabled: i32, x: f32, y: f32) -> i32 {
+pub extern "C" fn bcs_window_set_ime(window: u64, enabled: i32, x: f32, y: f32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (enabled, x, y);
+            let _ = (window, enabled, x, y);
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            with_window(|window, _| {
+            with_window(window, |window, _| {
                 window.ime_enabled = enabled != 0;
                 window.ime_position = bevy::math::Vec2::new(x, y);
                 status::OK
             })
         }
     })
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use bevy::prelude::World;
+    use bevy::window::{PrimaryWindow, Window};
+
+    use crate::interop::status;
+    use crate::state::loan_world;
+
+    /// A window past the first is addressed by its entity and the first by [`super::PRIMARY`],
+    /// each changing only itself, and an entity with no window is refused rather than taken for
+    /// the first.
+    #[test]
+    fn each_window_is_addressed_by_its_entity() {
+        let mut world = World::new();
+        let first = world.spawn((Window::default(), PrimaryWindow)).id();
+        let second = world.spawn(Window::default()).id();
+        let plain = world.spawn_empty().id();
+
+        let title = |world: &mut World, window: u64, text: &core::ffi::CStr| {
+            loan_world(world, || unsafe { super::bcs_window_set_title(window, text.as_ptr()) })
+        };
+
+        assert_eq!(title(&mut world, second.to_bits(), c"Second"), status::OK);
+        assert_eq!(title(&mut world, super::PRIMARY, c"First"), status::OK);
+        assert_eq!(title(&mut world, plain.to_bits(), c"Plain"), status::NOT_PRESENT);
+
+        assert_eq!(world.get::<Window>(first).map(|window| window.title.as_str()), Some("First"));
+        assert_eq!(world.get::<Window>(second).map(|window| window.title.as_str()), Some("Second"));
+
+        assert_eq!(loan_world(&mut world, || super::bcs_window_set_size(second.to_bits(), 300, 200)), status::OK);
+        let (mut width, mut height) = (0u32, 0u32);
+        assert_eq!(loan_world(&mut world, || unsafe { super::bcs_window_size(second.to_bits(), &mut width, &mut height) }), status::OK);
+        assert_eq!((width, height), (300, 200));
+        assert_eq!(world.get::<Window>(first).map(|window| window.resolution.width() as u32), Some(Window::default().resolution.width() as u32));
+    }
 }

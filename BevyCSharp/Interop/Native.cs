@@ -25,7 +25,13 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 278;
+    internal const int ExpectedAbiVersion = 279;
+
+    /// <summary>
+    /// The window the <c>bcs_window_*</c> calls address for the primary one, which no entity's
+    /// bits can be, where <see cref="Entity.None"/>'s zero could be Bevy's first entity.
+    /// </summary>
+    internal const ulong PrimaryWindow = ulong.MaxValue;
 
     static Native() => NativeLoader.Initialize();
 
@@ -362,17 +368,17 @@ internal static unsafe partial class Native
     /// <summary>Sets the primary window's title.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_title(string title);
+    internal static partial int bcs_window_set_title(ulong window, string title);
 
     /// <summary>Resizes the primary window, in logical pixels.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_size(uint width, uint height);
+    internal static partial int bcs_window_set_size(ulong window, uint width, uint height);
 
     /// <summary>Reads the primary window's size, in logical pixels.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_size(uint* width, uint* height);
+    internal static partial int bcs_window_size(ulong window, uint* width, uint* height);
 
     /// <summary>Writes the primary window's entity.</summary>
     [LibraryImport(Library)]
@@ -382,32 +388,32 @@ internal static unsafe partial class Native
     /// <summary>Switches between windowed and borderless fullscreen.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_mode(int mode);
+    internal static partial int bcs_window_set_mode(ulong window, int mode);
 
     /// <summary>Moves the window, in physical pixels.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_position(int x, int y);
+    internal static partial int bcs_window_set_position(ulong window, int x, int y);
 
     /// <summary>Sets decorations, resizability and always-on-top together.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_style(int decorations, int resizable, int alwaysOnTop);
+    internal static partial int bcs_window_set_style(ulong window, int decorations, int resizable, int alwaysOnTop);
 
     /// <summary>Sets the shape of the pointer over the window.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_cursor_shape(int shape);
+    internal static partial int bcs_window_set_cursor_shape(ulong window, int shape);
 
     /// <summary>Sets the pointer over the window to an image.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_cursor_image(int image, uint x, uint y);
+    internal static partial int bcs_window_set_cursor_image(ulong window, int image, uint x, uint y);
 
     /// <summary>Cuts the pointer's image to one frame of an atlas, with that frame's hotspot.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_cursor_atlas(int layout, uint index, uint x, uint y);
+    internal static partial int bcs_window_set_cursor_atlas(ulong window, int layout, uint index, uint x, uint y);
 
     /// <summary>Sets how often the app updates with its window focused and without.</summary>
     [LibraryImport(Library)]
@@ -434,27 +440,27 @@ internal static unsafe partial class Native
     /// <summary>Minimizes the window.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_minimize();
+    internal static partial int bcs_window_minimize(ulong window);
 
     /// <summary>Maximizes the window, or puts it back.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_maximized(int maximized);
+    internal static partial int bcs_window_set_maximized(ulong window, int maximized);
 
     /// <summary>Writes where the window is, how large, and whether it is maximized.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_place(NativeWindowPlace* place);
+    internal static partial int bcs_window_place(ulong window, NativeWindowPlace* place);
 
     /// <summary>Hands the window to the platform to be moved by the pointer.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_start_drag_move();
+    internal static partial int bcs_window_start_drag_move(ulong window);
 
     /// <summary>Hands the window to the platform to be resized from an edge.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_start_drag_resize(int edge);
+    internal static partial int bcs_window_start_drag_resize(ulong window, int edge);
 
     /// <summary>Counts the monitors the platform reports.</summary>
     [LibraryImport(Library)]
@@ -474,7 +480,7 @@ internal static unsafe partial class Native
     /// <summary>Takes the screen over at one of a monitor's own video modes.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_video_mode(int monitor, int mode);
+    internal static partial int bcs_window_set_video_mode(ulong window, int monitor, int mode);
 
     /// <summary>Describes one monitor by index.</summary>
     [LibraryImport(Library)]
@@ -484,7 +490,7 @@ internal static unsafe partial class Native
     /// <summary>Sets whether the cursor is confined or hidden.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_cursor(int grab, int visible);
+    internal static partial int bcs_window_set_cursor(ulong window, int grab, int visible);
 
     // -- App states
 

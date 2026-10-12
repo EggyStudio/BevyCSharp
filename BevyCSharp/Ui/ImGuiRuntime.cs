@@ -264,7 +264,7 @@ public static unsafe class ImGuiRuntime
             _ => CursorShape.Default,
         };
 
-        _ = Native.bcs_window_set_cursor_shape((int)shape);
+        _ = Native.bcs_window_set_cursor_shape(Native.PrimaryWindow, (int)shape);
     }
 
     /// <summary>Ends the frame and hands the engine what came of it.</summary>
