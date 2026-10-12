@@ -108,6 +108,7 @@ internal static class Catalog
         new("test_meshlet", TestMeshlet.Build, TestMeshlet.Configure),
         new("mirror", MirrorExample.Build),
         new("solari", Solari.Build, Solari.Configure),
+        new("solari_reflections", SolariReflections.Build, SolariReflections.Configure),
         new("light_textures", LightTextures.Build),
         new("lines", Lines.Build),
         new("mesh_ray_cast", MeshRayCast.Build),

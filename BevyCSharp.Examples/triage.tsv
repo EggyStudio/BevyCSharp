@@ -399,7 +399,6 @@ transparent_window	can
 window_drag_move	can
 window_resizing	can	the size read each frame and shown when it changes, where Bevy reads its resize messages
 inline_image	can	through Bevy's reflected InlineImage
-solari_reflections	missing	the settings of Solari's reflections its panel sets, which Config.RayTracedLighting does not reach
 compressed_image_saver	missing	Bevy's asset processor and its compressing image saver, which the bridge does not run
 mines	can
 mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types

@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c8849d71`. Item 21, read from the commit: under a `[Changed]` filter the runner
+Reviewed up to `0da017e7`. render_recovery, ABI 276, read against the lock, no crate: a policy for a
+render error, quit, ignore, stop rendering or recover, an error count, and a call that causes Bevy's
+four errors, out of memory, a validation error, a device destroyed and an endless loop, which the
+example offers as Bevy's does and the capture presses none of; the guide's section in the running
+page. Three things the diff shows only in part. First, wgpu's std feature is off in this build, so
+wgpu keeps one error-scope stack for every thread, and while a pipeline compiles on any pool thread
+a validation error raised on any thread falls into the pipeline cache's scope, comes back as a
+failed shader module, and is never reported, which holds for Bevy's own concurrent compiles too;
+turning the feature on adds no package but four edges of wasm-only crates to the lock, which
+Decision 25 leaves to the owner's word, so it is reverted, and the cause instead waits for a frame
+with no pipeline compiling, in an exclusive system at cleanup, after which the recovery tests passed
+six runs of six where the error went missing in one of three. The owner is asked at 05:45 whether
+wgpu's std feature may go on. Second, Bevy 0.20's recovery comes back without its lighting, an unlit
+cube drawing its color and a lit one black with no light state the bridge touches, and a lost device
+dies in Bevy's GPU clustering readback on the render thread in four runs of six, so the tests cause
+validation errors alone and the docs and the recover remark say both limits. Third, three crashes
+fixed on the way: an app quitting while pipelines compile could abort at exit as a pool thread
+dropped the last device under the driver's exit handlers, so every exit waits at most ten seconds
+for compiling pipelines; the offscreen frame wait ended the process with code 87 on a submission a
+lost device never took, so it waits on its own device's marks alone and treats a wrong submission
+index as the renderer's to report, with a unit test; and a destroy mid-frame let Bevy's later
+systems panic making buffers on the dead device, so the cause moved to the frame's end. One failure
+in the first full run, a shadow test reading no grays, passed alone and paired, and a cause left
+pending from a previous app, which could fire in the next test's app, is cleared as each app is
+built, after which the suite passed whole, 1,450 and 2 skipped of 1,452; cargo 167 and 95.
+EXAMPLES.md reads 356 written, 2 in part and 23 missing. Right, the error scope's leak found and
+worked around rather than papered, the lock left to the owner, and each crash fixed where it was and
+tested. Next solari_reflections, written and building, then the rows that wait on the owner's word.
+
+Before it, `c8849d71` came, item 21, read from the commit: under a `[Changed]` filter the runner
 lists the chunks unmarked and marks each row as the method runs on it, its own component and the
 ones it writes, in the one-component form and the form of several, so a method watching its own
 component runs on the rows that changed before it ran and not on every row every frame, and a row
@@ -55,28 +84,6 @@ since at minus the radius times the scale on the vertical axis on every call, wh
 Mars at half size. EXAMPLES.md reads 355 written, 2 in part and 24 missing. Right, the planet placed
 every call rather than trusting the add, and Mars refused without the picture its dust needs. Next
 item 21, the changed filter, then render_recovery and solari_reflections as read against the lock.
-
-Before it, `c9b8728f` came, item 19, the world a scene file saves whole: `EcsText`, two numbers into
-the managed store `EcsList` keeps its lists in, so a component names text of any length, converting
-to and from `string`, freed by the hook the generator registers when the component leaves its
-entity, copied with a clone, a JSON string in the scene and a text field in the inspector, a handle
-used after its text is freed throwing; `[NotSaved]` on a component's field, which the schema marks,
-the scene file skips on a write and a load leaves at the type's start, and which rides along through
-a script reload's in-place move; `[SceneResource]` on a resource struct of the game's own, a
-generated schema as a component's and the ones present written under `worldResources` by
-`SceneFile.Save` and inserted by `Load` alone, since `Write` and `Read` back the editor's undo of a
-delete, which must not roll a resource back, a test covering it; the two attributes in files of
-their own. Bevy's example saves under the user's folder, prints the JSON and loads a checked-in JSON
-scene with the helmet, logging what arrived; the components and the scenes guides have their
-sections; 203 lines of whole-scene tests, the generator's tests for the text and the attribute, and
-the reload test carrying a field left out. The suite 1,440 passed and 2 skipped of 1,442;
-EXAMPLES.md reads 354 written, 2 in part and 25 missing. Right, the text a handle into the store the
-lists already use, and the resources kept out of the calls the undo rides on. Found on the way and
-not fixed: a behavior's `[Changed]` filter on its own type fires every frame, since the chunks call
-stamps every row before the runner tests the filter, which the generator's tests already note and
-the example sidesteps with a read-only query, as Bevy's log system reads; it is item 21, after
-atmosphere, which is written and waits on the native build at ABI 275. Then render_recovery and
-solari_reflections as read against the lock.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
