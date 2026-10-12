@@ -55,7 +55,6 @@ BevyCSharp.Tests/Mesh2dTests.cs
 BevyCSharp.Tests/MeshFileTests.cs
 BevyCSharp.Tests/MeshTagTests.cs
 BevyCSharp.Tests/NativeComponentTests.cs
-BevyCSharp.Tests/NativeInputLayoutTests.cs
 BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
 BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
@@ -75,7 +74,6 @@ BevyCSharp.Tests/SceneValueTests.cs
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
-BevyCSharp.Tests/ShaderLayoutTests.cs
 BevyCSharp.Tests/ShaderPassTests.cs
 BevyCSharp.Tests/ShaderValueTests.cs
 BevyCSharp.Tests/ShadowTests.cs
@@ -85,6 +83,5 @@ BevyCSharp.Tests/SparseComponentTests.cs
 BevyCSharp.Tests/SpirvComputeTests.cs
 BevyCSharp.Tests/SpriteTests.cs
 BevyCSharp.Tests/StreamingTests.cs
-BevyCSharp.Tests/TextConventionTests.cs
 BevyCSharp.Tests/TimingTests.cs
 BevyCSharp.Tests/UiPixelTests.cs
