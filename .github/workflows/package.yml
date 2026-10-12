@@ -440,6 +440,51 @@ jobs:
           path: ${{ runner.temp }}/examples
           if-no-files-found: ignore
 
+  # A real window stormed while it draws, resized through odd sizes, minimized and given back,
+  # moved and set to a last size it must then draw at with nothing logged (WindowStormTests). Only
+  # where the bridges are built, since the test job's headless bridge draws nothing, and in X11
+  # under xvfb-run, which gives a minimized window back where nothing else on the runner would show
+  # one. The test skips where it is not asked for, so the step asks and fails when it was skipped.
+  storm:
+    name: storm a window
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: [native]
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe to draw with, ALSA, which the bridge's audio links against, and an X server of
+      # the runner's own for the window.
+      - name: Install a software Vulkan, ALSA and Xvfb
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev xvfb
+
+      - name: Build the tests on the render bridge
+        run: dotnet build BevyCSharp.Tests -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Storm a window
+        run: |
+          out="$RUNNER_TEMP/storm.txt"
+          xvfb-run -a -s "-screen 0 1920x1080x24" env -u WAYLAND_DISPLAY BCS_WINDOW_STORM=1 \
+            dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --no-build --filter "FullyQualifiedName~WindowStormTests" | tee "$out"
+          if ! grep -Eq "Passed: +1, Skipped: +0" "$out"; then
+            echo "::error::The window storm did not run, so nothing was stormed. The test skips where it is not asked for or has no X11 display."
+            exit 1
+          fi
+
   # The README followed as a stranger would, in a container holding the .NET SDK and the packages of
   # this commit alone, the template installed and a game made from it, held to the first program as
   # the README has it, built and run with no display. build/readme-walk.sh takes the program out of

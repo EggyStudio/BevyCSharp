@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `220aa7b0`, the project file's window title and icon: `ProjectSettings.Title` and
+Reviewed up to `4074f045`, two commits from SHARED.md's rows. `530d0dc6`, the shader cache's
+imports: `ShaderImportTests.AnEditToAModuleAnotherExportsRecompilesTheShaderImportingIt`, a tint
+module exported again by a gather module through `__exported import`, the shader importing gather
+alone, an edit to the tint turning the cube from green to red, so the compiler's dependency file,
+which decides whether a cached result stands, is proven to hold the exporter's export; the import
+test of `ShaderMaterialTests` moved with it, since that file passed N 1.3's 800 lines, the suite
+catching it and no listing taken. `4074f045`, the window storm: `WindowStormTests` opens a real
+window, resizes it through eight sizes a frame apart, some odd, minimizes it and gives it back twice
+through the window's minimize request, moves it, sets 800 by 450 and takes a screenshot that must
+read 800 by 450 with nothing logged; `Needs.WindowStorm` skips it unless `BCS_WINDOW_STORM=1` on a
+display that gives a minimized window back, X11 on Linux and not Wayland, Windows or macOS, so it
+never moves a window about a desktop unasked and the jobs with no display say why they skip; winit
+refused its loop off the main thread, so the bridge builds `WinitPlugin` with `run_on_any_thread` on
+Linux and Windows, which a game's app on its main thread never meets and macOS ignores. Run under
+`xvfb-run` with `WAYLAND_DISPLAY` unset, 4 of 4 on the laptop's GPU and once on lavapipe, 4 to 6 s
+each; the whole suite over both passed, 1,469 and 3 skipped of 1,472, the storm the third. Both
+right. SHARED.md's two rows read has. Next the step that runs the storm in the workflow, in the pack
+run and not on every push: a push's test job builds the headless bridge and nothing in it draws, so
+the storm would skip there as every drawing test does, and a render build for it alone would cost
+the job a quarter of an hour cold; the pack run holds the native job's linux-x64 render bridge as an
+artifact, so a step there puts it in the test bin and runs the storm under `xvfb-run -a` with the
+variable set, `xvfb` among the packages, its failure an `::error::` naming it, as 3DEngine's storm
+runs in its whole run and not on each push.
+
+Before it, `220aa7b0` came, the project file's window title and icon: `ProjectSettings.Title` and
 `Icon`, two rows on the Project page; an app's window takes the title where its config leaves the
 default, `App.TitleFor` tested, and the player prefers it to the scene's file name, so an export
 opens under it; the icon through `bcs_window_set_icon` at ABI 281, `window/icon.rs`, which keeps the
@@ -50,20 +74,6 @@ start and the export taking it; the icon's field and row with the window wearing
 bridge call, since Bevy's `Window` carries no icon of its own and winit's is set by the
 `WinitWindows` under the primary window, an ABI step; the executable's and the bundle's icons, each
 platform's own, listed under the export and not taken.
-
-Before it, `7c5fb903` came, a documents commit: the shadows' 2 ms said and left. Bevy's `trace`
-feature, which puts the spans in, is not compiled into the bridge, and turning it on wants a new
-`native/Cargo.lock`, the locked metadata refusing it, the manifest restored and the lock
-byte-identical after, so placing them waits as the crates the lock lacks do, said under the shadows'
-entry. A first wording named who decides, NormTests caught it and the commit was amended before it
-went anywhere: N 4.7 holding by its own test. Right. Next, from TODO.md's order at its first
-buildable item, Animation's: nothing in a scene names the state machine a placed model runs. A
-component, `AnimationMachinePlayer`, holding a `DataRef<AnimationStateMachine>`, which the per-frame
-advance starts on an entity carrying it once its model arrives and stops when the component is taken
-off or the entity despawned, so a level saves which machine each placed character runs and the
-inspector edits it as any data reference; managed alone, no ABI; a test saving a scene with the
-component and loading it to a running machine, and the animation guide's state machine section
-gaining the component. The graph drawing and the blend of clips by a parameter stay listed.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

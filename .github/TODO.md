@@ -555,8 +555,9 @@ as the reason, so a run's summary counts what did not run there rather than pass
 A real window is put through a storm of resizes, minimizes and moves while it draws, and must
 draw at the size last asked for with nothing logged (`WindowStormTests`). It runs where a run asks
 with `BCS_WINDOW_STORM=1` on a display that gives a minimized window back, which `xvfb-run` gives
-off any desktop, on a GPU or on lavapipe alike, and is skipped with that reason elsewhere, the test
-workflow's jobs having no display.
+off any desktop, on a GPU or on lavapipe alike, and is skipped with that reason elsewhere. The pack
+run storms one on lavapipe under `xvfb-run` with the Linux render bridge, and a push's test job,
+whose bridge draws nothing, skips it as it skips every test that draws.
 
 Every attribute the generators act on is compiled and run by `GeneratorAttributeTests`, from the
 generators' own table (`RecognizedAttributes`), so an attribute added there with no case fails by
