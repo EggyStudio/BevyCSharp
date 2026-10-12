@@ -10,7 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `29f904fd`, a documents commit: the marking by compared bytes measured over the
+Reviewed up to `7c5fb903`, a documents commit: the shadows' 2 ms said and left. Bevy's `trace`
+feature, which puts the spans in, is not compiled into the bridge, and turning it on wants a new
+`native/Cargo.lock`, the locked metadata refusing it, the manifest restored and the lock
+byte-identical after, so placing them waits as the crates the lock lacks do, said under the shadows'
+entry. A first wording named who decides, NormTests caught it and the commit was amended before it
+went anywhere: N 4.7 holding by its own test. Right. Next, from TODO.md's order at its first
+buildable item, Animation's: nothing in a scene names the state machine a placed model runs. A
+component, `AnimationMachinePlayer`, holding a `DataRef<AnimationStateMachine>`, which the per-frame
+advance starts on an entity carrying it once its model arrives and stops when the component is taken
+off or the entity despawned, so a level saves which machine each placed character runs and the
+inspector edits it as any data reference; managed alone, no ABI; a test saving a scene with the
+component and loading it to a running machine, and the animation guide's state machine section
+gaining the component. The graph drawing and the blend of clips by a parameter stay listed.
+
+Before it, `29f904fd` came, a documents commit: the marking by compared bytes measured over the
 twentieth and is out, TODO.md saying why. The stress game's movers by its own script, each side
 packed as its own version so the game built on that build alone: 100,000 from 3.61 to 4.12 ms, 14%
 more, 200,000 from 5.86 to 6.64, 300,000 from 7.85 to 8.74 and 400,000 from 9.82 to 11.17, the
@@ -40,23 +54,6 @@ folded into the same, at ABI 281. It is stricter than Bevy's own detection, whic
 so it is kept only on a measure: the stress game's frame before and after by its own script, kept
 where the frame grows by less than a twentieth, and the comparing written as a cost in the behaviors
 guide; where it costs more, the marking stays as `c8849d71` has it and TODO.md says why.
-
-Before it, `0ad78d34` came, two commits from TODO.md's order. `df8ace41`: a box, sphere or capsule
-left at zero on a placed model's root fits the model's parts, waiting until the scene instances have
-posted the root ready, a set they keep pruned of the despawned and forgotten as an app starts,
-rather than being a unit cube made once, as a hull waits already; its test read a unit cube under
-the suite's load when it waited on Bevy's instance alone, which can sit on the root a frame before
-the scene's entities, mended before the commit and then passed ten of ten beside a process drawing
-the shadow and animation tests in a loop; the physics guide follows, and TODO.md's physics notes
-lose the crouch and the joint's two bodies, in since, with the material card's item corrected.
-`0ad78d34`: a pad's dead zones set through the reflected settings on its entity, pinned by a test of
-a pretended pad, inside the zone reading zero and past it unscaled, as the default zone did already
-though Bevy's comments speak of rescaling; the input guide follows, and TODO.md's behavior item
-reads as `c8849d71` left it. Verdict 13 stands at seven whole suites of ten, this one over both.
-Right, the fit waiting on what the engine itself posts rather than on Bevy's instance, and a test's
-flake mended before it could be committed. Next TODO.md's order on: the synthetic pointer's drag on
-a handle and the camera's steering in an offscreen editor, which exercise the editor as a user does;
-touch gestures wait, having no device here to read them on.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

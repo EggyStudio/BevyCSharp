@@ -162,10 +162,10 @@ curves, a field of any reflected component among what a curve moves, and an even
 triggers observers as the clip passes it. The console's `anim.*` commands reach it from the editor.
 What is left:
 
-- **A state machine is run from code.** `Animation.Run` starts one on a model, and nothing in a
-  scene file names the machine a placed model runs, nor draws its states as a graph in the editor.
-  A state plays one clip, rather than a blend of clips by a parameter as a walk turning into a run
-  by speed would.
+- **A state machine is edited as lists.** `Animation.Run` starts one on a model, and an
+  `AnimationMachinePlayer` names the one a placed model runs, which a scene saves. Nothing draws its
+  states as a graph in the editor, and a state plays one clip, rather than a blend of clips by a
+  parameter as a walk turning into a run by speed would.
 
 ### Textures and shaders
 

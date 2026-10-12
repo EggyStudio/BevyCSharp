@@ -158,6 +158,8 @@ readonly struct Bevy.AnimationFinished : IEquatable<AnimationFinished>
   static bool op_Inequality(AnimationFinished left, AnimationFinished right)
   string Clip { get; init; }
   void Deconstruct(out Entity Scene, out string Clip)
+struct Bevy.AnimationMachinePlayer
+  DataRef<AnimationStateMachine> Machine
 sealed class Bevy.AnimationMachineState
   AnimationMachineState()
   bool Repeat

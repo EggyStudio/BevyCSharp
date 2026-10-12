@@ -5,6 +5,12 @@ public static partial class Animation
     /// <summary>The machines running, by the model they run on.</summary>
     private static readonly Dictionary<Entity, RunningMachine> Machines = [];
 
+    /// <summary>
+    /// The machine each <see cref="AnimationMachinePlayer"/> was last started with, or nothing where
+    /// it named none that could run, with the id it named, so a reference is read and run once.
+    /// </summary>
+    private static readonly Dictionary<Entity, (AnimationStateMachine? Machine, ulong Id)> Played = [];
+
     /// <summary>Runs a state machine on a model, which enters its starting state once the model arrives.</summary>
     /// <param name="scene">The entity the model's scene was spawned under.</param>
     /// <param name="machine">The states and transitions, read from a file or made in code.</param>
@@ -68,6 +74,7 @@ public static partial class Animation
     /// <summary>Moves every machine one step. Called once a frame by the app.</summary>
     internal static void AdvanceMachines(EcsWorld world)
     {
+        StartPlayers(world);
         if (Machines.Count == 0) return;
 
         foreach (var (scene, running) in Machines.ToList())
@@ -91,8 +98,67 @@ public static partial class Animation
         }
     }
 
+    /// <summary>
+    /// Starts the machine each <see cref="AnimationMachinePlayer"/> names, again where it names
+    /// another or its file was read again, and stops the one a player started on a model that no
+    /// longer carries it.
+    /// </summary>
+    private static void StartPlayers(EcsWorld world)
+    {
+        var players = world.EntitiesWith<AnimationMachinePlayer>();
+        if (players.Length == 0 && Played.Count == 0) return;
+
+        if (Played.Count > 0)
+        {
+            var carrying = players.ToHashSet();
+            foreach (var entity in Played.Keys.Where(entity => !carrying.Contains(entity)).ToList())
+            {
+                Played.Remove(entity);
+                Machines.Remove(entity);
+            }
+        }
+
+        foreach (var entity in players)
+        {
+            var reference = world.GetOrDefault<AnimationMachinePlayer>(entity).Machine;
+
+            // Read once for each reference, which a file that will not read leaves at nothing, so
+            // the log hears of it once rather than every frame.
+            if (Played.TryGetValue(entity, out var was) && was.Id == reference.Id && was.Machine is null) continue;
+
+            AnimationStateMachine? machine = null;
+            if (reference.IsSet && !DataAssets.TryGet(reference, out machine, out var problem))
+            {
+                Log.Error($"The animation state machine of {entity} did not start. {problem}");
+                machine = null;
+            }
+
+            // The machine it was started with, the same object while its file was not read again,
+            // left as it is, running or stopped since by the game or by a clip the model lacks.
+            if (was.Id == reference.Id && ReferenceEquals(was.Machine, machine)) continue;
+
+            Played[entity] = (machine, reference.Id);
+            Machines.Remove(entity);
+            if (machine is null) continue;
+
+            try
+            {
+                Run(entity, machine);
+            }
+            catch (ArgumentException error)
+            {
+                Log.Error($"The animation state machine of {entity} did not start. {error.Message}");
+                Played[entity] = (null, reference.Id);
+            }
+        }
+    }
+
     /// <summary>Forgets every machine, for an app starting, whose entities are its own.</summary>
-    internal static void ForgetMachines() => Machines.Clear();
+    internal static void ForgetMachines()
+    {
+        Machines.Clear();
+        Played.Clear();
+    }
 
     private static RunningMachine Running(Entity scene) =>
         Machines.TryGetValue(scene, out var running)

@@ -107,6 +107,125 @@ public sealed class AnimationMachineTests
     }
 
     /// <summary>
+    /// Runs a test in an asset root of its own holding the strip and a machine of one state that
+    /// bends it, with the machine's id, and puts the root back after.
+    /// </summary>
+    private static void InStripFolder(Action<string, ulong> test)
+    {
+        using var folder = new TestFolder("bcs-player-");
+        Directory.CreateDirectory(Path.Combine(folder.Path, "models"));
+        File.Copy(Path.Combine(EngineHarness.AssetDirectory, "models", "bend.gltf"), Path.Combine(folder.Path, "models", "bend.gltf"));
+        File.WriteAllText(
+            Path.Combine(folder.Path, "strip.data.json"),
+            """
+            { "format": "bevycsharp.data.1", "type": "Bevy.AnimationStateMachine",
+              "fields": { "States": [ { "Name": "Bending", "Clip": "Bend", "Speed": 4 } ] } }
+            """);
+
+        var was = Streaming.AssetRoot;
+        Streaming.AssetRoot = folder.Path;
+        DataAssets.ReloadAll();
+        AssetIds.Reindex();
+
+        try
+        {
+            test(folder.Path, AssetIds.IdOf("strip.data.json", create: true));
+        }
+        finally
+        {
+            Streaming.AssetRoot = was;
+            DataAssets.ReloadAll();
+            AssetIds.Reindex();
+        }
+    }
+
+    /// <summary>
+    /// A model carrying a player that names a machine file runs that machine once it arrives, and
+    /// stops when the player is taken off, while one naming no file is said on the log once and
+    /// left as it is.
+    /// </summary>
+    [SkippableFact]
+    [ExpectsError("bevy", "did not start")]
+    public void APlayerInTheSceneRunsTheMachineItNames()
+    {
+        Needs.Renderer();
+
+        InStripFolder((root, id) =>
+        {
+            var (placed, lost) = (Entity.None, Entity.None);
+            string? running = null, lostState = "never read", after = "never read";
+
+            var run = new PictureRun
+            {
+                AssetRoot = root,
+                Scene = ecs =>
+                {
+                    placed = ecs.SpawnScene(AssetServer.LoadGltfScene("models/bend.gltf"));
+                    ecs.Add(placed, new AnimationMachinePlayer { Machine = new DataRef<AnimationStateMachine>(id) });
+
+                    lost = ecs.SpawnScene(AssetServer.LoadGltfScene("models/bend.gltf"));
+                    ecs.Add(lost, new AnimationMachinePlayer { Machine = new DataRef<AnimationStateMachine>(987654321) });
+                },
+            };
+
+            run.Until("bending", _ => Animation.MachineStateOf(placed) == "Bending")
+                .Do("reading it", world =>
+                {
+                    running = Animation.StateOf(placed)?.Clip;
+                    lostState = Animation.MachineStateOf(lost);
+                    world.Resource<EcsWorld>().Remove<AnimationMachinePlayer>(placed);
+                })
+                .Wait(3)
+                .Do("reading it again", _ => after = Animation.MachineStateOf(placed))
+                .Go();
+
+            Assert.Equal("Bend", running);
+            Assert.Null(lostState);
+            Assert.Null(after);
+        });
+    }
+
+    /// <summary>
+    /// A placed model's player is saved with the scene, by the machine file's id, and the scene
+    /// loaded again runs the machine on the model it places.
+    /// </summary>
+    [SkippableFact]
+    public void ASceneSavedWithAPlayerLoadsToARunningMachine()
+    {
+        Needs.Renderer();
+
+        InStripFolder((root, id) =>
+        {
+            var file = Path.Combine(root, "level.scene.json");
+            var (placed, loaded) = (Entity.None, Entity.None);
+
+            var run = new PictureRun
+            {
+                AssetRoot = root,
+                Scene = ecs =>
+                {
+                    placed = SceneInstances.Spawn(ecs, "models/bend.gltf");
+                    ecs.Add(placed, new AnimationMachinePlayer { Machine = new DataRef<AnimationStateMachine>(id) });
+                },
+            };
+
+            run.Until("bending", _ => Animation.MachineStateOf(placed) == "Bending")
+                .Do("saving the scene and loading it again", world =>
+                {
+                    var ecs = world.Resource<EcsWorld>();
+                    SceneFile.Save(ecs, file, entity => entity == placed);
+                    ecs.Despawn(placed);
+                    loaded = SceneFile.Load(ecs, file).Entities.Single(ecs.Has<AnimationMachinePlayer>);
+                })
+                .Until("bending again", _ => Animation.MachineStateOf(loaded) == "Bending")
+                .Go();
+
+            Assert.Contains("Bevy.AnimationMachinePlayer", File.ReadAllText(file));
+            Assert.Null(Animation.MachineStateOf(placed));
+        });
+    }
+
+    /// <summary>
     /// The machine starts once the model arrives, moves on a trigger and uses it up, moves on a
     /// number passing a value, and comes back when a clip that plays once ends.
     /// </summary>

@@ -278,6 +278,22 @@ Animation.Trigger(fox, "Jump");                  // kept until the transition it
 refused when it is run, and one naming a clip the model does not have is stopped once the model
 arrives, with why on the log.
 
+A model placed in a level names its machine with an `AnimationMachinePlayer` on the entity that
+places it rather than through `Animation.Run`, a reference to the machine's file, which the scene
+saves and the inspector edits as any reference to a data asset, so the level keeps which machine
+each character runs. The machine starts once the model arrives, starts again when the reference
+names another or its file is read again, and stops when the component is taken off:
+
+<!-- compiled with:
+Entity placed = default;
+DataRef<AnimationStateMachine> walker = default;
+float pace = 0f;
+-->
+```csharp
+ctx.Ecs.Add(placed, new AnimationMachinePlayer { Machine = walker });   // walker.data.json
+Animation.SetParameter(placed, "Speed", pace);                         // as for one run from code
+```
+
 A mesh's morph targets, the shapes its vertices blend toward as a clip moves their weights, are
 named in the file, and `Render.MorphTargetNames` gives a mesh's names in their order once it has
 arrived, so a weight is set by the shape it moves toward rather than by its place.
