@@ -2,32 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Core/Plugin.cs DefaultPlugins
-BevyCSharp/Core/Plugin.cs IPlugin
-BevyCSharp/Core/Plugin.cs IPluginGroup
-BevyCSharp/Core/Plugin.cs PluginOrderException
-BevyCSharp/Core/Stage.cs StageOrder
-BevyCSharp/Core/SystemDescriptor.cs SystemFn
-BevyCSharp/Core/Window.cs CursorGrab
-BevyCSharp/Core/Window.cs CursorShape
-BevyCSharp/Core/Window.cs MonitorInfo
-BevyCSharp/Core/Window.cs VideoMode
-BevyCSharp/Core/Window.cs WindowEdge
-BevyCSharp/Core/Window.cs WindowMode
-BevyCSharp/Core/Window.cs WindowPlace
-BevyCSharp/Core/WindowMessages.cs CursorEntered
-BevyCSharp/Core/WindowMessages.cs CursorLeft
-BevyCSharp/Core/WindowMessages.cs FileDropped
-BevyCSharp/Core/WindowMessages.cs FileHoverCanceled
-BevyCSharp/Core/WindowMessages.cs FileHovered
-BevyCSharp/Core/WindowMessages.cs ImeCommit
-BevyCSharp/Core/WindowMessages.cs ImeComposing
-BevyCSharp/Core/WindowMessages.cs ImeDisabled
-BevyCSharp/Core/WindowMessages.cs ImeEnabled
-BevyCSharp/Core/WindowMessages.cs WindowCloseRequested
-BevyCSharp/Core/WindowMessages.cs WindowFocusChanged
-BevyCSharp/Core/WindowMessages.cs WindowResized
-BevyCSharp/Core/WindowMessages.cs WindowScaleFactorChanged
 BevyCSharp/Diagnostics/ConsoleCommands.cs CommandAttribute
 BevyCSharp/Diagnostics/ConsoleCommands.cs CommandParameter
 BevyCSharp/Diagnostics/ConsoleCommands.cs ConsoleCommand
