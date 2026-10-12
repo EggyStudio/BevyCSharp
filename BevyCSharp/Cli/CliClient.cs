@@ -125,9 +125,3 @@ public static class CliClient
         }
     }
 }
-
-/// <summary>What a console command run in another app answered.</summary>
-/// <param name="Success">Whether it worked.</param>
-/// <param name="Result">What it said, or nothing.</param>
-/// <param name="Error">Why it failed, when it did.</param>
-public sealed record CliAnswer(bool Success, string? Result, string? Error);
