@@ -65,7 +65,6 @@ BevyCSharp.Tests/RenderReadTests.cs
 BevyCSharp.Tests/RenderTargetTests.cs
 BevyCSharp.Tests/RenderTests.cs
 BevyCSharp.Tests/ResourceTests.cs
-BevyCSharp.Tests/RotationTests.cs
 BevyCSharp.Tests/SampleLightTests.cs
 BevyCSharp.Tests/SaveGameTests.cs
 BevyCSharp.Tests/ScaleTests.cs
