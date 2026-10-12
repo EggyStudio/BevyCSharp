@@ -30,6 +30,12 @@ use bevy::render::texture::{FallbackImage, GpuImage};
 
 use super::reflect::{Binding, BindingKind, FieldType, Layout, Scalar, Target};
 
+mod checks;
+#[cfg(test)]
+mod tests;
+
+pub use checks::{check, listing};
+
 /// How a sampler reads, as a game describes it.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct SamplerSettings {
@@ -131,73 +137,6 @@ fn split_index(key: &str) -> (&str, u32) {
     }
 }
 
-/// Says whether `value` can go where `name` is, and why not when it cannot.
-///
-/// What the entry points ask before storing a value, so a wrong name or a wrong type is refused
-/// where the call was made rather than found later on the render side.
-pub fn check(layout: &Layout, name: &str, value: &Value) -> Result<(), String> {
-    let (base, index) = match value {
-        Value::Image(..) | Value::Sampler(_) | Value::Buffer(_) => split_index(name),
-        _ => (name, 0),
-    };
-
-    let Some(target) = layout.find(base) else {
-        return Err(format!(
-            "the shader declares nothing called {base}. It declares {}.",
-            listing(layout)
-        ));
-    };
-
-    match (target, value) {
-        (Target::Constant(_), Value::Numbers { components: 1, data, .. }) if data.len() == 4 => Ok(()),
-        (Target::Constant(constant), value) => Err(format!(
-            "{base} is a pipeline constant, a {}, which takes one number, and {} cannot go there",
-            constant.scalar.describe(),
-            value.describe()
-        )),
-        (Target::Uniform { ty, .. }, Value::Numbers { scalar, components, data }) => {
-            fits(ty, *scalar, *components, data.len() / 4)
-        }
-        (Target::Uniform { .. }, Value::Bytes(_)) => Ok(()),
-        (Target::Resource { info, .. }, Value::Bytes(_))
-            if matches!(info.kind, BindingKind::Uniform { .. }) =>
-        {
-            Ok(())
-        }
-        (Target::Resource { info, .. }, value) => {
-            let wanted = match (&info.kind, value) {
-                (BindingKind::Texture { .. } | BindingKind::StorageTexture { .. }, Value::Image(..))
-                | (BindingKind::Storage { .. }, Value::Buffer(_))
-                | (BindingKind::Sampler { .. }, Value::Sampler(_))
-                | (BindingKind::AccelerationStructure, Value::RayScene(_)) => true,
-                _ => false,
-            };
-
-            if !wanted {
-                return Err(format!(
-                    "{base} is a {}, and {} cannot go there",
-                    info.describe(),
-                    value.describe()
-                ));
-            }
-
-            if index >= info.count.unwrap_or(1) {
-                return Err(format!(
-                    "{base} holds {}, so there is no element {index}",
-                    info.count.unwrap_or(1)
-                ));
-            }
-
-            Ok(())
-        }
-        (Target::Uniform { ty, .. }, value) => Err(format!(
-            "{name} is a {}, and {} cannot go there",
-            ty.describe(),
-            value.describe()
-        )),
-    }
-}
-
 /// Says whether `count` elements of `components` numbers of `scalar` fit a field of type `ty`.
 fn fits(ty: &FieldType, scalar: Scalar, components: u32, numbers: usize) -> Result<(), String> {
     let (element, capacity) = match ty {
@@ -245,17 +184,6 @@ fn fits(ty: &FieldType, scalar: Scalar, components: u32, numbers: usize) -> Resu
     }
 
     Ok(())
-}
-
-/// Every name in a layout, for a message.
-pub fn listing(layout: &Layout) -> String {
-    let names = layout.names();
-
-    if names.is_empty() {
-        "nothing".into()
-    } else {
-        names.join(", ")
-    }
 }
 
 /// Writes numbers where a field is, element by element at the field's stride.
@@ -858,108 +786,5 @@ impl Packed {
 
     fn is_array(&self, number: u32) -> bool {
         self.arrays.contains(&number)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::super::reflect::{Family, reflect};
-    use super::*;
-
-    fn layout() -> Layout {
-        reflect(
-            include_str!("fixtures/material_fragment.wgsl"),
-            include_str!("fixtures/material_fragment.json"),
-            Family::Material,
-        )
-        .expect("the fixture reflects")
-        .layout
-    }
-
-    fn floats(values: &[f32]) -> Vec<u8> {
-        values.iter().flat_map(|value| value.to_ne_bytes()).collect()
-    }
-
-    fn numbers(components: u32, values: &[f32]) -> Value {
-        Value::Numbers {
-            scalar: Scalar::F32,
-            components,
-            data: floats(values),
-        }
-    }
-
-    #[test]
-    fn a_value_of_the_right_shape_is_accepted() {
-        let layout = layout();
-
-        assert_eq!(check(&layout, "roughness", &numbers(1, &[0.5])), Ok(()));
-        assert_eq!(check(&layout, "tint", &numbers(4, &[1.0; 4])), Ok(()));
-        assert_eq!(check(&layout, "weights", &numbers(1, &[1.0; 1000])), Ok(()));
-        assert_eq!(check(&layout, "twist", &numbers(16, &[0.0; 16])), Ok(()));
-        assert_eq!(check(&layout, "lights[2].color", &numbers(3, &[1.0; 3])), Ok(()));
-    }
-
-    #[test]
-    fn a_wrong_name_says_what_there_is() {
-        let error = check(&layout(), "rougness", &numbers(1, &[0.5])).unwrap_err();
-        assert!(error.contains("rougness") && error.contains("roughness"), "{error}");
-    }
-
-    #[test]
-    fn a_wrong_shape_is_refused() {
-        let layout = layout();
-
-        assert!(check(&layout, "tint", &numbers(3, &[1.0; 3])).is_err());
-        assert!(check(&layout, "weights", &numbers(1, &[1.0; 1001])).is_err());
-        assert!(
-            check(
-                &layout,
-                "mode",
-                &Value::Numbers {
-                    scalar: Scalar::F32,
-                    components: 1,
-                    data: floats(&[1.0])
-                }
-            )
-            .is_err()
-        );
-        assert!(check(&layout, "albedo", &numbers(1, &[1.0])).is_err());
-    }
-
-    #[test]
-    fn an_array_is_written_at_its_stride() {
-        let layout = layout();
-        let Some(Target::Uniform { offset, ty, .. }) = layout.find("weights") else {
-            panic!("weights was not found");
-        };
-
-        let mut bytes = vec![0u8; 16200];
-        write_numbers(&mut bytes, offset, ty, 1, &floats(&[1.0, 2.0, 3.0]));
-
-        let at = |index: usize| {
-            let start = offset as usize + index * 16;
-            f32::from_ne_bytes(bytes[start..start + 4].try_into().unwrap())
-        };
-
-        assert_eq!((at(0), at(1), at(2)), (1.0, 2.0, 3.0));
-    }
-
-    #[test]
-    fn a_matrix_is_written_a_padded_row_at_a_time() {
-        let ty = FieldType::Matrix(Scalar::F32, 3, 3);
-        let mut bytes = vec![0u8; 48];
-
-        write_numbers(&mut bytes, 0, &ty, 9, &floats(&[1., 2., 3., 4., 5., 6., 7., 8., 9.]));
-
-        let at = |byte: usize| f32::from_ne_bytes(bytes[byte..byte + 4].try_into().unwrap());
-        assert_eq!((at(0), at(8), at(16), at(32), at(40)), (1.0, 3.0, 4.0, 7.0, 9.0));
-    }
-
-    #[test]
-    fn an_element_of_an_array_of_textures_is_named_by_index() {
-        assert_eq!(element_name("layers", 0), "layers");
-        assert_eq!(element_name("layers", 3), "layers[3]");
-        assert_eq!(split_index("layers[3]"), ("layers", 3));
-        assert_eq!(split_index("albedo"), ("albedo", 0));
     }
 }
