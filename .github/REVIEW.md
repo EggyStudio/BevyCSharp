@@ -10,7 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2381bc58`, nine commits more: `732faf4c` makes the soft shadow test's failure say
+Reviewed up to `7f18b684`. Verdict 13's cause, found without a suite: the soft shadow test run ten
+times while another test process drew the SPIR-V compute, G-buffer and sample light tests in a loop
+failed twice, the diagnostic showing the soft picture all dark, 9,216 pixels of 9,216, with the hard
+one normal, so nothing was drawn, no hard edge and no neighbor's state; the picture run took its
+picture on the first frame the pipelines read ready, and a pipeline is asked for as the frame that
+needs it is drawn, after that question was answered, so under the parallel collections' load the
+soft picture's frame waited on one pipeline more than the answer saw. The picture run waits until
+the pipelines have read ready for three frames running, which covers every test that takes a picture
+through it, and under the same load 15 runs of 15 pass; the first of the ten whole suites the
+verdict asks runs, each later batch's counting. Right, the flake reproduced on purpose under load
+rather than waited for, and the fix in the one place every picture passes through. Next TODO.md's
+order as before, with this file read before each batch.
+
+Before it, `2381bc58` came, nine commits more: `732faf4c` makes the soft shadow test's failure say
 each picture's dark and light counts, Verdict 13's next read, and eight commits, one a folder, empty
 N 3.4's list of 39 places, each test class holding a test folder and disposing it in place of a
 string under the temp path and its own delete, the asset id tests' export copy taking a second
@@ -47,19 +60,6 @@ a blank picture from a hard edge. Right, the lists emptied by moves alone and th
 verdict rather than a retry. Next item 2's other lists in this order: N 3.4's 43 temp folders to the
 test folder across about twenty files, then N 3.3's 10 and N 4.1's 8, then N B3's 19 and N 4.5's 24
 read for which stand by design; the 18 rows wait on the owner's word.
-
-Before it, `eb82688b` came, fourteen commits of item 2's lists in ten minutes, each moving code
-alone: `cbba26c2` splits the scene file of 1,882 lines into captures, lights and sprites with the
-two image calls joining the images file, the scene file left at 696; `bffa7ce9` splits the view
-shader tests into the assets folder, `6fb0a312` the values file into its checks and tests, and
-`0ba830f4` the render control tests into the window's; and ten commits move the test files into
-folders matching the library's, N 1.4's list falling by them from the whole to 28 and N 3.4's lines
-following. N 1.3's list is empty for the first time. The run of `75024f77` is green on all three;
-the owner pushed again at 07:24 and `eb82688b`'s run is in flight. Right, each a commit that moves
-code alone and shortens a list, as item 2 asks. Four files stand within ten lines of the rule,
-programs.rs at 798, the scene value at 793, the console's world commands at 792 and values.rs at
-790, so the next batch that touches any of them splits it first. Next item 2's lists on, N 1.4's 28
-and N 1.2's; the 18 rows wait on the owner's word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -595,7 +595,13 @@ from [SHARED.md](SHARED.md).
     tells a blank picture, a frame drawn before anything, from a hard edge, a soft shadow drawn
     hard. Read on the next failure by those counts and by what ran before it in the suite's order,
     since a test that passes alone and fails in the suite is carrying its neighbor's state or its
-    timing. Settled when the cause is named and the suite passes ten whole runs.
+    timing. Cause found at `7f18b684`, reproduced under load with no suite, the test run ten times
+    beside another process drawing three picture tests in a loop and failing twice with the soft
+    picture all dark and the hard one normal: the picture run took its picture on the first frame
+    the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
+    failure was timing under the parallel collections' load and not order; the picture run waits for
+    three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
+    under the load. Settled when ten whole suites pass since `7f18b684`, the first running.
 
 ## Decisions
 

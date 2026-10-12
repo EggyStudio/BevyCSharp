@@ -236,9 +236,9 @@ is the protocol. Clips are listed in the file's order, one the file left unnamed
 number of times before it holds its last pose, and `SetRepeat` changes that while it plays without
 starting it over, zero being for ever. A clip that does not repeat posts `AnimationFinished` when
 it reaches its end. The
-console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor or `bcs`. One clip
-plays at a time, fading from the last, so masks, additive layers and a state machine over clips
-are left to the game.
+console's `anim.clips`, `anim.play` and `anim.stop` do the same from the editor or `bcs`. `Play`
+plays one clip at a time, fading from the last. A graph built node by node, below, blends clips by
+weight with masks and additive layers, and a state machine over clips is left to the game.
 
 A mesh's morph targets, the shapes its vertices blend toward as a clip moves their weights, are
 named in the file, and `Render.MorphTargetNames` gives a mesh's names in their order once it has

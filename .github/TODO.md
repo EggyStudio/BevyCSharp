@@ -24,28 +24,31 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-- **Bevy's styled widgets, three examples.** Feathers, Bevy's styled widgets over its core ones,
-  which the bridge does not build, its crate not being in the lock, and which Bevy spawns from its
-  scene templates (`feathers_counter`, `feathers_gallery`, `virtual_keyboard`). The core widgets are
-  built and reached through their wrappers, what they report reaches C# as Bevy's `Activate`,
-  `ValueChange` and `MenuEvent`, and the focus moves between nodes by direction.
+Each of the eighteen waits on a crate the lock does not hold, or, for the system fonts, on the
+decision to keep their discovery off.
+
+- **Bevy's camera controllers, five examples.** Its free, pan and pan-orbit cameras, their plugins
+  and their settings (`free_camera_controller`, `pan_camera_controller`, `pan_orbit_camera_cad`,
+  `pan_orbit_camera_minimal`, `pan_orbit_camera_ortho`), where `BevyCSharp.Examples` has a free
+  camera of its own written as a behavior.
+- **Bevy's styled widgets, four examples.** Feathers, Bevy's styled widgets over its core ones,
+  which Bevy spawns from its scene templates (`feathers_counter`, `feathers_gallery`,
+  `feathers_number_input`, `virtual_keyboard`). The core widgets are built and reached through their
+  wrappers, what they report reaches C# as Bevy's `Activate`, `ValueChange` and `MenuEvent`, and
+  the focus moves between nodes by direction.
+- **Bevy's dev tools, four examples.** Its FPS overlay and frame time graph (`fps_overlay`), its
+  infinite grid (`infinite_grid`, `scene_viewer`) and its picking debug overlay (`debug_picking`),
+  all in `bevy_dev_tools`.
 - **System fonts, three examples.** Bevy's system font discovery, which the bridge does not
   compile in, so a generic family such as sans-serif resolves to the system's font
   (`generic_font_families`, `ime_support`), and the families Bevy's `FontCx` lists and the family
   each generic one stands for (`system_fonts`). A run's weight, width, style, OpenType features and
   axes, its underline and strikethrough and its background color are reached, and the atlases Bevy
   lays a font's glyphs out in are read.
-- **Bevy's deferred buffers from a Slang shader, one example.** A Slang shader is lit by Bevy
-  through `bcs::light` and `bcs::finish`, reaches the clustered decals over it and an irradiance
-  volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
-  into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
-  whose outputs follow the camera's prepasses.
-- **A 2D mesh drawn by a shader, one example.** A `Mesh2d` is drawn with Bevy's `ColorMaterial`,
-  and `shader_material_2d` needs a Slang material that draws on one as `Material` does on a 3D
-  mesh.
-- **Bevy's camera controllers, two examples.** Its free and pan cameras, their plugins and their
-  settings (`free_camera_controller`, `pan_camera_controller`), where `BevyCSharp.Examples` has a
-  free camera of its own written as a behavior.
+- **Assets over HTTP, one example.** Bevy's web asset source (`web_asset`), which pulls in `ureq`.
+- **Compressed images saved, one example.** Bevy's asset processor and its compressing image saver
+  (`compressed_image_saver`), which pull in `ctt`.
+
 Two examples are written in part, leaving out a feature named in each row.
 
 - **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
@@ -154,21 +157,17 @@ does and be authorable without recompiling the bridge, which is the part worth h
 `bevy_animation` is compiled into the render profile, and `Animation` plays a glTF file's clips by
 name on the entity its scene was spawned under, once or over and over, at a speed, held, moved to a
 time, stopped, and faded from one clip to the next over a time, with `AnimationFinished` posted when
-a clip that plays once ends. Every clip in the file is offered, one it left unnamed as Bevy labels
-it, and a clip plays on every animated root the file has. The console's `anim.*` commands reach it
-from the editor. What is left:
+a clip that plays once ends. A graph built node by node blends clips by weight, with masks and
+additive layers, clips are made in code from curves, and an event placed on a clip triggers
+observers as the clip passes it. The console's `anim.*` commands reach it from the editor. What is
+left:
 
-- **One clip at a time.** Bevy's animation graph blends any number of clips by weight, and the
-  bridge builds a flat graph of every clip and plays the newest through `AnimationTransitions`. A
-  clip on part of a body only (a mask), a clip added over another (an additive layer) and weights
-  a game sets itself each need the graph exposed as nodes rather than names.
 - **No state machine.** Which clip follows which, on what condition, is the game's code, read off
   `StateOf` and `AnimationFinished`. A table of states and transitions the editor could draw would
   sit over this.
-- **Clips come from files.** A clip made in code, or one targeting a component other than the
-  transform and a mesh's morph weights, has no way in.
-- **No events inside a clip.** Bevy fires an event at a time within a clip, such as a footstep,
-  which the bridge does not pass on.
+- **A clip made in code moves a few properties.** A curve moves a transform's translation, rotation
+  or scale, an interface node's scale or rotation, or a text's color. A field of another component,
+  which Bevy's animated fields reach through reflection, has no curve of its own.
 
 ### Textures and shaders
 
