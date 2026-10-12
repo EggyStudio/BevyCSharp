@@ -172,12 +172,12 @@ back through tier 1.
 A component lives in Bevy's storage as bytes, so it cannot hold a managed `List<T>`, whose memory
 the garbage collector moves and frees. Two kinds of list fill the gap, and both are built.
 
-- **Inline lists** (`BevyCSharp/Ecs/InlineList.cs`) hold a count and a fixed run of unmanaged
-  items over C#'s `[InlineArray]`. They are the component's own bytes, so they iterate in chunks
-  with everything else and cost nothing to keep, which suits small bounded lists: waypoints, slots,
-  the last few hits. The capacity is part of the type, `InlineList4<T>` through `InlineList64<T>`,
-  because C# fixes an inline array's length at compile time and cannot take it as a type parameter.
-  A freed slot is cleared, so two lists of the same items are the same bytes.
+- **Inline lists** (`BevyCSharp/Ecs/InlineList4.cs` to `InlineList64.cs`) hold a count and a fixed
+  run of unmanaged items over C#'s `[InlineArray]`. They are the component's own bytes, so they
+  iterate in chunks with everything else and cost nothing to keep, which suits small bounded lists:
+  waypoints, slots, the last few hits. The capacity is part of the type, `InlineList4<T>` through
+  `InlineList64<T>`, because C# fixes an inline array's length at compile time and cannot take it as
+  a type parameter. A freed slot is cleared, so two lists of the same items are the same bytes.
 - **`EcsList<T>` and `EcsMap<K, V>`** (`BevyCSharp/Ecs/EcsList.cs`, `EcsMap.cs`) are unmanaged
   handles (a slot and a generation) into a store on the managed side, so they grow without bound
   and hold `string` as well as unmanaged values. Each is made on its first write.
