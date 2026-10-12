@@ -1,4 +1,5 @@
-//! What the managed side reads of an image as a whole.
+//! What the managed side reads of an image as a whole, and the images it makes and the samplers it
+//! sets on them.
 
 use crate::interop::status;
 #[cfg(feature = "render")]
@@ -554,6 +555,127 @@ pub unsafe extern "C" fn bcs_render_image_set_pixels(image: i32, data: *const u8
                 }
 
                 kept.copy_from_slice(bytes);
+                status::OK
+            })
+        }
+    })
+}
+
+/// Makes an image out of pixels the caller already holds, and returns its asset key.
+///
+/// The other half of [`bcs_render_read_capture`]. Reading gives back what was drawn; this takes a
+/// picture that was never in a file, for a texture worked out at startup, a mask built from a
+/// heightmap, or a capture handed back to a material.
+///
+/// `pixels` is `width * height * 4` bytes of RGBA, read as sRGB, as a color somebody chose is.
+/// `srgb` at zero reads them as linear instead, for a picture whose numbers mean something other
+/// than a color, such as a normal map or a roughness mask.
+///
+/// Returns a negative where the size is zero, the pointer is null, or there is no renderer.
+///
+/// # Safety
+/// `pixels` must point at `width * height * 4` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_create_image(
+    pixels: *const u8,
+    width: u32,
+    height: u32,
+    srgb: i32,
+) -> i32 {
+    crate::interop::guard_with(-1, || {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (pixels, width, height, srgb);
+            -1
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::RenderAssetUsages;
+            use bevy::image::Image;
+            use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+            if pixels.is_null() || width == 0 || height == 0 {
+                return -1;
+            }
+
+            let count = width as usize * height as usize * 4;
+            let pixels = unsafe { core::slice::from_raw_parts(pixels, count) }.to_vec();
+
+            // Kept in both worlds rather than only in the renderer's, because a picture made this
+            // way is usually made to be read back or handed on, and an asset the main world has
+            // dropped cannot be either.
+            let image = Image::new(
+                Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                pixels,
+                if srgb != 0 {
+                    TextureFormat::Rgba8UnormSrgb
+                } else {
+                    TextureFormat::Rgba8Unorm
+                },
+                RenderAssetUsages::default(),
+            );
+
+            crate::state::with_world_opt(|world| {
+                let handle = world
+                    .get_resource_mut::<bevy::asset::Assets<Image>>()?
+                    .add(image);
+
+                Some(crate::assets::insert_handle(world, handle.untyped()))
+            })
+            .flatten()
+            .unwrap_or(-1)
+        }
+    })
+}
+
+/// Gives an image that exists the sampler `config` describes, how it repeats past its edges and how
+/// it is filtered.
+///
+/// For an image made in code, which no loader settings reached, and for one loaded already. One
+/// still loading is not there to be changed, and answers [`status::NOT_PRESENT`], since
+/// `bcs_asset_load_image` gives an image its settings as it loads. Written through `into_inner`,
+/// so Bevy sees the image change and takes the new sampler to the GPU.
+///
+/// # Safety
+/// `config` must point to a readable [`crate::interop::BcsImageConfig`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_sampler(key: i32, config: *const crate::interop::BcsImageConfig) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (key, config);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::image::{Image, ImageSampler};
+
+            if config.is_null() {
+                return status::NULL_ARG;
+            }
+            let descriptor = crate::assets::sampler_from(unsafe { &*config });
+
+            with_world(|world| {
+                let handle = match super::image_handle(world, key) {
+                    Ok(Some(handle)) => handle,
+                    Ok(None) => return status::NULL_ARG,
+                    Err(code) => return code,
+                };
+                let Some(mut images) = world.get_resource_mut::<bevy::asset::Assets<Image>>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some(image) = images.get_mut(&handle) else {
+                    return status::NOT_PRESENT;
+                };
+
+                image.into_inner().sampler = ImageSampler::Descriptor(descriptor);
                 status::OK
             })
         }

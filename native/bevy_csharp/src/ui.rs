@@ -463,11 +463,11 @@ pub unsafe extern "C" fn bcs_ui_set_image(entity: u64, config: *const BcsUiImage
                         min_inset: Vec2::new(config.slice_border[0], config.slice_border[1]),
                         max_inset: Vec2::new(config.slice_border[2], config.slice_border[3]),
                     },
-                    center_scale_mode: crate::render::scene::slice_scale(
+                    center_scale_mode: crate::render::sprites::slice_scale(
                         config.slice_tiling & 2,
                         config.tile_stretch,
                     ),
-                    sides_scale_mode: crate::render::scene::slice_scale(
+                    sides_scale_mode: crate::render::sprites::slice_scale(
                         config.slice_tiling & 1,
                         config.tile_stretch,
                     ),

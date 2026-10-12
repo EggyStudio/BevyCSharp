@@ -9,7 +9,7 @@ use bevy::prelude::Resource;
 /// The image a windowless run draws into.
 ///
 /// Present only in an offscreen run, so its absence says a capture should read the window instead.
-/// [`crate::render::scene::bcs_render_screenshot`] asks it that question.
+/// [`crate::render::captures::bcs_render_screenshot`] asks it that question.
 #[cfg(feature = "render")]
 #[derive(Resource)]
 pub struct OffscreenTarget {

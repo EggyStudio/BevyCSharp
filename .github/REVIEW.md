@@ -10,9 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4e6eab36`. Item 16: the click command moves the pointer to the point, holds it there
-two frames, `ClickHoverFrames`, presses, releases the frame after and answers the frame after that,
-timed as the drag is, since picking finds what is under the pointer as it moves and matches a
+Reviewed up to `75024f77`. font_atlas_debug, ABI 277, read from the commit: a call answering the
+picture of each font atlas Bevy holds and the size of the font drawn into it, the smaller sizes
+first and an atlas's of a size in the order Bevy opened them, `Ui.FontAtlasPictures`, each an image
+a node can be given, listed first by count and then into the caller's arrays; the example Bevy's,
+its characters drawn from .NET's generator seeded from Bevy's number, which deals other characters,
+said in the triage note, and each atlas shown as an image node as it fills; a test that text drawn
+fills an atlas, that the atlases empty, and that text drawn after fills one again; the interface
+guide's lines. The suite 1,452 passed and 2 skipped of 1,454; cargo 167 and 95; the example seen
+live offscreen for 200 frames, the atlas filling top left with white glyphs while the yellow text
+grows along the bottom as Bevy's picture does, no error logged; and the seed cut to four bytes,
+since .NET's generator takes no more, which the triage row and the example say. EXAMPLES.md reads
+358 written, 2 in part and 18 missing, every missing row waiting on the owner's word. Right, the
+atlases reached by a listing call and shown as the images they are. The owner pushed both
+repositories at 07:00, and the runs of `e424550c` here and of `75024f77` in BevyCSharp are in
+flight, read on the next tick. Next item 2's lists, the four rules with places listed, paid down a
+commit at a time, which the working session has begun with N 1.3's list.
+
+Before it, `4e6eab36` came, item 16: the click command moves the pointer to the point, holds it
+there two frames, `ClickHoverFrames`, presses, releases the frame after and answers the frame after
+that, timed as the drag is, since picking finds what is under the pointer as it moves and matches a
 release to its press; a test runs the real command as the CLI does, the world lent and the pending
 answer polled each frame, and clicks three points of a node the pointer has not visited, hearing
 three clicks of three where the old command heard two in two runs, five runs of five, and one hover
@@ -49,35 +66,6 @@ rows to read as not applying with the triage note saying so. Next item 16, the o
 landing where the pointer has not been, with the CLI's input, then items 5 to 10 in their order, the
 parity items from 3DEngine, each read first for whether 0.20 already has it; the owner's word on the
 crates opens the rest.
-
-Before it, `0da017e7` came, render_recovery, ABI 276, read against the lock, no crate: a policy for
-a render error, quit, ignore, stop rendering or recover, an error count, and a call that causes
-Bevy's four errors, out of memory, a validation error, a device destroyed and an endless loop, which
-the example offers as Bevy's does and the capture presses none of; the guide's section in the
-running page. Three things the diff shows only in part. First, wgpu's std feature is off in this
-build, so wgpu keeps one error-scope stack for every thread, and while a pipeline compiles on any
-pool thread a validation error raised on any thread falls into the pipeline cache's scope, comes
-back as a failed shader module, and is never reported, which holds for Bevy's own concurrent
-compiles too; turning the feature on adds no package but four edges of wasm-only crates to the lock,
-which Decision 25 leaves to the owner's word, so it is reverted, and the cause instead waits for a
-frame with no pipeline compiling, in an exclusive system at cleanup, after which the recovery tests
-passed six runs of six where the error went missing in one of three. The owner is asked at 05:45
-whether wgpu's std feature may go on. Second, Bevy 0.20's recovery comes back without its lighting,
-an unlit cube drawing its color and a lit one black with no light state the bridge touches, and a
-lost device dies in Bevy's GPU clustering readback on the render thread in four runs of six, so the
-tests cause validation errors alone and the docs and the recover remark say both limits. Third,
-three crashes fixed on the way: an app quitting while pipelines compile could abort at exit as a
-pool thread dropped the last device under the driver's exit handlers, so every exit waits at most
-ten seconds for compiling pipelines; the offscreen frame wait ended the process with code 87 on a
-submission a lost device never took, so it waits on its own device's marks alone and treats a wrong
-submission index as the renderer's to report, with a unit test; and a destroy mid-frame let Bevy's
-later systems panic making buffers on the dead device, so the cause moved to the frame's end. One
-failure in the first full run, a shadow test reading no grays, passed alone and paired, and a cause
-left pending from a previous app, which could fire in the next test's app, is cleared as each app is
-built, after which the suite passed whole, 1,450 and 2 skipped of 1,452; cargo 167 and 95.
-EXAMPLES.md reads 356 written, 2 in part and 23 missing. Right, the error scope's leak found and
-worked around rather than papered, the lock left to the owner, and each crash fixed where it was and
-tested. Next solari_reflections, written and building, then the rows that wait on the owner's word.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
