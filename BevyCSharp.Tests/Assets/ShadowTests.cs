@@ -98,11 +98,24 @@ public sealed class ShadowTests
     {
         Needs.Renderer();
 
-        var hard = Grays(PictureOfAHangingSlab(softness: 0f));
-        var soft = Grays(PictureOfAHangingSlab(softness: 5f));
+        var hardPicture = PictureOfAHangingSlab(softness: 0f);
+        var softPicture = PictureOfAHangingSlab(softness: 5f);
+        var (hard, soft) = (Grays(hardPicture), Grays(softPicture));
 
-        Assert.True(soft > hard + 30, $"the soft shadow had {soft} pixels between light and dark, the hard one {hard}");
+        // The dark and the light of each picture too, so a failure says whether the soft one came
+        // out with a hard edge or with no shadow at all, which a full suite met where a run of this
+        // class alone never has.
+        Assert.True(
+            soft > hard + 30,
+            $"the soft shadow had {soft} pixels between light and dark, the hard one {hard}; the soft picture "
+            + $"{Tones(softPicture)}, the hard one {Tones(hardPicture)}");
     }
+
+    /// <summary>How many of a picture's pixels are dark and how many light, as words for a failure.</summary>
+    private static string Tones(CapturedImage picture) =>
+        $"{PictureRun.Count(picture, (r, g, b) => r <= 40 && g <= 40 && b <= 40)} dark and "
+        + $"{PictureRun.Count(picture, (r, g, b) => r >= 170 && g >= 170 && b >= 170)} light of "
+        + $"{picture.Width * picture.Height}";
 
     /// <summary>How many pixels are neither the shadow's dark nor the lit floor's light.</summary>
     private static int Grays(CapturedImage picture) =>

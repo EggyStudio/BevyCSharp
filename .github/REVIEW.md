@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `eb82688b`, fourteen commits of item 2's lists in ten minutes, each moving code
+Reviewed up to `969ac3bd`, nine commits of item 2's lists, one a library folder, each moving types
+alone within its folder so each compiles alone and checked line for line as a move: every public
+type that shared a file is in a file named for it, the partial classes in the type-and-part form,
+and N 1.2's list is empty; one mend inside the move, a file whose usings stood after its namespace
+line and went with the first type into the new file, put back, no other file caught; the components
+and scenes documents name the new files where they named the old by path, the cheat sheet moves the
+three tile calls since it orders a partial class's methods by file, the public listing is unchanged,
+and the norm tests pass. N 1.4's 28 all carry reasons, the build scripts, the documents, the editor,
+the examples and the generator left out by design, so no move of its remains. The soft shadow test
+failed again in the suite over `eb82688b` after the pending cause's reset, which was not its cause,
+two of the last four whole suites against four runs alone and three paired with the recovery tests,
+so it is Verdict 13, its failure made to say each picture's dark and light counts so the next tells
+a blank picture from a hard edge. Right, the lists emptied by moves alone and the flake given a
+verdict rather than a retry. Next item 2's other lists in this order: N 3.4's 43 temp folders to the
+test folder across about twenty files, then N 3.3's 10 and N 4.1's 8, then N B3's 19 and N 4.5's 24
+read for which stand by design; the 18 rows wait on the owner's word.
+
+Before it, `eb82688b` came, fourteen commits of item 2's lists in ten minutes, each moving code
 alone: `cbba26c2` splits the scene file of 1,882 lines into captures, lights and sprites with the
 two image calls joining the images file, the scene file left at 696; `bffa7ce9` splits the view
 shader tests into the assets folder, `6fb0a312` the values file into its checks and tests, and
@@ -39,25 +56,6 @@ atlases reached by a listing call and shown as the images they are. The owner pu
 repositories at 07:00, and the runs of `e424550c` here and of `75024f77` in BevyCSharp are in
 flight, read on the next tick. Next item 2's lists, the four rules with places listed, paid down a
 commit at a time, which the working session has begun with N 1.3's list.
-
-Before it, `4e6eab36` came, item 16: the click command moves the pointer to the point, holds it
-there two frames, `ClickHoverFrames`, presses, releases the frame after and answers the frame after
-that, timed as the drag is, since picking finds what is under the pointer as it moves and matches a
-release to its press; a test runs the real command as the CLI does, the world lent and the pending
-answer polled each frame, and clicks three points of a node the pointer has not visited, hearing
-three clicks of three where the old command heard two in two runs, five runs of five, and one hover
-frame also passed five of five, the constant's remark saying two keeps one to spare; the CLI page's
-verb table gives the click its row. The suite 1,451 passed and 2 skipped of 1,453. Right, the hover
-given its frames rather than the test given a retry. Items 5 to 10 were done before and were named
-as next here by this session's slip, their titles wrapping past the grep that read them; the working
-session read each for whether its work since still holds them and found it does, the norm rule of
-every exception caught running, every example built on the package alone at `0.0.0-examples1` with
-the four new ones among them, the scripts passing, and the template, the removed components and the
-code fixes untouched. And font_atlas_debug needs no crate, its triage note having put it with the
-system fonts it does not use: a bridge call answering the atlas pictures Bevy's font atlas sets
-hold, each set by its size with its pictures as asset keys, and the example spawning an image node
-for each. Next font_atlas_debug, then the 18 rows wait on the owner's word; meanwhile item 2's
-lists, the four rules with places listed, paid down a commit at a time.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -583,6 +581,17 @@ from [SHARED.md](SHARED.md).
    exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
+
+13. **The soft shadow test fails in two of the last four whole suites and passes alone.**
+    `ShadowTests.ASoftShadowFadesWhereAHardOneCuts` read no grays in the first whole run after
+    render_recovery and again in the suite over `eb82688b`, after a cause left pending from a
+    previous app was cleared as each app is built, which was therefore not its cause; it passed four
+    runs alone and three paired with the recovery tests, and its picture run already waits for the
+    pipelines to be ready. Its failure says each picture's dark and light counts since, so the next
+    tells a blank picture, a frame drawn before anything, from a hard edge, a soft shadow drawn
+    hard. Read on the next failure by those counts and by what ran before it in the suite's order,
+    since a test that passes alone and fails in the suite is carrying its neighbor's state or its
+    timing. Settled when the cause is named and the suite passes ten whole runs.
 
 ## Decisions
 
