@@ -10330,6 +10330,7 @@ static class Bevy.Render
   static IReadOnlyList<PassTiming> Timings()
   static MeshData? DataOf(AssetHandle mesh)
   static MeshRecipe? RecipeOf(AssetHandle mesh)
+  static RenderErrorPolicy ErrorPolicy { get; set; }
   static bool CompressMesh(AssetHandle mesh)
   static bool GenerateTangents(AssetHandle mesh)
   static bool IsDrawn(Entity entity)
@@ -10349,9 +10350,11 @@ static class Bevy.Render
   static bool TryReadMesh(AssetHandle mesh, out MeshData? triangles)
   static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals)
   static bool WriteMaterial(AssetHandle material, MaterialSettings settings)
+  static int ErrorCount { get; }
   static string MaterialPathOf(Entity entity)
   static string MeshPathOf(Entity entity)
   static string[]? MorphTargetNames(AssetHandle mesh)
+  static void CauseError(RenderErrorCause cause)
   static void ClearAtmosphere(Entity camera)
   static void ClearSkyLighting(Entity camera)
   static void CountDrawnMeshes(bool on)
@@ -10429,6 +10432,16 @@ static class Bevy.Render2d
   static void SetTilemap(EcsWorld world, Entity entity, TilemapChunk chunk, ReadOnlySpan<TileData?> tiles)
   static void SetTiles(EcsWorld world, Entity entity, int start, ReadOnlySpan<TileData?> tiles)
   static void WriteMaterial(AssetHandle material, ColorMaterialSettings settings)
+enum Bevy.RenderErrorCause : int
+  DeviceLost = 3
+  EndlessLoop = 4
+  OutOfMemory = 1
+  Validation = 2
+enum Bevy.RenderErrorPolicy : int
+  Ignore = 1
+  Quit = 0
+  Recover = 3
+  StopRendering = 2
 readonly struct Bevy.Rot2 : IEquatable<Rot2>
   Rot2(float Cos, float Sin)
   bool Equals(Rot2 other)

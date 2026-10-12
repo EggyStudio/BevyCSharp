@@ -145,12 +145,20 @@ fn wait_for_the_frame_before(
     queue: bevy::ecs::system::Res<bevy::render::renderer::RenderQueue>,
     device: bevy::ecs::system::Res<bevy::render::renderer::RenderDevice>,
     frame: Option<bevy::ecs::system::Res<bevy::diagnostic::FrameCount>>,
-    mut before: bevy::ecs::system::Local<Option<(wgpu::SubmissionIndex, u32)>>,
+    mut before: bevy::ecs::system::Local<Option<(wgpu::SubmissionIndex, u32, wgpu::Device)>>,
 ) {
     // Nothing submitted, which marks where this frame's work ends in the queue.
     let now = queue.submit([]);
     let drawn = frame.map_or(0, |frame| frame.0);
-    if let Some((index, frame)) = before.replace((now, drawn)) {
+    let current = device.wgpu_device().clone();
+    if let Some((index, frame, made_on)) = before.replace((now, drawn, current.clone())) {
+        // A mark from the device the renderer had before it was made again after an error names a
+        // submission the new one never had, which wgpu refuses to wait for, and the old device's
+        // work is gone with it, so there is nothing to wait for.
+        if made_on != current {
+            return;
+        }
+
         let waited = device.poll(wgpu::PollType::Wait { submission_index: Some(index), timeout: Some(FRAME_BEFORE_LIMIT) });
         if let Some(line) = stalled(waited.err(), frame) {
             bevy::log::error!("{line}");
@@ -172,7 +180,7 @@ pub(crate) const FRAME_BEFORE_LIMIT: std::time::Duration = std::time::Duration::
 pub(crate) const STALLED_EXIT_CODE: i32 = 87;
 
 /// The line an offscreen run ends with when the wait for the frame before ran out, naming the frame
-/// as Bevy counts it, or nothing when the wait ended as it should.
+/// as Bevy counts it, or nothing when the wait ended as it should or the device was lost.
 #[cfg(feature = "render")]
 fn stalled(error: Option<wgpu::PollError>, frame: u32) -> Option<String> {
     match error {
@@ -182,11 +190,10 @@ fn stalled(error: Option<wgpu::PollError>, frame: u32) -> Option<String> {
             FRAME_BEFORE_LIMIT.as_secs(),
             STALLED_EXIT_CODE
         )),
-        Some(other) => Some(format!(
-            "Waiting for the GPU to finish frame {frame} failed ({other}), so the offscreen run ends \
-             with exit code {STALLED_EXIT_CODE}."
-        )),
-        None => None,
+        // A mark the device never took, since it was lost before the frame's mark was queued. The
+        // renderer reports the loss as an error of its own, which the game's policy answers,
+        // closing the app or making the renderer again, so the run is not ended here.
+        Some(wgpu::PollError::WrongSubmissionIndex(..)) | None => None,
     }
 }
 
@@ -311,7 +318,9 @@ mod tests {
         assert!(line.contains(&format!("{} seconds", FRAME_BEFORE_LIMIT.as_secs())), "{line}");
         assert!(line.contains(&STALLED_EXIT_CODE.to_string()), "{line}");
 
-        // A wait that ended as it should says nothing, and the run goes on.
+        // A wait that ended as it should says nothing, and the run goes on, as it does past a mark a
+        // lost device never took, which the renderer's error answers.
         assert_eq!(stalled(None, 90), None);
+        assert_eq!(stalled(Some(wgpu::PollError::WrongSubmissionIndex(33, 32)), 90), None);
     }
 }

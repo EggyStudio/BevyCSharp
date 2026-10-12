@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**355 written, 2 written in part, 0 can be written, 24 missing and 57 do not apply.** Of the 381 that apply, 357 can be written with what is bridged, 2 of them leaving something out.
+**356 written, 2 written in part, 0 can be written, 23 missing and 57 do not apply.** Of the 381 that apply, 358 can be written with what is bridged, 2 of them leaving something out.
 
 **163 of the 175 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -13,7 +13,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [2D Rendering](#2d-rendering) | 28 | 0 | 0 | 0 | 1 | 10 of 13 |
 | [3D Rendering](#3d-rendering) | 67 | 0 | 0 | 1 | 0 | 41 of 43 |
 | [Animation](#animation) | 13 | 0 | 0 | 0 | 0 | 9 of 9 |
-| [Application](#application) | 11 | 0 | 0 | 1 | 7 | 2 of 2 |
+| [Application](#application) | 12 | 0 | 0 | 0 | 7 | 2 of 2 |
 | [Assets](#assets) | 11 | 0 | 0 | 2 | 5 | 3 of 3 |
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Audio](#audio) | 8 | 0 | 0 | 0 | 0 | 4 of 4 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **355** | **2** | **0** | **24** | **57** | **163 of 175** |
+| **All** | **356** | **2** | **0** | **23** | **57** | **163 of 175** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -190,7 +190,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`persisting_window_settings`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/window/persisting_window_settings.rs) | Demonstrates saving window position settings | [written](../BevyCSharp.Examples/window/persisting_window_settings.cs), through Config.RememberWindow, which keeps the window's place, size and fullscreen in the game's persistent settings as Bevy's settings plugin keeps them |
 | [`plugin`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/plugin.rs) | Demonstrates the creation and registration of a custom plugin | [written](../BevyCSharp.Examples/app/plugin.cs), prints [its output](assets/examples/plugin.txt) |
 | [`plugin_group`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/plugin_group.rs) | Demonstrates the creation and registration of a custom plugin group | [written](../BevyCSharp.Examples/app/plugin_group.cs), prints [its output](assets/examples/plugin_group.txt) |
-| [`render_recovery`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/render_recovery.rs) | Demonstrates how bevy can recover from rendering failures. | missing, recovering from a lost GPU device |
+| [`render_recovery`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/render_recovery.rs) | Demonstrates how bevy can recover from rendering failures. | [written](../BevyCSharp.Examples/app/render_recovery.cs) |
 | [`return_after_run`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/return_after_run.rs) | Show how to return to main after the Bevy app has exited | [written](../BevyCSharp.Examples/app/return_after_run.cs), prints [its output](assets/examples/return_after_run.txt) |
 | [`settings`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/settings.rs) | Demonstrates persistence of settings | [written](../BevyCSharp.Examples/app/settings.cs) |
 | [`thread_pool_resources`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/app/thread_pool_resources.rs) | Creates and customizes the internal thread pool | does not apply, tunes Bevy's task pools, which the bridge sets up |

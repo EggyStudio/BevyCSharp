@@ -161,6 +161,29 @@ Bevy's error_handling sets it, each kind of exception a system throws logged the
 again at each power of ten, and `Config.FailFastOnSystemException` ends the run at the first, as
 Bevy's default handler panics. A system that deals with its own error catches it.
 
+An error the GPU reports ends the run too, as Bevy's does, unless the game says otherwise:
+
+```csharp
+Render.ErrorPolicy = RenderErrorPolicy.Recover;    // a lost device is made again
+Render.CauseError(RenderErrorCause.DeviceLost);    // and here is one, to see that it is
+```
+
+`Ignore` draws on as if nothing happened, `StopRendering` keeps the game's systems running with
+drawing stopped, and `Recover` makes the renderer again, a device and all, which is how a game
+outlives a driver update or a GPU reset. Bevy asks again every frame while drawing is stopped, so a
+policy set then takes over, and `Render.ErrorCount` and `Shaders.LastRenderError` say what
+arrived. An error left where it was may come back every frame under `Ignore` or `Recover`, which can
+make the picture flash, so a game choosing either takes away what caused it. `Render.CauseError`
+causes each of Bevy's four kinds for a game to try its policy on, and two of them, running out of
+memory and a shader that never ends, reach the machine's own graphics, which may need a restart, as
+Bevy warns of its own.
+
+Bevy 0.20 makes the renderer again without the lighting it had, so a mesh Bevy lights draws black
+after a recovery, where an unlit one draws as before. A device lost while Bevy's GPU clustering waits
+on a readback ends the run in Bevy's own code, which a test met in four runs of six, so a lost device
+is survived only some of the time. `Recover` is the way to keep a game running long enough to save
+and say so, rather than to carry on as before.
+
 A game on a player's machine has no console anybody reads, so the run writes what it says to
 `logs/latest.log` beside the executable, C#'s lines and Bevy's, with the last five runs' logs kept
 beside it. An exception nothing caught, a task's exception nobody looked at, or a panic inside

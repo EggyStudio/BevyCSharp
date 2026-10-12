@@ -91,9 +91,10 @@ public static unsafe partial class Shaders
     /// </para>
     /// <para>
     /// Set, the error is logged and <see cref="LastRenderError"/> keeps it, and frames drawn with
-    /// the broken pipeline are dropped until a fixed shader reloads. Every other kind of error
-    /// still closes the app. The editor sets it; a game has to ask. Process-wide, because the
-    /// renderer asks from its own thread.
+    /// the broken pipeline are dropped until a fixed shader reloads, whatever
+    /// <see cref="Render.ErrorPolicy"/> says. Every other kind of error does what that policy says,
+    /// closing the app unless it was set otherwise. The editor sets it; a game has to ask.
+    /// Process-wide, because the renderer asks from its own thread.
     /// </para>
     /// </remarks>
     public static bool KeepRenderingAfterErrors

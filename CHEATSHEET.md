@@ -936,6 +936,7 @@ static void SetAmbientOcclusion(Entity camera, AmbientOcclusionQuality? quality,
 static void SetDeferredRendering(bool on);                      // Draws Bevy's own materials deferred, into a G-buffer lit afterward, or forward, lit as they are drawn, which is the default
 static void SetContactShadows(Entity camera, ContactShadowSettings? settings);  // Draws contact shadows on a camera, or with null stops
 static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings);  // Turns Bevy's screen-space reflections on for a camera, or with null off
+static void CauseError(RenderErrorCause cause);                 // Causes an error on the GPU, for a game to see what its ErrorPolicy does with one, as Bevy's render_recovery example causes them
 static Capture BeginCapture(AssetHandle target);                // Asks for a picture to be read back into memory rather than written to a file
 static Capture BeginCapture();                                  // Asks for a picture of whatever this run is drawing into
 static bool TryReadCapture(Capture capture, out CapturedImage? picture);  // Reads a capture once it has arrived, and forgets it

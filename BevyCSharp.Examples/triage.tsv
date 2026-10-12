@@ -123,7 +123,6 @@ no_renderer	n/a	builds Bevy's renderer with no graphics backend, which the bridg
 persisting_window_settings	can	through Config.RememberWindow, which keeps the window's place, size and fullscreen in the game's persistent settings as Bevy's settings plugin keeps them
 plugin	can
 plugin_group	can
-render_recovery	missing	recovering from a lost GPU device
 return_after_run	can
 settings	can
 thread_pool_resources	n/a	tunes Bevy's task pools, which the bridge sets up

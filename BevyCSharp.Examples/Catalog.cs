@@ -163,6 +163,7 @@ internal static class Catalog
         new("logs", Logs.Build),
         new("headless", Headless.Build, Prints: 1, Returned: Headless.Returned),
         new("headless_renderer", HeadlessRenderer.Build, HeadlessRenderer.Configure),
+        new("render_recovery", RenderRecovery.Build),
         new("plugin", PluginExample.Build, Prints: 130),
         new("plugin_group", PluginGroupExample.Build, Prints: 3),
         new("return_after_run", ReturnAfterRun.Build, Prints: 3, Returned: ReturnAfterRun.Returned),

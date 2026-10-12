@@ -102,7 +102,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         #[cfg(feature = "render")]
         {
             use bevy::prelude::*;
-            use bevy::render::settings::{Backends, RenderCreation, WgpuSettings};
+            use bevy::render::settings::RenderCreation;
             use bevy::render::RenderPlugin;
             use bevy::window::{ExitCondition, PresentMode, Window, WindowPlugin};
             use bevy::winit::WinitPlugin;
@@ -123,24 +123,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 PresentMode::AutoNoVsync
             };
 
-            // `None` leaves wgpu's own preference order alone, which already puts Vulkan first
-            // on Linux and Windows. Naming a backend pins the choice instead, and startup then
-            // fails loudly if the machine cannot provide it, which is the point of asking.
-            let backends = match config.backend {
-                1 => Some(Backends::VULKAN),
-                2 => Some(Backends::DX12),
-                3 => Some(Backends::METAL),
-                4 => Some(Backends::GL),
-                _ => None,
-            };
-
-            let wgpu = match backends {
-                Some(backends) => WgpuSettings {
-                    backends: Some(backends),
-                    ..default()
-                },
-                None => WgpuSettings::default(),
-            };
+            // The backend the config names, or wgpu's own choice, remembered so a renderer made
+            // again after an error is made the same way.
+            let backends = crate::render::render_errors::backends_named(config.backend);
+            let wgpu = crate::render::render_errors::wgpu_settings(config.backend);
 
             let plugins = DefaultPlugins
                 .set(WindowPlugin {

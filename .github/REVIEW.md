@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a76577ac`. atmosphere, ABI 276, read against the lock as the working session read
+Reviewed up to `c8849d71`. Item 21, read from the commit: under a `[Changed]` filter the runner
+lists the chunks unmarked and marks each row as the method runs on it, its own component and the
+ones it writes, in the one-component form and the form of several, so a method watching its own
+component runs on the rows that changed before it ran and not on every row every frame, and a row
+the filter skips stays unmarked as Bevy leaves a row its query does not reach; the generator's test
+no longer notes the limit, the world_serialization example's query is Bevy's shape again, and a test
+spawns three entities, changes one, and reads the method run on each as it arrived and then on the
+changed one alone the frame after; the behaviors guide says it. The suite 1,445 passed and 2 skipped
+of 1,447; the new case fails on the runner before and passes on this one, which the working session
+proved by swapping the file back and forth; the example run offscreen for 90 frames logs each entity
+once and the resource once. Right, the marking moved to the rows the method touches, where the
+filter's meaning lives. Found under render_recovery and reaching past it: an app that quits early,
+while its first pipelines still compile, can abort freeing memory of an invalid size, the core dump
+showing a pool thread finishing a pipeline task Bevy had cancelled, which drops the last device
+reference so the device is destroyed while the main thread is in the driver's exit handlers, hit
+every time by a render error at frame 10 under the default quit and by the test host; the fix in the
+batch waits at most ten seconds for compiling pipelines in the handler's quit branch and in an
+extract system the frame any exit is written, so a window closed during the startup compile is
+covered too; and the error causes fire from a system in the render world as Bevy's example does,
+since one made from the C# system on the main thread was caught by an error scope of Bevy's pipeline
+cache and reported as a failed shader module, so the app never quit. Next render_recovery, written
+at ABI 276 with its four policies, the error count and the four causes reachable and none pressed,
+then solari_reflections.
+
+Before it, `a76577ac` came, atmosphere, ABI 276, read against the lock as the working session read
 it, no crate: the sky a planet's air scatters, earth's or Mars's, Mars's dust scattering by a
 picture of its phase the caller loads, Bevy's own, a sky of Mars without one refused, and the
 rendering method chosen; one planet kept in the world and placed on every call so its ground sits at
@@ -53,26 +77,6 @@ stamps every row before the runner tests the filter, which the generator's tests
 the example sidesteps with a read-only query, as Bevy's log system reads; it is item 21, after
 atmosphere, which is written and waits on the native build at ABI 275. Then render_recovery and
 solari_reflections as read against the lock.
-
-Before it, `2aaaef58` came, decodable, ABI 274, as shaped: a sample stream the game fills, an asset
-of the bridge's with its rate, channels and a shared queue of samples, its decoder taking up to 512
-samples at a time into a buffer of its own so the audio thread meets the game's writes once a
-stretch and giving silence on an underrun so the source never ends, registered with the audio
-sources where a device plays and in the silent plugin's start and finish beside the tone, the play
-call trying a clip, then a tone, then a stream; three calls, to make a stream, to queue samples,
-refusing a count that is not whole frames and answering the length, and to ask how many wait, and
-`Audio.CreateSampleStream`, `QueueSamples` and `QueuedSamples` in C#; the example Bevy's sine at 440
-Hz at a fifth of the volume, written each frame to keep a tenth of a second queued with Bevy's phase
-step, its capture an empty window as audio's is; tests native, the decoder playing the queue, then
-silence, then a sample queued later, and managed, 4,410 samples drained by frame 30 on the set
-clock, the entity alive after the underrun and three samples to a stereo stream refused; the audio
-guide's paragraph and block. debug_picking's note reads that the overlay is in a crate the bridge
-does not compile in, the owner's word kept out of EXAMPLES.md's row by N 4.7 and said here instead.
-The suite 1,434 passed and 2 skipped of 1,436; cargo 165 and 94; the norm tests 19 of 19; the audio
-guide's seven blocks build. EXAMPLES.md reads 353 written, 2 in part and 26 missing, Audio all
-eight. Right, the one honest counterpart of a decoder C# cannot run, and the underrun silence rather
-than an end. Next item 19, the world a scene file saves whole, then the three rows read against the
-lock.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -561,15 +565,15 @@ from [SHARED.md](SHARED.md).
     atlas table every chunk shares, per-chunk constants, or what a compute pass also reads. Done at
     `7f42cf40`, meshes.rs split first into mesh_data.rs.
 
-21. **A behavior's `[Changed]` filter on its own type fires every frame.** Found by the working
-    session writing item 19: the chunks call stamps every row of a component the behavior writes
-    before the runner tests the filter, so a behavior that reads and writes one type with
-    `[Changed]` on it runs on every row every frame, which the generator's tests note and the
+21. **A behavior's `[Changed]` filter on its own type fires every frame; done at `c8849d71`.** Found
+    by the working session writing item 19: the chunks call stamps every row of a component the
+    behavior writes before the runner tests the filter, so a behavior that reads and writes one type
+    with `[Changed]` on it runs on every row every frame, which the generator's tests note and the
     world_serialization example sidesteps with a read-only query. The fix the session read: fetch
     the chunks unmarked and mark only the rows the body runs on, so a row changed by the behavior
     itself counts as changed for the next frame and an untouched one does not, with a test of a
     behavior that changes one row of three and runs on that one alone the frame after, and the
-    example's query restored to Bevy's shape. After atmosphere and before render_recovery.
+    example's query restored to Bevy's shape. Done at `c8849d71` as written.
 
 ## Verdicts
 

@@ -49,6 +49,7 @@ pub mod probes;
 pub mod programs;
 pub mod projection;
 pub mod rays;
+pub mod recovery;
 pub mod reflect;
 pub mod render_errors;
 pub mod scene;

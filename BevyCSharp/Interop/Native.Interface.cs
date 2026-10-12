@@ -251,6 +251,26 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_meshlets_active();
 
+    /// <summary>Says what an error the renderer reports does: 0 quit, 1 ignore, 2 stop rendering, 3 recover.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_error_policy(int policy);
+
+    /// <summary>What an error the renderer reports does now.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_error_policy();
+
+    /// <summary>How many errors the renderer has reported.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_error_count();
+
+    /// <summary>Causes an error on the GPU: 1 out of memory, 2 validation, 3 a lost device, 4 an endless loop.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_cause_error(int cause);
+
     /// <summary>Starts or stops reading back how many meshes the opaque pass draws.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

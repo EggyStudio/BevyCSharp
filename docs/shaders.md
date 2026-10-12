@@ -534,9 +534,9 @@ the program a new layout, and every material keeps its values by name, so a para
 starts at zero and the rest keep what they held. A file that fails to compile leaves the last version
 that compiled in use and says why in the log, in `program.Diagnostics`, and through `shader.errors`
 in the console. One that has never compiled draws magenta. A shader reading an input its vertex
-shader never wrote is a validation error, which closes the app;
-`Shaders.KeepRenderingAfterErrors` logs it and drops the frames it breaks instead, and the editor
-sets it.
+shader never wrote is a validation error, which closes the app unless `Render.ErrorPolicy` says
+otherwise; `Shaders.KeepRenderingAfterErrors` logs it and drops the frames it breaks instead, and the
+editor sets it.
 
 ### Passes over the picture
 
