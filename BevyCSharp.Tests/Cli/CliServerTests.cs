@@ -25,16 +25,15 @@ namespace Bevy.Tests;
 public sealed class CliServerTests : IDisposable
 {
     private readonly string _was = CliSessionFile.Directory;
-    private readonly string _mine = Path.Combine(
-        Path.GetTempPath(), $"bcs-server-{Guid.NewGuid():N}");
+    private readonly TestFolder _folder = new("bcs-server-");
 
-    public CliServerTests() => CliSessionFile.Directory = _mine;
+    public CliServerTests() => CliSessionFile.Directory = _folder.Path;
 
     public void Dispose()
     {
         CliSessionFile.Directory = _was;
 
-        if (Directory.Exists(_mine)) Directory.Delete(_mine, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -206,7 +205,7 @@ public sealed class CliServerTests : IDisposable
     {
         Needs.Renderer();
 
-        var folder = Path.Combine(_mine, "shots");
+        var folder = Path.Combine(_folder.Path, "shots");
         Directory.CreateDirectory(folder);
 
         var running = Start(() =>

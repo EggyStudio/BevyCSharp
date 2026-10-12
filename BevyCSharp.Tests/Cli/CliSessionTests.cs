@@ -14,16 +14,15 @@ namespace Bevy.Tests;
 public sealed class CliSessionTests : IDisposable
 {
     private readonly string _was = CliSessionFile.Directory;
-    private readonly string _mine = Path.Combine(
-        Path.GetTempPath(), $"bcs-sessions-{Guid.NewGuid():N}");
+    private readonly TestFolder _folder = new("bcs-sessions-");
 
-    public CliSessionTests() => CliSessionFile.Directory = _mine;
+    public CliSessionTests() => CliSessionFile.Directory = _folder.Path;
 
     public void Dispose()
     {
         CliSessionFile.Directory = _was;
 
-        if (Directory.Exists(_mine)) Directory.Delete(_mine, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -93,8 +92,8 @@ public sealed class CliSessionTests : IDisposable
     [Fact]
     public void AFileThatIsNotOneOfTheseIsIgnoredRatherThanThrown()
     {
-        Directory.CreateDirectory(_mine);
-        File.WriteAllText(Path.Combine(_mine, "9999.json"), "{ not json at all");
+        Directory.CreateDirectory(_folder.Path);
+        File.WriteAllText(Path.Combine(_folder.Path, "9999.json"), "{ not json at all");
 
         Assert.Empty(CliSessionFile.All());
     }
