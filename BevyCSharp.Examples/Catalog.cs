@@ -407,6 +407,7 @@ internal static class Catalog
         new("stacked_gradients", StackedGradients.Build),
         new("tab_navigation", TabNavigation.Build),
         new("text_debug", TextDebug.Build),
+        new("font_atlas_debug", FontAtlasDebug.Build),
         new("text", TextExample.Build),
         new("strikethrough_and_underline", StrikethroughAndUnderline.Build),
         new("text_background_colors", TextBackgroundColors.Build),

@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**357 written, 2 written in part, 0 can be written, 19 missing and 60 do not apply.** Of the 378 that apply, 359 can be written with what is bridged, 2 of them leaving something out.
+**358 written, 2 written in part, 0 can be written, 18 missing and 60 do not apply.** Of the 378 that apply, 360 can be written with what is bridged, 2 of them leaving something out.
 
 **164 of the 176 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 57 | 0 | 0 | 8 | 0 | 22 of 24 |
+| [UI (User Interface)](#ui-user-interface) | 58 | 0 | 0 | 7 | 0 | 22 of 24 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **357** | **2** | **0** | **19** | **60** | **164 of 176** |
+| **All** | **358** | **2** | **0** | **18** | **60** | **164 of 176** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -540,7 +540,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`feathers_number_input`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/feathers_number_input.rs) | Feathers Number Input Options | missing, Feathers' number input, whose crate the bridge does not compile in |
 | [`fixed_node`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/fixed_node.rs) | Demonstrates how to use FixedNode to lay out a UI node as a root node | [written](../BevyCSharp.Examples/ui/fixed_node.cs), through Bevy's reflected FixedNode |
 | [`flex_layout`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/flex_layout.rs) | Demonstrates how the AlignItems and JustifyContent properties can be composed to layout nodes and position text | [written](../BevyCSharp.Examples/ui/flex_layout.cs) |
-| [`font_atlas_debug`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_atlas_debug.rs) | Illustrates how FontAtlases are populated (used to optimize text rendering internally) | missing, reading the font atlases |
+| [`font_atlas_debug`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_atlas_debug.rs) | Illustrates how FontAtlases are populated (used to optimize text rendering internally) | [written](../BevyCSharp.Examples/ui/font_atlas_debug.cs), its characters drawn from .NET's generator seeded from Bevy's number, which deals other characters than Bevy's |
 | [`font_query`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_query.rs) | Demonstrates font querying | [written](../BevyCSharp.Examples/ui/font_query.cs) |
 | [`font_variations`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_variations.rs) | Demonstrates how to use OpenType font variations. | [written](../BevyCSharp.Examples/ui/font_variations.cs) |
 | [`font_weights`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/font_weights.rs) | Demonstrates how to use font weights. | [written](../BevyCSharp.Examples/ui/font_weights.cs) |

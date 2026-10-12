@@ -338,7 +338,7 @@ editable_text_filter	can	the filter the characters the field takes, where Bevy's
 feathers_counter	missing	Bevy's Feathers widgets
 feathers_gallery	missing	Bevy's Feathers widgets
 flex_layout	can
-font_atlas_debug	missing	reading the font atlases
+font_atlas_debug	can	its characters drawn from .NET's generator seeded from Bevy's number, which deals other characters than Bevy's
 font_query	can
 font_variations	can
 font_weights	can

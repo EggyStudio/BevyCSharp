@@ -29,12 +29,12 @@ the most examples, and the largest is taken between groups of examples. The coun
   scene templates (`feathers_counter`, `feathers_gallery`, `virtual_keyboard`). The core widgets are
   built and reached through their wrappers, what they report reaches C# as Bevy's `Activate`,
   `ValueChange` and `MenuEvent`, and the focus moves between nodes by direction.
-- **System fonts and the font atlases, four examples.** Bevy's system font discovery, which the
-  bridge does not compile in, so a generic family such as sans-serif resolves to the system's font
+- **System fonts, three examples.** Bevy's system font discovery, which the bridge does not
+  compile in, so a generic family such as sans-serif resolves to the system's font
   (`generic_font_families`, `ime_support`), and the families Bevy's `FontCx` lists and the family
-  each generic one stands for (`system_fonts`). And reading the atlases Bevy lays a font's glyphs
-  out in (`font_atlas_debug`). A run's weight, width, style, OpenType features and axes, its
-  underline and strikethrough and its background color are reached.
+  each generic one stands for (`system_fonts`). A run's weight, width, style, OpenType features and
+  axes, its underline and strikethrough and its background color are reached, and the atlases Bevy
+  lays a font's glyphs out in are read.
 - **Bevy's deferred buffers from a Slang shader, one example.** A Slang shader is lit by Bevy
   through `bcs::light` and `bcs::finish`, reaches the clustered decals over it and an irradiance
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws

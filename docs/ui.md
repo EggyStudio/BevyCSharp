@@ -182,6 +182,8 @@ light text readable over a picture that might be light too.
 Bevy draws each glyph of each font at each size into a font atlas the first time it is shown, so the
 atlases grow with the sizes text is drawn at. `Ui.FontAtlases` says how many there are and the bytes
 they hold, and `Ui.ClearFontAtlases` empties them, as Bevy's text stress tests measure them.
+`Ui.FontAtlasPictures` answers each atlas's image with the size of the font drawn into it, which a
+node given it with `Ui.SetImage` shows filling, as Bevy's font_atlas_debug does.
 
 `Ui.SpawnTextSpan` adds a run to a text that already exists, in its own font, size and color, such
 as a bold word inside a sentence. The spans read in the order they were added, after whatever the

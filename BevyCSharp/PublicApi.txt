@@ -1793,6 +1793,17 @@ sealed class Bevy.FoldoutAttribute : Attribute
   FoldoutAttribute(string path)
   bool Open { get; init; }
   string Path { get; }
+readonly struct Bevy.FontAtlasPicture : IEquatable<FontAtlasPicture>
+  AssetHandle Picture { get; init; }
+  FontAtlasPicture(AssetHandle Picture, float FontSize)
+  bool Equals(FontAtlasPicture other)
+  float FontSize { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(FontAtlasPicture left, FontAtlasPicture right)
+  static bool op_Inequality(FontAtlasPicture left, FontAtlasPicture right)
+  void Deconstruct(out AssetHandle Picture, out float FontSize)
 sealed class Bevy.FormerNameAttribute : Attribute
   FormerNameAttribute(string name)
   string Name { get; }
@@ -11430,6 +11441,7 @@ static class Bevy.Ui
   static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f)
   static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float, float, float, float) color)
   static Entity? Navigate(NavAction action)
+  static IReadOnlyList<FontAtlasPicture> FontAtlasPictures()
   static TextViewport? TextViewportOf(Entity field)
   static UiInteraction InteractionOf(Entity entity)
   static string? EditableTextOf(Entity node)

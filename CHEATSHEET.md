@@ -1246,6 +1246,7 @@ static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f);
 static Entity SpawnText(string text, UiSettings settings, UiTextSettings style);  // Spawns a run of text, set as style describes
 static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float R, float G, float B, float A) color);  // Adds a run of text to an existing one, set in its own font and color
 static void SetText(Entity entity, string text);                // Replaces what a text entity says
+static IReadOnlyList<FontAtlasPicture> FontAtlasPictures();     // The picture of each font atlas Bevy holds and the size of the font drawn into it, the smaller sizes first and the atlases of a size in the order Bevy opened them
 static void ClearFontAtlases();                                 // Empties the font atlases, which Bevy fills again with the glyphs drawn after
 static UiInteraction InteractionOf(Entity entity);              // Reports how the pointer stands on an interactive node
 static void SetImage(Entity entity, AssetHandle image);         // Draws an image inside a node, or replaces the one it draws

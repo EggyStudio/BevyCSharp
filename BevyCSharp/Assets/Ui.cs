@@ -205,6 +205,45 @@ public static unsafe partial class Ui
     }
 
     /// <summary>
+    /// The picture of each font atlas Bevy holds and the size of the font drawn into it, the
+    /// smaller sizes first and the atlases of a size in the order Bevy opened them. Only valid
+    /// inside a system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Bevy draws each glyph the first time a text needs it into an atlas of the font's size, and
+    /// opens another of that size when one is full, so the pictures show which glyphs a game has
+    /// drawn, as Bevy's font_atlas_debug shows them filling. Each is an image a node given it with
+    /// <see cref="SetImage(Entity, AssetHandle)"/> draws as it is, empty where no glyph is.
+    /// </para>
+    /// <para>
+    /// A picture read again is the same <see cref="AssetHandle"/>, so reading them every frame
+    /// costs no more than the call. Empty where no text has been drawn.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="BevyNativeException">This build has no renderer.</exception>
+    public static IReadOnlyList<FontAtlasPicture> FontAtlasPictures()
+    {
+        var total = Native.Check(Native.bcs_ui_font_atlas_pictures(null, null, 0), "listing the font atlases");
+        if (total == 0) return [];
+
+        // Asked again with room for what there was, and read as far as fitted, since text drawn
+        // between the two calls cannot happen inside one system.
+        var keys = new int[total];
+        var sizes = new float[total];
+        int written;
+        fixed (int* keyAt = keys)
+        fixed (float* sizeAt = sizes)
+        {
+            written = Native.Check(Native.bcs_ui_font_atlas_pictures(keyAt, sizeAt, total), "listing the font atlases");
+        }
+
+        var pictures = new FontAtlasPicture[Math.Min(written, total)];
+        for (var i = 0; i < pictures.Length; i++) pictures[i] = new FontAtlasPicture(new AssetHandle(keys[i]), sizes[i]);
+        return pictures;
+    }
+
+    /// <summary>
     /// Empties the font atlases, which Bevy fills again with the glyphs drawn after. Only valid
     /// inside a system.
     /// </summary>

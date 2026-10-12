@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `e2cecce6`, the three remote-protocol rows set as not applying with the note that
+Reviewed up to `4e6eab36`. Item 16: the click command moves the pointer to the point, holds it there
+two frames, `ClickHoverFrames`, presses, releases the frame after and answers the frame after that,
+timed as the drag is, since picking finds what is under the pointer as it moves and matches a
+release to its press; a test runs the real command as the CLI does, the world lent and the pending
+answer polled each frame, and clicks three points of a node the pointer has not visited, hearing
+three clicks of three where the old command heard two in two runs, five runs of five, and one hover
+frame also passed five of five, the constant's remark saying two keeps one to spare; the CLI page's
+verb table gives the click its row. The suite 1,451 passed and 2 skipped of 1,453. Right, the hover
+given its frames rather than the test given a retry. Items 5 to 10 were done before and were named
+as next here by this session's slip, their titles wrapping past the grep that read them; the working
+session read each for whether its work since still holds them and found it does, the norm rule of
+every exception caught running, every example built on the package alone at `0.0.0-examples1` with
+the four new ones among them, the scripts passing, and the template, the removed components and the
+code fixes untouched. And font_atlas_debug needs no crate, its triage note having put it with the
+system fonts it does not use: a bridge call answering the atlas pictures Bevy's font atlas sets
+hold, each set by its size with its pictures as asset keys, and the example spawning an image node
+for each. Next font_atlas_debug, then the 18 rows wait on the owner's word; meanwhile item 2's
+lists, the four rules with places listed, paid down a commit at a time.
+
+Before it, `e2cecce6` came, the three remote-protocol rows set as not applying with the note that
 this engine's own command line stands in for Bevy's protocol, EXAMPLES.md reading 357 written, 2 in
 part, 19 missing and 60 not applying, and `b326b127`, solari_reflections, examples alone and no
 bridge change: Bevy's room of mirrors with the helmet reflected in its panel, run with the
@@ -59,30 +78,6 @@ built, after which the suite passed whole, 1,450 and 2 skipped of 1,452; cargo 1
 EXAMPLES.md reads 356 written, 2 in part and 23 missing. Right, the error scope's leak found and
 worked around rather than papered, the lock left to the owner, and each crash fixed where it was and
 tested. Next solari_reflections, written and building, then the rows that wait on the owner's word.
-
-Before it, `c8849d71` came, item 21, read from the commit: under a `[Changed]` filter the runner
-lists the chunks unmarked and marks each row as the method runs on it, its own component and the
-ones it writes, in the one-component form and the form of several, so a method watching its own
-component runs on the rows that changed before it ran and not on every row every frame, and a row
-the filter skips stays unmarked as Bevy leaves a row its query does not reach; the generator's test
-no longer notes the limit, the world_serialization example's query is Bevy's shape again, and a test
-spawns three entities, changes one, and reads the method run on each as it arrived and then on the
-changed one alone the frame after; the behaviors guide says it. The suite 1,445 passed and 2 skipped
-of 1,447; the new case fails on the runner before and passes on this one, which the working session
-proved by swapping the file back and forth; the example run offscreen for 90 frames logs each entity
-once and the resource once. Right, the marking moved to the rows the method touches, where the
-filter's meaning lives. Found under render_recovery and reaching past it: an app that quits early,
-while its first pipelines still compile, can abort freeing memory of an invalid size, the core dump
-showing a pool thread finishing a pipeline task Bevy had cancelled, which drops the last device
-reference so the device is destroyed while the main thread is in the driver's exit handlers, hit
-every time by a render error at frame 10 under the default quit and by the test host; the fix in the
-batch waits at most ten seconds for compiling pipelines in the handler's quit branch and in an
-extract system the frame any exit is written, so a window closed during the startup compile is
-covered too; and the error causes fire from a system in the render world as Bevy's example does,
-since one made from the C# system on the main thread was caught by an error scope of Bevy's pipeline
-cache and reported as a failed shader module, so the app never quit. Next render_recovery, written
-at ABI 276 with its four policies, the error count and the four causes reachable and none pressed,
-then solari_reflections.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -471,14 +466,14 @@ from [SHARED.md](SHARED.md).
     otherwise. Done at `c447a370` in the three files, the CPU's model gone with the GPU's; the
     Solari comment at `c16f67e5`, so nothing outside `.github` names the model.
 
-16. **An offscreen click lands only where the pointer has been.** Found at `d91665d9`: driven
-    offscreen through `./bcs`, a click at a point the pointer has not moved to is lost, the button
-    example counting two of three clicks at one spot and every one once the pointer has been moved
-    there a few frames first, since picking wants the hover a frame before the press. The click
-    moves the pointer there and gives the frames the hover takes before it presses, in the CLI's
-    verb or in the harness that drives the examples, so a session or a test clicking a place it has
-    not hovered loses nothing, measured by the example's three of three, with a test. With the batch
-    that next touches the CLI's input.
+16. **An offscreen click lands only where the pointer has been, done at `4e6eab36`.** Found at
+    `d91665d9`: driven offscreen through `./bcs`, a click at a point the pointer has not moved to is
+    lost, the button example counting two of three clicks at one spot and every one once the pointer
+    has been moved there a few frames first, since picking wants the hover a frame before the press.
+    The click moves the pointer there and gives the frames the hover takes before it presses, in the
+    CLI's verb or in the harness that drives the examples, so a session or a test clicking a place
+    it has not hovered loses nothing, measured by the example's three of three, with a test. Done at
+    `4e6eab36`, two hover frames before the press and a test of three of three.
 
 17. **The examples' counts under the Examples heading, and a count on each group's heading, done at
     `02598971` (Decision 30).** The owner asked on 2026-10-11 at 19:35. The line the table script

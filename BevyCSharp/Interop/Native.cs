@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 276;
+    internal const int ExpectedAbiVersion = 277;
 
     static Native() => NativeLoader.Initialize();
 
@@ -331,6 +331,11 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_font_atlases(ulong* counts);
+
+    /// <summary>Writes each font atlas's picture key and font size, and answers how many there are.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_font_atlas_pictures(int* keys, float* sizes, int capacity);
 
     /// <summary>Empties the font atlases.</summary>
     [LibraryImport(Library)]
