@@ -19,23 +19,26 @@ suite that passed, 1,474 with 3 skipped. Right. The suite shuffled by a seed was
 said to take it at the upgrade: `379f59a4` of 2026-10-10, `BCS_SCHEDULE_SHUFFLE_SEED` over every
 schedule of the app and its render world through Bevy's `shuffle_seed`, said in BUILDING.md, a
 shuffled run then finding a capture taken before its pipelines; the row reads has. A whole suite
-shuffled by the seed 20261012 was running at 16:36, its result read before the weak orderings start.
-The weak orderings are not taken: every C# system reaches Bevy as an exclusive system, the one sound
-shape while managed code can spawn and insert at any moment, and Bevy counts an exclusive system as
-conflicting with every other, so `before_weak` between two C# systems keeps its edge every time and
-a weak order through Bevy is the strong one by another name; `Read<T>` and `Write<T>` record intent
-for the overlay's explanation, nothing running sooner for them, and a managed rule dropping an edge
-where the declared access does not conflict would loosen an order a game relied on with nothing
-gained. SHARED.md's row says so, and returns when systems that declare their access run
-non-exclusively. The row of a run with no window making no sound was done at `c7f1cbc6`,
-`SilentAudio` in Bevy's output's place, a config field for real sound and a test that the sounds end
-on time, and reads has. The feature-test program's row, read against `BevyCSharp.FeatureTest`, has
-every part in: the hub with signposts to its zones and the render gallery, the capsule character on
-its courses, the admin panel on F1 with its settings kept between runs, the console drawn in the
-interface beside the F3 overlay, the crash log beside the executable with a report for an exception
-nothing caught and for a panic, and the portable build for testers from the hand-run workflow; the
-row reads has. Next the shuffled suite's result, after which the order holds nothing a coder can
-take without a word.
+shuffled by the seed 20261012 passed whole, 1,471 and 3 skipped of 1,474 in 15 m 49 s, no test
+leaning on an order the shuffle breaks this time, the seed proven to reach the tests by one run
+under the suite's capped scope logging the shuffle from the bridge's stages. The weak orderings are
+not taken: every C# system reaches Bevy as an exclusive system, the one sound shape while managed
+code can spawn and insert at any moment, and Bevy counts an exclusive system as conflicting with
+every other, so `before_weak` between two C# systems keeps its edge every time and a weak order
+through Bevy is the strong one by another name; `Read<T>` and `Write<T>` record intent for the
+overlay's explanation, nothing running sooner for them, and a managed rule dropping an edge where
+the declared access does not conflict would loosen an order a game relied on with nothing gained.
+SHARED.md's row says so, and returns when systems that declare their access run non-exclusively. The
+row of a run with no window making no sound was done at `c7f1cbc6`, `SilentAudio` in Bevy's output's
+place, a config field for real sound and a test that the sounds end on time, and reads has. The
+feature-test program's row, read against `BevyCSharp.FeatureTest`, has every part in: the hub with
+signposts to its zones and the render gallery, the capsule character on its courses, the admin panel
+on F1 with its settings kept between runs, the console drawn in the interface beside the F3 overlay,
+the crash log beside the executable with a report for an exception nothing caught and for a panic,
+and the portable build for testers from the hand-run workflow; the row reads has. The order holds
+nothing a coder can take without a word, so the working session stops with these documents in its
+commit; the owner's words pending are the 18 rows' crates, the wgpu feature and the pack run, whose
+storm job runs first there.
 
 Before it, `daa653ad` came, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines
 over the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it
