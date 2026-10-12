@@ -12,8 +12,6 @@ BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no 
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
 BevyCSharp.Tests/CaptureTests.cs
 BevyCSharp.Tests/ChangingTypeTests.cs
-BevyCSharp.Tests/CliCommandSchemaTests.cs
-BevyCSharp.Tests/CliConsoleHostTests.cs
 BevyCSharp.Tests/ComponentSchemaTests.cs
 BevyCSharp.Tests/DataReferenceCountTests.cs
 BevyCSharp.Tests/DepthOfFieldTests.cs
@@ -39,7 +37,6 @@ BevyCSharp.Tests/Editor/EditorWorldTests.cs	tests the editor, which is no area o
 BevyCSharp.Tests/Editor/LevelCameraTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Editor/PreviewRendererTests.cs	tests the editor, which is no area of the library
 BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
-BevyCSharp.Tests/FrameProfileTests.cs
 BevyCSharp.Tests/GBufferTests.cs
 BevyCSharp.Tests/GamepadTests.cs
 BevyCSharp.Tests/Generator/GeneratorAttributeTests.cs	tests the generators, which are no area of the library
@@ -67,7 +64,6 @@ BevyCSharp.Tests/OffscreenTests.cs
 BevyCSharp.Tests/OtherComponentTests.cs
 BevyCSharp.Tests/OverlayTests.cs
 BevyCSharp.Tests/PngTests.cs
-BevyCSharp.Tests/PointerDragTests.cs
 BevyCSharp.Tests/ReflectedComponentTests.cs
 BevyCSharp.Tests/ReflectionTests.cs
 BevyCSharp.Tests/RenderCornerTests.cs
