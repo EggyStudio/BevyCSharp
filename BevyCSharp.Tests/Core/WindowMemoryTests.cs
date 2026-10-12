@@ -16,14 +16,14 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class WindowMemoryTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-window-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-window-");
 
-    public WindowMemoryTests() => UserData.Root = _root;
+    public WindowMemoryTests() => UserData.Root = _folder.Path;
 
     public void Dispose()
     {
         UserData.Root = EngineHarness.UserDirectory;
-        if (Directory.Exists(_root)) Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]

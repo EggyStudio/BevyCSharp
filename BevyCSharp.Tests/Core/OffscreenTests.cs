@@ -21,14 +21,13 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class OffscreenTests : IDisposable
 {
-    private readonly string _directory = Path.Combine(
-        Path.GetTempPath(), $"bcs-offscreen-{Guid.NewGuid():N}");
+    private readonly TestFolder _folder = new("bcs-offscreen-");
 
-    public OffscreenTests() => Directory.CreateDirectory(_directory);
+    public OffscreenTests() => Directory.CreateDirectory(_folder.Path);
 
     public void Dispose()
     {
-        if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+        _folder.Dispose();
     }
 
     [SkippableFact]
@@ -36,7 +35,7 @@ public sealed class OffscreenTests : IDisposable
     {
         Needs.Renderer();
 
-        var path = Path.Combine(_directory, "capture.png");
+        var path = Path.Combine(_folder.Path, "capture.png");
 
         using var app = new App(Config.OffscreenFor(320, 180, frames: 90));
 
@@ -107,7 +106,7 @@ public sealed class OffscreenTests : IDisposable
         {
             using (ConsoleHost.Lend(world))
             {
-                var answer = ConsoleCommands.Run($"shot {Path.Combine(_directory, "none.png")}");
+                var answer = ConsoleCommands.Run($"shot {Path.Combine(_folder.Path, "none.png")}");
 
                 Assert.Contains("nothing", answer);
             }
@@ -115,7 +114,7 @@ public sealed class OffscreenTests : IDisposable
 
         harness.Run();
 
-        Assert.False(File.Exists(Path.Combine(_directory, "none.png")));
+        Assert.False(File.Exists(Path.Combine(_folder.Path, "none.png")));
     }
 
     /// <summary>
