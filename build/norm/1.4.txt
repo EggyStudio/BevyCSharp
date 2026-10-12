@@ -101,5 +101,4 @@ BevyCSharp.Tests/SystemOrderTests.cs
 BevyCSharp.Tests/TextConventionTests.cs
 BevyCSharp.Tests/TimingTests.cs
 BevyCSharp.Tests/UiPixelTests.cs
-BevyCSharp.Tests/ViewShaderTests.cs
 BevyCSharp.Tests/WindowMemoryTests.cs

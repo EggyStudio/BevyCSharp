@@ -3,5 +3,4 @@
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
 BevyCSharp.Tests/RenderControlTests.cs
-BevyCSharp.Tests/ViewShaderTests.cs
 native/bevy_csharp/src/render/values.rs
