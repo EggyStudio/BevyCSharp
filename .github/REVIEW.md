@@ -10,20 +10,47 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `daa653ad`, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines over
-the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it counts
-the C# and the Rust, and found the pass module over the line, so its deferred part, the G-buffer's
-surface and a shadow stage's depth, is a module of its own, `bcs_pass_deferred.slang` at 230 lines,
-which `bcs_pass.slang` includes at 588, the bridge's module list nine where eight. `daa653ad`, the
-click command's count: `input.click <x> <y> [count]`, from the first press a press on each even step
-and a release on each odd one, a frame apart, so the clicks fall within the double-click time and
-each is heard with its place in the run, four at most, a triple click the most anything asks for
-with one to spare; `ClickCommandTests.AClickGivenACountIsHeardAsThatManyInARun` beside the one that
-hears a click where the pointer has not been; BCS.md's row says the count. Both right. SHARED.md's
-two rows read has. The push's run, the first with the storm job, skips it as the job's condition
-says, and the Linux suite passed in eleven minutes; the macOS and Windows suites, and 3DEngine's
-four jobs on `ee85866f`, were running at 16:32. Next the console pads made up to the index a command
-names, under way, then the shuffled suite, then the weak orderings.
+Reviewed up to `64bb30aa`, the console pads: `input.button` and `input.axis` connect console pads up
+to the pad a command names, four at most in all, each named by its place, the first "Console pad" as
+a lone one always was and the second "Console pad 2", a negative index and pad 4 refused with the
+rule said; `GamepadTests.APadCommandConnectsConsolePadsUpToThePadItNames` holds a second player's
+South on a run with no pad, reads both names and the refusal; BCS.md's row says it, over a whole
+suite that passed, 1,474 with 3 skipped. Right. The suite shuffled by a seed was in before the row
+said to take it at the upgrade: `379f59a4` of 2026-10-10, `BCS_SCHEDULE_SHUFFLE_SEED` over every
+schedule of the app and its render world through Bevy's `shuffle_seed`, said in BUILDING.md, a
+shuffled run then finding a capture taken before its pipelines; the row reads has. A whole suite
+shuffled by the seed 20261012 was running at 16:36, its result read before the weak orderings start.
+The weak orderings are not taken: every C# system reaches Bevy as an exclusive system, the one sound
+shape while managed code can spawn and insert at any moment, and Bevy counts an exclusive system as
+conflicting with every other, so `before_weak` between two C# systems keeps its edge every time and
+a weak order through Bevy is the strong one by another name; `Read<T>` and `Write<T>` record intent
+for the overlay's explanation, nothing running sooner for them, and a managed rule dropping an edge
+where the declared access does not conflict would loosen an order a game relied on with nothing
+gained. SHARED.md's row says so, and returns when systems that declare their access run
+non-exclusively. The row of a run with no window making no sound was done at `c7f1cbc6`,
+`SilentAudio` in Bevy's output's place, a config field for real sound and a test that the sounds end
+on time, and reads has. The feature-test program's row, read against `BevyCSharp.FeatureTest`, has
+every part in: the hub with signposts to its zones and the render gallery, the capsule character on
+its courses, the admin panel on F1 with its settings kept between runs, the console drawn in the
+interface beside the F3 overlay, the crash log beside the executable with a report for an exception
+nothing caught and for a panic, and the portable build for testers from the hand-run workflow; the
+row reads has. Next the shuffled suite's result, after which the order holds nothing a coder can
+take without a word.
+
+Before it, `daa653ad` came, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines
+over the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it
+counts the C# and the Rust, and found the pass module over the line, so its deferred part, the
+G-buffer's surface and a shadow stage's depth, is a module of its own, `bcs_pass_deferred.slang` at
+230 lines, which `bcs_pass.slang` includes at 588, the bridge's module list nine where eight.
+`daa653ad`, the click command's count: `input.click <x> <y> [count]`, from the first press a press
+on each even step and a release on each odd one, a frame apart, so the clicks fall within the
+double-click time and each is heard with its place in the run, four at most, a triple click the most
+anything asks for with one to spare; `ClickCommandTests.AClickGivenACountIsHeardAsThatManyInARun`
+beside the one that hears a click where the pointer has not been; BCS.md's row says the count. Both
+right. SHARED.md's two rows read has. The push's run, the first with the storm job, skips it as the
+job's condition says, and the Linux suite passed in eleven minutes; the macOS and Windows suites,
+and 3DEngine's four jobs on `ee85866f`, were running at 16:32. Next the console pads made up to the
+index a command names, under way, then the shuffled suite, then the weak orderings.
 
 Before it, `c5873eef` came, the pack run's storm: a job of the pack run alone, after the native job,
 which downloads its linux-x64 render bridge, builds the tests on it with the freshness check off,
@@ -42,30 +69,6 @@ double-click time and console pads made up to the index a command names, four at
 suite run once with the schedule's order shuffled by a seed, Bevy 0.20 being in, before the weak
 orderings it also brings, since a shuffled suite says which tests lean on an order before an
 ordering is made weak.
-
-Before it, `4074f045` came, two commits from SHARED.md's rows. `530d0dc6`, the shader cache's
-imports: `ShaderImportTests.AnEditToAModuleAnotherExportsRecompilesTheShaderImportingIt`, a tint
-module exported again by a gather module through `__exported import`, the shader importing gather
-alone, an edit to the tint turning the cube from green to red, so the compiler's dependency file,
-which decides whether a cached result stands, is proven to hold the exporter's export; the import
-test of `ShaderMaterialTests` moved with it, since that file passed N 1.3's 800 lines, the suite
-catching it and no listing taken. `4074f045`, the window storm: `WindowStormTests` opens a real
-window, resizes it through eight sizes a frame apart, some odd, minimizes it and gives it back twice
-through the window's minimize request, moves it, sets 800 by 450 and takes a screenshot that must
-read 800 by 450 with nothing logged; `Needs.WindowStorm` skips it unless `BCS_WINDOW_STORM=1` on a
-display that gives a minimized window back, X11 on Linux and not Wayland, Windows or macOS, so it
-never moves a window about a desktop unasked and the jobs with no display say why they skip; winit
-refused its loop off the main thread, so the bridge builds `WinitPlugin` with `run_on_any_thread` on
-Linux and Windows, which a game's app on its main thread never meets and macOS ignores. Run under
-`xvfb-run` with `WAYLAND_DISPLAY` unset, 4 of 4 on the laptop's GPU and once on lavapipe, 4 to 6 s
-each; the whole suite over both passed, 1,469 and 3 skipped of 1,472, the storm the third. Both
-right. SHARED.md's two rows read has. Next the step that runs the storm in the workflow, in the pack
-run and not on every push: a push's test job builds the headless bridge and nothing in it draws, so
-the storm would skip there as every drawing test does, and a render build for it alone would cost
-the job a quarter of an hour cold; the pack run holds the native job's linux-x64 render bridge as an
-artifact, so a step there puts it in the test bin and runs the storm under `xvfb-run -a` with the
-variable set, `xvfb` among the packages, its failure an `::error::` naming it, as 3DEngine's storm
-runs in its whole run and not on each push.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
