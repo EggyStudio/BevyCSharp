@@ -5,8 +5,12 @@ namespace Bevy.Physics;
 /// <para>
 /// Sized in the entity's own units and scaled with its transform, so a cube stretched into a wall
 /// has a wall's collider. A size left at zero takes the bounds of the mesh the entity is drawn
-/// with, and of a unit cube where it is drawn with none, so putting a collider on what the editor
-/// spawned fits it without a number typed. <see cref="Colliders.TryFit"/> says what it comes to.
+/// with, or where it is drawn with none the bounds of the meshes under it as one, as the entity
+/// placing a model has its parts, and a unit cube where nothing under it is drawn either, so
+/// putting a collider on what the editor spawned or placed fits it without a number typed. A model
+/// is waited for until its parts are spawned and loaded, as a hull is, and one whose file never
+/// loads is waited for as long.
+/// <see cref="Colliders.TryFit"/> says what it comes to.
 /// </para>
 /// <para>
 /// <see cref="ColliderShape.Hull"/> and <see cref="ColliderShape.Mesh"/> are the drawn meshes

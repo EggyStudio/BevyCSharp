@@ -465,6 +465,53 @@ public sealed class PhysicsTests
         Assert.Null(outside);
     }
 
+    /// <summary>
+    /// A box left at zero on the entity placing a model waits for the model's parts, rather than
+    /// being a unit cube while there are none, and then fits the two of them as one.
+    /// </summary>
+    [SkippableFact]
+    public void ABoxLeftAtZeroOnAModelsRootFitsTheModelsParts()
+    {
+        Needs.Renderer();
+
+        var config = Config.OffscreenFor(64, 64, frames: 120);
+        config.AssetRoot = EngineHarness.AssetDirectory;
+        using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
+
+        var model = Entity.None;
+        var frame = 0;
+        bool? waited = null;
+        ColliderFit? fit = null;
+
+        app.AddSystem(Stage.Startup, new SystemDescriptor(
+            world =>
+            {
+                // Two strips half a unit wide and two tall, at x of 1.5 either side of the root.
+                var ecs = world.Resource<EcsWorld>();
+                model = ecs.SpawnScene(AssetServer.LoadGltfScene("models/pair.gltf"));
+                ecs.Add(model, new Collider { Shape = ColliderShape.Box });
+            },
+            "Test.Model"));
+
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                if (++frame == 1) waited = !Colliders.TryFit(ecs, model, out _);
+                if (fit is null && Colliders.TryFit(ecs, model, out var found)) fit = found;
+            },
+            "Test.Fit"));
+
+        app.Run();
+
+        Assert.True(waited, "the box was fitted before the model's parts were spawned");
+        Assert.NotNull(fit);
+        Assert.Equal(3.5f, fit.Value.Size.X, 0.01f);
+        Assert.Equal(2f, fit.Value.Size.Y, 0.01f);
+        Assert.Equal(0f, fit.Value.Center.X, 0.01f);
+    }
+
     /// <summary>A body is the entity's once, and asking for a second is refused.</summary>
     [Fact]
     public void AnEntityHasOneBody()

@@ -358,11 +358,11 @@ language.
   holding every entity, its components and its mesh and material, by file or, made in memory, as a
   primitive's recipe, a mesh's geometry or a material's settings, and either can be saved as a file
   of its own (`*.mesh.json`, `*.material.json`). The cards edit a primitive's measures and a
-  material's colors, surface, clearcoat, transmission, attenuation, anisotropy, lightmap exposure
-  and every map those have. What a standard material has beyond that is the specular tint and its
-  maps, which UV set each map reads, the depth map for parallax and a few switches (fog, a normal
-  map's green, depth bias, forward or deferred), which are left out until a card or a game asks for
-  one.
+  material's colors, surface, clearcoat, transmission, attenuation, anisotropy, lightmap exposure,
+  specular tint, parallax from a depth map, forward or deferred drawing and every map those have.
+  What a standard material has beyond `MaterialSettings` is which UV set each map reads and three
+  switches (fog, a normal map's green and depth bias), which are left out until a card or a game
+  asks for one.
 - **A mesh and a material are shown by where they came from.** They are Bevy components holding
   typed handles, so the panel draws them as their own section with a card each, and a picker of
   shapes, what the scene uses and each mesh or material of each model file. An OBJ lists no parts,
@@ -457,31 +457,28 @@ or projection data, so those stay on reflection.
 
 ### Physics
 
-`Bevy.Physics` simulates rigid bodies with BepuPhysics v2 on the managed side, in the library
-beside the interface. `PhysicsWorld` is the whole surface, with bodies by entity
-and no Bepu type in it, so the engine underneath can be replaced without a game changing. It owns
-the simulation, its buffer pool and thread dispatcher, and the callbacks Bepu requires, steps once
-per fixed step, and writes each dynamic body back through `Transform`. Each body can have a
-material of its own, friction and a bounce Bepu's stiff contacts do not give, which the world
-gives back after the step, and a body that tumbles in an odd shape is a convex hull of its points,
-turning about the hull's center while its entity keeps its origin. Ball joints, hinges, welds and
-distance ranges hold bodies together, a hinge can turn itself and stop at an angle, and contacts
-are reported, a sensor making a trigger volume. It is part of the core library, so the package the
-workflow packs carries it, with BepuPhysics as a dependency. `Paused` holds the simulation still for
-a game's pause. A level holds its bodies as `RigidBody` and `Collider` components, which the
-plugin makes and keeps in step, the inspector edits and the editor draws. A `CharacterController`
-beside a dynamic body makes it a character, walked toward a velocity along its ground, which walls
-stop, steps lift and slopes up to an angle hold, and which jumps and says whether it stands on
-anything.
+`Bevy.Physics` simulates rigid bodies with BepuPhysics v2 on the managed side, in the library beside
+the interface. `PhysicsWorld` is the whole surface, with bodies by entity and no Bepu type in it, so
+the engine underneath can be replaced without a game changing. It owns the simulation, its buffer
+pool and thread dispatcher, and the callbacks Bepu requires, steps once per fixed step, and writes
+each dynamic body back through `Transform`. Each body can have a material of its own, friction and a
+bounce Bepu's stiff contacts do not give, which the world gives back after the step, and a body that
+tumbles in an odd shape is a convex hull of its points, turning about the hull's center while its
+entity keeps its origin. Ball joints, hinges, welds and distance ranges hold bodies together, a
+hinge can turn itself and stop at an angle, and contacts are reported, a sensor making a trigger
+volume. It is part of the core library, so the package the workflow packs carries it, with
+BepuPhysics as a dependency. `Paused` holds the simulation still for a game's pause. A level holds
+its bodies as `RigidBody` and `Collider` components, which the plugin makes and keeps in step, the
+inspector edits and the editor draws. A `CharacterController` beside a dynamic body makes it a
+character, walked toward a velocity along its ground, which walls stop, steps lift and slopes up to
+an angle hold, and which jumps, crouches to the height its controller is given where the room
+overhead allows, and says whether it stands on anything. A `JointBetween` holds two bodies a level
+places together as the joints made in code do.
 
-- **A collider fits one mesh.** One left at a size of zero takes the bounds of the mesh its own
-  entity is drawn with, so on a placed model's root, which draws nothing itself, it is a unit cube.
-  Fitting the meshes under the root as one would let a model carry a collider without a size typed.
-- **A character stands at one height.** It cannot crouch, which 3DEngine's does by making its
-  capsule shorter where nothing above is in the way of standing again. A `Height` on the
-  controller, made again with the room overhead checked first, would give it that.
-- **Joints are code only.** A hinge or a weld between two bodies a level holds is made with
-  `PhysicsWorld.Connect`, and has no component naming the two entities.
+- **A body is fitted once.** A collider left at a size of zero takes the bounds of the meshes its
+  entity, or a placed model under it, is drawn with, and a hull or a mesh their triangles, once all
+  of them have loaded, and what is spawned under the entity after its body is made does not change
+  the body.
 
 ## Platform
 

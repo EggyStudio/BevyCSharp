@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Bevy.Physics;
 
 /// <summary>Works out what a <see cref="Collider"/> collides as, and draws it.</summary>
@@ -56,7 +54,7 @@ public static class Colliders
 
         if (collider.Shape is ColliderShape.Hull or ColliderShape.Mesh)
         {
-            if (!App.HasRenderer || !TryDrawnUnder(world, entity, out var drawn) || drawn.Positions.Length < 4) return false;
+            if (!App.HasRenderer || DrawnUnder(world, entity, out var drawn) != Drawn.Found || drawn!.Positions.Length < 4) return false;
 
             var positions = drawn.Positions.Select(point => Times(point + collider.Offset, scale)).ToArray();
             var (low, high) = Bounds(positions);
@@ -66,12 +64,28 @@ public static class Colliders
             return true;
         }
 
-        // The mesh it is drawn with, or nothing for an entity drawn with none or a build with no
-        // renderer, which a size given outright does not need.
+        // The mesh it is drawn with, or for an entity drawn with none the meshes under it as one, as
+        // a placed model's root has its parts, or nothing for a build with no renderer, which a
+        // size given outright does not need. A model whose scene has not spawned yet, or a mesh
+        // under it still loading, is waited for, since the body is made once from what this
+        // answers and a cube made in the meantime would stay.
         MeshData? mesh = null;
-        if (collider.Size == Vec3.Zero && App.HasRenderer && Render.MeshOf(world, entity) is { IsValid: true } handle)
+        if (collider.Size == Vec3.Zero && App.HasRenderer)
         {
-            if (!TryMesh(handle, out mesh)) return false;
+            if (Render.MeshOf(world, entity) is { IsValid: true } handle)
+            {
+                if (!TryMesh(handle, out mesh)) return false;
+            }
+            else
+            {
+                switch (DrawnUnder(world, entity, out mesh))
+                {
+                    case Drawn.Loading:
+                        return false;
+                    case Drawn.Nothing when IsUnspawnedModel(world, entity):
+                        return false;
+                }
+            }
         }
 
         // The box the shape fits in, given or taken from the mesh, and where its middle is.
@@ -176,19 +190,19 @@ public static class Colliders
 
     /// <summary>
     /// The meshes an entity and those under it are drawn with, as one, each placed in the entity's
-    /// own space by the transforms between them, or false while one of them is loading or none of
-    /// them is drawn with any.
+    /// own space by the transforms between them, or which of the two reasons there is none: one of
+    /// them is loading, or none of them is drawn with any.
     /// </summary>
     /// <remarks>
     /// A model is spawned under the entity that places it, its parts each a child drawn with a mesh
-    /// of its own and the entity with none, so a hull or a mesh taken from the entity alone would
-    /// wait forever. A mesh of lines or points is passed over, having no triangles. Each point is
+    /// of its own and the entity with none, so a hull, a mesh or a box fitted to the entity alone
+    /// would wait forever or be a unit cube. A mesh of lines or points is passed over, having no triangles. Each point is
     /// carried up through the transforms of the entities between it and the entity, which together
     /// place a part in its model, and the entity's own scale is put on afterwards with the
     /// collider's. Walked from the entity downward each time it is asked, since a body is made once
     /// and the walk is only repeated while it waits.
     /// </remarks>
-    private static bool TryDrawnUnder(EcsWorld world, Entity entity, [NotNullWhen(true)] out MeshData? drawn)
+    private static Drawn DrawnUnder(EcsWorld world, Entity entity, out MeshData? drawn)
     {
         drawn = null;
         var positions = new List<Vec3>();
@@ -206,7 +220,7 @@ public static class Colliders
             }
 
             if (Render.MeshOf(world, next) is not { IsValid: true } handle) continue;
-            if (!TryMesh(handle, out var mesh) || mesh is null) return false;
+            if (!TryMesh(handle, out var mesh) || mesh is null) return Drawn.Loading;
             if (mesh.Topology != MeshTopology.Triangles) continue;
 
             var first = (uint)positions.Count;
@@ -222,11 +236,41 @@ public static class Colliders
             }
         }
 
-        if (positions.Count == 0) return false;
+        if (positions.Count == 0) return Drawn.Nothing;
 
         drawn = new MeshData { Positions = [.. positions], Indices = [.. indices] };
-        return true;
+        return Drawn.Found;
     }
+
+    /// <summary>What the walk under an entity found.</summary>
+    private enum Drawn
+    {
+        /// <summary>Triangles, gathered.</summary>
+        Found,
+
+        /// <summary>A mesh that has not loaded yet, which asking again later finds.</summary>
+        Loading,
+
+        /// <summary>Nothing drawn with triangles, which asking again does not change.</summary>
+        Nothing,
+    }
+
+    /// <summary>
+    /// Whether an entity places a model whose scene is not among its descendants yet, which has no
+    /// children until it is, so nothing drawn under it then says nothing about the model.
+    /// </summary>
+    /// <remarks>
+    /// Asked of what <see cref="WorldInstanceReady"/> was posted for rather than of Bevy's
+    /// <c>WorldInstance</c>, which can be on the root a frame before the scene's entities are, and
+    /// a box fitted in that frame was the unit cube of an entity with nothing under it.
+    /// </remarks>
+    private static bool IsUnspawnedModel(EcsWorld world, Entity entity) =>
+        ComponentSchemas.For(ModelRoot) is { } root
+        && world.HasById(entity, root.Id)
+        && !SceneInstances.IsReady(entity);
+
+    /// <summary>The component Bevy puts on the entity a model is placed by, naming the model.</summary>
+    private const string ModelRoot = "bevy_world_serialization::components::WorldAssetRoot";
 
     // A point carried up through transforms, the nearest first, each scaling, turning and moving it.
     private static Vec3 Placed(Vec3 point, Transform[] up)

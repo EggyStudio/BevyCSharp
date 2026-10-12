@@ -68,10 +68,11 @@ ctx.Ecs.Add(coin, new Collider { Shape = ColliderShape.Sphere });
 
 A collider is sized in the entity's own units and scaled with it, so a cube stretched into a wall
 collides as one. One left at a size of zero takes the bounds of the mesh the entity is drawn with,
-and `Hull` and `Mesh` are the drawn meshes themselves, the second for a static floor or wall. Those
-two take the meshes of the entities under it as well, placed as they are under it, so a `Mesh`
-collider on the entity that places a level's model is the shape of its floors and walls once the
-model has spawned and loaded. A static body on an entity under others is put where they put it,
+or of the meshes under it where it is drawn with none, so a box on the entity that places a model
+fits the whole model once its parts have spawned, and `Hull` and `Mesh` are the drawn meshes
+themselves, the second for a static floor or wall. Those two take the meshes of the entities under
+it as well, placed as they are under it, so a `Mesh` collider on the entity that places a level's
+model is the shape of its floors and walls once the model has spawned and loaded. A static body on an entity under others is put where they put it,
 moved, turned and scaled, as when the walls of a spawned scene carry the bodies themselves, and is
 made again when its own transform changes, not when a parent's does.
 `Colliders.TryFit` says what one comes to and `Colliders.Draw` draws it as a gizmo, which is how the

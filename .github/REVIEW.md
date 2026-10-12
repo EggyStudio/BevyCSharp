@@ -10,7 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `df06e9dd`, the window's calls for a window past the first, ABI 279: every window
+Reviewed up to `b1d10ceb`, a node's scrollbar width as a setting, ABI 280: the field appended to the
+node's description with its end asserted at the same offsets on both sides, 336, 344 and 352, by
+constant asserts in the bridge and by the interface tests, so a field added on one side alone fails
+a build; a test of a scrolling node keeping room for its scrollbar; the interface guide's lines.
+TODO.md's note that nothing draws one no longer held, Bevy's scrollbar widget being reachable.
+Verdict 13 stands at six whole suites of ten, this one over the scrollbar width, 1,462 passed.
+Right, the layout pinned on both sides where a field was added. Next TODO.md's physics, read first
+and found partly stale, the crouch and the joint's two bodies in since, so what remains is managed
+only: a box, sphere or capsule left at zero on a placed model's root fits the meshes under it,
+waiting while the scene has not spawned or a part is loading as a hull does, rather than being a
+unit cube made once; the material card's item corrected in the same batch, the card having the
+specular tint, the parallax and the drawing method already.
+
+Before it, `df06e9dd` came, the window's calls for a window past the first, ABI 279: every window
 export takes the window's entity bits, the primary named by the one value no entity has, since zero
 is C#'s none and could be Bevy's first entity, and the window class gains an entity overload of each
 call, the size, the place, the scale, minimizing, the cursor's grab, image, atlas and shape among
@@ -32,22 +45,6 @@ Right, the field reached by the paths Bevy already names rather than a table of 
 TODO.md's order on, the textures' and shaders' items being edges of wgpu, Slang and Bevy: the
 window's calls for a window past the first, each export taking the window's entity with zero the
 primary and the window's overloads taking an entity, at ABI 279.
-
-Before it, `667ca9ac` came, the animation state machine from TODO.md's animation section: a data
-asset of states, each a clip and how it plays, and transitions tried in order, each on a parameter
-above or below a value, a flag, a trigger used up as it is taken, or the state's clip ending, an
-empty from standing for any state; `Animation.Run` starts it on a model and plays each state through
-the existing play, so the fade, the state read and the finished event are unchanged, the parameters
-set and the trigger pulled by name, the state read back and the machine stopped; the editor's data
-asset inspector edits it as two lists with no code of its own; three tests, a machine naming a state
-it lacks refused, a machine in a file reading back with its states and transitions, and a machine
-moving on a trigger, a value and a clip's end; the assets guide's section and the cheat sheet's six
-lines. Left in TODO.md: a scene naming the machine a placed model runs, a graph drawing of it, and a
-state blending clips by a parameter. Right, the machine run through the play the engine had rather
-than beside it. The Shared line is read, a row of SHARED.md, and removed. Verdict 13 stands at three
-whole suites of ten, each the listing and eleven, no failure. Next the animation order on: a curve
-on a field of any reflected component, by type path and reflect path, each field its own evaluator
-keyed by the component and the path's hash, checked against a default when added, native at ABI 278.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -589,9 +586,11 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; five of ten so far, over
-    the save diff, the state machine, the field curve and the window calls, each the listing and
-    eleven with no failure.
+    under the load. Settled when ten whole suites pass since `7f18b684`; six of ten so far, over the
+    save diff, the state machine, the field curve, the window calls and the scrollbar width, each
+    the listing and eleven with no failure; a seventh failed by one new test of a batch not yet
+    committed, the shadow test passing in it, and counts for neither side, the new test's own wait
+    on a scene's root mended before its commit.
 
 ## Decisions
 

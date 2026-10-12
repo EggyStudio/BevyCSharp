@@ -163,6 +163,27 @@ public static partial class SceneInstances
     private static readonly List<Entity> Pending = [];
 
     /// <summary>
+    /// The roots posted ready, whose scene's entities are in the world, which Bevy's own
+    /// <c>WorldInstance</c> can be on a frame before they are.
+    /// </summary>
+    private static readonly HashSet<Entity> Posted = [];
+
+    /// <summary>
+    /// Whether the scene placed under a root has been spawned and its entities are in the world,
+    /// as <see cref="WorldInstanceReady"/> says of it, for a reader that cannot wait on the message.
+    /// </summary>
+    internal static bool IsReady(Entity root)
+    {
+        lock (Posted) return Posted.Contains(root);
+    }
+
+    /// <summary>Forgets the roots posted ready, for an app starting, whose entities are its own.</summary>
+    internal static void Forget()
+    {
+        lock (Posted) Posted.Clear();
+    }
+
+    /// <summary>
     /// Whether a scene file places <paramref name="target"/>, itself or through the scenes it
     /// places, which a save checks so it never writes a scene that contains itself.
     /// </summary>
@@ -581,6 +602,12 @@ public static partial class SceneInstances
         }
         while (read == Batch);
 
+        // Roots despawned since, so the set holds what is placed now rather than all ever placed.
+        lock (Posted)
+        {
+            if (Posted.Count > 0) Posted.RemoveWhere(root => !world.IsAlive(root));
+        }
+
         // Subscenes were applied as they were read, and are only announced here.
         Entity[] placed;
         lock (Pending)
@@ -608,6 +635,7 @@ public static partial class SceneInstances
             if (DataOf(world, outer) is { Missed.Count: > 0 }) Report(world, outer, Apply(world, outer, retry: true));
         }
 
+        lock (Posted) Posted.Add(entity);
         bus.Send(new WorldInstanceReady(entity));
     }
 
