@@ -532,8 +532,11 @@ storage as itself, and one is left.
   (`native/stress`), and the bridge about 2 ms more, which grows with the shadow views and which
   neither adding its render installers to the plain scene one at a time nor comparing the passes
   Bevy times placed within this laptop's spread of 1.5 ms. It lies outside the passes Bevy times,
-  which leave out the shadow passes, and tracing spans in a profiler would place it. Smaller point
-  light shadow maps, or fewer faces, would be settings to offer a game.
+  which leave out the shadow passes, and tracing spans in a profiler would place it, but Bevy's
+  `trace` feature, which puts the spans in, is not compiled into the bridge, and turning it on
+  changes `native/Cargo.lock`, which a feature turned on here may not, so placing it waits as the
+  crates the lock lacks do. Smaller point light shadow maps, or fewer faces, would be settings to
+  offer a game.
 
 ### Testing
 

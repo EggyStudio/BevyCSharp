@@ -10,7 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `81ff10fe`, the editor driven offscreen: a live offscreen editor showed the handle's
+Reviewed up to `29f904fd`, a documents commit: the marking by compared bytes measured over the
+twentieth and is out, TODO.md saying why. The stress game's movers by its own script, each side
+packed as its own version so the game built on that build alone: 100,000 from 3.61 to 4.12 ms, 14%
+more, 200,000 from 5.86 to 6.64, 300,000 from 7.85 to 8.74 and 400,000 from 9.82 to 11.17, the
+managed time at 100,000 from 0.70 to 1.14 ms, the copy and the comparison of the mover and its
+transform on every row with one mark call a run; the runners, the bridge call and the test reverted,
+the bridge back at ABI 280, the two packages and their cache entries removed and the stress game on
+its own package again, no whole suite run for a commit of documents alone. Right, the condition set
+before the work and kept when the measure went against it, the measure recorded. TODO.md's order has
+left items that wait on a device, the touch gestures; on the audio crate, a looping sound's seek and
+a bus's effects; on the owner, the 18 rows, the wgpu feature, publishing and the CI cache; on a
+later ImGui bundle; and the deferred material's switches, with one the working session can take: the
+shadows' 2 ms placed by Bevy's tracing spans in a profile of the stress game's lights, without a
+crate where the trace feature Bevy has is compiled in, else said and left. Next that.
+
+Before it, `81ff10fe` came, the editor driven offscreen: a live offscreen editor showed the handle's
 drag worked already, the cube moving under the drag on the move tool's middle handle, and the right
 drag steered nothing, since the camera reads the mouse's accumulated motion, which no pretended
 pointer wrote; a pretended move writes that motion from where the pointer was, none for a first
@@ -42,19 +57,6 @@ Right, the fit waiting on what the engine itself posts rather than on Bevy's ins
 flake mended before it could be committed. Next TODO.md's order on: the synthetic pointer's drag on
 a handle and the camera's steering in an offscreen editor, which exercise the editor as a user does;
 touch gestures wait, having no device here to read them on.
-
-Before it, `b1d10ceb` came, a node's scrollbar width as a setting, ABI 280: the field appended to
-the node's description with its end asserted at the same offsets on both sides, 336, 344 and 352, by
-constant asserts in the bridge and by the interface tests, so a field added on one side alone fails
-a build; a test of a scrolling node keeping room for its scrollbar; the interface guide's lines.
-TODO.md's note that nothing draws one no longer held, Bevy's scrollbar widget being reachable.
-Verdict 13 stands at six whole suites of ten, this one over the scrollbar width, 1,462 passed.
-Right, the layout pinned on both sides where a field was added. Next TODO.md's physics, read first
-and found partly stale, the crouch and the joint's two bodies in since, so what remains is managed
-only: a box, sphere or capsule left at zero on a placed model's root fits the meshes under it,
-waiting while the scene has not spawned or a part is loading as a hull does, rather than being a
-unit cube made once; the material card's item corrected in the same batch, the card having the
-specular tint, the parallax and the drawing method already.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
