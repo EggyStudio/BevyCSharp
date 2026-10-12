@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**357 written, 2 written in part, 0 can be written, 22 missing and 57 do not apply.** Of the 381 that apply, 359 can be written with what is bridged, 2 of them leaving something out.
+**357 written, 2 written in part, 0 can be written, 19 missing and 60 do not apply.** Of the 378 that apply, 359 can be written with what is bridged, 2 of them leaving something out.
 
 **164 of the 176 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -29,7 +29,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 4 of 4 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
-| [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 3 | 1 |  |
+| [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 0 | 4 |  |
 | [Scene](#scene) | 1 | 0 | 0 | 0 | 1 | 1 of 1 |
 | [Shaders](#shaders) | 24 | 0 | 0 | 0 | 3 | 8 of 9 |
 | [Shaders Advanced](#shaders-advanced) | 3 | 0 | 0 | 0 | 1 | 1 of 1 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **357** | **2** | **0** | **22** | **57** | **164 of 176** |
+| **All** | **357** | **2** | **0** | **19** | **60** | **164 of 176** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -410,10 +410,10 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`app_under_test`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/app_under_test.rs) | A Bevy app that you can connect to with the BRP and control | missing, Bevy's remote protocol, where bcs is this engine's own |
+| [`app_under_test`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/app_under_test.rs) | A Bevy app that you can connect to with the BRP and control | does not apply, Bevy's remote protocol, for which bcs, this engine's own, stands in |
 | [`client`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/client.rs) | A simple command line client that can control Bevy apps via the BRP | does not apply, a Rust client of Bevy's remote protocol |
-| [`integration_test`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/integration_test.rs) | Connects to a running Bevy app via BRP, finds a button, and clicks it | missing, Bevy's remote protocol, where bcs is this engine's own |
-| [`server`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/server.rs) | A Bevy app that you can connect to with the BRP and edit | missing, Bevy's remote protocol, where bcs is this engine's own |
+| [`integration_test`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/integration_test.rs) | Connects to a running Bevy app via BRP, finds a button, and clicks it | does not apply, Bevy's remote protocol, for which bcs, this engine's own, stands in |
+| [`server`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/remote/server.rs) | A Bevy app that you can connect to with the BRP and edit | does not apply, Bevy's remote protocol, for which bcs, this engine's own, stands in |
 
 ## Scene
 

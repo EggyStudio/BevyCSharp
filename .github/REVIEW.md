@@ -10,30 +10,48 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `0da017e7`. render_recovery, ABI 276, read against the lock, no crate: a policy for a
-render error, quit, ignore, stop rendering or recover, an error count, and a call that causes Bevy's
-four errors, out of memory, a validation error, a device destroyed and an endless loop, which the
-example offers as Bevy's does and the capture presses none of; the guide's section in the running
-page. Three things the diff shows only in part. First, wgpu's std feature is off in this build, so
-wgpu keeps one error-scope stack for every thread, and while a pipeline compiles on any pool thread
-a validation error raised on any thread falls into the pipeline cache's scope, comes back as a
-failed shader module, and is never reported, which holds for Bevy's own concurrent compiles too;
-turning the feature on adds no package but four edges of wasm-only crates to the lock, which
-Decision 25 leaves to the owner's word, so it is reverted, and the cause instead waits for a frame
-with no pipeline compiling, in an exclusive system at cleanup, after which the recovery tests passed
-six runs of six where the error went missing in one of three. The owner is asked at 05:45 whether
-wgpu's std feature may go on. Second, Bevy 0.20's recovery comes back without its lighting, an unlit
-cube drawing its color and a lit one black with no light state the bridge touches, and a lost device
-dies in Bevy's GPU clustering readback on the render thread in four runs of six, so the tests cause
-validation errors alone and the docs and the recover remark say both limits. Third, three crashes
-fixed on the way: an app quitting while pipelines compile could abort at exit as a pool thread
-dropped the last device under the driver's exit handlers, so every exit waits at most ten seconds
-for compiling pipelines; the offscreen frame wait ended the process with code 87 on a submission a
-lost device never took, so it waits on its own device's marks alone and treats a wrong submission
-index as the renderer's to report, with a unit test; and a destroy mid-frame let Bevy's later
-systems panic making buffers on the dead device, so the cause moved to the frame's end. One failure
-in the first full run, a shadow test reading no grays, passed alone and paired, and a cause left
-pending from a previous app, which could fire in the next test's app, is cleared as each app is
+Reviewed up to `b326b127`. solari_reflections, examples alone and no bridge change: Bevy's room of
+mirrors with the helmet reflected in its panel, run with the ray-traced lighting and the path tracer
+both, a key swapping the camera between them at runtime and the path tracer reset in any frame the
+scene changed as Bevy's is; the roughness slider the reflected slider widgets with the self-update
+and Bevy's two ticks, the presets writing its value; material changes through the material write,
+the planes Bevy's sizes turned to face each axis; seen live offscreen on the development machine's
+GPU, the room, the mirrors, the helmet's reflection and the timings drawn, the path tracer
+converging and no error logged, the capture Solari's picture without DLSS as Bevy's is, and the DLSS
+row saying the app is not compiled with it as Bevy's does; the norm and path tests 19 of 19, the
+last whole suite standing at `0da017e7`. EXAMPLES.md reads 357 written, 2 in part and 22 missing.
+Right, Bevy's example reached whole on what the bridge already had. With it the three rows read
+against the lock are done, and the 22 missing wait on the owner's word for crates, Feathers, the dev
+tools, the camera controllers, the system fonts and the asset processor, or are Bevy's remote
+protocol, which this engine answers with its own command line, three rows to read as not applying
+with the triage note saying so. Next item 16, the offscreen click landing where the pointer has not
+been, with the CLI's input, then items 5 to 10 in their order, the parity items from 3DEngine, each
+read first for whether 0.20 already has it; the owner's word on the crates opens the rest.
+
+Before it, `0da017e7` came, render_recovery, ABI 276, read against the lock, no crate: a policy for
+a render error, quit, ignore, stop rendering or recover, an error count, and a call that causes
+Bevy's four errors, out of memory, a validation error, a device destroyed and an endless loop, which
+the example offers as Bevy's does and the capture presses none of; the guide's section in the
+running page. Three things the diff shows only in part. First, wgpu's std feature is off in this
+build, so wgpu keeps one error-scope stack for every thread, and while a pipeline compiles on any
+pool thread a validation error raised on any thread falls into the pipeline cache's scope, comes
+back as a failed shader module, and is never reported, which holds for Bevy's own concurrent
+compiles too; turning the feature on adds no package but four edges of wasm-only crates to the lock,
+which Decision 25 leaves to the owner's word, so it is reverted, and the cause instead waits for a
+frame with no pipeline compiling, in an exclusive system at cleanup, after which the recovery tests
+passed six runs of six where the error went missing in one of three. The owner is asked at 05:45
+whether wgpu's std feature may go on. Second, Bevy 0.20's recovery comes back without its lighting,
+an unlit cube drawing its color and a lit one black with no light state the bridge touches, and a
+lost device dies in Bevy's GPU clustering readback on the render thread in four runs of six, so the
+tests cause validation errors alone and the docs and the recover remark say both limits. Third,
+three crashes fixed on the way: an app quitting while pipelines compile could abort at exit as a
+pool thread dropped the last device under the driver's exit handlers, so every exit waits at most
+ten seconds for compiling pipelines; the offscreen frame wait ended the process with code 87 on a
+submission a lost device never took, so it waits on its own device's marks alone and treats a wrong
+submission index as the renderer's to report, with a unit test; and a destroy mid-frame let Bevy's
+later systems panic making buffers on the dead device, so the cause moved to the frame's end. One
+failure in the first full run, a shadow test reading no grays, passed alone and paired, and a cause
+left pending from a previous app, which could fire in the next test's app, is cleared as each app is
 built, after which the suite passed whole, 1,450 and 2 skipped of 1,452; cargo 167 and 95.
 EXAMPLES.md reads 356 written, 2 in part and 23 missing. Right, the error scope's leak found and
 worked around rather than papered, the lock left to the owner, and each crash fixed where it was and
@@ -62,28 +80,6 @@ since one made from the C# system on the main thread was caught by an error scop
 cache and reported as a failed shader module, so the app never quit. Next render_recovery, written
 at ABI 276 with its four policies, the error count and the four causes reachable and none pressed,
 then solari_reflections.
-
-Before it, `a76577ac` came, atmosphere, ABI 276, read against the lock as the working session read
-it, no crate: the sky a planet's air scatters, earth's or Mars's, Mars's dust scattering by a
-picture of its phase the caller loads, Bevy's own, a sky of Mars without one refused, and the
-rendering method chosen; one planet kept in the world and placed on every call so its ground sits at
-the origin, since Bevy places it on add alone and Mars after earth would keep earth's center, where
-the old path put the center at the origin by a scale; `Render.SetSunDisk` for the disk a directional
-light draws; the module moved to the post folder's atmosphere file, the lighting file shorter by 142
-lines; the example Bevy's with its terrain and the phase picture in the assets list, the deferred
-water, the fog volume, the anti-aliasing, the reflections, the sun disk and the bloom reached, the
-free camera left out as Bevy's is gated, and the water shader gaining a roughness the reflections
-example sets to 0.09; 128 lines of atmosphere tests; the sky guide's section. The suite 1,444 passed
-and 2 skipped of 1,446. Mars seen live offscreen through the CLI: a hazy, dusty tan sky with the sun
-high and a dim gray-brown at sunset where earth is orange at the same sun, so the planet's remark
-says a hazy tan by day and nothing of blue sunsets, which the render did not show; the phase picture
-is 1,024 by 1 of four floats, so loading it as a plain image decodes no sRGB; and the placement
-corrected from the first reading, the old path having inserted a scale alone so propagation set the
-planet's center at the origin and any scale but one drew from inside it, where the planet stands
-since at minus the radius times the scale on the vertical axis on every call, which a test reads for
-Mars at half size. EXAMPLES.md reads 355 written, 2 in part and 24 missing. Right, the planet placed
-every call rather than trusting the add, and Mars refused without the picture its dust needs. Next
-item 21, the changed filter, then render_recovery and solari_reflections as read against the lock.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.

@@ -40,8 +40,6 @@ the most examples, and the largest is taken between groups of examples. The coun
   volume's light through Bevy's own functions, and draws in the forward pass. `ssr`'s water draws
   into Bevy's deferred buffers, which needs a Slang material to write them from a stage of its own
   whose outputs follow the camera's prepasses.
-- **Bevy's remote protocol, three examples.** `bcs` is this engine's own, so these wait on whether
-  the protocol is worth carrying beside it.
 - **A 2D mesh drawn by a shader, one example.** A `Mesh2d` is drawn with Bevy's `ColorMaterial`,
   and `shader_material_2d` needs a Slang material that draws on one as `Material` does on a 3D
   mesh.
@@ -247,10 +245,10 @@ code already in the binary.
   horizontal or vertical cross, laid out as a column when its pixels arrive, or six images of
   their own (`Render.CubemapFromFaces`). A compressed cross would be rearranged block by block. A
   cube cameras draw into, a layer each, is a target made with six layers.
-- **One medium, which is earth's air.** Density, ground albedo and a quality setting are bridged.
-  Mars is the other medium Bevy ships, and its dust phase comes from a texture the caller would have
-  to supply, since nothing embeds one. `ScatteringMedium::new` takes arbitrary scattering and
-  absorption terms, which an alien planet needs and a flat config cannot describe.
+- **Two media, earth's air and Mars's.** Density, ground albedo, the rendering method and a
+  quality setting are bridged, and Mars's dust scatters by a picture the caller loads, Bevy's
+  `textures/mars_mie_phase.ktx2`. `ScatteringMedium::new` takes arbitrary scattering and absorption
+  terms, which an alien planet needs and a flat config cannot describe.
 - **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature pulling in `dlss_wgpu`, which has
   licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or Linux.
   It also needs a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of whether

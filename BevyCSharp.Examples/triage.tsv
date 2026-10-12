@@ -271,10 +271,10 @@ reflection	n/a	about Rust reflection
 reflection_types	n/a	about Rust reflection
 serialization	n/a	about Rust reflection
 type_data	n/a	about Rust reflection
-app_under_test	missing	Bevy's remote protocol, where bcs is this engine's own
+app_under_test	n/a	Bevy's remote protocol, for which bcs, this engine's own, stands in
 client	n/a	a Rust client of Bevy's remote protocol
-integration_test	missing	Bevy's remote protocol, where bcs is this engine's own
-server	missing	Bevy's remote protocol, where bcs is this engine's own
+integration_test	n/a	Bevy's remote protocol, for which bcs, this engine's own, stands in
+server	n/a	Bevy's remote protocol, for which bcs, this engine's own, stands in
 bsn	n/a	writes a scene in BSN, a Rust macro, which Bevy 0.20 loads from no file
 fullscreen_material	can	as a pass the camera runs
 manual_material	n/a	writes a material with Rust's mid-level render API

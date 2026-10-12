@@ -78,7 +78,7 @@ Bevy's group written here, and one that prints rather than draws is in EXAMPLES.
 the row.
 
 <!-- examples -->
-Of Bevy's 438 examples, 357 are written in C# here and 2 more in part, 0 more can be with what is bridged, 22 wait on something the bridge lacks and 57 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
+Of Bevy's 438 examples, 357 are written in C# here and 2 more in part, 0 more can be with what is bridged, 19 wait on something the bridge lacks and 60 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
 <!-- /examples -->
 
 <!-- example-gallery -->
