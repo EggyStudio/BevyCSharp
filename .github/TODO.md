@@ -484,11 +484,11 @@ places together as the joints made in code do.
 
 ### Input
 
-- **A gamepad's rumble is not felt from a pretended pad, and its own settings are Bevy's.**
-  Buttons, sticks, triggers, connection and rumble reach C#, and a pad is pretended by
-  `SyntheticInput` for a script or a test. Each pad's dead zones and the threshold a trigger counts
-  as pressed at are Bevy's defaults, which `GamepadSettings` on the pad's entity would let a game
-  change, and a pad's buttons beyond Bevy's nineteen standard ones are not read.
+- **A gamepad's rumble is not felt from a pretended pad, and its odd buttons are not read.**
+  Buttons, sticks, triggers, connection and rumble reach C#, a pad is pretended by
+  `SyntheticInput` for a script or a test, and each pad's dead zones and the press a trigger counts
+  at are set through the `GamepadSettingsRef` on its entity. A pad's buttons beyond Bevy's nineteen
+  standard ones are not read.
 - **IME reaches the bus and the editor, not Bevy's UI.** `Window.SetIme` turns the input method on,
   and `ImeComposing` and `ImeCommit` arrive as messages, so a field of the game's own can show a
   candidate before it is committed, and the editor's fields take what is committed. Bevy's UI has
@@ -559,11 +559,11 @@ Every attribute the generators act on is compiled and run by `GeneratorAttribute
 generators' own table (`RecognizedAttributes`), so an attribute added there with no case fails by
 name, and one that stops compiling fails its case.
 
-- **A behavior's own component reads as changed every frame its methods run.** A method per
-  entity takes the component by reference, and the runner marks what it hands out as changed,
-  so `[Changed(typeof(Self))]` is always true, and a system watching for changes to a behavior's
-  component sees all of them change each frame. Handing it out unmarked and marking only what a
-  method wrote would need the runner to compare or the method to say.
+- **A behavior's own component reads as changed on every row its method runs on.** A method per
+  entity takes the component by reference, and the runner marks each row it hands to the method,
+  so a system watching for changes to a behavior's component sees every row an unfiltered method
+  ran on change each frame, written or not. Marking only what a method wrote would need the runner
+  to compare or the method to say.
 
 A game is played whole as well. Where the workflow builds the bridges, a job packs the library
 with the Linux bridge, builds `games/Courtyard` on that package and plays it through `play.sh` on

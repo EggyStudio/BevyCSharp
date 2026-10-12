@@ -90,6 +90,54 @@ public sealed class GamepadTests
         Assert.Equal(0, padsAfter);
     }
 
+    /// <summary>
+    /// A pad's dead zone is set through the settings Bevy keeps on its entity, so a tilt inside it
+    /// reads as none and one past it reads as it is, as the default zone's does.
+    /// </summary>
+    [Fact]
+    public void APadsDeadZoneIsSetOnItsEntity()
+    {
+        using var harness = new EngineHarness(frames: 20);
+
+        var pad = Entity.None;
+        var frame = 0;
+        float? inside = null, past = null;
+
+        harness.OnContext(Stage.Startup, _ => pad = SyntheticInput.ConnectGamepad("Worn pad"));
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            frame++;
+            var now = ctx.Input.Gamepads.FirstOrDefault(known => known.Entity == pad);
+
+            switch (frame)
+            {
+                case 2:
+                    // A worn stick that rests a little off its middle, given a wide dead zone.
+                    ctx.Ecs.Wrap<Bevy.Reflected.GamepadSettingsRef>(pad).DefaultAxisSettingsDeadzoneUpperbound = 0.7f;
+                    break;
+
+                case 4:
+                    SyntheticInput.SetGamepadAxis(pad, GamepadAxis.LeftX, 0.6f);
+                    break;
+
+                case 8:
+                    inside = now?.LeftStick.X;
+                    SyntheticInput.SetGamepadAxis(pad, GamepadAxis.LeftX, 0.85f);
+                    break;
+
+                case 12:
+                    past = now?.LeftStick.X;
+                    break;
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(0f, inside);
+        Assert.Equal(0.85f, past!.Value, 3);
+    }
+
     [Fact]
     public void ARumbleIsTakenByAPadThatCannotRumble()
     {

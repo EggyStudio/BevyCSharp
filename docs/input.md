@@ -91,7 +91,9 @@ foreach (var joined in ctx.Read<GamepadConnected>()) AddPlayer(joined.Gamepad);
 
 The face buttons are named by where they sit, `South` being A on one pad and Cross on another. A
 stick at rest reads zero through Bevy's dead zones, and a trigger is both an axis and, down past
-three quarters, a button. `pad.Rumble(strong, weak, seconds)` shakes one. Real pads are found by
+three quarters, a button. Both are the pad's own, kept by Bevy on its entity, so a game widens one
+pad's dead zone for a worn stick, or lowers the press a trigger counts at, through its wrapper
+(`ctx.Ecs.Wrap<GamepadSettingsRef>(pad.Entity).DefaultAxisSettingsDeadzoneUpperbound = 0.2f`). `pad.Rumble(strong, weak, seconds)` shakes one. Real pads are found by
 gilrs in the render and editor profiles, and every profile reads a pad pretended by
 `SyntheticInput.ConnectGamepad`, which is how a test or `./bcs command input.button 0 South 10`
 presses a button on a machine with none attached.
