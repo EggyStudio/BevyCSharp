@@ -2,41 +2,6 @@
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
 
-BevyCSharp/Interop/NativeTypes.Audio.cs NativeAudioConfig
-BevyCSharp/Interop/NativeTypes.Ecs.cs NativeChunk
-BevyCSharp/Interop/NativeTypes.Frame.cs NativeFrameState
-BevyCSharp/Interop/NativeTypes.Frame.cs NativeProfile
-BevyCSharp/Interop/NativeTypes.Frame.cs NativeTime
-BevyCSharp/Interop/NativeTypes.ImGui.cs NativeImGuiCommand
-BevyCSharp/Interop/NativeTypes.ImGui.cs NativeImGuiFrame
-BevyCSharp/Interop/NativeTypes.ImGui.cs NativeImGuiVertex
-BevyCSharp/Interop/NativeTypes.Input.cs NativeGamepad
-BevyCSharp/Interop/NativeTypes.Input.cs NativeInput
-BevyCSharp/Interop/NativeTypes.Input.cs NativeTouch
-BevyCSharp/Interop/NativeTypes.Input.cs NativeTouchArray
-BevyCSharp/Interop/NativeTypes.Render.cs NativeAnimationState
-BevyCSharp/Interop/NativeTypes.Render.cs NativeAtmosphereConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeCameraConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeColorMaterial
-BevyCSharp/Interop/NativeTypes.Render.cs NativeEditableTextConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeGizmoConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeGizmoText
-BevyCSharp/Interop/NativeTypes.Render.cs NativeGradingConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeGradingSection
-BevyCSharp/Interop/NativeTypes.Render.cs NativeImageConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeLightConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeMeshData
-BevyCSharp/Interop/NativeTypes.Render.cs NativeMeshInfo
-BevyCSharp/Interop/NativeTypes.Render.cs NativePostConfig
-BevyCSharp/Interop/NativeTypes.Render.cs NativeSpriteConfig
-BevyCSharp/Interop/NativeTypes.Ui.cs NativeGridTrack
-BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiGridConfig
-BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiImageConfig
-BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiNodeConfig
-BevyCSharp/Interop/NativeTypes.Ui.cs NativeUiTextConfig
-BevyCSharp/Interop/NativeTypes.Window.cs NativeMonitor
-BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowEvent
-BevyCSharp/Interop/NativeTypes.Window.cs NativeWindowPlace
 BevyCSharp/Scenes/SceneAttributes.cs DataVersionAttribute
 BevyCSharp/Scenes/SceneAttributes.cs FormerNameAttribute
 BevyCSharp/Scenes/SceneValue.cs SceneReferences
