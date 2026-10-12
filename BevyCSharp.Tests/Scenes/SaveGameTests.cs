@@ -24,25 +24,25 @@ public partial struct Wallet
 [Collection("engine")]
 public sealed class SaveGameTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-save-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-save-");
 
     public SaveGameTests()
     {
-        Directory.CreateDirectory(_root);
-        UserData.Root = Path.Combine(_root, "user");
+        Directory.CreateDirectory(_folder.Path);
+        UserData.Root = Path.Combine(_folder.Path, "user");
     }
 
     public void Dispose()
     {
         UserData.Root = EngineHarness.UserDirectory;
         SaveGame.Persisted.Clear();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
     public void ASaveHoldsWhatPlayChangedAndLoadsBackOverTheScene()
     {
-        var level = Path.Combine(_root, "level.scene.json");
+        var level = Path.Combine(_folder.Path, "level.scene.json");
 
         using (var making = new EngineHarness(frames: 2))
         {
@@ -95,7 +95,7 @@ public sealed class SaveGameTests : IDisposable
         }
 
         // Under the player's directory, holding the wallet and not the walls.
-        var file = Path.Combine(_root, "user", "saves", "slot.save.json");
+        var file = Path.Combine(_folder.Path, "user", "saves", "slot.save.json");
         var text = File.ReadAllText(file);
         Assert.Contains("Bevy.Tests.Wallet", text);
         Assert.DoesNotContain("Wall\"", text);
@@ -131,7 +131,7 @@ public sealed class SaveGameTests : IDisposable
     [Fact]
     public void ALoadDuringPlayReplacesTheGameAndLeavesWhatTheGameMadeItself()
     {
-        var level = Path.Combine(_root, "yard.scene.json");
+        var level = Path.Combine(_folder.Path, "yard.scene.json");
         File.WriteAllText(level, """
             { "format": "bevycsharp.scene.2",
               "entities": [
@@ -184,7 +184,7 @@ public sealed class SaveGameTests : IDisposable
     [Fact]
     public void ALoadIsSentTheFrameAfterOnce()
     {
-        var level = Path.Combine(_root, "sent.scene.json");
+        var level = Path.Combine(_folder.Path, "sent.scene.json");
         File.WriteAllText(level, """
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Hero",
@@ -224,7 +224,7 @@ public sealed class SaveGameTests : IDisposable
     [Fact]
     public void AComponentDeclaredElsewhereIsSavedOnceNamed()
     {
-        var level = Path.Combine(_root, "small.scene.json");
+        var level = Path.Combine(_folder.Path, "small.scene.json");
         File.WriteAllText(level, """
             { "format": "bevycsharp.scene.2",
               "entities": [ { "id": 1, "name": "Hero",
@@ -261,7 +261,7 @@ public sealed class SaveGameTests : IDisposable
     [Fact]
     public void AValueTheSlotCarriesComesBackWithTheSave()
     {
-        var level = Path.Combine(_root, "empty.scene.json");
+        var level = Path.Combine(_folder.Path, "empty.scene.json");
         File.WriteAllText(level, """{ "format": "bevycsharp.scene.2", "entities": [] }""");
 
         var quests = new Persistent<Settings>("quests", SettingsJson.Default.Settings, () => new Settings());

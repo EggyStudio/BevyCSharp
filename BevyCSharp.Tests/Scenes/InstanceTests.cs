@@ -18,11 +18,11 @@ public sealed class InstanceTests : IDisposable
 {
     private const string Rig = "models/rig.gltf";
 
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-instance-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-instance-");
 
-    public InstanceTests() => Directory.CreateDirectory(_root);
+    public InstanceTests() => Directory.CreateDirectory(_folder.Path);
 
-    public void Dispose() => Directory.Delete(_root, recursive: true);
+    public void Dispose() => _folder.Dispose();
 
     [SkippableFact]
     public void AnInstanceIsReportedReadyAndItsNodesAreFoundByPath()
@@ -64,7 +64,7 @@ public sealed class InstanceTests : IDisposable
     [SkippableFact]
     public void OverridesAreSavedAsChangesAndAppliedAgainAfterALoad()
     {
-        var file = Path.Combine(_root, "fleet.scene.json");
+        var file = Path.Combine(_folder.Path, "fleet.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {
@@ -144,7 +144,7 @@ public sealed class InstanceTests : IDisposable
     [SkippableFact]
     public void AnOverrideWhoseNodeIsGoneIsReportedAndKept()
     {
-        var file = Path.Combine(_root, "renamed.scene.json");
+        var file = Path.Combine(_folder.Path, "renamed.scene.json");
         File.WriteAllText(file, """
             { "format": "bevycsharp.scene.2",
               "entities": [
@@ -238,7 +238,7 @@ public sealed class InstanceTests : IDisposable
     [SkippableFact]
     public void AChildAddedUnderAModelsNodeGoesBackUnderItOnceTheModelSpawns()
     {
-        var file = Path.Combine(_root, "flagged.scene.json");
+        var file = Path.Combine(_folder.Path, "flagged.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {
@@ -286,7 +286,7 @@ public sealed class InstanceTests : IDisposable
     [SkippableFact]
     public void ARenamedNodeKeepsItsPathAndItsNewNameAfterALoad()
     {
-        var file = Path.Combine(_root, "renamed-node.scene.json");
+        var file = Path.Combine(_folder.Path, "renamed-node.scene.json");
 
         using (var saving = new EngineHarness(frames: 300, fps: 240))
         {

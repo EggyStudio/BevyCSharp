@@ -97,13 +97,13 @@ public sealed class Recipe
 [Collection("engine")]
 public sealed class ChangingTypeTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "bcs-change-" + Guid.NewGuid().ToString("n"));
+    private readonly TestFolder _folder = new("bcs-change-");
     private readonly string _was = Streaming.AssetRoot;
 
     public ChangingTypeTests()
     {
-        Directory.CreateDirectory(_root);
-        Streaming.AssetRoot = _root;
+        Directory.CreateDirectory(_folder.Path);
+        Streaming.AssetRoot = _folder.Path;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
     }
@@ -113,7 +113,7 @@ public sealed class ChangingTypeTests : IDisposable
         Streaming.AssetRoot = _was;
         DataAssets.ReloadAll();
         AssetIds.Reindex();
-        Directory.Delete(_root, recursive: true);
+        _folder.Dispose();
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public sealed class ChangingTypeTests : IDisposable
                     "Bevy.Tests.Hitpoints": { "Max": 9, "Back": { "Stiff": 4, "Damping": 2 } },
                     "Bevy.Transform": { "Translation": [0, 0, 0] } } } ] }
             """;
-        var file = Path.Combine(_root, "renamed.scene.json");
+        var file = Path.Combine(_folder.Path, "renamed.scene.json");
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -197,7 +197,7 @@ public sealed class ChangingTypeTests : IDisposable
                     "Bevy.Tests.Vigor": { "Most": 5, "Glow": 3, "Rear": { "Stiffness": 1, "Spin": "fast" } },
                     "Bevy.Transform": { "Translation": [0, 0, 0] } } } ] }
             """;
-        var file = Path.Combine(_root, "kept.scene.json");
+        var file = Path.Combine(_folder.Path, "kept.scene.json");
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -244,7 +244,7 @@ public sealed class ChangingTypeTests : IDisposable
     public void ADataAssetWrittenBeforeARenameLoadsAndKeepsWhatItDoesNotRead()
     {
         File.WriteAllText(
-            Path.Combine(_root, "kit.data.json"),
+            Path.Combine(_folder.Path, "kit.data.json"),
             """
             { "format": "bevycsharp.data.1", "type": "Bevy.Tests.Loadout",
               "fields": { "Count": 3, "Label": "Old", "Extra": [1] } }
@@ -261,7 +261,7 @@ public sealed class ChangingTypeTests : IDisposable
 
         DataAssets.Save(id);
 
-        using var saved = JsonDocument.Parse(File.ReadAllText(Path.Combine(_root, "kit.data.json")));
+        using var saved = JsonDocument.Parse(File.ReadAllText(Path.Combine(_folder.Path, "kit.data.json")));
         Assert.Equal("Bevy.Tests.Kit", saved.RootElement.GetProperty("type").GetString());
         var fields = saved.RootElement.GetProperty("fields");
         Assert.Equal("Old", fields.GetProperty("Title").GetString());
@@ -279,7 +279,7 @@ public sealed class ChangingTypeTests : IDisposable
                 { "id": 2, "name": "Second", "components": { "Bevy.Tests.Gauge": { "$version": 2, "Most": 50, "Reading": 2 } } },
                 { "id": 3, "name": "Third", "components": { "Bevy.Tests.Gauge": { "$version": 3, "Most": 50, "Current": 2 } } } ] }
             """;
-        var file = Path.Combine(_root, "versions.scene.json");
+        var file = Path.Combine(_folder.Path, "versions.scene.json");
 
         using var harness = new EngineHarness(frames: 2);
 
@@ -318,7 +318,7 @@ public sealed class ChangingTypeTests : IDisposable
     public void ADataAssetAtAnEarlierVersionIsBroughtUpOnceAndSavedAtThisOne()
     {
         File.WriteAllText(
-            Path.Combine(_root, "bread.data.json"),
+            Path.Combine(_folder.Path, "bread.data.json"),
             """{ "format": "bevycsharp.data.1", "type": "Bevy.Tests.Recipe", "fields": { "Yield": 4 } }""");
         var id = AssetIds.IdOf("bread.data.json", create: true);
 
@@ -328,6 +328,6 @@ public sealed class ChangingTypeTests : IDisposable
         // Read again from the file it was saved to, which records the version, so it is not doubled twice.
         DataAssets.ReloadAll();
         Assert.Equal(8, DataAssets.Get(new DataRef<Recipe>(id)).Yield);
-        Assert.Contains("\"$version\": 2", File.ReadAllText(Path.Combine(_root, "bread.data.json")));
+        Assert.Contains("\"$version\": 2", File.ReadAllText(Path.Combine(_folder.Path, "bread.data.json")));
     }
 }
