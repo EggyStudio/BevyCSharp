@@ -1,6 +1,6 @@
 // Bevy's water_material shader in Slang, ripples made by laying four octaves of a normal map over
-// each other as they drift, for its ssr example. Bevy's draws only deferred, into the buffers its
-// screen-space reflections read, and this does too, through its deferred stage.
+// each other as they drift, for its ssr and atmosphere examples. Bevy's draws only deferred, into
+// the buffers its screen-space reflections read, and this does too, through its deferred stage.
 
 import bcs;
 
@@ -13,6 +13,8 @@ uniform float4 octave_vectors[2];
 uniform float4 octave_scales;
 /// How tall the waves of each octave are.
 uniform float4 octave_strengths;
+/// How rough the black surface under the ripples is, as the example's standard material base sets it.
+uniform float roughness;
 
 /// One octave's normal, which is not a slerp toward it but near enough.
 float3 octave(float2 uv, float strength)
@@ -33,11 +35,11 @@ float3 ripples(float2 uv, float time)
         octave(uv2, octave_strengths[2]) + octave(uv3, octave_strengths[3]));
 }
 
-/// Black and nearly as smooth as glass, as the example's standard material base is.
+/// Black and as smooth as the example's standard material base is.
 bcs::Surface water(bcs::Surface surface, float2 uv, float time)
 {
     surface.base_color = float4(0.0, 0.0, 0.0, 1.0);
-    surface.roughness = 0.09;
+    surface.roughness = roughness;
     surface.normal = ripples(uv, time);
     return surface;
 }

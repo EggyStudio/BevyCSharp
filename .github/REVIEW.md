@@ -10,7 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2aaaef58`. decodable, ABI 274, as shaped: a sample stream the game fills, an asset
+Reviewed up to `c9b8728f`. Item 19, the world a scene file saves whole: `EcsText`, two numbers into
+the managed store `EcsList` keeps its lists in, so a component names text of any length, converting
+to and from `string`, freed by the hook the generator registers when the component leaves its
+entity, copied with a clone, a JSON string in the scene and a text field in the inspector, a handle
+used after its text is freed throwing; `[NotSaved]` on a component's field, which the schema marks,
+the scene file skips on a write and a load leaves at the type's start, and which rides along through
+a script reload's in-place move; `[SceneResource]` on a resource struct of the game's own, a
+generated schema as a component's and the ones present written under `worldResources` by
+`SceneFile.Save` and inserted by `Load` alone, since `Write` and `Read` back the editor's undo of a
+delete, which must not roll a resource back, a test covering it; the two attributes in files of
+their own. Bevy's example saves under the user's folder, prints the JSON and loads a checked-in JSON
+scene with the helmet, logging what arrived; the components and the scenes guides have their
+sections; 203 lines of whole-scene tests, the generator's tests for the text and the attribute, and
+the reload test carrying a field left out. The suite 1,440 passed and 2 skipped of 1,442;
+EXAMPLES.md reads 354 written, 2 in part and 25 missing. Right, the text a handle into the store the
+lists already use, and the resources kept out of the calls the undo rides on. Found on the way and
+not fixed: a behavior's `[Changed]` filter on its own type fires every frame, since the chunks call
+stamps every row before the runner tests the filter, which the generator's tests already note and
+the example sidesteps with a read-only query, as Bevy's log system reads; it is item 21, after
+atmosphere, which is written and waits on the native build at ABI 275. Then render_recovery and
+solari_reflections as read against the lock.
+
+Before it, `2aaaef58` came, decodable, ABI 274, as shaped: a sample stream the game fills, an asset
 of the bridge's with its rate, channels and a shared queue of samples, its decoder taking up to 512
 samples at a time into a buffer of its own so the audio thread meets the game's writes once a
 stretch and giving silence on an underrun so the source never ends, registered with the audio
@@ -72,36 +94,6 @@ tools' picking overlay, and bevy_dev_tools is not in the lock and waits on the o
 other crates (Decisions 11 and 12), a C# imitation of the overlay being another tool and not Bevy's
 example, so its row stays missing with a note saying so, written in decodable's batch. Then item 19,
 and the three rows read against the lock.
-
-Before it, `7bc0af69` came, occlusion_culling, ABI 271: how many meshes the GPU drew in the opaque
-pass, read back from Bevy's indirect draw buffers as Bevy's example reads them, behind the debug
-flag the app's render plugins are built with, which adds a copy source to buffers Bevy makes anyway;
-while a game counts, staging buffers sized to the opaque pass's indirect data and batch sets are
-made as the resources are flushed, the parameters copied after the main pass and the copies of the
-frame before mapped at extraction into counts both worlds hold; `Render.DrawnMeshes` sums the first
-batch set's draws' instance counts and says why there is no count, pending, uncountable where the
-GPU cannot say how many draws there are, or no GPU culling, the parsing in pure functions with a
-native test. The test puts four cubes in view and four behind the camera and reads 4 where the GPU
-can count, skipped with the reason elsewhere, waiting as a capture waits, since pipelines read as
-ready at frame 1 before any was asked for and the four arrived at frame 21, so a fixed short wait
-read 0. The example is Bevy's with the examples' buttons for Bevy's Feathers, said in the triage
-note, its capture reading 338 of 363 meshes drawn; the drawing guide's paragraph and block after the
-camera flags. The suite 1,431 passed and 2 skipped of 1,433; cargo 163 and 93; the norm tests 19 of
-19, the prose at 302; the guide's six blocks build. EXAMPLES.md reads 350 written, 2 in part and 29
-missing. Right, the readback asked for rather than always on, and the count's absence told apart by
-its cause. world_serialization is more than a row, the working session read, its triage line naming
-three gaps the engine has, and it is item 19 with the shape the session proposed: a component's
-text, a field a scene leaves out, and a resource of the game's own in the scene file. The owner
-refined the stream's plan at 22:55, approved at 22:58 (Decision 32): a position is every mesh's, as
-this engine had it, and the packed data a stream beside it, which is what `32ae29fb` gives; one
-thing is left for the sixteen bytes a voxel vertex can be, a switch that leaves the worked-out
-normals out, which is item 20, small, with the row under way or right after. The owner asked at
-23:05 that four bytes be called four bytes and never a word, which this file does from here and item
-18's guides, remarks and shader comments do with item 20, their `word` names `packed`. The run of
-`7bc0af69` is green on all three, read at 23:10, which reads `6c491f7c` and `32ae29fb` with it,
-their own run cancelled by the later push. Next transform_gizmo, read for whether anything short of
-Feathers and the camera controller reaches it, debug_picking, pitch, decodable, then item 19, then
-the three read against the lock as the working session read them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -546,15 +538,15 @@ from [SHARED.md](SHARED.md).
     `32ae29fb` as written, the mip generation's layers refused with it.
 
 19. **A world a scene file saves whole: a component's text, a field left out and a resource of the
-    game's own, Bevy's `world_serialization` reached from C#.** The row's triage line names three
-    gaps, each real, read by the working session at `7bc0af69`. First, a component struct holds no
-    string, strings being allowed only on managed types and a component's strings living in
-    `EcsList<string>` and `EcsMap`: an `EcsText` handle into the same managed store, as `EcsList`
-    is, converting to and from `string` implicitly, freed by the same removal and despawn hook,
-    given its own copy by `Clone`, written to a scene as a JSON string and drawn by the inspector as
-    a text field. Second, nothing marks a field a scene file leaves out: `[NotSaved]` on a
-    component's field, Bevy's skip of serializing, which the schema marks, the scene file skips on a
-    write and a load leaves at the value the type starts with. Third, a scene file writes no
+    game's own, Bevy's `world_serialization` reached from C#, done at `c9b8728f`.** The row's triage
+    line names three gaps, each real, read by the working session at `7bc0af69`. First, a component
+    struct holds no string, strings being allowed only on managed types and a component's strings
+    living in `EcsList<string>` and `EcsMap`: an `EcsText` handle into the same managed store, as
+    `EcsList` is, converting to and from `string` implicitly, freed by the same removal and despawn
+    hook, given its own copy by `Clone`, written to a scene as a JSON string and drawn by the
+    inspector as a text field. Second, nothing marks a field a scene file leaves out: `[NotSaved]`
+    on a component's field, Bevy's skip of serializing, which the schema marks, the scene file skips
+    on a write and a load leaves at the value the type starts with. Third, a scene file writes no
     resources of the world, its resources being meshes and materials: a resource struct of the
     game's own marked `[SceneResource]` gets a generated schema as a component does,
     `SceneFile.Save` writes those present in a `worldResources` array and `Load` inserts them. The
@@ -563,8 +555,9 @@ from [SHARED.md](SHARED.md).
     printed, and a checked-in JSON scene loaded with the helmet and the log of what was added, since
     Bevy's RON scene names Rust types a C# app cannot load. Generator, scene format, inspector and
     docs work, with the generator's tests for the text and the attribute, a scene round trip of
-    each, the inspector's field, and a scene from before reading as before. After decodable and
-    before the three rows read against the lock.
+    each, the inspector's field, and a scene from before reading as before. Done at `c9b8728f` as
+    written, with the resources kept out of the editor's undo path and a field left out riding
+    through a script reload.
 
 20. **A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32), done at
     `7f42cf40`.** `mesh_from` works normals out for every triangle mesh given none, 12 bytes a
@@ -588,6 +581,16 @@ from [SHARED.md](SHARED.md).
     the binding model; and a buffer stays the right tool for what is not per vertex, a palette or
     atlas table every chunk shares, per-chunk constants, or what a compute pass also reads. Done at
     `7f42cf40`, meshes.rs split first into mesh_data.rs.
+
+21. **A behavior's `[Changed]` filter on its own type fires every frame.** Found by the working
+    session writing item 19: the chunks call stamps every row of a component the behavior writes
+    before the runner tests the filter, so a behavior that reads and writes one type with
+    `[Changed]` on it runs on every row every frame, which the generator's tests note and the
+    world_serialization example sidesteps with a read-only query. The fix the session read: fetch
+    the chunks unmarked and mark only the rows the body runs on, so a row changed by the behavior
+    itself counts as changed for the next frame and an untouched one does not, with a test of a
+    behavior that changes one row of three and runs on that one alone the frame after, and the
+    example's query restored to Bevy's shape. After atmosphere and before render_recovery.
 
 ## Verdicts
 

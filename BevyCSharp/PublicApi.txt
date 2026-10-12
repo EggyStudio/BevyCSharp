@@ -355,7 +355,10 @@ static class Bevy.AssetServer
   static string? PathOf(AssetHandle handle)
 readonly struct Bevy.Atmosphere : INativeComponent
 sealed class Bevy.AtmosphereSettings
+  AssetHandle DustPhase { get; set; }
   AtmosphereSettings()
+  SkyMethod Method { get; set; }
+  SkyPlanet Planet { get; set; }
   SkyQuality Quality { get; set; }
   float Density { get; set; }
   float GroundAlbedo { get; set; }
@@ -2449,7 +2452,10 @@ struct Bevy.Interop.NativeAtmosphereConfig
   float GroundAlbedo
   float HazeDistance
   float Scale
+  int DustPhase
   int Enabled
+  int Method
+  int Planet
   int Quality
 struct Bevy.Interop.NativeAudioConfig
   float PlaySeconds
@@ -10404,6 +10410,7 @@ static class Bevy.Render
   static void SetSkybox(Entity camera, AssetHandle cubemap, float brightness = 1000f, Quat? rotation = null)
   static void SetSoftShadows(Entity light, float size)
   static void SetSortedTransparency(Entity camera, bool on = true, uint layers = 0u, float average = 0f, float threshold = 0f)
+  static void SetSunDisk(Entity light, SunDisk disk)
   static void SetViewport(Entity camera, uint x, uint y, uint width, uint height)
   static void SetWireframe(Entity entity, bool on, (float, float, float, float) color = default)
   static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels)
@@ -10939,6 +10946,12 @@ readonly struct Bevy.Sides : IEquatable<Sides>
   static bool op_Equality(Sides left, Sides right)
   static bool op_Inequality(Sides left, Sides right)
   void Deconstruct(out Length Left, out Length Top, out Length Right, out Length Bottom)
+enum Bevy.SkyMethod : int
+  LookupTexture = 0
+  Raymarched = 1
+enum Bevy.SkyPlanet : int
+  Earth = 0
+  Mars = 1
 enum Bevy.SkyQuality : int
   Cheap = 1
   Default = 0
@@ -11096,6 +11109,20 @@ sealed class Bevy.SubStateOfAttribute : Attribute
   SubStateOfAttribute(Type parent, object whileIn)
   Type Parent { get; }
   object WhileIn { get; }
+readonly struct Bevy.SunDisk : IEquatable<SunDisk>
+  SunDisk(float AngularSize, float Intensity = 1f)
+  bool Equals(SunDisk other)
+  float AngularSize { get; init; }
+  float Intensity { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static SunDisk Earth { get; }
+  static SunDisk Mars { get; }
+  static SunDisk Off { get; }
+  static bool op_Equality(SunDisk left, SunDisk right)
+  static bool op_Inequality(SunDisk left, SunDisk right)
+  void Deconstruct(out float AngularSize, out float Intensity)
 static class Bevy.SyntheticInput
   static Entity ConnectGamepad(string name = "Console pad")
   static bool TryTakeClickWithoutWindow(out float x, out float y)

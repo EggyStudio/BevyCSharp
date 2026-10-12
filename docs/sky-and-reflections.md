@@ -63,6 +63,27 @@ each setting, and what changes is banding in a gradient and how much of a frame 
 The camera is given a high dynamic range target either way, because a sun scattered through air is
 far brighter than white.
 
+<!-- compiled with:
+Entity camera = default, sun = default;
+-->
+```csharp
+Render.SetAtmosphere(camera, new AtmosphereSettings
+{
+    Planet = SkyPlanet.Mars,
+    DustPhase = AssetServer.Load(AssetKind.Image, "textures/mars_mie_phase.ktx2"),
+    Method = SkyMethod.Raymarched,
+});
+Render.SetSunDisk(sun, SunDisk.Mars);
+```
+
+`Planet` is earth's air unless set, or Mars's, thin and dusty, whose dust scatters light by the
+picture `DustPhase` names, Bevy's `textures/mars_mie_phase.ktx2` among its assets. Changing it moves
+the planet so its ground stays at the origin. `Method` works the sky out from lookup textures, Bevy's
+quick default for a scene inside the air, or by marching rays, slower and right from far off, a
+planet seen from orbit included, with sharp shadows in fog. `SetSunDisk` sets how wide and bright
+the sun a directional light stands for looks in the sky, earth's unless set, Mars's smaller, and
+`SunDisk.Off` none, without changing what the light lights.
+
 `SetSkyLighting` derives an environment map from that atmosphere each frame, so a surface picks up
 the color of what is around it rather than only what a lamp points at it, and the light follows the
 sun without anything being animated. The size it generates is a square cubemap resolution and has to

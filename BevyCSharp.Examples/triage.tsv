@@ -13,7 +13,6 @@ animated_material	can
 generate_custom_mesh	can
 anti_aliasing	can
 atmospheric_fog	can	through Bevy's reflected DistanceFog
-atmosphere	missing	Bevy's Mars scattering medium and its choice of rendering method
 fog	can	through Bevy's reflected DistanceFog
 auto_exposure	can
 blend_modes	can

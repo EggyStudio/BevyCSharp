@@ -17,6 +17,26 @@ namespace Bevy;
 /// </remarks>
 public sealed class AtmosphereSettings
 {
+    /// <summary>Whose air the light scatters through, earth's unless set.</summary>
+    /// <remarks>
+    /// Mars's needs <see cref="DustPhase"/>, and its sun looks smaller, which the light's
+    /// <see cref="SunDisk.Mars"/> draws (<see cref="Render.SetSunDisk"/>).
+    /// </remarks>
+    public SkyPlanet Planet { get; set; } = SkyPlanet.Earth;
+
+    /// <summary>
+    /// The picture of how Mars's dust scatters light at each angle, which a sky of Mars needs and
+    /// one of earth leaves alone.
+    /// </summary>
+    /// <remarks>
+    /// Bevy ships it as <c>textures/mars_mie_phase.ktx2</c> in its assets, loaded as any image is.
+    /// A sky of Mars without it is refused, since Bevy has nothing to build that sky from.
+    /// </remarks>
+    public AssetHandle DustPhase { get; set; } = AssetHandle.None;
+
+    /// <summary>How the sky is worked out, from lookup textures unless set.</summary>
+    public SkyMethod Method { get; set; } = SkyMethod.LookupTexture;
+
     /// <summary>
     /// How thick the air is, as a multiple of earth's.
     /// </summary>

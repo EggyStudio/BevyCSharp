@@ -112,6 +112,7 @@ internal static class Catalog
         new("lines", Lines.Build),
         new("mesh_ray_cast", MeshRayCast.Build),
         new("texture", Texture.Build),
+        new("atmosphere", AtmosphereExample.Build),
         new("atmospheric_fog", AtmosphericFog.Build),
         new("fog", Fog.Build),
         new("rect_light", RectLight.Build),

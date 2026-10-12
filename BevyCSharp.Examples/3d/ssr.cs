@@ -133,7 +133,8 @@ internal static class Ssr
             .SetSampler("water_sampler", SamplerSettings.Linear)
             .Set("octave_vectors", new[] { new Vector4(0.080f, 0.059f, 0.073f, -0.062f), new Vector4(0.153f, 0.138f, -0.149f, -0.195f) })
             .Set("octave_scales", new Vector4(1f, 2.1f, 7.9f, 14.9f) * 5f)
-            .Set("octave_strengths", new Vector4(0.16f, 0.18f, 0.093f, 0.044f));
+            .Set("octave_strengths", new Vector4(0.16f, 0.18f, 0.093f, 0.044f))
+            .Set("roughness", 0.09f);
         ecs.Add(ecs.SpawnMesh(plane, water, wide), new WaterModel());
 
         // The camera, with an environment map and a skybox so the water has more to reflect than

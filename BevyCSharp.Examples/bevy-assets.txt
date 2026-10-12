@@ -327,3 +327,5 @@ textures/rpg/ui/generic-rpg-ui-inventario02.png
 textures/rpg/ui/generic-rpg-ui-inventario03.png
 textures/rpg/ui/generic-rpg-ui-inventario04.png
 textures/rpg/ui/generic-rpg-ui-text-box.png
+models/terrain/terrain.glb
+textures/mars_mie_phase.ktx2

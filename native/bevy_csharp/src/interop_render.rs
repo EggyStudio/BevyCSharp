@@ -209,6 +209,13 @@ pub struct BcsAtmosphereConfig {
     /// How much light the ground bounces back into the air, where earth's is `0.3` and Mars's is
     /// `0.1`. `0` takes the one that belongs to the medium.
     pub ground_albedo: f32,
+    /// Whose air: `0` earth's, `1` Mars's.
+    pub planet: i32,
+    /// The asset key of the picture Mars's dust scatters light by, which Mars needs and earth
+    /// leaves alone.
+    pub dust_phase: i32,
+    /// How the sky is computed: `0` from lookup textures, Bevy's own, `1` by marching rays.
+    pub method: i32,
 }
 
 /// One debug shape to draw this frame.

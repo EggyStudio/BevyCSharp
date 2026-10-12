@@ -445,6 +445,15 @@ public struct NativeAtmosphereConfig
 
     /// <summary>How much light the ground bounces back, or 0 for the medium's own.</summary>
     public float GroundAlbedo;
+
+    /// <summary>Whose air: 0 earth's, 1 Mars's.</summary>
+    public int Planet;
+
+    /// <summary>The asset key of the picture Mars's dust scatters by.</summary>
+    public int DustPhase;
+
+    /// <summary>How the sky is computed: 0 from lookup textures, 1 by marching rays.</summary>
+    public int Method;
 }
 
 /// <summary>One tonal range's part of a color grade. Mirrors <c>BcsGradingSection</c>.</summary>

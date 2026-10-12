@@ -1,5 +1,6 @@
 //! What a camera does to the picture once the scene has been drawn.
 
+pub mod atmosphere;
 pub mod effects;
 pub mod environment;
 pub mod lighting;

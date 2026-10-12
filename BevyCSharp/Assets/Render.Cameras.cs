@@ -500,6 +500,11 @@ public static unsafe partial class Render
     /// <see cref="SetPostProcessing"/> for a tonemapper to bring that range back down.
     /// </para>
     /// <para>
+    /// Called again with another <see cref="AtmosphereSettings.Planet"/>, it moves the planet so its
+    /// ground stays at the origin, Mars's being smaller than earth's. Mars's sun looks smaller as
+    /// well, which <see cref="SetSunDisk"/> gives the light.
+    /// </para>
+    /// <para>
     /// Refused where meshlets run (<see cref="MeshletsActive"/>). Bevy 0.19 builds its meshlet
     /// pipelines without the bindings an atmosphere adds to a camera's view, so the first meshlet
     /// mesh drawn under one fails the GPU's validation and ends the app. A skybox
@@ -508,6 +513,7 @@ public static unsafe partial class Render
     /// </remarks>
     /// <param name="camera">The camera that should see the sky.</param>
     /// <param name="settings">How thick the air is, and at what scale.</param>
+    /// <exception cref="ArgumentException">A sky of Mars without its <see cref="AtmosphereSettings.DustPhase"/>.</exception>
     /// <exception cref="BevyNativeException">
     /// The entity is gone or is not a camera, this build has no renderer, or meshlets run.
     /// </exception>
@@ -524,6 +530,14 @@ public static unsafe partial class Render
     public static void SetAtmosphere(Entity camera, AtmosphereSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
+
+        if (settings.Planet == SkyPlanet.Mars && !settings.DustPhase.IsValid)
+        {
+            throw new ArgumentException(
+                "A sky of Mars needs the picture its dust scatters light by, as DustPhase, which "
+                + "Bevy ships as textures/mars_mie_phase.ktx2.",
+                nameof(settings));
+        }
 
         if (MeshletsActive)
         {
@@ -542,11 +556,40 @@ public static unsafe partial class Render
             HazeDistance = settings.HazeDistance,
             Quality = (int)settings.Quality,
             GroundAlbedo = settings.GroundAlbedo,
+            Planet = (int)settings.Planet,
+            DustPhase = settings.DustPhase.Key,
+            Method = (int)settings.Method,
         };
 
         Native.Check(
             Native.bcs_render_set_atmosphere(camera.Bits, &native),
             $"setting the atmosphere on {camera}");
+    }
+
+    /// <summary>
+    /// Gives a directional light the disk of the sun it stands for, which an atmosphere draws in
+    /// its sky where the light comes from. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A light given none is drawn with <see cref="SunDisk.Earth"/>, so a sky of Mars
+    /// (<see cref="SkyPlanet.Mars"/>) gives its sun <see cref="SunDisk.Mars"/>, and
+    /// <see cref="SunDisk.Off"/> leaves the sky lit with no disk in it. The disk is how the sun
+    /// looks, and the light's brightness and shadows stay as they are.
+    /// </remarks>
+    /// <param name="light">A directional light from <see cref="SpawnLight(LightSettings)"/>.</param>
+    /// <param name="disk">How wide and how bright the disk is.</param>
+    /// <exception cref="ArgumentOutOfRangeException">A size or an intensity below zero.</exception>
+    /// <exception cref="BevyNativeException">
+    /// The entity is gone or is not a directional light, or this build has no renderer.
+    /// </exception>
+    public static void SetSunDisk(Entity light, SunDisk disk)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(disk.AngularSize, nameof(disk));
+        ArgumentOutOfRangeException.ThrowIfNegative(disk.Intensity, nameof(disk));
+
+        Native.Check(
+            Native.bcs_render_set_sun_disk(light.Bits, disk.AngularSize, disk.Intensity),
+            $"setting the sun's disk on {light}");
     }
 
     /// <summary>

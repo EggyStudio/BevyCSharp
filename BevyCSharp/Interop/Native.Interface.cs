@@ -132,6 +132,11 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_set_atmosphere(
         ulong camera, NativeAtmosphereConfig* config);
 
+    /// <summary>Gives a directional light the disk of the sun an atmosphere draws for it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_sun_disk(ulong light, float angularSize, float intensity);
+
     /// <summary>Lights the scene from a cubemap, filtered on the GPU.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
