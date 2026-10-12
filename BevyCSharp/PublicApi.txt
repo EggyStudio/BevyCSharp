@@ -3223,6 +3223,7 @@ struct Bevy.Interop.NativeUiNodeConfig
   float PaddingTop
   float Right
   float RowGap
+  float ScrollbarWidth
   float Shrink
   float Top
   float Width
@@ -11628,6 +11629,7 @@ sealed class Bevy.UiSettings
   float AspectRatio { get; set; }
   float ClipMargin { get; set; }
   float Grow { get; set; }
+  float ScrollbarWidth { get; set; }
   float Shrink { get; set; }
 sealed class Bevy.UiTextCursorSettings
   Color Color { get; set; }

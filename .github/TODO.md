@@ -308,17 +308,14 @@ drawn sliced, tiled or fitted inside its size the way a video player letterboxes
 
 `Ui` spawns nodes and text, sets a node's position, size, per-side padding, margin and border,
 direction, justification, alignment, gaps, growth, wrapping, bounds, overflow, aspect ratio, where
-its clipping falls and which camera draws it, draws an image inside one, scrolls what it clips,
-draws one frame of a sheet rather than a whole picture, breaks and aligns a run of text in a font of
-its own at a spacing and smoothing it chooses, casts a shadow behind it, rewrites it in place, and
-reports the pointer over a node asked to be interactive. Naming the camera lets a screen be drawn
-with no window, so the layout is asserted on pixel by pixel in an offscreen run like the rest of the
-renderer. That covers a HUD, a button, a menu that lays itself out, a panel that resizes, a list
-that scrolls and a paragraph that fits its box.
+its clipping falls and which camera draws it, draws an image inside one, scrolls what it clips with
+room kept for a scrollbar, draws one frame of a sheet rather than a whole picture, breaks and aligns
+a run of text in a font of its own at a spacing and smoothing it chooses, casts a shadow behind it,
+rewrites it in place, and reports the pointer over a node asked to be interactive. Naming the camera
+lets a screen be drawn with no window, so the layout is asserted on pixel by pixel in an offscreen
+run like the rest of the renderer. That covers a HUD, a button, a menu that lays itself out, a panel
+that resizes, a list that scrolls and a paragraph that fits its box.
 
-- **Scrollbar width.** `scrollbar_width` is the one `Node` field left unbridged, and it reserves
-  room at the edge of a scrolling node for a scrollbar. Nothing here draws one, so the room would
-  be a gap.
 - **Fonts by family name.** Excluded deliberately. `FontSource` can name
   `SansSerif`, `Monospace` or the system interface font, but Bevy resolves those through
   `system_font_discovery`, whose Linux backend links against fontconfig at build time. Without the

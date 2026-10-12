@@ -214,6 +214,7 @@ fn node_from(config: &BcsUiNodeConfig) -> bevy::ui::Node {
             visual_box: visual_box(config.clip_box),
             margin: config.clip_margin,
         },
+        scrollbar_width: config.scrollbar_width.max(0.0),
         ..Default::default()
     }
 }

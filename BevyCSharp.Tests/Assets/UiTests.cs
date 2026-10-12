@@ -548,6 +548,54 @@ public sealed class UiTests
     }
 
     /// <summary>
+    /// A node that scrolls down keeps the room it is given for a scrollbar at its right edge, so a
+    /// child as wide as the node is laid out short of it.
+    /// </summary>
+    [SkippableFact]
+    public void AScrollingNodeKeepsRoomForAScrollbar()
+    {
+        Needs.Renderer();
+
+        var (list, row) = (Entity.None, Entity.None);
+        (Vec2 Bar, float Row)? laid = null;
+
+        using var app = new App(Config.OffscreenFor(640, 360, frames: 4));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            Render2d.SpawnCamera2d();
+            list = Ui.SpawnNode(new UiSettings
+            {
+                Width = Length.Px(200f),
+                Height = Length.Px(100f),
+                OverflowY = UiOverflow.Scroll,
+                ScrollbarWidth = 20f,
+            });
+            row = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Px(300f), Shrink = 0f });
+            ecs.SetParent(row, list);
+        }, "Test.Scene"));
+        app.AddSystem(Stage.Last, new SystemDescriptor(world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            laid = (ecs.Wrap<ComputedNodeRef>(list).ScrollbarSize, ecs.Wrap<ComputedNodeRef>(row).Size.X);
+        }, "Test.Read"));
+
+        Assert.Equal(0, app.Run());
+        Assert.Equal(20f, laid!.Value.Bar.X, 0.5f);
+        Assert.Equal(180f, laid.Value.Row, 0.5f);
+    }
+
+    /// <summary>The node's description ends where the bridge's does, its last fields at the same places.</summary>
+    [Fact]
+    public void TheNodesDescriptionEndsWhereTheBridgesDoes()
+    {
+        Assert.Equal(336, System.Runtime.InteropServices.Marshal.OffsetOf<NativeUiNodeConfig>(nameof(NativeUiNodeConfig.Camera)).ToInt32());
+        Assert.Equal(344, System.Runtime.InteropServices.Marshal.OffsetOf<NativeUiNodeConfig>(nameof(NativeUiNodeConfig.ScrollbarWidth)).ToInt32());
+        Assert.Equal(352, System.Runtime.InteropServices.Marshal.SizeOf<NativeUiNodeConfig>());
+    }
+
+    /// <summary>
     /// A windowless run's camera spawned at startup draws the interface from the first frame, the
     /// mark chosen once the camera is pointed at the run's image. Chosen before, the interface was
     /// laid out that frame against no camera at no size, where a node with a margin inside one that

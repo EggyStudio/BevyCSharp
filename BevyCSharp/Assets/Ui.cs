@@ -486,6 +486,7 @@ public static unsafe partial class Ui
         CornerBottomLeftUnit = (int)settings.Corners.BottomLeft.Unit,
         BoxSizing = (int)settings.Sizing,
         Camera = settings.Camera.Bits,
+        ScrollbarWidth = settings.ScrollbarWidth,
     };
 
     /// <summary>Gives <paramref name="entity"/> the input focus, so the keys go to it.</summary>

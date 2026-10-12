@@ -190,6 +190,19 @@ public sealed class UiSettings
     /// <summary>What happens to contents past the top and bottom edges.</summary>
     public UiOverflow OverflowY { get; set; } = UiOverflow.Visible;
 
+    /// <summary>
+    /// Room kept at the far edge of each axis that scrolls, in logical pixels, for a scrollbar to
+    /// sit in rather than over the contents.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>scrollbar_width</c>, which the layout takes from the contents' side of a node whose
+    /// <see cref="OverflowX"/> or <see cref="OverflowY"/> is <see cref="UiOverflow.Scroll"/>, the
+    /// right edge for one that scrolls down and the bottom for one that scrolls across. Nothing is
+    /// drawn there by itself, so a node with a bar of its own, Bevy's <c>Scrollbar</c> widget on an
+    /// absolutely placed child as its scrollbars example has one, goes in the room this keeps.
+    /// </remarks>
+    public float ScrollbarWidth { get; set; }
+
     /// <summary>Space between the rows of children.</summary>
     public Length RowGap { get; set; } = Length.Zero;
 

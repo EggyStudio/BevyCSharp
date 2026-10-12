@@ -257,4 +257,7 @@ public struct NativeUiNodeConfig
 
     /// <summary>Which camera draws this node, or zero for the one drawing to the window.</summary>
     public ulong Camera;
+
+    /// <summary>Room kept for a scrollbar at the far edge of each axis that scrolls, in logical pixels.</summary>
+    public float ScrollbarWidth;
 }

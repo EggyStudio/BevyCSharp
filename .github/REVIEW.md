@@ -10,7 +10,18 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `be9b174f`, the animation section's last item, ABI 278: a curve on a field of any
+Reviewed up to `df06e9dd`, the window's calls for a window past the first, ABI 279: every window
+export takes the window's entity bits, the primary named by the one value no entity has, since zero
+is C#'s none and could be Bevy's first entity, and the window class gains an entity overload of each
+call, the size, the place, the scale, minimizing, the cursor's grab, image, atlas and shape among
+them, the references to the overloaded calls pinned; a test sets a spawned window by its entity and
+reads a plain entity refused; the window guide and the cheat sheet follow. Verdict 13 stands at five
+whole suites of ten, this one over the window calls, 1,460 passed. Right, the primary given a handle
+no entity can collide with. Next TODO.md's order on: a node's scrollbar width as a setting, the
+item's note that nothing draws one no longer holding since Bevy's scrollbar widget is reachable, the
+node description's end asserted at the same offsets on both sides, at ABI 280.
+
+Before it, `be9b174f` came, the animation section's last item, ABI 278: a curve on a field of any
 reflected component, `AnimationCurve.Field` by the component's type path and Bevy's reflect path to
 the field, each field its own evaluator keyed by the component and the path's hash, the path and the
 value's kind checked when the curve is added against a default of the component where Bevy can make
@@ -37,21 +48,6 @@ than beside it. The Shared line is read, a row of SHARED.md, and removed. Verdic
 whole suites of ten, each the listing and eleven, no failure. Next the animation order on: a curve
 on a field of any reflected component, by type path and reflect path, each field its own evaluator
 keyed by the component and the path's hash, checked against a default when added, native at ABI 278.
-
-Before it, `a99eceb3` came, the scenes' two items from TODO.md. `ae26e39b`: a scene file or a data
-asset from a newer build keeps its version among the values no field read, so an older build's save
-writes the newer version back and the newer build reads the file as its own rather than migrating it
-a second time, a value the older build changed written in the older shape under the newer version,
-which the attribute's remark says; two tests, a file and a data asset from a newer build saved at
-their own version, and the scenes document's section moved to built. `a99eceb3`: a save of the
-scenes' entities writes the fields play changed alone, comparing with the values as loaded, which
-the save's beginning records, a component play took off as null, one put on whole, an entity play
-left alone skipped and one spawned during play whole; a test that a save holds only the fields play
-changed so a level fixed in an update still reaches a player's save; the scenes document and the
-guide say both. Right, the version kept rather than migrated twice, and the save as the difference
-play made rather than the world. Verdict 13 stands at one whole suite of ten. Next TODO.md's order
-as before, the animation state machine under way in the tree with a Shared line waiting on its
-commit.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -593,9 +589,9 @@ from [SHARED.md](SHARED.md).
     the pipelines read ready, while the frame being drawn asked for one pipeline more, so the
     failure was timing under the parallel collections' load and not order; the picture run waits for
     three frames of pipelines ready running, which covers every picture test, and 15 runs of 15 pass
-    under the load. Settled when ten whole suites pass since `7f18b684`; four of ten so far, over
-    the save diff, the state machine and the field curve, each the listing and eleven with no
-    failure.
+    under the load. Settled when ten whole suites pass since `7f18b684`; five of ten so far, over
+    the save diff, the state machine, the field curve and the window calls, each the listing and
+    eleven with no failure.
 
 ## Decisions
 

@@ -301,7 +301,9 @@ clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by 
 like any other input and calling `Ui.SetScroll(list, 0f, offset)`. `ClipBox` says where the
 clipping falls, which for a list with a border is the difference between rows disappearing at the
 border and disappearing inside it, and `ClipMargin` pushes that line out by a few pixels for a
-shadow or a focus ring.
+shadow or a focus ring. `ScrollbarWidth` keeps room at the far edge of an axis that scrolls, the
+right for a list that scrolls down, which nothing fills by itself, so a bar placed there, Bevy's
+`Scrollbar` widget below among them, sits beside the rows rather than over them.
 
 `AspectRatio` decides the side the layout was not told about, so a tile stays square while only its
 width is being decided, and `AlignContent` spreads the lines a wrapped node produced the way

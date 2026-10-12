@@ -281,7 +281,16 @@ pub struct BcsUiNodeConfig {
     pub box_sizing: i32,
     /// Which camera draws this node, as entity bits, or `0` for whichever one draws to the window.
     pub camera: u64,
+    /// Room kept for a scrollbar at the far edge of each axis that scrolls, in logical pixels.
+    pub scrollbar_width: f32,
 }
+
+// Where C#'s `NativeUiNodeConfig` has its last two fields and how long it is, which
+// `UiTests` asserts from that side, so a field added on one side alone fails a build or a
+// test rather than reading its neighbor.
+const _: () = assert!(core::mem::offset_of!(BcsUiNodeConfig, camera) == 336);
+const _: () = assert!(core::mem::offset_of!(BcsUiNodeConfig, scrollbar_width) == 344);
+const _: () = assert!(core::mem::size_of::<BcsUiNodeConfig>() == 352);
 
 /// One track of a grid, and how many times it repeats.
 ///
