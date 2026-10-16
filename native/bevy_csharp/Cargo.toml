@@ -254,13 +254,12 @@ serde = "1"
 wgpu = { version = "30", default-features = false, optional = true }
 # The weather behind `Config.Weather`, vendored as a member of the workspace.
 bevy_weather = { path = "../bevy_weather", default-features = false, optional = true }
-
-# Linux and the BSDs only.
-#
-# Bevy's `wayland` feature switches on winit's Wayland backend, which by default links
-# libwayland at build time and so needs the Wayland development headers present. Naming winit
-# directly lets us add `wayland-dlopen`, which loads the library at runtime instead. The
-# practical effect is that the bridge builds on any machine with just a C compiler, and the one
-# binary still works on both X11 and Wayland sessions.
-[target.'cfg(all(unix, not(any(target_os = "macos", target_os = "ios", target_os = "android"))))'.dependencies]
+# Named directly for two things Bevy does not reach, on every platform: a window's icon, which
+# winit sets on its own window (`Icon`, `set_window_icon`) and Bevy's `Window` carries none of,
+# and on Linux and the BSDs Wayland loaded at runtime. Bevy's `wayland` feature switches on
+# winit's Wayland backend, which by default links libwayland at build time and so needs the
+# Wayland development headers present, and `wayland-dlopen` loads the library at runtime
+# instead, so the bridge builds on any machine with a C compiler alone and the one binary works
+# on both X11 and Wayland sessions. winit gates its Wayland half to those systems, so the
+# feature names nothing on Windows and macOS. The same version Bevy pins, already in the tree.
 winit = { version = "0.30", default-features = false, optional = true }

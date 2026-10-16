@@ -13,9 +13,10 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Every figure is a name and a whole number on one line, for a script to read without parsing a
-/// sentence. Managed memory is the garbage collector's, and the process's resident size, with the
-/// most it has held since it started (<see cref="MemoryGuard.PeakBytes"/>), takes in what a
-/// graphics driver holds, which on a software renderer is the device's memory too. The rest is the
+/// sentence. Managed memory is the garbage collector's, and the process's, its resident size or on
+/// Windows its committed private bytes (<see cref="MemoryGuard.ResidentBytes"/>), with the most it
+/// has held since it started (<see cref="MemoryGuard.PeakBytes"/>), takes in what a graphics
+/// driver holds, which on a software renderer is the device's memory too. The rest is the
 /// bridge's, the bytes Rust's allocator holds, the entities and their indices, the asset handles
 /// this side keeps, the assets of each kind Bevy holds, and where a renderer runs what wgpu has
 /// asked the GPU for, its allocator's bytes and how many of each resource are alive, as

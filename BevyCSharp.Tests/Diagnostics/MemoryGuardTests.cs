@@ -24,7 +24,8 @@ public sealed class MemoryGuardTests
         // A quarter of a gigabyte from the system rather than from the GC, which may hand an array
         // pages it kept resident from earlier tests, so the growth read would be what it held back
         // rather than what the guard reads. A byte a page written, so its pages are the machine's
-        // and not only promised.
+        // and not only promised. Read on Windows as the private bytes committed, which Windows
+        // cannot trim as it trimmed a working set that read this as 64 megabytes more.
         var held = (byte*)NativeMemory.Alloc(size);
         try
         {

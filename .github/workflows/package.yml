@@ -205,6 +205,29 @@ jobs:
           ask command app.status
           ask stop
 
+      # The bridge checked for Windows and macOS in each profile, as the pack's native job builds it
+      # on their runners, so a compile that only a pack would find, such as a crate named for Linux
+      # alone, is found on the push. A check compiles no binary and needs no linker, so the Linux
+      # runner does it, its cache keeping each target's build beside the rest. blake3 takes its
+      # Rust path, since its C needs the target's compiler, which the runner has not, and meshlets
+      # stay out for the same reason, metis being C; the pack builds both on their own systems.
+      - name: Check the bridge for Windows and macOS
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          CARGO_FEATURE_PURE: '1'
+        run: |
+          rustup target add x86_64-pc-windows-msvc aarch64-apple-darwin
+          for target in x86_64-pc-windows-msvc aarch64-apple-darwin; do
+            for profile in headless render editor,solari; do
+              echo "cargo check --target $target --features $profile"
+              if ! cargo check --manifest-path native/Cargo.toml --target "$target" --no-default-features --features "$profile" --config 'build.warnings="deny"'; then
+                echo "::error::The bridge does not compile for $target in the $profile profile, which a pack builds on that system."
+                exit 1
+              fi
+            done
+          done
+
       # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
       # managed test can reach, the bridge's again with the renderer's crates, where shader
       # reflection and the packing of values by name live, and the managed suite, each a process

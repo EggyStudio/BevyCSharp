@@ -24,9 +24,10 @@ namespace Bevy;
 /// environment names none.
 /// </para>
 /// <para>
-/// What is counted is the resident memory, the pages of the machine's memory the process holds,
-/// which takes in the bridge's allocations and the GPU driver's with the managed heap, and not
-/// what a GPU holds of its own. Once the console and the crash file have said why, the process
+/// What is counted is the memory the process holds of the machine, which takes in the bridge's
+/// allocations and the GPU driver's with the managed heap, and not what a GPU holds of its own: on
+/// Linux and macOS the resident pages, which the system's own last resort weighs a process by, and
+/// on Windows the private bytes committed, its commit charge (<see cref="ResidentBytes"/>). Once the console and the crash file have said why, the process
 /// ends at once with <see cref="ExitCode"/>, running nothing an exit runs. Bevy's threads are still
 /// drawing then, and a GPU driver torn down under them by the handlers of an ordinary exit crashed
 /// the process, whose core dump held the memory for as long again as it took to write.
@@ -63,10 +64,24 @@ public static partial class MemoryGuard
     public static double DefaultCap { get; } = Math.Min(8.0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 4.0 / Gigabyte);
 
     /// <summary>How many bytes of the machine's memory the process holds now.</summary>
-    /// <remarks>Each reading is kept toward the peak the <c>memory</c> command says.</remarks>
+    /// <remarks>
+    /// <para>
+    /// The resident set on Linux and macOS, the pages in the machine's memory, which run those
+    /// systems out and by which they weigh a process when they do.
+    /// </para>
+    /// <para>
+    /// On Windows, the private bytes the process has committed, its commit charge, rather than its
+    /// working set. Windows trims a working set as it pleases, moving pages the process has not
+    /// touched lately to its standby list while they are still the process's, so a working set can
+    /// read far less than the process holds, and read as a quarter of a gigabyte written a byte a
+    /// page grew by 64 megabytes. What runs a Windows machine out is its commit limit, which the
+    /// private bytes count toward until they are freed, whatever is trimmed.
+    /// </para>
+    /// <para>Each reading is kept toward the peak the <c>memory</c> command says.</para>
+    /// </remarks>
     public static long ResidentBytes()
     {
-        var held = Environment.WorkingSet;
+        var held = Held();
         var peak = Interlocked.Read(ref _peak);
         while (held > peak)
         {
@@ -78,9 +93,18 @@ public static partial class MemoryGuard
         return held;
     }
 
+    /// <summary>The figure <see cref="ResidentBytes"/> reads, by system.</summary>
+    private static long Held()
+    {
+        if (!OperatingSystem.IsWindows()) return Environment.WorkingSet;
+
+        using var process = Process.GetCurrentProcess();
+        return process.PrivateMemorySize64;
+    }
+
     /// <summary>
-    /// The most of the machine's memory the process has held since it began, the largest resident
-    /// size read here, or what the system says where it says more.
+    /// The most of the machine's memory the process has held since it began, the largest
+    /// <see cref="ResidentBytes"/> read here, or what the system says where it says more.
     /// </summary>
     /// <remarks>
     /// The readings here come first because they are the same on every system, and the same the
@@ -92,6 +116,11 @@ public static partial class MemoryGuard
     internal static long PeakBytes()
     {
         var now = ResidentBytes();
+
+        // The system's own peak of the same figure where it keeps one, which Windows does not for
+        // the private bytes, so there the readings are all there is, as on macOS.
+        if (OperatingSystem.IsWindows()) return Math.Max(now, Interlocked.Read(ref _peak));
+
         using var process = Process.GetCurrentProcess();
         return Math.Max(Math.Max(now, Interlocked.Read(ref _peak)), process.PeakWorkingSet64);
     }

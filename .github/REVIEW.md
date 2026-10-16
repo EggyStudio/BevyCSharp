@@ -35,10 +35,14 @@ feature-test program's row, read against `BevyCSharp.FeatureTest`, has every par
 signposts to its zones and the render gallery, the capsule character on its courses, the admin panel
 on F1 with its settings kept between runs, the console drawn in the interface beside the F3 overlay,
 the crash log beside the executable with a report for an exception nothing caught and for a panic,
-and the portable build for testers from the hand-run workflow; the row reads has. The order holds
-nothing a coder can take without a word, so the working session stops with these documents in its
-commit; the owner's words pending are the 18 rows' crates, the wgpu feature and the pack run, whose
-storm job runs first there.
+and the portable build for testers from the hand-run workflow; the row reads has. The runs of
+`c11a5705` on 2026-10-12 both failed, the push's Windows suite on the memory guard's test, Verdict
+14, and the pack run's native job on its four Windows and macOS targets, Verdict 15, so on
+2026-10-16 the owner stopped development on both engines until every job is green on every push and
+pack (Decision 33); the two verdicts are the working session's and nothing else is. Before that, the
+order held nothing a coder could take without a word, so the working session stopped with these
+documents in its commit; the owner's words pending are the 18 rows' crates, the wgpu feature and the
+pack run, whose storm job runs first there.
 
 Before it, `daa653ad` came, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines
 over the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it
@@ -599,6 +603,33 @@ from [SHARED.md](SHARED.md).
    `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
    Settled when a pack run plays Courtyard and says so.
 
+14. **The memory guard's test reads a quarter of a gigabyte written as 64 MB more held, on
+    Windows.** On the push of `c11a5705`, 2026-10-12,
+    `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows` allocated 256 MiB from the system, wrote a byte
+    a page and read the process holding 685,117,440 bytes before and 749,817,856 after, 64 MB more
+    where the test asks three quarters of the 256; the suite's other 1,037 passed, Linux and macOS
+    passed the test, and the pack run's Windows suite an hour later passed it too. The guard reads
+    the working set, which Windows trims under pressure as it pleases, so pages the test wrote may
+    already have left it when the second reading came, while the memory stays committed to the
+    process; a cap meant to stop a program before the machine suffers wants what the process has
+    committed, which a trimmed working set hides. One thing: read which figure the guard should mean
+    on Windows, the committed private bytes or the working set, and make the test's reading that
+    figure with the reason in the guard's remarks; if the working set is kept, the test says so and
+    asks the growth of a figure Windows cannot trim. Settled at three green Windows suites in a row.
+
+15. **The pack run's native job fails on its four Windows and macOS targets.** On the pack run of
+    `c11a5705`, 2026-10-12, the native job built the render bridge for six targets and failed on
+    win-x64, win-arm64, osx-x64 and osx-arm64 with exit code 101, the compiler's, in 6 to 20
+    minutes, while linux-x64 and linux-arm64 built, and the three test jobs passed on their headless
+    bridges, Windows and macOS among them; the job's log is not readable from here. So the render or
+    editor profile holds something that compiles on Linux alone, in what came since the last green
+    pack: the window's icon through winit's window under `WINIT_WINDOWS`, the winit loop on any
+    thread, the storm's plugin setting, the mesh streams or the normals' flag. Two things: the four
+    targets checked here, `rustup target add` and `cargo check --target` for x86_64-pc-windows-msvc
+    and aarch64-apple-darwin under each of the three profiles, which needs no linker, and the break
+    mended; and the same check in the push's Linux job, cached, so a compile that only a pack would
+    find is found on the push. Settled when the pack run's native job builds all six.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -777,5 +808,12 @@ from [SHARED.md](SHARED.md).
     packed four bytes ride in a stream beside it, which is what item 18 gave; 3DEngine's second
     stage becomes a vertex of positions alone, and here the worked-out normals can be left out, item
     20.
+
+33. **No development on either engine until every job is green on every push and pack.** On
+    2026-10-16 the owner, after the pushes and pack runs of both engines failed in a row each on a
+    different job while the code stood still, stopped development on both: the working sessions mend
+    what the verdicts name and nothing else, every push must be green on every job, three in a row,
+    and the pack run after them, before an item is taken again, on 3DEngine as here (its Decision
+    39).
 
 ## Replies
