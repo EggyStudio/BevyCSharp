@@ -10,9 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `64bb30aa`, the console pads: `input.button` and `input.axis` connect console pads up
-to the pad a command names, four at most in all, each named by its place, the first "Console pad" as
-a lone one always was and the second "Console pad 2", a negative index and pad 4 refused with the
+Reviewed up to `292eead2`, Verdicts 14 and 15 mended in one commit and nothing else, as Decision 33
+asks, over `c29c5e0d` and `c11a5705`, two commits of documents. Verdict 15 reproduced by `cargo
+check --target` for x86_64-pc-windows-msvc and aarch64-apple-darwin, the render profile failing on
+both with E0433 at `window/icon.rs` naming `winit::window::Icon`: winit was a direct dependency of
+the bridge on Linux and the BSDs alone, named there for `wayland-dlopen`, so the icon of `220aa7b0`
+compiled on Linux only; winit moves to the dependencies of every system with both reasons, the lock
+byte-identical, and headless, render, editor and editor with solari check clean for both targets,
+meshlets alone uncheckable from Linux for metis's C wanting the target's compiler. The push's Linux
+test job gains "Check the bridge for Windows and macOS", the two targets added and the three
+profiles checked for each with warnings denied and blake3 on its Rust path, cached, an `::error::`
+naming the target and the profile, so a compile only a pack would find is found on the push. Verdict
+14: the guard reads the private bytes committed on Windows, the commit charge Windows runs out of
+and cannot trim, and the resident set elsewhere, the reason and the 64 MB reading in its remarks,
+the peak on Windows the readings' own since Windows keeps none of private bytes, the test's comment
+and the memory command's remarks saying the figure. The whole suite 1,471 and 3 skipped of 1,474.
+Right. The push of `292eead2` on 2026-10-16 was green on every job, Linux in 16 minutes with the new
+check of the two targets inside it, Windows in 20 and macOS in 18, the first of Decision 33's three
+and Verdict 14's first green Windows suite. The pack run started at 21:40: the native job built all
+six targets, which settles Verdict 15, the three suites green, Windows Verdict 14's second of three,
+the README's walk green, and then three jobs that run in a pack run alone failed on their first run
+since they were made or changed, the storm job's tests not loading the bridge the job downloaded
+(Verdict 16), the package check reading the release notes written under the artifacts as a runtime's
+(Verdict 17) and Swarm's play ending with a command's timeout on lavapipe (Verdict 18), the
+examples' captures running at 22:27. The jobs a pack run alone exercises carry every change made
+between two packs untested, which is why each pack has found a new failure; the owner's word is
+asked on a pack run after every push that touches them, or a scheduled one.
+
+Before it, `64bb30aa` came, the console pads: `input.button` and `input.axis` connect console pads
+up to the pad a command names, four at most in all, each named by its place, the first "Console pad"
+as a lone one always was and the second "Console pad 2", a negative index and pad 4 refused with the
 rule said; `GamepadTests.APadCommandConnectsConsolePadsUpToThePadItNames` holds a second player's
 South on a run with no pad, reads both names and the refusal; BCS.md's row says it, over a whole
 suite that passed, 1,474 with 3 skipped. Right. The suite shuffled by a seed was in before the row
@@ -58,24 +85,6 @@ right. SHARED.md's two rows read has. The push's run, the first with the storm j
 job's condition says, and the Linux suite passed in eleven minutes; the macOS and Windows suites,
 and 3DEngine's four jobs on `ee85866f`, were running at 16:32. Next the console pads made up to the
 index a command names, under way, then the shuffled suite, then the weak orderings.
-
-Before it, `c5873eef` came, the pack run's storm: a job of the pack run alone, after the native job,
-which downloads its linux-x64 render bridge, builds the tests on it with the freshness check off,
-installs a software Vulkan, ALSA and Xvfb, and runs the storm's filter under `xvfb-run -a` on a 1920
-by 1080 screen with `BCS_WINDOW_STORM=1` and `WAYLAND_DISPLAY` unset, each step through
-`build/step.py`, with an `::error::` where the summary is not one passed and none skipped, since the
-test skips silently where it is not asked; the script passed here under `bash -e -o pipefail`;
-TODO.md's testing paragraph says the pack run storms a window and a push's headless job skips it as
-it skips every test that draws. Right; the job's first run is the pack run, read when it comes.
-SHARED.md's rows that read to take on this side where the work was done since read has, the code
-fixes, `Removed`, the template, the examples on the package, the script test, N 2.10 and the
-captures compared whole, and the storm's row loses its next. Next, in order: the rule of 800 lines
-counting the Slang shaders of the bridge and the examples in N 1.3's test, which item 2 described
-and the test does not do yet; then the two CLI rows, `input.click` taking a count within the
-double-click time and console pads made up to the index a command names, four at most; then the
-suite run once with the schedule's order shuffled by a seed, Bevy 0.20 being in, before the weak
-orderings it also brings, since a shuffled suite says which tests lean on an order before an
-ordering is made weak.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -577,6 +586,9 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
+Verdict 15, the native job's four targets, settled on the pack run of `292eead2` on 2026-10-16, all
+six built after winit became a dependency on every system at that commit.
+
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
    `BevyCSharp.Tests/bin/Release/net10.0/build/package/BevyCSharp.0.4.88.nupkg`. The step exports
@@ -616,19 +628,43 @@ from [SHARED.md](SHARED.md).
     on Windows, the committed private bytes or the working set, and make the test's reading that
     figure with the reason in the guard's remarks; if the working set is kept, the test says so and
     asks the growth of a figure Windows cannot trim. Settled at three green Windows suites in a row.
+    Mended at `292eead2`, the private bytes read on Windows. Two green Windows suites of three, the
+    push and the pack run of `292eead2`.
 
-15. **The pack run's native job fails on its four Windows and macOS targets.** On the pack run of
-    `c11a5705`, 2026-10-12, the native job built the render bridge for six targets and failed on
-    win-x64, win-arm64, osx-x64 and osx-arm64 with exit code 101, the compiler's, in 6 to 20
-    minutes, while linux-x64 and linux-arm64 built, and the three test jobs passed on their headless
-    bridges, Windows and macOS among them; the job's log is not readable from here. So the render or
-    editor profile holds something that compiles on Linux alone, in what came since the last green
-    pack: the window's icon through winit's window under `WINIT_WINDOWS`, the winit loop on any
-    thread, the storm's plugin setting, the mesh streams or the normals' flag. Two things: the four
-    targets checked here, `rustup target add` and `cargo check --target` for x86_64-pc-windows-msvc
-    and aarch64-apple-darwin under each of the three profiles, which needs no linker, and the break
-    mended; and the same check in the push's Linux job, cached, so a compile that only a pack would
-    find is found on the push. Settled when the pack run's native job builds all six.
+16. **The storm job's tests do not load the bridge the job downloaded.** On the pack run of
+    `292eead2`, 2026-10-16, the first run of the storm job since `c5873eef` made it, the job
+    downloaded the linux-x64 render bridge to `build/artifacts/linux-x64`, built the tests with the
+    freshness check off and ran the storm's filter, and the one test failed in
+    `NativeLoader.Initialize`, the ABI call `bcs_abi_version` throwing from inside `VerifyAbi`, so
+    the library was not where the test project's build looks for it or the one found was not that
+    one; the play, capture and README jobs download the same artifact to the same path and their
+    games loaded it, which says the test project's build and a game's differ in where they take the
+    bridge from. One thing: the job reproduced here as a fresh checkout with the render bridge put
+    at that path and the same two commands, the test project's copy of the bridge read in its
+    targets, and the job mended to put the library where that copy takes it, or the copy taught the
+    artifacts' path, with the step saying which library the test loaded. Settled when the storm job
+    passes in a pack run.
+
+17. **The package check reads the release notes written under the artifacts as a runtime's
+    library.** On the same pack run, the pack job failed N 6.4: `BevyCSharp.0.5.79.nupkg` does not
+    hold `runtimes/artifacts/native/release-notes.txt`. The pack step writes the release notes to
+    `build/artifacts/release-notes.txt` (`build/release-notes.sh`, its default) before the pack, and
+    N 6.4 takes every file under `build/artifacts` as a runtime's native library named by its
+    folder, so the notes' folder read as a runtime. One thing: the notes are written beside the
+    artifacts and not among them, `build/release-notes.txt`, the script's default and the step's
+    path moving together, and N 6.4 reads the runtime folders alone, a folder a file deep and named
+    as a runtime identifier, so a file beside them is not a library. Settled when the pack job
+    passes.
+
+18. **Swarm's play ends with a command's timeout on lavapipe.** On the same pack run, the play job
+    failed in `games/Swarm/play.sh` with exit code 6, the command line's timeout, after the game had
+    answered and its menu was read; the step's page carries only the game's warning that the adapter
+    renders in software, since the script exits on the first failing command under `set -e` without
+    saying which, and its own `fail` speaks only for its checks. The game draws its forty laps of
+    movers on lavapipe, where a wait for frames outlasts the command's patience as Tactics' did in
+    3DEngine (its Verdict 56). Two things: the script's commands that wait for frames take a timeout
+    long enough for a software device, and a trap on error says the command that failed and its
+    code, so the next failure is read from the page. Settled when the play job passes in a pack run.
 
 ## Decisions
 

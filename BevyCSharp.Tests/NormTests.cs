@@ -297,14 +297,20 @@ public sealed partial class NormTests
             "README.md",
         };
 
-        // The natives staged for the pack, a system a folder, each in its runtime's folder.
+        // The natives staged for the pack, a system a folder, each in its runtime's folder. The
+        // folders named as a runtime are read alone, and the files in them a level deep, since a
+        // file beside them is no library. The pack run of 292eead2 wrote its release notes into
+        // build/artifacts, and this read them as the natives of a runtime called artifacts.
         var staged = Path.Combine(Root, "build", "artifacts");
+        var runtime = new Regex(@"^(?:linux|linux-musl|win|osx)-(?:x64|arm64)$");
         if (Directory.Exists(staged))
         {
-            foreach (var native in Directory.EnumerateFiles(staged, "*", SearchOption.AllDirectories))
+            foreach (var folder in Directory.EnumerateDirectories(staged).Where(folder => runtime.IsMatch(Path.GetFileName(folder))))
             {
-                var rid = Path.GetFileName(Path.GetDirectoryName(native)!);
-                wanted.Add($"runtimes/{rid}/native/{Path.GetFileName(native)}");
+                foreach (var native in Directory.EnumerateFiles(folder))
+                {
+                    wanted.Add($"runtimes/{Path.GetFileName(folder)}/native/{Path.GetFileName(native)}");
+                }
             }
         }
 

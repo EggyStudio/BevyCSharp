@@ -284,7 +284,10 @@ jobs:
     name: play Courtyard
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
+    # to four processors, two frames a second with its creatures in their hundreds, and the job
+    # plays three games after it builds the guide and every example, then soaks and publishes.
+    timeout-minutes: 60
     needs: [native]
     # Each step through build/step.py, which gives one that fails having said nothing an error
     # naming the step, the command that failed with its exit code, its last lines and the last
@@ -498,8 +501,17 @@ jobs:
       - name: Build the tests on the render bridge
         run: dotnet build BevyCSharp.Tests -p:BevyCSharpSkipNativeFreshnessCheck=true
 
+      # The loader takes the bridge beside the tests before any other, so the one there is held to
+      # be the bridge downloaded above and named, since the tests of 292eead2 had none beside them
+      # and the step said only that the call for the bridge's version threw.
       - name: Storm a window
         run: |
+          loaded=BevyCSharp.Tests/bin/Debug/net10.0/libbevy_csharp.so
+          if ! cmp -s build/artifacts/linux-x64/libbevy_csharp.so "$loaded"; then
+            echo "::error::The tests' build put no copy of the render bridge this run built beside them, at $loaded, so the test would load another or none."
+            exit 1
+          fi
+          echo "The test loads $loaded, the render bridge the native job built, sha256 $(sha256sum "$loaded" | cut -c1-16)."
           out="$RUNNER_TEMP/storm.txt"
           xvfb-run -a -s "-screen 0 1920x1080x24" env -u WAYLAND_DISPLAY BCS_WINDOW_STORM=1 \
             dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --no-build --filter "FullyQualifiedName~WindowStormTests" | tee "$out"
@@ -594,8 +606,8 @@ jobs:
       # commit's sentence a line (build/release-notes.sh).
       - name: Pack
         run: |
-          build/release-notes.sh "$PWD/build/artifacts/release-notes.txt"
-          args=(-c Release -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/artifacts/release-notes.txt")
+          build/release-notes.sh "$PWD/build/release-notes.txt"
+          args=(-c Release -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/release-notes.txt")
           if [ -n "${{ inputs.version }}" ]; then
             args+=(-p:Version=${{ inputs.version }})
           fi

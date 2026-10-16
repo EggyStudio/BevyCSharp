@@ -33,6 +33,8 @@ msbuild.log
 /build/target-portable/
 /build/artifacts/
 /build/package/
+# The package's release notes, which build/release-notes.sh writes for a pack.
+/build/release-notes.txt
 # A bridge built for one game with --embed, which carries that game's assets.
 /build/embedded/
 # A render bridge for exported games, built with --game.

@@ -156,6 +156,31 @@
     </ItemGroup>
 
     <!--
+      Where no build ran here and a bridge was put in this machine's slot of the staged ones alone,
+      the slot is copied in the flat copy's place. The pack workflow's jobs that run a program from
+      this repository download the bridge its native job built into that slot, as the pack reads it,
+      and the storm job's tests of 292eead2 found no bridge beside them, since the copy above takes
+      build/target alone and the slot was never read. The slot is named by the SDK's portable runtime
+      identifier, linux-x64 where a distribution's SDK names its own, which is how build-native.sh
+      names it.
+    -->
+    <PropertyGroup>
+        <BevyCSharpHostArtifactDir>$(BevyCSharpArtifactDir)$(NETCoreSdkPortableRuntimeIdentifier)/</BevyCSharpHostArtifactDir>
+        <BevyCSharpNoFlatCopy Condition="!Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.so') And !Exists('$(BevyCSharpNativeOutDir)bevy_csharp.dll') And !Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.dylib')">true</BevyCSharpNoFlatCopy>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(BevyCSharpNoFlatCopy)' == 'true'">
+        <None Include="$(BevyCSharpHostArtifactDir)libbevy_csharp.so"
+              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
+              Condition="Exists('$(BevyCSharpHostArtifactDir)libbevy_csharp.so')"/>
+        <None Include="$(BevyCSharpHostArtifactDir)bevy_csharp.dll"
+              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
+              Condition="Exists('$(BevyCSharpHostArtifactDir)bevy_csharp.dll')"/>
+        <None Include="$(BevyCSharpHostArtifactDir)libbevy_csharp.dylib"
+              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
+              Condition="Exists('$(BevyCSharpHostArtifactDir)libbevy_csharp.dylib')"/>
+    </ItemGroup>
+
+    <!--
       The native bridge is built by cargo, not by MSBuild, so nothing forces it to be current.
       A stale artifact is a nasty failure to diagnose: the ABI version still matches, but an
       entry point added since it was staged is missing, and the app dies on the first call to it
