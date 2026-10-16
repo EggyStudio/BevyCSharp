@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `292eead2`, Verdicts 14 and 15 mended in one commit and nothing else, as Decision 33
+Reviewed up to `9f76fded`, Verdicts 16, 17 and 18 mended in one commit and nothing else beyond one
+reasoned change. Verdict 16 reproduced in a fresh checkout with a render bridge in the artifacts'
+slot alone: the library project copies the bridge to its output from `build/target/release` alone, a
+folder only a native build here makes, so the tests' bin held none, and the examples program fails
+the same way there, which the captures job has had since `661682eb` of 2026-10-04 and will fail on;
+where that folder holds no bridge the project copies the slot named by the SDK's portable runtime
+identifier instead, linux-x64 on a distribution's SDK as the native script names it, and the storm
+step compares the bin's bridge with the downloaded one, failing with an `::error::` naming the path
+where they differ and else saying which library the test loads with its hash's prefix; a fresh
+checkout through `build/step.py` gave that error before the mend and the storm passed under xvfb
+after it, an example running from the slot. Verdict 17: the release notes go to
+`build/release-notes.txt`, the script's default and the step's path together and ignored by git, and
+N 6.4 reads the folders named as a runtime alone, (linux|linux-musl|win|osx)-(x64|arm64), and the
+files directly in them, checked on a Release pack with a stray notes file among the artifacts
+passing and a fake osx-arm64 slot still failing by name. Verdict 18: every call in Swarm's play goes
+through a wrapper with `--timeout 600` that says its words, its code and the command line's first
+line of why on a failure, and an ERR trap names any other failing command with its code and line;
+played on lavapipe pinned to four cores, exit 0 in 676 seconds, the 120-frame profile taking 63 and
+an 80-frame hold 40, both past the command line's 30, which is the exit code 6. The game job's limit
+goes from 30 minutes to 60 with its reason, Swarm alone taking eleven here beside the guide, every
+example, two other games, the soak and the publish, which stands. Found and not mended, since
+Decision 33 holds: Swarm does not build on its own default package version, 0.0.14-game, seven
+errors for calls the package lacks, the workflow building it on 0.0.0-ci; item 22 after the stop
+lifts. The whole suite 1,471 and 3 skipped of 1,474. Right. The pack run's capture job ended at
+23:09 cancelled at the job's hour with nothing said, every example failing to start for the bridge
+Verdict 16 names and the script waiting each one's patience out before the next, Verdict 19. Next
+the push, the second toward Decision 33's three if whole green, and the pack run after it, whose
+storm, pack, play and capture jobs settle Verdicts 16 to 18.
+
+Before it, `292eead2` came, Verdicts 14 and 15 mended in one commit and nothing else, as Decision 33
 asks, over `c29c5e0d` and `c11a5705`, two commits of documents. Verdict 15 reproduced by `cargo
 check --target` for x86_64-pc-windows-msvc and aarch64-apple-darwin, the render profile failing on
 both with E0433 at `window/icon.rs` naming `winit::window::Icon`: winit was a direct dependency of
@@ -70,21 +99,6 @@ pack (Decision 33); the two verdicts are the working session's and nothing else 
 order held nothing a coder could take without a word, so the working session stopped with these
 documents in its commit; the owner's words pending are the 18 rows' crates, the wgpu feature and the
 pack run, whose storm job runs first there.
-
-Before it, `daa653ad` came, two commits from SHARED.md's rows. `72307f37`, the rule of 800 lines
-over the Slang shaders: N 1.3's test counts the bridge's and the examples' `.slang` files as it
-counts the C# and the Rust, and found the pass module over the line, so its deferred part, the
-G-buffer's surface and a shadow stage's depth, is a module of its own, `bcs_pass_deferred.slang` at
-230 lines, which `bcs_pass.slang` includes at 588, the bridge's module list nine where eight.
-`daa653ad`, the click command's count: `input.click <x> <y> [count]`, from the first press a press
-on each even step and a release on each odd one, a frame apart, so the clicks fall within the
-double-click time and each is heard with its place in the run, four at most, a triple click the most
-anything asks for with one to spare; `ClickCommandTests.AClickGivenACountIsHeardAsThatManyInARun`
-beside the one that hears a click where the pointer has not been; BCS.md's row says the count. Both
-right. SHARED.md's two rows read has. The push's run, the first with the storm job, skips it as the
-job's condition says, and the Linux suite passed in eleven minutes; the macOS and Windows suites,
-and 3DEngine's four jobs on `ee85866f`, were running at 16:32. Next the console pads made up to the
-index a command names, under way, then the shuffled suite, then the weak orderings.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -584,6 +598,14 @@ from [SHARED.md](SHARED.md).
     behavior that changes one row of three and runs on that one alone the frame after, and the
     example's query restored to Bevy's shape. Done at `c8849d71` as written.
 
+22. **Swarm builds on the package version its project names.** `games/Swarm/Swarm.csproj` names
+    0.0.14-game where nothing sets `BevyCSharpVersion`, and on it the game does not build, seven
+    errors for `MainThread` and `CharacterController` the package of that version lacks; the
+    workflow builds it on 0.0.0-ci, so no job sees it, and a reader cloning the game does. After
+    Decision 33 lifts: the default follows the package the game was last played on, or the games
+    take their version from one place the pack writes, and a check that each game builds on its own
+    default where the package is published. Found at `9f76fded`.
+
 ## Verdicts
 
 Verdict 15, the native job's four targets, settled on the pack run of `292eead2` on 2026-10-16, all
@@ -643,7 +665,8 @@ six built after winit became a dependency on every system at that commit.
     at that path and the same two commands, the test project's copy of the bridge read in its
     targets, and the job mended to put the library where that copy takes it, or the copy taught the
     artifacts' path, with the step saying which library the test loaded. Settled when the storm job
-    passes in a pack run.
+    passes in a pack run. Mended at `9f76fded`, the project copying the artifacts' slot where no
+    build ran here, which the captures job wanted too.
 
 17. **The package check reads the release notes written under the artifacts as a runtime's
     library.** On the same pack run, the pack job failed N 6.4: `BevyCSharp.0.5.79.nupkg` does not
@@ -654,7 +677,7 @@ six built after winit became a dependency on every system at that commit.
     artifacts and not among them, `build/release-notes.txt`, the script's default and the step's
     path moving together, and N 6.4 reads the runtime folders alone, a folder a file deep and named
     as a runtime identifier, so a file beside them is not a library. Settled when the pack job
-    passes.
+    passes. Mended at `9f76fded`.
 
 18. **Swarm's play ends with a command's timeout on lavapipe.** On the same pack run, the play job
     failed in `games/Swarm/play.sh` with exit code 6, the command line's timeout, after the game had
@@ -665,6 +688,19 @@ six built after winit became a dependency on every system at that commit.
     3DEngine (its Verdict 56). Two things: the script's commands that wait for frames take a timeout
     long enough for a software device, and a trap on error says the command that failed and its
     code, so the next failure is read from the page. Settled when the play job passes in a pack run.
+    Mended at `9f76fded`, every call with `--timeout 600` and named on failure.
+
+19. **The capture job waits an hour through examples that cannot start, and says nothing.** On the
+    pack run of `292eead2`, 2026-10-16, the capture job built the examples and ran
+    `build/capture-examples.sh`, which opens each of the 250 examples in turn, and the job was
+    cancelled at its 60 minutes with the step still running, its page holding the cancellation
+    alone; the examples found no bridge beside them, Verdict 16's cause, and the script lists an
+    example that did not start among the failed and goes on to the next, each waiting the command
+    line's patience for a program that will never serve, so a cause every example shares costs an
+    hour and is never named. One thing: the script stops when three examples in a row fail to start,
+    with an `::error::` saying so and the first one's log tail, since a program that cannot start
+    twice more will not start at all, and otherwise goes on as it does; the job's limit stays.
+    Settled when the capture job passes in a pack run.
 
 ## Decisions
 

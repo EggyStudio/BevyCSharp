@@ -33,9 +33,44 @@ empty="audio drag_and_drop empty empty_defaults monitor_info mouse_grab mouse_in
 # picture.
 flat="clear_color fixed_node gpu_readback mesh2d persisting_window_settings transform_hierarchy window_settings"
 
+# What an example that did not start said in the log bcs open keeps, without the colors Bevy writes
+# or a stack's frames, which push the exception's own lines out of any tail. Its first lines at an
+# error say why, and its last lines follow them.
+said() {
+    local clean
+    clean=$(sed -E 's/\x1b\[[0-9;]*m//g' "$1" 2>/dev/null | grep -v '^ *at ' | cut -c1-240)
+    grep -m 4 -E 'Unhandled exception|--->|panicked at|ERROR' <<< "$clean"
+    tail -n 10 <<< "$clean"
+}
+
+# Three examples in a row that do not start end the run, since a program that cannot start twice
+# more will not start at all, and bcs waits a minute and a half for each before it says so. On the
+# pack run of 292eead2 no example found the bridge, and the step waited through them until the job's
+# hour ran out, its page holding the cancellation alone. The first one's log is read before the next
+# opens and writes over it.
+unstarted=()
 for example in $("$program" --list); do
-    if ! build/capture-example.sh "$example" "$into/$example.webp"; then
-        failed+=("$example (did not start or could not be captured)")
+    build/capture-example.sh "$example" "$into/$example.webp"
+    code=$?
+    if [ "$code" -eq 3 ]; then
+        [ ${#unstarted[@]} -eq 0 ] && first=$(said build/sessions/BevyCSharp.Examples.log)
+        unstarted+=("$example")
+        failed+=("$example (did not start)")
+        if [ ${#unstarted[@]} -eq 3 ]; then
+            echo "${unstarted[*]} did not start, one after another, so no other example is tried. What ${unstarted[0]} said:" >&2
+            printf '%s\n' "$first" >&2
+            if [ "${GITHUB_ACTIONS:-}" = true ]; then
+                lines=${first//%/%25}
+                printf '::error title=Examples do not start::%s did not start, one after another, so no other example was tried. What %s said:%%0A%s\n' \
+                    "${unstarted[*]}" "${unstarted[0]}" "${lines//$'\n'/%0A}"
+            fi
+            exit 1
+        fi
+        continue
+    fi
+    unstarted=()
+    if [ "$code" -ne 0 ]; then
+        failed+=("$example (could not be captured)")
         continue
     fi
 

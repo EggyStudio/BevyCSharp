@@ -78,7 +78,9 @@ esac
 # compared with its checked-in picture asks. A device drawing on the CPU, as the workflow's does,
 # compiles for seconds, and on the machine's clock an example turning its camera has gone half
 # round by the frame its capture is taken at.
-./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}"
+# One that does not start ends this with 3, which build/capture-examples.sh tells from one that
+# started and could not be captured, and stops on when examples do not start one after another.
+./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}" || exit 3
 
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in
