@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `cd2d542d`, Verdict 27 mended again and nothing else, 3 files. The memory guard's
+Reviewed up to `dd2149ee`, Verdict 28 mended and nothing else, 7 files. The memory command answers
+`live`, the bytes its last full blocking collection kept, beside `managed` and `heap`, which the
+soak check says and no longer judges, with the reasons in its header, the first reading below zero
+with objects pinned and the second counting free space; the check judges `live` at five percent and
+256 KiB, four times what a ten-minute soak of the three games on lavapipe moved; BUILDING.md,
+`docs/tools.md` and `MemoryCommandTests` follow. Checked on the working machine were the whole
+suite, 1,474 passed and 3 skipped of 1,477, the ten-minute soak of the three games and the feature
+test's fifteen minutes, all passing. Right. Verdict 26's cause is the bridge's features and not the
+clock, read from the Replies and chosen under it, the pictures taken on the package's bridge; item
+25 is applied and awaits its commit. Next that commit and Verdict 26's, the owner's push, and a push
+run and a pack run whole green, Decision 35's gate.
+
+Before it, `cd2d542d` came, Verdict 27 mended again and nothing else, 3 files. The memory guard's
 test collects twice before its first reading, a full, aggressive, compacting collection with its
 finalizers each time, so the collector decommits what it frees at once, then enters a region of no
 collection, 16 MiB of budget, that holds until after the second reading and is ended where it still
@@ -53,33 +65,6 @@ failed Swarm's soak (Verdict 28); the feature test's course passed in 71 minutes
 did not run, so Decision 35's gate is not met. At 20:34 the owner read the voxel game's README's
 opening and widened Decision 37 to likenesses and figures of speech, item 25 open again for them.
 Next the three verdicts' mends and item 25, their push, and a push run and a pack run whole green.
-
-Before it, `f8e9a6d2` came, item 25 done and nothing else, 470 files. STYLE.md has the Register
-section after the game repository's, with this engine's pairs and names, the technical senses kept
-(a GPU's driver, a joint's drive, a body that bounces, a path tracer's bounces) and the identifiers
-(`build/drive-feature-test.sh`, the `drive` job, `--drive`, `Drives`, `EditorBoot.Drive`,
-`PhysicsMaterial.Bounce`, `SolariLightingRef.MaxBounces`, `PostSettings.Glow`), and the colon rule
-and its two checks are the game's with this engine's examples, beside a grep for the pairs. The
-sweep reworded some 150 lines of drive words, 46 of the light words and the colons of 105 Markdown
-lines and some 630 comment lines across the library, the editor, the examples, the feature test, the
-tests, the scripts, the workflows and the bridge's Rust, WGSL and Slang, with 21 comments whose
-ending colon ran on into prose; the README's and `docs/tools.md`'s heading on a running app reads
-Controlling where it read Driving, their links with it, `.github/BCS.md` is titled for controlling a
-running app, the `drive` job shows as "run the feature test's course", `bcs` prints that it controls
-a running app and the course script prints `[course]`; the README's first program and the template's
-`Spin.cs` say in a sentence what their two methods do, kept the same. Left, and rightly: AGENTS.md,
-which changes on the owner's word given in that session; the colons in strings a program prints that
-tests and scripts read; the vendored weather crate. The sample read says the same things in the
-rule's register and loses no fact. Checked on the working machine: the whole suite, `NormTests`,
-`DocsScriptTests` following the renamed headings' links, `CheatsheetTests` with the cheatsheet
-written again, the workflow and script tests and `FirstGameTests`, 71 of 71; the bridge built again
-as editor with meshlets and Solari. Right. The owner pushed it at 16:09 and its run failed on macOS
-alone, the memory guard's test reading 189 MiB of growth where 192 was asked, Verdict 27; Linux and
-Windows were green. In the pack run of `85df443c`, read at 16:29, the four capture shards ran 21 to
-31 minutes each, Verdict 25's shape at work, and failed on Verdict 26's names alone, 13 differences
-and 4 failed captures spread over them; the play job passed in 25 minutes and the course's job in 73
-with its soak, so the run ended failed on the shards alone at 17:00. Verdicts 26 and 27 are the
-coder's next, then the owner's push and the pack run that is Decision 35's gate.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -740,6 +725,29 @@ failing on one picture apiece, which is Verdict 26's.
     machine, the two pictures taken again if they change on the working machine, and the lines of
     `build/captures-differ.txt` whose reason was the clock are read again under it, a load still
     ending in whichever frame the machine reaches. Settled when the four shards pass on a pack run.
+    The mend named was in place, which the reading here missed, `build/capture-example.sh:94`
+    opening every picture with `--frame-time 0.0166667`, which `BevyCSharp.Cli/Launch.cs:268` hands
+    the app as `BCS_FRAME_TIME`, and two captures of each example in the runner's image matched to
+    the pixel; the working session found the cause instead, read under Replies on 2026-10-17 and
+    recorded here. The runner's bridge is built with `--render` alone, where the checkout's carries
+    the editor, meshlets and Solari, and `bevy_solari` turns on `bevy_pbr`'s `dfg_lut`, which lights
+    the specular term of every standard material from Bevy's precomputed table where its absence
+    leaves a fitted curve and which Bevy's default features leave off; the checked-in pictures were
+    taken on a bridge with Solari, so the `--render` bridge draws `many_lights` 45.455 percent and
+    `many_cubes` 4.570 apart, the runner's figures, a `render,solari` bridge draws them to the pixel
+    as the full one does, and these two show it past the allowance since every pixel of theirs is a
+    light's spot or a cube's edge; the session's earlier word that `many_lights` matched in the
+    runner's image was read while its allowance line still stood, and is withdrawn. The choice
+    between the two mends offered is the pictures, not the package. The package lights a material as
+    Bevy's default features do, and a tester's bridge built with Solari lights it as Bevy's does
+    with Solari, which is Bevy's own behavior and not this engine's to change for its pictures; so
+    the pictures of the examples that need no Solari are taken on a bridge built without it,
+    `--render`, as the native job builds it and as a user of the package draws, these two taken
+    again, and BUILDING.md says which bridge a picture is taken on and why. Turning `dfg_lut` on in
+    the render profile stays a question for the owner's eye, since it changes how every game built
+    on the package lights its materials; Decision 25 lets the working session turn it on the day the
+    owner wants the table's lighting in the package. Settled when the four shards pass on a pack
+    run.
 
 27. **The memory guard's test reads less growth on macOS than the pages it touched.** On the push of
     `f8e9a6d2`, 2026-10-17, the macOS suite failed one test of the 1,572 run,
@@ -787,7 +795,17 @@ failing on one picture apiece, which is Verdict 26's.
     or the bytes promoted at the last collection, `heap` is said and not judged, as `gen2` is, with
     the reason in `soak-check.py`, and the slack of the new figure is measured on a ten-minute soak
     of the three games before it is set (N 3.5). Settled when the play job's soak passes on a pack
-    run.
+    run. Mended at `dd2149ee`, the memory command answering `live`, the bytes the last full blocking
+    collection kept, which the soak judges at five percent and 256 KiB, a ten-minute soak of the
+    three games on lavapipe holding it within 60,712 bytes of where each settled and the feature
+    test's fifteen minutes at 1.10 to 1.13 MB; `managed` and `heap` are said and not judged, the
+    first reading below zero with objects pinned, -481,448 bytes in the stress program and -160,896
+    in Swarm after a full collection, the second counting free space. One thing more, since Swarm's
+    soak gave five readings on a loaded four-processor machine where the check needs six and the
+    runner gave enough with a thin margin. The soak runs on past its seconds until each game has its
+    six readings, within a cap it names, or the check's too-few line says the round's length, so a
+    slow runner does not fail for want of readings. Settled when the play job's soak passes on a
+    pack run.
 
 ## Decisions
 

@@ -503,6 +503,14 @@ device or the bridge has not, meshlets or ray-traced lighting, is captured as th
 gives of that, and one a device ends the process drawing as the words saying so with the device's
 own description, each beside where its picture would be and compared with nothing.
 
+A picture is taken on a bridge built without Solari, `build/build-native.sh --render`, with
+`--meshlet` for `meshlet`, `test_meshlet` and `many_meshlet_materials`, as the native job builds the
+bridge the runner captures with and a game's package carries, and only `solari` and
+`solari_reflections` are taken on one built with `--solari`. Solari brings in Bevy's `dfg_lut`,
+which lights the specular term of every standard material from a precomputed table where a bridge
+without it uses a fitted curve, so on the pack run of `afcf8301` the runner drew `many_lights` 45.4
+percent and `many_cubes` 4.6 percent apart from pictures taken with it.
+
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is the
 text it printed, followed by the lines it logged through `Log`, as `<name>.txt` beside the pictures,
