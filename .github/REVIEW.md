@@ -10,29 +10,45 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `50470331`, Verdicts 20, 21 and 22 mended in one commit and nothing else, as Decision
-33 asks. Every script the pack jobs run calls the command line through helpers that give `--timeout
-600` and name a failed call with its code and the first line the command line gave of why, which it
-writes to its output and not its errors, so Swarm's helpers of `9f76fded`, which kept the errors,
-had named an empty why; an ERR trap under `set -E` names anything else. The feature test's drive has
-a job of its own with 90 minutes and its artifact, the play job building the feature test for the
-soak alone; the drive's platform and elevator checks take the farthest the player was carried over
-240 and 300 frames, read every 30, since a net change over 90 frames straddled the swing's turn on
-lavapipe. The storm step installs `libxcursor1`, `libxi6` and `libxkbcommon-x11-0`, the three an
-Ubuntu 24.04 container with the job's packages alone showed winit unable to open one after another,
-runs the test with `--diag`, takes the test host's standard error out of that log, says a failure
-whole and uploads the folder. The capture script fetches Bevy's files and then builds the examples
-itself, the job's own build step gone, the single capture building again where the program lacks a
-fetched file, and the capture and drive jobs fetch `slangc` before they run, since 34 examples and
-the feature test compile Slang as they run. Checked on the working machine: the whole suite 1,471
-and 3 skipped of 1,474, NormTests 18 of 18; in the container, the storm passing in four seconds with
-the three libraries and the step's error ending with winit's line without them; the drive whole on
-lavapipe in some 70 minutes, the course from the platform on in 26 and passing; 26 captures in a
-fresh checkout none blank, 25 matching and `dynamic_mip_generation` matching once slangc was there.
-Right. One thing left in it: the play job's soak runs the feature test without `slangc`, so its log
-carries the compile errors though the soak reads memory alone; the play job fetches it too, a commit
-of its own before the push. Next the push, the third toward Decision 33's three if whole green, and
-the pack run after it, whose drive, storm and capture jobs settle Verdicts 20 to 22.
+Reviewed up to `5e01491e`, the one thing left in `50470331` done and nothing else: the play job
+fetches `slangc` before it builds the feature test for the soak, with the line of comment the drive
+and capture jobs have. The whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18. Right. The
+owner pushed `50470331` and `5e01491e` at 11:40, two runs at once; the first was cancelled at its
+start by the workflow's own rule with the second going on, and the run of `5e01491e` was whole
+green, Linux in 12 minutes, Windows 14, macOS 11, the third of Decision 33's three. The pack run on
+it, started at 11:58, built the six bridges, passed the Linux and macOS suites, the storm, which
+settled Verdict 21, and the README walk, and failed its Windows suite on one test, Verdict 23, and
+its play job at the soak, Verdict 24, so the pack job was skipped; the drive job passed in 56
+minutes, which settled Verdict 20, and the capture job was under way at 13:23. The same day the
+owner ordered two workflows an engine, with the tester zips and the scene packs as runs on the
+owner's machine (Decisions 34 and 35, item 23); the rework is the first work after Verdicts 23 and
+24 are mended, and a green push and a green pack run under the new workflows are Decision 33's gate
+before features resume.
+
+Before it, `50470331` came, Verdicts 20, 21 and 22 mended in one commit and nothing else, as
+Decision 33 asks. Every script the pack jobs run calls the command line through helpers that give
+`--timeout 600` and name a failed call with its code and the first line the command line gave of
+why, which it writes to its output and not its errors, so Swarm's helpers of `9f76fded`, which kept
+the errors, had named an empty why; an ERR trap under `set -E` names anything else. The feature
+test's drive has a job of its own with 90 minutes and its artifact, the play job building the
+feature test for the soak alone; the drive's platform and elevator checks take the farthest the
+player was carried over 240 and 300 frames, read every 30, since a net change over 90 frames
+straddled the swing's turn on lavapipe. The storm step installs `libxcursor1`, `libxi6` and
+`libxkbcommon-x11-0`, the three an Ubuntu 24.04 container with the job's packages alone showed winit
+unable to open one after another, runs the test with `--diag`, takes the test host's standard error
+out of that log, says a failure whole and uploads the folder. The capture script fetches Bevy's
+files and then builds the examples itself, the job's own build step gone, the single capture
+building again where the program lacks a fetched file, and the capture and drive jobs fetch `slangc`
+before they run, since 34 examples and the feature test compile Slang as they run. Checked on the
+working machine: the whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18; in the container,
+the storm passing in four seconds with the three libraries and the step's error ending with winit's
+line without them; the drive whole on lavapipe in some 70 minutes, the course from the platform on
+in 26 and passing; 26 captures in a fresh checkout none blank, 25 matching and
+`dynamic_mip_generation` matching once slangc was there. Right. One thing left in it: the play job's
+soak runs the feature test without `slangc`, so its log carries the compile errors though the soak
+reads memory alone; the play job fetches it too, a commit of its own before the push. Next the push,
+the third toward Decision 33's three if whole green, and the pack run after it, whose drive, storm
+and capture jobs settle Verdicts 20 to 22.
 
 Before it, `d2a20b6a` came, Verdict 19 mended and nothing else: the one example's capture exits with
 3 where the open fails, so the loop tells an example that never started from one that could not be
@@ -55,35 +71,6 @@ blank or not captured and 152 captures past the share allowed, Verdict 22, the e
 Bevy's assets were fetched, and Verdict 19 settled, the job ending within its hour with a page
 naming each failure. The pack run failed, so Decision 33 asks the three mends, a third green push
 and a pack run after it.
-
-Before it, `9f76fded` came, Verdicts 16, 17 and 18 mended in one commit and nothing else beyond one
-reasoned change. Verdict 16 reproduced in a fresh checkout with a render bridge in the artifacts'
-slot alone: the library project copies the bridge to its output from `build/target/release` alone, a
-folder only a native build here makes, so the tests' bin held none, and the examples program fails
-the same way there, which the captures job has had since `661682eb` of 2026-10-04 and will fail on;
-where that folder holds no bridge the project copies the slot named by the SDK's portable runtime
-identifier instead, linux-x64 on a distribution's SDK as the native script names it, and the storm
-step compares the bin's bridge with the downloaded one, failing with an `::error::` naming the path
-where they differ and else saying which library the test loads with its hash's prefix; a fresh
-checkout through `build/step.py` gave that error before the mend and the storm passed under xvfb
-after it, an example running from the slot. Verdict 17: the release notes go to
-`build/release-notes.txt`, the script's default and the step's path together and ignored by git, and
-N 6.4 reads the folders named as a runtime alone, (linux|linux-musl|win|osx)-(x64|arm64), and the
-files directly in them, checked on a Release pack with a stray notes file among the artifacts
-passing and a fake osx-arm64 slot still failing by name. Verdict 18: every call in Swarm's play goes
-through a wrapper with `--timeout 600` that says its words, its code and the command line's first
-line of why on a failure, and an ERR trap names any other failing command with its code and line;
-played on lavapipe pinned to four cores, exit 0 in 676 seconds, the 120-frame profile taking 63 and
-an 80-frame hold 40, both past the command line's 30, which is the exit code 6. The game job's limit
-goes from 30 minutes to 60 with its reason, Swarm alone taking eleven here beside the guide, every
-example, two other games, the soak and the publish, which stands. Found and not mended, since
-Decision 33 holds: Swarm does not build on its own default package version, 0.0.14-game, seven
-errors for calls the package lacks, the workflow building it on 0.0.0-ci; item 22 after the stop
-lifts. The whole suite 1,471 and 3 skipped of 1,474. Right. The pack run's capture job ended at
-23:09 cancelled at the job's hour with nothing said, every example failing to start for the bridge
-Verdict 16 names and the script waiting each one's patience out before the next, Verdict 19. Next
-the push, the second toward Decision 33's three if whole green, and the pack run after it, whose
-storm, pack, play and capture jobs settle Verdicts 16 to 18.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -591,17 +578,49 @@ from [SHARED.md](SHARED.md).
     take their version from one place the pack writes, and a check that each game builds on its own
     default where the package is published. Found at `9f76fded`.
 
+23. **Two workflows an engine, `build.yml` on a push and `pack.yml` by hand (Decision 34), after
+    Verdicts 23 and 24.** `package.yml` folds into `build.yml`, which gains `push`, `pull_request`
+    and `workflow_call` with one input, `pack`, and the `docs` job, its inputs `version`, `targets`
+    and `test_os` gone and the matrices literal: `native (rid)` (pack only), `test (os)`, `digest`,
+    `docs`, and pack-only `game`, `drive`, `examples`, `storm` and `readme`, each needing `native`;
+    the push's paths filter becomes 3DEngine's (`['**', '!.github/**.md', '.github/BUILDING.md',
+    '!AGENTS.md', '!games/**.md', '!.github/assets/**']`), so a docs-only push runs the docs check
+    it skipped under `paths-ignore`, and `branches` goes. `pack.yml` keeps `workflow_dispatch` with
+    `publish` and runs `build` (uses `build.yml` with `pack: true`) then `pack` (needs `build`, 20
+    minutes, through `step.py`): the version read in it with `fetch-depth: 0`, the six `native-*`
+    artifacts laid out under `build/artifacts`, the notices check, the release notes, `dotnet pack`,
+    the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked
+    and the summary, so a package is made only when every job passed, where today's pack job needs
+    `native` and `test` alone; the `version` and `publish` jobs go. `feature-test.yml` and
+    `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the owner's
+    machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip needs a
+    Windows machine with `--cache`), and the Sponza drive is `build/scenes.sh` (the meshlet and
+    solari bridge, `build/fetch-slang.sh`, `./bcs scenes fetch intel-sponza`, the feature test built
+    strict and driven with `SHOTS=build/scenes`), BUILDING.md:356-363 saying so. Both files:
+    `permissions: contents: read`, concurrency `build-${{ github.ref }}` cancelling in progress and
+    `pack-${{ github.ref }}` not, a time limit on every job with its reason (N 6.8), a head comment
+    saying what a push runs and what the pack run adds; a push still tests the library alone, the
+    render bridge costing a quarter of an hour cold, said in BUILDING.md in one sentence beside
+    3DEngine's. Lines that change: `build/step.py:6-7`, `.github/BUILDING.md:63, 213, 336-379, 481,
+    498`, `README.md:202, 266`. Checked by `WorkflowTests`, `TestScriptTests`, `NormTests`,
+    `build/check-docs.py`, a push run green with the pack-only jobs skipped, a docs-only push
+    running, and a pack run green with its package, which are Decision 33's gate (Decision 35). The
+    norm's and SHARED.md's lines are the reviewer's and ride with the commit.
+
 ## Verdicts
 
-Verdicts 3 and 14 to 19 are settled: 15, the native job's four targets, on the pack run of
-`292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
-commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
-green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
-`d2a20b6a` the same day, 3, Courtyard played from the package with its step's page saying so, 16,
-the storm's test loading the bridge the job downloaded, which the step named, 17, the pack job
-passing with the notes beside the artifacts, and 18, Swarm played into its third wave within its
-commands' patience, and 19, the capture job ending within its hour with a page naming each failure,
-the examples started and none waited on.
+Verdicts 3, 14 to 21 are settled: 15, the native job's four targets, on the pack run of `292eead2`
+on 2026-10-16, all six built after winit became a dependency on every system at that commit; 14, the
+memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third green Windows
+suite in a row after the private bytes were read at `292eead2`; and on the pack run of `d2a20b6a`
+the same day, 3, Courtyard played from the package with its step's page saying so, 16, the storm's
+test loading the bridge the job downloaded, which the step named, 17, the pack job passing with the
+notes beside the artifacts, and 18, Swarm played into its third wave within its commands' patience,
+and 19, the capture job ending within its hour with a page naming each failure, the examples started
+and none waited on; and 21, the storm's app made on the runner once the three libraries winit opens
+were installed, on the pack run of `5e01491e` on 2026-10-17, the storm passing in a minute and a
+half; and 20, the feature test driven through its course on lavapipe in 56 minutes, in a job of its
+own on the same pack run.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -615,58 +634,6 @@ the examples started and none waited on.
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
-
-20. **The feature test's drive ends with a command's timeout on lavapipe, saying nothing.** On the
-    pack run of `d2a20b6a`, 2026-10-17, the play job played Courtyard and Swarm and failed in
-    `build/drive-feature-test.sh` with exit code 6, the command line's code for a run that failed,
-    which its timeout gives; the step's page carries the feature test's build and three warnings
-    from its log, nothing of which command ended it. The script has the shape Verdict 18 named in
-    Swarm's play: nineteen calls of the command line, none with `--timeout`, so each waits the
-    default 30 seconds, and waits of 60 to 365 frames on a software device drawing the hub under its
-    weather at a few frames a second outlast that, `set -e` ending the script at the first without a
-    word. Three things: every call that waits on the program takes `--timeout 600` and is named on
-    failure with its code and the command line's first line, as Swarm's `c` and `shot` and its ERR
-    trap do since `9f76fded`; the same reading of every script the pack jobs run, Courtyard's play,
-    `build/first-game.sh`, `build/soak.sh`, `build/play-native.sh`, `build/publish-feature-test.sh`
-    and `build/capture-example.sh`, so one pack run does not find them a script at a time; and the
-    three warnings read from the run's `courtyard` artifact, whose `feature-test.log` holds them, a
-    material of shader program 6 given `size` and a dispatch of program 4 given `flies` and `reach`
-    when the program's layout declared nothing, either a compile that failed earlier in the log or
-    values set before the program's layout was known, neither seen on the working machine, and the
-    page showing three lines of a log at a warning or worse hid what came before. Read on the
-    working machine the same day: the three warnings are the feature test's own `.slang` shaders
-    failing to compile on a runner with no `slangc`, which neither the play job nor the capture job
-    fetches where the feature test's own workflow does, so each program's layout was empty and the
-    trees' wind and the fireflies drew the fallback; the drive and capture jobs fetch it, the pin
-    the feature test's workflow uses. And the drive run whole on lavapipe failed the moving
-    platform's station after 46 minutes, the check and not the engine at fault: the platform swings
-    as a sine with a period of ten and a half seconds and the check took the net change over 90
-    frames, which on a slow device straddled the turn of the swing, the elevator's check the same;
-    both take the farthest the player was carried, read every 30 frames over 240 and 300, whose
-    worst case over every point of the swing is 1.5 and 1.6 against the 1 asked, the course
-    unchanged. Settled when the play job passes in a pack run. Mended at `50470331`: the helpers,
-    the trap, the drive's own job with 90 minutes, the platform and elevator checks taking the
-    farthest the player was carried, and `slangc` fetched before the drive; the play job's soak
-    still runs the feature test without it, a commit to follow.
-
-21. **The storm's app is not made on the runner, and the step says only where it threw.** On the
-    same pack run, the storm job's test loaded the bridge the job downloaded, which the step named,
-    and failed in the constructor of `App`, `bcs_app_create` returning null, which is a panic inside
-    `build_app` caught by the guard; the step's page holds the stack trace's last lines and the test
-    count, the exception's message and the bridge's words on stderr standing above the six lines the
-    page keeps, and the job keeps no artifact. The storm job is the first place a window is opened
-    on a runner: the suites run offscreen and never make winit's event loop, and the test passed on
-    the working machine's display, so what the runner lacks has been read nowhere. Two things: on
-    failure the step prints `storm.txt` whole, one test's lines, and uploads it with `if: always()`;
-    and the cause reproduced in an `ubuntu:24.04` container with the step's packages alone, Xvfb,
-    the software Vulkan and ALSA, where the libraries winit opens at run time on X11, `libX11`,
-    `libXcursor`, `libXi`, `libXrandr`, `libxkbcommon` and `libxkbcommon-x11`, are the first
-    suspects, Bevy's own workflow installing libraries beside Xvfb before it runs its examples; what
-    the container shows missing the step installs. Settled when the storm job passes in a pack run.
-    Mended at `50470331`: the three libraries installed with the reason, the test run with `--diag`,
-    its host's standard error taken from that log, a failure said whole and the folder uploaded; the
-    step's error in the container without the three ended with winit's line naming libXcursor, and
-    with them the storm passed in four seconds.
 
 22. **The examples are built before Bevy's assets are fetched, so the runner captures them without
     their textures, models, fonts and shaders.** On the pack run of `d2a20b6a`, 2026-10-17, the
@@ -696,6 +663,36 @@ the examples started and none waited on.
     fetched file, `slangc` fetched before the captures and the job at 90 minutes; in a fresh
     checkout 26 captures came out none blank, 25 matching and `dynamic_mip_generation` matching once
     slangc was there.
+
+23. **The CLI's ready system is denied its session file on Windows while a test reads it.** On the
+    pack run of `5e01491e`, 2026-10-17, the Windows suite failed one test of the 1,038 run,
+    `CliServerTests.AServingAppAnswersWhileItRuns`, under N 3.7: the engine logged one error, the
+    system `Cli.Ready` throwing `UnauthorizedAccessException`, access to the path denied, and the
+    same test passed on the push of `5e01491e` half an hour before and on every Windows suite since
+    the test came. On Windows a file another process or thread holds open without sharing its
+    deletion refuses a move over it with that exception, where Linux and macOS let the move through,
+    so the ready system writing or moving the session file into place while the test, or the suite's
+    other reader, had it open is the shape; 3DEngine met the same race from the reader's side (its
+    Verdict 57) and reads the file again up to four times ten milliseconds apart. Two things:
+    `Cli.Ready`'s write of the session file read for what it does when the file is held, the writer
+    trying again a few times a few milliseconds apart before it logs, and the readers opening the
+    file with `FileShare.ReadWrite | FileShare.Delete`; and the test's reading of the session file
+    read for the same. Settled at three green Windows suites in a row.
+
+24. **The soak's step says a game grew or could not be played, and names neither.** On the same pack
+    run, the play job played Courtyard and Swarm and failed at the soak of the four programs with
+    the step's own words alone, that a game grew or could not be played over two and a half minutes,
+    nothing of which program, what `build/soak-check.py` read or what the soak's script said, since
+    the step prints its one `::error::` after the scripts and `build/step.py` adds its page only to
+    a step that said nothing. The feature test joined the soak with its shaders compiled for the
+    first time at `5e01491e`, `slangc` fetched before it, and on lavapipe at a frame a second its
+    compiles run through much of the 150 seconds, so its memory climbing without leveling off is the
+    first reading to take and a failed open the second. Two things: the step's error carries
+    `soak-check.py`'s words and each soak's `FAILED` line, each soak's standard error kept in a file
+    and read into it, so the next page names the program and the figure; and the soak of the feature
+    test read on lavapipe with `slangc` here, its readings beginning after its shaders are compiled,
+    as `publish-feature-test.sh` waits on `shader.list`, if the compiles are what climbed. Settled
+    when the play job passes in a pack run.
 
 ## Decisions
 
@@ -883,4 +880,53 @@ the examples started and none waited on.
     and the pack run after them, before an item is taken again, on 3DEngine as here (its Decision
     39).
 
+34. **Two workflows an engine, build and pack, the same shape in both; the tester zips and the scene
+    packs are runs on the owner's machine.** The owner found on 2026-10-17 that the two engines'
+    workflow sets differed, five files here and four in 3DEngine with graphs that looked unlike each
+    other, and ordered each engine down to two: a build workflow on an ordinary push and a pack
+    workflow by hand, consistent between them, the pack run keeping every check that ran only there;
+    the feature test's zips and the Sponza drive leave CI for the owner's machine, the Sponza files
+    under `.ref/Sponza`. Written as item 23 here and item 26 in 3DEngine (its Decision 40). The
+    norm's "the workflow" names both, and a rule the one it means.
+
+35. **Decision 33's gate is the new workflows.** The owner chose on 2026-10-17 that the rework of
+    item 23 starts that day as the first work on both engines, after the verdicts open are mended,
+    and that the green lights Decision 33 asks are then asked of the new workflows: a green push and
+    a green pack run under them on each engine before features resume (3DEngine's Decision 42).
+
 ## Replies
+
+**Verdict 23.** `CliSessionFile.Write` tries its move over the old file five times, ten milliseconds
+apart, before the refusal goes to the caller, where `Cli.Ready` logged the first, and
+`CliSessionFile.Read` opens the file sharing reads, writes and deletion, where `File.ReadAllBytes`
+shared reads alone, which on Windows refuses a move over the file. The test waits for the ready file
+through `CliSessionFile.All`, so its reading is the library's and shares the same way. A new test,
+`AWriteOutlastsAReaderHoldingTheFile`, holds the file as a reading of the whole file held it and
+lets it go at the first pause between tries, the pause swappable as 3DEngine's reader has it, so on
+Windows the first move is refused and the second goes through, and on Linux and macOS the first
+does. Whether sharing deletion alone lets Windows move a file over one being read could not be tried
+here, so the writer tries again as well. The session and server tests passed 16 of 16.
+
+**Verdict 24.** Read in the runner's image, the .NET SDK's Ubuntu 24.04 with Mesa's lavapipe held to
+four processors, the play job's steps run up to the soak with `slangc` fetched. The step failed as
+on the runner, and each of the four had been read too few times to judge, Courtyard and the stress
+program three times, Swarm twice and the feature test once, where the check judges six. Nothing
+climbed. With the four at once a round took 67 to 100 seconds, and the feature test's first round
+ended six minutes into its soak, so two and a half minutes could not read any of them enough. The
+soak had not run on a runner before `5e01491e`, since in every pack run before it the drive came
+first in the same job and failed. The compiles were not the cause, so the readings are not held back
+for them. `build/soaks.sh <seconds> <game>...` soaks the games named at once, keeps each soak's
+errors and each check's words beside the readings in `build/soak`, and says a failure as one error
+carrying each `FAILED` line and each value that climbed or was read too few times. A soak of 20
+seconds in the container ended with `stress played for 20 seconds, and one grew or could not be
+played.` and `build/soak/stress.txt: 2 readings, too few to judge` on the next line. The play job
+soaks Courtyard, Swarm and the stress program through it for ten minutes, which read them seven to
+ten times in the container, nothing climbing. The drive job soaks the feature test alone after its
+drive for fifteen minutes, its shaders in the cache the drive's run filled, which read it seven
+times there, a round every 132 seconds and its resident size level at 1.30 GB. Nothing in the play
+job runs the feature test now, so it no longer fetches `slangc` or builds it. Each job uploads
+`build/soak`, as `soak` and `feature-test-soak`, and `.github/BUILDING.md` says the soak's new
+shape. The play job's hour now holds seven and a half minutes more of soak, and its other steps
+could not be timed here; the drive job's estimate rises to some 70 of its 90 minutes. Bash once
+warned of a null byte it dropped from one of the feature test's readings, the reading still whole,
+and it was not looked into further.

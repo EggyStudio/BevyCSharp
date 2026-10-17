@@ -399,15 +399,20 @@ Courtyard's play and Swarm's hold each frame to a sixtieth of a second of the ga
 `app.frametime`, since the play plans each walk in frames and the runner draws with Mesa's software
 Vulkan, a few frames a second, which on the machine's clock carried the runner past its coins.
 
-`build/soak.sh <courtyard|stress|swarm> <seconds>` plays a game through `bcs` a round at a time, as a
-player left at it would, and reads `memory.collect` after its rounds, no more often than every five
-seconds, into `build/soak/<game>.txt`. `build/soak-check.py` fails when anything it holds (managed
-memory, the process's resident size, the bridge's allocations, the entities, the asset handles and
-the assets of each kind) climbs past what it reached earlier in the run by more than a little. A
-round ends where the game is the same each time, Courtyard back on its menu after a save, a walk
-and a load, Swarm at its end after a fight with its first wave, and the stress program after a
-number of frames, so two readings of a game that leaks nothing match. The pack workflow plays the
-three at once for two and a half minutes this way, and a ten-minute run of each holds level here.
+`build/soak.sh <courtyard|stress|swarm|feature-test> <seconds>` plays a game through `bcs` a round
+at a time, as a player left at it would, and reads `memory.collect` after its rounds, no more often
+than every five seconds, into `build/soak/<game>.txt`. `build/soak-check.py` fails when anything it
+holds (managed memory, the process's resident size, the bridge's allocations, the entities, the
+asset handles and the assets of each kind) climbs past what it reached earlier in the run by more
+than a little, and when it was read fewer than six times. A round ends where the game is the same
+each time, Courtyard back on its menu after a save, a walk and a load, Swarm at its end after a
+fight with its first wave, the feature test's player back where its walk round a square of the hub
+began, and the stress program after a number of frames, so two readings of a game that leaks
+nothing match. `build/soaks.sh <seconds> <game>...` soaks several at once and judges each, a failure
+said as one error naming each game's failure and each value that climbed. The pack workflow soaks
+Courtyard, Swarm and the stress program at once for ten minutes, and the feature test alone for
+fifteen after its drive, since lavapipe plays a round of each in a minute or two, and a ten-minute
+run of each game holds level here.
 
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by

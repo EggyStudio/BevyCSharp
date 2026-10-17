@@ -35,8 +35,17 @@ public static class CliSessionFile
 
     /// <summary>Writes one, replacing whatever was there.</summary>
     /// <remarks>
+    /// <para>
     /// Written whole and moved into place, so a reader never catches a half-written file. The mode
     /// is set on the temporary file before the move, so it is never briefly readable by others.
+    /// </para>
+    /// <para>
+    /// On Windows a move over a file that something else has open is refused with access denied,
+    /// where Linux and macOS let it through, and a reader listing the sessions opens each file for
+    /// the moment it takes to read it. The app's first ready file met one of those reads in the
+    /// suite on a Windows runner and its system logged the refusal, so the move is tried again a
+    /// few times ten milliseconds apart before the refusal goes to the caller.
+    /// </para>
     /// </remarks>
     public static void Write(CliSession session)
     {
@@ -67,20 +76,53 @@ public static class CliSessionFile
         }
 
         Restrict(temporary);
-        File.Move(temporary, final, overwrite: true);
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(temporary, final, overwrite: true);
+                return;
+            }
+            catch (Exception error) when (attempt < Attempts
+                                              && error is IOException or UnauthorizedAccessException)
+            {
+                Pause();
+            }
+        }
     }
+
+    /// <summary>How many times a move held up by a reader is tried before the refusal is passed on.</summary>
+    /// <remarks>
+    /// A reader holds the file for well under a millisecond, so five tries over forty milliseconds
+    /// outlast one by far, and a frame that meets one waits ten milliseconds, forty at the most,
+    /// where it would have logged an error.
+    /// </remarks>
+    private const int Attempts = 5;
+
+    /// <summary>The wait between two tries of a move, which a test makes the moment it lets the file go.</summary>
+    internal static Action Pause { get; set; } = static () => Thread.Sleep(10);
 
     /// <summary>Reads one, or nothing when the file is missing or not one of these.</summary>
     /// <remarks>
+    /// <para>
     /// A file being written as it is read, or left behind by an older version, answers nothing
     /// rather than throwing. Discovery runs on every command, and a tool that cannot list sessions
     /// because one of them is malformed is a tool that cannot be used to fix it.
+    /// </para>
+    /// <para>
+    /// Opened sharing writes and deletion with whoever else has it, so a read stands in the way of
+    /// as little as Windows allows while the app moves its next file over this one, the rest left
+    /// to the tries <see cref="Write"/> makes.
+    /// </para>
     /// </remarks>
     public static CliSession? Read(string path)
     {
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllBytes(path));
+            using var stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var document = JsonDocument.Parse(stream);
             var root = document.RootElement;
 
             return new CliSession(

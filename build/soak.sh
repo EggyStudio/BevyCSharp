@@ -15,7 +15,7 @@
 # folder is the one the pack workflow builds it to from the package.
 #
 # The game is started offscreen and serving and stopped at the end whatever happened, and every
-# call names it, so the three are played at once.
+# call names it, so several are played at once (build/soaks.sh).
 set -eEuo pipefail
 cd "$(dirname "$0")/.."
 

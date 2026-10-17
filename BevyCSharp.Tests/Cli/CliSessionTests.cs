@@ -89,6 +89,39 @@ public sealed class CliSessionTests : IDisposable
         Assert.Equal(Environment.ProcessId, left.Pid);
     }
 
+    /// <summary>
+    /// A file another reader has open is written over once the reader lets it go, rather than the
+    /// refusal reaching the app.
+    /// </summary>
+    /// <remarks>
+    /// Held as a reading of the whole file holds it, sharing reads alone, which on Windows refuses
+    /// the move with access denied, as the app's first ready file met in the suite on a Windows
+    /// runner. The reader lets go at the first pause between tries, so the second try goes through
+    /// whenever the first was refused, and on Linux and macOS the first goes through.
+    /// </remarks>
+    [Fact]
+    public void AWriteOutlastsAReaderHoldingTheFile()
+    {
+        CliSessionFile.Write(Session(Environment.ProcessId));
+
+        var held = new FileStream(
+            CliSessionFile.PathFor(Environment.ProcessId), FileMode.Open, FileAccess.Read, FileShare.Read);
+        var was = CliSessionFile.Pause;
+        CliSessionFile.Pause = held.Dispose;
+
+        try
+        {
+            CliSessionFile.Write(Session(Environment.ProcessId) with { Frame = 13 });
+        }
+        finally
+        {
+            CliSessionFile.Pause = was;
+            held.Dispose();
+        }
+
+        Assert.Equal(13u, Assert.Single(CliSessionFile.All()).Frame);
+    }
+
     [Fact]
     public void AFileThatIsNotOneOfTheseIsIgnoredRatherThanThrown()
     {
