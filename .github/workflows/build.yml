@@ -506,16 +506,24 @@ jobs:
   # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does
   # not start or draws nothing, on the Linux bridge the native job built, then each capture compared
   # with the one in .github/assets/examples, failing on one that differs by more than devices do
-  # (build/compare-captures.py). The captures are kept as the run's artifact.
+  # (build/compare-captures.py). Four jobs share the list, each taking every fourth example by its
+  # place in it, 90 of the 360, and each keeps its captures as an artifact of its own.
   examples:
-    name: capture the examples
+    name: capture the examples (${{ matrix.shard }} of 4)
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # An hour and a half, since the captures took 56 minutes of the hour on the pack run of d2a20b6a,
-    # some ten seconds an example on lavapipe, with none of Bevy's files there for an example to load
-    # and draw.
-    timeout-minutes: 90
+    # An hour each. The whole list took 56 minutes on the pack run of d2a20b6a, some ten seconds an
+    # example on lavapipe with none of Bevy's files there to load and no slangc to compile with, and
+    # past the 90 minutes of one job on the pack run of 5e01491e with both in place, so a quarter of
+    # it should take half an hour or less. The script's budget is twenty minutes under the limit,
+    # which leaves the setup, the build and the comparison their time, and a shard past it names how
+    # far it got.
+    timeout-minutes: 60
     needs: [native]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     # Each step through build/step.py, as the game job has it.
     defaults:
       run:
@@ -544,9 +552,11 @@ jobs:
         run: build/fetch-slang.sh
 
       # The examples built by the script itself, after it fetches Bevy's files, which the build
-      # copies beside the program.
-      - name: Capture every example
-        run: build/capture-examples.sh "${{ runner.temp }}/examples" -p:BevyCSharpSkipNativeFreshnessCheck=true
+      # copies beside the program, and this shard's quarter of them captured within the budget.
+      - name: Capture this shard's examples
+        env:
+          CAPTURE_MINUTES: '40'
+        run: build/capture-examples.sh "${{ runner.temp }}/examples" --shard ${{ matrix.shard }}/4 -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       # Even where a capture failed, so a run names every example that went wrong, of both kinds.
       - name: Compare the captures with the checked-in ones
@@ -556,7 +566,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: examples
+          name: examples-${{ matrix.shard }}
           path: ${{ runner.temp }}/examples
           if-no-files-found: ignore
 

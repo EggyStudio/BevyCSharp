@@ -4,16 +4,35 @@
 # run runs it before every package, and it is how the captures in
 # .github/assets/examples are taken again after a change that touches many examples.
 #
-#   build/capture-examples.sh [folder] [options for dotnet build]
+#   build/capture-examples.sh [folder] [--shard <n>/<count>] [options for dotnet build]
 #
 # The pictures go to .github/assets/examples unless another folder is given. The examples are built
 # here with the options given, as -p:BevyCSharpSkipNativeFreshnessCheck=true where the bridge was
-# built elsewhere.
+# built elsewhere. With --shard, only every count-th example of the list is captured, from the n-th
+# on, counting from one, so that many runs side by side capture the whole list between them, as the
+# pack run's capture jobs do.
+#
+# Where CAPTURE_MINUTES is set, no example is started once that many minutes have gone since the
+# first, and an error names how many of how many were reached and the last of them, so a run that
+# cannot finish says how far it got before a job's limit cuts it off with nothing said. The pack
+# run of 5e01491e, the first with Bevy's files and slangc in place, was cancelled at its 90 minutes
+# with the captures still running and its page holding the cancellation alone.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 into="${1:-.github/assets/examples}"
 [ $# -gt 0 ] && shift
+shard=1
+shards=1
+if [ "${1:-}" = --shard ]; then
+    shard="${2%/*}"
+    shards="${2#*/}"
+    if ! [[ "$2" == */* && "$shard" =~ ^[0-9]+$ && "$shards" =~ ^[0-9]+$ ]] || (( shard < 1 || shard > shards )); then
+        echo "capture-examples.sh: --shard takes <n>/<count>, n from 1 to count, where it was given ${2:-nothing}" >&2
+        exit 2
+    fi
+    shift 2
+fi
 mkdir -p "$into"
 
 # Bevy's files first and the build after them, since the build copies beside the program what
@@ -57,7 +76,25 @@ said() {
 # hour ran out, its page holding the cancellation alone. The first one's log is read before the next
 # opens and writes over it.
 unstarted=()
+examples=()
+index=0
 for example in $("$program" --list); do
+    (( index++ % shards == shard - 1 )) && examples+=("$example")
+done
+budget="${CAPTURE_MINUTES:-}"
+began=$SECONDS
+reached=0
+last=none
+over=""
+for example in "${examples[@]}"; do
+    if [ -n "$budget" ] && (( SECONDS - began >= budget * 60 )); then
+        over="The captures' budget of $budget minutes ended after $reached of ${#examples[@]} examples, the last reached $last, $(( ${#examples[@]} - reached )) left uncaptured."
+        echo "$over" >&2
+        [ "${GITHUB_ACTIONS:-}" = true ] && echo "::error title=Captures past their budget::$over"
+        break
+    fi
+    reached=$(( reached + 1 ))
+    last="$example"
     build/capture-example.sh "$example" "$into/$example.webp"
     code=$?
     if [ "$code" -eq 3 ]; then
@@ -126,4 +163,5 @@ if [ ${#failed[@]} -gt 0 ]; then
     fi
     exit 1
 fi
-echo "captured every example into $into"
+[ -n "$over" ] && exit 1
+echo "captured ${#examples[@]} examples into $into in $(( (SECONDS - began) / 60 )) minutes"

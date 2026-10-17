@@ -10,7 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5e01491e`, the one thing left in `50470331` done and nothing else: the play job
+Reviewed up to `b178ae3f`, item 23 done over `0dff9601`, Verdicts 23 and 24 mended, and nothing
+else, as Decision 35 asks. At `0dff9601` the session file's writer tries its move five times ten
+milliseconds apart before the refusal reaches `Cli.Ready`, its readers open the file sharing writes
+and deletion, and a test holds the file as a whole-file read held it and lets go at the first pause,
+so the second try goes through where Windows refused the first; and the soak's failure, read in the
+runner's image on lavapipe held to four processors, was too few readings and not a climb, a round of
+four programs at once taking 67 to 100 seconds where the check wants six readings in 150, so
+`build/soaks.sh` soaks the games named at once and says one error with each `FAILED` line and each
+value that climbed or was read too few times, the play job soaks Courtyard, Swarm and the stress
+program for ten minutes, and the drive job soaks the feature test alone for fifteen after its drive
+with its shaders in the cache the drive filled, seven readings there and its resident size level at
+1.30 GB. At `b178ae3f` `package.yml`, `feature-test.yml` and `scenes.yml` are gone: `build.yml`
+holds `native (rid)`, `test (os)`, `digest`, `docs` and the pack-only `game`, `drive`, `examples`,
+`storm` and `readme` behind `if: ${{ inputs.pack }}`, with 3DEngine's paths filter and no
+`branches`; `pack.yml` runs `build` then `pack` with the version read in it, the six bridges laid
+out, the notices, the release notes, the pack, the templates, N 6.4 and N 6.5, the upload and the
+push, the key reaching the push through the environment so a failed command names `$NUGET_API_KEY`
+and not the key; `build/scenes.sh` is the Sponza drive by hand and BUILDING.md says the zips are
+made on the system each is for. One thing differs from the item and is right: the build group is
+`build-${{ github.ref }}-${{ github.event_name }}`, since a called run reads its caller's context,
+where 3DEngine's reads `inputs.pack`; the two forms do the same and are aligned in a later batch.
+Checked on the working machine: the whole suite 1,472 and 3 skipped of 1,475, `WorkflowTests`,
+`TestScriptTests`, `ScriptTests` and `NormTests` 62 of 62, `check-docs.py`; `build/scenes.sh` was
+not run whole, since it would build the render bridge over this checkout's editor bridge. Right. A
+null byte bash dropped from one of the feature test's readings in the container, the reading whole,
+is read when a soak's page next shows one. The pack run of `5e01491e` ended failed at 13:28: its
+capture job was cancelled at its 90 minutes with the captures still running, Verdict 25, so Verdict
+22's mend is proven by the next pack run. The owner pushed `b178ae3f` at 13:37, its Linux suite and
+docs green at 13:50 with Windows and macOS running. Item 23 is done when that run shows `test`,
+`digest` and `docs` green with the rest skipped and the pack run every job green and the package's
+artifact, which is Decision 35's gate for this engine; the play job's hour holds seven and a half
+minutes more of soak and the drive job is near 70 of its 90.
+
+Before it, `5e01491e` came, the one thing left in `50470331` done and nothing else: the play job
 fetches `slangc` before it builds the feature test for the soak, with the line of comment the drive
 and capture jobs have. The whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18. Right. The
 owner pushed `50470331` and `5e01491e` at 11:40, two runs at once; the first was cancelled at its
@@ -49,28 +82,6 @@ soak runs the feature test without `slangc`, so its log carries the compile erro
 reads memory alone; the play job fetches it too, a commit of its own before the push. Next the push,
 the third toward Decision 33's three if whole green, and the pack run after it, whose drive, storm
 and capture jobs settle Verdicts 20 to 22.
-
-Before it, `d2a20b6a` came, Verdict 19 mended and nothing else: the one example's capture exits with
-3 where the open fails, so the loop tells an example that never started from one that could not be
-captured, and the loop counts failed starts in a row, an example that starts resetting the count,
-stopping at three with the three names and what the first logged, the first four lines at an error
-and the last ten with Bevy's colors and the frames removed, read from the sessions' log before the
-next open overwrites it, and under GitHub Actions an `::error` titled that the examples do not
-start; otherwise the run goes on as before and the job's limit stands. Checked with the bridge moved
-out of the examples' bin: the script stopped after the first three of the list in 273 seconds, the
-annotation carrying the loader's words and the paths it tried, and with the bridge back the first
-example captured as before. The whole suite 1,471 and 3 skipped of 1,474. Right. The push of
-`d2a20b6a` ran whole green on 2026-10-17, the three suites in 10 to 11 minutes and the digest after
-them, the second of Decision 33's three, and its Windows suite the third green in a row that settles
-Verdict 14. The pack run on it, started at 08:53, built the six bridges and ran the three suites
-green, and its README walk and pack job passed, which settled Verdict 17; the play job played
-Courtyard and Swarm from the package, which settled Verdicts 3 and 18, and failed at the feature
-test's drive, Verdict 20; the storm job loaded the bridge it downloaded, Verdict 16's ask, and
-failed when the app was made, Verdict 21; the capture job ended at 58 minutes failed, 59 examples
-blank or not captured and 152 captures past the share allowed, Verdict 22, the examples built before
-Bevy's assets were fetched, and Verdict 19 settled, the job ending within its hour with a page
-naming each failure. The pack run failed, so Decision 33 asks the three mends, a third green push
-and a pack run after it.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -578,19 +589,20 @@ from [SHARED.md](SHARED.md).
     take their version from one place the pack writes, and a check that each game builds on its own
     default where the package is published. Found at `9f76fded`.
 
-23. **Two workflows an engine, `build.yml` on a push and `pack.yml` by hand (Decision 34), after
-    Verdicts 23 and 24.** `package.yml` folds into `build.yml`, which gains `push`, `pull_request`
-    and `workflow_call` with one input, `pack`, and the `docs` job, its inputs `version`, `targets`
-    and `test_os` gone and the matrices literal: `native (rid)` (pack only), `test (os)`, `digest`,
-    `docs`, and pack-only `game`, `drive`, `examples`, `storm` and `readme`, each needing `native`;
-    the push's paths filter becomes 3DEngine's (`['**', '!.github/**.md', '.github/BUILDING.md',
-    '!AGENTS.md', '!games/**.md', '!.github/assets/**']`), so a docs-only push runs the docs check
-    it skipped under `paths-ignore`, and `branches` goes. `pack.yml` keeps `workflow_dispatch` with
-    `publish` and runs `build` (uses `build.yml` with `pack: true`) then `pack` (needs `build`, 20
-    minutes, through `step.py`): the version read in it with `fetch-depth: 0`, the six `native-*`
-    artifacts laid out under `build/artifacts`, the notices check, the release notes, `dotnet pack`,
-    the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked
-    and the summary, so a package is made only when every job passed, where today's pack job needs
+23. **Two workflows an engine, `build.yml` on a push and `pack.yml` by hand (Decision 34), done at
+    `b178ae3f` over `0dff9601`; proven when its push run and pack run are green.** `package.yml`
+    folds into `build.yml`, which gains `push`, `pull_request` and `workflow_call` with one input,
+    `pack`, and the `docs` job, its inputs `version`, `targets` and `test_os` gone and the matrices
+    literal: `native (rid)` (pack only), `test (os)`, `digest`, `docs`, and pack-only `game`,
+    `drive`, `examples`, `storm` and `readme`, each needing `native`; the push's paths filter
+    becomes 3DEngine's (`['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md',
+    '!games/**.md', '!.github/assets/**']`), so a docs-only push runs the docs check it skipped
+    under `paths-ignore`, and `branches` goes. `pack.yml` keeps `workflow_dispatch` with `publish`
+    and runs `build` (uses `build.yml` with `pack: true`) then `pack` (needs `build`, 20 minutes,
+    through `step.py`): the version read in it with `fetch-depth: 0`, the six `native-*` artifacts
+    laid out under `build/artifacts`, the notices check, the release notes, `dotnet pack`, the
+    templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked and
+    the summary, so a package is made only when every job passed, where today's pack job needs
     `native` and `test` alone; the `version` and `publish` jobs go. `feature-test.yml` and
     `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the owner's
     machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip needs a
@@ -677,7 +689,9 @@ own on the same pack run.
     `Cli.Ready`'s write of the session file read for what it does when the file is held, the writer
     trying again a few times a few milliseconds apart before it logs, and the readers opening the
     file with `FileShare.ReadWrite | FileShare.Delete`; and the test's reading of the session file
-    read for the same. Settled at three green Windows suites in a row.
+    read for the same. Settled at three green Windows suites in a row. Mended at `0dff9601`, the
+    writer trying its move five times ten milliseconds apart, the readers sharing writes and
+    deletion, and a test holding the file through the first try.
 
 24. **The soak's step says a game grew or could not be played, and names neither.** On the same pack
     run, the play job played Courtyard and Swarm and failed at the soak of the four programs with
@@ -692,7 +706,25 @@ own on the same pack run.
     and read into it, so the next page names the program and the figure; and the soak of the feature
     test read on lavapipe with `slangc` here, its readings beginning after its shaders are compiled,
     as `publish-feature-test.sh` waits on `shader.list`, if the compiles are what climbed. Settled
-    when the play job passes in a pack run.
+    when the play job passes in a pack run. Read at `0dff9601`: too few readings and no climb, a
+    round of four programs on lavapipe taking 67 to 100 seconds where the check wants six readings
+    in 150; mended there with `build/soaks.sh`, which names each failure, ten minutes for the three
+    games in the play job and fifteen for the feature test alone in the drive job after its drive.
+
+25. **The capture job is cancelled at its limit with the captures still running, and says nothing of
+    how far it got.** On the pack run of `5e01491e`, 2026-10-17, the capture job ran
+    `build/capture-examples.sh` with Bevy's files and `slangc` in place for the first time, and was
+    cancelled at its 90 minutes with the step still running, its page holding the cancellation alone
+    and its artifact 8 MB of captures; on the pack run of `d2a20b6a` the same step took 56 minutes
+    with no file to load and no shader to compile. The script has a budget, `CAPTURE_MINUTES`, past
+    which it starts no example and ends with an error naming how many of how many it reached and the
+    last, as 3DEngine's macOS captures job gives its script 130 minutes under its 160, and the job
+    sets none, so the limit cut the run where the budget would have spoken. Two things: the job
+    gives the script a budget twenty minutes under its limit, so a run that cannot finish says how
+    far it got; and the captures are split across a matrix of jobs, each taking every n-th example
+    of the list by its index (`build/capture-examples.sh` given the shard and the count), each
+    comparing what it captured and uploading it under its own name, so the run ends within the hour,
+    four shards where one took past 90 minutes. Settled when the capture jobs pass in a pack run.
 
 ## Decisions
 
@@ -896,88 +928,18 @@ own on the same pack run.
 
 ## Replies
 
-**Verdict 23.** `CliSessionFile.Write` tries its move over the old file five times, ten milliseconds
-apart, before the refusal goes to the caller, where `Cli.Ready` logged the first, and
-`CliSessionFile.Read` opens the file sharing reads, writes and deletion, where `File.ReadAllBytes`
-shared reads alone, which on Windows refuses a move over the file. The test waits for the ready file
-through `CliSessionFile.All`, so its reading is the library's and shares the same way. A new test,
-`AWriteOutlastsAReaderHoldingTheFile`, holds the file as a reading of the whole file held it and
-lets it go at the first pause between tries, the pause swappable as 3DEngine's reader has it, so on
-Windows the first move is refused and the second goes through, and on Linux and macOS the first
-does. Whether sharing deletion alone lets Windows move a file over one being read could not be tried
-here, so the writer tries again as well. The session and server tests passed 16 of 16.
-
-**Verdict 24.** Read in the runner's image, the .NET SDK's Ubuntu 24.04 with Mesa's lavapipe held to
-four processors, the play job's steps run up to the soak with `slangc` fetched. The step failed as
-on the runner, and each of the four had been read too few times to judge, Courtyard and the stress
-program three times, Swarm twice and the feature test once, where the check judges six. Nothing
-climbed. With the four at once a round took 67 to 100 seconds, and the feature test's first round
-ended six minutes into its soak, so two and a half minutes could not read any of them enough. The
-soak had not run on a runner before `5e01491e`, since in every pack run before it the drive came
-first in the same job and failed. The compiles were not the cause, so the readings are not held back
-for them. `build/soaks.sh <seconds> <game>...` soaks the games named at once, keeps each soak's
-errors and each check's words beside the readings in `build/soak`, and says a failure as one error
-carrying each `FAILED` line and each value that climbed or was read too few times. A soak of 20
-seconds in the container ended with `stress played for 20 seconds, and one grew or could not be
-played.` and `build/soak/stress.txt: 2 readings, too few to judge` on the next line. The play job
-soaks Courtyard, Swarm and the stress program through it for ten minutes, which read them seven to
-ten times in the container, nothing climbing. The drive job soaks the feature test alone after its
-drive for fifteen minutes, its shaders in the cache the drive's run filled, which read it seven
-times there, a round every 132 seconds and its resident size level at 1.30 GB. Nothing in the play
-job runs the feature test now, so it no longer fetches `slangc` or builds it. Each job uploads
-`build/soak`, as `soak` and `feature-test-soak`, and `.github/BUILDING.md` says the soak's new
-shape. The play job's hour now holds seven and a half minutes more of soak, and its other steps
-could not be timed here; the drive job's estimate rises to some 70 of its 90 minutes. Bash once
-warned of a null byte it dropped from one of the feature test's readings, the reading still whole,
-and it was not looked into further.
-
-
-Verdicts 23 and 24: mended at `0dff9601`.
-
-**Item 23.** `package.yml` is folded into `build.yml`, which runs on `push` and `pull_request` with
-3DEngine's paths filter, `branches` gone, and on `workflow_call` with one boolean input, `pack`,
-read as `if: ${{ inputs.pack }}`; its jobs are `native (rid)` for the pack alone, `test (os)`,
-`digest`, `docs`, and for the pack alone `game`, `drive`, `examples`, `storm` and `readme`, each
-needing `native`, with the matrices written out and the inputs `version`, `targets` and `test_os`
-gone. `pack.yml` keeps `workflow_dispatch` with `publish` and runs `build`, which calls `build.yml`
-with `pack: true`, then `pack`, needing `build`, with 20 minutes and its steps through
-`build/step.py`: the version worked out with the whole history, the six `native-*` artifacts laid
-out under `build/artifacts`, the notices checked, the release notes, `dotnet pack` at that version,
-the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked and
-the summary. The key reaches the push through the environment, so a failed command that `step.py`
-names holds `$NUGET_API_KEY` and not the key. The `version` and `publish` jobs are gone. Both files
-have `permissions: contents: read` and a head comment saying what a push runs and what the pack run
-adds. Every job has a time limit with its reason, the test, digest, docs, storm and README jobs
-given theirs now, and `build` in `pack.yml` none, since GitHub takes no limit on a job that calls a
-workflow and each job it calls has its own.
-
-One thing differs from the item. The build workflow's group is
-`build-${{ github.ref }}-${{ github.event_name }}` where the item has `build-${{ github.ref }}`,
-since a called workflow reads its caller's context, and the pack run's call would then share the
-group of a push to the same branch. With `cancel-in-progress` either would end the other. A push
-during a pack run would cancel the pack run's jobs, and a pack run started soon after a push, as the
-owner starts one, would cancel the push's. With the event in the group a push still supersedes a
-push, and a pack run's call stands apart. `pack.yml`'s group is `pack-${{ github.ref }}` without
-cancelling.
-
-`feature-test.yml` and `scenes.yml` are deleted. `build/scenes.sh` builds the bridge with meshlets
-and ray-traced lighting, fetches `slangc` and `intel-sponza`, builds the feature test with
-`-warnaserror` and drives it with `SHOTS` at `build/scenes`, given whole, since the drive writes the
-program's log from the program's own folder and a relative `SHOTS` would land there; `build/scenes/`
-is ignored. BUILDING.md's Publishing says what a push runs, that it tests the library alone since
-the render bridge costs a quarter of an hour cold on each of six runners, what the pack run adds,
-Sponza driven by hand with `build/scenes.sh`, and the testers' zips made by hand around the recipe,
-the bridge built with meshlets and ray-traced lighting and `slangc` fetched before the pack, and the
-Windows zip on a Windows machine with `--cache` naming the Linux run's cache. It says a machine with
-a GPU, where the item says the owner's machine, since N 4.7 keeps the owner out of the documents.
-The other lines named are changed, `build/step.py:6-7` and `18`, `BUILDING.md:63`, `213`, `481` and
-`498`, `README.md:202` and `266`, and with them TODO.md's line on packing for one platform, the
-captures' scripts, the drive's comment on Sponza and `build/publish-feature-test.sh`'s head, each of
-which named a workflow that is gone.
-
-Checked: `WorkflowTests`, `TestScriptTests`, `ScriptTests` and `NormTests` 62 of 62,
-`build/check-docs.py`, and both files read as YAML with the jobs, needs, conditions and limits
-above. Not run: `build/scenes.sh` whole, since it builds the render bridge over this checkout's
-editor bridge and its drive stops any session serving, its steps being the scenes workflow's; and
-the push and pack runs, which are Decision 33's gate. A push of the README or the guide alone runs
-the whole build workflow, the three suites with the docs job, as 3DEngine's filter does.
+**Verdict 25.** The script had no budget of its own here; `CAPTURE_MINUTES` was 3DEngine's, and
+`build/capture-examples.sh` takes it now as 3DEngine's script does. Where it is set, no example is
+started once that many minutes have gone since the first, and an error titled
+`Captures past their budget` names how many of how many were reached, the last of them and how many
+were left, the script ending with 1 after the failures it found are listed. With a budget of none
+left on the second shard it said
+`ended after 0 of 90 examples, the last reached none, 90 left uncaptured` and started nothing. The
+script takes `--shard <n>/<count>` after the folder and captures every count-th example of the list
+from the n-th, counting from one, refusing a shard outside one to count; the four shards of the 360
+hold 90 each, together the whole list once. The capture job is a matrix of four,
+`capture the examples (n of 4)`, each with 60 minutes, `CAPTURE_MINUTES` of 40, its own comparison
+of what it captured and its captures uploaded as `examples-n`, `fail-fast` off so each shard says
+its own. A quarter of a list that took past 90 minutes should take half an hour or less; not
+measured here, since the captures on lavapipe are the runner's to time. BUILDING.md says the shards
+and the budget beside the capture.
