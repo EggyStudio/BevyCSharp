@@ -17,7 +17,7 @@ namespace Bevy.Tests;
 /// <c>Bevy.Physics</c> and its outer type before a nested one.
 /// </para>
 /// <para>
-/// What the page leaves out is what a reader never calls by name, delegates, enums, the types the
+/// The page leaves out what a reader never calls by name, which is delegates, enums, the types the
 /// compiler makes, an enumerator, accessors, and the members a record or <c>object</c> gives every
 /// type. The reflection here is the test's, and the library itself reflects on nothing.
 /// </para>

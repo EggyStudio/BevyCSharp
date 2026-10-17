@@ -92,6 +92,36 @@ esac
 # started and could not be captured, and stops on when examples do not start one after another.
 ./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}" || exit 3
 
+# One drawn with what this device or this bridge has not, meshlets or ray-traced lighting, says so
+# as its app is built, and is captured as those words, with the times and colors taken off, beside
+# where its picture would be, and compared with nothing, since what it draws without them is not
+# the example. It ends this with 4, which build/capture-examples.sh counts as captured. The pack
+# run of b178ae3f drew meshlet, test_meshlet, solari and solari_reflections on lavapipe without
+# them, 29 to 96 percent apart from their pictures, and many_meshlet_materials blank.
+lacking=$(sed -E 's/\x1b\[[0-9;]*m//g' build/sessions/BevyCSharp.Examples.log 2>/dev/null \
+    | grep -E '(Meshlets were|Ray-traced lighting was) asked for, but' | sed -E 's/^[^ ]+Z +//' || true)
+if [ -n "$lacking" ]; then
+    printf '%s\n' "$lacking" > "${out%.webp}.txt"
+    exit 4
+fi
+
+# One that a device ends the process drawing, by a fault of the device's own, is captured as words
+# saying so with the device as it describes itself, and compared with nothing, ending this with 4
+# as above. clustered_decals ends Mesa 25.2's llvmpipe, the runner's software device, with a
+# segmentation fault in a rasterizer thread running the decals' fragment shader, as the pack run of
+# b178ae3f found and a container of the runner's image showed, where Mesa 26.2's llvmpipe and a GPU
+# draw it.
+case "$example" in
+  clustered_decals) faulty='driver: "llvmpipe".*driver_info: "Mesa 25\.' ;;
+  *) faulty='' ;;
+esac
+adapter=$(sed -E 's/\x1b\[[0-9;]*m//g' build/sessions/BevyCSharp.Examples.log 2>/dev/null \
+    | grep -E "AdapterInfo" | sed -E 's/^[^ ]+Z +//' || true)
+if [ -n "$faulty" ] && grep -qE "$faulty" <<< "$adapter"; then
+    printf '%s\n%s\n' "Not drawn, since this device ends the process drawing the example's decals." "$adapter" > "${out%.webp}.txt"
+    exit 4
+fi
+
 # Each command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since a
 # software device, as the workflow's runner has, draws some examples a frame every few seconds, and
 # one that fails is named with its code under bcs's own words of why.
@@ -132,6 +162,10 @@ case "$example" in
   auto_exposure) frames=900 ;;
   # Decals stamped one a second, which take some seconds to be more than one.
   clustered_decal_maps) frames=600 ;;
+  # A component taken off once two seconds have passed, the moment the usual frame stands at, which
+  # the checked-in picture caught with the logo white and the runner's on the pack run of b178ae3f
+  # with it tinted, so half a second after.
+  removal_detection) frames=150 ;;
   # Lighting that gathers over frames, and a robot that has walked out from behind the console.
   solari) frames=400 ;;
   # A bar that fills over two seconds and empties over two more, so empty at the second second and

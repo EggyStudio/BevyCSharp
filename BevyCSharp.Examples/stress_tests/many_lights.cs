@@ -49,7 +49,9 @@ internal static class ManyLights
 
         // A spiral over the sphere, which gives about as many lights in view whichever way the
         // camera looks, in doubles so the spread has no seams.
-        var random = new Random();
+        // Seeded where the workflow runs it, as alien_cake_addict is, so a capture there colors the
+        // lights as the checked-in picture does, where Bevy's draws its colors from the system.
+        var random = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? new Random(19878367) : new Random();
         var goldenRatio = 0.5 * (1.0 + Math.Sqrt(5.0));
         for (var i = 0; i < NLights; i++)
         {

@@ -7,9 +7,12 @@ the run that changed it.
 A pixel differs where one of its channels is further than STEP from the checked-in picture's, and a
 picture differs where more than SHARE of its pixels do, which the edges, text and filtering of two
 devices take between them, as 3DEngine's reference frames are held. A failure is said with its
-share and the box its differing pixels lie in. An example that prints is compared as text, line by
-line with every number set apart, since what it prints holds frame times and counts measured as it
-ran, and its share is of its lines.
+share and the box its differing pixels lie in. An example that prints is compared as text, by how
+many times it prints each line with every number set apart, since what it prints holds frame times
+and counts measured as it ran and an entity's id that differs between builds, and its systems with
+no order between them print in whichever order the executor runs them, which differs between
+machines, as change_detection, ecs_guide and system_closure did between this machine and the
+runner. Its share is of its lines.
 
 An example allowed more is a line of build/captures-differ.txt, its name and the share it was
 measured at, then a tab and why. One with nothing checked in is said and passed over, since a new
@@ -23,6 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
+from collections import Counter
 
 # How far a channel may move before its pixel counts as differing, out of 255.
 STEP = 24
@@ -116,14 +120,16 @@ def compare_picture(example, capture, reference, limit):
 
 def compare_text(example, capture, reference, limit):
     """Why a printed capture fails, or None where it passes."""
-    printed, kept = lines(capture), lines(reference)
-    longest = max(len(printed), len(kept), 1)
-    changed = [i for i in range(longest) if (printed[i] if i < len(printed) else None) != (kept[i] if i < len(kept) else None)]
-    share = len(changed) / longest
+    printed, kept = Counter(lines(capture)), Counter(lines(reference))
+    longest = max(sum(printed.values()), sum(kept.values()), 1)
+    extra, missing = printed - kept, kept - printed
+    changed = max(sum(extra.values()), sum(missing.values()))
+    share = changed / longest
     if share <= limit:
         return None
-    return (f"{example} prints {len(changed)} of {longest} lines otherwise, {share:.0%}, past the {limit:.0%} it is "
-            f"allowed, the first being line {changed[0] + 1}")
+    first = next(iter(extra or missing))
+    return (f"{example} prints {changed} of {longest} lines otherwise, {share:.0%}, past the {limit:.0%} it is "
+            f"allowed, one being {first!r}")
 
 
 def main(arguments):

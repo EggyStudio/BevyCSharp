@@ -19,14 +19,18 @@ internal static class ChangeDetection
         public override string ToString() => FormattableString.Invariant($"MyResource({Value:0.0})");
     }
 
-    private static Random _random = new();
-
     // Bevy's changed_by, which it keeps under its track_location feature.
     public static void Configure(Config config) => config.TrackChangeLocations = true;
 
     public static void Build(App app)
     {
-        _random = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? new Random(19878367) : new Random();
+        // A generator for each system that draws, seeded where the workflow runs it, since the three
+        // run in whichever order the executor picks, as Bevy's do, and drawing from one would hand
+        // each the others' numbers on a run that ordered them otherwise.
+        var seeded = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+        var first = seeded ? new Random(19878367) : new Random();
+        var second = seeded ? new Random(19878368) : new Random();
+        var resource = seeded ? new Random(19878369) : new Random();
 
         app.Startup(ctx =>
         {
@@ -34,18 +38,18 @@ internal static class ChangeDetection
             ctx.World.InsertResource(new MyResource(0f));
         }, "change_detection.Setup");
 
-        app.Update(ChangeComponent, "change_detection.ChangeComponent");
-        app.Update(ChangeComponent, "change_detection.ChangeComponent2");
-        app.Update(ChangeResource, "change_detection.ChangeResource");
+        app.Update(ctx => ChangeComponent(ctx, first), "change_detection.ChangeComponent");
+        app.Update(ctx => ChangeComponent(ctx, second), "change_detection.ChangeComponent2");
+        app.Update(ctx => ChangeResource(ctx, resource), "change_detection.ChangeResource");
         app.Update(Detect, "change_detection.ChangeDetection");
     }
 
     // A tenth of the time, the component set to the elapsed seconds, only where they differ.
-    private static void ChangeComponent(BehaviorContext ctx)
+    private static void ChangeComponent(BehaviorContext ctx, Random random)
     {
         foreach (var entity in ctx.Ecs.EntitiesWith<MyComponent>())
         {
-            if (_random.NextDouble() >= 0.1) continue;
+            if (random.NextDouble() >= 0.1) continue;
             var changed = new MyComponent { Value = MathF.Round(ctx.Time.Elapsed) };
             Log.Info($"New value: {changed} {entity.Index}v{entity.Generation}");
             ctx.Ecs.SetIfNeq(entity, changed);
@@ -53,9 +57,9 @@ internal static class ChangeDetection
     }
 
     // The same of the resource.
-    private static void ChangeResource(BehaviorContext ctx)
+    private static void ChangeResource(BehaviorContext ctx, Random random)
     {
-        if (_random.NextDouble() >= 0.1) return;
+        if (random.NextDouble() >= 0.1) return;
         var changed = new MyResource(MathF.Round(ctx.Time.Elapsed));
         Log.Info($"New value: {changed}");
         ctx.World.SetResourceIfNeq(changed);

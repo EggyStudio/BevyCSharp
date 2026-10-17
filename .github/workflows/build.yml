@@ -526,10 +526,12 @@ jobs:
           name: native-linux-x64
           path: build/artifacts/linux-x64
 
-      # Lavapipe, as the game job has it, since the runner has no graphics card, and libwebp's
-      # tools, which write and read the captures where the runner's ImageMagick has no WebP.
-      - name: Install a software Vulkan, ALSA and WebP
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev webp
+      # Lavapipe, as the game job has it, since the runner has no graphics card, libwebp's tools,
+      # which write and read the captures where ImageMagick has no WebP, and ImageMagick, which
+      # scales a shot of another shape to 1280 by 720 before it is written. The runner has none, so
+      # on the pack run of b178ae3f resizing and window_settings kept their windows' sizes.
+      - name: Install a software Vulkan, ALSA, WebP and ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev webp imagemagick
 
       # The examples compile their .slang shaders as they run, and the checkout holds no shader
       # cache, so without slangc each of them draws the magenta fallback.

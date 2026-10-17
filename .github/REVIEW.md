@@ -10,7 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1d246e9f`, item 24 done and nothing else, as Decision 35 asks. The `docs` job and
+Reviewed up to `f8e9a6d2`, item 25 done and nothing else, 470 files. STYLE.md has the Register
+section after the game repository's, with this engine's pairs and names, the technical senses kept
+(a GPU's driver, a joint's drive, a body that bounces, a path tracer's bounces) and the identifiers
+(`build/drive-feature-test.sh`, the `drive` job, `--drive`, `Drives`, `EditorBoot.Drive`,
+`PhysicsMaterial.Bounce`, `SolariLightingRef.MaxBounces`, `PostSettings.Glow`), and the colon rule
+and its two checks are the game's with this engine's examples, beside a grep for the pairs. The
+sweep reworded some 150 lines of drive words, 46 of the light words and the colons of 105 Markdown
+lines and some 630 comment lines across the library, the editor, the examples, the feature test, the
+tests, the scripts, the workflows and the bridge's Rust, WGSL and Slang, with 21 comments whose
+ending colon ran on into prose; the README's and `docs/tools.md`'s heading on a running app reads
+Controlling where it read Driving, their links with it, `.github/BCS.md` is titled for controlling a
+running app, the `drive` job shows as "run the feature test's course", `bcs` prints that it controls
+a running app and the course script prints `[course]`; the README's first program and the template's
+`Spin.cs` say in a sentence what their two methods do, kept the same. Left, and rightly: AGENTS.md,
+which changes on the owner's word given in that session; the colons in strings a program prints that
+tests and scripts read; the vendored weather crate. The sample read says the same things in the
+rule's register and loses no fact. Checked on the working machine: the whole suite, `NormTests`,
+`DocsScriptTests` following the renamed headings' links, `CheatsheetTests` with the cheatsheet
+written again, the workflow and script tests and `FirstGameTests`, 71 of 71; the bridge built again
+as editor with meshlets and Solari. Right. The owner pushed it at 16:09 and its run failed on macOS
+alone, the memory guard's test reading 189 MiB of growth where 192 was asked, Verdict 27; Linux and
+Windows were green. In the pack run of `85df443c`, read at 16:29, the four capture shards ran 21 to
+31 minutes each, Verdict 25's shape at work, and failed on Verdict 26's names alone, 13 differences
+and 4 failed captures spread over them; the play job passed in 25 minutes and the course's job in 73
+with its soak, so the run ended failed on the shards alone at 17:00. Verdicts 26 and 27 are the
+coder's next, then the owner's push and the pack run that is Decision 35's gate.
+
+Before it, `1d246e9f` came, item 24 done and nothing else, as Decision 35 asks. The `docs` job and
 the head comment's line on it are gone from `build.yml`, the paths filter's comment naming the
 suite's test where it named the job; the two facts went into `DocsScriptTests`, the class listed for
 the docs scripts, so no line joined `build/norm/1.4.txt`: the first runs `build/check-docs.py`
@@ -57,39 +84,6 @@ In that one, read at 14:51, the six bridges, the three suites, the storm, the RE
 play job passed, the play job in 22 minutes with its ten-minute soak, which settled Verdict 24, and
 its Windows suite was the third green in a row since `0dff9601`, which settled Verdict 23; the
 capture job and the course's job were running.
-
-Before it, `b178ae3f` came, item 23 done over `0dff9601`, Verdicts 23 and 24 mended, and nothing
-else, as Decision 35 asks. At `0dff9601` the session file's writer tries its move five times ten
-milliseconds apart before the refusal reaches `Cli.Ready`, its readers open the file sharing writes
-and deletion, and a test holds the file as a whole-file read held it and lets go at the first pause,
-so the second try goes through where Windows refused the first; and the soak's failure, read in the
-runner's image on lavapipe held to four processors, was too few readings and not a climb, a round of
-four programs at once taking 67 to 100 seconds where the check wants six readings in 150, so
-`build/soaks.sh` soaks the games named at once and says one error with each `FAILED` line and each
-value that climbed or was read too few times, the play job soaks Courtyard, Swarm and the stress
-program for ten minutes, and the `drive` job soaks the feature test alone for fifteen after the
-course with its shaders in the cache the course's run filled, seven readings there and its resident
-size level at 1.30 GB. At `b178ae3f` `package.yml`, `feature-test.yml` and `scenes.yml` are gone:
-`build.yml` holds `native (rid)`, `test (os)`, `digest`, `docs` and the pack-only `game`, `drive`,
-`examples`, `storm` and `readme` behind `if: ${{ inputs.pack }}`, with 3DEngine's paths filter and
-no `branches`; `pack.yml` runs `build` then `pack` with the version read in it, the six bridges laid
-out, the notices, the release notes, the pack, the templates, N 6.4 and N 6.5, the upload and the
-push, the key reaching the push through the environment so a failed command names `$NUGET_API_KEY`
-and not the key; `build/scenes.sh` is the Sponza run by hand and BUILDING.md says the zips are made
-on the system each is for. One thing differs from the item and is right: the build group is
-`build-${{ github.ref }}-${{ github.event_name }}`, since a called run reads its caller's context,
-where 3DEngine's reads `inputs.pack`; the two forms do the same and are aligned in a later batch.
-Checked on the working machine: the whole suite 1,472 and 3 skipped of 1,475, `WorkflowTests`,
-`TestScriptTests`, `ScriptTests` and `NormTests` 62 of 62, `check-docs.py`; `build/scenes.sh` was
-not run whole, since it would build the render bridge over this checkout's editor bridge. Right. A
-null byte bash dropped from one of the feature test's readings in the container, the reading whole,
-is read when a soak's page next shows one. The pack run of `5e01491e` ended failed at 13:28: its
-capture job was cancelled at its 90 minutes with the captures still running, Verdict 25, so Verdict
-22's mend is proven by the next pack run. The owner pushed `b178ae3f` at 13:37, its Linux suite and
-docs green at 13:50 with Windows and macOS running. Item 23 is done when that run shows `test`,
-`digest` and `docs` green with the rest skipped and the pack run every job green and the package's
-artifact, which is Decision 35's gate for this engine; the play job's hour holds seven and a half
-minutes more of soak and the `drive` job is near 70 of its 90.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -638,9 +632,9 @@ from [SHARED.md](SHARED.md).
     and failing on a link to a page that is not there, `WorkflowTests`, `NormTests`, and the push
     run showing `test`, `digest` and nothing else.
 
-25. **The register: STYLE.md's rule and the sweep (Decision 37), after item 24.** STYLE.md gains a
-    section, Register: prose uses the technical and generic term, the engine's own where it has one,
-    and no figure of speech or casual paraphrase, with the pairs the owner named and their
+25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`.** STYLE.md
+    gains a section, Register: prose uses the technical and generic term, the engine's own where it
+    has one, and no figure of speech or casual paraphrase, with the pairs the owner named and their
     replacements: the light that bounces becomes global illumination; gives off light and glowing
     become emissive; driving a running program becomes controlling or scripting it through the
     command line, and a drive a scripted run or a course. The colon joins it: STYLE.md's rule, which
@@ -759,6 +753,21 @@ games.
     runner's own allowed in `build/captures-differ.txt` with its share and reason or a fault mended,
     `clustered_decals`' failed shot and the two audio examples' blank pictures read from their logs.
     Settled when the capture jobs pass in a pack run.
+
+27. **The memory guard's test reads less growth on macOS than the pages it touched.** On the push of
+    `f8e9a6d2`, 2026-10-17, the macOS suite failed one test of the 1,572 run,
+    `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`, the process holding 864,550,912 bytes before
+    and 1,062,436,864 after it allocated 256 MiB and wrote a byte a page, 189 MiB more where the
+    test asks three quarters of the 256, 192; Linux and Windows passed it, and every macOS suite
+    since Verdict 14's mend had. On Windows the guard read the working set, which the system trims,
+    and Verdict 14 made it read the private bytes; on macOS it reads the resident size, which the
+    system's memory compressor can shrink under pressure while the pages stay the process's, so a
+    reading of what the process holds falls short of what it touched on a runner short of memory.
+    One thing: on macOS the guard reads the figure the system keeps for what a process holds with
+    its compressed pages counted, the physical footprint `task_info` answers for the task, with the
+    reason in the guard's remarks, and the test's reading is that figure; or, if the resident size
+    is kept, the test asks the growth of a figure the compressor cannot shrink. Settled at three
+    green macOS suites in a row.
 
 ## Decisions
 
@@ -983,33 +992,38 @@ games.
 
 ## Replies
 
-Item 24: done at `1d246e9f`.
+**Verdict 26.** Read in the runner's image, the .NET SDK's Ubuntu 24.04 with Mesa 25.2.8's lavapipe
+on four processors, with the capture job's packages, since the run's artifact needs signing in to
+download. An example drawn with what the bridge or the device has not, meshlets or ray-traced
+lighting, logs it as its app is built, and `build/capture-example.sh` takes those lines as its
+capture beside where its picture would be and ends with 4, which `build/capture-examples.sh` counts
+as captured, and `compare-captures.py` finds nothing checked in for it; the runner's bridge is built
+`--render`, without either, so there meshlet, test_meshlet, many_meshlet_materials, solari and
+solari_reflections say "this bridge was built without them", which was read against a log holding
+the line, since this machine's lavapipe, Mesa 26.2.2, draws both and says nothing. clustered_decals
+ends Mesa 25.2.8's llvmpipe with a segmentation fault in a rasterizer thread running its fragment
+shader, `gdb` in the runner's image showing it, where Mesa 26.2.2's llvmpipe and the GPU draw it, so
+on an adapter describing itself as llvmpipe of Mesa 25 it is captured as words saying so with that
+description. decodable and pitch spawn no camera, their checked-in pictures one color, and join the
+list of examples that show nothing by design. change_detection and ecs_guide drew from one seeded
+generator in systems the executor runs in either order, so each drawing system has a generator of
+its own, and their texts were taken again; a printed capture is compared by how many times each line
+is printed, numbers set apart as before, so systems printing in another order, as system_closure's
+do, match. The capture job installs ImageMagick, which in Ubuntu 24.04 scaled a square shot to 1280
+by 720 and wrote the WebP itself. removal_detection is taken at frame 150, since its component comes
+off at two seconds, the frame 120 stands at. many_lights is seeded where the workflow runs it and
+its picture taken again, which matched in the runner's image, so its line comes off
+`build/captures-differ.txt`; many_foxes, 10.2 percent apart there, its foxes' run starting when
+their model has loaded, goes on with 0.12, and the file's head says a line comes off when its cause
+is mended, where it said the list only gets shorter. many_cubes and async_compute matched in the
+runner's image at the runner's cap of four gigabytes, async_compute as on the shard run, so neither
+is listed. In the runner's image every one named above that draws or prints passed the comparison,
+many_foxes under its line, and clustered_decals was captured as words. Besides, `CheatsheetTests`'
+remarks lose a cleft sentence the last commit's sweep touched.
 
-**Item 25.** STYLE.md gains Register after the game repository's at `b87e386`, with this engine's
-pairs and names, the technical senses kept (a GPU's driver, a joint's drive, a body that bounces, a
-path tracer's bounces) and the identifiers (`build/drive-feature-test.sh`, the `drive` job,
-`--drive`, `Drives`, `Drive:`, `EditorBoot.Drive`, the `Test.Drive` systems,
-`PhysicsMaterial.Bounce`, `SolariLightingRef.MaxBounces`, `PostSettings.Glow`, the test
-`AGlowingWallLightsTheFloorWhenRaysAreTraced`). Its colon rule is the game's, with this engine's
-examples, and its checks are the game's two, a grep over comments and scripts and an awk over the
-Markdown outside its code, beside the register's grep. The sweep reworded some 150 lines of drive
-words, 46 of the light words and the colons of 105 Markdown lines and some 630 comment lines, in the
-library, the editor, the examples, the feature test, the tests, the scripts, the workflows and the
-bridge's Rust, WGSL and Slang, and the 21 comments whose line ended in a colon that ran on into
-prose; a colon before a list, a code block or a command set below, a label in a table, a named
-argument in code and the guide's `<!-- compiled with:` markers stay. The headings
-`Driving a running app` in the README and `docs/tools.md` are `Controlling a running app`, their
-links with them, `.github/BCS.md` is titled `Controlling a running BevyCSharp app with bcs`, the
-`drive` job shows as `run the feature test's course`, `bcs` prints
-`controls a running BevyCSharp app` and the serving line `Control it with`, and the course script
-prints `[course]` where it printed `[drive]`. The README's first program and the template's
-`Spin.cs` say what a static and an instance method do in a sentence, where they said `static:` and
-`instance:`, the two kept the same. Left as they are: AGENTS.md, which changes here only on the
-owner's word given in this session, so its `drive the live session` and its row on `BevyCSharp.Cli`
-wait for that word; the colons in strings a program prints, which tests and scripts read; and the
-comments of `native/bevy_weather`, which is vendored. CHEATSHEET.md is written again from the
-library's documentation, and the bridge was built again, its sources' comments changed. The bridge's
-headless profile checked clean and its editor profile, with meshlets and Solari, built in the
-container; the render profile's check needs libudev's headers, which this machine has only in the
-container. The whole suite passed, and `DocsScriptTests` follows the renamed headings' links.
+**Verdict 27.** On macOS the guard reads the physical footprint, `ri_phys_footprint` of
+`proc_pid_rusage`, which counts the pages the memory compressor holds with the resident ones, the
+figure `TASK_VM_INFO` calls `phys_footprint`, imported from `libproc` as .NET's own runtime imports
+it, and the resident size where the call answers nothing; the remarks and the test's comment say
+why. Linux and Windows read as before, and the guard's tests pass here; macOS is the push's to show.
 

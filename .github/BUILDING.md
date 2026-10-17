@@ -498,7 +498,10 @@ that release's code until it is written again from the current one with its head
 row in EXAMPLES.md links Bevy's source at that release. The pack run captures every example on the
 Linux bridge it built, in four jobs that each take every fourth example of the list
 (`build/capture-examples.sh <folder> --shard <n>/4`), each given 40 minutes in `CAPTURE_MINUTES`,
-past which the script starts no example and names how far it got.
+past which the script starts no example and names how far it got. An example drawn with what the
+device or the bridge has not, meshlets or ray-traced lighting, is captured as the words its log
+gives of that, and one a device ends the process drawing as the words saying so with the device's
+own description, each beside where its picture would be and compared with nothing.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is the

@@ -2,71 +2,71 @@ WARN csharp: Change detected!
 	-> value: MyComponent(0.0)
 	-> added: true
 	-> changed: true
-	-> changed by: change_detection.cs:33
+	-> changed by: change_detection.cs:37
 WARN csharp: Change detected!
 	-> value: MyResource(0.0)
 	-> added: true
 	-> changed: true
-	-> changed by: change_detection.cs:34
+	-> changed by: change_detection.cs:38
+INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 124v0
 INFO csharp: New value: MyResource(0.0)
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyResource(0.0)
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyResource(0.0)
-INFO csharp: New value: MyComponent(0.0) 121v0
-INFO csharp: New value: MyComponent(1.0) 121v0
+INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
 WARN csharp: Change detected!
 	-> value: MyComponent(1.0)
 	-> added: false
 	-> changed: true
-	-> changed by: change_detection.cs:51
+	-> changed by: change_detection.cs:55
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
 WARN csharp: Change detected!
 	-> value: MyResource(1.0)
 	-> added: false
 	-> changed: true
-	-> changed by: change_detection.cs:61
+	-> changed by: change_detection.cs:65
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 121v0
-INFO csharp: New value: MyComponent(1.0) 121v0
-INFO csharp: New value: MyComponent(1.0) 121v0
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
+INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 121v0
-INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
 WARN csharp: Change detected!
 	-> value: MyComponent(2.0)
 	-> added: false
 	-> changed: true
-	-> changed by: change_detection.cs:51
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
+	-> changed by: change_detection.cs:55
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
 INFO csharp: New value: MyResource(2.0)
 WARN csharp: Change detected!
 	-> value: MyResource(2.0)
 	-> added: false
 	-> changed: true
-	-> changed by: change_detection.cs:61
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
+	-> changed by: change_detection.cs:65
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
 INFO csharp: New value: MyResource(2.0)
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
+INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 124v0
 INFO csharp: New value: MyResource(2.0)
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyComponent(2.0) 121v0
-INFO csharp: New value: MyResource(2.0)
-INFO csharp: New value: MyResource(2.0)
-INFO csharp: New value: MyComponent(2.0) 121v0
 INFO csharp: New value: MyResource(2.0)

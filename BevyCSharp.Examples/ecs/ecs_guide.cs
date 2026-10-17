@@ -28,13 +28,20 @@ internal static class EcsGuide
     // The players' names, which a player points into, since a component here holds no string.
     internal static readonly List<string> Names = [];
 
-    // Seeded, so a capture plays the same game each time, where Bevy's draws from the system.
+    // Seeded, so a capture plays the same game each time, where Bevy's draws from the system. A
+    // generator for each system that draws, since NewPlayer and ExclusivePlayer run in whichever
+    // order the executor picks, as Bevy's do, and drawing from one would hand each the other's
+    // numbers on a run that ordered them the other way.
     internal static Random Random = new(19878367);
+    private static Random _newPlayer = new(19878368);
+    private static Random _exclusivePlayer = new(19878369);
 
     public static void Build(App app)
     {
         Names.Clear();
         Random = new Random(19878367);
+        _newPlayer = new Random(19878368);
+        _exclusivePlayer = new Random(19878369);
 
         app.Startup(ctx =>
         {
@@ -77,7 +84,7 @@ internal static class EcsGuide
     private static void NewPlayer(BehaviorContext ctx)
     {
         var state = ctx.Res<GameState>();
-        if (Random.Next(2) == 0 || state.TotalPlayers >= ctx.Res<GameRules>().MaxPlayers) return;
+        if (_newPlayer.Next(2) == 0 || state.TotalPlayers >= ctx.Res<GameRules>().MaxPlayers) return;
 
         state.TotalPlayers++;
         AddPlayer(ctx.Ecs, $"Player {state.TotalPlayers}");
@@ -88,7 +95,7 @@ internal static class EcsGuide
     private static void ExclusivePlayer(BehaviorContext ctx)
     {
         var state = ctx.World.Resource<GameState>();
-        if (Random.Next(2) == 0 || state.TotalPlayers >= ctx.World.Resource<GameRules>().MaxPlayers) return;
+        if (_exclusivePlayer.Next(2) == 0 || state.TotalPlayers >= ctx.World.Resource<GameRules>().MaxPlayers) return;
 
         Console.WriteLine($"Player {state.TotalPlayers + 1} has joined the game!");
         AddPlayer(ctx.Ecs, $"Player {state.TotalPlayers + 1}");
