@@ -290,19 +290,35 @@ def largest_in_tree(pid):
         return None
     if not table:
         return None
-    tree, frontier = {pid}, [pid]
-    while frontier:
-        parent = frontier.pop()
-        for child, (ppid, _) in table.items():
-            if ppid == parent and child not in tree:
-                tree.add(child)
-                frontier.append(child)
-    sizes = [table[p][1] for p in tree if p in table]
+    sizes = [table[p][1] for p in tree_under(pid, table) if p in table]
     return max(sizes) // (1024 * 1024) if sizes else None
 
 
+def tree_under(pid, table):
+    """The processes under pid in a table of each one's parent, resident bytes and creation time.
+
+    A process is taken as a child only where it was not created before the parent its recorded id
+    names. Windows gives an orphan to no other parent and uses an id again, so a process left from
+    an earlier run, a test host among them, can name an id a process of this tree was given since,
+    and would be counted toward the memory limit, the suite's own as well as a test's. Linux and
+    macOS give an orphan to another parent, and their tables carry no creation time.
+    """
+    tree, frontier = [pid], [pid]
+    while frontier:
+        parent = frontier.pop()
+        born = table[parent][2] if parent in table else None
+        for child, (ppid, _, created) in table.items():
+            if ppid != parent or child in tree:
+                continue
+            if born is not None and created is not None and created < born:
+                continue
+            tree.append(child)
+            frontier.append(child)
+    return tree
+
+
 def process_table():
-    """Each process's parent and resident bytes."""
+    """Each process's parent, resident bytes and creation time, where the system gives one."""
     if sys.platform.startswith("linux"):
         table = {}
         for entry in os.listdir("/proc"):
@@ -311,13 +327,13 @@ def process_table():
             try:
                 with open(f"/proc/{entry}/status", encoding="ascii", errors="replace") as status:
                     fields = dict(line.split(":", 1) for line in status if ":" in line)
-                table[int(entry)] = (int(fields["PPid"]), int(fields.get("VmRSS", "0 kB").split()[0]) * 1024)
+                table[int(entry)] = (int(fields["PPid"]), int(fields.get("VmRSS", "0 kB").split()[0]) * 1024, None)
             except (OSError, KeyError, ValueError):
                 continue
         return table
     if sys.platform == "darwin":
         out = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,rss="], capture_output=True, text=True).stdout
-        return {int(p): (int(pp), int(rss) * 1024) for p, pp, rss in (line.split() for line in out.splitlines() if len(line.split()) == 3)}
+        return {int(p): (int(pp), int(rss) * 1024, None) for p, pp, rss in (line.split() for line in out.splitlines() if len(line.split()) == 3)}
     if os.name == "nt":
         return windows_process_table()
     return {}
@@ -359,8 +375,14 @@ def windows_process_table():
             continue
         counters = Counters()
         counters.cb = ctypes.sizeof(Counters)
+        # When the process was created, in the 100-nanosecond steps a FILETIME counts, so a process
+        # created before the parent its id names is told from that parent's child (tree_under).
+        created, ended, kernel, user = (wintypes.FILETIME() for _ in range(4))
+        born = None
+        if kernel32.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(ended), ctypes.byref(kernel), ctypes.byref(user)):
+            born = (created.dwHighDateTime << 32) | created.dwLowDateTime
         if kernel32.K32GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
-            table[pid] = (ppid, counters.WorkingSetSize)
+            table[pid] = (ppid, counters.WorkingSetSize, born)
         kernel32.CloseHandle(handle)
     return table
 
@@ -373,13 +395,7 @@ def kill_tree(child):
         table = process_table()
     except Exception:
         table = {}
-    tree, frontier = [child.pid], [child.pid]
-    while frontier:
-        parent = frontier.pop()
-        for pid, (ppid, _) in table.items():
-            if ppid == parent and pid not in tree:
-                tree.append(pid)
-                frontier.append(pid)
+    tree = tree_under(child.pid, table)
     try:
         os.killpg(child.pid, signal.SIGKILL)
     except OSError:

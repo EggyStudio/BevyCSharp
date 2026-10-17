@@ -158,6 +158,47 @@ public sealed class TestScriptTests : IDisposable
     }
 
     /// <summary>
+    /// A process created before the parent its recorded id names is no child of it, so the memory
+    /// the tree is held to is read without it, and a process whose system gives no creation time is
+    /// taken by its parent's id alone.
+    /// </summary>
+    /// <remarks>
+    /// Windows gives an orphan to no other parent and uses an id again, so a test host left from an
+    /// earlier run can name an id a process of the tree was given since. The table is given here,
+    /// since no system makes one on request: 10 is the process watched, made at 500; 11 its child,
+    /// made after it; 12 a host of 900 MB made at 100, before 10, under the id 10 took after its
+    /// parent's; 13 a child of 12; and 20 a child of 10 with no creation time, as on Linux and macOS.
+    /// </remarks>
+    [SkippableFact]
+    public void AProcessCreatedBeforeTheParentItsIdNamesIsLeftOutOfTheTree()
+    {
+        var python = Needs.Python();
+        // Loaded as the script loads its page module, from build/ with no compiled copy left there.
+        const string code = """
+            import importlib.util, sys
+            sys.dont_write_bytecode = True
+            sys.path.insert(0, "build")
+            spec = importlib.util.spec_from_file_location("test_script", "build/test.py")
+            script = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(script)
+            table = {10: (1, 10 << 20, 500), 11: (10, 20 << 20, 600), 12: (10, 900 << 20, 100),
+                     13: (12, 300 << 20, 700), 20: (10, 40 << 20, None)}
+            script.process_table = lambda: table
+            print(sorted(script.tree_under(10, table)), script.largest_in_tree(10))
+            """;
+
+        var start = new ProcessStartInfo(python) { WorkingDirectory = Root, RedirectStandardOutput = true, RedirectStandardError = true };
+        start.ArgumentList.Add("-c");
+        start.ArgumentList.Add(code);
+        using var run = Process.Start(start)!;
+        var said = run.StandardOutput.ReadToEndAsync();
+        var errors = run.StandardError.ReadToEndAsync();
+        Assert.True(run.WaitForExit(30_000));
+
+        Assert.Equal("[10, 11, 20] 40", said.Result.Trim() + errors.Result.Trim());
+    }
+
+    /// <summary>
     /// Two cases of a theory whose arguments are cut to the same name are both counted, as the
     /// suite's own tally counts them, and the same cases read again from a part are not.
     /// </summary>

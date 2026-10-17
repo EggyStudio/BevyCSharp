@@ -10,31 +10,43 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b4d45938`, Verdict 26 mended at `01f448b9`, Verdict 28's addition done at `a62e96c8`
-and item 25 done, in three commits. At `01f448b9` `many_lights` and `many_cubes` are taken again on
-the working machine's GPU with a `--render` bridge, reading 0.063 and 0.419 percent from captures in
-the runner's image on the same kind of bridge, and BUILDING.md says a picture is taken on a bridge
-built without Solari, with `--meshlet` for the three meshlet examples and `--solari` for the two
-Solari ones alone, with the `dfg_lut` reason and the run's figures. At `a62e96c8` `build/soak.sh`
-plays on past its seconds, by at most half of them again, until it has read each game as often as
-`soak-check.py --fewest` prints, six, and the check's too-few line gives the round's length;
-BUILDING.md and the play and course jobs' comments give the longer bound, fifteen minutes for the
-three games and twenty-two and a half for the feature test, within the jobs' limits. At `b4d45938`
-70 rewordings across 64 files take the likenesses and idioms out, STYLE.md's Register carrying the
-rule, the owner's example row, the idiom list with the knob, the plumbing, the wiring, an escape
-hatch and for free added, and a search in its checks that leaves the vendored weather crate and the
-notices out; a handful became the count the code gives, eighteen multiplications in `Quat`, six
-calls and one a character in the physics sync, five entities in `Movement`; leans on became depends
-or relies on; the literal box of `Render.Skins.cs`, the gamepad stick's knob, the orientation
-gizmo's knob and by hand stay. Each read, right. Checked on the working machine were the whole suite
-over the three, 1,474 passed and 3 skipped of 1,477, with the bridge rebuilt with the editor,
-meshlets and Solari and the cheatsheet written again. The owner pushed `dd2149ee` at 22:39 and
-`b4d45938` at 23:23. The push run of `dd2149ee` ended red at 22:55 on the Windows suite alone, one
-test of the script's lost-suite handling (Verdict 29), Linux and macOS green, the macOS suite the
-second of three toward Verdict 27; the pack run of `cd2d542d` ended at 23:06 with shards 1 and 4 red
-on the two pictures as before, the play job green with its soak and the feature test's course green
-in 68 minutes, the pack job not run. Next the push run of `b4d45938` and a pack run, Decision 35's
-gate.
+Reviewed up to `c9d2bf3d`, Verdict 29 mended and nothing else, 4 files. The lost-suite theory's hang
+case runs under a memory limit of a terabyte, which no process of a runner holds, so its time limit
+alone can end it, the other three cases keeping 200 MB, each case's limit an argument of the theory
+with the reason in a comment, the sleeping stand-in measured at 10 MB on Linux; a loss to the memory
+limit says the reading against the limit in the part's summary line and in its heading, "its largest
+process read at 210 MB past the 200 MB allowed", which the grow case asserts, the digest's JSON
+carrying it and BUILDING.md saying so. Checked on the working machine was the whole suite, 1,474
+passed and 3 skipped of 1,477. Right. The working session read a possible cause and left it, which
+Verdict 29 takes up. Next the owner's push and a pack run, Decision 35's gate, whose push half the
+run of `b4d45938` met.
+
+Before it, `b4d45938` came, Verdict 26 mended at `01f448b9`, Verdict 28's addition done at
+`a62e96c8` and item 25 done, in three commits. At `01f448b9` `many_lights` and `many_cubes` are
+taken again on the working machine's GPU with a `--render` bridge, reading 0.063 and 0.419 percent
+from captures in the runner's image on the same kind of bridge, and BUILDING.md says a picture is
+taken on a bridge built without Solari, with `--meshlet` for the three meshlet examples and
+`--solari` for the two Solari ones alone, with the `dfg_lut` reason and the run's figures. At
+`a62e96c8` `build/soak.sh` plays on past its seconds, by at most half of them again, until it has
+read each game as often as `soak-check.py --fewest` prints, six, and the check's too-few line gives
+the round's length; BUILDING.md and the play and course jobs' comments give the longer bound,
+fifteen minutes for the three games and twenty-two and a half for the feature test, within the jobs'
+limits. At `b4d45938` 70 rewordings across 64 files take the likenesses and idioms out, STYLE.md's
+Register carrying the rule, the owner's example row, the idiom list with the knob, the plumbing, the
+wiring, an escape hatch and for free added, and a search in its checks that leaves the vendored
+weather crate and the notices out; a handful became the count the code gives, eighteen
+multiplications in `Quat`, six calls and one a character in the physics sync, five entities in
+`Movement`; leans on became depends or relies on; the literal box of `Render.Skins.cs`, the gamepad
+stick's knob, the orientation gizmo's knob and by hand stay. Each read, right. Checked on the
+working machine were the whole suite over the three, 1,474 passed and 3 skipped of 1,477, with the
+bridge rebuilt with the editor, meshlets and Solari and the cheatsheet written again. The owner
+pushed `dd2149ee` at 22:39 and `b4d45938` at 23:23. The push run of `dd2149ee` ended red at 22:55 on
+the Windows suite alone, one test of the script's lost-suite handling (Verdict 29), Linux and macOS
+green, the macOS suite the second of three toward Verdict 27; the pack run of `cd2d542d` ended at
+23:06 with shards 1 and 4 red on the two pictures as before, the play job green with its soak and
+the feature test's course green in 68 minutes, the pack job not run. The push run of `b4d45938`
+ended at 23:38 whole green, Linux in 15 minutes, Windows in 15 and macOS in 12, the macOS suite the
+third green in a row since `cd2d542d`, which settles Verdict 27.
 
 Before it, `dd2149ee` came, Verdict 28 mended and nothing else, 7 files. The memory command answers
 `live`, the bytes its last full blocking collection kept, beside `managed` and `heap`, which the
@@ -47,16 +59,6 @@ test's fifteen minutes, all passing. Right. Verdict 26's cause is the bridge's f
 clock, read from the Replies and chosen under it, the pictures taken on the package's bridge; item
 25 is applied and awaits its commit. Next that commit and Verdict 26's, the owner's push, and a push
 run and a pack run whole green, Decision 35's gate.
-
-Before it, `cd2d542d` came, Verdict 27 mended again and nothing else, 3 files. The memory guard's
-test collects twice before its first reading, a full, aggressive, compacting collection with its
-finalizers each time, so the collector decommits what it frees at once, then enters a region of no
-collection, 16 MiB of budget, that holds until after the second reading and is ended where it still
-stands, both readings and the allocation inside it, the comment saying why and keeping the Windows
-and macOS figures' reasons. Right. The owner pushed it at 21:31, and its run ended at 21:48 whole
-green, the first push run whole green under the new workflow, Linux in 12 minutes, macOS in 9 and
-Windows in 17, the macOS suite the first of three toward Verdict 27; the owner started a pack run on
-it at 21:41. Verdicts 26 and 28 and item 25 stay open, so Decision 35's gate holds.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -650,7 +652,7 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 3 and 14 to 25 are settled: 15, the native job's four targets, on the pack run of
+Verdicts 3, 14 to 25 and 27 are settled: 15, the native job's four targets, on the pack run of
 `292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
 commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
 green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
@@ -667,7 +669,9 @@ the pack run of `b178ae3f` the same day, the play job passing with its ten-minut
 games; and 22, Bevy's files fetched before the examples are built, and 25, the capture's budget and
 its four shards, on the pack run of `afcf8301` the same day, the four shards capturing every example
 with none blank and ending in 19 to 28 minutes of their 60, each comparing its own, two of them
-failing on one picture apiece, which is Verdict 26's.
+failing on one picture apiece, which is Verdict 26's; and 27, the memory guard's figure on macOS, on
+the push of `b4d45938` on 2026-10-17, the third green macOS suite in a row after `cd2d542d` settled
+the heap before the test's first reading and forbade a collection until its second.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -744,37 +748,6 @@ failing on one picture apiece, which is Verdict 26's.
     run. Mended at `01f448b9`, the two pictures taken again on a `--render` bridge and BUILDING.md
     saying which bridge a picture is taken on.
 
-27. **The memory guard's test reads less growth on macOS than the pages it touched.** On the push of
-    `f8e9a6d2`, 2026-10-17, the macOS suite failed one test of the 1,572 run,
-    `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows`, the process holding 864,550,912 bytes before
-    and 1,062,436,864 after it allocated 256 MiB and wrote a byte a page, 189 MiB more where the
-    test asks three quarters of the 256, 192; Linux and Windows passed it, and every macOS suite
-    since Verdict 14's mend had. On Windows the guard read the working set, which the system trims,
-    and Verdict 14 made it read the private bytes; on macOS it reads the resident size, which the
-    system's memory compressor can shrink under pressure while the pages stay the process's, so a
-    reading of what the process holds falls short of what it touched on a runner short of memory.
-    One thing: on macOS the guard reads the figure the system keeps for what a process holds with
-    its compressed pages counted, the physical footprint `task_info` answers for the task, with the
-    reason in the guard's remarks, and the test's reading is that figure; or, if the resident size
-    is kept, the test asks the growth of a figure the compressor cannot shrink. Settled at three
-    green macOS suites in a row. Mended at `afcf8301`, the guard reading the physical footprint on
-    macOS. On the push of `afcf8301`, 2026-10-17, the macOS suite failed the same test with the
-    footprint read, 611,438,080 bytes before and 807,128,960 after, 186.6 MiB of growth where 192 is
-    asked, and the pack run's macOS suite of the same commit, started a minute apart, passed it, so
-    the figure is the right one and the test still measures the whole process while the rest of it
-    moves. The class is in the engine collection, which runs alone (`EngineTests.cs:8`), yet within
-    the window the collector may collect and decommit the garbage the tests before it left, the 64
-    MiB array of the test beside it among it, and the C allocator return freed blocks to the system,
-    which macOS's does at once where glibc keeps them, so the delta falls short by what left. The
-    mend is one thing. The test measures memory only it moves, the heap settled before the first
-    reading, a full collection with its finalizers twice over, and no collection within the window,
-    `GC.TryStartNoGCRegion` entered before the first reading and ended after the second, with the
-    reason in its comment; and if that does not hold on three suites, the two readings are taken in
-    a child process that does nothing else and answers them. Settled at three green macOS suites in
-    a row after that. Mended again at `cd2d542d`, the test collecting twice, aggressively, before
-    its first reading and allowing no collection until its second; settled at three green macOS
-    suites in a row after it.
-
 28. **The soak judges the collector's heap size, which grows with its budget and holds garbage, so
     Swarm's soak failed with nothing leaking.** On the pack run of `afcf8301`, 2026-10-17, the play
     job's ten-minute soak of three games failed Swarm, its `heap` 751,256 bytes at the most of the
@@ -816,7 +789,17 @@ failing on one picture apiece, which is Verdict 26's.
     thing. The hang case's memory limit is set where nothing the stand-in holds can reach it,
     measured, so the time limit alone can end it, and the script's lost line says the figure it read
     against the limit, as the cap case's does, so a reading that passes a limit is read on the page
-    rather than guessed. Settled at three green Windows suites in a row after the mend.
+    rather than guessed. Settled at three green Windows suites in a row after the mend. Mended at
+    `c9d2bf3d`, the hang case held to a terabyte so its time limit alone ends it, and the page
+    saying the reading that passed a memory limit beside the limit. The working session read a cause
+    it did not act on, and it is asked here. On Windows `build/test.py` builds the process tree from
+    the parent ids Toolhelp records (line 318), and Windows neither reparents an orphan nor keeps an
+    id from reuse, so a process left from an earlier run whose recorded parent id is one the
+    stand-in's tree reuses is counted under it, a test host among them, which is how a sleeping
+    stand-in's tree read past 200 MB and how the suite's own cap could be passed by a stranger. One
+    thing more. The tree takes a process as a child only when it was created after its recorded
+    parent (`GetProcessTimes`), as psutil's walk does, so a reused id pulls no stranger in. Settled
+    at three green Windows suites in a row after that.
 
 ## Decisions
 
