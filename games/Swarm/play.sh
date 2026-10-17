@@ -25,10 +25,11 @@ fail() { echo "FAILED: $*" >&2; grep -h "^\[swarm\]\|^\[play\]" "$shots/game.log
 # workflow's runner has, draws the game's hundreds of creatures a few frames a second. The pack run
 # of 292eead2 ended on a command's timeout with nothing said but bcs's exit code, so one that fails
 # says its words, its code and the first line bcs gave of why, and anything else that fails is
-# named by the trap below.
-c() { ./bcs command "$@" --timeout 600 2>"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; }
+# named by the trap below. bcs writes why a command failed to its output, as it writes the answer,
+# so the output is kept in a file and passed on once the command has worked.
+c() { ./bcs command "$@" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
-shot() { ./bcs shot "$1" --timeout 600 >/dev/null 2>"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
+shot() { ./bcs shot "$1" --timeout 600 >"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
 
 # One of the numbers swarm.status answers with, by its name.
 status() { c swarm.status | tr ' ' '\n' | sed -n "s/^$1=//p"; }

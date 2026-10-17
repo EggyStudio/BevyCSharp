@@ -6,7 +6,7 @@
 # writes the picture into .github/assets/first-game.
 #
 #   build/first-game.sh [package version] [--shots]
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/.."
 root="$PWD"
 version="${1:-}"
@@ -15,7 +15,10 @@ work="$(mktemp -d)"
 trap './bcs stop --name Coins >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 
 fail() { echo "FAILED: step $1: $2" >&2; exit 1; }
-c() { ./bcs command "$@" --name Coins --timeout 600 >/dev/null; }
+# Each call of bcs that fails says its words, its code and the first line bcs gave of why, as the
+# games' plays do, and anything else that fails is named by the trap.
+c() { ./bcs command "$@" --name Coins --timeout 600 >"$work/said.txt" || fail "$n" "./bcs command $* ended with $?, $(head -n 1 "$work/said.txt")"; }
+trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 
 for step in games/FirstGame/steps/*.cs; do
     n="$(basename "$step" .cs)"
@@ -46,8 +49,9 @@ for step in games/FirstGame/steps/*.cs; do
         case "$n" in 01 | 02 | 03) ;; *) c input.hold D 60 ;; esac
         case "$n" in 11 | 12) c state.set Mode Won ;; esac
         c frames.wait 10
-        ./bcs shot "$work/$n.png" --name Coins >/dev/null
-        ./bcs stop --name Coins >/dev/null
+        ./bcs shot "$work/$n.png" --name Coins --timeout 600 >"$work/said.txt" \
+            || fail "$n" "./bcs shot ended with $?, $(head -n 1 "$work/said.txt")"
+        ./bcs stop --name Coins >"$work/said.txt" || fail "$n" "./bcs stop ended with $?, $(head -n 1 "$work/said.txt")"
         mkdir -p .github/assets/first-game
         magick "$work/$n.png" -resize 640x360 -quality 80 -strip ".github/assets/first-game/$n.webp"
     fi

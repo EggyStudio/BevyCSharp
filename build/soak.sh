@@ -16,7 +16,7 @@
 #
 # The game is started offscreen and serving and stopped at the end whatever happened, and every
 # call names it, so the three are played at once.
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
 name="$1"
@@ -37,12 +37,17 @@ fi
 mkdir -p build/soak
 out="$PWD/build/soak/$name.txt"
 log="$PWD/build/soak/$name.log"
+said="$PWD/build/soak/$name.said"
 : > "$out"
 
-c() { ./bcs command "$@" --name "$program" --timeout 600; }
+# Each call of bcs that fails says its words, its code and the first line bcs gave of why, as the
+# games' plays do, where set -e ended one with nothing said, and anything else that fails is named
+# by the trap. The four games play at once, so each line names its game.
+c() { ./bcs command "$@" --name "$program" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
 fail() { echo "FAILED: $name: $*" >&2; tail -20 "$log" >&2 || true; exit 1; }
 
+trap 'code=$?; echo "FAILED: $name: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop --name "$program" >/dev/null 2>&1 || true' EXIT
 (cd "$folder" && { BCS_OFFSCREEN=1 BCS_SERVE=1 "./$program" "${args[@]}"; echo "[soak] the game exited with $?"; } >"$log" 2>&1 &)
 for _ in $(seq 1 120); do ./bcs status 2>/dev/null | grep -q "ready.*$program" && break; sleep 1; done
@@ -97,7 +102,11 @@ while ((SECONDS < end)); do
     round
     rounds=$((rounds + 1))
     if ((SECONDS >= next)); then
-        echo "$SECONDS $(c memory.collect)" >>"$out"
+        # Read into a name first, since a substitution inside echo's words would leave a failed
+        # reading as an empty line and the soak going on.
+        at=$SECONDS
+        reading=$(c memory.collect)
+        echo "$at $reading" >>"$out"
         next=$((SECONDS + 5))
     fi
 done

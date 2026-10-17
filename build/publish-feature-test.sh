@@ -22,7 +22,7 @@
 # which is taken in its place, since an entry is named by the shader's path under the assets, its
 # defines and the bridge's own modules, and every checkout has the same text with the same line
 # ends (.gitattributes).
-set -euo pipefail
+set -eEuo pipefail
 
 version="$1"
 shift
@@ -57,6 +57,12 @@ fi
 rm -rf "$out/assets/.slang-cache"
 
 fail() { ./bcs stop > /dev/null 2>&1 || true; echo "publish-feature-test.sh: $1" >&2; tail -n 20 "$out/logs/latest.log" >&2 || true; exit 1; }
+# Each call of bcs waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
+# making every program compiles each of them, and one that fails says its words, its code and the
+# first line bcs gave of why, as the games' plays do. Anything else that fails is named by the trap.
+said="build/feature-test/said.txt"
+c() { ./bcs command --timeout 600 "$@" > "$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
+trap 'code=$?; echo "publish-feature-test.sh: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 if [ -n "$cache" ]; then
   cp -R "$cache" "$out/assets/.slang-cache"
 else
@@ -64,12 +70,12 @@ else
   (cd "$out" && ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve > /dev/null 2>&1 &)
   for _ in $(seq 1 120); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && break; sleep 1; done
   ./bcs status | grep -q "ready.*BevyCSharp.FeatureTest" || fail "the published program never answered"
-  ./bcs command shader.status | grep -q "slangc was found" || fail "slangc was not found, so the shaders cannot be compiled into the cache; build/fetch-slang.sh fetches it"
+  c shader.status | grep -q "slangc was found" || fail "slangc was not found, so the shaders cannot be compiled into the cache; build/fetch-slang.sh fetches it"
 
-  ./bcs command feature.shaders > /dev/null
+  c feature.shaders > /dev/null
   listed=""
   for _ in $(seq 1 180); do
-    listed=$(./bcs command shader.list)
+    listed=$(c shader.list)
     grep -q "compiling" <<< "$listed" || break
     sleep 1
   done
@@ -77,7 +83,7 @@ else
   for shader in BevyCSharp.FeatureTest/assets/shaders/*.slang; do
     grep -q "shaders/$(basename "$shader")" <<< "$listed" || fail "the program never made $(basename "$shader")"
   done
-  ./bcs stop > /dev/null
+  ./bcs stop > "$said" || fail "./bcs stop ended with $?, $(head -n 1 "$said")"
 fi
 
 # What a tester has no use for, the run's log, the symbols the native compiler writes beside the

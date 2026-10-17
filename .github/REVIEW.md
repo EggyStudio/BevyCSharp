@@ -10,7 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9f76fded`, Verdicts 16, 17 and 18 mended in one commit and nothing else beyond one
+Reviewed up to `d2a20b6a`, Verdict 19 mended and nothing else: the one example's capture exits with
+3 where the open fails, so the loop tells an example that never started from one that could not be
+captured, and the loop counts failed starts in a row, an example that starts resetting the count,
+stopping at three with the three names and what the first logged, the first four lines at an error
+and the last ten with Bevy's colors and the frames removed, read from the sessions' log before the
+next open overwrites it, and under GitHub Actions an `::error` titled that the examples do not
+start; otherwise the run goes on as before and the job's limit stands. Checked with the bridge moved
+out of the examples' bin: the script stopped after the first three of the list in 273 seconds, the
+annotation carrying the loader's words and the paths it tried, and with the bridge back the first
+example captured as before. The whole suite 1,471 and 3 skipped of 1,474. Right. The push of
+`d2a20b6a` ran whole green on 2026-10-17, the three suites in 10 to 11 minutes and the digest after
+them, the second of Decision 33's three, and its Windows suite the third green in a row that settles
+Verdict 14. The pack run on it, started at 08:53, built the six bridges and ran the three suites
+green, and its README walk and pack job passed, which settled Verdict 17; the play job played
+Courtyard and Swarm from the package, which settled Verdicts 3 and 18, and failed at the feature
+test's drive, Verdict 20; the storm job loaded the bridge it downloaded, Verdict 16's ask, and
+failed when the app was made, Verdict 21; the capture job ended at 58 minutes failed, 59 examples
+blank or not captured and 152 captures past the share allowed, Verdict 22, the examples built before
+Bevy's assets were fetched, and Verdict 19 settled, the job ending within its hour with a page
+naming each failure. The pack run failed, so Decision 33 asks the three mends, a third green push
+and a pack run after it.
+
+Before it, `9f76fded` came, Verdicts 16, 17 and 18 mended in one commit and nothing else beyond one
 reasoned change. Verdict 16 reproduced in a fresh checkout with a render bridge in the artifacts'
 slot alone: the library project copies the bridge to its output from `build/target/release` alone, a
 folder only a native build here makes, so the tests' bin held none, and the examples program fails
@@ -65,40 +87,6 @@ since they were made or changed, the storm job's tests not loading the bridge th
 examples' captures running at 22:27. The jobs a pack run alone exercises carry every change made
 between two packs untested, which is why each pack has found a new failure; the owner's word is
 asked on a pack run after every push that touches them, or a scheduled one.
-
-Before it, `64bb30aa` came, the console pads: `input.button` and `input.axis` connect console pads
-up to the pad a command names, four at most in all, each named by its place, the first "Console pad"
-as a lone one always was and the second "Console pad 2", a negative index and pad 4 refused with the
-rule said; `GamepadTests.APadCommandConnectsConsolePadsUpToThePadItNames` holds a second player's
-South on a run with no pad, reads both names and the refusal; BCS.md's row says it, over a whole
-suite that passed, 1,474 with 3 skipped. Right. The suite shuffled by a seed was in before the row
-said to take it at the upgrade: `379f59a4` of 2026-10-10, `BCS_SCHEDULE_SHUFFLE_SEED` over every
-schedule of the app and its render world through Bevy's `shuffle_seed`, said in BUILDING.md, a
-shuffled run then finding a capture taken before its pipelines; the row reads has. A whole suite
-shuffled by the seed 20261012 passed whole, 1,471 and 3 skipped of 1,474 in 15 m 49 s, no test
-leaning on an order the shuffle breaks this time, the seed proven to reach the tests by one run
-under the suite's capped scope logging the shuffle from the bridge's stages. The weak orderings are
-not taken: every C# system reaches Bevy as an exclusive system, the one sound shape while managed
-code can spawn and insert at any moment, and Bevy counts an exclusive system as conflicting with
-every other, so `before_weak` between two C# systems keeps its edge every time and a weak order
-through Bevy is the strong one by another name; `Read<T>` and `Write<T>` record intent for the
-overlay's explanation, nothing running sooner for them, and a managed rule dropping an edge where
-the declared access does not conflict would loosen an order a game relied on with nothing gained.
-SHARED.md's row says so, and returns when systems that declare their access run non-exclusively. The
-row of a run with no window making no sound was done at `c7f1cbc6`, `SilentAudio` in Bevy's output's
-place, a config field for real sound and a test that the sounds end on time, and reads has. The
-feature-test program's row, read against `BevyCSharp.FeatureTest`, has every part in: the hub with
-signposts to its zones and the render gallery, the capsule character on its courses, the admin panel
-on F1 with its settings kept between runs, the console drawn in the interface beside the F3 overlay,
-the crash log beside the executable with a report for an exception nothing caught and for a panic,
-and the portable build for testers from the hand-run workflow; the row reads has. The runs of
-`c11a5705` on 2026-10-12 both failed, the push's Windows suite on the memory guard's test, Verdict
-14, and the pack run's native job on its four Windows and macOS targets, Verdict 15, so on
-2026-10-16 the owner stopped development on both engines until every job is green on every push and
-pack (Decision 33); the two verdicts are the working session's and nothing else is. Before that, the
-order held nothing a coder could take without a word, so the working session stopped with these
-documents in its commit; the owner's words pending are the 18 rows' crates, the wgpu feature and the
-pack run, whose storm job runs first there.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -608,8 +596,15 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdict 15, the native job's four targets, settled on the pack run of `292eead2` on 2026-10-16, all
-six built after winit became a dependency on every system at that commit.
+Verdicts 3 and 14 to 19 are settled: 15, the native job's four targets, on the pack run of
+`292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
+commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
+green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
+`d2a20b6a` the same day, 3, Courtyard played from the package with its step's page saying so, 16,
+the storm's test loading the bridge the job downloaded, which the step named, 17, the pack job
+passing with the notes beside the artifacts, and 18, Swarm played into its third wave within its
+commands' patience, and 19, the capture job ending within its hour with a page naming each failure,
+the examples started and none waited on.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -624,83 +619,75 @@ six built after winit became a dependency on every system at that commit.
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
 
-3. **The pack run of `421d4e1` fails in the step that plays Courtyard, with exit code 1 and no
-   reason.** Read from the run's jobs: `package / play Courtyard` failed at its ninth step, `Play
-   Courtyard`, after the bridge and the package were built, and the job's annotations hold the
-   build's warnings and `Process completed with exit code 1`, nothing of the game. The pack run of
-   `b263f6d` had skipped the step, so this is the first time the game was played from the package
-   since the page came, and whatever stopped it is in a log nobody reads, as 3DEngine's first-person
-   walk was (its Verdict 28). Two things, as there: the game is played here as the workflow plays
-   it, from the packed package by `bcs`, to find what stopped it; and every step of the pack
-   workflow that runs a program ends with a page or an `::error::` naming the step, the command, its
-   exit code and its last lines at a warning or worse, which 3DEngine's `build/step.py` and
-   `build/page.py` do, taken from there (SHARED.md), with their tests under `TestScriptTests`.
-   Settled when a pack run plays Courtyard and says so.
+20. **The feature test's drive ends with a command's timeout on lavapipe, saying nothing.** On the
+    pack run of `d2a20b6a`, 2026-10-17, the play job played Courtyard and Swarm and failed in
+    `build/drive-feature-test.sh` with exit code 6, the command line's code for a run that failed,
+    which its timeout gives; the step's page carries the feature test's build and three warnings
+    from its log, nothing of which command ended it. The script has the shape Verdict 18 named in
+    Swarm's play: nineteen calls of the command line, none with `--timeout`, so each waits the
+    default 30 seconds, and waits of 60 to 365 frames on a software device drawing the hub under its
+    weather at a few frames a second outlast that, `set -e` ending the script at the first without a
+    word. Three things: every call that waits on the program takes `--timeout 600` and is named on
+    failure with its code and the command line's first line, as Swarm's `c` and `shot` and its ERR
+    trap do since `9f76fded`; the same reading of every script the pack jobs run, Courtyard's play,
+    `build/first-game.sh`, `build/soak.sh`, `build/play-native.sh`, `build/publish-feature-test.sh`
+    and `build/capture-example.sh`, so one pack run does not find them a script at a time; and the
+    three warnings read from the run's `courtyard` artifact, whose `feature-test.log` holds them, a
+    material of shader program 6 given `size` and a dispatch of program 4 given `flies` and `reach`
+    when the program's layout declared nothing, either a compile that failed earlier in the log or
+    values set before the program's layout was known, neither seen on the working machine, and the
+    page showing three lines of a log at a warning or worse hid what came before. Read on the
+    working machine the same day: the three warnings are the feature test's own `.slang` shaders
+    failing to compile on a runner with no `slangc`, which neither the play job nor the capture job
+    fetches where the feature test's own workflow does, so each program's layout was empty and the
+    trees' wind and the fireflies drew the fallback; the drive and capture jobs fetch it, the pin
+    the feature test's workflow uses. And the drive run whole on lavapipe failed the moving
+    platform's station after 46 minutes, the check and not the engine at fault: the platform swings
+    as a sine with a period of ten and a half seconds and the check took the net change over 90
+    frames, which on a slow device straddled the turn of the swing, the elevator's check the same;
+    both take the farthest the player was carried, read every 30 frames over 240 and 300, whose
+    worst case over every point of the swing is 1.5 and 1.6 against the 1 asked, the course
+    unchanged. Settled when the play job passes in a pack run.
 
-14. **The memory guard's test reads a quarter of a gigabyte written as 64 MB more held, on
-    Windows.** On the push of `c11a5705`, 2026-10-12,
-    `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows` allocated 256 MiB from the system, wrote a byte
-    a page and read the process holding 685,117,440 bytes before and 749,817,856 after, 64 MB more
-    where the test asks three quarters of the 256; the suite's other 1,037 passed, Linux and macOS
-    passed the test, and the pack run's Windows suite an hour later passed it too. The guard reads
-    the working set, which Windows trims under pressure as it pleases, so pages the test wrote may
-    already have left it when the second reading came, while the memory stays committed to the
-    process; a cap meant to stop a program before the machine suffers wants what the process has
-    committed, which a trimmed working set hides. One thing: read which figure the guard should mean
-    on Windows, the committed private bytes or the working set, and make the test's reading that
-    figure with the reason in the guard's remarks; if the working set is kept, the test says so and
-    asks the growth of a figure Windows cannot trim. Settled at three green Windows suites in a row.
-    Mended at `292eead2`, the private bytes read on Windows. Two green Windows suites of three, the
-    push and the pack run of `292eead2`.
+21. **The storm's app is not made on the runner, and the step says only where it threw.** On the
+    same pack run, the storm job's test loaded the bridge the job downloaded, which the step named,
+    and failed in the constructor of `App`, `bcs_app_create` returning null, which is a panic inside
+    `build_app` caught by the guard; the step's page holds the stack trace's last lines and the test
+    count, the exception's message and the bridge's words on stderr standing above the six lines the
+    page keeps, and the job keeps no artifact. The storm job is the first place a window is opened
+    on a runner: the suites run offscreen and never make winit's event loop, and the test passed on
+    the working machine's display, so what the runner lacks has been read nowhere. Two things: on
+    failure the step prints `storm.txt` whole, one test's lines, and uploads it with `if: always()`;
+    and the cause reproduced in an `ubuntu:24.04` container with the step's packages alone, Xvfb,
+    the software Vulkan and ALSA, where the libraries winit opens at run time on X11, `libX11`,
+    `libXcursor`, `libXi`, `libXrandr`, `libxkbcommon` and `libxkbcommon-x11`, are the first
+    suspects, Bevy's own workflow installing libraries beside Xvfb before it runs its examples; what
+    the container shows missing the step installs. Settled when the storm job passes in a pack run.
 
-16. **The storm job's tests do not load the bridge the job downloaded.** On the pack run of
-    `292eead2`, 2026-10-16, the first run of the storm job since `c5873eef` made it, the job
-    downloaded the linux-x64 render bridge to `build/artifacts/linux-x64`, built the tests with the
-    freshness check off and ran the storm's filter, and the one test failed in
-    `NativeLoader.Initialize`, the ABI call `bcs_abi_version` throwing from inside `VerifyAbi`, so
-    the library was not where the test project's build looks for it or the one found was not that
-    one; the play, capture and README jobs download the same artifact to the same path and their
-    games loaded it, which says the test project's build and a game's differ in where they take the
-    bridge from. One thing: the job reproduced here as a fresh checkout with the render bridge put
-    at that path and the same two commands, the test project's copy of the bridge read in its
-    targets, and the job mended to put the library where that copy takes it, or the copy taught the
-    artifacts' path, with the step saying which library the test loaded. Settled when the storm job
-    passes in a pack run. Mended at `9f76fded`, the project copying the artifacts' slot where no
-    build ran here, which the captures job wanted too.
-
-17. **The package check reads the release notes written under the artifacts as a runtime's
-    library.** On the same pack run, the pack job failed N 6.4: `BevyCSharp.0.5.79.nupkg` does not
-    hold `runtimes/artifacts/native/release-notes.txt`. The pack step writes the release notes to
-    `build/artifacts/release-notes.txt` (`build/release-notes.sh`, its default) before the pack, and
-    N 6.4 takes every file under `build/artifacts` as a runtime's native library named by its
-    folder, so the notes' folder read as a runtime. One thing: the notes are written beside the
-    artifacts and not among them, `build/release-notes.txt`, the script's default and the step's
-    path moving together, and N 6.4 reads the runtime folders alone, a folder a file deep and named
-    as a runtime identifier, so a file beside them is not a library. Settled when the pack job
-    passes. Mended at `9f76fded`.
-
-18. **Swarm's play ends with a command's timeout on lavapipe.** On the same pack run, the play job
-    failed in `games/Swarm/play.sh` with exit code 6, the command line's timeout, after the game had
-    answered and its menu was read; the step's page carries only the game's warning that the adapter
-    renders in software, since the script exits on the first failing command under `set -e` without
-    saying which, and its own `fail` speaks only for its checks. The game draws its forty laps of
-    movers on lavapipe, where a wait for frames outlasts the command's patience as Tactics' did in
-    3DEngine (its Verdict 56). Two things: the script's commands that wait for frames take a timeout
-    long enough for a software device, and a trap on error says the command that failed and its
-    code, so the next failure is read from the page. Settled when the play job passes in a pack run.
-    Mended at `9f76fded`, every call with `--timeout 600` and named on failure.
-
-19. **The capture job waits an hour through examples that cannot start, and says nothing.** On the
-    pack run of `292eead2`, 2026-10-16, the capture job built the examples and ran
-    `build/capture-examples.sh`, which opens each of the 250 examples in turn, and the job was
-    cancelled at its 60 minutes with the step still running, its page holding the cancellation
-    alone; the examples found no bridge beside them, Verdict 16's cause, and the script lists an
-    example that did not start among the failed and goes on to the next, each waiting the command
-    line's patience for a program that will never serve, so a cause every example shares costs an
-    hour and is never named. One thing: the script stops when three examples in a row fail to start,
-    with an `::error::` saying so and the first one's log tail, since a program that cannot start
-    twice more will not start at all, and otherwise goes on as it does; the job's limit stays.
-    Settled when the capture job passes in a pack run.
+22. **The examples are built before Bevy's assets are fetched, so the runner captures them without
+    their textures, models, fonts and shaders.** On the pack run of `d2a20b6a`, 2026-10-17, the
+    capture job's step captured the examples for 56 of the job's 60 minutes and failed with 59
+    named, 58 blank and `deferred_raymarch` not captured, and the comparison after it failed 152 of
+    the rest past the two percent allowed, `atmosphere` 55 percent, `atmospheric_fog` 61, `align`
+    and `anchor_layout` 6 to 8 with their text. The 58 blank load a file of Bevy's: a sprite's
+    texture, a glTF, a font, a shader under `shaders/`, a skybox or a lightmap. The examples project
+    copies `bevy-assets/**` beside the program at build time, as `assets/`, and
+    `build/fetch-bevy-assets.sh` fills that folder; the job builds the examples in one step and runs
+    `build/capture-examples.sh` in the next, which fetches first, so on the runner the build found
+    an empty folder and copied nothing, and the fetch after it reached no program. On the working
+    machine the folder stood from an earlier run, which is why the 329 captures matched between the
+    GPU and lavapipe there. Four things: the assets are fetched before the build that copies them,
+    in the capture job and in every path that builds the examples on a fresh checkout, the script
+    and the project making the order hold rather than a comment asking for it; the comparison read
+    again on the next pack run, what still differs being the runner's own, each either allowed in
+    `build/captures-differ.txt` with its share and reason, as the script provides, or its picture
+    taken again, the owner's eye deciding a picture the README shows; the job's limit given room
+    above the 56 minutes the step took with nothing to load, 90, said with the cost; and `slangc`
+    fetched before the captures, as the feature test's workflow fetches it, since 34 examples
+    compile a Slang shader of the examples' own at run time and drew the magenta fallback on a
+    runner without it, `animate_shader`, `atmosphere`, `dynamic_mip_generation`, `shader_material`
+    and `ui_material` among them, a cause of the differences known before the next comparison is
+    read. Settled when the capture job passes in a pack run.
 
 ## Decisions
 
@@ -889,3 +876,51 @@ six built after winit became a dependency on every system at that commit.
     39).
 
 ## Replies
+
+**Verdict 20.** Mended in the commit that carries this reply. Every call of the command line in
+`build/drive-feature-test.sh` goes through `c` and `shot` with `--timeout 600`, a failure ending the
+script with an `::error` naming the call, its exit code and the first line bcs gave of why, and an
+ERR trap names anything else. Courtyard's play, `build/first-game.sh`, `build/soak.sh`,
+`build/publish-feature-test.sh` and `build/capture-example.sh` have the same, and
+`build/play-native.sh` calls bcs nowhere itself. bcs writes why a command failed to its output,
+`error [TIMEOUT] ...`, and not to its errors, so the helpers Swarm's play has had since `9f76fded`,
+which kept the errors, named the call and the code with an empty why. Every helper, Swarm's among
+them, keeps the output in a file, reads its first line on a failure and passes it on when the call
+worked, and each said `./bcs command app.status ended with 4, error [NO_SESSION] No app is
+serving. ...` run against no session. The three warnings reproduced in the container of Verdict 21
+below, the last three of fourteen values reported against the fallbacks' empty layouts, each
+program's two ERROR lines of a failed compile before them, and with slangc there the feature test
+logged neither. The drive has a job of its own, `drive the feature test`, needing the native job,
+fetching slangc, packing and building on the package as the play job does, with 90 minutes and its
+own artifact, `feature-test`; the play job builds the feature test for the soak and keeps its hour.
+Measured in the container on Ubuntu's lavapipe held to four processors: 1.1 frames a second at the
+hub under the weather, with slangc or without; the course up to the moving platform in 46 minutes,
+where it failed as the verdict says; and from the platform to the end, with the checks taking the
+farthest the player was carried, worst cases 1.5 over 240 frames and 1.6 over 300 against the 1
+asked, 26 minutes and passing. That is some 70 minutes in all here, near 47 on the runner at the
+1.5 times this machine's speed Swarm showed there, 7.4 minutes against 11.
+
+**Verdict 21.** Mended in the same commit. Reproduced in `mcr.microsoft.com/dotnet/sdk:10.0-noble`,
+Ubuntu 24.04.5 with the SDK, with the storm step's packages alone and the tests built in it from a
+fresh checkout on this machine's bridge, an editor build whose window is the render build's. The
+test failed in the constructor of `App` as on the runner, and the test host's standard error, which
+`dotnet test` writes to its `--diag` log alone, said winit could not open `libXcursor.so.1`; with
+`libxcursor1` installed, `libXi.so.6`; with `libxi6`, `libxkbcommon-x11.so`; and with
+`libxkbcommon-x11-0` the storm passed on llvmpipe in four seconds. `libX11`, `libX11-xcb`,
+`libXrandr` and `libxkbcommon` came with Xvfb and Mesa. The step installs the three with the reason
+in its comment, runs the test with `--diag`, takes the test host's standard error from it into
+`stderr.txt`, says a failure in one `::error` holding `storm.txt` whole and the standard error after
+it, and uploads the folder as `storm` with `if: always()`. Run through `build/step.py` in the
+container without the three, the error ended with winit's line naming libXcursor, and with them the
+step passed.
+
+**Verdict 22.** Mended in the same commit. `build/capture-examples.sh` fetches Bevy's files and then
+builds the examples itself, with the options given after the folder, and the job passes
+`-p:BevyCSharpSkipNativeFreshnessCheck=true` to it in place of its own build step.
+`build/capture-example.sh` fetches as well, and builds again in the program's configuration where
+the program lacks a file the fetch holds. The job fetches slangc before the captures, as the step's
+comment says why, and has 90 minutes. Checked in a fresh checkout on this machine's GPU, the
+examples built first as the job built them. The loop fetched 325 files, built, and captured 26 in
+five minutes, none blank, 25 matching theirs and `dynamic_mip_generation` 3.0 percent off with its
+mip levels drawn as the magenta fallback; with slangc it matched, and `sprite`, captured after the
+bird it draws was taken out from beside the program, built again and matched.

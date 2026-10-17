@@ -12,7 +12,7 @@
 # to the course leaves it, and judged by where `player` says it is after. A failure is said as an
 # error annotation with the program's last lines at a warning or worse, and a capture of each
 # station is left in the folder SHOTS names, or a temporary one.
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
 program="${1:-BevyCSharp.FeatureTest/bin/Debug/net10.0}"
@@ -22,28 +22,40 @@ program="${1:-BevyCSharp.FeatureTest/bin/Debug/net10.0}"
 export BCS_MEMORY_CAP_GB="${BCS_MEMORY_CAP_GB:-8}"
 shots="${SHOTS:-$(mktemp -d)}"
 log="$shots/feature-test.log"
+said="$shots/said.txt"
 ground=-1.2
 
-quiet() { ./bcs command "$@" > /dev/null; }
 fail() {
-  local said=""
-  [ -f "$log" ] && said=$(grep -E 'WARN|ERROR|panicked|Unhandled' "$log" | tail -n 3 | tr '\n' ' ' || true)
-  echo "::error title=feature test::$1. ${said}" >&2
+  local logged=""
+  [ -f "$log" ] && logged=$(grep -E 'WARN|ERROR|panicked|Unhandled' "$log" | tail -n 3 | tr '\n' ' ' || true)
+  echo "::error title=feature test::${1%.}. ${logged}" >&2
   exit 1
 }
 
+# Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
+# most of them wait for frames, as many as 365 for the crawl through the tunnel, and a software
+# device, as the workflow's runner has, draws the hub under its weather a few frames a second. The
+# pack run of d2a20b6a ended here on a command's timeout with nothing said but bcs's exit code, so
+# one that fails says its words, its code and the first line bcs gave of why, as Swarm's play does,
+# and anything else that fails is named by the trap below. bcs writes why to its output, as it
+# writes the answer, so the output is kept in a file and passed on once the command has worked. The
+# timeout comes before the command's words, since bcs passes on whatever follows a `--` as it is.
+c() { ./bcs command --timeout 600 "$@" > "$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
+quiet() { c "$@" > /dev/null; }
+
 # The player's place as "x y z", read from the line `player` answers.
-where() { ./bcs command player | sed -n 's/^at \([-0-9.]*\) \([-0-9.]*\) \([-0-9.]*\),.*/\1 \2 \3/p'; }
+where() { c player | sed -n 's/^at \([-0-9.]*\) \([-0-9.]*\) \([-0-9.]*\),.*/\1 \2 \3/p'; }
 # A piece's place as "x y z", read from its transform's line.
-piece() { ./bcs command entity.get "$@" | sed -n 's/^Transform.Translation = //p' | tr ',' ' '; }
+piece() { c entity.get "$@" | sed -n 's/^Transform.Translation = //p' | tr ',' ' '; }
 # A height above the ground, as a number bcs can be given.
 up() { awk -v g="$ground" -v d="$1" 'BEGIN { print g + d }'; }
 # Whether one sum compares with another as asked, awk working out both.
 holds() { awk "BEGIN { exit !(($1) $2 ($3)) }"; }
 # Puts the player at a station's start and waits for it to settle.
 at() { quiet player.put "$1" "$2" "$3"; quiet frames.wait 20; }
-shot() { ./bcs shot "$shots/$1.png" > /dev/null; }
+shot() { ./bcs shot "$shots/$1.png" --timeout 600 > "$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
 
+trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop > /dev/null 2>&1 || true' EXIT
 ./bcs stop > /dev/null 2>&1 || true
 
@@ -56,8 +68,8 @@ quiet app.frametime 0.0166667
 # The day held still at eight in the morning, the sun low in the east as the views were framed
 # under, so each run captures the same light, and put back as it was at the end, as the effects
 # page's settings are.
-day_speed=$(./bcs command setting DaySpeed | sed -n 's/^DaySpeed = //p')
-day_hour=$(./bcs command setting Hour | sed -n 's/^Hour = //p')
+day_speed=$(c setting DaySpeed | sed -n 's/^DaySpeed = //p')
+day_hour=$(c setting Hour | sed -n 's/^Hour = //p')
 quiet setting "DaySpeed 0"
 quiet day.hour 8
 
@@ -66,7 +78,7 @@ quiet day.hour 8
 # it was at the end with the day.
 weather_was=()
 for name in WeatherTier WeatherKind Procedural CloudCover; do
-  weather_was+=("$name $(./bcs command setting "$name" | sed -n "s/^$name = //p")")
+  weather_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
 done
 quiet setting "WeatherTier Potato"
 quiet setting "WeatherKind PartlyCloudy"
@@ -79,7 +91,7 @@ shot 1-hub
 
 # The hub's frame time under the weather, beside Sponza's, which on the workflow's software
 # renderer measures the weather's cost there.
-./bcs command app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
+c app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
   | awk '{ printf "1-hub, the weather at its lowest tier %.1f ms\n", ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
@@ -101,7 +113,7 @@ quiet input.key Space
 quiet frames.wait 4
 quiet input.key Space
 quiet frames.wait 5
-./bcs command player | grep -q flying || fail "a double tap of jump in creative mode did not take off"
+c player | grep -q flying || fail "a double tap of jump in creative mode did not take off"
 quiet input.hold Space 40
 quiet frames.wait 45
 read -r _ flown _ < <(where)
@@ -110,7 +122,7 @@ quiet mode walking
 quiet frames.wait 90
 quiet mode spectator
 quiet frames.wait 5
-./bcs command player | grep -q spectator || fail "the mode command did not set spectator mode"
+c player | grep -q spectator || fail "the mode command did not set spectator mode"
 quiet mode walking
 
 # The course, from its start, facing east along it.
@@ -192,21 +204,37 @@ holds "$back" "<" 47 || fail "the pit did not put the player back at the course'
 
 # The moving platform carries the player and the elevator lifts it, each put on where it is now,
 # and the disc turns it.
+#
+# The platform and the elevator swing back and forth, so each is judged by the farthest it took the
+# player from where it stood, read every 30 frames, over a wait long enough that the least of that
+# at any point of the swing is past the one asked for, 1.5 for the platform over 240 frames and 1.6
+# for the elevator over 300. Where it stood after the wait alone says nothing at the end of a swing,
+# which a wait straddling it brings back to where it began. A software device puts fewer frames
+# between two commands than a graphics card does, so the drive comes to each at another point of its
+# swing, and on lavapipe the platform's 90 frames straddled its end, taking the player from x 60.96
+# to 61.00.
+farthest() {
+  local axis=$1 x y z start far=0
+  read -r x y z < <(where) || return 1
+  start=${!axis}
+  for _ in $(seq 30 30 "$2"); do
+    quiet frames.wait 30
+    read -r x y z < <(where) || return 1
+    far=$(awk -v a="${!axis}" -v b="$start" -v f="$far" 'BEGIN { d = a > b ? a - b : b - a; print (d > f ? d : f) }')
+  done
+  echo "$far"
+}
 read -r px py pz < <(piece Moving platform)
 quiet player.put "$px" "$(awk -v y="$py" 'BEGIN { print y + 0.3 }')" "$pz"
 quiet frames.wait 10
-read -r before _ _ < <(where)
-quiet frames.wait 90
-read -r after _ _ < <(where)
-holds "$(awk -v a="$after" -v b="$before" 'BEGIN { print (a > b ? a - b : b - a) }')" ">" 1 || fail "the moving platform did not carry the player, from x $before to $after"
+carried=$(farthest x 240)
+holds "$carried" ">" 1 || fail "the moving platform did not carry the player, which went no farther than $carried from where it stood"
 read -r ex ey ez < <(piece Elevator)
 quiet player.put "$ex" "$(awk -v y="$ey" 'BEGIN { print y + 0.3 }')" "$ez"
 quiet frames.wait 10
-read -r _ low _ < <(where)
-quiet frames.wait 120
-read -r _ lifted _ < <(where)
+lifted=$(farthest y 300)
 read -r _ ey2 _ < <(piece Elevator)
-holds "$(awk -v a="$lifted" -v b="$low" 'BEGIN { print (a > b ? a - b : b - a) }')" ">" 1 || fail "the elevator did not move the player, from y $low to $lifted with the elevator at $ey2"
+holds "$lifted" ">" 1 || fail "the elevator did not move the player, which went no farther than $lifted from where it stood, the elevator at y $ey2"
 at 82 "$(up 1)" 10
 read -r turn_x _ turn_z < <(where)
 quiet frames.wait 90
@@ -238,7 +266,7 @@ quiet mode spectator
 quiet frames.wait 5
 view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "${8:-40}"; shot "$1"; }
 for piece in "Gallery wall" "Cornell lamp" "Reflection probe" "Irradiance volume" "Fog volume" "Tree 1, crown"; do
-  ./bcs command entity.get "$piece" > /dev/null 2>&1 || fail "the zones were not built, $piece is missing"
+  ./bcs command --timeout 600 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
 done
 view 5-gallery -55 4 -3 -63.5 3 -1 60
 view 6-cornell -62 2.8 -13 -72 1.8 -13
@@ -252,7 +280,7 @@ view 15-meadow 12 1.5 80 0 0.5 70
 
 # The effects page's ambient occlusion and dusk sky through the setting command, each put back as
 # it was after, so a run on the working machine leaves its settings as it found them.
-setting() { ./bcs command setting "$1" | sed -n 's/^[A-Za-z]* = "\{0,1\}\([^"]*\)"\{0,1\}$/\1/p'; }
+setting() { c setting "$1" | sed -n 's/^[A-Za-z]* = "\{0,1\}\([^"]*\)"\{0,1\}$/\1/p'; }
 occlusion=$(setting AmbientOcclusion)
 backdrop=$(setting Backdrop)
 quiet setting "AmbientOcclusion true"
@@ -270,7 +298,7 @@ if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END
   grep -q "Intel Sponza stands" "$log" || fail "Sponza did not load from its pack"
   timed() {
     view "$@"
-    ./bcs command app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
+    c app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
       | awk -v name="$1" '{ printf "%s %.1f ms\n", name, ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
   }
   timed 17-sponza 45 4 -45 60 3 -60 120
@@ -288,7 +316,7 @@ for was in "${weather_was[@]}"; do quiet setting "$was"; done
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
 # in what it kept before a run passes the cap and is stopped.
-./bcs command memory | tr ' ' '\n' | awk 'last == "peak" { printf "peak %.2f GB\n", $1 / 2^30 } { last = $1 }' \
+c memory | tr ' ' '\n' | awk 'last == "peak" { printf "peak %.2f GB\n", $1 / 2^30 } { last = $1 }' \
   | tee -a "$shots/frame-times.txt"
 
 echo "drove the feature test, captures in $shots"

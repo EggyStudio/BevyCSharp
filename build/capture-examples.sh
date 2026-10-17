@@ -4,16 +4,24 @@
 # package workflow runs it on every package, and it is how the captures in
 # .github/assets/examples are taken again after a change that touches many examples.
 #
-#   dotnet build BevyCSharp.Examples
-#   build/capture-examples.sh [folder]
+#   build/capture-examples.sh [folder] [options for dotnet build]
 #
-# The pictures go to .github/assets/examples unless another folder is given.
+# The pictures go to .github/assets/examples unless another folder is given. The examples are built
+# here with the options given, as -p:BevyCSharpSkipNativeFreshnessCheck=true where the bridge was
+# built elsewhere.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 into="${1:-.github/assets/examples}"
+[ $# -gt 0 ] && shift
 mkdir -p "$into"
-build/fetch-bevy-assets.sh
+
+# Bevy's files first and the build after them, since the build copies beside the program what
+# bevy-assets holds when it runs, and compiles in the picture embedded_asset carries only where its
+# file is there. The pack run of d2a20b6a built the examples in a step before this fetched, and the
+# 58 examples that load a file of Bevy's were captured blank.
+build/fetch-bevy-assets.sh || exit 1
+dotnet build BevyCSharp.Examples "$@" || exit 1
 
 failed=()
 program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)

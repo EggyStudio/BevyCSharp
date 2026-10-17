@@ -13,8 +13,9 @@
 # picture would, as <example>.txt, followed by what it logged itself, as Bevy's own print with info!,
 # the lines of the log under the target C# logs with, and those of Bevy's log of its diagnostics,
 # which an example of the diagnostics store prints, without their colors and times.
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/.."
+trap 'code=$?; echo "capture-example.sh: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 
 # Run as the workflow runs them, where Bevy's examples that roll dice seed them, as
 # alien_cake_addict does, and contributors takes its fixed list of names rather than this
@@ -22,6 +23,15 @@ cd "$(dirname "$0")/.."
 export GITHUB_ACTIONS=true
 
 program=$(ls -t BevyCSharp.Examples/bin/*/net10.0/BevyCSharp.Examples | head -1)
+
+# Bevy's files fetched where they are missing, and the examples built again where the program was
+# built before one of them was there, since only a build copies them beside it. An example captured
+# without the files it loads comes out blank, as 58 did on the pack run of d2a20b6a.
+build/fetch-bevy-assets.sh
+built=$(dirname "$program")
+if comm -23 <(cd BevyCSharp.Examples/bevy-assets && find . -type f | sort) <(cd "$built/assets" && find . -type f | sort) | grep -q .; then
+    dotnet build BevyCSharp.Examples -c "$(basename "$(dirname "$built")")" -v q --nologo
+fi
 if "$program" --printing | grep -qx "$1"; then
     out="${2:-.github/assets/examples/$1.webp}"
     mkdir -p "$(dirname "$out")"
@@ -82,25 +92,30 @@ esac
 # started and could not be captured, and stops on when examples do not start one after another.
 ./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}" || exit 3
 
+# Each command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since a
+# software device, as the workflow's runner has, draws some examples a frame every few seconds, and
+# one that fails is named with its code under bcs's own words of why.
+c() { ./bcs command "$@" --quiet --timeout 600 || { echo "capture-example.sh: ./bcs command $* ended with $? in $example" >&2; exit 1; }; }
+
 # Examples that show something only once they are given input are driven here, by name.
 case "$example" in
   # A level, which the screen loads once 1 is pressed.
-  loading_screen) ./bcs command input.hold Digit1 2 --quiet ;;
+  loading_screen) c input.hold Digit1 2 ;;
   # A pad pretended, as one in the hands, its left stick pushed up and to the right, its right
   # stick down, and its right trigger far enough down to count as held.
   gamepad_viewer)
-    ./bcs command input.axis 0 LeftX 0.6 --quiet
-    ./bcs command input.axis 0 LeftY 0.4 --quiet
-    ./bcs command input.axis 0 RightY -0.7 --quiet
-    ./bcs command input.axis 0 RightTrigger 0.8 --quiet ;;
+    c input.axis 0 LeftX 0.6
+    c input.axis 0 LeftY 0.4
+    c input.axis 0 RightY -0.7
+    c input.axis 0 RightTrigger 0.8 ;;
   # A hundred points sampled inside the cube and a hundred on its surface, which D scatters and M
   # turns from the one to the other.
   random_sampling)
-    ./bcs command input.key D --quiet
-    ./bcs command frames.wait 2 --quiet
-    ./bcs command input.key M --quiet
-    ./bcs command frames.wait 2 --quiet
-    ./bcs command input.key D --quiet ;;
+    c input.key D
+    c frames.wait 2
+    c input.key M
+    c frames.wait 2
+    c input.key D ;;
   *) ;;
 esac
 
@@ -135,7 +150,8 @@ esac
 # clock every pipeline compiles in the frame that asks for it, so that frame is the same moment of
 # the scene, drawn whole, on any device.
 shot="${out%.webp}.shot.png"
-./bcs shot "$shot" "$frames" --quiet --timeout 600
+./bcs shot "$shot" "$frames" --quiet --timeout 600 \
+    || { echo "capture-example.sh: ./bcs shot of frame $frames ended with $? in $example" >&2; exit 1; }
 
 # Every picture sixteen by nine, as the README's gallery shows each in a box of that shape, so a
 # shot of another shape, as the square window Bevy's resizing test opens, is scaled until it fills

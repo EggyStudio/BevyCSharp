@@ -9,15 +9,25 @@
 # The game is started offscreen and serving, played by holding keys as a person would, and stopped
 # at the end whatever happened. Captures of each step are left in the folder named by SHOTS, or
 # in a temporary one.
-set -euo pipefail
+set -eEuo pipefail
 cd "$(dirname "$0")/../.."
 
 game="${1:-games/Courtyard/bin/Debug/net10.0}"
 shots="${SHOTS:-$(mktemp -d)}"
+said="$shots/said.txt"
 
-c() { ./bcs command "$@"; }
-quiet() { ./bcs command "$@" >/dev/null; }
 fail() { echo "FAILED: $*" >&2; grep -h "^\[play\]" "$shots/game.log" >&2 || true; exit 1; }
+
+# Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
+# a software device, as the workflow's runner has, draws a few frames a second and a hold or a wait
+# runs for as many of them as it names. Swarm's play and the feature test's drive ended pack runs on
+# a command's timeout with nothing said but bcs's exit code, so one that fails here says its words,
+# its code and the first line bcs gave of why, and anything else that fails is named by the trap
+# below. bcs writes why to its output, as it writes the answer, so the output is kept in a file and
+# passed on once the command has worked.
+c() { ./bcs command "$@" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
+quiet() { c "$@" >/dev/null; }
+shot() { ./bcs shot "$1" --timeout 600 >"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
 
 # Where an entity is, as "x z", from the line entity.get prints its translation on.
 where() {
@@ -54,6 +64,7 @@ coins() { c entity.get Runner | sed -n 's/^Wallet.Coins = //p'; }
 carrying() { [ "$(coins)" -ge "$1" ]; }
 won() { grep -q "\[courtyard\] won with" "$shots/game.log"; }
 
+trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop >/dev/null 2>&1 || true' EXIT
 
 ./bcs stop >/dev/null 2>&1 || true
@@ -67,7 +78,7 @@ for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Courtyard" &
 # several times as far as planned, past every coin and into the wall.
 quiet app.frametime 0.0166667
 quiet frames.wait 30
-./bcs shot "$shots/1-menu.png" >/dev/null
+shot "$shots/1-menu.png"
 c entity.get Runner | grep -q "^CharacterController" && fail "the runner is a character before play starts"
 
 quiet input.key Enter
@@ -78,7 +89,7 @@ c entity.get Runner | grep -q "^CharacterController" || fail "Enter did not star
 go_to 0 4 carrying 1
 quiet frames.wait 5
 [ "$(coins)" = 1 ] || fail "the first coin was not picked up"
-./bcs shot "$shots/2-one-coin.png" >/dev/null
+shot "$shots/2-one-coin.png"
 
 quiet input.key F5
 quiet frames.wait 5
@@ -90,7 +101,7 @@ quiet frames.wait 5
 # Paused, the runner holds still with W down.
 quiet input.key Escape
 quiet frames.wait 5
-./bcs shot "$shots/3-paused.png" >/dev/null
+shot "$shots/3-paused.png"
 read -r before _ < <(where Runner)
 quiet input.hold D 20
 read -r after _ < <(where Runner)
@@ -102,7 +113,7 @@ quiet frames.wait 5
 quiet input.key F9
 quiet frames.wait 10
 [ "$(coins)" = 1 ] || fail "the load did not bring back the save's one coin"
-./bcs shot "$shots/4-loaded.png" >/dev/null
+shot "$shots/4-loaded.png"
 
 # From the save, with the first coin gone and the runner back where the level puts it. The last
 # coin is come at from the side away from the goal, which it is beside, so the runner does not
@@ -116,6 +127,6 @@ quiet frames.wait 5
 go_to 5 -5 won
 quiet frames.wait 10
 grep -q "\[courtyard\] won with 3 coins" "$shots/game.log" || fail "reaching the goal with every coin did not win"
-./bcs shot "$shots/5-won.png" >/dev/null
+shot "$shots/5-won.png"
 
 echo "played to $shots"
