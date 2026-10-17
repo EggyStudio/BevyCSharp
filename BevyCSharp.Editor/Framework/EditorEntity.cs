@@ -103,7 +103,7 @@ public static class EditorEntity
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What goes is written as a scene first, in memory, the way Project/Save writes the world:
+    /// What goes is written as a scene first, in memory, the way Project/Save writes the world,
     /// every component the scene format holds, and the mesh and material each is drawn with, by
     /// the file it came from or, made in memory, as a primitive's recipe, a mesh's geometry or a
     /// material's settings. Undoing reads it back, puts each top entity under the parent it had,

@@ -1,7 +1,7 @@
 # Behaviors
 
 A `[Behavior]` struct is both a component and the systems that act on it. This chapter covers what a
-game writes: what a method runs as, when it runs, which entities it sees, and what it may touch
+game writes, what a method runs as, when it runs, which entities it sees, and what it may touch
 while it does.
 
 The generator checks a behavior as it is compiled and says what is wrong as an error with a number,
@@ -70,7 +70,7 @@ changes sees only real ones.
 
 One taken `ref` is marked changed every frame the system runs, whether it was written or not, where
 Bevy marks one only when it is written through. What watches for changes then sees one every
-frame: a `[Changed]` filter passes, a transform is propagated again, and Bevy's path tracer starts
+frame. A `[Changed]` filter passes, a transform is propagated again, and Bevy's path tracer starts
 its picture over for a camera it reads as moved. A behavior that reads every frame and writes
 seldom takes the component `in` and writes through the world when it changes:
 
@@ -225,7 +225,7 @@ inputs give a different fall on a slow frame, and a long enough one steps straig
 floor.
 
 `[OnFixedUpdate]` runs on Bevy's fixed timestep instead, as many times per frame as the elapsed
-time allows: twice after a slow frame, not at all after a fast one. Each run covers the same
+time allows, twice after a slow frame and not at all after a fast one. Each run covers the same
 slice of time, so the simulation is reproducible.
 
 <!-- compiled with:
@@ -370,15 +370,16 @@ public static bool ChordHeld(World world) =>
     world.Resource<Input>().AllKeysDown([Key.ControlLeft, Key.F3]);
 ```
 
-`Input` mirrors Bevy's `ButtonInput` here: `AnyKeyDown`, `AllKeysDown`, `AnyKeyPressed` and
+`Input` mirrors Bevy's `ButtonInput` here. `AnyKeyDown`, `AllKeysDown`, `AnyKeyPressed` and
 `AnyKeyReleased` take a span of keys, like `any_pressed` / `all_pressed` / `any_just_pressed`.
 
 ## Stepping through a stage
 
 `Stepping` holds back the systems of the stages added to it and runs them one at a time on request,
-as Bevy's `Stepping` resource does, to watch a frame's work happen system by system. While it is
-on, the systems of those stages wait, frame after frame, and every other stage runs as before, so
-the app keeps drawing and reading keys. It is driven from a system in a stage that is not stepped:
+as Bevy's `Stepping` resource does, to watch a frame's work happen system by system. While it is on,
+the systems of those stages wait, frame after frame, and every other stage runs as before, so the
+app keeps drawing and reading keys. It is turned on and stepped from a system in a stage that is not
+stepped:
 
 ```csharp
 [OnPostUpdate]

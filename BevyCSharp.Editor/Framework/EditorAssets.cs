@@ -56,7 +56,7 @@ public static class EditorAssets
     internal static void Forget() => Selected = null;
 
     /// <summary>
-    /// What is in the current directory: directories first, then files, both by name.
+    /// What is in the current directory, directories first, then files, both by name.
     /// </summary>
     /// <remarks>
     /// Read from disk each time it is asked for rather than cached. The directory is watched and
@@ -121,7 +121,7 @@ public static class EditorAssets
     }
 
     /// <summary>
-    /// The mesh a path names: a mesh file read on this side, a part of a model by its label, or a
+    /// The mesh a path names, a mesh file read on this side, a part of a model by its label, or a
     /// model's first mesh.
     /// </summary>
     /// <remarks>
@@ -138,7 +138,7 @@ public static class EditorAssets
     }
 
     /// <summary>
-    /// The material a path names: a material file read on this side, a part of a model by its
+    /// The material a path names, a material file read on this side, a part of a model by its
     /// label, or a model's first material.
     /// </summary>
     /// <remarks>Read as <see cref="LoadMesh"/> reads a mesh file.</remarks>
@@ -167,7 +167,7 @@ public static class EditorAssets
 
     private static readonly Dictionary<string, AssetHandle> Loaded = new(StringComparer.Ordinal);
 
-    /// <summary>What a path is called in the browser: a part of a model by the name the model gives it, a file by its name.</summary>
+    /// <summary>What a path is called in the browser, a part of a model by the name the model gives it, a file by its name.</summary>
     public static string NameOf(string relative)
     {
         var hash = relative.IndexOf('#');
@@ -436,7 +436,7 @@ public static class EditorAssets
     private static bool Under(string path, string folder) =>
         path == folder || path.StartsWith(folder + "/", StringComparison.Ordinal);
 
-    /// <summary>A path as the panel keeps them: forward slashes, none at either end.</summary>
+    /// <summary>A path as the panel keeps them, forward slashes, none at either end.</summary>
     private static string Clean(string path) => path.Trim().Replace('\\', '/').Trim('/');
 
     /// <summary>The absolute path of something in the asset directory.</summary>

@@ -323,7 +323,7 @@ pub extern "C" fn bcs_render_set_soft_shadows(light: u64, size: f32) -> i32 {
     })
 }
 
-/// Sets how a camera filters the shadow maps it reads: `0` a hardware two-by-two, `1` a Gaussian,
+/// Sets how a camera filters the shadow maps it reads, `0` a hardware two-by-two, `1` a Gaussian,
 /// which is Bevy's default, and `2` temporal, which varies the pattern each frame for temporal
 /// antialiasing to average, and which soft shadows need to be quiet.
 #[unsafe(no_mangle)]

@@ -129,8 +129,8 @@ each kind do not keep between them.
 
 ## What a pointer does to an entity
 
-Bevy's picking finds what is under the mouse or a finger, an interface node, a sprite or a mesh,
-and says what the pointer does to it: comes over it, presses it, clicks it, drags it or drops
+Bevy's picking finds what is under the mouse or a finger, an interface node, a sprite or a mesh, and
+says what the pointer does to it, whether it comes over it, presses it, clicks it, drags it or drops
 something on it. A game observes that at the entity, as Bevy's `Pointer<E>` events are observed:
 
 <!-- compiled with:

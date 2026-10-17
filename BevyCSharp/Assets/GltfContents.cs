@@ -43,7 +43,7 @@ public static class GltfContents
         }
     }
 
-    /// <summary>The JSON of a glTF file: all of a text one, the first chunk of a binary one.</summary>
+    /// <summary>The JSON of a glTF file, all of a text one, the first chunk of a binary one.</summary>
     private static ReadOnlyMemory<byte> Json(byte[] bytes)
     {
         // A binary file starts with its magic, a version and a length, then chunks, the first of

@@ -1,4 +1,4 @@
-//! What a mesh holds, read back: its counts and attributes, its triangles and normals, and the names
+//! What a mesh holds, read back, its counts and attributes, its triangles and normals, and the names
 //! of its morph targets. A mesh is made from vertices in [`super::mesh_data`].
 
 use crate::interop::status;
@@ -21,7 +21,7 @@ pub struct BcsMeshInfo {
     pub index_bits: u32,
     /// `0` triangles, `1` a triangle strip, `2` lines, `3` a line strip, `4` points.
     pub topology: u32,
-    /// Which attributes it has, one bit each: `1` normals, `2` tangents, `4` UVs, `8` a second UV
+    /// Which attributes it has, one bit each, `1` normals, `2` tangents, `4` UVs, `8` a second UV
     /// set, `16` vertex colors, `32` joint indices, `64` joint weights, `128` a stream of the game's
     /// own.
     pub attributes: u32,
@@ -31,7 +31,7 @@ pub struct BcsMeshInfo {
     pub max: [f32; 3],
 }
 
-/// Reads what a mesh holds: its counts, its attributes and its bounds.
+/// Reads what a mesh holds, its counts, its attributes and its bounds.
 ///
 /// # Safety
 /// `out` must be writable for one [`BcsMeshInfo`].
@@ -210,7 +210,7 @@ pub extern "C" fn bcs_render_mesh_generate_tangents(handle: i32) -> i32 {
     })
 }
 
-/// Copies a mesh's triangles out: its positions, three floats each, and its indices, three a
+/// Copies a mesh's triangles out, its positions, three floats each, and its indices, three a
 /// triangle.
 ///
 /// For whatever needs the shape rather than the picture, a physics engine building a collision

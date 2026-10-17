@@ -6,7 +6,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The picker behind a color swatch: a spectrum to pick from, a hue and a clearness to slide, the
+/// The picker behind a color swatch, a spectrum to pick from, a hue and a clearness to slide, the
 /// color as it was beside the color as it is, and the numbers, to read or to type.
 /// </summary>
 /// <remarks>
@@ -267,7 +267,7 @@ internal static class ColorPicker
     }
 
     /// <summary>
-    /// The bar under the square: the hue for RGB, HSV and HSL, the hue drawn in OKLCH for OKLCH,
+    /// The bar under the square, the hue for RGB, HSV and HSL, the hue drawn in OKLCH for OKLCH,
     /// and the lightness for OKLab, whose square is the other two axes.
     /// </summary>
     /// <remarks>
@@ -370,7 +370,7 @@ internal static class ColorPicker
     }
 
     /// <summary>
-    /// A point of an OKLCH or OKLab square as it is drawn: the color where a screen can show it,
+    /// A point of an OKLCH or OKLab square as it is drawn, the color where a screen can show it,
     /// and dimmed toward the flyout's own color where it cannot.
     /// </summary>
     /// <remarks>
@@ -837,7 +837,7 @@ internal static class ColorPicker
         draw.PopClipRect();
     }
 
-    /// <summary>A hex code back into a color: six digits, or eight with alpha, with or without the mark.</summary>
+    /// <summary>A hex code back into a color, six digits, or eight with alpha, with or without the mark.</summary>
     private static Vector4? Parse(string text)
     {
         var hex = text.Trim().TrimStart('#');

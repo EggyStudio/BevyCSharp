@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the shadows a light casts beyond a plain shadow map: contact shadows traced through the
+/// Covers the shadows a light casts beyond a plain shadow map, contact shadows traced through the
 /// depth buffer, and soft shadows whose penumbra widens with distance.
 /// </summary>
 [Collection("engine")]

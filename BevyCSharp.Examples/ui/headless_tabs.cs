@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Interface;
 
-// Demonstrates the behavior-only tab widgets in bevy_ui_widgets: four tab strips, three that keep
+// Demonstrates the behavior-only tab widgets in bevy_ui_widgets, four tab strips, three that keep
 // their own selection and one whose selection an observer keeps in state of the game's own, each
 // tab colored as it is selected, hovered or disabled and outlined while it holds the focus Tab
 // moves.

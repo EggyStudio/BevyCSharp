@@ -1,10 +1,10 @@
 # A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
 # test job builds (test), and puts the three systems' pages on one (digest). The pack workflow calls
-# this one with `pack` (pack.yml), which adds
-# the render bridge built for all six platforms (native) and, on the Linux one, Courtyard and Swarm
-# played from a package of this commit with the games soaked and Courtyard published native (game),
-# the feature test driven (drive), every example captured (examples), a window stormed (storm) and
-# the README walked in a container (readme), and the pack run packs only once every job here passed.
+# this one with `pack` (pack.yml), which adds the render bridge built for all six platforms (native)
+# and, on the Linux one, Courtyard and Swarm played from a package of this commit with the games
+# soaked and Courtyard published native (game), the feature test run through its course (drive),
+# every example captured (examples), a window stormed (storm) and the README walked in a container
+# (readme), and the pack run packs only once every job here passed.
 name: build
 
 # Documents and captures are left out, apart from the README, the guide and BUILDING.md, whose links
@@ -19,9 +19,9 @@ on:
     inputs:
       pack:
         description: >-
-          Whether to build the six bridges and run the jobs that play, drive, capture, storm and
-          walk on the Linux one, as the pack workflow asks. A push gives no inputs, so there it is
-          empty and reads as false.
+          Whether to build the six bridges and run the jobs that play, run the feature test's
+          course, capture, storm and walk on the Linux one, as the pack workflow asks. A push
+          gives no inputs, so there it is empty and reads as false.
         type: boolean
         required: false
         default: false
@@ -367,8 +367,8 @@ jobs:
       # held to four processors of the working machine played a round of each in 67 to 100 seconds
       # with the feature test beside them, and the two and a half minutes the pack run of 5e01491e
       # gave them read each two or three times where the check judges six; ten minutes read the
-      # three seven to ten times there, nothing climbing. The feature test is soaked in the drive's
-      # job, alone on its runner.
+      # three seven to ten times there, nothing climbing. The feature test is soaked in the job that
+      # runs its course, alone on its runner.
       - name: Play the games a while and check nothing they hold grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
@@ -405,19 +405,18 @@ jobs:
           path: build/soak
           if-no-files-found: ignore
 
-  # The feature test, built on a package as Courtyard is, and driven through the hub and each
-  # station of its course, every one judged by where the player ends up
-  # (build/drive-feature-test.sh). A job of its own beside the play job, so the drive adds nothing
-  # to how long a run takes.
+  # The feature test, built on a package as Courtyard is, and run through the hub and each station
+  # of its course, every one judged by where the player ends up (build/drive-feature-test.sh). A job
+  # of its own beside the play job, so the course run adds nothing to how long a run takes.
   drive:
-    name: drive the feature test
+    name: run the feature test's course
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # An hour and a half. The drive's holds and waits come to some 4,600 frames, and lavapipe held to
-    # four processors of the working machine draws the hub under its weather at 1.1 frames a second,
-    # with slangc or without, so the drive took some 70 minutes there. The runner played Swarm in 7.4
-    # minutes where that machine took 11, which puts the drive near 47 minutes here, with the pack,
-    # the build and the fetch of slangc before it and the soak of fifteen minutes after it.
+    # An hour and a half. The course run's holds and waits come to some 4,600 frames, and lavapipe
+    # held to four processors of the working machine draws the hub under its weather at 1.1 frames a
+    # second, with slangc or without, so the run took some 70 minutes there. The runner played Swarm
+    # in 7.4 minutes where that machine took 11, which puts the run near 47 minutes here, with the
+    # pack, the build and the fetch of slangc before it and the soak of fifteen minutes after it.
     timeout-minutes: 90
     needs: [native]
     # Each step through build/step.py, as the play job has it.
@@ -450,7 +449,7 @@ jobs:
       - name: Pack
         run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
-      - name: Drive the feature test
+      - name: Run the feature test's course
         env:
           SHOTS: ${{ runner.temp }}/feature-test
           BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
@@ -460,7 +459,7 @@ jobs:
           build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
 
       # The feature test played a round at a time at the hub, as the play job soaks the games
-      # (build/soaks.sh), here after the drive, whose run left its shaders compiled in the cache
+      # (build/soaks.sh), here after the course run, which left its shaders compiled in the cache
       # beside its assets, so the readings are not of compiles. Alone on the runner, since on the
       # working machine's lavapipe held to four processors its first round ended six minutes into
       # its soak with the three games beside it, and three minutes in alone, each round after it
@@ -473,7 +472,7 @@ jobs:
         run: build/soaks.sh 900 feature-test
 
       # Each station's capture, the program's log and the frame times, which say where a failed
-      # drive went wrong.
+      # course run went wrong.
       - uses: actions/upload-artifact@v7
         if: always()
         with:

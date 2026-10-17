@@ -161,7 +161,7 @@ away, and everything it knows about the log and the commands it asks the library
 
 Bevy keeps a store of named measures, each a history of numbers with a value smoothed over time and
 an average over what it keeps. Bevy's own plugins measure into it where `Config.DiagnosticPlugins`
-asks for them: `FrameTime` for the frame time, frames a second and the frame count, `EntityCount`
+asks for them, `FrameTime` for the frame time, frames a second and the frame count, `EntityCount`
 for the entities, and `Render` for each render pass's CPU and GPU time. `Log` prints every
 diagnostic once a second to Bevy's log. A game's own measures go in the same store and are printed
 beside Bevy's, a suffix after each number:
@@ -183,7 +183,7 @@ or all of them again for null. Bevy's measures of the process's and the machine'
 need a crate the bridge does not compile in, so they are not in the store. The `diagnostics` command
 lists the store as the log prints it.
 
-## Driving a running app
+## Controlling a running app
 
 The same catalog is reachable from a terminal. `Config.Serve`, or `--serve`, or `BCS_SERVE` in the
 environment, opens a socket on the loopback interface and writes a session file, and `bcs` finds it
@@ -241,7 +241,7 @@ not, with a stable token in `errors[0].code` and an exit code that separates *it
   "errors": [], "warnings": [] }
 ```
 
-`bcs` also wraps the cold paths, in the order this repository needs them: `bcs build` builds the
+`bcs` also wraps the cold paths, in the order this repository needs them. `bcs build` builds the
 bridge and then the managed side, `bcs test` runs the suite through `build/test.py`, as CI does,
 and exits 8 when tests fail and 6 when the run never reached a verdict, a test host lost to a crash
 or to its memory cap among them, and `bcs doctor` answers why nothing is starting. `bcs help` lists

@@ -230,7 +230,7 @@ their contacts, which divided by the step is the force between them, a crate's w
 rests or is dragged across, since the friction is not counted. A pair asleep goes on being answered
 with what it pressed as it fell asleep, since nothing between them changes while it sleeps.
 
-Joints hold two moving bodies together: a ball joint for a shoulder or a pendulum, a hinge for a
+Joints hold two moving bodies together, a ball joint for a shoulder or a pendulum, a hinge for a
 door or a wheel, a weld for a part bolted on, a distance range for a rope or a rod, and a slider
 for a drawer or a lift.
 

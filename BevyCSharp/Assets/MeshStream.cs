@@ -9,7 +9,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// Bevy's <c>MeshVertexAttribute</c>, as its <c>custom_vertex_attribute</c> example declares one, for
-/// what a vertex holds that no attribute of Bevy's says: a voxel's face and texture packed into four
+/// what a vertex holds that no attribute of Bevy's says, such as a voxel's face and texture packed into four
 /// bytes and unpacked in the shader, a blend weight, a wind phase. The vertex shader declares the
 /// input in its own vertex struct at the location's <c>TEXCOORDn</c>, <c>TEXCOORD8</c> for location 8,
 /// as every input here is declared by location, so the game writes one number twice and the two

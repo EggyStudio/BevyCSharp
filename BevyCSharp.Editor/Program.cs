@@ -79,7 +79,7 @@ Shaders.KeepRenderingAfterErrors = true;
 // run given one is usually a check that needs the same window every time.
 config.RememberWindow = size is null;
 
-// Answers `bcs` while it runs: what is in the world, what a click does, what the window looks
+// Answers `bcs` while it runs, what is in the world, what a click does, what the window looks
 // like, without stopping to ask. BCS_SERVE does the same for a run that cannot be given arguments.
 config.Serve = args.Contains("--serve");
 

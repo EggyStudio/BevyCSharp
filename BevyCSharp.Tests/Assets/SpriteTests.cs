@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the 2D path: a camera that measures in pixels, and sprites under it.
+/// Covers the 2D path, a camera that measures in pixels, and sprites under it.
 /// </summary>
 /// <remarks>
 /// What reaches the screen needs a window. What is checked here is that a sprite is an ordinary

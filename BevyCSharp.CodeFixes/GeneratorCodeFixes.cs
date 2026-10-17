@@ -14,8 +14,9 @@ namespace Bevy.CodeFixes;
 
 /// <summary>
 /// The fixes an editor offers for the behavior and command generators' diagnostics, where the right
-/// change is clear from the diagnostic alone: a behavior struct made partial, a stage method given
-/// the context it takes, one stage kept of several, and a command made static or reachable.
+/// change is clear from the diagnostic alone, such as a behavior struct made partial, a stage
+/// method given the context it takes, one stage kept of several, and a command made static or
+/// reachable.
 /// </summary>
 /// <remarks>
 /// A <c>[RunIf]</c> naming nothing (BCS004), a filter or a behavior holding references (BCS005 and

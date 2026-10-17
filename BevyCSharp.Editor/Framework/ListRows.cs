@@ -133,7 +133,7 @@ internal static class ListRows
     }
 
     /// <summary>
-    /// What a folded item is called: its first piece of text, which is usually its name, or its type
+    /// What a folded item is called, its first piece of text, which is usually its name, or its type
     /// and its place when it has none.
     /// </summary>
     private static string Title(BehaviorContext ctx, Entity entity, ItemFields fields, ItemFields.Bound? bound, int index)

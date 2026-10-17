@@ -24,7 +24,7 @@ pub fn fnv(bytes: &[u8]) -> u64 {
     hash
 }
 
-/// What names a cache entry: the file, the entry point, the defines and the bridge's modules.
+/// What names a cache entry, the file, the entry point, the defines and the bridge's modules.
 ///
 /// The file by its path under the root rather than on disk, so the cache still applies after the
 /// game has been moved somewhere else.

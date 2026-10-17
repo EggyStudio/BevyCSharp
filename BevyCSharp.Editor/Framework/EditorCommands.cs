@@ -353,7 +353,7 @@ public static class EditorCommands
             1,
             "Statistics, performance and keys"));
 
-        // The scene view's own camera: its lens, how it flies, and how it draws, beside the
+        // The scene view's own camera, its lens, how it flies, and how it draws, beside the
         // statistics, and in the same place, so only one of the two cards is up at a time.
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Right,

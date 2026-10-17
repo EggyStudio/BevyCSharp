@@ -45,7 +45,7 @@ public readonly record struct ViewDraw
     /// shadows everything they light, Bevy's own geometry included.
     /// </summary>
     /// <remarks>
-    /// Drawn again for each shadow view, depth alone, after Bevy has drawn its own casters there:
+    /// Drawn again for each shadow view, depth alone, after Bevy has drawn its own casters there,
     /// each of the camera's directional cascades, each spot light, and each face of each point
     /// light's cube. Its vertex shader runs with that view in <c>bcs_pass::view</c>, so placing
     /// geometry from the view as it always does places it as the light sees it, and its fragment
@@ -89,7 +89,7 @@ public readonly record struct ViewDraw
     /// none is blended where any is an integer image.
     /// </para>
     /// <para>
-    /// The camera's prepass is drawn into by the same names: <c>normals</c> and <c>motion</c>
+    /// The camera's prepass is drawn into by the same names, <c>normals</c> and <c>motion</c>
     /// where it draws them, and on a camera drawing deferred, the G-buffer as <c>gbuffer</c> and
     /// which lighting pass lights each pixel as <c>lighting_pass</c>. A draw into those two runs
     /// at <see cref="FramePoint.InPrepass"/>, and Bevy's deferred lighting then lights what it
@@ -138,7 +138,7 @@ public readonly record struct ViewDraw
     };
 
     /// <summary>
-    /// As many vertices and instances as four unsigned integers in a buffer say when it runs:
+    /// As many vertices and instances as four unsigned integers in a buffer say when it runs,
     /// vertices, instances, the first vertex and the first instance. For a program drawing with mesh
     /// shaders, as many workgroups as three unsigned integers there say instead.
     /// </summary>

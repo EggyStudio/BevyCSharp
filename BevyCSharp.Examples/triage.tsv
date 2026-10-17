@@ -113,7 +113,7 @@ custom_loop	n/a	replaces Bevy's runner, which the bridge owns
 drag_and_drop	can
 empty	can
 empty_defaults	can
-externally_driven_headless_renderer	n/a	drives Bevy's update from Rust code
+externally_driven_headless_renderer	n/a	runs Bevy's update from Rust code
 headless	can	the second app stopped after three seconds, where Bevy's counts until it is stopped
 headless_renderer	can	the offscreen picture captured, where Bevy copies the image out of the render world itself
 log_layers_ecs	n/a	adds a tracing layer, written in Rust

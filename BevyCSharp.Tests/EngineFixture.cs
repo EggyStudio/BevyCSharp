@@ -59,7 +59,7 @@ public sealed class EngineHarness : IDisposable
     /// </summary>
     /// <remarks>
     /// Not <see cref="AppContext.BaseDirectory"/>, which is the directory of whatever launched
-    /// the process: `dotnet` under `dotnet test`, and the IDE's own runner under a Rider or
+    /// the process, `dotnet` under `dotnet test`, and the IDE's own runner under a Rider or
     /// Visual Studio run. Neither is where these assets were copied. The assembly knows where it
     /// is regardless of who started it.
     /// </remarks>

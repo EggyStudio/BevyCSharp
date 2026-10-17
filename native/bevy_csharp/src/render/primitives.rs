@@ -140,7 +140,7 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
             }
         },
         // A sphere of rings and slices rather than Bevy's default of subdivided triangles, which
-        // maps an image around it the way a globe is drawn: the radius, then how many slices go
+        // maps an image around it the way a globe is drawn, the radius, then how many slices go
         // around it and how many rings from pole to pole, at least three and two.
         "UvSphere" => Sphere::new(a)
             .mesh()
@@ -164,7 +164,7 @@ fn primitive(kind: &str, a: f32, b: f32, c: f32) -> Option<bevy::mesh::Mesh> {
         "Circle" => Circle::new(a).mesh().into(),
         "Annulus" => Annulus::new(a, b).mesh().into(),
         "Rectangle" => Rectangle::new(a, b).mesh().into(),
-        // The flat shapes a 2D camera draws, in the plane a rectangle is, by Bevy's own measures:
+        // The flat shapes a 2D camera draws, in the plane a rectangle is, by Bevy's own measures,
         // a sector or a segment by its radius and the half angle it spans, an ellipse by its half
         // width and half height, a capsule by its radius and the length between its ends, a
         // rhombus by its two diagonals, and a regular polygon by its circumradius and sides.

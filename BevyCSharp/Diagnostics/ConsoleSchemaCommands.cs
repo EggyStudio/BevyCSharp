@@ -51,7 +51,7 @@ internal static class ConsoleSchemaCommands
     }
 
     /// <summary>
-    /// The lines of the description: each component, then its fields in the order Bevy declares
+    /// The lines of the description, each component, then its fields in the order Bevy declares
     /// them, with the components sorted by type path so a regeneration diffs only where Bevy did.
     /// </summary>
     /// <remarks>

@@ -190,7 +190,7 @@ public static class Colliders
 
     /// <summary>
     /// The meshes an entity and those under it are drawn with, as one, each placed in the entity's
-    /// own space by the transforms between them, or which of the two reasons there is none: one of
+    /// own space by the transforms between them, or which of the two reasons there is none, one of
     /// them is loading, or none of them is drawn with any.
     /// </summary>
     /// <remarks>

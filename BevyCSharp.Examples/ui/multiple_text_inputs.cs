@@ -77,7 +77,7 @@ internal static class MultipleTextInputs
             }
         }
 
-        // A row of the grid: what sets its field apart, the field, its value and its submission.
+        // A row of the grid, what sets its field apart, the field, its value and its submission.
         Entity Row(int row, string name)
         {
             var label = Ui.SpawnNode(new UiSettings { Border = Sides.All(Length.Px(4f)), Justify = UiJustify.Center, Align = UiAlign.Center, BorderColor = White });

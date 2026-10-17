@@ -1,10 +1,10 @@
 # TODO
 
-Work outstanding on BevyCSharp, in the order it blocks building a game: getting content in, drawing
+Work outstanding on BevyCSharp, in the order it blocks building a game, getting content in, drawing
 it, putting an interface on it, making it behave, reaching the devices a player has, and shipping
 the result.
 
-The ECS half of the project is finished and covered by tests: the behavior model, chunked
+The ECS half of the project is finished and covered by tests, the behavior model, chunked
 iteration, change detection, filters, hierarchy, scheduling, commands, input and states. What is
 thin is the engine-facing half. Bevy is compiled in far further than it is bridged, so most of what
 follows is bridge work over code already linked into the binary rather than a dependency to add.
@@ -125,16 +125,16 @@ scene or a `.scn`/`.scn.ron` file, both of which are a `WorldAsset` in 0.19. `Lo
 needs a window, because translating a glTF material into one the renderer draws with belongs to the
 renderer, which is the arrangement rather than a limitation.
 
-The division of labor this aims at: glTF carries geometry, materials and animations, because Blender
-and every other tool exports them, and composition happens after the scene is spawned by adding
-components to what the file defined.
+In the division of labor this aims at, glTF carries geometry, materials and animations, because
+Blender and every other tool exports them, and composition happens after the scene is spawned by
+adding components to what the file defined.
 
 Bevy's own answer to composition is Bevy Scene Notation, and it is **not** reachable from C#.
 `bsn!` is a compile-time Rust macro expanding into types that implement the `Scene` trait, so there
 is nothing to call at runtime, and Bevy ships no `.bsn` asset format or loader yet. Scenes written
 in BSN exist only in Rust source.
 
-What C# has instead is spawn-then-patch through the ECS surface: spawn the scene, walk it with
+What C# has instead is spawn-then-patch through the ECS surface. Spawn the scene, walk it with
 `ChildrenOf`, add components to the entities it produced, overwrite the `Transform` an artist set.
 That reaches the same result with the same last-write-wins rule, because both end as component
 inserts. Two things BSN has that it does not:
@@ -175,7 +175,7 @@ block at a time, but a windowless app reports no compressed format as decodable,
 which desktop adapters do not decode, would need transcoding on load. Nothing here blocks a game; it
 is size on disk and upload cost.
 
-Shaders are Slang, and a shader declares whatever it needs: numbers, arrays, structs, constant
+Shaders are Slang, and a shader declares whatever it needs, numbers, arrays, structs, constant
 buffers, any number of textures of any shape, samplers, storage buffers and images. The bridge reads
 the layout the compiler reports and builds each material's, pass's and dispatch's bind group from
 it, and C# sets every value by name. A camera runs any number of programs over its picture as
@@ -298,7 +298,7 @@ anchored off its center, cut down to one rectangle of a sheet or one frame of an
 drawn sliced, tiled or fitted inside its size the way a video player letterboxes.
 
 - **Animation is a sample, not a feature.** `SpriteAnimation` in `BevyCSharp.FeatureTest` steps a sheet
-  and is there to be copied. A game adds frame events, a queue of clips and animation driven by the
+  and is there to be copied. A game adds frame events, a queue of clips and animation run by the
   state machine, and each would be the wrong shape shipped in the library while still costing a
   query a frame.
 
@@ -349,7 +349,7 @@ call per field per frame, so there is no widget tree to keep in step with the wo
 details of whatever is selected, the tools float in the scene's corners, and the rest is behind a
 hamburger whose contents are a table of paths. A component is a card that opens and shuts, a field
 is a row drawn as its kind and attributes say, and a component with nothing to show is a tag. The
-bottom left is a strip of tabs opening into a card: the console, the asset browser, the shader
+bottom left is a strip of tabs opening into a card, the console, the asset browser, the shader
 programs, the images the scene camera's shaders keep, the settings and the style. Gizmos draw the selection, its handles, the ground and the camera's orientation, and a
 drag on a handle moves, turns or stretches what is selected. [EDITOR.md](EDITOR.md) has the design
 language.
@@ -411,7 +411,7 @@ language.
 
 ### States
 
-States carry their edges and their entities: `[OnEnter]` and `[OnExit]` run once per transition,
+States carry their edges and their entities. `[OnEnter]` and `[OnExit]` run once per transition,
 `[InState]` every frame a state is held, `DespawnOnExit` ties an entity's life to a value, and
 `[SubStateOf]` declares a state that exists only while another holds a value, so a pause disappears
 with the run it belongs to, and `[ComputedFrom]` declares one whose value follows from another's.
@@ -435,7 +435,7 @@ associated type and the types exist when the crate is built.
 ### Engine messages
 
 The window's messages are drained onto the managed bus each frame, so `ctx.Read<WindowResized>()`
-reads an engine message the way it reads one another system sent. Ten are bridged: six whose
+reads an engine message the way it reads one another system sent. Ten are bridged. Six whose
 payload is numbers, the three file drag-and-drop messages, and `AssetLoadFailed`, which carries the
 path, the reason and the kind for an asset that would not load. Text crosses the boundary by the caller
 owning the buffer, so a caller probes with a small buffer and calls again only when the answer did
@@ -542,7 +542,7 @@ storage as itself, and one is left.
 
 What reaches the render world is drawn and looked at rather than taken on trust. Every registration
 goes through `assets::init_asset_once`, whose two halves the crate's own tests pin, and the step
-after is covered by drawing into an offscreen target and asserting on the pixels: a mesh with an
+after is covered by drawing into an offscreen target and asserting on the pixels, for a mesh with an
 unlit material made in code (`DrawnTests`), a glTF file's own material (`GltfMaterialDrawnTests`), a
 lit surface through the sky and environment map tests, a sprite through the overlay one, and text
 and the interface through the layout's pixel tests. Every lens effect is checked by the shape of

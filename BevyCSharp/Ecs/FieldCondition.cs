@@ -4,7 +4,7 @@ namespace Bevy;
 /// One reason a field might not be shown.
 /// </summary>
 /// <remarks>
-/// The condition as it was written, kept whole rather than resolved: which field decides, what it
+/// The condition as it was written, kept whole rather than resolved, which field decides, what it
 /// has to say, and whether the sense is reversed. Whoever is drawing asks the world; nothing here
 /// can, and nothing here should have to.
 /// </remarks>

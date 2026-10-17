@@ -133,7 +133,9 @@ public partial struct Packs
         return ScenePacks.IsFetched(pack) ? Load(ctx, pack) : Fetch(pack);
     }
 
-    /// <summary>Loads a fetched pack into the zone, from the console and the drive script.</summary>
+    /// <summary>
+    /// Loads a fetched pack into the zone, from the console and build/drive-feature-test.sh.
+    /// </summary>
     [Command("scene.load", "Loads a fetched scene pack into the scenes zone: scene.load <name>")]
     internal static string LoadCommand(string name)
     {

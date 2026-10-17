@@ -21,7 +21,7 @@ namespace Bevy;
 [StructLayout(LayoutKind.Sequential)]
 public struct ViewVisibility : INativeComponent
 {
-    /// <summary>The raw byte Bevy stores: bit 0 this frame, bit 1 the previous frame.</summary>
+    /// <summary>The raw byte Bevy stores, bit 0 this frame, bit 1 the previous frame.</summary>
     public byte Bits;
 
     /// <summary>True when some view rendered this entity this frame.</summary>

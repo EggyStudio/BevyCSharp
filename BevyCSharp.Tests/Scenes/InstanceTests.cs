@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers a glTF scene placed as an instance: its nodes addressed by path, the changes made over it
+/// Covers a glTF scene placed as an instance, its nodes addressed by path, the changes made over it
 /// recorded as overrides, and those written to a scene file and applied again after a load.
 /// </summary>
 /// <remarks>

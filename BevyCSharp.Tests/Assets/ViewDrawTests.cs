@@ -573,7 +573,7 @@ public sealed class ViewDrawTests
 
     /// <summary>
     /// The renderer says which names a camera drew, so an inspector can offer only what a watch
-    /// would show: the camera's own image and the prepass it asked for, and not the ambient
+    /// would show, the camera's own image and the prepass it asked for, and not the ambient
     /// occlusion or G-buffer it did not.
     /// </summary>
     [SkippableFact]

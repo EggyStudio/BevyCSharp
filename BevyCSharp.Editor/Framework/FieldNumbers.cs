@@ -135,7 +135,7 @@ internal static class FieldNumbers
     /// <summary>The angles that field is being turned to, in degrees.</summary>
     private static Vector3 _turned;
 
-    /// <summary>The angles to show for a rotation: the ones being typed, or the world's own.</summary>
+    /// <summary>The angles to show for a rotation, the ones being typed, or the world's own.</summary>
     /// <param name="id">Which field is asking.</param>
     /// <param name="turn">What the world says it is rotated by.</param>
     internal static Vector3 Turning(string id, Quat turn)

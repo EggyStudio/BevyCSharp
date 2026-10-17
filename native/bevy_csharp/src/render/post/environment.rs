@@ -1,4 +1,4 @@
-//! Lighting and a background from cubemaps: one filtered on the GPU, one derived from the sky, a
+//! Lighting and a background from cubemaps, one filtered on the GPU, one derived from the sky, a
 //! pair somebody baked, and the skybox, each waiting for its images to become cubes.
 
 use crate::interop::status;
@@ -205,7 +205,7 @@ impl PendingCubemaps {
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct PendingFaces(pub(crate) Vec<PendingFace>);
 
-/// One cubemap made of six images: the image it becomes, and the faces in the column's order.
+/// One cubemap made of six images, the image it becomes, and the faces in the column's order.
 #[cfg(feature = "render")]
 pub struct PendingFace {
     /// The image handed back at once, which holds a placeholder until the faces arrive.

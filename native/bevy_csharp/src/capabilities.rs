@@ -5,14 +5,14 @@ use crate::interop::status;
 #[cfg(feature = "render")]
 use crate::state::with_world;
 
-/// Reports which native profile this library was built with: `1` if the renderer is
+/// Reports which native profile this library was built with, `1` if the renderer is
 /// compiled in, `0` for a headless-only build.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_render() -> i32 {
     if cfg!(feature = "render") { 1 } else { 0 }
 }
 
-/// Reports which UI profile this library was built with: `1` if the HTML and CSS surface is
+/// Reports which UI profile this library was built with, `1` if the HTML and CSS surface is
 /// compiled in, `0` otherwise.
 ///
 /// Separate from [`bcs_has_render`] because the editor profile is a superset of the render one. A
@@ -23,7 +23,7 @@ pub extern "C" fn bcs_has_editor() -> i32 {
     if cfg!(feature = "editor") { 1 } else { 0 }
 }
 
-/// Reports whether this library carries a game's assets compiled in: `1` when it was built with
+/// Reports whether this library carries a game's assets compiled in, `1` when it was built with
 /// `--embed`, `0` otherwise.
 ///
 /// A library built so reads every asset from what it carries, whatever asset root an app names,
@@ -37,7 +37,7 @@ pub extern "C" fn bcs_has_embedded_assets() -> i32 {
 pub(crate) static INTERFACE_INSTALLED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 
-/// Reports whether the running app installed the interface: `1` when it did, `0` otherwise.
+/// Reports whether the running app installed the interface, `1` when it did, `0` otherwise.
 ///
 /// A different question again from [`bcs_has_editor`], which answers what the library was built
 /// with rather than what this app asked for. A build carrying the surface still draws no interface

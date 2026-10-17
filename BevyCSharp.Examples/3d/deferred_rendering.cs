@@ -6,10 +6,11 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Two flight helmets, glossy spheres, an unlit glowing sphere with a light in it and a cube carved
-// by parallax mapping, drawn deferred, forward, or forward with a prepass, which 1, 2 and 3 choose.
-// The ground and two small cubes are drawn forward whichever is chosen, a material set apart from
-// the rest. Space starts and stops the sun going round and the cube turning, and H hides the text.
+// Two flight helmets, glossy spheres, an unlit sphere brighter than white with a light in it and a
+// cube carved by parallax mapping, drawn deferred, forward, or forward with a prepass, which 1, 2
+// and 3 choose. The ground and two small cubes are drawn forward whichever is chosen, a material
+// set apart from the rest. Space starts and stops the sun going round and the cube turning, and H
+// hides the text.
 internal static class DeferredRendering
 {
     private enum Mode
@@ -83,7 +84,7 @@ internal static class DeferredRendering
         ecs.SpawnMesh(cube, forward, Transform.At(-0.3f, 0.5f, -0.2f));
         ecs.SpawnMesh(cube, forward, Transform.At(0.2f, 0.5f, 0.2f));
 
-        // A glowing sphere, unlit and brighter than white, with a point light of its color in it.
+        // A sphere, unlit and brighter than white, with a point light of its color in it.
         var sphere = Render.CreateMesh(MeshShape.UvSphere, 0.125f, 32f, 18f);
         var glow = Color.FromSrgb(10f, 4f, 1f);
         var lamp = ecs.SpawnMesh(sphere, Render.CreateMaterial(new MaterialSettings { BaseColor = glow, Unlit = true }), Transform.At(0.4f, 0.5f, -0.8f));
@@ -126,7 +127,7 @@ internal static class DeferredRendering
         _text = Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
     }
 
-    // The cube Bevy's parallax_mapping example carves, small and turning beside the glowing sphere.
+    // The cube Bevy's parallax_mapping example carves, small and turning beside the bright sphere.
     private static void SetupParallax(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;

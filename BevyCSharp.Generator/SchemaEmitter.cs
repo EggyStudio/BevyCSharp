@@ -207,8 +207,8 @@ internal static class SchemaEmitter
             .Append("                    \"").Append(field.Name).Append("\",\n")
             .Append("                    global::Bevy.FieldKind.").Append(field.Kind).Append(",\n")
             .Append("                    \"").Append(Display(field.Type)).Append("\",\n")
-            // Read: absent component reads as null, which a tool draws as a blank row rather than
-            // as a zero it might then write back.
+            // A read of an absent component gives null, which a tool draws as a blank row rather
+            // than as a zero it might then write back.
             .Append("                    static (world, entity) =>\n")
             .Append("                        world.TryGet<").Append(model.QualifiedName)
             .Append(">(entity, out var component) ? ")
@@ -223,8 +223,8 @@ internal static class SchemaEmitter
                 _ => "component." + field.Name,
             })
             .Append(" : null")
-            // Write: read, modify, write back. Going through Set rather than a reference into
-            // storage makes Bevy see the change.
+            // A write reads, changes and writes back. Going through Set rather than a reference
+            // into storage makes Bevy see the change.
             .Append(Writer(model, field));
 
         var hints = field.Hints.IsEmpty ? null : field.Hints;
@@ -810,7 +810,7 @@ internal static class SchemaEmitter
         model.FormerNames.Select(name =>
             name.IndexOf('.') >= 0 || model.Namespace is null ? name : model.Namespace + "." + name);
 
-    /// <summary>The type as a tool should show it: no <c>global::</c>, no namespace.</summary>
+    /// <summary>The type as a tool should show it, no <c>global::</c>, no namespace.</summary>
     private static string Display(string qualified)
     {
         var name = qualified.StartsWith("global::", System.StringComparison.Ordinal)

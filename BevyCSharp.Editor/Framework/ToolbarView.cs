@@ -51,7 +51,7 @@ public static class ToolbarView
     }
 
     /// <summary>
-    /// Where the groups are measured from: the scene's top left while docked, and the same point
+    /// Where the groups are measured from, the scene's top left while docked, and the same point
     /// while floating, where the scene is the whole window, so docking or floating the panel does
     /// not move a button.
     /// </summary>

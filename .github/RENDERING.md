@@ -186,7 +186,7 @@ distribution and a specular input to lighting.
 
 Both ends Bevy ships are bridged. Its screen-space reflections run over its deferred path, and a
 reflection probe can capture itself, rendering the room into a cube that Bevy filters on the GPU,
-live or once. A reflection package adds what those two leave out: a trace that reaches past the
+live or once. A reflection package adds what those two leave out, a trace that reaches past the
 screen's edge through the probes and the world-space structures, and a specular input a package's
 own result can be written into, which Bevy's lighting does not have yet.
 
@@ -194,14 +194,14 @@ own result can be written into, which Bevy's lighting does not have yet.
 
 Probes at several scales, each tracing short intervals, merged coarse to fine. In three dimensions
 it is still being made fast enough, and it is deliberately left until then. What it will need is
-already on this list: 3D and array textures with storage access, compute over them every frame, a
+already on this list, 3D and array textures with storage access, compute over them every frame, a
 voxel or distance representation to trace against, and an indirect diffuse input to lighting.
 
 ## What Unity made them work around, and the hook that replaces each
 
 | built around | supported here as |
 |---|---|
-| Copying the pipeline's compute shaders, rewriting their text and swapping them in through reflection, to reach the indirect diffuse and occlusion textures | Named lighting inputs a pass or a compute shader writes: ambient occlusion, indirect diffuse, indirect specular |
+| Copying the pipeline's compute shaders, rewriting their text and swapping them in through reflection, to reach the indirect diffuse and occlusion textures | Named lighting inputs a pass or a compute shader writes, which are ambient occlusion, indirect diffuse and indirect specular |
 | Subtracting the engine's ambient term from the lit picture and adding GI back | Turning the engine's ambient off per camera when an indirect input is provided |
 | Re-rendering every opaque to get normals and albedo in forward | A prepass that writes normals, and a thin G-buffer (albedo, metallic, roughness) on request |
 | Drawing its own object motion buffer, and marking moving pixels in the stencil | Motion vectors from the prepass, with previous transforms for every instance, bound to passes |
@@ -231,7 +231,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Compute before any camera draws | Has (`render/compute.rs`) |
 | Compute per camera, with the view, at a chosen point in the frame | Has (`render/views.rs`, `Shaders.SetViewDispatches`) |
 | Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute and draws (`FramePoint`), and for passes at every point with a picture (`ShaderPass.At`) |
-| Passes writing several targets, or depth | Has for draws on a camera: the picture, or any number of the camera's images at once (`ViewDraw.Targets`), with depth. A full-screen pass writes the picture alone, and a draw of one triangle over the picture into several images does the rest |
+| Passes writing several targets, or depth | Has, for draws on a camera, the picture or any number of the camera's images at once (`ViewDraw.Targets`), with depth. A full-screen pass writes the picture alone, and a draw of one triangle over the picture into several images does the rest |
 | Async compute | Missing. wgpu has one queue per device, so this waits on wgpu |
 
 ### Per view
@@ -363,7 +363,7 @@ Each phase unblocks a class of package, and none needs a later one.
    buffers that grow are in, and so are draws into integer targets for a visibility buffer and
    Bevy's meshlets as an opt-in. A pass resolving a visibility buffer can write depth, motion and
    normals, since a draw after the prepass targets the prepass's motion and normals and writes
-   depth, and a draw casts shadows by being drawn into every shadow view: each directional
+   depth, and a draw casts shadows by being drawn into every shadow view, each directional
    cascade, spot light map and point light face, so shadow views are views. The phase's
    foundations are in.
 4. **Streaming.** Region uploads into an image, block-compressed images and worker-thread reads

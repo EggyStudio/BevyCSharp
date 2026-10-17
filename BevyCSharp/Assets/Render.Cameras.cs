@@ -490,7 +490,7 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Two things make a sky: a planet, which is an entity the size of a world, and a camera told
+    /// Two things make a sky, a planet, which is an entity the size of a world, and a camera told
     /// to sample it. This call keeps at most one planet in the world and points the camera at it,
     /// so calling it for a second camera adds a viewer rather than a second sky.
     /// </para>

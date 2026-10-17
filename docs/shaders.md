@@ -183,8 +183,8 @@ vertex's index as it fetches the position. A storage buffer is a material's bind
 would need a material of its own or a share of one large buffer at an offset, either of which breaks
 the batch, and a buffer read takes the vertex's number and an instance's offset by hand. The fetch
 costs about the same either way, and what a stream gains is the binding. A buffer is the right tool
-for what is not one value a vertex: a palette or an atlas table every mesh shares, a mesh's own
-constants, or what a compute pass reads as well.
+for what is not one value a vertex, such as a palette or an atlas table every mesh shares, a mesh's
+own constants, or what a compute pass reads as well.
 
 ### Pipeline constants
 
@@ -358,7 +358,7 @@ own draws none.
 A program draws an interface node with its interface stages, and the interface draws the material as
 Bevy draws a `UiMaterial`, across the whole node over its background, border and image and under
 its text. Its fragment shader imports `bcs_ui` and takes the `bcs_ui::VertexOutput` Bevy's own
-vertex shader hands on: where on the node the fragment is, the node's size in pixels, its border
+vertex shader hands on, where on the node the fragment is, the node's size in pixels, its border
 widths and how far its corners are rounded, enough to draw a border or a rounded edge of its own.
 Its own values are declared and set by name as a 3D material's are:
 
@@ -418,7 +418,7 @@ float4 fragment(bcs::VertexOutput mesh) : SV_Target
 }
 ```
 
-A surface holds what a standard material does: its color, the light it gives off, how metal and
+A surface holds what a standard material does, its color, its emissive light, how metal and
 rough it is, its reflectance, how much ambient light reaches it, and the normal it is lit by, which
 a normal map bends. `bcs::lit` is two steps, `bcs::light` and then `bcs::finish`, and a shader that
 changes the lit color, cutting it into steps or tinting it, calls them apart and changes it between,
@@ -484,8 +484,8 @@ buffers under [Compute on a camera](compute.md#compute-on-a-camera)).
 
 Bevy projects a clustered decal onto whatever lies inside its box, and its standard material lays
 the decal's textures on. A surface here has them laid on with `bcs::decals` before it is lit, the
-color over the surface's by its alpha, how metal and rough it is, its normal map and the light it
-gives off, as the standard material lays them. A shader that does something of its own with each
+color over the surface's by its alpha, how metal and rough it is, its normal map and its emissive
+light, as the standard material lays them. A shader that does something of its own with each
 decal walks them itself, by `bcs::decal_count`, the tag a game gave each, which Bevy hands over and
 does nothing with, and each of its textures, as Bevy's clustered_decals example tints its decals by
 their tags:

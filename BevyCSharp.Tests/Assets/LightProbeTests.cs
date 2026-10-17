@@ -6,7 +6,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers light probes: reflection probes lit by baked cubemaps, and irradiance volumes lit from a
+/// Covers light probes, reflection probes lit by baked cubemaps, and irradiance volumes lit from a
 /// 3D image, including one a compute shader writes.
 /// </summary>
 [Collection("engine")]
@@ -197,8 +197,9 @@ public sealed class LightProbeTests
     }
 
     /// <summary>
-    /// A mirror sphere inside a probe that captures its surroundings reflects each glowing block on
-    /// the side it stands, so every face camera drew into the layer Bevy reads for that direction.
+    /// A mirror sphere inside a probe that captures its surroundings reflects each emissive block
+    /// on the side it stands, so every face camera drew into the layer Bevy reads for that
+    /// direction.
     /// </summary>
     [SkippableTheory]
     [InlineData(true)]
@@ -243,7 +244,7 @@ public sealed class LightProbeTests
 
     /// <summary>
     /// A smooth sphere in a large capturing probe, a red block to its right, green to its left,
-    /// blue above and yellow behind the camera, all glowing and all out of the camera's view.
+    /// blue above and yellow behind the camera, all emissive and all out of the camera's view.
     /// </summary>
     private static CapturedImage CaptureScene(bool live)
     {

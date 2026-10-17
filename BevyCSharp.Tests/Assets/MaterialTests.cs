@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers what a material can be made of: its factors, how it handles alpha, and its textures.
+/// Covers what a material can be made of, its factors, how it handles alpha, and its textures.
 /// </summary>
 /// <remarks>
 /// What a surface looks like needs a GPU and an eye. What is checked here is that every setting

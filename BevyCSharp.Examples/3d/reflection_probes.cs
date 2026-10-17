@@ -35,7 +35,7 @@ internal static class ReflectionProbes
             _probeSpecular = AssetServer.Load(AssetKind.Image, "environment_maps/cubes_reflection_probe_specular_rgb9e5_zstd.ktx2");
             _cubes = AssetServer.LoadGltfScene("models/cubes/Cubes.glb", 0);
 
-            // Bevy's Exposure { ev100: 11.0 }, as a lens: f/1 open for a 2048th of a second at ISO 100.
+            // Bevy's Exposure { ev100: 11.0 }, as a lens, f/1 open for a 2048th of a second at ISO 100.
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-3.883f, 0.325f, 2.781f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(_camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.AcesFitted });
             Render.SetLensExposure(_camera, aperture: 1f, shutter: 1f / 2048f, sensitivity: 100f);

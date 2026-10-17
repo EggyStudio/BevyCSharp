@@ -41,11 +41,11 @@ What they draw with is five more, which nothing else in the editor duplicates:
 
 | class | what it is |
 |---|---|
-| `EditorSurface` | the gaps and the plates: gutters, cards, regions, grab handles, what a thing lying on the scene wears |
-| `EditorWidgets` | the controls ImGui does not draw the way this look needs: a round box to tick, a slider, a pill, a list to choose from, a flyout, a tooltip |
-| `EditorDraw` | the shapes drawn by hand: an exactly rounded rectangle, a capsule, an icon, an eye |
+| `EditorSurface` | the gaps and the plates, such as gutters, cards, regions, grab handles and what a thing lying on the scene wears |
+| `EditorWidgets` | the controls ImGui does not draw the way this look needs, such as a round box to tick, a slider, a pill, a list to choose from, a flyout and a tooltip |
+| `EditorDraw` | the shapes drawn by hand, such as an exactly rounded rectangle, a capsule, an icon and an eye |
 | `EditorSort` | the order names are listed in, which reads a run of digits as the number it spells |
-| `EditorText` | names as a panel shows them: a component without its path, a file cut to the room it has |
+| `EditorText` | names as a panel shows them, such as a component without its path and a file cut to the room it has |
 | `EditorRows` | a list of named values, as a name in one column and what it holds in the other |
 | `RoundedRows` | rounded highlights behind the rows ImGui draws square |
 
@@ -84,7 +84,7 @@ changed in the style tab changes what is drawn instead of being written over on 
 | rung | value | what it is |
 |---|---|---|
 | `Ground` | `#000000` | what lies between the panels and round the scene while docked, solid unless its alpha is lowered to let the desktop through |
-| `Panel` | `#1A1A1A` | a panel: the world list, the details, an open tab and the window that adds an entity |
+| `Panel` | `#1A1A1A` | a panel, as the world list, the details, an open tab and the window that adds an entity |
 | `Group` | `#262626` | a component's rows inside a panel |
 | `Field` | `#3E3E3E` | a box that is typed in, a button, the groove of a bar, the plate of a menu or a tooltip, and the plate of the toolbars, the tabs and the window's buttons |
 | `Hover` | `#525252` | a control under the pointer |
@@ -182,7 +182,7 @@ in the row under them stops short of them (`EditorSurface.FullWidth`), which is 
 box when the world is above the details and the entity's name when the two are side by side. While the panel floats, a title row runs across the scene
 with the toolbars at its left, and pressing it where nothing else is moves the window and pressing
 it twice maximizes it. Along the top of the window runs a band that does the same and draws
-nothing: over the scene down to where its toolbars begin, and over the panel down to where its
+nothing, over the scene down to where its toolbars begin, and over the panel down to where its
 fields begin, so the window is taken hold of without aiming for a line a few pixels tall. The
 editor opens docked, and the arrangement it was left in is saved with its preferences. The few pixels round every edge resize the window, with the pointer changing shape to say
 so. None of that is drawn. The editor draws every frame it can rather than waiting for the display
@@ -234,7 +234,7 @@ lists the material of each of its parts.
 
 ### The asset browser
 
-The Assets tab shows the folder chosen in its tree as tiles: an image as itself, a model as a
+The Assets tab shows the folder chosen in its tree as tiles, an image as itself, a model as a
 thumbnail drawn once and kept under `user://thumbnails/` (`Thumbnails`), and anything else as its
 kind's icon. A search box narrows the tiles by name, a chip narrows them to one kind, and a slider
 sizes them. A model's thumbnail is drawn on a transparent background, so the tile's own color shows
@@ -243,7 +243,7 @@ Twice on a model's tile goes into it, as into a folder, where its meshes and mat
 their own, and ".." leads back out.
 
 Picking a file selects it and lets go of any entity, since there is one selection, of entities or
-of a file, and picking an entity lets go of the file. The details panel then shows the file: its
+of a file, and picking an entity lets go of the file. The details panel then shows the file, its
 name and kind, a look at it by kind (a model turning, a mesh or material file under the card an
 entity's mesh or material gets, an image fitted to the panel, a scene's count of entities), "Place
 in the scene" for a model or a scene, and its path, size, last change and id.
@@ -361,7 +361,7 @@ Unity separates window kinds by how they dismiss, which is the distinction worth
 An editor needs at least the first three. A hierarchy is a default window; a component picker is a
 dropdown; a detached graph is a popup.
 
-Unity's **overlays** are the closer model for the floating look this editor has: containers that
+Unity's **overlays** are the closer model for the floating look this editor has, containers that
 float over the viewport, dock to its edges, collapse to an icon, and are toggled from one menu
 bound to a single key. Their layout modes are panel, collapsed, horizontal and vertical, and an
 overlay with no horizontal or vertical layout collapses when docked to an edge.
@@ -464,7 +464,7 @@ carries a closure that reads and writes the real struct instead.
 
 `DetailsPanel` draws the cards, `ComponentFields` draws the rows in them and `FieldNumbers` decides
 how a number in one is written and dragged. What a field is drawn as follows from its kind and from
-the hints its attributes declared: a round box to tick for a flag, a box for a number, a bar for a
+the hints its attributes declared, a round box to tick for a flag, a box for a number, a bar for a
 number with two ends, three boxes across for a vector, a list to choose from for a choice (a field
 whose bottom corners go square while its list is open, meeting a list whose top corners are square,
 so the two read as one shape grown downward), a swatch for three numbers that are a color (whose
@@ -480,7 +480,7 @@ same edge and the unit is read with the name it qualifies.
 **Every edit is undoable, and a run of them is one edit.** A row compares what the field held
 before its widget was drawn with what it holds after, and records the difference under the field's
 own name, so a drag along a bar or a number typed one character at a time comes back as one
-change. The same goes for what the panels do outside a field: a rename, a drag on the handles, an
+change. The same goes for what the panels do outside a field, a rename, a drag on the handles, an
 entity taken out of its parent, something hidden with its eye, and a component put on or taken off.
 Taking one off keeps what it held, so putting it back is the component again rather than a fresh
 empty one in its place. A delete keeps what went as a scene in memory, so undoing it brings the
@@ -517,7 +517,7 @@ the answers on the schema as `FieldHints`, so nothing reflects at runtime:
 | `[Header("...")]` | a word above the field, grouping what follows |
 | `[Space]` | a blank row above the field |
 | `[Separator]` | a line across the panel above the field |
-| `[Info("...", Kind = ...)]` | a sentence in the panel above the field: something to know, a warning, an error |
+| `[Info("...", Kind = ...)]` | a sentence in the panel above the field, which is something to know, a warning or an error |
 | `[Foldout("A/B")]` | puts the field in a fold, which opens and shuts; slashes nest them, and each level sets what it holds one step further in |
 | `[Color]` | three numbers that are a color, as a swatch the width of the row that opens a picker |
 | `[Inline]` | three numbers beside each other rather than one per row, as a vector already is |
@@ -571,7 +571,7 @@ saying how many are selected. The panels have no headings otherwise, since a lis
 name at the top of a card say what they are.
 
 What an entity is drawn with is saved as well, by the path its mesh and material were loaded from,
-or, for one made in memory, as how to make it again: a primitive as its shape and measures, a
+or, for one made in memory, as how to make it again, a primitive as its shape and measures, a
 standard material as its settings, a mesh built vertex by vertex as its geometry, and a material
 from a material file by the file.
 
@@ -671,32 +671,34 @@ looks like the rest.
 
 ## Verification
 
-**Input is driven rather than simulated.** `SyntheticInput` writes the window's own messages: the
-`CursorMoved` and `MouseButtonInput` a real pointer produces, and the `KeyboardInput` a real key
-produces, each both as itself and inside the `WindowEvent` batch the backends read. So a click goes
-through the picking raycast, the widget that decides it was clicked, and the button state the camera
-reads, exactly as a hand's would. Calling the method a click would have called tests the method and
-not the path to it, and the failures were on the path: a ring that could not be grabbed, a flyout
-that opened once, a selection that cleared itself on the frame it was made, a text field that could
-not be typed into. `SyntheticInput.Wheel` does the same for the wheel, which a list that pages and a
-camera that zooms read. What none of it can do is move the desktop's cursor, and it does not try.
+**Input is sent through the window rather than simulated.** `SyntheticInput` writes the window's own
+messages, the `CursorMoved` and `MouseButtonInput` a real pointer produces, and the `KeyboardInput`
+a real key produces, each both as itself and inside the `WindowEvent` batch the backends read. So a
+click goes through the picking raycast, the widget that decides it was clicked, and the button state
+the camera reads, exactly as a hand's would. Calling the method a click would have called tests the
+method and not the path to it, and the failures were on the path, a ring that could not be grabbed,
+a flyout that opened once, a selection that cleared itself on the frame it was made, a text field
+that could not be typed into. `SyntheticInput.Wheel` does the same for the wheel, which a list that
+pages and a camera that zooms read. What none of it can do is move the desktop's cursor, and it does
+not try.
 
-**A running editor can be driven instead, and usually should be.** `./bcs open --editor` starts one
-that answers a socket; `./bcs command input.click 1450 700`, `./bcs command frames.wait 5` and
-`./bcs shot /tmp/after.png` then do from a terminal what a probe script does from the environment,
-against an editor that is already up. The difference is the loop. A probe is one arrangement per
-process, decided before the run starts and read afterwards, while a session is asked and answered a
-frame at a time, so what to do next can depend on what the last answer said. The probe covers what a
-session cannot, which is a fixed arrangement captured the same way every time with no session to
-keep alive. A comparison of the chrome before and after a change needs that, and it is one command
-rather than a session to open, drive and stop. Either works on a machine with no display, as long as
-the run is given `--offscreen`, which draws the editor into an image instead of onto a screen.
+**A running editor can be controlled through the command line instead, and usually should be.**
+`./bcs open --editor` starts one that answers a socket; `./bcs command input.click 1450 700`,
+`./bcs command frames.wait 5` and `./bcs shot /tmp/after.png` then do from a terminal what a probe
+script does from the environment, against an editor that is already up. The difference is the loop.
+A probe is one arrangement per process, decided before the run starts and read afterwards, while a
+session is asked and answered a frame at a time, so what to do next can depend on what the last
+answer said. The probe covers what a session cannot, which is a fixed arrangement captured the same
+way every time with no session to keep alive. A comparison of the chrome before and after a change
+needs that, and it is one command rather than a session to open, control and stop. Either works on a
+machine with no display, as long as the run is given `--offscreen`, which draws the editor into an
+image instead of onto a screen.
 
 `BCS_PROBE` names what a run should do, as words separated by commas, and `BCS_SHOT` says where to
 write the picture. `select`, `several` and `many` put something in the world and choose it, `dock`,
 `wide`, `narrow`, `tab`, `assets`, `settings` and `style` arrange the editor, `click`, `hover`,
-`drag`, `band`, `pick` and `pull` drive the pointer at the points `BCS_PROBE_CLICK` lists, `into`
-opens a number for typing, `keys`, `enter`, `back` and `undo` drive the keyboard, and `project`
+`drag`, `band`, `pick` and `pull` move the pointer at the points `BCS_PROBE_CLICK` lists, `into`
+opens a number for typing, `keys`, `enter`, `back` and `undo` press keys, and `project`
 saves and reads back. A run prints what the editor ended up holding, so a capture and a few lines of
 output answer most questions about a change.
 

@@ -8,7 +8,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// A green cube on black, which a pass turns into something that could not have been drawn any
-/// other way: magenta on white for an inversion, red for a channel swap. Either picture says the
+/// other way, magenta on white for an inversion, red for a channel swap. Either picture says the
 /// pass ran, read the picture the camera drew, and wrote the one that reached the screen.
 /// </remarks>
 [Collection("engine")]

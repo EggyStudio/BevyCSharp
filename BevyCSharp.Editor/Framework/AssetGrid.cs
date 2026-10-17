@@ -5,7 +5,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The tile an asset is shown as, wherever assets are shown as tiles: the asset browser and the
+/// The tile an asset is shown as, wherever assets are shown as tiles, the asset browser and the
 /// picker that chooses a mesh or a material.
 /// </summary>
 /// <remarks>

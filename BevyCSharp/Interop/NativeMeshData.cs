@@ -35,6 +35,6 @@ public unsafe struct NativeMeshData
     /// <summary>How many streams there are.</summary>
     public int StreamCount;
 
-    /// <summary>How the mesh is made, four bytes of bits: 1 leaves a triangle mesh without worked-out normals.</summary>
+    /// <summary>How the mesh is made, four bytes of bits, where 1 leaves a triangle mesh without worked-out normals.</summary>
     public uint Flags;
 }

@@ -107,7 +107,7 @@ public static unsafe partial class Animation
 
     /// <summary>
     /// Changes how many times the clip playing plays, counting those it has finished, without
-    /// starting it over: zero for ever, one for once.
+    /// starting it over, zero for ever, one for once.
     /// </summary>
     /// <remarks>
     /// Bevy's <c>set_repeat</c>. A clip that has already played more times than asked stops at the

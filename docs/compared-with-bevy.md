@@ -33,9 +33,9 @@ shows each written example's capture beside Bevy's to compare.
   ([Physics](physics.md)).
 - **Shaders in Slang**, compiled and reloaded as the game runs, beside Bevy's WGSL
   ([Shaders](shaders.md)).
-- **An app driven from the terminal.** `bcs` asks a running app what is in its world, sets a
+- **An app controlled from the terminal.** `bcs` asks a running app what is in its world, sets a
   value, presses a key and takes a picture, the same commands its console and editor have
-  ([Driving a running app](tools.md#driving-a-running-app)).
+  ([Controlling a running app](tools.md#controlling-a-running-app)).
 - **A package with no Rust in it.** `dotnet add package BevyCSharp` brings the library, the
   generator and a built bridge for Linux, Windows and macOS on x64 and Arm, so a game needs the .NET
   SDK and no Rust toolchain ([Install](https://github.com/EggyStudio/BevyCSharp#install)).
@@ -109,8 +109,8 @@ cd BevyCSharp.FeatureTest/bin/Debug/net10.0 && ./BevyCSharp.FeatureTest --offscr
 ./bcs command setting "WeatherTier High"    # and the frame rate from ./bcs command app.status
 ```
 
-The workflow's drive of the feature test writes the hub's frame time under the weather's lowest
-tier beside its captures, which on its software renderer measures the weather's cost there.
+The workflow's run through the feature test's course writes the hub's frame time under the weather's
+lowest tier beside its captures, which on its software renderer measures the weather's cost there.
 
 How much of Bevy is reached is [EXAMPLES.md](../.github/EXAMPLES.md)'s count, kept by
 `build/examples-table.py` from the table of every one of Bevy's examples.

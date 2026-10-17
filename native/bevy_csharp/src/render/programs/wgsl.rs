@@ -162,7 +162,7 @@ const LIGHTING_STAND_IN: &str = "fn bcs_pbr_light(base_color: vec4<f32>, emissiv
     world_position: vec4<f32>, world_normal: vec3<f32>, normal: vec3<f32>) -> vec4<f32> { return base_color; }\n\
     fn bcs_pbr_finish(color: vec4<f32>, frag_coord: vec4<f32>, world_position: vec4<f32>) -> vec4<f32> { return color; }\n";
 
-/// What `bcs::light` and `bcs::finish` call: Bevy's own lighting of a standard material's surface,
+/// What `bcs::light` and `bcs::finish` call, Bevy's own lighting of a standard material's surface,
 /// over the view's lights, shadows and environment maps, and Bevy's own processing after it, which
 /// is fog and, for a camera that does not draw in high dynamic range, tonemapping. Each is imported
 /// from Bevy as its own materials import it.
@@ -298,13 +298,13 @@ const DECALS_STAND_IN: &str = "fn bcs_decal_count(frag_coord: vec4<f32>, world_p
     fn bcs_decal_normal(frag_coord: vec4<f32>, world_position: vec4<f32>, index: u32, normal: vec3<f32>) -> vec3<f32> { return normal; }\n";
 
 /// What `bcs::decal_count`, `bcs::decal_tag`, `bcs::decal_has`, `bcs::decal_sample` and
-/// `bcs::decals` call: Bevy's own walk through the clustered decals over a point of the view, as
+/// `bcs::decals` call, Bevy's own walk through the clustered decals over a point of the view, as
 /// its `ClusteredDecalIterator` takes it, and the textures Bevy holds for them.
 ///
 /// A decal is found by its place in that walk, so each call walks again from the first, which for
 /// the few decals over one point costs less than a walk Slang could hold on to between calls. A
 /// map is 0 for the base color, 1 for the normal map, 2 for metallic and roughness and 3 for the
-/// light given off, as Bevy's iterator names them. Where the device cannot have clustered decals,
+/// emissive light, as Bevy's iterator names them. Where the device cannot have clustered decals,
 /// Bevy compiles none of their bindings, and every point has none over it.
 const DECALS: &str = r#"
 // Moves the iterator on to the decal at `index` over the point, saying whether there is one.
@@ -413,7 +413,7 @@ const DECALS_IMPORTS: &[&str] = &[
 const IRRADIANCE_STAND_IN: &str = "fn bcs_irradiance_light(frag_coord: vec4<f32>, world_position: vec4<f32>, \
     normal: vec3<f32>) -> vec3<f32> { return vec3<f32>(0.0); }\n";
 
-/// What `bcs::irradiance` calls: Bevy's own `irradiance_volume_light`, the diffuse light the
+/// What `bcs::irradiance` calls, Bevy's own `irradiance_volume_light`, the diffuse light the
 /// irradiance volumes over a point give a surface facing a way there, at each volume's intensity,
 /// found through the view's clusters as Bevy's standard material finds it. Where the device cannot
 /// have irradiance volumes, or the view has none, Bevy declares none of their bindings, and every

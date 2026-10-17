@@ -16,7 +16,7 @@ namespace Bevy.Tests;
 /// reads as a model that loaded.
 /// </para>
 /// <para>
-/// The file is written by the test: one square facing the camera, with an unlit green material
+/// The file is written by the test, one square facing the camera, with an unlit green material
 /// (<c>KHR_materials_unlit</c>), so the color is the material's alone and not a question about the
 /// lighting. The camera clears to blue, which nothing in the file is.
 /// </para>

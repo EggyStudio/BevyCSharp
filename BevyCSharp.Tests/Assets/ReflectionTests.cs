@@ -8,8 +8,8 @@ namespace Bevy.Tests;
 public sealed class ReflectionTests
 {
     /// <summary>
-    /// A glowing green cube over a smooth dark floor shows in the floor with reflections on, and not
-    /// with them off.
+    /// An emissive green cube over a smooth dark floor shows in the floor with reflections on, and
+    /// not with them off.
     /// </summary>
     [SkippableFact]
     public void ASmoothFloorReflectsWhatStandsOnIt()

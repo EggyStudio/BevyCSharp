@@ -196,7 +196,7 @@ pub extern "C" fn bcs_audio_create_pitch(frequency: f32, seconds: f32) -> i32 {
     })
 }
 
-/// Changes a playing sound: its volume, and whether it is paused.
+/// Changes a playing sound, its volume, and whether it is paused.
 ///
 /// Reaches the `AudioSink` Bevy attaches once playback has started, so a call in the same frame
 /// as [`bcs_audio_play`] reports [`status::NOT_PRESENT`] rather than taking effect.
@@ -435,7 +435,7 @@ pub unsafe extern "C" fn bcs_audio_state(entity: u64, volume: *mut f32, paused: 
 
 /// Runs `f` over a playing sound's sink, or answers `None` before it has one.
 ///
-/// Three components carry the same trait: Bevy's sink for a plain sound, its sink for a spatial
+/// Three components carry the same trait, Bevy's sink for a plain sound, its sink for a spatial
 /// one, and the bridge's for a sound in a run with no window, so each is tried in turn.
 #[cfg(feature = "render")]
 fn sink_of<R>(

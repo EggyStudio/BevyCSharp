@@ -40,7 +40,7 @@ public static class ComponentSchemas
     static ComponentSchemas() => AddBuiltIn();
 
     /// <summary>
-    /// Every schema: the registered ones in registration order, then the reflected ones by type
+    /// Every schema, the registered ones in registration order, then the reflected ones by type
     /// path.
     /// </summary>
     public static IReadOnlyList<ComponentSchema> All

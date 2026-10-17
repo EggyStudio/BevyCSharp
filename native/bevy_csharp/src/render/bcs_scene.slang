@@ -10,7 +10,7 @@ module bcs_scene;
 public namespace bcs_scene
 {
 
-/// One slot of an instance buffer: an entity's transform this frame and on the previous one.
+/// One slot of an instance buffer, an entity's transform this frame and on the previous one.
 ///
 /// Matrices are four columns, which `transform` multiplies out. A slot with no entity in it holds
 /// zeros, which transform everything to the origin.
@@ -20,7 +20,7 @@ public struct Instance
     public float4 previous_world_from_local[4];
 };
 
-/// One slot of a material buffer: what an entity's standard material says it is made of.
+/// One slot of a material buffer, what an entity's standard material says it is made of.
 ///
 /// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
 /// not in it; The material multiplies its texture by `base_color`.
@@ -122,7 +122,7 @@ public struct PoolVertex
     public float4 uv;
 };
 
-/// One mesh of a geometry pool: where its vertices and indices start in the pool's buffers, how
+/// One mesh of a geometry pool, where its vertices and indices start in the pool's buffers, how
 /// many there are, and the box it fits in, on the mesh before any transform.
 public struct PoolMesh
 {

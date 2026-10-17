@@ -5,7 +5,7 @@
 //!
 //! Two sources, because each is right about a different thing:
 //!
-//! - The WGSL `slangc` wrote, read with naga, says which bindings exist and what they are: uniform
+//! - The WGSL `slangc` wrote, read with naga, says which bindings exist and what they are, uniform
 //! or storage, texture of which shape, sampler of which kind, array of how many. The pipeline will
 //! be checked against it, so the layout is built from it, and a binding the entry point does not
 //! use is not in it at all.
@@ -44,7 +44,7 @@ pub use spirv::{SCENE_GROUP, reflect_spirv, remap_descriptor_sets};
 
 // -- Reading what slangc wrote
 
-/// What reading a compile produced: the WGSL or the SPIR-V with its groups where they belong, and
+/// What reading a compile produced, the WGSL or the SPIR-V with its groups where they belong, and
 /// the layout of the shader's own group.
 #[derive(Clone, Debug)]
 pub struct Reflected {

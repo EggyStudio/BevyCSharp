@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace Bevy;
 
 /// <summary>
-/// A mesh made in memory as JSON, the form a scene's resources and a mesh file share: a primitive
+/// A mesh made in memory as JSON, the form a scene's resources and a mesh file share, a primitive
 /// as its shape and measures, a mesh built vertex by vertex as its geometry.
 /// </summary>
 internal static class MeshJson

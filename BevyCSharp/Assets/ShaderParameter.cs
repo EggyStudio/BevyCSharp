@@ -5,7 +5,7 @@ namespace Bevy;
 /// <param name="Name">The name its value is set by.</param>
 /// <param name="Scalar">For numbers, which kind.</param>
 /// <param name="Components">
-/// For numbers, how many make one element: one for a scalar, four for a <c>float4</c>, sixteen for
+/// For numbers, how many make one element, one for a scalar, four for a <c>float4</c>, sixteen for
 /// a <c>float4x4</c>.
 /// </param>
 /// <param name="Count">How many elements, which is one unless it is an array.</param>

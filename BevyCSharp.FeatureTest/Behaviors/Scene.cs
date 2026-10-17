@@ -131,7 +131,7 @@ public partial struct Scene
 
         var ground = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, GroundSize, GroundSize));
-        // Tiling takes both halves: a repeating sampler, and UVs that run past one. The plane's
+        // Tiling takes both halves, a repeating sampler, and UVs that run past one. The plane's
         // own UVs stop at one however large it is, so without the scale this shows a single
         // stretched copy, a square of the checker two units across.
         Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(new MaterialSettings

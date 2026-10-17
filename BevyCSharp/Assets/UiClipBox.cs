@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>Which box a node that clips its overflow clips at.</summary>
 /// <remarks>
-/// The three boxes a node has: the content it holds, that plus its padding, and that plus its
+/// The three boxes a node has, the content it holds, that plus its padding, and that plus its
 /// border. Which one is clipped at decides where a scrolling list's rows disappear.
 /// </remarks>
 public enum UiClipBox

@@ -1,6 +1,6 @@
 //! Bevy's app states, reachable from C#.
 //!
-//! Not to be confused with [`crate::state`], which holds the world loan. These are Bevy `States`:
+//! Not to be confused with [`crate::state`], which holds the world loan. These are Bevy `States`,
 //! the menu/playing/paused axis a game scopes its systems to.
 //!
 //! A `States` type is a Rust type, and C# cannot define one. What it can do is choose a value, so
@@ -9,7 +9,7 @@
 //! keeps two unrelated state machines from treading on each other.
 //!
 //! The slot count is fixed because the types have to exist at compile time, and each one costs
-//! compile time rather than runtime: `insert_state` is generic, so a slot brings its own copy of
+//! compile time rather than runtime. `insert_state` is generic, so a slot brings its own copy of
 //! the state resources, the transition schedules and the systems that despawn what a state owns,
 //! whether or not a game ever adds it. Eight covers an app state, a pause, a menu page, a phase
 //! and room to spare, at about four seconds of build time each. Raising it is this list and a
@@ -47,7 +47,7 @@ pub extern "C" fn bcs_state_slots() -> i32 {
 /// which suits "the interface is up on these three screens", where a plain state would leave two
 /// facts to keep in step and a sub-state would only answer whether it exists.
 ///
-/// `from` and `to` are the two halves of the table, of `count` entries each: a value of the source
+/// `from` and `to` are the two halves of the table, of `count` entries each, a value of the source
 /// axis and what the computed state is while the source holds it. A source value the table says
 /// nothing about means the computed state does not exist at all, so [`bcs_state_get`] on it
 /// answers [`status::NOT_PRESENT`] rather than a value, and [`bcs_state_set`] on it is always

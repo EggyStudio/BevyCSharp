@@ -163,7 +163,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Reads what a behavior shows: its instance fields and its readable properties.
+    /// Reads what a behavior shows, its instance fields and its readable properties.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -197,10 +197,10 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A component's field may itself be a struct with fields: a spring with a stiffness and a
-    /// damping, a slot with a name and a weight. Described as one opaque row it says nothing, and
-    /// there is nothing a tool could do with it. So it is taken apart, and the parts are ordinary
-    /// fields whose names carry the path they came from.
+    /// A component's field may itself be a struct with fields, such as a spring with a stiffness
+    /// and a damping, a slot with a name and a weight. Described as one opaque row it says nothing,
+    /// and there is nothing a tool could do with it. So it is taken apart, and the parts are
+    /// ordinary fields whose names carry the path they came from.
     /// </para>
     /// <para>
     /// The parts land in a fold named after the field they came from, so a struct inside a

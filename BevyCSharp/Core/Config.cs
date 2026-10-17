@@ -1,12 +1,12 @@
 namespace Bevy;
 
 /// <summary>
-/// How the engine should start: window shape, presentation and headless behavior.
+/// How the engine should start, window shape, presentation and headless behavior.
 /// </summary>
 /// <remarks>
 /// The native bridge ships in two profiles. A <c>render</c> build installs Bevy's
 /// <c>DefaultPlugins</c> and opens a real window; a <c>headless</c> build installs
-/// <c>MinimalPlugins</c> and drives the loop with Bevy's schedule runner. Setting
+/// <c>MinimalPlugins</c> and runs the loop with Bevy's schedule runner. Setting
 /// <see cref="Headless"/> forces the second path even on a render build, which is how tests
 /// and dedicated servers run the exact same behavior code without a display.
 /// </remarks>
@@ -51,7 +51,7 @@ public sealed class Config
 
     /// <summary>
     /// Number of frames to run before exiting, for headless runs. Zero runs until something
-    /// calls <see cref="App.RequestExit()"/>. Tests use this to drive a fixed number of ticks.
+    /// calls <see cref="App.RequestExit()"/>. Tests use this to run a fixed number of ticks.
     /// </summary>
     public uint HeadlessFrames { get; set; }
 
@@ -159,7 +159,7 @@ public sealed class Config
     public bool WatchAssets { get; set; }
 
     /// <summary>
-    /// Draw an interface: Dear ImGui, rasterized by the engine.
+    /// Draw an interface, Dear ImGui, rasterized by the engine.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -322,7 +322,7 @@ public sealed class Config
     /// <para>
     /// A run with no window to look at is a test, a soak, a capture or a tool, and a sound it
     /// plays reaches somebody beside the machine who never asked for it, so by default such a run
-    /// opens no device. Its sounds still run their course: each is decoded and drawn from on the
+    /// opens no device. Its sounds still run their course. Each is decoded and drawn from on the
     /// app's clock as a device would draw from it, so it pauses, seeks, loops and ends when it
     /// would be heard to, a sound played with <see cref="PlaybackMode.Despawn"/> goes on time, and
     /// a game that waits on a sound's end works the same. <see cref="Audio.IsSilent"/> says which
@@ -402,10 +402,10 @@ public sealed class Config
     /// zero for the cap <c>BCS_MEMORY_CAP_GB</c> names, or none where it names none either.
     /// </summary>
     /// <remarks>
-    /// For a run that might take the machine's memory with it, a test, a tool driving a scene or a
-    /// technique being tried, so it stops and says why where the system would otherwise end
-    /// whatever it chose. A shipped game is held to none unless it asks. See
-    /// <see cref="MemoryGuard"/>.
+    /// For a run that might take the machine's memory with it, a test, a tool controlling a scene
+    /// or a technique being tried, so it stops and says why where the system would otherwise end
+    /// whatever it chose. A shipped game is held to none unless it asks. See <see
+    /// cref="MemoryGuard"/>.
     /// </remarks>
     public double MemoryCap { get; set; }
 
@@ -476,7 +476,7 @@ public sealed class Config
     /// <remarks>
     /// <para>
     /// Decided when the window is made, since the platform builds a see-through window
-    /// differently from an opaque one. What is left clear is then clear: the world's clear color
+    /// differently from an opaque one. What is left clear is then clear, the world's clear color
     /// where it has no alpha (<see cref="Render.SetClearColor"/>), the part of a window a camera's
     /// viewport leaves out, and the corners <see cref="Render.SetRoundedCorners"/> takes off. A
     /// window without a frame (<see cref="Window.SetStyle(bool, bool, bool)"/>) and with this on can be any shape.
@@ -535,8 +535,8 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Bevy's Solari traces rays against the scene with the GPU's ray tracing hardware: direct light
-    /// from every light and every emissive surface, and indirect light bounced off everything, in
+    /// Bevy's Solari traces rays against the scene with the GPU's ray tracing hardware, direct light
+    /// from every light and every emissive surface, and indirect light from everything, in
     /// real time. It needs a bridge built with it (<c>./bcs build --editor --solari</c>) and an
     /// adapter with ray queries, which the bridge asks about before turning it on and which
     /// <see cref="Render.RayTracingActive"/> reports.
@@ -610,7 +610,7 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// An exception must never unwind into Rust, so it is always caught at the boundary. This
-    /// switch decides what happens next: log and keep the frame going (the default, which
+    /// switch decides what happens next, log and keep the frame going (the default, which
     /// keeps a game playable through a scripting bug), or stop the app so a test fails loudly.
     /// </remarks>
     public bool FailFastOnSystemException { get; set; }

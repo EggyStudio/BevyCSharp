@@ -11,13 +11,14 @@ namespace Bevy;
 /// For tests and tools. What a click does is not one thing. A widget decides it was clicked, an
 /// editor decides what that meant, and something in the world changes. Calling the method a click
 /// would have called tests the method and not the path to it, and the path is where the interesting
-/// failures are: a handle that cannot be grabbed, a menu that opens once, a value that goes in and
-/// does not come back.
+/// failures are, such as a handle that cannot be grabbed, a menu that opens once, a value that goes
+/// in and does not come back.
 /// </para>
 /// <para>
 /// It writes into ImGui's own event queue, which is where a real pointer's report ends up, so
 /// everything the interface does behaves exactly as it would. It cannot move the operating system's
-/// cursor, and does not try to, because what it drives is the application rather than the desktop.
+/// cursor, and does not try to, because what it sends input to is the application rather than the
+/// desktop.
 /// </para>
 /// <para>
 /// A pointer is written into Bevy as the window's own messages too, and in an offscreen run, which
@@ -124,7 +125,7 @@ public static class SyntheticInput
     /// <remarks>
     /// <para>
     /// The keyboard's half of <see cref="Send"/>. Everything between the window and a text field
-    /// runs: the engine's own key state, the messages it writes, whatever turns those into the
+    /// runs, the engine's own key state, the messages it writes, whatever turns those into the
     /// characters an interface inserts. Putting characters straight into the interface's queue
     /// tests the field and not the path to it, and the path is where a keyboard goes wrong.
     /// </para>
@@ -201,9 +202,9 @@ public static class SyntheticInput
     /// <paramref name="caretStart"/> to <paramref name="caretEnd"/>, or hidden at -1.
     /// </summary>
     /// <remarks>
-    /// For driving a field that takes composed input, which no key can produce. It arrives as an
-    /// <see cref="ImeComposing"/> on the next frame, with or without a window, since what reads it
-    /// does not ask which window it came from.
+    /// For typing into a field that takes composed input, which no key can produce. It arrives as
+    /// an <see cref="ImeComposing"/> on the next frame, with or without a window, since what reads
+    /// it does not ask which window it came from.
     /// </remarks>
     public static void Compose(string text, int caretStart = -1, int caretEnd = -1) =>
         Ime(0, text, caretStart, caretEnd);
@@ -268,7 +269,7 @@ public static class SyntheticInput
                 NativeStatus.InvalidState,
                 $"Sending a pointer {action} at {x},{y} failed, because this run has no window and "
                 + "no interface to send it to. A headless run draws neither. Run with a window, or "
-                + "drive what the click would have done directly.");
+                + "call what the click would have done directly.");
 
         if (!windowless) Native.Check(status, $"sending a pointer {action} at {x},{y}");
         else if (button == MouseButton.Left) Unwindowed(x, y, action);

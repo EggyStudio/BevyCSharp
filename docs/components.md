@@ -46,7 +46,7 @@ offsets of 0, 16 and 28 rather than the source order. Both layouts are 48 bytes,
 passes either way and the mistake shows up as stretched geometry. The check compares every offset.
 
 `ChildOf` and `Children` hold a relationship and a `Vec`, neither of which raw bytes can
-represent, so they are name-only handles: `Has<ChildOf>()`, `Count<Children>()` and `[With]`
+represent, so they are name-only handles. `Has<ChildOf>()`, `Count<Children>()` and `[With]`
 filters work, while reading or writing one is refused rather than corrupting the world. Use
 `SetParent`, `ParentOf` and `ChildrenOf` for the hierarchy itself.
 

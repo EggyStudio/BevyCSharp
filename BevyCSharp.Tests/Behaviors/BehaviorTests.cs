@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>A behavior with per-entity state, driven by an instance method.</summary>
+/// <summary>A behavior with per-entity state, run by an instance method.</summary>
 [Behavior]
 public partial struct Counter
 {
@@ -138,7 +138,7 @@ public partial struct ChordHud
 }
 
 /// <summary>
-/// Covers the generated behavior plumbing: registration, per-entity dispatch, filters,
+/// Covers the generated behavior plumbing, registration, per-entity dispatch, filters,
 /// conditions and stage ordering.
 /// </summary>
 [Collection("engine")]
@@ -188,16 +188,16 @@ public sealed class BehaviorTests
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            // Not poisoned: filtered out by [With].
+            // Not poisoned, so filtered out by [With].
             var plain = ctx.Ecs.Spawn();
             ctx.Ecs.Add(plain, new FilteredCounter());
 
-            // Poisoned: matches.
+            // Poisoned, so it matches.
             var poisoned = ctx.Ecs.Spawn();
             ctx.Ecs.Add(poisoned, new FilteredCounter());
             ctx.Ecs.Add(poisoned, new Poisoned());
 
-            // Poisoned and shielded: filtered out by [Without].
+            // Poisoned and shielded, so filtered out by [Without].
             var shielded = ctx.Ecs.Spawn();
             ctx.Ecs.Add(shielded, new FilteredCounter());
             ctx.Ecs.Add(shielded, new Poisoned());

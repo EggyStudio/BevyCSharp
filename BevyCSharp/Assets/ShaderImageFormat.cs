@@ -45,7 +45,7 @@ public enum ShaderImageFormat
     /// </summary>
     Bc1 = 10,
 
-    /// <summary>One block-compressed channel, eight bytes a block: a height, a mask, a roughness.</summary>
+    /// <summary>One block-compressed channel, eight bytes a block, for a height, a mask or a roughness.</summary>
     Bc4 = 11,
 
     /// <summary>Two block-compressed channels, sixteen bytes a block, which is a normal map's form.</summary>

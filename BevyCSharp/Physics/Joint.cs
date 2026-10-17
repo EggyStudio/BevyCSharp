@@ -23,21 +23,21 @@ public readonly record struct Joint
     internal (float Speed, float Force)? Drive { get; private init; }
 
     /// <summary>
-    /// A point on one body held to a point on the other, free to turn any way about it: a
+    /// A point on one body held to a point on the other, free to turn any way about it, such as a
     /// shoulder, a pendulum's pivot, a chain's links.
     /// </summary>
     public static Joint Ball(Vec3 anchorA, Vec3 anchorB) => new() { Kind = 0, AnchorA = anchorA, AnchorB = anchorB };
 
     /// <summary>
-    /// The same, and turning only about one axis: a door, a wheel, an elbow. The two axes are the
-    /// same line, said in each body's own space.
+    /// The same, and turning only about one axis, such as a door, a wheel or an elbow. The two axes
+    /// are the same line, said in each body's own space.
     /// </summary>
     public static Joint Hinge(Vec3 anchorA, Vec3 axisA, Vec3 anchorB, Vec3 axisB) =>
         new() { Kind = 1, AnchorA = anchorA, AnchorB = anchorB, AxisA = axisA, AxisB = axisB };
 
     /// <summary>
-    /// The two held exactly as they are to each other when joined, as though glued: a sword in a
-    /// hand, a part bolted onto a vehicle.
+    /// The two held exactly as they are to each other when joined, as though glued, such as a sword
+    /// in a hand, a part bolted onto a vehicle.
     /// </summary>
     public static Joint Weld() => new() { Kind = 2 };
 

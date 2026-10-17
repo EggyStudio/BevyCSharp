@@ -45,7 +45,7 @@ public sealed record CapturedImage(uint Width, uint Height, byte[] Pixels)
     /// thumbnail laid over a tile needs.
     /// </para>
     /// <para>
-    /// The plainest PNG there is: eight bits a channel, red, green, blue and alpha, every row
+    /// The plainest PNG there is, eight bits a channel, red, green, blue and alpha, every row
     /// stored as it is and the whole compressed once. The bytes are the GPU's, which for an sRGB
     /// target are already the encoded colors a PNG holds.
     /// </para>
@@ -79,7 +79,7 @@ public sealed record CapturedImage(uint Width, uint Height, byte[] Pixels)
         return file.ToArray();
     }
 
-    /// <summary>Writes one chunk: its length, its name, its data and the check over the last two.</summary>
+    /// <summary>Writes one chunk, its length, its name, its data and the check over the last two.</summary>
     private static void Chunk(Stream file, string name, ReadOnlySpan<byte> data)
     {
         Span<byte> number = stackalloc byte[4];

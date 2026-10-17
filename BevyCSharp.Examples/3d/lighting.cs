@@ -60,7 +60,7 @@ internal static class Lighting
 
         Render.SetAmbientLight(OrangeRed, 200f);
 
-        // A red point light, a green spot light and a blue point light, each with a small glowing
+        // A red point light, a green spot light and a blue point light, each with a small emissive
         // shape of its color where it is.
         var red = Light(ecs, LightKind.Point, (1f, 0f, 0f), Transform.At(1f, 2f, 0f));
         Bulb(ecs, red, Render.CreateMesh(MeshShape.Sphere, 0.1f), (1f, 0f, 0f, 1f), (4f, 0f, 0f, 1f), Transform.Identity);

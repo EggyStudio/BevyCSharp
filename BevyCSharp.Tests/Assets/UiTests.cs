@@ -402,7 +402,7 @@ public sealed class UiTests
             foreach (var child in new[] { filler, fixedWidth, odd })
                 ctx.Ecs.SetParent(child, row);
 
-            // A screen put away without despawning it: no layout, no drawing, no space taken.
+            // A screen put away without despawning it, no layout, no drawing, no space taken.
             var hidden = Ui.SpawnNode(new UiSettings { Display = UiDisplay.None });
 
             Assert.True(ctx.Ecs.IsAlive(row));

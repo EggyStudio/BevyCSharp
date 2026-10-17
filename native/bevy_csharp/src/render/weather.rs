@@ -1,7 +1,7 @@
-//! Weather and a sky around Bevy's atmosphere, through the `bevy_weather` crate: a day and night
+//! Weather and a sky around Bevy's atmosphere, through the `bevy_weather` crate, a day and night
 //! from real solar geometry, stars, a galaxy and a moon with its phase, clouds raymarched through a
-//! shell over the planet with their shadows on the ground, fog, rain, snow and thunder, driven by a
-//! procedural forecast or set by hand.
+//! shell over the planet with their shadows on the ground, fog, rain, snow and thunder, set by a
+//! procedural forecast or by hand.
 //!
 //! An app asks for it with `Config.Weather`, since the plugin brings a sun and a moon of its own
 //! where the app has marked none, a planet with an atmosphere, and the exposure it is calibrated
@@ -11,7 +11,7 @@
 //!
 //! The crate's resources and components reflect, so the managed side reaches them through the
 //! wrappers generated from Bevy's registry (`WeatherConfigRef`, `WeatherTimeRef`, `WeatherRef`,
-//! `ProceduralWeatherRef`, `WeatherCameraRef`, `SunLightRef` and the rest). What does not is here:
+//! `ProceduralWeatherRef`, `WeatherCameraRef`, `SunLightRef` and the rest). What does not is here,
 //! whether the plugin runs, and a preset of conditions to ease into or to snap to.
 
 #[cfg(feature = "render")]

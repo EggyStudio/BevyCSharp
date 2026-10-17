@@ -19,7 +19,7 @@ internal readonly record struct Ran(int Code, string Output)
     }
 }
 
-/// <summary>Runs the things that are not a running app: the build, the tests, a cold run.</summary>
+/// <summary>Runs the things that are not a running app, the build, the tests, a cold run.</summary>
 internal static class Shell
 {
     /// <summary>

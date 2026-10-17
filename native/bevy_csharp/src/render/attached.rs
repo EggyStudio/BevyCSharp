@@ -223,7 +223,7 @@ pub unsafe extern "C" fn bcs_render_asset_path(
 
 /// Says how an entity's mesh is treated beyond what it looks like.
 ///
-/// A bit each: `1` is never culled for being out of view, `2` casts no shadow, `4` receives none,
+/// A bit each, `1` is never culled for being out of view, `2` casts no shadow, `4` receives none,
 /// `8` is drawn alone rather than batched with the meshes it shares a mesh and a material with, and
 /// `16` is left out of the CPU's culling for the GPU's alone. A bit left clear takes that behavior
 /// off again, so the flags are the whole answer rather than additions to it.

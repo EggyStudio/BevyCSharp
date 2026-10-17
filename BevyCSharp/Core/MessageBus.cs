@@ -142,7 +142,7 @@ public sealed class MessageBus
         void Clear();
     }
 
-    /// <summary>One message type's pair of queues: the one being filled, and the one being read.</summary>
+    /// <summary>One message type's pair of queues, the one being filled, and the one being read.</summary>
     private sealed class Channel<T> : IChannel where T : notnull
     {
         private readonly object _gate = new();

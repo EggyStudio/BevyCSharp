@@ -169,7 +169,7 @@ internal static class CliDispatch
         writer => Payload(writer, request.Holding ?? string.Empty, request.Held, frame),
         request.Id);
 
-    /// <summary>What a run answers with: the command, what it said, and when.</summary>
+    /// <summary>What a run answers with, the command, what it said, and when.</summary>
     private static void Payload(
         System.Text.Json.Utf8JsonWriter writer, string name, string? answer, ulong frame)
     {

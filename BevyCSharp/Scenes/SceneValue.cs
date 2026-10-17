@@ -200,7 +200,7 @@ public static class SceneValue
                 return references.WriteAsset(json, asset);
 
             case FieldKind.Data when value is IDataRef { Id: not 0 } data:
-                // The id and the path both, as every reference to a file is written: found by the
+                // The id and the path both, as every reference to a file is written, found by the
                 // id while the file is renamed, and by the path if its sidecar is lost.
                 json.WriteStartObject();
                 json.WriteString("uid", data.Id.ToString("x16", plain));
@@ -587,7 +587,7 @@ public static class SceneValue
     }
 
     /// <summary>
-    /// The file id a data reference names: its id when a file still has it, and the id of the file
+    /// The file id a data reference names, its id when a file still has it, and the id of the file
     /// at its path when none does, which finds a file whose sidecar was lost.
     /// </summary>
     private static object? DataId(JsonElement json)
@@ -635,7 +635,7 @@ public static class SceneValue
         return true;
     }
 
-    /// <summary>One struct's worth of a component: its own values and the structs inside it.</summary>
+    /// <summary>One struct's worth of a component, its own values and the structs inside it.</summary>
     private sealed class Node(string name)
     {
         public string Name { get; } = name;

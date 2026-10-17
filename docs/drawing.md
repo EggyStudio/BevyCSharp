@@ -72,14 +72,14 @@ if (Render.DrawnMeshes(out var drawn) == DrawnMeshCount.Known)
 ```
 
 Counting costs two copies and a readback a frame, so it is asked for. `DrawnMeshes` says too why
-there is no count: one still on its way, a GPU whose culling cannot be counted, or one that does not
-cull, where every mesh in view is drawn.
+there is no count, for one still on its way, a GPU whose culling cannot be counted, or one that does
+not cull, where every mesh in view is drawn.
 
 A vertex can carry a value of the game's own beside its position, a stream as Bevy's
-`custom_vertex_attribute` carries one, for a vertex shader of the program's own to read: a voxel's
-face and texture packed into four bytes, a blend weight, a wind phase. Each stream is a name, one of
-five formats (`UInt`, `UInt2`, `Float`, `Float4` and `UNorm8x4`, four bytes read as 0 to 1), a
-location from 8 to 15, and its values:
+`custom_vertex_attribute` carries one, for a vertex shader of the program's own to read, such as a
+voxel's face and texture packed into four bytes, a blend weight, a wind phase. Each stream is a
+name, one of five formats (`UInt`, `UInt2`, `Float`, `Float4` and `UNorm8x4`, four bytes read as 0
+to 1), a location from 8 to 15, and its values:
 
 <!-- compiled with:
 using System.Numerics;

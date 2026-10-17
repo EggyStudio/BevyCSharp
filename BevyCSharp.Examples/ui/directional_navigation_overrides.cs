@@ -9,9 +9,10 @@ namespace BevyCSharp.Examples.Interface;
 
 // Demonstrates automatic directional navigation with manual navigation overrides. Three pages of
 // buttons, each reached from its neighbors by where it is on the screen, and edges drawn by hand
-// where that is not the way meant: rows that wrap to the next, a far button joined to the others,
-// a grid whose up and down are blocked and one whose up and down are turned over, and the way from
-// each page to the next. Moving the focus onto another page shows that page and hides the last.
+// where that is not the way meant, such as rows that wrap to the next, a far button joined to the
+// others, a grid whose up and down are blocked and one whose up and down are turned over, and the
+// way from each page to the next. Moving the focus onto another page shows that page and hides the
+// last.
 internal static class DirectionalNavigationOverrides
 {
     // A grid page's buttons, four rows of three.

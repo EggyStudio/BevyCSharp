@@ -35,7 +35,7 @@ public sealed class PostSettings
     public bool Hdr { get; set; }
 
     /// <summary>
-    /// Samples per pixel taken while the scene is rasterized: 1, 2, 4 or 8.
+    /// Samples per pixel taken while the scene is rasterized, 1, 2, 4 or 8.
     /// </summary>
     /// <remarks>
     /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off, as a

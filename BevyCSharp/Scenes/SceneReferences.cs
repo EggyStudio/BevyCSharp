@@ -6,7 +6,7 @@ using System.Text.Json.Nodes;
 namespace Bevy;
 
 /// <summary>
-/// How a scene names what a field refers to: another entity, and an asset.
+/// How a scene names what a field refers to, another entity or an asset.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -115,7 +115,7 @@ public class SceneReferences
     }
 
     /// <summary>
-    /// The path a file reference names: where the file holding its id is now, with the label the
+    /// The path a file reference names, where the file holding its id is now, with the label the
     /// reference gave, or the path it recorded when no file holds the id.
     /// </summary>
     /// <remarks>A bare string is read as a path, which is how a scene wrote a file before ids.</remarks>

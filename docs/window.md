@@ -121,7 +121,7 @@ Render.SetMipGeneration(picture, true);
 
 ### The window
 
-The window can be driven while the app runs:
+The window can be changed while the app runs:
 
 ```csharp
 Window.SetTitle("Level 2");
@@ -283,10 +283,10 @@ foreach (var monitor in ecs.All<MonitorRef>())
 A run with no display finds no monitors, so a game written this way opens nothing offscreen, and
 one that has to run there opens a window of its own when it finds none.
 
-`Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually be driven at,
+`Window.MonitorModes` lists the resolutions and refresh rates a monitor can actually run at,
 and `Window.SetVideoMode(monitor, mode)` takes the screen over at one of them. That is the case
 `WindowMode.Fullscreen` does not cover, where a game runs at a resolution the desktop is not in. The
-mode is named by its place in the list rather than by numbers, because a monitor can only be driven
+mode is named by its place in the list rather than by numbers, because a monitor can only run
 at the modes it offers, and how many it offers depends on the platform as much as on the hardware.
 
 ---

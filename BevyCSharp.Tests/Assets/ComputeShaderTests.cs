@@ -142,7 +142,7 @@ public sealed class ComputeShaderTests
     /// </summary>
     /// <remarks>
     /// Two quads, left and right of the middle, lifted by a dispatch. What is checked is where the
-    /// green is: at the sides before, above them after, and never in the middle, which is where
+    /// green is, at the sides before, above them after, and never in the middle, which is where
     /// both quads would be if the buffer were not read at all.
     /// </remarks>
     [SkippableFact]

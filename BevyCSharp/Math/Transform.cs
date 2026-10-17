@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Bevy;
 
 /// <summary>
-/// Where an entity sits: position, rotation and scale, relative to its parent.
+/// Where an entity sits, position, rotation and scale, relative to its parent.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -82,7 +82,7 @@ public struct Transform : INativeComponent
         _tailPaddingB = 0f;
     }
 
-    /// <summary>The identity transform: at the origin, unrotated, unscaled.</summary>
+    /// <summary>The identity transform, at the origin, unrotated, unscaled.</summary>
     public static Transform Identity => new(Vec3.Zero, Quat.Identity, Vec3.One);
 
     /// <summary>A transform at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>.</summary>

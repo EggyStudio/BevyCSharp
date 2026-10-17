@@ -1,7 +1,7 @@
 //! Shader programs, which Slang files draw a material, run over a camera's picture or run over
 //! buffers, compiled and kept current while the app runs.
 //!
-//! A program names up to six stages, each a file (or source text) and an entry point: the vertex
+//! A program names up to six stages, each a file (or source text) and an entry point, the vertex
 //! and fragment shaders of a material's main pass and of its prepass, a full-screen pass over a
 //! camera's picture, and a compute shader. A program is a number, and a material, a pass or a
 //! dispatch says which number it runs, so there is no limit on how many a game has.
@@ -13,7 +13,7 @@
 //!
 //! **Why a table outside the world.** The render side builds pipelines and bind groups from a
 //! program, and it has no main world to look in, so it reads [`TABLE`]. The world keeps the rest
-//! ([`ShaderPrograms`]): the compile jobs, the files to watch and what went wrong.
+//! ([`ShaderPrograms`]), the compile jobs, the files to watch and what went wrong.
 //!
 //! **Hot reload.** A Slang file is recompiled here, off the main thread, whenever it or anything it
 //! imported changes. A successful compile is a new shader asset and a new layout, and the program's
@@ -23,7 +23,7 @@
 //!
 //! **When a file fails.** The last version that compiled stays, so a typo in a running game
 //! changes nothing on screen and says what is wrong in the log. A stage that has never compiled
-//! draws with a fallback instead of drawing nothing: magenta for a fragment shader or a pass, which
+//! draws with a fallback instead of drawing nothing, magenta for a fragment shader or a pass, which
 //! is conspicuous on purpose, Bevy's own behavior for a vertex shader, and nothing for a compute
 //! shader. The fallback has the entry point the stage asked for, because the pipeline names it.
 
@@ -196,7 +196,7 @@ pub enum StageFile {
 }
 
 impl StageFile {
-    /// What messages call it: the path, or a name made from the text's hash.
+    /// What messages call it, the path, or a name made from the text's hash.
     fn describe(&self) -> String {
         match self {
             StageFile::Path(path) => path.clone(),

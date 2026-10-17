@@ -1,4 +1,4 @@
-//! App lifecycle: construction, stage wiring, system registration and the run loop.
+//! App lifecycle, construction, stage wiring, system registration and the run loop.
 
 use core::time::Duration;
 
@@ -37,7 +37,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     let mut app = App::new();
 
     // Bevy resolves a relative asset directory against the executable, which for a .NET host is
-    // whatever launched the process: `dotnet` itself under `dotnet test`, not the directory the
+    // whatever launched the process, `dotnet` itself under `dotnet test`, not the directory the
     // assembly and its assets are in. Naming the directory outright is the only way to be sure,
     // so the managed side passes one whenever it knows where its assets are.
     // `None` leaves the decision to Bevy, which watches only when the build carries a watcher
@@ -262,7 +262,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // How the pointer stands on each interactive node, which the managed side reads.
             crate::ui::install(&mut app);
 
-            // HTML and CSS driven UI, when the profile carries it and the app asked for it.
+            // an interface written in HTML and CSS, when the profile carries it and the app asked
+            // for it.
             //
             // Asked for rather than assumed, because the plugin is not free to an app that never
             // opens a document. It spawns a camera of its own, registers its widget systems and

@@ -8,7 +8,7 @@ using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 namespace BevyCSharp.Examples.Games;
 
 // A panel listing the systems of the stages it steps, with an arrow at the one stepping runs next,
-// shown while stepping is on, and the keys that drive it. ` turns stepping on and off, S runs the
+// shown while stepping is on, and the keys that control it. ` turns stepping on and off, S runs the
 // next system, Space the rest of the frame, and / logs Bevy's account of the stepping.
 //
 // Bevy's runs its systems in a schedule of its own after Update, and these run in PostUpdate, the

@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples.ThreeD;
 
 using Quality = Bevy.Reflected.ScreenSpaceTransmissionRef.QualityVariant;
 
-// Showcases light transmission in the physically based material: glass spheres that bend what is
+// Showcases light transmission in the physically based material, glass spheres that bend what is
 // behind them, a candle whose wax lets its flame's light through, and a sheet of paper lit from
 // behind, with keys for each material property and for the screen-space pass that draws them.
 internal static class Transmission
@@ -121,7 +121,7 @@ internal static class Transmission
 
         _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(1f, 1.8f, 7f), Vec3.Zero, Vec3.UnitY));
         ApplyPost();
-        // Bevy's Exposure { ev100: 6.0 }, as a lens: f/1 open for a 64th of a second at ISO 100.
+        // Bevy's Exposure { ev100: 6.0 }, as a lens, f/1 open for a 64th of a second at ISO 100.
         Render.SetLensExposure(_camera, aperture: 1f, shutter: 1f / 64f, sensitivity: 100f);
         ecs.Insert<ColorGradingRef>(_camera).GlobalPostSaturation = 1.2f;
         Render.SetEnvironmentMap(

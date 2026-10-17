@@ -1,4 +1,4 @@
-// A pass showing two images a draw wrote together: red where the first holds the first instance,
+// A pass showing two images a draw wrote together, red where the first holds the first instance,
 // and the second's value as green.
 
 import bcs_pass;

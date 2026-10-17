@@ -1,6 +1,6 @@
 //! Bevy's UI, reachable from C#.
 //!
-//! A UI node is a `Node` component carrying a whole layout description: two dozen fields, several
+//! A UI node is a `Node` component carrying a whole layout description, two dozen fields, several
 //! of them enums with payloads. Mirroring that byte for byte is not possible the way `Transform`
 //! is, so the bridge takes a description and builds the components on this side, the way
 //! [`crate::render`] does for meshes and materials.
@@ -343,8 +343,8 @@ fn target_camera(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNo
 
 /// Spawns a rectangle, and returns its entity or `0`.
 ///
-/// The building block everything else sits in or on: a panel, a bar, a backdrop. Parent one to
-/// another with `bcs_ecs_set_parent` to lay them out.
+/// The building block everything else sits in or on, such as a panel, a bar or a backdrop. Parent
+/// one to another with `bcs_ecs_set_parent` to lay them out.
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsUiNodeConfig`].
@@ -388,7 +388,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_node(config: *const BcsUiNodeConfig) -> u6
 }
 
 
-/// Reports how the pointer stands on a node: `0` none, `1` hovered, `2` pressed.
+/// Reports how the pointer stands on a node, `0` none, `1` hovered, `2` pressed.
 ///
 /// Read from the node's [`PointerOnNode`], kept from Bevy's `Pressed` and `Hovered`, so the three
 /// codes are the bridge's own and stay put whatever Bevy keeps them in.

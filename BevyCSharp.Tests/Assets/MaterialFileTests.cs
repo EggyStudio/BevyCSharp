@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers materials kept in files of their own: saved, shared by a scene's entities, and read again
+/// Covers materials kept in files of their own, saved, shared by a scene's entities, and read again
 /// when the file changes.
 /// </summary>
 /// <remarks>

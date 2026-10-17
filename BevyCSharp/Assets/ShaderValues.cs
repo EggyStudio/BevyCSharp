@@ -90,7 +90,8 @@ public static unsafe class ShaderValues
 
         /// <summary>
         /// Sets numbers <paramref name="components"/> to an element, for the shapes C# has no type
-        /// for: an <c>int2</c>, a <c>uint3</c>, a <c>float3x3</c>, or an array of any of them.
+        /// for, such as an <c>int2</c>, a <c>uint3</c>, a <c>float3x3</c>, or an array of any of
+        /// them.
         /// </summary>
         /// <remarks>
         /// <typeparamref name="TItem"/> is <see cref="float"/>, <see cref="int"/> or
@@ -122,7 +123,7 @@ public static unsafe class ShaderValues
         }
 
         /// <summary>
-        /// Copies bytes, as they are, to where a name is: a struct, an array of structs, or a whole
+        /// Copies bytes, as they are, to where a name is, a struct, an array of structs, or a whole
         /// <c>ConstantBuffer</c>.
         /// </summary>
         /// <remarks>
@@ -311,7 +312,7 @@ public static unsafe class ShaderValues
         }
 
         /// <summary>
-        /// Sets numbers under a name from memory: <paramref name="count"/> elements of
+        /// Sets numbers under a name from memory, <paramref name="count"/> elements of
         /// <paramref name="components"/> four-byte numbers each.
         /// </summary>
         internal T Numbers(string name, ShaderScalar scalar, int components, void* data, int count)

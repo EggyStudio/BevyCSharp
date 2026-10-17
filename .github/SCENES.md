@@ -1,6 +1,6 @@
 # Scenes, data assets and saves
 
-How a scene is written to a file and read back, with what it is made of: glTF content, components
+How a scene is written to a file and read back, with what it is made of, glTF content, components
 from both sides of the bridge, scenes placed inside other scenes, data kept in files of its own
 (Unity's ScriptableObject, Godot's Resource), and a player's save. The values of §4, the ids of §2
 for every file,
@@ -51,10 +51,10 @@ Everything is read from one of two places, named in a path by its prefix.
 - **`assets://`** is the game's content, and read-only once shipped. While developing it is the
   asset folder. A shipped game has it as a folder beside the executable, embedded in the binary,
   or in a pack file ([PLAY.md](PLAY.md), embedding).
-- **`user://`** is writable and belongs to the player: settings, saves, anything the game writes.
-  It is the platform's data directory under the game's name (`$XDG_DATA_HOME` or
-  `~/.local/share` on Linux, `%APPDATA%` on Windows, `~/Library/Application Support` on macOS),
-  the same one `Persistent<T>` writes to.
+- **`user://`** is writable and belongs to the player, for settings, saves and anything the game
+  writes. It is the platform's data directory under the game's name (`$XDG_DATA_HOME` or
+  `~/.local/share` on Linux, `%APPDATA%` on Windows, `~/Library/Application Support` on macOS), the
+  same one `Persistent<T>` writes to.
 
 The managed side resolves both (`SceneFile.Resolve`, `UserData`), and `user://` is registered with
 Bevy as an asset source named `user` (ABI 156), with the directory made as an app starts, so a
@@ -130,7 +130,7 @@ Not built:
 }
 ```
 
-Built in `BevyCSharp/Scenes/SceneFile.cs`: `SceneFile.Save(world, "assets://levels/one.scene.json")`
+Built in `BevyCSharp/Scenes/SceneFile.cs`. `SceneFile.Save(world, "assets://levels/one.scene.json")`
 writes entities and `SceneFile.Load` spawns them, returning what it spawned and the component types
 it kept without knowing them (§7). `scene.save` and `scene.load` do the same from the console and the command line.
 
@@ -157,7 +157,7 @@ it kept without knowing them (§7). `scene.save` and `scene.load` do the same fr
   `SceneFile.Excluded`, which the editor sets to its own cameras and previews.
 - **A mesh and a material** are written by the file each came from, as its id and path (§2), or,
   made in memory, as a resource of the scene saying how to make it again (a mesh built vertex by
-  vertex as its geometry, see below): a primitive as its shape and measures
+  vertex as its geometry, see below), a primitive as its shape and measures
   (`Render.RecipeOf`) and a standard material as its settings (`Render.TryReadMaterial`). Two
   entities sharing one share one resource, and loading makes it once, so they still share it.
 
@@ -182,7 +182,7 @@ The schemas carry each field's `FieldKind`, which decides how it is written.
 - **One writer and one reader per kind** (`SceneValue`, `BevyCSharp/Scenes/SceneValue.cs`), over
   `Utf8JsonWriter` and the reader `JsonDocument` is built on. A vector is an array of numbers, a
   color is linear RGBA, an enum is its name, flags are a list of names, and an entity or an asset is
-  an object written by `SceneReferences`: `{ "entity": 7 }` for an entity the writer numbered, and
+  an object written by `SceneReferences`, `{ "entity": 7 }` for an entity the writer numbered, and
   `{ "path": … }` for an asset loaded from a file. A reference that cannot be followed after a
   reload (an entity the scene did not number, an asset built in memory) is written as `null`. So
   nothing goes through `ToString()` and back, and nothing reflects, which keeps it working under
@@ -213,7 +213,7 @@ prefab, which is a scene made to be placed many times.
   "components": { "Bevy.Transform": { "Translation": [5, 0, 0] } } }
 ```
 
-Built in `BevyCSharp/Scenes/SceneInstances.cs`, for a glTF scene and for a `.scene.json`:
+Built in `BevyCSharp/Scenes/SceneInstances.cs`, for a glTF scene and for a `.scene.json`.
 `SceneInstances.Spawn` places one, `Set`, `Add`, `Remove` and `Delete` change a node and record the change, `SceneFile` writes an
 instance as above and loads it again, and the bridge passes Bevy's `WorldInstanceReady` on as a
 message of the same name (ABI 155), at the top of the frame after Bevy announces it, with the
@@ -237,14 +237,14 @@ instance's overrides already applied.
   what the node holds and inserting the result. Recording folds a change into the one before it
   for the same node and component, so the list says where the instance ended up.
 - **Instances nest,** and an override can reach into a nested instance by a longer path. Saving
-  refuses a scene that would contain itself. Built: overrides are recorded on the outermost
+  refuses a scene that would contain itself. As built, overrides are recorded on the outermost
   instance, the one a scene file writes, and one reaching into a nested glTF instance that has
   not spawned yet is applied again when it has. Loading refuses a scene file that places itself,
   directly or through another, and saving looks through the scene files an instance places for
   the file being written.
 - **The editor shows what is overridden** by marking the field, and offers reverting it to the
   model's value, as Unity's prefab overrides do. Godot's "editable children" is the same idea.
-  Built: an inspector edit, a gizmo drag and `entity.set` on a node of an instance are recorded
+  As built, an inspector edit, a gizmo drag and `entity.set` on a node of an instance are recorded
   through `SceneInstances.Mark`, a component added or removed there and a node deleted through
   `MarkAdded`, `MarkRemoved` and `Delete`, the field's name is drawn in the accent, and a right-click on it
   offers the model's value back (`SceneInstances.Revert`). The model's value is remembered when a
@@ -331,7 +331,7 @@ Not built:
 
 A save records what changed while playing, over the scenes the game started from. Built in
 `BevyCSharp/Scenes/SaveGame.cs`, with `Persistent<T>` and the `user://` root in
-`BevyCSharp/Scenes/Persistent.cs`: `SaveGame.Start` loads the scenes a game begins from and
+`BevyCSharp/Scenes/Persistent.cs`. `SaveGame.Start` loads the scenes a game begins from and
 remembers which saved entities they hold, `SaveGame.Save` writes the difference (format
 `bevycsharp.save.1`), and `SaveGame.Load` reads the scenes again and lays the save over them.
 
@@ -350,7 +350,7 @@ remembers which saved entities they hold, `SaveGame.Save` writes the difference 
   scene that were despawned are written as deleted. A field referring to an entity is written as
   that entity's save id.
 - **Global state** is `Persistent<T>` ([PLAY.md](PLAY.md)), named in the save rather than copied into
-  it, or copied when the game asks for it to belong to the save slot. Built: `SaveGame.Carry`
+  it, or copied when the game asks for it to belong to the save slot. As built, `SaveGame.Carry`
   copies a `Persistent<T>` into every save under `values` and puts it back on a load, and one not
   carried stays in its own file. Naming one in the save, to check on a load that it is the same
   file, is not built.

@@ -9,7 +9,7 @@ namespace Bevy.Interop;
 /// <remarks>
 /// When the package is consumed normally, NuGet's <c>runtimes/{rid}/native/</c> layout means
 /// the default resolver already finds the library and the extra probing here never fires. The
-/// probe paths exist for the cases NuGet does not cover: running straight out of the repo
+/// probe paths exist for the cases NuGet does not cover, running straight out of the repo
 /// against a local <c>cargo build</c>, and single-file or otherwise relocated layouts.
 /// </remarks>
 internal static class NativeLoader

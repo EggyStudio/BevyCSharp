@@ -49,7 +49,7 @@ public sealed partial class PhysicsWorld
     public bool IsCharacter(Entity entity) => _characters.ContainsKey(entity);
 
     /// <summary>
-    /// Makes a dynamic body that was made from components a character: upright, unturnable,
+    /// Makes a dynamic body that was made from components a character, upright, unturnable,
     /// frictionless and never asleep.
     /// </summary>
     /// <remarks>

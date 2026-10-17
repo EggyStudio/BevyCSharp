@@ -11,7 +11,7 @@ using Sensitivity = Bevy.Reflected.FxaaRef.EdgeThresholdVariant;
 using SensitivityMin = Bevy.Reflected.FxaaRef.EdgeThresholdMinVariant;
 using SmaaPreset = Bevy.Reflected.SmaaRef.PresetVariant;
 
-// Compares the antialiasing Bevy has: none, MSAA at two, four or eight samples, FXAA at five
+// Compares the antialiasing Bevy has, none, MSAA at two, four or eight samples, FXAA at five
 // sensitivities, SMAA at four qualities and TAA, with contrast adaptive sharpening and an
 // orthographic projection to try each against. Bevy's DLSS is behind a feature its examples are
 // not built with by default, and is left out here as there.

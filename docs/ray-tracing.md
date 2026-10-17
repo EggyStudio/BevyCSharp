@@ -20,7 +20,7 @@ Render.SetRayTraced(wall, wallMesh);
 ```
 
 Direct light comes from every light and every emissive surface, found by rays rather than shadow
-maps, so a glowing screen lights the face in front of it, and indirect light is bounced off every
+maps, so an emissive screen lights the face in front of it, and indirect light comes from every
 surface taking part, so a red wall tints the floor beside it and a lamp lights the corners it
 cannot see. It builds up over a few frames and follows what moves. It needs a bridge built with it
 (`./bcs build --editor --solari`) and an adapter with ray queries, which the bridge asks about
@@ -119,7 +119,7 @@ void main(uint3 id : SV_DispatchThreadID)
 ```
 
 `bcs_ray::trace` answers the nearest triangle a ray meets, and `bcs_ray::surface_at` unpacks it the
-way Solari does: the position this frame and the last, the normal with the normal map applied,
+way Solari does, the position this frame and the last, the normal with the normal map applied,
 texture coordinates, and the material's color, emission, roughness and metalness with its textures
 read. The acceleration structure, vertices, transforms, materials and lights are Solari's, declared
 in group two and bound to the bind group Solari builds each frame, so they follow the scene without

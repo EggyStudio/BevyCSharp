@@ -1,4 +1,4 @@
-//! Sound a game makes as it plays: samples written from C# into a queue that a decoder of Bevy's
+//! Sound a game makes as it plays, samples written from C# into a queue that a decoder of Bevy's
 //! reads.
 //!
 //! Bevy plays a sound of a game's own through a type implementing its `Decodable`, whose decoder

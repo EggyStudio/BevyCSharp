@@ -11,7 +11,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// A small version of the technique, to show the pieces a package of this kind is built from. The
 /// rays are traced by a compute shader of the program's own (<c>assets/shaders/rtao.slang</c>),
-/// compiled to SPIR-V for its ray queries, against a ray scene: the ground, the cube and the lamp as
+/// compiled to SPIR-V for its ray queries, against a ray scene, the ground, the cube and the lamp as
 /// a plane, a box and a sphere in a geometry pool, placed where the scene's entities are every
 /// frame. The answer is written into the ambient occlusion texture Bevy's materials read, in place
 /// of Bevy's screen-space estimate, so the lighting itself is darkened rather than a picture drawn

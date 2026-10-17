@@ -26,7 +26,7 @@ use bevy::prelude::Entity;
 use crate::interop::status;
 use crate::state::{loan_world, with_world};
 
-/// What C# is called with: which of the five kinds of change, the component's id, the entity's
+/// What C# is called with, which of the five kinds of change, the component's id, the entity's
 /// bits, and the component's bytes as they were when the observer ran, valid only for the call.
 pub type LifecycleCallback =
     unsafe extern "C" fn(kind: i32, component: i32, entity: u64, data: *const u8, len: usize, user: *mut c_void);

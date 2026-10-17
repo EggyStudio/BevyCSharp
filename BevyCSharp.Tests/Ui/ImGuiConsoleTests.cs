@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// window, running what is typed into it, and closed by the same key.
 /// </summary>
 /// <remarks>
-/// Driven offscreen with the interface asked for, the key pressed where a real one starts
+/// Run offscreen with the interface asked for, the key pressed where a real one starts
 /// (<see cref="SyntheticInput.Tap"/>) and the command typed into the interface's own queue, as the
 /// editor's tests of a field type. In the engine collection, since it runs an app and the
 /// console's ring is the process's.

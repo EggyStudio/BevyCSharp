@@ -139,7 +139,7 @@ impl AsAssetId for BcsMaterial3d {
     }
 }
 
-/// What decides a material's pipelines: the program, which version of it, the faces culled, and
+/// What decides a material's pipelines, the program, which version of it, the faces culled, and
 /// whether it draws a sprite.
 ///
 /// The version, because a program whose shader was edited has a new layout as well as new code,
@@ -468,7 +468,7 @@ fn prepass_specialize(
     )
 }
 
-/// What every pipeline of a material gets on top of what Bevy builds: the faces culled, and the
+/// What every pipeline of a material gets on top of what Bevy builds, the faces culled, and the
 /// vertex attributes a prepass vertex shader of a program's own reads.
 fn user_specialize(
     _pipeline: &dyn std::any::Any,

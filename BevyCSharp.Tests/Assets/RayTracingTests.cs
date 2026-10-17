@@ -12,9 +12,9 @@ namespace Bevy.Tests;
 public sealed class RayTracingTests
 {
     /// <summary>
-    /// A glowing red wall beside a white floor, with no lamp and no ambient light, lights the floor
-    /// red when the camera traces rays, since an emissive surface is a light to them, and leaves it
-    /// dark when it does not.
+    /// An emissive red wall beside a white floor, with no lamp and no ambient light, lights the
+    /// floor red when the camera traces rays, since an emissive surface is a light to them, and
+    /// leaves it dark when it does not.
     /// </summary>
     [SkippableFact]
     public void AGlowingWallLightsTheFloorWhenRaysAreTraced()
@@ -61,9 +61,9 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
-    /// A glowing wall made of a mesh with no texture coordinates, as a model drawn in plain colors
-    /// often is, is given coordinates of zero rather than refused, and lights the floor as one with
-    /// coordinates does.
+    /// An emissive wall made of a mesh with no texture coordinates, as a model drawn in plain
+    /// colors often is, is given coordinates of zero rather than refused, and lights the floor as
+    /// one with coordinates does.
     /// </summary>
     [SkippableFact]
     public void AMeshWithNoTextureCoordinatesIsTracedAllTheSame()
@@ -78,9 +78,9 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
-    /// A camera drawn by Bevy's path tracer, in an app that asked for it, sees the glowing wall light
-    /// the floor red from its rays alone, the raster meshes taken away as Bevy's solari example
-    /// takes them.
+    /// A camera drawn by Bevy's path tracer, in an app that asked for it, sees the emissive wall
+    /// light the floor red from its rays alone, the raster meshes taken away as Bevy's solari
+    /// example takes them.
     /// </summary>
     [SkippableFact]
     public void ThePathTracerLightsTheFloorFromItsRaysAlone()

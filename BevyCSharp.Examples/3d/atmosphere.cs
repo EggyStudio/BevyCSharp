@@ -129,7 +129,7 @@ internal static class AtmosphereExample
         });
         Render.SetExposure(_camera, _ev100);
 
-        // The atmosphere drives the reflections and the ambient light of this view.
+        // The reflections and the ambient light of this view come from the atmosphere.
         Render.SetSkyLighting(_camera);
 
         ecs.Insert<VolumetricFogRef>(_camera).AmbientIntensity = 0f;

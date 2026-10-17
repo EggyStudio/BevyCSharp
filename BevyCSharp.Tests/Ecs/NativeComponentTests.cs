@@ -396,7 +396,7 @@ public sealed class NativeComponentTests
     [Fact]
     public void VisibilityMirrorsAreSingleBytes()
     {
-        // Bevy stores all three in a byte: an enum with three variants, a bool, and a bool pair
+        // Bevy stores all three in a byte, an enum with three variants, a bool, and a bool pair
         // packed into two bits. A mirror that widened any of them would read the neighboring
         // component. This needs no world, so it holds on a headless build too.
         Assert.Equal(1, Unsafe.SizeOf<Visibility>());

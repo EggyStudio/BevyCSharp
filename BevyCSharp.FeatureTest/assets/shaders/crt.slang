@@ -1,4 +1,4 @@
-// A pass that makes the picture look like it came through an old screen: the channels pulled
+// A pass that makes the picture look like it came through an old screen, the channels pulled
 // apart toward the edges, and dark lines across it.
 //
 // Run after tonemapping, because it is about the picture as a picture rather than about light.

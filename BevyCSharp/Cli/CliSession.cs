@@ -29,7 +29,7 @@ namespace Bevy;
 /// <param name="Abi">The native bridge version it loaded.</param>
 /// <param name="Renderer">Whether that bridge can draw, which decides whether it can be captured.</param>
 /// <param name="Editor">Whether that bridge carries the interface surface.</param>
-/// <param name="State">Where it is in its life: <c>starting</c>, <c>ready</c> or <c>closing</c>.</param>
+/// <param name="State">Where it is in its life, <c>starting</c>, <c>ready</c> or <c>closing</c>.</param>
 /// <param name="Frame">What the frame counter said at the last heartbeat.</param>
 /// <param name="Heartbeat">When that was.</param>
 public sealed record CliSession(
@@ -81,6 +81,6 @@ public sealed record CliSession(
         }
     }
 
-    /// <summary>What <c>bcs status</c> calls it: ready, starting, unreachable or gone.</summary>
+    /// <summary>What <c>bcs status</c> calls it, ready, starting, unreachable or gone.</summary>
     public string Report => !Running ? "gone" : Stale ? "unreachable" : State;
 }

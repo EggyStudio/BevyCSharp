@@ -9,6 +9,8 @@ public enum PointerKind
     /// <summary>A finger on a touch screen.</summary>
     Touch,
 
-    /// <summary>A pointer a game drives itself, as one moving over an interface drawn into a texture.</summary>
+    /// <summary>
+    /// A pointer a game moves itself, as one moving over an interface drawn into a texture.
+    /// </summary>
     Custom,
 }

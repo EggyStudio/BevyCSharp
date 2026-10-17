@@ -131,7 +131,7 @@ SaveGame.Load(ctx.Ecs);                              // the scenes again, with t
 ```
 
 A save holds what play changed and nothing a scene already says. An entity is saved when it
-carries a `SaveId`, which the editor gives it with Add Component and code with `SaveId.New()`: the
+carries a `SaveId`, which the editor gives it with Add Component and code with `SaveId.New()`. The
 fields play changed of its components marked `[Persist]` (or named in `SaveGame.Persisted`, for
 one such as `Bevy.Transform`) are written, a component play took off is written as `null`, an
 entity spawned during play is written whole, and one of the scene's that was despawned is written
@@ -212,7 +212,7 @@ is in the type's own namespace. A change a rename cannot say goes in `Migrate`, 
 with the version the file was written at, and a type at a later version with no such method is
 warned about (BCS008).
 
-What a build cannot read is kept rather than dropped: a component whose type it lacks, one Bevy
+What a build cannot read is kept rather than dropped. A component whose type it lacks, one Bevy
 refuses, and a value no field reads all ride along on the entity as the JSON the file had and are
 written back where they were. A branch that deletes a type, or an older build opening a newer
 scene, then leaves that type's data in the file for the build that knows it. A newer file keeps

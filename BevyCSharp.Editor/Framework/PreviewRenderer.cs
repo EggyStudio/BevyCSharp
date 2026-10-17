@@ -278,7 +278,7 @@ internal static class PreviewRenderer
     /// <summary>The slot a key has, or nothing.</summary>
     private static Slot? Find(string key) => Pool.FirstOrDefault(slot => slot?.Key == key);
 
-    /// <summary>The slot for a key: its own, a free one, or the one asked for least recently.</summary>
+    /// <summary>The slot for a key, its own, a free one, or the one asked for least recently.</summary>
     private static Slot Take(BehaviorContext ctx, string key)
     {
         if (Find(key) is { } held) return held;

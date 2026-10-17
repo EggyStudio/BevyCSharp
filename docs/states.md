@@ -42,7 +42,7 @@ public static void BuildLevel(BehaviorContext ctx) { }
 public static void TearDown(BehaviorContext ctx) { }
 ```
 
-That is where a screen is built and taken away: once per transition, not once per frame. A
+That is where a screen is built and taken away, once per transition rather than once per frame. A
 transition attribute replaces the stage attribute rather than joining it, because the two say
 different things about when a method runs, and asking for both is reported as an error.
 

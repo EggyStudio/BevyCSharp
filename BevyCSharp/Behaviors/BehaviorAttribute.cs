@@ -29,7 +29,7 @@ namespace Bevy;
 /// </para>
 /// </remarks>
 /// <example>
-/// A behavior with no state, driving other components:
+/// A behavior with no state, which changes other components:
 /// <code>
 /// [Behavior]
 /// public partial struct Gravity

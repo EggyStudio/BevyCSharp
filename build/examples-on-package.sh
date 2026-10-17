@@ -23,7 +23,7 @@ mkdir -p "$work/Examples"
 (cd BevyCSharp.Examples && find . -name '*.cs' -not -path './bin/*' -not -path './obj/*' -print0 | tar --null -cf - --files-from=-) \
   | (cd "$work/Examples" && tar -xf -)
 
-# Without what runs the examples, which a reader copying one into a game has none of: the catalog,
+# Without what runs the examples, which a reader copying one into a game has none of, the catalog,
 # the program that opens one by name, the record it keeps them in and the input a capture pretends,
 # so an example reaching into any of them fails to build here.
 rm "$work/Examples/Catalog.cs" "$work/Examples/Program.cs" "$work/Examples/Example.cs" "$work/Examples/Drives.cs"

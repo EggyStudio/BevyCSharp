@@ -18,7 +18,7 @@ void main(uint3 id : SV_DispatchThreadID)
     let depth_value = bcs_pass::load_depth(pixel);
     let world = bcs_pass::world_position(bcs_pass::uv_of(pixel), depth_value);
 
-    // Nothing drawn, or outside the cone: marked apart from both lit and shadowed.
+    // Nothing drawn, or outside the cone, marked apart from both lit and shadowed.
     if (depth_value <= 0.0 || bcs_pass::point_light_count() == 0 || all(bcs_pass::point_light_radiance(0, world) <= 0.0))
     {
         sunlit[pixel] = -1.0;

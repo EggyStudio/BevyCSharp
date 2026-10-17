@@ -68,7 +68,7 @@ internal static class Pages
 
     /// <summary>
     /// The weather's page, its switch and, where it runs, the kind of weather, the cloud cover, the
-    /// tier and whether the forecast drives it.
+    /// tier and whether the forecast sets it.
     /// </summary>
     private static Page Skies() => new("Weather",
     [

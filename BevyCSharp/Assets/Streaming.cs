@@ -8,7 +8,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Streaming textures or geometry is reading many small pieces of large files while a game runs:
+/// Streaming textures or geometry is reading many small pieces of large files while a game runs,
 /// the tiles or clusters a frame found missing, requested by the GPU and uploaded as they arrive.
 /// Reading them on the frame's thread stalls the frame on the disk, and handing them all over the
 /// frame they finish turns a burst of finished reads into a burst of uploads, which is a hitch of

@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the editor's document: a scene file that leaves the editor's own entities out and replaces
+/// Covers the editor's document, a scene file that leaves the editor's own entities out and replaces
 /// the scene when it is loaded, and one that does not read, which leaves the scene as it was.
 /// </summary>
 [Collection("engine")]

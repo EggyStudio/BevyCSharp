@@ -1,4 +1,4 @@
-// What a shader running on a camera sees of it: the picture drawn so far, time, the view and the
+// What a shader running on a camera sees of it, the picture drawn so far, time, the view and the
 // previous frame's, and the depth, normals and motion the camera's prepass drew.
 //
 // A full-screen pass, a compute shader dispatched on a camera and geometry a camera draws all reach
@@ -92,7 +92,7 @@ public struct PreviousView
 
 // -- The scene's lights, laid out as Bevy lays them out
 
-/// One cascade of a directional light's shadow: what projects the world onto its layer of the
+/// One cascade of a directional light's shadow, what projects the world onto its layer of the
 /// shadow map, and how far from the camera it reaches.
 public struct DirectionalCascade
 {
@@ -156,7 +156,7 @@ public struct PointLight
     public float range;
 };
 
-/// What the bridge adds about the scene to Bevy's own light data: how many point and spot lights
+/// What the bridge adds about the scene to Bevy's own light data, how many point and spot lights
 /// `point_lights` holds, and the camera's environment map.
 public struct SceneInfo
 {
@@ -191,7 +191,7 @@ public static const uint DIRECTIONAL_LIGHT_SHADOWS = 1u << 0u;
 [[vk::binding(14, 101)]] public TextureCube environment_diffuse_map;
 /// The same, sharp in its first level and rougher in each after it.
 [[vk::binding(15, 101)]] public TextureCube environment_specular_map;
-/// Bevy's spatio-temporal blue noise: layers of noise whose values are spread evenly both across a
+/// Bevy's spatio-temporal blue noise, layers of noise whose values are spread evenly both across a
 /// layer and from one layer to the next. Gray until it arrives.
 [[vk::binding(16, 101)]] public Texture2DArray blue_noise_layers;
 
@@ -496,7 +496,7 @@ public bool orthographic()
     return view.clip_from_view[3].w == 1.0;
 }
 
-/// Where the ray through the pixel at `uv` starts: at the camera for a perspective view, and on
+/// Where the ray through the pixel at `uv` starts, at the camera for a perspective view, and on
 /// the near plane for an orthographic one.
 public float3 ray_origin(float2 uv)
 {
@@ -533,7 +533,7 @@ public bool has_environment()
     return scene_info.environment_mips > 0;
 }
 
-/// A world direction turned the way the environment's cubes are sampled: rotated as the
+/// A world direction turned the way the environment's cubes are sampled, rotated as the
 /// environment was, and with z negated, since cube maps are left-handed and Bevy's world is not.
 float3 environment_direction(float3 direction)
 {

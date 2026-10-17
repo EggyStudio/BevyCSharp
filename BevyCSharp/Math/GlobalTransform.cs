@@ -85,7 +85,7 @@ public struct GlobalTransform : INativeComponent
         _padTranslation = 0f;
     }
 
-    /// <summary>The transform that does nothing: at the origin, unrotated, unscaled.</summary>
+    /// <summary>The transform that does nothing, at the origin, unrotated, unscaled.</summary>
     public static GlobalTransform Identity =>
         new(Vec3.UnitX, Vec3.UnitY, Vec3.UnitZ, Vec3.Zero);
 

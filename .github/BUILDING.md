@@ -14,22 +14,23 @@ dotnet run --project BevyCSharp.FeatureTest -- --headless --frames 120 --verbose
 ```
 
 Most of what the bridge does is only observable from managed code, so the suite is where nearly
-all of the coverage is. The Rust tests cover what it cannot reach from there: the convention for
+all of the coverage is. The Rust tests cover what it cannot reach from there, the convention for
 returning text through a caller's buffer, the guard that turns a panic into a status code rather
 than an unwind into .NET, and the asset registration that has to stay inert when it is asked twice.
 
-`build/test.py` runs three parts, each a process held to a time and a memory: `bridge`, cargo's
-tests of the bridge, `renderer`, the same with the renderer's crates, and `suite`, the managed
-suite. Naming parts runs those alone, as `build/test.py suite` does. The log ends with a page of at
-most 200 lines, the counts and a line for each part, any process lost, and the failures by cause,
-which is also written to `BevyCSharp.Tests/TestResults/digest.md`. A suite that is lost, by a crash,
-a hang, its time, its memory or the cap MemoryGuard holds the test host to, runs again in parts, so
-one crash costs only its own part's tests, and every listed test without a result is counted.
-`--filter` holds the suite and its parts to a filter, as `dotnet test` takes one. `./bcs test` runs
-the suite this way, so a count there is the page's. `dotnet test` and `cargo test` still run as they
-always did, and a host the cap stopped prints a tally of the tests that ran before it as though they
-were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during
-which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
+`build/test.py` runs three parts, each a process held to a time and a memory, which are `bridge`,
+cargo's tests of the bridge, `renderer`, the same with the renderer's crates, and `suite`, the
+managed suite. Naming parts runs those alone, as `build/test.py suite` does. The log ends with a
+page of at most 200 lines, the counts and a line for each part, any process lost, and the failures
+by cause, which is also written to `BevyCSharp.Tests/TestResults/digest.md`. A suite that is lost,
+by a crash, a hang, its time, its memory or the cap MemoryGuard holds the test host to, runs again
+in parts, so one crash costs only its own part's tests, and every listed test without a result is
+counted. `--filter` holds the suite and its parts to a filter, as `dotnet test` takes one.
+`./bcs test` runs the suite this way, so a count there is the page's. `dotnet test` and `cargo test`
+still run as they always did, and a host the cap stopped prints a tally of the tests that ran before
+it as though they were the run, which only its last line, the cap's, and `Test Run Aborted` tell
+apart. A test during which the engine logs an error fails unless it says it expects that error with
+`[ExpectsError]`.
 
 `cargo test` with no feature named builds the default profile, the headless one, which is the one
 the workflow tests the bridge in, and it has none of the renderer's crates. A test reaching them
@@ -235,7 +236,7 @@ Three platform notes worth knowing:
   a clear error rather than letting it crash inside AppKit. The check applies only when a window is
   actually going to be opened (`App.WillOpenWindow`), because the constraint belongs to windowing
   rather than to the engine. A headless run has no event loop and works from any thread, so a test
-  runner can drive it from its own worker threads.
+  runner can run it from its own worker threads.
 - **The one Linux binary serves both X11 and Wayland.** Which is used is decided at runtime, so
   there is no separate build for each.
 
@@ -334,13 +335,13 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 
 ## Publishing
 
-A push or a pull request runs the build workflow, `build.yml`: the test suite on Linux, Windows and
-macOS, the three systems the package ships for, which follows every link of the README and the guide
-into this repository among its tests (`DocsScriptTests`), and each page of what failed put on one
-for the commit. On Windows it also opens the feature test through `bcs`, headless, and asks how it
-is, since that is the one system where `bcs` starts a program through `cmd.exe`, within a few
-minutes and with each answer printed. On macOS it installs `dotnet-gcdump` for the leak test, which
-names the types that grew where the heap's floor rose. A push tests the library alone, on the
+A push or a pull request runs the build workflow, `build.yml`, which runs the test suite on Linux,
+Windows and macOS, the three systems the package ships for, which follows every link of the README
+and the guide into this repository among its tests (`DocsScriptTests`), and each page of what failed
+put on one for the commit. On Windows it also opens the feature test through `bcs`, headless, and
+asks how it is, since that is the one system where `bcs` starts a program through `cmd.exe`, within
+a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump` for the leak test,
+which names the types that grew where the heap's floor rose. A push tests the library alone, on the
 headless bridge each test job builds, since the render bridge costs a quarter of an hour cold on
 each of six runners and only a package needs it, and nothing a commit message says changes that.
 
@@ -348,7 +349,7 @@ A package is made by the pack workflow, `pack.yml`, run by hand from the Actions
 workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves
 out. Those build the bridge for all six platforms, play Courtyard and Swarm, keeping Swarm's frame
 profile with the run's captures, soak the games, build and run every step of the first game
-(`build/first-game.sh`, whose `--shots` draws the page's pictures again), drive the feature test's
+(`build/first-game.sh`, whose `--shots` draws the page's pictures again), take the feature test's
 player through each station of its course, built on the package as Courtyard is
 (`build/drive-feature-test.sh`), capture every example, storm a window and walk the README's
 install in a container, the template installed and a game made from it (`build/readme-walk.sh`).
@@ -357,14 +358,15 @@ are kept as the run's artifact, to download and upload to nuget.org by hand. Tic
 **publish** box pushes both to nuget.org from the run instead, which needs the `NUGET_API_KEY`
 secret.
 
-Intel Sponza is driven by hand on a machine with a GPU rather than in a workflow, since its pack is
-hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets and ray-traced lighting,
-fetches `slangc` and the pack (`./bcs scenes fetch intel-sponza`), builds the feature test with
-warnings as errors and drives it with its captures in `build/scenes`, where the drive loads the
-fetched pack and captures its reference views from outside its door and inside its hall with their
-frame times. A pack itself is made by `build/make-scene-pack.py` from the scene as its makers
-publish it, needs Python 3.14 and Pillow, and is published by hand as an asset of the release
-`scene-packs`, at the address its manifest names.
+The feature test is run through Intel Sponza by hand on a machine with a GPU rather than in a
+workflow, since its pack is hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets
+and ray-traced lighting, fetches `slangc` and the pack (`./bcs scenes fetch intel-sponza`), builds
+the feature test with warnings as errors and runs it through its course with its captures in
+`build/scenes`, where the run loads the fetched pack and captures its reference views from outside
+its door and inside its hall with their frame times. A pack itself is made by
+`build/make-scene-pack.py` from the scene as its makers publish it, needs Python 3.14 and Pillow,
+and is published by hand as an asset of the release `scene-packs`, at the address its manifest
+names.
 
 The testers' zips are made by hand as well, each on the system it is for, since native code is
 published for the system it is made on. A zip holds the feature test published as native code from
@@ -417,12 +419,12 @@ asset handles and the assets of each kind) climbs past what it reached earlier i
 than a little, and when it was read fewer than six times. A round ends where the game is the same
 each time, Courtyard back on its menu after a save, a walk and a load, Swarm at its end after a
 fight with its first wave, the feature test's player back where its walk round a square of the hub
-began, and the stress program after a number of frames, so two readings of a game that leaks
-nothing match. `build/soaks.sh <seconds> <game>...` soaks several at once and judges each, a failure
-said as one error naming each game's failure and each value that climbed. The pack workflow soaks
-Courtyard, Swarm and the stress program at once for ten minutes, and the feature test alone for
-fifteen after its drive, since lavapipe plays a round of each in a minute or two, and a ten-minute
-run of each game holds level here.
+began, and the stress program after a number of frames, so two readings of a game that leaks nothing
+match. `build/soaks.sh <seconds> <game>...` soaks several at once and judges each, a failure said as
+one error naming each game's failure and each value that climbed. The pack workflow soaks Courtyard,
+Swarm and the stress program at once for ten minutes, and the feature test alone for fifteen after
+its course run, since lavapipe plays a round of each in a minute or two, and a ten-minute run of
+each game holds level here.
 
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by
@@ -457,7 +459,7 @@ build/api.sh                # BevyCSharp/PublicApi.txt from the built library, a
 ### The tonemapper references
 
 `BevyCSharp.Tests/references/tonemapping` holds a picture for each of Bevy's eight tonemappers,
-named as Bevy names it: a ramp of light values from a four thousandth to 256 in eight colors, as
+named as Bevy names it, a ramp of light values from a four thousandth to 256 in eight colors, as
 SHARED.md defines it, drawn by a material of its own through the tonemapper and kept as an eight-bit
 sRGB PNG. 3DEngine holds its own tonemappers to these pictures, and `TonemapRampTests` holds this
 engine to them within two levels of 255, or four for the three Bevy draws through lookup tables. A

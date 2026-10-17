@@ -2,7 +2,7 @@
 //!
 //! A glTF file's clips are loaded by Bevy as `AnimationClip`s, and the scene it spawns puts an
 //! `AnimationPlayer` on the node at the top of what they move. What Bevy leaves to the game is
-//! the rest: a graph of the clips for the player to read, and which of them plays. This keeps one
+//! the rest, a graph of the clips for the player to read, and which of them plays. This keeps one
 //! of those per scene, made the first time something asks, so the managed side names a clip by the
 //! name the artist gave it and plays it on the entity it spawned, with no graph or node index on
 //! that side at all.
@@ -416,7 +416,7 @@ pub extern "C" fn bcs_animation_adjust(root: u64, seconds: f32, speed: f32) -> i
     })
 }
 
-/// Changes how many times the clip playing on a scene plays, without starting it over: `0` for
+/// Changes how many times the clip playing on a scene plays, without starting it over, `0` for
 /// ever, and one or more that many times, counting the plays it has finished.
 ///
 /// [`status::INVALID_STATE`] when nothing is playing.

@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Framework;
 /// One component field, drawn as whatever kind of thing it is.
 /// </summary>
 /// <remarks>
-/// What a field knows about itself is <see cref="ComponentField"/>'s: its kind, its range, the
+/// What a field knows about itself is <see cref="ComponentField"/>'s, its kind, its range, the
 /// names of its options. This is the other half, which turns each of those into a widget and
 /// writes back what comes out of it.
 /// </remarks>

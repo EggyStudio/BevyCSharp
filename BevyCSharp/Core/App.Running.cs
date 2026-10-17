@@ -56,7 +56,7 @@ public sealed unsafe partial class App : IDisposable
         // macOS insists the *window* event loop owns the main thread, and breaking that rule
         // crashes inside AppKit rather than anywhere that points back here. The constraint belongs
         // to windowing, not to the engine, because a headless run creates no window and no event
-        // loop, so it is free to run anywhere, and a test runner can drive it from its own worker
+        // loop, so it is free to run anywhere, and a test runner can run it from its own worker
         // threads. The bridge answers yes on every platform but Apple, so this costs one call and
         // only ever fires where it genuinely matters.
         if (WillOpenWindow && Native.bcs_is_main_thread() == 0)

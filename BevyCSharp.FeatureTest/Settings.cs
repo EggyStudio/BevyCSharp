@@ -206,7 +206,7 @@ public sealed record FeatureSettings
     public WeatherConfigRef.QualityVariant WeatherTier { get; init; } = WeatherConfigRef.QualityVariant.Low;
 
     /// <summary>
-    /// Whether the weather comes from the forecast the clock drives, rather than from
+    /// Whether the weather comes from the forecast the clock advances, rather than from
     /// <see cref="WeatherKind"/> and <see cref="CloudCover"/>.
     /// </summary>
     public bool Procedural { get; init; }
@@ -273,7 +273,7 @@ public static class Settings
 
     /// <summary>
     /// Reads one setting, or changes it as the panel would, for a tester at the console and for
-    /// the drive script.
+    /// build/drive-feature-test.sh.
     /// </summary>
     /// <remarks>
     /// The settings go to JSON and back through the same generated context the file is kept with,

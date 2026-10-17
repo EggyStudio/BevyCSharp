@@ -19,7 +19,7 @@ public static class EditorSurface
     /// </summary>
     /// <remarks>
     /// The editor works out where each of its windows goes and how large it is, so ImGui is asked
-    /// not to do any of that: no title bar to drag by, no corner to resize from, no remembered
+    /// not to do any of that, no title bar to drag by, no corner to resize from, no remembered
     /// position, and no scrollbar, because what scrolls is a region inside rather than the window
     /// itself.
     /// </remarks>
@@ -60,7 +60,7 @@ public static class EditorSurface
     /// The gap between two surfaces, and between a surface and the edge it is inset from.
     /// </summary>
     /// <remarks>
-    /// One number for every gap inside the editor: a panel's edge to its cards, one card to the
+    /// One number for every gap inside the editor, a panel's edge to its cards, one card to the
     /// next, the scene to whatever is beside it. What tells two surfaces apart is the step in
     /// their fill, and the gap only has to be wide enough to be read as deliberate. Two gaps of
     /// different widths in one picture read as an arrangement that has slipped.
@@ -365,7 +365,7 @@ public static class EditorSurface
     }
 
     /// <summary>
-    /// What an empty pane says, in its middle: what is not there, and under it, dimmer, how it
+    /// What an empty pane says, in its middle, what is not there, and under it, dimmer, how it
     /// comes to be.
     /// </summary>
     /// <remarks>

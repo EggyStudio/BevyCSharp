@@ -6,7 +6,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers what a shader may declare and how its values are set by name: far more of everything
+/// Covers what a shader may declare and how its values are set by name, far more of everything
 /// than a fixed layout would hold, every shape of texture, structs and matrices, and the errors a
 /// wrong name or shape gets.
 /// </summary>

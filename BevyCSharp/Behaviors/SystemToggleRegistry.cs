@@ -5,7 +5,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// Stored as a world resource so the state survives across frames and can be inspected or
-/// driven from elsewhere: a debug menu, a save file, or a test.
+/// set from elsewhere, such as a debug menu, a save file or a test.
 /// </remarks>
 public sealed class SystemToggleRegistry
 {

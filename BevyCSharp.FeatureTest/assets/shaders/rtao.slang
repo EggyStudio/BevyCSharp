@@ -1,4 +1,4 @@
-// Ray-traced ambient occlusion: from every surface on screen, a few short rays across the half of
+// Ray-traced ambient occlusion, from every surface on screen, a few short rays across the half of
 // the sky it faces, through a ray scene of stand-in meshes, and the share that met nothing written
 // where Bevy's own lighting reads its occlusion.
 //

@@ -15,7 +15,7 @@ public struct NativePostConfig
     /// <summary>Non-zero to draw into a high dynamic range target.</summary>
     public int Hdr;
 
-    /// <summary>Samples per pixel: 1 off, or 2, 4, 8.</summary>
+    /// <summary>Samples per pixel, 1 for none, or 2, 4 or 8.</summary>
     public int Msaa;
 
     /// <summary>0 none, 1 FXAA, 2 SMAA.</summary>

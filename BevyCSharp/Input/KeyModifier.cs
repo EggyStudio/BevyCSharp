@@ -5,7 +5,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is a flags enum, so a shortcut can require any number of modifiers at once:
+/// This is a flags enum, so a shortcut can require any number of modifiers at once, as
 /// <c>KeyModifier.Ctrl | KeyModifier.Shift</c>.
 /// </para>
 /// <para>

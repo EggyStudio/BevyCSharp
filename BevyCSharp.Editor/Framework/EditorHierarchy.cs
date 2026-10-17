@@ -123,7 +123,7 @@ public static class EditorHierarchy
         return steps.Count;
     }
 
-    /// <summary>One thing moved: where it was, and the transform it had and has.</summary>
+    /// <summary>One thing moved, where it was, and the transform it had and has.</summary>
     private readonly record struct Step(Entity Child, Entity Previous, bool Placed, Transform Before, Transform After);
 
     /// <summary>What a thing is called, for the history.</summary>
@@ -199,7 +199,7 @@ public static class EditorHierarchy
         return matrix;
     }
 
-    /// <summary>A transform as a matrix: scaled, then turned, then moved.</summary>
+    /// <summary>A transform as a matrix, scaled, then turned, then moved.</summary>
     private static Matrix4x4 Local(Transform transform) =>
         Matrix4x4.CreateScale(transform.Scale.X, transform.Scale.Y, transform.Scale.Z)
         * Matrix4x4.CreateFromQuaternion(new Quaternion(

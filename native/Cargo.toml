@@ -19,6 +19,6 @@ linker_messages = "allow"
 opt-level = 3
 lto = "thin"
 codegen-units = 1
-# NOT `panic = "abort"`: the C ABI relies on `catch_unwind` to stop a Rust panic
+# NOT `panic = "abort"`. The C ABI relies on `catch_unwind` to stop a Rust panic
 # from unwinding into the .NET runtime, and abort would bypass that guard entirely.
 panic = "unwind"

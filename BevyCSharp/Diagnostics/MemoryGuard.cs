@@ -12,7 +12,7 @@ namespace Bevy;
 /// <para>
 /// A scene, a technique or a leak can take memory faster than anything watching the frame notices,
 /// and a machine that runs out ends whatever process the system chooses, which may be the editor,
-/// a terminal or the tool driving the app rather than the app. With a cap, a thread of its own
+/// a terminal or the tool controlling the app rather than the app. With a cap, a thread of its own
 /// reads how much memory the process holds four times a second, and past the cap says why on the
 /// console and in the crash file and ends the process, so it is the app that stops and says so.
 /// </para>
@@ -20,12 +20,12 @@ namespace Bevy;
 /// The cap is <see cref="Config.MemoryCap"/>, or <c>BCS_MEMORY_CAP_GB</c> in the environment where
 /// the config names none, in gigabytes, and there is none by default, so a shipped game is never
 /// stopped by it. The tools that start apps to look at them, <c>bcs open</c>, <c>bcs test</c> and
-/// <c>bcs run</c>, the drive script and the test suite, give <see cref="DefaultCap"/> where the
-/// environment names none.
+/// <c>bcs run</c>, <c>build/drive-feature-test.sh</c> and the test suite, give <see
+/// cref="DefaultCap"/> where the environment names none.
 /// </para>
 /// <para>
 /// What is counted is the memory the process holds of the machine, which takes in the bridge's
-/// allocations and the GPU driver's with the managed heap, and not what a GPU holds of its own: on
+/// allocations and the GPU driver's with the managed heap, and not what a GPU holds of its own. On
 /// Linux and macOS the resident pages, which the system's own last resort weighs a process by, and
 /// on Windows the private bytes committed, its commit charge (<see cref="ResidentBytes"/>). Once the console and the crash file have said why, the process
 /// ends at once with <see cref="ExitCode"/>, running nothing an exit runs. Bevy's threads are still
@@ -200,7 +200,7 @@ public static partial class MemoryGuard
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
-            // Said on the console already, and a tool driving the app reads the console.
+            // Said on the console already, and a tool controlling the app reads the console.
         }
 
         // Said again, last, since Bevy's threads go on writing to the console while the crash file

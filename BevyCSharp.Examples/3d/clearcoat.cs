@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Demonstrates the clearcoat PBR feature: car paint, a coated glass bubble, a golf ball and
+// Demonstrates the clearcoat PBR feature, car paint, a coated glass bubble, a golf ball and
 // scratched gold, each turning under a light that circles them. Space swaps the point light for a
 // directional one and back, which here is spawning the other kind where the first was.
 internal static class Clearcoat

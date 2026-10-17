@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows the two ways to change what an entity's mesh looks like: Space points the right shape at
+// Shows the two ways to change what an entity's mesh looks like. Space points the right shape at
 // a different mesh, swapping cube and sphere, and Return changes the left shape's mesh itself,
 // doubling and halving it, which every entity drawing that mesh would show.
 internal static class AlterMesh

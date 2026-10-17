@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Cameras;
 
-// Shakes a 2D camera by trauma, after Squirrel Eiserloh's talk on juicing a game: Space adds
+// Shakes a 2D camera by trauma, after Squirrel Eiserloh's talk on juicing a game. Space adds
 // trauma, which decays over time, and the camera is moved and turned by Perlin noise scaled by
 // the trauma squared, so a little shakes little and a lot shakes hard.
 internal static class ScreenShake2d

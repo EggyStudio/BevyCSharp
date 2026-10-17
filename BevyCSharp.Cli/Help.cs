@@ -10,7 +10,7 @@ internal static class Help
     {
         Console.WriteLine(
             """
-            bcs - drives a running BevyCSharp app from the command line.
+            bcs - controls a running BevyCSharp app from the command line.
 
             Live session
               status                     What is running, and whether it is answering

@@ -3,7 +3,7 @@
 //!
 //! A ray traced in a compute shader, or a scene voxelized by one, meets triangles of whatever mesh
 //! is there, so every mesh it might meet has to be in memory it can index, not in the vertex
-//! buffers only a draw of that mesh binds. A pool is three buffers: every vertex, as
+//! buffers only a draw of that mesh binds. A pool is three buffers, every vertex, as
 //! `bcs_scene::PoolVertex` (a position, a normal and texture coordinates, 48 bytes); every
 //! triangle's three vertex numbers, counted from the start of its mesh; and a table of the meshes,
 //! as `bcs_scene::PoolMesh`, saying where each one's vertices and indices start, how many there

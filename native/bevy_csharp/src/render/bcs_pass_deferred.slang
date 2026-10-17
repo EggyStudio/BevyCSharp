@@ -24,7 +24,7 @@ public struct Surface
     public float reflectance;
     /// The material's own occlusion, from its occlusion texture, not screen-space occlusion.
     public float diffuse_occlusion;
-    /// Light the surface gives off, times the camera's exposure where a lightmap added to it.
+    /// The surface's emissive light, times the camera's exposure where a lightmap added to it.
     public float3 emissive;
     /// The world-space normal.
     public float3 normal;
@@ -100,7 +100,7 @@ public Surface surface_of(uint4 texel)
 /// for each pixel it lights.
 public static const uint STANDARD_LIGHTING = 1u;
 
-/// A surface as Bevy's default standard material describes one facing `normal`: white, rough by
+/// A surface as Bevy's default standard material describes one facing `normal`, white, rough by
 /// half, not metal, reflecting half the light head on, receiving shadows and covered by fog.
 public Surface surface(float3 normal)
 {
@@ -187,7 +187,7 @@ public uint4 gbuffer_of(Surface surface)
         (x & 0xFFF) | ((y & 0xFFF) << 12) | ((flags & 0xFF) << 24));
 }
 
-/// What a draw writes into the deferred buffers: the packed surface, the lighting pass that
+/// What a draw writes into the deferred buffers, the packed surface, the lighting pass that
 /// lights it, and its depth, which tests it against Bevy's geometry and hides it behind what is
 /// nearer.
 public struct Deferred

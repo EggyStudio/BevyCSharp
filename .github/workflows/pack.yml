@@ -1,9 +1,9 @@
-# Runs the build workflow whole when run from the Actions tab ("Run workflow"): the tests on Linux,
+# Runs the build workflow whole when run from the Actions tab ("Run workflow"), the tests on Linux,
 # Windows and macOS and the docs check as a push runs them, and the jobs a push leaves out, the
 # bridge built for all six platforms, Courtyard and Swarm played from a package of this commit, the
-# feature test driven, every example captured, a window stormed and the README walked (build.yml).
-# Then it packs, only once every one of those passed, so no package is made before its games are
-# played on it, and pushes the package to nuget.org when asked to.
+# feature test run through its course, every example captured, a window stormed and the README
+# walked (build.yml). Then it packs, only once every one of those passed, so no package is made
+# before its games are played on it, and pushes the package to nuget.org when asked to.
 #
 # The version is build/version.sh's, the major and minor in build/version.txt and as the patch the
 # commits since that file last changed. The package is kept as the run's artifact either way, so a

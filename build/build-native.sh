@@ -2,7 +2,7 @@
 #
 # Builds the native Bevy bridge and stages it where the NuGet package expects it.
 #
-# The managed package is portable, but the bridge is not: it is a cdylib that has to be built
+# The managed package is portable, but the bridge is not. It is a cdylib that has to be built
 # once per runtime identifier and shipped under runtimes/<rid>/native/. This script builds the
 # host RID by default; pass a target triple to cross-compile one of the others.
 #
@@ -306,7 +306,7 @@ fi
 mkdir -p "$ARTIFACT_DIR/$RID"
 cp "$BUILT" "$ARTIFACT_DIR/$RID/$LIBNAME"
 
-# A flat copy for repo-local development: the projects copy this next to their own output, so
+# A flat copy for repo-local development. The projects copy this next to their own output, so
 # running the sample or the tests works without packing first. Always under build/target, which
 # is where the project files look, whichever way the build was done.
 mkdir -p "$BUILD_DIR/target/release"

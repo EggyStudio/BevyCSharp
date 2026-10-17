@@ -1,4 +1,4 @@
-//! Shared C ABI vocabulary: status codes, POD structs and the panic guard.
+//! Shared C ABI vocabulary, status codes, POD structs and the panic guard.
 //!
 //! Every `extern "C"` entry point in this crate funnels through [`guard`] so a Rust
 //! panic can never unwind across the FFI boundary into the .NET runtime (which is
@@ -202,7 +202,7 @@ pub struct BcsConfig {
     /// Frames per second cap for headless runs; `0` runs as fast as possible.
     pub headless_fps: u32,
     /// Number of frames to run before exiting; `0` runs until an exit is requested.
-    /// Used by tests to drive a deterministic number of ticks.
+    /// Used by tests to run a deterministic number of ticks.
     pub headless_frames: u32,
     /// Graphics API to pin the renderer to. `0` leaves the choice to wgpu; see
     /// `GraphicsBackend` on the managed side for the rest. Ignored when headless.
@@ -395,7 +395,7 @@ mod tests {
 
     #[test]
     fn text_reports_what_it_needs_before_it_writes_anything() {
-        // The convention every entry point carrying text follows: call with nothing, learn the
+        // The convention every entry point carrying text follows, call with nothing, learn the
         // length, call again with a buffer that size.
         let needed = unsafe { write_text("hello", core::ptr::null_mut(), 0) };
         assert_eq!(5, needed);

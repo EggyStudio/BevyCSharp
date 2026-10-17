@@ -1,4 +1,4 @@
-//! The structs the render's calls take from the managed side, which mirrors each field for field:
+//! The structs the render's calls take from the managed side, which mirrors each field for field,
 //! cameras, reflections, post-processing and effects, the sky, gizmos, grading, sprites, images,
 //! materials and lights.
 
@@ -65,7 +65,7 @@ pub struct BcsReflectionConfig {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsPostConfig {
-    /// Which curve maps the rendered range onto the display: `0` none, `1` Reinhard,
+    /// Which curve maps the rendered range onto the display, `0` none, `1` Reinhard,
     /// `2` Reinhard luminance, `3` ACES fitted, `4` AgX, `5` somewhat boring, `6` TonyMcMapface,
     /// `7` Blender filmic.
     pub tonemapping: i32,
@@ -74,12 +74,12 @@ pub struct BcsPostConfig {
     /// Non-zero to draw into a high dynamic range target, so a highlight can be brighter than
     /// white, and bloom reads it.
     pub hdr: i32,
-    /// Samples per pixel taken while rasterizing: `1` off, or `2`, `4`, `8`.
+    /// Samples per pixel taken while rasterizing, `1` off, or `2`, `4`, `8`.
     pub msaa: i32,
-    /// The antialiasing that runs as a pass over the finished picture: `0` none, `1` FXAA,
+    /// The antialiasing that runs as a pass over the finished picture, `0` none, `1` FXAA,
     /// `2` SMAA, `3` temporal, which needs `msaa` off and a 3D camera.
     pub antialias: i32,
-    /// How hard FXAA or SMAA looks for an edge: `0` low, `1` medium, `2` high, `3` ultra.
+    /// How hard FXAA or SMAA looks for an edge, `0` low, `1` medium, `2` high, `3` ultra.
     pub antialias_quality: i32,
     /// Strength of contrast adaptive sharpening, `0` to leave the picture unsharpened.
     pub sharpen: f32,
@@ -107,7 +107,7 @@ pub struct BcsPostConfig {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsEffectsConfig {
-    /// How out-of-focus depths are blurred: `0` not at all, `1` gaussian, `2` bokeh.
+    /// How out-of-focus depths are blurred, `0` not at all, `1` gaussian, `2` bokeh.
     pub dof_mode: i32,
     /// Distance in meters to what is in focus.
     pub focal_distance: f32,
@@ -132,7 +132,7 @@ pub struct BcsEffectsConfig {
     pub aberration_samples: u32,
     /// Asset key of the image the fringe takes its colors from, or `-1` for red, green, blue.
     pub aberration_lut: i32,
-    /// Strength of the lens warp: positive bulges outwards, negative pinches inwards, `0` for a
+    /// Strength of the lens warp. Positive bulges outwards, negative pinches inwards, `0` for a
     /// straight picture.
     pub distortion: f32,
     /// Zoom applied after warping, to crop the edges a strong warp leaves uncovered.
@@ -188,7 +188,7 @@ pub struct BcsEffectsConfig {
 /// A sky computed from the light scattering through a planet's air.
 ///
 /// The atmosphere itself is a planet-sized entity that the camera looks out from, so this config
-/// describes both: which planet, and how the camera should sample it.
+/// describes both, which planet, and how the camera should sample it.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsAtmosphereConfig {
@@ -202,19 +202,19 @@ pub struct BcsAtmosphereConfig {
     /// How far the scattering in front of the scene is computed for, in meters. `0` takes Bevy's
     /// own distance.
     pub haze_distance: f32,
-    /// How finely the sky is computed: `0` Bevy's own, `1` cheaper, `2` finer. Every one of them
+    /// How finely the sky is computed, `0` Bevy's own, `1` cheaper, `2` finer. Every one of them
     /// draws the same sky, and the difference is banding in a gradient and how much of a frame it
     /// costs.
     pub quality: i32,
     /// How much light the ground bounces back into the air, where earth's is `0.3` and Mars's is
     /// `0.1`. `0` takes the one that belongs to the medium.
     pub ground_albedo: f32,
-    /// Whose air: `0` earth's, `1` Mars's.
+    /// Whose air it is, `0` for earth's and `1` for Mars's.
     pub planet: i32,
     /// The asset key of the picture Mars's dust scatters light by, which Mars needs and earth
     /// leaves alone.
     pub dust_phase: i32,
-    /// How the sky is computed: `0` from lookup textures, Bevy's own, `1` by marching rays.
+    /// How the sky is computed, `0` from lookup textures, Bevy's own, `1` by marching rays.
     pub method: i32,
 }
 
@@ -231,12 +231,12 @@ pub struct BcsGizmoConfig {
     /// `5` circle, `6` arc, `7` arrow, `8` grid, `9` box, `10` capsule, `11` cone, `12` cylinder,
     /// `13` torus, `20` conical frustum. `14` to `19` are the flat rectangle, circle, fading line,
     /// arrow, arc and grid a 2D camera draws, which read the same numbers with the third one
-    /// dropped. `28` to `36` are Bevy's primitives as it draws them: a flat plane, a plane, a flat
+    /// dropped. `28` to `36` are Bevy's primitives as it draws them, a flat plane, a plane, a flat
     /// endless line, an endless line, then a flat capsule, annulus, circular sector, circular
     /// segment and regular polygon. What the fields below mean depends on this, because every
     /// shape is described by the same handful of numbers.
     pub kind: i32,
-    /// Where the shape sits: a line's start, or the center of everything else.
+    /// Where the shape sits, a line's start, or the center of everything else.
     pub start: [f32; 3],
     /// The second set of numbers, read differently by each shape that needs one.
     ///
@@ -246,7 +246,7 @@ pub struct BcsGizmoConfig {
     pub end: [f32; 3],
     /// Which way the shape faces, as a quaternion. A line and an arrow have two ends instead.
     pub rotation: [f32; 4],
-    /// How large: a sphere's or a circle's radius, an axis arm's length, or a grid cell's side.
+    /// How large, a sphere's or a circle's radius, an axis arm's length, or a grid cell's side.
     pub radius: f32,
     /// Linear RGBA. Axes color themselves red, green and blue.
     pub color: [f32; 4],
@@ -259,7 +259,7 @@ pub struct BcsGizmoConfig {
 /// One tonal range's part of a color grade.
 ///
 /// The four multipliers are the standard ASC CDL terms, so a grade written for a film pipeline
-/// carries across: `out = (i * gain + lift) ^ gamma`, with saturation applied around it.
+/// carries across, `out = (i * gain + lift) ^ gamma`, with saturation applied around it.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsGradingSection {
@@ -336,9 +336,9 @@ pub struct BcsSpriteConfig {
     pub has_anchor: i32,
     /// Where the transform sits on the sprite, from `-0.5` to `0.5` on each axis.
     pub anchor: [f32; 2],
-    /// How the picture meets `size`: `0` its own, `1` sliced, `2` tiled, `3` scaled to fit.
+    /// How the picture meets `size`, `0` its own, `1` sliced, `2` tiled, `3` scaled to fit.
     pub mode: i32,
-    /// How a scaled picture fits: `0` fit centered, `1` fit at the start, `2` fit at the end,
+    /// How a scaled picture fits, `0` fit centered, `1` fit at the start, `2` fit at the end,
     /// `3` fill centered, `4` fill at the start, `5` fill at the end. Read only when `mode` is `3`.
     pub scaling: i32,
     /// Left, top, right and bottom insets of the nine-slice border, in pixels.
@@ -351,7 +351,7 @@ pub struct BcsSpriteConfig {
     pub tile_y: i32,
     /// How far the picture stretches before a tile repeats. `0` takes Bevy's default of one.
     pub tile_stretch: f32,
-    /// Which parts of a sliced picture tile rather than stretch, as a mask: `1` the sides, `2` the
+    /// Which parts of a sliced picture tile rather than stretch, as a mask, `1` the sides, `2` the
     /// middle, `3` both, `0` neither. Read only when the picture is sliced, and the repeat is
     /// measured by `tile_stretch` the way a tiled picture's is.
     pub slice_tiling: i32,
@@ -394,9 +394,9 @@ pub struct BcsMaterialConfig {
     pub metallic: f32,
     /// How rough, from a mirror near zero to fully diffuse at one.
     pub roughness: f32,
-    /// Light the surface gives off, which is not affected by any lamp. The first three are
+    /// The surface's emissive light, which is not affected by any lamp. The first three are
     /// luminance in nits, and the fourth decides whether the camera's exposure is applied to
-    /// them: `1` scales them the way it scales everything else, `0` leaves them as written.
+    /// them, `1` scales them the way it scales everything else, `0` leaves them as written.
     /// Nothing here is drawn at all when `unlit` is set, because Bevy adds the emission inside
     /// the lighting it is skipping.
     pub emissive: [f32; 4],

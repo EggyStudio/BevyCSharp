@@ -186,7 +186,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// A C# identifier in Pascal case from a Rust name: <c>shadow_depth_bias</c> becomes
+    /// A C# identifier in Pascal case from a Rust name. <c>shadow_depth_bias</c> becomes
     /// <c>ShadowDepthBias</c>, <c>MeshMaterial3d&lt;StandardMaterial&gt;</c> becomes
     /// <c>MeshMaterial3dStandardMaterial</c>.
     /// </summary>

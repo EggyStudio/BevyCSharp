@@ -322,7 +322,7 @@ pub extern "C" fn bcs_render_cluster_material_create() -> i32 {
     })
 }
 
-/// Whether meshlets are running in this app: the bridge was built with them, the app asked for
+/// Whether meshlets are running in this app, the bridge was built with them, the app asked for
 /// them, and the GPU can draw them. `1` or `0`.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_meshlets_active() -> i32 {

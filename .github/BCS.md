@@ -1,9 +1,9 @@
-# Driving a running BevyCSharp app with bcs
+# Controlling a running BevyCSharp app with bcs
 
 ## Check for a live session first
 
 **Before asking anything about a BevyCSharp app, run `./bcs status`.** If a session is answering,
-drive it. A round trip against a warm app is about one frame; starting an app to ask one question
+control it. A round trip against a warm app is about one frame; starting an app to ask one question
 is a second of startup, a fresh world, and a guess about which frame to look at.
 
 ```bash
@@ -42,10 +42,10 @@ What is usually there:
 | `input.press`/`input.release`, `input.move`, `input.wheel`, `input.type`, `input.key`, `input.uikey` | Real input through the window's own path, so picking and focus behave |
 | `input.hold <W\|W,D> <frames>` | Hold keys for exactly that many frames and answer once they are let go, for a game that acts while one is down |
 | `input.drag <x> <y> <dx> <dy> <frames> [Right\|Middle]` | Press at a point, move an equal step each frame for that many frames, release the frame after, and answer then, for a swipe, a handle or a slider dragged |
-| `input.button <pad> <South\|Start\|...> <frames>`, `input.axis <pad> <LeftX\|...\|RightTrigger> <value>`, `input.pads` | Hold a gamepad's button or set its axis, pretended pads connected up to the one the number names where it is past the last, pad 3 at most, so 1 on a machine with none drives a second player |
+| `input.button <pad> <South\|Start\|...> <frames>`, `input.axis <pad> <LeftX\|...\|RightTrigger> <value>`, `input.pads` | Hold a gamepad's button or set its axis, pretended pads connected up to the one the number names where it is past the last, pad 3 at most, so 1 on a machine with none plays as a second player |
 | `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for as long as the calls between take; keys reach an offscreen run too |
 | `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
-| `frame.profile [frames]` | What a frame spends: managed systems by name, calls into the bridge, Bevy's schedule, the render's phases |
+| `frame.profile [frames]` | What a frame spends on managed systems by name, calls into the bridge, Bevy's schedule and the render's phases |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |
@@ -58,7 +58,7 @@ into reads. Letters arrive either way, but **Enter, Escape, Tab and the arrows i
 work through `input.uikey`**, because a window Enter leaves a line typed and never submitted.
 `input.type` writes into the interface alone, so an app without one answers `NO_INTERFACE`; there,
 tap letters with `input.key`, which types each one at the window.
-Driving the editor's own console, for example:
+Controlling the editor's own console, for example:
 
 ```bash
 ./bcs command input.key Backquote      # the console tab, a window shortcut
@@ -139,12 +139,12 @@ on the scene selects what is under it, or clears the selection over nothing, whi
 answers by casting a ray from its camera since Bevy's picking needs a window. A drag on a handle
 and the camera's steering still read the window's pointer, so they do nothing there. `input.key`
 writes a window message and is refused, and `input.uikey` and `input.type` reach the interface as
-they do anywhere. For what a click cannot do there, drive it with a command of its own (`select`,
+they do anywhere. For what a click cannot do there, reach it with a command of its own (`select`,
 `assets.open`, `do <menu path>`), and take the picture afterwards.
 
 ## More than one app serving
 
-Every session-driving verb refuses to guess:
+Every verb that controls a session refuses to guess:
 
 ```bash
 ./bcs command app.status --name BevyCSharp.Editor    # by entry assembly
@@ -167,7 +167,7 @@ and before falling back to editing files by hand.
 2. **A headless bridge, or a headless run.** `shot` answers `NO_RENDERER` when the bridge was
    built without one, and `NO_WINDOW` when this run installed no renderer. Neither is a bug in the
    tool. Rebuild with `./bcs build --render` for the first, and for the second start a session
-   that draws: a window, or `--offscreen`, which needs no display.
+   that draws, a window or `--offscreen`, which needs no display.
 3. **A sandboxed shell.** If your own commands run in a restrictive sandbox, a genuinely running
    app can be invisible to `./bcs status`, because the session file or the loopback connection may
    be out of reach. Say so and ask, rather than concluding the app is down and rewriting files

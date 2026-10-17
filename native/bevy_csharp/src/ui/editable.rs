@@ -246,7 +246,7 @@ pub unsafe extern "C" fn bcs_ui_set_text_cursor(entity: u64, cursor: *const BcsT
     })
 }
 
-/// Writes the part of a text field's text it shows, in the text's own layout units: where its top
+/// Writes the part of a text field's text it shows, in the text's own layout units, where its top
 /// left corner is, across and down, then how wide and how tall it is. Returns
 /// [`status::NOT_PRESENT`] for an entity that is no field.
 ///

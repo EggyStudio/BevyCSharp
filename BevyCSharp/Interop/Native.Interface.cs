@@ -104,13 +104,13 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_world_to_viewport(
         ulong camera, float x, float y, float z, float* point);
 
-    /// <summary>Turns a viewport point into a ray: origin then direction.</summary>
+    /// <summary>Turns a viewport point into a ray, its origin then its direction.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_viewport_to_world(
         ulong camera, float x, float y, float* ray);
 
-    /// <summary>Writes an entity's world-space bounds: min x, y, z then max x, y, z.</summary>
+    /// <summary>Writes an entity's world-space bounds, min x, y, z then max x, y, z.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_bounds(ulong entity, float* bounds);
@@ -251,7 +251,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_meshlets_active();
 
-    /// <summary>Says what an error the renderer reports does: 0 quit, 1 ignore, 2 stop rendering, 3 recover.</summary>
+    /// <summary>Says what an error the renderer reports does, 0 to quit, 1 to ignore, 2 to stop rendering and 3 to recover.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_error_policy(int policy);

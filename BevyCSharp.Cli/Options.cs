@@ -3,7 +3,7 @@ namespace BevyCSharp.Cli;
 /// <summary>What every verb understands, whichever verb it is.</summary>
 internal sealed record Options
 {
-    /// <summary>How to write the answer: <c>human</c> or <c>json</c>.</summary>
+    /// <summary>How to write the answer, <c>human</c> or <c>json</c>.</summary>
     public string Format { get; init; } = "human";
 
     /// <summary>Only sessions started from this directory.</summary>
@@ -29,7 +29,7 @@ internal sealed record Options
     /// </summary>
     /// <remarks>
     /// Flags are recognized anywhere until a bare <c>--</c>, and everything after that is left
-    /// alone. That matters for <c>bcs command</c>, whose own arguments can look like flags:
+    /// alone. That matters for <c>bcs command</c>, whose own arguments can look like flags.
     /// <c>bcs command input.type -- --headless</c> types the word rather than reading it.
     /// </remarks>
     public static (Options Flags, string[] Words) Parse(string[] arguments)

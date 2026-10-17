@@ -93,9 +93,9 @@ voxelizing a scene, or giving geometry a shader placed its motion all build on i
 `Shaders.CreateMaterialBuffer(capacity)` does the same for what entities are made of. Each slot
 holds the base color, emissive color, roughness, metallic and reflectance of the entity's standard
 material, as `bcs_scene::Material`, written when they change. Put an entity in the same slot of both
-and a shader reaching it by index has where it is and what light bouncing off it looks like, and a
-GI ray shades its hit with that. Textures are not in it, and the base color is the factor the
-material multiplies them by.
+and a shader reaching it by index has where it is and what color the indirect light it passes on
+takes, and a GI ray shades its hit with that. Textures are not in it, and the base color is the
+factor the material multiplies them by.
 
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:
@@ -111,7 +111,7 @@ var rock = Shaders.AddToGeometryPool(pool, rockMesh);            // 0, its numbe
 trace.SetBuffer("vertices", pool.Vertices).SetBuffer("indices", pool.Indices).SetBuffer("meshes", pool.Meshes);
 ```
 
-Every mesh added is appended to the same three buffers: its vertices as `bcs_scene::PoolVertex`,
+Every mesh added is appended to the same three buffers, its vertices as `bcs_scene::PoolVertex`,
 its triangles' vertex numbers, and an entry in the mesh table, `bcs_scene::PoolMesh`, with where
 they start, how many there are, and its bounds. `bcs_scene::pool_corner` reads a triangle's corner,
 `intersect_triangle` finds where a ray meets it with the weights that interpolate the corners'
@@ -228,12 +228,13 @@ culling instances or clusters tests a box against. It turns Bevy's occlusion cul
 camera as well, since that builds it. A screen-space trace needs the nearest depth instead, which a
 camera image with mip levels, built a level at a time, gives.
 
-A dispatch on a camera runs every frame at one of four points: `AfterPrepass`, once depth, normals,
-motion, shadows and Bevy's own ambient occlusion exist and before anything is lit; `AfterOpaque`, between opaque and transparent
-geometry; and `BeforeTonemapping` or `AfterTonemapping`, ahead of the passes on the same side. Its
-workgroups cover a fraction of the picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer
-(`Indirect`). It reads the same inputs a pass does through `import bcs_pass;`, and a compute shader
-importing `bcs_compute` runs on a camera as well, reading only time.
+A dispatch on a camera runs every frame at one of four points, which are `AfterPrepass`, once depth,
+normals, motion, shadows and Bevy's own ambient occlusion exist and before anything is lit;
+`AfterOpaque`, between opaque and transparent geometry; and `BeforeTonemapping` or
+`AfterTonemapping`, ahead of the passes on the same side. Its workgroups cover a fraction of the
+picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer (`Indirect`). It reads the same
+inputs a pass does through `import bcs_pass;`, and a compute shader importing `bcs_compute` runs on
+a camera as well, reading only time.
 
 **Drawing on a camera.** A program with a `DrawVertex` and a `DrawFragment` stage draws into a
 camera's picture at a frame point, tested against its depth, out of buffers rather than a mesh.
@@ -462,21 +463,22 @@ Bevy's own on, and while it is on a compute shader on the camera sees the textur
 reads as `ambient_occlusion`, so one run at `AfterPrepass` that writes it replaces Bevy's answer
 with its own, and the ambient light (`Render.SetAmbientLight`) is darkened by it where a surface is
 hemmed in. Diffuse light that varies through space goes in through an irradiance volume a compute
-shader writes (see [Light probes](sky-and-reflections.md#light-probes)). Bevy's lighting has no per-pixel indirect input,
-so a screen-space GI result is added to the picture instead, and done this way it lands where the
-lighting would have put it: a draw of one triangle over the whole picture at `AfterOpaque`, blended
-`Add`, whose fragment shader returns the GI result times the surface's color from the `gbuffer`.
-That is after opaque geometry is lit and before transparent geometry, bloom and tonemapping, so
-glass in front is drawn over it and the tonemapper sees it as light like any other. With the
-camera's ambient light off (`Render.SetAmbientLight(camera, (0, 0, 0), 0)`) it replaces ambient
-rather than adding to it. [.github/RENDERING.md](../.github/RENDERING.md) has what a true input inside
-Bevy's lighting would add.
+shader writes (see [Light probes](sky-and-reflections.md#light-probes)). Bevy's lighting has no
+per-pixel indirect input, so a screen-space GI result is added to the picture instead, and done this
+way it lands where the lighting would have put it, with a draw of one triangle over the whole
+picture at `AfterOpaque`, blended `Add`, whose fragment shader returns the GI result times the
+surface's color from the `gbuffer`. That is after opaque geometry is lit and before transparent
+geometry, bloom and tonemapping, so glass in front is drawn over it and the tonemapper sees it as
+light like any other. With the camera's ambient light off
+(`Render.SetAmbientLight(camera, (0, 0, 0), 0)`) it replaces ambient rather than adding to it.
+[.github/RENDERING.md](../.github/RENDERING.md) has what a true input inside Bevy's lighting would
+add.
 
 The feature test carries a small screen-space GI written this way, as a reference for how the pieces
 fit rather than a technique to ship, in `BevyCSharp.FeatureTest/Behaviors/ScreenSpaceLight.cs` and
 the three `gi_*.slang` files beside its other shaders. Its panel's graphics page turns it on, and
-`./bcs command feature.gi "on 4"` on a running one turns it on with the bounce exaggerated four
-times, which is how its share of the picture is told apart from the rest.
+`./bcs command feature.gi "on 4"` on a running one turns it on with the indirect light exaggerated
+four times, which is how its share of the picture is told apart from the rest.
 
 A storage image may be declared in any format the adapter can write, `[format("r16f")]` included,
 although core WGSL has fewer. Slang writes the nearest core format and the bridge puts the declared

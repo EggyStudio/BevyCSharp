@@ -73,7 +73,9 @@ public partial struct Renderer
             Console.WriteLine($"[Renderer] dropped {dropped.Path}");
     }
 
-    /// <summary>Drives the window from the keyboard: F11 fullscreen, Tab cursor lock.</summary>
+    /// <summary>
+    /// Sets the window from the keyboard, F11 toggling fullscreen and Tab the cursor lock.
+    /// </summary>
     /// <remarks>
     /// Cursor lock is the one a first-person camera cannot do without, because it reads how far
     /// the mouse moved rather than where it is.

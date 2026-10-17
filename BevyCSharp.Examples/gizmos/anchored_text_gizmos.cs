@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Gizmo;
 
-// Shows how a text gizmo's anchor decides which point of it stands at its position: each word
+// Shows how a text gizmo's anchor decides which point of it stands at its position. Each word
 // turns about the point marked with a cross, which is its left, right, middle, top or bottom.
 internal static class AnchoredTextGizmos
 {

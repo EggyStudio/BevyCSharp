@@ -97,9 +97,9 @@ public static class EditorDraw
     /// A rectangle with its corners taken off, rounded by exactly what it was asked for.
     /// </summary>
     /// <remarks>
-    /// Every fill in the editor that has a corner goes through here. ImGui rounds a rectangle by
-    /// at most half its shortest side less a pixel, so a shape meant to end in a half circle ends
-    /// in one with a flat two pixels wide, and the flat shows on everything small: a handle, a
+    /// Every fill in the editor that has a corner goes through here. ImGui rounds a rectangle by at
+    /// most half its shortest side less a pixel, so a shape meant to end in a half circle ends in
+    /// one with a flat two pixels wide, and the flat shows on everything small, such as a handle, a
     /// row's pill, a closed card. This draws the four arcs itself and keeps the radius it is given.
     /// </remarks>
     /// <param name="min">The top left corner.</param>
@@ -220,7 +220,7 @@ public static class EditorDraw
         Rounded(min, max, MathF.Max(max.X - min.X, max.Y - min.Y), color, onto);
 
     /// <summary>
-    /// One of the three marks a window's own buttons carry: a bar to minimize, a square to
+    /// One of the three marks a window's own buttons carry, a bar to minimize, a square to
     /// maximize, two squares to put back, and a cross to close.
     /// </summary>
     /// <remarks>

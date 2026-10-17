@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Three forward decals of one checker texture over a white floor scattered with turned cubes: blue
+// Three forward decals of one checker texture over a white floor scattered with turned cubes. Blue
 // and opaque, green and blended, and red and added, each drawn over the last by its depth bias, and
 // each laid over the cubes' sides as over the floor. A decal reads the surfaces it is drawn on from
 // the camera's depth prepass, and the camera flies as Bevy's free camera does.

@@ -2,7 +2,7 @@
 
 use super::*;
 
-/// Makes one of Bevy's widgets keep its own state: `0` a slider its value, `1` a checkbox whether
+/// Makes one of Bevy's widgets keep its own state, `0` a slider its value, `1` a checkbox whether
 /// it is checked, `2` a radio group which of its buttons is, `3` a tab list which of its tabs is
 /// selected.
 ///

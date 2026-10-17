@@ -10,7 +10,7 @@
 //! the material's bind group was made against, and a program edited since makes a new key rather
 //! than finding an old pipeline.
 //!
-//! Everything else is Bevy's: extracting the nodes, their quads with their clipping, the order
+//! Everything else is Bevy's, extracting the nodes, their quads with their clipping, the order
 //! among everything else an interface draws, and the draw itself, so a node drawn this way takes
 //! outlines, shadows and stacking as any other node does.
 
@@ -45,7 +45,7 @@ pub struct BcsUiMaterial {
     pub material: BcsMaterial,
 }
 
-/// What decides an interface material's pipeline: the program, its version and its constants, as
+/// What decides an interface material's pipeline, the program, its version and its constants, as
 /// for a 3D material, and the layout and shaders of that version, which the pipeline is made with.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct BcsUiMaterialKey {

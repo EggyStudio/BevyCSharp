@@ -10,7 +10,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <remarks>
 /// <para>
 /// Crates and balls light enough for the player to push. A door on a hinge between two kinematic
-/// anchors' worth of frame, a lift on a slider driven up and down by its joint's drive, a rope of
+/// anchors' worth of frame, a lift on a slider moved up and down by its joint's drive, a rope of
 /// balls held each to the one above by a distance joint, and a pressure plate whose lamp lights
 /// while something presses it, read each frame from <see cref="PhysicsWorld.ContactImpulse"/>, the
 /// impulse a step between the plate and each body that might stand on it. A joint is an entity of
@@ -74,7 +74,7 @@ public partial struct Playground
     }
 
     /// <summary>
-    /// Drives the lift up and down, and lights the lamp while the plate is pressed.
+    /// Moves the lift up and down, and lights the lamp while the plate is pressed.
     /// </summary>
     [OnUpdate]
     public static void Run(BehaviorContext ctx)
@@ -113,7 +113,7 @@ public partial struct Playground
         Joint(ecs, "Door's hinge joint", hinge, new JointBetween { Kind = JointKind.Hinge, A = anchor, B = door, MinAngle = -110f, MaxAngle = 110f });
     }
 
-    /// <summary>A lift on a slider, which <see cref="Run"/> drives up and down.</summary>
+    /// <summary>A lift on a slider, which <see cref="Run"/> moves up and down.</summary>
     private static void Lift(EcsWorld ecs, AssetHandle box, AssetHandle steel)
     {
         var at = new Vec3(68f, Ground + 0.2f, 24f);

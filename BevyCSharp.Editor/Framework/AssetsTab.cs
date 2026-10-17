@@ -190,7 +190,7 @@ public static class AssetsTab
     }
 
     /// <summary>
-    /// Offers what a tile can have done to it: renamed, or deleted.
+    /// Offers what a tile can have done to it, renamed or deleted.
     /// </summary>
     /// <remarks>
     /// Both open a small box of their own rather than acting from the menu, because a rename needs
@@ -365,7 +365,7 @@ public static class AssetsTab
     }
 
     /// <summary>
-    /// Where a model dropped at a point on the scene goes: on the surface under the pointer, or on
+    /// Where a model dropped at a point on the scene goes, on the surface under the pointer, or on
     /// the ground plane where the pointer is over nothing, or nowhere in particular above the horizon.
     /// </summary>
     /// <remarks>

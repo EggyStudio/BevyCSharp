@@ -1,4 +1,4 @@
-// Draws a square of `size` at each center in `centers` into two images at once: which instance it
+// Draws a square of `size` at each center in `centers` into two images at once, which instance it
 // is, counted from one, into the first, and a half into the second.
 
 import bcs_pass;

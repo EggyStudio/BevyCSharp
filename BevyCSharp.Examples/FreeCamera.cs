@@ -8,7 +8,7 @@ namespace BevyCSharp.Examples;
 // may lean on.
 
 /// <summary>
-/// Flies its camera as Bevy's <c>FreeCamera</c> does: WASD across, E and Q up and down, Shift to
+/// Flies its camera as Bevy's <c>FreeCamera</c> does, WASD across, E and Q up and down, Shift to
 /// run, and the mouse turning it while its left button is held.
 /// </summary>
 /// <remarks>

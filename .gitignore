@@ -1,5 +1,5 @@
 # Claude Code's own folder, which it writes a lock file and its settings in. Nothing of the
-# repository's lives there, the document on driving a session being .github/BCS.md.
+# repository's lives there, the document on controlling a session being .github/BCS.md.
 .claude/
 
 # .NET build output
@@ -56,7 +56,7 @@ msbuild.log
 # What build/soak.sh reads from a game it plays, and the game's log.
 /build/soak/
 
-# What build/scenes.sh captures of the scene packs, with the drive's log and frame times.
+# What build/scenes.sh captures of the scene packs, with the course run's log and frame times.
 /build/scenes/
 
 # The testers' zips build/publish-feature-test.sh makes, and the folders they are made from.

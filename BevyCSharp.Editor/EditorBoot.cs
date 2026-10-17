@@ -5,7 +5,7 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor;
 
 /// <summary>
-/// Brings the editor up and drives it, as an ordinary behavior.
+/// Brings the editor up and runs it, as an ordinary behavior.
 /// </summary>
 /// <remarks>
 /// Nothing here is privileged. The editor is a BevyCSharp app like any other, so a panel binds
@@ -29,7 +29,7 @@ public partial struct EditorBoot
 
         EditorSelection.Camera = camera;
 
-        // The interface: one ImGui context, the editor's style, and the panels that make it.
+        // The interface, one ImGui context, the editor's style, and the panels that make it.
         EditorShell.Load(EditorPaths.Own);
 
         // The window's own frame in place of the platform's, where there is a window.

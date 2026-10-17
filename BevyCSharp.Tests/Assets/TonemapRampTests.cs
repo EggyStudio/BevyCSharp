@@ -106,7 +106,7 @@ public sealed class TonemapRampTests
 
     /// <summary>The ramp's own values, so a reference shows what the test says it does.</summary>
     /// <remarks>
-    /// Read off the references rather than drawn, where every tonemapper agrees: the darkest column
+    /// Read off the references rather than drawn, where every tonemapper agrees, the darkest column
     /// is black or nearly in every row, a column brightens or holds as it goes right, and the first
     /// row, the gray, has its three channels within a level of each other.
     /// </remarks>

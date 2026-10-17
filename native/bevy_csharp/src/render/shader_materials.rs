@@ -1,4 +1,4 @@
-//! Materials a program draws, on a mesh, a 2D mesh or an interface node: made, changed and put on
+//! Materials a program draws, on a mesh, a 2D mesh or an interface node, made, changed and put on
 //! an entity.
 
 use crate::interop::status;
@@ -164,7 +164,7 @@ pub extern "C" fn bcs_shader_material_ui_create(program: i32) -> i32 {
     })
 }
 
-/// Changes how a material is drawn: its program, alpha, faces culled and depth bias.
+/// Changes how a material is drawn, its program, alpha, faces culled and depth bias.
 ///
 /// A negative `program` leaves the program as it is, and a negative `alpha` leaves the rest, so
 /// changing the program alone needs nothing read back first.

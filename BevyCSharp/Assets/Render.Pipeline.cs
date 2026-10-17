@@ -75,7 +75,7 @@ public static unsafe partial class Render
     /// <remarks>
     /// <para>
     /// Direct light from every light and every emissive surface, found by tracing rays rather than
-    /// from shadow maps, and indirect light bounced off every surface taking part, which is global
+    /// from shadow maps, and indirect light from every surface taking part, which is global
     /// illumination. A red wall tints the floor beside it, and a lamp in a room lights the corners
     /// it cannot see. It builds up over a few frames and follows what moves, so a sudden cut shows
     /// a moment of settling.
@@ -191,7 +191,7 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// Answers <see cref="DrawnMeshCount.Known"/> with the count once one has come back, and says
-    /// otherwise why there is none: still on its way, a GPU whose culling cannot be counted, or one
+    /// otherwise why there is none, still on its way, a GPU whose culling cannot be counted, or one
     /// that does not cull at all.
     /// </remarks>
     /// <param name="drawn">The meshes drawn, where the answer is <see cref="DrawnMeshCount.Known"/>.</param>
@@ -267,7 +267,7 @@ public static unsafe partial class Render
     /// inside a system.
     /// </summary>
     /// <remarks>
-    /// For seeing how a mesh was cut and which level of detail is drawn where: clusters far from
+    /// For seeing how a mesh was cut and which level of detail is drawn where. Clusters far from
     /// the camera are fewer and larger. Each cluster's color is picked from its number, so it holds
     /// still as the camera moves until a different level is drawn. It is Bevy's own, the material
     /// its meshlet renderer draws when no fragment program is named, and is given to an entity with

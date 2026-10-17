@@ -116,7 +116,7 @@ pub extern "C" fn bcs_render_set_mip_generation(image: i32, on: i32) -> i32 {
 /// Whether `image` has to be given its levels before Bevy can make them, or why it cannot be.
 ///
 /// Refused with [`status::INVALID_STATE`] for a format Bevy's downsampler cannot write, and for an
-/// image of more than one layer or a 3D one, since the downsampler as Bevy's jobs drive it reads and
+/// image of more than one layer or a 3D one, since the downsampler as Bevy's jobs run it reads and
 /// writes one 2D layer, which would leave every other layer's levels zero.
 #[cfg(feature = "render")]
 fn needs_room(image: &Image) -> Result<bool, i32> {

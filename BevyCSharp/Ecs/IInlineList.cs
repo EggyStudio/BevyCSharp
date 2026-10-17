@@ -14,7 +14,7 @@ namespace Bevy;
 /// memory the garbage collector moves and frees. An inline list is a count and a fixed run of
 /// items, all of it the component's own bytes, so it iterates in chunks with everything else, costs
 /// nothing to keep, and needs nothing freed when the entity goes. It suits a list with a bound
-/// known in advance: waypoints, inventory slots, the last few hits.
+/// known in advance, such as waypoints, inventory slots, the last few hits.
 /// </para>
 /// <para>
 /// The capacity is part of the type (<see cref="InlineList4{T}"/>, <see cref="InlineList8{T}"/> and

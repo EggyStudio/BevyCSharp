@@ -1,5 +1,5 @@
 // Adds light to the picture where the G-buffer has a surface, times that surface's color, the way a
-// screen-space GI result is composited: a triangle over the whole picture, drawn added, after
+// screen-space GI result is composited, a triangle over the whole picture, drawn added, after
 // opaque geometry and before transparent geometry and tonemapping.
 
 import bcs_pass;

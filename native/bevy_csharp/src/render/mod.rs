@@ -1,4 +1,4 @@
-//! Drawing: the assets a picture is made of, the entities that carry them, and what a camera
+//! Drawing, the assets a picture is made of, the entities that carry them, and what a camera
 //! does with the result.
 //!
 //! Everything here needs the `render` feature. A headless build keeps the entry points so the
@@ -10,17 +10,17 @@
 //!   two cannot go through the generic component path, because each is a Rust value that has to be
 //!   constructed rather than described by a layout, and the components carrying them hold a
 //!   typed `Handle<T>`, which raw bytes cannot represent.
-//! - [`scene`] spawns what the picture contains: cameras, lights and sprites.
+//! - [`scene`] spawns what the picture contains, cameras, lights and sprites.
 //! - [`post`] covers what a camera does to the picture once the scene has been drawn.
 //! - [`probes`] places light probes, which light what is inside a box from an image, and are
 //!   the way a global illumination package's answer reaches Bevy's materials.
-//! - [`shaders`] is the boundary for shaders the game wrote: [`programs`] says which files draw a
+//! - [`shaders`] is the boundary for shaders the game wrote, [`programs`] says which files draw a
 //! material and keeps them compiled, [`material`] holds what such a material carries, [`passes`]
 //! runs them over a camera's picture, [`compute`] runs them over buffers outside of any picture,
 //! [`slang`] compiles the ones written in Slang, and [`rays`] builds the acceleration structures
 //! the ones tracing rays of their own trace against.
 //!
-//! What the three share sits here: resolving an asset key, and refusing an entity that is not a
+//! What the three share sits here, resolving an asset key, and refusing an entity that is not a
 //! camera.
 
 pub mod adapter;
@@ -108,7 +108,7 @@ pub(crate) fn image_handle(
 
 /// Reports why `entity` cannot be given what a camera is given, or `None` if it can.
 ///
-/// Everything these calls attach is read by the render graph the camera drives, so on any other
+/// Everything these calls attach is read by the render graph the camera runs, so on any other
 /// entity it would sit there doing nothing. Answered through a shared reference, so a call can be
 /// refused before it has built anything it would have to throw away.
 #[cfg(feature = "render")]

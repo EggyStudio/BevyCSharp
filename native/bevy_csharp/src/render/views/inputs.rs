@@ -39,7 +39,7 @@ pub struct ViewInputs {
     /// better, but a 2D camera has neither, so it is zeros, which a 2D shader has no reason to
     /// read.
     empty_previous: Buffer,
-    /// What stands in for the lights of a camera that has none, which is every 2D camera: no
+    /// What stands in for the lights of a camera that has none, which is every 2D camera, no
     /// directional lights, no point lights, and shadow maps that shadow nothing.
     empty_lights: Buffer,
     empty_clustered: Buffer,
@@ -435,7 +435,7 @@ pub struct ViewInputSources<'a> {
     pub environment: Option<&'a ViewEnvironmentTextures>,
 }
 
-/// The size of what binding thirteen holds: counts of the scene's lights, and the environment's
+/// The size of what binding thirteen holds, counts of the scene's lights, and the environment's
 /// intensity, rotation and mip count, which `bcs_pass::SceneInfo` mirrors.
 const SCENE_INFO_BYTES: u64 = 32;
 

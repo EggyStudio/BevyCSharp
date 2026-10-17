@@ -10,7 +10,7 @@ namespace Bevy.Tests;
 /// A command is a static method over words, with nowhere for a world to be passed in. Everything
 /// ECS-touching in this engine is ambient on the world Bevy lends the running system, so a command
 /// about entities is only meaningful inside a frame, and something has to say which frame. That is
-/// the loan, and both halves of it are worth pinning down: that a lent command can see the world,
+/// the loan, and both halves of it are worth pinning down, that a lent command can see the world,
 /// and that an unlent one says so instead of taking the program down.
 /// </remarks>
 [Collection("engine")]

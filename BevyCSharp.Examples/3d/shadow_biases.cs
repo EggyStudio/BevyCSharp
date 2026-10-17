@@ -7,7 +7,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Demonstrates how shadow biases affect shadows in a 3D scene: a row of spheres running far into
+// Demonstrates how shadow biases affect shadows in a 3D scene, a row of spheres running far into
 // the distance over a plane, lit by a directional or a point light whose depth and normal biases
 // change with the number keys.
 internal static class ShadowBiases

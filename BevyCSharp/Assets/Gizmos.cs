@@ -4,7 +4,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// Debug drawing: lines, spheres and axis markers, for one frame at a time.
+/// Debug drawing of lines, spheres and axis markers, for one frame at a time.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -44,7 +44,7 @@ public static unsafe partial class Gizmos
     /// <param name="to">Linear RGBA at the end. An alpha of zero is a line that runs out.</param>
     /// <param name="inFront">Whether the scene can hide it. See <see cref="Line"/>.</param>
     /// <remarks>
-    /// What draws something that has no edge: a grid that thins into the distance rather than
+    /// What draws something that has no edge, a grid that thins into the distance rather than
     /// stopping at a square boundary, a trail that dies away behind what left it. Fading a line by
     /// cutting it into pieces and coloring each is the same picture with a seam every few
     /// centimeters and one call per piece.
@@ -85,7 +85,7 @@ public static unsafe partial class Gizmos
     /// Whether the scene can hide it. In front by default, because a gizmo is usually a control (a
     /// handle, an outline, a marker) and one hiding inside the thing it describes has failed at the
     /// only job it has. Pass <see langword="false"/> for a shape drawn *in* the scene rather
-    /// than about it: a grid, a path, a wireframe, all of which have to be behind what is in front
+    /// than about it, a grid, a path, a wireframe, all of which have to be behind what is in front
     /// of them to describe the scene at all.
     /// </param>
     public static void Line(
@@ -241,7 +241,7 @@ public static unsafe partial class Gizmos
 
     /// <summary>Draws part of a circle.</summary>
     /// <remarks>
-    /// What shows an angle rather than a direction: a field of view, a turn still to be made, the
+    /// What shows an angle rather than a direction, a field of view, a turn still to be made, the
     /// sweep a limb is allowed. It starts where the rotation's own X axis points and runs
     /// anticlockwise, so aiming an arc is a matter of turning it.
     /// </remarks>

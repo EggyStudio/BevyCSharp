@@ -8,7 +8,7 @@ namespace BevyCSharp.Examples.ThreeD;
 
 using Visibility = Bevy.Reflected.VisibilityRef.ValueVariant;
 
-// Demonstrates light textures, a picture a light shines through as a gobo shapes a stage light: a
+// Demonstrates light textures, a picture a light shines through as a gobo shapes a stage light. A
 // torch's beam on a spotlight, faces thrown out by a point light inside a box of them, and caustics
 // tiled across a directional light. Drag to move the camera or the chosen light, or over the Scale
 // and Roll buttons to change what dragging does.
@@ -82,8 +82,8 @@ internal static class LightTextures
         ecs.Insert<SpotLightTextureRef>(_spot).Image = AssetServer.Load(AssetKind.Image, "lightmaps/torch_spotlight_texture.png");
         ecs.Add(_spot, new Selection { Kind = SelectionKind.SpotLight });
 
-        // A blue point light inside a box of faces, which throws them on the walls, with a glowing
-        // ball to see it by.
+        // A blue point light inside a box of faces, which throws them on the walls, with an
+        // emissive ball to see it by.
         var pointParent = ecs.Spawn();
         ecs.Add(pointParent, new Transform(new Vec3(0f, 1.8f, 0.01f), Quat.Identity, new Vec3(0.1f)));
         ecs.Insert<VisibilityRef>(pointParent).Value = Visibility.Hidden;

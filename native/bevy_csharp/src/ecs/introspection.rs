@@ -1,4 +1,4 @@
-//! What is in the world at all: every entity, the components each carries, and their names.
+//! What is in the world at all, every entity, the components each carries, and their names.
 //!
 //! What an editor needs and a game does not. Not "read this component off that entity", which the
 //! calls in `ecs` already do, but "what is here at all". A hierarchy has nothing to list and an

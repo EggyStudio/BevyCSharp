@@ -56,7 +56,7 @@ public sealed class CliPlugin : IPlugin
         // or the test page counting what was logged as a warning, tells news from a fault.
         Console.WriteLine(
             $"INFO [bcs] serving on 127.0.0.1:{_server.Port}. "
-            + "Drive it with bcs status, bcs list, bcs command <name>.");
+            + "Control it with bcs status, bcs list and bcs command <name>.");
 
         // Announced once the first frame is in, because a caller waiting for "ready" is waiting to
         // be able to ask something, and nothing can be asked until there is a frame to answer in.

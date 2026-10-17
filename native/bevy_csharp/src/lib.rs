@@ -2,9 +2,9 @@
 //!
 //! # What this is
 //!
-//! Bevy owns the engine: the ECS world, the scheduler, timing, input, windowing and the renderer.
+//! Bevy owns the engine, the ECS world, the scheduler, timing, input, windowing and the renderer.
 //! This crate adds no engine of its own. It exposes enough of Bevy through a stable, flat C
-//! interface for .NET to drive it:
+//! interface for .NET to run it, as follows.
 //!
 //! **Components** are registered at runtime from C# struct layouts, using Bevy's
 //!   dynamic [`ComponentDescriptor`] support. A `[Behavior]` struct becomes a real Bevy

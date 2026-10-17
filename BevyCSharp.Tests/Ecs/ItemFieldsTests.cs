@@ -45,7 +45,7 @@ public partial struct Patrol
 }
 
 /// <summary>
-/// Covers lists whose items have fields of their own: described a field at a time, edited through
+/// Covers lists whose items have fields of their own, described a field at a time, edited through
 /// a copy, and written and read as objects.
 /// </summary>
 [Collection("engine")]

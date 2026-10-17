@@ -1,4 +1,4 @@
-//! Vertex streams of a game's own: an attribute Bevy names nothing for, carried on a mesh beside the
+//! Vertex streams of a game's own, an attribute Bevy names nothing for, carried on a mesh beside the
 //! ones it does and read by a vertex shader of the game's at a location the game chose.
 //!
 //! Bevy takes such an attribute as a `MeshVertexAttribute`, a name, an id that orders it among the
@@ -222,7 +222,7 @@ pub fn append(layout: &MeshVertexBufferLayoutRef, attributes: &mut Vec<VertexAtt
     }
 }
 
-/// What a 3D mesh's own vertex shader is handed where its mesh carries a stream: Bevy's attributes
+/// What a 3D mesh's own vertex shader is handed where its mesh carries a stream, Bevy's attributes
 /// at the locations Bevy's mesh pipeline gives them, where the layout holds them, a skin's among
 /// them, and then the streams.
 ///

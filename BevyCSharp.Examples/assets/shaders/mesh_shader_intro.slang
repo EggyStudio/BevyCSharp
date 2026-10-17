@@ -1,4 +1,4 @@
-// Bevy's mesh_shader_intro shaders in Slang: a task shader that runs a cube of mesh shader
+// Bevy's mesh_shader_intro shaders in Slang, a task shader that runs a cube of mesh shader
 // workgroups growing with time, a mesh shader that writes a cube for each, colored by where it is
 // and culled triangle by triangle in a wave, and a fragment shader that colors it.
 import bcs_pass;

@@ -131,12 +131,12 @@ public sealed class ShaderProgramSettings
     /// <para>
     /// Without it a draw casts the shadow of the triangles its vertex shader places, depth alone.
     /// With it each fragment of those triangles writes its own depth, or discards to cast nothing
-    /// there, which is how geometry its vertex shader does not place casts a shadow: a surface a
-    /// fragment shader finds by marching a ray from each pixel of a triangle covering the whole
-    /// view, as Bevy's deferred_raymarch example draws one. It runs once for each shadow view with
-    /// that view in <c>bcs_pass::view</c>, so the ray from a pixel (<c>bcs_pass::ray_origin</c>,
-    /// <c>bcs_pass::ray_direction</c>) is the light's, and <c>bcs_pass::shadow_depth</c> returns
-    /// the depth the shadow map holds for a point.
+    /// there, which is how geometry its vertex shader does not place casts a shadow, such as a
+    /// surface a fragment shader finds by marching a ray from each pixel of a triangle covering the
+    /// whole view, as Bevy's deferred_raymarch example draws one. It runs once for each shadow view
+    /// with that view in <c>bcs_pass::view</c>, so the ray from a pixel
+    /// (<c>bcs_pass::ray_origin</c>, <c>bcs_pass::ray_direction</c>) is the light's, and
+    /// <c>bcs_pass::shadow_depth</c> returns the depth the shadow map holds for a point.
     /// </para>
     /// <para>
     /// The depth goes in a struct member marked <c>SV_Depth</c>, as <c>bcs_pass::ShadowDepth</c>
@@ -174,7 +174,7 @@ public sealed class ShaderProgramSettings
     /// </summary>
     /// <remarks>
     /// It reaches Bevy's view through <c>import bcs_ui;</c> and takes the <c>bcs_ui::VertexOutput</c>
-    /// Bevy's own interface material vertex shader hands on: where on the node the fragment is, the
+    /// Bevy's own interface material vertex shader hands on, where on the node the fragment is, the
     /// node's size in pixels, its borders and how its corners are rounded, which is enough to draw
     /// a border or a rounded edge of the material's own. The material's own values are declared and
     /// set by name as a 3D material's are.

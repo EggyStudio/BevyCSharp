@@ -6,7 +6,7 @@ public partial struct Spin
     [Range(0f, 5f)] public float Speed;
     private float _angle;
 
-    // static: one plain system
+    // A static method is one plain system
     [OnStartup]
     public static void Scene(BehaviorContext ctx)
     {
@@ -19,7 +19,7 @@ public partial struct Spin
         Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(0.25f, 0.55f, 0.85f));
     }
 
-    // instance: once per entity that has one, handed the entity's transform
+    // An instance method runs once per entity that has one, handed the entity's transform
     [OnUpdate]
     public void Tick(BehaviorContext ctx, ref Transform transform)
     {

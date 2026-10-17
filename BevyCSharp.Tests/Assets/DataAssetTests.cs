@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>A data asset holding what a component cannot: text, lists and a dictionary.</summary>
+/// <summary>A data asset holding what a component cannot, text, lists and a dictionary.</summary>
 [DataAsset]
 public sealed class WeaponStats
 {
@@ -47,7 +47,7 @@ public partial struct Armed
 }
 
 /// <summary>
-/// Covers data assets: their files, their ids, and a component referring to one.
+/// Covers data assets, their files, their ids, and a component referring to one.
 /// </summary>
 /// <remarks>
 /// Each test points the asset root at a directory of its own and puts it back afterwards, since

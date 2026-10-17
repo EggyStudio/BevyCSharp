@@ -9,7 +9,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// An asset, another entity, or some of a set of flags. What these have in common is that the field
-/// cannot say what may be put in it without asking something else: the files under the asset root,
+/// cannot say what may be put in it without asking something else, the files under the asset root,
 /// the entities in the world, the names the flags were declared with.
 /// </para>
 /// <para>
@@ -61,7 +61,7 @@ internal static class FieldPickers
         }
     }
 
-    /// <summary>What an asset field can be given: nothing, then the files that suit it.</summary>
+    /// <summary>What an asset field can be given, nothing, then the files that suit it.</summary>
     private static IReadOnlyList<PickerItem> Offered(Entity entity, ComponentField field, string kind)
     {
         var items = new List<PickerItem>
@@ -232,7 +232,7 @@ internal static class FieldPickers
     /// <summary>What each handle a field has held is called.</summary>
     private static readonly Dictionary<AssetHandle, string> Paths = [];
 
-    /// <summary>Which files suit a field: what it asked for, or what its kind usually holds.</summary>
+    /// <summary>Which files suit a field, what it asked for, or what its kind usually holds.</summary>
     private static IReadOnlyCollection<string> Suits(ComponentField field, string kind)
     {
         if (field.Hints.Extensions is { Length: > 0 } asked)

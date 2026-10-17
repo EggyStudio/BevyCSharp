@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Behaviors;
 [Behavior]
 public partial struct TransformGizmo
 {
-    /// <summary>Which handle is being dragged: an axis, <see cref="Center"/>, or -1.</summary>
+    /// <summary>Which handle is being dragged, an axis, <see cref="Center"/>, or -1.</summary>
     internal static int Axis { get; private set; } = -1;
 
     /// <summary>The handle that picks no axis, for a drag across the screen rather than along a line.</summary>
@@ -397,7 +397,7 @@ public partial struct TransformGizmo
     /// Applies a drag of the middle handle, which picks no axis.
     /// </summary>
     /// <remarks>
-    /// One handle, three meanings, each the thing the tool cannot otherwise do: a move across the
+    /// One handle, three meanings, each the thing the tool cannot otherwise do, a move across the
     /// screen instead of along a line, a turn about whatever way the hand went instead of about
     /// one axis, and a stretch of all three axes at once instead of one.
     /// </remarks>

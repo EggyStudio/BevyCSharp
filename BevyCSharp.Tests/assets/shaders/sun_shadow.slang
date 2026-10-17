@@ -17,7 +17,7 @@ void main(uint3 id : SV_DispatchThreadID)
     let pixel = int2(id.xy);
     let depth_value = bcs_pass::load_depth(pixel);
 
-    // Nothing drawn here: marked apart from both lit and shadowed.
+    // Nothing drawn here, marked apart from both lit and shadowed.
     if (depth_value <= 0.0)
     {
         sunlit[pixel] = -1.0;

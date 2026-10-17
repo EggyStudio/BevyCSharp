@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Captures one of the examples as EXAMPLES.md shows it: opened offscreen at Bevy's window of 1280
-# by 720, driven where it waits for input, run long enough to settle, captured and closed. The pack
+# Captures one of the examples as EXAMPLES.md shows it, opened offscreen at Bevy's window of 1280 by
+# 720, given input where it waits for it, run long enough to settle, captured and closed. The pack
 # run captures every example this way, and a written or changed example's capture in
 # .github/assets/examples is taken with it.
 #
@@ -97,7 +97,7 @@ esac
 # one that fails is named with its code under bcs's own words of why.
 c() { ./bcs command "$@" --quiet --timeout 600 || { echo "capture-example.sh: ./bcs command $* ended with $? in $example" >&2; exit 1; }; }
 
-# Examples that show something only once they are given input are driven here, by name.
+# Examples that show something only once they are given input are given their input here, by name.
 case "$example" in
   # A level, which the screen loads once 1 is pressed.
   loading_screen) c input.hold Digit1 2 ;;

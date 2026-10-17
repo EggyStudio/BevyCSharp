@@ -8,7 +8,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <remarks>
 /// <para>
 /// This is the whole of sprite animation, and it lives here rather than in the library on purpose.
-/// Nothing about it needs a bridge: <see cref="SpriteSettings.Frame"/> names a frame by number, so
+/// Nothing about it needs a bridge. <see cref="SpriteSettings.Frame"/> names a frame by number, so
 /// counting the seconds and calling <see cref="Render2d.SetSprite(EcsWorld, Entity, AssetHandle,
 /// SpriteSettings)"/> is all there is to it. A game wanting frame events, a queue of clips, or
 /// animation that follows the state machine will write its own, and one shipped in the library

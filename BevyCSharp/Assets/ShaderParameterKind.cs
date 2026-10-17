@@ -3,7 +3,7 @@ namespace Bevy;
 /// <summary>What a name a shader declares is.</summary>
 public enum ShaderParameterKind
 {
-    /// <summary>Numbers: a scalar, a vector, a matrix or an array of them.</summary>
+    /// <summary>Numbers, as a scalar, a vector, a matrix or an array of them.</summary>
     Number,
 
     /// <summary>A struct or an array of them, set field by field or as bytes.</summary>

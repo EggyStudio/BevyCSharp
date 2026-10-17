@@ -595,7 +595,7 @@ static bool IsComputed(string name);                            // Whether a com
 static int Save(EcsWorld world, string path, Func<Entity, bool>? include = null, bool giveIds = false);  // Writes entities to a scene file, and their children with them
 static int Write(EcsWorld world, Utf8JsonWriter json, Func<Entity, bool>? include = null, bool giveIds = false);  // Writes entities as a scene document
 static bool CanDescribe(EcsWorld world, Entity entity);         // Whether a scene can say how to make what an entity is drawn with, as Write writes it, or the entity is drawn with nothing
-static string Resolve(string path);                             // The full path a scene path names: one under the asset root, with or without AssetsPrefix, one under the player's own directory after Prefix, or an absolute one as it is
+static string Resolve(string path);                             // The full path a scene path names, one under the asset root, with or without AssetsPrefix, one under the player's own directory after Prefix, or an absolute one as it is
 static SceneLoad Load(EcsWorld world, string path, Entity parent = default);  // Spawns everything a scene file holds
 static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default);  // Spawns everything a scene document holds
 ```
@@ -609,7 +609,7 @@ static bool IsInstance(EcsWorld world, Entity entity);          // Whether an en
 static string? SceneOf(EcsWorld world, Entity root);            // The scene an instance places, as the asset path it was spawned from, or nothing
 static IReadOnlyList<InstanceOverride> Overrides(EcsWorld world, Entity root);  // The overrides an instance holds, in the order they were made
 static IReadOnlyList<string> Missed(EcsWorld world, Entity root);  // The paths the last application of an instance's overrides could not find, which are kept in the instance and written back
-static Entity RootOf(EcsWorld world, Entity entity);            // The instance root an entity belongs to: the nearest ancestor that is one, or the entity itself, or none
+static Entity RootOf(EcsWorld world, Entity entity);            // The instance root an entity belongs to, the nearest ancestor that is one, or the entity itself, or none
 static Entity OuterRootOf(EcsWorld world, Entity entity);       // The outermost instance root an entity belongs to, which is the one a scene file writes, or none
 static string? PathOf(EcsWorld world, Entity root, Entity node);  // A node's path of names from an instance's root, or nothing when it is not under the root
 static Entity Find(EcsWorld world, Entity root, string path);   // The node a path of names leads to from an instance's root, or none
@@ -638,7 +638,7 @@ object? ReadEntity(JsonElement json);                           // Reads a refer
 bool WriteAsset(Utf8JsonWriter json, AssetHandle asset);        // Writes a reference to an asset by its file, reporting whether it has one
 object? ReadAsset(JsonElement json, string kind);               // Reads a reference to an asset by loading its file as the kind of asset given
 void WriteFile(Utf8JsonWriter json, string path);               // Writes a reference to a file under the asset root as its id and its path, or as its path alone when it has no id
-static string? ReadFile(JsonElement json);                      // The path a file reference names: where the file holding its id is now, with the label the reference gave, or the path it recorded when no file holds the id
+static string? ReadFile(JsonElement json);                      // The path a file reference names, where the file holding its id is now, with the label the reference gave, or the path it recorded when no file holds the id
 ```
 
 ### `SceneResources`
@@ -799,7 +799,7 @@ static void Stop(Entity scene);                                 // Stops every c
 static void Pause(Entity scene);                                // Holds what a model is playing where it is
 static void Resume(Entity scene);                               // Lets what a model is playing go on from where it was held
 static void Seek(Entity scene, float seconds);                  // Moves the clip a model is playing to a time from its start
-static void SetRepeat(Entity scene, uint times);                // Changes how many times the clip playing plays, counting those it has finished, without starting it over: zero for ever, one for once
+static void SetRepeat(Entity scene, uint times);                // Changes how many times the clip playing plays, counting those it has finished, without starting it over, zero for ever, one for once
 static void SetSpeed(Entity scene, float speed);                // Changes how fast the clip a model is playing goes
 static AnimationState? StateOf(Entity scene);                   // What a model is playing, or nothing while it has not arrived
 static AssetHandle CreateClip();                                // Makes an empty clip, which AddCurve fills
@@ -910,13 +910,13 @@ static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle
 static bool CompressMesh(AssetHandle mesh);                     // Compresses a mesh as Bevy's regular compression does, in place, so everything drawn with it holds a fraction of the memory
 static MeshData? DataOf(AssetHandle mesh);                      // The geometry a mesh was built from, or null for one that was not made by CreateMesh
-static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of: its counts, its attributes and its bounds, read without copying its vertices
+static bool TryGetMeshInfo(AssetHandle mesh, out MeshInfo info);  // What a mesh is made of, its counts, its attributes and its bounds, read without copying its vertices
 static bool GenerateTangents(AssetHandle mesh);                 // Works out tangents for a mesh that has none, from its normals and texture coordinates, as a normal map and anisotropy read them, which Bevy's primitives are made without
 static bool TryReadMaterial(AssetHandle material, out MaterialSettings? settings);  // A standard material's settings, read back from the engine, whether code made the material or a glTF file brought it
 static bool TryReadImage(AssetHandle image, out ImagePixels? pixels);  // Reads an image's texels from the copy the app keeps of it, or answers false while it is loading or where no copy is kept
 static bool TryImageSize(AssetHandle image, out uint width, out uint height, out uint depth);  // Reads how large an image is in texels, once it has loaded
 static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels);  // Writes texels over the copy an image keeps, as many bytes as it holds, so the GPU is given them again and everything showing the image changes
-static bool TryReadMesh(AssetHandle mesh, out MeshData? triangles);  // Reads a mesh's triangles back: where each vertex is, and which three make each triangle
+static bool TryReadMesh(AssetHandle mesh, out MeshData? triangles);  // Reads a mesh's triangles back, where each vertex is, and which three make each triangle
 static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals);  // Reads a mesh's positions back with the normal at each
 static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags);  // Says how an entity's mesh is treated beyond what it looks like
 static AssetHandle CreateMaterial(float red, float green, float blue, float alpha = 1f, float metallic = 0f, float roughness = 0.5f);  // Builds a physically based material and returns a handle to it
@@ -932,8 +932,8 @@ static void Screenshot(string path, AssetHandle target);        // Writes what a
 static void Screenshot(string path, Entity window);             // Writes what a window the game spawned shows to a PNG file
 static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null);  // Lights the scene from a cubemap, filtered on the GPU
 static void SetEnvironmentMap(Entity camera, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Quat? rotation = null);  // Lights the scene from a pair of cubemaps somebody baked earlier
-static void SetReflectionProbe(Entity probe, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Vec3? falloff = null);  // Makes an entity a reflection probe: a box inside which surfaces reflect a pair of baked cubemaps rather than the camera's environment
-static void SetIrradianceVolume(Entity probe, AssetHandle voxels, float intensity = 1000f, Vec3? falloff = null);  // Makes an entity an irradiance volume: a box inside which surfaces take their diffuse indirect light from a grid of points held in a 3D image
+static void SetReflectionProbe(Entity probe, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Vec3? falloff = null);  // Makes an entity a reflection probe, a box inside which surfaces reflect a pair of baked cubemaps rather than the camera's environment
+static void SetIrradianceVolume(Entity probe, AssetHandle voxels, float intensity = 1000f, Vec3? falloff = null);  // Makes an entity an irradiance volume, a box inside which surfaces take their diffuse indirect light from a grid of points held in a 3D image
 static void SetProbeCapture(Entity probe, ProbeCaptureSettings? settings);  // Makes an entity a reflection probe that renders what is around it, or with null stops
 static void RecaptureProbe(Entity probe);                       // Captures a probe that is not live again, after what is around it has changed
 static void SetSkyLighting(Entity camera, float intensity = 1f, uint size = 512);  // Lights the scene from the sky this camera is already scattering
@@ -1097,7 +1097,7 @@ static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an inst
 static void SetPasses(Entity camera, params ShaderPass[] passes);  // Replaces the full-screen passes a camera runs over what it drew, in the order given
 static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false, bool deferred = false, bool previous = false, bool pyramid = false);  // Asks a camera to draw its depth, its normals, its motion vectors or any of them before the scene, for its passes and its compute shaders to read
 static void SetViewImages(Entity camera, params ViewImage[] images);  // Gives a camera images that its passes and compute shaders keep from frame to frame, replacing any it had
-static IReadOnlyList<string> DrawnViewImageNames(Entity camera);  // The names a Watch on the camera would find, as of the last frame it drew: its own images and those of EngineViewImageNames it has
+static IReadOnlyList<string> DrawnViewImageNames(Entity camera);  // The names a Watch on the camera would find, as of the last frame it drew, its own images and those of EngineViewImageNames it has
 static IReadOnlyList<string> ViewImageNames(Entity camera);     // The names of the images a camera owns, as SetViewImages last gave them, with their _previous and _mip names
 static AssetHandle Watch(Entity camera, string name, uint width = 320, uint height = 180, float scale = 1f, float offset = 0f);  // Starts watching one of a camera's images
 static void Unwatch(Entity camera, string name);                // Stops watching one of a camera's images
@@ -1121,8 +1121,8 @@ static T Set<T>(T target, string name, Quaternion value);       // Sets a float
 static T Set<T>(T target, string name, Matrix4x4 value);        // Sets a float
 static T Set<T, TItem>(T target, string name, ReadOnlySpan<TItem> items);  // Sets a float
 static T Set<T, TItem>(T target, string name, TItem[] items);   // Sets a float
-static T SetNumbers<T, TItem>(T target, string name, int components, ReadOnlySpan<TItem> numbers);  // Sets numbers components to an element, for the shapes C# has no type for: an int2, a uint3, a float3x3, or an array of any of them
-static T SetBytes<T, TItem>(T target, string name, ReadOnlySpan<TItem> items);  // Copies bytes, as they are, to where a name is: a struct, an array of structs, or a whole ConstantBuffer
+static T SetNumbers<T, TItem>(T target, string name, int components, ReadOnlySpan<TItem> numbers);  // Sets numbers components to an element, for the shapes C# has no type for, such as an int2, a uint3, a float3x3, or an array of any of them
+static T SetBytes<T, TItem>(T target, string name, ReadOnlySpan<TItem> items);  // Copies bytes, as they are, to where a name is, a struct, an array of structs, or a whole ConstantBuffer
 static T SetStruct<T, TItem>(T target, string name, TItem value);  // Sets a struct, as its bytes
 static T SetTexture<T>(T target, string name, AssetHandle image, int index = 0, int mip = -1);  // Puts an image on a texture, at index in an array of them, or takes it off again with None
 static T SetRayScene<T>(T target, string name, RayScene scene);  // Puts a RayScene on an acceleration structure the shader traces, or takes it off again with default
@@ -1165,7 +1165,7 @@ static ViewDispatch Indirect(ShaderInstance instance, FramePoint point, AssetHan
 ```csharp
 static ViewDraw Fixed(ShaderInstance instance, FramePoint point, uint vertices, uint instances = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // vertices vertices, instances times
 static ViewDraw Meshes(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // x by y by z workgroups of a program's task shader, or of its mesh shader where it has no task shader, for a program drawing with mesh shaders (DrawMesh)
-static ViewDraw Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // As many vertices and instances as four unsigned integers in a buffer say when it runs: vertices, instances, the first vertex and the first instance
+static ViewDraw Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // As many vertices and instances as four unsigned integers in a buffer say when it runs, vertices, instances, the first vertex and the first instance
 ```
 
 ### `ComponentArray<T>`
@@ -1329,7 +1329,7 @@ Track Filling(bool collapse = false);                           // The same trac
 ```csharp
 static void Start(string? fonts = null, float size = 15f, params string[] faces);  // Creates the context and hands the engine the font atlas
 static ImFontPtr Face(string face);                             // One of the loaded faces, or whatever is in force when it was not loaded
-static void Begin(BehaviorContext ctx);                         // Starts a frame: how large the window is, what the pointer did, what was typed
+static void Begin(BehaviorContext ctx);                         // Starts a frame, how large the window is, what the pointer did, what was typed
 static void End();                                              // Ends the frame and hands the engine what came of it
 ```
 
@@ -1392,7 +1392,7 @@ bool Has(Entity entity);                                        // Whether an en
 void Add(Entity entity, PhysicsShape shape, BodyKind kind, Transform at, float mass = 1f, bool sensor = false, PhysicsMaterial? material = null);  // Gives an entity a body, starting where at puts it
 void SetMaterial(Entity entity, PhysicsMaterial material);      // Changes how a body's surface slides and bounces, from the next step
 bool Remove(Entity entity);                                     // Takes an entity's body away, leaving the entity where it is
-(Vec3 Linear, Vec3 Angular) Velocity(Entity entity);            // A body's velocity: how fast it moves, and how fast it turns about each axis
+(Vec3 Linear, Vec3 Angular) Velocity(Entity entity);            // A body's velocity, how fast it moves, and how fast it turns about each axis
 void SetVelocity(Entity entity, Vec3 linear, Vec3 angular = default);  // Sets a dynamic body's velocity, waking it if it had come to rest
 void Place(EcsWorld ecs, Entity entity, Vec3 position);         // Puts a dynamic body's entity at a place at once and at rest, as a character's respawn or a teleport does, rather than carrying it there through what lies between
 void ApplyImpulse(Entity entity, Vec3 impulse, Vec3 offset = default);  // Pushes a dynamic body with an impulse, a change in momentum, at a point offset from its center, which turns it as well where the point is off center
@@ -1440,9 +1440,9 @@ static PhysicsShape Hull(MeshData mesh);                        // The same, aro
 ### `Physics.Joint`
 
 ```csharp
-static Joint Ball(Vec3 anchorA, Vec3 anchorB);                  // A point on one body held to a point on the other, free to turn any way about it: a shoulder, a pendulum's pivot, a chain's links
-static Joint Hinge(Vec3 anchorA, Vec3 axisA, Vec3 anchorB, Vec3 axisB);  // The same, and turning only about one axis: a door, a wheel, an elbow
-static Joint Weld();                                            // The two held exactly as they are to each other when joined, as though glued: a sword in a hand, a part bolted onto a vehicle
+static Joint Ball(Vec3 anchorA, Vec3 anchorB);                  // A point on one body held to a point on the other, free to turn any way about it, such as a shoulder, a pendulum's pivot, a chain's links
+static Joint Hinge(Vec3 anchorA, Vec3 axisA, Vec3 anchorB, Vec3 axisB);  // The same, and turning only about one axis, such as a door, a wheel or an elbow
+static Joint Weld();                                            // The two held exactly as they are to each other when joined, as though glued, such as a sword in a hand, a part bolted onto a vehicle
 static Joint Distance(Vec3 anchorA, Vec3 anchorB, float minimum, float maximum);  // A point on each kept between minimum and maximum apart, a rope where the minimum is zero and a rod where the two are equal
 static Joint Slider(Vec3 axisA);                                // The second body sliding along an axis against the first, neither turning against the other, starting as they are placed, as a drawer, a sliding door or a lift on its frame does
 Joint WithMotor(float degreesPerSecond, float torque);          // A hinge that turns itself, a fan or a wheel driven at a speed, pushing with no more than a torque
@@ -1565,7 +1565,7 @@ static void SetFullscreenOn(Entity window, Entity monitor);     // Makes a windo
 static int MonitorCount();                                      // How many monitors the platform reports
 static MonitorInfo Monitor(int index);                          // Describes one monitor, by an index below MonitorCount
 static string MonitorName(int index);                           // The name the platform gives a monitor, by an index below MonitorCount
-static VideoMode[] MonitorModes(int index);                     // Every video mode a monitor can be driven at, by an index below MonitorCount
+static VideoMode[] MonitorModes(int index);                     // Every video mode a monitor can run at, by an index below MonitorCount
 static void SetVideoMode(int monitor, int mode);                // Takes the screen over in exclusive fullscreen at one of a monitor's own video modes
 static void SetCursor(CursorGrab grab, bool visible);           // Sets whether the cursor is confined or hidden
 static void SetTitle(Entity window, string title);              // Sets a window's title

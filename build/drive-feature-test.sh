@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Drives the feature test's player through the hub and each station of the course through bcs,
+# Takes the feature test's player through the hub and each station of the course through bcs,
 # offscreen, and fails at the first station that does not do what it is for, then captures each
 # zone drawn rather than played, the render gallery, the light hall and the meadow.
 #
@@ -59,7 +59,7 @@ trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2
 trap './bcs stop > /dev/null 2>&1 || true' EXIT
 ./bcs stop > /dev/null 2>&1 || true
 
-(cd "$program" && { ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve; echo "[drive] the feature test exited with $?"; } > "$log" 2>&1 &)
+(cd "$program" && { ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve; echo "[course] the feature test exited with $?"; } > "$log" 2>&1 &)
 for _ in $(seq 1 90); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && break; sleep 1; done
 ./bcs status | grep -q "ready.*BevyCSharp.FeatureTest" || fail "the feature test never answered"
 
@@ -210,7 +210,7 @@ holds "$back" "<" 47 || fail "the pit did not put the player back at the course'
 # at any point of the swing is past the one asked for, 1.5 for the platform over 240 frames and 1.6
 # for the elevator over 300. Where it stood after the wait alone says nothing at the end of a swing,
 # which a wait straddling it brings back to where it began. A software device puts fewer frames
-# between two commands than a graphics card does, so the drive comes to each at another point of its
+# between two commands than a graphics card does, so the run comes to each at another point of its
 # swing, and on lavapipe the platform's 90 frames straddled its end, taking the player from x 60.96
 # to 61.00.
 farthest() {
@@ -319,4 +319,4 @@ for was in "${weather_was[@]}"; do quiet setting "$was"; done
 c memory | tr ' ' '\n' | awk 'last == "peak" { printf "peak %.2f GB\n", $1 / 2^30 } { last = $1 }' \
   | tee -a "$shots/frame-times.txt"
 
-echo "drove the feature test, captures in $shots"
+echo "ran the feature test's course, captures in $shots"

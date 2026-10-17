@@ -1,4 +1,4 @@
-// Bevy's tonemapping_test_patterns.wgsl in Slang: a sweep of hues over fifteen stops of exposure
+// Bevy's tonemapping_test_patterns.wgsl in Slang, a sweep of hues over fifteen stops of exposure
 // on the top half, and a continuous hue sweep growing brighter on the bottom half, written in
 // linear light for the camera's tonemapping to map.
 import bcs;

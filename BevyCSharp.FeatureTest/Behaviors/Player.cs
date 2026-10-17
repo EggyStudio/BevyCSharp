@@ -440,7 +440,7 @@ public partial struct Player
     }
 
     /// <summary>
-    /// Says where the player is and how it moves, for a tester and for the drive script.
+    /// Says where the player is and how it moves, for a tester and for build/drive-feature-test.sh.
     /// </summary>
     [Command("player", "Where the player is, how it moves and whether it stands on ground")]
     internal static string Where()
@@ -456,7 +456,8 @@ public partial struct Player
     }
 
     /// <summary>
-    /// Puts the player at a point, facing as it was, for the drive script to try a station.
+    /// Puts the player at a point, facing as it was, for build/drive-feature-test.sh to try a
+    /// station.
     /// </summary>
     [Command("player.put", "Puts the player's feet at a point, at rest: player.put <x> <y> <z>")]
     internal static string PutCommand(float x, float y, float z)

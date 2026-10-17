@@ -107,7 +107,7 @@ pub struct RequestedPrepass(pub u32);
 /// Asks a camera to draw depth, normals and motion vectors before the scene, for its shader passes
 /// and compute shaders to read.
 ///
-/// `flags` is a bit each: `1` depth, `2` normals, `4` motion vectors, `8` Bevy's G-buffer, which
+/// `flags` is a bit each, `1` depth, `2` normals, `4` motion vectors, `8` Bevy's G-buffer, which
 /// also turns deferred rendering on, `16` keeping the previous frame's depth and G-buffer beside
 /// this frame's, which does nothing without one of them, and `32` Bevy's depth pyramid, which turns
 /// its GPU occlusion culling on for the camera, and brings depth. A bit left clear takes that
@@ -213,7 +213,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
 
 /// Says how a camera draws beyond what it looks at.
 ///
-/// A bit each: `1` draws each batch with its own call rather than Bevy's indirect draws from a
+/// A bit each, `1` draws each batch with its own call rather than Bevy's indirect draws from a
 /// buffer the GPU fills, and `2` leaves its view out of the CPU's culling, for the GPU's alone. A
 /// bit left clear takes that behavior off again, so the flags are the whole answer rather than
 /// additions to it.
@@ -566,7 +566,7 @@ mod tests {
 /// world's, every frame.
 ///
 /// Bevy copies each across when it has changed since its copying system last ran, and one set
-/// from a managed startup system is missed that way: the scene's first frame draws with Bevy's
+/// from a managed startup system is missed that way. The scene's first frame draws with Bevy's
 /// defaults and every frame after it too, until something changes the value again. Comparing the
 /// two each frame costs a few floats and catches a change however it was made, so a value is in
 /// the picture from the frame it was set.

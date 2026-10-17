@@ -274,7 +274,7 @@ public sealed class EcsWorldTests
 
         harness.OnContext(Stage.Update, ctx =>
         {
-            // A dedicated thread rather than the thread pool: `Task.Wait` is allowed to inline
+            // A dedicated thread rather than the thread pool. `Task.Wait` is allowed to inline
             // a queued task onto the waiting thread, which would run this on the main thread
             // and quietly test nothing.
             var worker = new Thread(() =>

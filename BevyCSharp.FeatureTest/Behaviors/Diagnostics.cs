@@ -24,7 +24,7 @@ public sealed class SampleReport
 /// <remarks>
 /// <c>[ToggleKey]</c> is the whole implementation of "press F8 to stop the counts": no resource
 /// to declare, no key handler to write, no condition to wire up. The state lives in
-/// <see cref="SystemToggleRegistry"/>, so it survives across frames and can be driven from a
+/// <see cref="SystemToggleRegistry"/>, so it survives across frames and can be set from a
 /// menu or a test as well as from the keyboard.
 /// </remarks>
 [Behavior]

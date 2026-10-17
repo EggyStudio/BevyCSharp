@@ -33,7 +33,7 @@ var sky = new MaterialSettings { BaseColor = Color.FromHsl(210f, 0.6f, 0.7f), Un
 A texture is combined with its matching factor rather than replacing it, so a base color map on the
 default white shows unchanged and tinting it is a matter of setting a color. The image need not have
 finished loading, because the material holds a handle rather than pixels. Five maps are bound this
-way: base color, normal, metallic-roughness, emissive and occlusion.
+way, base color, normal, metallic-roughness, emissive and occlusion.
 
 `AlphaMode` decides what happens where a material is not opaque. `Mask` draws a pixel or skips it,
 deciding at `AlphaCutoff`, so the surface still writes depth and nothing has to be sorted, which

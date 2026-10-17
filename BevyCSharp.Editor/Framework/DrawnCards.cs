@@ -6,7 +6,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The Mesh card and the Material card: a turnable picture of what an entity is drawn with, what
+/// The Mesh card and the Material card, a turnable picture of what an entity is drawn with, what
 /// the mesh is made of, and the material's settings as rows.
 /// </summary>
 /// <remarks>
@@ -51,7 +51,7 @@ internal static class DrawnCards
     }
 
     /// <summary>
-    /// What the Mesh card holds, for a mesh an entity is drawn with or one picked as a file: the
+    /// What the Mesh card holds, for a mesh an entity is drawn with or one picked as a file, the
     /// picture, the measures of a primitive, and what it is made of.
     /// </summary>
     /// <param name="ctx">This frame.</param>
@@ -65,7 +65,7 @@ internal static class DrawnCards
         var wire = PreviewRenderer.Wireframe(MeshKey);
         if (Toggle("Wireframe", ref wire)) PreviewRenderer.SetWireframe(MeshKey, wire);
 
-        // How the mesh is shown: lit, in a checker that shows its UVs, or with its normals drawn.
+        // How the mesh is shown, lit, in a checker that shows its UVs, or with its normals drawn.
         ImGui.SameLine();
         ImGui.SetNextItemWidth(MathF.Max(80f, ImGui.GetContentRegionAvail().X - DetailsPanel.RightInset));
         EditorWidgets.Choice(
@@ -115,7 +115,7 @@ internal static class DrawnCards
 
     /// <summary>
     /// What the Material card holds, for a material an entity is drawn with or one picked as a
-    /// file: the picture and the settings as rows.
+    /// file, the picture and the settings as rows.
     /// </summary>
     /// <param name="ctx">This frame.</param>
     /// <param name="material">The material.</param>
@@ -135,7 +135,7 @@ internal static class DrawnCards
     internal static int UsersOf(EcsWorld world, AssetHandle material) => Users(world, material);
 
     /// <summary>
-    /// What can be done with a material besides changing it: give this entity a copy of its own,
+    /// What can be done with a material besides changing it, give this entity a copy of its own,
     /// and keep one made here in a file.
     /// </summary>
     /// <remarks>
@@ -169,7 +169,7 @@ internal static class DrawnCards
     }
 
     /// <summary>
-    /// What can be done with a mesh made here: give this entity a copy of its own while others share
+    /// What can be done with a mesh made here, give this entity a copy of its own while others share
     /// it, and keep it in a file.
     /// </summary>
     /// <remarks>
@@ -310,7 +310,7 @@ internal static class DrawnCards
         ImGui.TextDisabled(value);
     }
 
-    /// <summary>Where a mesh came from: a file, a primitive with its measures, or code.</summary>
+    /// <summary>Where a mesh came from, a file, a primitive with its measures, or code.</summary>
     private static string Origin(Entity entity, AssetHandle mesh)
     {
         if (!entity.IsNone && Render.MeshPathOf(entity) is { Length: > 0 } path) return path;

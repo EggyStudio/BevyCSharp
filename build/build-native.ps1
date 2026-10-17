@@ -175,7 +175,7 @@ $RidDir = Join-Path $ArtifactDir $Rid
 New-Item -ItemType Directory -Force -Path $RidDir | Out-Null
 Copy-Item -Force $Built (Join-Path $RidDir $LibName)
 
-# A flat copy for repo-local development: the projects copy this next to their own output, so
+# A flat copy for repo-local development. The projects copy this next to their own output, so
 # running the sample or the tests works without packing first.
 $FlatDir = Join-Path $TargetDir 'release'
 New-Item -ItemType Directory -Force -Path $FlatDir | Out-Null

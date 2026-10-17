@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Bevy.Interop;
 
-/// <summary>One video mode a monitor can be driven at.</summary>
+/// <summary>One video mode a monitor can run at.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeVideoMode
 {

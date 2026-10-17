@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Shading;
 
-// A camera that renders depth alone, into no window and no image, and a plane showing what it saw:
+// A camera that renders depth alone, into no window and no image, and a plane showing what it saw,
 // a turning cube, near in white and far in black. The depth camera is marked by a lime cone, and
 // W, A, S and D move it around the cube.
 //

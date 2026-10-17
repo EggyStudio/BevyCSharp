@@ -240,7 +240,7 @@ public sealed class ComponentSchemaTests
     {
         var schema = ComponentSchemas.For("Bevy.Tests.Described")!;
 
-        // What a tool has to know before it writes a component back: which rows are the state and
+        // What a tool has to know before it writes a component back, which rows are the state and
         // which are another way of reading it. Doubled is Speed seen twice over, and writing it
         // after Speed would put twice the value back.
         Assert.False(schema.Field("Speed")!.Derived);
@@ -275,7 +275,7 @@ public sealed class ComponentSchemaTests
             ctx.Ecs.Add(entity, new Described { Count = 9 });
             ctx.Ecs.Add(entity, Transform.At(1f, 2f, 3f));
 
-            // The whole round trip an inspector makes: ask what the entity carries, then ask
+            // The whole round trip an inspector makes, ask what the entity carries, then ask
             // what each of those is, without naming a single type.
             var described = new List<string>();
             foreach (var id in ctx.Ecs.ComponentsOf(entity))
@@ -368,7 +368,7 @@ public partial struct Hinted
 /// A component using the attributes that arrange an inspector rather than describe a value.
 /// </summary>
 /// <remarks>
-/// Separate from <see cref="Hinted"/> so that each fixture reads as one thing: what a value is, and
+/// Separate from <see cref="Hinted"/> so that each fixture reads as one thing, what a value is, and
 /// where it goes on the screen.
 /// </remarks>
 [Behavior]

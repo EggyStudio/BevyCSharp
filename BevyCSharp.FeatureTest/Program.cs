@@ -43,7 +43,7 @@ MemoryGuard.DefaultTheEnvironment();
 // The panel's settings, read before the window opens, since vsync is the window's from its start.
 var saved = Settings.Current;
 
-// Three ways to run the same behaviors: onto a screen, into an image, or with no renderer at all. A
+// Three ways to run the same behaviors, onto a screen, into an image, or with no renderer at all. A
 // machine with no display can still see the picture from the middle one.
 var config = windowed
     ? Config.Windowed(Settings.GameName, 1280, 720, ParseBackend(args, Backend))
@@ -80,7 +80,7 @@ config.GpuTimings = config.MeshletClusters > 0 || args.Contains("--timings");
 if (offscreen && args.Contains("--timings")) config.HeadlessFps = 1000;
 
 // Asks for the interface the panel, the overlay and the console are drawn with, offscreen as well,
-// where bcs drives them with the keys it sends and a capture shows them. A bridge without it
+// where bcs sends them keys and a capture shows them. A bridge without it
 // compiled in ignores this and they are not drawn.
 config.Gui = windowed || offscreen;
 
@@ -113,7 +113,7 @@ Console.WriteLine(windowed ? "close the window to exit" : string.Empty);
 return BevyApp.Run(app => app.AddPlugin(new Bevy.Physics.PhysicsPlugin()), config);
 
 // Reads --frames N, defaulting to a short run so a plain `dotnet run` still does something. Zero
-// runs until something asks the app to stop, as a session driven from `bcs` needs.
+// runs until something asks the app to stop, as a session controlled from `bcs` needs.
 static uint ParseFrames(string[] arguments)
 {
     var index = Array.IndexOf(arguments, "--frames");

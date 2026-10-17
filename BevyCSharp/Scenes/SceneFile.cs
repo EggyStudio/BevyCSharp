@@ -490,7 +490,7 @@ public static partial class SceneFile
     }
 
     /// <summary>
-    /// The full path a scene path names: one under the asset root, with or without
+    /// The full path a scene path names, one under the asset root, with or without
     /// <see cref="AssetsPrefix"/>, one under the player's own directory after
     /// <see cref="UserData.Prefix"/>, or an absolute one as it is.
     /// </summary>
@@ -540,7 +540,7 @@ public static partial class SceneFile
     }
 
     /// <summary>
-    /// Each entity's id: the one it was loaded with when no other entity being written has it, and
+    /// Each entity's id, the one it was loaded with when no other entity being written has it, and
     /// the next unused number otherwise.
     /// </summary>
     private static Dictionary<Entity, int> Ids(EcsWorld world, List<Entity> ordered)

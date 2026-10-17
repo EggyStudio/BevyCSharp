@@ -1,4 +1,4 @@
-// A pass that paints a visibility buffer: black where it holds nothing, red for the first
+// A pass that paints a visibility buffer, black where it holds nothing, red for the first
 // instance, green for the second.
 
 import bcs_pass;

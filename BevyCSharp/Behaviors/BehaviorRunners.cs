@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Bevy;
 
 /// <summary>
-/// Drives per-entity behavior methods over Bevy's storage.
+/// Runs per-entity behavior methods over Bevy's storage.
 /// </summary>
 /// <remarks>
 /// <para>

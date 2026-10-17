@@ -408,12 +408,12 @@ public static unsafe partial class Window
     }
 
     /// <summary>
-    /// Every video mode a monitor can be driven at, by an index below <see cref="MonitorCount"/>.
+    /// Every video mode a monitor can run at, by an index below <see cref="MonitorCount"/>.
     /// </summary>
     /// <remarks>
     /// <para>
     /// What a settings screen lists when it offers exclusive fullscreen. A monitor can only be
-    /// driven at the modes it reports, so the list is the choice rather than a validation of one
+    /// run at the modes it reports, so the list is the choice rather than a validation of one
     /// somebody typed.
     /// </para>
     /// <para>
@@ -462,7 +462,7 @@ public static unsafe partial class Window
     /// </para>
     /// <para>
     /// The mode is named by its place in <see cref="MonitorModes"/> rather than by numbers, because
-    /// a monitor can only be driven at the modes it offers.
+    /// a monitor can only run at the modes it offers.
     /// </para>
     /// </remarks>
     /// <param name="monitor">An index below <see cref="MonitorCount"/>.</param>

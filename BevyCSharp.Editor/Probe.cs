@@ -7,7 +7,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor;
 
 /// <summary>
-/// Drives the editor from the outside, so that what it does can be checked without a person.
+/// Controls the editor from the outside, so that what it does can be checked without a person.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -3,7 +3,7 @@ using Bevy;
 
 namespace BevyCSharp.Cli;
 
-/// <summary>The cold verbs: building, testing, a one-shot run, and why nothing works.</summary>
+/// <summary>The cold verbs, building, testing, a one-shot run, and why nothing works.</summary>
 internal static class Tools
 {
     /// <summary>
@@ -256,8 +256,8 @@ internal static class Tools
     /// <summary>Runs an app once, cold, and passes its output straight through.</summary>
     /// <remarks>
     /// For when a fresh world really is wanted, a headless run of a fixed number of frames, as a
-    /// test or a capture of a first frame needs. Driving a running app is cheaper for everything
-    /// else.
+    /// test or a capture of a first frame needs. Controlling a running app is cheaper for
+    /// everything else.
     /// </remarks>
     public static int Run(Options options, string[] arguments)
     {

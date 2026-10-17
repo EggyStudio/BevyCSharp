@@ -9,7 +9,7 @@ namespace BevyCSharp.Examples;
 // lists it as one of the two helpers an example may lean on.
 
 /// <summary>
-/// The row of radio buttons many of Bevy's examples are driven by, drawn as Bevy's
+/// The row of radio buttons many of Bevy's examples are controlled by, drawn as Bevy's
 /// <c>helpers/widgets.rs</c> draws it, with a title and then the options side by side, the chosen
 /// one white with black text and the rest the other way round.
 /// </summary>

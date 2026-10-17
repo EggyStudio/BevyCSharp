@@ -5,7 +5,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// A node lays its children out along one axis. This is the axis, and everything else in the
-/// layout is described relative to it: <see cref="UiSettings.Justify"/> spreads them along it,
+/// layout is described relative to it. <see cref="UiSettings.Justify"/> spreads them along it,
 /// <see cref="UiSettings.Align"/> places them across it.
 /// </remarks>
 public enum UiDirection

@@ -1,4 +1,4 @@
-//! What a camera owns for the shaders that run on it: images kept from frame to frame, compute run
+//! What a camera owns for the shaders that run on it, images kept from frame to frame, compute run
 //! at a point in its frame, and the inputs every pass and every such dispatch reads.
 //!
 //! Screen-space techniques (ambient occlusion, global illumination, reflections, anything temporal)
@@ -15,7 +15,7 @@
 //! reachable a level at a time as `name_mip0`, `name_mip1` and so on, which is how a depth pyramid
 //! is built one level from the last, reading one level while writing the next.
 //!
-//! **Compute on a camera.** A dispatch attached to a camera runs every frame at one of four points:
+//! **Compute on a camera.** A dispatch attached to a camera runs every frame at one of four points,
 //! after the prepass, after opaque geometry and before transparent, before tonemapping, or after
 //! it. Its workgroups are either counted from the picture's size, a fixed number, or read from a
 //! buffer another dispatch wrote, so a shader can decide on the GPU how much work follows.
@@ -32,7 +32,7 @@
 //! | 5 | the camera's normals |
 //! | 6 | the camera's motion vectors, in UV units per frame |
 //! | 7 | the previous frame's view matrices |
-//! | 8 | the camera's lights: every directional light with its shadow cascades, and the ambient light |
+//! | 8 | the camera's lights, every directional light with its shadow cascades, and the ambient light |
 //! | 9 | every point and spot light |
 //! | 10 | the directional lights' shadow maps, a layer per cascade |
 //! | 11 | the point lights' shadow maps, a cube per light |
@@ -46,7 +46,7 @@
 //!
 //! Depth, normals and motion come from the prepass, which a camera draws only when asked. What a
 //! camera does not draw, or draws multisampled (which a plain texture binding cannot take), is a
-//! stand-in: depth zero, which is the far plane in Bevy's reversed depth, white normals and zero
+//! stand-in, depth zero, which is the far plane in Bevy's reversed depth, white normals and zero
 //! motion. A camera with no previous view data, which is every 2D camera, reads this frame's.
 
 #![cfg(feature = "render")]

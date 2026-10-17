@@ -72,7 +72,7 @@ public static class RoundedRows
     /// </summary>
     /// <remarks>
     /// Every list in the editor that lets ImGui draw its own rows goes through here, so they all
-    /// highlight the same way: the menu off the toolbar, a component's own menu, what can be
+    /// highlight the same way, the menu off the toolbar, a component's own menu, what can be
     /// added to an entity, and the folder tree. Nesting comes for free, because each call keeps
     /// whatever was in force and puts it back.
     /// </remarks>

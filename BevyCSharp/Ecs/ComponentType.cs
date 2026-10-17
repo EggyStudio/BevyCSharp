@@ -145,7 +145,7 @@ public static class ComponentType<T> where T : struct
             + "wrong bytes and writing it would corrupt the world, so the value operations are "
             + "refused.");
 
-    /// <summary>Layout probe: the offset of <c>Value</c> is the alignment of <typeparamref name="T"/>.</summary>
+    /// <summary>A layout probe, where the offset of <c>Value</c> is the alignment of <typeparamref name="T"/>.</summary>
     private struct AlignmentProbe
     {
 #pragma warning disable CS0169 // Fields are never used; they exist purely to create padding.

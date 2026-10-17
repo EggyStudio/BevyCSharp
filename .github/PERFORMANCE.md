@@ -22,7 +22,7 @@ four parts.
   where the app asked for them (`Config.GpuTimings`).
 
 `FrameProfile.Start`, `Take` and `Stop` are the same from code. Counting costs something on every
-crossing, so a measured frame is slower than the same frame unmeasured: 7.0 ms against 6.2 ms at a
+crossing, so a measured frame is slower than the same frame unmeasured, 7.0 ms against 6.2 ms at a
 hundred thousand crossings a frame, about a tenth.
 
 `games/Stress` is the load, built on the packed package as a game is, in two modes.

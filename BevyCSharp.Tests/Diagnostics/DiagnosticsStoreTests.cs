@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers Bevy's diagnostics store as a game reaches it: a diagnostic of its own registered,
+/// Covers Bevy's diagnostics store as a game reaches it, a diagnostic of its own registered,
 /// measured, read back and turned off, Bevy's own plugins measuring into it, and its log filtered.
 /// </summary>
 [Collection("engine")]

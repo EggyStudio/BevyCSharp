@@ -77,7 +77,7 @@ public sealed class AssetTests
     public void AMissingFileEndsUpFailedRatherThanStuck()
     {
         // Nothing here loads a real asset, so this is the state transition that can be observed
-        // without shipping a fixture: queued, attempted, given up on.
+        // without shipping a fixture, queued, attempted, given up on.
         //
         // The attempt happens on an IO thread while the app spins frames as fast as it can, so
         // how many frames pass before the failure lands is a property of the machine. A fixed

@@ -31,7 +31,7 @@ public static class ConsoleLog
 
     /// <summary>What the frame counter says, for whoever writes a line next.</summary>
     /// <remarks>
-    /// Set by whatever is driving the program. A log that had to ask the engine what frame it is
+    /// Set by whatever runs the program's loop. A log that had to ask the engine what frame it is
     /// would be a log that cannot be written to from a thread, or before there is an engine.
     /// </remarks>
     public static ulong Frame { get; set; }

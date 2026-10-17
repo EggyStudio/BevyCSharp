@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// The same picture of pixels three times, scaled up: on the left as an image loads unless told
+// The same picture of pixels three times, scaled up, on the left as an image loads unless told
 // otherwise, its pixels blurred by the linear sampler, on the right with a .meta file beside it
 // that asks the loader for the nearest sampler, and above with the nearest sampler asked for where
 // it is loaded, as Bevy's load_builder().with_settings does, so both of those keep their pixels

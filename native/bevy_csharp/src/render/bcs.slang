@@ -1,4 +1,4 @@
-// What a BevyCSharp material shader sees of Bevy: the view, time, the mesh's transforms, and the
+// What a BevyCSharp material shader sees of Bevy, the view, time, the mesh's transforms, and the
 // structs Bevy's own vertex shader hands a fragment shader.
 //
 // A shader reaches it with `import bcs;`, and everything in it is under the `bcs` namespace. The
@@ -50,7 +50,7 @@ public struct View
     public float4 view_from_clip[4];
     public float3 world_position;
     public float exposure;
-    /// Where the view is on its target: x, y, width and height, in pixels.
+    /// Where the view is on its target, x, y, width and height, in pixels.
     public float4 viewport;
     public float4 main_pass_viewport;
 };
@@ -289,14 +289,14 @@ public PrepassVertexOutput prepass_output(uint instance, float3 position, float3
 // own `apply_pbr_lighting` and `main_pass_post_lighting_processing`, and which take only numbers
 // and vectors, so nothing here depends on the names Slang gives its structs in the WGSL it writes.
 
-/// What a lit surface is, as Bevy's standard material describes one: its color, the light it gives
+/// What a lit surface is, as Bevy's standard material describes one, its color, the light it gives
 /// off, how metal and how rough it is, how much light it reflects head on, how much ambient light
 /// reaches it, and which way it faces.
 public struct Surface
 {
     /// The color, linear RGBA, its alpha read as the material's alpha mode says.
     public float4 base_color;
-    /// The light it gives off, linear, in Bevy's units, so a value well above one glows.
+    /// Its emissive light, linear, in Bevy's units, so a value well above one glows.
     public float4 emissive;
     public float metallic;
     /// Bevy's perceptual roughness, from mirror smooth at zero to fully rough at one.
@@ -309,7 +309,7 @@ public struct Surface
     public float3 normal;
 };
 
-/// A surface as Bevy's default standard material describes the mesh at this point: white, rough
+/// A surface as Bevy's default standard material describes the mesh at this point, white, rough
 /// by half, not metal, facing the way the mesh does.
 public Surface surface(VertexOutput mesh)
 {
@@ -361,7 +361,7 @@ public float4 light(Surface surface, VertexOutput mesh)
         mesh.world_normal, surface.normal);
 }
 
-/// What Bevy does to a lit color in the shader: fog, and tonemapping and debanding for a camera that
+/// What Bevy does to a lit color in the shader, fog, and tonemapping and debanding for a camera that
 /// does not draw in high dynamic range. Effects over the whole picture, such as bloom, come after,
 /// outside the shader.
 public float4 finish(float4 color, VertexOutput mesh)
@@ -481,7 +481,7 @@ public enum DecalMap
     Normal = 1,
     /// How metal it is in blue and how rough in green.
     MetallicRoughness = 2,
-    /// The light it gives off.
+    /// Its emissive light.
     Emissive = 3,
 }
 
@@ -566,10 +566,10 @@ public float4 decal_sample(VertexOutput mesh, uint index, DecalMap map)
     return pbr_decal_sample(mesh.position, mesh.world_position, index, uint(map));
 }
 
-/// The surface with every decal over this point laid on, as Bevy's standard material lays them:
+/// The surface with every decal over this point laid on, as Bevy's standard material lays them,
 /// each decal's color over the surface's by its alpha, how metal and rough it is mixed in by the
-/// same alpha where it says, its normal map bending the normal on a mesh with tangents, and the
-/// light it gives off added.
+/// same alpha where it says, its normal map bending the normal on a mesh with tangents, and its
+/// emissive light added.
 public Surface decals(Surface surface, VertexOutput mesh)
 {
     var output = surface;

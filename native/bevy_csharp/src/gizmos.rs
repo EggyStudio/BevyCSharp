@@ -20,14 +20,14 @@ use crate::interop::{status, BcsGizmoConfig};
 pub struct QueuedGizmo {
     /// Which shape. See [`crate::interop::BcsGizmoConfig::kind`] for the list.
     pub kind: i32,
-    /// Where the shape sits: a line's start, or the center of everything else.
+    /// Where the shape sits, a line's start, or the center of everything else.
     pub start: [f32; 3],
     /// A line's far end, and for the shapes that need two or three more numbers, whatever
     /// [`crate::interop::BcsGizmoConfig::end`] says they are.
     pub end: [f32; 3],
     /// Which way it faces, as a quaternion. A line and an arrow have two ends instead.
     pub rotation: [f32; 4],
-    /// How large: a radius, an axis length, or a grid's cell spacing.
+    /// How large, a radius, an axis length, or a grid's cell spacing.
     pub radius: f32,
     /// Color, linear RGBA. Axes use their own red, green and blue.
     pub color: [f32; 4],
@@ -238,7 +238,7 @@ macro_rules! draw_shape {
 
             20 => {
                 // A cone with its point cut off, which is the one remaining primitive whose
-                // numbers fit the queue: a radius at each end and a height between them.
+                // numbers fit the queue, a radius at each end and a height between them.
                 $gizmos.primitive_3d(
                     &ConicalFrustum {
                         radius_bottom: shape.radius,
@@ -345,8 +345,9 @@ macro_rules! draw_shape {
                 drop(rect);
             }
             // Bevy's primitives as its own primitive_2d and primitive_3d draw them, each from the
-            // numbers it is made of, for what no shape above draws the same way: a plane's normal
-            // and the plane, an endless line's direction, and the flat shapes of a circle's parts.
+            // numbers it is made of, for what no shape above draws the same way, such as a plane's
+            // normal and the plane, an endless line's direction, and the flat shapes of a circle's
+            // parts.
             28 => $gizmos.primitive_2d(&bevy::shape::Plane2d { normal: bevy::math::Dir2::Y }, turn, $color),
             29 => drop($gizmos.primitive_3d(
                 &bevy::shape::Plane3d { normal: bevy::math::Dir3::Y, half_size: Vec2::new(far.x, far.y) },

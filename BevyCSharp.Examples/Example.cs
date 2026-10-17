@@ -29,7 +29,9 @@ internal sealed record Example(
     Action? Returned = null,
     Action<App>? Drive = null);
 
-/// <summary>What drives an example for its capture, beside what the package says for it.</summary>
+/// <summary>
+/// What gives an example its input for its capture, beside what the package says for it.
+/// </summary>
 internal static class Scene
 {
     /// <summary>

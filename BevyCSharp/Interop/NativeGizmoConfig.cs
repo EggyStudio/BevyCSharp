@@ -66,6 +66,6 @@ public struct NativeGizmoConfig
     /// <summary>Far end alpha.</summary>
     public float EndColorA;
 
-    /// <summary>Whether the scene can hide it: 0 is depth tested, anything else draws in front.</summary>
+    /// <summary>Whether the scene can hide it. 0 is depth tested, anything else draws in front.</summary>
     public int InFront;
 }

@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>A behavior driven by the fixed timestep rather than by the frame.</summary>
+/// <summary>A behavior run by the fixed timestep rather than by the frame.</summary>
 [Behavior]
 public partial struct FixedStepper
 {
@@ -111,7 +111,7 @@ public sealed class FixedUpdateTests
         harness.On(Stage.FixedUpdate, _ => steps++);
 
         // Both readings are taken at the top of the frame, before that frame's fixed steps have
-        // run, so the steps counted are exactly those driven by time the snapshot already
+        // run, so the steps counted are exactly those due to time the snapshot already
         // includes. Reading them from different points in the frame would compare a step count
         // against a clock that does not cover it, which on a machine with uneven frame times is
         // a different answer every run.

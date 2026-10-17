@@ -607,7 +607,7 @@ pub fn sync_view_dispatches(
 
 /// Replaces the passes a camera runs over its picture with `count` instances, in order.
 ///
-/// `after_tonemapping` holds a place per instance: `0` on the linear picture before tonemapping,
+/// `after_tonemapping` holds a place per instance, `0` on the linear picture before tonemapping,
 /// `1` on the picture as the screen will show it, and `2` on the lit opaque geometry before
 /// transparent geometry is drawn. A count of zero takes every pass off.
 ///

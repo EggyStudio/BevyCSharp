@@ -113,7 +113,7 @@ pub type CleanupList = Arc<Mutex<Vec<SystemReg>>>;
 
 /// The opaque handle C# holds for the lifetime of the engine.
 pub struct BcsApp {
-    /// The Bevy app under construction, or driving the loop.
+    /// The Bevy app under construction, or running the loop.
     pub app: App,
     /// Callbacks to run on the way out, shared with the cleanup system in the schedule.
     pub cleanup: CleanupList,

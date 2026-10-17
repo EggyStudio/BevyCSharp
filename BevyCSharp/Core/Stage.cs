@@ -35,10 +35,10 @@ public enum Stage
     /// <summary>Once, after the main loop exits.</summary>
     Cleanup = 7,
 
-    /// <summary>Engine-internal: refreshes <see cref="Time"/> and <see cref="Input"/>.</summary>
+    /// <summary>Engine-internal, it refreshes <see cref="Time"/> and <see cref="Input"/>.</summary>
     FrameSync = 8,
 
-    /// <summary>Engine-internal: applies the queued <see cref="EcsCommands"/>.</summary>
+    /// <summary>Engine-internal, it applies the queued <see cref="EcsCommands"/>.</summary>
     CommandFlush = 9,
 
     /// <summary>Once, before the first frame, ahead of <see cref="Startup"/>, as Bevy's <c>PreStartup</c> runs.</summary>
@@ -54,7 +54,7 @@ public enum Stage
     /// </summary>
     /// <remarks>
     /// Runs between <see cref="PreUpdate"/> and <see cref="Update"/>, as many times as the time
-    /// since the last frame allows: twice after a slow frame, not at all after a fast one. That
+    /// since the last frame allows, twice after a slow frame and not at all after a fast one. That
     /// makes it frame-rate independent, and it is why the number to integrate with is
     /// <see cref="Time.FixedDelta"/> rather than <see cref="Time.Delta"/>.
     /// </remarks>

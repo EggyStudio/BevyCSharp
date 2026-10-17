@@ -1,4 +1,4 @@
-// Screen-space global illumination, the second step: this frame's rays blended into what the
+// Screen-space global illumination, the second step, this frame's rays blended into what the
 // pixel gathered before, found where it was through the motion vectors, so a pixel's light is the
 // average of many frames' single rays. Where the pixel was off screen last frame, it starts over.
 

@@ -4,7 +4,7 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Behaviors;
 
 /// <summary>
-/// Drives a camera the way an editor's scene view does, steered while a mouse button is held.
+/// Moves a camera the way an editor's scene view does, steered while a mouse button is held.
 /// </summary>
 /// <remarks>
 /// <para>

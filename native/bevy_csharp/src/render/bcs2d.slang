@@ -1,4 +1,4 @@
-// What a BevyCSharp 2D material shader sees of Bevy: the view, time, the mesh's transform, and the
+// What a BevyCSharp 2D material shader sees of Bevy, the view, time, the mesh's transform, and the
 // struct Bevy's own 2D vertex shader hands a fragment shader.
 //
 // A shader drawing a 2D mesh reaches it with `import bcs2d;`, and everything in it is under the
@@ -32,7 +32,7 @@ public struct View
     public float4 view_from_clip[4];
     public float3 world_position;
     public float exposure;
-    /// Where the view is on its target: x, y, width and height, in pixels.
+    /// Where the view is on its target, x, y, width and height, in pixels.
     public float4 viewport;
     public float4 main_pass_viewport;
 };

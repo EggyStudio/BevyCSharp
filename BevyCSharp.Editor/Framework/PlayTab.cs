@@ -43,7 +43,7 @@ public static class PlayTab
             return;
         }
 
-        // While the game runs, its world beside what it writes: what it holds, the fields of the
+        // While the game runs, its world beside what it writes, what it holds, the fields of the
         // one picked, and the output, each a pane, with the clock's buttons over them.
         EditorRemote.Watch();
         Clock();
@@ -203,7 +203,7 @@ public static class PlayTab
     }
 
     /// <summary>
-    /// The second row: which platform to export for, how its assets ship, and Export.
+    /// The second row, which platform to export for, how its assets ship, and Export.
     /// </summary>
     /// <remarks>
     /// Under the row that plays and builds rather than in it, since an export is asked for far less

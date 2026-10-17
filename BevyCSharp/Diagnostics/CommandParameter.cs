@@ -10,7 +10,7 @@ namespace Bevy;
 /// </remarks>
 /// <param name="Name">The parameter's own name, as the method spelled it.</param>
 /// <param name="Kind">
-/// What a word is read as: <c>text</c>, <c>flag</c>, <c>whole</c>, <c>long</c>, <c>single</c> or
+/// What a word is read as, <c>text</c>, <c>flag</c>, <c>whole</c>, <c>long</c>, <c>single</c> or
 /// <c>number</c>.
 /// </param>
 /// <param name="TakesLine">

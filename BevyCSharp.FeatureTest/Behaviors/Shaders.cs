@@ -12,7 +12,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// Everything here is a Slang file under <c>assets/shaders</c>, and every one of them reloads when
 /// it is saved while the program runs, so a change to the path in <c>fireflies_step.slang</c>
 /// changes how the swarm flies, and a change to <c>fireflies.slang</c> how it glows. What each
-/// shader declares is set from here by name: the glow's color and size, how far a firefly strays,
+/// shader declares is set from here by name, the glow's color and size, how far a firefly strays,
 /// and how strong the old screen is.
 /// </para>
 /// <para>
@@ -92,7 +92,7 @@ public partial struct ShaderShowcase
 
         // The squares are drawn wherever the buffer says, so the mesh's own bounds, which are a
         // single square at the origin, say nothing about where they are, and culling by them
-        // would lose the whole swarm whenever the origin left the view. Glowing points cast no
+        // would lose the whole swarm whenever the origin left the view. Emissive points cast no
         // shadow either.
         ctx.Ecs.Add(swarm, Transform.Identity);
         Render.SetMeshFlags(ctx.Ecs, swarm, MeshFlags.NoFrustumCulling | MeshFlags.NoShadowCasting);

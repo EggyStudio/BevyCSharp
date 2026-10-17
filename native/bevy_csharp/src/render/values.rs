@@ -1,4 +1,4 @@
-//! What a shader is handed: values by name, and the bind group they become.
+//! What a shader is handed, values by name, and the bind group they become.
 //!
 //! A material, a pass and a dispatch all hold the same thing, namely whatever the game has said
 //! about the names its shader declares. A number or a group of them goes into a uniform buffer at
@@ -61,7 +61,7 @@ impl Default for SamplerSettings {
 /// One value a game gave a name.
 #[derive(Clone, PartialEq, Debug)]
 pub enum Value {
-    /// Numbers, packed tight, `components` of them to an element: one for a scalar, four for a
+    /// Numbers, packed tight, `components` of them to an element, one for a scalar, four for a
     /// `float4`, sixteen for a `float4x4`. More than one element is an array.
     Numbers {
         scalar: Scalar,

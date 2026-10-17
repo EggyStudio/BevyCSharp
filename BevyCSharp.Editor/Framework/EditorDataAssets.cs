@@ -4,7 +4,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// Data assets in the editor: making one, picking one for a field, and writing back what was
+/// Data assets in the editor, making one, picking one for a field, and writing back what was
 /// changed.
 /// </summary>
 /// <remarks>

@@ -5,9 +5,9 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// For a value something else is derived from: a radius a collider is rebuilt from, a count a pool
-/// is resized to. Without it the derived thing is only right after whatever recomputes it happens
-/// to run, which in an editor with nothing playing may be never.
+/// For a value something else is derived from, such as a radius a collider is rebuilt from, a count
+/// a pool is resized to. Without it the derived thing is only right after whatever recomputes it
+/// happens to run, which in an editor with nothing playing may be never.
 /// </para>
 /// <para>
 /// The methods are named on the same component and take nothing. They are called after the write

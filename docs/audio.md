@@ -109,7 +109,7 @@ One decode covers the sheet, rather than one file and one decode per effect. `Pl
 runs to the end of the clip.
 
 A sound can be placed in the world instead of played into both ears equally. That takes two
-things: the sound saying so, and an entity to hear from.
+things, the sound saying so and an entity to hear from.
 
 <!-- compiled with:
 AssetHandle hum = default;

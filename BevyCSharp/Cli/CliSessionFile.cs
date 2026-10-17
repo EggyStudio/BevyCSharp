@@ -17,7 +17,7 @@ public static class CliSessionFile
     /// </summary>
     /// <remarks>
     /// One per user rather than one per project, and overridable with <c>BCS_SESSIONS</c> so that a
-    /// test, or a second checkout being driven at the same time, can have a directory of its own
+    /// test, or a second checkout being worked in at the same time, can have a directory of its own
     /// instead of writing into the one a person's own apps are using.
     /// </remarks>
     public static string Directory { get; set; } =

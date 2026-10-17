@@ -28,7 +28,7 @@ public sealed class ReflectionSettings
     /// <summary>Steps of the first march along the ray.</summary>
     public uint Steps { get; set; } = 10;
 
-    /// <summary>How the steps spread out: one for even steps, more for finer ones near the start.</summary>
+    /// <summary>How the steps spread out, one for even steps, more for finer ones near the start.</summary>
     public float StepExponent { get; set; } = 1f;
 
     /// <summary>Steps of the search that narrows a hit down.</summary>

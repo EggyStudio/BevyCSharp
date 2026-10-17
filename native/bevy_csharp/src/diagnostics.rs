@@ -77,7 +77,7 @@ pub struct BcsDiagnostic {
     pub enabled: u32,
 }
 
-/// A path as Bevy takes one, or nothing for one it would refuse: empty, beginning or ending with a
+/// A path as Bevy takes one, or nothing for one it would refuse, empty, beginning or ending with a
 /// slash, or with two slashes together, which Bevy checks only in a debug build.
 ///
 /// # Safety
@@ -231,7 +231,7 @@ pub unsafe extern "C" fn bcs_diagnostic_set_enabled(path: *const core::ffi::c_ch
     })
 }
 
-/// Copies every diagnostic in the store out, by the text convention, a line each in path order:
+/// Copies every diagnostic in the store out, by the text convention, a line each in path order,
 /// its path, its suffix, `1` or `0` for whether it is on, how many measurements it keeps, and its
 /// last, smoothed and average values, apart by tabs, a value it has none of yet empty. Only valid
 /// inside a system.

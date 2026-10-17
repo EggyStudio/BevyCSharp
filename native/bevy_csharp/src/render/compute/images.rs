@@ -1,4 +1,4 @@
-//! Images a compute shader writes and anything samples: made as zeros, from texels or
+//! Images a compute shader writes and anything samples, made as zeros, from texels or
 //! block-compressed, and written a region at a time on the GPU.
 
 use bevy::asset::{Assets, Handle, RenderAssetUsages};
@@ -78,7 +78,7 @@ pub(super) fn write_image_regions(
 }
 
 /// Asks for `bytes` to be written into the region of `key`'s image at `origin`, `size` texels,
-/// of mip level `mip`, and checks it fits: the region inside the level, and exactly its texels.
+/// of mip level `mip`, and checks it fits, the region inside the level, and exactly its texels.
 ///
 /// Only the GPU's copy changes. The image's copy in memory keeps what it had, which matters only
 /// if the image is changed from this side afterward, since that uploads the memory copy again.

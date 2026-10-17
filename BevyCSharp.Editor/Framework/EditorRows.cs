@@ -124,7 +124,7 @@ public static class EditorRows
     }
 
     /// <summary>
-    /// A field's name: dimmed when the selection disagrees about it, in the accent when an instance
+    /// A field's name, dimmed when the selection disagrees about it, in the accent when an instance
     /// overrides it, with a revert on a right-click when there is one.
     /// </summary>
     /// <remarks>

@@ -40,8 +40,8 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// The other end of <see cref="CreateTarget"/>. A camera pointed at a texture draws a picture
-    /// nothing on screen shows, and this is how it is read back: a minimap, a portal, or a second
-    /// viewport, checked without a person looking at the window it is not in.
+    /// nothing on screen shows, and this is how it is read back, for a minimap, a portal, or a
+    /// second viewport, checked without a person looking at the window it is not in.
     /// </remarks>
     /// <param name="path">Where to write the PNG. Relative paths are resolved by the process.</param>
     /// <param name="target">The image to capture, from <see cref="CreateTarget"/>.</param>
@@ -179,7 +179,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>
-    /// Makes an entity a reflection probe: a box inside which surfaces reflect a pair of baked
+    /// Makes an entity a reflection probe, a box inside which surfaces reflect a pair of baked
     /// cubemaps rather than the camera's environment. Only valid inside a system.
     /// </summary>
     /// <remarks>
@@ -235,7 +235,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>
-    /// Makes an entity an irradiance volume: a box inside which surfaces take their diffuse
+    /// Makes an entity an irradiance volume, a box inside which surfaces take their diffuse
     /// indirect light from a grid of points held in a 3D image. Only valid inside a system.
     /// </summary>
     /// <remarks>
@@ -568,7 +568,7 @@ public static unsafe partial class Render
     /// </summary>
     /// <remarks>
     /// Light arriving from every direction at once, which is the cheapest stand-in for all the
-    /// light bounced around a scene, and what ambient occlusion darkens where a surface is hemmed
+    /// indirect light of a scene, and what ambient occlusion darkens where a surface is hemmed
     /// in. <paramref name="brightness"/> is in candela per square meter, the unit Bevy's lights
     /// use, and Bevy's own is eighty.
     /// </remarks>

@@ -7,7 +7,7 @@
 //! an eight-bit image asset, scaled and offset into view, after the camera's frame is done. The
 //! editor shows that image, and so can a game's own debug overlay.
 //!
-//! Anything a shader on the camera can read by name can be watched: the camera's own images, their
+//! Anything a shader on the camera can read by name can be watched, the camera's own images, their
 //! `_previous` and `_mip` names, `ambient_occlusion` where Bevy's is on, and the prepass's `depth`,
 //! `normals` and `motion`. A single channel shows as gray, two as red and green, and more as color.
 

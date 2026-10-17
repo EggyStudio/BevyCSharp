@@ -6,7 +6,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows assets of a game's own types read by a loader of its own: a CustomAsset read from a RON
+// Shows assets of a game's own types read by a loader of its own, a CustomAsset read from a RON
 // file, one from a file with no extension, and the same file read again as a blob of bytes, each
 // printed once all three are in.
 //

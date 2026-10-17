@@ -7,7 +7,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The editor's own view of the scene, and how it looks and moves: its lens, how it flies, and
+/// The editor's own view of the scene, and how it looks and moves, its lens, how it flies, and
 /// what it draws the picture with, in a card at the scene's top right.
 /// </summary>
 /// <remarks>
@@ -15,7 +15,7 @@ namespace BevyCSharp.Editor.Framework;
 /// The scene view's camera is the editor's, not the game's, so what it looks like is a working
 /// preference rather than part of the scene, and it is set here rather than on a component in the
 /// world list, where it is not listed. Unity's scene view keeps the same things behind a button in
-/// its toolbar: the field of view and the clip planes, how fast the camera flies and how it eases,
+/// its toolbar, the field of view and the clip planes, how fast the camera flies and how it eases,
 /// and whether the view shows the scene's effects.
 /// </para>
 /// <para>
@@ -85,7 +85,7 @@ public static class SceneCamera
 
         Render.SetPerspective(camera, Math.Clamp(FieldOfView, 5f, 170f), MathF.Max(0.001f, Near), MathF.Max(Near + 0.01f, Far));
 
-        // The plain look is the editor's: a high-range picture, one sample a pixel, the default
+        // The plain look is the editor's, a high-range picture, one sample a pixel, the default
         // curve, and nothing else. The one the scene camera was made with.
         var settings = new PostSettings { Hdr = true, Msaa = 1 };
 

@@ -1,4 +1,4 @@
-// Screen-space global illumination, the last step: one triangle over the whole picture, drawn
+// Screen-space global illumination, the last step, one triangle over the whole picture, drawn
 // added after opaque geometry is lit, adding each pixel's gathered light times the color of the
 // surface there. Before transparent geometry and tonemapping, so glass is drawn over it and the
 // tonemapper sees it as light like any other.

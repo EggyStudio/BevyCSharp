@@ -53,7 +53,7 @@ internal static class ManyGradients
         var grid = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f), Display = UiDisplay.Grid });
         UiGrid.Set(grid, new GridSettings { Columns = [Track.Flex(1f).Repeated(Cols)], Rows = [Track.Flex(1f).Repeated(rows)] });
 
-        // Bevy's palette of CSS colors: red, blue, green, yellow, orange, lime and dark cyan.
+        // Bevy's palette of CSS colors, red, blue, green, yellow, orange, lime and dark cyan.
         Color[] colors =
         [
             Color.FromSrgb8(255, 0, 0), Color.FromSrgb8(0, 0, 255), Color.FromSrgb8(0, 128, 0), Color.FromSrgb8(255, 255, 0),

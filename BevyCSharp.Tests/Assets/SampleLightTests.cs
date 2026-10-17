@@ -15,8 +15,8 @@ public sealed class SampleLightTests
         Path.Combine(EngineHarness.AssetDirectory, "..", "..", "..", "..", "..", "BevyCSharp.FeatureTest", "assets"));
 
     /// <summary>
-    /// A sunlit red wall beside a white floor tints the floor near it red once the bounce is
-    /// traced, gathered and added, and leaves it white without.
+    /// A sunlit red wall beside a white floor tints the floor near it red once the indirect light
+    /// is traced, gathered and added, and leaves it white without.
     /// </summary>
     [SkippableFact]
     public void TheSamplesBounceTintsTheFloorBesideARedWall()
@@ -27,7 +27,8 @@ public sealed class SampleLightTests
         var bounced = Floor(bounce: true);
         var plain = Floor(bounce: false);
 
-        // Pixels of the lower half, which is floor, that the bounce made redder than they were.
+        // Pixels of the lower half, which is floor, that the indirect light made redder than they
+        // were.
         var tinted = 0;
 
         for (var y = 64u; y < 128; y++)
@@ -40,7 +41,7 @@ public sealed class SampleLightTests
             }
         }
 
-        Assert.True(tinted > 200, $"the bounce tinted {tinted} pixels of the floor red");
+        Assert.True(tinted > 200, $"the indirect light tinted {tinted} pixels of the floor red");
     }
 
     /// <summary>

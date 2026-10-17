@@ -11,7 +11,7 @@ namespace Bevy.Tests;
 /// The only kind of run whose output can be checked without a person and without a display. A
 /// windowed run needs a display server to open a window on, which a build server does not have,
 /// and a headless run installs no renderer at all, so neither can answer the one question a test
-/// cannot otherwise ask: was anything actually drawn.
+/// cannot otherwise ask, whether anything was actually drawn.
 /// </para>
 /// <para>
 /// Skipped on a bridge with no renderer, which the test workflow builds, so this runs where there

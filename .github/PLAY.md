@@ -8,19 +8,18 @@ step exists and the rest is planned, in the order each depends on the last.
 **Play runs the project in a window of its own.** The Play tab along the bottom (`PlayTab`), `F5`
 and `Project/Play` start the project through `dotnet run --project <file> -- --window`, and the same
 places stop it (`EditorPlay`). The tab's Build, and `Project/Build`, run `dotnet build` instead,
-which says whether the project compiles without starting it. One runs at a time. It runs the project the editor
-was opened on with `--project`, or the sample when it was opened on none, unless the tab's field
-or the settings name another project file. The scene's toolbars carry no play
-button, so the viewport holds the scene and the tools that act on it, and the game, which changes
-nothing in the view, is started from the tab where its output is read. `dotnet run` builds the
-project first when it is out of date, so the first press takes as long as a build. What the game
-writes appears in the editor's console, each line marked `[game]`, or `[build]` for a build's, and
-in the tab, which keeps the last lines of the game or the build on their own, with the terminal's
-color codes taken out.
-Stopping kills the whole process tree, since `dotnet run` starts the game as a child of its own, and
-closing the editor stops the game with it. An editor with no window of its own starts what it plays
-with `BCS_OFFSCREEN` as well as `BCS_SERVE`, so the game draws into an image and is driven through
-`bcs`. Export, in a row of its own, publishes the project for a player (§3).
+which says whether the project compiles without starting it. One runs at a time. It runs the project
+the editor was opened on with `--project`, or the sample when it was opened on none, unless the
+tab's field or the settings name another project file. The scene's toolbars carry no play button, so
+the viewport holds the scene and the tools that act on it, and the game, which changes nothing in
+the view, is started from the tab where its output is read. `dotnet run` builds the project first
+when it is out of date, so the first press takes as long as a build. What the game writes appears in
+the editor's console, each line marked `[game]`, or `[build]` for a build's, and in the tab, which
+keeps the last lines of the game or the build on their own, with the terminal's color codes taken
+out. Stopping kills the whole process tree, since `dotnet run` starts the game as a child of its
+own, and closing the editor stops the game with it. An editor with no window of its own starts what
+it plays with `BCS_OFFSCREEN` as well as `BCS_SERVE`, so the game draws into an image and is
+controlled through `bcs`. Export, in a row of its own, publishes the project for a player (§3).
 
 A separate process rather than a mode of the editor's own world, as Godot does it, because a game
 that runs inside the editor shares its state, its crashes and its frame. Its window is the one it
@@ -97,21 +96,22 @@ and Build only run and compile it on this machine.
   3. The assets, either as a folder beside the executable or embedded (below).
 - **Output.** Each step's output goes to the tab as the game's does to the console, with the
   failing step named. A finished build shows its folder and its size and offers to run it.
-- **Settings per target,** saved with the project rather than the editor: the name, the icon,
+- **Settings per target,** saved with the project rather than the editor, the name, the icon,
   the window's title, whether to embed assets, and `DesktopTitleBar`.
 
 The same build is a `[Command]` (`project.export <rid> [embed]`), so `./bcs` and CI build a game the
 way the tab does.
 
-Built: a row under Play and Build with a choice of runtime identifier (this machine's first), an
-"Embed assets" box and Export, which runs `dotnet publish -c Release -r <rid> --self-contained` into
-the project's own `bin/Export/<rid>/`, where version control already looks away. With the box
-ticked, the project's assets are first compiled into a bridge of its own (§4), which replaces the
-one the publish copied, and the files the managed side reads are compiled into the game's
-assembly, so the export carries no asset folder beside scripts. Unticked, the ids beside the files
-become one `uids.json`, and the sidecars are left out of what ships. `EditorPlay` runs the steps
-as a chain of processes, each started when the one before it ends well, and the tab names the step that failed. The exported sample starts and draws
-as the debug build does.
+As built, there is a row under Play and Build with a choice of runtime identifier (this machine's
+first), an "Embed assets" box and Export, which runs
+`dotnet publish -c Release -r <rid> --self-contained` into the project's own `bin/Export/<rid>/`,
+where version control already looks away. With the box ticked, the project's assets are first
+compiled into a bridge of its own (§4), which replaces the one the publish copied, and the files the
+managed side reads are compiled into the game's assembly, so the export carries no asset folder
+beside scripts. Unticked, the ids beside the files become one `uids.json`, and the sidecars are left
+out of what ships. `EditorPlay` runs the steps as a chain of processes, each started when the one
+before it ends well, and the tab names the step that failed. The exported sample starts and draws as
+the debug build does.
 
 Without embedding, the bridge a game ships is a render one built for exports
 (`build-native.sh --render --game`), staged under `build/game/<rid>/` apart from the one the
@@ -151,10 +151,10 @@ That fits a build step that already builds the bridge per target, so the plan ta
 
 The first is enough to ship; the second removes the per-game bridge build.
 
-Built: both. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns on the bridge's `embed`
-feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before the
-asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests keep
-the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
+Both are built. `build-native.sh --embed <dir>` (`-Embed` in PowerShell) turns on the bridge's
+`embed` feature over that folder, which adds `EmbeddedAssetPlugin` in `ReplaceDefault` mode before
+the asset plugin, and stages the library under `build/embedded/<rid>/` so the editor and the tests
+keep the ordinary bridge. `App.HasEmbeddedAssets` (`bcs_has_embedded_assets`, ABI 161) reports it.
 
 The export takes the second. `BevyCSharpEmbedAssets` (`BevyCSharp.Embed.targets`) compiles the
 whole asset folder into the game's assembly, apart from scripts and shaders, which the game
@@ -189,12 +189,12 @@ on the managed side as well:
 
 - **The window's size, place and monitor.** A game reopening where it was closed is expected on
   the desktop. `bevy-persistent-windows` does this over `bevy-persistent`, but its 0.9 release is
-  on Bevy 0.17. Built instead on the managed side, which needs no crate: `Config.RememberWindow`
+  on Bevy 0.17. Built instead on the managed side, which needs no crate. `Config.RememberWindow`
   keeps a `WindowPlace` in `user://window.json` through `Persistent<T>`, read before the window
   opens and passed to the bridge as where to open it, and written when `Window.Place`
   (`bcs_window_place`, ABI 160) says the window has moved, been resized or been maximized. A
   maximized window keeps the size it goes back to. Wayland never tells an app where its window is,
-  so there it keeps the size and not the place. Not built: the monitor, which matters on Wayland,
+  so there it keeps the size and not the place. The monitor is not kept, which matters on Wayland,
   where it is the one part of the place a compositor takes.
 
 For what C# owns, the same design on the managed side:
@@ -212,7 +212,7 @@ For what C# owns, the same design on the managed side:
 - **Save games are built on it** as a diff over the scenes they name, which [SCENES.md](SCENES.md)
   sets out with the rest of the scene format.
 - **`EditorSettings` is kept in it,** since it is the same thing with a format of its own, so a
-  game's settings screen and the editor's store their values the same way. Built:
+  game's settings screen and the editor's store their values the same way. As built,
   `EditorProject` writes the settings to `user://settings.json` as a `Persistent<T>`, and reads a
   `settings.txt` left in the assets by an older build when there is no such file yet. What belongs
   to the project rather than the person, the startup scene, the fixed step and the export's

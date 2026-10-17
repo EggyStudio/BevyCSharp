@@ -5,19 +5,19 @@ namespace BevyCSharp.Editor.Framework;
 /// <summary>Which corner of the viewport a toolbar button sits in.</summary>
 public enum ToolbarSlot
 {
-    /// <summary>Top left: the menu, and what acts on the whole editor.</summary>
+    /// <summary>Top left, the menu, and what acts on the whole editor.</summary>
     Left,
 
-    /// <summary>Top center: what changes the mode of the viewport.</summary>
+    /// <summary>Top center, what changes the mode of the viewport.</summary>
     Center,
 
-    /// <summary>Top right: what the editor is doing.</summary>
+    /// <summary>Top right, what the editor is doing.</summary>
     Right,
 
-    /// <summary>Bottom right: what describes the view rather than acting on it.</summary>
+    /// <summary>Bottom right, what describes the view rather than acting on it.</summary>
     BottomRight,
 
-    /// <summary>Left edge, stacked downwards: the modes a viewport can be in.</summary>
+    /// <summary>Left edge, stacked downwards, the modes a viewport can be in.</summary>
     LeftEdge,
 }
 

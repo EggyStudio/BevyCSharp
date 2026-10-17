@@ -17,7 +17,7 @@ namespace Bevy.Tests;
 /// <para>
 /// The cap is the default the tools give (<see cref="MemoryGuard.DefaultCap"/>) where the
 /// environment names none, so a test that runs away ends the run and says so, where a machine
-/// running out of memory ended whichever process the system chose, the session driving the run
+/// running out of memory ended whichever process the system chose, the session running the suite
 /// among them.
 /// </para>
 /// </remarks>

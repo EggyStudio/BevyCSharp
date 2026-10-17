@@ -22,7 +22,7 @@ public static partial class SceneFile
         private readonly List<object> _held = [];
 
         /// <summary>
-        /// The resource id of a mesh made in memory: a primitive as its recipe, one built vertex
+        /// The resource id of a mesh made in memory, a primitive as its recipe, one built vertex
         /// by vertex as its geometry, or zero for one that is neither.
         /// </summary>
         public int Mesh(AssetHandle mesh) =>

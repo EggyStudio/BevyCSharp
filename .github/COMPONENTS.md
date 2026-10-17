@@ -1,4 +1,4 @@
-# Components: Bevy's own, collections, and data assets
+# Bevy's components, collections and data assets
 
 How every component Bevy has becomes usable from C# without a mirror written by hand, how a
 component holds a list or a dictionary, and how data kept in a file of its own (Unity's
@@ -32,7 +32,7 @@ system needs to read the bytes in place every frame. Everything else goes throug
 
 ## 1. Every Bevy component, in three tiers
 
-Bevy describes its own types at runtime through reflection: a type's path, its fields and their
+Bevy describes its own types at runtime through reflection, a type's path, its fields and their
 types, its enum variants, and how to insert, read and remove it as a component
 (`ReflectComponent`). A type added by a later Bevy, or by a plugin, is described the same way with
 nothing written here. So the answer is to read that description rather than to write mirrors, and
@@ -43,7 +43,7 @@ to keep mirrors only where their speed matters.
 - **The registry, described.** `bcs_reflect_types` walks `AppTypeRegistry` and returns each type
   that has `ReflectComponent`, with its type path (`bevy_light::point_light::PointLight`), its
   short name, its component id, whether it has a default (`ReflectDefault` or `ReflectFromWorld`)
-  and whether it is mutable. Every type a field reaches is described once beside them: struct,
+  and whether it is mutable. Every type a field reaches is described once beside them, as a struct,
   tuple struct, enum with its variants and their fields, or a list, map, set, tuple or opaque
   value. Every component is registered with the world as it is described, so its id is fixed for
   the run.
@@ -113,7 +113,7 @@ silent failure rather than a compile error.
   the analyzer, and because a line per field diffs as exactly the fields that changed. The fields
   come from the same schemas the inspector draws, so a wrapper and a row name everything alike.
 - **Generated wrappers.** `BevyCSharp.Generator/ReflectedGenerator.cs` reads the file, which only
-  the library names as an additional file, and emits `Bevy.Reflected.PointLightRef` and the rest:
+  the library names as an additional file, and emits `Bevy.Reflected.PointLightRef` and the rest,
   a readonly struct over an entity with a typed property per field (`float Intensity`,
   `bool ShadowMapsEnabled`, a nested enum for an enum whose variants hold nothing, `AssetHandle` for
   a handle, `TimeSpan` for a duration, and `int` for one of Rust's integers that hold no zero, a
@@ -141,7 +141,7 @@ silent failure rather than a compile error.
 The hand mirrors stay the model for what a system iterates every frame, and the generator writes
 them where it can.
 
-- **Only plain data.** A type qualifies when the dump shows only fixed-size fields: numbers,
+- **Only plain data.** A type qualifies when the dump shows only fixed-size fields, such as numbers,
   vectors, quaternions, colors, fieldless enums, and structs of those. A handle, a `Vec`, a
   `String` or an `Option` of a non-plain type rules it out, and it stays on tier 2.
 - **Layout from the compiler.** A mirror needs the offsets Rust chose, which Rust does not
@@ -174,10 +174,11 @@ the garbage collector moves and frees. Two kinds of list fill the gap, and both 
 
 - **Inline lists** (`BevyCSharp/Ecs/InlineList4.cs` to `InlineList64.cs`) hold a count and a fixed
   run of unmanaged items over C#'s `[InlineArray]`. They are the component's own bytes, so they
-  iterate in chunks with everything else and cost nothing to keep, which suits small bounded lists:
-  waypoints, slots, the last few hits. The capacity is part of the type, `InlineList4<T>` through
-  `InlineList64<T>`, because C# fixes an inline array's length at compile time and cannot take it as
-  a type parameter. A freed slot is cleared, so two lists of the same items are the same bytes.
+  iterate in chunks with everything else and cost nothing to keep, which suits small bounded lists
+  such as waypoints, slots, the last few hits. The capacity is part of the type, `InlineList4<T>`
+  through `InlineList64<T>`, because C# fixes an inline array's length at compile time and cannot
+  take it as a type parameter. A freed slot is cleared, so two lists of the same items are the same
+  bytes.
 - **`EcsList<T>` and `EcsMap<K, V>`** (`BevyCSharp/Ecs/EcsList.cs`, `EcsMap.cs`) are unmanaged
   handles (a slot and a generation) into a store on the managed side, so they grow without bound
   and hold `string` as well as unmanaged values. Each is made on its first write.
@@ -219,10 +220,11 @@ What is not built:
 
 ## 3. Data assets
 
-Data kept in a file of its own and shared by whatever refers to it: an enemy's stats, a weapon, a
-dialogue, a loot table. Unity calls it a ScriptableObject and Godot a Resource. [SCENES.md](SCENES.md)
-(§6) covers the file and the reference, and this section the type and how it is edited. Built in
-`BevyCSharp/Assets/DataAssets.cs` and `BevyCSharp.Editor/Framework/EditorDataAssets.cs`.
+Data kept in a file of its own and shared by whatever refers to it, such as an enemy's stats, a
+weapon, a dialogue, a loot table. Unity calls it a ScriptableObject and Godot a Resource.
+[SCENES.md](SCENES.md) (§6) covers the file and the reference, and this section the type and how it
+is edited. Built in `BevyCSharp/Assets/DataAssets.cs` and
+`BevyCSharp.Editor/Framework/EditorDataAssets.cs`.
 
 ```csharp
 [DataAsset]
@@ -270,12 +272,12 @@ var table = chest.Loot.Value;   // or DataAssets.Get(chest.Loot)
 
 - **Items with fields of their own.** A list or a map whose items are a struct or a class (a
   `List<LootEntry>`, an `InlineList8<Waypoint>`) has `FieldKind.Struct` items, and the generator
-  describes the item type in an `ItemFields` on the field, as it describes a data asset: rows over
-  a box holding one item, a class item copied first so an edit never changes the one the list
-  holds. A scene or a data file writes each item as an object of its fields, and the editor draws
-  a list's items each as a fold named by its first text, with the grip and the remove button in
-  front, and a map's values as their fields under their key. Items go
-  three types deep, since a class can hold a list of itself.
+  describes the item type in an `ItemFields` on the field, as it describes a data asset, as rows
+  over a box holding one item, a class item copied first so an edit never changes the one the list
+  holds. A scene or a data file writes each item as an object of its fields, and the editor draws a
+  list's items each as a fold named by its first text, with the grip and the remove button in front,
+  and a map's values as their fields under their key. Items go three types deep, since a class can
+  hold a list of itself.
 - **Opened in place.** A set `DataRef` row has a fold under it named for the asset's type and how
   much shares it ("shared with 2 others"), holding the asset's own rows, and "Make unique" in it
   copies the asset to a file of its own beside it (`DataAssets.Copy`) and points the field at the

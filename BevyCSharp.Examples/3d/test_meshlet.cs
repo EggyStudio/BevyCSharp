@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Meshlets shown beside the meshes they were cut from as the app starts: a sphere and a cube, each
+// Meshlets shown beside the meshes they were cut from as the app starts, a sphere and a cube, each
 // drawn as a mesh and as a meshlet mesh at four distances, in a material whose every mip level is a
 // checkerboard of its own color, so the level each draws at shows. M swaps the meshlet meshes'
 // material for one that colors each cluster.

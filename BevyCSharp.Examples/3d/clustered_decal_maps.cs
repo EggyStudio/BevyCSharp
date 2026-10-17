@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Demonstrates clustered decals with normal, metallic-roughness and emissive maps: a Bevy logo is
+// Demonstrates clustered decals with normal, metallic-roughness and emissive maps. A Bevy logo is
 // stamped on a scratched wall each second, grows in, stays ten seconds and shrinks away, with its
 // gold outline drawn, and the buttons turn its glow on and off.
 internal static class ClusteredDecalMaps

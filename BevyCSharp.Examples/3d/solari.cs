@@ -10,7 +10,7 @@ namespace BevyCSharp.Examples.ThreeD;
 // Demonstrates realtime dynamic raytraced lighting using Bevy Solari, in the pica pica diorama with
 // a robot patrolling it, its own light lit or dark, the sun on or off, and how long each of
 // Solari's passes takes and how many cells its world cache holds in the corner. --many-lights
-// draws a plain of eight thousand boxes under four hundred glowing spheres instead, and
+// draws a plain of eight thousand boxes under four hundred emissive spheres instead, and
 // --pathtracer draws either with Bevy's reference path tracer in the lighting's place.
 //
 // Needs a bridge built with --solari and a GPU with ray queries. The boxes and the spheres' colors
@@ -93,7 +93,7 @@ internal static class Solari
     }
 
     // Bevy's setup_many_lights, a plain of boxes of every color and roughness under a grid of
-    // spheres glowing in every color, from a camera high above, its bloom a little lower than
+    // emissive spheres of every color, from a camera high above, its bloom a little lower than
     // Bevy's own.
     private static void SetupManyLights(BehaviorContext ctx)
     {
@@ -199,7 +199,7 @@ internal static class Solari
 
     // Each mesh of the two models is given to the rays once it has loaded, as Bevy's observer does
     // when a scene is ready, and drawn by the rays alone where the path tracer draws, and three of
-    // their materials are changed by name: the diorama's lamps off, the robot's lamp lit, and its
+    // their materials are changed by name, the diorama's lamps off, the robot's lamp lit, and its
     // dark glass made opaque, since the rays do not pass through what transmits light.
     private static void AddRaytracingMeshes(BehaviorContext ctx)
     {

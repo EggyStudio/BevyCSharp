@@ -1,4 +1,4 @@
-//! Skinned meshes built in code: the joints each vertex follows, the skin's inverse bindposes and
+//! Skinned meshes built in code, the joints each vertex follows, the skin's inverse bindposes and
 //! the joint entities that move it.
 //!
 //! Bevy skins a mesh on the GPU from two vertex attributes, four joints a vertex and how much each

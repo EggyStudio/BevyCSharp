@@ -3,7 +3,7 @@
 //
 // Column x holds the linear value 2 to the power of (20 x / 1023 - 12), from a four thousandth to
 // 256, so the picture runs from black through every exposure a tonemapper bends to far past white.
-// Each row holds it in another color: gray, red, green and blue alone, cyan, magenta and yellow,
+// Each row holds it in another color, gray, red, green and blue alone, cyan, magenta and yellow,
 // and the value with half of it and a quarter of it, a warm color whose hue a tonemapper may turn.
 // The value is written as it is, with no light, exposure or grading on it, so what the camera's
 // tonemapper is given is this and nothing else.

@@ -44,8 +44,8 @@ internal static class Needs
 
     /// <summary>
     /// A window this test may open and storm, which the run asked for with
-    /// <see cref="WindowStormVariable"/> set to 1, on a display that gives a minimized window back:
-    /// X11 on Linux, which <c>xvfb-run</c> gives off any desktop, Windows or macOS.
+    /// <see cref="WindowStormVariable"/> set to 1, on a display that gives a minimized window back,
+    /// X11 on Linux, which <c>xvfb-run</c> gives with no desktop, Windows or macOS.
     /// </summary>
     /// <remarks>
     /// Asked for rather than taken wherever there is a display, since the window is minimized and

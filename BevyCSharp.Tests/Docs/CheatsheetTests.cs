@@ -17,7 +17,7 @@ namespace Bevy.Tests;
 /// <c>Bevy.Physics</c> and its outer type before a nested one.
 /// </para>
 /// <para>
-/// What the page leaves out is what a reader never calls by name: delegates, enums, the types the
+/// What the page leaves out is what a reader never calls by name, delegates, enums, the types the
 /// compiler makes, an enumerator, accessors, and the members a record or <c>object</c> gives every
 /// type. The reflection here is the test's, and the library itself reflects on nothing.
 /// </para>
@@ -131,11 +131,11 @@ public sealed partial class CheatsheetTests
         return count;
     }
 
-    // A heading naming a type, generic arguments dropped: ### `EcsList<T>` is EcsList.
+    // A heading naming a type, generic arguments dropped, ### `EcsList<T>` is EcsList.
     [GeneratedRegex(@"^### `(?<type>[\w.]+)(?:<[^>]*>)?`")]
     private static partial Regex Heading();
 
-    // A declaration on a line of its own: what it returns, its name, its parameters and a comment.
+    // A declaration on a line of its own, what it returns, its name, its parameters and a comment.
     [GeneratedRegex(@"^(?:static )?\S.*?\s+(?<name>[A-Z]\w*)(?:<[^>]*>)?\((?<parameters>.*)\);\s*(?://.*)?$")]
     private static partial Regex Declaration();
 

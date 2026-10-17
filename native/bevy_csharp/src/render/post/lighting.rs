@@ -1,4 +1,4 @@
-//! How a camera's scene is lit: deferred or forward, contact shadows, screen-space reflections, the
+//! How a camera's scene is lit, deferred or forward, contact shadows, screen-space reflections, the
 //! ambient light and its occlusion, and sorted transparency.
 
 use crate::interop::{status, BcsReflectionConfig};

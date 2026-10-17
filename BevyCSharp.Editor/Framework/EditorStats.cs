@@ -7,7 +7,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// What the engine is doing, as a card over the scene's top right: how fast, where the time goes,
+/// What the engine is doing, as a card over the scene's top right, how fast, where the time goes,
 /// how much is in the world, how much memory it takes, what it is drawn with, and the keys.
 /// </summary>
 /// <remarks>
@@ -16,7 +16,7 @@ namespace BevyCSharp.Editor.Framework;
 /// them, because the question somebody tuning a scene asks most is whether it is fast enough and
 /// what it is spending its frame on. A graph of the last few seconds of frames comes first, since a
 /// hitch is a spike in a line and invisible in an average, and the numbers under it are the ones a
-/// person reads off such a card: frames a second, the frame in milliseconds at its best, typical
+/// person reads off such a card, frames a second, the frame in milliseconds at its best, typical
 /// and worst, and the render passes that took longest on the GPU.
 /// </para>
 /// <para>

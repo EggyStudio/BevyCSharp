@@ -34,7 +34,7 @@ namespace Bevy;
 /// </example>
 public static unsafe class Audio
 {
-    /// <summary>What the mixer knows of a sound: its bus, its own volume, and whether it is paused.</summary>
+    /// <summary>What the mixer knows of a sound, its bus, its own volume, and whether it is paused.</summary>
     private sealed record Mixed(string? Bus, float Volume, bool Paused);
 
     /// <summary>Every sound played since the app was made, by its entity's bits.</summary>
@@ -64,7 +64,7 @@ public static unsafe class Audio
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Bevy has no mixer, so a bus is kept here: a name and a volume, and the sounds played on it
+    /// Bevy has no mixer, so a bus is kept here, a name and a volume, and the sounds played on it
     /// through <see cref="AudioSettings.Bus"/>. Setting it reaches every sound on it now and every
     /// one played later, and a sound's own volume from <see cref="SetVolume"/> is kept apart, so a
     /// music slider and a fade on one track multiply rather than overwrite each other.

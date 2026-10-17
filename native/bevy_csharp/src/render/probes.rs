@@ -550,7 +550,7 @@ fn start_capture(
     ));
 }
 
-/// Takes a capture off an entity: its cameras, and the light made from them.
+/// Takes a capture off an entity, its cameras, and the light made from them.
 ///
 /// Both halves of the light go, because Bevy answers a generated map with an ordinary one it
 /// inserts beside it, and the ordinary one left behind would keep lighting from a cube nothing

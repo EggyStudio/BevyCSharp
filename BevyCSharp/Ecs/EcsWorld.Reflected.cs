@@ -62,7 +62,7 @@ public sealed unsafe partial class EcsWorld
     /// so a system filtering on the component being changed sees it. An immutable component, as
     /// the hierarchy's <c>ChildOf</c> or a slider's value is, cannot be written in place, so it is
     /// copied, the copy written, and the copy inserted over it, which runs its hooks and observers
-    /// as Bevy's own insert does: writing a <c>ChildOf</c> moves the child under the new parent.
+    /// as Bevy's own insert does. Writing a <c>ChildOf</c> moves the child under the new parent.
     /// </remarks>
     /// <exception cref="BevyNativeException">
     /// The entity does not carry the component, or the value does not fit the field.
@@ -469,7 +469,7 @@ public sealed unsafe partial class EcsWorld
     /// </para>
     /// <para>
     /// Of the 68 resources an editor build of Bevy 0.20 reflects, eight reflect no default, and
-    /// their plugins put seven of them in before the first frame: <c>DefaultQueryFilters</c>,
+    /// their plugins put seven of them in before the first frame, <c>DefaultQueryFilters</c>,
     /// <c>LineGizmoEntities</c>, <c>AutoNavigationConfig</c>, <c>InputFocusVisible</c>,
     /// <c>StaticTransformOptimizations</c>, <c>GlobalUiDebugOptions</c> and
     /// <c>QueuedSelectAll</c>. The eighth, <c>TransformGizmoSettings</c>, starts absent and is

@@ -70,7 +70,7 @@ public static class DataAssets
     /// <param name="Bind">Describes the fields of one boxed value.</param>
     private sealed record Kind(string Name, Type Type, Func<object> Create, Func<object, ComponentSchema> Bind);
 
-    /// <summary>One loaded asset: its box, the schema bound to it, and its type.</summary>
+    /// <summary>One loaded asset, its box, the schema bound to it, and its type.</summary>
     /// <remarks>
     /// <c>Unread</c> holds the values the file had that no field reads, written back by every save
     /// so a file outlives a build that does not know them, as a scene's do.

@@ -452,7 +452,7 @@ public static class WorldPanel
     }
 
     /// <summary>
-    /// What a row looks like: its fill, its fold arrow, its picture and its name.
+    /// What a row looks like, its fill, its fold arrow, its picture and its name.
     /// </summary>
     /// <remarks>
     /// Drawn rather than laid out. The invisible button is the row as far as ImGui is concerned,

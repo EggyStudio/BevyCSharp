@@ -8,7 +8,7 @@ using Vector4 = System.Numerics.Vector4;
 namespace BevyCSharp.Examples.Animations;
 
 // Shows how the same four colors, white, yellow, red and black, change in between when animated in
-// different color spaces: the top three along a cubic curve in linear RGB, XYZ and Oklab, the
+// different color spaces, the top three along a cubic curve in linear RGB, XYZ and Oklab, the
 // bottom three mixed a pair at a time in HSL, sRGB and Oklch.
 //
 // Bevy's colors are its own types with the space each belongs to, and the conversions between

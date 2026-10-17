@@ -8,7 +8,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A shader test is a sequence rather than one frame: wait for a compile, take a picture, edit a
+/// A shader test is a sequence rather than one frame, wait for a compile, take a picture, edit a
 /// file, wait for the edit to arrive, take another. Each step is checked once a frame and the next
 /// starts when it says it is done, so a test can wait on the thing it is about rather than on a
 /// number of frames somebody guessed.

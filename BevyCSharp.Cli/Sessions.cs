@@ -14,8 +14,8 @@ internal static class Sessions
     /// </summary>
     /// <remarks>
     /// Two sessions and no way to tell them apart is an error rather than a guess. Picking one
-    /// would be right half the time, and the other half is an agent driving the wrong app for as
-    /// long as it takes to notice.
+    /// would be right half the time, and the other half is an agent controlling the wrong app for
+    /// as long as it takes to notice.
     /// </remarks>
     /// <param name="options">The filters the caller gave.</param>
     /// <param name="command">Which verb is asking, for the envelope.</param>

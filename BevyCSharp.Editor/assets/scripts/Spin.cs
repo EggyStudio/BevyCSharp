@@ -6,8 +6,9 @@ public partial struct Spin
     [Range(0f, 5f)] public float Speed;
     private float _angle;
 
-    // static: one plain system. In a script, startup means whenever the script is loaded, so this
-    // runs again on every save, and the cube the last save made is taken away first.
+    // A static method is one plain system. In a script, startup means whenever the script is
+    // loaded, so this runs again on every save, and the cube the last save made is taken away
+    // first.
     [OnStartup]
     public static void Spawn(BehaviorContext ctx)
     {
@@ -36,7 +37,7 @@ public partial struct Spin
         Console.WriteLine("[script] Spin is running");
     }
 
-    // instance: once per entity that has one
+    // An instance method runs once per entity that has one
     [OnUpdate]
     public void Tick(BehaviorContext ctx)
     {

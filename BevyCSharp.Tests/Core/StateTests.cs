@@ -418,7 +418,7 @@ public sealed class StateTests
     public void ATransitionRunsOnceRatherThanEveryFrame()
     {
         // The distinction that makes these worth having. A stage runs every frame the state is
-        // held, and an edge runs once as it changes. A screen is built by one and driven by the
+        // held, and an edge runs once as it changes. A screen is built by one and updated by the
         // other.
         ScreenLifecycle.Entered = 0;
         ScreenLifecycle.Exited = 0;

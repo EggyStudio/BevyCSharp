@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Follows the README as a stranger would, in a container holding the .NET SDK and nothing of this
-# repository but the packed packages: the template installed and a game made from it as Install
+# repository but the packed packages, the template installed and a game made from it as Install
 # says, built, and run with no display as Install says. A step the README leaves out or gets wrong
 # fails here.
 #
@@ -42,7 +42,7 @@ cp "build/package/BevyCSharp.$version.nupkg" "build/package/BevyCSharp.Templates
 
 # The steps as Install gives them, with the template installed from its package rather than from
 # nuget.org and the engine taken from a folder of its own, which the template's --package-folder
-# writes a nuget.config for, then what Install says Linux needs, which this image lacks: ALSA's
+# writes a nuget.config for, then what Install says Linux needs, which this image lacks, ALSA's
 # library and a Vulkan driver that draws on the processor. Run with no display, it ends after 120
 # frames.
 cat > "$work/walk.sh" <<WALK

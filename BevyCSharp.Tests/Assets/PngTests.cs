@@ -27,7 +27,7 @@ public sealed class PngTests
 
         Assert.Equal(new byte[] { 0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A }, png[..8]);
 
-        // The header: three wide, two tall, eight bits a channel, red, green, blue and alpha.
+        // The header, three wide, two tall, eight bits a channel, red, green, blue and alpha.
         Assert.Equal("IHDR", System.Text.Encoding.ASCII.GetString(png, 12, 4));
         Assert.Equal(3u, BinaryPrimitives.ReadUInt32BigEndian(png.AsSpan(16)));
         Assert.Equal(2u, BinaryPrimitives.ReadUInt32BigEndian(png.AsSpan(20)));

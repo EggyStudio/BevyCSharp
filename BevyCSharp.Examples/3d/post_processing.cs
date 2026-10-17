@@ -7,7 +7,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Demonstrates Bevy's built-in postprocessing features: chromatic aberration, a vignette and lens
+// Demonstrates Bevy's built-in postprocessing features, chromatic aberration, a vignette and lens
 // distortion, each changed with the arrow keys. The fog is Bevy's DistanceFog, put on through
 // reflection.
 internal static class PostProcessing

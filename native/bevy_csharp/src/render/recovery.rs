@@ -11,7 +11,7 @@ use crate::interop::status;
 #[cfg(feature = "render")]
 static PENDING: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
 
-/// Says what an error the renderer reports does: `0` closes the app with an error, Bevy's own
+/// Says what an error the renderer reports does, `0` closes the app with an error, Bevy's own
 /// answer, `1` logs it and draws on as if nothing happened, `2` keeps the app running with drawing
 /// stopped, and `3` makes the renderer again, a device and all, with the backend the app started
 /// with, and draws on with that. Bevy asks again every frame while drawing is stopped, so a policy
@@ -75,7 +75,7 @@ pub extern "C" fn bcs_render_error_count() -> i32 {
 }
 
 /// Causes an error on the GPU, for a game to see what its policy does with one, as Bevy's example
-/// causes them: `1` running out of memory, by asking for far more textures than a device holds,
+/// causes them, `1` running out of memory, by asking for far more textures than a device holds,
 /// `2` a validation error, from a buffer too large to make, `3` a lost device, by destroying it,
 /// and `4` a lost device, by a compute shader that never ends, which the system resets the GPU
 /// over.

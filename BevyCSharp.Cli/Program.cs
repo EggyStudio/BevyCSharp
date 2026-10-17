@@ -1,7 +1,7 @@
 using BevyCSharp.Cli;
 
-// The one entry point an agent uses on this repository: find a running app, ask it what it can do,
-// drive it, capture what it draws, and build and test around that. Everything is one envelope on
+// The one entry point an agent uses on this repository, find a running app, ask it what it can do,
+// control it, capture what it draws, and build and test around that. Everything is one envelope on
 // the standard output stream and one exit code, so nothing here has to be read by a person.
 
 var (options, rest) = Options.Parse(args);

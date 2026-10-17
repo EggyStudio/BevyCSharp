@@ -11,17 +11,17 @@
 # machine, as build/play-native.sh takes one. Native code is published for the system it is made
 # on, so the Windows zip is made on Windows and the Linux one on Linux. The options are
 # passed on, as -p:CppCompilerAndLinker=gcc on a machine with no clang. The folder the zip was made
-# from is left beside it, for build/drive-feature-test.sh to drive.
+# from is left beside it, for build/drive-feature-test.sh to run through its course.
 #
 # A tester's machine has no slangc, so the program reads its shaders from the cache under its
 # assets, which the program fills where slangc is found (build/fetch-slang.sh). The published
 # program is run once here, offscreen and serving, every program it can use is made
 # (feature.shaders), and the run waits until each has compiled, so the cache that ships holds every
-# one. Any session serving is stopped first, as the drive script stops one. On a machine where the
-# program cannot draw, as on a runner with no GPU, --cache names the cache a run elsewhere filled,
-# which is taken in its place, since an entry is named by the shader's path under the assets, its
-# defines and the bridge's own modules, and every checkout has the same text with the same line
-# ends (.gitattributes).
+# one. Any session serving is stopped first, as build/drive-feature-test.sh stops one. On a machine
+# where the program cannot draw, as on a runner with no GPU, --cache names the cache a run elsewhere
+# filled, which is taken in its place, since an entry is named by the shader's path under the
+# assets, its defines and the bridge's own modules, and every checkout has the same text with the
+# same line ends (.gitattributes).
 set -eEuo pipefail
 
 version="$1"

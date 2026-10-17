@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Ecs;
 
-// Prints the name of each schedule as it runs: Bevy's startup schedules with one of the example's
+// Prints the name of each schedule as it runs, Bevy's startup schedules with one of the example's
 // own placed after PreStartup, and in every frame Bevy's First, Update and Last with one of its own
 // placed after Update, which runs its systems one after another on one thread.
 internal static class CustomSchedule

@@ -330,7 +330,7 @@ pub extern "C" fn bcs_render_spawn_camera_2d(order: i32) -> u64 {
     })
 }
 
-/// Writes an entity's world-space bounds into `out`: min x, y, z then max x, y, z.
+/// Writes an entity's world-space bounds into `out`, min x, y, z then max x, y, z.
 ///
 /// A tool needs this to draw a box around what is selected, and a camera needs it to frame it. Bevy
 /// computes an `Aabb` for every mesh it draws, in the mesh's own space, so the eight corners are
@@ -515,7 +515,7 @@ pub unsafe extern "C" fn bcs_render_world_to_viewport(
     })
 }
 
-/// Turns a point on the viewport into a ray: origin `x, y, z` then direction `x, y, z`.
+/// Turns a point on the viewport into a ray, origin `x, y, z` then direction `x, y, z`.
 ///
 /// The other half of [`bcs_render_world_to_viewport`], and what makes dragging a gizmo handle
 /// exact rather than approximate. The point being dragged to is where the cursor's ray comes

@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers a scene file placed in another as an instance: read under its root with its overrides
+/// Covers a scene file placed in another as an instance, read under its root with its overrides
 /// applied in the same frame, nested instances reached by a longer path, and a scene that would
 /// contain itself refused.
 /// </summary>

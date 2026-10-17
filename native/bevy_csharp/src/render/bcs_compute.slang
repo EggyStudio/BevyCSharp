@@ -1,7 +1,7 @@
 // What a Slang compute shader sees from the bridge, which is time and a few helpers.
 //
 // A shader reaches it with `import bcs_compute;`, and everything in it is under the `bcs_compute`
-// namespace. A dispatch carries whatever the shader declares: numbers, buffers read and written,
+// namespace. A dispatch carries whatever the shader declares, numbers, buffers read and written,
 // images read and written, samplers, in any number, each set from C# by its name. Time is in space
 // 101, which the bridge moves to group one after the compile, so the shader's own globals keep
 // group zero to themselves. It is at binding two, which is where a dispatch run on a camera finds

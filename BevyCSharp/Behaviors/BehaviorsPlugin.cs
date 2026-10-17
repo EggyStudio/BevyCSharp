@@ -55,7 +55,7 @@ public sealed class BehaviorsPlugin : IPlugin
         var found = 0;
         using (new SystemRegistrationSourceScope(StaticSourceTag))
         {
-            // Fast path: everything whose module initializer has already run.
+            // The fast path, everything whose module initializer has already run.
             foreach (var register in BehaviorRegistry.Snapshot())
             {
                 // A script's, which its host registers, as the scan below leaves them too.
@@ -66,7 +66,7 @@ public sealed class BehaviorsPlugin : IPlugin
                 found++;
             }
 
-            // Fallback: assemblies that are loaded but have not been touched, so their module
+            // The fallback, assemblies that are loaded but have not been touched, so their module
             // initializer has not fired. Anything already in the registry is skipped.
             if (ScanLoadedAssemblies) found += ScanForMissedRegistrations(app, Assemblies);
         }

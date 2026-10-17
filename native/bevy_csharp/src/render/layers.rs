@@ -1,5 +1,5 @@
-//! Cameras drawing into one layer of an image with several: a face of a cube, or a slice of an
-//! array.
+//! Cameras drawing into one layer of an image with several, such as a face of a cube, or a slice of
+//! an array.
 //!
 //! Bevy's image target names an image and no layer, and a camera draws into the whole of what it is
 //! given, so a camera cannot draw into one face of a cube directly. A camera pointed at a layer
@@ -27,7 +27,7 @@ use bevy::render::{Extract, ExtractSchedule, RenderApp};
 
 use crate::interop::status;
 
-/// On a camera drawing into one layer of an image: the image, the layer, and the companion the
+/// On a camera drawing into one layer of an image, the image, the layer, and the companion the
 /// camera draws into.
 #[derive(Component, Clone)]
 pub struct LayerTarget {

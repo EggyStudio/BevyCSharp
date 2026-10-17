@@ -5,7 +5,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The frame round the scene: its rounded corners, and the buttons at the window's top right.
+/// The frame round the scene, its rounded corners, and the buttons at the window's top right.
 /// </summary>
 public static class EditorSceneFrame
 {
@@ -76,7 +76,7 @@ public static class EditorSceneFrame
     }
 
     /// <summary>
-    /// Makes the camera that paints the ground: first to draw, over the whole window, seeing
+    /// Makes the camera that paints the ground, first to draw, over the whole window, seeing
     /// nothing, and cleared to the ground color.
     /// </summary>
     /// <remarks>
@@ -100,7 +100,7 @@ public static class EditorSceneFrame
     }
 
     /// <summary>
-    /// The buttons at the window's top right: the pin that docks the panel, then, where the editor
+    /// The buttons at the window's top right, the pin that docks the panel, then, where the editor
     /// draws its own frame, an empty one that moves the window, and minimize, maximize and close.
     /// </summary>
     /// <remarks>

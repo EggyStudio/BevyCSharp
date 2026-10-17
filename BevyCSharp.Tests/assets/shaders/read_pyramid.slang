@@ -1,4 +1,4 @@
-// Reads Bevy's depth pyramid on a camera: how many levels it has, the first level's size, the
+// Reads Bevy's depth pyramid on a camera, how many levels it has, the first level's size, the
 // depth at the middle of the first level, and the one texel of the last level.
 
 import bcs_pass;

@@ -107,7 +107,7 @@ internal static class BehaviorEmitter
             foreach (var name in method.Before.Items)
                 source.Append("\n            .Before(\"").Append(name.Replace("\\", "\\\\").Replace("\"", "\\\"")).Append("\")");
 
-            // Access metadata: an instance method writes its own component store, a static one only
+            // Access metadata. An instance method writes its own component store, a static one only
             // declares a read of the world. Keeping these distinct lets unrelated behaviors be
             // reported as non-conflicting.
             source.Append(method.IsStatic

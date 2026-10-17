@@ -101,7 +101,7 @@ internal static class EditorConsoleCommands
     /// <summary>Opens a folder under the asset root in the assets panel.</summary>
     /// <remarks>
     /// What a person does by clicking a tile, reachable from the console and so from <c>bcs</c>.
-    /// Checking a tile from outside the window means driving the editor to a particular folder, and
+    /// Checking a tile from outside the window means taking the editor to a particular folder, and
     /// it is the same call the tile makes.
     /// </remarks>
     [Command("assets.open", "Opens a folder, or a model's parts, in the assets panel: assets.open <folder or model>")]
@@ -198,7 +198,7 @@ internal static class EditorConsoleCommands
     /// <summary>Compiles a fragment of C# and runs it here.</summary>
     /// <remarks>
     /// What a catalog of commands cannot cover. The world is in scope as <c>world</c>, a fragment
-    /// with no semicolon is an expression, and anything else has to return to say something:
+    /// with no semicolon is an expression, and anything else has to return to say something, as
     /// <c>eval world.All().Length</c>, or <c>eval var e = world.Spawn(); world.SetName(e, "x");
     /// return e.Index;</c>.
     /// </remarks>

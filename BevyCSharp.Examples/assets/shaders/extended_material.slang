@@ -1,4 +1,4 @@
-// Bevy's extended_material shader in Slang: its standard material's red, lit by Bevy, with the
+// Bevy's extended_material shader in Slang, its standard material's red, lit by Bevy, with the
 // blue made the same as the red before lighting and the lit color cut into steps after it.
 import bcs;
 

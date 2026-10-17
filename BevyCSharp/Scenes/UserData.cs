@@ -5,11 +5,11 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Writable and the player's: settings, saves, anything the game writes. It is the platform's data
-/// directory under the game's name, <c>$XDG_DATA_HOME</c> or <c>~/.local/share</c> on Linux,
-/// <c>%APPDATA%</c> on Windows and <c>~/Library/Application Support</c> on macOS, so a game's
-/// files sit where the platform's own tools and backups look for them. <c>assets://</c> is the
-/// other root, the game's content, which a shipped game cannot write to.
+/// Writable and the player's, for settings, saves and anything the game writes. It is the
+/// platform's data directory under the game's name, <c>$XDG_DATA_HOME</c> or <c>~/.local/share</c>
+/// on Linux, <c>%APPDATA%</c> on Windows and <c>~/Library/Application Support</c> on macOS, so a
+/// game's files sit where the platform's own tools and backups look for them. <c>assets://</c> is
+/// the other root, the game's content, which a shipped game cannot write to.
 /// </para>
 /// <para>
 /// The name is <see cref="Config.GameName"/>, or the title, set when an app starts. A test or a

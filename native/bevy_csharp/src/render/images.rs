@@ -263,7 +263,7 @@ pub fn reshape_images(
 }
 
 /// Answers the compressed texture formats this device decodes, as the bits of Bevy's
-/// `CompressedImageFormats`: `1` ASTC, `2` ASTC's HDR form, `4` BC and `8` ETC2, or none without a
+/// `CompressedImageFormats`, `1` ASTC, `2` ASTC's HDR form, `4` BC and `8` ETC2, or none without a
 /// renderer.
 ///
 /// For a game choosing among copies of one texture compressed each way, as Bevy's skybox example

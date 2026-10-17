@@ -18,7 +18,7 @@ fn program(world: &World, id: i32) -> Result<(&ShaderPrograms, &Program), i32> {
     Ok((programs, program))
 }
 
-/// Whether a program can run yet: `0` still compiling, `1` ready, `2` failed.
+/// Whether a program can run yet, `0` still compiling, `1` ready, `2` failed.
 ///
 /// A failed program may still run, with the last version that compiled or with a fallback, and
 /// failed is still the answer, because what is on disk is not what is on screen.
@@ -86,7 +86,7 @@ pub fn describe(world: &World, id: i32) -> Option<String> {
     Some(program(world, id).ok()?.1.description.clone())
 }
 
-/// What a program's shaders declare, a line each: its binding, name and kind.
+/// What a program's shaders declare, a line each, its binding, name and kind.
 pub fn describe_layout(id: i32) -> Option<String> {
     let entry = lookup(u32::try_from(id).ok()?)?;
     let mut lines = Vec::new();

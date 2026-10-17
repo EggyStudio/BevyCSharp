@@ -90,7 +90,7 @@ public static unsafe partial class Ui
     /// </summary>
     /// <remarks>
     /// Bevy keeps a field's scroll here rather than as a node's scroll position, so Bevy's
-    /// scrollbar widget cannot drive it. A field's own scrollbar sizes its thumb from this and the
+    /// scrollbar widget cannot move it. A field's own scrollbar sizes its thumb from this and the
     /// text's laid out size, its <c>TextLayoutInfoRef.Size</c>, and moves the text with
     /// <see cref="ScrollText"/>. It is as Bevy last laid the field out, so a frame behind an edit.
     /// </remarks>

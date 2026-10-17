@@ -381,7 +381,7 @@ public static unsafe partial class Gizmos
     /// <param name="size">The height of a capital letter, in world units.</param>
     /// <param name="anchor">
     /// The point of the text's bounds at <paramref name="position"/>, from minus a half to a half
-    /// on each axis: (0, 0) its middle, (-0.5, 0) the middle of its left side, (0, 0.5) the middle
+    /// on each axis, (0, 0) its middle, (-0.5, 0) the middle of its left side, (0, 0.5) the middle
     /// of its top.
     /// </param>
     /// <param name="color">Linear RGBA.</param>

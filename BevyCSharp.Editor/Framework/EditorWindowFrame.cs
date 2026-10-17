@@ -78,7 +78,7 @@ public static class EditorWindowFrame
     /// How tall the title row across the top of the window is, while the panel floats.
     /// </summary>
     /// <remarks>
-    /// The row the toolbars sit in at the left and the window's buttons at the right: a button's
+    /// The row the toolbars sit in at the left and the window's buttons at the right, a button's
     /// height, and the same inset above it the toolbars keep from the window's edge. Whatever in it
     /// is not a button, and is not the panel lying over its right end, moves the window, where the
     /// frame is the editor's own.
@@ -231,7 +231,7 @@ public static class EditorWindowFrame
     }
 
     /// <summary>
-    /// The edges the window is resized from: the pointer's shape over them, and a press on one.
+    /// The edges the window is resized from, the pointer's shape over them, and a press on one.
     /// </summary>
     /// <remarks>
     /// <para>

@@ -1,11 +1,11 @@
 //! Stepping through the systems of a schedule one at a time, as Bevy's `Stepping` resource does,
-//! which its breakout example's panel and its system_stepping drive.
+//! which its breakout example's panel and its system_stepping step.
 //!
 //! Bevy asks for a system by its type or by its node in a built schedule. Every C# system is the
 //! same closure type here, so C# names one by the name it was added under, and the name becomes
 //! nodes once the schedule holds them. A schedule is taken out of `Schedules` while it runs, and a
 //! C# system is always running in one, so what C# asks of a schedule is answered from here, after
-//! the frame, when none of them is running: [`refresh`] runs in Bevy's `Main` once every schedule
+//! the frame, when none of them is running, [`refresh`] runs in Bevy's `Main` once every schedule
 //! of the frame has, as Bevy's own helper reads them from a schedule of its own.
 
 use bevy::app::{First, FixedUpdate, Last, Main, PostUpdate, PreUpdate, Update};

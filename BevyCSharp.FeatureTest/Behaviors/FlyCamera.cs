@@ -3,7 +3,7 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Drives a camera the way an editor's scene view does, steered while a mouse button is held.
+/// Moves a camera the way an editor's scene view does, steered while a mouse button is held.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -71,7 +71,7 @@ public partial struct FlyCamera
 
     /// <summary>Whether this behavior currently holds the cursor.</summary>
     /// <remarks>
-    /// Tracked because the cursor is shared: <see cref="Renderer"/> binds Tab to a lock of its
+    /// Tracked because the cursor is shared. <see cref="Renderer"/> binds Tab to a lock of its
     /// own, and the window offers no way to read back which mode is in force. Releasing only
     /// what was taken here keeps the two from fighting over a button neither is holding.
     /// </remarks>

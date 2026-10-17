@@ -3,7 +3,7 @@ namespace Bevy;
 /// <summary>The Slang that fills a stage, as a file or as text, and the entry point in it.</summary>
 /// <param name="Path">A <c>.slang</c> file under the asset root.</param>
 /// <param name="Entry">
-/// The function, or null for the usual name: <c>vertex</c> for either vertex shader,
+/// The function, or null for the usual name, <c>vertex</c> for either vertex shader,
 /// <c>fragment</c> for either fragment shader or a pass, and <c>main</c> for compute. Naming it
 /// lets one file hold every stage of a program, the prepass's beside the main pass's.
 /// </param>

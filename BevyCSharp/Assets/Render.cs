@@ -171,7 +171,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>
-    /// What a mesh is made of: its counts, its attributes and its bounds, read without copying
+    /// What a mesh is made of, its counts, its attributes and its bounds, read without copying
     /// its vertices.
     /// </summary>
     /// <returns>Whether the mesh could be read, which one still loading cannot.</returns>
@@ -387,7 +387,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>
-    /// Reads a mesh's triangles back: where each vertex is, and which three make each triangle.
+    /// Reads a mesh's triangles back, where each vertex is, and which three make each triangle.
     /// Only valid inside a system.
     /// </summary>
     /// <remarks>

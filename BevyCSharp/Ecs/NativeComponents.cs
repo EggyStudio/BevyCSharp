@@ -134,7 +134,7 @@ public static class NativeComponents
     /// </summary>
     /// <remarks>
     /// Keyed on the engine's name rather than passed in by the caller, so the check runs whichever
-    /// route asked for the id: the property below, or <see cref="ComponentType{T}"/> resolving a
+    /// route asked for the id, the property below, or <see cref="ComponentType{T}"/> resolving a
     /// type that implements <see cref="INativeComponent"/>.
     /// </remarks>
     private static void ExtraCheck(string name)

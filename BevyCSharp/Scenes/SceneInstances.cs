@@ -38,7 +38,7 @@ public static partial class SceneInstances
 {
     static SceneInstances() => SceneInstance.Initialize();
 
-    /// <summary>What an instance holds: the scene's path and its overrides.</summary>
+    /// <summary>What an instance holds, the scene's path and its overrides.</summary>
     internal sealed class Data
     {
         public required string Path { get; set; }
@@ -80,7 +80,7 @@ public static partial class SceneInstances
     /// </summary>
     /// <param name="world">The world to spawn into.</param>
     /// <param name="path">
-    /// The scene, as an asset path: a glTF file with the scene named after <c>#</c>
+    /// The scene, as an asset path, a glTF file with the scene named after <c>#</c>
     /// (<c>models/ship.gltf#Scene0</c>), or the file alone for its first scene.
     /// </param>
     /// <returns>The instance's root, which has a transform of its own to place it by.</returns>
@@ -240,7 +240,7 @@ public static partial class SceneInstances
         DataOf(world, root)?.Missed.ToArray() ?? [];
 
     /// <summary>
-    /// The instance root an entity belongs to: the nearest ancestor that is one, or the entity
+    /// The instance root an entity belongs to, the nearest ancestor that is one, or the entity
     /// itself, or none.
     /// </summary>
     public static Entity RootOf(EcsWorld world, Entity entity)

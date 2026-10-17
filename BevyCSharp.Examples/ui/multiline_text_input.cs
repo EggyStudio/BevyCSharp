@@ -15,7 +15,7 @@ namespace BevyCSharp.Examples.Interface;
 // taken as Enter is pressed in it, and a menu sets how its lines are justified.
 //
 // The scrollbar is built against the field's viewport and its text's laid out size, since a
-// field's scroll is no node's scroll position and Bevy's scrollbar widget cannot drive it.
+// field's scroll is no node's scroll position and Bevy's scrollbar widget cannot move it.
 internal static class MultilineTextInput
 {
     private static readonly Color DarkSlateGray = Color.FromSrgb8(47, 79, 79);
@@ -327,7 +327,7 @@ public partial struct JustifyLabel;
 /// </summary>
 /// <remarks>
 /// Built against the field's viewport and its text's laid out size, since a field's scroll is no
-/// node's scroll position and Bevy's scrollbar widget cannot drive it. It takes no part in the tab
+/// node's scroll position and Bevy's scrollbar widget cannot move it. It takes no part in the tab
 /// order and is never focused.
 /// </remarks>
 [Behavior]

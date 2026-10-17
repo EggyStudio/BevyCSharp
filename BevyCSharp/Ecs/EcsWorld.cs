@@ -568,7 +568,7 @@ public sealed unsafe partial class EcsWorld
     /// Every live entity in the world.
     /// </summary>
     /// <remarks>
-    /// Every one, including the entities the engine spawned for itself: the window, the monitors,
+    /// Every one, including the entities the engine spawned for itself, the window, the monitors,
     /// the cameras and the observers hung off them. Which of those are worth showing is a
     /// question about the tool rather than about the world, so nothing is filtered here.
     /// </remarks>

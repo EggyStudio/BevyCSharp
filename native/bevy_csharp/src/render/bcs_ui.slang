@@ -1,4 +1,4 @@
-// What a BevyCSharp interface material shader sees of Bevy: the view, time, and the struct Bevy's
+// What a BevyCSharp interface material shader sees of Bevy, the view, time, and the struct Bevy's
 // own interface material vertex shader hands a fragment shader, the node's place on it, its size,
 // its borders and its corners.
 //
@@ -33,7 +33,7 @@ public struct View
     public float4 view_from_clip[4];
     public float3 world_position;
     public float exposure;
-    /// Where the view is on its target: x, y, width and height, in pixels.
+    /// Where the view is on its target, x, y, width and height, in pixels.
     public float4 viewport;
     public float4 main_pass_viewport;
 };

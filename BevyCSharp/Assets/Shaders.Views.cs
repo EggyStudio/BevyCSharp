@@ -12,9 +12,10 @@ public static unsafe partial class Shaders
     /// <remarks>
     /// <para>
     /// A pass is a program's pass stage run once for every pixel of the camera's picture, reading
-    /// the picture so far and writing the next one: a color grade, an outline, a distortion, a
-    /// scan line, anything a picture can be turned into. Passes before tonemapping see the linear
-    /// picture, which can be brighter than white, and those after it see what the screen will show.
+    /// the picture so far and writing the next one, such as a color grade, an outline, a
+    /// distortion, a scan line, anything a picture can be turned into. Passes before tonemapping
+    /// see the linear picture, which can be brighter than white, and those after it see what the
+    /// screen will show.
     /// </para>
     /// <para>
     /// <c>import bcs_pass;</c> gives a pass the picture, its depth and normals, the view and the
@@ -259,7 +260,7 @@ public static unsafe partial class Shaders
         ["depth", "normals", "motion", "ambient_occlusion", "gbuffer", "depth_previous", "gbuffer_previous", "depth_pyramid"];
 
     /// <summary>
-    /// The names a <see cref="Watch"/> on the camera would find, as of the last frame it drew: its
+    /// The names a <see cref="Watch"/> on the camera would find, as of the last frame it drew, its
     /// own images and those of <see cref="EngineViewImageNames"/> it has.
     /// </summary>
     /// <remarks>
@@ -311,9 +312,9 @@ public static unsafe partial class Shaders
     /// <para>
     /// A screen-space technique is a chain of images nobody looks at, and when its result is wrong
     /// the question is which link broke. The images a camera owns live on the GPU in formats a
-    /// picture cannot show, so a watch draws one into an image anything can show: the editor's
-    /// Frame tab, a material, a UI node. One channel shows as gray, two as red and green, and more
-    /// as color.
+    /// picture cannot show, so a watch draws one into an image anything can show, such as the
+    /// editor's Frame tab, a material, a UI node. One channel shows as gray, two as red and green,
+    /// and more as color.
     /// </para>
     /// <para>
     /// Anything a shader on the camera reads by name can be watched, and the prepass's

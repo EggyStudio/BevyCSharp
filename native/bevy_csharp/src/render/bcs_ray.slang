@@ -1,4 +1,4 @@
-// Rays for a compute shader of the game's own, which it reaches with `import bcs_ray;`: against the
+// Rays for a compute shader of the game's own, which it reaches with `import bcs_ray;`, against the
 // scene Bevy's Solari traces, or against a ray scene the game built over a geometry pool.
 //
 // Solari keeps an acceleration structure over every mesh given to `Render.SetRayTraced`, and
@@ -27,7 +27,7 @@ module bcs_ray;
 public namespace bcs_ray
 {
 
-/// One vertex as Solari packs it: the position with the normal's x, the normal's y and z with the
+/// One vertex as Solari packs it, the position with the normal's x, the normal's y and z with the
 /// texture coordinates, and the tangent.
 public struct PackedVertex
 {
@@ -117,7 +117,7 @@ public struct Hit
     /// Which instance, which is the slot every per-instance buffer above is read at, and the slot an
     /// entity was put in for a ray scene of the game's own.
     public uint instance;
-    /// The instance's own number: the pool mesh it is made of, for a ray scene of the game's own.
+    /// The instance's own number, the pool mesh it is made of, for a ray scene of the game's own.
     public uint mesh;
     /// Which triangle of that instance's mesh.
     public uint triangle;
@@ -236,7 +236,7 @@ public struct Surface
     public float triangle_area;
 };
 
-/// Unpacks what `hit` met: where it is, which way it faces, and what it is made of there.
+/// Unpacks what `hit` met, where it is, which way it faces, and what it is made of there.
 ///
 /// The vertices are read from the instance's slice of the vertex and index buffers, interpolated
 /// by the hit's barycentrics and carried into the world by its transform, and the material's

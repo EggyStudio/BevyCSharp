@@ -497,7 +497,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ime_drain();
 
-    /// <summary>Reads one drained input method message: its kind, its caret and its text.</summary>
+    /// <summary>Reads one drained input method message, its kind, its caret and its text.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ime_read(int index, int* kind, int* caret, byte* output, int capacity);
@@ -647,7 +647,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_set_text_cursor(ulong entity, NativeTextCursor* cursor);
 
-    /// <summary>Writes the part of a field's text it shows: offset across and down, then width and height.</summary>
+    /// <summary>Writes the part of a field's text it shows, offset across and down, then width and height.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_editable_viewport(ulong entity, float* output);

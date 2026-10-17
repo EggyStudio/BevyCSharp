@@ -18,8 +18,8 @@ public sealed class AssetAttribute(string kind) : Attribute
     /// Which file extensions to offer, separated by spaces, or nothing for the usual ones.
     /// </summary>
     /// <remarks>
-    /// For an asset type whose files are not named after it: a scene in a glTF file, a material
-    /// in one, anything a game's own loader reads.
+    /// For an asset type whose files are not named after it, such as a scene in a glTF file, a
+    /// material in one, anything a game's own loader reads.
     /// </remarks>
     public string Extensions { get; init; } = string.Empty;
 }

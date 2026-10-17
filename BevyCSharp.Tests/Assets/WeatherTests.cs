@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the weather: off unless an app asks for it, and where it runs, its clock, its forecast
+/// Covers the weather, off unless an app asks for it, and where it runs, its clock, its forecast
 /// and its conditions reached through the wrappers and a preset set through the bridge.
 /// </summary>
 /// <remarks>

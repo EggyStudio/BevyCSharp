@@ -13,7 +13,7 @@ namespace Bevy;
 /// actually are.
 /// </para>
 /// <para>
-/// <see cref="Read{T}"/> and <see cref="Write{T}"/> therefore record intent rather than drive
+/// <see cref="Read{T}"/> and <see cref="Write{T}"/> therefore record intent rather than decide
 /// scheduling today. They are honored by <see cref="ConflictsWith"/>, which the diagnostics overlay
 /// uses to explain ordering, and a future non-exclusive fast path would key off them.
 /// </para>

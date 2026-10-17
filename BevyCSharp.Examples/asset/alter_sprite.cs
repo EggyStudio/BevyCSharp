@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows the two ways to change what a sprite shows: Space points the right sprite at a different
+// Shows the two ways to change what a sprite shows. Space points the right sprite at a different
 // image, swapping bird and logo, and Return changes the left sprite's image itself, inverting every
 // byte of it, which every sprite showing that image would show.
 internal static class AlterSprite

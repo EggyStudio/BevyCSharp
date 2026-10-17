@@ -5,7 +5,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers reading meshes and materials back from the engine: what a mesh holds, how a primitive was
+/// Covers reading meshes and materials back from the engine, what a mesh holds, how a primitive was
 /// made, and a material's settings.
 /// </summary>
 /// <remarks>

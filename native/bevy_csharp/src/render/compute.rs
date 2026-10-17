@@ -1,5 +1,5 @@
-//! Compute: Slang programs run on the GPU outside of any picture, over buffers and images the game
-//! made.
+//! Compute, the Slang programs run on the GPU outside of any picture, over buffers and images the
+//! game made.
 //!
 //! A buffer is a `ShaderBuffer` asset, which Bevy keeps on the GPU between frames, so what one
 //! dispatch writes the next reads, and a material or a pass handed the same buffer draws from it
@@ -11,7 +11,7 @@
 //! than to the bridge. Dispatches run in the order they were asked for, each seeing what the one
 //! before wrote.
 //!
-//! **What a compute shader reads.** Group zero is whatever it declares: numbers, buffers read or
+//! **What a compute shader reads.** Group zero is whatever it declares, numbers, buffers read or
 //! written, images read or written in any format, samplers, arrays of any of them. It is laid out
 //! from the shader's reflection and filled by name. Group one is time, at binding two, which
 //! `bcs_compute` declares. A dispatch that runs on a camera instead reads the camera's inputs there
@@ -70,7 +70,7 @@ use images::{PendingImageWrites, extract_image_writes, write_image_regions};
 /// The smallest a buffer is made, because a buffer has to have a size to be bound.
 const SMALLEST_BUFFER: u64 = 16;
 
-/// What a buffer the game made can be used as: read and written by a shader, copied to and from,
+/// What a buffer the game made can be used as, read and written by a shader, copied to and from,
 /// and read as vertices or as the arguments of an indirect draw.
 pub fn buffer_usage() -> BufferUsages {
     BufferUsages::STORAGE
@@ -707,7 +707,7 @@ pub fn read_image(world: &mut World, key: i32) -> i32 {
 
 /// Takes what a read brought back, if it has arrived and fits.
 ///
-/// The text convention with one addition: [`status::NOT_PRESENT`] while the bytes are still on
+/// The text convention with one addition, [`status::NOT_PRESENT`] while the bytes are still on
 /// their way. Bytes that do not fit are left for a second call with a buffer of the size returned.
 ///
 /// # Safety

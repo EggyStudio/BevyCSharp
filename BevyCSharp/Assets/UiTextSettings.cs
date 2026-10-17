@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// How a run of text is set: its font and size, and what happens to it at the edges of its node.
+/// How a run of text is set, its font and size, and what happens to it at the edges of its node.
 /// </summary>
 public sealed class UiTextSettings
 {

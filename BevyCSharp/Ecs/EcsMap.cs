@@ -9,7 +9,7 @@ namespace Bevy;
 /// <typeparam name="TKey">What the entries are found by.</typeparam>
 /// <typeparam name="TValue">What they hold, which may be a string or any other managed type.</typeparam>
 /// <remarks>
-/// Everything <see cref="EcsList{T}"/> says holds here: two numbers in the component, the
+/// Everything <see cref="EcsList{T}"/> says holds here, two numbers in the component, the
 /// dictionary made on its first write, copies of the handle naming the same dictionary, freed by
 /// the remove hook the generator registers when the component leaves its entity, and a handle used
 /// after that throwing rather than reading another entity's entries.

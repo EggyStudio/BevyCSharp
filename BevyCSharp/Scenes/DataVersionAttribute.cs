@@ -6,10 +6,10 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// For a change a rename cannot say: a field split in two, a number whose unit changed, an enum
-/// whose values were renumbered. The type declares a method of this shape, public or internal so
-/// the registration the generator writes beside it can call it, and the generator finds it by name.
-/// A load calls it with the version the file was written at and the type's JSON:
+/// For a change a rename cannot say, such as a field split in two, a number whose unit changed, an
+/// enum whose values were renumbered. The type declares a method of this shape, public or internal
+/// so the registration the generator writes beside it can call it, and the generator finds it by
+/// name. A load calls it with the version the file was written at and the type's JSON:
 /// </para>
 /// <code>
 /// [Behavior, DataVersion(3)]

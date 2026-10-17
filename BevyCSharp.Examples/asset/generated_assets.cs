@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows meshes made by code while the app runs rather than loaded: a cone generated on a worker and
+// Shows meshes made by code while the app runs rather than loaded, a cone generated on a worker and
 // added once it is done, and a torus put in place of an empty mesh a moment later, each drawn by an
 // entity that had its mesh before the mesh had anything in it.
 internal static class GeneratedAssets
@@ -55,7 +55,7 @@ internal static class GeneratedAssets
         }, "generated_assets.GenerateMesh");
     }
 
-    // A cone standing on its base, its tip up the Y axis, as Bevy's Cone is: a ring of sides
+    // A cone standing on its base, its tip up the Y axis, as Bevy's Cone is, a ring of sides
     // meeting at the tip, and a disc beneath, each face its own vertices so it is lit flat.
     private static MeshData Cone(float radius, float height, int segments)
     {

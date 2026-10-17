@@ -9,6 +9,6 @@ public enum DrawBlend
     /// <summary>Over what is there, by the fragment's alpha.</summary>
     Alpha = 1,
 
-    /// <summary>Added to what is there, for anything glowing.</summary>
+    /// <summary>Added to what is there, for anything emissive.</summary>
     Add = 2,
 }

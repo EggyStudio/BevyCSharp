@@ -4,7 +4,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// Bevy's diagnostics store: named measures, a frame's time or a count of enemies, each with its
+/// Bevy's diagnostics store of named measures, a frame's time or a count of enemies, each with its
 /// history, which Bevy's own plugins measure into and a game registers its own in.
 /// </summary>
 /// <remarks>

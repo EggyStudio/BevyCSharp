@@ -145,7 +145,7 @@ public sealed class CliSessionTests : IDisposable
     /// </summary>
     /// <remarks>
     /// Past what any platform hands out, so nothing answers to it. Low numbers do not work for
-    /// this: 0 is the kernel on Linux and the system idle process on Windows, and asking about
+    /// this. 0 is the kernel on Linux and the system idle process on Windows, and asking about
     /// either reports something that is, in the only sense that matters here, running.
     /// </remarks>
     private const int Gone = int.MaxValue - 1;

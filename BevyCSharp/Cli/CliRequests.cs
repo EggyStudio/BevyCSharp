@@ -14,7 +14,7 @@ internal sealed class CliRequest(string operation, string? line, string? id)
     private readonly TaskCompletionSource<string> _answer =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    /// <summary>What was asked: <c>run</c>, <c>list</c>, <c>status</c> or <c>ping</c>.</summary>
+    /// <summary>What was asked, <c>run</c>, <c>list</c>, <c>status</c> or <c>ping</c>.</summary>
     public string Operation { get; } = operation;
 
     /// <summary>The command line to run, for <c>run</c>.</summary>

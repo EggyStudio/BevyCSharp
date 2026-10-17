@@ -3,21 +3,21 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Screen-space global illumination, from the panel's graphics page, light bounced off what is on
-/// screen onto what is near it, so the lamp-lit cube warms the ground around it and a colored
+/// Screen-space global illumination, from the panel's graphics page, the indirect light of what is
+/// on screen onto what is near it, so the lamp-lit cube warms the ground around it and a colored
 /// surface tints its neighbors.
 /// </summary>
 /// <remarks>
 /// <para>
 /// A small, plain version of the technique, written to show what a package of this kind is built
-/// from rather than to compete with one. Three shaders in <c>assets/shaders</c> do the work: one
+/// from rather than to compete with one. Three shaders in <c>assets/shaders</c> do the work, one
 /// ray a pixel at half size, marched through the depth buffer, taking the light it meets from last
 /// frame's lit picture (<c>gi_trace.slang</c>); the rays of many frames averaged, found through
 /// the motion vectors (<c>gi_accumulate.slang</c>); and the result added to the picture times the
 /// surface's color, before glass and tonemapping (<c>gi_composite.slang</c>).
 /// </para>
 /// <para>
-/// All of it is the camera's: images it owns and keeps from frame to frame, compute it runs after
+/// All of it is the camera's, images it owns and keeps from frame to frame, compute it runs after
 /// opaque geometry, a draw it makes, and the G-buffer, depth, motion, blue noise and environment
 /// that shaders on a camera read. Each file reloads when saved, like every shader in the program.
 /// </para>
@@ -77,7 +77,7 @@ public partial struct ScreenSpaceLight
     {
         if (!_trace.IsValid || Camera(ConsoleHost.Ecs) is not { } camera) return "there is no camera to light";
 
-        // A strength after the state exaggerates or tones down the bounce, which is how its
+        // A strength after the state exaggerates or tones down the indirect light, which is how its
         // contribution is told apart from the rest of the lighting.
         var words = state.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         _on = words.Length > 0 && words[0] is "on" or "1" or "true";

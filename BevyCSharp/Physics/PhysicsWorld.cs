@@ -261,7 +261,7 @@ public sealed partial class PhysicsWorld : IDisposable
         return true;
     }
 
-    /// <summary>A body's velocity: how fast it moves, and how fast it turns about each axis.</summary>
+    /// <summary>A body's velocity, how fast it moves, and how fast it turns about each axis.</summary>
     /// <exception cref="KeyNotFoundException">The entity has no body that moves.</exception>
     public (Vec3 Linear, Vec3 Angular) Velocity(Entity entity)
     {

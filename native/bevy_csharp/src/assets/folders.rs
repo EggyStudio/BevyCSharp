@@ -1,4 +1,4 @@
-//! A folder of assets loaded at once, as Bevy's `AssetServer::load_folder` loads one: every file in
+//! A folder of assets loaded at once, as Bevy's `AssetServer::load_folder` loads one, every file in
 //! it loaded in parallel, and the folder an asset of its own holding their handles, loaded once all
 //! of them are.
 

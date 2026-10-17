@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.ThreeD;
 
-// Demonstrates a mirror: a second camera, the main one reflected across the mirror's plane, draws
+// Demonstrates a mirror. A second camera, the main one reflected across the mirror's plane, draws
 // the world into an image, and the mirror shows that image at the pixels it covers. Dragging moves
 // the camera around the scene or the running fox across the ground, as the buttons choose.
 internal static class MirrorExample
@@ -102,7 +102,7 @@ internal static class MirrorExample
         var mirrorCameras = ecs.EntitiesWith<MirrorCamera>();
         foreach (var mirrorCamera in mirrorCameras) ecs.Set(mirrorCamera, new Transform(Reflect(camera.Translation), reflected, new Vec3(-1f, 1f, 1f)));
 
-        // The near plane is the mirror's own, so nothing behind the mirror is drawn into it: its
+        // The near plane is the mirror's own, so nothing behind the mirror is drawn into it. Its
         // normal in the main camera's view space and its distance from the camera.
         var normal = mirror.Rotation * Vec3.UnitY;
         var distance = Vec3.Dot(normal, mirror.Translation - camera.Translation);

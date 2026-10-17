@@ -43,7 +43,7 @@ pub enum DrawBlend {
     Opaque,
     /// Over it, by the fragment's alpha.
     Alpha,
-    /// Added to it, for anything glowing.
+    /// Added to it, for anything emissive.
     Add,
 }
 
@@ -88,7 +88,7 @@ pub struct ViewDraw {
 #[extract_component_filter(With<Camera>)]
 pub struct BcsViewDraws(pub Vec<ViewDraw>);
 
-/// What decides a draw's pipeline: program, version, target formats, sample count, blend, depth
+/// What decides a draw's pipeline, program, version, target formats, sample count, blend, depth
 /// write and whether there is depth at all, since a pipeline names all of them.
 type PipelineKey = (u32, u32, Vec<TextureFormat>, u32, DrawBlend, bool, bool);
 

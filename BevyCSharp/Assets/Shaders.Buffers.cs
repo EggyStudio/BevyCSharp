@@ -98,7 +98,7 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>How many bytes one slot of an instance buffer takes.</summary>
-    /// <remarks>Two matrices of four columns: this frame's transform, then the previous frame's.</remarks>
+    /// <remarks>Two matrices of four columns, this frame's transform, then the previous frame's.</remarks>
     public const int InstanceSlotBytes = 128;
 
     /// <summary>
@@ -194,8 +194,8 @@ public static unsafe partial class Shaders
     /// declares a <c>RaytracingAccelerationStructure</c>, is handed the scene by name with
     /// <c>SetRayScene</c>, and traces it with <c>bcs_ray::trace_in</c> and <c>visible_in</c>. It is
     /// independent of the scene Solari keeps, so it runs without ray-traced lighting, and it can
-    /// hold whatever a technique needs its rays to meet: simpler stand-ins for what is drawn, a
-    /// coarser level of detail, or only what should cast a shadow.
+    /// hold whatever a technique needs its rays to meet, such as simpler stand-ins for what is
+    /// drawn, a coarser level of detail, or only what should cast a shadow.
     /// </para>
     /// <para>
     /// Each pool mesh is built into a structure of its own once, the first frame the pool's
@@ -260,12 +260,12 @@ public static unsafe partial class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A ray that hits something has to know its color to bounce light off it, and world-space GI
-    /// and traced reflections shade their hits with it. The engine reads it from each entity's
-    /// material rather than a package guessing it, and writes it only when something changed. Slots
-    /// are set with <see cref="SetInstance"/>, and putting an entity in the same slot of an
-    /// instance buffer and a material buffer gives a shader its transform and its material by one
-    /// index.
+    /// A ray that hits something has to know its color for the indirect light it passes on, and
+    /// world-space GI and traced reflections shade their hits with it. The engine reads it from
+    /// each entity's material rather than a package guessing it, and writes it only when something
+    /// changed. Slots are set with <see cref="SetInstance"/>, and putting an entity in the same
+    /// slot of an instance buffer and a material buffer gives a shader its transform and its
+    /// material by one index.
     /// </para>
     /// <para>
     /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Material&gt;</c>. Textures are not

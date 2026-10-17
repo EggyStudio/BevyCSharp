@@ -406,7 +406,7 @@ public sealed class ReflectedComponentTests
             var size = schema.Field("soft_shadow_size")!;
             var some = schema.Field("soft_shadow_size.Some")!;
 
-            // An Option is an enum with data: a row choosing the variant, and the variant's value
+            // An Option is an enum with data, a row choosing the variant, and the variant's value
             // as a row shown only while it is the one held.
             Assert.Equal(FieldKind.Enum, size.Kind);
             Assert.Equal(["None", "Some"], size.Options);

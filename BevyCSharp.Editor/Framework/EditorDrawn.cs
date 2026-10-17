@@ -82,12 +82,12 @@ internal static class EditorDrawn
     }
 
     /// <summary>
-    /// A material drawn by a shader the game wrote: which program, whether it compiled, and every
+    /// A material drawn by a shader the game wrote, which program, whether it compiled, and every
     /// value its shaders declare, which can be dragged while it draws.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A row per name the shader declares, with a widget for what it is: a drag for numbers and
+    /// A row per name the shader declares, with a widget for what it is, a drag for numbers and
     /// vectors, a color picker for a <c>float3</c> or <c>float4</c> whose name says it is a color,
     /// a box for a <c>bool</c>. What cannot be dragged (textures, buffers, samplers, structs and
     /// matrices) is listed with its kind, so the row still says the name exists.
@@ -404,7 +404,7 @@ internal static class EditorDrawn
     }
 
     /// <summary>
-    /// What a mesh can be: one of the engine's shapes, a mesh the scene already draws with, or a
+    /// What a mesh can be, one of the engine's shapes, a mesh the scene already draws with, or a
     /// model file's first mesh.
     /// </summary>
     /// <remarks>
@@ -450,7 +450,7 @@ internal static class EditorDrawn
         return items;
     }
 
-    /// <summary>What a material can be: a new one, one the scene already draws with, or a model file's first.</summary>
+    /// <summary>What a material can be, a new one, one the scene already draws with, or a model file's first.</summary>
     private static IReadOnlyList<PickerItem> Materials(BehaviorContext ctx, Entity entity, string kind, string label)
     {
         var items = new List<PickerItem>
@@ -487,7 +487,7 @@ internal static class EditorDrawn
     }
 
     /// <summary>
-    /// What a model file offers a mesh or a material row: each of its meshes or materials by the
+    /// What a model file offers a mesh or a material row, each of its meshes or materials by the
     /// name the file gives it, or the file alone when it lists none, such as an OBJ.
     /// </summary>
     private static IEnumerable<PickerItem> Parts(Entity entity, string title, string file, string kind, string label)

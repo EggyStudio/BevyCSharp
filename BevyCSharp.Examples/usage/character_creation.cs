@@ -257,7 +257,7 @@ internal static class CharacterCreation
         Ui.SetText(mark, _tintYellow ? "X" : " ");
     }
 
-    // The character on the right of the screen: Bevy's icon, its hat, and a line saying who it is.
+    // The character on the right of the screen, Bevy's icon, its hat, and a line saying who it is.
     private static void SpawnCharacter(EcsWorld ecs)
     {
         var view = ecs.Spawn();

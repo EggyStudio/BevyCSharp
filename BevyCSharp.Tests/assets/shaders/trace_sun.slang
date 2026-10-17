@@ -1,4 +1,4 @@
-// Ray-traced shadows on a camera: for every pixel with a surface, a ray toward the sun through the
+// Ray-traced shadows on a camera, for every pixel with a surface, a ray toward the sun through the
 // scene Solari keeps, writing one into `lit` where nothing is in the way and zero where something
 // is, and a half where the pixel shows nothing.
 

@@ -14,7 +14,7 @@ until it is whole.
 
 ## Before committing
 
-Before a commit is made, [STYLE.md](STYLE.md) is read and applied to everything the commit adds:
+Before a commit is made, [STYLE.md](STYLE.md) is read and applied to everything the commit adds,
 comments, XML documentation, messages, Markdown and the commit message itself. The checks at the
 end of STYLE.md are run over what is staged rather than the whole tree, so a hit is in the work
 being committed and is fixed before it goes in:
@@ -66,7 +66,7 @@ the first line, an empty second line and the sentence on the third.
 ## A batch that shares a file with another
 
 When two batches touch one file, only the first batch's hunks are staged, so each commit holds one
-thing. `git add -p` asks questions interactively and cannot be driven by an agent, so hunks are
+thing. `git add -p` asks questions interactively and cannot be answered by an agent, so hunks are
 picked from the diff and applied to the index instead:
 
 ```bash

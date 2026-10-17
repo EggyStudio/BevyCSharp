@@ -6,7 +6,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the interface's text: its color, rewriting what it says, how it breaks to a width, the
+/// Covers the interface's text, its color, rewriting what it says, how it breaks to a width, the
 /// font it is set in, the lines drawn under and through it, and its font's features and axes.
 /// </summary>
 [Collection("engine")]

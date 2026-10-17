@@ -128,7 +128,7 @@ public sealed class SceneValueTests
 
             var text = Written(json => SceneValue.WriteComponent(json, schema, ctx.Ecs, source, references));
 
-            // Read by eye as well as by code: names rather than numbers, arrays for vectors.
+            // Read by eye as well as by code, names rather than numbers, arrays for vectors.
             Assert.Contains("\"Mood\":\"Restless\"", text);
             Assert.Contains("\"Marks\":[\"Hot\",\"Loud\"]", text);
             Assert.Contains("\"Target\":{\"entity\":7}", text);

@@ -355,7 +355,7 @@ public static unsafe partial class Render
     /// <para>
     /// For a shader's <c>TextureCube</c>, and what <see cref="SetSkybox"/> takes. The faces are a
     /// column, top to bottom in the order +X, -X, +Y, -Y, +Z, -Z, or the same six in a row, or a
-    /// cross: four wide and three tall with +Y over +Z, -Y under it and -X, +Z, +X, -Z across the
+    /// cross, four wide and three tall with +Y over +Z, -Y under it and -X, +Z, +X, -Z across the
     /// middle, or three wide and four tall with -Z under -Y, drawn half a turn round. The shape says
     /// which, and a cross or a row is laid out as a column when its pixels arrive. A compressed
     /// image is taken as a column only.
@@ -513,9 +513,9 @@ public static unsafe partial class Render
     /// Bevy draws a camera into a whole image, so the camera draws into an ordinary image of the
     /// layer's size and format, and that is copied into the layer after the cameras have drawn.
     /// Six cameras at one point, each a quarter turn apart with a field of view of ninety degrees
-    /// and a square picture, pointed at the six layers of a cube target, capture a cube map: a
+    /// and a square picture, pointed at the six layers of a cube target, capture a cube map, a
     /// probe of a package's own, a sky, or what a light sees. The layers are in the order a cube
-    /// is: plus and minus X, plus and minus Y, plus and minus Z.
+    /// is, plus and minus X, plus and minus Y, then plus and minus Z.
     /// </para>
     /// <para>
     /// A negative <paramref name="layer"/> draws into the whole image, as the overload without one

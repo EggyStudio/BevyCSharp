@@ -10,7 +10,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// One place for the conversion, because two things use it and they have to agree: a reflected
+/// One place for the conversion, because two things use it and they have to agree, a reflected
 /// schema's rows, which an inspector draws, and the typed wrappers the generator emits from the
 /// checked-in description of Bevy's components. A row that read a vector one way and a wrapper
 /// that wrote it another would each look right alone.

@@ -72,7 +72,7 @@ public sealed class VertexStreamTests
     }
 
     /// <summary>
-    /// A stream is checked before it crosses: its bytes against its format and the vertices, its
+    /// A stream is checked before it crosses, its bytes against its format and the vertices, its
     /// location against the streams' range, and its location and name against the mesh's other
     /// streams.
     /// </summary>

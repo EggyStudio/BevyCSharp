@@ -19,7 +19,7 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>bcs</ToolCommandName>
         <PackageId>BevyCSharp.Cli</PackageId>
-        <Description>Drives a running BevyCSharp app from the command line.</Description>
+        <Description>Controls a running BevyCSharp app from the command line.</Description>
     </PropertyGroup>
 
     <!--

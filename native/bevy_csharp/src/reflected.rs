@@ -4,7 +4,7 @@
 //! component, and the most expensive to keep, because each needs a match arm, a layout export, a
 //! schema and a test, and each breaks when Bevy reorders a field. So most of Bevy had none and was
 //! invisible to C#. Bevy already describes its types at runtime, through the `AppTypeRegistry`
-//! every app carries: a type's path, its fields and their types, its enum variants, and through
+//! every app carries, a type's path, its fields and their types, its enum variants, and through
 //! `ReflectComponent` how to insert, read and remove it. This module reads that description
 //! instead of writing mirrors, so every reflected component, including one a later Bevy or a
 //! plugin adds, is reachable with no code per type.

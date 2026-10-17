@@ -249,7 +249,7 @@ public static partial class SceneFile
     }
 
     /// <summary>
-    /// What an entity is drawn with: one of the scene's resources, or a file found by its id or
+    /// What an entity is drawn with, one of the scene's resources, or a file found by its id or
     /// its path.
     /// </summary>
     private static AssetHandle Drawn(JsonElement entry, string name, string kind, Dictionary<int, AssetHandle> made)

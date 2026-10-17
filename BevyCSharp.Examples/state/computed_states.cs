@@ -13,7 +13,7 @@ namespace BevyCSharp.Examples.States;
 internal static class ComputedStatesExample
 {
     // Bevy's AppState, Menu or InGame { paused, turbo }, its values as bits of the one number a
-    // state holds here: InGame, and with it Paused and Turbo where they are set.
+    // state holds here, InGame, and with it Paused and Turbo where they are set.
     [Flags]
     internal enum AppState { Menu = 0, InGame = 1, Paused = 2, Turbo = 4 }
 

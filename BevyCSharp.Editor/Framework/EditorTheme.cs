@@ -6,7 +6,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// What the editor looks like: a ladder of grays, one accent, and the shapes they are drawn in.
+/// What the editor looks like, a ladder of grays, one accent, and the shapes they are drawn in.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -50,7 +50,7 @@ public sealed record EditorTheme
 
     /// <summary>
     /// A box to type in, a button, and the plate of everything pressed that lies on the scene or
-    /// between the panels: the toolbars, the tabs and the window's buttons.
+    /// between the panels, the toolbars, the tabs and the window's buttons.
     /// </summary>
     public Vector4 Field { get; init; } = Rgb(0x3E, 0x3E, 0x3E);
 
@@ -184,8 +184,9 @@ public sealed record EditorTheme
         style.FrameBorderSize = 0f;
         style.TabBorderSize = 0f;
 
-        // Smooth edges on everything drawn by hand, which is most of this look: the rounded row
-        // behind a menu item, a circle under a toolbar picture, the corners taken off the scene.
+        // Smooth edges on everything drawn by hand, which is most of this look, such as the rounded
+        // row behind a menu item, a circle under a toolbar picture, the corners taken off the
+        // scene.
         style.AntiAliasedLines = true;
         style.AntiAliasedLinesUseTex = true;
         style.AntiAliasedFill = true;

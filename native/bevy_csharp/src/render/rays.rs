@@ -3,10 +3,10 @@
 //!
 //! Solari keeps one acceleration structure, over the meshes given to ray-traced lighting, and a
 //! shader reaches it through `bcs_ray`. A package tracing rays for its own purposes often needs a
-//! different scene: stand-ins simpler than what is drawn, a level of detail meant for rays, or no
-//! Solari at all. A ray scene is that. Its meshes are a pool's (see [`super::pools`]), each built
-//! once into a bottom-level structure, and its instances are entities in numbered slots, each with
-//! the pool mesh it is made of, placed where their transforms are every frame.
+//! different scene, such as stand-ins simpler than what is drawn, a level of detail meant for rays,
+//! or no Solari at all. A ray scene is that. Its meshes are a pool's (see [`super::pools`]), each
+//! built once into a bottom-level structure, and its instances are entities in numbered slots, each
+//! with the pool mesh it is made of, placed where their transforms are every frame.
 //!
 //! A shader declares a `RaytracingAccelerationStructure` and is handed a scene by name, like any
 //! other value, and traces it with `bcs_ray::trace_in`. A hit's instance is the slot, so an
@@ -56,7 +56,7 @@ pub fn supported(world: &World) -> bool {
         .is_some_and(|device| device.features().contains(WgpuFeatures::EXPERIMENTAL_RAY_QUERY))
 }
 
-/// One scene as the game describes it: which pool its meshes are, and what is in each slot.
+/// One scene as the game describes it, which pool its meshes are, and what is in each slot.
 struct Scene {
     /// The pool, by the key of its mesh table.
     pool: i32,

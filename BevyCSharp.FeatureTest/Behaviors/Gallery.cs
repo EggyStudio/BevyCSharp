@@ -20,8 +20,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// and a green one, a tall block and a short one, and an emissive panel under the ceiling with a
 /// point light beneath it. It is lit by the point light's shadow map, and where the program was
 /// started with ray-traced lighting (the panel's graphics page, from the next start) and the
-/// bridge and the GPU have Solari, by rays from the panel instead, the walls' colors bleeding onto
-/// the blocks as the light bounces, the room's meshes given to the rays as they are made.
+/// bridge and the GPU have Solari, by rays from the panel instead, the walls' colors carried onto
+/// the blocks by global illumination, the room's meshes given to the rays as they are made.
 /// </para>
 /// <para>
 /// Every sphere and block is a static body (<see cref="Blocks"/>), so the player walks round the

@@ -348,7 +348,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_clear_font_atlases();
 
-    /// <summary>Reads a node's interaction: 0 none, 1 hovered, 2 pressed.</summary>
+    /// <summary>Reads a node's interaction, 0 for none, 1 for hovered and 2 for pressed.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_interaction(ulong entity);
@@ -665,7 +665,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_state_set(int slot, int value);
 
-    // -- ECS (ambient: requires an active world loan)
+    // -- ECS, ambient, each needing an active world loan
 
     /// <summary>Splits an entity handle into its logical index and generation.</summary>
     [LibraryImport(Library)]

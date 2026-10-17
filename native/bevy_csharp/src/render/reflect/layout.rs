@@ -61,7 +61,7 @@ impl Family {
     }
 }
 
-/// Where `bcs_sprite.slang` declares what a sprite says, in a 2D material's own group: the sprite's
+/// Where `bcs_sprite.slang` declares what a sprite says, in a 2D material's own group, the sprite's
 /// numbers, its image and the image's sampler.
 ///
 /// Bound by the bridge from the sprite a material draws rather than from values, so reflection
@@ -262,14 +262,14 @@ pub enum Target<'a> {
         offset: u32,
         ty: &'a FieldType,
     },
-    /// A whole binding: a texture, a sampler, a buffer, or a uniform buffer set as bytes.
+    /// A whole binding, a texture, a sampler, a buffer, or a uniform buffer set as bytes.
     Resource { binding: u32, info: &'a Binding },
     /// A pipeline constant, which takes one number.
     Constant(&'a Constant),
 }
 
 impl Layout {
-    /// Finds where a name goes: `roughness`, `lights[3].color`, `sun.power`, `albedo`.
+    /// Finds where a name goes, as `roughness`, `lights[3].color`, `sun.power`, `albedo`.
     ///
     /// A loose global is found by its own name, and a field of a `ConstantBuffer` by the buffer's
     /// name and the field's.
@@ -280,7 +280,7 @@ impl Layout {
 
         let (head, rest) = split_head(path);
 
-        // A binding named outright: a resource, or a uniform buffer as a whole.
+        // A binding named outright, a resource, or a uniform buffer as a whole.
         for (number, binding) in &self.bindings {
             if binding.name != head || binding.name == LOOSE {
                 continue;

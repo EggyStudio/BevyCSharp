@@ -5,7 +5,7 @@ namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
 /// Plays the game in a window of its own, as Godot does, and builds it. The project is built and
-/// run as a process beside the editor, driven from the Play tab.
+/// run as a process beside the editor, controlled from the Play tab.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -59,7 +59,7 @@ public static class EditorPlay
     /// <summary>When the game was last started, which tells its session from any that ran before.</summary>
     public static DateTimeOffset StartedAt { get; private set; } = DateTimeOffset.MaxValue;
 
-    /// <summary>What is running: the game, a build, or nothing.</summary>
+    /// <summary>What is running, the game, a build, or nothing.</summary>
     public static PlayJob Job { get; private set; }
 
     /// <summary>Whether the game is running.</summary>
@@ -460,7 +460,7 @@ public static class EditorPlay
             start.Environment["BCS_SERVE"] = "1";
 
             // And with no window when the editor has none, which is a machine with no display or
-            // a script driving the editor that has asked for nothing on the screen.
+            // a script controlling the editor that has asked for nothing on the screen.
             if (Offscreen) start.Environment[Config.OffscreenVariable] = "1";
             StartedAt = DateTimeOffset.Now.AddSeconds(-1);
         }

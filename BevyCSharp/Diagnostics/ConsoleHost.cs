@@ -7,7 +7,7 @@ namespace Bevy;
 /// <para>
 /// A <c>[Command]</c> method takes words and returns a sentence, which is the whole of its signature
 /// and the reason adding one is writing one. That leaves three things it sometimes needs and cannot
-/// be handed: the world, a way to say it failed rather than merely answered, and a way to say its
+/// be handed, the world, a way to say it failed rather than merely answered, and a way to say its
 /// answer is not ready yet. All three live here, set around the call by whatever ran it.
 /// </para>
 /// <para>
@@ -81,7 +81,7 @@ public static class ConsoleHost
     /// </summary>
     /// <remarks>
     /// For a command whose point is the waiting. The command runs once, now, and says when its
-    /// answer should be handed back; it is not run again. Whoever is driving the console decides
+    /// answer should be handed back; it is not run again. Whoever is using the console decides
     /// what to do with that, and a console with no frames to wait for ignores it.
     /// </remarks>
     public static void Hold(ulong frame) => Held = frame;
@@ -94,7 +94,7 @@ public static class ConsoleHost
     /// For a command whose answer comes back from the GPU a few frames later, such as a buffer read
     /// back. The command returns what it has now, which a console shows at once, and
     /// <paramref name="poll"/> is asked once a frame, with the world lent, until it answers with
-    /// something other than null. That is then handed back as the command's answer: in place of the
+    /// something other than null. That is then handed back as the command's answer, in place of the
     /// first one to a caller of <c>bcs command</c>, and as a line of its own in a console.
     /// </para>
     /// <para>

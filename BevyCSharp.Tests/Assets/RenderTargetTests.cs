@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// What a portal, a security monitor, a minimap and a second viewport are all built from. The
-/// camera is ordinary in every other way, so what is worth pinning down is the part that is not:
+/// camera is ordinary in every other way, so what is worth pinning down is the part that is not,
 /// that the image is created, that a camera can be pointed at it and put back, and that what the
 /// camera drew can be read out of it.
 /// </remarks>
@@ -367,7 +367,7 @@ public sealed class RenderTargetTests : IDisposable
     }
 
     /// <summary>
-    /// Cameras pointed at single layers of a cube target fill those faces and no others: plus X
+    /// Cameras pointed at single layers of a cube target fill those faces and no others, plus X
     /// with one camera's clear color, minus Y with the other's, and plus Z left black.
     /// </summary>
     [SkippableFact]

@@ -8,7 +8,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// Paths are resolved by Bevy relative to the <c>assets</c> directory beside the executable.
-/// Loading is asynchronous: <see cref="Load"/> returns as soon as the request is queued, and the
+/// Loading is asynchronous. <see cref="Load"/> returns as soon as the request is queued, and the
 /// handle reports <see cref="AssetLoadState.Loading"/> until the file has been read and parsed.
 /// </remarks>
 public static unsafe class AssetServer

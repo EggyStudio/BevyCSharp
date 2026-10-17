@@ -23,7 +23,7 @@ pub struct BcsMeshData {
     /// Streams of the game's own (see [`super::streams`]), `stream_count` of them, or null.
     pub streams: *const super::streams::BcsMeshStream,
     pub stream_count: i32,
-    /// How the mesh is made, four bytes of bits: [`LEAVE_NORMALS_OUT`].
+    /// How the mesh is made, four bytes of bits, [`LEAVE_NORMALS_OUT`].
     pub flags: u32,
 }
 

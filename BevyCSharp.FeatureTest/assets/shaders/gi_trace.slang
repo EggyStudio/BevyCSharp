@@ -1,8 +1,8 @@
-// Screen-space global illumination, the first step: for each pixel of a half-sized image, one ray
+// Screen-space global illumination, the first step, for each pixel of a half-sized image, one ray
 // bounced off the surface there, marched through the depth buffer, picking up the light of what it
 // hits from last frame's lit picture, or the sky's where it leaves the screen.
 //
-// A deliberately small version of the technique, to show the pieces a package builds it from: the
+// A deliberately small version of the technique, to show the pieces a package builds it from, the
 // G-buffer for the surface's normal, the depth buffer to march through, blue noise to choose the
 // ray, last frame's picture for the light it finds, and the camera's environment for what it does
 // not. Everything it declares is set by name from `ScreenSpaceLight.cs`.

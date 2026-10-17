@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers keeping where the window was left between runs: what is kept as the window moves and is
+/// Covers keeping where the window was left between runs, what is kept as the window moves and is
 /// maximized, and what the next run opens with.
 /// </summary>
 /// <remarks>

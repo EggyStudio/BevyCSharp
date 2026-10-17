@@ -34,7 +34,7 @@ public sealed class MaterialSettings
     public float Roughness { get; set; } = 0.5f;
 
     /// <summary>
-    /// Light the surface gives off, which no lamp affects. Black by default.
+    /// The surface's emissive light, which no lamp affects. Black by default.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -65,8 +65,8 @@ public sealed class MaterialSettings
     /// Draw back faces as well as front ones.
     /// </summary>
     /// <remarks>
-    /// For anything modeled as a single sheet: a leaf, a flag, a curtain. It doubles the work
-    /// for that surface, and lighting on the back face uses the front face's normal.
+    /// For anything modeled as a single sheet, such as a leaf, a flag, a curtain. It doubles the
+    /// work for that surface, and lighting on the back face uses the front face's normal.
     /// </remarks>
     public bool DoubleSided { get; set; }
 

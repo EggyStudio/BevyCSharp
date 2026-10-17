@@ -198,7 +198,7 @@ pub(super) fn level_view(texture: &Texture, mip: u32) -> TextureView {
     })
 }
 
-/// Every name a shader on a view can read an image by: the camera's own images, and the engine's.
+/// Every name a shader on a view can read an image by, the camera's own images, and the engine's.
 ///
 /// The engine's are Bevy's ambient occlusion where the camera has it on, which a shader may
 /// replace, and the G-buffer where the camera draws deferred, which a shader reads a surface's

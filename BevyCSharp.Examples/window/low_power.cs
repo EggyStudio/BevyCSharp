@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Windowing;
 
-// Runs the window in each of winit's update modes in turn, Space moving to the next: continuous, as
+// Runs the window in each of winit's update modes in turn, Space moving to the next, continuous, as
 // a game is played, then reactive, as a desktop tool rests until something happens, then reactive
 // with a redraw asked for every update, and then with the loop woken every update. The cube turns
 // only while the app updates, and the count says how many updates there have been.

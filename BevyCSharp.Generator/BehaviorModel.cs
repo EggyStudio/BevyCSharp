@@ -214,7 +214,7 @@ internal sealed record BehaviorInvokable(string Name, MethodHintModel Hints)
 /// <param name="KeyKind">The kind of a map's keys, and nothing for any other field.</param>
 /// <param name="KeyType">The C# type of a map's keys.</param>
 /// <param name="Collection">
-/// How a list or map is held: <c>inline</c>, <c>stored</c> in the managed store, or <c>managed</c> as
+/// How a list or map is held, <c>inline</c>, <c>stored</c> in the managed store, or <c>managed</c> as
 /// a .NET collection, which only a data asset can hold. Nothing for any other field.
 /// </param>
 /// <param name="ItemFields">The fields of each item, for items with fields of their own.</param>

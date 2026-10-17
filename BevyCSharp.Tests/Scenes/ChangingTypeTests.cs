@@ -87,7 +87,7 @@ public sealed class Recipe
 }
 
 /// <summary>
-/// Covers changing a type without breaking the files written before the change: a type and its
+/// Covers changing a type without breaking the files written before the change, a type and its
 /// fields renamed, and components and values this build does not know carried through a save.
 /// </summary>
 /// <remarks>

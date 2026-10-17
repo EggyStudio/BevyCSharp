@@ -1,4 +1,4 @@
-// Bevy's extended_material_bindless shader in Slang: its standard material's gray, multiplied by an
+// Bevy's extended_material_bindless shader in Slang, its standard material's gray, multiplied by an
 // image and a color of the material's own before Bevy lights it.
 import bcs;
 

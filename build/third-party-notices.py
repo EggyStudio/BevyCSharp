@@ -38,7 +38,7 @@ SOURCE_ENDINGS = (".rs", ".toml", ".c", ".h", ".cpp", ".py", ".sh", ".html", ".j
 SKIPPED_FOLDERS = {"tests", "benches", "examples", "target", ".git"}
 
 # Code a crate wrote that is now part of the bridge's own source, kept under its authors' license
-# after the crate left the lock: its name and release, license, holder, and what was taken.
+# after the crate left the lock, its name and release, license, holder, and what was taken.
 TAKEN = [
     ("bevy_embedded_assets", "0.16.0", "MIT OR Apache-2.0", "François Mockers",
      "the build script and the asset reader of the `embed` feature, in `native/bevy_csharp/build.rs` "

@@ -1,4 +1,4 @@
-// Writes the counts of an indirect draw: six vertices a square, `squares` of them.
+// Writes the counts of an indirect draw, six vertices a square, `squares` of them.
 
 import bcs_compute;
 

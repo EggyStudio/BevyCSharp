@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows waiting for a hundred loads at once before using any of them: a red floor and "Loading..."
+// Shows waiting for a hundred loads at once before using any of them, a red floor and "Loading..."
 // until every model is in, then a hundred models standing on a green floor and "Loaded!".
 //
 // Bevy counts the loads down with a barrier its loads hold a guard of, and a task waiting on it

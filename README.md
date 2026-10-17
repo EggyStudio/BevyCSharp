@@ -19,7 +19,7 @@ public partial struct Spin
     [Range(0f, 5f)] public float Speed;
     private float _angle;
 
-    // static: one plain system
+    // A static method is one plain system
     [OnStartup]
     public static void Scene(BehaviorContext ctx)
     {
@@ -32,7 +32,7 @@ public partial struct Spin
         Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(0.25f, 0.55f, 0.85f));
     }
 
-    // instance: once per entity that has one, handed the entity's transform
+    // An instance method runs once per entity that has one, handed the entity's transform
     [OnUpdate]
     public void Tick(BehaviorContext ctx, ref Transform transform)
     {
@@ -62,7 +62,7 @@ two thirds of the Bevy examples about a game rather than Rust. [Compared with Be
 - [Examples](#examples)
 - [Install](#install)
 - [Guide](#guide)
-- [Driving a running app](#driving-a-running-app)
+- [Controlling a running app](#controlling-a-running-app)
 - [Status and limitations](#status-and-limitations)
 - [Building from source](#building-from-source)
 - [Contributing](#contributing)
@@ -172,7 +172,7 @@ Of Bevy's 438 examples, 358 are written in C# here and 2 more in part, 0 more ca
 
 ```bash
 dotnet run --project BevyCSharp.Examples -- 3d_scene
-./bcs open --example lighting --offscreen     # serving, for ./bcs to drive and capture
+./bcs open --example lighting --offscreen     # serving, for ./bcs to control and capture
 ```
 
 ## Install
@@ -234,13 +234,13 @@ transform the renderer reads and a sound played from C# is an entity in the same
 | [Math](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/math.md) | Shapes as values, points sampled in them, bounding volumes and casts, and cubic curves |
 | [Running a game](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/running-a-game.md) | In a window, headless or offscreen, and behaviors reloaded while it runs |
 | [Making a game](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/making-a-game.md) | Courtyard, a small game from an empty project to an export |
-| [The tools](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md) | The editor, its console, and driving a running app |
+| [The tools](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md) | The editor, its console, and controlling a running app |
 | [How it works](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/how-it-works.md) | Inside, between C# and Bevy |
 | [Compared with Bevy](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/compared-with-bevy.md) | What is the same, what it adds, what it costs, and what was measured |
 
-## Driving a running app
+## Controlling a running app
 
-`./bcs` drives a running app from a terminal, the editor, a game or an example, answering in JSON,
+`./bcs` controls a running app from a terminal, the editor, a game or an example, answering in JSON,
 which is how a change is checked without a person at the window:
 
 ```bash
@@ -311,14 +311,14 @@ The two halves are built separately, and a rebuilt bridge is invisible until a m
 it, which is why the second line is not optional. `build/build-native.sh --render` adds the renderer
 and `--editor` adds the interface on top of it.
 
-[.github/BUILDING.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/BUILDING.md) has the rest: the three native profiles and what each
+[.github/BUILDING.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/BUILDING.md) has the rest, the three native profiles and what each
 costs, the platforms and their prerequisites, how the package is assembled for six runtime
 identifiers, and how a release is published.
 
 ## Contributing
 
-Prose in this repository follows [.github/STYLE.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/STYLE.md): no em dashes, no spaced
-hyphens as punctuation, no colon joining two clauses where a full stop or a "because" belongs, no
+Prose in this repository follows [.github/STYLE.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/STYLE.md), which uses no em dashes, no spaced
+hyphens as punctuation, no colon inside a running sentence, no
 padded section banners, and comments that explain why rather than restate the code.
 
 ## License

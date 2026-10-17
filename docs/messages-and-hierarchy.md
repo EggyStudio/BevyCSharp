@@ -128,7 +128,7 @@ A child's `Transform` is relative to its parent, and Bevy combines them during p
 parented entity only has to describe its own motion. Parenting goes through Bevy's relationship API
 rather than a raw component write, which keeps the reverse child list correct.
 
-`GlobalTransform` is the result of that propagation: where the entity sits in world space.
+`GlobalTransform` is the result of that propagation, where the entity sits in world space.
 
 <!-- compiled with:
 Entity moon = default;

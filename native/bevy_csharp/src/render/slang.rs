@@ -51,7 +51,7 @@ pub const PRELUDE_2D: &str = include_str!("bcs2d.slang");
 /// What a Slang shader drawing an interface node can import as `bcs_ui`.
 pub const UI_PRELUDE: &str = include_str!("bcs_ui.slang");
 
-/// What a Slang shader drawing a sprite can import as `bcs_sprite`: the sprite's image, color and
+/// What a Slang shader drawing a sprite can import as `bcs_sprite`, the sprite's image, color and
 /// cutting, with Bevy's functions for them.
 pub const SPRITE_PRELUDE: &str = include_str!("bcs_sprite.slang");
 
@@ -65,11 +65,11 @@ pub const PASS_DEFERRED: &str = include_str!("bcs_pass_deferred.slang");
 /// What a Slang compute shader can import as `bcs_compute`.
 pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 
-/// What any Slang shader can import as `bcs_scene`: the layout of what the engine writes about the
+/// What any Slang shader can import as `bcs_scene`, the layout of what the engine writes about the
 /// scene into buffers, such as instance transforms.
 pub const SCENE_PRELUDE: &str = include_str!("bcs_scene.slang");
 
-/// What a compute shader compiled to SPIR-V can import as `bcs_ray`: Solari's scene, to trace rays
+/// What a compute shader compiled to SPIR-V can import as `bcs_ray`, Solari's scene, to trace rays
 /// against.
 pub const RAY_PRELUDE: &str = include_str!("bcs_ray.slang");
 
@@ -162,7 +162,7 @@ pub struct Compiled {
     pub wgsl: String,
     /// The SPIR-V, or empty where the compile was to WGSL.
     pub spirv: Vec<u8>,
-    /// What `slangc -reflection-json` wrote: every parameter, its binding and its layout.
+    /// What `slangc -reflection-json` wrote, every parameter, its binding and its layout.
     pub reflection: String,
     /// Every file the result depends on besides the source, so that a change to any of them
     /// triggers a recompile.

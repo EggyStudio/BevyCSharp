@@ -11,13 +11,13 @@ components in general and [SCENES.md](SCENES.md) how all of it is saved.
 
 - **"Drawn with"** (`BevyCSharp.Editor/Framework/EditorDrawn.cs`) is a section under the components
   with a Mesh row and a Material row. Each is a button naming the file, or "made here", that opens
-  `PickerWindow` with three groups (§4): Bevy's primitives or a new material, what the scene already
+  `PickerWindow` with three groups (§4), Bevy's primitives or a new material, what the scene already
   draws with, and the model files, searched and picked with the keyboard, and a pick is a step to
   undo. Under each row is its card (§1).
-- **Thirteen of Bevy's primitives** (`MeshShape`: cuboid, sphere, plane, capsule, cylinder, cone,
-  conical frustum, torus, circle, annulus, rectangle, triangle, tetrahedron) are made with
-  `Render.CreateMesh`, which keeps the shape and measures beside the handle (`Render.RecipeOf`),
-  and a material with `Render.CreateMaterial(MaterialSettings)`.
+- **Thirteen of Bevy's primitives** (`MeshShape`, which are cuboid, sphere, plane, capsule,
+  cylinder, cone, conical frustum, torus, circle, annulus, rectangle, triangle, tetrahedron) are
+  made with `Render.CreateMesh`, which keeps the shape and measures beside the handle
+  (`Render.RecipeOf`), and a material with `Render.CreateMaterial(MaterialSettings)`.
 - **What comes back.** `Render.TryGetMeshInfo` gives a mesh's vertex and index counts, index width,
   topology, attributes and bounds without copying its vertices, `Render.TryReadMaterial` a standard
   material's settings whoever made it, `Render.MeshOf` and `MaterialOf` the handles an entity is
@@ -50,7 +50,7 @@ An entity that draws shows two cards in the details, in the place "Drawn with" h
 Built in `BevyCSharp.Editor/Framework/DrawnCards.cs`, as an open fold under each row:
 
 - **The Mesh card** shows the mesh alone in a plain gray, turned by dragging, with a Wireframe
-  toggle, and what it is made of and where it came from: the file, a primitive's shape and measures
+  toggle, and what it is made of and where it came from, the file, a primitive's shape and measures
   (`Render.RecipeOf`), or "built in code", then vertices, triangles, indices and their width,
   topology, attributes and size.
 - **The Material card** shows the material on a sphere, turned the same way, and its settings as
@@ -87,7 +87,7 @@ design, all of it:
   - **Its settings as rows:** base color, metallic, roughness, emissive, alpha mode, double-sided,
     unlit, and the texture slots as small thumbnails, each a picker filtered to textures.
   - **A shader material** keeps the parameter rows it has today.
-- **What the bridge reads** (built): `bcs_render_mesh_info` for the counts, attributes, index
+- **What the bridge reads** (built) is `bcs_render_mesh_info` for the counts, attributes, index
   format and bounds, `bcs_render_material_read` for a `MaterialSettings` back from a
   `StandardMaterial`, `bcs_render_material_write` for writing one back, and the rest of Bevy's
   primitives, with each primitive's measures kept on the managed side beside its handle so it can
@@ -103,14 +103,14 @@ program already holds, so they need no exports of their own.
 The cards, the asset browser and the picker all draw assets, and each drawing one its own way would
 be three cameras, three lights and three framings to keep consistent.
 
-Built as `PreviewRenderer` (`BevyCSharp.Editor/Framework/PreviewRenderer.cs`): four slots on render
-layer bits 12 to 15, each asked for by a key every frame it is wanted, drawing a glTF scene, a mesh
-in gray or a material on a sphere, framed so a ball round the subject fits from any angle, turned
-by a drag, and put away after the panels draw when nothing asked for it. More keys than slots take
-over the one asked for least recently. The details panel's picture of a selected file is one key of
-it.
+Built as `PreviewRenderer` (`BevyCSharp.Editor/Framework/PreviewRenderer.cs`), with four slots on
+render layer bits 12 to 15, each asked for by a key every frame it is wanted, drawing a glTF scene,
+a mesh in gray or a material on a sphere, framed so a ball round the subject fits from any angle,
+turned by a drag, and put away after the panels draw when nothing asked for it. More keys than slots
+take over the one asked for least recently. The details panel's picture of a selected file is one
+key of it.
 
-Thumbnails are built in `BevyCSharp.Editor/Framework/Thumbnails.cs`: a model tile asks for one by
+Thumbnails are built in `BevyCSharp.Editor/Framework/Thumbnails.cs`. A model tile asks for one by
 being drawn, one file is shown in a slot of its own for thirty frames on a transparent background,
 or the color the "Thumbnail background" setting gives, read back with `Render.BeginCapture` and
 written with its alpha by `CapturedImage.ToPng` to `user://thumbnails/`, named by a hash of its
@@ -133,12 +133,12 @@ a thumbnail goes through a capture instead.
 ## 3. The asset browser
 
 Built, all of it. Model, mesh and material tiles show their thumbnails, an image is itself, and
-every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since a
-model and a mesh of it look alike at a glance. A search box, a chip per kind and a tile size slider
-sit over the tiles. A picked file is shown in the details panel rather than in a column beside the
+every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since a model
+and a mesh of it look alike at a glance. A search box, a chip per kind and a tile size slider sit
+over the tiles. A picked file is shown in the details panel rather than in a column beside the
 tiles, since picking a file lets go of any entity and one panel shows the one selection
-(`DetailsPanel.AssetDetails`). A model file opens into its meshes, materials and textures, read
-from its JSON by `GltfContents` without loading it: twice on its tile, or `assets.open` with its
+(`DetailsPanel.AssetDetails`). A model file opens into its meshes, materials and textures, read from
+its JSON by `GltfContents` without loading it. A pick twice on its tile, or `assets.open` with its
 path, goes into it as into a folder, where each part is a tile with its own picture and its own
 details. A part's path is the model's with the part's label after `#`, except a texture the model
 keeps in a file beside it, which Bevy loads from that file and the browser names by it.
@@ -157,11 +157,11 @@ keeps in a file beside it, which Bevy loads from that file and the browser names
 Picking a mesh is finding one among the assets, which the browser does, so the picker is
 the browser's grid in a window rather than a dropdown of paths.
 
-Built: the Mesh and Material rows open `PickerWindow` in its grid mode, with "Built in", "In this
+As built, the Mesh and Material rows open `PickerWindow` in its grid mode, with "Built in", "In this
 scene" and "Files" as below, each a heading over a row of tiles. A tile is the browser's
 (`AssetGrid.Face`), wearing the thumbnail of the file or model part it stands for
 (`PickerItem.Path`), and the arrows move a row at a time. Every mesh and material of every model is
-offered. Every other asset field opens the same window: a texture slot offers the images under the
+offered. Every other asset field opens the same window. A texture slot offers the images under the
 asset root and those inside models, a sound field the sounds, and a `DataRef<T>` the data files of
 its type. What is picked is held until the field's row is next drawn and written there
 (`FieldPickers.Give`), so the row records it in the history as it records an edit typed into it.
@@ -170,7 +170,7 @@ file, and are pictured all the same by `Thumbnails.Drawn`, which draws one as a 
 drawn and keeps the capture as an image in memory, named by the shape or the handle with what it
 looks like, so a material recolored in its card is pictured again.
 
-- **`AssetGrid`** comes out of `AssetsTab`: the tiles, the search, the kind chips and the
+- **`AssetGrid`** comes out of `AssetsTab`, the tiles, the search, the kind chips and the
   thumbnails. The tab draws it, and `PickerWindow` gains a grid mode that draws it too, with
   `PickerItem` gaining a picture.
 - **A mesh field opens the grid** with its kind fixed and three groups:
@@ -191,11 +191,11 @@ before a scene can keep it. Bevy does not ask for that, and a cube built in a sc
 no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is taken here.
 
 - **A sub-resource belongs to the scene** (built). A mesh or material made in place is saved
-  inside the scene file as how to make it again: a primitive and its parameters, a
+  inside the scene file as how to make it again, a primitive and its parameters, a
   `MaterialSettings`, or the `MeshData` a script built (`Render.DataOf`, kept beside the handle as a
   copy when the mesh is made). Two entities using one share it by an id within the scene.
 - **Save as asset** writes it to a file (`*.material.json`, or `*.mesh.json` for a primitive or
-  for generated geometry) and points every entity that used it at the file. Built: each card's
+  for generated geometry) and points every entity that used it at the file. As built, each card's
   "Save as asset" writes `MaterialFiles.SaveAs` or `MeshFiles.SaveAs`, named after the entity, into
   the folder the browser shows, and the asset is the file's from then on. A mesh file holds
   geometry as JSON rather than `.glb`, so one reader serves a primitive and a built mesh, and a

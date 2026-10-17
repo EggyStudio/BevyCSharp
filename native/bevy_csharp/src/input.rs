@@ -82,7 +82,7 @@ pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
 
 /// Moves, presses or releases the pointer, as though a hand had.
 ///
-/// What a test drives the scene with. The window's own messages are written, which is where a real
+/// The input a test sends the scene. The window's own messages are written, which is where a real
 /// pointer's report begins, so everything downstream behaves exactly as it would. The camera reads
 /// the button, picking raycasts the meshes, and a gizmo takes hold. An offscreen run, which has no
 /// window, has the pointer put on the image it draws into, for picking (see [`offscreen_pointer`]).
@@ -252,11 +252,11 @@ pub(crate) struct OffscreenPointer(pub bevy::prelude::Vec2);
 /// An offscreen run has no window for the cursor's messages to name, and its cameras draw into an
 /// image, so the pointer is put on that image instead, through Bevy's own `PointerInput`, which is
 /// what picking reads every pointer from. What is drawn there is then pointed at as it would be in
-/// a window, the interface's nodes, sprites and meshes alike, so a test or a script drives an
-/// offscreen run as it would a windowed one. The button is written as Bevy's `MouseButtonInput` as
-/// well, naming no window, which Bevy's input turns into the button's state and picking does not
-/// read, so a game reading the mouse sees it too. Returns
-/// [`crate::interop::status::INVALID_STATE`] for a run with neither a window nor such an image.
+/// a window, the interface's nodes, sprites and meshes alike, so a test or a script points at an
+/// offscreen run as it would at a windowed one. The button is written as Bevy's `MouseButtonInput`
+/// as well, naming no window, which Bevy's input turns into the button's state and picking does not
+/// read, so a game reading the mouse sees it too. Returns [`crate::interop::status::INVALID_STATE`]
+/// for a run with neither a window nor such an image.
 #[cfg(feature = "render")]
 fn offscreen_pointer(world: &mut bevy::prelude::World, at: bevy::prelude::Vec2, action: i32, button: i32) -> i32 {
     use bevy::camera::NormalizedRenderTarget;
@@ -314,11 +314,11 @@ fn write_motion(world: &mut bevy::prelude::World, delta: bevy::prelude::Vec2) {
     }
 }
 
-/// Says something as the platform's input method would: `0` composing `text` with the caret over
+/// Says something as the platform's input method would, `0` composing `text` with the caret over
 /// `start` to `end` (bytes of the UTF-8, or `-1` to hide it), `1` committing `text`, `2` turned on,
 /// `3` turned off.
 ///
-/// For a test or a tool driving a text field that takes composed input, which no key press can
+/// For a test or a tool typing into a text field that takes composed input, which no key press can
 /// produce. The message names the primary window where there is one, and no window otherwise, since
 /// nothing reading it here asks which.
 ///

@@ -11,7 +11,7 @@ use crate::interop::status;
 #[cfg(feature = "render")]
 use crate::state::with_world;
 
-/// The mode answering one of winit's two moments, focused or not: continuous where `continuous`
+/// The mode answering one of winit's two moments, focused or not, continuous where `continuous`
 /// is non-zero, and otherwise reactive, waiting `wait` seconds at most between updates and woken
 /// sooner by the kinds of event `reacts` names, `1` the devices' own (a mouse moved anywhere), `2`
 /// the app's own, as a wake, and `4` the window's.

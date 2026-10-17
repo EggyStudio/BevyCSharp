@@ -1,4 +1,4 @@
-//! The entry points for shaders the game wrote: programs, materials, passes over a camera's
+//! The entry points for shaders the game wrote, programs, materials, passes over a camera's
 //! picture, and compute shaders run over buffers.
 //!
 //! What a program is and how it is kept compiled is in [`super::programs`], how a shader's own
@@ -28,7 +28,7 @@ pub use super::shader_views::*;
 /// A file, or Slang source, and an entry point in it.
 ///
 /// Every string is NUL-terminated UTF-8. A null `path` and a null `source` leave the stage out, and
-/// a null `entry` is the name the stage's entry point usually has: `vertex`, `fragment`, or `main`
+/// a null `entry` is the name the stage's entry point usually has, `vertex`, `fragment`, or `main`
 /// for compute.
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -220,7 +220,7 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
     })
 }
 
-/// Reports whether a program can run yet: `0` compiling, `1` ready, `2` failed.
+/// Reports whether a program can run yet, `0` compiling, `1` ready, `2` failed.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_program_state(program: i32) -> i32 {
     crate::interop::guard(|| {
@@ -574,7 +574,7 @@ fn queue_dispatch(
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct ShaderInstances(pub Vec<Instance>);
 
-/// What a pass or a dispatch runs: a program and values by name.
+/// What a pass or a dispatch runs, a program and values by name.
 #[cfg(feature = "render")]
 #[derive(Clone, Debug)]
 pub struct Instance {

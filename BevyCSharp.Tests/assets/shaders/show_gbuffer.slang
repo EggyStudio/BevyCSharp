@@ -1,4 +1,4 @@
-// A pass that paints what Bevy's G-buffer says about each pixel: base color's red, metallic and
+// A pass that paints what Bevy's G-buffer says about each pixel, base color's red, metallic and
 // roughness as red, green and blue, or with `show` at one the normal, mapped into colors.
 
 import bcs_pass;

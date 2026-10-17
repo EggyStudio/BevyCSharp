@@ -10,7 +10,7 @@ namespace BevyCSharp.Tests;
 /// </summary>
 /// <remarks>
 /// The writer half is exercised without the native library, because what is worth testing is the
-/// caller's side of the convention: the probe buffer, the retry when the text does not fit, and
+/// caller's side of the convention, the probe buffer, the retry when the text does not fit, and
 /// what happens when the answer changes between the two calls.
 /// </remarks>
 public sealed unsafe class TextConventionTests

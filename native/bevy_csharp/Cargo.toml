@@ -15,7 +15,7 @@ workspace = true
 [features]
 default = ["headless"]
 
-# Editor profile: the render profile plus HTML and CSS driven UI.
+# The editor profile, the render profile and an interface written in HTML and CSS.
 #
 # Its own profile rather than part of `render`, because `render` is what CI builds for six
 # runtime identifiers and what the test suite links against, and this adds a hundred crates and
@@ -32,7 +32,7 @@ editor = [
     "bevy/reflect_documentation",
 ]
 
-# Bevy's meshlets, on top of whichever profile is built: meshes cut into clusters that the GPU
+# Bevy's meshlets, on top of whichever profile is built, meshes cut into clusters that the GPU
 # culls and picks a level of detail for, which is virtualized geometry as Bevy ships it.
 #
 # An addition rather than a profile of its own, and off in every profile, because the processor
@@ -47,7 +47,7 @@ meshlet = [
     "dep:wgpu",
 ]
 
-# Bevy's Solari: direct and indirect lighting traced against the scene with hardware ray queries,
+# Bevy's Solari, direct and indirect lighting traced against the scene with hardware ray queries,
 # which is world-space GI and reflections as Bevy ships them.
 #
 # An addition to a profile like meshlets, and off until an app asks (`Config.RayTracedLighting`),
@@ -66,12 +66,12 @@ solari = [
 # than a profile, and the bridge built with it serves that game alone. Any profile takes it.
 embed = []
 
-# Minimal profile: app + ECS + time + input + transform + math.
-# No window, no GPU, no audio. Drives the loop with ScheduleRunnerPlugin.
+# The minimal profile, with the app, the ECS, time, input, transforms and math.
+# No window, no GPU, no audio. Runs the loop with ScheduleRunnerPlugin.
 # This is what CI, unit tests and dedicated servers build.
 headless = [
     "bevy/std",
-    # Type names, which Bevy discards otherwise: without this a component can be found by name
+    # Type names, which Bevy discards otherwise. Without this a component can be found by name
     # but never reports one, and an editor showing an entity has nothing to label its rows with.
     "bevy/debug",
     "bevy/async_executor",
@@ -106,7 +106,7 @@ headless = [
     "bevy/reflect_auto_register",
 ]
 
-# Full desktop profile: a real window, Bevy's renderer and the winit input backend.
+# The full desktop profile, a real window, Bevy's renderer and the winit input backend.
 #
 # Deliberately assembled feature by feature rather than taking bevy/default_platform, which
 # links Wayland at build time. X11 gets in through x11-dl and Wayland through winit's dlopen, both
@@ -140,7 +140,7 @@ render = [
     "bevy/bevy_window",
     "bevy/bevy_render",
     "bevy/bevy_core_pipeline",
-    # Everything the camera does to the picture after the scene is drawn: bloom, depth of field,
+    # Everything the camera does to the picture after the scene is drawn, bloom, depth of field,
     # motion blur, and the antialiasing that runs as a pass rather than in the rasterizer. Both
     # are pure Rust and shaders, so neither adds a build dependency.
     "bevy/bevy_post_process",
@@ -181,7 +181,7 @@ render = [
     # groups nodes for a game's own bookkeeping without a box of its own, as Bevy's ghost_nodes
     # shows. A feature of the interface crate already built, which adds no crate.
     "bevy/ghost_nodes",
-    # Bevy's own widgets: its headless buttons, checkboxes, sliders, scroll bars and menus, and the
+    # Bevy's own widgets, its headless buttons, checkboxes, sliders, scroll bars and menus, and the
     # editable text a text field is, which lives with them because typing into one is input a
     # widget handles. They are added with the rest of Bevy's defaults. The interface's picking
     # comes with them, since a click gives a field its focus and drags a slider.
@@ -201,7 +201,7 @@ render = [
     "bevy/custom_cursor",
     "bevy/bevy_gizmos",
     "bevy/bevy_gizmos_render",
-    # Sound. Unlike everything else here this needs a system library at build time: cpal, which
+    # Sound. Unlike everything else here this needs a system library at build time, cpal, which
     # Bevy's audio sits on, links against ALSA on Linux. That is why it is in this profile and
     # not the minimal one, which stays buildable with nothing but a C compiler.
     # Real gamepads, found and read by gilrs. On Linux it reads them through libudev, whose
@@ -225,7 +225,7 @@ render = [
     # The tables a rectangular area light is shaded with, 46 kilobytes, embedded. Without them Bevy
     # draws no light from a RectLight and says so once.
     "bevy/area_light_luts",
-    # Windowing backends. Both are harmless off-platform: winit gates its X11 and Wayland
+    # Windowing backends. Both are harmless off-platform. Winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
     # the native window system is used instead.
     "bevy/x11",
@@ -254,7 +254,7 @@ serde = "1"
 wgpu = { version = "30", default-features = false, optional = true }
 # The weather behind `Config.Weather`, vendored as a member of the workspace.
 bevy_weather = { path = "../bevy_weather", default-features = false, optional = true }
-# Named directly for two things Bevy does not reach, on every platform: a window's icon, which
+# Named directly for two things Bevy does not reach, on every platform, a window's icon, which
 # winit sets on its own window (`Icon`, `set_window_icon`) and Bevy's `Window` carries none of,
 # and on Linux and the BSDs Wayland loaded at runtime. Bevy's `wayland` feature switches on
 # winit's Wayland backend, which by default links libwayland at build time and so needs the

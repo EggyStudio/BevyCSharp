@@ -260,13 +260,13 @@ Entity hall = default;
 Render.SetProbeCapture(hall, new ProbeCaptureSettings { Size = 256, Live = true });
 ```
 
-Six cameras at the probe's center draw the scene into the faces of a cube, and Bevy filters the
-cube into the probe's light on the GPU, so a mirror in the hall shows the hall as it is now,
-including whatever walks through it. That costs six more drawings of the scene a frame, which is
-why `Live = false` captures once instead, over the first frames after the scene has finished
-compiling, and `Render.RecaptureProbe` takes it again when the room changes. The faces are drawn at
-Bevy's default exposure and the default `Intensity` undoes it. The cameras see the probe's own
-light, so each capture reflects the last one and light bounces further each frame, which settles
+Six cameras at the probe's center draw the scene into the faces of a cube, and Bevy filters the cube
+into the probe's light on the GPU, so a mirror in the hall shows the hall as it is now, including
+whatever walks through it. That costs six more drawings of the scene a frame, which is why
+`Live = false` captures once instead, over the first frames after the scene has finished compiling,
+and `Render.RecaptureProbe` takes it again when the room changes. The faces are drawn at Bevy's
+default exposure and the default `Intensity` undoes it. The cameras see the probe's own light, so
+each capture reflects the last one and adds a reflection of a reflection each frame, which settles
 at that intensity and brightens without end well above it.
 
 ---

@@ -17,7 +17,7 @@ public sealed class DefaultPlugins : IPluginGroup
         yield return (new EnginePlugin(), 0);
         yield return (new BehaviorsPlugin(), 100);
 
-        // Inert unless Config.Serve or BCS_SERVE asks for it, so every app can be driven from a
+        // Inert unless Config.Serve or BCS_SERVE asks for it, so every app can be controlled from a
         // terminal and none pays for the possibility. Last, so the commands it serves are the ones
         // everything else has already registered.
         yield return (new CliPlugin(), 200);

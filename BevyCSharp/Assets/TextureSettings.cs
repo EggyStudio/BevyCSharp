@@ -34,7 +34,7 @@ public sealed class TextureSettings
     /// Whether the file holds color, in which case it is read as sRGB.
     /// </summary>
     /// <remarks>
-    /// Set false for a texture whose bytes are data rather than color: a normal map, a
+    /// Set false for a texture whose bytes are data rather than color, such as a normal map, a
     /// metallic-roughness map, an occlusion map. Reading one as sRGB bends every value in it.
     /// </remarks>
     public bool Srgb { get; set; } = true;

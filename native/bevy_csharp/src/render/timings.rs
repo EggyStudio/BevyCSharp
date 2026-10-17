@@ -70,7 +70,7 @@ fn collect(store: Option<bevy::ecs::system::Res<bevy::diagnostic::DiagnosticsSto
     }
 }
 
-/// Copies the last frame's render timings out, by the text convention, a line a pass: its name,
+/// Copies the last frame's render timings out, by the text convention, a line a pass, its name,
 /// then CPU and GPU milliseconds, apart by tabs, `-1` where there is none. Empty where the app did
 /// not ask for timings.
 ///

@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers meshes made in memory kept in files of their own: a primitive as its shape, a mesh built
+/// Covers meshes made in memory kept in files of their own, a primitive as its shape, a mesh built
 /// vertex by vertex as its geometry, each shared by the scene that refers to it.
 /// </summary>
 [Collection("engine")]

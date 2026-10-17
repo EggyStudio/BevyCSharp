@@ -11,7 +11,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// The console is the one part of a program that is expected to reach everything, and this is the
-/// whole of the mechanism: a name, a line of help, and something to run.
+/// whole of the mechanism, a name, a line of help, and something to run.
 /// </para>
 /// </remarks>
 public static class ConsoleCommands
@@ -91,9 +91,10 @@ public static class ConsoleCommands
 
         try
         {
-            // A command that takes the whole line is handed the whole line, spaces, quotes and
-            // all. Splitting it into words and joining them back up is lossy in exactly the cases
-            // that matter: a fragment of C# with a string literal in it, or a path with two spaces.
+            // A command that takes the whole line is handed the whole line, spaces, quotes and all.
+            // Splitting it into words and joining them back up is lossy in exactly the cases that
+            // matter, such as a fragment of C# with a string literal in it, or a path with two
+            // spaces.
             return command.Parameters is [{ TakesLine: true }]
                 ? command.Run([Unwrap(rest)])
                 : command.Run(Split(rest));

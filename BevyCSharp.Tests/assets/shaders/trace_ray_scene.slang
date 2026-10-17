@@ -1,6 +1,6 @@
 // Traces one ray a thread straight down from `height` through `scene`, a ray scene over a geometry
 // pool, along a row of points `spacing` apart centered on the origin, and writes what each met into
-// `hits`: the slot it hit, the pool mesh, the distance, and one, or all -1 where it met nothing.
+// `hits`, the slot it hit, the pool mesh, the distance, and one, or all -1 where it met nothing.
 
 import bcs_ray;
 

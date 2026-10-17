@@ -13,7 +13,7 @@ namespace Bevy;
 /// it did. <see cref="StepFrame"/> runs the next system of them in the next frame and
 /// <see cref="ContinueFrame"/> the rest of them, so a stepping frame of every stepped system can
 /// take many of the app's frames, and the app keeps drawing and reading input across them. Bevy's
-/// breakout example drives this from keys and its system_stepping from a script.
+/// breakout example steps this with keys, and its system_stepping from a script.
 /// </para>
 /// <para>
 /// Each call takes effect at the start of the next frame, as Bevy's does, so a call from a system

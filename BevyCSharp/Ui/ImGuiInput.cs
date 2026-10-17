@@ -9,9 +9,9 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// ImGui is told what happened rather than asked to look: a position, a button, a key, a character.
-/// The engine reports the state of things once a frame instead, so this turns one into the other,
-/// as every ImGui backend does.
+/// ImGui is told what happened rather than asked to look, a position, a button, a key or a
+/// character. The engine reports the state of things once a frame instead, so this turns one into
+/// the other, as every ImGui backend does.
 /// </para>
 /// <para>
 /// The keys mapped are the ones an interface acts on. A letter reaches a text field as the

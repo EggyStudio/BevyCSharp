@@ -32,7 +32,7 @@ public sealed class GBufferTests
     }
 
     /// <summary>
-    /// The faces the camera sees come out of the G-buffer with the normals they have: the fronts
+    /// The faces the camera sees come out of the G-buffer with the normals they have, the fronts
     /// facing it, and the tops facing up.
     /// </summary>
     [SkippableFact]
@@ -42,7 +42,7 @@ public sealed class GBufferTests
 
         var picture = Draw(show: 1);
 
-        // A normal mapped into a color and encoded: plus Z is (188, 188, 255), plus Y (188, 255, 188).
+        // A normal mapped into a color and encoded, plus Z is (188, 188, 255), plus Y (188, 255, 188).
         var front = 0;
         var top = 0;
 
@@ -276,7 +276,7 @@ public sealed class GBufferTests
     }
 
     /// <summary>
-    /// A pass sees Bevy's blue noise: many different values across the picture rather than the
+    /// A pass sees Bevy's blue noise, many different values across the picture rather than the
     /// gray that stands in for it, and a different layer on the next frame.
     /// </summary>
     [SkippableFact]

@@ -2,10 +2,10 @@
 
 Bevy's interface of nodes and text, laid out by flexbox and grid, and Dear ImGui for tools.
 
-An interface is **Dear ImGui**, running in C# and drawn by Bevy. Immediate mode: a call per widget
-per frame, no document to load, no binding to declare, and nothing to keep in step with the world.
-It is part of the library rather than part of the editor, so a game gets one by referencing
-`BevyCSharp` and nothing else.
+An interface is **Dear ImGui**, running in C# and drawn by Bevy. It works in immediate mode, a call
+per widget per frame, no document to load, no binding to declare, and nothing to keep in step with
+the world. It is part of the library rather than part of the editor, so a game gets one by
+referencing `BevyCSharp` and nothing else.
 
 <!-- compiled with:
 using ImGuiNET;
@@ -244,7 +244,7 @@ node that already exists rather than passed with one. `UiGrid.Set` also switches
 `UiDisplay.Grid`, so nothing has to say that twice.
 
 A ghost node groups nodes for a game's own reasons, a counter its buttons share or a part of the
-interface spawned and despawned whole, without a box of its own in the layout: its children are laid
+interface spawned and despawned whole, without a box of its own in the layout. Its children are laid
 out as though they were its parent's, in the parent's row or grid beside the parent's other
 children. It is Bevy's `GhostNode`, put on an entity of its own, as Bevy's ghost_nodes shows:
 
@@ -296,11 +296,11 @@ var menu = Ui.SpawnNode(new UiSettings { Display = UiDisplay.None });   // put a
 siblings up, and the second stops it drawing and leaves the hole. A screen that is toggled uses the
 first, and a health bar that blinks the second.
 
-`OverflowX` and `OverflowY` say what happens to contents past an edge: drawn anyway, clipped, or
-clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading the wheel
-like any other input and calling `Ui.SetScroll(list, 0f, offset)`. `ClipBox` says where the
-clipping falls, which for a list with a border is the difference between rows disappearing at the
-border and disappearing inside it, and `ClipMargin` pushes that line out by a few pixels for a
+`OverflowX` and `OverflowY` say what happens to contents past an edge, whether drawn anyway,
+clipped, or clipped and scrollable. Bevy has no scrolling of its own, so a list is moved by reading
+the wheel like any other input and calling `Ui.SetScroll(list, 0f, offset)`. `ClipBox` says where
+the clipping falls, which for a list with a border is the difference between rows disappearing at
+the border and disappearing inside it, and `ClipMargin` pushes that line out by a few pixels for a
 shadow or a focus ring. `ScrollbarWidth` keeps room at the far edge of an axis that scrolls, the
 right for a list that scrolls down, which nothing fills by itself, so a bar placed there, Bevy's
 `Scrollbar` widget below among them, sits beside the rows rather than over them.

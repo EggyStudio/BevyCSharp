@@ -169,7 +169,7 @@ pub unsafe extern "C" fn bcs_last_panic(out: *mut u8, capacity: i32) -> i32 {
     })
 }
 
-/// Panics on purpose, for a crash log to be tried: inside the guard when `guarded` is not zero,
+/// Panics on purpose, for a crash log to be tried, inside the guard when `guarded` is not zero,
 /// which answers a status, and otherwise on a thread of its own, which the hook writes as it
 /// happens and which ends that thread alone.
 #[unsafe(no_mangle)]

@@ -31,7 +31,7 @@ use bevy::ecs::world::{DeferredWorld, World};
 use crate::interop::status;
 use crate::state::with_world;
 
-/// What C# is called with when a component it registered a hook for leaves an entity: the
+/// What C# is called with when a component it registered a hook for leaves an entity, the
 /// entity's bits, the component id, and a pointer to the component's bytes, valid only for the
 /// call.
 pub type RemoveCallback = unsafe extern "C" fn(entity: u64, component: i32, data: *const u8);

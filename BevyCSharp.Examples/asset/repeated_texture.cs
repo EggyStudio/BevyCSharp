@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Assets;
 
-// Shows how an image repeats across a cube when its coordinates are scaled past one: in the middle
+// Shows how an image repeats across a cube when its coordinates are scaled past one, in the middle
 // the image once, on the left twice across and three times down sampled to repeat, and on the right
 // the same scaled image sampled as Bevy samples by default, stretching its last pixels.
 internal static class RepeatedTexture

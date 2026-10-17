@@ -1,5 +1,5 @@
 //! Bevy's Solari, lighting traced against the scene with hardware ray queries, direct light from
-//! every light and emissive surface, and indirect light bounced off everything, in real time.
+//! every light and emissive surface, and indirect light from everything, in real time.
 //!
 //! It is world-space global illumination and traced reflections as an engine ships them, and the
 //! reference a package doing either differently is weighed against. It sits behind the `solari`
@@ -142,7 +142,7 @@ pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>, path_
     ACTIVE.store(true, std::sync::atomic::Ordering::Relaxed);
 }
 
-/// Whether Solari is running: built in, asked for, and the adapter can trace rays. `1` or `0`.
+/// Whether Solari is running, built in, asked for, and the adapter can trace rays. `1` or `0`.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_ray_tracing_active() -> i32 {
     #[cfg(feature = "solari")]
@@ -228,7 +228,7 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
 }
 
 /// Makes an entity's mesh take part in ray tracing, reshaping the mesh the way Solari builds its
-/// structures from: exactly positions, normals, texture coordinates and tangents, which are worked
+/// structures from, exactly positions, normals, texture coordinates and tangents, which are worked
 /// out where it has none, thirty-two bit indices, and ray tracing enabled on it. A mesh with no
 /// texture coordinates is given coordinates and tangents of zero.
 ///

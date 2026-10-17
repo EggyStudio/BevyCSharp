@@ -5,13 +5,13 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers what a camera owns for the shaders that run on it: motion vectors, images kept from frame
+/// Covers what a camera owns for the shaders that run on it, motion vectors, images kept from frame
 /// to frame, compute run at a point in its frame, mip levels a level at a time, and dispatches
 /// whose size the GPU decides.
 /// </summary>
 /// <remarks>
 /// These are the pieces a screen-space technique is built from, so each test is a small version of
-/// one: a temporal accumulation, a depth pyramid, a compaction followed by the work it counted.
+/// one, a temporal accumulation, a depth pyramid, a compaction followed by the work it counted.
 /// </remarks>
 [Collection("engine")]
 public sealed class ViewShaderTests
@@ -202,7 +202,7 @@ public sealed class ViewShaderTests
     }
 
     /// <summary>
-    /// A camera asked for the depth pyramid hands it to its shaders whole: a power of two across,
+    /// A camera asked for the depth pyramid hands it to its shaders whole, a power of two across,
     /// every level down to one texel, the cube's depth at its middle, and the farthest depth of all
     /// at the top, which is the empty background's.
     /// </summary>

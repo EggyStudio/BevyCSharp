@@ -6,7 +6,7 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.TwoD;
 
-// Shows nine-slice sprites, two squares each drawn six ways: as they are, stretched, sliced so the
+// Shows nine-slice sprites, two squares each drawn six ways, as they are, stretched, sliced so the
 // corners keep their size, sliced with the middle and the sides tiled, wider, and with the corners
 // held small.
 internal static class SpriteSlice

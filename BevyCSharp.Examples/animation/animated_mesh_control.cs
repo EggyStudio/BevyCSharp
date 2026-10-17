@@ -5,7 +5,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Animations;
 
-// Plays the fox's run, walk and survey, controlled from the keyboard: paused and resumed, sped up
+// Plays the fox's run, walk and survey, controlled from the keyboard, paused and resumed, sped up
 // and slowed, moved back and forward, played a number of times or for ever, and changed for the
 // next with a quarter second's blend.
 internal static class AnimatedMeshControl

@@ -4,8 +4,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// A stage stepped one system at a time, as Bevy's system_stepping steps <c>Update</c>, driven from
-/// a stage that is not stepped as Bevy's breakout drives it from its own schedule.
+/// A stage stepped one system at a time, as Bevy's system_stepping steps <c>Update</c>, stepped
+/// from a stage that is not stepped, as Bevy's breakout steps it from its own schedule.
 /// </summary>
 [Collection("engine")]
 public sealed class SteppingTests

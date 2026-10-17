@@ -37,7 +37,7 @@ public sealed class AudioSettings
     /// </summary>
     /// <remarks>
     /// A spatial sound is heard from where its entity's <see cref="Transform"/> is, quieter with
-    /// distance and further to one side as it moves across. It takes two things: this, and an
+    /// distance and further to one side as it moves across. It takes two things, this and an
     /// entity to hear from, which <see cref="Audio.SetListener(Entity, float)"/> nominates.
     /// </remarks>
     public bool Spatial { get; set; }

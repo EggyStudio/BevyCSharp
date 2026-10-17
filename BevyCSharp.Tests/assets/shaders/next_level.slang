@@ -1,4 +1,4 @@
-// Builds the second level of a camera's pyramid from the first: the largest of each two by two,
+// Builds the second level of a camera's pyramid from the first, the largest of each two by two,
 // doubled, so a picture of it says the level was written from the one before.
 
 import bcs_pass;

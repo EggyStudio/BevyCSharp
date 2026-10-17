@@ -12,7 +12,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// The world being edited is meant to end up an asset that keeps its edits, and this is the half
-/// of that which can be honest today. It saves what this side can describe: an entity's name, and
+/// of that which can be honest today. It saves what this side can describe, an entity's name, and
 /// every component with a <see cref="ComponentSchema"/>, field by field.
 /// </para>
 /// <para>

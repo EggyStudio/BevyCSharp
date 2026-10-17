@@ -1,4 +1,4 @@
-// Bevy's screen_space_texture_material shader in Slang: a black, polished metal surface that gives
+// Bevy's screen_space_texture_material shader in Slang, a black, polished metal surface that gives
 // off light read from an image at the pixel it is drawn on, rather than at its UVs, so what a second
 // camera drew shows through it as through a window.
 import bcs;

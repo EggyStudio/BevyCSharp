@@ -1,4 +1,4 @@
-// What an interface is made of: clipped, textured triangles in screen space.
+// What an interface is made of, clipped, textured triangles in screen space.
 //
 // The whole of the backend's shading. ImGui hands over triangles whose colors somebody typed into a
 // palette, so they are sRGB; the target this draws into is linear, and the conversion belongs here

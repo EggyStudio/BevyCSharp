@@ -6,7 +6,7 @@ using Bevy;
 
 namespace BevyCSharp.Examples.Shading;
 
-// Demonstrates Bevy's standard material extended by a shader of its own: a red sphere lit as the
+// Demonstrates Bevy's standard material extended by a shader of its own, a red sphere lit as the
 // standard material lights it, with its color changed before the lighting and the lit color cut
 // into steps after it, under a light that circles it.
 //

@@ -1,5 +1,5 @@
 // Traces one ray a thread straight down from `height` onto the scene Solari keeps, along a row of
-// points `spacing` apart centered on the origin, and writes what each met into `hits`: the
+// points `spacing` apart centered on the origin, and writes what each met into `hits`, the
 // surface's base color and the distance to it, or all -1 where the ray met nothing.
 
 import bcs_ray;

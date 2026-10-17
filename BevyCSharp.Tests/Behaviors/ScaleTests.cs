@@ -8,7 +8,7 @@ namespace Bevy.Tests;
 /// A behavior with enough entities to cross the parallel threshold.
 /// </summary>
 /// <remarks>
-/// The count matters: <see cref="BehaviorRunners.DefaultParallelThreshold"/> decides whether
+/// The count matters. <see cref="BehaviorRunners.DefaultParallelThreshold"/> decides whether
 /// iteration is split across the thread pool, and the two paths are different code. This
 /// behavior is deliberately spawned above the threshold so the parallel path is the one under
 /// test.
@@ -87,7 +87,7 @@ public sealed class ScaleTests
         Assert.Equal(ParticleCount, ticks.Count);
         Assert.True(entityBindingsCorrect, "A behavior saw the wrong entity for its component.");
 
-        // Every entity must have been visited the same number of times: no double-counting
+        // Every entity must have been visited the same number of times, no double-counting
         // across partition boundaries, and nothing skipped.
         Assert.All(ticks, t => Assert.Equal(ticks[0], t));
         Assert.True(ticks[0] >= 3, $"expected at least 3 ticks, saw {ticks[0]}");

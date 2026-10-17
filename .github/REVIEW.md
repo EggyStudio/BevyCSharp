@@ -10,7 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `85df443c`, Verdict 25 mended and nothing else, as Decision 35 asks.
+Reviewed up to `1d246e9f`, item 24 done and nothing else, as Decision 35 asks. The `docs` job and
+the head comment's line on it are gone from `build.yml`, the paths filter's comment naming the
+suite's test where it named the job; the two facts went into `DocsScriptTests`, the class listed for
+the docs scripts, so no line joined `build/norm/1.4.txt`: the first runs `build/check-docs.py`
+without `--external` over the checkout, and the second runs a copy of the script in a checkout of
+its own whose README links a page that is not there and whose page links a heading it lacks, the
+check ending with 1 and naming both and neither of the good ones. BUILDING.md's push paragraph names
+the test, the sentence on a push of the README alone is gone, and the guide's section says the suite
+runs the script without `--external` and the hand run before a package with it. Checked on the
+working machine: `DocsScriptTests`, `NormTests`, `WorkflowTests` and the script tests, 64 of 64.
+Right. Item 25, the register, is under way with limits the coder named and that hold: AGENTS.md
+waits for the owner's word given in that session (N 7.4), the reviewer's files, ASKS.md, the
+notices, the vendored weather crate, EXAMPLES.md's descriptions written from Bevy's metadata,
+generated files and identifiers stay, and a technical sense stays too, a joint's drive, a GPU
+driver, a physics bounce, a path tracer's bounces. The owner pushed `1d246e9f` at 15:17, its run
+under way at 15:23. In the pack run of `b178ae3f` the course's job passed in 72 minutes with its
+fifteen-minute soak of the feature test, and the one capture job was still running at its 75th
+minute, the pack run on `85df443c` queued behind it. That capture job ran to its end in 77 minutes
+and failed on 14 differences and 4 captures, Verdict 26, which is Verdict 22's mend at work and the
+runner's own differences left; the pack run on `85df443c` began at 15:28, its bridges, suites, storm
+and README walk green by 15:55 and its four capture shards, play job and course job running. The
+push run of `1d246e9f` was whole green at 15:35.
+
+Before it, `85df443c` came, Verdict 25 mended and nothing else, as Decision 35 asks.
 `build/capture-examples.sh` takes `--shard <n>/<count>` after the folder and captures every count-th
 example from the n-th, refusing a shard outside one to count, and takes `CAPTURE_MINUTES` as
 3DEngine's script does, starting no example once the minutes are gone and ending with an error that
@@ -67,21 +90,6 @@ docs green at 13:50 with Windows and macOS running. Item 23 is done when that ru
 `digest` and `docs` green with the rest skipped and the pack run every job green and the package's
 artifact, which is Decision 35's gate for this engine; the play job's hour holds seven and a half
 minutes more of soak and the `drive` job is near 70 of its 90.
-
-Before it, `5e01491e` came, the one thing left in `50470331` done and nothing else: the play job
-fetches `slangc` before it builds the feature test for the soak, with the line of comment the
-`drive` and `examples` jobs have. The whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18.
-Right. The owner pushed `50470331` and `5e01491e` at 11:40, two runs at once; the first was
-cancelled at its start by the workflow's own rule with the second going on, and the run of
-`5e01491e` was whole green, Linux in 12 minutes, Windows 14, macOS 11, the third of Decision 33's
-three. The pack run on it, started at 11:58, built the six bridges, passed the Linux and macOS
-suites, the storm, which settled Verdict 21, and the README walk, and failed its Windows suite on
-one test, Verdict 23, and its play job at the soak, Verdict 24, so the pack job was skipped; the
-`drive` job passed in 56 minutes, which settled Verdict 20, and the capture job was under way at
-13:23. The same day the owner ordered two workflows an engine, with the tester zips and the scene
-packs as runs on the owner's machine (Decisions 34 and 35, item 23); the rework is the first work
-after Verdicts 23 and 24 are mended, and a green push and a green pack run under the new workflows
-are Decision 33's gate before features resume.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -620,15 +628,15 @@ from [SHARED.md](SHARED.md).
     norm's and SHARED.md's lines are the reviewer's and ride with the commit.
 
 24. **The docs job leaves the build workflow (Decision 36); the repository's own links are a test of
-    the suite.** The `docs` job and its `build/check-docs.py --external` go from `build.yml`, with
-    the head comment's line on it; a test of the suite, `DocumentLinkTests` as 3DEngine names its
-    own, runs `build/check-docs.py` without `--external`, so every link of the README and the guide
-    into the repository is held to a file and a heading that are there, with no request made (N
-    4.3), and the script's `--external` stays for a run by hand before a package. BUILDING.md:339,
-    347 and 513 say the suite's test and the hand run where they said the job, and the push
-    paragraph's sentence that a push of the README alone runs the docs job goes with it. Checked by
-    the test passing here and failing on a link to a page that is not there, `WorkflowTests`,
-    `NormTests`, and the push run showing `test`, `digest` and nothing else.
+    the suite; done at `1d246e9f`.** The `docs` job and its `build/check-docs.py --external` go from
+    `build.yml`, with the head comment's line on it; a test of the suite, in `DocsScriptTests`, runs
+    `build/check-docs.py` without `--external`, so every link of the README and the guide into the
+    repository is held to a file and a heading that are there, with no request made (N 4.3), and the
+    script's `--external` stays for a run by hand before a package. BUILDING.md:339, 347 and 513 say
+    the suite's test and the hand run where they said the job, and the push paragraph's sentence
+    that a push of the README alone runs the docs job goes with it. Checked by the test passing here
+    and failing on a link to a page that is not there, `WorkflowTests`, `NormTests`, and the push
+    run showing `test`, `digest` and nothing else.
 
 25. **The register: STYLE.md's rule and the sweep (Decision 37), after item 24.** STYLE.md gains a
     section, Register: prose uses the technical and generic term, the engine's own where it has one,
@@ -729,6 +737,28 @@ games.
     within the hour, four shards where one took past 90 minutes. Settled when the capture jobs pass
     in a pack run. Mended at `85df443c`: the budget taken by the script, four shards of 90 examples
     each with 60 minutes and a budget of 40, each comparing and uploading its own.
+
+26. **Eighteen captures stand between the runner and the checked-in pictures once Bevy's files are
+    in place.** On the pack run of `b178ae3f`, 2026-10-17, the one capture job ran 77 minutes to its
+    end with Bevy's files and `slangc` in place, where the 58 blank captures of `d2a20b6a` are three
+    and the 152 differences fourteen, which is Verdict 22's mend at work. What stands: `decodable`,
+    `pitch` and `many_meshlet_materials` blank and `clustered_decals` not captured; `meshlet`,
+    `test_meshlet`, `solari` and `solari_reflections` apart by 29 to 96 percent, drawn with features
+    lavapipe has not, meshlets and ray queries; `many_lights` apart by 84 where 40 is allowed,
+    `many_foxes` by 10, `removal_detection` by 6, `many_cubes` by 4 and `async_compute` by 2.2 where
+    2 is; `change_detection`, `ecs_guide` and `system_closure` printing 5 to 65 percent of their
+    lines otherwise; and `resizing` and `window_settings` captured at their windows' sizes, 401 by
+    401 and 500 by 300, where the script scales a capture of another shape to 1280 by 720 through
+    ImageMagick, which the runner has not, so the `cwebp` fallback kept the size. Four things: an
+    example drawn with a feature the device lacks, meshlets or ray queries, is captured with the
+    words that say so and compared with nothing, by the device's own answer; the printed examples'
+    lines read for what varies between runs, an entity's id or a system's order, and the print made
+    the same each run or the comparison taught the lines that vary; the job installing ImageMagick
+    so a capture of another shape is scaled as the script means, or the script scaling with Python's
+    own; and the rest read one by one from the run's `examples` artifact, each difference the
+    runner's own allowed in `build/captures-differ.txt` with its share and reason or a fault mended,
+    `clustered_decals`' failed shot and the two audio examples' blank pictures read from their logs.
+    Settled when the capture jobs pass in a pack run.
 
 ## Decisions
 
@@ -953,13 +983,33 @@ games.
 
 ## Replies
 
-**Item 24.** The `docs` job and the head comment's line on it are gone from `build.yml`, the paths
-filter's comment naming the suite's test where it named the job. `DocsScriptTests` runs
-`build/check-docs.py` without `--external` over the checkout, and runs a copy of it in a checkout of
-its own whose README links a page that is not there and whose page links a heading it lacks, the
-check ending with 1 and naming both and neither the page nor the heading that are there.
-BUILDING.md's push paragraph names the test, the sentence on a push of the README alone is gone, and
-its section on the guide says the suite runs the script without `--external` and the hand run before
-a package with it. `DocsScriptTests`, `NormTests`, `WorkflowTests` and the script tests passed 64 of
-64; the whole suite before the two facts moved out of `Docs/DocumentLinkTests.cs` passed but for
-`N_1_4`, which the move answers.
+Item 24: done at `1d246e9f`.
+
+**Item 25.** STYLE.md gains Register after the game repository's at `b87e386`, with this engine's
+pairs and names, the technical senses kept (a GPU's driver, a joint's drive, a body that bounces, a
+path tracer's bounces) and the identifiers (`build/drive-feature-test.sh`, the `drive` job,
+`--drive`, `Drives`, `Drive:`, `EditorBoot.Drive`, the `Test.Drive` systems,
+`PhysicsMaterial.Bounce`, `SolariLightingRef.MaxBounces`, `PostSettings.Glow`, the test
+`AGlowingWallLightsTheFloorWhenRaysAreTraced`). Its colon rule is the game's, with this engine's
+examples, and its checks are the game's two, a grep over comments and scripts and an awk over the
+Markdown outside its code, beside the register's grep. The sweep reworded some 150 lines of drive
+words, 46 of the light words and the colons of 105 Markdown lines and some 630 comment lines, in the
+library, the editor, the examples, the feature test, the tests, the scripts, the workflows and the
+bridge's Rust, WGSL and Slang, and the 21 comments whose line ended in a colon that ran on into
+prose; a colon before a list, a code block or a command set below, a label in a table, a named
+argument in code and the guide's `<!-- compiled with:` markers stay. The headings
+`Driving a running app` in the README and `docs/tools.md` are `Controlling a running app`, their
+links with them, `.github/BCS.md` is titled `Controlling a running BevyCSharp app with bcs`, the
+`drive` job shows as `run the feature test's course`, `bcs` prints
+`controls a running BevyCSharp app` and the serving line `Control it with`, and the course script
+prints `[course]` where it printed `[drive]`. The README's first program and the template's
+`Spin.cs` say what a static and an instance method do in a sentence, where they said `static:` and
+`instance:`, the two kept the same. Left as they are: AGENTS.md, which changes here only on the
+owner's word given in this session, so its `drive the live session` and its row on `BevyCSharp.Cli`
+wait for that word; the colons in strings a program prints, which tests and scripts read; and the
+comments of `native/bevy_weather`, which is vendored. CHEATSHEET.md is written again from the
+library's documentation, and the bridge was built again, its sources' comments changed. The bridge's
+headless profile checked clean and its editor profile, with meshlets and Solari, built in the
+container; the render profile's check needs libudev's headers, which this machine has only in the
+container. The whole suite passed, and `DocsScriptTests` follows the renamed headings' links.
+

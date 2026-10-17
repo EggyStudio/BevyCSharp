@@ -27,9 +27,9 @@ pub enum Stage {
     Cleanup = 7,
     /// Bevy's fixed timestep, run zero or more times a frame, each covering the same slice of time.
     FixedUpdate = 10,
-    /// Internal: mirrors Bevy's time and input into C#, ahead of every user system.
+    /// Internal, it mirrors Bevy's time and input into C#, ahead of every user system.
     FrameSync = 8,
-    /// Internal: applies the managed command buffer, after every user `PostUpdate` system.
+    /// Internal, it applies the managed command buffer, after every user `PostUpdate` system.
     CommandFlush = 9,
 }
 
@@ -57,8 +57,8 @@ impl Stage {
 /// Orders the C# systems Bevy cannot order for itself.
 ///
 /// Every C# system is an exclusive system, so Bevy serializes them but leaves the order
-/// unspecified. These sets pin down the three places where order actually matters:
-/// the frame-state sync must precede all user work, the command flush must follow all
+/// unspecified. These sets pin down the three places where order actually matters.
+/// The frame-state sync must precede all user work, the command flush must follow all
 /// user `PostUpdate` work, and `Stage.Render` must precede `Stage.Last`.
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum BcsSet {

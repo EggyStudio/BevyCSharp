@@ -57,7 +57,7 @@ internal static class Output
                     Console.WriteLine($"error [{error.Code}] {error.Message}");
                 }
 
-                // A failure can still carry a payload worth seeing: what a command answered before
+                // A failure can still carry a payload worth seeing, what a command answered before
                 // it said it had failed, or the candidates an ambiguous session listed.
                 Payload(root, human, options);
                 return Exit.For(Code(root));
@@ -129,7 +129,7 @@ internal static class Output
             return;
         }
 
-        // The default reading: what the command answered, which is the whole of it for most.
+        // The default reading, what the command answered, which is the whole of it for most.
         if (data.TryGetProperty("result", out var result)
             && result.ValueKind == JsonValueKind.String)
         {

@@ -215,7 +215,7 @@ pub unsafe extern "C" fn bcs_monitor_mode(
 /// [`bcs_window_set_mode`](super::bcs_window_set_mode) takes the mode the monitor is already in, which avoids a switch the
 /// compositor has to undo on every alt-tab. This is the other case, where a game needs to run at a
 /// resolution the desktop is not in, and it asks for one of the modes [`bcs_monitor_mode`]
-/// described rather than for arbitrary numbers, because a monitor can only be driven at the modes
+/// described rather than for arbitrary numbers, because a monitor can only run at the modes
 /// it offers.
 ///
 /// Returns [`status::NO_ENTITY`] where there is no such monitor and [`status::NOT_PRESENT`] where

@@ -4,7 +4,7 @@
 //! its bind group layout, and its 2D renderer below that trait draws from a `MaterialProperties`
 //! per material, as the 3D one does. So this is a material type that implements that layer
 //! directly, every material bringing the layout its program's 2D stages declare, and the systems
-//! below do what `Material2dPlugin` does for a type: an allocator entry, extraction of which entity
+//! below do what `Material2dPlugin` does for a type, an allocator entry, extraction of which entity
 //! is drawn with which material, and telling the specializer which entities changed.
 //!
 //! The asset holds a [`BcsMaterial`], so values are set on a 2D material by name exactly as on a

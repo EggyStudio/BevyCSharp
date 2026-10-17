@@ -252,7 +252,7 @@ public struct NativeUiNodeConfig
     /// <summary>Unit of <see cref="CornerBottomLeft"/>.</summary>
     public int CornerBottomLeftUnit;
 
-    /// <summary>What the sizes measure: 0 the border box, 1 the content box.</summary>
+    /// <summary>What the sizes measure, 0 for the border box and 1 for the content box.</summary>
     public int BoxSizing;
 
     /// <summary>Which camera draws this node, or zero for the one drawing to the window.</summary>

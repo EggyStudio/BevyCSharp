@@ -1,4 +1,4 @@
-// A pass comparing the picture with last frame's copy of it, which is half its size: red where the picture is more red than
+// A pass comparing the picture with last frame's copy of it, which is half its size, red where the picture is more red than
 // green now, green where the copy was, and blue wherever the copy holds anything at all.
 
 import bcs_pass;

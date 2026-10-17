@@ -229,7 +229,7 @@ internal static class Thumbnails
         _writing = writing with { Frames = writing.Frames + 1 };
     }
 
-    /// <summary>What a file is drawn as: a model as its scene, a mesh file alone, a material file on a sphere.</summary>
+    /// <summary>What a file is drawn as, a model as its scene, a mesh file alone, a material file on a sphere.</summary>
     private static PreviewSubject? Subject(string file)
     {
         try

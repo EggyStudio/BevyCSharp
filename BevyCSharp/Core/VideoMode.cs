@@ -3,11 +3,11 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// One video mode a monitor can be driven at.
+/// One video mode a monitor can run at.
 /// </summary>
 /// <remarks>
 /// A resolution, a color depth and a refresh rate together, which exclusive fullscreen takes the
-/// screen over with. A monitor offers a fixed list of these and can be driven at no others, so a
+/// screen over with. A monitor offers a fixed list of these and can run at no others, so a
 /// settings screen offers what <see cref="Window.MonitorModes"/> returns rather than a pair of
 /// number boxes.
 /// </remarks>

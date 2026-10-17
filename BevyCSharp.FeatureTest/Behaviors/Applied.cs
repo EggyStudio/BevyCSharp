@@ -33,7 +33,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </para>
 /// <para>
 /// Where the weather runs, the sky is the weather's and the backdrop is left alone. Its tier and
-/// whether the forecast drives it go on its resources, and with the forecast off, the kind of
+/// whether the forecast sets it go on its resources, and with the forecast off, the kind of
 /// weather is set as a preset, eased into, with the cloud cover over it. A kind chosen on the panel
 /// brings its own cover, which the panel then shows, and the cover saved with the settings is the
 /// one a run starts with.

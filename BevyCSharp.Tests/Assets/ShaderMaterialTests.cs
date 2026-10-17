@@ -6,7 +6,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers materials drawn by shaders the game wrote in Slang: that they draw, reload, fail
+/// Covers materials drawn by shaders the game wrote in Slang, that they draw, reload, fail
 /// visibly, and answer for themselves.
 /// </summary>
 /// <remarks>
@@ -352,7 +352,7 @@ public sealed class ShaderMaterialTests
     /// drew rather than of the mesh it started as.
     /// </summary>
     /// <remarks>
-    /// A ball held above a floor under a light shining straight down, drawn swollen, twice: once by
+    /// A ball held above a floor under a light shining straight down, drawn swollen, twice, once by
     /// a program whose prepass moves the vertices the same way, and once by one that leaves the
     /// prepass to Bevy. What is counted is the dark floor, which is the shadow.
     /// </remarks>

@@ -14,7 +14,7 @@ using Tonemapping = Bevy.Reflected.TonemappingRef.ValueVariant;
 // arrow keys.
 internal static class TonemappingExample
 {
-    // One method's grading: exposure, gamma, saturation before tonemapping and after it.
+    // One method's grading, exposure, gamma, saturation before tonemapping and after it.
     private sealed record Grading(float Exposure = 0f, float Gamma = 1f, float PreSaturation = 1f, float PostSaturation = 1f);
 
     private static readonly Tonemapping[] Methods =

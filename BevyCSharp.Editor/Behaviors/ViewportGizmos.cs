@@ -4,7 +4,7 @@ using BevyCSharp.Editor.Framework;
 namespace BevyCSharp.Editor.Behaviors;
 
 /// <summary>
-/// What the editor draws into the scene: the selection, its handles, and which way the camera is
+/// What the editor draws into the scene, the selection, its handles, and which way the camera is
 /// pointing.
 /// </summary>
 /// <remarks>
@@ -211,7 +211,7 @@ public partial struct ViewportGizmos
     /// <para>
     /// One question asked of each spacing on its own, which makes the change between two of them
     /// impossible to catch happening. A spacing is at full strength when its cells are the size the
-    /// height calls for, and fades away over the decade on either side of that: out below, as the
+    /// height calls for, and fades away over the decade on either side of that, out below, as the
     /// cells shrink toward nothing, and <em>in</em> from above, as they come down from being too
     /// large to be a grid at all.
     /// </para>
@@ -326,7 +326,7 @@ public partial struct ViewportGizmos
     }
 
     /// <summary>
-    /// What a grid line looks like at a world position: every tenth one brighter than its
+    /// What a grid line looks like at a world position, every tenth one brighter than its
     /// neighbors, and anything else plain.
     /// </summary>
     /// <remarks>
@@ -362,7 +362,7 @@ public partial struct ViewportGizmos
         (float R, float G, float B, float A) color, float strength) =>
         (color.R, color.G, color.B, MathF.Min(1f, color.A * strength));
 
-    /// <summary>What an ordinary grid line is: white, at whatever strength it has left.</summary>
+    /// <summary>What an ordinary grid line is, white, at whatever strength it has left.</summary>
     private static (float R, float G, float B, float A) Gray(float strength) =>
         (0.72f, 0.74f, 0.80f, strength);
 
@@ -373,7 +373,7 @@ public partial struct ViewportGizmos
 
         var held = TransformGizmo.Axis;
 
-        // The middle handle, which is the one that does not pick an axis: a drag across the screen
+        // The middle handle, which is the one that does not pick an axis, a drag across the screen
         // for a move, a turn about whatever way the pointer went for a rotation, and every axis at
         // once for a scale. Drawn first so the arms are over it rather than under.
         // Everything solid is drawn at a size in pixels, so how densely it has to be filled is
@@ -433,7 +433,7 @@ public partial struct ViewportGizmos
     /// <summary>How wide that head is at its base, as a fraction of its length.</summary>
     private const float ArrowWidth = 0.42f;
 
-    /// <summary>The middle handle when it is not held: no axis, so no axis color.</summary>
+    /// <summary>The middle handle when it is not held, with no axis and so no axis color.</summary>
     private static readonly (float R, float G, float B, float A) Middle = (0.85f, 0.85f, 0.88f, 1f);
 
     /// <summary>Which way the camera is pointing, in the world.</summary>
@@ -449,7 +449,7 @@ public partial struct ViewportGizmos
     /// <para>
     /// Filled rather than outlined, because a ring in the middle of three arms reads as a fourth
     /// thing to aim at the edge of rather than as one thing to press. There is nothing to draw
-    /// with but lines, so it is filled the way a pen fills a circle: rings from the middle out,
+    /// with but lines, so it is filled the way a pen fills a circle, rings from the middle out,
     /// each a little wider than the last, and spokes across them.
     /// </para>
     /// <para>
@@ -566,7 +566,7 @@ public partial struct ViewportGizmos
         Math.Clamp((int)(MathF.Tau * pixels / Covered), 12, 96);
 
     /// <summary>
-    /// How far a handle reaches: whatever a fixed number of pixels is worth where the thing is.
+    /// How far a handle reaches, whatever a fixed number of pixels is worth where the thing is.
     /// </summary>
     /// <remarks>
     /// A handle is a control, not a part of the scene, and a control is the size a hand needs it

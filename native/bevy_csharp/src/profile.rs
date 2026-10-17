@@ -181,7 +181,7 @@ fn mark<const I: usize>(mut clock: ResMut<RenderClock>) {
 }
 
 /// Puts clock systems at the two ends of the render schedule, which runs beside the main one on a
-/// thread of its own, so its whole time is seen and not only the passes the GPU timings name:
+/// thread of its own, so its whole time is seen and not only the passes the GPU timings name,
 /// preparing what was extracted, queuing it, submitting it, and waiting on the GPU where it waits.
 #[cfg(feature = "render")]
 pub fn install_render(app: &mut App) {

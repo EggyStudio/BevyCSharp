@@ -1,4 +1,4 @@
-// Writes the level below from the level above: the largest of each two by two, doubled.
+// Writes the level below from the level above, the largest of each two by two, doubled.
 
 import bcs_compute;
 

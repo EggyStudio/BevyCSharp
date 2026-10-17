@@ -91,7 +91,7 @@ public partial struct Zones
 
     /// <summary>
     /// Puts the spectator camera at a point looking at another, for a picture of one thing in a
-    /// zone, as the drive script takes them.
+    /// zone, as build/drive-feature-test.sh takes them.
     /// </summary>
     /// <remarks>
     /// Refused outside spectator mode, where the camera is the player's and would be put back at

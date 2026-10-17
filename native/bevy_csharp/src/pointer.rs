@@ -304,7 +304,7 @@ static NEXT_POINTER: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU
 
 /// Spawns a pointer of the game's own, Bevy's `PointerId::Custom`, and writes its number.
 ///
-/// A pointer a game drives itself, as one moving over an interface drawn into a texture on a
+/// A pointer a game moves itself, as one moving over an interface drawn into a texture on a
 /// cube, which the game moves to where a ray from the mouse meets the cube. Bevy finds what it is
 /// over as it finds what the mouse is over, wherever [`bcs_pointer_input`] puts it.
 ///
@@ -394,7 +394,7 @@ pub extern "C" fn bcs_pointer_input(number: u64, image: i32, x: f32, y: f32, act
     })
 }
 
-/// The pointer Bevy knows by the kind and number C# reports it under: `0` the mouse, `1` a touch by
+/// The pointer Bevy knows by the kind and number C# reports it under, `0` the mouse, `1` a touch by
 /// its finger, `2` a pointer [`bcs_pointer_spawn`] made, by its number.
 #[cfg(feature = "render")]
 fn pointer_id(kind: i32, number: u64) -> Option<bevy::picking::pointer::PointerId> {

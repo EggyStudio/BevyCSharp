@@ -24,7 +24,7 @@ pub fn install(app: &mut bevy::app::App) {
     );
 }
 
-/// The mode a see-through window is composited in, out of those its surface offers: premultiplied,
+/// The mode a see-through window is composited in, out of those its surface offers, premultiplied,
 /// since a camera and the interface write that, then straight, then opaque.
 ///
 /// Opaque last and always, because Bevy configures a surface with whatever mode the window asked

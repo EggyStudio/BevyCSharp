@@ -190,8 +190,8 @@ impl AssetHandles {
 
 /// Takes ownership of a handle and returns the value C# will refer to it by.
 ///
-/// Used by assets built in memory rather than loaded from a file: a mesh, a material, an atlas
-/// layout.
+/// Used by assets built in memory rather than loaded from a file, such as a mesh, a material, an
+/// atlas layout.
 pub(crate) fn insert_handle(world: &mut World, handle: UntypedHandle) -> i32 {
     world.get_resource_or_init::<AssetHandles>().insert(handle)
 }
@@ -270,7 +270,7 @@ fn load(world: &mut World, kind: &str, path: &str) -> i32 {
 
 /// Starts loading an asset and returns the handle C# refers to it by.
 ///
-/// Returns a negative status on failure: [`status::NO_COMPONENT`] when the kind is not one this
+/// Returns a negative status on failure, [`status::NO_COMPONENT`] when the kind is not one this
 /// build knows, [`status::UNSUPPORTED`] when the app has no asset server.
 ///
 /// # Safety

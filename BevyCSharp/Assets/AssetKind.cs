@@ -20,7 +20,7 @@ public static class AssetKind
     public const string StandardMaterial = "StandardMaterial";
 
     /// <summary>
-    /// A whole glTF file: its meshes, materials and nodes. Render builds only.
+    /// A whole glTF file, its meshes, materials and nodes. Render builds only.
     /// </summary>
     /// <remarks>
     /// The description of a model rather than anything drawable. To draw part of one, load that
@@ -29,7 +29,7 @@ public static class AssetKind
     public const string Gltf = "Gltf";
 
     /// <summary>
-    /// A sound: Ogg Vorbis, WAV, FLAC or MP3. Render builds only.
+    /// A sound in Ogg Vorbis, WAV, FLAC or MP3. Render builds only.
     /// </summary>
     /// <remarks>
     /// Play it with <see cref="Audio.Play(AssetHandle, AudioSettings)"/>. Sound belongs to the

@@ -544,7 +544,7 @@ public sealed class RenderControlTests
     [SkippableFact]
     public void TwoCamerasCanSplitTheWindow()
     {
-        // Splitscreen: the same scene drawn twice, each into half the framebuffer. The second
+        // Splitscreen, the same scene drawn twice, each into half the framebuffer. The second
         // camera must not clear, or it would wipe out the first one's half.
         using var harness = new EngineHarness(frames: 2);
         Needs.Renderer();

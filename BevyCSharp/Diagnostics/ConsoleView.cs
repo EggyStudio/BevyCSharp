@@ -131,7 +131,7 @@ public sealed class ConsoleView
     }
 
     /// <summary>
-    /// The commands whose answers are not ready yet: what each is called, what to ask, and the
+    /// The commands whose answers are not ready yet, what each is called, what to ask, and the
     /// frame it is given up at. Shared by every console view, since an answer belongs to the log.
     /// </summary>
     private static readonly List<(string Name, Func<string?> Poll, ulong GiveUp)> Waiting = [];

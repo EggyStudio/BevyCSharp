@@ -5,7 +5,7 @@ using ImGuiNET;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// The editor's menu: which branch is up, where it was asked for, and the rows in it.
+/// The editor's menu, which branch is up, where it was asked for, and the rows in it.
 /// </summary>
 /// <remarks>
 /// A popup belongs to the frame it is opened in, so what somebody asks for is remembered here and

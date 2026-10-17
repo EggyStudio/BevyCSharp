@@ -7,7 +7,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// These are the ones about the app rather than about the console: what is in the world, what it
+/// These are the ones about the app rather than about the console, what is in the world, what it
 /// looks like, and what happens when something is clicked. They exist because the alternative is a
 /// process per question. Starting an app to ask what an entity's position is costs a second of
 /// startup, a fresh world, and a guess at which frame to ask on; asking one that is already running
@@ -435,7 +435,7 @@ internal static partial class ConsoleWorldCommands
 
     /// <summary>Sets the seconds each frame advances the clock by, or lets the machine's clock run.</summary>
     /// <remarks>
-    /// So a session is driven by frames, as a test is, and <c>frames.wait 60</c> after
+    /// So a session is scripted in frames, as a test is, and <c>frames.wait 60</c> after
     /// <c>app.frametime 0.016666</c> is a second of the game whatever the machine took.
     /// </remarks>
     [Command("app.frametime", "Seconds each frame advances the clock by, or off for the machine's clock: app.frametime [seconds|off]")]

@@ -495,7 +495,7 @@ pub extern "C" fn bcs_window_start_drag_move(window: u64) -> i32 {
 /// Hands the window to the platform to be resized by the pointer from one edge or corner, from a
 /// button that is held now until it is let go.
 ///
-/// `edge` counts clockwise from the top: `0` north, `1` north-east, `2` east, `3` south-east,
+/// `edge` counts clockwise from the top, `0` north, `1` north-east, `2` east, `3` south-east,
 /// `4` south, `5` south-west, `6` west, `7` north-west. A window without the platform's border
 /// has no edge the platform will resize it by, so an app that draws its own frame calls this from
 /// the edges of it. Called on the press, like a drag move.

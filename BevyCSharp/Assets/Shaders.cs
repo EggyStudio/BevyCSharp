@@ -390,7 +390,7 @@ public static unsafe partial class Shaders
     /// </remarks>
     /// <param name="program">The program that draws it.</param>
     /// <param name="alpha">
-    /// Which of Bevy's 2D passes draws it: the opaque one, the alpha-masked one, where the fragment
+    /// Which of Bevy's 2D passes draws it, the opaque one, the alpha-masked one, where the fragment
     /// shader discards what it leaves undrawn, as Bevy's own 2D materials do, or the blended one,
     /// which mixes it with what is behind by its alpha. None draws a 2D mesh opaque and a sprite as
     /// the sprite's own alpha mode says, as a Bevy sprite material naming no alpha mode does.

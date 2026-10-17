@@ -146,7 +146,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>
-    /// Checks a mesh's streams before they cross: each named, at a location of the streams' range no
+    /// Checks a mesh's streams before they cross, each named, at a location of the streams' range no
     /// other takes, and the length its format and the vertices make.
     /// </summary>
     private static void CheckStreams(MeshStream[] streams, int count)

@@ -8,7 +8,7 @@
 
 use crate::interop::status;
 
-/// What was asked and not yet put on: each window's entity and the image for it.
+/// What was asked and not yet put on, each window's entity and the image for it.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
 struct Pending(Vec<(bevy::ecs::entity::Entity, bevy::asset::Handle<bevy::image::Image>)>);

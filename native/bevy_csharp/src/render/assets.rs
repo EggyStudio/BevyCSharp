@@ -12,10 +12,10 @@ use crate::state::with_world;
 /// Builds a physically based material and returns an asset handle for it.
 ///
 /// Color components are linear sRGB in the range zero to one. `metallic` and `roughness` follow
-/// the usual convention: zero metallic for a dielectric, roughness near zero for a mirror.
+/// the usual convention, zero metallic for a dielectric, roughness near zero for a mirror.
 ///
 /// A texture is named by the asset key of an already-loaded image, which is how the two halves of
-/// the asset surface meet: `bcs_asset_load` produces the key, this consumes it. The image does
+/// the asset surface meet. `bcs_asset_load` produces the key, this consumes it. The image does
 /// not have to have finished loading; the material picks it up when it arrives, which is the
 /// behavior a Bevy handle has anyway.
 ///

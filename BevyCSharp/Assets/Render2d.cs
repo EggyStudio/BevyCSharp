@@ -3,7 +3,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// Draws in two dimensions: a camera that measures in pixels, and sprites to put under it.
+/// Draws in two dimensions, a camera that measures in pixels, and sprites to put under it.
 /// </summary>
 /// <remarks>
 /// Separate from <see cref="Render"/> because the two are different ways of looking at the world

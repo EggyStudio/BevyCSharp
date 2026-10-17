@@ -18,7 +18,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// volumetric fog. Down the east side are a reflection probe captured once, which a chrome sphere
 /// and a gold one reflect the bay in, an irradiance volume made in code, which lights a white
 /// figure from each side in another color with no light in the bay, clustered decals over a wall,
-/// the floor and a corner, and tubes and a sphere glowing past white for the bloom.
+/// the floor and a corner, and emissive tubes and a sphere past white for the bloom.
 /// </para>
 /// <para>
 /// Every picture the bays use is drawn here a pixel at a time, the cookie, the decals and the
@@ -250,7 +250,7 @@ public partial struct Lights
     }
 
     /// <summary>
-    /// A panel glowing under the ceiling with a light the panel's size behind it, over three thin
+    /// An emissive panel under the ceiling with a light the panel's size behind it, over three thin
     /// posts and a sphere whose shadows are sharp where they stand and soft farther out.
     /// </summary>
     private static void Sized(EcsWorld ecs, float z)
@@ -419,7 +419,7 @@ public partial struct Lights
     }
 
     /// <summary>
-    /// Tubes and a sphere glowing well past white on a dark wall, for the bloom to scatter, with
+    /// Tubes and a sphere emissive well past white on a dark wall, for the bloom to scatter, with
     /// a dim light of each tube's color to put its glow on the wall.
     /// </summary>
     private static void Glow(EcsWorld ecs, float z)

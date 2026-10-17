@@ -93,7 +93,7 @@ public sealed class Input
     /// <summary>True while at least one of <paramref name="keys"/> is held.</summary>
     /// <remarks>
     /// Mirrors Bevy's <c>ButtonInput::any_pressed</c>. This is how you express a side-agnostic
-    /// modifier by hand: <c>AnyKeyDown([Key.ControlLeft, Key.ControlRight])</c>.
+    /// modifier by hand, as <c>AnyKeyDown([Key.ControlLeft, Key.ControlRight])</c>.
     /// </remarks>
     public bool AnyKeyDown(ReadOnlySpan<Key> keys)
     {

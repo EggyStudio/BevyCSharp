@@ -347,7 +347,7 @@ public enum Key
     /// <summary>The context-menu key.</summary>
     ContextMenu = 103,
 
-    // Aliases: the same values under shorter names.
+    // Aliases, the same values under shorter names.
 
     /// <summary>Alias for <see cref="ControlLeft"/>.</summary>
     LCtrl = ControlLeft,

@@ -7,7 +7,7 @@ namespace Bevy;
 
 /// <summary>Asks a running app something, over its loopback port.</summary>
 /// <remarks>
-/// The other end of <see cref="CliServer"/>, in the library so anything can be a client: the
+/// The other end of <see cref="CliServer"/>, in the library so anything can be a client, the
 /// <c>bcs</c> tool, and the editor watching a game it started. The answer is the envelope
 /// <see cref="CliJson"/> describes, as text, and <see cref="Run"/> reads a command's out of it.
 /// </remarks>
@@ -21,7 +21,7 @@ public static class CliClient
     /// save a millisecond on a loopback socket and cost every caller a lifetime to manage.
     /// </remarks>
     /// <param name="session">Which app to ask.</param>
-    /// <param name="operation">What to ask: <c>ping</c>, <c>status</c>, <c>list</c> or <c>run</c>.</param>
+    /// <param name="operation">What to ask, <c>ping</c>, <c>status</c>, <c>list</c> or <c>run</c>.</param>
     /// <param name="line">The command line, for <c>run</c>.</param>
     /// <param name="seconds">How long to wait before giving up.</param>
     /// <returns>The envelope, which is this tool's answer too.</returns>

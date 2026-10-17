@@ -15,7 +15,7 @@ namespace Bevy;
 /// asked for, which Bevy draws over whatever the scene drew.
 /// </para>
 /// <para>
-/// Three calls make a frame: <see cref="Start"/> once, then <see cref="Begin"/> and
+/// Three calls make a frame, <see cref="Start"/> once, then <see cref="Begin"/> and
 /// <see cref="End"/> around whatever draws the windows. Everything between them is ordinary ImGui.
 /// </para>
 /// <para>
@@ -201,7 +201,7 @@ public static unsafe class ImGuiRuntime
     public static ImFontPtr Face(string face) =>
         Faces.TryGetValue(face, out var found) ? found : ImGui.GetFont();
 
-    /// <summary>Starts a frame: how large the window is, what the pointer did, what was typed.</summary>
+    /// <summary>Starts a frame, how large the window is, what the pointer did, what was typed.</summary>
     public static void Begin(BehaviorContext ctx)
     {
         ArgumentNullException.ThrowIfNull(ctx);

@@ -22,7 +22,7 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// When a file is selected in the asset browser, which lets go of any entity, the panel shows the
-/// file instead: what it is and where it is, and what can be seen or changed of it. A data asset's
+/// file instead, what it is and where it is, and what can be seen or changed of it. A data asset's
 /// fields are drawn as a component's are, a mesh or a material file gets the card an entity's mesh
 /// or material gets, a model is drawn turning, and an image is shown.
 /// </para>
@@ -201,7 +201,7 @@ public static class DetailsPanel
     private const string AssetKey = "asset";
 
     /// <summary>
-    /// A file selected in the asset browser: what it is, a look at it where it has one, and where
+    /// A file selected in the asset browser, what it is, a look at it where it has one, and where
     /// it is.
     /// </summary>
     /// <remarks>
@@ -369,8 +369,8 @@ public static class DetailsPanel
 
     /// <summary>One component, as a card with its fields in it.</summary>
     /// <remarks>
-    /// The fill is drawn behind the group rather than around it, through a split in the draw list:
-    /// the content goes on the upper channel, the rectangle on the lower one, and the merge puts
+    /// The fill is drawn behind the group rather than around it, through a split in the draw list.
+    /// The content goes on the upper channel, the rectangle on the lower one, and the merge puts
     /// the rectangle underneath. That is how a card is drawn without a window to hold it.
     /// </remarks>
     private static void Component(BehaviorContext ctx, Entity entity, ComponentSchema schema)
@@ -378,7 +378,7 @@ public static class DetailsPanel
         var theme = EditorTheme.Current;
         var draw = ImGui.GetWindowDrawList();
 
-        // Three layers: the component's card at the bottom, the cards its folds make over that, and
+        // Three layers, the component's card at the bottom, the cards its folds make over that, and
         // the rows on top, since each card's size is only known once what is on it has been drawn.
         draw.ChannelsSplit(3);
         draw.ChannelsSetCurrent(2);
@@ -528,7 +528,7 @@ public static class DetailsPanel
     private sealed class FoldStack(string component, ImDrawListPtr draw)
     {
         /// <summary>
-        /// A level entered with its header drawn: where the header began, how far right its card
+        /// A level entered with its header drawn, where the header began, how far right its card
         /// runs, and whether it is open.
         /// </summary>
         private readonly List<(Vector2 From, float Right, bool Open)?> _cards = [];

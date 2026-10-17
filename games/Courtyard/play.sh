@@ -18,13 +18,13 @@ said="$shots/said.txt"
 
 fail() { echo "FAILED: $*" >&2; grep -h "^\[play\]" "$shots/game.log" >&2 || true; exit 1; }
 
-# Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
-# a software device, as the workflow's runner has, draws a few frames a second and a hold or a wait
-# runs for as many of them as it names. Swarm's play and the feature test's drive ended pack runs on
-# a command's timeout with nothing said but bcs's exit code, so one that fails here says its words,
-# its code and the first line bcs gave of why, and anything else that fails is named by the trap
-# below. bcs writes why to its output, as it writes the answer, so the output is kept in a file and
-# passed on once the command has worked.
+# Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since a
+# software device, as the workflow's runner has, draws a few frames a second and a hold or a wait
+# runs for as many of them as it names. Swarm's play and the feature test's course run ended pack
+# runs on a command's timeout with nothing said but bcs's exit code, so one that fails here says its
+# words, its code and the first line bcs gave of why, and anything else that fails is named by the
+# trap below. bcs writes why to its output, as it writes the answer, so the output is kept in a file
+# and passed on once the command has worked.
 c() { ./bcs command "$@" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
 shot() { ./bcs shot "$1" --timeout 600 >"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }

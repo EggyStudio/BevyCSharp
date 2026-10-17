@@ -55,7 +55,7 @@ pub struct BcsRoundedCorners {
 #[derive(Resource, Clone)]
 struct CornerShader(Handle<Shader>);
 
-/// The pipelines for each format a picture comes in, queued the first time one is met: the one
+/// The pipelines for each format a picture comes in, queued the first time one is met, the one
 /// that multiplies what is there by the coverage, and the one that adds the fill outside it.
 #[derive(Resource, Default)]
 struct CornerPipelines(Mutex<HashMap<TextureFormat, (CachedRenderPipelineId, CachedRenderPipelineId)>>);

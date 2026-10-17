@@ -136,7 +136,7 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
 /// The wait has a limit. wgpu signals a submission's fence even when nothing was submitted, so the
 /// mark waited on is always in the queue behind the frame's work, and a wait that does not end is a
 /// GPU that has not finished that work, as `irradiance_volumes` met once at frame 90 on a laptop's
-/// GPU. Without a limit the run stood still with nothing said until whatever drove it gave up. Past
+/// GPU. Without a limit the run stood still with nothing said until whatever ran it gave up. Past
 /// [`FRAME_BEFORE_LIMIT`] the run ends, saying which frame the GPU did not finish, with
 /// [`STALLED_EXIT_CODE`], since a device that has not finished a frame in that long cannot be
 /// counted on to finish closing either.

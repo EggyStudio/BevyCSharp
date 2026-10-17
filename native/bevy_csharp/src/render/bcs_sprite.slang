@@ -1,4 +1,4 @@
-// What a BevyCSharp 2D material drawing a sprite reads of the sprite: its image, its color, and how
+// What a BevyCSharp 2D material drawing a sprite reads of the sprite, its image, its color, and how
 // the image is cut, flipped, tiled and sliced over the quad, with Bevy's functions for each.
 //
 // A fragment shader drawing a sprite reaches it with `import bcs_sprite;` beside `import bcs2d;`,

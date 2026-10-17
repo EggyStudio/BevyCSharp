@@ -9,7 +9,7 @@ namespace Bevy;
 /// <remarks>
 /// A shader being edited is compiled in the background and reported in the log, which is the
 /// right place for a line saying it worked and the wrong place to go looking for why it did not.
-/// These answer the question directly: which programs there are, which of them failed and what
+/// These answer the question directly, which programs there are, which of them failed and what
 /// the compiler said, what each declares and at which offset, and a way to compile one again
 /// without touching its file.
 /// </remarks>

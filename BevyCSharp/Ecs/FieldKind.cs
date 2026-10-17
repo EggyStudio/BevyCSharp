@@ -34,7 +34,7 @@ public enum FieldKind
     /// <summary>A reference to another entity.</summary>
     Entity,
 
-    /// <summary>A reference to a loaded asset: a mesh, an image, a material, a sound.</summary>
+    /// <summary>A reference to a loaded asset, a mesh, an image, a material or a sound.</summary>
     Asset,
 
     /// <summary>One of a fixed set of names, which <see cref="ComponentField.Options"/> lists.</summary>

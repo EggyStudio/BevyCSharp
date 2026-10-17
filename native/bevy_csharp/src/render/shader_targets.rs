@@ -210,10 +210,10 @@ pub(super) fn put(kind: i32, id: i64, name: String, value: super::values::Value)
     })
 }
 
-/// Sets numbers under a name: a scalar, a vector, a matrix, or an array of any of them.
+/// Sets numbers under a name, a scalar, a vector, a matrix, or an array of any of them.
 ///
 /// `scalar` is `0` float, `1` signed integer, `2` unsigned integer. `components` is how many
-/// numbers one element is: one for a scalar, four for a `float4`, sixteen for a `float4x4`, and
+/// numbers one element is, one for a scalar, four for a `float4`, sixteen for a `float4x4`, and
 /// `count` is how many elements there are, which is one unless it is an array.
 ///
 /// # Safety
@@ -275,7 +275,7 @@ pub unsafe extern "C" fn bcs_shader_set_numbers(
     })
 }
 
-/// Sets bytes under a name, copied as they are to where the name is: a struct laid out as the
+/// Sets bytes under a name, copied as they are to where the name is, a struct laid out as the
 /// shader lays it out, or a whole `ConstantBuffer`.
 ///
 /// # Safety

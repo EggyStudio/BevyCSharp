@@ -1,4 +1,4 @@
-// Draws each firefly as a glowing square turned to face the camera, placed from the buffer the
+// Draws each firefly as an emissive square turned to face the camera, placed from the buffer the
 // compute shader moves.
 //
 // The mesh is one square per firefly with its corners at the origin, so where each one is comes

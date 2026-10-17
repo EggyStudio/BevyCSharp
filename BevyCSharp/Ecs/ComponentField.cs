@@ -125,7 +125,7 @@ public sealed class ComponentField
     /// <remarks>
     /// Set by the schema that lists it rather than passed in, because a field is written before
     /// the component that holds it exists. What it is for is everything that has to look sideways
-    /// from a field: the methods to call when it changes, the field a condition names, the values
+    /// from a field, the methods to call when it changes, the field a condition names, the values
     /// to put back when it is reset.
     /// </remarks>
     public ComponentSchema? Schema { get; internal set; }

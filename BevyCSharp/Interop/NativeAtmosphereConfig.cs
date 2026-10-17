@@ -18,18 +18,20 @@ public struct NativeAtmosphereConfig
     /// <summary>How far the haze in front of the scene is computed, in meters; 0 for Bevy's.</summary>
     public float HazeDistance;
 
-    /// <summary>How finely the sky is computed: 0 Bevy's own, 1 cheaper, 2 finer.</summary>
+    /// <summary>
+    /// How finely the sky is computed, 0 for Bevy's own, 1 for cheaper and 2 for finer.
+    /// </summary>
     public int Quality;
 
     /// <summary>How much light the ground bounces back, or 0 for the medium's own.</summary>
     public float GroundAlbedo;
 
-    /// <summary>Whose air: 0 earth's, 1 Mars's.</summary>
+    /// <summary>Whose air it is, 0 for earth's and 1 for Mars's.</summary>
     public int Planet;
 
     /// <summary>The asset key of the picture Mars's dust scatters by.</summary>
     public int DustPhase;
 
-    /// <summary>How the sky is computed: 0 from lookup textures, 1 by marching rays.</summary>
+    /// <summary>How the sky is computed, 0 from lookup textures and 1 by marching rays.</summary>
     public int Method;
 }

@@ -383,7 +383,7 @@ internal static class ReflectedSchemas
                 : type;
 
         /// <summary>
-        /// The hints every reflected row carries: its label, its tooltip, its fold and its
+        /// The hints every reflected row carries, its label, its tooltip, its fold and its
         /// conditions.
         /// </summary>
         private static FieldHints Hints(At at, string label) =>
@@ -714,7 +714,7 @@ internal static class ReflectedSchemas
         path.Length == 0 ? name : path + "." + name;
 
     /// <summary>
-    /// Turns a Rust field name into a label: <c>shadows_enabled</c> becomes "Shadows enabled".
+    /// Turns a Rust field name into a label. <c>shadows_enabled</c> becomes "Shadows enabled".
     /// </summary>
     private static string Humanize(string name)
     {
