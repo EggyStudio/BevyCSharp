@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d2a20b6a`, Verdict 19 mended and nothing else: the one example's capture exits with
+Reviewed up to `50470331`, Verdicts 20, 21 and 22 mended in one commit and nothing else, as Decision
+33 asks. Every script the pack jobs run calls the command line through helpers that give `--timeout
+600` and name a failed call with its code and the first line the command line gave of why, which it
+writes to its output and not its errors, so Swarm's helpers of `9f76fded`, which kept the errors,
+had named an empty why; an ERR trap under `set -E` names anything else. The feature test's drive has
+a job of its own with 90 minutes and its artifact, the play job building the feature test for the
+soak alone; the drive's platform and elevator checks take the farthest the player was carried over
+240 and 300 frames, read every 30, since a net change over 90 frames straddled the swing's turn on
+lavapipe. The storm step installs `libxcursor1`, `libxi6` and `libxkbcommon-x11-0`, the three an
+Ubuntu 24.04 container with the job's packages alone showed winit unable to open one after another,
+runs the test with `--diag`, takes the test host's standard error out of that log, says a failure
+whole and uploads the folder. The capture script fetches Bevy's files and then builds the examples
+itself, the job's own build step gone, the single capture building again where the program lacks a
+fetched file, and the capture and drive jobs fetch `slangc` before they run, since 34 examples and
+the feature test compile Slang as they run. Checked on the working machine: the whole suite 1,471
+and 3 skipped of 1,474, NormTests 18 of 18; in the container, the storm passing in four seconds with
+the three libraries and the step's error ending with winit's line without them; the drive whole on
+lavapipe in some 70 minutes, the course from the platform on in 26 and passing; 26 captures in a
+fresh checkout none blank, 25 matching and `dynamic_mip_generation` matching once slangc was there.
+Right. One thing left in it: the play job's soak runs the feature test without `slangc`, so its log
+carries the compile errors though the soak reads memory alone; the play job fetches it too, a commit
+of its own before the push. Next the push, the third toward Decision 33's three if whole green, and
+the pack run after it, whose drive, storm and capture jobs settle Verdicts 20 to 22.
+
+Before it, `d2a20b6a` came, Verdict 19 mended and nothing else: the one example's capture exits with
 3 where the open fails, so the loop tells an example that never started from one that could not be
 captured, and the loop counts failed starts in a row, an example that starts resetting the count,
 stopping at three with the three names and what the first logged, the first four lines at an error
@@ -60,33 +84,6 @@ lifts. The whole suite 1,471 and 3 skipped of 1,474. Right. The pack run's captu
 Verdict 16 names and the script waiting each one's patience out before the next, Verdict 19. Next
 the push, the second toward Decision 33's three if whole green, and the pack run after it, whose
 storm, pack, play and capture jobs settle Verdicts 16 to 18.
-
-Before it, `292eead2` came, Verdicts 14 and 15 mended in one commit and nothing else, as Decision 33
-asks, over `c29c5e0d` and `c11a5705`, two commits of documents. Verdict 15 reproduced by `cargo
-check --target` for x86_64-pc-windows-msvc and aarch64-apple-darwin, the render profile failing on
-both with E0433 at `window/icon.rs` naming `winit::window::Icon`: winit was a direct dependency of
-the bridge on Linux and the BSDs alone, named there for `wayland-dlopen`, so the icon of `220aa7b0`
-compiled on Linux only; winit moves to the dependencies of every system with both reasons, the lock
-byte-identical, and headless, render, editor and editor with solari check clean for both targets,
-meshlets alone uncheckable from Linux for metis's C wanting the target's compiler. The push's Linux
-test job gains "Check the bridge for Windows and macOS", the two targets added and the three
-profiles checked for each with warnings denied and blake3 on its Rust path, cached, an `::error::`
-naming the target and the profile, so a compile only a pack would find is found on the push. Verdict
-14: the guard reads the private bytes committed on Windows, the commit charge Windows runs out of
-and cannot trim, and the resident set elsewhere, the reason and the 64 MB reading in its remarks,
-the peak on Windows the readings' own since Windows keeps none of private bytes, the test's comment
-and the memory command's remarks saying the figure. The whole suite 1,471 and 3 skipped of 1,474.
-Right. The push of `292eead2` on 2026-10-16 was green on every job, Linux in 16 minutes with the new
-check of the two targets inside it, Windows in 20 and macOS in 18, the first of Decision 33's three
-and Verdict 14's first green Windows suite. The pack run started at 21:40: the native job built all
-six targets, which settles Verdict 15, the three suites green, Windows Verdict 14's second of three,
-the README's walk green, and then three jobs that run in a pack run alone failed on their first run
-since they were made or changed, the storm job's tests not loading the bridge the job downloaded
-(Verdict 16), the package check reading the release notes written under the artifacts as a runtime's
-(Verdict 17) and Swarm's play ending with a command's timeout on lavapipe (Verdict 18), the
-examples' captures running at 22:27. The jobs a pack run alone exercises carry every change made
-between two packs untested, which is why each pack has found a new failure; the owner's word is
-asked on a pack run after every push that touches them, or a scheduled one.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -647,7 +644,10 @@ the examples started and none waited on.
     frames, which on a slow device straddled the turn of the swing, the elevator's check the same;
     both take the farthest the player was carried, read every 30 frames over 240 and 300, whose
     worst case over every point of the swing is 1.5 and 1.6 against the 1 asked, the course
-    unchanged. Settled when the play job passes in a pack run.
+    unchanged. Settled when the play job passes in a pack run. Mended at `50470331`: the helpers,
+    the trap, the drive's own job with 90 minutes, the platform and elevator checks taking the
+    farthest the player was carried, and `slangc` fetched before the drive; the play job's soak
+    still runs the feature test without it, a commit to follow.
 
 21. **The storm's app is not made on the runner, and the step says only where it threw.** On the
     same pack run, the storm job's test loaded the bridge the job downloaded, which the step named,
@@ -663,6 +663,10 @@ the examples started and none waited on.
     `libXcursor`, `libXi`, `libXrandr`, `libxkbcommon` and `libxkbcommon-x11`, are the first
     suspects, Bevy's own workflow installing libraries beside Xvfb before it runs its examples; what
     the container shows missing the step installs. Settled when the storm job passes in a pack run.
+    Mended at `50470331`: the three libraries installed with the reason, the test run with `--diag`,
+    its host's standard error taken from that log, a failure said whole and the folder uploaded; the
+    step's error in the container without the three ended with winit's line naming libXcursor, and
+    with them the storm passed in four seconds.
 
 22. **The examples are built before Bevy's assets are fetched, so the runner captures them without
     their textures, models, fonts and shaders.** On the pack run of `d2a20b6a`, 2026-10-17, the
@@ -687,7 +691,11 @@ the examples started and none waited on.
     compile a Slang shader of the examples' own at run time and drew the magenta fallback on a
     runner without it, `animate_shader`, `atmosphere`, `dynamic_mip_generation`, `shader_material`
     and `ui_material` among them, a cause of the differences known before the next comparison is
-    read. Settled when the capture job passes in a pack run.
+    read. Settled when the capture job passes in a pack run. Mended at `50470331`: the capture
+    script fetching and then building, the single capture building again where the program lacks a
+    fetched file, `slangc` fetched before the captures and the job at 90 minutes; in a fresh
+    checkout 26 captures came out none blank, 25 matching and `dynamic_mip_generation` matching once
+    slangc was there.
 
 ## Decisions
 
@@ -876,51 +884,3 @@ the examples started and none waited on.
     39).
 
 ## Replies
-
-**Verdict 20.** Mended in the commit that carries this reply. Every call of the command line in
-`build/drive-feature-test.sh` goes through `c` and `shot` with `--timeout 600`, a failure ending the
-script with an `::error` naming the call, its exit code and the first line bcs gave of why, and an
-ERR trap names anything else. Courtyard's play, `build/first-game.sh`, `build/soak.sh`,
-`build/publish-feature-test.sh` and `build/capture-example.sh` have the same, and
-`build/play-native.sh` calls bcs nowhere itself. bcs writes why a command failed to its output,
-`error [TIMEOUT] ...`, and not to its errors, so the helpers Swarm's play has had since `9f76fded`,
-which kept the errors, named the call and the code with an empty why. Every helper, Swarm's among
-them, keeps the output in a file, reads its first line on a failure and passes it on when the call
-worked, and each said `./bcs command app.status ended with 4, error [NO_SESSION] No app is
-serving. ...` run against no session. The three warnings reproduced in the container of Verdict 21
-below, the last three of fourteen values reported against the fallbacks' empty layouts, each
-program's two ERROR lines of a failed compile before them, and with slangc there the feature test
-logged neither. The drive has a job of its own, `drive the feature test`, needing the native job,
-fetching slangc, packing and building on the package as the play job does, with 90 minutes and its
-own artifact, `feature-test`; the play job builds the feature test for the soak and keeps its hour.
-Measured in the container on Ubuntu's lavapipe held to four processors: 1.1 frames a second at the
-hub under the weather, with slangc or without; the course up to the moving platform in 46 minutes,
-where it failed as the verdict says; and from the platform to the end, with the checks taking the
-farthest the player was carried, worst cases 1.5 over 240 frames and 1.6 over 300 against the 1
-asked, 26 minutes and passing. That is some 70 minutes in all here, near 47 on the runner at the
-1.5 times this machine's speed Swarm showed there, 7.4 minutes against 11.
-
-**Verdict 21.** Mended in the same commit. Reproduced in `mcr.microsoft.com/dotnet/sdk:10.0-noble`,
-Ubuntu 24.04.5 with the SDK, with the storm step's packages alone and the tests built in it from a
-fresh checkout on this machine's bridge, an editor build whose window is the render build's. The
-test failed in the constructor of `App` as on the runner, and the test host's standard error, which
-`dotnet test` writes to its `--diag` log alone, said winit could not open `libXcursor.so.1`; with
-`libxcursor1` installed, `libXi.so.6`; with `libxi6`, `libxkbcommon-x11.so`; and with
-`libxkbcommon-x11-0` the storm passed on llvmpipe in four seconds. `libX11`, `libX11-xcb`,
-`libXrandr` and `libxkbcommon` came with Xvfb and Mesa. The step installs the three with the reason
-in its comment, runs the test with `--diag`, takes the test host's standard error from it into
-`stderr.txt`, says a failure in one `::error` holding `storm.txt` whole and the standard error after
-it, and uploads the folder as `storm` with `if: always()`. Run through `build/step.py` in the
-container without the three, the error ended with winit's line naming libXcursor, and with them the
-step passed.
-
-**Verdict 22.** Mended in the same commit. `build/capture-examples.sh` fetches Bevy's files and then
-builds the examples itself, with the options given after the folder, and the job passes
-`-p:BevyCSharpSkipNativeFreshnessCheck=true` to it in place of its own build step.
-`build/capture-example.sh` fetches as well, and builds again in the program's configuration where
-the program lacks a file the fetch holds. The job fetches slangc before the captures, as the step's
-comment says why, and has 90 minutes. Checked in a fresh checkout on this machine's GPU, the
-examples built first as the job built them. The loop fetched 325 files, built, and captured 26 in
-five minutes, none blank, 25 matching theirs and `dynamic_mip_generation` 3.0 percent off with its
-mip levels drawn as the magenta fallback; with slangc it matched, and `sprite`, captured after the
-bird it draws was taken out from beside the program, built again and matched.

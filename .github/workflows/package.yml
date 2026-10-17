@@ -361,6 +361,11 @@ jobs:
           BCS_STEP_LOGS: ${{ runner.temp }}/swarm
         run: mkdir -p "$SHOTS" && games/Swarm/play.sh
 
+      # The feature test compiles its .slang shaders as it runs, and the checkout holds no shader
+      # cache, so without slangc each of them draws the magenta fallback.
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
       # The feature test on the same package, for the soak below to play beside the games. The
       # drive through its course has a job of its own.
       - name: Build the feature test
