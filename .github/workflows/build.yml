@@ -1,40 +1,684 @@
+# A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
+# test job builds (test), puts the three systems' pages on one (digest) and follows every link of the
+# README and the guide (docs). The pack workflow calls this one with `pack` (pack.yml), which adds
+# the render bridge built for all six platforms (native) and, on the Linux one, Courtyard and Swarm
+# played from a package of this commit with the games soaked and Courtyard published native (game),
+# the feature test driven (drive), every example captured (examples), a window stormed (storm) and
+# the README walked in a container (readme), and the pack run packs only once every job here passed.
 name: build
 
-# Continuous integration. A push or a pull request runs the test suite on Linux and Windows and
-# nothing else. The per-platform bridges and the package are built only by the pack workflow,
-# which is run by hand from the Actions tab, so what a commit message says decides nothing here.
-
+# Documents and captures are left out, apart from the README, the guide and BUILDING.md, which the
+# docs job checks and the guide links into. A later pattern overrides an earlier one, so BUILDING.md
+# comes after the rule leaving out the other Markdown under .github.
 on:
   push:
-    branches: [main, master]
-    paths-ignore: ['**.md', '.gitignore', 'LICENSE', '.idea/**']
+    paths: ['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md', '!games/**.md', '!.github/assets/**']
   pull_request:
-    paths-ignore: ['**.md', '.gitignore', 'LICENSE', '.idea/**']
-
-# A run is disposable, so a newer push supersedes it.
-concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+    paths: ['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md', '!games/**.md', '!.github/assets/**']
+  workflow_call:
+    inputs:
+      pack:
+        description: >-
+          Whether to build the six bridges and run the jobs that play, drive, capture, storm and
+          walk on the Linux one, as the pack workflow asks. A push gives no inputs, so there it is
+          empty and reads as false.
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
 
+# A newer push supersedes a run in progress. The pack run's call of this workflow reads the pack
+# run's own context, its ref the same branch's, so the event is in the group too, or a push would
+# end the pack run's jobs, and a pack run started after a push would end the push's.
+concurrency:
+  group: build-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  CARGO_TERM_COLOR: always
+  # A warning from the bridge fails its build, as -warnaserror does for the managed side below,
+  # since a warning left standing hides the next one (NORM.md, N 6.1). Cargo's own setting rather
+  # than RUSTFLAGS, which is part of every crate's fingerprint and would build them all again,
+  # while this judges what cargo prints, the warnings of a crate it replays from its cache as well.
+  CARGO_BUILD_WARNINGS: deny
+
+
 jobs:
+  native:
+    name: native (${{ matrix.rid }})
+    if: ${{ inputs.pack }}
+    runs-on: ${{ matrix.os }}
+    # A cold render build compiles the whole of Bevy, wgpu and winit, which is roughly a quarter
+    # of an hour. The cap is here so a label no runner answers fails in minutes instead of
+    # queueing for the six-hour default.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both macOS slices build on the same Apple Silicon runner. Apple's toolchain is
+        # multi-arch, so an x86_64 binary cross-compiles cleanly from arm64, and there is no
+        # Intel runner image left to target natively anyway.
+        include:
+          - { os: ubuntu-24.04, rid: linux-x64, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64, target: aarch64-unknown-linux-gnu }
+          - { os: windows-latest, rid: win-x64, target: x86_64-pc-windows-msvc }
+          - { os: windows-11-arm, rid: win-arm64, target: aarch64-pc-windows-msvc }
+          - { os: macos-latest, rid: osx-arm64, target: aarch64-apple-darwin }
+          - { os: macos-latest, rid: osx-x64, target: x86_64-apple-darwin }
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # The target directory is named as well as the workspace, because build-native.sh writes to
+      # build/target rather than to native/target and a cache pointed at the crate would save an
+      # empty directory and restore it over a build that had to start from nothing every time.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> ../build/target
+          key: ${{ matrix.target }}
+
+      # The only development packages a render build needs. Everything graphical resolves at
+      # runtime, since winit reaches X11 and Wayland through dlopen, and wgpu loads Vulkan the
+      # same way. Audio and gamepads are the exceptions, because cpal links against ALSA and gilrs
+      # against libudev. Windows and macOS reach both through the system SDK, so this is Linux only.
+      - name: Install ALSA and libudev headers
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev
+
+      - name: Build native bridge
+        shell: bash
+        run: build/build-native.sh --render --target ${{ matrix.target }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-${{ matrix.rid }}
+          path: build/artifacts/${{ matrix.rid }}/*
+          if-no-files-found: error
+          # Only the pack run's own jobs read them, so they need not outlive it by much.
+          retention-days: 3
+
   test:
-    name: test
-    uses: ./.github/workflows/package.yml
-    with:
-      pack: false
-      test_os: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    # An hour, where the three took 11 to 14 minutes on the push of 5e01491e with their caches, so
+    # a headless bridge built with no cache and a lost suite run again in parts (build/test.py) both
+    # fit, and a test that hangs ends the job within it rather than at GitHub's six hours.
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Two directories, because this job builds the bridge through the script and then runs the
+      # crate's own tests through cargo, and those write to build/target and native/target.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            native -> ../build/target
+            native
+          key: test-${{ matrix.os }}
+
+      # The suite runs headless everywhere, so the smaller profile is enough and much faster.
+      - name: Build native bridge
+        shell: bash
+        run: build/build-native.sh
+
+      # N 5.2 of NORM.md, the table of Bevy's examples written again from Bevy's own list and held
+      # to the one checked in, with the README's count and each example's head. The list is read
+      # from the Bevy crate in cargo's registry, which the build above fills. Linux alone,
+      # since the table is the same on every system.
+      - name: Check the table of examples
+        if: runner.os == 'Linux'
+        run: python3 build/examples-table.py --check
+
+      # The renderer brings audio and gamepads, and cpal links against ALSA and gilrs against
+      # libudev, so the renderer's part of the tests cannot build without their headers. The native
+      # job installs the same packages for the same reason.
+      - name: Install ALSA and libudev headers
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev pkg-config
+
+      # dotnet-gcdump, at the version tried, with which the leak test counts the heap's objects by
+      # type after its twentieth app and its hundredth, since the heap grew on macOS's runner and
+      # nowhere else, so a failure there names the types that grew (REVIEW.md, Verdict 9).
+      - name: Install dotnet-gcdump for the leak test
+        if: runner.os == 'macOS'
+        run: |
+          dotnet tool install dotnet-gcdump --version 10.0.745401 --tool-path "$RUNNER_TEMP/gcdump"
+          echo "BCS_GCDUMP=$RUNNER_TEMP/gcdump/dotnet-gcdump" >> "$GITHUB_ENV"
+
+      # The suite covers the library; this covers everything else in the solution. Neither the
+      # feature test nor the editor is reached by `dotnet test`, so without it a runnable project can
+      # stop compiling without CI noticing. A warning anywhere in it fails the step (NORM.md, N 6.1),
+      # and one that is right to keep is turned off where it arises, with its reason beside it.
+      - name: Build the solution
+        run: dotnet build BevyCSharp.slnx -c Release -warnaserror
+
+      # bcs opens a program through cmd.exe on Windows, which nothing else in the workflow does, so
+      # the feature test is opened through it and asked how it is, as a person or an agent opens
+      # one, and stopped. Headless, with no count of frames so it runs until stopped, since the
+      # job's bridge has no renderer and the program refuses a window without one. Each answer is
+      # kept, and one that fails is said on the page with bcs's code and sentence and the end of
+      # the program's log, where the step said an exit code alone (NORM.md, N 6.7).
+      # A few minutes, where the three answers take seconds, so one that waits fails here with the
+      # answers before it printed, rather than at the job's limit with nothing said. Each answer
+      # goes to a file of its own rather than through $(...), whose pipe a program bcs starts may
+      # inherit on Windows and hold open for as long as it runs, which would keep the step waiting
+      # on the opening's answer until the program ended.
+      - name: Open the feature test through bcs
+        if: runner.os == 'Windows'
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          asked=0
+          ask() {
+            local code=0 answer="$RUNNER_TEMP/bcs-answer-$((asked += 1)).json"
+            echo "./bcs $*"
+            ./bcs "$@" --json > "$answer" || code=$?
+            head -n 12 "$answer"
+            if [ "$code" -ne 0 ]; then
+              python build/bcs-answer.py "./bcs $*" "$code" BevyCSharp.FeatureTest < "$answer"
+              exit "$code"
+            fi
+          }
+          ask open --feature-test --headless --frames 0
+          ask command app.status
+          ask stop
+
+      # The bridge checked for Windows and macOS in each profile, as the pack's native job builds it
+      # on their runners, so a compile that only a pack would find, such as a crate named for Linux
+      # alone, is found on the push. A check compiles no binary and needs no linker, so the Linux
+      # runner does it, its cache keeping each target's build beside the rest. blake3 takes its
+      # Rust path, since its C needs the target's compiler, which the runner has not, and meshlets
+      # stay out for the same reason, metis being C; the pack builds both on their own systems.
+      - name: Check the bridge for Windows and macOS
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          CARGO_FEATURE_PURE: '1'
+        run: |
+          rustup target add x86_64-pc-windows-msvc aarch64-apple-darwin
+          for target in x86_64-pc-windows-msvc aarch64-apple-darwin; do
+            for profile in headless render editor,solari; do
+              echo "cargo check --target $target --features $profile"
+              if ! cargo check --manifest-path native/Cargo.toml --target "$target" --no-default-features --features "$profile" --config 'build.warnings="deny"'; then
+                echo "::error::The bridge does not compile for $target in the $profile profile, which a pack builds on that system."
+                exit 1
+              fi
+            done
+          done
+
+      # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
+      # managed test can reach, the bridge's again with the renderer's crates, where shader
+      # reflection and the packing of values by name live, and the managed suite, each a process
+      # held to a time and a memory. A suite that is lost runs again in parts, and the log ends with
+      # a page of what failed, which is the job's summary and its annotations. The renderer's part
+      # runs on Linux alone, since it is the longer build and its tests read saved compiler output
+      # that is the same on every system.
+      # A Mac has python3 and no python, and Windows the other way round.
+      - name: Test
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            python3 build/test.py --no-build --configuration Release --timeout-minutes 30
+          elif [ "$RUNNER_OS" = macOS ]; then
+            python3 build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
+          else
+            python build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
+          fi
+
+      # The page, from every run, for the digest job below.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-digest-${{ matrix.os }}
+          path: |
+            BevyCSharp.Tests/TestResults/digest.md
+            BevyCSharp.Tests/TestResults/digest.json
+          if-no-files-found: ignore
+
+  # One page for the commit from each system's page, a line for each system and each cause with
+  # the systems it was seen on, the one place that says where a commit fails.
+  digest:
+    name: test digest
+    needs: [test]
+    if: always()
+    runs-on: ubuntu-24.04
+    # Ten minutes for a download and a script that take seconds, so one that stalls fails soon.
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: test-digest-*
+          path: digests
+
+      - run: python3 build/test.py --digest digests/*
 
   # The README and the guide under docs/, every link followed, so a page moved or a heading renamed
   # without the links to it fails here rather than on a reader.
   docs:
     name: docs
     runs-on: ubuntu-24.04
+    # Five minutes for a script that asks each address once, so one that never answers fails here
+    # rather than at GitHub's six hours.
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
 
       - name: Follow every link in the README and the guide
         run: python3 build/check-docs.py --external
+
+  # Courtyard, the small game under games/, built on a package as a project outside this
+  # repository is, and played from its menu to its win by games/Courtyard/play.sh with no display.
+  # Only where the bridges are built, since the game draws offscreen and the test job's headless
+  # bridge draws nothing.
+  game:
+    name: play Courtyard
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
+    # to four processors, two frames a second with its creatures in their hundreds, and the job
+    # plays two games after it builds the guide and every example, then soaks three for ten minutes
+    # and publishes.
+    timeout-minutes: 60
+    needs: [native]
+    # Each step through build/step.py, which gives one that fails having said nothing an error
+    # naming the step, the command that failed with its exit code, its last lines and the last
+    # lines at a warning or worse of the game's logs (NORM.md, N 6.7). The play of 421d4e1 ended
+    # this job with an exit code alone, what stopped the game being in its log. The plays name
+    # their logs' folder in their own env, since a job's env cannot read the runner's context and
+    # GitHub refuses a workflow whose job's env does.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe, Mesa's Vulkan on the processor, since the runner has no graphics card for the
+      # game to draw with, and ALSA, which the bridge's audio links against.
+      - name: Install a software Vulkan and ALSA
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
+
+      # A package of this commit's library and the Linux bridge alone, under a version of its
+      # own so nothing cached under another is restored in its place.
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Build Courtyard
+        run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
+      - name: Build Swarm
+        run: dotnet build games/Swarm -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
+      - name: Build the stress program
+        run: dotnet build games/Stress -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
+      # Every step of the game docs/first-game.md makes, each a whole program, built on the same
+      # package and run offscreen, so no step the page shows stops compiling or starting.
+      - name: Build and run every step of the first game
+        run: build/first-game.sh 0.0.0-ci
+
+      # Every example built in a project of its own on the package alone, as a reader copying one
+      # into a game of their own builds it (NORM.md, N 2.7).
+      - name: Build the examples on the package alone
+        run: build/examples-on-package.sh 0.0.0-ci
+
+      # Every C# block of the guide under docs/ built on the same package, a fragment after the
+      # lines a comment before it gives, so a block calling what the library no longer has fails
+      # the run with its page and line (build/docs-on-package.py).
+      - name: Build the guide's code on the package
+        run: python3 -u build/docs-on-package.py --version 0.0.0-ci
+
+      - name: Play Courtyard
+        env:
+          SHOTS: ${{ runner.temp }}/courtyard
+          BCS_STEP_LOGS: ${{ runner.temp }}/courtyard
+        run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
+
+      # A game in behaviors alone with creatures in their hundreds, played into its third wave, with
+      # the frame profiled while the most of them are alive, which the run keeps beside the captures.
+      - name: Play Swarm
+        env:
+          SHOTS: ${{ runner.temp }}/swarm
+          BCS_STEP_LOGS: ${{ runner.temp }}/swarm
+        run: mkdir -p "$SHOTS" && games/Swarm/play.sh
+
+      # Courtyard, the stress program and Swarm built on the package played at once a round at a
+      # time, while what each holds is read after its rounds (build/soak.sh), failing when any of it
+      # climbs without leveling off (build/soak-check.py), as a leak does, with an error naming each
+      # game's failure and each value that climbed (build/soaks.sh). Ten minutes, since lavapipe
+      # held to four processors of the working machine played a round of each in 67 to 100 seconds
+      # with the feature test beside them, and the two and a half minutes the pack run of 5e01491e
+      # gave them read each two or three times where the check judges six; ten minutes read the
+      # three seven to ten times there, nothing climbing. The feature test is soaked in the drive's
+      # job, alone on its runner.
+      - name: Play the games a while and check nothing they hold grows
+        env:
+          BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
+        run: build/soaks.sh 600 courtyard stress swarm
+
+      # The same game published as native code from the package, as a player gets it, which keeps
+      # only what the compiler sees used, and played to its win the same way (NORM.md, N 2.5). The
+      # native compiler links with clang, against zlib.
+      - name: Install clang and zlib
+        run: sudo apt-get install -y -qq --no-install-recommends clang zlib1g-dev
+
+      - name: Publish Courtyard native and play it
+        env:
+          SHOTS: ${{ runner.temp }}/courtyard-native
+          BCS_STEP_LOGS: ${{ runner.temp }}/courtyard-native
+        run: mkdir -p "$SHOTS" && build/play-native.sh 0.0.0-ci
+
+      # What each step looked like and the game's own log, which say where a failed run went wrong.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: courtyard
+          path: |
+            ${{ runner.temp }}/courtyard
+            ${{ runner.temp }}/courtyard-native
+            ${{ runner.temp }}/swarm
+          if-no-files-found: ignore
+
+      # The soak's readings, the games' logs, each soak's errors and each check's words.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: soak
+          path: build/soak
+          if-no-files-found: ignore
+
+  # The feature test, built on a package as Courtyard is, and driven through the hub and each
+  # station of its course, every one judged by where the player ends up
+  # (build/drive-feature-test.sh). A job of its own beside the play job, so the drive adds nothing
+  # to how long a run takes.
+  drive:
+    name: drive the feature test
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # An hour and a half. The drive's holds and waits come to some 4,600 frames, and lavapipe held to
+    # four processors of the working machine draws the hub under its weather at 1.1 frames a second,
+    # with slangc or without, so the drive took some 70 minutes there. The runner played Swarm in 7.4
+    # minutes where that machine took 11, which puts the drive near 47 minutes here, with the pack,
+    # the build and the fetch of slangc before it and the soak of fifteen minutes after it.
+    timeout-minutes: 90
+    needs: [native]
+    # Each step through build/step.py, as the play job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe and ALSA, as the play job has them.
+      - name: Install a software Vulkan and ALSA
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
+
+      # The feature test compiles its .slang shaders as it runs, and the checkout holds no shader
+      # cache, so without slangc each of them draws the magenta fallback.
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
+      # A package of this commit's library and the Linux bridge alone, as the play job packs one.
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Drive the feature test
+        env:
+          SHOTS: ${{ runner.temp }}/feature-test
+          BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
+        run: |
+          mkdir -p "$SHOTS"
+          dotnet build BevyCSharp.FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
+          build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
+
+      # The feature test played a round at a time at the hub, as the play job soaks the games
+      # (build/soaks.sh), here after the drive, whose run left its shaders compiled in the cache
+      # beside its assets, so the readings are not of compiles. Alone on the runner, since on the
+      # working machine's lavapipe held to four processors its first round ended six minutes into
+      # its soak with the three games beside it, and three minutes in alone, each round after it
+      # taking 132 seconds; fifteen minutes read it seven times there, nothing climbing, and at the
+      # runner's pace about ten.
+      - name: Play the feature test a while and check nothing it holds grows
+        if: ${{ !cancelled() }}
+        env:
+          BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
+        run: build/soaks.sh 900 feature-test
+
+      # Each station's capture, the program's log and the frame times, which say where a failed
+      # drive went wrong.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: feature-test
+          path: ${{ runner.temp }}/feature-test
+          if-no-files-found: ignore
+
+      # The soak's readings, the program's log, the soak's errors and the check's words.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: feature-test-soak
+          path: build/soak
+          if-no-files-found: ignore
+
+  # Every example in BevyCSharp.Examples opened offscreen and captured, failing on one that does
+  # not start or draws nothing, on the Linux bridge the native job built, then each capture compared
+  # with the one in .github/assets/examples, failing on one that differs by more than devices do
+  # (build/compare-captures.py). The captures are kept as the run's artifact.
+  examples:
+    name: capture the examples
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # An hour and a half, since the captures took 56 minutes of the hour on the pack run of d2a20b6a,
+    # some ten seconds an example on lavapipe, with none of Bevy's files there for an example to load
+    # and draw.
+    timeout-minutes: 90
+    needs: [native]
+    # Each step through build/step.py, as the game job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe, as the game job has it, since the runner has no graphics card, and libwebp's
+      # tools, which write and read the captures where the runner's ImageMagick has no WebP.
+      - name: Install a software Vulkan, ALSA and WebP
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev webp
+
+      # The examples compile their .slang shaders as they run, and the checkout holds no shader
+      # cache, so without slangc each of them draws the magenta fallback.
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
+      # The examples built by the script itself, after it fetches Bevy's files, which the build
+      # copies beside the program.
+      - name: Capture every example
+        run: build/capture-examples.sh "${{ runner.temp }}/examples" -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      # Even where a capture failed, so a run names every example that went wrong, of both kinds.
+      - name: Compare the captures with the checked-in ones
+        if: ${{ !cancelled() }}
+        run: python3 build/compare-captures.py "${{ runner.temp }}/examples"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: examples
+          path: ${{ runner.temp }}/examples
+          if-no-files-found: ignore
+
+  # A real window stormed while it draws, resized through odd sizes, minimized and given back,
+  # moved and set to a last size it must then draw at with nothing logged (WindowStormTests). Only
+  # where the bridges are built, since the test job's headless bridge draws nothing, and in X11
+  # under xvfb-run, which gives a minimized window back where nothing else on the runner would show
+  # one. The test skips where it is not asked for, so the step asks and fails when it was skipped.
+  storm:
+    name: storm a window
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # Twenty minutes, where the tests' build takes a few and the storm took a minute and a half on
+    # the pack run of 5e01491e, so a window that never comes back fails within the run.
+    timeout-minutes: 20
+    needs: [native]
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe to draw with, ALSA, which the bridge's audio links against, an X server of the
+      # runner's own for the window, and the libraries winit opens as it runs on X11 that none of
+      # those brings, the cursors', the input extension's and the keyboard map's. Without them winit
+      # makes no event loop and the app's constructor throws, as the storm of d2a20b6a did. An
+      # Ubuntu 24.04 container holding this job's packages alone failed so for each of the three
+      # in turn, and stormed once it had them.
+      - name: Install a software Vulkan, ALSA, Xvfb and the libraries winit opens on X11
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev xvfb libxcursor1 libxi6 libxkbcommon-x11-0
+
+      - name: Build the tests on the render bridge
+        run: dotnet build BevyCSharp.Tests -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      # The loader takes the bridge beside the tests before any other, so the one there is held to
+      # be the bridge downloaded above and named, since the tests of 292eead2 had none beside them
+      # and the step said only that the call for the bridge's version threw.
+      #
+      # A failed test is said whole, the test host's standard error after it, where the bridge says
+      # why it made no app. dotnet test leaves that out of what it prints and writes it to its log
+      # of diagnostics alone, so the step's page for d2a20b6a held the stack's last lines and no
+      # cause. The folder is kept as the run's artifact.
+      - name: Storm a window
+        run: |
+          loaded=BevyCSharp.Tests/bin/Debug/net10.0/libbevy_csharp.so
+          if ! cmp -s build/artifacts/linux-x64/libbevy_csharp.so "$loaded"; then
+            echo "::error::The tests' build put no copy of the render bridge this run built beside them, at $loaded, so the test would load another or none."
+            exit 1
+          fi
+          echo "The test loads $loaded, the render bridge the native job built, sha256 $(sha256sum "$loaded" | cut -c1-16)."
+          storm="$RUNNER_TEMP/storm"
+          mkdir -p "$storm"
+          out="$storm/storm.txt"
+          tested=0
+          xvfb-run -a -s "-screen 0 1920x1080x24" env -u WAYLAND_DISPLAY BCS_WINDOW_STORM=1 \
+            dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --no-build --filter "FullyQualifiedName~WindowStormTests" \
+              --diag "$storm/diagnostics/log.txt" | tee "$out" || tested=$?
+          sed -n 's/.*Test host standard error line: //p' "$storm/diagnostics/log.txt" > "$storm/stderr.txt" || true
+          if [ "$tested" -ne 0 ]; then
+            said=$(sed -E 's/\x1b\[[0-9;]*m//g' "$out" "$storm/stderr.txt")
+            said=${said//%/%25}
+            echo "::error title=The window storm failed::dotnet test ended with $tested. What it printed, then the test host's standard error:%0A${said//$'\n'/%0A}"
+            exit 1
+          fi
+          if ! grep -Eq "Passed: +1, Skipped: +0" "$out"; then
+            echo "::error::The window storm did not run, so nothing was stormed. The test skips where it is not asked for or has no X11 display."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: storm
+          path: ${{ runner.temp }}/storm
+          if-no-files-found: ignore
+
+  # The README followed as a stranger would, in a container holding the .NET SDK and the packages of
+  # this commit alone, the template installed and a game made from it, held to the first program as
+  # the README has it, built and run with no display. build/readme-walk.sh takes the program out of
+  # README.md, so a change to the README or the template that parts them fails here.
+  readme:
+    name: walk the README
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # Half an hour for a pack, the container's image pulled and a game made, built and run in it,
+    # so a step that waits fails within the run.
+    timeout-minutes: 30
+    needs: [native]
+    # Each step through build/step.py, as the game job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      - name: Pack
+        run: |
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+          build/pack-templates.sh 0.0.0-ci
+
+      - name: Walk the README
+        env:
+          CONTAINER: docker
+        run: build/readme-walk.sh 0.0.0-ci
+

@@ -60,7 +60,7 @@ docs/                  the guide, a page an area, which the README's Guide lists
 BevyCSharp.Tests/      test suite, run against a real Bevy app
 native/                Rust sources for the bridge
 build/                 the native build scripts, and everything they generate
-.github/workflows/     CI: builds every runtime identifier, then packs them together
+.github/workflows/     CI: build.yml tests a push, pack.yml builds all six bridges and packs
 ```
 
 ## Warnings
@@ -210,11 +210,11 @@ Each is built by the same command, on a machine that can target it:
 build/build-native.sh --render --target aarch64-apple-darwin
 ```
 
-`.github/workflows/build.yml` does this across a runner matrix and packs every RID into one
-package. Locally you get whichever platform you built; `dotnet pack` skips the slots you have
-no binary for rather than failing. Each bridge goes under `runtimes/<rid>/native/`, where .NET
-looks for the platform it runs on, and the source generator under `analyzers/dotnet/cs/`, where
-the compiler finds it.
+The pack workflow does this across a runner matrix, through the build workflow's native job, and
+packs every RID into one package. Locally you get whichever platform you built; `dotnet pack`
+skips the slots you have no binary for rather than failing. Each bridge goes under
+`runtimes/<rid>/native/`, where .NET looks for the platform it runs on, and the source generator
+under `analyzers/dotnet/cs/`, where the compiler finds it.
 
 Three platform notes worth knowing:
 
@@ -334,49 +334,61 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 
 ## Publishing
 
-A push or a pull request runs the test suite on Linux, Windows and macOS, the three systems the
-package ships for, and stops there. On Windows it also opens the feature test through `bcs`,
-headless, and asks how it is, since that is the one system where `bcs` starts a program through
-`cmd.exe`, within a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump`
-for the leak test, which names the types that grew where the heap's floor rose. It builds no
-per-platform bridge and packs nothing, and nothing a commit message says changes that.
+A push or a pull request runs the build workflow, `build.yml`: the test suite on Linux, Windows and
+macOS, the three systems the package ships for, each page of what failed put on one for the commit,
+and every link of the README and the guide followed (`build/check-docs.py --external`). On Windows
+it also opens the feature test through `bcs`, headless, and asks how it is, since that is the one
+system where `bcs` starts a program through `cmd.exe`, within a few minutes and with each answer
+printed. On macOS it installs `dotnet-gcdump` for the leak test, which names the types that grew
+where the heap's floor rose. A push tests the library alone, on the headless bridge each test job
+builds, since the render bridge costs a quarter of an hour cold on each of six runners and only a
+package needs it, and nothing a commit message says changes that. A push of the documents under
+`.github` other than this page, of AGENTS.md, of a game's notes or of the captures alone starts no
+run, so a push of the README or the guide alone runs the docs job with the rest.
 
-A package is made by the **pack** workflow, run by hand from the Actions tab ("Run workflow"). It
-builds the bridge for all six platforms, runs the tests on the three systems, plays Courtyard and
-Swarm, keeping Swarm's frame profile with the run's captures, drives the feature test's player
-through each station of its course, built on the package as Courtyard is
-(`build/drive-feature-test.sh`), soaks the four of them for a while, builds and runs every step of
-the first game (`build/first-game.sh`, whose `--shots` draws the page's pictures again), and walks
-the README's install in a container, the template installed and a game made from it
-(`build/readme-walk.sh`), and packs only once all of them pass. The engine's package and the
-template's are kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
+A package is made by the pack workflow, `pack.yml`, run by hand from the Actions tab ("Run
+workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves
+out. Those build the bridge for all six platforms, play Courtyard and Swarm, keeping Swarm's frame
+profile with the run's captures, soak the games, build and run every step of the first game
+(`build/first-game.sh`, whose `--shots` draws the page's pictures again), drive the feature test's
+player through each station of its course, built on the package as Courtyard is
+(`build/drive-feature-test.sh`), capture every example, storm a window and walk the README's
+install in a container, the template installed and a game made from it (`build/readme-walk.sh`).
+Its pack job packs only once every one of those passed. The engine's package and the template's
+are kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
 **publish** box pushes both to nuget.org from the run instead, which needs the `NUGET_API_KEY`
 secret.
 
-The **scene packs** workflow, also run by hand and never by a push, builds the bridge with
-meshlets and ray-traced lighting, fetches each scene pack `scenes/` names into the actions cache,
-where it stays between runs under the manifests' hash, and drives the feature test, which loads
-each fetched pack and captures its reference views with their frame times as the run's artifact. A
-pack itself is made by `build/make-scene-pack.py` from the scene as its makers publish it, needs
-Python 3.14 and Pillow, and is published by hand as an asset of the release `scene-packs`, at the
-address its manifest names.
+Intel Sponza is driven by hand on a machine with a GPU rather than in a workflow, since its pack is
+hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets and ray-traced lighting,
+fetches `slangc` and the pack (`./bcs scenes fetch intel-sponza`), builds the feature test with
+warnings as errors and drives it with its captures in `build/scenes`, where the drive loads the
+fetched pack and captures its reference views from outside its door and inside its hall with their
+frame times. A pack itself is made by `build/make-scene-pack.py` from the scene as its makers
+publish it, needs Python 3.14 and Pillow, and is published by hand as an asset of the release
+`scene-packs`, at the address its manifest names.
 
-The **feature test zips** workflow, run by hand when a build is to go to testers, makes the feature
-test as a tester gets it, published as native code from the package for Linux and for Windows with
-the bridge built with meshlets and ray-traced lighting, each a zip kept as the run's artifact. A zip
-holds the program, the bridge and the interface's library, the assets, the scene packs' manifests
-and `BevyCSharp.FeatureTest/README.txt`, which names the keys, the panel, the console and where the
-logs and the settings are. A tester has no `slangc`, so each zip carries the cache of its compiled
-shaders, which the Linux job fills by running the published program on a software Vulkan with
-every program it can use made (`feature.shaders`), and which the Windows job, whose runner draws
-nothing, takes from it, an entry being named by the shader's path, its defines and the bridge's own
-modules. `build/publish-feature-test.sh` makes one zip for the machine it runs on, from a package
-packed into `build/package`:
+The testers' zips are made by hand as well, each on the system it is for, since native code is
+published for the system it is made on. A zip holds the feature test published as native code from
+the package, the bridge built with meshlets and ray-traced lighting and the interface's library, the
+assets, the scene packs' manifests and `BevyCSharp.FeatureTest/README.txt`, which names the keys,
+the panel, the console and where the logs and the settings are. A tester has no `slangc`, so each
+zip carries the cache of its compiled shaders, which the script fills by running the published
+program with every program it can use made (`feature.shaders`). `build/publish-feature-test.sh`
+makes one zip for the machine it runs on, from a package packed into `build/package`:
 
 ```bash
+build/build-native.sh --render --meshlet --solari
+build/fetch-slang.sh
 dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.40-game
 build/publish-feature-test.sh 0.0.40-game   # build/feature-test/BevyCSharp-FeatureTest-<rid>.zip
 ```
+
+The Windows zip needs a Windows machine, the same steps run from Git's bash there with `--cache`
+after the version naming the cache a Linux run filled,
+`build/feature-test/BevyCSharp-FeatureTest-linux-x64/assets/.slang-cache` copied across, which
+holds on every system, since an entry is named by the shader's path, its defines and the bridge's
+own modules.
 
 A version named with `-p:BevyCSharpVersion` builds the feature test on that package rather than on
 the library's project, as the script and the pack workflow do.
@@ -483,8 +495,8 @@ example not yet written has its state and what it waits on. It also writes the c
 example opens with, naming the example of Bevy's it is written from, at which version and under
 Bevy's licenses. A head naming an earlier release than the lock's is kept, the example following
 that release's code until it is written again from the current one with its head taken off, and its
-row in EXAMPLES.md links Bevy's source at that release. The package workflow captures every example
-on the Linux bridge it built.
+row in EXAMPLES.md links Bevy's source at that release. The pack run captures every example on the
+Linux bridge it built.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is the
@@ -497,7 +509,8 @@ Bevy's does, and `--printing` lists them.
 `docs/` holds the guide, a page an area for somebody using the engine, and the README is for
 somebody deciding whether to, so it links to each page by its full URL, since it is also the
 package's page on nuget.org. `build/check-docs.py` follows every link in the README and the guide,
-`--external` the ones off this repository too, and the workflow run on every push runs it.
+`--external` the ones off this repository too, and the build workflow runs it on every push, a push
+of the README or the guide alone among them.
 
 `build/docs-on-package.py` builds every C# block of the guide against the packed package, as a
 reader copying one into a game would, and the pack workflow runs it beside the examples' own build.

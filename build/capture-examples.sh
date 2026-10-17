@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Captures every example written in BevyCSharp.Examples, one after another, and fails where one
-# does not start or comes out a single flat color, as an example that drew nothing does. The
-# package workflow runs it on every package, and it is how the captures in
+# does not start or comes out a single flat color, as an example that drew nothing does. The pack
+# run runs it before every package, and it is how the captures in
 # .github/assets/examples are taken again after a change that touches many examples.
 #
 #   build/capture-examples.sh [folder] [options for dotnet build]

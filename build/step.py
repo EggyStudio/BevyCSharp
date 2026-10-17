@@ -3,21 +3,22 @@
 
     build/step.py SCRIPT [--workflow FILE] [--logs DIR]...
 
-The jobs of the pack workflow that build and run programs on Linux run each of their steps through
-this, as the shell GitHub runs a step's script in (`shell: python3 build/step.py {0}`). The script
-runs as GitHub's own bash runs one, under `bash -e -o pipefail`, so the first command that fails
-ends it, and what it prints is passed on as it comes. A step that fails and prints no `::error::` of
-its own is given one, which names the step, the command that failed with its line and exit code,
-the step's last lines, and the last lines at a warning or worse of each log written while it ran,
-those `bcs open` keeps under build/sessions and those in the folders BCS_STEP_LOGS names, as the
-test page names its causes (NORM.md, N 6.7). Before it, Courtyard's play ended the game job with an
-exit code and nothing else, what stopped the game being in a log nobody read.
+The jobs the pack run adds to the build workflow, which build and run programs on Linux, and the
+pack workflow's pack job run each of their steps through this, as the shell GitHub runs a step's
+script in (`shell: python3 build/step.py {0}`). The script runs as GitHub's own bash runs one, under
+`bash -e -o pipefail`, so the first command that fails ends it, and what it prints is passed on as
+it comes. A step that fails and prints no `::error::` of its own is given one, which names the step,
+the command that failed with its line and exit code, the step's last lines, and the last lines at a
+warning or worse of each log written while it ran, those `bcs open` keeps under build/sessions and
+those in the folders BCS_STEP_LOGS names, as the test page names its causes (NORM.md, N 6.7). Before
+it, Courtyard's play ended the game job with an exit code and nothing else, what stopped the game
+being in a log nobody read.
 
 The step is named as the workflow names it, found by its script among the workflows under
 .github/workflows, where an expression GitHub filled in matches whatever it was filled with. All of
-them are searched rather than the one GITHUB_WORKFLOW_REF names, since the pack workflow's jobs are
-a reusable workflow's and that variable names the workflow that called it. It exits with the
-script's exit code.
+them are searched rather than the one GITHUB_WORKFLOW_REF names, since every job of a pack run but
+its pack job is the build workflow's, called from the pack workflow, which that variable names. It
+exits with the script's exit code.
 """
 
 import argparse

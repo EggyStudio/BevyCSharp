@@ -56,6 +56,9 @@ msbuild.log
 # What build/soak.sh reads from a game it plays, and the game's log.
 /build/soak/
 
+# What build/scenes.sh captures of the scene packs, with the drive's log and frame times.
+/build/scenes/
+
 # The testers' zips build/publish-feature-test.sh makes, and the folders they are made from.
 /build/feature-test/
 

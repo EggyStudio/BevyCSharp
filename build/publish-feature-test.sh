@@ -9,7 +9,7 @@
 #
 # The package is the version named, packed into build/package beforehand with the bridge for this
 # machine, as build/play-native.sh takes one. Native code is published for the system it is made
-# on, so a workflow makes the Windows zip on Windows and the Linux one on Linux. The options are
+# on, so the Windows zip is made on Windows and the Linux one on Linux. The options are
 # passed on, as -p:CppCompilerAndLinker=gcc on a machine with no clang. The folder the zip was made
 # from is left beside it, for build/drive-feature-test.sh to drive.
 #

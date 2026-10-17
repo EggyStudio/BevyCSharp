@@ -1,6 +1,9 @@
-# Builds the bridge for every platform, tests on Linux and Windows, and packs, when run from the
-# Actions tab ("Run workflow"), and pushes the package to nuget.org when asked to. Nothing is
-# packed unless every bridge built and both test jobs passed.
+# Runs the build workflow whole when run from the Actions tab ("Run workflow"): the tests on Linux,
+# Windows and macOS and the docs check as a push runs them, and the jobs a push leaves out, the
+# bridge built for all six platforms, Courtyard and Swarm played from a package of this commit, the
+# feature test driven, every example captured, a window stormed and the README walked (build.yml).
+# Then it packs, only once every one of those passed, so no package is made before its games are
+# played on it, and pushes the package to nuget.org when asked to.
 #
 # The version is build/version.sh's, the major and minor in build/version.txt and as the patch the
 # commits since that file last changed. The package is kept as the run's artifact either way, so a
@@ -18,52 +21,110 @@ on:
 permissions:
   contents: read
 
+# A second pack run of a branch waits for the first rather than ending it, since each is started by
+# hand for a package and runs for more than an hour.
+concurrency:
+  group: pack-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
 jobs:
-  version:
-    name: version
+  # GitHub takes no time limit on a job that calls a workflow, and each job it calls has its own.
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      pack: true
+
+  pack:
+    name: pack
+    needs: [build]
     runs-on: ubuntu-24.04
-    outputs:
-      version: ${{ steps.version.outputs.version }}
+    # Twenty minutes, where the pack, the templates, the listing and the package's tests take a few,
+    # so a step that waits fails within the run's patience rather than at GitHub's six hours.
+    timeout-minutes: 20
+    # Each step through build/step.py, as the build workflow's jobs that run programs have it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
     steps:
-      # The whole history, since the patch counts commits.
+      # The whole history, since the version's patch counts commits and the release notes are read
+      # from them.
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
       - name: Work out the version
         id: version
         run: echo "version=$(build/version.sh)" >> "$GITHUB_OUTPUT"
 
-  package:
-    name: package
-    needs: version
-    uses: ./.github/workflows/package.yml
-    with:
-      version: ${{ needs.version.outputs.version }}
-      pack: true
-      test_os: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
-
-  publish:
-    name: publish
-    needs: [version, package]
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
+      # Every runtime identifier's bridge, laid back out the way the csproj expects to find it.
       - uses: actions/download-artifact@v8
         with:
-          name: BevyCSharp-${{ needs.version.outputs.version }}
-          path: package
+          pattern: native-*
+          path: staging
 
+      - name: Collect native artifacts
+        run: |
+          mkdir -p build/artifacts
+          for dir in staging/native-*; do
+            rid="${dir#staging/native-}"
+            mkdir -p "build/artifacts/$rid"
+            cp "$dir"/* "build/artifacts/$rid/"
+          done
+          find build/artifacts -type f | sort
+
+      # The notices the package carries, written from the crates of native/Cargo.lock, which a
+      # change to the lock leaves out of date until the script is run again.
+      - name: Check the third-party notices
+        run: build/third-party-notices.py --check
+
+      # The staleness guard in the csproj compares timestamps against the Rust sources, and a
+      # fresh checkout writes those after the downloaded artifacts. The binaries came from this
+      # very commit, so the check has nothing useful to say here.
+      # The release notes are the commits since build/version.txt last changed, newest first, each
+      # commit's sentence a line (build/release-notes.sh).
+      - name: Pack
+        run: |
+          build/release-notes.sh "$PWD/build/release-notes.txt"
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=${{ steps.version.outputs.version }} -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/release-notes.txt"
+          build/pack-templates.sh
+
+      - name: Show what shipped
+        run: for package in build/package/*.nupkg; do unzip -l "$package"; done
+
+      # N 6.4 and N 6.5 of NORM.md, the package holding the library, its generator, its build files
+      # and the natives of every system staged above, and the notices naming every crate of the lock.
+      - name: Check what the package holds
+        run: |
+          # A whole path, since the test runs from its own folder. It reads a relative one from the
+          # checkout as well, and the job does not lean on that.
+          export BCS_PACKAGE="$PWD/$(ls build/package/BevyCSharp.[0-9]*.nupkg | head -1)"
+          dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj -c Release -p:BevyCSharpSkipNativeFreshnessCheck=true --filter "FullyQualifiedName~NormTests.N_6_4|FullyQualifiedName~NormTests.N_6_5"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: BevyCSharp-${{ steps.version.outputs.version }}
+          path: build/package/*.nupkg
+          if-no-files-found: error
+
+      # The key through the environment, so the command a failure names holds its name and not it.
       - name: Push to nuget.org
         if: ${{ inputs.publish }}
-        run: dotnet nuget push "package/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Say what was made
         run: |
-          echo "### BevyCSharp ${{ needs.version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "### BevyCSharp ${{ steps.version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ inputs.publish }}" = "true" ]; then
             echo "Pushed to nuget.org." >> "$GITHUB_STEP_SUMMARY"
           else

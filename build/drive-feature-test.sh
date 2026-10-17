@@ -289,9 +289,9 @@ view 16-effects -55 4 -3 -63.5 3 -1 60
 quiet setting "AmbientOcclusion $occlusion"
 quiet setting "Backdrop $backdrop"
 
-# Sponza, where its pack has been fetched, which the push workflows never do, from outside its
-# door and from inside its hall, each view's frame time written beside the captures, as the
-# workflow started by hand for the scene packs keeps them.
+# Sponza, where its pack has been fetched, which no workflow does, from outside its door and from
+# inside its hall, each view's frame time written beside the captures, as build/scenes.sh keeps
+# them.
 if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END { exit !found }'; then
   quiet scene.load intel-sponza
   for _ in $(seq 1 60); do grep -q "Intel Sponza stands" "$log" && break; quiet frames.wait 10; done

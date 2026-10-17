@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Captures one of the examples as EXAMPLES.md shows it: opened offscreen at Bevy's window of 1280
-# by 720, driven where it waits for input, run long enough to settle, captured and closed. The package workflow
-# captures every example this way, and a written or changed example's capture in
+# by 720, driven where it waits for input, run long enough to settle, captured and closed. The pack
+# run captures every example this way, and a written or changed example's capture in
 # .github/assets/examples is taken with it.
 #
 #   dotnet build BevyCSharp.Examples

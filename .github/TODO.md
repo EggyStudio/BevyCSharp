@@ -588,7 +588,7 @@ fails there.
   `build-native.sh` writes to, so the bridge and the crate's own tests both come back from cache.
   What is not cached is the container path `PORTABLE=1` takes, which writes to
   `build/target-portable` and serves a local checkout on a newer glibc.
-- **Packing on one machine produces a package for one platform.** Use the CI workflow, or run
+- **Packing on one machine produces a package for one platform.** Use the pack workflow, or run
   `build-native.sh` on each target, to produce a package covering all six runtime identifiers.
 - **An export is built for one platform at a time, on that platform.** The Play tab exports a
   project with `dotnet publish`, self-contained, for a chosen platform, with the render bridge

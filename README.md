@@ -199,8 +199,7 @@ draws where there is no graphics card:
 BCS_OFFSCREEN=1 BCS_FRAMES=120 dotnet run
 ```
 
-The package workflow follows these steps in a container holding the .NET SDK and the two packages
-alone.
+The pack run follows these steps in a container holding the .NET SDK and the two packages alone.
 
 ## Guide
 
@@ -263,7 +262,7 @@ how many of them are written stands under [Examples](#examples).
 
 Known gaps:
 
-- A locally built package contains only the platform you built it on. Use the CI workflow, or
+- A locally built package contains only the platform you built it on. Use the pack workflow, or
   run `build-native.sh` on each target platform, to produce a package covering all of them.
 - A render build draws. Mesh primitives, textured physically based materials, cameras, lights,
   sprites, gizmos, UI nodes and text are reachable from a behavior script, verified on Vulkan. glTF

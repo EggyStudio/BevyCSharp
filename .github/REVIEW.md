@@ -930,3 +930,54 @@ shape. The play job's hour now holds seven and a half minutes more of soak, and 
 could not be timed here; the drive job's estimate rises to some 70 of its 90 minutes. Bash once
 warned of a null byte it dropped from one of the feature test's readings, the reading still whole,
 and it was not looked into further.
+
+
+Verdicts 23 and 24: mended at `0dff9601`.
+
+**Item 23.** `package.yml` is folded into `build.yml`, which runs on `push` and `pull_request` with
+3DEngine's paths filter, `branches` gone, and on `workflow_call` with one boolean input, `pack`,
+read as `if: ${{ inputs.pack }}`; its jobs are `native (rid)` for the pack alone, `test (os)`,
+`digest`, `docs`, and for the pack alone `game`, `drive`, `examples`, `storm` and `readme`, each
+needing `native`, with the matrices written out and the inputs `version`, `targets` and `test_os`
+gone. `pack.yml` keeps `workflow_dispatch` with `publish` and runs `build`, which calls `build.yml`
+with `pack: true`, then `pack`, needing `build`, with 20 minutes and its steps through
+`build/step.py`: the version worked out with the whole history, the six `native-*` artifacts laid
+out under `build/artifacts`, the notices checked, the release notes, `dotnet pack` at that version,
+the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked and
+the summary. The key reaches the push through the environment, so a failed command that `step.py`
+names holds `$NUGET_API_KEY` and not the key. The `version` and `publish` jobs are gone. Both files
+have `permissions: contents: read` and a head comment saying what a push runs and what the pack run
+adds. Every job has a time limit with its reason, the test, digest, docs, storm and README jobs
+given theirs now, and `build` in `pack.yml` none, since GitHub takes no limit on a job that calls a
+workflow and each job it calls has its own.
+
+One thing differs from the item. The build workflow's group is
+`build-${{ github.ref }}-${{ github.event_name }}` where the item has `build-${{ github.ref }}`,
+since a called workflow reads its caller's context, and the pack run's call would then share the
+group of a push to the same branch. With `cancel-in-progress` either would end the other. A push
+during a pack run would cancel the pack run's jobs, and a pack run started soon after a push, as the
+owner starts one, would cancel the push's. With the event in the group a push still supersedes a
+push, and a pack run's call stands apart. `pack.yml`'s group is `pack-${{ github.ref }}` without
+cancelling.
+
+`feature-test.yml` and `scenes.yml` are deleted. `build/scenes.sh` builds the bridge with meshlets
+and ray-traced lighting, fetches `slangc` and `intel-sponza`, builds the feature test with
+`-warnaserror` and drives it with `SHOTS` at `build/scenes`, given whole, since the drive writes the
+program's log from the program's own folder and a relative `SHOTS` would land there; `build/scenes/`
+is ignored. BUILDING.md's Publishing says what a push runs, that it tests the library alone since
+the render bridge costs a quarter of an hour cold on each of six runners, what the pack run adds,
+Sponza driven by hand with `build/scenes.sh`, and the testers' zips made by hand around the recipe,
+the bridge built with meshlets and ray-traced lighting and `slangc` fetched before the pack, and the
+Windows zip on a Windows machine with `--cache` naming the Linux run's cache. It says a machine with
+a GPU, where the item says the owner's machine, since N 4.7 keeps the owner out of the documents.
+The other lines named are changed, `build/step.py:6-7` and `18`, `BUILDING.md:63`, `213`, `481` and
+`498`, `README.md:202` and `266`, and with them TODO.md's line on packing for one platform, the
+captures' scripts, the drive's comment on Sponza and `build/publish-feature-test.sh`'s head, each of
+which named a workflow that is gone.
+
+Checked: `WorkflowTests`, `TestScriptTests`, `ScriptTests` and `NormTests` 62 of 62,
+`build/check-docs.py`, and both files read as YAML with the jobs, needs, conditions and limits
+above. Not run: `build/scenes.sh` whole, since it builds the render bridge over this checkout's
+editor bridge and its drive stops any session serving, its steps being the scenes workflow's; and
+the push and pack runs, which are Decision 33's gate. A push of the README or the guide alone runs
+the whole build workflow, the three suites with the docs job, as 3DEngine's filter does.
