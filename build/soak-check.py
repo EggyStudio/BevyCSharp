@@ -4,6 +4,7 @@ and the rest is cut in two halves. The most a value reached in the second half m
 reached in the first by the slack its kind is given, and no more.
 
     python3 build/soak-check.py build/soak/<game>.txt [...]
+    python3 build/soak-check.py --fewest      # the readings it judges no fewer than
 
 A reading is a line of the seconds into the run and then names and numbers in pairs, as the memory
 command answers. A count that only ever grows, as the collections are, is not judged, and neither are
@@ -44,21 +45,26 @@ FEWEST = 6
 
 
 def read(path):
-    rows = []
+    """The seconds into the run of each reading, and its names and numbers."""
+    seconds, rows = [], []
     with open(path, encoding="utf-8") as lines:
         for line in lines:
             words = line.split()
             pairs = words[1:]
             if len(pairs) < 2 or len(pairs) % 2:
                 continue
+            seconds.append(int(words[0]))
             rows.append({pairs[i]: int(pairs[i + 1]) for i in range(0, len(pairs), 2)})
-    return rows
+    return seconds, rows
 
 
 def judge(path):
-    rows = read(path)
+    seconds, rows = read(path)
     if len(rows) < FEWEST:
-        print(f"{path}: {len(rows)} readings, too few to judge")
+        # How long a round took, the time between readings, so the soak that reads this few is
+        # given the seconds its rounds need.
+        apart = f", a round taking some {(seconds[-1] - seconds[0]) // (len(rows) - 1)} seconds" if len(rows) > 1 else ""
+        print(f"{path}: {len(rows)} readings{apart}, too few to judge where {FEWEST} are")
         return False
 
     kept = rows[len(rows) // 4:]
@@ -81,6 +87,9 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__)
         return 2
+    if sys.argv[1] == "--fewest":
+        print(FEWEST)
+        return 0
     results = [judge(path) for path in sys.argv[1:]]
     return 0 if all(results) else 1
 

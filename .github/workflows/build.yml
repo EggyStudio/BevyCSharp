@@ -285,8 +285,8 @@ jobs:
     runs-on: ubuntu-24.04
     # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
     # to four processors, two frames a second with its creatures in their hundreds, and the job
-    # plays two games after it builds the guide and every example, then soaks three for ten minutes
-    # and publishes.
+    # plays two games after it builds the guide and every example, then soaks three for ten minutes,
+    # or fifteen where a game's rounds are too slow for six readings in ten, and publishes.
     timeout-minutes: 60
     needs: [native]
     # Each step through build/step.py, which gives one that fails having said nothing an error
@@ -416,7 +416,8 @@ jobs:
     # held to four processors of the working machine draws the hub under its weather at 1.1 frames a
     # second, with slangc or without, so the run took some 70 minutes there. The runner played Swarm
     # in 7.4 minutes where that machine took 11, which puts the run near 47 minutes here, with the
-    # pack, the build and the fetch of slangc before it and the soak of fifteen minutes after it.
+    # pack, the build and the fetch of slangc before it and the soak of fifteen minutes after it, or
+    # of twenty-two and a half where its rounds are too slow for six readings in fifteen.
     timeout-minutes: 90
     needs: [native]
     # Each step through build/step.py, as the play job has it.

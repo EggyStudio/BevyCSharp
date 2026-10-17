@@ -2,7 +2,8 @@
 # Plays a game for a while through ./bcs as a player left at it would, a round at a time, and reads
 # what the program holds (memory.collect) at the end of a round, no more often than every five
 # seconds, into build/soak/<game>.txt. build/soak-check.py then fails when anything it holds climbs
-# without leveling off, as a leak does.
+# without leveling off, as a leak does. A game whose rounds are slow plays on past the seconds
+# given, by as much as half of them again, until it has been read as often as the check judges.
 #
 #   build/soak.sh <courtyard|stress|swarm|feature-test> <seconds> [folder the game was built to]
 #
@@ -95,10 +96,15 @@ round() {
     esac
 }
 
+# Six readings, as build/soak-check.py judges no fewer, which Swarm's rounds of two minutes on
+# lavapipe held to four processors of the working machine missed by one in ten minutes.
+fewest=$(python3 build/soak-check.py --fewest)
 rounds=0
+readings=0
 end=$((SECONDS + seconds))
+cap=$((end + seconds / 2))
 next=$SECONDS
-while ((SECONDS < end)); do
+while ((SECONDS < end)) || ((readings < fewest && SECONDS < cap)); do
     round
     rounds=$((rounds + 1))
     if ((SECONDS >= next)); then
@@ -107,8 +113,9 @@ while ((SECONDS < end)); do
         at=$SECONDS
         reading=$(c memory.collect)
         echo "$at $reading" >>"$out"
+        readings=$((readings + 1))
         next=$((SECONDS + 5))
     fi
 done
 grep -q "^\[soak\] the game exited" "$log" && fail "the game stopped while it was played"
-echo "$name: $rounds rounds in $seconds seconds, $(wc -l <"$out") readings in $out"
+echo "$name: $rounds rounds in $((SECONDS - end + seconds)) seconds, $readings readings in $out"
