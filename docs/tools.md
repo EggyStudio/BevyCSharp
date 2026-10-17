@@ -213,11 +213,12 @@ and asks it things:
 ./bcs command window.shot '#402 /tmp/second.png'   # one of them, offscreen as well
 ```
 
-`memory` answers with what the program holds as name and number pairs, the managed heap, the
-process's resident size and the most it has held, the bytes the bridge has allocated, the entities
-with the indices handed out, the asset handles held and the assets of each kind Bevy holds, and
-where a renderer runs, the GPU memory wgpu has allocated and how many buffers, textures, pipelines
-and other GPU resources are alive, as `gpu.` pairs. Read at intervals while a game is played, as
+`memory` answers with what the program holds as name and number pairs, the managed heap with what
+its last full collection kept alive as `live`, the process's resident size and the most it has
+held, the bytes the bridge has allocated, the entities with the indices handed out, the asset
+handles held and the assets of each kind Bevy holds, and where a renderer runs, the GPU memory wgpu
+has allocated and how many buffers, textures, pipelines and other GPU resources are alive, as
+`gpu.` pairs. Read at intervals while a game is played, as
 `build/soak.sh` does, a value that keeps climbing is a leak, and a resident size that climbs while
 every `gpu.` count stands still is memory the graphics driver keeps for itself.
 

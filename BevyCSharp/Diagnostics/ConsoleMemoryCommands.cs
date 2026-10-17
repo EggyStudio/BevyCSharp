@@ -13,31 +13,41 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Every figure is a name and a whole number on one line, for a script to read without parsing a
-/// sentence. Managed memory is the garbage collector's, and the process's, its resident size or on
-/// Windows its committed private bytes (<see cref="MemoryGuard.ResidentBytes"/>), with the most it
-/// has held since it started (<see cref="MemoryGuard.PeakBytes"/>), takes in what a graphics
-/// driver holds, which on a software renderer is the device's memory too. The rest is the
-/// bridge's, the bytes Rust's allocator holds, the entities and their indices, the asset handles
-/// this side keeps, the assets of each kind Bevy holds, and where a renderer runs what wgpu has
-/// asked the GPU for, its allocator's bytes and how many of each resource are alive, as
-/// <c>gpu.</c> pairs. A resident size that climbs while every
-/// <c>gpu.</c> count stands still is memory the driver keeps for itself.
+/// sentence. Managed memory is the garbage collector's, with what its last full collection found
+/// alive (<c>live</c>), and the process's, its resident size or on Windows its committed private
+/// bytes (<see cref="MemoryGuard.ResidentBytes"/>), with the most it has held since it started
+/// (<see cref="MemoryGuard.PeakBytes"/>), takes in what a graphics driver holds, which on a
+/// software renderer is the device's memory too. The rest is the bridge's, the bytes Rust's
+/// allocator holds, the entities and their indices, the asset handles this side keeps, the assets
+/// of each kind Bevy holds, and where a renderer runs what wgpu has asked the GPU for, its
+/// allocator's bytes and how many of each resource are alive, as <c>gpu.</c> pairs. A resident size
+/// that climbs while every <c>gpu.</c> count stands still is memory the driver keeps for itself.
 /// </para>
 /// </remarks>
 internal static unsafe class ConsoleMemoryCommands
 {
     /// <summary>Says what the program holds as it is, without a collection.</summary>
     /// <remarks>
+    /// <para>
     /// Read as the program left it, so a climb shows as it happens. <c>memory.collect</c> tells
     /// what is held apart from what waits to be collected.
+    /// </para>
+    /// <para>
+    /// <c>live</c> is the bytes the last full blocking collection kept, the heap's live objects as
+    /// of that collection, and the figure a soak judges. <c>managed</c> is the
+    /// runtime's total, which with objects pinned counts the free space around them against
+    /// itself and reads below zero, as it read in Stress and Swarm after a full collection,
+    /// and <c>heap</c> is the heap's size at the last collection with that free space in it.
+    /// </para>
     /// </remarks>
     [Command("memory", "What the program holds, as name and number pairs: managed memory, the process and its peak, the bridge's allocations, entities, assets and the GPU's resources")]
     internal static string Memory()
     {
         var info = GC.GetGCMemoryInfo();
+        var full = GC.GetGCMemoryInfo(GCKind.FullBlocking);
         var line = string.Create(
             CultureInfo.InvariantCulture,
-            $"managed {GC.GetTotalMemory(forceFullCollection: false)} heap {info.HeapSizeBytes} gen2 {GC.CollectionCount(2)} process {MemoryGuard.ResidentBytes()} peak {MemoryGuard.PeakBytes()}");
+            $"managed {GC.GetTotalMemory(forceFullCollection: false)} live {full.PromotedBytes} heap {info.HeapSizeBytes} gen2 {GC.CollectionCount(2)} process {MemoryGuard.ResidentBytes()} peak {MemoryGuard.PeakBytes()}");
 
         // The handles need a world, which a command asked from outside a frame has not got.
         if (ConsoleHost.World is not null)

@@ -6,15 +6,26 @@ reached in the first by the slack its kind is given, and no more.
     python3 build/soak-check.py build/soak/<game>.txt [...]
 
 A reading is a line of the seconds into the run and then names and numbers in pairs, as the memory
-command answers. A count that only ever grows, as the collections are, is not judged.
+command answers. A count that only ever grows, as the collections are, is not judged, and neither are
+the runtime's managed total and the heap's size, which are said beside the live figure.
 """
 
 import sys
 
 # How far past the first half's most each value may go, as a share of it and an amount.
+#
+# The live figure is the bytes the managed heap holds alive, those kept by the full collection
+# memory.collect makes, as build/soak.sh reads it after each round. The two beside it are said
+# and not judged. The heap's size is its size at that collection with the free space between its
+# objects counted, which the collector leaves larger or smaller as it sees fit, so on the pack run
+# of afcf8301 Swarm's grew from 751,256 bytes to 4,608,176 with nothing climbing. The managed
+# total, GC.GetTotalMemory, counts the free space around pinned objects against itself, and read
+# below zero in Stress and Swarm after a full collection, -481,448 and -160,896 bytes.
 SLACK = {
-    "managed": (0.15, 2 << 20),
-    "heap": (0.15, 2 << 20),
+    # A ten-minute soak of Courtyard, the stress program and Swarm on lavapipe held what each kept
+    # alive within 60,712 bytes of where it settled, Courtyard's 2,191,664 to 2,253,432, so a
+    # quarter of a megabyte past the first half's most is four times that.
+    "live": (0.05, 256 << 10),
     # The process's resident size takes in the graphics driver's memory and the pages the runtime
     # has not given back, which move by megabytes from one reading to the next.
     "process": (0.10, 48 << 20),

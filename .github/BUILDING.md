@@ -414,9 +414,9 @@ Vulkan, a few frames a second, which on the machine's clock carried the runner p
 `build/soak.sh <courtyard|stress|swarm|feature-test> <seconds>` plays a game through `bcs` a round
 at a time, as a player left at it would, and reads `memory.collect` after its rounds, no more often
 than every five seconds, into `build/soak/<game>.txt`. `build/soak-check.py` fails when anything it
-holds (managed memory, the process's resident size, the bridge's allocations, the entities, the
-asset handles and the assets of each kind) climbs past what it reached earlier in the run by more
-than a little, and when it was read fewer than six times. A round ends where the game is the same
+holds (what the managed heap holds alive, the process's resident size, the bridge's allocations,
+the entities, the asset handles and the assets of each kind) climbs past what it reached earlier in
+the run by more than a little, and when it was read fewer than six times. A round ends where the game is the same
 each time, Courtyard back on its menu after a save, a walk and a load, Swarm at its end after a
 fight with its first wave, the feature test's player back where its walk round a square of the hub
 began, and the stress program after a number of frames, so two readings of a game that leaks nothing

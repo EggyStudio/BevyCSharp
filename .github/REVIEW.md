@@ -10,7 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `afcf8301`, Verdict 27 mended over `ea6b95ae`, Verdict 26, and nothing else, as
+Reviewed up to `cd2d542d`, Verdict 27 mended again and nothing else, 3 files. The memory guard's
+test collects twice before its first reading, a full, aggressive, compacting collection with its
+finalizers each time, so the collector decommits what it frees at once, then enters a region of no
+collection, 16 MiB of budget, that holds until after the second reading and is ended where it still
+stands, both readings and the allocation inside it, the comment saying why and keeping the Windows
+and macOS figures' reasons. Right. The owner pushed it at 21:31, and its run ended at 21:48 whole
+green, the first push run whole green under the new workflow, Linux in 12 minutes, macOS in 9 and
+Windows in 17, the macOS suite the first of three toward Verdict 27; the owner started a pack run on
+it at 21:41. Verdicts 26 and 28 and item 25 stay open, so Decision 35's gate holds.
+
+Before it, `afcf8301` came, Verdict 27 mended over `ea6b95ae`, Verdict 26, and nothing else, as
 Decision 35 asks. At `ea6b95ae`, read in the runner's image with Mesa 25.2.8's lavapipe on four
 processors since the run's artifact needs a signed-in download: an example drawn with meshlets or
 ray-traced lighting the bridge or the device has not is captured as the warning the app logs for it,
@@ -39,8 +49,8 @@ where 192 is asked (Verdict 27, continued), Linux and Windows green. The pack ru
 three suites, macOS among them, digest, README walk and storm passed; the capture shards ended in 19
 to 28 minutes each, two green and two red on one picture apiece, `many_lights` by 45.4 percent and
 `many_cubes` by 4.6 (Verdict 26, continued, and Verdicts 22 and 25 settle on them); the play job
-failed Swarm's soak (Verdict 28); the feature test's course was still running at 20:50, and the pack
-job did not run, so Decision 35's gate is not met. At 20:34 the owner read the voxel game's README's
+failed Swarm's soak (Verdict 28); the feature test's course passed in 71 minutes, and the pack job
+did not run, so Decision 35's gate is not met. At 20:34 the owner read the voxel game's README's
 opening and widened Decision 37 to likenesses and figures of speech, item 25 open again for them.
 Next the three verdicts' mends and item 25, their push, and a push run and a pack run whole green.
 
@@ -70,29 +80,6 @@ Windows were green. In the pack run of `85df443c`, read at 16:29, the four captu
 and 4 failed captures spread over them; the play job passed in 25 minutes and the course's job in 73
 with its soak, so the run ended failed on the shards alone at 17:00. Verdicts 26 and 27 are the
 coder's next, then the owner's push and the pack run that is Decision 35's gate.
-
-Before it, `1d246e9f` came, item 24 done and nothing else, as Decision 35 asks. The `docs` job and
-the head comment's line on it are gone from `build.yml`, the paths filter's comment naming the
-suite's test where it named the job; the two facts went into `DocsScriptTests`, the class listed for
-the docs scripts, so no line joined `build/norm/1.4.txt`: the first runs `build/check-docs.py`
-without `--external` over the checkout, and the second runs a copy of the script in a checkout of
-its own whose README links a page that is not there and whose page links a heading it lacks, the
-check ending with 1 and naming both and neither of the good ones. BUILDING.md's push paragraph names
-the test, the sentence on a push of the README alone is gone, and the guide's section says the suite
-runs the script without `--external` and the hand run before a package with it. Checked on the
-working machine: `DocsScriptTests`, `NormTests`, `WorkflowTests` and the script tests, 64 of 64.
-Right. Item 25, the register, is under way with limits the coder named and that hold: AGENTS.md
-waits for the owner's word given in that session (N 7.4), the reviewer's files, ASKS.md, the
-notices, the vendored weather crate, EXAMPLES.md's descriptions written from Bevy's metadata,
-generated files and identifiers stay, and a technical sense stays too, a joint's drive, a GPU
-driver, a physics bounce, a path tracer's bounces. The owner pushed `1d246e9f` at 15:17, its run
-under way at 15:23. In the pack run of `b178ae3f` the course's job passed in 72 minutes with its
-fifteen-minute soak of the feature test, and the one capture job was still running at its 75th
-minute, the pack run on `85df443c` queued behind it. That capture job ran to its end in 77 minutes
-and failed on 14 differences and 4 captures, Verdict 26, which is Verdict 22's mend at work and the
-runner's own differences left; the pack run on `85df443c` began at 15:28, its bridges, suites, storm
-and README walk green by 15:55 and its four capture shards, play job and course job running. The
-push run of `1d246e9f` was whole green at 15:35.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -781,7 +768,9 @@ failing on one picture apiece, which is Verdict 26's.
     `GC.TryStartNoGCRegion` entered before the first reading and ended after the second, with the
     reason in its comment; and if that does not hold on three suites, the two readings are taken in
     a child process that does nothing else and answers them. Settled at three green macOS suites in
-    a row after that.
+    a row after that. Mended again at `cd2d542d`, the test collecting twice, aggressively, before
+    its first reading and allowing no collection until its second; settled at three green macOS
+    suites in a row after it.
 
 28. **The soak judges the collector's heap size, which grows with its budget and holds garbage, so
     Swarm's soak failed with nothing leaking.** On the pack run of `afcf8301`, 2026-10-17, the play
