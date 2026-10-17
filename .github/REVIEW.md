@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `dd2149ee`, Verdict 28 mended and nothing else, 7 files. The memory command answers
+Reviewed up to `b4d45938`, Verdict 26 mended at `01f448b9`, Verdict 28's addition done at `a62e96c8`
+and item 25 done, in three commits. At `01f448b9` `many_lights` and `many_cubes` are taken again on
+the working machine's GPU with a `--render` bridge, reading 0.063 and 0.419 percent from captures in
+the runner's image on the same kind of bridge, and BUILDING.md says a picture is taken on a bridge
+built without Solari, with `--meshlet` for the three meshlet examples and `--solari` for the two
+Solari ones alone, with the `dfg_lut` reason and the run's figures. At `a62e96c8` `build/soak.sh`
+plays on past its seconds, by at most half of them again, until it has read each game as often as
+`soak-check.py --fewest` prints, six, and the check's too-few line gives the round's length;
+BUILDING.md and the play and course jobs' comments give the longer bound, fifteen minutes for the
+three games and twenty-two and a half for the feature test, within the jobs' limits. At `b4d45938`
+70 rewordings across 64 files take the likenesses and idioms out, STYLE.md's Register carrying the
+rule, the owner's example row, the idiom list with the knob, the plumbing, the wiring, an escape
+hatch and for free added, and a search in its checks that leaves the vendored weather crate and the
+notices out; a handful became the count the code gives, eighteen multiplications in `Quat`, six
+calls and one a character in the physics sync, five entities in `Movement`; leans on became depends
+or relies on; the literal box of `Render.Skins.cs`, the gamepad stick's knob, the orientation
+gizmo's knob and by hand stay. Each read, right. Checked on the working machine were the whole suite
+over the three, 1,474 passed and 3 skipped of 1,477, with the bridge rebuilt with the editor,
+meshlets and Solari and the cheatsheet written again. The owner pushed `dd2149ee` at 22:39 and
+`b4d45938` at 23:23. The push run of `dd2149ee` ended red at 22:55 on the Windows suite alone, one
+test of the script's lost-suite handling (Verdict 29), Linux and macOS green, the macOS suite the
+second of three toward Verdict 27; the pack run of `cd2d542d` ended at 23:06 with shards 1 and 4 red
+on the two pictures as before, the play job green with its soak and the feature test's course green
+in 68 minutes, the pack job not run. Next the push run of `b4d45938` and a pack run, Decision 35's
+gate.
+
+Before it, `dd2149ee` came, Verdict 28 mended and nothing else, 7 files. The memory command answers
 `live`, the bytes its last full blocking collection kept, beside `managed` and `heap`, which the
 soak check says and no longer judges, with the reasons in its header, the first reading below zero
 with objects pinned and the second counting free space; the check judges `live` at five percent and
@@ -31,40 +57,6 @@ and macOS figures' reasons. Right. The owner pushed it at 21:31, and its run end
 green, the first push run whole green under the new workflow, Linux in 12 minutes, macOS in 9 and
 Windows in 17, the macOS suite the first of three toward Verdict 27; the owner started a pack run on
 it at 21:41. Verdicts 26 and 28 and item 25 stay open, so Decision 35's gate holds.
-
-Before it, `afcf8301` came, Verdict 27 mended over `ea6b95ae`, Verdict 26, and nothing else, as
-Decision 35 asks. At `ea6b95ae`, read in the runner's image with Mesa 25.2.8's lavapipe on four
-processors since the run's artifact needs a signed-in download: an example drawn with meshlets or
-ray-traced lighting the bridge or the device has not is captured as the warning the app logs for it,
-beside where its picture would be, ending the capture with 4, which the loop counts as captured and
-the comparison compares with nothing, so the five that drew without them are read no more;
-`clustered_decals`, whose fragment shader ends Mesa 25.2's llvmpipe in a rasterizer thread where
-Mesa 26.2's and a GPU draw it, is captured as words with the adapter's line on that adapter alone;
-`decodable` and `pitch`, which spawn no camera and whose pictures are one color, joined the list of
-examples empty by design; `change_detection` and `ecs_guide` shared one seeded generator between
-systems the executor runs in either order and each drawing system has its own, their texts taken
-again, and `compare-captures.py` compares a printed capture by how often each line occurs with the
-numbers masked, so an order the executor chooses no longer counts; the capture job installs
-ImageMagick, which scaled a 401 by 401 shot to 1280 by 720 in that image; `removal_detection` is
-taken at frame 150, after the component comes off at the second mark frame 120 stood on,
-`many_lights` is seeded under GitHub Actions and matched, `many_foxes` is allowed 12 percent since
-each fox runs from the frame its model loads, and `many_cubes` and `async_compute` matched at the
-runner's cap and are listed nowhere. At `afcf8301` the memory guard reads on macOS the physical
-footprint, `ri_phys_footprint` from `proc_pid_rusage` in libproc as .NET's runtime loads it, the
-resident pages with those the compressor holds, falling back to the resident size where the system
-answers nothing, the struct field for field macOS's `rusage_info_v0`; Linux and Windows read as
-before and the test's comment says why. Checked on the working machine: the whole suite 1,474 and 3
-skipped; every named example drawing or printing in the runner's image; the guard's tests, macOS's
-being the push's to show. Right. The owner pushed both at 19:47 and started the pack run with them.
-The push run ended at 20:04 red on macOS, the memory guard's test short again, 186.6 MiB of growth
-where 192 is asked (Verdict 27, continued), Linux and Windows green. The pack run's six natives,
-three suites, macOS among them, digest, README walk and storm passed; the capture shards ended in 19
-to 28 minutes each, two green and two red on one picture apiece, `many_lights` by 45.4 percent and
-`many_cubes` by 4.6 (Verdict 26, continued, and Verdicts 22 and 25 settle on them); the play job
-failed Swarm's soak (Verdict 28); the feature test's course passed in 71 minutes, and the pack job
-did not run, so Decision 35's gate is not met. At 20:34 the owner read the voxel game's README's
-opening and widened Decision 37 to likenesses and figures of speech, item 25 open again for them.
-Next the three verdicts' mends and item 25, their push, and a push run and a pack run whole green.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -613,24 +605,24 @@ from [SHARED.md](SHARED.md).
     and failing on a link to a page that is not there, `WorkflowTests`, `NormTests`, and the push
     run showing `test`, `digest` and nothing else.
 
-25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`, open again for
-    the figures Decision 37 adds.** STYLE.md gains a section, Register: prose uses the technical and
-    generic term, the engine's own where it has one, and no figure of speech or casual paraphrase,
-    with the pairs the owner named and their replacements: the light that bounces becomes global
-    illumination; gives off light and glowing become emissive; driving a running program becomes
-    controlling or scripting it through the command line, and a drive a scripted run or a course.
-    The colon joins it: STYLE.md's rule, which allows a colon before a list, tightens so that a
-    running sentence holds none, the sentence recast or split where one appended an elaboration or a
-    list, as in "makes the program the README opens with: a window with a turning cube"; a colon
-    stands before a bulleted list, a code block or a command, and as a label in a table, and
-    STYLE.md's check of colons joining clauses reads prose lines of Markdown as well as comments.
-    The sweep covers README.md, `docs/`, AGENTS.md, `templates/README.md`, every Markdown under
-    `.github`, the comments of the code, the scripts and the workflows, and the sentences a program
-    prints; 20 documents hold the drive words some 90 times and one the first pair once, and a rough
-    count finds a colon inside a sentence on some 180 prose lines of the documents and 160 comment
-    lines of the library and the examples. `build/drive-feature-test.sh` and the `drive` job keep
-    their names as identifiers, the job's shown name becoming "run the feature test's course" and
-    the comments reworded. The REVIEW.md, NORM.md and SHARED.md lines are the reviewer's and are
+25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`, the figures
+    Decision 37 adds at `b4d45938`.** STYLE.md gains a section, Register: prose uses the technical
+    and generic term, the engine's own where it has one, and no figure of speech or casual
+    paraphrase, with the pairs the owner named and their replacements: the light that bounces
+    becomes global illumination; gives off light and glowing become emissive; driving a running
+    program becomes controlling or scripting it through the command line, and a drive a scripted run
+    or a course. The colon joins it: STYLE.md's rule, which allows a colon before a list, tightens
+    so that a running sentence holds none, the sentence recast or split where one appended an
+    elaboration or a list, as in "makes the program the README opens with: a window with a turning
+    cube"; a colon stands before a bulleted list, a code block or a command, and as a label in a
+    table, and STYLE.md's check of colons joining clauses reads prose lines of Markdown as well as
+    comments. The sweep covers README.md, `docs/`, AGENTS.md, `templates/README.md`, every Markdown
+    under `.github`, the comments of the code, the scripts and the workflows, and the sentences a
+    program prints; 20 documents hold the drive words some 90 times and one the first pair once, and
+    a rough count finds a colon inside a sentence on some 180 prose lines of the documents and 160
+    comment lines of the library and the examples. `build/drive-feature-test.sh` and the `drive` job
+    keep their names as identifiers, the job's shown name becoming "run the feature test's course"
+    and the comments reworded. The REVIEW.md, NORM.md and SHARED.md lines are the reviewer's and are
     swept already. Checked by `NormTests`, the links test of item 24 and `git grep -i` for the pairs
     finding the channel's history alone. One commit. 3DEngine's game repository did this first at
     its `b87e386`, and its STYLE.md's Register section and colon rule, with their checks, are the
@@ -652,7 +644,9 @@ from [SHARED.md](SHARED.md).
     beside them, STYLE.md's Register section carrying the rule with the owner's example. The box a
     joint leaves (`Assets/Render.Skins.cs:121`) and the road to a signpost (`Zones.cs:125`) are
     literal and stay, and the third-party notices are their authors' text. The reviewer's line in
-    NORM.md is reworded here. Done when committed.
+    NORM.md is reworded here. Done at `b4d45938`, 70 rewordings across 64 files, the idiom list
+    grown by the knob, the plumbing, the wiring, an escape hatch and for free, a handful made the
+    count the code gives, and the literal senses kept.
 
 ## Verdicts
 
@@ -747,7 +741,8 @@ failing on one picture apiece, which is Verdict 26's.
     the render profile stays a question for the owner's eye, since it changes how every game built
     on the package lights its materials; Decision 25 lets the working session turn it on the day the
     owner wants the table's lighting in the package. Settled when the four shards pass on a pack
-    run.
+    run. Mended at `01f448b9`, the two pictures taken again on a `--render` bridge and BUILDING.md
+    saying which bridge a picture is taken on.
 
 27. **The memory guard's test reads less growth on macOS than the pages it touched.** On the push of
     `f8e9a6d2`, 2026-10-17, the macOS suite failed one test of the 1,572 run,
@@ -805,7 +800,23 @@ failing on one picture apiece, which is Verdict 26's.
     runner gave enough with a thin margin. The soak runs on past its seconds until each game has its
     six readings, within a cap it names, or the check's too-few line says the round's length, so a
     slow runner does not fail for want of readings. Settled when the play job's soak passes on a
-    pack run.
+    pack run. The readings' addition is done at `a62e96c8`, the soak playing on by at most half its
+    seconds again until each game has its six readings, and the check naming the round's length
+    where it has fewer.
+
+29. **The script's lost-suite test asked for the time limit and the script named the memory limit,
+    on Windows, once.** On the push of `dd2149ee`, 2026-10-17, the Windows suite failed one of the
+    1,041 tests it ran, `TestScriptTests`' theory that a lost suite is said first and run again in
+    parts, in its hang case, where the stand-in sleeps ten minutes under a limit of 0.1 minutes and
+    200 MB, and the page read "ended at its memory limit" where "ended at its time limit" was asked;
+    Linux and macOS passed it, and so had every Windows suite before, the push of `cd2d542d` among
+    them. `build/test.py:164-166` reads the clock first and the memory second on each poll, so the
+    memory limit was passed before the six seconds were, the stand-in's process tree holding more
+    than 200 MB on that runner for a moment, python and whatever the watch counts under it. One
+    thing. The hang case's memory limit is set where nothing the stand-in holds can reach it,
+    measured, so the time limit alone can end it, and the script's lost line says the figure it read
+    against the limit, as the cap case's does, so a reading that passes a limit is read on the page
+    rather than guessed. Settled at three green Windows suites in a row after the mend.
 
 ## Decisions
 

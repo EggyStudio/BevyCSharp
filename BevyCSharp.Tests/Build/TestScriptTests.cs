@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Xunit;
 
@@ -128,23 +129,28 @@ public sealed class TestScriptTests : IDisposable
         Assert.DoesNotContain("Repeated most", File.ReadAllText(_folder.File("digest.md")));
     }
 
+    // The hang case's memory limit is a terabyte, which no process of a runner holds, so the time
+    // limit alone ends it. The stand-in sleeping holds 10 MB on Linux, and on the Windows runner of
+    // the push of dd2149ee the tree the script read under it once passed the 200 MB the other cases
+    // are held to before its six seconds did.
     [SkippableTheory]
-    [InlineData("hang", "ended at its time limit")]
-    [InlineData("grow", "ended at its memory limit")]
-    [InlineData("die", "lost to a crash")]
-    [InlineData("cap", "stopped at its memory cap")]
-    public void ALostSuiteIsSaidFirstAndRunsAgainInParts(string mode, string said)
+    [InlineData("hang", "ended at its time limit", 1 << 20)]
+    [InlineData("grow", "ended at its memory limit, its largest process read at", 200)]
+    [InlineData("die", "lost to a crash", 200)]
+    [InlineData("cap", "stopped at its memory cap", 200)]
+    public void ALostSuiteIsSaidFirstAndRunsAgainInParts(string mode, string said, int megabytes)
     {
         var python = Needs.Python();
         var (exit, log) = Script(python, new() { ["BCS_STANDIN"] = mode },
             "suite", "--dotnet", $"{python} BevyCSharp.Tests/Build/dotnet_standin.py",
-            "--results", _folder.Path, "--timeout-minutes", "0.1", "--memory-mb", "200");
+            "--results", _folder.Path, "--timeout-minutes", "0.1", "--memory-mb", megabytes.ToString(CultureInfo.InvariantCulture));
 
         Assert.Equal(1, exit);
         var page = File.ReadAllLines(_folder.File("digest.md"));
         Assert.Contains("110 passed, 0 failed, 0 skipped, 0 without a result", page[0]);
         Assert.StartsWith($"### Lost: the suite, {said}", page.First(line => line.StartsWith("### ", StringComparison.Ordinal)));
         if (mode == "cap") Assert.Contains(page, line => line.Contains("past its cap of 3.75 GB", StringComparison.Ordinal));
+        if (mode == "grow") Assert.Contains(page, line => line.StartsWith("### Lost", StringComparison.Ordinal) && line.Contains("MB past the 200 MB allowed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- AlphaTests to CharlieTests: 105 passed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- NormTests: 5 passed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- everything else: 0 passed", StringComparison.Ordinal));

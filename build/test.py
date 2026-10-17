@@ -75,6 +75,7 @@ class Process:
         self.exit_code = None
         self.seconds = 0.0
         self.peak_mb = 0
+        self.past_mb = None       # the reading that passed the memory limit, and the limit
         self.lost = None          # None, or "crash", "hang", "time", "memory", "cap" or "build"
         self.running = []         # the tests it was in, where the blame collector says
         self.after = None         # the last test to end before it was lost
@@ -83,7 +84,7 @@ class Process:
         self.results = {}         # a cargo part's, by test, as a results file holds them
 
     def summary(self):
-        how = LOSSES[self.lost] if self.lost else "ended"
+        how = (LOSSES[self.lost] + (past(self.past_mb) + "," if self.past_mb else "")) if self.lost else "ended"
         held = f", {self.peak_mb:,} MB at most" if self.peak_mb else ""
         tests = f"{self.counts['Passed']:,} passed, {self.counts['Failed']:,} failed, {self.counts['NotExecuted']:,} skipped, "
         return f"{self.label}: {tests}{how} after {duration(self.seconds)}{held}, exit code {self.exit_code}, its output in {self.output}"
@@ -91,6 +92,12 @@ class Process:
 
 LOSSES = {"time": "ended at its time limit", "memory": "ended at its memory limit", "hang": "lost to a test that hung",
           "crash": "lost to a crash", "build": "did not build", "cap": "stopped at its memory cap"}
+
+
+def past(reading):
+    """The reading that passed the memory limit and the limit, said after the loss, as the cap's line
+    says the guard's, so a process ended for its memory is read on the page and not guessed at."""
+    return f", its largest process read at {reading[0]:,} MB past the {reading[1]:,} MB allowed" if reading else ""
 
 # What MemoryGuard says as it ends a process past its cap, whose exit vstest reports as a crashed
 # host, its tally of the tests that ran before passing for a whole run's.
@@ -165,6 +172,7 @@ def watch(command, output, process, args, started, memory):
             process.lost = "time"
         elif held is not None and held > args.memory_mb:
             process.lost = "memory"
+            process.past_mb = (held, args.memory_mb)
         if process.lost:
             kill_tree(child)
             break
@@ -538,7 +546,7 @@ def digest(results_dir, processes, listed, seconds):
         "commit": commit(),
         "passed": outcomes["Passed"], "failed": outcomes["Failed"], "skipped": outcomes["NotExecuted"], "no_result": no_result,
         "seconds": round(seconds), "peak_mb": max((p.peak_mb for p in processes), default=0),
-        "processes": [{"label": p.label, "lost": p.lost, "seconds": round(p.seconds), "peak_mb": p.peak_mb, "exit_code": p.exit_code,
+        "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "seconds": round(p.seconds), "peak_mb": p.peak_mb, "exit_code": p.exit_code,
                        "running": p.running, "after": p.after, "last_lines": p.last_lines, "summary": p.summary()} for p in processes],
         "causes": sorted(causes.values(), key=lambda c: (-c["count"], c["key"])),
         "repeated": repeated_lines(read_text(path) for path in outputs),
@@ -585,7 +593,7 @@ def page(d):
         if not p["lost"]:
             continue
         held = f" holding {p['peak_mb']:,} MB" if p["peak_mb"] else ""
-        lines.append(f"### Lost: {p['label']}, {LOSSES[p['lost']]}, after {duration(p['seconds'])}{held}, exit code {p['exit_code']}")
+        lines.append(f"### Lost: {p['label']}, {LOSSES[p['lost']]}{past(p.get('past_mb'))}, after {duration(p['seconds'])}{held}, exit code {p['exit_code']}")
         if p["running"]:
             lines.append("In " + ", ".join(f"`{t}`" for t in p["running"]))
         elif p.get("after"):
