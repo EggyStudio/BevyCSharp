@@ -10,7 +10,41 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f8e9a6d2`, item 25 done and nothing else, 470 files. STYLE.md has the Register
+Reviewed up to `afcf8301`, Verdict 27 mended over `ea6b95ae`, Verdict 26, and nothing else, as
+Decision 35 asks. At `ea6b95ae`, read in the runner's image with Mesa 25.2.8's lavapipe on four
+processors since the run's artifact needs a signed-in download: an example drawn with meshlets or
+ray-traced lighting the bridge or the device has not is captured as the warning the app logs for it,
+beside where its picture would be, ending the capture with 4, which the loop counts as captured and
+the comparison compares with nothing, so the five that drew without them are read no more;
+`clustered_decals`, whose fragment shader ends Mesa 25.2's llvmpipe in a rasterizer thread where
+Mesa 26.2's and a GPU draw it, is captured as words with the adapter's line on that adapter alone;
+`decodable` and `pitch`, which spawn no camera and whose pictures are one color, joined the list of
+examples empty by design; `change_detection` and `ecs_guide` shared one seeded generator between
+systems the executor runs in either order and each drawing system has its own, their texts taken
+again, and `compare-captures.py` compares a printed capture by how often each line occurs with the
+numbers masked, so an order the executor chooses no longer counts; the capture job installs
+ImageMagick, which scaled a 401 by 401 shot to 1280 by 720 in that image; `removal_detection` is
+taken at frame 150, after the component comes off at the second mark frame 120 stood on,
+`many_lights` is seeded under GitHub Actions and matched, `many_foxes` is allowed 12 percent since
+each fox runs from the frame its model loads, and `many_cubes` and `async_compute` matched at the
+runner's cap and are listed nowhere. At `afcf8301` the memory guard reads on macOS the physical
+footprint, `ri_phys_footprint` from `proc_pid_rusage` in libproc as .NET's runtime loads it, the
+resident pages with those the compressor holds, falling back to the resident size where the system
+answers nothing, the struct field for field macOS's `rusage_info_v0`; Linux and Windows read as
+before and the test's comment says why. Checked on the working machine: the whole suite 1,474 and 3
+skipped; every named example drawing or printing in the runner's image; the guard's tests, macOS's
+being the push's to show. Right. The owner pushed both at 19:47 and started the pack run with them.
+The push run ended at 20:04 red on macOS, the memory guard's test short again, 186.6 MiB of growth
+where 192 is asked (Verdict 27, continued), Linux and Windows green. The pack run's six natives,
+three suites, macOS among them, digest, README walk and storm passed; the capture shards ended in 19
+to 28 minutes each, two green and two red on one picture apiece, `many_lights` by 45.4 percent and
+`many_cubes` by 4.6 (Verdict 26, continued, and Verdicts 22 and 25 settle on them); the play job
+failed Swarm's soak (Verdict 28); the feature test's course was still running at 20:50, and the pack
+job did not run, so Decision 35's gate is not met. At 20:34 the owner read the voxel game's README's
+opening and widened Decision 37 to likenesses and figures of speech, item 25 open again for them.
+Next the three verdicts' mends and item 25, their push, and a push run and a pack run whole green.
+
+Before it, `f8e9a6d2` came, item 25 done and nothing else, 470 files. STYLE.md has the Register
 section after the game repository's, with this engine's pairs and names, the technical senses kept
 (a GPU's driver, a joint's drive, a body that bounces, a path tracer's bounces) and the identifiers
 (`build/drive-feature-test.sh`, the `drive` job, `--drive`, `Drives`, `EditorBoot.Drive`,
@@ -59,31 +93,6 @@ and failed on 14 differences and 4 captures, Verdict 26, which is Verdict 22's m
 runner's own differences left; the pack run on `85df443c` began at 15:28, its bridges, suites, storm
 and README walk green by 15:55 and its four capture shards, play job and course job running. The
 push run of `1d246e9f` was whole green at 15:35.
-
-Before it, `85df443c` came, Verdict 25 mended and nothing else, as Decision 35 asks.
-`build/capture-examples.sh` takes `--shard <n>/<count>` after the folder and captures every count-th
-example from the n-th, refusing a shard outside one to count, and takes `CAPTURE_MINUTES` as
-3DEngine's script does, starting no example once the minutes are gone and ending with an error that
-names how many of how many it reached, the last and how many were left; the capture job is a matrix
-of four, each with 60 minutes, a budget of 40, its own comparison and its captures as `examples-n`,
-`fail-fast` off; and BUILDING.md says the shards and the budget. The verdict as first written said
-the script already had the budget and the job set none, which was 3DEngine's script read as this
-one's; the coder's Reply corrected it and the verdict reads right below. Checked on the working
-machine: a shard given no budget starting nothing and saying so, the whole suite 1,472 and 3 skipped
-of 1,475. Not measured: a shard's time on lavapipe, which the pack run shows. Right. The push run of
-`b178ae3f` was whole green at 13:55, the first under the new workflows: Linux in 13 minutes, Windows
-in 16, macOS in 15, the docs check and the digest, the pack-only jobs skipped. The owner started the
-pack run on `b178ae3f` at 13:52, before this commit, so its one capture job runs without the shards
-and the budget; its other jobs prove the fold and settle Verdicts 23 and 24 if green, and the shards
-wait for the pack run after `85df443c` is pushed. Both runs are Decision 35's gate. At 14:31 the
-owner asked whether the docs job is needed, since it follows links alone, and it goes (Decision 36,
-item 24), the repository's own links checked by a test of the suite as 3DEngine's are, with no job
-and no request made. The push run of `85df443c` was whole green at 14:48, Linux in 12 minutes, macOS
-in 11, Windows in 17, and its pack run queues behind the one on `b178ae3f`, as the pack group asks.
-In that one, read at 14:51, the six bridges, the three suites, the storm, the README walk and the
-play job passed, the play job in 22 minutes with its ten-minute soak, which settled Verdict 24, and
-its Windows suite was the third green in a row since `0dff9601`, which settled Verdict 23; the
-capture job and the course's job were running.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -632,32 +641,50 @@ from [SHARED.md](SHARED.md).
     and failing on a link to a page that is not there, `WorkflowTests`, `NormTests`, and the push
     run showing `test`, `digest` and nothing else.
 
-25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`.** STYLE.md
-    gains a section, Register: prose uses the technical and generic term, the engine's own where it
-    has one, and no figure of speech or casual paraphrase, with the pairs the owner named and their
-    replacements: the light that bounces becomes global illumination; gives off light and glowing
-    become emissive; driving a running program becomes controlling or scripting it through the
-    command line, and a drive a scripted run or a course. The colon joins it: STYLE.md's rule, which
-    allows a colon before a list, tightens so that a running sentence holds none, the sentence
-    recast or split where one appended an elaboration or a list, as in "makes the program the README
-    opens with: a window with a turning cube"; a colon stands before a bulleted list, a code block
-    or a command, and as a label in a table, and STYLE.md's check of colons joining clauses reads
-    prose lines of Markdown as well as comments. The sweep covers README.md, `docs/`, AGENTS.md,
-    `templates/README.md`, every Markdown under `.github`, the comments of the code, the scripts and
-    the workflows, and the sentences a program prints; 20 documents hold the drive words some 90
-    times and one the first pair once, and a rough count finds a colon inside a sentence on some 180
-    prose lines of the documents and 160 comment lines of the library and the examples.
-    `build/drive-feature-test.sh` and the `drive` job keep their names as identifiers, the job's
-    shown name becoming "run the feature test's course" and the comments reworded. The REVIEW.md,
-    NORM.md and SHARED.md lines are the reviewer's and are swept already. Checked by `NormTests`,
-    the links test of item 24 and `git grep -i` for the pairs finding the channel's history alone.
-    One commit. 3DEngine's game repository did this first at its `b87e386`, and its STYLE.md's
-    Register section and colon rule, with their checks, are the text to take, with this engine's
-    examples in place of the game's.
+25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`, open again for
+    the figures Decision 37 adds.** STYLE.md gains a section, Register: prose uses the technical and
+    generic term, the engine's own where it has one, and no figure of speech or casual paraphrase,
+    with the pairs the owner named and their replacements: the light that bounces becomes global
+    illumination; gives off light and glowing become emissive; driving a running program becomes
+    controlling or scripting it through the command line, and a drive a scripted run or a course.
+    The colon joins it: STYLE.md's rule, which allows a colon before a list, tightens so that a
+    running sentence holds none, the sentence recast or split where one appended an elaboration or a
+    list, as in "makes the program the README opens with: a window with a turning cube"; a colon
+    stands before a bulleted list, a code block or a command, and as a label in a table, and
+    STYLE.md's check of colons joining clauses reads prose lines of Markdown as well as comments.
+    The sweep covers README.md, `docs/`, AGENTS.md, `templates/README.md`, every Markdown under
+    `.github`, the comments of the code, the scripts and the workflows, and the sentences a program
+    prints; 20 documents hold the drive words some 90 times and one the first pair once, and a rough
+    count finds a colon inside a sentence on some 180 prose lines of the documents and 160 comment
+    lines of the library and the examples. `build/drive-feature-test.sh` and the `drive` job keep
+    their names as identifiers, the job's shown name becoming "run the feature test's course" and
+    the comments reworded. The REVIEW.md, NORM.md and SHARED.md lines are the reviewer's and are
+    swept already. Checked by `NormTests`, the links test of item 24 and `git grep -i` for the pairs
+    finding the channel's history alone. One commit. 3DEngine's game repository did this first at
+    its `b87e386`, and its STYLE.md's Register section and colon rule, with their checks, are the
+    text to take, with this engine's examples in place of the game's. Open again on 2026-10-17 at
+    20:34 for the figures Decision 37 adds, a likeness in place of a description and an idiom in
+    place of a term. At a glance stands in `BevyCSharp/Assets/GizmoJoint.cs:7`,
+    `Assets/Gizmos.Settings.cs:274`, `Ecs/ColorAttribute.cs:6`, the editor's `AssetGrid.cs:51`,
+    `EditorDrawn.cs:411, 576`, `EditorRows.cs:132` and `FieldPickers.cs:41`,
+    `BevyCSharp.Tests/NormTests.cs:217`, `CHEATSHEET.md:1233`, `docs/gizmos.md:98` and
+    `.github/ASSETS.md:137`; a handful of in `Behaviors/BehaviorRunners.cs:14`,
+    `Input/Input.cs:198`, `Math/Quat.cs:124`, `Physics/PhysicsWorld.Sync.cs:60`, the editor's
+    `EditorStats.cs:204`, `EditorToolbar.cs:67` and `PreviewRenderer.cs:465`,
+    `BevyCSharp.FeatureTest/Behaviors/Movement.cs:6` and `.github/PERFORMANCE.md:121`; the knob in
+    `Assets/GradingSettings.cs:15` and `Assets/Render.Cameras.cs:229`; out of the box in
+    `.github/RENDERING.md:383`; a great deal of in the editor's `DetailsPanel.cs:846` and
+    `native/bevy_csharp/src/render/bcs.slang:286`; plumbing in
+    `BevyCSharp.Tests/Behaviors/BehaviorTests.cs:141`; a long way in
+    `BevyCSharp.Tests/Assets/ExposureTests.cs:32`; and whatever a sweep for such figures finds
+    beside them, STYLE.md's Register section carrying the rule with the owner's example. The box a
+    joint leaves (`Assets/Render.Skins.cs:121`) and the road to a signpost (`Zones.cs:125`) are
+    literal and stay, and the third-party notices are their authors' text. The reviewer's line in
+    NORM.md is reworded here. Done when committed.
 
 ## Verdicts
 
-Verdicts 3, 14 to 21, 23 and 24 are settled: 15, the native job's four targets, on the pack run of
+Verdicts 3 and 14 to 25 are settled: 15, the native job's four targets, on the pack run of
 `292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
 commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
 green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
@@ -671,7 +698,10 @@ in a minute and a half; and 20, the feature test run through its course on lavap
 in a job of its own on the same pack run; 23, the session file's move on Windows, on the third green
 Windows suite in a row after `0dff9601`, the push of `85df443c` on 2026-10-17; and 24, the soak, on
 the pack run of `b178ae3f` the same day, the play job passing with its ten-minute soak of three
-games.
+games; and 22, Bevy's files fetched before the examples are built, and 25, the capture's budget and
+its four shards, on the pack run of `afcf8301` the same day, the four shards capturing every example
+with none blank and ending in 19 to 28 minutes of their 60, each comparing its own, two of them
+failing on one picture apiece, which is Verdict 26's.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -685,52 +715,6 @@ games.
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
-
-22. **The examples are built before Bevy's assets are fetched, so the runner captures them without
-    their textures, models, fonts and shaders.** On the pack run of `d2a20b6a`, 2026-10-17, the
-    capture job's step captured the examples for 56 of the job's 60 minutes and failed with 59
-    named, 58 blank and `deferred_raymarch` not captured, and the comparison after it failed 152 of
-    the rest past the two percent allowed, `atmosphere` 55 percent, `atmospheric_fog` 61, `align`
-    and `anchor_layout` 6 to 8 with their text. The 58 blank load a file of Bevy's: a sprite's
-    texture, a glTF, a font, a shader under `shaders/`, a skybox or a lightmap. The examples project
-    copies `bevy-assets/**` beside the program at build time, as `assets/`, and
-    `build/fetch-bevy-assets.sh` fills that folder; the job builds the examples in one step and runs
-    `build/capture-examples.sh` in the next, which fetches first, so on the runner the build found
-    an empty folder and copied nothing, and the fetch after it reached no program. On the working
-    machine the folder stood from an earlier run, which is why the 329 captures matched between the
-    GPU and lavapipe there. Four things: the assets are fetched before the build that copies them,
-    in the capture job and in every path that builds the examples on a fresh checkout, the script
-    and the project making the order hold rather than a comment asking for it; the comparison read
-    again on the next pack run, what still differs being the runner's own, each either allowed in
-    `build/captures-differ.txt` with its share and reason, as the script provides, or its picture
-    taken again, the owner's eye deciding a picture the README shows; the job's limit given room
-    above the 56 minutes the step took with nothing to load, 90, said with the cost; and `slangc`
-    fetched before the captures, as the feature test's workflow fetches it, since 34 examples
-    compile a Slang shader of the examples' own at run time and drew the magenta fallback on a
-    runner without it, `animate_shader`, `atmosphere`, `dynamic_mip_generation`, `shader_material`
-    and `ui_material` among them, a cause of the differences known before the next comparison is
-    read. Settled when the capture job passes in a pack run. Mended at `50470331`: the capture
-    script fetching and then building, the single capture building again where the program lacks a
-    fetched file, `slangc` fetched before the captures and the job at 90 minutes; in a fresh
-    checkout 26 captures came out none blank, 25 matching and `dynamic_mip_generation` matching once
-    slangc was there.
-
-25. **The capture job is cancelled at its limit with the captures still running, and says nothing of
-    how far it got.** On the pack run of `5e01491e`, 2026-10-17, the capture job ran
-    `build/capture-examples.sh` with Bevy's files and `slangc` in place for the first time, and was
-    cancelled at its 90 minutes with the step still running, its page holding the cancellation alone
-    and its artifact 8 MB of captures; on the pack run of `d2a20b6a` the same step took 56 minutes
-    with no file to load and no shader to compile. The script had no budget of its own, where
-    3DEngine's takes `CAPTURE_MINUTES`, past which it starts no example and ends with an error
-    naming how many of how many it reached and the last, its macOS captures job giving it 130
-    minutes under its 160, so here the limit cut the run with nothing said. Two things: the script
-    takes that budget and the job gives it one twenty minutes under its limit, so a run that cannot
-    finish says how far it got; and the captures are split across a matrix of jobs, each taking
-    every n-th example of the list by its index (`build/capture-examples.sh` given the shard and the
-    count), each comparing what it captured and uploading it under its own name, so the run ends
-    within the hour, four shards where one took past 90 minutes. Settled when the capture jobs pass
-    in a pack run. Mended at `85df443c`: the budget taken by the script, four shards of 90 examples
-    each with 60 minutes and a budget of 40, each comparing and uploading its own.
 
 26. **Eighteen captures stand between the runner and the checked-in pictures once Bevy's files are
     in place.** On the pack run of `b178ae3f`, 2026-10-17, the one capture job ran 77 minutes to its
@@ -752,7 +736,23 @@ games.
     own; and the rest read one by one from the run's `examples` artifact, each difference the
     runner's own allowed in `build/captures-differ.txt` with its share and reason or a fault mended,
     `clustered_decals`' failed shot and the two audio examples' blank pictures read from their logs.
-    Settled when the capture jobs pass in a pack run.
+    Settled when the capture jobs pass in a pack run. Mended at `ea6b95ae`, each of the eighteen
+    read in the runner's image and answered as the head paragraph says. On the pack run of
+    `afcf8301`, 2026-10-17, two of the four shards failed at the comparison on one picture each,
+    `many_lights` apart by 45.4 percent and `many_cubes` by 4.6 where 2 is allowed, the two the head
+    paragraph says matched in the runner's image, and the rest of the four shards' captures matched
+    or stood allowed. Both turn their camera by `Time.Delta`, the machine's clock, `many_lights` at
+    its line 89 and `many_cubes` at 266 outside its benchmark mode, and `many_cubes` colors by
+    `Time.Elapsed` at 289, so the frame taken shows the camera where that machine's frame times put
+    it, which a seed does not fix and a container matches only while its frames take as long as the
+    runner's. `Config.FrameSeconds` is Bevy's manual time step, offered in its own remark for a
+    capture of something moving to be the same on every machine, and `build/capture-example.sh:41`
+    sets it through `BCS_FRAME_TIME` for a printed example's run alone, while a picture is taken on
+    the machine's clock. The mend is one thing. A picture's run is taken on the set clock as a
+    printed one is, every example, so a capture is the same frame of the same clock on every
+    machine, the two pictures taken again if they change on the working machine, and the lines of
+    `build/captures-differ.txt` whose reason was the clock are read again under it, a load still
+    ending in whichever frame the machine reaches. Settled when the four shards pass on a pack run.
 
 27. **The memory guard's test reads less growth on macOS than the pages it touched.** On the push of
     `f8e9a6d2`, 2026-10-17, the macOS suite failed one test of the 1,572 run,
@@ -767,7 +767,38 @@ games.
     its compressed pages counted, the physical footprint `task_info` answers for the task, with the
     reason in the guard's remarks, and the test's reading is that figure; or, if the resident size
     is kept, the test asks the growth of a figure the compressor cannot shrink. Settled at three
-    green macOS suites in a row.
+    green macOS suites in a row. Mended at `afcf8301`, the guard reading the physical footprint on
+    macOS. On the push of `afcf8301`, 2026-10-17, the macOS suite failed the same test with the
+    footprint read, 611,438,080 bytes before and 807,128,960 after, 186.6 MiB of growth where 192 is
+    asked, and the pack run's macOS suite of the same commit, started a minute apart, passed it, so
+    the figure is the right one and the test still measures the whole process while the rest of it
+    moves. The class is in the engine collection, which runs alone (`EngineTests.cs:8`), yet within
+    the window the collector may collect and decommit the garbage the tests before it left, the 64
+    MiB array of the test beside it among it, and the C allocator return freed blocks to the system,
+    which macOS's does at once where glibc keeps them, so the delta falls short by what left. The
+    mend is one thing. The test measures memory only it moves, the heap settled before the first
+    reading, a full collection with its finalizers twice over, and no collection within the window,
+    `GC.TryStartNoGCRegion` entered before the first reading and ended after the second, with the
+    reason in its comment; and if that does not hold on three suites, the two readings are taken in
+    a child process that does nothing else and answers them. Settled at three green macOS suites in
+    a row after that.
+
+28. **The soak judges the collector's heap size, which grows with its budget and holds garbage, so
+    Swarm's soak failed with nothing leaking.** On the pack run of `afcf8301`, 2026-10-17, the play
+    job's ten-minute soak of three games failed Swarm, its `heap` 751,256 bytes at the most of the
+    first half and 4,608,176 at the most of the second, past the bound of 2,961,096, while
+    `managed`, the entities, the handles and the native bytes held within their slack. The `heap`
+    the memory command answers is `GCMemoryInfo.HeapSizeBytes` (`ConsoleMemoryCommands.cs:40`), the
+    heap's size at the collector's last collection with its garbage and free space in it, and the
+    collector widens generation 0's budget as a run goes on, so the size at a collection climbs
+    sixfold in a steady game; the soak passed on the pack run of `b178ae3f` (Verdict 24) and failed
+    here with the game unchanged, by that budget's course. The mend is one thing. The soak judges a
+    figure of live memory, the total after a full collection the command answers when asked
+    (`GC.GetTotalMemory(true)`, a pause once a reading, which a reading every ten seconds affords)
+    or the bytes promoted at the last collection, `heap` is said and not judged, as `gen2` is, with
+    the reason in `soak-check.py`, and the slack of the new figure is measured on a ten-minute soak
+    of the three games before it is set (N 3.5). Settled when the play job's soak passes on a pack
+    run.
 
 ## Decisions
 
@@ -988,42 +1019,15 @@ games.
     that a running sentence holds no colon. STYLE.md carries both rules with these pairs in each
     repository, every document, comment and message a reader sees is swept (item 25 here, 29 in
     3DEngine, 4 in Voxel-Sandbox), and an identifier keeps its name unless the rename is cheap and
-    the thing is new; a new name follows the rule.
+    the thing is new; a new name follows the rule. On 2026-10-17 at 20:34 the owner read the voxel
+    game's README's opening, "A voxel game in the manner of Minecraft, and the ground floor of a
+    larger one", and asked that no phrasing of the kind stand either. A likeness is not a
+    description and a figure of speech is not a term, so a thing is said by what it is and does,
+    another product is named only where a rule or a number is taken from it, and a plan is not
+    written into a description. The idioms the three repositories hold go with it, in the manner of,
+    the ground floor of, out of the box, under the hood, at a glance, a handful of, in the wild, a
+    great deal of, the knob, the plumbing and a long way among them, items 25 here, 29 in 3DEngine
+    and 5 in Voxel-Sandbox; a word in its literal sense stays, a box a joint leaves or a road to a
+    signpost.
 
 ## Replies
-
-**Verdict 26.** Read in the runner's image, the .NET SDK's Ubuntu 24.04 with Mesa 25.2.8's lavapipe
-on four processors, with the capture job's packages, since the run's artifact needs signing in to
-download. An example drawn with what the bridge or the device has not, meshlets or ray-traced
-lighting, logs it as its app is built, and `build/capture-example.sh` takes those lines as its
-capture beside where its picture would be and ends with 4, which `build/capture-examples.sh` counts
-as captured, and `compare-captures.py` finds nothing checked in for it; the runner's bridge is built
-`--render`, without either, so there meshlet, test_meshlet, many_meshlet_materials, solari and
-solari_reflections say "this bridge was built without them", which was read against a log holding
-the line, since this machine's lavapipe, Mesa 26.2.2, draws both and says nothing. clustered_decals
-ends Mesa 25.2.8's llvmpipe with a segmentation fault in a rasterizer thread running its fragment
-shader, `gdb` in the runner's image showing it, where Mesa 26.2.2's llvmpipe and the GPU draw it, so
-on an adapter describing itself as llvmpipe of Mesa 25 it is captured as words saying so with that
-description. decodable and pitch spawn no camera, their checked-in pictures one color, and join the
-list of examples that show nothing by design. change_detection and ecs_guide drew from one seeded
-generator in systems the executor runs in either order, so each drawing system has a generator of
-its own, and their texts were taken again; a printed capture is compared by how many times each line
-is printed, numbers set apart as before, so systems printing in another order, as system_closure's
-do, match. The capture job installs ImageMagick, which in Ubuntu 24.04 scaled a square shot to 1280
-by 720 and wrote the WebP itself. removal_detection is taken at frame 150, since its component comes
-off at two seconds, the frame 120 stands at. many_lights is seeded where the workflow runs it and
-its picture taken again, which matched in the runner's image, so its line comes off
-`build/captures-differ.txt`; many_foxes, 10.2 percent apart there, its foxes' run starting when
-their model has loaded, goes on with 0.12, and the file's head says a line comes off when its cause
-is mended, where it said the list only gets shorter. many_cubes and async_compute matched in the
-runner's image at the runner's cap of four gigabytes, async_compute as on the shard run, so neither
-is listed. In the runner's image every one named above that draws or prints passed the comparison,
-many_foxes under its line, and clustered_decals was captured as words. Besides, `CheatsheetTests`'
-remarks lose a cleft sentence the last commit's sweep touched.
-
-**Verdict 27.** On macOS the guard reads the physical footprint, `ri_phys_footprint` of
-`proc_pid_rusage`, which counts the pages the memory compressor holds with the resident ones, the
-figure `TASK_VM_INFO` calls `phys_footprint`, imported from `libproc` as .NET's own runtime imports
-it, and the resident size where the call answers nothing; the remarks and the test's comment say
-why. Linux and Windows read as before, and the guard's tests pass here; macOS is the push's to show.
-

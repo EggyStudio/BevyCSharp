@@ -1,3 +1,4 @@
+using System.Runtime;
 using System.Runtime.InteropServices;
 using Bevy;
 using Xunit;
@@ -19,29 +20,53 @@ public sealed class MemoryGuardTests
     public unsafe void TheMemoryHeldIsReadAsItGrows()
     {
         const nuint size = 256 << 20;
-        var before = MemoryGuard.ResidentBytes();
 
-        // A quarter of a gigabyte from the system rather than from the GC, which may hand an array
-        // pages it kept resident from earlier tests, so the growth read would be what it held back
-        // rather than what the guard reads. A byte a page written, so its pages are the machine's
-        // and not only promised. Read on Windows as the private bytes committed, which Windows
-        // cannot trim as it trimmed a working set that read this as 64 megabytes more, and on macOS
-        // as the physical footprint, which counts the pages the system compressed under pressure
-        // where the resident size read this as 189 megabytes more on a runner short of memory.
-        var held = (byte*)NativeMemory.Alloc(size);
+        // The reading is the whole process's, so whatever the rest of the process would free is
+        // freed before the first reading. The garbage earlier tests left, the 64 megabyte array of
+        // the test beside this one among it, is collected and given back first, a full collection
+        // with its finalizers twice over, since a finalizer can free what the second collection
+        // takes, and aggressive, so the collector decommits what it freed now rather than over the
+        // seconds after. Then no collection runs until the second reading, since one in between
+        // would give pages back while this counts them in, and on macOS, whose allocator returns
+        // freed blocks to the system at once, the footprint read 186.6 megabytes of growth that way.
+        for (var pass = 0; pass < 2; pass++)
+        {
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+        }
+
+        var still = GC.TryStartNoGCRegion(16 << 20);
         try
         {
-            for (nuint at = 0; at < size; at += 4096) held[at] = 1;
-            var after = MemoryGuard.ResidentBytes();
+            var before = MemoryGuard.ResidentBytes();
 
-            // Three quarters of it, since the reading is the whole process's, and the rest of the
-            // process, the GC and the C allocator among it, may give pages back while this runs.
-            Assert.True(before > 0);
-            Assert.True(after - before > 192L << 20, $"the process held {before} bytes and then {after}");
+            // A quarter of a gigabyte from the system rather than from the GC, which may hand an
+            // array pages it kept resident from earlier tests, so the growth read would be what it
+            // held back rather than what the guard reads. A byte a page written, so its pages are
+            // the machine's and not only promised. Read on Windows as the private bytes committed,
+            // which Windows cannot trim as it trimmed a working set that read this as 64 megabytes
+            // more, and on macOS as the physical footprint, which counts the pages the system
+            // compressed under pressure where the resident size read this as 189 megabytes more on
+            // a runner short of memory.
+            var held = (byte*)NativeMemory.Alloc(size);
+            try
+            {
+                for (nuint at = 0; at < size; at += 4096) held[at] = 1;
+                var after = MemoryGuard.ResidentBytes();
+
+                // Three quarters of it, since the C allocator and the threads the runtime keeps
+                // may still give pages back while this runs.
+                Assert.True(before > 0);
+                Assert.True(after - before > 192L << 20, $"the process held {before} bytes and then {after}");
+            }
+            finally
+            {
+                NativeMemory.Free(held);
+            }
         }
         finally
         {
-            NativeMemory.Free(held);
+            if (still && GCSettings.LatencyMode == GCLatencyMode.NoGCRegion) GC.EndNoGCRegion();
         }
     }
 
