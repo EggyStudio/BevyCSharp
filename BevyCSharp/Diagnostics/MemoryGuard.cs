@@ -26,8 +26,10 @@ namespace Bevy;
 /// <para>
 /// What is counted is the memory the process holds of the machine, which takes in the bridge's
 /// allocations and the GPU driver's with the managed heap, and not what a GPU holds of its own. On
-/// Linux and macOS the resident pages, which the system's own last resort weighs a process by, and
-/// on Windows the private bytes committed, its commit charge (<see cref="ResidentBytes"/>). Once the console and the crash file have said why, the process
+/// Linux the resident pages, which the system's own last resort weighs a process by, on macOS the
+/// physical footprint, its resident pages with those the system compressed, and on Windows the
+/// private bytes committed, its commit charge (<see cref="ResidentBytes"/>). Once the console and
+/// the crash file have said why, the process
 /// ends at once with <see cref="ExitCode"/>, running nothing an exit runs. Bevy's threads are still
 /// drawing then, and a GPU driver torn down under them by the handlers of an ordinary exit crashed
 /// the process, whose core dump held the memory for as long again as it took to write.
@@ -66,8 +68,16 @@ public static partial class MemoryGuard
     /// <summary>How many bytes of the machine's memory the process holds now.</summary>
     /// <remarks>
     /// <para>
-    /// The resident set on Linux and macOS, the pages in the machine's memory, which run those
-    /// systems out and by which they weigh a process when they do.
+    /// The resident set on Linux, the pages in the machine's memory, which run it out and by which
+    /// it weighs a process when they do.
+    /// </para>
+    /// <para>
+    /// On macOS, the physical footprint, which Activity Monitor shows as a process's memory: its
+    /// resident pages and those the system's memory compressor holds for it compressed. Short of
+    /// memory, macOS compresses pages a process has not touched lately, which stay the process's
+    /// and leave its resident size, so a resident size read 189 megabytes more for a quarter of a
+    /// gigabyte written a byte a page on a runner short of memory, where the footprint counts it
+    /// all. The resident size is read where the system does not answer.
     /// </para>
     /// <para>
     /// On Windows, the private bytes the process has committed, its commit charge, rather than its
@@ -96,10 +106,40 @@ public static partial class MemoryGuard
     /// <summary>The figure <see cref="ResidentBytes"/> reads, by system.</summary>
     private static long Held()
     {
+        if (OperatingSystem.IsMacOS() && Footprint() is > 0 and var footprint) return footprint;
         if (!OperatingSystem.IsWindows()) return Environment.WorkingSet;
 
         using var process = Process.GetCurrentProcess();
         return process.PrivateMemorySize64;
+    }
+
+    /// <summary>
+    /// The physical footprint macOS answers for this process, or zero where it answers nothing.
+    /// </summary>
+    private static long Footprint()
+    {
+        try
+        {
+            return ProcPidRusage(Environment.ProcessId, RusageInfoV0, out var info) == 0 ? (long)info.PhysFootprint : 0;
+        }
+        catch (Exception error) when (error is DllNotFoundException or EntryPointNotFoundException)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>The flavor of <c>proc_pid_rusage</c> whose answer is <see cref="RusageInfo"/>.</summary>
+    private const int RusageInfoV0 = 0;
+
+    /// <summary>
+    /// <c>rusage_info_v0</c> of macOS's <c>sys/resource.h</c>, field for field, of which only the
+    /// footprint is read.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RusageInfo
+    {
+        public ulong Uuid0, Uuid1, UserTime, SystemTime, PackageIdleWakeups, InterruptWakeups, PageIns, WiredSize;
+        public ulong ResidentSize, PhysFootprint, StartTime, ExitTime;
     }
 
     /// <summary>
@@ -225,6 +265,10 @@ public static partial class MemoryGuard
     /// </summary>
     [LibraryImport("libc", EntryPoint = "_exit")]
     private static partial void EndNow(int code);
+
+    /// <summary>macOS's usage of a process, from libproc, by the name .NET's own runtime loads it by.</summary>
+    [LibraryImport("libproc", EntryPoint = "proc_pid_rusage")]
+    private static partial int ProcPidRusage(int pid, int flavor, out RusageInfo info);
 
     [LibraryImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

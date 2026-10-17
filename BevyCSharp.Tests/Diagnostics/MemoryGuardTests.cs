@@ -25,7 +25,9 @@ public sealed class MemoryGuardTests
         // pages it kept resident from earlier tests, so the growth read would be what it held back
         // rather than what the guard reads. A byte a page written, so its pages are the machine's
         // and not only promised. Read on Windows as the private bytes committed, which Windows
-        // cannot trim as it trimmed a working set that read this as 64 megabytes more.
+        // cannot trim as it trimmed a working set that read this as 64 megabytes more, and on macOS
+        // as the physical footprint, which counts the pages the system compressed under pressure
+        // where the resident size read this as 189 megabytes more on a runner short of memory.
         var held = (byte*)NativeMemory.Alloc(size);
         try
         {
