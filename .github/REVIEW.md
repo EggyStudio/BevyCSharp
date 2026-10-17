@@ -10,7 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b178ae3f`, item 23 done over `0dff9601`, Verdicts 23 and 24 mended, and nothing
+Reviewed up to `85df443c`, Verdict 25 mended and nothing else, as Decision 35 asks.
+`build/capture-examples.sh` takes `--shard <n>/<count>` after the folder and captures every count-th
+example from the n-th, refusing a shard outside one to count, and takes `CAPTURE_MINUTES` as
+3DEngine's script does, starting no example once the minutes are gone and ending with an error that
+names how many of how many it reached, the last and how many were left; the capture job is a matrix
+of four, each with 60 minutes, a budget of 40, its own comparison and its captures as `examples-n`,
+`fail-fast` off; and BUILDING.md says the shards and the budget. The verdict as first written said
+the script already had the budget and the job set none, which was 3DEngine's script read as this
+one's; the coder's Reply corrected it and the verdict reads right below. Checked on the working
+machine: a shard given no budget starting nothing and saying so, the whole suite 1,472 and 3 skipped
+of 1,475. Not measured: a shard's time on lavapipe, which the pack run shows. Right. The push run of
+`b178ae3f` was whole green at 13:55, the first under the new workflows: Linux in 13 minutes, Windows
+in 16, macOS in 15, the docs check and the digest, the pack-only jobs skipped. The owner started the
+pack run on `b178ae3f` at 13:52, before this commit, so its one capture job runs without the shards
+and the budget; its other jobs prove the fold and settle Verdicts 23 and 24 if green, and the shards
+wait for the pack run after `85df443c` is pushed. Both runs are Decision 35's gate. At 14:31 the
+owner asked whether the docs job is needed, since it follows links alone, and it goes (Decision 36,
+item 24), the repository's own links checked by a test of the suite as 3DEngine's are, with no job
+and no request made. The push run of `85df443c` was whole green at 14:48, Linux in 12 minutes, macOS
+in 11, Windows in 17, and its pack run queues behind the one on `b178ae3f`, as the pack group asks.
+In that one, read at 14:51, the six bridges, the three suites, the storm, the README walk and the
+play job passed, the play job in 22 minutes with its ten-minute soak, which settled Verdict 24, and
+its Windows suite was the third green in a row since `0dff9601`, which settled Verdict 23; the
+capture job and the course's job were running.
+
+Before it, `b178ae3f` came, item 23 done over `0dff9601`, Verdicts 23 and 24 mended, and nothing
 else, as Decision 35 asks. At `0dff9601` the session file's writer tries its move five times ten
 milliseconds apart before the refusal reaches `Cli.Ready`, its readers open the file sharing writes
 and deletion, and a test holds the file as a whole-file read held it and lets go at the first pause,
@@ -19,16 +44,16 @@ runner's image on lavapipe held to four processors, was too few readings and not
 four programs at once taking 67 to 100 seconds where the check wants six readings in 150, so
 `build/soaks.sh` soaks the games named at once and says one error with each `FAILED` line and each
 value that climbed or was read too few times, the play job soaks Courtyard, Swarm and the stress
-program for ten minutes, and the drive job soaks the feature test alone for fifteen after its drive
-with its shaders in the cache the drive filled, seven readings there and its resident size level at
-1.30 GB. At `b178ae3f` `package.yml`, `feature-test.yml` and `scenes.yml` are gone: `build.yml`
-holds `native (rid)`, `test (os)`, `digest`, `docs` and the pack-only `game`, `drive`, `examples`,
-`storm` and `readme` behind `if: ${{ inputs.pack }}`, with 3DEngine's paths filter and no
-`branches`; `pack.yml` runs `build` then `pack` with the version read in it, the six bridges laid
+program for ten minutes, and the `drive` job soaks the feature test alone for fifteen after the
+course with its shaders in the cache the course's run filled, seven readings there and its resident
+size level at 1.30 GB. At `b178ae3f` `package.yml`, `feature-test.yml` and `scenes.yml` are gone:
+`build.yml` holds `native (rid)`, `test (os)`, `digest`, `docs` and the pack-only `game`, `drive`,
+`examples`, `storm` and `readme` behind `if: ${{ inputs.pack }}`, with 3DEngine's paths filter and
+no `branches`; `pack.yml` runs `build` then `pack` with the version read in it, the six bridges laid
 out, the notices, the release notes, the pack, the templates, N 6.4 and N 6.5, the upload and the
 push, the key reaching the push through the environment so a failed command names `$NUGET_API_KEY`
-and not the key; `build/scenes.sh` is the Sponza drive by hand and BUILDING.md says the zips are
-made on the system each is for. One thing differs from the item and is right: the build group is
+and not the key; `build/scenes.sh` is the Sponza run by hand and BUILDING.md says the zips are made
+on the system each is for. One thing differs from the item and is right: the build group is
 `build-${{ github.ref }}-${{ github.event_name }}`, since a called run reads its caller's context,
 where 3DEngine's reads `inputs.pack`; the two forms do the same and are aligned in a later batch.
 Checked on the working machine: the whole suite 1,472 and 3 skipped of 1,475, `WorkflowTests`,
@@ -41,47 +66,22 @@ capture job was cancelled at its 90 minutes with the captures still running, Ver
 docs green at 13:50 with Windows and macOS running. Item 23 is done when that run shows `test`,
 `digest` and `docs` green with the rest skipped and the pack run every job green and the package's
 artifact, which is Decision 35's gate for this engine; the play job's hour holds seven and a half
-minutes more of soak and the drive job is near 70 of its 90.
+minutes more of soak and the `drive` job is near 70 of its 90.
 
 Before it, `5e01491e` came, the one thing left in `50470331` done and nothing else: the play job
-fetches `slangc` before it builds the feature test for the soak, with the line of comment the drive
-and capture jobs have. The whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18. Right. The
-owner pushed `50470331` and `5e01491e` at 11:40, two runs at once; the first was cancelled at its
-start by the workflow's own rule with the second going on, and the run of `5e01491e` was whole
-green, Linux in 12 minutes, Windows 14, macOS 11, the third of Decision 33's three. The pack run on
-it, started at 11:58, built the six bridges, passed the Linux and macOS suites, the storm, which
-settled Verdict 21, and the README walk, and failed its Windows suite on one test, Verdict 23, and
-its play job at the soak, Verdict 24, so the pack job was skipped; the drive job passed in 56
-minutes, which settled Verdict 20, and the capture job was under way at 13:23. The same day the
-owner ordered two workflows an engine, with the tester zips and the scene packs as runs on the
-owner's machine (Decisions 34 and 35, item 23); the rework is the first work after Verdicts 23 and
-24 are mended, and a green push and a green pack run under the new workflows are Decision 33's gate
-before features resume.
-
-Before it, `50470331` came, Verdicts 20, 21 and 22 mended in one commit and nothing else, as
-Decision 33 asks. Every script the pack jobs run calls the command line through helpers that give
-`--timeout 600` and name a failed call with its code and the first line the command line gave of
-why, which it writes to its output and not its errors, so Swarm's helpers of `9f76fded`, which kept
-the errors, had named an empty why; an ERR trap under `set -E` names anything else. The feature
-test's drive has a job of its own with 90 minutes and its artifact, the play job building the
-feature test for the soak alone; the drive's platform and elevator checks take the farthest the
-player was carried over 240 and 300 frames, read every 30, since a net change over 90 frames
-straddled the swing's turn on lavapipe. The storm step installs `libxcursor1`, `libxi6` and
-`libxkbcommon-x11-0`, the three an Ubuntu 24.04 container with the job's packages alone showed winit
-unable to open one after another, runs the test with `--diag`, takes the test host's standard error
-out of that log, says a failure whole and uploads the folder. The capture script fetches Bevy's
-files and then builds the examples itself, the job's own build step gone, the single capture
-building again where the program lacks a fetched file, and the capture and drive jobs fetch `slangc`
-before they run, since 34 examples and the feature test compile Slang as they run. Checked on the
-working machine: the whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18; in the container,
-the storm passing in four seconds with the three libraries and the step's error ending with winit's
-line without them; the drive whole on lavapipe in some 70 minutes, the course from the platform on
-in 26 and passing; 26 captures in a fresh checkout none blank, 25 matching and
-`dynamic_mip_generation` matching once slangc was there. Right. One thing left in it: the play job's
-soak runs the feature test without `slangc`, so its log carries the compile errors though the soak
-reads memory alone; the play job fetches it too, a commit of its own before the push. Next the push,
-the third toward Decision 33's three if whole green, and the pack run after it, whose drive, storm
-and capture jobs settle Verdicts 20 to 22.
+fetches `slangc` before it builds the feature test for the soak, with the line of comment the
+`drive` and `examples` jobs have. The whole suite 1,471 and 3 skipped of 1,474, NormTests 18 of 18.
+Right. The owner pushed `50470331` and `5e01491e` at 11:40, two runs at once; the first was
+cancelled at its start by the workflow's own rule with the second going on, and the run of
+`5e01491e` was whole green, Linux in 12 minutes, Windows 14, macOS 11, the third of Decision 33's
+three. The pack run on it, started at 11:58, built the six bridges, passed the Linux and macOS
+suites, the storm, which settled Verdict 21, and the README walk, and failed its Windows suite on
+one test, Verdict 23, and its play job at the soak, Verdict 24, so the pack job was skipped; the
+`drive` job passed in 56 minutes, which settled Verdict 20, and the capture job was under way at
+13:23. The same day the owner ordered two workflows an engine, with the tester zips and the scene
+packs as runs on the owner's machine (Decisions 34 and 35, item 23); the rework is the first work
+after Verdicts 23 and 24 are mended, and a green push and a green pack run under the new workflows
+are Decision 33's gate before features resume.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -196,14 +196,14 @@ from [SHARED.md](SHARED.md).
    at `app.rs:91`, `cargo-emit` left out since a build script prints its own directives, the crate's
    MIT or Apache-2.0 notice kept for what was taken, and the dependency removed (Decision 17).
 
-   **The weather vendored and ported.** `bevy_weather` 0.2.0 targets 0.19.1 alone and has one
+**The weather vendored and ported.** `bevy_weather` 0.2.0 targets 0.19.1 alone and has one
    maintainer; its source in `.ref/bevy_weather-main` becomes a workspace member
    `native/bevy_weather` in upstream's shape with its LICENSE.md, the bridge depending on it by
    path, and is ported there: four shader loads whose `sky.wgsl` and `precipitation.wgsl` carry five
    preprocessor lines, converted to WESL and renamed `.wesl`; five `AsBindGroup` derives and eight
    material impls; 34 atmosphere sites against an atmosphere that is per camera in 0.20
-   (`AtmosphereBuffer` a component, `init_atmosphere_buffer` gone). The Weather page and the drive
-   script pass as before, and the port is offered upstream by the owner (Decision 18).
+   (`AtmosphereBuffer` a component, `init_atmosphere_buffer` gone). The Weather page and the course
+   script script pass as before, and the port is offered upstream by the owner (Decision 18).
 
    **The schema and the files.** `bevy-components.tsv` written again from an editor build as
    BUILDING.md has it, its diff read as what Bevy changed; `ABI_VERSION` and `ExpectedAbiVersion`
@@ -215,14 +215,14 @@ from [SHARED.md](SHARED.md).
    reads `FormerNames`, so a file written on 0.19 keeps reading, Courtyard's file left as it is for
    the proof.
 
-   **What a game's author sees, measured.** `ScreenSpaceTransmission` is opt-in on `Camera3d`, so
-   the transmission example and the gallery add it and `docs/materials.md` says so; `Camera2d`
-   defaults to `Tonemapping::Linear` and `Tonemapping::None` is a full passthrough, so
-   `TonemapRampTests` may fail for `None.png`, which is rewritten with the reason if the change is
-   Bevy's (3DEngine's copies follow, SHARED.md); sprites draw through `Mesh2d` with an `alpha_mode`
-   and same-Z order may change; Bevy's own sets order weakly, so a bridge system that leaned on an
-   unstated order between two of Bevy's may move. The suite on three systems, every capture compared
-   and each difference named as Bevy's or a fault, the feature test driven through every zone inside
+**What a game's author sees, measured.** `ScreenSpaceTransmission` is opt-in on `Camera3d`, so the
+   transmission example and the gallery add it and `docs/materials.md` says so; `Camera2d` defaults
+   to `Tonemapping::Linear` and `Tonemapping::None` is a full passthrough, so `TonemapRampTests` may
+   fail for `None.png`, which is rewritten with the reason if the change is Bevy's (3DEngine's
+   copies follow, SHARED.md); sprites draw through `Mesh2d` with an `alpha_mode` and same-Z order
+   may change; Bevy's own sets order weakly, so a bridge system that leaned on an unstated order
+   between two of Bevy's may move. The suite on three systems, every capture compared and each
+   difference named as Bevy's or a fault, the feature test run through every zone inside
    `systemd-run --user --scope -p MemoryMax=20G -p MemorySwapMax=0`, the soak, Courtyard from the
    package. The suite is run once more with `ScheduleBuildSettings::shuffle_seed` set, which
    `bevy/debug` offers and the headless profile has, and what it finds is mended or listed. The
@@ -454,13 +454,13 @@ from [SHARED.md](SHARED.md).
     `.claude` folder and long subfolders holding nothing else being unwanted, as for 3DEngine's. The
     document becomes `.github/BCS.md`, beside the other documents a session reads, its skill header
     dropped since it means nothing outside that folder, its body as it is; AGENTS.md's line on
-    driving a session and its documents table name the new place, which the owner's ask is the word
-    for, as does STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins
-    `.gitignore` so the tool's own lock file there never enters the tree. A batch of its own, taken
-    when the owner types the ask in the working session, which changes AGENTS.md and the tool's own
-    folder only on the owner's word given there and has asked the owner for it, a right the
-    reviewing session holds. Done at `53fd0c3f` on the owner's word typed there: `.github/BCS.md`,
-    every reference moved, the folder gone and ignored.
+    controlling a session and its documents table name the new place, which the owner's ask is the
+    word for, as does STYLE.md's line on the skills; the folder goes with the move, and `.claude/`
+    joins `.gitignore` so the tool's own lock file there never enters the tree. A batch of its own,
+    taken when the owner types the ask in the working session, which changes AGENTS.md and the
+    tool's own folder only on the owner's word given there and has asked the owner for it, a right
+    the reviewing session holds. Done at `53fd0c3f` on the owner's word typed there:
+    `.github/BCS.md`, every reference moved, the folder gone and ignored.
 
 15. **The development machine's GPU is named nowhere a user reads, done at `c447a370` and `c16f67e5`
     (Decision 29).** The owner asked on 2026-10-11 at 17:26, as of 3DEngine, that the mention of
@@ -472,12 +472,12 @@ from [SHARED.md](SHARED.md).
     Solari comment at `c16f67e5`, so nothing outside `.github` names the model.
 
 16. **An offscreen click lands only where the pointer has been, done at `4e6eab36`.** Found at
-    `d91665d9`: driven offscreen through `./bcs`, a click at a point the pointer has not moved to is
+    `d91665d9`: run offscreen through `./bcs`, a click at a point the pointer has not moved to is
     lost, the button example counting two of three clicks at one spot and every one once the pointer
     has been moved there a few frames first, since picking wants the hover a frame before the press.
     The click moves the pointer there and gives the frames the hover takes before it presses, in the
-    CLI's verb or in the harness that drives the examples, so a session or a test clicking a place
-    it has not hovered loses nothing, measured by the example's three of three, with a test. Done at
+    CLI's verb or in the harness that runs the examples, so a session or a test clicking a place it
+    has not hovered loses nothing, measured by the example's three of three, with a test. Done at
     `4e6eab36`, two hover frames before the press and a test of three of three.
 
 17. **The examples' counts under the Examples heading, and a count on each group's heading, done at
@@ -606,33 +606,70 @@ from [SHARED.md](SHARED.md).
     `native` and `test` alone; the `version` and `publish` jobs go. `feature-test.yml` and
     `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the owner's
     machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip needs a
-    Windows machine with `--cache`), and the Sponza drive is `build/scenes.sh` (the meshlet and
-    solari bridge, `build/fetch-slang.sh`, `./bcs scenes fetch intel-sponza`, the feature test built
-    strict and driven with `SHOTS=build/scenes`), BUILDING.md:356-363 saying so. Both files:
-    `permissions: contents: read`, concurrency `build-${{ github.ref }}` cancelling in progress and
-    `pack-${{ github.ref }}` not, a time limit on every job with its reason (N 6.8), a head comment
-    saying what a push runs and what the pack run adds; a push still tests the library alone, the
-    render bridge costing a quarter of an hour cold, said in BUILDING.md in one sentence beside
-    3DEngine's. Lines that change: `build/step.py:6-7`, `.github/BUILDING.md:63, 213, 336-379, 481,
-    498`, `README.md:202, 266`. Checked by `WorkflowTests`, `TestScriptTests`, `NormTests`,
+    Windows machine with `--cache`), and the Sponza run is `build/scenes.sh` (the meshlet and solari
+    bridge, `build/fetch-slang.sh`, `./bcs scenes fetch intel-sponza`, the feature test built strict
+    and run with `SHOTS=build/scenes`), BUILDING.md:356-363 saying so. Both files: `permissions:
+    contents: read`, concurrency `build-${{ github.ref }}` cancelling in progress and `pack-${{
+    github.ref }}` not, a time limit on every job with its reason (N 6.8), a head comment saying
+    what a push runs and what the pack run adds; a push still tests the library alone, the render
+    bridge costing a quarter of an hour cold, said in BUILDING.md in one sentence beside 3DEngine's.
+    Lines that change: `build/step.py:6-7`, `.github/BUILDING.md:63, 213, 336-379, 481, 498`,
+    `README.md:202, 266`. Checked by `WorkflowTests`, `TestScriptTests`, `NormTests`,
     `build/check-docs.py`, a push run green with the pack-only jobs skipped, a docs-only push
     running, and a pack run green with its package, which are Decision 33's gate (Decision 35). The
     norm's and SHARED.md's lines are the reviewer's and ride with the commit.
 
+24. **The docs job leaves the build workflow (Decision 36); the repository's own links are a test of
+    the suite.** The `docs` job and its `build/check-docs.py --external` go from `build.yml`, with
+    the head comment's line on it; a test of the suite, `DocumentLinkTests` as 3DEngine names its
+    own, runs `build/check-docs.py` without `--external`, so every link of the README and the guide
+    into the repository is held to a file and a heading that are there, with no request made (N
+    4.3), and the script's `--external` stays for a run by hand before a package. BUILDING.md:339,
+    347 and 513 say the suite's test and the hand run where they said the job, and the push
+    paragraph's sentence that a push of the README alone runs the docs job goes with it. Checked by
+    the test passing here and failing on a link to a page that is not there, `WorkflowTests`,
+    `NormTests`, and the push run showing `test`, `digest` and nothing else.
+
+25. **The register: STYLE.md's rule and the sweep (Decision 37), after item 24.** STYLE.md gains a
+    section, Register: prose uses the technical and generic term, the engine's own where it has one,
+    and no figure of speech or casual paraphrase, with the pairs the owner named and their
+    replacements: the light that bounces becomes global illumination; gives off light and glowing
+    become emissive; driving a running program becomes controlling or scripting it through the
+    command line, and a drive a scripted run or a course. The colon joins it: STYLE.md's rule, which
+    allows a colon before a list, tightens so that a running sentence holds none, the sentence
+    recast or split where one appended an elaboration or a list, as in "makes the program the README
+    opens with: a window with a turning cube"; a colon stands before a bulleted list, a code block
+    or a command, and as a label in a table, and STYLE.md's check of colons joining clauses reads
+    prose lines of Markdown as well as comments. The sweep covers README.md, `docs/`, AGENTS.md,
+    `templates/README.md`, every Markdown under `.github`, the comments of the code, the scripts and
+    the workflows, and the sentences a program prints; 20 documents hold the drive words some 90
+    times and one the first pair once, and a rough count finds a colon inside a sentence on some 180
+    prose lines of the documents and 160 comment lines of the library and the examples.
+    `build/drive-feature-test.sh` and the `drive` job keep their names as identifiers, the job's
+    shown name becoming "run the feature test's course" and the comments reworded. The REVIEW.md,
+    NORM.md and SHARED.md lines are the reviewer's and are swept already. Checked by `NormTests`,
+    the links test of item 24 and `git grep -i` for the pairs finding the channel's history alone.
+    One commit. 3DEngine's game repository did this first at its `b87e386`, and its STYLE.md's
+    Register section and colon rule, with their checks, are the text to take, with this engine's
+    examples in place of the game's.
+
 ## Verdicts
 
-Verdicts 3, 14 to 21 are settled: 15, the native job's four targets, on the pack run of `292eead2`
-on 2026-10-16, all six built after winit became a dependency on every system at that commit; 14, the
-memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third green Windows
-suite in a row after the private bytes were read at `292eead2`; and on the pack run of `d2a20b6a`
-the same day, 3, Courtyard played from the package with its step's page saying so, 16, the storm's
-test loading the bridge the job downloaded, which the step named, 17, the pack job passing with the
-notes beside the artifacts, and 18, Swarm played into its third wave within its commands' patience,
-and 19, the capture job ending within its hour with a page naming each failure, the examples started
-and none waited on; and 21, the storm's app made on the runner once the three libraries winit opens
-were installed, on the pack run of `5e01491e` on 2026-10-17, the storm passing in a minute and a
-half; and 20, the feature test driven through its course on lavapipe in 56 minutes, in a job of its
-own on the same pack run.
+Verdicts 3, 14 to 21, 23 and 24 are settled: 15, the native job's four targets, on the pack run of
+`292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
+commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
+green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
+`d2a20b6a` the same day, 3, Courtyard played from the package with its step's page saying so, 16,
+the storm's test loading the bridge the job downloaded, which the step named, 17, the pack job
+passing with the notes beside the artifacts, and 18, Swarm played into its third wave within its
+commands' patience, and 19, the capture job ending within its hour with a page naming each failure,
+the examples started and none waited on; and 21, the storm's app made on the runner once the three
+libraries winit opens were installed, on the pack run of `5e01491e` on 2026-10-17, the storm passing
+in a minute and a half; and 20, the feature test run through its course on lavapipe in 56 minutes,
+in a job of its own on the same pack run; 23, the session file's move on Windows, on the third green
+Windows suite in a row after `0dff9601`, the push of `85df443c` on 2026-10-17; and 24, the soak, on
+the pack run of `b178ae3f` the same day, the play job passing with its ten-minute soak of three
+games.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -676,55 +713,22 @@ own on the same pack run.
     checkout 26 captures came out none blank, 25 matching and `dynamic_mip_generation` matching once
     slangc was there.
 
-23. **The CLI's ready system is denied its session file on Windows while a test reads it.** On the
-    pack run of `5e01491e`, 2026-10-17, the Windows suite failed one test of the 1,038 run,
-    `CliServerTests.AServingAppAnswersWhileItRuns`, under N 3.7: the engine logged one error, the
-    system `Cli.Ready` throwing `UnauthorizedAccessException`, access to the path denied, and the
-    same test passed on the push of `5e01491e` half an hour before and on every Windows suite since
-    the test came. On Windows a file another process or thread holds open without sharing its
-    deletion refuses a move over it with that exception, where Linux and macOS let the move through,
-    so the ready system writing or moving the session file into place while the test, or the suite's
-    other reader, had it open is the shape; 3DEngine met the same race from the reader's side (its
-    Verdict 57) and reads the file again up to four times ten milliseconds apart. Two things:
-    `Cli.Ready`'s write of the session file read for what it does when the file is held, the writer
-    trying again a few times a few milliseconds apart before it logs, and the readers opening the
-    file with `FileShare.ReadWrite | FileShare.Delete`; and the test's reading of the session file
-    read for the same. Settled at three green Windows suites in a row. Mended at `0dff9601`, the
-    writer trying its move five times ten milliseconds apart, the readers sharing writes and
-    deletion, and a test holding the file through the first try.
-
-24. **The soak's step says a game grew or could not be played, and names neither.** On the same pack
-    run, the play job played Courtyard and Swarm and failed at the soak of the four programs with
-    the step's own words alone, that a game grew or could not be played over two and a half minutes,
-    nothing of which program, what `build/soak-check.py` read or what the soak's script said, since
-    the step prints its one `::error::` after the scripts and `build/step.py` adds its page only to
-    a step that said nothing. The feature test joined the soak with its shaders compiled for the
-    first time at `5e01491e`, `slangc` fetched before it, and on lavapipe at a frame a second its
-    compiles run through much of the 150 seconds, so its memory climbing without leveling off is the
-    first reading to take and a failed open the second. Two things: the step's error carries
-    `soak-check.py`'s words and each soak's `FAILED` line, each soak's standard error kept in a file
-    and read into it, so the next page names the program and the figure; and the soak of the feature
-    test read on lavapipe with `slangc` here, its readings beginning after its shaders are compiled,
-    as `publish-feature-test.sh` waits on `shader.list`, if the compiles are what climbed. Settled
-    when the play job passes in a pack run. Read at `0dff9601`: too few readings and no climb, a
-    round of four programs on lavapipe taking 67 to 100 seconds where the check wants six readings
-    in 150; mended there with `build/soaks.sh`, which names each failure, ten minutes for the three
-    games in the play job and fifteen for the feature test alone in the drive job after its drive.
-
 25. **The capture job is cancelled at its limit with the captures still running, and says nothing of
     how far it got.** On the pack run of `5e01491e`, 2026-10-17, the capture job ran
     `build/capture-examples.sh` with Bevy's files and `slangc` in place for the first time, and was
     cancelled at its 90 minutes with the step still running, its page holding the cancellation alone
     and its artifact 8 MB of captures; on the pack run of `d2a20b6a` the same step took 56 minutes
-    with no file to load and no shader to compile. The script has a budget, `CAPTURE_MINUTES`, past
-    which it starts no example and ends with an error naming how many of how many it reached and the
-    last, as 3DEngine's macOS captures job gives its script 130 minutes under its 160, and the job
-    sets none, so the limit cut the run where the budget would have spoken. Two things: the job
-    gives the script a budget twenty minutes under its limit, so a run that cannot finish says how
-    far it got; and the captures are split across a matrix of jobs, each taking every n-th example
-    of the list by its index (`build/capture-examples.sh` given the shard and the count), each
-    comparing what it captured and uploading it under its own name, so the run ends within the hour,
-    four shards where one took past 90 minutes. Settled when the capture jobs pass in a pack run.
+    with no file to load and no shader to compile. The script had no budget of its own, where
+    3DEngine's takes `CAPTURE_MINUTES`, past which it starts no example and ends with an error
+    naming how many of how many it reached and the last, its macOS captures job giving it 130
+    minutes under its 160, so here the limit cut the run with nothing said. Two things: the script
+    takes that budget and the job gives it one twenty minutes under its limit, so a run that cannot
+    finish says how far it got; and the captures are split across a matrix of jobs, each taking
+    every n-th example of the list by its index (`build/capture-examples.sh` given the shard and the
+    count), each comparing what it captured and uploading it under its own name, so the run ends
+    within the hour, four shards where one took past 90 minutes. Settled when the capture jobs pass
+    in a pack run. Mended at `85df443c`: the budget taken by the script, four shards of 90 examples
+    each with 60 minutes and a budget of 40, each comparing and uploading its own.
 
 ## Decisions
 
@@ -917,7 +921,7 @@ own on the same pack run.
     workflow sets differed, five files here and four in 3DEngine with graphs that looked unlike each
     other, and ordered each engine down to two: a build workflow on an ordinary push and a pack
     workflow by hand, consistent between them, the pack run keeping every check that ran only there;
-    the feature test's zips and the Sponza drive leave CI for the owner's machine, the Sponza files
+    the feature test's zips and the Sponza run leave CI for the owner's machine, the Sponza files
     under `.ref/Sponza`. Written as item 23 here and item 26 in 3DEngine (its Decision 40). The
     norm's "the workflow" names both, and a rule the one it means.
 
@@ -926,20 +930,36 @@ own on the same pack run.
     and that the green lights Decision 33 asks are then asked of the new workflows: a green push and
     a green pack run under them on each engine before features resume (3DEngine's Decision 42).
 
+36. **The docs job goes; the repository's links are the suite's to check.** The owner asked on
+    2026-10-17 whether the build workflow needs a job that follows the README's and the guide's
+    links and found it unnecessary, so the job and its requests to outside addresses leave the
+    workflow. N 4.3 stands: a test of the suite follows every link into the repository against the
+    checkout with no request made, as 3DEngine's `DocumentLinkTests` does, and a link to an outside
+    address is followed by hand with `build/check-docs.py --external` when a package is made.
+    Written as item 24.
+
+37. **Prose is technical and generic.** The owner said on 2026-10-17 that phrasings such as "the
+    light that bounces" and "how to drive the game" read as casual and do not fit. A feature is
+    named by its technical term, the engine's own where it has one, and never by a figure of speech
+    or a paraphrase: global illumination where the light bounced; emissive where a block gave off
+    light; a running program controlled or scripted through the command line where it was driven,
+    and a scripted run or a course where a drive. The owner added at 14:37 that the colon is
+    overused, an elaboration or a list appended to a sentence after one where a sentence would do,
+    in documents, comments and logs alike, which STYLE.md should have covered; its rule tightens so
+    that a running sentence holds no colon. STYLE.md carries both rules with these pairs in each
+    repository, every document, comment and message a reader sees is swept (item 25 here, 29 in
+    3DEngine, 4 in Voxel-Sandbox), and an identifier keeps its name unless the rename is cheap and
+    the thing is new; a new name follows the rule.
+
 ## Replies
 
-**Verdict 25.** The script had no budget of its own here; `CAPTURE_MINUTES` was 3DEngine's, and
-`build/capture-examples.sh` takes it now as 3DEngine's script does. Where it is set, no example is
-started once that many minutes have gone since the first, and an error titled
-`Captures past their budget` names how many of how many were reached, the last of them and how many
-were left, the script ending with 1 after the failures it found are listed. With a budget of none
-left on the second shard it said
-`ended after 0 of 90 examples, the last reached none, 90 left uncaptured` and started nothing. The
-script takes `--shard <n>/<count>` after the folder and captures every count-th example of the list
-from the n-th, counting from one, refusing a shard outside one to count; the four shards of the 360
-hold 90 each, together the whole list once. The capture job is a matrix of four,
-`capture the examples (n of 4)`, each with 60 minutes, `CAPTURE_MINUTES` of 40, its own comparison
-of what it captured and its captures uploaded as `examples-n`, `fail-fast` off so each shard says
-its own. A quarter of a list that took past 90 minutes should take half an hour or less; not
-measured here, since the captures on lavapipe are the runner's to time. BUILDING.md says the shards
-and the budget beside the capture.
+**Item 24.** The `docs` job and the head comment's line on it are gone from `build.yml`, the paths
+filter's comment naming the suite's test where it named the job. `DocsScriptTests` runs
+`build/check-docs.py` without `--external` over the checkout, and runs a copy of it in a checkout of
+its own whose README links a page that is not there and whose page links a heading it lacks, the
+check ending with 1 and naming both and neither the page nor the heading that are there.
+BUILDING.md's push paragraph names the test, the sentence on a push of the README alone is gone, and
+its section on the guide says the suite runs the script without `--external` and the hand run before
+a package with it. `DocsScriptTests`, `NormTests`, `WorkflowTests` and the script tests passed 64 of
+64; the whole suite before the two facts moved out of `Docs/DocumentLinkTests.cs` passed but for
+`N_1_4`, which the move answers.

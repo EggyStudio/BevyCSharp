@@ -1,15 +1,15 @@
 # A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
-# test job builds (test), puts the three systems' pages on one (digest) and follows every link of the
-# README and the guide (docs). The pack workflow calls this one with `pack` (pack.yml), which adds
+# test job builds (test), and puts the three systems' pages on one (digest). The pack workflow calls
+# this one with `pack` (pack.yml), which adds
 # the render bridge built for all six platforms (native) and, on the Linux one, Courtyard and Swarm
 # played from a package of this commit with the games soaked and Courtyard published native (game),
 # the feature test driven (drive), every example captured (examples), a window stormed (storm) and
 # the README walked in a container (readme), and the pack run packs only once every job here passed.
 name: build
 
-# Documents and captures are left out, apart from the README, the guide and BUILDING.md, which the
-# docs job checks and the guide links into. A later pattern overrides an earlier one, so BUILDING.md
-# comes after the rule leaving out the other Markdown under .github.
+# Documents and captures are left out, apart from the README, the guide and BUILDING.md, whose links
+# and headings a test of the suite holds to each other (DocsScriptTests). A later pattern overrides
+# an earlier one, so BUILDING.md comes after the rule leaving out the other Markdown under .github.
 on:
   push:
     paths: ['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md', '!games/**.md', '!.github/assets/**']
@@ -274,20 +274,6 @@ jobs:
           path: digests
 
       - run: python3 build/test.py --digest digests/*
-
-  # The README and the guide under docs/, every link followed, so a page moved or a heading renamed
-  # without the links to it fails here rather than on a reader.
-  docs:
-    name: docs
-    runs-on: ubuntu-24.04
-    # Five minutes for a script that asks each address once, so one that never answers fails here
-    # rather than at GitHub's six hours.
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Follow every link in the README and the guide
-        run: python3 build/check-docs.py --external
 
   # Courtyard, the small game under games/, built on a package as a project outside this
   # repository is, and played from its menu to its win by games/Courtyard/play.sh with no display.

@@ -335,16 +335,14 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 ## Publishing
 
 A push or a pull request runs the build workflow, `build.yml`: the test suite on Linux, Windows and
-macOS, the three systems the package ships for, each page of what failed put on one for the commit,
-and every link of the README and the guide followed (`build/check-docs.py --external`). On Windows
-it also opens the feature test through `bcs`, headless, and asks how it is, since that is the one
-system where `bcs` starts a program through `cmd.exe`, within a few minutes and with each answer
-printed. On macOS it installs `dotnet-gcdump` for the leak test, which names the types that grew
-where the heap's floor rose. A push tests the library alone, on the headless bridge each test job
-builds, since the render bridge costs a quarter of an hour cold on each of six runners and only a
-package needs it, and nothing a commit message says changes that. A push of the documents under
-`.github` other than this page, of AGENTS.md, of a game's notes or of the captures alone starts no
-run, so a push of the README or the guide alone runs the docs job with the rest.
+macOS, the three systems the package ships for, which follows every link of the README and the guide
+into this repository among its tests (`DocsScriptTests`), and each page of what failed put on one
+for the commit. On Windows it also opens the feature test through `bcs`, headless, and asks how it
+is, since that is the one system where `bcs` starts a program through `cmd.exe`, within a few
+minutes and with each answer printed. On macOS it installs `dotnet-gcdump` for the leak test, which
+names the types that grew where the heap's floor rose. A push tests the library alone, on the
+headless bridge each test job builds, since the render bridge costs a quarter of an hour cold on
+each of six runners and only a package needs it, and nothing a commit message says changes that.
 
 A package is made by the pack workflow, `pack.yml`, run by hand from the Actions tab ("Run
 workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves
@@ -511,8 +509,10 @@ Bevy's does, and `--printing` lists them.
 `docs/` holds the guide, a page an area for somebody using the engine, and the README is for
 somebody deciding whether to, so it links to each page by its full URL, since it is also the
 package's page on nuget.org. `build/check-docs.py` follows every link in the README and the guide,
-`--external` the ones off this repository too, and the build workflow runs it on every push, a push
-of the README or the guide alone among them.
+`--external` the ones off this repository too. The suite runs it without `--external`, with no
+request made (`DocsScriptTests`), so every push holds the links into this repository to a file and a
+heading that are there, and `build/check-docs.py --external` is run by hand before a package, since
+a site that does not answer for a minute is no fault of a commit.
 
 `build/docs-on-package.py` builds every C# block of the guide against the packed package, as a
 reader copying one into a game would, and the pack workflow runs it beside the examples' own build.
