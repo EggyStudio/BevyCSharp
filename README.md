@@ -7,7 +7,7 @@ Write [Bevy](https://bevy.org) games in C#.
 <sup>`BevyCSharp.Editor`, `dotnet run --project BevyCSharp.Editor`</sup>
 
 Mark a struct `[Behavior]`, give it methods with stage attributes, and a Roslyn source generator
-wires it into Bevy's schedule, as a component and a system at the same time. Bevy is the engine
+registers it with Bevy's schedule, as a component and a system at the same time. Bevy is the engine
 underneath, with its ECS, its scheduler, its timing, its input and its renderer.
 
 ```csharp

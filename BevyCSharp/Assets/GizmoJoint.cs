@@ -3,8 +3,8 @@ namespace Bevy;
 /// <summary>How two gizmo lines meet at a corner.</summary>
 /// <remarks>
 /// Only visible on a shape whose lines meet, which is every closed shape and no single segment. At
-/// a thin width the corners are too small to tell apart, so this is for the thick lines an overlay
-/// drawn to be read at a glance uses.
+/// a thin width the corners are too small to tell apart, so this is for thick lines, as an overlay
+/// drawn over the scene uses.
 /// </remarks>
 public enum GizmoJoint
 {

@@ -2,7 +2,7 @@
 # Builds every example on the packed package alone, in a project of its own outside the repository,
 # as a reader who copies one into a game of their own does (NORM.md, N 2.7). A picture in the README
 # opens an example as the way to do a thing, so what an example calls has to be what a game on the
-# package can call, its generator and its build files included, and an example that leans on the
+# package can call, its generator and its build files included, and an example that relies on the
 # examples project, or on what the library keeps to itself, fails here.
 #
 #   build/examples-on-package.sh <version>
@@ -28,7 +28,7 @@ mkdir -p "$work/Examples"
 # so an example reaching into any of them fails to build here.
 rm "$work/Examples/Catalog.cs" "$work/Examples/Program.cs" "$work/Examples/Example.cs" "$work/Examples/Drives.cs"
 
-# The helpers an example may still lean on, each with why, which only gets shorter. Each stands in
+# The helpers an example may still use, each with why, which only gets shorter. Each stands in
 # for something Bevy's examples take from a crate the bridge does not compile in, and goes when it
 # can be asked for.
 #   FreeCamera.cs  the free camera of Bevy's camera controller crate

@@ -95,7 +95,7 @@ edge of the screen. Without them, a light or an entity carrying `ShowLightGizmoR
 meaning from another without spending a second color on it, so a path already walked can be drawn
 against the one still to come, and the gap and the run of a dash are measured in line widths.
 `joint` rounds, mitres or bevels the corners of a closed shape, which shows at the thick widths an
-overlay meant to be read at a glance uses. `perspective` makes the width a size at the camera's
+overlay drawn over the scene uses. `perspective` makes the width a size at the camera's
 near plane rather than a size on screen, so a line further away is drawn thinner.
 
 `Gizmos.Lines` draws a whole run of segments in one crossing, each with its own two ends and color,

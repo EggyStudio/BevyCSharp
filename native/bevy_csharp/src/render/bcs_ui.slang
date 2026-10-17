@@ -6,7 +6,7 @@
 // the `bcs_ui` namespace. What the material carries is whatever the shader declares, as for a 3D
 // material, and is set from C# by name. Bevy's interface material pipeline binds the view in group
 // zero and the material in group one, and the bindings below are in space 100, which the bridge
-// moves to group zero after the compile, out of the way of the material's.
+// moves to group zero after the compile, so they never share a binding with the material's.
 //
 // Locations are `TEXCOORDn` semantics, as in `bcs`, the index being the location, and the structs
 // below line up with the ones Bevy's own interface material WGSL declares.

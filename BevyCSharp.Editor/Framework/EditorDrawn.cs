@@ -408,7 +408,7 @@ internal static class EditorDrawn
     /// model file's first mesh.
     /// </summary>
     /// <remarks>
-    /// A shape is made fresh at a size that reads at a glance, and its card edits nothing yet.
+    /// A shape is made fresh at about a unit across, and its card edits nothing yet.
     /// Picking a mesh the scene already uses shares it, as a scene file writes it once for every
     /// entity drawn with it.
     /// </remarks>
@@ -573,7 +573,7 @@ internal static class EditorDrawn
         return $"#{Byte(shown.X):x2}{Byte(shown.Y):x2}{Byte(shown.Z):x2}";
     }
 
-    /// <summary>Bevy's shapes, each at a size that reads at a glance.</summary>
+    /// <summary>Bevy's shapes, each about a unit across.</summary>
     private static readonly (string Shape, float A, float B, float C)[] Shapes =
     [
         (MeshShape.Cuboid, 1f, 1f, 1f),

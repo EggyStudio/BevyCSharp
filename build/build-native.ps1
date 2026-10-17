@@ -74,7 +74,7 @@ $ArtifactDir = Join-Path $BuildDir 'artifacts'
 # -Editor implies the renderer, so it wins when both are given rather than being refused.
 $Features = if ($Editor) { 'editor' } elseif ($Render -or $Meshlet -or $Solari) { 'render' } else { 'headless' }
 
-# Meshlets and ray-traced lighting sit on top of a profile rather than replacing one.
+# Meshlets and ray-traced lighting are added to a profile rather than replacing one.
 if ($Meshlet) { $Features = "$Features,meshlet" }
 if ($Solari) { $Features = "$Features,solari" }
 

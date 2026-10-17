@@ -1230,7 +1230,7 @@ static void ShowLights(bool all, LightGizmoColoring coloring = LightGizmoColorin
 static void ShowBounds(bool all, (float R, float G, float B, float A)? color = null);  // Sets whether Bevy draws every entity's bounding box, and in what color
 static AssetHandle Record(Action draw);                         // Keeps the shapes draw asks for in an asset, rather than drawing them for one frame, for an entity to draw every frame with Attach
 static void Attach(EcsWorld world, Entity entity, AssetHandle gizmo);  // Has an entity draw a gizmo asset Record made, every frame, placed by the entity's transform
-static void Axes(Transform transform, float length = 1f, bool inFront = true);  // Draws a set of axes, so an orientation can be read at a glance
+static void Axes(Transform transform, float length = 1f, bool inFront = true);  // Draws a set of axes, which show an orientation
 static Gizmos.BatchScope Batch();                               // Gathers every shape drawn until the returned scope ends, and hands them over in one call
 static void Text(string text, Vec3 position, Quat rotation, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text in the world, in Bevy's stroke font, facing the way it is turned
 static void Text2d(string text, (float X, float Y) position, float angle, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text, flat, for a 2D camera

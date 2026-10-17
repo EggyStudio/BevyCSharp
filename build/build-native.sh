@@ -88,7 +88,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Meshlets and ray-traced lighting sit on top of a profile rather than replacing one, and bring the
+# Meshlets and ray-traced lighting are added to a profile rather than replacing one, and bring the
 # renderer with them, so a headless build asked for either becomes a render build.
 if [[ ( "$MESHLET" == 1 || "$SOLARI" == 1 ) && "$FEATURES" == "headless" ]]; then
     FEATURES="render"

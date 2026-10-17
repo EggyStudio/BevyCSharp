@@ -9,7 +9,7 @@
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
     </PropertyGroup>
 
-    <!-- Wired up as the sample is, the library as a reference and the generator as an analyzer,
+    <!-- Referenced as the sample is, the library as a reference and the generator as an analyzer,
          which is what the package does for a game. -->
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>

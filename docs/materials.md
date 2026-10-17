@@ -142,8 +142,8 @@ specular extension fills both. A full alpha counts as half, as glTF has it, so a
 should reach the whole range sets `Reflectance` to two.
 
 The G-buffer has no room for a tint, so a material drawn deferred
-(`Render.SetDeferredRendering`) shows none. `OpaqueRenderMethod` takes one opaque or masked material
-out of the way the rest are drawn. `Forward` draws it forward while the rest are deferred, as Bevy's
+(`Render.SetDeferredRendering`) shows none. `OpaqueRenderMethod` draws one opaque or masked material
+by another method than the rest. `Forward` draws it forward while the rest are deferred, as Bevy's
 deferred example draws its ground, and `Deferred` writes it into the G-buffer while the rest are
 forward, which only a camera drawing the G-buffer then shows. `Auto`, the default, follows the rest.
 

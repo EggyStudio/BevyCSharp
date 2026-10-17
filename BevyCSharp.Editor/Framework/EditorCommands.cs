@@ -338,8 +338,8 @@ public static class EditorCommands
             11,
             "Snap to a grid, which holding Control does as well"));
 
-        // What the engine is doing, and what the keys do here, kept out of the way until it is
-        // asked for. At the top right, where every engine's viewport keeps its statistics.
+        // What the engine is doing, and what the keys do here, hidden until it is asked for. At the
+        // top right, where every engine's viewport keeps its statistics.
         EditorToolbar.Add(new ToolbarButton(
             ToolbarSlot.Right,
             EditorIcons.Info,

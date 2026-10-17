@@ -121,7 +121,7 @@ public struct Quat : IEquatable<Quat>
 
     /// <summary>Turns a point by this rotation.</summary>
     /// <remarks>
-    /// The usual expansion of <c>q v q*</c>, which is a handful of multiplications rather than
+    /// The usual expansion of <c>q v q*</c>, which is eighteen multiplications rather than
     /// building a matrix for one point. Rotating a direction and rotating a position are the same
     /// operation here, because a rotation has no translation to add.
     /// </remarks>

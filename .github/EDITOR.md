@@ -12,8 +12,7 @@ assets, the settings and the style are six panels using one mechanism six ways, 
 dropdown and a right click are a seventh use of the same thing.
 
 That is the reason the framework came first. A fixed arrangement of menubar, hierarchy, viewport
-and inspector is one arrangement, and the moment it is baked into the shell it stops being a
-choice.
+and inspector is one arrangement, and once the shell draws it directly it stops being a choice.
 
 Everything the editor offers is registered in a table rather than drawn into a panel, and each
 table is a line a game writes. The menu, the toolbar, the tabs, the settings, the ways of telling
@@ -417,8 +416,8 @@ What that buys:
   the trade ImGui makes and the reason it is the tool for a panel full of numbers that change.
 - **The look is data.** `EditorTheme` is a record of every color and metric, written to
   `assets/theme.txt` and read back at startup, and the style tab edits that record rather than
-  ImGui's style, so every knob it shows is one that survives being saved. Ship with project writes
-  it into the project's `project.json` as well, which the editor wears when it has no
+  ImGui's style, so every setting it shows is one that survives being saved. Ship with project
+  writes it into the project's `project.json` as well, which the editor wears when it has no
   `theme.txt`, so a look goes wherever the project does.
 - **A project's settings are the project's.** The startup scene, the fixed step and how the
   project was last exported live in `assets/project.json` (`ProjectSettings`), written by the

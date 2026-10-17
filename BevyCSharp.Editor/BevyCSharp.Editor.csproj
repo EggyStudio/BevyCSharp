@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <!--
-      The same wiring BevyCSharp.FeatureTest uses: the library as a reference and the generator as an
-      analyzer. The analyzer line is required rather than tidy, because analyzers are per
-      compilation: without it the panels in this project generate nothing and bind to nothing.
+      The same references BevyCSharp.FeatureTest has, the library as a reference and the generator
+      as an analyzer. The analyzer line is required rather than tidy, because analyzers are per
+      compilation, and without it the panels in this project generate nothing and bind to nothing.
     -->
     <!--
       Compiling behavior scripts while the editor runs, which brings Roslyn, and which the player

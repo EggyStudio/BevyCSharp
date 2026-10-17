@@ -12,9 +12,9 @@ namespace Bevy;
 /// ends, rather than a curve per channel.
 /// </para>
 /// <para>
-/// This is the knob a game gives an artist rather than a player. It runs after tonemapping, so it
-/// is about the look of the finished picture; <see cref="PostSettings.Hdr"/> and the exposure the
-/// camera meters at are about how the scene became a picture in the first place.
+/// This is the setting a game gives an artist rather than a player. It runs after tonemapping, so
+/// it is about the look of the finished picture; <see cref="PostSettings.Hdr"/> and the exposure
+/// the camera meters at are about how the scene became a picture in the first place.
 /// </para>
 /// </remarks>
 /// <example>

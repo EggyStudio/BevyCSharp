@@ -146,12 +146,24 @@ Prose uses the technical and generic term for a thing, the engine's own where it
 figure of speech or casual paraphrase in its place. A paraphrase reads as an explanation the first
 time and as a mannerism after, and a reader who knows the term translates it back each time.
 
+A likeness is not a description and a figure of speech is not a term, so a thing is said by what it
+is and does. Another product is named only where a rule or a number is taken from it, as the
+editor's measures are taken from Unity's and the examples from Bevy's. A description holds no plan,
+so no line says what a thing is the start of or grows toward.
+
 | instead of | write |
 |---|---|
 | `the light that bounces`, `the bounce` | `global illumination`, or `indirect light` where its effect is meant |
 | `a material that gives off light`, `a glowing screen` | `an emissive material`, `an emissive screen` |
 | `drives the running app`, `driving a session` | `controls the running app through the command line`, `scripting a session` |
 | `a drive of the feature test`, `the drive through the course` | `a scripted run of the feature test`, `the run through the course` |
+| `A voxel game in the manner of Minecraft, and the ground floor of a larger one` | `A voxel game set in an endless generated world whose blocks are placed and broken, with its light, its water, its mobs and the items they drop` |
+
+The idioms in the manner of, the ground floor of, out of the box, under the hood, at a glance, a
+handful of, a great deal of, in the wild, the knob, the plumbing, the wiring, an escape hatch, for
+free and a long way are replaced in the same way, each by the term or the number it stands for. A
+word in its literal sense stays, as by hand does for work done without a tool or a program and a
+knob does on a gamepad's stick.
 
 A word in its technical sense keeps it, as a GPU's driver, a joint's drive, which is the motor of a
 slider, a body that bounces off another and a path tracer's bounces do. A name of the engine's API
@@ -239,6 +251,10 @@ awk 'FNR == 1 { code = 0 } /^ *```/ { code = !code; next } !code && /[a-z)`]: /'
 # The casual paraphrases the register replaces. A word in its technical sense, and a name, are
 # left, so each hit is read.
 git grep -n -i -E "light that bounces|the bounce|bounc(e|es|ing) (no )?light|give[sn]? off|gave off|glowing|\bdriv(e|en|es|ing)\b" -- ':!.github/REVIEW.md'
+
+# The likenesses and idioms the register replaces. A word in its literal sense is left, so each hit
+# is read, and the vendored weather crate and the third-party notices are their authors' text.
+git grep -n -i -E "in the manner of|ground floor|out of the box|under the hood|at a glance|a handful of|a great deal of|in the wild|\bknobs?\b|plumbing|wiring|wired up|escape hatch|for free|a long way" -- ':!.github/REVIEW.md' ':!native/bevy_weather' ':!THIRD-PARTY-NOTICES.md'
 
 # Padded section banners.
 grep -rn "// -- .*--" --include=*.cs --include=*.rs .

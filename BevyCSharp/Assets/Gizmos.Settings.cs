@@ -271,7 +271,7 @@ public static unsafe partial class Gizmos
     };
 
     /// <summary>
-    /// Draws a set of axes, so an orientation can be read at a glance.
+    /// Draws a set of axes, which show an orientation.
     /// </summary>
     /// <remarks>
     /// Colored by Bevy, red for X, green for Y and blue for Z. Drawing these on an entity is the
@@ -309,7 +309,7 @@ public static unsafe partial class Gizmos
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Each shape otherwise crosses to the engine on its own, which is nothing for a handful and
+    /// Each shape otherwise crosses to the engine on its own, which costs little for a few and
     /// adds up for a scene drawing thousands of spheres or boxes a frame. Inside a batch every
     /// shape call is kept here instead, and the lot is handed over when the scope is disposed,
     /// as <see cref="Lines"/> hands over its run.

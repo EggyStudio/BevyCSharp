@@ -214,7 +214,7 @@ public sealed partial class NormTests
     }
 
     // The lines a reader reads, which leaves out each row of a table, an HTML one's as the gallery
-    // writes them and a Markdown one's, since a row is taken in at a glance.
+    // writes them and a Markdown one's, since a row is read in the time a line of prose is.
     private static int ProseLines(string text) =>
         text.Split('\n')[..^1].Count(line => !line.TrimStart().StartsWith("<tr>", StringComparison.Ordinal) && !line.TrimStart().StartsWith('|'));
 

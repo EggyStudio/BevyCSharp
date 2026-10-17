@@ -5,7 +5,7 @@ namespace BevyCSharp.Examples;
 // A helper the examples share, as Bevy 0.20's examples share the free camera of its camera
 // controller crate, which the bridge does not compile in. It goes when that camera can be asked
 // for, and until then build/examples-on-package.sh lists it as one of the two helpers an example
-// may lean on.
+// may use.
 
 /// <summary>
 /// Flies its camera as Bevy's <c>FreeCamera</c> does, WASD across, E and Q up and down, Shift to

@@ -133,10 +133,10 @@ a thumbnail goes through a capture instead.
 ## 3. The asset browser
 
 Built, all of it. Model, mesh and material tiles show their thumbnails, an image is itself, and
-every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since a model
-and a mesh of it look alike at a glance. A search box, a chip per kind and a tile size slider sit
-over the tiles. A picked file is shown in the details panel rather than in a column beside the
-tiles, since picking a file lets go of any entity and one panel shows the one selection
+every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since the
+thumbnails of a model and of a mesh of it look alike. A search box, a chip per kind and a tile size
+slider sit over the tiles. A picked file is shown in the details panel rather than in a column
+beside the tiles, since picking a file lets go of any entity and one panel shows the one selection
 (`DetailsPanel.AssetDetails`). A model file opens into its meshes, materials and textures, read from
 its JSON by `GltfContents` without loading it. A pick twice on its tile, or `assets.open` with its
 path, goes into it as into a folder, where each part is a tile with its own picture and its own

@@ -60,7 +60,7 @@ macro_rules! define_slots {
                         return by_rule($cslot, sources.0).map($derived);
                     }
 
-                    // A linear scan, because the table is a handful of entries and a caller
+                    // A linear scan, because the table holds a few entries and a caller
                     // writing one long enough for that to matter is describing a lookup rather
                     // than a state.
                     let used = COMPUTED_LEN[$cslot].load(Ordering::Relaxed).max(0) as usize;

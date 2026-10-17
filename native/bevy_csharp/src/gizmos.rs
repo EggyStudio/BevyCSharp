@@ -39,7 +39,7 @@ pub struct QueuedGizmo {
 
 /// What C# has asked to be drawn this frame.
 ///
-/// Text is kept beside the shapes rather than among them, since a shape is a handful of numbers
+/// Text is kept beside the shapes rather than among them, since a shape is a few numbers
 /// that copy as they are and a run of text owns its string.
 #[derive(bevy::ecs::resource::Resource, Default)]
 pub struct GizmoQueue(pub Vec<QueuedGizmo>, pub Vec<QueuedText>, pub Option<Vec<QueuedGizmo>>);

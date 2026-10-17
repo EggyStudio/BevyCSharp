@@ -57,10 +57,10 @@ public sealed partial class PhysicsWorld
         ArgumentNullException.ThrowIfNull(ecs);
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Read in a handful of calls rather than a few a body, since a level holds thousands of
-        // bodies and almost none of them change in a step. What was added or changed since the
-        // last sync is listed by the world, and the bodies it holds are asked after in one call a
-        // component, so a step where nothing changed reads nothing a body.
+        // Read in six calls and one a character rather than a few a body, since a level holds
+        // thousands of bodies and almost none of them change in a step. What was added or changed
+        // since the last sync is listed by the world, and the bodies it holds are asked after in
+        // one call a component, so a step where nothing changed reads nothing a body.
         var since = _syncTick;
         var candidates = new HashSet<Entity>(_waitingForMesh);
         _waitingForMesh.Clear();

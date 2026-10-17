@@ -843,7 +843,7 @@ public static class DetailsPanel
             if (!schema.CanAdd || carried.Contains(schema.Name)) continue;
 
             // What the engine works out for itself is not something to put on by hand, and Bevy
-            // reflects a great deal of it.
+            // reflects much of it.
             if (schema.Origin == SchemaOrigin.Reflected && EditorEntity.IsDerived(ctx.Ecs, schema.Id))
                 continue;
 

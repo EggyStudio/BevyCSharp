@@ -3,7 +3,7 @@ using Bevy;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// Spawns a handful of moving entities and integrates their positions each frame.
+/// Spawns five moving entities and integrates their positions each frame.
 /// </summary>
 /// <remarks>
 /// Every method here is static, so this behavior is never stored on an entity. It holds two

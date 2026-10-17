@@ -64,7 +64,7 @@ public sealed record ToolbarButton(
 /// <remarks>
 /// <para>
 /// Not a bar. A bar across the top would push the columns down and take a strip of the scene
-/// permanently; a handful of buttons in the corners takes only what they cover, and they follow
+/// permanently; a few buttons in the corners take only what they cover, and they follow
 /// the viewport as panels open and close.
 /// </para>
 /// <para>

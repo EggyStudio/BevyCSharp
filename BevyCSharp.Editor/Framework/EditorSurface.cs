@@ -259,7 +259,7 @@ public static class EditorSurface
     /// The short pill that says a thing can be taken hold of and dragged.
     /// </summary>
     /// <remarks>
-    /// Out of the way until it is wanted, docked or floating. A handle drawn all the time is one
+    /// Hidden until the pointer comes near, docked or floating. A handle drawn all the time is one
     /// more mark on the screen that says nothing until somebody reaches for it, and the gap it
     /// sits in already says where to reach. The pointer finds it, and it shows then.
     /// </remarks>

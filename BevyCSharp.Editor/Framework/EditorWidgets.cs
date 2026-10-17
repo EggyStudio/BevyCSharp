@@ -475,7 +475,7 @@ public static class EditorWidgets
     /// </remarks>
     /// <param name="id">Which field this is, so a drag can be followed between frames.</param>
     /// <param name="fraction">How far along the value sits, from nothing to all of it.</param>
-    /// <param name="slide">The slider to call, once its own colors are out of the way.</param>
+    /// <param name="slide">The slider to call, its own groove and handle made transparent.</param>
     /// <param name="readout">
     /// What to write on the bar, clear of the handle, or nothing at all for a bar that says
     /// nothing. Left out entirely to keep whatever ImGui writes on it, for a bar with a word rather

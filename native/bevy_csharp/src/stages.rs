@@ -79,7 +79,7 @@ pub const SHUFFLE_SEED_VARIABLE: &str = "BCS_SCHEDULE_SHUFFLE_SEED";
 /// Shuffles the order every schedule of the app and its render world runs its systems in, within
 /// what their constraints allow, where [`SHUFFLE_SEED_VARIABLE`] names a seed.
 ///
-/// For finding a system that leans on an order nothing states, which another order breaks, as a
+/// For finding a system that depends on an order nothing states, which another order breaks, as a
 /// run of the suite with a seed does. Bevy's own `ScheduleBuildSettings::shuffle_seed`, which the
 /// `debug` feature every profile carries offers. Set as the app starts to run, once the managed
 /// side has added its systems and its states, and only the seed is changed of each schedule's

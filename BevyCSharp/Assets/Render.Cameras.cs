@@ -226,7 +226,7 @@ public static unsafe partial class Render
     /// </param>
     /// <param name="firstBound">
     /// Where the first cascade ends. The ones after it are spaced out toward
-    /// <paramref name="maximum"/>, so this is the knob for how much detail the near ground gets.
+    /// <paramref name="maximum"/>, so this sets how much detail the near ground gets.
     /// </param>
     /// <param name="overlap">
     /// How much of each cascade is blended into the next, as a proportion, which keeps the join

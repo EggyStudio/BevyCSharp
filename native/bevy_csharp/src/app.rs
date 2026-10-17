@@ -1,4 +1,4 @@
-//! App lifecycle, construction, stage wiring, system registration and the run loop.
+//! App lifecycle, construction, the stages' order, system registration and the run loop.
 
 use core::time::Duration;
 

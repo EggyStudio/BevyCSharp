@@ -29,7 +29,8 @@ public sealed class ExposureTests
                 camera = PictureRun.Camera(ecs);
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
 
-                // A gray cube under a dim light, which auto exposure brings up a long way.
+                // A gray cube under a dim light, which auto exposure brightens by more than the
+                // fifteen levels asked below.
                 PictureRun.Cube(ecs, Render.CreateMaterial(new MaterialSettings { BaseColor = (0.5f, 0.5f, 0.5f, 1f), Roughness = 1f }), 3f);
                 var light = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 300f, Shadows = false });
                 ecs.Add(light, Transform.LookingAt(new Vec3(1f, 2f, 3f), Vec3.Zero, Vec3.UnitY));

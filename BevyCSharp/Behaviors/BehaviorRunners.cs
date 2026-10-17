@@ -11,7 +11,7 @@ namespace Bevy;
 /// The generated code calls this. Keeping the iteration here rather than emitting it per behavior
 /// means the pointer arithmetic, the parallel partitioning and the filtering rules are written
 /// once, live in a project that has already opted into unsafe code, and can be fixed without
-/// regenerating anything. The generated runner stays a handful of readable, safe lines.
+/// regenerating anything. The generated runner stays a few readable, safe lines.
 /// </para>
 /// </remarks>
 public static partial class BehaviorRunners

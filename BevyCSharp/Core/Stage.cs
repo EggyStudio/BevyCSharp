@@ -43,9 +43,9 @@ public enum Stage
 
     /// <summary>Once, before the first frame, ahead of <see cref="Startup"/>, as Bevy's <c>PreStartup</c> runs.</summary>
     /// <remarks>
-    /// For what every startup system leans on being there, as a resource made before anything reads
-    /// it, and before a schedule of the game's own placed after it with
-    /// <see cref="App.AddSchedule"/>, as Bevy's custom_schedule places its startup schedule.
+    /// For what every startup system relies on being there, as a resource made before anything
+    /// reads it, and before a schedule of the game's own placed after it with <see
+    /// cref="App.AddSchedule"/>, as Bevy's custom_schedule places its startup schedule.
     /// </remarks>
     PreStartup = 11,
 

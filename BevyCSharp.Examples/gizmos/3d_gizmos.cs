@@ -31,8 +31,8 @@ internal static class Gizmos3d
     {
         var ecs = ctx.Ecs;
 
-        // A sphere drawn with ten thousand segments to each circle, which would cost a great deal
-        // asked for every frame and costs nothing kept.
+        // A sphere drawn with ten thousand segments to each circle, which asked for every frame
+        // would cost every segment's work each frame, and kept costs nothing.
         var sphere = Gizmos.Record(() => Gizmos.Sphere(Vec3.Zero, 0.5f, Crimson, resolution: 30_000 / 3));
         var holder = ecs.Spawn();
         ecs.Add(holder, Transform.At(4f, 1f, 0f));

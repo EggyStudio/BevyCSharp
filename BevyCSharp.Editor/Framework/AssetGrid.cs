@@ -48,7 +48,7 @@ internal static class AssetGrid
     /// <summary>The word a path's badge says, or nothing for a folder.</summary>
     /// <remarks>
     /// A picture alone does not say what a thing is. A model, a mesh of it and a material on a
-    /// sphere are three gray shapes at a glance, and a texture and a screenshot of a scene look
+    /// sphere are three gray shapes in a thumbnail, and a texture and a screenshot of a scene look
     /// alike, so every tile names its kind in a word as well as showing it. The word is the
     /// singular of the chip that narrows the browser to that kind, so the two read as one.
     /// </remarks>

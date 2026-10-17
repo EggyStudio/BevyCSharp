@@ -462,7 +462,7 @@ internal static class PreviewRenderer
     /// <summary>Puts a subject and everything under it on the slot's layer, and its edges on or off.</summary>
     /// <remarks>
     /// Every frame rather than once, because a glTF scene's children arrive frames after it is
-    /// asked for, and writing the layer again costs a component insert on a handful of entities.
+    /// asked for, and writing the layer again costs a component insert on each of its few entities.
     /// </remarks>
     private static void Walk(BehaviorContext ctx, Slot slot, Entity entity)
     {

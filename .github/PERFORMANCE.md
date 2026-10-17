@@ -116,11 +116,11 @@ A frame leaves 60 a second between **50,000 and 100,000 drawn cubes**.
 
 `PhysicsWorld.Sync` asked after every body's `RigidBody`, `Collider` and `Transform` each fixed
 step, a few calls into the bridge a body. It asks the world instead for the bodies and colliders
-added or changed since it last ran (`bcs_ecs_changed_since`), and asks after the bodies it has
-made all at once, whether each still has both components and whether its transform was written
-(`bcs_ecs_has_many`), so a step in which nothing changed costs a handful of calls. The step asks
-after every body's entity the same way, and writes back only the bodies the simulation moved, as
-it did before, so a body at rest costs nothing.
+added or changed since it last ran (`bcs_ecs_changed_since`), and asks after the bodies it has made
+all at once, whether each still has both components and whether its transform was written
+(`bcs_ecs_has_many`), so a step in which nothing changed costs six calls and one a character. The
+step asks after every body's entity the same way, and writes back only the bodies the simulation
+moved, as it did before, so a body at rest costs nothing.
 
 At 50,000 drawn cubes with shadows (5,000 bodies) the sync went from 6.6 ms to 0.36 ms and the
 physics system from 9.4 ms to 2.8 ms, which is now Bepu's step and the write back of what moved.

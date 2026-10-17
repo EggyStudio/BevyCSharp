@@ -194,7 +194,7 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
 
 /// Reports the size and alignment Bevy uses for a component.
 ///
-/// The managed side mirrors a handful of Bevy's structs so it can read and write them in place,
+/// The managed side mirrors a few of Bevy's structs so it can read and write them in place,
 /// and those mirrors have to match byte for byte. They are easy to get subtly wrong. `Quat` is
 /// SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` out to 48 bytes
 /// rather than the 40 its fields suggest. Checking the real numbers turns that class of mistake

@@ -73,8 +73,8 @@ public static class RoundedRows
     /// <remarks>
     /// Every list in the editor that lets ImGui draw its own rows goes through here, so they all
     /// highlight the same way, the menu off the toolbar, a component's own menu, what can be
-    /// added to an entity, and the folder tree. Nesting comes for free, because each call keeps
-    /// whatever was in force and puts it back.
+    /// added to an entity, and the folder tree. A call inside another needs nothing more, because
+    /// each call keeps whatever was in force and puts it back.
     /// </remarks>
     /// <param name="rows">What to draw, calling <see cref="Row"/> after each row.</param>
     public static void Rows(Action rows)

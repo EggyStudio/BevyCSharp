@@ -7,7 +7,7 @@ namespace Bevy;
 /// <see cref="App"/> already inserts <see cref="Time"/>, <see cref="Input"/>,
 /// <see cref="EcsWorld"/> and <see cref="EcsCommands"/> in its constructor, because the
 /// internal frame systems need them before any plugin runs. This plugin exists so that
-/// contract is explicit and so later engine wiring has an obvious home.
+/// contract is explicit and an engine system added later has one place to be added in.
 /// </remarks>
 public sealed class EnginePlugin : IPlugin
 {

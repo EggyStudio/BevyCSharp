@@ -25,7 +25,7 @@
         <Title>BevyCSharp</Title>
         <Description>
             Write Bevy games in C#. Mark a struct [Behavior], give it [OnUpdate] methods, and a
-            source generator wires it into the Bevy schedule as both a component and a system.
+            source generator registers it with the Bevy schedule as both a component and a system.
             Bevy is the engine underneath, providing its ECS, scheduler, renderer and input
             through a native bridge.
         </Description>
@@ -186,8 +186,9 @@
       entry point added since it was staged is missing, and the app dies on the first call to it
       with an EntryPointNotFoundException far from the cause.
 
-      Inputs/Outputs give this for free. MSBuild skips a target whose outputs are all newer
-      than its inputs, so the body below runs only when the staged bridge is actually stale.
+      Inputs and Outputs give this without a check of its own. MSBuild skips a target whose outputs
+      are all newer than its inputs, so the body below runs only when the staged bridge is actually
+      stale.
 
       Set BevyCSharpSkipNativeFreshnessCheck=true where timestamps carry no meaning, such as CI
       collecting binaries that were built from this very commit on other machines.

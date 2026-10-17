@@ -201,7 +201,7 @@ public static class EditorStats
         Row("recording", Say($"{cpu:0.00} ms"));
         Row("passes", Say($"{timings.Count}"));
 
-        // The few that matter, since a frame's time is nearly always in a handful of its passes.
+        // The four that take longest, since nearly all of a frame's time is in a few of its passes.
         foreach (var timing in timings
                      .OrderByDescending(timing => timing.GpuMilliseconds ?? timing.CpuMilliseconds ?? 0)
                      .Take(4))

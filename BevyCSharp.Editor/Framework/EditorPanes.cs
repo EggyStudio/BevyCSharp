@@ -169,8 +169,8 @@ public static class EditorPanes
         if (held) EditorShell.PanelWidth -= ImGui.GetIO().MouseDelta.X;
 
         // Standing up, because this edge moves sideways, and otherwise the same handle as the one
-        // between the world and the data, out of the way while the panel floats over the scene and
-        // always there once it is docked.
+        // between the world and the data, hidden while the panel floats over the scene and always
+        // there once it is docked.
         //
         // In the middle of the gap the panel keeps to the left of its cards, which is the gap a
         // person sees between the scene and the card. Centered on the window's own edge instead,

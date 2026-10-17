@@ -195,7 +195,7 @@ public sealed class Input
 
     /// <summary>Reads the logical keys held, pressed and released, at the same moment as the rest of the frame's input.</summary>
     /// <remarks>
-    /// One call into the bridge a frame for them all. A keyboard holds a handful of keys at once,
+    /// One call into the bridge a frame for them all. A keyboard holds a few keys down at once,
     /// so thirty-two is more than a hand presses, and any past them would be read as up.
     /// </remarks>
     internal unsafe void UpdateLogicalKeys()

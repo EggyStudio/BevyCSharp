@@ -5,8 +5,8 @@
 // `bcs2d` namespace. What the material carries is whatever the shader declares, as for a 3D
 // material, and is set from C# by name. Bevy's 2D pipeline binds the view in group zero, the mesh
 // in group one and the material in group two, and the bindings below are in spaces the bridge
-// moves to the first two after the compile (100 to the view's, 101 to the mesh's), which keeps
-// them out of the way of the material's.
+// moves to the first two after the compile (100 to the view's, 101 to the mesh's), so they never
+// share a binding with the material's.
 //
 // Locations are `TEXCOORDn` semantics, as in `bcs`, the index being the location, and the structs
 // below line up with the ones Bevy's own 2D WGSL declares, which differ from the 3D ones.

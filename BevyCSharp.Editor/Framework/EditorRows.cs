@@ -129,8 +129,8 @@ public static class EditorRows
     /// </summary>
     /// <remarks>
     /// The accent rather than a mark beside the name, because the name column is narrow and a
-    /// colored name is read at a glance down a column of plain ones, as Unity's bold override
-    /// names are.
+    /// colored name is found in a column of plain ones without reading each, as Unity's bold
+    /// override names are.
     /// </remarks>
     public static void Name(string name, bool differs = false, bool overridden = false, Action? revert = null)
     {

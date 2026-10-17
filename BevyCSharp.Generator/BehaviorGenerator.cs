@@ -17,7 +17,7 @@ namespace Bevy.Generator;
 /// a <c>Register(App)</c> that adds them to the schedule. It then emits a single per-assembly
 /// entry point tagged <c>[GeneratedBehaviorRegistration]</c>, which
 /// <c>BehaviorsPlugin</c> finds reflectively at startup. That is the whole reason a consuming
-/// project needs no registration code, because the wiring is generated and then discovered.
+/// project needs no registration code, because the registration is generated and then discovered.
 /// </para>
 /// <para>
 /// The emitted code stays deliberately thin. Iteration, filtering and parallel partitioning

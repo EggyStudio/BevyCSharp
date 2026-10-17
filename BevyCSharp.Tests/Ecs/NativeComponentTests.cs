@@ -150,8 +150,8 @@ public sealed class NativeComponentTests
             ctx.Ecs.SetParent(first, parent);
             ctx.Ecs.SetParent(second, parent);
 
-            // Going through Bevy's relationship API rather than writing the component means the
-            // reverse list is maintained for free. Writing the bytes would give a hierarchy that
+            // Going through Bevy's relationship API rather than writing the component means Bevy
+            // keeps the reverse list as well. Writing the bytes would give a hierarchy that
             // only worked in one direction.
             Assert.Equal(parent, ctx.Ecs.ParentOf(first));
             Assert.Equal(parent, ctx.Ecs.ParentOf(second));

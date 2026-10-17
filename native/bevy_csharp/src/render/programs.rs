@@ -320,7 +320,7 @@ impl ShaderPrograms {
 /// How often the files are looked at.
 ///
 /// Four times a second, which is quicker than anybody switches from the editor to the game and
-/// slow enough that reading a handful of small files costs nothing measurable.
+/// slow enough that reading a few small files costs nothing measurable.
 const POLL_INTERVAL: Duration = Duration::from_millis(250);
 
 /// What a file holds, as a hash, or `None` where it cannot be read.

@@ -37,8 +37,8 @@ internal static class FieldPickers
         var held = Called(handle);
         var kind = field.Hints.Asset ?? AssetKind.Mesh;
 
-        // An image shows itself beside its name, at the height of the row, so a texture slot says
-        // what it holds at a glance rather than by a path to read.
+        // An image shows itself beside its name, at the height of the row, so a texture slot shows
+        // what it holds as a picture rather than as a path to read.
         if (kind == AssetKind.Image && AssetServer.PathOf(handle) is { Length: > 0 } picture)
         {
             var side = ImGui.GetFrameHeight();

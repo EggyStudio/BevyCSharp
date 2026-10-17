@@ -154,7 +154,7 @@ app.Update(ctx => score.Tick(ctx.Time.Delta), "Score");
 app.On(Stage.FixedUpdate, Step, "Step", runIf: world => !world.Resource<Time>().Paused);
 ```
 
-`Stage.PreStartup` runs once ahead of the startup stage, for what every startup system leans on,
+`Stage.PreStartup` runs once ahead of the startup stage, for what every startup system relies on,
 and has no attribute, being a stage a plugin sets things up in rather than a behavior. A schedule of
 the game's own, a `ScheduleLabel` taking systems as a stage does, runs in a place of its own in the
 frame once `App.AddSchedule` puts it right after one of Bevy's, and runs its systems one after

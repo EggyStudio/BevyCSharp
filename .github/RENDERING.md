@@ -379,8 +379,8 @@ Each phase unblocks a class of package, and none needs a later one.
 
 ## What to watch
 
-- **Bevy's meshlets and Solari**, since each release moves both, and either may become what this
-  engine offers out of the box.
+- **Bevy's meshlets and Solari**, since each release moves both, and either may move from a
+  feature the bridge is built with on request into every build of it.
 - **wgpu ray queries and acceleration structures**, and Slang's WGSL output gaining them, which
   decides whether ray tracing can stay on the WGSL path.
 - **Mesh shaders in wgpu**, which would change how a cluster rasterizer is best written.

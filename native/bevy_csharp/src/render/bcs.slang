@@ -9,7 +9,7 @@
 // global a shader declares without a binding of its own (numbers, arrays, structs, textures and
 // arrays of them, samplers, buffers) belongs to the material, and C# sets each one by the name it
 // has here. The bindings below are in spaces the bridge moves to Bevy's own groups after the
-// compile (100 to the view's group, 102 to the mesh's), which keeps them out of the way of the
+// compile (100 to the view's group, 102 to the mesh's), so they never share a binding with the
 // material's, whatever it declares.
 //
 // Locations are given as `TEXCOORDn` semantics rather than `vk::location`, because Slang's WGSL
@@ -282,8 +282,8 @@ public PrepassVertexOutput prepass_output(uint instance, float3 position, float3
 
 // -- Bevy's lighting
 //
-// A material drawn by a fragment shader here is lit by nothing unless it lights itself, and
-// Bevy's lighting is a great deal of WGSL over bindings that change with every feature a camera
+// A material drawn by a fragment shader here is lit by nothing unless it lights itself, and Bevy's
+// lighting is thousands of lines of WGSL over bindings that change with every feature a camera
 // turns on. So it is not written again in Slang. `light` and `finish` call WGSL functions by fixed
 // names, which the bridge puts in front of any compiled shader that calls them, written over Bevy's
 // own `apply_pbr_lighting` and `main_pass_post_lighting_processing`, and which take only numbers

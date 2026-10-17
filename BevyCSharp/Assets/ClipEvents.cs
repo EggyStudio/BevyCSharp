@@ -4,7 +4,7 @@ namespace Bevy;
 /// <remarks>
 /// A clip holds the number alone, since the event is a C# value Bevy cannot hold, and the number
 /// finds what to trigger. The table outlives an app, as the clips placed in one do not, which
-/// costs a delegate for each event ever placed, a handful for a game.
+/// costs a delegate for each event ever placed, of which a game places few.
 /// </remarks>
 internal static class ClipEvents
 {

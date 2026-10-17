@@ -72,8 +72,8 @@ Widgets are addressed by point rather than by name. The interface is immediate-m
 a call that happened, and the layout decided where it landed. Capture, read the coordinates off the
 picture, then click.
 
-`eval` is the escape hatch when no command covers what you need. The world is in scope as `world`;
-a fragment with no semicolon is an expression.
+`eval` runs C# against the running world where no command covers what you need. The world is in
+scope as `world`; a fragment with no semicolon is an expression.
 
 ```bash
 ./bcs command eval "world.All().Length"

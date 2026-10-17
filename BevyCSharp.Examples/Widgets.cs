@@ -6,7 +6,7 @@ namespace BevyCSharp.Examples;
 // A helper the examples share, as Bevy's own examples share helpers/widgets.rs and
 // helpers/radio.rs, each taking it in by path. It goes when Feathers' radio buttons can be asked
 // for, which Bevy 0.20's examples draw theirs with, and until then build/examples-on-package.sh
-// lists it as one of the two helpers an example may lean on.
+// lists it as one of the two helpers an example may use.
 
 /// <summary>
 /// The row of radio buttons many of Bevy's examples are controlled by, drawn as Bevy's

@@ -138,7 +138,7 @@ public partial struct ChordHud
 }
 
 /// <summary>
-/// Covers the generated behavior plumbing, registration, per-entity dispatch, filters,
+/// Covers the code generated for behaviors, their registration, per-entity dispatch, filters,
 /// conditions and stage ordering.
 /// </summary>
 [Collection("engine")]

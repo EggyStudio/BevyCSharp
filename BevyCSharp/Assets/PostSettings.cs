@@ -39,7 +39,7 @@ public sealed class PostSettings
     /// </summary>
     /// <remarks>
     /// Smooths the edges of geometry and nothing else. Four is Bevy's own; one turns it off, as a
-    /// game leaning on <see cref="AntiAlias"/> does, and <see cref="AntiAliasPass.Temporal"/>
+    /// game relying on <see cref="AntiAlias"/> does, and <see cref="AntiAliasPass.Temporal"/>
     /// requires it.
     /// <para>
     /// Cameras drawing to the same window or image draw into one picture, so they have to agree,

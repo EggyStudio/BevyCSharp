@@ -11,10 +11,11 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The escape hatch that makes a command line complete. A catalog of commands covers what somebody
-/// thought to write a command for; this covers the rest, and it does it against the world that is
-/// already loaded rather than a fresh one. Reading a field nobody exposed, calling a method on the
-/// way to deciding whether it deserves a command, or spawning something to look at is one line.
+/// C# run against the world, which completes the command line. A catalog of commands covers what
+/// somebody thought to write a command for; this covers the rest, and it does it against the world
+/// that is already loaded rather than a fresh one. Reading a field nobody exposed, calling a method
+/// on the way to deciding whether it deserves a command, or spawning something to look at is one
+/// line.
 /// </para>
 /// <para>
 /// Each fragment is compiled into its own collectible load context and dropped afterwards, the same
