@@ -440,6 +440,126 @@ public sealed class ReflectedWrapperTests
     }
 
     /// <summary>
+    /// An <c>Option</c> holding a tuple is a nullable tuple, a text layout's cursor its visibility and
+    /// the rectangle it is drawn in, the rectangle the record a list of them is read as, chosen as
+    /// <c>Some</c> where it held none and cleared with null.
+    /// </summary>
+    [SkippableFact]
+    public void AnOptionHoldingATupleIsANullableTuple()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        (bool, Rect)? empty = (true, new Rect(Vec2.Zero, Vec2.Zero)), written = null, rewritten = null, cleared = empty;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var layout = ctx.Ecs.Insert<TextLayoutInfoRef>(ctx.Ecs.Spawn());
+            empty = layout.Cursor;
+            layout.Cursor = (true, new Rect(new Vec2(1f, 2f), new Vec2(3f, 4f)));
+            written = layout.Cursor;
+            layout.Cursor = (false, new Rect(new Vec2(-1f, 0f), new Vec2(5f, 6f)));
+            rewritten = layout.Cursor;
+            layout.Cursor = null;
+            cleared = layout.Cursor;
+        });
+
+        harness.Run();
+
+        Assert.Null(empty);
+        Assert.Equal((true, new Rect(new Vec2(1f, 2f), new Vec2(3f, 4f))), written);
+        Assert.Equal((false, new Rect(new Vec2(-1f, 0f), new Vec2(5f, 6f))), rewritten);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
+    /// A list of options holding tuples, the changes of focus Bevy records, is a list of nullable
+    /// tuples, written whole and read back an item at a time, an item holding none among them.
+    /// </summary>
+    [SkippableFact]
+    public void AListOfOptionsHoldingTuplesIsWrittenAndReadWhole()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        IReadOnlyList<(Entity, FocusCauseValue)?>? read = null, emptied = null;
+        var focused = Entity.None;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            focused = ctx.Ecs.Spawn();
+            var focus = ctx.Ecs.Resource<InputFocusRef>() ?? ctx.Ecs.InsertResource<InputFocusRef>();
+            focus.RecordedChanges = [(focused, FocusCauseValue.Pressed), null, (focused, FocusCauseValue.Auto)];
+            read = focus.RecordedChanges;
+            focus.RecordedChanges = [];
+            emptied = focus.RecordedChanges;
+        });
+
+        harness.Run();
+
+        Assert.Equal([(focused, FocusCauseValue.Pressed), null, (focused, FocusCauseValue.Auto)], read!);
+        Assert.Empty(emptied!);
+    }
+
+    /// <summary>
+    /// A moment of the machine's clock is the time after the real clock started, the clock's start
+    /// none and its last update past it once a frame has run, and one written reads back as it was.
+    /// </summary>
+    [Fact]
+    public void AnInstantIsTheTimeAfterTheRealClockStarted()
+    {
+        using var harness = new EngineHarness(frames: 3);
+        TimeSpan? start = null, last = null, written = null, cleared = TimeSpan.Zero;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            var time = ctx.Ecs.Resource<TimeRealRef>()!.Value;
+            start = time.ContextStartup;
+            last = time.ContextLastUpdate;
+            time.ContextFirstUpdate = TimeSpan.FromSeconds(1.25);
+            written = time.ContextFirstUpdate;
+            time.ContextFirstUpdate = null;
+            cleared = time.ContextFirstUpdate;
+        });
+
+        harness.Run();
+
+        Assert.Equal(TimeSpan.Zero, start);
+        Assert.True(last > TimeSpan.Zero, $"the last update read {last} after the start");
+        Assert.Equal(TimeSpan.FromSeconds(1.25), written);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
+    /// A node of an animation graph is its index, the node animation transitions play a nullable
+    /// one, as the library's animation calls take a node.
+    /// </summary>
+    [SkippableFact]
+    public void AGraphNodeIsItsIndex()
+    {
+        Needs.Renderer();
+
+        using var harness = new EngineHarness(frames: 2);
+        uint? empty = 1, written = null, cleared = 1;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var transitions = ctx.Ecs.Insert<AnimationTransitionsRef>(ctx.Ecs.Spawn());
+            empty = transitions.MainAnimation;
+            transitions.MainAnimation = 3;
+            written = transitions.MainAnimation;
+            transitions.MainAnimation = null;
+            cleared = transitions.MainAnimation;
+        });
+
+        harness.Run();
+
+        Assert.Null(empty);
+        Assert.Equal(3u, written);
+        Assert.Null(cleared);
+    }
+
+    /// <summary>
     /// An <c>Option</c> of a record written while it is already <c>Some</c> keeps what the record
     /// does not hold, as a sprite's texture atlas keeps its layout when its frame is written.
     /// </summary>

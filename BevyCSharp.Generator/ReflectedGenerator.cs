@@ -217,8 +217,14 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     /// <summary>Rust's duration, which Bevy reflects as one value with no fields, read and written whole.</summary>
     private const string Duration = "Duration";
 
+    /// <summary>
+    /// A moment of the machine's clock, which the bridge reads and writes as the seconds after the
+    /// real clock started, and a wrapper as that time.
+    /// </summary>
+    private const string Instant = "Instant";
+
     /// <summary>The C# type a field's property has, or nothing for a kind a wrapper does not type.</summary>
-    private static string? TypeOf(FieldModel field) => field.Rust == Range ? "global::Bevy.FloatRange" : field.Rust == Duration ? "global::System.TimeSpan" : field.Kind switch
+    private static string? TypeOf(FieldModel field) => field.Rust is Range ? "global::Bevy.FloatRange" : field.Rust is Duration or Instant ? "global::System.TimeSpan" : field.Kind switch
     {
         "Float" => "float",
         "Double" => "double",
@@ -237,7 +243,8 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             "i8" => "sbyte",
             "u16" => "ushort",
             "i16" => "short",
-            "u32" => "uint",
+            // A node of an animation graph, by its index, as the library's animation calls take one.
+            "u32" or "petgraph::graph::NodeIndex" => "uint",
             "u64" or "usize" => "ulong",
             "i64" or "isize" => "long",
             _ => "int",
@@ -265,6 +272,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     {
         _ when field.Rust == Range => $"global::Bevy.ReflectedValue.Range(_world, Entity, TypePath, {path})",
         _ when field.Rust == Duration => $"global::Bevy.ReflectedValue.Duration(_world, Entity, TypePath, {path})",
+        _ when field.Rust == Instant => $"global::Bevy.ReflectedValue.Instant(_world, Entity, TypePath, {path})",
         "Color" => $"global::Bevy.ReflectedValue.Color(_world, Entity, TypePath, {path})",
         "Asset" => $"global::Bevy.ReflectedValue.Asset(_world, Entity, TypePath, {path})",
         _ => $"global::Bevy.ReflectedValue.Get<{TypeOf(field)}>(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind})",
@@ -275,6 +283,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     {
         _ when field.Rust == Range => $"global::Bevy.ReflectedValue.SetRange(_world, Entity, TypePath, {path}, {value});",
         _ when field.Rust == Duration => $"global::Bevy.ReflectedValue.SetDuration(_world, Entity, TypePath, {path}, {value});",
+        _ when field.Rust == Instant => $"global::Bevy.ReflectedValue.SetInstant(_world, Entity, TypePath, {path}, {value});",
         "Color" => $"_world.SetReflectedColor(Entity, TypePath, {path}, {value});",
         "Asset" => $"_world.SetReflectedAsset(Entity, TypePath, {path}, {value});",
         _ => $"global::Bevy.ReflectedValue.Set(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{field.Kind}, {Checked(field, value)});",

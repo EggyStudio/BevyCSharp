@@ -531,3 +531,114 @@ fn a_variant_holding_a_list_is_chosen_with_the_list_empty() {
     });
     assert_eq!(vec![Filled::Many(vec![])], app.world().get::<Listed>(entity).unwrap().fills);
 }
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Paired {
+    pair: Option<(u8, f32)>,
+}
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Timed {
+    at: Option<Instant>,
+}
+
+/// A tuple's values are described by their index, as a tuple struct's fields are, and reached by
+/// it, so the managed side walks one as it walks a struct.
+#[test]
+fn a_tuple_is_described_and_reached_by_the_index_of_each_value() {
+    let (mut app, _) = probe_app();
+    app.register_type::<Paired>();
+    let entity = app.world_mut().spawn(Paired::default()).id();
+    let dump = loan_world(app.world_mut(), || text(|out, capacity| unsafe { bcs_reflect_types(out, capacity) }));
+    let dump: Value = serde_json::from_str(&dump.unwrap()).unwrap();
+
+    let tuple = &dump["types"]["(u8, f32)"];
+    assert_eq!("tuple", tuple["kind"]);
+    let fields: Vec<(&str, &str)> = tuple["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|f| (f["name"].as_str().unwrap(), f["type"].as_str().unwrap()))
+        .collect();
+    assert_eq!(vec![("0", "u8"), ("1", "f32")], fields);
+
+    loan_world(app.world_mut(), || {
+        let (type_path, pair, some) = (c("bevy_csharp::reflected::tests::Paired"), c(".pair"), c("Some"));
+        let (first, second) = (c(".pair.0.0"), c(".pair.0.1"));
+        let bits = entity.to_bits();
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_variant(bits, type_path.as_ptr(), pair.as_ptr(), some.as_ptr()) });
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_integer(bits, type_path.as_ptr(), first.as_ptr(), 7) });
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_float(bits, type_path.as_ptr(), second.as_ptr(), 1.5) });
+    });
+    assert_eq!(Some((7, 1.5)), app.world().get::<Paired>(entity).unwrap().pair);
+}
+
+/// An instant is read and written as the seconds after the real clock started, before it as
+/// fewer than none, and an optional one chosen as Some starts at the moment it is chosen.
+#[test]
+fn an_instant_is_read_and_written_as_seconds_after_the_real_clock_started() {
+    use bevy::time::{Real, Time};
+
+    let (mut app, _) = probe_app();
+    app.register_type::<Timed>();
+    app.insert_resource(Time::<Real>::default());
+    let start = app.world().resource::<Time<Real>>().startup();
+    let entity = app.world_mut().spawn(Timed::default()).id();
+
+    let read = loan_world(app.world_mut(), || {
+        let (type_path, at, some, held) = (c("bevy_csharp::reflected::tests::Timed"), c(".at"), c("Some"), c(".at.0"));
+        let bits = entity.to_bits();
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_variant(bits, type_path.as_ptr(), at.as_ptr(), some.as_ptr()) });
+
+        let mut chosen = -1.0;
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_float(bits, type_path.as_ptr(), held.as_ptr(), &mut chosen) });
+        assert!(chosen >= 0.0, "an instant chosen as Some reads {chosen} seconds after the start");
+
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_float(bits, type_path.as_ptr(), held.as_ptr(), -0.25) });
+        let mut before = 0.0;
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_float(bits, type_path.as_ptr(), held.as_ptr(), &mut before) });
+        assert_eq!(-0.25, before);
+
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_float(bits, type_path.as_ptr(), held.as_ptr(), 2.5) });
+        let mut after = 0.0;
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_float(bits, type_path.as_ptr(), held.as_ptr(), &mut after) });
+        after
+    });
+
+    assert_eq!(2.5, read);
+    assert_eq!(Some(start + core::time::Duration::from_millis(2500)), app.world().get::<Timed>(entity).unwrap().at);
+}
+
+#[cfg(feature = "render")]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Played {
+    node: Option<bevy::animation::graph::AnimationNodeIndex>,
+}
+
+/// A node of an animation graph is read and written as its index, which a negative number cannot
+/// be.
+#[cfg(feature = "render")]
+#[test]
+fn a_graph_node_is_read_and_written_as_its_index() {
+    let (mut app, _) = probe_app();
+    app.register_type::<Played>();
+    let entity = app.world_mut().spawn(Played::default()).id();
+    loan_world(app.world_mut(), || {
+        let (type_path, node, some, held) = (c("bevy_csharp::reflected::tests::Played"), c(".node"), c("Some"), c(".node.0"));
+        let bits = entity.to_bits();
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_variant(bits, type_path.as_ptr(), node.as_ptr(), some.as_ptr()) });
+        assert_eq!(status::OK, unsafe { bcs_reflect_set_integer(bits, type_path.as_ptr(), held.as_ptr(), 4) });
+
+        let mut read = 0i64;
+        assert_eq!(status::OK, unsafe { bcs_reflect_get_integer(bits, type_path.as_ptr(), held.as_ptr(), &mut read) });
+        assert_eq!(4, read);
+        assert_ne!(status::OK, unsafe { bcs_reflect_set_integer(bits, type_path.as_ptr(), held.as_ptr(), -1) });
+    });
+    assert_eq!(
+        Some(bevy::animation::graph::AnimationNodeIndex::new(4)),
+        app.world().get::<Played>(entity).unwrap().node
+    );
+}

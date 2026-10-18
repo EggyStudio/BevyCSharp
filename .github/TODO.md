@@ -68,12 +68,6 @@ description (`ctx.Ecs.Get<PointLightRef>`), and has a schema built from Bevy's o
 the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
 code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 
-- **A variant holding a tuple, an instant or a graph's index has no typed property.** The generated
-  wrappers (`Bevy.Reflected`) type an enum inside a variant, a list, a duration and an integer that
-  holds no zero, but an `Option` of a tuple (a text layout's cursor, a window's pan gesture, the
-  focus and its cause), of Rust's `Instant` (the real clock's first and last update) or of a node
-  index (animation transitions' main animation) keeps its variant names alone, and the value stays
-  on a string path checked when it runs.
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. Generating
   mirrors and their layout checks is tier 3.

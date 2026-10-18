@@ -4,17 +4,17 @@
 # workflow runs it after it pushes a package, naming the version it pushed, and it first waits for
 # nuget.org to list that version, since a game's default may be a minimum that resolves to it.
 #
-#   build/games-on-defaults.sh <version just pushed>
+#   build/games-on-defaults.sh <version this run pushed>
 #
 # The wait is bounded, twenty minutes unless GAMES_WAIT_MINUTES says otherwise, since nuget.org
 # validates and indexes a package for some minutes after its push. A game whose default does not
-# build is named in an error with the version just pushed as the one to raise it to, which is a
+# build is named in an error with the version this run pushed as the one to raise it to, which is a
 # commit of one line a game (BUILDING.md).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 if [ $# -ne 1 ]; then
-    echo "games-on-defaults.sh: give the version just pushed, as in build/games-on-defaults.sh 0.5.3" >&2
+    echo "games-on-defaults.sh: give the version this run pushed, as in build/games-on-defaults.sh 0.5.3" >&2
     exit 2
 fi
 version="$1"
@@ -37,7 +37,7 @@ fi
 echo "BevyCSharp $version is listed on nuget.org"
 
 # Restored into a folder of its own from nuget.org alone, so neither build/package, which holds the
-# package just packed, nor a package another step restored stands in for what a reader is given.
+# package this run packed, nor a package another step restored stands in for what a reader is given.
 failed=()
 for project in games/*/*.csproj; do
     game="$(basename "$(dirname "$project")")"
@@ -55,6 +55,6 @@ done
 
 if [ ${#failed[@]} -gt 0 ]; then
     said=$(printf '%s%%0A' "${failed[@]}")
-    echo "::error title=A game does not build on its default::${said}Raise each to $version, the version just pushed, in its project's BevyCSharpVersion (BUILDING.md)."
+    echo "::error title=A game does not build on its default::${said}Raise each to $version, the version this run pushed, in its project's BevyCSharpVersion (BUILDING.md)."
     exit 1
 fi

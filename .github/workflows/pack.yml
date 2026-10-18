@@ -125,7 +125,7 @@ jobs:
         run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       # Each game built on the version its own project names, from nuget.org alone, as a reader
-      # cloning the repository builds it, once nuget.org lists the package just pushed, which a
+      # cloning the repository builds it, once nuget.org lists the package this run pushed, which a
       # game's default may resolve to (build/games-on-defaults.sh). A game whose default does not
       # build is named in an error with this version as the one to raise it to (BUILDING.md).
       - name: Build each game on its own default from nuget.org

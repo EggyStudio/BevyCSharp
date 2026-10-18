@@ -124,7 +124,16 @@ pub(super) fn describe(registry: &TypeRegistry, info: &'static TypeInfo, types: 
             entry["variants"] = Value::Array(variants);
             "enum"
         }
-        TypeInfo::Tuple(_) => "tuple",
+        // A tuple's values by their index, as a tuple struct's, so the managed side walks one as it
+        // walks a struct, as the cursor a text layout may hold is its visibility and its rectangle.
+        TypeInfo::Tuple(info) => {
+            let fields: Vec<Value> = info
+                .iter()
+                .map(|f| field(f.index().to_string(), f.type_path(), f.type_info(), None))
+                .collect();
+            entry["fields"] = Value::Array(fields);
+            "tuple"
+        }
         // A list or an array says what it holds, so one of numbers or vectors can be edited as a
         // list rather than shown as JSON. An array's length is fixed, which the managed side keeps.
         TypeInfo::List(info) => {

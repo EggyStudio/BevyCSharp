@@ -32,6 +32,7 @@ use bevy::color::{Color, LinearRgba, Srgba};
 use bevy::ecs::component::ComponentId;
 use bevy::ecs::reflect::{AppTypeRegistry, ReflectComponent, ReflectFromWorld};
 use bevy::ecs::world::World;
+use bevy::platform::time::Instant;
 use bevy::reflect::enums::{DynamicEnum, DynamicVariant, VariantInfo};
 use bevy::reflect::serde::{TypedReflectDeserializer, TypedReflectSerializer};
 use bevy::reflect::std_traits::ReflectDefault;
@@ -181,6 +182,18 @@ fn default_of(
         return Ok(Box::new(made));
     }
 
+    // A tuple registers no default, though Rust's is each value's own, and an optional one, as the
+    // cursor a text layout may hold, its visibility and its rectangle, is made of each value's
+    // default for the caller to write the real ones over.
+    if let Some(info @ TypeInfo::Tuple(tuple)) = registry.get_type_info(type_id) {
+        let mut made = DynamicTuple::default();
+        for value in tuple.iter() {
+            made.insert_boxed(default_of(registry, value.type_id(), value.type_path())?);
+        }
+        made.set_represented_type(Some(info));
+        return Ok(Box::new(made));
+    }
+
     // An integer that holds no zero has no default, and an optional one, as the grid line a node
     // is placed on, is chosen as one for the caller to write the real number over.
     macro_rules! one {
@@ -193,6 +206,12 @@ fn default_of(
     {
         use core::num::*;
         one!(NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroIsize, NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize);
+    }
+
+    // An instant registers no default, and an optional one, as the real clock's last update, is
+    // made at the moment it is chosen, for the caller to write the real one over.
+    if type_id == TypeId::of::<Instant>() {
+        return Ok(Box::new(Instant::now()));
     }
 
     // A range of numbers registers no default, though Rust's is the empty range at zero, which a

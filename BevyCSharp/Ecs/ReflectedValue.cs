@@ -299,6 +299,43 @@ internal static class ReflectedValue
         return FormattableString.Invariant($"{{\"secs\":{seconds},\"nanos\":{nanos}}}");
     }
 
+    /// <summary>Reads a moment of the machine's clock a wrapper names, as the time after the real clock started.</summary>
+    /// <remarks>
+    /// Bevy gives an instant no form to serialize, since it means nothing apart from the clock it
+    /// was read from, so the bridge reads it against the moment the real clock started, as
+    /// <c>Time&lt;Real&gt;</c>'s first and last update are read.
+    /// </remarks>
+    internal static TimeSpan Instant(EcsWorld world, Entity entity, string type, string path) =>
+        TimeSpan.FromSeconds(world.GetReflectedFloat(entity, type, path) ?? throw Absent(type, entity));
+
+    /// <summary>Writes a moment of the machine's clock a wrapper names, as the time after the real clock started.</summary>
+    internal static void SetInstant(EcsWorld world, Entity entity, string type, string path, TimeSpan value) =>
+        world.SetReflectedFloat(entity, type, path, value.TotalSeconds);
+
+    /// <summary>
+    /// Reads the items of a list a wrapper names one at a time, each by <paramref name="read"/> at its
+    /// own path, for items a record does not hold, as nullable tuples are.
+    /// </summary>
+    internal static T[] ReadItems<T>(EcsWorld world, Entity entity, string type, string at, Func<EcsWorld, Entity, string, string, T> read)
+    {
+        var items = new T[Count(world, entity, type, at)];
+        for (var i = 0; i < items.Length; i++) items[i] = read(world, entity, type, Item(at, i));
+        return items;
+    }
+
+    /// <summary>
+    /// Writes a list a wrapper names as long as it is given, one item at a time by
+    /// <paramref name="write"/> at its own path, as <see cref="ReadItems"/> reads one.
+    /// </summary>
+    internal static void WriteItems<T>(
+        EcsWorld world, Entity entity, string type, string at, IReadOnlyList<T> value, Action<EcsWorld, Entity, string, string, T> write)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        Resize(world, entity, type, at, value.Count);
+        for (var i = 0; i < value.Count; i++) write(world, entity, type, Item(at, i), value[i]);
+    }
+
     /// <summary>
     /// A value for a field of one of Rust's integers that hold no zero, refused where it is zero.
     /// </summary>

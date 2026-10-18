@@ -14,6 +14,7 @@ component	bevy_animation::AnimationTargetId	AnimationTargetId
 component	bevy_animation::graph::AnimationGraphHandle	AnimationGraphHandle
 component	bevy_animation::transition::AnimationTransitions	AnimationTransitions
 field	bevy_animation::transition::AnimationTransitions	main_animation	.main_animation	Enum	Option<NodeIndex>	None,Some
+variant	bevy_animation::transition::AnimationTransitions	main_animation	Some		.main_animation.0	Int	petgraph::graph::NodeIndex	
 field	bevy_animation::transition::AnimationTransitions	transitions	.transitions	List	Vec<AnimationTransition>	bevy_animation::transition::AnimationTransition
 component	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	ContrastAdaptiveSharpening
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	enabled	.enabled	Bool	bool	
@@ -546,7 +547,11 @@ variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	min.x	.0.0.
 variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	min.y	.0.0.0.rect.0.min.y	Int	u32	
 variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	max.x	.0.0.0.rect.0.max.x	Int	u32	
 variant	bevy_picking::cursor::DefaultCursor	0.Custom.Image.rect	Some	max.y	.0.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	hotspot.0	.0.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Image	hotspot.1	.0.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::DefaultCursor	0.Custom	Url	url	.0.0.0.url	String	alloc::string::String	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Url	hotspot.0	.0.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::DefaultCursor	0.Custom	Url	hotspot.1	.0.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::DefaultCursor	0	System		.0.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::cursor::EntityCursor	EntityCursor
 field	bevy_picking::cursor::EntityCursor	value		Enum	EntityCursor	Custom,System
@@ -561,7 +566,11 @@ variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	min.x	.0
 variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	min.y	.0.0.rect.0.min.y	Int	u32	
 variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	max.x	.0.0.rect.0.max.x	Int	u32	
 variant	bevy_picking::cursor::EntityCursor	value.Custom.Image.rect	Some	max.y	.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	hotspot.0	.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Image	hotspot.1	.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::EntityCursor	value.Custom	Url	url	.0.0.url	String	alloc::string::String	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Url	hotspot.0	.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::EntityCursor	value.Custom	Url	hotspot.1	.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::EntityCursor	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::cursor::OverrideCursor	OverrideCursor
 field	bevy_picking::cursor::OverrideCursor	0	.0	Enum	Option<EntityCursor>	None,Some
@@ -577,7 +586,11 @@ variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	min.x
 variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	min.y	.0.0.0.0.rect.0.min.y	Int	u32	
 variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	max.x	.0.0.0.0.rect.0.max.x	Int	u32	
 variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom.Image.rect	Some	max.y	.0.0.0.0.rect.0.max.y	Int	u32	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	hotspot.0	.0.0.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Image	hotspot.1	.0.0.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Url	url	.0.0.0.0.url	String	alloc::string::String	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Url	hotspot.0	.0.0.0.0.hotspot.0	Int	u16	
+variant	bevy_picking::cursor::OverrideCursor	0.Some.Custom	Url	hotspot.1	.0.0.0.0.hotspot.1	Int	u16	
 variant	bevy_picking::cursor::OverrideCursor	0.Some	System		.0.0.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_picking::events::PointerState	PointerState
 component	bevy_picking::hover::DirectlyHovered	DirectlyHovered
@@ -785,6 +798,9 @@ field	bevy_text::pipeline::TextLayoutInfo	glyphs	.glyphs	List	Vec<PositionedGlyp
 field	bevy_text::pipeline::TextLayoutInfo	run_geometry	.run_geometry	List	Vec<RunGeometry>	bevy_text::pipeline::RunGeometry
 field	bevy_text::pipeline::TextLayoutInfo	size	.size	Vec2	glam::Vec2	
 field	bevy_text::pipeline::TextLayoutInfo	cursor	.cursor	Enum	Option<(bool, Rect)>	None,Some
+variant	bevy_text::pipeline::TextLayoutInfo	cursor	Some	0	.cursor.0.0	Bool	bool	
+variant	bevy_text::pipeline::TextLayoutInfo	cursor	Some	1.min	.cursor.0.1.min	Vec2	glam::Vec2	
+variant	bevy_text::pipeline::TextLayoutInfo	cursor	Some	1.max	.cursor.0.1.max	Vec2	glam::Vec2	
 field	bevy_text::pipeline::TextLayoutInfo	selection_rects	.selection_rects	List	Vec<Rect>	bevy_math::rects::rect::Rect
 field	bevy_text::pipeline::TextLayoutInfo	preedit_underline_rects	.preedit_underline_rects	List	Vec<Rect>	bevy_math::rects::rect::Rect
 field	bevy_text::pipeline::TextLayoutInfo	inline_boxes	.inline_boxes	List	Vec<(Entity, InlineBoxKind, Rect)>	(bevy_ecs::entity::Entity, bevy_text::inline_box::InlineBoxKind, bevy_math::rects::rect::Rect)
@@ -865,8 +881,11 @@ field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_wrapped	.elapsed_wr
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
 component	bevy_time::time::Time<bevy_time::real::Real>	Time<Real>
+field	bevy_time::time::Time<bevy_time::real::Real>	context.startup	.context.startup	Double	Instant	
 field	bevy_time::time::Time<bevy_time::real::Real>	context.first_update	.context.first_update	Enum	Option<Instant>	None,Some
+variant	bevy_time::time::Time<bevy_time::real::Real>	context.first_update	Some		.context.first_update.0	Double	Instant	
 field	bevy_time::time::Time<bevy_time::real::Real>	context.last_update	.context.last_update	Enum	Option<Instant>	None,Some
+variant	bevy_time::time::Time<bevy_time::real::Real>	context.last_update	Some		.context.last_update.0	Double	Instant	
 field	bevy_time::time::Time<bevy_time::real::Real>	wrap_period	.wrap_period	Double	Duration	
 field	bevy_time::time::Time<bevy_time::real::Real>	delta	.delta	Double	Duration	
 field	bevy_time::time::Time<bevy_time::real::Real>	delta_secs	.delta_secs	Float	f32	
@@ -1927,7 +1946,11 @@ variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	min.x	.0.0.
 variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	min.y	.0.0.rect.0.min.y	Int	u32	
 variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	max.x	.0.0.rect.0.max.x	Int	u32	
 variant	bevy_window::cursor::CursorIcon	value.Custom.Image.rect	Some	max.y	.0.0.rect.0.max.y	Int	u32	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	hotspot.0	.0.0.hotspot.0	Int	u16	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Image	hotspot.1	.0.0.hotspot.1	Int	u16	
 variant	bevy_window::cursor::CursorIcon	value.Custom	Url	url	.0.0.url	String	alloc::string::String	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Url	hotspot.0	.0.0.hotspot.0	Int	u16	
+variant	bevy_window::cursor::CursorIcon	value.Custom	Url	hotspot.1	.0.0.hotspot.1	Int	u16	
 variant	bevy_window::cursor::CursorIcon	value	System		.0	Enum	SystemCursorIcon	Default,ContextMenu,Help,Pointer,Progress,Wait,Cell,Crosshair,Text,VerticalText,Alias,Copy,Move,NoDrop,NotAllowed,Grab,Grabbing,EResize,NResize,NeResize,NwResize,SResize,SeResize,SwResize,WResize,EwResize,NsResize,NeswResize,NwseResize,ColResize,RowResize,AllScroll,ZoomIn,ZoomOut
 component	bevy_window::monitor::Monitor	Monitor
 field	bevy_window::monitor::Monitor	name	.name	Enum	Option<String>	None,Some
@@ -2014,6 +2037,8 @@ field	bevy_window::window::Window	recognize_pinch_gesture	.recognize_pinch_gestu
 field	bevy_window::window::Window	recognize_rotation_gesture	.recognize_rotation_gesture	Bool	bool	
 field	bevy_window::window::Window	recognize_doubletap_gesture	.recognize_doubletap_gesture	Bool	bool	
 field	bevy_window::window::Window	recognize_pan_gesture	.recognize_pan_gesture	Enum	Option<(u8, u8)>	None,Some
+variant	bevy_window::window::Window	recognize_pan_gesture	Some	0	.recognize_pan_gesture.0.0	Int	u8	
+variant	bevy_window::window::Window	recognize_pan_gesture	Some	1	.recognize_pan_gesture.0.1	Int	u8	
 field	bevy_window::window::Window	movable_by_window_background	.movable_by_window_background	Bool	bool	
 field	bevy_window::window::Window	fullsize_content_view	.fullsize_content_view	Bool	bool	
 field	bevy_window::window::Window	has_shadow	.has_shadow	Bool	bool	
@@ -2031,6 +2056,7 @@ field	bevy_world_serialization::components::WorldAssetRoot	0	.0	Asset	Handle<Wor
 item	bevy_animation::transition::AnimationTransition	AnimationTransition
 field	bevy_animation::transition::AnimationTransition	current_weight	.current_weight	Float	f32	
 field	bevy_animation::transition::AnimationTransition	weight_decline_per_sec	.weight_decline_per_sec	Float	f32	
+field	bevy_animation::transition::AnimationTransition	animation	.animation	Int	petgraph::graph::NodeIndex	
 item	bevy_ecs::component::info::ComponentId	ComponentId
 field	bevy_ecs::component::info::ComponentId	0	.0	Int	usize	
 item	bevy_math::rects::rect::Rect	Rect
@@ -2240,6 +2266,8 @@ item	core::any::TypeId	TypeId
 item	core::ops::Range<usize>	Range<usize>
 item	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>
 field	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	value		Enum	Option<(Entity, FocusCause)>	None,Some
+variant	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	value	Some	0	.0.0	Entity	bevy_ecs::entity::Entity	
+variant	core::option::Option<(bevy_ecs::entity::Entity, bevy_input_focus::gained_and_lost::FocusCause)>	value	Some	1	.0.1	Enum	FocusCause	Navigated,Pressed,Auto
 item	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	Option<bevy_sprite_render::tilemap_chunk::TileData>
 field	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value		Enum	Option<TileData>	None,Some
 variant	core::option::Option<bevy_sprite_render::tilemap_chunk::TileData>	value	Some	tileset_index	.0.tileset_index	Int	u16	

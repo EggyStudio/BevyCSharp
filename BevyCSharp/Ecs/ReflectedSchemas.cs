@@ -259,6 +259,14 @@ internal static class ReflectedSchemas
                 return;
             }
 
+            // A moment of the machine's clock, which Bevy gives no form to serialize, so the bridge
+            // reads and writes it as the seconds after the real clock started.
+            if (type == Instant)
+            {
+                fields.Add(Moment(at, label));
+                return;
+            }
+
             var registered = described.ValueKind == JsonValueKind.Object
                 && described.GetProperty("registered").GetBoolean();
             var kind = registered ? described.GetProperty("kind").GetString() : null;
@@ -273,7 +281,9 @@ internal static class ReflectedSchemas
                     Member(inner.Type, label, at with { Reflect = at.Reflect + "." + inner.Name });
                     return;
 
-                case "struct" or "tuple_struct":
+                // A tuple's values are walked by their index as a struct's fields are, as the cursor
+                // a text layout holds is its visibility and its rectangle.
+                case "struct" or "tuple_struct" or "tuple":
                     Members(type, at with
                     {
                         Fold = at.Fold is null ? label : at.Fold + "/" + label,
@@ -353,7 +363,7 @@ internal static class ReflectedSchemas
             if (Scalar(type) is null
                 && types.TryGetProperty(type, out var described)
                 && described.GetProperty("registered").GetBoolean()
-                && described.GetProperty("kind").GetString() == "struct"
+                && described.GetProperty("kind").GetString() is "struct" or "tuple"
                 && at.Depth < Depth)
             {
                 Members(type, at);
@@ -497,6 +507,27 @@ internal static class ReflectedSchemas
             };
         }
 
+        /// <summary>A row holding a moment of the machine's clock, drawn as the seconds after the real clock started.</summary>
+        private ComponentField Moment(At at, string label)
+        {
+            var (owner, path, within) = (component, at.Reflect, at.Within);
+            return new ComponentField(
+                at.Name,
+                FieldKind.Double,
+                "Instant",
+                (world, entity) => Holds(world, entity, owner, within)
+                    ? Attempted(() => world.GetReflectedFloat(entity, owner, path))
+                    : null,
+                (world, entity, value) => ComponentSchemas.TryCoerce<double>(value, out var seconds)
+                    && double.IsFinite(seconds)
+                    && Holds(world, entity, owner, within)
+                    && Sent(() => world.SetReflectedFloat(entity, owner, path, seconds)),
+                hints: Hints(at, label))
+            {
+                ReflectPath = path,
+            };
+        }
+
         /// <summary>A row holding a range of numbers, drawn as its start and its end.</summary>
         private ComponentField Spanning(At at, string label)
         {
@@ -611,6 +642,9 @@ internal static class ReflectedSchemas
         return true;
     }
 
+    /// <summary>Bevy's moment of the machine's clock, read and written as seconds by the bridge.</summary>
+    private const string Instant = "bevy_platform::time::Instant";
+
     /// <summary>The kind of a field whose type the inspector has an editor for, by type path.</summary>
     private static FieldKind? Scalar(string type) => type switch
     {
@@ -625,6 +659,10 @@ internal static class ReflectedSchemas
         "core::num::NonZeroU8" or "core::num::NonZeroU16" or "core::num::NonZeroU32" or "core::num::NonZeroU64"
             or "core::num::NonZeroUsize" or "core::num::NonZeroI8" or "core::num::NonZeroI16"
             or "core::num::NonZeroI32" or "core::num::NonZeroI64" or "core::num::NonZeroIsize" => FieldKind.Int,
+
+        // A node of an animation graph is its index, as the graph's own calls take it.
+        "petgraph::graph::NodeIndex" => FieldKind.Int,
+
         "alloc::string::String" => FieldKind.String,
         "glam::Vec2" => FieldKind.Vec2,
         "glam::Vec3" or "glam::Vec3A" => FieldKind.Vec3,

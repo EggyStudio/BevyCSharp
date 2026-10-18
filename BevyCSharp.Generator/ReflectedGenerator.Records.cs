@@ -18,6 +18,11 @@ public sealed partial class ReflectedGenerator
     /// <param name="Some">For an <c>Option</c> inside the variant, the one value its <c>Some</c> holds, the part a nullable.</param>
     /// <param name="List">For a list of records, the record its items are, which reads and writes them.</param>
     /// <param name="Element">For a list of plain values, what one item is, read and written as its kind is.</param>
+    /// <param name="Tuple">
+    /// For an <c>Option</c> holding a tuple, the tuple's values in order, the part a nullable tuple,
+    /// each value's own part or, for one with fields of its own, its record's.
+    /// </param>
+    /// <param name="Items">For a list of options holding tuples, what one item is.</param>
     private sealed record Part(
         string Name,
         string Type,
@@ -26,7 +31,9 @@ public sealed partial class ReflectedGenerator
         List<Case>? Cases = null,
         Part? Some = null,
         UnionModel? List = null,
-        FieldModel? Element = null);
+        FieldModel? Element = null,
+        List<Part>? Tuple = null,
+        Part? Items = null);
 
     /// <summary>One variant of a union, the record it is and what that record holds.</summary>
     private sealed record Case(string Variant, string Record, List<Part> Parts);
@@ -198,6 +205,9 @@ public sealed partial class ReflectedGenerator
         var inner = CasesOf(field with { Name = row }, scope.Variants.Where(p => p.Enum == row), scope);
         if (inner is null) return null;
 
+        // An Option holding a tuple is a nullable tuple, as the focus and its cause are.
+        if (TupleOf(field, name, inner, scope) is { } tuple) return tuple;
+
         // An Option holding one value is a nullable, as one a component holds is.
         if (inner.Count == 2
             && inner[0] is { Variant: "None", Parts.Count: 0 }
@@ -209,6 +219,81 @@ public sealed partial class ReflectedGenerator
 
         var union = scope.Unions.Add(field.Rust, inner, isStruct: false, plain: inner.All(c => c.Parts.Count == 0));
         return new Part(name, "global::Bevy.Reflected." + union.Name, field, union, inner);
+    }
+
+    /// <summary>
+    /// An <c>Option</c> holding a tuple as a nullable tuple, its values in order, or nothing where the
+    /// field is not one.
+    /// </summary>
+    /// <remarks>
+    /// A tuple has no name a record could take, so it is C#'s own tuple, as Rust's is. A value with
+    /// fields of its own, as the rectangle of a text layout's cursor, is the record its type is, the
+    /// one a list of that type already made where they agree.
+    /// </remarks>
+    /// <param name="field">The enum field, its Rust type naming the tuple.</param>
+    /// <param name="name">The record's parameter name for it.</param>
+    /// <param name="cases">The field's variants, as <see cref="CasesOf"/> gave them.</param>
+    /// <param name="scope">The rows it is among.</param>
+    private static Part? TupleOf(FieldModel field, string name, List<Case> cases, Scope scope)
+    {
+        if (cases.Count != 2 || cases[0] is not { Variant: "None", Parts.Count: 0 } || cases[1] is not { Variant: "Some" } some) return null;
+        if (!field.Rust.StartsWith("Option<(", StringComparison.Ordinal) || !field.Rust.EndsWith(")>", StringComparison.Ordinal)) return null;
+
+        var types = Elements(field.Rust.Substring("Option<(".Length, field.Rust.Length - "Option<(".Length - ")>".Length));
+        var values = new List<Part>();
+        for (var at = 0; at < types.Count; at++)
+        {
+            var index = at.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var whole = some.Parts.Where(p => p.Field.Name == index).ToList();
+            var inner = some.Parts.Where(p => p.Field.Name.StartsWith(index + ".", StringComparison.Ordinal)).ToList();
+            var item = "Item" + (at + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+            if (whole.Count == 1 && inner.Count == 0)
+            {
+                values.Add(whole[0] with { Name = item });
+                continue;
+            }
+
+            // A value with fields of its own, each field named as its row is after the value's index.
+            if (whole.Count != 0 || inner.Count == 0) return null;
+            var recordName = Identifier(Last(types[at]));
+            var fields = inner
+                .Select(p => p with { Name = PartName(p.Field.Name.Substring(index.Length + 1), recordName) })
+                .ToList();
+            // The record may be one another field made first, so this value is read and written by
+            // its own rows' paths rather than by those the record was made with.
+            var record = scope.Unions.Add(types[at], [new Case(string.Empty, recordName, fields)], isStruct: true);
+            values.Add(new Part(item, "global::Bevy.Reflected." + record.Name, field, record, [new Case(string.Empty, record.Name, fields)]));
+        }
+
+        return new Part(name, "(" + string.Join(", ", values.Select(v => v.Type)) + ")?", field, Tuple: values);
+    }
+
+    /// <summary>The types of a tuple's values, from the text between its parentheses, generic arguments kept whole.</summary>
+    private static List<string> Elements(string text)
+    {
+        var elements = new List<string>();
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < text.Length; i++)
+        {
+            switch (text[i])
+            {
+                case '<' or '(' or '[':
+                    depth++;
+                    break;
+                case '>' or ')' or ']':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    elements.Add(text.Substring(start, i - start).Trim());
+                    start = i + 1;
+                    break;
+            }
+        }
+
+        elements.Add(text.Substring(start).Trim());
+        return elements;
     }
 
     /// <summary>The kinds of the plain values a list of them is typed as, which a wrapper reads and writes one at a time.</summary>
@@ -257,8 +342,15 @@ public sealed partial class ReflectedGenerator
         UnionModel record;
         if (item.Fields.Items.Count == 1 && item.Fields.Items[0] is { Name: "value", Kind: "Enum" } value)
         {
+            // Options holding tuples, as the focus's recorded changes are, read and written an item
+            // at a time as the nullable tuples they are, since a tuple has no record to hold the
+            // methods a list of records is read through.
+            var read = PartOf(value, value.Name, "Value", rows);
+            if (read is { Tuple: not null })
+                return new Part(name, $"global::System.Collections.Generic.IReadOnlyList<{read.Type}>", field, Items: read);
+
             // An enum's items, as a gradient's are, read and written as the union its row is.
-            if (PartOf(value, value.Name, "Value", rows) is not { Union: { Plain: false } union } part) return null;
+            if (read is not { Union: { Plain: false } union } part) return null;
             record = union;
             record.Item = part;
         }
@@ -295,6 +387,10 @@ public sealed partial class ReflectedGenerator
         if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.ReadList(_world, Entity, TypePath, {path})";
         if (part.Element is { } element)
             return $"global::Bevy.ReflectedValue.Items<{TypeOf(element)}>(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{element.Kind})";
+        if (part.Items is { } items)
+            return $"global::Bevy.ReflectedValue.ReadItems(_world, Entity, TypePath, {path}, static (_world, Entity, TypePath, item) => {Read(items, "item")})";
+        if (part.Tuple is { } tuple)
+            return $"({variant} == \"None\" ? null : ({part.Type})({string.Join(", ", tuple.Select(v => ReadValue(v, prefix)))}))";
         if (part.Some is { } some) return $"({variant} == \"None\" ? null : ({part.Type}){Read(some, prefix)})";
         if (part.Union is not { } union) return Reading(part.Field, path);
         if (union.Plain) return $"global::System.Enum.Parse<global::Bevy.Reflected.{union.Name}>({variant})";
@@ -304,6 +400,18 @@ public sealed partial class ReflectedGenerator
         return $"({variant} switch {{ {string.Join(" ", arms)} var other => throw new global::System.InvalidOperationException("
             + "$\"'{" + path + "}' of {TypePath} holds {other}, which this wrapper was not generated with.\") })";
     }
+
+    /// <summary>One value of a tuple, a record with fields of its own made from each.</summary>
+    private static string ReadValue(Part value, string? prefix) =>
+        value is { Union: { Struct: true } record, Cases: { Count: 1 } cases }
+            ? $"new global::Bevy.Reflected.{record.Name}({string.Join(", ", cases[0].Parts.Select(p => Read(p, prefix)))})"
+            : Read(value, prefix);
+
+    /// <summary>The statements writing one value of a tuple, a record with fields of its own a field at a time.</summary>
+    private static string WriteValue(Part value, string held, int depth, string? prefix) =>
+        value is { Union: { Struct: true }, Cases: { Count: 1 } cases }
+            ? string.Join(" ", cases[0].Parts.Select(p => Write(p, held + "." + p.Name, depth, prefix)))
+            : Write(value, held, depth, prefix);
 
     /// <summary>
     /// The statements writing one value of a record, an enum inside it by choosing its variant and
@@ -320,6 +428,16 @@ public sealed partial class ReflectedGenerator
         if (part.List is { } list) return $"global::Bevy.Reflected.{list.Name}.WriteList(_world, Entity, TypePath, {path}, {value});";
         if (part.Element is { } element)
             return $"global::Bevy.ReflectedValue.SetItems(_world, Entity, TypePath, {path}, global::Bevy.FieldKind.{element.Kind}, {value});";
+        if (part.Items is { } items)
+            return $"global::Bevy.ReflectedValue.WriteItems(_world, Entity, TypePath, {path}, {value}, static (_world, Entity, TypePath, item, held) => {{ {Write(items, "held", depth + 1, "item")} }});";
+        if (part.Tuple is { } tuple)
+        {
+            // Switched to Some only from None, as an Option holding one value is.
+            var present = "some" + depth;
+            return $"if ({value} is not {{ }} {present}) _world.SetVariant(Entity, TypePath, {path}, \"None\"); "
+                + $"else {{ if (global::Bevy.ReflectedValue.Variant(_world, Entity, TypePath, {path}) != \"Some\") _world.SetVariant(Entity, TypePath, {path}, \"Some\"); "
+                + string.Join(" ", tuple.Select(v => WriteValue(v, present + "." + v.Name, depth + 1, prefix))) + " }";
+        }
         if (part.Some is { } some)
         {
             // Switched to Some only from None, since switching makes the variant again at its default.
@@ -496,6 +614,20 @@ public sealed partial class ReflectedGenerator
         {
             var some = cases[1];
             if (some.Parts.Count == 0) return false;
+
+            // A tuple, as a window's pan gesture is its two counts of fingers, a nullable tuple.
+            if (TupleOf(field, unique, cases, scope) is { } tuple)
+            {
+                text.Append($$"""
+                        public {{tuple.Type}} {{unique}}
+                        {
+                            get => {{Read(tuple, null)}};
+                            set { {{Write(tuple, "value", 1, null)}} }
+                        }
+
+                    """);
+                return true;
+            }
 
             if (some.Parts.Count == 1 && some.Parts[0].Field.Name.Length == 0)
             {

@@ -19,7 +19,7 @@ pub unsafe extern "C" fn bcs_reflect_list_len(entity: u64, type_path: *const c_c
             return status::NULL_ARG;
         };
         let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
-        let counted = read_field(entity, &type_path, &path, "a list", |value| match value.reflect_ref() {
+        let counted = read_field(entity, &type_path, &path, "a list", |value, _| match value.reflect_ref() {
             ReflectRef::List(list) => Some(list.len()),
             ReflectRef::Array(array) => Some(array.len()),
             _ => None,

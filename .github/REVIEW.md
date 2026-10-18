@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b50890cb`, Verdict 29's addition done and nothing else, 3 files. The test script's
+Reviewed up to `5e750133`, item 22 done and nothing else, 8 files, the first item taken since
+Decision 33 lifted. Courtyard, the stress program and the first game name 0.4.129, the newest
+published version, and each built on it from nuget.org; Swarm names 0.5.0, which NuGet reads as the
+lowest published version at or past it, so the first publish of 0.5 restores it with no commit, and
+until then its restore fails naming 0.4.129 as the nearest, its project's comment saying why and how
+it is built meanwhile. `build/games-on-defaults.sh <version>` waits for nuget.org's flat container
+to list the version, twenty minutes at most, then builds each game strict on its own default from
+nuget.org alone into a folder of its own, so the fresh pack under `build/package` cannot stand in,
+prints each game's errors and names a game whose default does not build in an error with the version
+to raise it to, and a version not listed in time in one of its own; run against 0.4.129 it built the
+three and named Swarm. The pack job runs it after the push to nuget.org, when publishing alone, its
+limit 45 minutes where 20 stood, the comment counting the wait and a minute or two a game.
+BUILDING.md's publishing section says what a game's default is, that a raise is one line a game, how
+Swarm is built until 0.5 is published, a pack under a version of its own and new each time since
+NuGet keeps the first package under a version, and what the publish check does. Checked on the
+working machine was the whole suite, 1,475 passed and 3 skipped of 1,478. Right. The pack run of
+`b50890cb` ended whole green at 02:35 with its package, the second in a row, its Windows suite the
+second of three toward Verdict 29 and the feature test's course taking 47 minutes. Next the owner's
+push of this commit, and item 26, the reflected variants, chosen at 02:05 since every other row
+waits on a crate, a word the owner types in the working session or the owner's screens.
+
+Before it, `b50890cb` came, Verdict 29's addition done and nothing else, 3 files. The test script's
 table of processes carries each one's creation time beside its parent and resident bytes, read on
 Windows through `GetProcessTimes` as a FILETIME and none on Linux and macOS, which hand an orphan to
 another parent; one walk, `tree_under`, takes a process as a child only where it was not created
@@ -43,33 +64,6 @@ JSON carrying it and BUILDING.md saying so. Checked on the working machine was t
 1,474 passed and 3 skipped of 1,477. Right. The working session read a possible cause and left it,
 which Verdict 29 takes up. Next the owner's push and a pack run, Decision 35's gate, whose push half
 the run of `b4d45938` met.
-
-Before it, `b4d45938` came, Verdict 26 mended at `01f448b9`, Verdict 28's addition done at
-`a62e96c8` and item 25 done, in three commits. At `01f448b9` `many_lights` and `many_cubes` are
-taken again on the working machine's GPU with a `--render` bridge, reading 0.063 and 0.419 percent
-from captures in the runner's image on the same kind of bridge, and BUILDING.md says a picture is
-taken on a bridge built without Solari, with `--meshlet` for the three meshlet examples and
-`--solari` for the two Solari ones alone, with the `dfg_lut` reason and the run's figures. At
-`a62e96c8` `build/soak.sh` plays on past its seconds, by at most half of them again, until it has
-read each game as often as `soak-check.py --fewest` prints, six, and the check's too-few line gives
-the round's length; BUILDING.md and the play and course jobs' comments give the longer bound,
-fifteen minutes for the three games and twenty-two and a half for the feature test, within the jobs'
-limits. At `b4d45938` 70 rewordings across 64 files take the likenesses and idioms out, STYLE.md's
-Register carrying the rule, the owner's example row, the idiom list with the knob, the plumbing, the
-wiring, an escape hatch and for free added, and a search in its checks that leaves the vendored
-weather crate and the notices out; a handful became the count the code gives, eighteen
-multiplications in `Quat`, six calls and one a character in the physics sync, five entities in
-`Movement`; leans on became depends or relies on; the literal box of `Render.Skins.cs`, the gamepad
-stick's knob, the orientation gizmo's knob and by hand stay. Each read, right. Checked on the
-working machine were the whole suite over the three, 1,474 passed and 3 skipped of 1,477, with the
-bridge rebuilt with the editor, meshlets and Solari and the cheatsheet written again. The owner
-pushed `dd2149ee` at 22:39 and `b4d45938` at 23:23. The push run of `dd2149ee` ended red at 22:55 on
-the Windows suite alone, one test of the script's lost-suite handling (Verdict 29), Linux and macOS
-green, the macOS suite the second of three toward Verdict 27; the pack run of `cd2d542d` ended at
-23:06 with shards 1 and 4 red on the two pictures as before, the play job green with its soak and
-the feature test's course green in 68 minutes, the pack job not run. The push run of `b4d45938`
-ended at 23:38 whole green, Linux in 15 minutes, Windows in 15 and macOS in 12, the macOS suite the
-third green in a row since `cd2d542d`, which settles Verdict 27.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -569,28 +563,34 @@ from [SHARED.md](SHARED.md).
     behavior that changes one row of three and runs on that one alone the frame after, and the
     example's query restored to Bevy's shape. Done at `c8849d71` as written.
 
-22. **Swarm builds on the package version its project names.** `games/Swarm/Swarm.csproj` names
-    0.0.14-game where nothing sets `BevyCSharpVersion`, and on it the game does not build, seven
-    errors for `MainThread` and `CharacterController` the package of that version lacks; the
-    workflow builds it on 0.0.0-ci, so no job sees it, and a reader cloning the game does. After
-    Decision 33 lifts: the default follows the package the game was last played on, or the games
-    take their version from one place the pack writes, and a check that each game builds on its own
-    default where the package is published. Found at `9f76fded`. Read again on 2026-10-18 with
-    Decision 33 lifted, from the working session's measurement. All four games name versions
-    nuget.org has not, local packs of earlier sessions, Courtyard and Swarm 0.0.14-game, the stress
-    program 0.0.25-game and the first game 0.0.38-game, so a reader cloning the repository builds
-    none of them; Courtyard, the stress program and the first game build on 0.4.129, the newest of
-    the ten published, and Swarm does not, wanting `MainThread`, which no published version carries
-    yet. The shape chosen is the session's. Each game's default names the newest published version
-    it builds on, three at 0.4.129 and Swarm at the version it needs until the next publish carries
-    it, its project's comment saying the checkout is packed under that version to build it; the pack
-    job, when it publishes, builds each game on its own default from nuget.org after the push,
-    waiting on the index with a bounded retry whose cost the job's limit comment counts (N 6.8), and
-    fails with an error naming each game whose default does not build and the version that push
-    carried as the one to raise it to, the raise being a one-line commit a game; and BUILDING.md
-    says what a game's default is and how a game whose default awaits a publish is built. No shared
-    version file, since a game here is built as one outside the repository is, from the package and
-    its own project file alone, and the version last played is 0.0.0-ci, never published.
+22. **Swarm builds on the package version its project names, done at `5e750133`.**
+    `games/Swarm/Swarm.csproj` names 0.0.14-game where nothing sets `BevyCSharpVersion`, and on it
+    the game does not build, seven errors for `MainThread` and `CharacterController` the package of
+    that version lacks; the workflow builds it on 0.0.0-ci, so no job sees it, and a reader cloning
+    the game does. After Decision 33 lifts: the default follows the package the game was last played
+    on, or the games take their version from one place the pack writes, and a check that each game
+    builds on its own default where the package is published. Found at `9f76fded`. Read again on
+    2026-10-18 with Decision 33 lifted, from the working session's measurement. All four games name
+    versions nuget.org has not, local packs of earlier sessions, Courtyard and Swarm 0.0.14-game,
+    the stress program 0.0.25-game and the first game 0.0.38-game, so a reader cloning the
+    repository builds none of them; Courtyard, the stress program and the first game build on
+    0.4.129, the newest of the ten published, and Swarm does not, wanting `MainThread`, which no
+    published version carries yet. The shape chosen is the session's. Each game's default names the
+    newest published version it builds on, three at 0.4.129 and Swarm at the version it needs until
+    the next publish carries it, its project's comment saying the checkout is packed under that
+    version to build it; the pack job, when it publishes, builds each game on its own default from
+    nuget.org after the push, waiting on the index with a bounded retry whose cost the job's limit
+    comment counts (N 6.8), and fails with an error naming each game whose default does not build
+    and the version that push carried as the one to raise it to, the raise being a one-line commit a
+    game; and BUILDING.md says what a game's default is and how a game whose default awaits a
+    publish is built. No shared version file, since a game here is built as one outside the
+    repository is, from the package and its own project file alone, and the version last played is
+    0.0.0-ci, never published. Done at `5e750133` as chosen, the three games at 0.4.129, Swarm at
+    0.5.0 as a minimum the first publish of 0.5 meets, the publish check in the pack job and
+    BUILDING.md saying the rest. One word to mend in the next commit, under N 4.1 and STYLE.md's
+    banned list, the eight places the commit says the version was pushed or published a moment ago
+    with the word the list names, in BUILDING.md, the pack job's comment, the script's head, usage
+    and error and the project comments, which read "the version this run pushed" instead.
 
 23. **Two workflows an engine, `build.yml` on a push and `pack.yml` by hand (Decision 34), done at
     `b178ae3f` over `0dff9601`; proven by the push run and the pack run of `b4d45938` on
@@ -675,6 +675,20 @@ from [SHARED.md](SHARED.md).
     NORM.md is reworded here. Done at `b4d45938`, 70 rewordings across 64 files, the idiom list
     grown by the knob, the plumbing, the wiring, an escape hatch and for free, a handful made the
     count the code gives, and the literal senses kept.
+
+26. **The reflected variants holding a tuple, an instant or a graph's index get typed properties,
+    TODO.md's open line under the components through reflection, item 4's remainder.** Chosen on
+    2026-10-18 as the next work, since every other row of the Now list and of TODO.md waits on a
+    crate the lock lacks, on a word the owner types in the working session (Decisions 11, 12 and 20;
+    Feathers, the camera controllers, the dev tools, `sysinfo`, `ctt`, `ureq`, the template's
+    publishing) or on a run on the owner's screens (`monitor_info`), and the font examples stay off
+    under Decision 13. The generated wrappers type an enum inside a variant, a list, a duration and
+    an integer that holds no zero, and leave an `Option` of a tuple (a text layout's cursor, a
+    window's pan gesture, the focus and its cause), of Rust's `Instant` (the real clock's first and
+    last update) or of a node index (animation transitions' main animation) with its variant names
+    alone, the value on a string path checked when it runs; each gets a typed property, with a test
+    a kind, and TODO.md's line and COMPONENTS.md follow. One commit, the eight register rewordings
+    riding along.
 
 ## Verdicts
 

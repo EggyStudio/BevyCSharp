@@ -4681,7 +4681,7 @@ readonly struct Bevy.Reflected.AnimationTargetIdRef : IReflectedComponent<Animat
   bool Remove()
   const string TypePath = "bevy_animation::AnimationTargetId"
 sealed class Bevy.Reflected.AnimationTransition : IEquatable<AnimationTransition>
-  AnimationTransition(float CurrentWeight, float WeightDeclinePerSec)
+  AnimationTransition(float CurrentWeight, float WeightDeclinePerSec, uint Animation)
   bool Equals(AnimationTransition? other)
   float CurrentWeight { get; init; }
   float WeightDeclinePerSec { get; init; }
@@ -4690,16 +4690,14 @@ sealed class Bevy.Reflected.AnimationTransition : IEquatable<AnimationTransition
   override string ToString()
   static bool op_Equality(AnimationTransition? left, AnimationTransition? right)
   static bool op_Inequality(AnimationTransition? left, AnimationTransition? right)
-  void Deconstruct(out float CurrentWeight, out float WeightDeclinePerSec)
+  uint Animation { get; init; }
+  void Deconstruct(out float CurrentWeight, out float WeightDeclinePerSec, out uint Animation)
 readonly struct Bevy.Reflected.AnimationTransitionsRef : IReflectedComponent<AnimationTransitionsRef>, IReflectedWrapper<AnimationTransitionsRef>
-  AnimationTransitionsRef.MainAnimationVariant MainAnimation { get; set; }
   Entity Entity { get; }
   IReadOnlyList<AnimationTransition> Transitions { get; set; }
   bool Remove()
   const string TypePath = "bevy_animation::transition::AnimationTransitions"
-enum Bevy.Reflected.AnimationTransitionsRef.MainAnimationVariant : int
-  None = 0
-  Some = 1
+  uint? MainAnimation { get; set; }
 abstract class Bevy.Reflected.AssetIdImage : IEquatable<AssetIdImage>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -5477,7 +5475,7 @@ abstract class Bevy.Reflected.CustomCursor : IEquatable<CustomCursor>
   virtual bool Equals(CustomCursor? other)
 sealed class Bevy.Reflected.CustomCursor.Image : CustomCursor, IEquatable<CustomCursor.Image>, IEquatable<CustomCursor>
   AssetHandle Handle { get; init; }
-  Image(AssetHandle Handle, OptionTextureAtlas TextureAtlas, bool FlipX, bool FlipY, OptionURect Rect)
+  Image(AssetHandle Handle, OptionTextureAtlas TextureAtlas, bool FlipX, bool FlipY, OptionURect Rect, ushort Hotspot0, ushort Hotspot1)
   OptionTextureAtlas TextureAtlas { get; init; }
   OptionURect Rect { get; init; }
   bool Equals(CustomCursor.Image? other)
@@ -5491,9 +5489,11 @@ sealed class Bevy.Reflected.CustomCursor.Image : CustomCursor, IEquatable<Custom
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(CustomCursor.Image? left, CustomCursor.Image? right)
   static bool op_Inequality(CustomCursor.Image? left, CustomCursor.Image? right)
-  void Deconstruct(out AssetHandle Handle, out OptionTextureAtlas TextureAtlas, out bool FlipX, out bool FlipY, out OptionURect Rect)
+  ushort Hotspot0 { get; init; }
+  ushort Hotspot1 { get; init; }
+  void Deconstruct(out AssetHandle Handle, out OptionTextureAtlas TextureAtlas, out bool FlipX, out bool FlipY, out OptionURect Rect, out ushort Hotspot0, out ushort Hotspot1)
 sealed class Bevy.Reflected.CustomCursor.Url : CustomCursor, IEquatable<CustomCursor.Url>, IEquatable<CustomCursor>
-  Url(string UrlValue)
+  Url(string UrlValue, ushort Hotspot0, ushort Hotspot1)
   bool Equals(CustomCursor.Url? other)
   bool Equals(CustomCursor? other)
   override bool Equals(object? obj)
@@ -5504,7 +5504,9 @@ sealed class Bevy.Reflected.CustomCursor.Url : CustomCursor, IEquatable<CustomCu
   static bool op_Equality(CustomCursor.Url? left, CustomCursor.Url? right)
   static bool op_Inequality(CustomCursor.Url? left, CustomCursor.Url? right)
   string UrlValue { get; init; }
-  void Deconstruct(out string UrlValue)
+  ushort Hotspot0 { get; init; }
+  ushort Hotspot1 { get; init; }
+  void Deconstruct(out string UrlValue, out ushort Hotspot0, out ushort Hotspot1)
 sealed class Bevy.Reflected.DVec2 : IEquatable<DVec2>
   DVec2(double X, double Y)
   bool Equals(DVec2? other)
@@ -5740,6 +5742,10 @@ readonly struct Bevy.Reflected.FixedNodeRef : IReflectedComponent<FixedNodeRef>,
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::FixedNode"
+enum Bevy.Reflected.FocusCauseValue : int
+  Auto = 2
+  Navigated = 0
+  Pressed = 1
 readonly struct Bevy.Reflected.FocusPolicyRef : IReflectedComponent<FocusPolicyRef>, IReflectedWrapper<FocusPolicyRef>
   Entity Entity { get; }
   FocusPolicyRef.ValueVariant Value { get; set; }
@@ -6522,6 +6528,7 @@ readonly struct Bevy.Reflected.InputFocusRef : IReflectedComponent<InputFocusRef
   Entity Entity { get; }
   Entity? CurrentFocus { get; set; }
   Entity? OriginalFocus { get; set; }
+  IReadOnlyList<(Entity, FocusCauseValue)?> RecordedChanges { get; set; }
   bool Remove()
   const string TypePath = "bevy_input_focus::InputFocus"
 readonly struct Bevy.Reflected.InputFocusVisibleRef : IReflectedComponent<InputFocusVisibleRef>, IReflectedWrapper<InputFocusVisibleRef>
@@ -7729,9 +7736,6 @@ readonly struct Bevy.Reflected.OcclusionCullingRef : IReflectedComponent<Occlusi
   bool Remove()
   const string TypePath = "bevy_render::occlusion_culling::OcclusionCulling"
 enum Bevy.Reflected.OptionBlendState : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.OptionEntityFocusCause : int
   None = 0
   Some = 1
 abstract class Bevy.Reflected.OptionTextureAtlas : IEquatable<OptionTextureAtlas>
@@ -9311,19 +9315,16 @@ readonly struct Bevy.Reflected.TextInputRef : IReflectedComponent<TextInputRef>,
   bool Remove()
   const string TypePath = "bevy_ui_widgets::text_input::TextInput"
 readonly struct Bevy.Reflected.TextLayoutInfoRef : IReflectedComponent<TextLayoutInfoRef>, IReflectedWrapper<TextLayoutInfoRef>
+  (bool, Rect)? Cursor { get; set; }
   Entity Entity { get; }
   IReadOnlyList<PositionedGlyph> Glyphs { get; set; }
   IReadOnlyList<Rect> PreeditUnderlineRects { get; set; }
   IReadOnlyList<Rect> SelectionRects { get; set; }
   IReadOnlyList<RunGeometry> RunGeometry { get; set; }
-  TextLayoutInfoRef.CursorVariant Cursor { get; set; }
   Vec2 Size { get; set; }
   bool Remove()
   const string TypePath = "bevy_text::pipeline::TextLayoutInfo"
   float ScaleFactor { get; set; }
-enum Bevy.Reflected.TextLayoutInfoRef.CursorVariant : int
-  None = 0
-  Some = 1
 readonly struct Bevy.Reflected.TextLayoutRef : IReflectedComponent<TextLayoutRef>, IReflectedWrapper<TextLayoutRef>
   Entity Entity { get; }
   TextLayoutRef.JustifyVariant Justify { get; set; }
@@ -9439,12 +9440,13 @@ readonly struct Bevy.Reflected.TimeFixedRef : IReflectedComponent<TimeFixedRef>,
   float ElapsedSecsWrapped { get; set; }
 readonly struct Bevy.Reflected.TimeRealRef : IReflectedComponent<TimeRealRef>, IReflectedWrapper<TimeRealRef>
   Entity Entity { get; }
-  TimeRealRef.ContextFirstUpdateVariant ContextFirstUpdate { get; set; }
-  TimeRealRef.ContextLastUpdateVariant ContextLastUpdate { get; set; }
+  TimeSpan ContextStartup { get; set; }
   TimeSpan Delta { get; set; }
   TimeSpan Elapsed { get; set; }
   TimeSpan ElapsedWrapped { get; set; }
   TimeSpan WrapPeriod { get; set; }
+  TimeSpan? ContextFirstUpdate { get; set; }
+  TimeSpan? ContextLastUpdate { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::time::Time<bevy_time::real::Real>"
   double DeltaSecsF64 { get; set; }
@@ -9453,12 +9455,6 @@ readonly struct Bevy.Reflected.TimeRealRef : IReflectedComponent<TimeRealRef>, I
   float DeltaSecs { get; set; }
   float ElapsedSecs { get; set; }
   float ElapsedSecsWrapped { get; set; }
-enum Bevy.Reflected.TimeRealRef.ContextFirstUpdateVariant : int
-  None = 0
-  Some = 1
-enum Bevy.Reflected.TimeRealRef.ContextLastUpdateVariant : int
-  None = 0
-  Some = 1
 readonly struct Bevy.Reflected.TimeRef : IReflectedComponent<TimeRef>, IReflectedWrapper<TimeRef>
   Entity Entity { get; }
   TimeSpan Delta { get; set; }
@@ -10128,6 +10124,7 @@ sealed class Bevy.Reflected.WindowPosition.Centered : WindowPosition, IEquatable
   static bool op_Inequality(WindowPosition.Centered? left, WindowPosition.Centered? right)
   void Deconstruct(out MonitorSelection Value)
 readonly struct Bevy.Reflected.WindowRef : IReflectedComponent<WindowRef>, IReflectedWrapper<WindowRef>
+  (byte, byte)? RecognizePanGesture { get; set; }
   CompassOctantValue? InternalDragResizeRequest { get; set; }
   DVec2? InternalPhysicalCursorPosition { get; set; }
   Entity Entity { get; }
@@ -10137,7 +10134,6 @@ readonly struct Bevy.Reflected.WindowRef : IReflectedComponent<WindowRef>, IRefl
   WindowRef.CompositeAlphaModeVariant CompositeAlphaMode { get; set; }
   WindowRef.PreferredScreenEdgesDeferringSystemGesturesVariant PreferredScreenEdgesDeferringSystemGestures { get; set; }
   WindowRef.PresentModeVariant PresentMode { get; set; }
-  WindowRef.RecognizePanGestureVariant RecognizePanGesture { get; set; }
   WindowRef.WindowLevelVariant WindowLevel { get; set; }
   WindowTheme? WindowTheme { get; set; }
   bool BorderlessGame { get; set; }
@@ -10203,9 +10199,6 @@ enum Bevy.Reflected.WindowRef.PresentModeVariant : int
   FifoRelaxed = 3
   Immediate = 4
   Mailbox = 5
-enum Bevy.Reflected.WindowRef.RecognizePanGestureVariant : int
-  None = 0
-  Some = 1
 enum Bevy.Reflected.WindowRef.WindowLevelVariant : int
   AlwaysOnBottom = 0
   AlwaysOnTop = 2

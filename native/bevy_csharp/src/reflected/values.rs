@@ -312,12 +312,34 @@ pub unsafe extern "C" fn bcs_reflect_set_color(
     })
 }
 
-/// A number field's value, whatever width of float it is.
-fn float_of(value: &dyn PartialReflect) -> Option<f64> {
+/// A number field's value, whatever width of float it is, or an instant's seconds since the real
+/// clock started.
+fn float_of(value: &dyn PartialReflect, world: &World) -> Option<f64> {
     if let Some(v) = value.try_downcast_ref::<f32>() {
         return Some(f64::from(*v));
     }
+    if let Some(at) = value.try_downcast_ref::<Instant>() {
+        return since_startup(*at, world);
+    }
     value.try_downcast_ref::<f64>().copied()
+}
+
+/// When the real clock started, which an instant is read and written against.
+///
+/// An instant is a moment of the machine's own clock that means nothing as a number, which is
+/// why Bevy reflects it with no form to serialize, so it crosses as the seconds after the moment
+/// the real clock started, as the clock's own first and last update are read.
+fn startup(world: &World) -> Option<Instant> {
+    world.get_resource::<bevy::time::Time<bevy::time::Real>>().map(|time| time.startup())
+}
+
+/// An instant as the seconds after the real clock started, negative before it.
+fn since_startup(at: Instant, world: &World) -> Option<f64> {
+    let start = startup(world)?;
+    Some(match at.checked_duration_since(start) {
+        Some(after) => after.as_secs_f64(),
+        None => -start.duration_since(at).as_secs_f64(),
+    })
 }
 
 /// A whole number or a flag's value, whatever width or signedness it is, with a flag as one or
@@ -344,13 +366,27 @@ fn integer_of(value: &dyn PartialReflect) -> Option<i64> {
     use core::num::*;
     widen_nonzero!(NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroIsize, NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize);
 
+    // A node of an animation graph, as the one animation transitions play, read as its index.
+    #[cfg(feature = "render")]
+    if let Some(node) = value.try_downcast_ref::<bevy::animation::graph::AnimationNodeIndex>() {
+        return i64::try_from(node.index()).ok();
+    }
+
     value.try_downcast_ref::<bool>().map(|on| i64::from(*on))
 }
 
-/// A float as a value of the same width as the one a field holds.
-fn refloated(held: &dyn PartialReflect, number: f64) -> Option<Box<dyn PartialReflect>> {
+/// A float as a value of the same width as the one a field holds, or for an instant the moment
+/// that many seconds after the real clock started, refused where it is not a finite number or
+/// falls outside what the machine's clock holds.
+fn refloated(held: &dyn PartialReflect, number: f64, world: &World) -> Option<Box<dyn PartialReflect>> {
     if held.try_downcast_ref::<f32>().is_some() {
         return Some(Box::new(number as f32));
+    }
+    if held.try_downcast_ref::<Instant>().is_some() {
+        let start = startup(world)?;
+        let apart = core::time::Duration::try_from_secs_f64(number.abs()).ok()?;
+        let at = if number < 0.0 { start.checked_sub(apart) } else { start.checked_add(apart) };
+        return at.map(|at| Box::new(at) as Box<dyn PartialReflect>);
     }
     held.try_downcast_ref::<f64>().map(|_| Box::new(number) as Box<dyn PartialReflect>)
 }
@@ -382,6 +418,14 @@ fn reintegered(held: &dyn PartialReflect, whole: i64) -> Option<Box<dyn PartialR
         NonZeroU8 => u8, NonZeroU16 => u16, NonZeroU32 => u32, NonZeroU64 => u64, NonZeroUsize => usize
     );
 
+    // A graph's node by its index, which the graph keeps as four bytes.
+    #[cfg(feature = "render")]
+    if held.try_downcast_ref::<bevy::animation::graph::AnimationNodeIndex>().is_some() {
+        return u32::try_from(whole)
+            .ok()
+            .map(|index| Box::new(bevy::animation::graph::AnimationNodeIndex::new(index as usize)) as Box<dyn PartialReflect>);
+    }
+
     held.try_downcast_ref::<bool>().map(|_| Box::new(whole != 0) as Box<dyn PartialReflect>)
 }
 
@@ -392,10 +436,11 @@ pub(super) fn read_field<R>(
     type_path: &str,
     path: &str,
     what: &str,
-    read: impl FnOnce(&dyn PartialReflect) -> Option<R>,
+    read: impl FnOnce(&dyn PartialReflect, &World) -> Option<R>,
 ) -> Result<R, i32> {
     let mut found = None;
     let code = with_world(|world| {
+        let world: &World = world;
         let registry = world.resource::<AppTypeRegistry>().clone();
         let registry = registry.read();
         let (_, reflect) = match component_of(&registry, type_path) {
@@ -412,7 +457,7 @@ pub(super) fn read_field<R>(
             Ok(value) => value,
             Err(code) => return code,
         };
-        match read(value) {
+        match read(value, world) {
             Some(value) => {
                 found = Some(value);
                 status::OK
@@ -430,7 +475,7 @@ fn write_field(
     type_path: &str,
     path: &str,
     what: &str,
-    make: impl FnOnce(&dyn PartialReflect) -> Option<Box<dyn PartialReflect>>,
+    make: impl FnOnce(&dyn PartialReflect, &World) -> Option<Box<dyn PartialReflect>>,
 ) -> i32 {
     with_world(|world| {
         let registry = world.resource::<AppTypeRegistry>().clone();
@@ -442,6 +487,7 @@ fn write_field(
 
         let entity = entity_from(entity);
         let value = {
+            let world: &World = world;
             let Ok(found) = world.get_entity(entity) else {
                 return fail(status::NO_ENTITY, "The entity does not exist.");
             };
@@ -452,7 +498,7 @@ fn write_field(
                 Ok(held) => held,
                 Err(code) => return code,
             };
-            match make(held) {
+            match make(held, world) {
                 Some(value) => value,
                 None => return fail(status::INVALID_STATE, format!("'{path}' cannot hold {what}.")),
             }
@@ -510,7 +556,7 @@ pub unsafe extern "C" fn bcs_reflect_set_float(
             return status::NULL_ARG;
         };
         let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
-        write_field(entity, &type_path, &path, "a float", |held| refloated(held, value))
+        write_field(entity, &type_path, &path, "a float", |held, world| refloated(held, value, world))
     })
 }
 
@@ -533,7 +579,7 @@ pub unsafe extern "C" fn bcs_reflect_get_integer(
             return status::NULL_ARG;
         }
         let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
-        match read_field(entity, &type_path, &path, "a whole number or a flag", integer_of) {
+        match read_field(entity, &type_path, &path, "a whole number or a flag", |value, _| integer_of(value)) {
             Ok(value) => {
                 unsafe { out.write(value) };
                 status::OK
@@ -560,6 +606,6 @@ pub unsafe extern "C" fn bcs_reflect_set_integer(
             return status::NULL_ARG;
         };
         let path = unsafe { cstr_to_string(path) }.unwrap_or_default();
-        write_field(entity, &type_path, &path, &format!("{value}"), |held| reintegered(held, value))
+        write_field(entity, &type_path, &path, &format!("{value}"), |held, _| reintegered(held, value))
     })
 }
