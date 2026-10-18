@@ -84,6 +84,34 @@ planet seen from orbit included, with sharp shadows in fog. `SetSunDisk` sets ho
 the sun a directional light stands for looks in the sky, earth's unless set, Mars's smaller, and
 `SunDisk.Off` none, without changing what the light lights.
 
+`Medium` gives the planet an air of the game's own in place of earth's or Mars's, Bevy's
+`ScatteringMedium::new`, a list of terms, each a gas or a dust with the red, green and blue light it
+absorbs and scatters a meter where it is densest, how it thins with height, linearly, exponentially
+or as a layer about one height, and how it scatters by direction, evenly, as a gas or as a dust
+leaning forward. The planet keeps its size from `Planet`, and an air of the game's own needs no
+`DustPhase`. A term that absorbs or scatters less than nothing, or a dust that sends all its light
+one way, is refused with its reason.
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+// A gas that scatters red more than blue, under a sky the color of rust.
+Render.SetAtmosphere(camera, new AtmosphereSettings
+{
+    Medium =
+    [
+        new ScatteringTerm
+        {
+            Scattering = new Vec3(33.1e-6f, 13.6e-6f, 5.8e-6f),
+            Falloff = ScatteringFalloff.Exponential,
+            FalloffScale = 0.13f,
+            Phase = ScatteringPhase.Rayleigh,
+        },
+    ],
+});
+```
+
 `SetSkyLighting` derives an environment map from that atmosphere each frame, so a surface picks up
 the color of what is around it rather than only what a lamp points at it, and the light follows the
 sun without anything being animated. The size it generates is a square cubemap resolution and has to

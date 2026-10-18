@@ -34,4 +34,10 @@ public struct NativeAtmosphereConfig
 
     /// <summary>How the sky is computed, 0 from lookup textures and 1 by marching rays.</summary>
     public int Method;
+
+    /// <summary>How many terms <see cref="Terms"/> holds, 0 for the planet's own air.</summary>
+    public int TermCount;
+
+    /// <summary>Where the terms of an air of the caller's own lie, <see cref="TermCount"/> of them.</summary>
+    public nint Terms;
 }

@@ -83,4 +83,16 @@ public sealed class AtmosphereSettings
     /// Mars's is 0.1. Zero leaves the one that belongs to the medium.
     /// </remarks>
     public float GroundAlbedo { get; set; }
+
+    /// <summary>
+    /// An air of the game's own, its gases and dusts, in place of the planet's, or none for the
+    /// planet's own.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>ScatteringMedium::new</c>, for a planet whose sky earth's and Mars's airs cannot
+    /// be bent into by <see cref="Density"/>. The planet keeps its size from <see cref="Planet"/>,
+    /// and an air of the game's own needs no <see cref="DustPhase"/>. Each term is described by
+    /// numbers, so a falloff or a phase Bevy takes as a curve is not offered.
+    /// </remarks>
+    public IReadOnlyList<ScatteringTerm>? Medium { get; set; }
 }

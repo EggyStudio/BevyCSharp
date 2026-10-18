@@ -1,5 +1,5 @@
-//! The sky a planet's air scatters, earth's or Mars's, and the disk of the sun a directional light
-//! stands for in it.
+//! The sky a planet's air scatters, earth's, Mars's or one of the caller's own, and the disk of the
+//! sun a directional light stands for in it.
 
 use crate::interop::{status, BcsAtmosphereConfig};
 
@@ -28,6 +28,11 @@ const MARS: i32 = 1;
 /// rather than by moving anything. Mars's dust scatters light by a picture of its phase the caller
 /// loads, Bevy's `textures/mars_mie_phase.ktx2`, and a sky of Mars without one is refused with
 /// [`status::NULL_ARG`], since there would be no sky to build at all.
+///
+/// An air of the caller's own, `term_count` terms at `terms`, takes the place of the planet's, the
+/// planet keeping its size, and each term is a gas or a dust of its own amounts, Bevy's
+/// `ScatteringMedium::new`, so an alien planet's sky is described by what its air is. A term that
+/// describes no air is refused with [`status::NULL_ARG`].
 ///
 /// # Safety
 /// `config` must point to a readable [`BcsAtmosphereConfig`].
@@ -75,9 +80,17 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
                     return status::OK;
                 }
 
+                // An air of the caller's own, each term a gas or a dust of its own amounts, in place
+                // of the planet's, which an alien planet needs and the two planets' own airs cannot
+                // be bent into.
+                let own = match own_medium(&config) {
+                    Ok(terms) => terms,
+                    Err(code) => return code,
+                };
+
                 // Mars's dust scatters by the picture of its phase, which has to be there before
-                // the medium is made.
-                let dust_phase = if config.planet == MARS {
+                // the medium is made, and an air of the caller's own needs none.
+                let dust_phase = if config.planet == MARS && own.is_none() {
                     let phase = crate::assets::clone_handle(world, config.dust_phase)
                         .and_then(|handle| handle.try_typed::<bevy::image::Image>().ok());
                     let Some(phase) = phase else {
@@ -89,9 +102,10 @@ pub unsafe extern "C" fn bcs_render_set_atmosphere(
                 };
 
                 let density = if config.density > 0.0 { config.density } else { 1.0 };
-                let medium = match dust_phase {
-                    Some(phase) => ScatteringMedium::mars(256, 256, phase),
-                    None => ScatteringMedium::earth(256, 256),
+                let medium = match (own, dust_phase) {
+                    (Some(terms), _) => ScatteringMedium::new(256, 256, terms).with_label("own_atmosphere"),
+                    (None, Some(phase)) => ScatteringMedium::mars(256, 256, phase),
+                    (None, None) => ScatteringMedium::earth(256, 256),
                 }
                 .with_density_multiplier(density);
 
@@ -231,9 +245,64 @@ pub extern "C" fn bcs_render_set_sun_disk(light: u64, angular_size: f32, intensi
     })
 }
 
+/// The terms of an air of the caller's own, or nothing for the planet's own, refused where one does
+/// not describe an air.
+///
+/// A term absorbs and scatters no less than nothing and a finite amount, thins as one of the three
+/// shapes Bevy describes with numbers, a tent's center and width within the air's height, and leans
+/// its scattering less than wholly forward or back, since a dust that scatters all its light one way
+/// is no phase Bevy can sample. A shape or a phase given by a curve takes a closure, which nothing on
+/// the other side of the bridge can hand over.
+#[cfg(feature = "render")]
+fn own_medium(config: &BcsAtmosphereConfig) -> Result<Option<Vec<bevy::light::atmosphere::ScatteringTerm>>, i32> {
+    use bevy::light::atmosphere::{Falloff, PhaseFunction, ScatteringTerm};
+    use bevy::math::Vec3;
+
+    if config.term_count <= 0 {
+        return Ok(None);
+    }
+    if config.terms.is_null() {
+        return Err(status::NULL_ARG);
+    }
+
+    // SAFETY: the caller hands `term_count` terms at `terms`, which outlive this call.
+    let given = unsafe { core::slice::from_raw_parts(config.terms, config.term_count as usize) };
+    let mut terms = Vec::with_capacity(given.len());
+    for term in given {
+        let amounts = term.absorption.iter().chain(term.scattering.iter());
+        if amounts.into_iter().any(|amount| !amount.is_finite() || *amount < 0.0) {
+            return Err(status::NULL_ARG);
+        }
+
+        let falloff = match term.falloff {
+            0 => Falloff::Linear,
+            1 if term.falloff_a.is_finite() => Falloff::Exponential { scale: term.falloff_a },
+            2 if (0.0..=1.0).contains(&term.falloff_a) && (0.0..=1.0).contains(&term.falloff_b) => Falloff::Tent {
+                center: term.falloff_a,
+                width: term.falloff_b,
+            },
+            _ => return Err(status::NULL_ARG),
+        };
+        let phase = match term.phase {
+            0 => PhaseFunction::Isotropic,
+            1 => PhaseFunction::Rayleigh,
+            2 if term.asymmetry > -1.0 && term.asymmetry < 1.0 => PhaseFunction::Mie { asymmetry: term.asymmetry },
+            _ => return Err(status::NULL_ARG),
+        };
+
+        terms.push(ScatteringTerm {
+            absorption: Vec3::from_array(term.absorption),
+            scattering: Vec3::from_array(term.scattering),
+            falloff,
+            phase,
+        });
+    }
+    Ok(Some(terms))
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::interop::BcsAtmosphereConfig;
+    use crate::interop::{BcsAtmosphereConfig, BcsScatteringTerm};
 
     /// The fields the managed side writes, at the places it writes them.
     #[test]
@@ -242,7 +311,12 @@ mod tests {
         assert_eq!(core::mem::offset_of!(BcsAtmosphereConfig, planet), 24);
         assert_eq!(core::mem::offset_of!(BcsAtmosphereConfig, dust_phase), 28);
         assert_eq!(core::mem::offset_of!(BcsAtmosphereConfig, method), 32);
-        assert_eq!(core::mem::size_of::<BcsAtmosphereConfig>(), 36);
+        assert_eq!(core::mem::offset_of!(BcsAtmosphereConfig, term_count), 36);
+        assert_eq!(core::mem::offset_of!(BcsAtmosphereConfig, terms), 40);
+        assert_eq!(core::mem::size_of::<BcsAtmosphereConfig>(), 48);
+        assert_eq!(core::mem::offset_of!(BcsScatteringTerm, falloff), 24);
+        assert_eq!(core::mem::offset_of!(BcsScatteringTerm, phase), 36);
+        assert_eq!(core::mem::size_of::<BcsScatteringTerm>(), 44);
     }
 
     /// Earth and Mars each sit with their ground at the origin, at any scale.

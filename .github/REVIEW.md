@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9b539deb`, item 27's second step done and nothing else, 19 files, the ABI 282 to
+Reviewed up to `1a6c5d22`, item 27's third step done and the item with it, 19 files, the ABI 283 to
+284. The library's transform, global transform and three visibility types name their components by
+reflected path and carry the description's layout through `DescribedLayouts`, an internal class the
+generator writes from the description's lines for the five, so no signature is copied by hand, and
+the first-use check and the every-layout test hold them as they hold a generated mirror; a new test
+holds each type's layout to the description's line, its size to the signature's and each declared
+field's offset to its path's, the visibility mode's values to the described numbers. The three hand
+layout exports with their imports, the three verify functions and the extra check, and the five
+short-name arms are gone, 426 lines less; the arms for the name-only handles and the interaction
+type stay, and the size check through the component layout stays for a mirror with no described
+layout, the kind a game writes by the documented example, which no mirror of the library's reaches.
+The generator writes no mirror for a component a hand type covers, 95 where 100 were, and
+`PublicApi.txt` loses the five and lists the hand types' interface. COMPONENTS.md's third tier says
+every mirror is held alike and its order reads that every step is built, TODO.md's components
+section says the mirrors are generated, the native component interface's documentation looks a
+component up by path with its example, and the guide, BUILDING.md and COMPONENTS.md name the
+antialiasing mirror where they named the transform's. Checked on the working machine were the whole
+suite, 1,486 passed and 3 skipped of 1,489, and the bridge's 98 headless tests with the bridge
+rebuilt. Right. Next item 28, the atmosphere's custom medium, and the owner's push of the six
+commits since `b50890cb`.
+
+Before it, `9b539deb` came, item 27's second step done and nothing else, 19 files, the ABI 282 to
 283. The bridge's layout answer gives each fieldless enum the number each variant is stored as,
 every variant made through `FromReflect` and its bytes read little-endian since Rust promises no
 discriminant, held to `as` casts by the bridge's test; the schema dump writes a layout line after
@@ -57,27 +78,6 @@ passed and 3 skipped of 1,485, with the bridge rebuilt. Right. Next step two, th
 115 layouts into the description and the generator making mirrors from them, with the suite's test
 and the first-use check against the running bridge; and the owner's push of the three commits since
 `b50890cb`.
-
-Before it, `c3bd5349` came, item 26 done and item 22's eight rewordings with it, 19 files, no export
-changed. The bridge describes a tuple's values by index as a tuple struct's, makes a tuple's default
-from each value's, where choosing `Some` was refused before, and an instant at the present to be
-written over, reads and writes an instant as seconds after the real clock's startup, negative before
-it, and an animation node index as an integer refusing a negative, with three tests of its own; the
-managed walk takes a tuple as a struct, a node index as an integer and an instant as a moment
-through the bridge's float calls, since JSON carries no instant, and the description dumped again
-from an editor session gains 28 lines; the generator makes an `Option` of a tuple a nullable C#
-tuple, a list of them read and written whole through `ReadItems` and `WriteItems` with static
-lambdas, an instant a `TimeSpan` and a node index a `uint` as `Animation.PlayGraph` takes. The
-surface gains the text layout's cursor, the window's pan gesture, the focus's recorded changes, the
-real clock's first and last update and startup, a transition's main animation and animation, and the
-custom cursors' hotspot, `PublicApi.txt` written again; four tests in `ReflectedWrapperTests`, one a
-kind; TODO.md's line is gone, COMPONENTS.md says the three kinds and names the lists of tuples whose
-items still have no record, and `docs/components.md` says each kind. Checked on the working machine
-were the whole suite, 1,479 passed and 3 skipped of 1,482, the bridge rebuilt with the editor,
-meshlets and Solari, and the bridge's tests headless and with render in the container. Right. Next
-the owner's push of `5e750133` and this commit, a word of the owner's typed in the working session
-for the items that wait on one, and item 27, the byte mirrors, chosen at 03:10 from TODO.md as the
-next line that needs no crate and no word, its first step bounded.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -706,30 +706,30 @@ from [SHARED.md](SHARED.md).
     tuples left named in COMPONENTS.md.
 
 27. **Byte mirrors for the components that are plain data, COMPONENTS.md's third tier, TODO.md's
-    next open line, in steps.** Chosen on 2026-10-18 at 03:10 over the smaller atmosphere line, by
-    the list's order, the working session having measured that 141 of the 352 described components
-    hold only fixed-size fields or fieldless enums. The build generates a Rust export a type
-    reporting its size, alignment and each field's offset, which replace the hand layout functions,
-    the generator writes a byte mirror for each type that qualifies, and `bcs_component_id_of`
-    resolves any reflected path, its short-name arms leaving with the hand mirrors. The first step
-    is a commit of its own and bounded, since `offset_of!` from the bridge's crate wants each field
-    public and a Bevy type with private fields does not qualify, two of the five hand mirrors
-    perhaps among them: it counts the qualifying types with public fields, emits their layout
-    exports and the checks that hold them, and reports the count and the types left out before the
-    mirrors are written; the mirrors and the lookup by path follow in commits of their own, the hand
-    mirrors staying for the types that do not qualify. The atmosphere's custom medium, a bridge
-    call, a settings record, a test and the guide's line, is the line after. Changed at 03:10 on the
-    working session's finding, before the first step. `offset_of!` compiles only where every field
-    on the path is public from the bridge's crate and reaches no field inside a variant, so choosing
-    the types would mean parsing Bevy's sources; instead the layout is read through reflection on a
-    value made at its default, a reflected field being a reference into the value whose address less
-    the value's is the offset the compiler chose, private fields included, which a spike on
-    `Transform` gave as 0, 16 and 28, `offset_of!`'s answers, with the size and alignment from the
-    component's registered layout. One export, `bcs_reflect_layout` of a type path, an ABI bump; the
-    mirrors are generated from layouts dumped into the description as the wrappers are, and a test
-    of the suite and a check at a mirror's first use compare the dumped layout with the running
-    bridge's measurement, refusing on a difference, so a Bevy upgrade that moves a field fails a
-    test and not a game's bytes. The first step holds the export against the hand layouts,
+    next open line, in steps, done at `1a6c5d22`.** Chosen on 2026-10-18 at 03:10 over the smaller
+    atmosphere line, by the list's order, the working session having measured that 141 of the 352
+    described components hold only fixed-size fields or fieldless enums. The build generates a Rust
+    export a type reporting its size, alignment and each field's offset, which replace the hand
+    layout functions, the generator writes a byte mirror for each type that qualifies, and
+    `bcs_component_id_of` resolves any reflected path, its short-name arms leaving with the hand
+    mirrors. The first step is a commit of its own and bounded, since `offset_of!` from the bridge's
+    crate wants each field public and a Bevy type with private fields does not qualify, two of the
+    five hand mirrors perhaps among them: it counts the qualifying types with public fields, emits
+    their layout exports and the checks that hold them, and reports the count and the types left out
+    before the mirrors are written; the mirrors and the lookup by path follow in commits of their
+    own, the hand mirrors staying for the types that do not qualify. The atmosphere's custom medium,
+    a bridge call, a settings record, a test and the guide's line, is the line after. Changed at
+    03:10 on the working session's finding, before the first step. `offset_of!` compiles only where
+    every field on the path is public from the bridge's crate and reaches no field inside a variant,
+    so choosing the types would mean parsing Bevy's sources; instead the layout is read through
+    reflection on a value made at its default, a reflected field being a reference into the value
+    whose address less the value's is the offset the compiler chose, private fields included, which
+    a spike on `Transform` gave as 0, 16 and 28, `offset_of!`'s answers, with the size and alignment
+    from the component's registered layout. One export, `bcs_reflect_layout` of a type path, an ABI
+    bump; the mirrors are generated from layouts dumped into the description as the wrappers are,
+    and a test of the suite and a check at a mirror's first use compare the dumped layout with the
+    running bridge's measurement, refusing on a difference, so a Bevy upgrade that moves a field
+    fails a test and not a game's bytes. The first step holds the export against the hand layouts,
     `Transform`'s three offsets, `GlobalTransform`'s four, `Visibility`'s size with its
     discriminants staying on their own function, and the two visibility types whose field is
     private, and counts of the 141 how many have a default and every byte in a reflected field or
@@ -752,7 +752,15 @@ from [SHARED.md](SHARED.md).
     signature, and the generator writes no mirror for a component a hand type covers, the five
     generated at `9b539deb` leaving the surface. The arms for the name-only handles, the child and
     children relations, the world instance and the atmosphere, and for the bridge's own interaction
-    type stay.
+    type stay. The third step is done at `1a6c5d22` as chosen, the hand types kept on the
+    description's layouts and the hand machinery gone, which ends the item, 95 generated mirrors
+    beside the five of the library's.
+
+28. **An atmosphere takes a medium of the game's own, TODO.md's rendering line, one commit.** Chosen
+    on 2026-10-18 as the line after item 27. Bevy's `ScatteringMedium::new` takes a game's own
+    scattering and absorption terms where the bridge offers earth's and Mars's alone; a bridge call,
+    a C# settings record, a test that a custom medium draws otherwise than earth's, and the guide's
+    line.
 
 ## Verdicts
 

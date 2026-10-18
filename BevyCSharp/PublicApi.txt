@@ -402,6 +402,7 @@ readonly struct Bevy.Atmosphere : INativeComponent
 sealed class Bevy.AtmosphereSettings
   AssetHandle DustPhase { get; set; }
   AtmosphereSettings()
+  IReadOnlyList<ScatteringTerm>? Medium { get; set; }
   SkyMethod Method { get; set; }
   SkyPlanet Planet { get; set; }
   SkyQuality Quality { get; set; }
@@ -2514,6 +2515,8 @@ struct Bevy.Interop.NativeAtmosphereConfig
   int Method
   int Planet
   int Quality
+  int TermCount
+  nint Terms
 struct Bevy.Interop.NativeAudioConfig
   float PlaySeconds
   float SpatialScale
@@ -3043,6 +3046,14 @@ struct Bevy.Interop.NativeSamplerConfig.<Address>e__FixedBuffer
   int FixedElementField
 struct Bevy.Interop.NativeSamplerConfig.<Linear>e__FixedBuffer
   int FixedElementField
+struct Bevy.Interop.NativeScatteringTerm
+  Vec3 Absorption
+  Vec3 Scattering
+  float Asymmetry
+  float FalloffA
+  float FalloffB
+  int Falloff
+  int Phase
 struct Bevy.Interop.NativeShaderDefine
   byte* Name
   int Kind
@@ -11068,6 +11079,24 @@ readonly struct Bevy.SaveLoaded : IEquatable<SaveLoaded>
   static bool op_Inequality(SaveLoaded left, SaveLoaded right)
   string Path { get; init; }
   void Deconstruct(out string Path, out IReadOnlyList<Entity> Entities)
+enum Bevy.ScatteringFalloff : int
+  Exponential = 1
+  Linear = 0
+  Tent = 2
+enum Bevy.ScatteringPhase : int
+  Isotropic = 0
+  Mie = 2
+  Rayleigh = 1
+sealed class Bevy.ScatteringTerm
+  ScatteringFalloff Falloff { get; set; }
+  ScatteringPhase Phase { get; set; }
+  ScatteringTerm()
+  Vec3 Absorption { get; set; }
+  Vec3 Scattering { get; set; }
+  float Asymmetry { get; set; }
+  float FalloffScale { get; set; }
+  float TentCenter { get; set; }
+  float TentWidth { get; set; }
 static class Bevy.SceneFile
   const string AssetsPrefix = "assets://"
   const string Format = "bevycsharp.scene.2"

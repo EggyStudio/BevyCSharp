@@ -216,6 +216,32 @@ pub struct BcsAtmosphereConfig {
     pub dust_phase: i32,
     /// How the sky is computed, `0` from lookup textures, Bevy's own, `1` by marching rays.
     pub method: i32,
+    /// How many terms `terms` holds, `0` for the planet's own air.
+    pub term_count: i32,
+    /// The terms of an air of the caller's own in place of the planet's, `term_count` of them.
+    pub terms: *const BcsScatteringTerm,
+}
+
+/// One element of an air of the caller's own, Bevy's `ScatteringTerm`, a gas or a dust that
+/// absorbs and scatters light in its own amounts, lies thicker or thinner with height, and scatters
+/// toward some directions more than others.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct BcsScatteringTerm {
+    /// How much light of red, green and blue it absorbs a meter at its densest.
+    pub absorption: [f32; 3],
+    /// How much light of red, green and blue it scatters a meter at its densest.
+    pub scattering: [f32; 3],
+    /// How it thins with height, `0` linearly, `1` exponentially, `2` as a tent about a height.
+    pub falloff: i32,
+    /// The exponential falloff's scale, or the tent's center, as a share of the air's height.
+    pub falloff_a: f32,
+    /// The tent's width, as a share of the air's height.
+    pub falloff_b: f32,
+    /// How it scatters by direction, `0` evenly, `1` as a gas does, `2` as a dust does.
+    pub phase: i32,
+    /// For a dust, how far its scattering leans forward, from -1 back to 1 forward.
+    pub asymmetry: f32,
 }
 
 /// One debug shape to draw this frame.

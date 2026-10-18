@@ -513,7 +513,10 @@ public static unsafe partial class Render
     /// </remarks>
     /// <param name="camera">The camera that should see the sky.</param>
     /// <param name="settings">How thick the air is, and at what scale.</param>
-    /// <exception cref="ArgumentException">A sky of Mars without its <see cref="AtmosphereSettings.DustPhase"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// A sky of Mars without its <see cref="AtmosphereSettings.DustPhase"/>, or a term of
+    /// <see cref="AtmosphereSettings.Medium"/> that describes no air.
+    /// </exception>
     /// <exception cref="BevyNativeException">
     /// The entity is gone or is not a camera, this build has no renderer, or meshlets run.
     /// </exception>
@@ -531,7 +534,8 @@ public static unsafe partial class Render
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (settings.Planet == SkyPlanet.Mars && !settings.DustPhase.IsValid)
+        var own = settings.Medium is { Count: > 0 } medium ? NativeTerms(medium) : null;
+        if (settings.Planet == SkyPlanet.Mars && own is null && !settings.DustPhase.IsValid)
         {
             throw new ArgumentException(
                 "A sky of Mars needs the picture its dust scatters light by, as DustPhase, which "
@@ -561,9 +565,63 @@ public static unsafe partial class Render
             Method = (int)settings.Method,
         };
 
-        Native.Check(
-            Native.bcs_render_set_atmosphere(camera.Bits, &native),
-            $"setting the atmosphere on {camera}");
+        fixed (NativeScatteringTerm* terms = own)
+        {
+            native.TermCount = own?.Length ?? 0;
+            native.Terms = (nint)terms;
+            Native.Check(
+                Native.bcs_render_set_atmosphere(camera.Bits, &native),
+                $"setting the atmosphere on {camera}");
+        }
+    }
+
+    /// <summary>
+    /// The terms of an air of a game's own as the bridge reads them, each refused with its reason
+    /// where it describes no air.
+    /// </summary>
+    /// <remarks>
+    /// A term absorbs and scatters no less than nothing and a finite amount, a tent lies within the
+    /// air's height, and a dust leans its scattering less than wholly one way, since one that sends
+    /// all its light forward or back is no phase Bevy can sample.
+    /// </remarks>
+    /// <exception cref="ArgumentException">A term that describes no air.</exception>
+    private static NativeScatteringTerm[] NativeTerms(IReadOnlyList<ScatteringTerm> medium)
+    {
+        var terms = new NativeScatteringTerm[medium.Count];
+        for (var i = 0; i < medium.Count; i++)
+        {
+            var term = medium[i] ?? throw new ArgumentException($"Term {i} of the medium is null.", nameof(medium));
+
+            string? why = null;
+            if (!Countable(term.Absorption) || !Countable(term.Scattering))
+                why = "absorbs or scatters less than nothing or no finite amount";
+            else if (!Enum.IsDefined(term.Falloff) || !Enum.IsDefined(term.Phase))
+                why = "names a falloff or a phase there is none of";
+            else if (term.Falloff == ScatteringFalloff.Exponential && !float.IsFinite(term.FalloffScale))
+                why = "thins by a scale that is no finite number";
+            else if (term.Falloff == ScatteringFalloff.Tent && !(term.TentCenter is >= 0f and <= 1f && term.TentWidth is >= 0f and <= 1f))
+                why = "lies as a tent outside the air's height, its center and width from 0 to 1";
+            else if (term.Phase == ScatteringPhase.Mie && !(term.Asymmetry is > -1f and < 1f))
+                why = "leans its scattering wholly one way, where a dust's asymmetry lies between -1 and 1";
+            if (why is not null) throw new ArgumentException($"Term {i} of the medium {why}.", nameof(medium));
+
+            terms[i] = new NativeScatteringTerm
+            {
+                Absorption = term.Absorption,
+                Scattering = term.Scattering,
+                Falloff = (int)term.Falloff,
+                FalloffA = term.Falloff == ScatteringFalloff.Tent ? term.TentCenter : term.FalloffScale,
+                FalloffB = term.TentWidth,
+                Phase = (int)term.Phase,
+                Asymmetry = term.Asymmetry,
+            };
+        }
+
+        return terms;
+
+        static bool Countable(Vec3 amounts) =>
+            float.IsFinite(amounts.X) && float.IsFinite(amounts.Y) && float.IsFinite(amounts.Z)
+            && amounts.X >= 0f && amounts.Y >= 0f && amounts.Z >= 0f;
     }
 
     /// <summary>

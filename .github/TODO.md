@@ -234,10 +234,11 @@ code already in the binary.
   horizontal or vertical cross, laid out as a column when its pixels arrive, or six images of
   their own (`Render.CubemapFromFaces`). A compressed cross would be rearranged block by block. A
   cube cameras draw into, a layer each, is a target made with six layers.
-- **Two media, earth's air and Mars's.** Density, ground albedo, the rendering method and a
-  quality setting are bridged, and Mars's dust scatters by a picture the caller loads, Bevy's
-  `textures/mars_mie_phase.ktx2`. `ScatteringMedium::new` takes arbitrary scattering and absorption
-  terms, which an alien planet needs and a flat config cannot describe.
+- **An air's terms are numbers.** Earth's air, Mars's, and one of the game's own
+  (`AtmosphereSettings.Medium`, Bevy's `ScatteringMedium::new`) are bridged, each term a gas or a
+  dust thinning linearly, exponentially or as a layer and scattering evenly, as a gas or as a dust.
+  A falloff Bevy takes as a curve and a phase it takes as a curve or a picture, as Mars's dust
+  scatters by, cross no bridge as numbers, so an air of the game's own has none of them.
 - **DLSS.** `bevy_anti_alias` carries it behind a `dlss` feature pulling in `dlss_wgpu`, which has
   licensing terms of its own and runs only on an NVIDIA RTX card through Vulkan on Windows or Linux.
   It also needs a `DlssProjectId` inserted before `DefaultPlugins` and a runtime check of whether
