@@ -151,26 +151,11 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
 
         with_world(|world| {
             let id = match name.as_str() {
-                "Transform" => world.register_component::<bevy::transform::components::Transform>(),
-                "GlobalTransform" => {
-                    world.register_component::<bevy::transform::components::GlobalTransform>()
-                }
                 "ChildOf" => world.register_component::<bevy::ecs::hierarchy::ChildOf>(),
                 "Children" => world.register_component::<bevy::ecs::hierarchy::Children>(),
                 "WorldInstance" => {
                     world.register_component::<bevy::world_serialization::WorldInstance>()
                 }
-                // Reached through the prelude rather than its defining crate, because Visibility
-                // moved from bevy_render to bevy_camera in 0.19, and the prelude survives such
-                // moves.
-                #[cfg(feature = "render")]
-                "Visibility" => world.register_component::<bevy::prelude::Visibility>(),
-                #[cfg(feature = "render")]
-                "InheritedVisibility" => {
-                    world.register_component::<bevy::prelude::InheritedVisibility>()
-                }
-                #[cfg(feature = "render")]
-                "ViewVisibility" => world.register_component::<bevy::prelude::ViewVisibility>(),
                 // The managed side's handle for a node that reacts to the pointer, the bridge's own
                 // component since Bevy's `Interaction` was deprecated.
                 #[cfg(feature = "render")]
@@ -180,8 +165,10 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
                     world.register_component::<bevy::light::atmosphere::Atmosphere>()
                 }
                 // Anything else is looked up by its full type path in Bevy's registry, so every
-                // reflected component resolves without an arm here. The arms above stay, because
-                // the mirrors name their components by short name.
+                // reflected component resolves without an arm here, the mirrors of the library and
+                // the generated ones among them. The arms above are for the handles that name a
+                // component without mirroring it, and the bridge's own interaction, which no path
+                // reaches.
                 path => match crate::reflected::component_id(world, path) {
                     Some(id) => id,
                     None => return status::NO_COMPONENT,
@@ -194,11 +181,11 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
 
 /// Reports the size and alignment Bevy uses for a component.
 ///
-/// The managed side mirrors a few of Bevy's structs so it can read and write them in place,
-/// and those mirrors have to match byte for byte. They are easy to get subtly wrong. `Quat` is
-/// SIMD-backed and sixteen-byte aligned on most targets, which pads `Transform` out to 48 bytes
-/// rather than the 40 its fields suggest. Checking the real numbers turns that class of mistake
-/// into an error at startup instead of memory corruption later.
+/// A mirror the description holds the layout of is checked field by field against
+/// `bcs_reflect_layout`. One a game writes for itself, with no such layout, is checked by its size
+/// here, which catches the commonest way such a mirror goes wrong: `Quat` is SIMD-backed and
+/// sixteen-byte aligned on most targets, which pads a struct holding one past the size its fields
+/// suggest, and reading a mirror of the wrong size returns plausible nonsense rather than failing.
 ///
 /// # Safety
 /// `size` and `align` must be writable, or null to skip that output.
@@ -231,126 +218,3 @@ pub unsafe extern "C" fn bcs_component_layout(
     })
 }
 
-/// Reports where Bevy places each field of `Transform`.
-///
-/// A size check alone is not enough to trust a mirrored struct. `Transform` uses Rust's default
-/// representation, which allows the compiler to reorder fields, and it does. The sixteen-byte
-/// aligned `Quat` is moved ahead of the two vectors. The reordered and source-order layouts
-/// happen to be the same total size, so only the offsets tell the two apart.
-///
-/// # Safety
-/// Each pointer must be writable, or null to skip that output.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_transform_layout(
-    size: *mut u32,
-    rotation: *mut u32,
-    translation: *mut u32,
-    scale: *mut u32,
-) -> i32 {
-    crate::interop::guard(|| {
-        use bevy::transform::components::Transform;
-
-        let write = |target: *mut u32, value: usize| {
-            if !target.is_null() {
-                unsafe { target.write(value as u32) };
-            }
-        };
-
-        write(size, core::mem::size_of::<Transform>());
-        write(rotation, core::mem::offset_of!(Transform, rotation));
-        write(translation, core::mem::offset_of!(Transform, translation));
-        write(scale, core::mem::offset_of!(Transform, scale));
-        status::OK
-    })
-}
-
-/// Reports where Bevy places each part of `GlobalTransform`.
-///
-/// The world-space result of propagation, and the one component a parented entity cannot compute
-/// for itself. `GlobalTransform` wraps a private `Affine3A`, so its offsets cannot be taken the way
-/// `Transform`'s are. They come from the affine instead, and the wrapper is confirmed to be nothing
-/// but that affine by comparing the two sizes, because a single-field struct that is exactly the
-/// size of its field has nowhere else to put it.
-///
-/// The offsets matter as much as they do for `Transform`, and for the same reason. `Vec3A` is
-/// SIMD-backed and sixteen-byte aligned, so each of the four vectors occupies sixteen bytes
-/// rather than the twelve its components need, and a mirror packing them tightly would read
-/// every axis but the first from the wrong place while passing a size check on the total.
-///
-/// # Safety
-/// Every output pointer must be writable, or null to skip that output.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_global_transform_layout(
-    size: *mut u32,
-    x_axis: *mut u32,
-    y_axis: *mut u32,
-    z_axis: *mut u32,
-    translation: *mut u32,
-) -> i32 {
-    crate::interop::guard(|| {
-        use bevy::math::{Affine3A, Mat3A};
-        use bevy::transform::components::GlobalTransform;
-
-        if core::mem::size_of::<GlobalTransform>() != core::mem::size_of::<Affine3A>() {
-            return status::INVALID_STATE;
-        }
-
-        let write = |target: *mut u32, value: usize| {
-            if !target.is_null() {
-                unsafe { target.write(value as u32) };
-            }
-        };
-
-        let matrix3 = core::mem::offset_of!(Affine3A, matrix3);
-
-        write(size, core::mem::size_of::<GlobalTransform>());
-        write(x_axis, matrix3 + core::mem::offset_of!(Mat3A, x_axis));
-        write(y_axis, matrix3 + core::mem::offset_of!(Mat3A, y_axis));
-        write(z_axis, matrix3 + core::mem::offset_of!(Mat3A, z_axis));
-        write(translation, core::mem::offset_of!(Affine3A, translation));
-        status::OK
-    })
-}
-
-/// Reports the size of `Visibility` and the discriminant behind each of its variants.
-///
-/// The other mirrors are structs, where a size and a set of offsets pin the layout down. This one
-/// is a fieldless enum, and what has to match is which number stands for which variant. Rust does
-/// not promise a discriminant order for a default-representation enum, and nothing about a one-byte
-/// mirror would look wrong if the engine renumbered them, because hiding an entity would quietly
-/// start meaning something else.
-///
-/// # Safety
-/// Every output pointer must be writable, or null to skip that output.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_visibility_layout(
-    size: *mut u32,
-    inherited: *mut u32,
-    hidden: *mut u32,
-    visible: *mut u32,
-) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (size, inherited, hidden, visible);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use bevy::prelude::Visibility;
-
-            let write = |target: *mut u32, value: usize| {
-                if !target.is_null() {
-                    unsafe { target.write(value as u32) };
-                }
-            };
-
-            write(size, core::mem::size_of::<Visibility>());
-            write(inherited, Visibility::Inherited as usize);
-            write(hidden, Visibility::Hidden as usize);
-            write(visible, Visibility::Visible as usize);
-            status::OK
-        }
-    })
-}

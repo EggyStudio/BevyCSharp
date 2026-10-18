@@ -24,7 +24,7 @@ namespace Bevy;
 /// </code>
 /// </example>
 [StructLayout(LayoutKind.Sequential)]
-public struct Visibility : INativeComponent
+public struct Visibility : INativeComponent, IMirroredLayout
 {
     /// <summary>What this entity asks for.</summary>
     public VisibilityMode Mode;
@@ -42,7 +42,13 @@ public struct Visibility : INativeComponent
     public static Visibility Visible => new(VisibilityMode.Visible);
 
     /// <summary>The engine's name for this component, which is how the generic API finds it.</summary>
-    readonly string INativeComponent.NativeName => "Visibility";
+    readonly string INativeComponent.NativeName => "bevy_camera::visibility::Visibility";
+
+    /// <summary>
+    /// Where Bevy puts each field, as the description holds it, which the bridge's own reading of
+    /// the component is held to the first time the type is used in a world.
+    /// </summary>
+    readonly string IMirroredLayout.Layout => DescribedLayouts.Visibility;
 
     /// <inheritdoc/>
     public readonly override string ToString() => $"Visibility({Mode})";

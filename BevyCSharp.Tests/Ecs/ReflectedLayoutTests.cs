@@ -130,15 +130,17 @@ public sealed class ReflectedLayoutTests
     }
 
     /// <summary>
-    /// A generated mirror reads and writes its component in place, a transform's fields where the
-    /// hand mirror reads them and an antialiasing pass's sensitivity as the variant the wrapper reads.
+    /// A generated mirror reads and writes its component in place, a sharpening pass's strength and
+    /// flags where its wrapper reads them and an antialiasing pass's sensitivity as the variant the
+    /// wrapper reads.
     /// </summary>
     [SkippableFact]
     public void AGeneratedMirrorReadsAndWritesItsComponentInPlace()
     {
         Needs.Renderer();
 
-        Vec3 moved = default, read = default;
+        float read = 0f, strength = 0f;
+        bool sharpened = false, denoised = true;
         string? threshold = null, written = null;
         bool enabled = false;
 
@@ -146,10 +148,12 @@ public sealed class ReflectedLayoutTests
         harness.OnContext(Stage.Startup, ctx =>
         {
             var entity = ctx.Ecs.Spawn();
-            ctx.Ecs.Add(entity, Transform.At(1f, 2f, 3f));
-            read = ctx.Ecs.GetRef<TransformMirror>(entity).Translation;
-            ctx.Ecs.GetRef<TransformMirror>(entity).Translation = new Vec3(4f, 5f, 6f);
-            moved = ctx.Ecs.GetRef<Transform>(entity).Translation;
+            var sharpening = ctx.Ecs.Insert<ContrastAdaptiveSharpeningRef>(entity);
+            sharpening.SharpeningStrength = 0.25f;
+            ref var bytes = ref ctx.Ecs.GetRef<ContrastAdaptiveSharpeningMirror>(entity);
+            (read, sharpened, denoised) = (bytes.SharpeningStrength, bytes.Enabled, bytes.Denoise);
+            bytes.SharpeningStrength = 0.75f;
+            strength = sharpening.SharpeningStrength;
 
             var fxaa = ctx.Ecs.Insert<FxaaRef>(entity);
             ref var mirror = ref ctx.Ecs.GetRef<FxaaMirror>(entity);
@@ -160,8 +164,10 @@ public sealed class ReflectedLayoutTests
 
         harness.Run();
 
-        Assert.Equal(new Vec3(1f, 2f, 3f), read);
-        Assert.Equal(new Vec3(4f, 5f, 6f), moved);
+        Assert.Equal(0.25f, read);
+        Assert.Equal(0.75f, strength);
+        Assert.True(sharpened);
+        Assert.False(denoised);
         Assert.True(enabled);
         Assert.Equal("High", threshold);
         Assert.Equal("Ultra", written);
@@ -191,6 +197,60 @@ public sealed class ReflectedLayoutTests
         Assert.Contains("mirrors it as 48/16;.translation@0:12", refused!.Message);
         Assert.Contains("48/16;.translation@16:12", refused.Message);
     }
+
+    /// <summary>
+    /// Each of the library's own mirrors carries the layout the description holds for its component,
+    /// and declares its fields at the offsets and its size that layout gives, and the visibility its
+    /// numbers, so the type a game uses and the description cannot drift apart.
+    /// </summary>
+    [Fact]
+    public void EachOfTheLibrarysMirrorsHoldsItsComponentWhereTheDescriptionSays()
+    {
+        var described = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Generated", "bevy-components.tsv"))
+            .Select(line => line.Split('\t'))
+            .Where(words => words is ["layout", _, _])
+            .ToDictionary(words => words[1], words => words[2], StringComparer.Ordinal);
+
+        Hold<Transform>(("Rotation", ".rotation"), ("Translation", ".translation"), ("Scale", ".scale"));
+        Hold<GlobalTransform>(
+            ("XAxis", ".0.matrix3.x_axis"), ("YAxis", ".0.matrix3.y_axis"), ("ZAxis", ".0.matrix3.z_axis"), ("Translation", ".0.translation"));
+        Hold<Visibility>(("Mode", ""));
+        Hold<InheritedVisibility>(("Value", ".0"));
+        Hold<ViewVisibility>(("Bits", ".0"));
+
+        var visibility = Placed(described["bevy_camera::visibility::Visibility"])[""];
+        Assert.Equal(
+            Enum.GetValues<VisibilityMode>().ToDictionary(mode => mode.ToString(), mode => (ulong)mode),
+            visibility.Variants);
+
+        void Hold<T>(params (string Field, string Path)[] fields) where T : unmanaged, INativeComponent
+        {
+            var mirror = (INativeComponent)default(T);
+            var layout = ((IMirroredLayout)mirror).Layout;
+            Assert.Equal(described[mirror.NativeName], layout);
+
+            var placed = Placed(layout);
+            Assert.Equal(int.Parse(layout.Split('/')[0], System.Globalization.CultureInfo.InvariantCulture), System.Runtime.CompilerServices.Unsafe.SizeOf<T>());
+            foreach (var (field, path) in fields)
+                Assert.True(placed[path].Offset == (int)Marshal.OffsetOf<T>(field), $"{typeof(T).Name}.{field} is at {Marshal.OffsetOf<T>(field)}, where the description puts '{path}' at {placed[path].Offset}");
+        }
+    }
+
+    /// <summary>Each path of a layout signature, its offset and the numbers of its variants.</summary>
+    private static Dictionary<string, (int Offset, Dictionary<string, ulong> Variants)> Placed(string layout) =>
+        layout.Split(';').Skip(1).ToDictionary(
+            entry => entry[..entry.IndexOf('@')],
+            entry =>
+            {
+                var colon = entry.IndexOf(':');
+                var brace = entry.IndexOf('{');
+                var variants = brace < 0
+                    ? new Dictionary<string, ulong>()
+                    : entry[(brace + 1)..^1].Split(',').Select(pair => pair.Split('='))
+                        .ToDictionary(pair => pair[0], pair => ulong.Parse(pair[1], System.Globalization.CultureInfo.InvariantCulture));
+                return (int.Parse(entry[(entry.IndexOf('@') + 1)..colon], System.Globalization.CultureInfo.InvariantCulture), variants);
+            },
+            StringComparer.Ordinal);
 
     /// <summary>Bevy's transform as it would be had its translation moved to its start.</summary>
     [StructLayout(LayoutKind.Explicit, Size = 48)]

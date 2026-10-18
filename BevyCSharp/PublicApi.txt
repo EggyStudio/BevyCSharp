@@ -2129,7 +2129,7 @@ static class Bevy.Gizmos
   static void Triangle(Vec3 a, Vec3 b, Vec3 c, (float, float, float, float) color, bool inFront = false)
 readonly struct Bevy.Gizmos.BatchScope : IDisposable
   void Dispose()
-struct Bevy.GlobalTransform : INativeComponent
+struct Bevy.GlobalTransform : IMirroredLayout, INativeComponent
   GlobalTransform(Vec3 xAxis, Vec3 yAxis, Vec3 zAxis, Vec3 translation)
   Quat Rotation { get; }
   Transform ToTransform()
@@ -2333,7 +2333,7 @@ sealed class Bevy.InfoAttribute : Attribute
   InfoAttribute(string text)
   NoteKind Kind { get; init; }
   string Text { get; }
-struct Bevy.InheritedVisibility : INativeComponent
+struct Bevy.InheritedVisibility : IMirroredLayout, INativeComponent
   bool IsVisible { get; }
   byte Value
   override string ToString()
@@ -6404,11 +6404,6 @@ readonly struct Bevy.Reflected.GlobalAmbientLightRef : IReflectedComponent<Globa
   bool Remove()
   const string TypePath = "bevy_light::ambient_light::GlobalAmbientLight"
   float Brightness { get; set; }
-struct Bevy.Reflected.GlobalTransformMirror : IMirroredLayout, INativeComponent
-  Vec3 Item0Matrix3XAxis
-  Vec3 Item0Matrix3YAxis
-  Vec3 Item0Matrix3ZAxis
-  Vec3 Item0Translation
 readonly struct Bevy.Reflected.GlobalTransformRef : IReflectedComponent<GlobalTransformRef>, IReflectedWrapper<GlobalTransformRef>
   Entity Entity { get; }
   Vec3 Item0Matrix3XAxis { get; set; }
@@ -6685,8 +6680,6 @@ readonly struct Bevy.Reflected.ImageNodeTextureAtlasLayoutRef : IReflectedCompon
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_render::image::ImageNodeTextureAtlasLayout"
-struct Bevy.Reflected.InheritedVisibilityMirror : IMirroredLayout, INativeComponent
-  bool Value
 readonly struct Bevy.Reflected.InheritedVisibilityRef : IReflectedComponent<InheritedVisibilityRef>, IReflectedWrapper<InheritedVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -9973,10 +9966,6 @@ readonly struct Bevy.Reflected.TransformGizmoStateRef : IReflectedComponent<Tran
   bool Active { get; set; }
   bool Remove()
   const string TypePath = "bevy_gizmos::transform_gizmo::TransformGizmoState"
-struct Bevy.Reflected.TransformMirror : IMirroredLayout, INativeComponent
-  Quat Rotation
-  Vec3 Scale
-  Vec3 Translation
 readonly struct Bevy.Reflected.TransformRef : IReflectedComponent<TransformRef>, IReflectedWrapper<TransformRef>
   Entity Entity { get; }
   Quat Rotation { get; set; }
@@ -10258,8 +10247,6 @@ sealed class Bevy.Reflected.VideoModeValue : IEquatable<VideoModeValue>
   uint RefreshRateMillihertz { get; init; }
   ushort BitDepth { get; init; }
   void Deconstruct(out uint PhysicalSizeX, out uint PhysicalSizeY, out ushort BitDepth, out uint RefreshRateMillihertz)
-struct Bevy.Reflected.ViewVisibilityMirror : IMirroredLayout, INativeComponent
-  byte Value
 readonly struct Bevy.Reflected.ViewVisibilityRef : IReflectedComponent<ViewVisibilityRef>, IReflectedWrapper<ViewVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -10299,12 +10286,6 @@ readonly struct Bevy.Reflected.VisibilityClassRef : IReflectedComponent<Visibili
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::visibility::VisibilityClass"
-struct Bevy.Reflected.VisibilityMirror : IMirroredLayout, INativeComponent
-  VisibilityMirror.Visibility Value
-enum Bevy.Reflected.VisibilityMirror.Visibility : byte
-  Hidden = 1
-  Inherited = 0
-  Visible = 2
 readonly struct Bevy.Reflected.VisibilityRangeRef : IReflectedComponent<VisibilityRangeRef>, IReflectedWrapper<VisibilityRangeRef>
   Entity Entity { get; }
   FloatRange EndMargin { get; set; }
@@ -11956,7 +11937,7 @@ readonly struct Bevy.Track : IEquatable<Track>
   static Track Px(float value)
   static bool op_Equality(Track left, Track right)
   static bool op_Inequality(Track left, Track right)
-struct Bevy.Transform : INativeComponent
+struct Bevy.Transform : IMirroredLayout, INativeComponent
   Quat Rotation
   Transform(Vec3 translation)
   Transform(Vec3 translation, Quat rotation, Vec3 scale)
@@ -12362,12 +12343,12 @@ readonly struct Bevy.ViewImage : IEquatable<ViewImage>
   static bool op_Inequality(ViewImage left, ViewImage right)
   string Name { get; init; }
   void Deconstruct(out string Name, out ShaderImageFormat Format, out float Scale, out bool History, out int Mips, out FramePoint? CopyAt, out bool ClearEachFrame)
-struct Bevy.ViewVisibility : INativeComponent
+struct Bevy.ViewVisibility : IMirroredLayout, INativeComponent
   bool IsVisible { get; }
   bool WasVisible { get; }
   byte Bits
   override string ToString()
-struct Bevy.Visibility : INativeComponent
+struct Bevy.Visibility : IMirroredLayout, INativeComponent
   Visibility(VisibilityMode mode)
   VisibilityMode Mode
   override string ToString()

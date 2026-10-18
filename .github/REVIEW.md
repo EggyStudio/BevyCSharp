@@ -10,29 +10,53 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5f8e4e07`, item 27's first step done and nothing else, 13 files, the ABI 281 to 282.
-`bcs_reflect_layout` of a type path, in a module of its own, answers the type's size and alignment
-from the world's registered layout where it is a component, its kind, and for each reachable field
-path its offset, size, alignment and kind, from a value made at its default through `ReflectDefault`
-or the dynamic build made concrete through `ReflectFromReflect`, a field reflected from outside the
-value refused; the bridge's test holds `Transform`'s three offsets to `offset_of!`'s and refuses an
-unknown path. On the managed side `ReflectedLayouts` measures and parses, `Unmirrored` says why a
-mirror could not hold a layout, a variant's value, a list, map or set, bytes no reflected field
-covers or an overlap, struct by struct so a SIMD vector's trailing bytes are padding, and
-`schema.layouts` counts. `ReflectedLayoutTests` hold the five hand layouts, `Transform`'s rotation,
-translation and scale, `GlobalTransform`'s three axes and translation through its private affine,
-`Visibility`'s size as an enum and the two one-byte visibility types, every one mirrorable, and a
-reason test for padding, a vector's tail, a variant, a gap, a trailing gap and an overlap. The
-count, from an editor session, is 140 candidates holding fixed-size values, 115 mirrorable, 24 left
-out for a variant's value, a `Color` or an enum whose variants hold values, the lights, the clear
-color, the text and border colors, the wireframe configs, the vignette and the sky's configs among
-them, and 1 for an ignored field, the delayed command queue, none lacking a default. COMPONENTS.md's
-third tier says the layout is the compiler's read from a value, gives the count and the reasons and
-marks the dump-and-check bullet as not built, and TODO.md's line says what is left with the command
-for its number. Checked on the working machine was the whole suite, 1,482 passed and 3 skipped of
-1,485, with the bridge rebuilt. Right. Next step two, the dump writing the 115 layouts into the
-description and the generator making mirrors from them, with the suite's test and the first-use
-check against the running bridge; and the owner's push of the three commits since `b50890cb`.
+Reviewed up to `9b539deb`, item 27's second step done and nothing else, 19 files, the ABI 282 to
+283. The bridge's layout answer gives each fieldless enum the number each variant is stored as,
+every variant made through `FromReflect` and its bytes read little-endian since Rust promises no
+discriminant, held to `as` casts by the bridge's test; the schema dump writes a layout line after
+each of the 115 measurable components, a signature of the size, the alignment and each row's offset,
+size and variant numbers; the generator makes an explicit-layout mirror struct beside each wrapper
+for 100 of them, each row at its offset, floats, doubles, booleans, integers by width, the vector
+and quaternion types with a SIMD vector as its 12 bytes of 16, and fieldless enums as C# enums of
+the measured numbers, one a Rust type, while 15 keep their layout without a mirror, 6 holding an
+entity whose raw write would pass the relationship hooks by, 4 a duration and 3 a range in Rust's
+own byte form and 2 a color. A mirror carries its signature, and at its first use in a world the
+component is measured again and a difference refuses the mirror naming both signatures, the id cache
+keyed by name and layout; `ReflectedLayoutTests` hold every layout line of the checked-in
+description to the running bridge's reading, naming each that moved, a transform mirror reading what
+the wrapper wrote and the reverse, an antialiasing mirror reading and writing its enum, and a struct
+with a moved field refused at first use. COMPONENTS.md's third tier says how the mirrors are made
+and checked and which 15 have none, BUILDING.md's dump paragraph names the layouts and the test,
+`docs/components.md` has a paragraph and a block on mirrors, and `PublicApi.txt` carries the
+hundred. Checked on the working machine was the whole suite, 1,485 passed and 3 skipped of 1,488,
+with the bridge rebuilt. Right. Next step three, the lookup of a component by its reflected path
+retiring the hand mirrors where a generated one stands; and the owner's push of the four commits
+since `b50890cb`.
+
+Before it, `5f8e4e07` came, item 27's first step done and nothing else, 13 files, the ABI 281 to
+282. `bcs_reflect_layout` of a type path, in a module of its own, answers the type's size and
+alignment from the world's registered layout where it is a component, its kind, and for each
+reachable field path its offset, size, alignment and kind, from a value made at its default through
+`ReflectDefault` or the dynamic build made concrete through `ReflectFromReflect`, a field reflected
+from outside the value refused; the bridge's test holds `Transform`'s three offsets to
+`offset_of!`'s and refuses an unknown path. On the managed side `ReflectedLayouts` measures and
+parses, `Unmirrored` says why a mirror could not hold a layout, a variant's value, a list, map or
+set, bytes no reflected field covers or an overlap, struct by struct so a SIMD vector's trailing
+bytes are padding, and `schema.layouts` counts. `ReflectedLayoutTests` hold the five hand layouts,
+`Transform`'s rotation, translation and scale, `GlobalTransform`'s three axes and translation
+through its private affine, `Visibility`'s size as an enum and the two one-byte visibility types,
+every one mirrorable, and a reason test for padding, a vector's tail, a variant, a gap, a trailing
+gap and an overlap. The count, from an editor session, is 140 candidates holding fixed-size values,
+115 mirrorable, 24 left out for a variant's value, a `Color` or an enum whose variants hold values,
+the lights, the clear color, the text and border colors, the wireframe configs, the vignette and the
+sky's configs among them, and 1 for an ignored field, the delayed command queue, none lacking a
+default. COMPONENTS.md's third tier says the layout is the compiler's read from a value, gives the
+count and the reasons and marks the dump-and-check bullet as not built, and TODO.md's line says what
+is left with the command for its number. Checked on the working machine was the whole suite, 1,482
+passed and 3 skipped of 1,485, with the bridge rebuilt. Right. Next step two, the dump writing the
+115 layouts into the description and the generator making mirrors from them, with the suite's test
+and the first-use check against the running bridge; and the owner's push of the three commits since
+`b50890cb`.
 
 Before it, `c3bd5349` came, item 26 done and item 22's eight rewordings with it, 19 files, no export
 changed. The bridge describes a tuple's values by index as a tuple struct's, makes a tuple's default
@@ -54,27 +78,6 @@ meshlets and Solari, and the bridge's tests headless and with render in the cont
 the owner's push of `5e750133` and this commit, a word of the owner's typed in the working session
 for the items that wait on one, and item 27, the byte mirrors, chosen at 03:10 from TODO.md as the
 next line that needs no crate and no word, its first step bounded.
-
-Before it, `5e750133` came, item 22 done and nothing else, 8 files, the first item taken since
-Decision 33 lifted. Courtyard, the stress program and the first game name 0.4.129, the newest
-published version, and each built on it from nuget.org; Swarm names 0.5.0, which NuGet reads as the
-lowest published version at or past it, so the first publish of 0.5 restores it with no commit, and
-until then its restore fails naming 0.4.129 as the nearest, its project's comment saying why and how
-it is built meanwhile. `build/games-on-defaults.sh <version>` waits for nuget.org's flat container
-to list the version, twenty minutes at most, then builds each game strict on its own default from
-nuget.org alone into a folder of its own, so the fresh pack under `build/package` cannot stand in,
-prints each game's errors and names a game whose default does not build in an error with the version
-to raise it to, and a version not listed in time in one of its own; run against 0.4.129 it built the
-three and named Swarm. The pack job runs it after the push to nuget.org, when publishing alone, its
-limit 45 minutes where 20 stood, the comment counting the wait and a minute or two a game.
-BUILDING.md's publishing section says what a game's default is, that a raise is one line a game, how
-Swarm is built until 0.5 is published, a pack under a version of its own and new each time since
-NuGet keeps the first package under a version, and what the publish check does. Checked on the
-working machine was the whole suite, 1,475 passed and 3 skipped of 1,478. Right. The pack run of
-`b50890cb` ended whole green at 02:35 with its package, the second in a row, its Windows suite the
-second of three toward Verdict 29 and the feature test's course taking 47 minutes. Next the owner's
-push of this commit, and item 26, the reflected variants, chosen at 02:05 since every other row
-waits on a crate, a word the owner types in the working session or the owner's screens.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -735,7 +738,21 @@ from [SHARED.md](SHARED.md).
     layout is the compiler's, read from a value rather than written at build time. The first step is
     done at `5f8e4e07`, the export holding every hand layout and 115 of 140 candidates mirrorable,
     24 left out for a variant's value and 1 for an ignored field; step two, the dumped layouts, the
-    generated mirrors and the two checks, follows.
+    generated mirrors and the two checks, follows. The second step is done at `9b539deb`, the 115
+    layouts dumped, 100 mirrors generated with 15 kept on their wrappers for an entity, a duration,
+    a range or a color, the suite's test and the first-use check in place; step three, the lookup by
+    path retiring the hand mirrors, follows. Step three's shape, chosen at 04:45 on the working
+    session's reading. The five hand types stay, being the library's own surface, `Transform` with
+    its constructors and methods in 353 files, `GlobalTransform` in 25 and the visibility types in a
+    score, and what retires is the hand machinery under them, the three hand layout exports, the
+    three verify functions with the size check through the component layout, and the five short-name
+    arms of the id lookup, an ABI bump; each hand type names its component by its reflected path and
+    carries the description's layout, so the first-use check and the suite's test hold it as they
+    hold a generated mirror, a test holds each hand type's declared offsets to the description's
+    signature, and the generator writes no mirror for a component a hand type covers, the five
+    generated at `9b539deb` leaving the surface. The arms for the name-only handles, the child and
+    children relations, the world instance and the atmosphere, and for the bridge's own interaction
+    type stay.
 
 ## Verdicts
 

@@ -141,8 +141,11 @@ silent failure rather than a compile error.
 
 ### Tier 3: byte mirrors, generated
 
-The hand mirrors stay the model for what a system iterates every frame, and the generator writes
-them where it can.
+A system that reads a component every frame reads its bytes in place through a mirror, a C# struct
+laid out as Bevy lays the component out. The library's own five (`Transform`, `GlobalTransform` and
+the three visibility types) are written by hand, since games use them with their constructors and
+helpers, and the generator writes the rest where it can. Every one is held to the layout the
+description holds and to the bridge's reading of it in the same way.
 
 - **Only plain data.** A type qualifies when the dump shows only fixed-size fields, such as numbers,
   vectors, quaternions, colors, fieldless enums, and structs of those. A handle, a `Vec`, a
@@ -163,20 +166,26 @@ them where it can.
   `layout` line after each of the 115 components, a signature of its size, its alignment, and each
   row's offset and size with the number each variant of an enum is stored as, which the bridge reads
   by making each variant (`ReflectedLayouts.Signature`). The generator makes a mirror from it
-  (`ReflectedGenerator.Mirrors.cs`), so it needs no running bridge, `TransformMirror` beside
-  `TransformRef`, a struct of explicit layout holding each row at its offset, an enum whose variants
+  (`ReflectedGenerator.Mirrors.cs`), so it needs no running bridge, `FxaaMirror` beside
+  `FxaaRef`, a struct of explicit layout holding each row at its offset, an enum whose variants
   hold nothing as a C# enum of the numbers read, one a Rust type. 100 of the 115 have one, and the
   layouts of the other 15 are written without a mirror, since 6 hold an entity, which a write past
   Bevy's hooks would break the relationships of, 4 a duration and 3 a range, whose bytes are Rust's
-  own form, and 2 a color. A mirror carries its signature (`IMirroredLayout`), and the bridge reads
+  own form, and 2 a color. No mirror is generated for the five the library writes by hand, which
+  carry the description's signature for their components instead (`DescribedLayouts`, generated),
+  and `ReflectedLayoutTests` holds each one's declared offsets and size, and the visibility's
+  numbers, to it. A mirror carries its signature (`IMirroredLayout`), and the bridge reads
   the component again the first time the mirror's id is asked for in a world and refuses a
   difference (`NativeComponents.VerifyMirror`), and `ReflectedLayoutTests` compares every layout the
   description holds with the running bridge's, so a Bevy upgrade that moves a field fails a test
   rather than a game's bytes.
-- **Lookup by type path.** `bcs_component_id_of` resolves any reflected type path through the
-  registry, and keeps its arms only for the short names the hand mirrors use. A generated
-  mirror names its type by path, so it needs no arm, and the arms go with the hand mirrors that a
-  generated one replaces, a type reflection cannot measure keeping its hand mirror. Not built yet.
+- **Lookup by type path.** Every mirror names its component by its reflected type path, which
+  `bcs_component_id_of` finds through the registry. Its short-name arms are left for the handles
+  that name a component without mirroring it (`ChildOf`, `Children`, `WorldInstance`,
+  `Atmosphere`) and for the bridge's own interaction component, which no path reaches. The hand
+  layout exports and the checks written for each hand mirror are gone, the reading of
+  `bcs_reflect_layout` checking all of them, and a mirror a game writes for itself with no layout
+  in the description is checked by its size (`bcs_component_layout`).
 
 The camera, light and mesh exports stay as helpers that set several components at once, and read
 back through tier 1.
@@ -320,7 +329,4 @@ field does, and counts among what shares the asset, items being searched three l
 
 ## Order
 
-Each step is usable on its own and tested before the next.
-
-1. **Tier 3**: the hand mirrors a generated one stands beside replaced by it, with the lookup by
-   path, and the existing mirror tests passing unchanged.
+Every step of this plan is built.

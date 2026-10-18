@@ -19,7 +19,7 @@ namespace Bevy;
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-public struct ViewVisibility : INativeComponent
+public struct ViewVisibility : INativeComponent, IMirroredLayout
 {
     /// <summary>The raw byte Bevy stores, bit 0 this frame, bit 1 the previous frame.</summary>
     public byte Bits;
@@ -31,7 +31,13 @@ public struct ViewVisibility : INativeComponent
     public readonly bool WasVisible => (Bits & 2) != 0;
 
     /// <summary>The engine's name for this component, which is how the generic API finds it.</summary>
-    readonly string INativeComponent.NativeName => "ViewVisibility";
+    readonly string INativeComponent.NativeName => "bevy_camera::visibility::ViewVisibility";
+
+    /// <summary>
+    /// Where Bevy puts each field, as the description holds it, which the bridge's own reading of
+    /// the component is held to the first time the type is used in a world.
+    /// </summary>
+    readonly string IMirroredLayout.Layout => DescribedLayouts.ViewVisibility;
 
     /// <inheritdoc/>
     public readonly override string ToString() => $"ViewVisibility({IsVisible})";

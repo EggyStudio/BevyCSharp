@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 283;
+    internal const int ExpectedAbiVersion = 284;
 
     /// <summary>
     /// The window the <c>bcs_window_*</c> calls address for the primary one, which no entity's
@@ -279,24 +279,6 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_component_layout(int component, uint* size, uint* align);
-
-    /// <summary>Reports where Bevy places each field of Transform.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_transform_layout(
-        uint* size, uint* rotation, uint* translation, uint* scale);
-
-    /// <summary>Reports where Bevy places each part of GlobalTransform.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_global_transform_layout(
-        uint* size, uint* xAxis, uint* yAxis, uint* zAxis, uint* translation);
-
-    /// <summary>Reports the size and variant numbering of Visibility. Render builds only.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_visibility_layout(
-        uint* size, uint* inherited, uint* hidden, uint* visible);
 
     // -- UI (render builds only)
 

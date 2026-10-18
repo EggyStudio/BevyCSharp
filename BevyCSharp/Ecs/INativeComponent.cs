@@ -28,7 +28,7 @@ namespace Bevy;
 /// public struct Visibility : INativeComponent
 /// {
 ///     public byte Mode;
-///     readonly string INativeComponent.NativeName => "Visibility";
+///     readonly string INativeComponent.NativeName => "bevy_camera::visibility::Visibility";
 /// }
 /// </code>
 /// </example>
@@ -36,8 +36,13 @@ public interface INativeComponent
 {
     /// <summary>The Bevy type's name, as the bridge knows it.</summary>
     /// <remarks>
-    /// The bridge resolves a fixed set of names; asking for one it does not expose fails when
-    /// the id is first resolved rather than quietly registering an unrelated component.
+    /// A reflected component's full type path, which the bridge finds in Bevy's registry, or one of
+    /// the few short names it keeps for a component that is named without being mirrored, such as
+    /// <c>ChildOf</c>. Asking for one it does not know fails when the id is first resolved rather
+    /// than quietly registering an unrelated component. A mirror is checked against Bevy's layout
+    /// then too, field by field where the description holds the component's layout, as it does for
+    /// the library's own mirrors and the generated ones in <c>Bevy.Reflected</c>, and by its size
+    /// otherwise.
     /// </remarks>
     string NativeName { get; }
 

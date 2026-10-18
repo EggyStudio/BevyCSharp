@@ -63,6 +63,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             }
             foreach (var union in unions.All)
                 spc.AddSource($"Reflected.Union.{union.Name}.g.cs", EmitUnion(union));
+            spc.AddSource("DescribedLayouts.g.cs", EmitDescribedLayouts(named));
         });
     }
 

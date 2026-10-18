@@ -19,7 +19,7 @@ namespace Bevy;
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-public struct Transform : INativeComponent
+public struct Transform : INativeComponent, IMirroredLayout
 {
     /// <summary>Rotation relative to the parent.</summary>
     public Quat Rotation;
@@ -38,7 +38,13 @@ public struct Transform : INativeComponent
     /// Implemented explicitly, because it answers a question about the type and nothing holding a
     /// transform needs it on the value's surface.
     /// </remarks>
-    readonly string INativeComponent.NativeName => "Transform";
+    readonly string INativeComponent.NativeName => "bevy_transform::components::transform::Transform";
+
+    /// <summary>
+    /// Where Bevy puts each field, as the description holds it, which the bridge's own reading of
+    /// the component is held to the first time the type is used in a world.
+    /// </summary>
+    readonly string IMirroredLayout.Layout => DescribedLayouts.Transform;
 
     private readonly float _tailPaddingA;
     private readonly float _tailPaddingB;

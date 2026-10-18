@@ -66,14 +66,9 @@ Every component Bevy reflects is read and written through Bevy's reflection, by 
 JSON (`ctx.Ecs.GetReflected`, `SetReflected`) or through a typed wrapper generated from a checked-in
 description (`ctx.Ecs.Get<PointLightRef>`), and has a schema built from Bevy's own description, so
 the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and the rest with no
-code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
-
-- **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
-  visibility types) are mirrored by hand, for systems that read them every frame. The layout of any
-  reflected type is read from a value of it, and 115 components of fixed-size values could be
-  mirrored (`./bcs command schema.layouts`), 100 of which have a mirror generated from the layout
-  the description holds and checked against the bridge. The hand mirrors stand beside generated ones
-  of the same components, and replacing them by the lookup by path is the rest of tier 3.
+code per type. A component of plain values is also read and written in place through a mirror
+generated from the same description and checked against the bridge, and
+[COMPONENTS.md](COMPONENTS.md) has nothing left of them.
 
 ### Collections in components
 

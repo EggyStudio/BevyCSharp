@@ -128,9 +128,10 @@ public static class NativeComponents
                     $"The native bridge does not expose Bevy's '{name}' component. It may belong "
                     + "to a feature this build was compiled without, such as the renderer.");
 
-            if (expectedSize > 0) VerifyLayout(name, id, expectedSize);
+            // A mirror the description holds the layout of is held to the bridge's reading of every
+            // field, and one written without it, as a game may write one, to the component's size.
             if (layout is not null) VerifyMirror(name, layout);
-            ExtraCheck(name);
+            else if (expectedSize > 0) VerifyLayout(name, id, expectedSize);
 
             Cache[key] = id;
             return id;
@@ -138,148 +139,12 @@ public static class NativeComponents
     }
 
     /// <summary>
-    /// Runs the further check a mirror needs when its size alone does not pin its layout down.
+    /// Fails loudly if a mirror's layout is not the one the bridge reads for its component.
     /// </summary>
     /// <remarks>
-    /// Keyed on the engine's name rather than passed in by the caller, so the check runs whichever
-    /// route asked for the id, the property below, or <see cref="ComponentType{T}"/> resolving a
-    /// type that implements <see cref="INativeComponent"/>.
-    /// </remarks>
-    private static void ExtraCheck(string name)
-    {
-        switch (name)
-        {
-            case "Transform":
-                VerifyTransform();
-                break;
-            case "GlobalTransform":
-                VerifyGlobalTransform();
-                break;
-            case "Visibility":
-                VerifyVisibility();
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Fails loudly if C#'s mirror of <see cref="Bevy.Transform"/> puts a field in the wrong place.
-    /// </summary>
-    /// <remarks>
-    /// The size check below is necessary but not sufficient. Bevy's <c>Transform</c> uses Rust's
-    /// default representation, so the compiler reorders its fields to save padding, and the
-    /// reordered layout happens to be the same total size as the source order. Only the offsets
-    /// distinguish them, and getting them wrong reads every value from the wrong place while
-    /// looking entirely healthy.
-    /// </remarks>
-    private static unsafe void VerifyTransform()
-    {
-        uint size;
-        uint rotation;
-        uint translation;
-        uint scale;
-        Native.Check(
-            Native.bcs_transform_layout(&size, &rotation, &translation, &scale),
-            "reading the layout of 'Transform'");
-
-        Expect("size", size, Bevy.Transform.NativeSize);
-        Expect("rotation", rotation, Bevy.Transform.RotationOffset);
-        Expect("translation", translation, Bevy.Transform.TranslationOffset);
-        Expect("scale", scale, Bevy.Transform.ScaleOffset);
-
-        static void Expect(string part, uint actual, int expected)
-        {
-            if (actual == (uint)expected) return;
-
-            throw new BevyNativeException(
-                NativeStatus.InvalidState,
-                $"Bevy places Transform's {part} at {actual}, but this build of BevyCSharp "
-                + $"mirrors it at {expected}. Using the mirror would read every field from the "
-                + "wrong place, so it is refused. The engine's field layout has changed.");
-        }
-    }
-
-    /// <summary>
-    /// Fails loudly if C#'s mirror of <see cref="Bevy.GlobalTransform"/> is packed wrongly.
-    /// </summary>
-    /// <remarks>
-    /// The same class of mistake as <see cref="VerifyTransform"/>, from a different cause. Each of
-    /// the four vectors is a sixteen-byte-aligned <c>Vec3A</c>, so it occupies four floats and
-    /// uses three. A mirror packing them tightly is 48 bytes rather than 64, which the size check
-    /// would catch; one that pads them but pads them differently would not.
-    /// </remarks>
-    private static unsafe void VerifyGlobalTransform()
-    {
-        uint size;
-        uint xAxis;
-        uint yAxis;
-        uint zAxis;
-        uint translation;
-        Native.Check(
-            Native.bcs_global_transform_layout(&size, &xAxis, &yAxis, &zAxis, &translation),
-            "reading the layout of 'GlobalTransform'");
-
-        Expect("size", size, Bevy.GlobalTransform.NativeSize);
-        Expect("x axis", xAxis, Bevy.GlobalTransform.XAxisOffset);
-        Expect("y axis", yAxis, Bevy.GlobalTransform.YAxisOffset);
-        Expect("z axis", zAxis, Bevy.GlobalTransform.ZAxisOffset);
-        Expect("translation", translation, Bevy.GlobalTransform.TranslationOffset);
-
-        static void Expect(string part, uint actual, int expected)
-        {
-            if (actual == (uint)expected) return;
-
-            throw new BevyNativeException(
-                NativeStatus.InvalidState,
-                $"Bevy places GlobalTransform's {part} at {actual}, but this build of BevyCSharp "
-                + $"mirrors it at {expected}. Using the mirror would read the world-space "
-                + "position from the wrong place, so it is refused. The engine's field layout "
-                + "has changed.");
-        }
-    }
-
-    /// <summary>
-    /// Fails loudly if C# has <see cref="Bevy.VisibilityMode"/>'s numbers wrong.
-    /// </summary>
-    /// <remarks>
-    /// The struct mirrors are checked by size and offset. This one is a fieldless enum, where what
-    /// has to match is which number stands for which variant, and a one-byte mirror looks equally
-    /// healthy whichever way they are numbered. Rust promises no particular order for a
-    /// default-representation enum, so getting it wrong would leave <c>Hidden</c> quietly meaning
-    /// something else.
-    /// </remarks>
-    private static unsafe void VerifyVisibility()
-    {
-        uint size;
-        uint inherited;
-        uint hidden;
-        uint visible;
-        Native.Check(
-            Native.bcs_visibility_layout(&size, &inherited, &hidden, &visible),
-            "reading the layout of 'Visibility'");
-
-        Expect("sizes Visibility at", size, sizeof(Bevy.VisibilityMode));
-        Expect("numbers Inherited", inherited, (int)Bevy.VisibilityMode.Inherited);
-        Expect("numbers Hidden", hidden, (int)Bevy.VisibilityMode.Hidden);
-        Expect("numbers Visible", visible, (int)Bevy.VisibilityMode.Visible);
-
-        static void Expect(string part, uint actual, int expected)
-        {
-            if (actual == (uint)expected) return;
-
-            throw new BevyNativeException(
-                NativeStatus.InvalidState,
-                $"Bevy {part} {actual}, but this build of BevyCSharp mirrors it as {expected}. "
-                + "Using the mirror would ask for the wrong visibility, so it is refused. The "
-                + "engine's definition has changed.");
-        }
-    }
-
-    /// <summary>
-    /// Fails loudly if a generated mirror's layout is not the one the bridge reads for its component.
-    /// </summary>
-    /// <remarks>
-    /// A generated mirror's fields stand where the description says the compiler put them when the
-    /// description was written. The bridge reads the layout again from a value of the component
+    /// A mirror's fields stand where the description says the compiler put them when the
+    /// description was written, a generated mirror's and the library's own transform and visibility
+    /// types' alike. The bridge reads the layout again from a value of the component
     /// (<see cref="ReflectedLayouts"/>), at the same paths, and every offset, size and enum number
     /// has to agree, so a Bevy release that moved a field refuses the mirror here rather than letting
     /// it read one field's bytes as another's.

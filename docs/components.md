@@ -191,12 +191,12 @@ What a wrapper adds over a string path is the compiler, because a field Bevy ren
 compiling once the description is regenerated after an upgrade, rather than failing on the day the
 line runs. It goes through the same reflection, so it costs what a string path costs.
 
-A component of plain values also has a mirror beside its wrapper, `TransformMirror` beside
-`TransformRef`, a struct of its bytes as they lie, so `GetRef` reads and writes the component itself
-and a query reads a column of it, at the cost of reading memory, for a system that reads it every
-frame. A mirror holds numbers, flags, vectors, quaternions and enums whose variants hold nothing,
-each at the offset the bridge read the compiler put it, and is refused the first time it is used if
-the running bridge reads its component otherwise:
+A component of plain values also has a mirror beside its wrapper, `FxaaMirror` beside `FxaaRef`, a
+struct of its bytes as they lie, as `Transform` is one the library writes itself, so `GetRef` reads
+and writes the component itself and a query reads a column of it, at the cost of reading memory, for
+a system that reads it every frame. A mirror holds numbers, flags, vectors, quaternions and enums
+whose variants hold nothing, each at the offset the bridge read the compiler put it, and is refused
+the first time it is used if the running bridge reads its component otherwise:
 
 <!-- compiled with:
 Entity entity = default;

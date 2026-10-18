@@ -32,7 +32,7 @@ namespace Bevy;
 /// </code>
 /// </example>
 [StructLayout(LayoutKind.Sequential)]
-public struct GlobalTransform : INativeComponent
+public struct GlobalTransform : INativeComponent, IMirroredLayout
 {
     /// <summary>The entity's local X axis in world space, scaled by its world scale.</summary>
     public Vec3 XAxis;
@@ -55,7 +55,13 @@ public struct GlobalTransform : INativeComponent
     private float _padTranslation;
 
     /// <summary>The engine's name for this component, which is how the generic API finds it.</summary>
-    readonly string INativeComponent.NativeName => "GlobalTransform";
+    readonly string INativeComponent.NativeName => "bevy_transform::components::global_transform::GlobalTransform";
+
+    /// <summary>
+    /// Where Bevy puts each field, as the description holds it, which the bridge's own reading of
+    /// the component is held to the first time the type is used in a world.
+    /// </summary>
+    readonly string IMirroredLayout.Layout => DescribedLayouts.GlobalTransform;
 
     /// <summary>The size Bevy gives this struct, which the padding above reproduces.</summary>
     internal const int NativeSize = 64;
