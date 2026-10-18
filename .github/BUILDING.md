@@ -190,8 +190,12 @@ dotnet build
 ```
 
 The file's diff is the list of what Bevy changed in its components. A field a game used that Bevy
-renamed or removed stops compiling at the property that named it, rather than failing on the day
-the line runs.
+renamed or removed stops compiling at the property that named it, rather than failing on the day the
+line runs. The dump also writes the layout of each component a byte mirror can hold, where the
+compiler put each field, which the generator makes the mirrors in `Bevy.Reflected` from
+(`TransformMirror` and the rest), and `ReflectedLayoutTests` fails while a layout the file holds is
+not the one the built bridge reads, so an upgrade that moved a field is found by the suite and the
+dump written again.
 
 ## Platforms
 

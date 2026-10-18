@@ -533,6 +533,22 @@ fn a_variant_holding_a_list_is_chosen_with_the_list_empty() {
     assert_eq!(vec![Filled::Many(vec![])], app.world().get::<Listed>(entity).unwrap().fills);
 }
 
+#[derive(Component, Reflect, Default, Clone, Copy)]
+#[reflect(Component, Default)]
+enum Lamp {
+    #[default]
+    Off,
+    Low,
+    High,
+}
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+struct Lit {
+    lamp: Lamp,
+    level: f32,
+}
+
 #[derive(Component, Reflect, Default)]
 #[reflect(Component, Default)]
 struct Paired {
@@ -678,6 +694,19 @@ fn a_types_layout_is_read_from_a_value_of_it() {
     assert_eq!("variant", row(&probe, ".mode")["kind"]);
     assert_eq!("struct", row(&probe, ".inner")["kind"]);
     assert_eq!("list", row(&probe, ".speeds")["kind"]);
+
+    // An enum none of whose variants holds a value says the number each is stored as, read from a
+    // value of each, as Rust's own casts give them.
+    app.register_type::<Lit>();
+    let lit = read(&mut app, "bevy_csharp::reflected::tests::Lit");
+    let lamp = row(&lit, ".lamp");
+    assert_eq!("enum", lamp["kind"]);
+    for (name, number) in [("Off", Lamp::Off as u64), ("Low", Lamp::Low as u64), ("High", Lamp::High as u64)] {
+        assert_eq!(number, lamp["variants"][name].as_u64().unwrap(), "{name}");
+    }
+    let alone = read(&mut app, "bevy_csharp::reflected::tests::Lamp");
+    assert_eq!("enum", alone["kind"]);
+    assert_eq!(Lamp::High as u64, alone["variants"]["High"].as_u64().unwrap());
 
     let unknown = c("bevy_csharp::reflected::tests::Nothing");
     let refused = loan_world(app.world_mut(), || unsafe { bcs_reflect_layout(unknown.as_ptr(), core::ptr::null_mut(), 0) });

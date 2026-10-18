@@ -92,10 +92,14 @@ public static class NativeComponents
     /// <param name="expectedSize">
     /// The size C#'s mirror occupies, or 0 when there is no mirror to check.
     /// </param>
+    /// <param name="layout">
+    /// For a generated mirror, the layout it was generated from, which the bridge's reading has to
+    /// match, or nothing for a mirror written by hand.
+    /// </param>
     /// <exception cref="BevyNativeException">
     /// The component is unknown to this build, or its layout does not match the mirror.
     /// </exception>
-    internal static int Resolve(string name, int expectedSize)
+    internal static int Resolve(string name, int expectedSize, string? layout = null)
     {
         lock (Gate)
         {
@@ -106,7 +110,10 @@ public static class NativeComponents
                 _generation = ComponentRegistry.Generation;
             }
 
-            if (Cache.TryGetValue(name, out var cached)) return cached;
+            // A mirror is cached under its layout as well as its name, so a second mirror of the same
+            // component, generated from another layout or written by hand, is checked for itself.
+            var key = layout is null ? name : name + "\n" + layout;
+            if (Cache.TryGetValue(key, out var cached)) return cached;
 
             var id = Native.bcs_component_id_of(name);
             if (id == NativeStatus.NoWorld)
@@ -122,9 +129,10 @@ public static class NativeComponents
                     + "to a feature this build was compiled without, such as the renderer.");
 
             if (expectedSize > 0) VerifyLayout(name, id, expectedSize);
+            if (layout is not null) VerifyMirror(name, layout);
             ExtraCheck(name);
 
-            Cache[name] = id;
+            Cache[key] = id;
             return id;
         }
     }
@@ -264,6 +272,31 @@ public static class NativeComponents
                 + "Using the mirror would ask for the wrong visibility, so it is refused. The "
                 + "engine's definition has changed.");
         }
+    }
+
+    /// <summary>
+    /// Fails loudly if a generated mirror's layout is not the one the bridge reads for its component.
+    /// </summary>
+    /// <remarks>
+    /// A generated mirror's fields stand where the description says the compiler put them when the
+    /// description was written. The bridge reads the layout again from a value of the component
+    /// (<see cref="ReflectedLayouts"/>), at the same paths, and every offset, size and enum number
+    /// has to agree, so a Bevy release that moved a field refuses the mirror here rather than letting
+    /// it read one field's bytes as another's.
+    /// </remarks>
+    private static void VerifyMirror(string name, string layout)
+    {
+        var measured = ReflectedLayouts.Measure(name) is { } read
+            ? ReflectedLayouts.Signature(read, ReflectedLayouts.PathsOf(layout))
+            : null;
+        if (measured == layout) return;
+
+        throw new BevyNativeException(
+            NativeStatus.InvalidState,
+            $"Bevy lays '{name}' out as {measured ?? "something without one of its fields"}, but this build of "
+            + $"BevyCSharp mirrors it as {layout}. Using the mirror would read a field from another's bytes, "
+            + "so it is refused. The engine's layout has changed since the description was written, and "
+            + "the schema dump writes it again (BUILDING.md).");
     }
 
     /// <summary>

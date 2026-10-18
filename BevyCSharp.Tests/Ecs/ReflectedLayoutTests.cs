@@ -1,4 +1,7 @@
+using System.Runtime.InteropServices;
 using Bevy;
+using Bevy.Interop;
+using Bevy.Reflected;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -90,6 +93,114 @@ public sealed class ReflectedLayoutTests
 
         var overlapping = Of(8, 4, new(".first", 0, 8, 4, "value"), new(".second", 4, 4, 4, "value"));
         Assert.Contains("'.second' overlaps", ReflectedLayouts.Unmirrored(overlapping));
+    }
+
+    /// <summary>
+    /// Every layout the description holds is the one the running bridge reads, so a Bevy upgrade
+    /// that moves a field fails here, with each component that moved named, before a mirror reads a
+    /// game's bytes from where the field was.
+    /// </summary>
+    [SkippableFact]
+    public void EveryLayoutTheDescriptionHoldsIsTheOneTheBridgeReads()
+    {
+        Needs.Renderer();
+
+        var dumped = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Generated", "bevy-components.tsv"))
+            .Select(line => line.Split('\t'))
+            .Where(words => words is ["layout", _, _])
+            .ToDictionary(words => words[1], words => words[2], StringComparer.Ordinal);
+        var moved = new List<string>();
+
+        using var harness = new EngineHarness(frames: 1);
+        harness.On(Stage.Startup, _ =>
+        {
+            foreach (var (type, layout) in dumped)
+            {
+                var read = ReflectedLayouts.Measure(type) is { } measured
+                    ? ReflectedLayouts.Signature(measured, ReflectedLayouts.PathsOf(layout))
+                    : null;
+                if (read != layout) moved.Add($"{type}: described {layout}, read {read}");
+            }
+        });
+
+        harness.Run();
+
+        Assert.True(dumped.Count > 100, $"the description holds {dumped.Count} layouts");
+        Assert.True(moved.Count == 0, "Layouts the bridge reads otherwise than the description:\n" + string.Join('\n', moved));
+    }
+
+    /// <summary>
+    /// A generated mirror reads and writes its component in place, a transform's fields where the
+    /// hand mirror reads them and an antialiasing pass's sensitivity as the variant the wrapper reads.
+    /// </summary>
+    [SkippableFact]
+    public void AGeneratedMirrorReadsAndWritesItsComponentInPlace()
+    {
+        Needs.Renderer();
+
+        Vec3 moved = default, read = default;
+        string? threshold = null, written = null;
+        bool enabled = false;
+
+        using var harness = new EngineHarness(frames: 1);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, Transform.At(1f, 2f, 3f));
+            read = ctx.Ecs.GetRef<TransformMirror>(entity).Translation;
+            ctx.Ecs.GetRef<TransformMirror>(entity).Translation = new Vec3(4f, 5f, 6f);
+            moved = ctx.Ecs.GetRef<Transform>(entity).Translation;
+
+            var fxaa = ctx.Ecs.Insert<FxaaRef>(entity);
+            ref var mirror = ref ctx.Ecs.GetRef<FxaaMirror>(entity);
+            (enabled, threshold) = (mirror.Enabled, mirror.EdgeThreshold.ToString());
+            mirror.EdgeThreshold = FxaaMirror.Sensitivity.Ultra;
+            written = fxaa.EdgeThreshold.ToString();
+        });
+
+        harness.Run();
+
+        Assert.Equal(new Vec3(1f, 2f, 3f), read);
+        Assert.Equal(new Vec3(4f, 5f, 6f), moved);
+        Assert.True(enabled);
+        Assert.Equal("High", threshold);
+        Assert.Equal("Ultra", written);
+    }
+
+    /// <summary>
+    /// A mirror whose layout is not the one the bridge reads is refused the first time its id is
+    /// asked for, naming the layout read and the one it holds, rather than reading one field's bytes
+    /// as another's.
+    /// </summary>
+    [SkippableFact]
+    public void AMirrorWhoseLayoutMovedIsRefusedAtFirstUse()
+    {
+        Needs.Renderer();
+
+        BevyNativeException? refused = null;
+        using var harness = new EngineHarness(frames: 1);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, Transform.Identity);
+            refused = Assert.Throws<BevyNativeException>(() => ctx.Ecs.Has<MovedTransform>(entity));
+        });
+
+        harness.Run();
+
+        Assert.Contains("mirrors it as 48/16;.translation@0:12", refused!.Message);
+        Assert.Contains("48/16;.translation@16:12", refused.Message);
+    }
+
+    /// <summary>Bevy's transform as it would be had its translation moved to its start.</summary>
+    [StructLayout(LayoutKind.Explicit, Size = 48)]
+    private struct MovedTransform : INativeComponent, IMirroredLayout
+    {
+        [FieldOffset(0)] public Vec3 Translation;
+
+        readonly string INativeComponent.NativeName => "bevy_transform::components::transform::Transform";
+
+        readonly string IMirroredLayout.Layout => "48/16;.translation@0:12";
     }
 
     /// <summary>

@@ -71,8 +71,9 @@ code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
   visibility types) are mirrored by hand, for systems that read them every frame. The layout of any
   reflected type is read from a value of it, and 115 components of fixed-size values could be
-  mirrored (`./bcs command schema.layouts`). Generating the mirrors from layouts dumped into the
-  description, with their checks against the bridge and the lookup by path, is the rest of tier 3.
+  mirrored (`./bcs command schema.layouts`), 100 of which have a mirror generated from the layout
+  the description holds and checked against the bridge. The hand mirrors stand beside generated ones
+  of the same components, and replacing them by the lookup by path is the rest of tier 3.
 
 ### Collections in components
 

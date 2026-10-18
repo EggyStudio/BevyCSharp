@@ -1,0 +1,218 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+
+namespace Bevy.Generator;
+
+public sealed partial class ReflectedGenerator
+{
+    /// <summary>One path of a component's layout, as its <c>layout</c> line gives it.</summary>
+    /// <param name="Offset">Its first byte, from the component's start.</param>
+    /// <param name="Size">How many bytes it takes.</param>
+    /// <param name="Variants">For an enum, each variant's name and the number it is stored as, in the order of the numbers.</param>
+    private sealed record Placed(int Offset, int Size, List<KeyValuePair<string, ulong>> Variants);
+
+    /// <summary>
+    /// The size and each path of a layout signature, <c>48/16;.translation@16:12;...</c>, or nothing
+    /// for one that does not read as such.
+    /// </summary>
+    private static (int Size, Dictionary<string, Placed> Paths)? ParseLayout(string layout)
+    {
+        var entries = layout.Split(';');
+        var head = entries[0].Split('/');
+        if (head.Length != 2 || !int.TryParse(head[0], NumberStyles.None, CultureInfo.InvariantCulture, out var size)) return null;
+
+        var paths = new Dictionary<string, Placed>(StringComparer.Ordinal);
+        foreach (var entry in entries.Skip(1))
+        {
+            var at = entry.IndexOf('@');
+            var colon = entry.IndexOf(':', at + 1);
+            var brace = entry.IndexOf('{', colon + 1);
+            if (at < 0 || colon < 0) return null;
+
+            var offsetText = entry.Substring(at + 1, colon - at - 1);
+            var sizeText = brace < 0 ? entry.Substring(colon + 1) : entry.Substring(colon + 1, brace - colon - 1);
+            if (!int.TryParse(offsetText, NumberStyles.None, CultureInfo.InvariantCulture, out var offset)
+                || !int.TryParse(sizeText, NumberStyles.None, CultureInfo.InvariantCulture, out var length))
+                return null;
+
+            var variants = new List<KeyValuePair<string, ulong>>();
+            if (brace >= 0)
+            {
+                foreach (var pair in entry.Substring(brace + 1, entry.Length - brace - 2).Split(','))
+                {
+                    var equals = pair.IndexOf('=');
+                    if (equals < 0 || !ulong.TryParse(pair.Substring(equals + 1), NumberStyles.None, CultureInfo.InvariantCulture, out var number))
+                        return null;
+                    variants.Add(new KeyValuePair<string, ulong>(pair.Substring(0, equals), number));
+                }
+            }
+
+            paths[entry.Substring(0, at)] = new Placed(offset, length, variants);
+        }
+
+        return (size, paths);
+    }
+
+    /// <summary>The mirror's name, its wrapper's with <c>Mirror</c> where the wrapper's has <c>Ref</c>.</summary>
+    private static string MirrorName(string wrapper)
+    {
+        var at = wrapper.LastIndexOf("Ref", StringComparison.Ordinal);
+        return at < 0 ? wrapper + "Mirror" : wrapper.Substring(0, at) + "Mirror" + wrapper.Substring(at + 3);
+    }
+
+    /// <summary>
+    /// The C# type a mirror holds a field's bytes as, or nothing where the bytes are not a value C#
+    /// can hold as they lie.
+    /// </summary>
+    /// <remarks>
+    /// A number, a flag, a vector and a quaternion are held as they are, a vector of three floats a
+    /// SIMD register holds in sixteen bytes as the twelve it uses. An entity is left out, since
+    /// writing one past Bevy's hooks breaks the relationships it keeps, and so is one of Rust's
+    /// integers that hold no zero, which a zero written as bytes would break, a duration, an
+    /// instant, a range and a color, whose bytes are Rust's own form. An enum is a C# enum of its
+    /// own, with the numbers the bridge read for each variant.
+    /// </remarks>
+    private static string? MirroredType(FieldModel field, Placed placed)
+    {
+        if (field.Rust is Duration or Instant || field.Rust == Range || field.Rust.Contains("NonZero")) return null;
+
+        var (type, size) = field.Kind switch
+        {
+            "Float" => ("float", 4),
+            "Double" => ("double", 8),
+            "Bool" => ("bool", 1),
+            "Vec2" => ("global::Bevy.Vec2", 8),
+            "Vec3" => ("global::Bevy.Vec3", 12),
+            "Vec4" => ("global::Bevy.Vec4", 16),
+            "Quat" => ("global::Bevy.Quat", 16),
+            "Int" => (TypeOf(field), WidthOf(TypeOf(field))),
+            _ => ((string?)null, 0),
+        };
+
+        if (type is null) return null;
+        if (field.Kind == "Vec3" && field.Rust.EndsWith("Vec3A", StringComparison.Ordinal)) return placed.Size == 16 ? type : null;
+        return placed.Size == size ? type : null;
+    }
+
+    /// <summary>The width in bytes of a C# integer type the description gives a whole number.</summary>
+    private static int WidthOf(string? type) => type switch
+    {
+        "byte" or "sbyte" => 1,
+        "short" or "ushort" => 2,
+        "int" or "uint" => 4,
+        "long" or "ulong" => 8,
+        _ => 0,
+    };
+
+    /// <summary>The C# integer an enum of a width is stored as.</summary>
+    private static string? Underlying(int size) => size switch
+    {
+        1 => "byte",
+        2 => "ushort",
+        4 => "uint",
+        8 => "ulong",
+        _ => null,
+    };
+
+    /// <summary>
+    /// A byte mirror of a component, its fields at the offsets its <c>layout</c> line gives, or
+    /// nothing for a component with no layout or with a field a mirror cannot hold.
+    /// </summary>
+    private static string? EmitMirror(ComponentModel component)
+    {
+        if (component.Layout is not { Length: > 0 } layout || ParseLayout(layout) is not { } parsed) return null;
+
+        var name = MirrorName(component.Type);
+        var used = new HashSet<string>(StringComparer.Ordinal) { name };
+        var fields = new StringBuilder();
+        var enums = new StringBuilder();
+
+        // One enum a Rust type, which every field of that type holds, as an antialiasing pass's two
+        // thresholds are both its sensitivity.
+        var declared = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var field in component.Fields.Items)
+        {
+            if (!parsed.Paths.TryGetValue(field.Reflect, out var placed)) return null;
+
+            var property = field.Name is "0" or "value" ? "Value" : Identifier(field.Name);
+            var unique = property;
+            for (var n = 2; !used.Add(unique); n++) unique = property + n;
+
+            string type;
+            if (field.Kind == "Enum" && declared.TryGetValue(field.Rust, out var known))
+            {
+                type = known;
+            }
+            else if (field.Kind == "Enum")
+            {
+                if (placed.Variants.Count == 0 || Underlying(placed.Size) is not { } underlying) return null;
+
+                // Called what its type is, or with Variant after where a field is called that, as a
+                // wrapper's nested enums are.
+                var enumName = Identifier(Last(field.Rust));
+                if (used.Contains(enumName)) enumName += "Variant";
+                for (var n = 2; !used.Add(enumName); n++) enumName = Identifier(Last(field.Rust)) + "Variant" + n;
+                var members = placed.Variants.Select(v =>
+                    $"        /// <summary>The variant <c>{Xml(Last(field.Rust))}::{Xml(v.Key)}</c>.</summary>\n"
+                    + $"        {Escaped(v.Key)} = {v.Value.ToString(CultureInfo.InvariantCulture)},");
+                enums.Append($$"""
+
+                        /// <summary>Bevy's <c>{{Xml(field.Rust)}}</c>, each variant the number the bridge read it stored as.</summary>
+                        public enum {{enumName}} : {{underlying}}
+                        {
+                    {{string.Join("\n\n", members)}}
+                        }
+
+                    """);
+                type = enumName;
+                declared[field.Rust] = enumName;
+            }
+            else if (MirroredType(field, placed) is { } held)
+            {
+                type = held;
+            }
+            else
+            {
+                return null;
+            }
+
+            fields.Append($$"""
+
+                    /// <summary>Bevy's <c>{{Xml(field.Name.Length == 0 ? Last(component.Path) : field.Name)}}</c>.</summary>
+                    [global::System.Runtime.InteropServices.FieldOffset({{placed.Offset.ToString(CultureInfo.InvariantCulture)}})]
+                    public {{type}} {{unique}};
+
+                """);
+        }
+
+        return $$"""
+            // <auto-generated/>
+            #nullable enable
+
+            namespace Bevy.Reflected;
+
+            /// <summary>Bevy's <c>{{Xml(component.Path)}}</c> as its bytes lie, read and written in place.</summary>
+            /// <remarks>
+            /// Generated from the layout <c>bevy-components.tsv</c> holds for it, where the bridge read the
+            /// compiler put each field, and held to the bridge's own reading the first time its id is
+            /// asked for in a world, so a Bevy release that moved a field refuses it rather than reading one
+            /// field's bytes as another's. <c>ctx.Ecs.GetRef&lt;{{name}}&gt;(entity)</c> reads and writes the
+            /// component itself, and a query reads a column of it, where the wrapper <see cref="{{component.Type}}"/>
+            /// goes through Bevy's reflection a field at a time.
+            /// </remarks>
+            [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = {{parsed.Size.ToString(CultureInfo.InvariantCulture)}})]
+            public struct {{name}} : global::Bevy.INativeComponent, global::Bevy.IMirroredLayout
+            {
+            {{fields}}
+                readonly string global::Bevy.INativeComponent.NativeName => "{{Quoted(component.Path)}}";
+
+                readonly string global::Bevy.IMirroredLayout.Layout => "{{Quoted(layout)}}";
+            {{enums}}}
+
+            """;
+    }
+}

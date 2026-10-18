@@ -159,11 +159,20 @@ them where it can.
   of its 140, 115 can be mirrored, 24 hold a `Color`, an enum whose variants hold values, which lie
   where the variant held puts them, and `DelayedCommandQueue` holds 32 bytes no reflected field
   covers. None lacks a default to measure.
-- **Generated from the description, checked against the bridge.** The mirrors are generated from
-  layouts the schema dump writes into the description beside the components, as the wrappers are,
-  so the generator needs no running bridge, and a test of the suite and a check at a mirror's first
-  use compare the dumped layout with the running bridge's and refuse a difference, so a Bevy
-  upgrade that moves a field fails a test rather than a game's bytes. Neither is built yet.
+- **Generated from the description, checked against the bridge.** The schema dump writes a
+  `layout` line after each of the 115 components, a signature of its size, its alignment, and each
+  row's offset and size with the number each variant of an enum is stored as, which the bridge reads
+  by making each variant (`ReflectedLayouts.Signature`). The generator makes a mirror from it
+  (`ReflectedGenerator.Mirrors.cs`), so it needs no running bridge, `TransformMirror` beside
+  `TransformRef`, a struct of explicit layout holding each row at its offset, an enum whose variants
+  hold nothing as a C# enum of the numbers read, one a Rust type. 100 of the 115 have one, and the
+  layouts of the other 15 are written without a mirror, since 6 hold an entity, which a write past
+  Bevy's hooks would break the relationships of, 4 a duration and 3 a range, whose bytes are Rust's
+  own form, and 2 a color. A mirror carries its signature (`IMirroredLayout`), and the bridge reads
+  the component again the first time the mirror's id is asked for in a world and refuses a
+  difference (`NativeComponents.VerifyMirror`), and `ReflectedLayoutTests` compares every layout the
+  description holds with the running bridge's, so a Bevy upgrade that moves a field fails a test
+  rather than a game's bytes.
 - **Lookup by type path.** `bcs_component_id_of` resolves any reflected type path through the
   registry, and keeps its arms only for the short names the hand mirrors use. A generated
   mirror names its type by path, so it needs no arm, and the arms go with the hand mirrors that a
@@ -313,6 +322,5 @@ field does, and counts among what shares the asset, items being searched three l
 
 Each step is usable on its own and tested before the next.
 
-1. **Tier 3**: generated mirrors from the layouts the schema dump writes, checked against the
-   bridge's reading, replacing the hand ones a reading measures, with the existing mirror tests
-   passing unchanged.
+1. **Tier 3**: the hand mirrors a generated one stands beside replaced by it, with the lookup by
+   path, and the existing mirror tests passing unchanged.

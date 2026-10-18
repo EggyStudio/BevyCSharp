@@ -29,7 +29,8 @@ internal static class ConsoleSchemaCommands
         + "# most. Regenerate it after upgrading Bevy, and read its diff as what Bevy changed.\n"
         + "# component <type path> <short name>\n"
         + "# field <type path> <name> <reflect path> <kind> <rust type> <options or asset kind>\n"
-        + "# variant <type path> <enum field> <variant> <name> <reflect path> <kind> <rust type> <options or asset kind>\n";
+        + "# variant <type path> <enum field> <variant> <name> <reflect path> <kind> <rust type> <options or asset kind>\n"
+        + "# layout <type path> <size/align;path@offset:size{variant=number,...};...>\n";
 
     /// <summary>Writes the description of Bevy's components to a file.</summary>
     [Command("schema.dump", "Writes Bevy's components for the generator: schema.dump <path>")]
@@ -130,7 +131,8 @@ internal static class ConsoleSchemaCommands
     /// describes with its own rows, their paths from the item, as a box shadow's list names its
     /// shadow style. The bridge's own components are left out, being its business rather than a
     /// game's, and so is one of Bevy's made for a type of the bridge's, as Bevy's interface
-    /// material node is for the bridge's shader material.
+    /// material node is for the bridge's shader material. A component a byte mirror could hold is
+    /// followed by a <c>layout</c> line, where the compiler put each of its rows' fields.
     /// </remarks>
     internal static List<string> Describe(string description)
     {
@@ -144,6 +146,7 @@ internal static class ConsoleSchemaCommands
         {
             lines.Add($"component\t{schema.QualifiedName}\t{schema.Name}");
             Rows(lines, schema.QualifiedName, schema.Fields, items);
+            if (Layout(schema) is { } layout) lines.Add($"layout\t{schema.QualifiedName}\t{layout}");
         }
 
         // The types lists hold as their items, each described once by its own rows after the
@@ -166,6 +169,32 @@ internal static class ConsoleSchemaCommands
         }
 
         return lines;
+    }
+
+    /// <summary>
+    /// Where the compiler put each field of a component a byte mirror could hold, as the signature
+    /// <see cref="ReflectedLayouts.Signature"/> writes over the paths of its rows, or nothing for one
+    /// it could not, or outside a frame, where there is no registry to read.
+    /// </summary>
+    /// <remarks>
+    /// Written for each component <c>schema.layouts</c> counts as one a mirror could hold, every
+    /// row a fixed-size value and every byte a field or padding, from which the generator makes the
+    /// mirror, and against which the bridge's own reading is checked at the mirror's first use.
+    /// </remarks>
+    private static string? Layout(ComponentSchema schema)
+    {
+        if (schema.Fields.Count == 0 || !schema.Fields.All(Fixed)) return null;
+
+        try
+        {
+            return ReflectedLayouts.Measure(schema.QualifiedName) is { } layout && ReflectedLayouts.Unmirrored(layout) is null
+                ? ReflectedLayouts.Signature(layout, schema.Fields.Select(field => field.ReflectPath!))
+                : null;
+        }
+        catch (BevyNativeException)
+        {
+            return null;
+        }
     }
 
     /// <summary>

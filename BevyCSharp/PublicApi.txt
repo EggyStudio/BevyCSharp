@@ -4556,6 +4556,9 @@ readonly struct Bevy.Rectangle : IBounded2d, IEquatable<Rectangle>
   static bool op_Equality(Rectangle left, Rectangle right)
   static bool op_Inequality(Rectangle left, Rectangle right)
   void Deconstruct(out Vec2 HalfSize)
+struct Bevy.Reflected.AabbMirror : IMirroredLayout, INativeComponent
+  Vec3 Center
+  Vec3 HalfExtents
 readonly struct Bevy.Reflected.AabbRef : IReflectedComponent<AabbRef>, IReflectedWrapper<AabbRef>
   Entity Entity { get; }
   Vec3 Center { get; set; }
@@ -4571,11 +4574,19 @@ readonly struct Bevy.Reflected.AccessibleLabelRef : IReflectedComponent<Accessib
   bool Remove()
   const string TypePath = "bevy_ui::accessibility::AccessibleLabel"
   string Value { get; set; }
+struct Bevy.Reflected.AccumulatedMouseMotionMirror : IMirroredLayout, INativeComponent
+  Vec2 Delta
 readonly struct Bevy.Reflected.AccumulatedMouseMotionRef : IReflectedComponent<AccumulatedMouseMotionRef>, IReflectedWrapper<AccumulatedMouseMotionRef>
   Entity Entity { get; }
   Vec2 Delta { get; set; }
   bool Remove()
   const string TypePath = "bevy_input::mouse::AccumulatedMouseMotion"
+struct Bevy.Reflected.AccumulatedMouseScrollMirror : IMirroredLayout, INativeComponent
+  AccumulatedMouseScrollMirror.MouseScrollUnit Unit
+  Vec2 Delta
+enum Bevy.Reflected.AccumulatedMouseScrollMirror.MouseScrollUnit : byte
+  Line = 0
+  Pixel = 1
 readonly struct Bevy.Reflected.AccumulatedMouseScrollRef : IReflectedComponent<AccumulatedMouseScrollRef>, IReflectedWrapper<AccumulatedMouseScrollRef>
   AccumulatedMouseScrollRef.UnitVariant Unit { get; set; }
   Entity Entity { get; }
@@ -4646,6 +4657,8 @@ readonly struct Bevy.Reflected.AmbientLightRef : IReflectedComponent<AmbientLigh
   bool Remove()
   const string TypePath = "bevy_light::ambient_light::AmbientLight"
   float Brightness { get; set; }
+struct Bevy.Reflected.AnchorMirror : IMirroredLayout, INativeComponent
+  Vec2 Value
 readonly struct Bevy.Reflected.AnchorRef : IReflectedComponent<AnchorRef>, IReflectedWrapper<AnchorRef>
   Entity Entity { get; }
   Vec2 Value { get; set; }
@@ -4749,6 +4762,8 @@ readonly struct Bevy.Reflected.AtmosphereConfigRef : IReflectedComponent<Atmosph
   float TwilightExposureLift { get; set; }
   float? ExposureEv100 { get; set; }
   uint? EnvironmentMapSize { get; set; }
+struct Bevy.Reflected.AutoDirectionalNavigationMirror : IMirroredLayout, INativeComponent
+  bool RespectTabOrder
 readonly struct Bevy.Reflected.AutoDirectionalNavigationRef : IReflectedComponent<AutoDirectionalNavigationRef>, IReflectedWrapper<AutoDirectionalNavigationRef>
   Entity Entity { get; }
   bool Remove()
@@ -4804,6 +4819,19 @@ sealed class Bevy.Reflected.Bloom : IEquatable<Bloom>
 enum Bevy.Reflected.BloomCompositeMode : int
   Additive = 1
   EnergyConserving = 0
+struct Bevy.Reflected.BloomMirror : IMirroredLayout, INativeComponent
+  BloomMirror.BloomCompositeMode CompositeMode
+  Vec2 Scale
+  float HighPassFrequency
+  float Intensity
+  float LowFrequencyBoost
+  float LowFrequencyBoostCurvature
+  float PrefilterThreshold
+  float PrefilterThresholdSoftness
+  uint MaxMipDimension
+enum Bevy.Reflected.BloomMirror.BloomCompositeMode : byte
+  Additive = 1
+  EnergyConserving = 0
 readonly struct Bevy.Reflected.BloomRef : IReflectedComponent<BloomRef>, IReflectedWrapper<BloomRef>
   BloomRef.CompositeModeVariant CompositeMode { get; set; }
   Entity Entity { get; }
@@ -4838,6 +4866,8 @@ readonly struct Bevy.Reflected.BoxShadowRef : IReflectedComponent<BoxShadowRef>,
   IReadOnlyList<ShadowStyle> Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::BoxShadow"
+struct Bevy.Reflected.BoxShadowSamplesMirror : IMirroredLayout, INativeComponent
+  uint Value
 readonly struct Bevy.Reflected.BoxShadowSamplesRef : IReflectedComponent<BoxShadowSamplesRef>, IReflectedWrapper<BoxShadowSamplesRef>
   Entity Entity { get; }
   bool Remove()
@@ -5149,6 +5179,12 @@ readonly struct Bevy.Reflected.CloudConfigRef : IReflectedComponent<CloudConfigR
   float WindMultiplier { get; set; }
   uint? LightSteps { get; set; }
   uint? Steps { get; set; }
+struct Bevy.Reflected.CloudShadowConfigMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+  float Strength
+  float TileSize
+  float UpdateSeconds
+  uint Resolution
 readonly struct Bevy.Reflected.CloudShadowConfigRef : IReflectedComponent<CloudShadowConfigRef>, IReflectedWrapper<CloudShadowConfigRef>
   Entity Entity { get; }
   bool Enabled { get; set; }
@@ -5329,6 +5365,12 @@ sealed class Bevy.Reflected.ComponentId : IEquatable<ComponentId>
   static bool op_Inequality(ComponentId? left, ComponentId? right)
   ulong Item0 { get; init; }
   void Deconstruct(out ulong Item0)
+struct Bevy.Reflected.CompositingSpaceMirror : IMirroredLayout, INativeComponent
+  CompositingSpaceMirror.CompositingSpace Value
+enum Bevy.Reflected.CompositingSpaceMirror.CompositingSpace : byte
+  Linear = 1
+  Oklab = 2
+  Srgb = 0
 readonly struct Bevy.Reflected.CompositingSpaceRef : IReflectedComponent<CompositingSpaceRef>, IReflectedWrapper<CompositingSpaceRef>
   CompositingSpaceRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5338,6 +5380,25 @@ enum Bevy.Reflected.CompositingSpaceRef.ValueVariant : int
   Linear = 1
   Oklab = 2
   Srgb = 0
+struct Bevy.Reflected.ComputedNodeMirror : IMirroredLayout, INativeComponent
+  Vec2 BorderMaxInset
+  Vec2 BorderMinInset
+  Vec2 BorderRadiusBottomLeft
+  Vec2 BorderRadiusBottomRight
+  Vec2 BorderRadiusTopLeft
+  Vec2 BorderRadiusTopRight
+  Vec2 ContentSize
+  Vec2 PaddingMaxInset
+  Vec2 PaddingMinInset
+  Vec2 ScrollPosition
+  Vec2 ScrollbarSize
+  Vec2 Size
+  Vec2 UnroundedSize
+  float EmSize
+  float InverseScaleFactor
+  float OutlineOffset
+  float OutlineWidth
+  float RemSize
 readonly struct Bevy.Reflected.ComputedNodeRef : IReflectedComponent<ComputedNodeRef>, IReflectedWrapper<ComputedNodeRef>
   Entity Entity { get; }
   Vec2 BorderMaxInset { get; set; }
@@ -5360,6 +5421,8 @@ readonly struct Bevy.Reflected.ComputedNodeRef : IReflectedComponent<ComputedNod
   float OutlineOffset { get; set; }
   float OutlineWidth { get; set; }
   float RemSize { get; set; }
+struct Bevy.Reflected.ComputedStackIndexMirror : IMirroredLayout, INativeComponent
+  uint Value
 readonly struct Bevy.Reflected.ComputedStackIndexRef : IReflectedComponent<ComputedStackIndexRef>, IReflectedWrapper<ComputedStackIndexRef>
   Entity Entity { get; }
   bool Remove()
@@ -5373,6 +5436,10 @@ readonly struct Bevy.Reflected.ComputedTextBlockRef : IReflectedComponent<Comput
   bool UsesRemSizes { get; set; }
   bool UsesViewportSizes { get; set; }
   const string TypePath = "bevy_text::text::ComputedTextBlock"
+struct Bevy.Reflected.ComputedUiRenderTargetInfoMirror : IMirroredLayout, INativeComponent
+  float ScaleFactor
+  uint PhysicalSizeX
+  uint PhysicalSizeY
 readonly struct Bevy.Reflected.ComputedUiRenderTargetInfoRef : IReflectedComponent<ComputedUiRenderTargetInfoRef>, IReflectedWrapper<ComputedUiRenderTargetInfoRef>
   Entity Entity { get; }
   bool Remove()
@@ -5385,6 +5452,10 @@ readonly struct Bevy.Reflected.ComputedUiTargetCameraRef : IReflectedComponent<C
   Entity? Camera { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::ComputedUiTargetCamera"
+struct Bevy.Reflected.ContactShadowsMirror : IMirroredLayout, INativeComponent
+  float Length
+  float Thickness
+  uint LinearSteps
 readonly struct Bevy.Reflected.ContactShadowsRef : IReflectedComponent<ContactShadowsRef>, IReflectedWrapper<ContactShadowsRef>
   Entity Entity { get; }
   bool Remove()
@@ -5396,6 +5467,10 @@ readonly struct Bevy.Reflected.ContentSizeRef : IReflectedComponent<ContentSizeR
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::measurement::ContentSize"
+struct Bevy.Reflected.ContrastAdaptiveSharpeningMirror : IMirroredLayout, INativeComponent
+  bool Denoise
+  bool Enabled
+  float SharpeningStrength
 readonly struct Bevy.Reflected.ContrastAdaptiveSharpeningRef : IReflectedComponent<ContrastAdaptiveSharpeningRef>, IReflectedWrapper<ContrastAdaptiveSharpeningRef>
   Entity Entity { get; }
   bool Denoise { get; set; }
@@ -5452,6 +5527,14 @@ readonly struct Bevy.Reflected.CursorIconRef : IReflectedComponent<CursorIconRef
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_window::cursor::CursorIcon"
+struct Bevy.Reflected.CursorOptionsMirror : IMirroredLayout, INativeComponent
+  CursorOptionsMirror.CursorGrabMode GrabMode
+  bool HitTest
+  bool Visible
+enum Bevy.Reflected.CursorOptionsMirror.CursorGrabMode : byte
+  Confined = 1
+  Locked = 2
+  None = 0
 readonly struct Bevy.Reflected.CursorOptionsRef : IReflectedComponent<CursorOptionsRef>, IReflectedWrapper<CursorOptionsRef>
   CursorOptionsRef.GrabModeVariant GrabMode { get; set; }
   Entity Entity { get; }
@@ -5518,6 +5601,13 @@ sealed class Bevy.Reflected.DVec2 : IEquatable<DVec2>
   static bool op_Equality(DVec2? left, DVec2? right)
   static bool op_Inequality(DVec2? left, DVec2? right)
   void Deconstruct(out double X, out double Y)
+struct Bevy.Reflected.DayPhaseMirror : IMirroredLayout, INativeComponent
+  DayPhaseMirror.DayPhase Value
+enum Bevy.Reflected.DayPhaseMirror.DayPhase : byte
+  Dawn = 3
+  Day = 0
+  Dusk = 1
+  Night = 2
 readonly struct Bevy.Reflected.DayPhaseRef : IReflectedComponent<DayPhaseRef>, IReflectedWrapper<DayPhaseRef>
   DayPhaseRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5528,6 +5618,11 @@ enum Bevy.Reflected.DayPhaseRef.ValueVariant : int
   Day = 0
   Dusk = 1
   Night = 2
+struct Bevy.Reflected.DebandDitherMirror : IMirroredLayout, INativeComponent
+  DebandDitherMirror.DebandDither Value
+enum Bevy.Reflected.DebandDitherMirror.DebandDither : byte
+  Disabled = 0
+  Enabled = 1
 readonly struct Bevy.Reflected.DebandDitherRef : IReflectedComponent<DebandDitherRef>, IReflectedWrapper<DebandDitherRef>
   DebandDitherRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5541,6 +5636,12 @@ readonly struct Bevy.Reflected.DefaultCursorRef : IReflectedComponent<DefaultCur
   EntityCursor Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_picking::cursor::DefaultCursor"
+struct Bevy.Reflected.DefaultOpaqueRendererMethodMirror : IMirroredLayout, INativeComponent
+  DefaultOpaqueRendererMethodMirror.OpaqueRendererMethod Value
+enum Bevy.Reflected.DefaultOpaqueRendererMethodMirror.OpaqueRendererMethod : byte
+  Auto = 2
+  Deferred = 1
+  Forward = 0
 readonly struct Bevy.Reflected.DefaultOpaqueRendererMethodRef : IReflectedComponent<DefaultOpaqueRendererMethodRef>, IReflectedWrapper<DefaultOpaqueRendererMethodRef>
   DefaultOpaqueRendererMethodRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5555,6 +5656,8 @@ readonly struct Bevy.Reflected.DefaultQueryFiltersRef : IReflectedComponent<Defa
   IReadOnlyList<ComponentId> Disabling { get; set; }
   bool Remove()
   const string TypePath = "bevy_ecs::entity_disabling::DefaultQueryFilters"
+struct Bevy.Reflected.DefaultSpatialScaleMirror : IMirroredLayout, INativeComponent
+  Vec3 Value
 readonly struct Bevy.Reflected.DefaultSpatialScaleRef : IReflectedComponent<DefaultSpatialScaleRef>, IReflectedWrapper<DefaultSpatialScaleRef>
   Entity Entity { get; }
   Vec3 Value { get; set; }
@@ -5573,6 +5676,8 @@ readonly struct Bevy.Reflected.DelayedCommandQueueRef : IReflectedComponent<Dela
   TimeSpan SubmitAt { get; set; }
   bool Remove()
   const string TypePath = "bevy_time::delayed_commands::DelayedCommandQueue"
+struct Bevy.Reflected.DenoiseCasMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.DenoiseCasRef : IReflectedComponent<DenoiseCasRef>, IReflectedWrapper<DenoiseCasRef>
   Entity Entity { get; }
   bool Remove()
@@ -5582,6 +5687,12 @@ readonly struct Bevy.Reflected.DeprecatedButtonRef : IReflectedComponent<Depreca
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::widget::button::DeprecatedButton"
+struct Bevy.Reflected.DeprecatedInteractionMirror : IMirroredLayout, INativeComponent
+  DeprecatedInteractionMirror.DeprecatedInteraction Value
+enum Bevy.Reflected.DeprecatedInteractionMirror.DeprecatedInteraction : byte
+  Hovered = 1
+  None = 2
+  Pressed = 0
 readonly struct Bevy.Reflected.DeprecatedInteractionRef : IReflectedComponent<DeprecatedInteractionRef>, IReflectedWrapper<DeprecatedInteractionRef>
   DeprecatedInteractionRef.ValueVariant Value { get; set; }
   Entity Entity { get; }
@@ -5591,6 +5702,16 @@ enum Bevy.Reflected.DeprecatedInteractionRef.ValueVariant : int
   Hovered = 1
   None = 2
   Pressed = 0
+struct Bevy.Reflected.DepthOfFieldMirror : IMirroredLayout, INativeComponent
+  DepthOfFieldMirror.DepthOfFieldMode Mode
+  float ApertureFStops
+  float FocalDistance
+  float MaxCircleOfConfusionDiameter
+  float MaxDepth
+  float SensorHeight
+enum Bevy.Reflected.DepthOfFieldMirror.DepthOfFieldMode : byte
+  Bokeh = 0
+  Gaussian = 1
 readonly struct Bevy.Reflected.DepthOfFieldRef : IReflectedComponent<DepthOfFieldRef>, IReflectedWrapper<DepthOfFieldRef>
   DepthOfFieldRef.ModeVariant Mode { get; set; }
   Entity Entity { get; }
@@ -5639,6 +5760,8 @@ readonly struct Bevy.Reflected.DirectionalLightRef : IReflectedComponent<Directi
   float ShadowDepthBias { get; set; }
   float ShadowNormalBias { get; set; }
   float? SoftShadowSize { get; set; }
+struct Bevy.Reflected.DirectionalLightShadowMapMirror : IMirroredLayout, INativeComponent
+  ulong Size
 readonly struct Bevy.Reflected.DirectionalLightShadowMapRef : IReflectedComponent<DirectionalLightShadowMapRef>, IReflectedWrapper<DirectionalLightShadowMapRef>
   Entity Entity { get; }
   bool Remove()
@@ -5654,6 +5777,8 @@ readonly struct Bevy.Reflected.DirectionalNavigationMapRef : IReflectedComponent
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_input_focus::directional_navigation::DirectionalNavigationMap"
+struct Bevy.Reflected.DirectlyHoveredMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.DirectlyHoveredRef : IReflectedComponent<DirectlyHoveredRef>, IReflectedWrapper<DirectlyHoveredRef>
   Entity Entity { get; }
   bool Remove()
@@ -5679,6 +5804,8 @@ readonly struct Bevy.Reflected.DynamicWorldRootRef : IReflectedComponent<Dynamic
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_world_serialization::components::DynamicWorldRoot"
+struct Bevy.Reflected.EmSizeMirror : IMirroredLayout, INativeComponent
+  float Value
 readonly struct Bevy.Reflected.EmSizeRef : IReflectedComponent<EmSizeRef>, IReflectedWrapper<EmSizeRef>
   Entity Entity { get; }
   bool Remove()
@@ -5746,6 +5873,11 @@ enum Bevy.Reflected.FocusCauseValue : int
   Auto = 2
   Navigated = 0
   Pressed = 1
+struct Bevy.Reflected.FocusPolicyMirror : IMirroredLayout, INativeComponent
+  FocusPolicyMirror.FocusPolicy Value
+enum Bevy.Reflected.FocusPolicyMirror.FocusPolicy : byte
+  Block = 0
+  Pass = 1
 readonly struct Bevy.Reflected.FocusPolicyRef : IReflectedComponent<FocusPolicyRef>, IReflectedWrapper<FocusPolicyRef>
   Entity Entity { get; }
   FocusPolicyRef.ValueVariant Value { get; set; }
@@ -5849,6 +5981,11 @@ readonly struct Bevy.Reflected.FogVolumeRef : IReflectedComponent<FogVolumeRef>,
   float LightIntensity { get; set; }
   float Scattering { get; set; }
   float ScatteringAsymmetry { get; set; }
+struct Bevy.Reflected.FontHintingMirror : IMirroredLayout, INativeComponent
+  FontHintingMirror.FontHinting Value
+enum Bevy.Reflected.FontHintingMirror.FontHinting : byte
+  Disabled = 0
+  Enabled = 1
 readonly struct Bevy.Reflected.FontHintingRef : IReflectedComponent<FontHintingRef>, IReflectedWrapper<FontHintingRef>
   Entity Entity { get; }
   FontHintingRef.ValueVariant Value { get; set; }
@@ -6055,6 +6192,16 @@ readonly struct Bevy.Reflected.FrustumRef : IReflectedComponent<FrustumRef>, IRe
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::primitives::Frustum"
+struct Bevy.Reflected.FxaaMirror : IMirroredLayout, INativeComponent
+  FxaaMirror.Sensitivity EdgeThreshold
+  FxaaMirror.Sensitivity EdgeThresholdMin
+  bool Enabled
+enum Bevy.Reflected.FxaaMirror.Sensitivity : byte
+  Extreme = 4
+  High = 2
+  Low = 0
+  Medium = 1
+  Ultra = 3
 readonly struct Bevy.Reflected.FxaaRef : IReflectedComponent<FxaaRef>, IReflectedWrapper<FxaaRef>
   Entity Entity { get; }
   FxaaRef.EdgeThresholdMinVariant EdgeThresholdMin { get; set; }
@@ -6257,6 +6404,11 @@ readonly struct Bevy.Reflected.GlobalAmbientLightRef : IReflectedComponent<Globa
   bool Remove()
   const string TypePath = "bevy_light::ambient_light::GlobalAmbientLight"
   float Brightness { get; set; }
+struct Bevy.Reflected.GlobalTransformMirror : IMirroredLayout, INativeComponent
+  Vec3 Item0Matrix3XAxis
+  Vec3 Item0Matrix3YAxis
+  Vec3 Item0Matrix3ZAxis
+  Vec3 Item0Translation
 readonly struct Bevy.Reflected.GlobalTransformRef : IReflectedComponent<GlobalTransformRef>, IReflectedWrapper<GlobalTransformRef>
   Entity Entity { get; }
   Vec3 Item0Matrix3XAxis { get; set; }
@@ -6284,11 +6436,17 @@ readonly struct Bevy.Reflected.GlobalVolumeRef : IReflectedComponent<GlobalVolum
   Volume Volume { get; set; }
   bool Remove()
   const string TypePath = "bevy_audio::volume::GlobalVolume"
+struct Bevy.Reflected.GlobalZIndexMirror : IMirroredLayout, INativeComponent
+  int Value
 readonly struct Bevy.Reflected.GlobalZIndexRef : IReflectedComponent<GlobalZIndexRef>, IReflectedWrapper<GlobalZIndexRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::GlobalZIndex"
   int Value { get; set; }
+struct Bevy.Reflected.GlobalsUniformMirror : IMirroredLayout, INativeComponent
+  float DeltaTime
+  float Time
+  uint FrameCount
 readonly struct Bevy.Reflected.GlobalsUniformRef : IReflectedComponent<GlobalsUniformRef>, IReflectedWrapper<GlobalsUniformRef>
   Entity Entity { get; }
   bool Remove()
@@ -6448,12 +6606,22 @@ sealed class Bevy.Reflected.GridTrackRepetition.Count : GridTrackRepetition, IEq
   static bool op_Inequality(GridTrackRepetition.Count? left, GridTrackRepetition.Count? right)
   ushort Value { get; init; }
   void Deconstruct(out ushort Value)
+struct Bevy.Reflected.GroundConditionsMirror : IMirroredLayout, INativeComponent
+  float SnowCover
+  float Wetness
 readonly struct Bevy.Reflected.GroundConditionsRef : IReflectedComponent<GroundConditionsRef>, IReflectedWrapper<GroundConditionsRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_weather::ground::GroundConditions"
   float SnowCover { get; set; }
   float Wetness { get; set; }
+struct Bevy.Reflected.GroundConfigMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+  float DryingSeconds
+  float MeltSeconds
+  float SettlingTemperature
+  float SnowfallSeconds
+  float WettingSeconds
 readonly struct Bevy.Reflected.GroundConfigRef : IReflectedComponent<GroundConfigRef>, IReflectedWrapper<GroundConfigRef>
   Entity Entity { get; }
   bool Enabled { get; set; }
@@ -6472,11 +6640,16 @@ readonly struct Bevy.Reflected.HoverMapRef : IReflectedComponent<HoverMapRef>, I
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::hover::HoverMap"
+struct Bevy.Reflected.HoveredMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.HoveredRef : IReflectedComponent<HoveredRef>, IReflectedWrapper<HoveredRef>
   Entity Entity { get; }
   bool Remove()
   bool Value { get; set; }
   const string TypePath = "bevy_picking::hover::Hovered"
+struct Bevy.Reflected.IgnoreScrollMirror : IMirroredLayout, INativeComponent
+  bool Item0X
+  bool Item0Y
 readonly struct Bevy.Reflected.IgnoreScrollRef : IReflectedComponent<IgnoreScrollRef>, IReflectedWrapper<IgnoreScrollRef>
   Entity Entity { get; }
   bool Item0X { get; set; }
@@ -6499,6 +6672,9 @@ enum Bevy.Reflected.ImageNodeRef.VisualBoxVariant : int
   BorderBox = 2
   ContentBox = 0
   PaddingBox = 1
+struct Bevy.Reflected.ImageNodeSizeMirror : IMirroredLayout, INativeComponent
+  uint SizeX
+  uint SizeY
 readonly struct Bevy.Reflected.ImageNodeSizeRef : IReflectedComponent<ImageNodeSizeRef>, IReflectedWrapper<ImageNodeSizeRef>
   Entity Entity { get; }
   bool Remove()
@@ -6509,6 +6685,8 @@ readonly struct Bevy.Reflected.ImageNodeTextureAtlasLayoutRef : IReflectedCompon
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_render::image::ImageNodeTextureAtlasLayout"
+struct Bevy.Reflected.InheritedVisibilityMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.InheritedVisibilityRef : IReflectedComponent<InheritedVisibilityRef>, IReflectedWrapper<InheritedVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -6531,6 +6709,8 @@ readonly struct Bevy.Reflected.InputFocusRef : IReflectedComponent<InputFocusRef
   IReadOnlyList<(Entity, FocusCauseValue)?> RecordedChanges { get; set; }
   bool Remove()
   const string TypePath = "bevy_input_focus::InputFocus"
+struct Bevy.Reflected.InputFocusVisibleMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.InputFocusVisibleRef : IReflectedComponent<InputFocusVisibleRef>, IReflectedWrapper<InputFocusVisibleRef>
   Entity Entity { get; }
   bool Remove()
@@ -6563,6 +6743,8 @@ readonly struct Bevy.Reflected.IsDefaultUiCameraRef : IReflectedComponent<IsDefa
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::IsDefaultUiCamera"
+struct Bevy.Reflected.IsResourceMirror : IMirroredLayout, INativeComponent
+  ulong Value
 readonly struct Bevy.Reflected.IsResourceRef : IReflectedComponent<IsResourceRef>, IReflectedWrapper<IsResourceRef>
   Entity Entity { get; }
   bool Remove()
@@ -6572,6 +6754,8 @@ readonly struct Bevy.Reflected.LabelRef : IReflectedComponent<LabelRef>, IReflec
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::widget::label::Label"
+struct Bevy.Reflected.LayoutConfigMirror : IMirroredLayout, INativeComponent
+  bool UseRounding
 readonly struct Bevy.Reflected.LayoutConfigRef : IReflectedComponent<LayoutConfigRef>, IReflectedWrapper<LayoutConfigRef>
   Entity Entity { get; }
   bool Remove()
@@ -6674,6 +6858,8 @@ sealed class Bevy.Reflected.LightGizmoColor.Varied : LightGizmoColor, IEquatable
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(LightGizmoColor.Varied? left, LightGizmoColor.Varied? right)
   static bool op_Inequality(LightGizmoColor.Varied? left, LightGizmoColor.Varied? right)
+struct Bevy.Reflected.LightProbeMirror : IMirroredLayout, INativeComponent
+  Vec3 Falloff
 readonly struct Bevy.Reflected.LightProbeRef : IReflectedComponent<LightProbeRef>, IReflectedWrapper<LightProbeRef>
   Entity Entity { get; }
   Vec3 Falloff { get; set; }
@@ -6687,6 +6873,11 @@ readonly struct Bevy.Reflected.LightmapRef : IReflectedComponent<LightmapRef>, I
   bool BicubicSampling { get; set; }
   bool Remove()
   const string TypePath = "bevy_pbr::lightmap::Lightmap"
+struct Bevy.Reflected.LightningLightMirror : IMirroredLayout, INativeComponent
+  float Duration
+  float PeakIntensity
+  float Remaining
+  uint Seed
 readonly struct Bevy.Reflected.LightningLightRef : IReflectedComponent<LightningLightRef>, IReflectedWrapper<LightningLightRef>
   Entity Entity { get; }
   bool Remove()
@@ -6776,17 +6967,24 @@ readonly struct Bevy.Reflected.MainEntityRef : IReflectedComponent<MainEntityRef
   Entity Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_extract::sync_world::MainEntity"
+struct Bevy.Reflected.MainPassResolutionOverrideMirror : IMirroredLayout, INativeComponent
+  uint Item0X
+  uint Item0Y
 readonly struct Bevy.Reflected.MainPassResolutionOverrideRef : IReflectedComponent<MainPassResolutionOverrideRef>, IReflectedWrapper<MainPassResolutionOverrideRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::camera::MainPassResolutionOverride"
   uint Item0X { get; set; }
   uint Item0Y { get; set; }
+struct Bevy.Reflected.ManageAccessibilityUpdatesMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.ManageAccessibilityUpdatesRef : IReflectedComponent<ManageAccessibilityUpdatesRef>, IReflectedWrapper<ManageAccessibilityUpdatesRef>
   Entity Entity { get; }
   bool Remove()
   bool Value { get; set; }
   const string TypePath = "bevy_a11y::ManageAccessibilityUpdates"
+struct Bevy.Reflected.ManualTextureViewHandleMirror : IMirroredLayout, INativeComponent
+  uint Value
 readonly struct Bevy.Reflected.ManualTextureViewHandleRef : IReflectedComponent<ManualTextureViewHandleRef>, IReflectedWrapper<ManualTextureViewHandleRef>
   Entity Entity { get; }
   bool Remove()
@@ -7036,6 +7234,12 @@ readonly struct Bevy.Reflected.MenuItemRef : IReflectedComponent<MenuItemRef>, I
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::menu::MenuItem"
+struct Bevy.Reflected.MenuPopupMirror : IMirroredLayout, INativeComponent
+  MenuPopupMirror.MenuLayout Layout
+enum Bevy.Reflected.MenuPopupMirror.MenuLayout : byte
+  Column = 0
+  Grid = 2
+  Row = 1
 readonly struct Bevy.Reflected.MenuPopupRef : IReflectedComponent<MenuPopupRef>, IReflectedWrapper<MenuPopupRef>
   Entity Entity { get; }
   MenuPopupRef.LayoutVariant Layout { get; set; }
@@ -7129,6 +7333,13 @@ readonly struct Bevy.Reflected.MeshPickingCameraRef : IReflectedComponent<MeshPi
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::mesh_picking::MeshPickingCamera"
+struct Bevy.Reflected.MeshPickingSettingsMirror : IMirroredLayout, INativeComponent
+  MeshPickingSettingsMirror.RayCastVisibilityVariant RayCastVisibility
+  bool RequireMarkers
+enum Bevy.Reflected.MeshPickingSettingsMirror.RayCastVisibilityVariant : byte
+  Any = 0
+  Visible = 1
+  VisibleInView = 2
 readonly struct Bevy.Reflected.MeshPickingSettingsRef : IReflectedComponent<MeshPickingSettingsRef>, IReflectedWrapper<MeshPickingSettingsRef>
   Entity Entity { get; }
   MeshPickingSettingsRef.RayCastVisibilityVariant RayCastVisibility { get; set; }
@@ -7139,6 +7350,8 @@ enum Bevy.Reflected.MeshPickingSettingsRef.RayCastVisibilityVariant : int
   Any = 0
   Visible = 1
   VisibleInView = 2
+struct Bevy.Reflected.MeshTagMirror : IMirroredLayout, INativeComponent
+  uint Value
 readonly struct Bevy.Reflected.MeshTagRef : IReflectedComponent<MeshTagRef>, IReflectedWrapper<MeshTagRef>
   Entity Entity { get; }
   bool Remove()
@@ -7148,6 +7361,12 @@ readonly struct Bevy.Reflected.MeshletMesh3dRef : IReflectedComponent<MeshletMes
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_pbr::meshlet::MeshletMesh3d"
+struct Bevy.Reflected.MeteorConfigMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+  float ArcLength
+  float Brightness
+  float Rate
+  float Width
 readonly struct Bevy.Reflected.MeteorConfigRef : IReflectedComponent<MeteorConfigRef>, IReflectedWrapper<MeteorConfigRef>
   Entity Entity { get; }
   bool Enabled { get; set; }
@@ -7304,6 +7523,8 @@ sealed class Bevy.Reflected.MinTrackSizingFunction.Vw : MinTrackSizingFunction, 
   static bool op_Equality(MinTrackSizingFunction.Vw? left, MinTrackSizingFunction.Vw? right)
   static bool op_Inequality(MinTrackSizingFunction.Vw? left, MinTrackSizingFunction.Vw? right)
   void Deconstruct(out float Value)
+struct Bevy.Reflected.MipBiasMirror : IMirroredLayout, INativeComponent
+  float Value
 readonly struct Bevy.Reflected.MipBiasRef : IReflectedComponent<MipBiasRef>, IReflectedWrapper<MipBiasRef>
   Entity Entity { get; }
   bool Remove()
@@ -7415,6 +7636,9 @@ readonly struct Bevy.Reflected.MorphWeightsRef : IReflectedComponent<MorphWeight
   IReadOnlyList<float> Weights { get; set; }
   bool Remove()
   const string TypePath = "bevy_mesh::morph::MorphWeights"
+struct Bevy.Reflected.MotionBlurMirror : IMirroredLayout, INativeComponent
+  float ShutterAngle
+  uint Samples
 readonly struct Bevy.Reflected.MotionBlurRef : IReflectedComponent<MotionBlurRef>, IReflectedWrapper<MotionBlurRef>
   Entity Entity { get; }
   bool Remove()
@@ -7425,6 +7649,13 @@ readonly struct Bevy.Reflected.MotionVectorPrepassRef : IReflectedComponent<Moti
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_core_pipeline::prepass::MotionVectorPrepass"
+struct Bevy.Reflected.MsaaMirror : IMirroredLayout, INativeComponent
+  MsaaMirror.Msaa Value
+enum Bevy.Reflected.MsaaMirror.Msaa : byte
+  Off = 1
+  Sample2 = 2
+  Sample4 = 4
+  Sample8 = 8
 readonly struct Bevy.Reflected.MsaaRef : IReflectedComponent<MsaaRef>, IReflectedWrapper<MsaaRef>
   Entity Entity { get; }
   MsaaRef.ValueVariant Value { get; set; }
@@ -7917,17 +8148,28 @@ readonly struct Bevy.Reflected.ParallaxCorrectionRef : IReflectedComponent<Paral
   ParallaxCorrection Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_light::probe::ParallaxCorrection"
+struct Bevy.Reflected.PathtracerMirror : IMirroredLayout, INativeComponent
+  bool Reset
 readonly struct Bevy.Reflected.PathtracerRef : IReflectedComponent<PathtracerRef>, IReflectedWrapper<PathtracerRef>
   Entity Entity { get; }
   bool Remove()
   bool Reset { get; set; }
   const string TypePath = "bevy_solari::pathtracer::Pathtracer"
+struct Bevy.Reflected.PickableMirror : IMirroredLayout, INativeComponent
+  bool IsHoverable
+  bool ShouldBlockLower
 readonly struct Bevy.Reflected.PickableRef : IReflectedComponent<PickableRef>, IReflectedWrapper<PickableRef>
   Entity Entity { get; }
   bool IsHoverable { get; set; }
   bool Remove()
   bool ShouldBlockLower { get; set; }
   const string TypePath = "bevy_picking::Pickable"
+struct Bevy.Reflected.PickingInteractionMirror : IMirroredLayout, INativeComponent
+  PickingInteractionMirror.PickingInteraction Value
+enum Bevy.Reflected.PickingInteractionMirror.PickingInteraction : byte
+  Hovered = 1
+  None = 0
+  Pressed = 2
 readonly struct Bevy.Reflected.PickingInteractionRef : IReflectedComponent<PickingInteractionRef>, IReflectedWrapper<PickingInteractionRef>
   Entity Entity { get; }
   PickingInteractionRef.ValueVariant Value { get; set; }
@@ -7979,6 +8221,8 @@ readonly struct Bevy.Reflected.PointLightRef : IReflectedComponent<PointLightRef
   float ShadowDepthBias { get; set; }
   float ShadowMapNearZ { get; set; }
   float ShadowNormalBias { get; set; }
+struct Bevy.Reflected.PointLightShadowMapMirror : IMirroredLayout, INativeComponent
+  ulong Size
 readonly struct Bevy.Reflected.PointLightShadowMapRef : IReflectedComponent<PointLightShadowMapRef>, IReflectedWrapper<PointLightShadowMapRef>
   Entity Entity { get; }
   bool Remove()
@@ -8045,6 +8289,9 @@ sealed class Bevy.Reflected.PointerIdValue.Touch : PointerIdValue, IEquatable<Po
   static bool op_Inequality(PointerIdValue.Touch? left, PointerIdValue.Touch? right)
   ulong Value { get; init; }
   void Deconstruct(out ulong Value)
+struct Bevy.Reflected.PointerInputSettingsMirror : IMirroredLayout, INativeComponent
+  bool IsMouseEnabled
+  bool IsTouchEnabled
 readonly struct Bevy.Reflected.PointerInputSettingsRef : IReflectedComponent<PointerInputSettingsRef>, IReflectedWrapper<PointerInputSettingsRef>
   Entity Entity { get; }
   bool IsMouseEnabled { get; set; }
@@ -8063,6 +8310,10 @@ readonly struct Bevy.Reflected.PointerMapRef : IReflectedComponent<PointerMapRef
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_picking::pointer::PointerMap"
+struct Bevy.Reflected.PointerPressStateMirror : IMirroredLayout, INativeComponent
+  bool Middle
+  bool Primary
+  bool Secondary
 readonly struct Bevy.Reflected.PointerPressStateRef : IReflectedComponent<PointerPressStateRef>, IReflectedWrapper<PointerPressStateRef>
   Entity Entity { get; }
   bool Middle { get; set; }
@@ -8137,6 +8388,11 @@ readonly struct Bevy.Reflected.PrecipitationConfigRef : IReflectedComponent<Prec
   float SnowSize { get; set; }
   uint Seed { get; set; }
   uint? ParticleCount { get; set; }
+struct Bevy.Reflected.PrecipitationKindMirror : IMirroredLayout, INativeComponent
+  PrecipitationKindMirror.PrecipitationKind Value
+enum Bevy.Reflected.PrecipitationKindMirror.PrecipitationKind : byte
+  Rain = 0
+  Snow = 1
 readonly struct Bevy.Reflected.PrecipitationKindRef : IReflectedComponent<PrecipitationKindRef>, IReflectedWrapper<PrecipitationKindRef>
   Entity Entity { get; }
   PrecipitationKindRef.ValueVariant Value { get; set; }
@@ -8161,6 +8417,21 @@ readonly struct Bevy.Reflected.PrimaryWindowRef : IReflectedComponent<PrimaryWin
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_window::window::PrimaryWindow"
+struct Bevy.Reflected.ProceduralWeatherMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+  float ClimateBaseHumidity
+  float ClimateCloudinessBias
+  float ClimateDiurnalSwing
+  float ClimateFogginess
+  float ClimateMeanTemperature
+  float ClimateMeanWindSpeed
+  float ClimatePrevailingWind
+  float ClimateSeasonalSwing
+  float ClimateStorminess
+  float SystemsPerDay
+  float TransitionHalfLife
+  float Variability
+  uint Seed
 readonly struct Bevy.Reflected.ProceduralWeatherRef : IReflectedComponent<ProceduralWeatherRef>, IReflectedWrapper<ProceduralWeatherRef>
   Entity Entity { get; }
   bool Enabled { get; set; }
@@ -8590,6 +8861,8 @@ sealed class Bevy.Reflected.ScalingMode.WindowSize : ScalingMode, IEquatable<Sca
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(ScalingMode.WindowSize? left, ScalingMode.WindowSize? right)
   static bool op_Inequality(ScalingMode.WindowSize? left, ScalingMode.WindowSize? right)
+struct Bevy.Reflected.SceneComponentInfoMirror : IMirroredLayout, INativeComponent
+  bool SpawnedFromScene
 readonly struct Bevy.Reflected.SceneComponentInfoRef : IReflectedComponent<SceneComponentInfoRef>, IReflectedWrapper<SceneComponentInfoRef>
   Entity Entity { get; }
   bool Remove()
@@ -8682,6 +8955,14 @@ readonly struct Bevy.Reflected.ScreenSpaceReflectionsRef : IReflectedComponent<S
   float Thickness { get; set; }
   uint BisectionSteps { get; set; }
   uint LinearSteps { get; set; }
+struct Bevy.Reflected.ScreenSpaceTransmissionMirror : IMirroredLayout, INativeComponent
+  ScreenSpaceTransmissionMirror.ScreenSpaceTransmissionQuality Quality
+  ulong Steps
+enum Bevy.Reflected.ScreenSpaceTransmissionMirror.ScreenSpaceTransmissionQuality : byte
+  High = 2
+  Low = 0
+  Medium = 1
+  Ultra = 3
 readonly struct Bevy.Reflected.ScreenSpaceTransmissionRef : IReflectedComponent<ScreenSpaceTransmissionRef>, IReflectedWrapper<ScreenSpaceTransmissionRef>
   Entity Entity { get; }
   ScreenSpaceTransmissionRef.QualityVariant Quality { get; set; }
@@ -8702,11 +8983,16 @@ readonly struct Bevy.Reflected.ScrollAreaRef : IReflectedComponent<ScrollAreaRef
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::scrollarea::ScrollArea"
+struct Bevy.Reflected.ScrollPositionMirror : IMirroredLayout, INativeComponent
+  Vec2 Value
 readonly struct Bevy.Reflected.ScrollPositionRef : IReflectedComponent<ScrollPositionRef>, IReflectedWrapper<ScrollPositionRef>
   Entity Entity { get; }
   Vec2 Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::ScrollPosition"
+struct Bevy.Reflected.ScrollbarDragStateMirror : IMirroredLayout, INativeComponent
+  bool Dragging
+  float DragOrigin
 readonly struct Bevy.Reflected.ScrollbarDragStateRef : IReflectedComponent<ScrollbarDragStateRef>, IReflectedWrapper<ScrollbarDragStateRef>
   Entity Entity { get; }
   bool Dragging { get; set; }
@@ -8748,6 +9034,12 @@ readonly struct Bevy.Reflected.SelectedTabRef : IReflectedComponent<SelectedTabR
   Entity? Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::tabs::SelectedTab"
+struct Bevy.Reflected.ShadowFilteringMethodMirror : IMirroredLayout, INativeComponent
+  ShadowFilteringMethodMirror.ShadowFilteringMethod Value
+enum Bevy.Reflected.ShadowFilteringMethodMirror.ShadowFilteringMethod : byte
+  Gaussian = 1
+  Hardware2x2 = 0
+  Temporal = 2
 readonly struct Bevy.Reflected.ShadowFilteringMethodRef : IReflectedComponent<ShadowFilteringMethodRef>, IReflectedWrapper<ShadowFilteringMethodRef>
   Entity Entity { get; }
   ShadowFilteringMethodRef.ValueVariant Value { get; set; }
@@ -8850,17 +9142,36 @@ sealed class Bevy.Reflected.SliceScaleMode.Tile : SliceScaleMode, IEquatable<Sli
   static bool op_Equality(SliceScaleMode.Tile? left, SliceScaleMode.Tile? right)
   static bool op_Inequality(SliceScaleMode.Tile? left, SliceScaleMode.Tile? right)
   void Deconstruct(out float StretchValue)
+struct Bevy.Reflected.SliderDragStateMirror : IMirroredLayout, INativeComponent
+  bool Dragging
+  float Offset
 readonly struct Bevy.Reflected.SliderDragStateRef : IReflectedComponent<SliderDragStateRef>, IReflectedWrapper<SliderDragStateRef>
   Entity Entity { get; }
   bool Dragging { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::slider::SliderDragState"
   float Offset { get; set; }
+struct Bevy.Reflected.SliderMirror : IMirroredLayout, INativeComponent
+  SliderMirror.SliderOrientation Orientation
+  SliderMirror.TrackClickVariant TrackClick
+enum Bevy.Reflected.SliderMirror.SliderOrientation : byte
+  Auto = 0
+  Horizontal = 1
+  Vertical = 2
+enum Bevy.Reflected.SliderMirror.TrackClickVariant : byte
+  Drag = 0
+  Snap = 2
+  Step = 1
+struct Bevy.Reflected.SliderPrecisionMirror : IMirroredLayout, INativeComponent
+  int Value
 readonly struct Bevy.Reflected.SliderPrecisionRef : IReflectedComponent<SliderPrecisionRef>, IReflectedWrapper<SliderPrecisionRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::slider::SliderPrecision"
   int Value { get; set; }
+struct Bevy.Reflected.SliderRangeMirror : IMirroredLayout, INativeComponent
+  float End
+  float Start
 readonly struct Bevy.Reflected.SliderRangeRef : IReflectedComponent<SliderRangeRef>, IReflectedWrapper<SliderRangeRef>
   Entity Entity { get; }
   bool Remove()
@@ -8881,6 +9192,8 @@ enum Bevy.Reflected.SliderRef.TrackClickVariant : int
   Drag = 0
   Snap = 2
   Step = 1
+struct Bevy.Reflected.SliderStepMirror : IMirroredLayout, INativeComponent
+  float Value
 readonly struct Bevy.Reflected.SliderStepRef : IReflectedComponent<SliderStepRef>, IReflectedWrapper<SliderStepRef>
   Entity Entity { get; }
   bool Remove()
@@ -8890,11 +9203,20 @@ readonly struct Bevy.Reflected.SliderThumbRef : IReflectedComponent<SliderThumbR
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::slider::SliderThumb"
+struct Bevy.Reflected.SliderValueMirror : IMirroredLayout, INativeComponent
+  float Value
 readonly struct Bevy.Reflected.SliderValueRef : IReflectedComponent<SliderValueRef>, IReflectedWrapper<SliderValueRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::slider::SliderValue"
   float Value { get; set; }
+struct Bevy.Reflected.SmaaMirror : IMirroredLayout, INativeComponent
+  SmaaMirror.SmaaPreset Preset
+enum Bevy.Reflected.SmaaMirror.SmaaPreset : byte
+  High = 2
+  Low = 0
+  Medium = 1
+  Ultra = 3
 readonly struct Bevy.Reflected.SmaaRef : IReflectedComponent<SmaaRef>, IReflectedWrapper<SmaaRef>
   Entity Entity { get; }
   SmaaRef.PresetVariant Preset { get; set; }
@@ -8905,6 +9227,19 @@ enum Bevy.Reflected.SmaaRef.PresetVariant : int
   Low = 0
   Medium = 1
   Ultra = 3
+struct Bevy.Reflected.SolariLightingMirror : IMirroredLayout, INativeComponent
+  bool Reset
+  bool Restir
+  float ConfidenceWeightCap
+  float WorldCacheMaxGiRayDistance
+  float WorldCacheMaxTemporalSamples
+  float WorldCachePositionBaseCellSize
+  float WorldCachePositionLodScale
+  uint MaxBounces
+  uint PrimaryDiSamples
+  uint SecondaryDiSamples
+  uint WorldCacheCellUpdatesSoftTarget
+  uint WorldCacheDirectLightSampleCount
 readonly struct Bevy.Reflected.SolariLightingRef : IReflectedComponent<SolariLightingRef>, IReflectedWrapper<SolariLightingRef>
   Entity Entity { get; }
   bool Remove()
@@ -8921,12 +9256,18 @@ readonly struct Bevy.Reflected.SolariLightingRef : IReflectedComponent<SolariLig
   uint SecondaryDiSamples { get; set; }
   uint WorldCacheCellUpdatesSoftTarget { get; set; }
   uint WorldCacheDirectLightSampleCount { get; set; }
+struct Bevy.Reflected.SpatialListenerMirror : IMirroredLayout, INativeComponent
+  Vec3 LeftEarOffset
+  Vec3 RightEarOffset
 readonly struct Bevy.Reflected.SpatialListenerRef : IReflectedComponent<SpatialListenerRef>, IReflectedWrapper<SpatialListenerRef>
   Entity Entity { get; }
   Vec3 LeftEarOffset { get; set; }
   Vec3 RightEarOffset { get; set; }
   bool Remove()
   const string TypePath = "bevy_audio::audio::SpatialListener"
+struct Bevy.Reflected.SphereMirror : IMirroredLayout, INativeComponent
+  Vec3 Center
+  float Radius
 readonly struct Bevy.Reflected.SphereRef : IReflectedComponent<SphereRef>, IReflectedWrapper<SphereRef>
   Entity Entity { get; }
   Vec3 Center { get; set; }
@@ -9130,6 +9471,16 @@ enum Bevy.Reflected.SpriteScalingMode : int
   FitCenter = 3
   FitEnd = 5
   FitStart = 4
+struct Bevy.Reflected.StarConfigMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+  float Brightness
+  float ColorVariation
+  float Density
+  float MagnitudeFalloff
+  float Occupancy
+  float Size
+  float TwinkleAmount
+  float TwinkleSpeed
 readonly struct Bevy.Reflected.StarConfigRef : IReflectedComponent<StarConfigRef>, IReflectedWrapper<StarConfigRef>
   Entity Entity { get; }
   bool Enabled { get; set; }
@@ -9143,6 +9494,11 @@ readonly struct Bevy.Reflected.StarConfigRef : IReflectedComponent<StarConfigRef
   float Size { get; set; }
   float TwinkleAmount { get; set; }
   float TwinkleSpeed { get; set; }
+struct Bevy.Reflected.StaticTransformOptimizationsMirror : IMirroredLayout, INativeComponent
+  StaticTransformOptimizationsMirror.StaticTransformOptimizations Value
+enum Bevy.Reflected.StaticTransformOptimizationsMirror.StaticTransformOptimizations : byte
+  Disabled = 1
+  Enabled = 0
 readonly struct Bevy.Reflected.StaticTransformOptimizationsRef : IReflectedComponent<StaticTransformOptimizationsRef>, IReflectedWrapper<StaticTransformOptimizationsRef>
   Entity Entity { get; }
   StaticTransformOptimizationsRef.ValueVariant Value { get; set; }
@@ -9170,6 +9526,15 @@ sealed class Bevy.Reflected.SubCameraView : IEquatable<SubCameraView>
   uint SizeX { get; init; }
   uint SizeY { get; init; }
   void Deconstruct(out uint FullSizeX, out uint FullSizeY, out Vec2 Offset, out uint SizeX, out uint SizeY)
+struct Bevy.Reflected.SunConfigMirror : IMirroredLayout, INativeComponent
+  bool Disk
+  float AngularRadius
+  float DiskIntensity
+  float LightTint
+  float ShadowCascadeOverlap
+  float ShadowDistance
+  float ShadowNearDistance
+  ulong ShadowCascades
 readonly struct Bevy.Reflected.SunConfigRef : IReflectedComponent<SunConfigRef>, IReflectedWrapper<SunConfigRef>
   Entity Entity { get; }
   bool Disk { get; set; }
@@ -9221,17 +9586,31 @@ enum Bevy.Reflected.SystemCursorIcon : int
   Wait = 5
   ZoomIn = 32
   ZoomOut = 33
+struct Bevy.Reflected.TabGroupMirror : IMirroredLayout, INativeComponent
+  bool Modal
+  int Order
 readonly struct Bevy.Reflected.TabGroupRef : IReflectedComponent<TabGroupRef>, IReflectedWrapper<TabGroupRef>
   Entity Entity { get; }
   bool Modal { get; set; }
   bool Remove()
   const string TypePath = "bevy_input_focus::tab_navigation::TabGroup"
   int Order { get; set; }
+struct Bevy.Reflected.TabIndexMirror : IMirroredLayout, INativeComponent
+  int Value
 readonly struct Bevy.Reflected.TabIndexRef : IReflectedComponent<TabIndexRef>, IReflectedWrapper<TabIndexRef>
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_input_focus::tab_navigation::TabIndex"
   int Value { get; set; }
+struct Bevy.Reflected.TabListMirror : IMirroredLayout, INativeComponent
+  TabListMirror.ControlOrientation Orientation
+  TabListMirror.TabActivation Activation
+enum Bevy.Reflected.TabListMirror.ControlOrientation : byte
+  Horizontal = 0
+  Vertical = 1
+enum Bevy.Reflected.TabListMirror.TabActivation : byte
+  Automatic = 1
+  Manual = 0
 readonly struct Bevy.Reflected.TabListRef : IReflectedComponent<TabListRef>, IReflectedWrapper<TabListRef>
   Entity Entity { get; }
   TabListRef.ActivationVariant Activation { get; set; }
@@ -9248,11 +9627,15 @@ readonly struct Bevy.Reflected.TabRef : IReflectedComponent<TabRef>, IReflectedW
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::tabs::Tab"
+struct Bevy.Reflected.TemporalAntiAliasingMirror : IMirroredLayout, INativeComponent
+  bool Reset
 readonly struct Bevy.Reflected.TemporalAntiAliasingRef : IReflectedComponent<TemporalAntiAliasingRef>, IReflectedWrapper<TemporalAntiAliasingRef>
   Entity Entity { get; }
   bool Remove()
   bool Reset { get; set; }
   const string TypePath = "bevy_anti_alias::taa::TemporalAntiAliasing"
+struct Bevy.Reflected.TemporalJitterMirror : IMirroredLayout, INativeComponent
+  Vec2 Offset
 readonly struct Bevy.Reflected.TemporalJitterRef : IReflectedComponent<TemporalJitterRef>, IReflectedWrapper<TemporalJitterRef>
   Entity Entity { get; }
   Vec2 Offset { get; set; }
@@ -9325,6 +9708,21 @@ readonly struct Bevy.Reflected.TextLayoutInfoRef : IReflectedComponent<TextLayou
   bool Remove()
   const string TypePath = "bevy_text::pipeline::TextLayoutInfo"
   float ScaleFactor { get; set; }
+struct Bevy.Reflected.TextLayoutMirror : IMirroredLayout, INativeComponent
+  TextLayoutMirror.JustifyVariant Justify
+  TextLayoutMirror.LineBreak Linebreak
+enum Bevy.Reflected.TextLayoutMirror.JustifyVariant : byte
+  Center = 1
+  End = 5
+  Justified = 3
+  Left = 0
+  Right = 2
+  Start = 4
+enum Bevy.Reflected.TextLayoutMirror.LineBreak : byte
+  AnyCharacter = 1
+  NoWrap = 3
+  WordBoundary = 0
+  WordOrCharacter = 2
 readonly struct Bevy.Reflected.TextLayoutRef : IReflectedComponent<TextLayoutRef>, IReflectedWrapper<TextLayoutRef>
   Entity Entity { get; }
   TextLayoutRef.JustifyVariant Justify { get; set; }
@@ -9498,6 +9896,19 @@ enum Bevy.Reflected.Tonemapping : int
   ReinhardLuminance = 3
   SomewhatBoringDisplayTransform = 6
   TonyMcMapface = 7
+struct Bevy.Reflected.TonemappingMirror : IMirroredLayout, INativeComponent
+  TonemappingMirror.Tonemapping Value
+enum Bevy.Reflected.TonemappingMirror.Tonemapping : byte
+  AcesFitted = 4
+  AgX = 5
+  BlenderFilmic = 8
+  KhronosPbrNeutral = 9
+  Linear = 1
+  None = 0
+  Reinhard = 2
+  ReinhardLuminance = 3
+  SomewhatBoringDisplayTransform = 6
+  TonyMcMapface = 7
 readonly struct Bevy.Reflected.TonemappingRef : IReflectedComponent<TonemappingRef>, IReflectedWrapper<TonemappingRef>
   Entity Entity { get; }
   TonemappingRef.ValueVariant Value { get; set; }
@@ -9562,6 +9973,10 @@ readonly struct Bevy.Reflected.TransformGizmoStateRef : IReflectedComponent<Tran
   bool Active { get; set; }
   bool Remove()
   const string TypePath = "bevy_gizmos::transform_gizmo::TransformGizmoState"
+struct Bevy.Reflected.TransformMirror : IMirroredLayout, INativeComponent
+  Quat Rotation
+  Vec3 Scale
+  Vec3 Translation
 readonly struct Bevy.Reflected.TransformRef : IReflectedComponent<TransformRef>, IReflectedWrapper<TransformRef>
   Entity Entity { get; }
   Quat Rotation { get; set; }
@@ -9588,6 +10003,11 @@ sealed class Bevy.Reflected.UVec2 : IEquatable<UVec2>
   uint X { get; init; }
   uint Y { get; init; }
   void Deconstruct(out uint X, out uint Y)
+struct Bevy.Reflected.UiAntiAliasMirror : IMirroredLayout, INativeComponent
+  UiAntiAliasMirror.UiAntiAlias Value
+enum Bevy.Reflected.UiAntiAliasMirror.UiAntiAlias : byte
+  Off = 1
+  On = 0
 readonly struct Bevy.Reflected.UiAntiAliasRef : IReflectedComponent<UiAntiAliasRef>, IReflectedWrapper<UiAntiAliasRef>
   Entity Entity { get; }
   UiAntiAliasRef.ValueVariant Value { get; set; }
@@ -9610,6 +10030,10 @@ readonly struct Bevy.Reflected.UiDebugOptionsRef : IReflectedComponent<UiDebugOp
   bool ShowHidden { get; set; }
   const string TypePath = "bevy_ui_render::debug_overlay::UiDebugOptions"
   float LineWidth { get; set; }
+struct Bevy.Reflected.UiGlobalTransformMirror : IMirroredLayout, INativeComponent
+  Vec2 Item0Matrix2XAxis
+  Vec2 Item0Matrix2YAxis
+  Vec2 Item0Translation
 readonly struct Bevy.Reflected.UiGlobalTransformRef : IReflectedComponent<UiGlobalTransformRef>, IReflectedWrapper<UiGlobalTransformRef>
   Entity Entity { get; }
   Vec2 Item0Matrix2XAxis { get; set; }
@@ -9621,11 +10045,15 @@ readonly struct Bevy.Reflected.UiPickingCameraRef : IReflectedComponent<UiPickin
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::picking_backend::UiPickingCamera"
+struct Bevy.Reflected.UiPickingSettingsMirror : IMirroredLayout, INativeComponent
+  bool RequireMarkers
 readonly struct Bevy.Reflected.UiPickingSettingsRef : IReflectedComponent<UiPickingSettingsRef>, IReflectedWrapper<UiPickingSettingsRef>
   Entity Entity { get; }
   bool Remove()
   bool RequireMarkers { get; set; }
   const string TypePath = "bevy_ui::picking_backend::UiPickingSettings"
+struct Bevy.Reflected.UiScaleMirror : IMirroredLayout, INativeComponent
+  float Value
 readonly struct Bevy.Reflected.UiScaleRef : IReflectedComponent<UiScaleRef>, IReflectedWrapper<UiScaleRef>
   Entity Entity { get; }
   bool Remove()
@@ -9830,6 +10258,8 @@ sealed class Bevy.Reflected.VideoModeValue : IEquatable<VideoModeValue>
   uint RefreshRateMillihertz { get; init; }
   ushort BitDepth { get; init; }
   void Deconstruct(out uint PhysicalSizeX, out uint PhysicalSizeY, out ushort BitDepth, out uint RefreshRateMillihertz)
+struct Bevy.Reflected.ViewVisibilityMirror : IMirroredLayout, INativeComponent
+  byte Value
 readonly struct Bevy.Reflected.ViewVisibilityRef : IReflectedComponent<ViewVisibilityRef>, IReflectedWrapper<ViewVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -9869,6 +10299,12 @@ readonly struct Bevy.Reflected.VisibilityClassRef : IReflectedComponent<Visibili
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::visibility::VisibilityClass"
+struct Bevy.Reflected.VisibilityMirror : IMirroredLayout, INativeComponent
+  VisibilityMirror.Visibility Value
+enum Bevy.Reflected.VisibilityMirror.Visibility : byte
+  Hidden = 1
+  Inherited = 0
+  Visible = 2
 readonly struct Bevy.Reflected.VisibilityRangeRef : IReflectedComponent<VisibilityRangeRef>, IReflectedWrapper<VisibilityRangeRef>
   Entity Entity { get; }
   FloatRange EndMargin { get; set; }
@@ -9945,6 +10381,24 @@ readonly struct Bevy.Reflected.WeatherCameraRef : IReflectedComponent<WeatherCam
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_weather::config::WeatherCamera"
+struct Bevy.Reflected.WeatherConfigMirror : IMirroredLayout, INativeComponent
+  WeatherConfigMirror.QualityVariant Quality
+  bool Atmosphere
+  bool CelestialLights
+  bool Clouds
+  bool DistanceFog
+  bool Precipitation
+  bool Sky
+  bool Thunder
+  bool VolumetricFog
+  float LightIntensityScale
+  float UnitsPerMeter
+enum Bevy.Reflected.WeatherConfigMirror.QualityVariant : byte
+  High = 3
+  Low = 1
+  Medium = 2
+  Potato = 0
+  Ultra = 4
 readonly struct Bevy.Reflected.WeatherConfigRef : IReflectedComponent<WeatherConfigRef>, IReflectedWrapper<WeatherConfigRef>
   Entity Entity { get; }
   WeatherConfigRef.QualityVariant Quality { get; set; }
@@ -9970,6 +10424,34 @@ readonly struct Bevy.Reflected.WeatherFogVolumeRef : IReflectedComponent<Weather
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_weather::fog::WeatherFogVolume"
+struct Bevy.Reflected.WeatherMirror : IMirroredLayout, INativeComponent
+  float CurrentCloudAltitude
+  float CurrentCloudCoverage
+  float CurrentCloudDensity
+  float CurrentCloudThickness
+  float CurrentFog
+  float CurrentHumidity
+  float CurrentRain
+  float CurrentSnow
+  float CurrentTemperature
+  float CurrentThunder
+  float CurrentTurbulence
+  float CurrentWindDirection
+  float CurrentWindSpeed
+  float TargetCloudAltitude
+  float TargetCloudCoverage
+  float TargetCloudDensity
+  float TargetCloudThickness
+  float TargetFog
+  float TargetHumidity
+  float TargetRain
+  float TargetSnow
+  float TargetTemperature
+  float TargetThunder
+  float TargetTurbulence
+  float TargetWindDirection
+  float TargetWindSpeed
+  float TransitionHalfLife
 readonly struct Bevy.Reflected.WeatherPlanetRef : IReflectedComponent<WeatherPlanetRef>, IReflectedWrapper<WeatherPlanetRef>
   Entity Entity { get; }
   bool Remove()
@@ -10005,6 +10487,15 @@ readonly struct Bevy.Reflected.WeatherRef : IReflectedComponent<WeatherRef>, IRe
   float TargetWindDirection { get; set; }
   float TargetWindSpeed { get; set; }
   float TransitionHalfLife { get; set; }
+struct Bevy.Reflected.WeatherTimeMirror : IMirroredLayout, INativeComponent
+  bool Paused
+  float AxialTilt
+  float DayLengthSecs
+  float Latitude
+  float MoonPhaseOffset
+  float TimeOfDay
+  float YearOffset
+  uint Day
 readonly struct Bevy.Reflected.WeatherTimeRef : IReflectedComponent<WeatherTimeRef>, IReflectedWrapper<WeatherTimeRef>
   Entity Entity { get; }
   bool Paused { get; set; }
@@ -10017,6 +10508,13 @@ readonly struct Bevy.Reflected.WeatherTimeRef : IReflectedComponent<WeatherTimeR
   float TimeOfDay { get; set; }
   float YearOffset { get; set; }
   uint Day { get; set; }
+struct Bevy.Reflected.WindMirror : IMirroredLayout, INativeComponent
+  Vec2 BaseVelocity
+  Vec2 Offset
+  Vec2 Velocity
+  float Gust
+  float OffsetWrap
+  uint Seed
 readonly struct Bevy.Reflected.WindRef : IReflectedComponent<WindRef>, IReflectedWrapper<WindRef>
   Entity Entity { get; }
   Vec2 BaseVelocity { get; set; }
@@ -10272,6 +10770,8 @@ readonly struct Bevy.Reflected.WireframeConfigRef : IReflectedComponent<Wirefram
 enum Bevy.Reflected.WireframeConfigRef.DefaultTopologyVariant : int
   Quads = 1
   Triangles = 0
+struct Bevy.Reflected.WireframeLineWidthMirror : IMirroredLayout, INativeComponent
+  float Width
 readonly struct Bevy.Reflected.WireframeLineWidthRef : IReflectedComponent<WireframeLineWidthRef>, IReflectedWrapper<WireframeLineWidthRef>
   Entity Entity { get; }
   bool Remove()
@@ -10281,6 +10781,11 @@ readonly struct Bevy.Reflected.WireframeRef : IReflectedComponent<WireframeRef>,
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_pbr::wireframe::Wireframe"
+struct Bevy.Reflected.WireframeTopologyMirror : IMirroredLayout, INativeComponent
+  WireframeTopologyMirror.WireframeTopology Value
+enum Bevy.Reflected.WireframeTopologyMirror.WireframeTopology : byte
+  Quads = 1
+  Triangles = 0
 readonly struct Bevy.Reflected.WireframeTopologyRef : IReflectedComponent<WireframeTopologyRef>, IReflectedWrapper<WireframeTopologyRef>
   Entity Entity { get; }
   WireframeTopologyRef.ValueVariant Value { get; set; }
@@ -10289,6 +10794,8 @@ readonly struct Bevy.Reflected.WireframeTopologyRef : IReflectedComponent<Wirefr
 enum Bevy.Reflected.WireframeTopologyRef.ValueVariant : int
   Quads = 1
   Triangles = 0
+struct Bevy.Reflected.WireframeXrayMirror : IMirroredLayout, INativeComponent
+  bool Value
 readonly struct Bevy.Reflected.WireframeXrayRef : IReflectedComponent<WireframeXrayRef>, IReflectedWrapper<WireframeXrayRef>
   Entity Entity { get; }
   bool Remove()
@@ -10299,6 +10806,8 @@ readonly struct Bevy.Reflected.WorldAssetRootRef : IReflectedComponent<WorldAsse
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_world_serialization::components::WorldAssetRoot"
+struct Bevy.Reflected.ZIndexMirror : IMirroredLayout, INativeComponent
+  int Value
 readonly struct Bevy.Reflected.ZIndexRef : IReflectedComponent<ZIndexRef>, IReflectedWrapper<ZIndexRef>
   Entity Entity { get; }
   bool Remove()

@@ -39,7 +39,14 @@ fn made(registry: &TypeRegistry, registration: &TypeRegistration, path: &str) ->
 /// A struct, a tuple struct and a tuple are walked into, an enum none of whose variants holds a
 /// value is one row, and anything else is one row of its kind, an enum whose variants hold values
 /// among them, since where a variant's value lies depends on the variant held.
-fn walk(value: &dyn PartialReflect, base: usize, size: usize, path: &str, rows: &mut Vec<Value>) -> Result<(), i32> {
+fn walk(
+    registry: &TypeRegistry,
+    value: &dyn PartialReflect,
+    base: usize,
+    size: usize,
+    path: &str,
+    rows: &mut Vec<Value>,
+) -> Result<(), i32> {
     let at = value as *const dyn PartialReflect as *const () as usize;
     let length = core::mem::size_of_val(value);
     if at < base || at + length > base + size {
@@ -52,29 +59,66 @@ fn walk(value: &dyn PartialReflect, base: usize, size: usize, path: &str, rows: 
     let kind = kind_of(value);
     if !path.is_empty() {
         let align = core::mem::align_of_val(value);
-        rows.push(json!({ "path": path, "offset": at - base, "size": length, "align": align, "kind": kind }));
+        let mut row = json!({ "path": path, "offset": at - base, "size": length, "align": align, "kind": kind });
+        if kind == "enum"
+            && let Some(variants) = discriminants(registry, value)
+        {
+            row["variants"] = variants;
+        }
+        rows.push(row);
     }
 
     match value.reflect_ref() {
         ReflectRef::Struct(fields) => {
             for i in 0..fields.field_len() {
                 let name = fields.name_at(i).unwrap_or_default();
-                walk(fields.field_at(i).unwrap(), base, size, &format!("{path}.{name}"), rows)?;
+                walk(registry, fields.field_at(i).unwrap(), base, size, &format!("{path}.{name}"), rows)?;
             }
         }
         ReflectRef::TupleStruct(fields) => {
             for i in 0..fields.field_len() {
-                walk(fields.field(i).unwrap(), base, size, &format!("{path}.{i}"), rows)?;
+                walk(registry, fields.field(i).unwrap(), base, size, &format!("{path}.{i}"), rows)?;
             }
         }
         ReflectRef::Tuple(fields) => {
             for i in 0..fields.field_len() {
-                walk(fields.field(i).unwrap(), base, size, &format!("{path}.{i}"), rows)?;
+                walk(registry, fields.field(i).unwrap(), base, size, &format!("{path}.{i}"), rows)?;
             }
         }
         _ => {}
     }
     Ok(())
+}
+
+/// The number each variant of an enum none of whose variants holds a value is stored as, by name,
+/// or nothing where a variant cannot be made or the enum is wider than eight bytes.
+///
+/// Rust promises no number for a variant of an enum of its default representation, so a mirror
+/// cannot write one down from the source. Each variant is made, through `FromReflect`, and the
+/// bytes it is stored in read as a little-endian number, which is what a mirror reads and writes.
+fn discriminants(registry: &TypeRegistry, value: &dyn PartialReflect) -> Option<Value> {
+    let info = value.get_represented_type_info()?;
+    let TypeInfo::Enum(variants) = info else {
+        return None;
+    };
+    let from = registry.get_type_data::<ReflectFromReflect>(info.type_id())?;
+    let size = core::mem::size_of_val(value);
+    if size > 8 {
+        return None;
+    }
+
+    let mut numbers = Map::new();
+    for variant in variants.iter() {
+        let mut held = DynamicEnum::new(variant.name(), DynamicVariant::Unit);
+        held.set_represented_type(Some(info));
+        let made = from.from_reflect(&held)?;
+        let at = made.as_ref() as *const dyn Reflect as *const u8;
+        // SAFETY: `made` is a live value of the enum's type, `size` bytes long, read as bytes.
+        let bytes = unsafe { core::slice::from_raw_parts(at, size) };
+        let number = bytes.iter().rev().fold(0u64, |held, byte| (held << 8) | u64::from(*byte));
+        numbers.insert(variant.name().to_owned(), Value::from(number));
+    }
+    Some(Value::Object(numbers))
 }
 
 /// What a value is to reflection, which says whether a mirror could read its bytes.
@@ -124,15 +168,23 @@ fn layout_json(world: &World, path: &str) -> Result<String, i32> {
 
     let base = value as *const dyn PartialReflect as *const () as usize;
     let mut rows = Vec::new();
-    walk(value, base, size, "", &mut rows)?;
-    Ok(json!({ "size": size, "align": align, "kind": kind_of(value), "fields": rows }).to_string())
+    walk(&registry, value, base, size, "", &mut rows)?;
+    let mut answer = json!({ "size": size, "align": align, "kind": kind_of(value), "fields": rows });
+    if kind_of(value) == "enum"
+        && let Some(variants) = discriminants(&registry, value)
+    {
+        answer["variants"] = variants;
+    }
+    Ok(answer.to_string())
 }
 
 /// Describes where the compiler put each field of a reflected type, as JSON.
 ///
-/// The type's size, alignment and kind, then a row for each field reflection reaches, walked into
+/// The type's size, alignment and kind, with the number each variant is stored as where it is an
+/// enum none of whose variants holds a value, then a row for each field reflection reaches, walked into
 /// structs, tuple structs and tuples, each with its reflect path, its offset from the value's
-/// start, its size, its alignment and its kind. A type with no default to make a value of is refused, and so is
+/// start, its size, its alignment and its kind, and the numbers of its variants where it is such an
+/// enum. A type with no default to make a value of is refused, and so is
 /// one a field of which is reflected from somewhere other than the value, which no derived type
 /// is. Bytes no row covers are padding or a field reflection leaves out, which the managed side
 /// tells apart by the alignment of what follows them.

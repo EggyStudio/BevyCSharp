@@ -57,7 +57,10 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             var items = pair.Left.Items.Where(c => c.Item).ToDictionary(c => c.Path, StringComparer.Ordinal);
             var unions = new Unions(new HashSet<string>(pair.Right.Items.Concat(named.Select(c => c.Type)), StringComparer.Ordinal));
             foreach (var component in named)
+            {
                 spc.AddSource($"Reflected.{component.Type}.g.cs", Emit(component, items, unions));
+                if (EmitMirror(component) is { } mirror) spc.AddSource($"Reflected.Mirror.{MirrorName(component.Type)}.g.cs", mirror);
+            }
             foreach (var union in unions.All)
                 spc.AddSource($"Reflected.Union.{union.Name}.g.cs", EmitUnion(union));
         });
@@ -92,8 +95,14 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
     /// <param name="Fields">Its rows.</param>
     /// <param name="Variants">The rows of its enums' variants.</param>
     /// <param name="Item">Whether it is a type a list holds as its items, which has no wrapper of its own.</param>
+    /// <param name="Layout">Where the compiler put each of its rows' fields, for a component a byte mirror can hold.</param>
     private sealed record ComponentModel(
-        string Path, string Short, EquatableArray<FieldModel> Fields, EquatableArray<VariantFieldModel> Variants, bool Item = false)
+        string Path,
+        string Short,
+        EquatableArray<FieldModel> Fields,
+        EquatableArray<VariantFieldModel> Variants,
+        bool Item = false,
+        string? Layout = null)
     {
         /// <summary>The wrapper's type name, settled once every component is known.</summary>
         public string Type { get; init; } = string.Empty;
@@ -108,6 +117,7 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
         var item = false;
         var fields = new List<FieldModel>();
         var variants = new List<VariantFieldModel>();
+        string? layout = null;
 
         void Close()
         {
@@ -116,10 +126,12 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
                 components.Add(new ComponentModel(path, shortName!,
                     new EquatableArray<FieldModel>(fields.ToArray()),
                     new EquatableArray<VariantFieldModel>(variants.ToArray()),
-                    item));
+                    item,
+                    layout));
             }
             fields.Clear();
             variants.Clear();
+            layout = null;
         }
 
         foreach (var raw in text.Split('\n'))
@@ -143,6 +155,10 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             else if (words[0] == "variant" && words.Length >= 9 && words[1] == path)
             {
                 variants.Add(new VariantFieldModel(words[2], words[3], words[4], words[5], words[6], words[7], words[8]));
+            }
+            else if (words[0] == "layout" && words.Length >= 3 && words[1] == path)
+            {
+                layout = words[2];
             }
         }
 

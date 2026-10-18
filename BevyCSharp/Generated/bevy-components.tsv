@@ -4,11 +4,14 @@
 # component <type path> <short name>
 # field <type path> <name> <reflect path> <kind> <rust type> <options or asset kind>
 # variant <type path> <enum field> <variant> <name> <reflect path> <kind> <rust type> <options or asset kind>
+# layout <type path> <size/align;path@offset:size{variant=number,...};...>
 component	bevy_a11y::AccessibilityRequested	AccessibilityRequested
 component	bevy_a11y::ManageAccessibilityUpdates	ManageAccessibilityUpdates
 field	bevy_a11y::ManageAccessibilityUpdates	0	.0	Bool	bool	
+layout	bevy_a11y::ManageAccessibilityUpdates	1/1;.0@0:1
 component	bevy_animation::AnimatedBy	AnimatedBy
 field	bevy_animation::AnimatedBy	0	.0	Entity	bevy_ecs::entity::Entity	
+layout	bevy_animation::AnimatedBy	8/8;.0@0:8
 component	bevy_animation::AnimationPlayer	AnimationPlayer
 component	bevy_animation::AnimationTargetId	AnimationTargetId
 component	bevy_animation::graph::AnimationGraphHandle	AnimationGraphHandle
@@ -20,18 +23,24 @@ component	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpen
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	enabled	.enabled	Bool	bool	
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	sharpening_strength	.sharpening_strength	Float	f32	
 field	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	denoise	.denoise	Bool	bool	
+layout	bevy_anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening	8/4;.enabled@4:1;.sharpening_strength@0:4;.denoise@5:1
 component	bevy_anti_alias::contrast_adaptive_sharpening::DenoiseCas	DenoiseCas
 field	bevy_anti_alias::contrast_adaptive_sharpening::DenoiseCas	0	.0	Bool	bool	
+layout	bevy_anti_alias::contrast_adaptive_sharpening::DenoiseCas	1/1;.0@0:1
 component	bevy_anti_alias::fxaa::Fxaa	Fxaa
 field	bevy_anti_alias::fxaa::Fxaa	enabled	.enabled	Bool	bool	
 field	bevy_anti_alias::fxaa::Fxaa	edge_threshold	.edge_threshold	Enum	Sensitivity	Low,Medium,High,Ultra,Extreme
 field	bevy_anti_alias::fxaa::Fxaa	edge_threshold_min	.edge_threshold_min	Enum	Sensitivity	Low,Medium,High,Ultra,Extreme
+layout	bevy_anti_alias::fxaa::Fxaa	3/1;.enabled@0:1;.edge_threshold@1:1{Low=0,Medium=1,High=2,Ultra=3,Extreme=4};.edge_threshold_min@2:1{Low=0,Medium=1,High=2,Ultra=3,Extreme=4}
 component	bevy_anti_alias::smaa::Smaa	Smaa
 field	bevy_anti_alias::smaa::Smaa	preset	.preset	Enum	SmaaPreset	Low,Medium,High,Ultra
+layout	bevy_anti_alias::smaa::Smaa	1/1;.preset@0:1{Low=0,Medium=1,High=2,Ultra=3}
 component	bevy_anti_alias::taa::TemporalAntiAliasing	TemporalAntiAliasing
 field	bevy_anti_alias::taa::TemporalAntiAliasing	reset	.reset	Bool	bool	
+layout	bevy_anti_alias::taa::TemporalAntiAliasing	1/1;.reset@0:1
 component	bevy_audio::audio::DefaultSpatialScale	DefaultSpatialScale
 field	bevy_audio::audio::DefaultSpatialScale	0	.0.0	Vec3	glam::Vec3	
+layout	bevy_audio::audio::DefaultSpatialScale	12/4;.0.0@0:12
 component	bevy_audio::audio::PlaybackSettings	PlaybackSettings
 field	bevy_audio::audio::PlaybackSettings	mode	.mode	Enum	PlaybackMode	Once,Loop,Despawn,Remove
 field	bevy_audio::audio::PlaybackSettings	volume	.volume	Enum	Volume	Linear,Decibels
@@ -50,6 +59,7 @@ variant	bevy_audio::audio::PlaybackSettings	duration	Some		.duration.0	Double	Du
 component	bevy_audio::audio::SpatialListener	SpatialListener
 field	bevy_audio::audio::SpatialListener	left_ear_offset	.left_ear_offset	Vec3	glam::Vec3	
 field	bevy_audio::audio::SpatialListener	right_ear_offset	.right_ear_offset	Vec3	glam::Vec3	
+layout	bevy_audio::audio::SpatialListener	24/4;.left_ear_offset@0:12;.right_ear_offset@12:12
 component	bevy_audio::volume::GlobalVolume	GlobalVolume
 field	bevy_audio::volume::GlobalVolume	volume	.volume	Enum	Volume	Linear,Decibels
 variant	bevy_audio::volume::GlobalVolume	volume	Linear		.volume.0	Float	f32	
@@ -99,8 +109,10 @@ component	bevy_camera::camera::Exposure	Exposure
 component	bevy_camera::camera::MainPassResolutionOverride	MainPassResolutionOverride
 field	bevy_camera::camera::MainPassResolutionOverride	0.x	.0.x	Int	u32	
 field	bevy_camera::camera::MainPassResolutionOverride	0.y	.0.y	Int	u32	
+layout	bevy_camera::camera::MainPassResolutionOverride	8/4;.0.x@0:4;.0.y@4:4
 component	bevy_camera::camera::ManualTextureViewHandle	ManualTextureViewHandle
 field	bevy_camera::camera::ManualTextureViewHandle	0	.0	Int	u32	
+layout	bevy_camera::camera::ManualTextureViewHandle	4/4;.0@0:4
 component	bevy_camera::camera::RenderTarget	RenderTarget
 field	bevy_camera::camera::RenderTarget	value		Enum	RenderTarget	Window,Image,TextureView,None
 variant	bevy_camera::camera::RenderTarget	value	Window		.0	Enum	WindowRef	Primary,Entity
@@ -120,16 +132,19 @@ variant	bevy_camera::components::Camera3d	depth_load_op	Clear		.depth_load_op.0	
 field	bevy_camera::components::Camera3d	depth_texture_usages	.depth_texture_usages.0	Int	u32	
 component	bevy_camera::components::CompositingSpace	CompositingSpace
 field	bevy_camera::components::CompositingSpace	value		Enum	CompositingSpace	Srgb,Linear,Oklab
+layout	bevy_camera::components::CompositingSpace	1/1;@0:1{Srgb=0,Linear=1,Oklab=2}
 component	bevy_camera::components::Hdr	Hdr
 component	bevy_camera::primitives::Aabb	Aabb
 field	bevy_camera::primitives::Aabb	center	.center	Vec3	glam::Vec3A	
 field	bevy_camera::primitives::Aabb	half_extents	.half_extents	Vec3	glam::Vec3A	
+layout	bevy_camera::primitives::Aabb	32/16;.center@0:16;.half_extents@16:16
 component	bevy_camera::primitives::CascadesFrusta	CascadesFrusta
 component	bevy_camera::primitives::CubemapFrusta	CubemapFrusta
 component	bevy_camera::primitives::Frustum	Frustum
 component	bevy_camera::primitives::Sphere	Sphere
 field	bevy_camera::primitives::Sphere	center	.center	Vec3	glam::Vec3A	
 field	bevy_camera::primitives::Sphere	radius	.radius	Float	f32	
+layout	bevy_camera::primitives::Sphere	32/16;.center@0:16;.radius@16:4
 component	bevy_camera::projection::Projection	Projection
 field	bevy_camera::projection::Projection	value		Enum	Projection	Perspective,Orthographic,Custom
 variant	bevy_camera::projection::Projection	value	Perspective	fov	.0.fov	Float	f32	
@@ -157,11 +172,14 @@ component	bevy_camera::visibility::CubemapVisibleEntities	CubemapVisibleEntities
 component	bevy_camera::visibility::DynamicSkinnedMeshBounds	DynamicSkinnedMeshBounds
 component	bevy_camera::visibility::InheritedVisibility	InheritedVisibility
 field	bevy_camera::visibility::InheritedVisibility	0	.0	Bool	bool	
+layout	bevy_camera::visibility::InheritedVisibility	1/1;.0@0:1
 component	bevy_camera::visibility::NoFrustumCulling	NoFrustumCulling
 component	bevy_camera::visibility::ViewVisibility	ViewVisibility
 field	bevy_camera::visibility::ViewVisibility	0	.0	Int	u8	
+layout	bevy_camera::visibility::ViewVisibility	1/1;.0@0:1
 component	bevy_camera::visibility::Visibility	Visibility
 field	bevy_camera::visibility::Visibility	value		Enum	Visibility	Inherited,Hidden,Visible
+layout	bevy_camera::visibility::Visibility	1/1;@0:1{Inherited=0,Hidden=1,Visible=2}
 component	bevy_camera::visibility::VisibilityClass	VisibilityClass
 field	bevy_camera::visibility::VisibilityClass	0	.0	List	SmallVec<[TypeId; 1]>	core::any::TypeId
 component	bevy_camera::visibility::VisibleEntities	VisibleEntities
@@ -170,6 +188,7 @@ component	bevy_camera::visibility::range::VisibilityRange	VisibilityRange
 field	bevy_camera::visibility::range::VisibilityRange	start_margin	.start_margin	Vec2	Range<f32>	
 field	bevy_camera::visibility::range::VisibilityRange	end_margin	.end_margin	Vec2	Range<f32>	
 field	bevy_camera::visibility::range::VisibilityRange	use_aabb	.use_aabb	Bool	bool	
+layout	bevy_camera::visibility::range::VisibilityRange	20/4;.start_margin@0:8;.end_margin@8:8;.use_aabb@16:1
 component	bevy_camera::visibility::render_layers::RenderLayers	RenderLayers
 field	bevy_camera::visibility::render_layers::RenderLayers	0	.0	List	SmallVec<[u64; 1]>	Int
 component	bevy_core_pipeline::prepass::DeferredPrepass	DeferredPrepass
@@ -185,6 +204,7 @@ field	bevy_ecs::entity_disabling::DefaultQueryFilters	disabling	.disabling	List	
 component	bevy_ecs::entity_disabling::Disabled	Disabled
 component	bevy_ecs::hierarchy::ChildOf	ChildOf
 field	bevy_ecs::hierarchy::ChildOf	0	.0	Entity	bevy_ecs::entity::Entity	
+layout	bevy_ecs::hierarchy::ChildOf	8/8;.0@0:8
 component	bevy_ecs::hierarchy::Children	Children
 field	bevy_ecs::hierarchy::Children	0	.0	List	Vec<Entity>	Entity
 component	bevy_ecs::name::Name	Name
@@ -192,8 +212,10 @@ component	bevy_ecs::observer::distributed_storage::ObservedBy	ObservedBy
 field	bevy_ecs::observer::distributed_storage::ObservedBy	0	.0	List	Vec<Entity>	Entity
 component	bevy_ecs::resource::IsResource	IsResource
 field	bevy_ecs::resource::IsResource	0	.0.0	Int	usize	
+layout	bevy_ecs::resource::IsResource	8/8;.0.0@0:8
 component	bevy_extract::sync_world::MainEntity	MainEntity
 field	bevy_extract::sync_world::MainEntity	0	.0	Entity	bevy_ecs::entity::Entity	
+layout	bevy_extract::sync_world::MainEntity	8/8;.0@0:8
 component	bevy_gizmos::aabb::ShowAabbGizmo	ShowAabbGizmo
 field	bevy_gizmos::aabb::ShowAabbGizmo	color	.color	Enum	Option<Color>	None,Some
 variant	bevy_gizmos::aabb::ShowAabbGizmo	color	Some		.color.0	Color	Color	
@@ -248,6 +270,7 @@ component	bevy_gizmos_render::LineGizmoEntities	LineGizmoEntities
 field	bevy_gizmos_render::LineGizmoEntities	line_gizmo_renderer	.line_gizmo_renderer.0	Entity	bevy_ecs::entity::Entity	
 field	bevy_gizmos_render::LineGizmoEntities	line_strip_gizmo_renderer	.line_strip_gizmo_renderer.0	Entity	bevy_ecs::entity::Entity	
 field	bevy_gizmos_render::LineGizmoEntities	line_joint_gizmo_renderer	.line_joint_gizmo_renderer.0	Entity	bevy_ecs::entity::Entity	
+layout	bevy_gizmos_render::LineGizmoEntities	24/8;.line_gizmo_renderer.0@0:8;.line_strip_gizmo_renderer.0@8:8;.line_joint_gizmo_renderer.0@16:8
 component	bevy_gltf::assets::GltfExtras	GltfExtras
 field	bevy_gltf::assets::GltfExtras	value	.value	String	alloc::string::String	
 component	bevy_gltf::assets::GltfMaterialExtras	GltfMaterialExtras
@@ -281,9 +304,11 @@ field	bevy_input::gamepad::GamepadSettings	default_button_axis_settings.low	.def
 field	bevy_input::gamepad::GamepadSettings	default_button_axis_settings.threshold	.default_button_axis_settings.threshold	Float	f32	
 component	bevy_input::mouse::AccumulatedMouseMotion	AccumulatedMouseMotion
 field	bevy_input::mouse::AccumulatedMouseMotion	delta	.delta	Vec2	glam::Vec2	
+layout	bevy_input::mouse::AccumulatedMouseMotion	8/4;.delta@0:8
 component	bevy_input::mouse::AccumulatedMouseScroll	AccumulatedMouseScroll
 field	bevy_input::mouse::AccumulatedMouseScroll	unit	.unit	Enum	MouseScrollUnit	Line,Pixel
 field	bevy_input::mouse::AccumulatedMouseScroll	delta	.delta	Vec2	glam::Vec2	
+layout	bevy_input::mouse::AccumulatedMouseScroll	12/4;.unit@8:1{Line=0,Pixel=1};.delta@0:8
 component	bevy_input_focus::InputFocus	InputFocus
 field	bevy_input_focus::InputFocus	current_focus	.current_focus	Enum	Option<Entity>	None,Some
 variant	bevy_input_focus::InputFocus	current_focus	Some		.current_focus.0	Entity	bevy_ecs::entity::Entity	
@@ -292,6 +317,7 @@ field	bevy_input_focus::InputFocus	original_focus	.original_focus	Enum	Option<En
 variant	bevy_input_focus::InputFocus	original_focus	Some		.original_focus.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_input_focus::InputFocusVisible	InputFocusVisible
 field	bevy_input_focus::InputFocusVisible	0	.0	Bool	bool	
+layout	bevy_input_focus::InputFocusVisible	1/1;.0@0:1
 component	bevy_input_focus::autofocus::AutoFocus	AutoFocus
 component	bevy_input_focus::directional_navigation::AutoNavigationConfig	AutoNavigationConfig
 field	bevy_input_focus::directional_navigation::AutoNavigationConfig	min_alignment_factor	.min_alignment_factor	Float	f32	
@@ -302,12 +328,15 @@ component	bevy_input_focus::directional_navigation::DirectionalNavigationMap	Dir
 component	bevy_input_focus::tab_navigation::TabGroup	TabGroup
 field	bevy_input_focus::tab_navigation::TabGroup	order	.order	Int	i32	
 field	bevy_input_focus::tab_navigation::TabGroup	modal	.modal	Bool	bool	
+layout	bevy_input_focus::tab_navigation::TabGroup	8/4;.order@0:4;.modal@4:1
 component	bevy_input_focus::tab_navigation::TabIndex	TabIndex
 field	bevy_input_focus::tab_navigation::TabIndex	0	.0	Int	i32	
+layout	bevy_input_focus::tab_navigation::TabIndex	4/4;.0@0:4
 component	bevy_light::NotShadowCaster	NotShadowCaster
 component	bevy_light::NotShadowReceiver	NotShadowReceiver
 component	bevy_light::ShadowFilteringMethod	ShadowFilteringMethod
 field	bevy_light::ShadowFilteringMethod	value		Enum	ShadowFilteringMethod	Hardware2x2,Gaussian,Temporal
+layout	bevy_light::ShadowFilteringMethod	1/1;@0:1{Hardware2x2=0,Gaussian=1,Temporal=2}
 component	bevy_light::TransmittedShadowReceiver	TransmittedShadowReceiver
 component	bevy_light::ambient_light::AmbientLight	AmbientLight
 field	bevy_light::ambient_light::AmbientLight	color	.color	Color	Color	
@@ -359,6 +388,7 @@ field	bevy_light::directional_light::DirectionalLight	shadow_depth_bias	.shadow_
 field	bevy_light::directional_light::DirectionalLight	shadow_normal_bias	.shadow_normal_bias	Float	f32	
 component	bevy_light::directional_light::DirectionalLightShadowMap	DirectionalLightShadowMap
 field	bevy_light::directional_light::DirectionalLightShadowMap	size	.size	Int	usize	
+layout	bevy_light::directional_light::DirectionalLightShadowMap	8/8;.size@0:8
 component	bevy_light::directional_light::DirectionalLightTexture	DirectionalLightTexture
 field	bevy_light::directional_light::DirectionalLightTexture	image	.image	Asset	Handle<Image>	Image
 field	bevy_light::directional_light::DirectionalLightTexture	tiled	.tiled	Bool	bool	
@@ -380,6 +410,7 @@ field	bevy_light::point_light::PointLight	shadow_normal_bias	.shadow_normal_bias
 field	bevy_light::point_light::PointLight	shadow_map_near_z	.shadow_map_near_z	Float	f32	
 component	bevy_light::point_light::PointLightShadowMap	PointLightShadowMap
 field	bevy_light::point_light::PointLightShadowMap	size	.size	Int	usize	
+layout	bevy_light::point_light::PointLightShadowMap	8/8;.size@0:8
 component	bevy_light::point_light::PointLightTexture	PointLightTexture
 field	bevy_light::point_light::PointLightTexture	image	.image	Asset	Handle<Image>	Image
 field	bevy_light::point_light::PointLightTexture	cubemap_layout	.cubemap_layout	Enum	CubemapLayout	CrossVertical,CrossHorizontal,SequenceVertical,SequenceHorizontal
@@ -400,6 +431,7 @@ field	bevy_light::probe::IrradianceVolume	intensity	.intensity	Float	f32
 field	bevy_light::probe::IrradianceVolume	affects_lightmapped_meshes	.affects_lightmapped_meshes	Bool	bool	
 component	bevy_light::probe::LightProbe	LightProbe
 field	bevy_light::probe::LightProbe	falloff	.falloff	Vec3	glam::Vec3	
+layout	bevy_light::probe::LightProbe	12/4;.falloff@0:12
 component	bevy_light::probe::ParallaxCorrection	ParallaxCorrection
 field	bevy_light::probe::ParallaxCorrection	value		Enum	ParallaxCorrection	None,Auto,Custom
 variant	bevy_light::probe::ParallaxCorrection	value	Custom		.0	Vec3	glam::Vec3	
@@ -453,6 +485,7 @@ component	bevy_mesh::components::Mesh3d	Mesh3d
 field	bevy_mesh::components::Mesh3d	0	.0	Asset	Handle<Mesh>	Mesh
 component	bevy_mesh::components::MeshTag	MeshTag
 field	bevy_mesh::components::MeshTag	value	.value	Int	u32	
+layout	bevy_mesh::components::MeshTag	4/4;.value@0:4
 component	bevy_mesh::morph::MeshMorphWeights	MeshMorphWeights
 field	bevy_mesh::morph::MeshMorphWeights	value		Enum	MeshMorphWeights	Value,Reference
 variant	bevy_mesh::morph::MeshMorphWeights	value	Value	weights	.weights	List	Vec<f32>	Float
@@ -467,6 +500,7 @@ component	bevy_pbr::contact_shadows::ContactShadows	ContactShadows
 field	bevy_pbr::contact_shadows::ContactShadows	linear_steps	.linear_steps	Int	u32	
 field	bevy_pbr::contact_shadows::ContactShadows	thickness	.thickness	Float	f32	
 field	bevy_pbr::contact_shadows::ContactShadows	length	.length	Float	f32	
+layout	bevy_pbr::contact_shadows::ContactShadows	12/4;.linear_steps@0:4;.thickness@4:4;.length@8:4
 component	bevy_pbr::fog::DistanceFog	DistanceFog
 field	bevy_pbr::fog::DistanceFog	color	.color	Color	Color	
 field	bevy_pbr::fog::DistanceFog	directional_light_color	.directional_light_color	Color	Color	
@@ -485,6 +519,7 @@ field	bevy_pbr::lightmap::Lightmap	uv_rect.max	.uv_rect.max	Vec2	glam::Vec2
 field	bevy_pbr::lightmap::Lightmap	bicubic_sampling	.bicubic_sampling	Bool	bool	
 component	bevy_pbr::material::DefaultOpaqueRendererMethod	DefaultOpaqueRendererMethod
 field	bevy_pbr::material::DefaultOpaqueRendererMethod	0	.0	Enum	OpaqueRendererMethod	Forward,Deferred,Auto
+layout	bevy_pbr::material::DefaultOpaqueRendererMethod	1/1;.0@0:1{Forward=0,Deferred=1,Auto=2}
 component	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_pbr::decal::forward::ForwardDecalMaterialExt>>	MeshMaterial3d<ExtendedMaterial<StandardMaterial, ForwardDecalMaterialExt>>
 component	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::pbr_material::StandardMaterial>	MeshMaterial3d<StandardMaterial>
 field	bevy_pbr::mesh_material::MeshMaterial3d<bevy_pbr::pbr_material::StandardMaterial>	0	.0	Asset	Handle<StandardMaterial>	StandardMaterial
@@ -504,9 +539,11 @@ field	bevy_pbr::ssr::ScreenSpaceReflections	linear_march_exponent	.linear_march_
 field	bevy_pbr::ssr::ScreenSpaceReflections	edge_fadeout	.edge_fadeout	Vec2	Range<f32>	
 field	bevy_pbr::ssr::ScreenSpaceReflections	bisection_steps	.bisection_steps	Int	u32	
 field	bevy_pbr::ssr::ScreenSpaceReflections	use_secant	.use_secant	Bool	bool	
+layout	bevy_pbr::ssr::ScreenSpaceReflections	44/4;.min_perceptual_roughness@0:8;.max_perceptual_roughness@8:8;.thickness@16:4;.linear_steps@20:4;.linear_march_exponent@24:4;.edge_fadeout@28:8;.bisection_steps@36:4;.use_secant@40:1
 component	bevy_pbr::transmission::ScreenSpaceTransmission	ScreenSpaceTransmission
 field	bevy_pbr::transmission::ScreenSpaceTransmission	steps	.steps	Int	usize	
 field	bevy_pbr::transmission::ScreenSpaceTransmission	quality	.quality	Enum	ScreenSpaceTransmissionQuality	Low,Medium,High,Ultra
+layout	bevy_pbr::transmission::ScreenSpaceTransmission	16/8;.steps@0:8;.quality@8:1{Low=0,Medium=1,High=2,Ultra=3}
 component	bevy_pbr::wireframe::Mesh3dWireframe	Mesh3dWireframe
 component	bevy_pbr::wireframe::NoWireframe	NoWireframe
 component	bevy_pbr::wireframe::Wireframe	Wireframe
@@ -520,19 +557,24 @@ field	bevy_pbr::wireframe::WireframeConfig	default_topology	.default_topology	En
 field	bevy_pbr::wireframe::WireframeConfig	xray_mode	.xray_mode	Bool	bool	
 component	bevy_pbr::wireframe::WireframeLineWidth	WireframeLineWidth
 field	bevy_pbr::wireframe::WireframeLineWidth	width	.width	Float	f32	
+layout	bevy_pbr::wireframe::WireframeLineWidth	4/4;.width@0:4
 component	bevy_pbr::wireframe::WireframeTopology	WireframeTopology
 field	bevy_pbr::wireframe::WireframeTopology	value		Enum	WireframeTopology	Triangles,Quads
+layout	bevy_pbr::wireframe::WireframeTopology	1/1;@0:1{Triangles=0,Quads=1}
 component	bevy_pbr::wireframe::WireframeXray	WireframeXray
 field	bevy_pbr::wireframe::WireframeXray	0	.0	Bool	bool	
+layout	bevy_pbr::wireframe::WireframeXray	1/1;.0@0:1
 component	bevy_picking::Pickable	Pickable
 field	bevy_picking::Pickable	should_block_lower	.should_block_lower	Bool	bool	
 field	bevy_picking::Pickable	is_hoverable	.is_hoverable	Bool	bool	
+layout	bevy_picking::Pickable	2/1;.should_block_lower@0:1;.is_hoverable@1:1
 component	bevy_picking::PickingSettings	PickingSettings
 field	bevy_picking::PickingSettings	is_enabled	.is_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	is_input_enabled	.is_input_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	is_hover_enabled	.is_hover_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	is_window_picking_enabled	.is_window_picking_enabled	Bool	bool	
 field	bevy_picking::PickingSettings	multi_click_interval	.multi_click_interval	Double	Duration	
+layout	bevy_picking::PickingSettings	24/8;.is_enabled@16:1;.is_input_enabled@17:1;.is_hover_enabled@18:1;.is_window_picking_enabled@19:1;.multi_click_interval@0:16
 component	bevy_picking::backend::ray::RayMap	RayMap
 component	bevy_picking::cursor::DefaultCursor	DefaultCursor
 field	bevy_picking::cursor::DefaultCursor	0	.0	Enum	EntityCursor	Custom,System
@@ -595,19 +637,24 @@ variant	bevy_picking::cursor::OverrideCursor	0.Some	System		.0.0.0	Enum	SystemCu
 component	bevy_picking::events::PointerState	PointerState
 component	bevy_picking::hover::DirectlyHovered	DirectlyHovered
 field	bevy_picking::hover::DirectlyHovered	0	.0	Bool	bool	
+layout	bevy_picking::hover::DirectlyHovered	1/1;.0@0:1
 component	bevy_picking::hover::HoverMap	HoverMap
 component	bevy_picking::hover::Hovered	Hovered
 field	bevy_picking::hover::Hovered	0	.0	Bool	bool	
+layout	bevy_picking::hover::Hovered	1/1;.0@0:1
 component	bevy_picking::hover::PickingInteraction	PickingInteraction
 field	bevy_picking::hover::PickingInteraction	value		Enum	PickingInteraction	Pressed,Hovered,None
+layout	bevy_picking::hover::PickingInteraction	1/1;@0:1{None=0,Hovered=1,Pressed=2}
 component	bevy_picking::hover::PreviousHoverMap	PreviousHoverMap
 component	bevy_picking::input::PointerInputSettings	PointerInputSettings
 field	bevy_picking::input::PointerInputSettings	is_touch_enabled	.is_touch_enabled	Bool	bool	
 field	bevy_picking::input::PointerInputSettings	is_mouse_enabled	.is_mouse_enabled	Bool	bool	
+layout	bevy_picking::input::PointerInputSettings	2/1;.is_touch_enabled@0:1;.is_mouse_enabled@1:1
 component	bevy_picking::mesh_picking::MeshPickingCamera	MeshPickingCamera
 component	bevy_picking::mesh_picking::MeshPickingSettings	MeshPickingSettings
 field	bevy_picking::mesh_picking::MeshPickingSettings	require_markers	.require_markers	Bool	bool	
 field	bevy_picking::mesh_picking::MeshPickingSettings	ray_cast_visibility	.ray_cast_visibility	Enum	RayCastVisibility	Any,Visible,VisibleInView
+layout	bevy_picking::mesh_picking::MeshPickingSettings	2/1;.require_markers@0:1;.ray_cast_visibility@1:1{Any=0,Visible=1,VisibleInView=2}
 component	bevy_picking::mesh_picking::ray_cast::RayCastBackfaces	RayCastBackfaces
 component	bevy_picking::mesh_picking::ray_cast::SimplifiedMesh	SimplifiedMesh
 field	bevy_picking::mesh_picking::ray_cast::SimplifiedMesh	0	.0	Asset	Handle<Mesh>	Mesh
@@ -622,6 +669,7 @@ component	bevy_picking::pointer::PointerPressState	PointerPressState
 field	bevy_picking::pointer::PointerPressState	primary	.primary	Bool	bool	
 field	bevy_picking::pointer::PointerPressState	secondary	.secondary	Bool	bool	
 field	bevy_picking::pointer::PointerPressState	middle	.middle	Bool	bool	
+layout	bevy_picking::pointer::PointerPressState	3/1;.primary@0:1;.secondary@1:1;.middle@2:1
 component	bevy_post_process::auto_exposure::settings::AutoExposure	AutoExposure
 field	bevy_post_process::auto_exposure::settings::AutoExposure	speed_brighten	.speed_brighten	Float	f32	
 field	bevy_post_process::auto_exposure::settings::AutoExposure	speed_darken	.speed_darken	Float	f32	
@@ -637,6 +685,7 @@ field	bevy_post_process::bloom::settings::Bloom	prefilter.threshold_softness	.pr
 field	bevy_post_process::bloom::settings::Bloom	composite_mode	.composite_mode	Enum	BloomCompositeMode	EnergyConserving,Additive
 field	bevy_post_process::bloom::settings::Bloom	max_mip_dimension	.max_mip_dimension	Int	u32	
 field	bevy_post_process::bloom::settings::Bloom	scale	.scale	Vec2	glam::Vec2	
+layout	bevy_post_process::bloom::settings::Bloom	40/4;.intensity@0:4;.low_frequency_boost@4:4;.low_frequency_boost_curvature@8:4;.high_pass_frequency@12:4;.prefilter.threshold@16:4;.prefilter.threshold_softness@20:4;.composite_mode@36:1{EnergyConserving=0,Additive=1};.max_mip_dimension@24:4;.scale@28:8
 component	bevy_post_process::dof::DepthOfField	DepthOfField
 field	bevy_post_process::dof::DepthOfField	mode	.mode	Enum	DepthOfFieldMode	Bokeh,Gaussian
 field	bevy_post_process::dof::DepthOfField	focal_distance	.focal_distance	Float	f32	
@@ -644,6 +693,7 @@ field	bevy_post_process::dof::DepthOfField	sensor_height	.sensor_height	Float	f3
 field	bevy_post_process::dof::DepthOfField	aperture_f_stops	.aperture_f_stops	Float	f32	
 field	bevy_post_process::dof::DepthOfField	max_circle_of_confusion_diameter	.max_circle_of_confusion_diameter	Float	f32	
 field	bevy_post_process::dof::DepthOfField	max_depth	.max_depth	Float	f32	
+layout	bevy_post_process::dof::DepthOfField	24/4;.mode@20:1{Bokeh=0,Gaussian=1};.focal_distance@0:4;.sensor_height@4:4;.aperture_f_stops@8:4;.max_circle_of_confusion_diameter@12:4;.max_depth@16:4
 component	bevy_post_process::effect_stack::chromatic_aberration::ChromaticAberration	ChromaticAberration
 field	bevy_post_process::effect_stack::chromatic_aberration::ChromaticAberration	color_lut	.color_lut	Enum	Option<Handle<Image>>	None,Some
 variant	bevy_post_process::effect_stack::chromatic_aberration::ChromaticAberration	color_lut	Some		.color_lut.0	Asset	Handle<Image>	Image
@@ -660,15 +710,19 @@ field	bevy_post_process::effect_stack::vignette::Vignette	color	.color	Color	Col
 component	bevy_post_process::motion_blur::MotionBlur	MotionBlur
 field	bevy_post_process::motion_blur::MotionBlur	shutter_angle	.shutter_angle	Float	f32	
 field	bevy_post_process::motion_blur::MotionBlur	samples	.samples	Int	u32	
+layout	bevy_post_process::motion_blur::MotionBlur	8/4;.shutter_angle@0:4;.samples@4:4
 component	bevy_render::camera::CameraRenderGraph	CameraRenderGraph
 component	bevy_render::camera::MipBias	MipBias
 field	bevy_render::camera::MipBias	0	.0	Float	f32	
+layout	bevy_render::camera::MipBias	4/4;.0@0:4
 component	bevy_render::camera::TemporalJitter	TemporalJitter
 field	bevy_render::camera::TemporalJitter	offset	.offset	Vec2	glam::Vec2	
+layout	bevy_render::camera::TemporalJitter	8/4;.offset@0:8
 component	bevy_render::globals::GlobalsUniform	GlobalsUniform
 field	bevy_render::globals::GlobalsUniform	time	.time	Float	f32	
 field	bevy_render::globals::GlobalsUniform	delta_time	.delta_time	Float	f32	
 field	bevy_render::globals::GlobalsUniform	frame_count	.frame_count	Int	u32	
+layout	bevy_render::globals::GlobalsUniform	12/4;.time@0:4;.delta_time@4:4;.frame_count@8:4
 component	bevy_render::occlusion_culling::OcclusionCulling	OcclusionCulling
 component	bevy_render::view::ColorGrading	ColorGrading
 field	bevy_render::view::ColorGrading	global.exposure	.global.exposure	Float	f32	
@@ -692,12 +746,16 @@ field	bevy_render::view::ColorGrading	highlights.contrast	.highlights.contrast	F
 field	bevy_render::view::ColorGrading	highlights.gamma	.highlights.gamma	Float	f32	
 field	bevy_render::view::ColorGrading	highlights.gain	.highlights.gain	Float	f32	
 field	bevy_render::view::ColorGrading	highlights.lift	.highlights.lift	Float	f32	
+layout	bevy_render::view::ColorGrading	88/4;.global.exposure@8:4;.global.temperature@12:4;.global.tint@16:4;.global.hue@20:4;.global.post_saturation@24:4;.global.midtones_range@0:8;.shadows.saturation@28:4;.shadows.contrast@32:4;.shadows.gamma@36:4;.shadows.gain@40:4;.shadows.lift@44:4;.midtones.saturation@48:4;.midtones.contrast@52:4;.midtones.gamma@56:4;.midtones.gain@60:4;.midtones.lift@64:4;.highlights.saturation@68:4;.highlights.contrast@72:4;.highlights.gamma@76:4;.highlights.gain@80:4;.highlights.lift@84:4
 component	bevy_render::view::DebandDither	DebandDither
 field	bevy_render::view::DebandDither	value		Enum	DebandDither	Disabled,Enabled
+layout	bevy_render::view::DebandDither	1/1;@0:1{Disabled=0,Enabled=1}
 component	bevy_render::view::Msaa	Msaa
 field	bevy_render::view::Msaa	value		Enum	Msaa	Off,Sample2,Sample4,Sample8
+layout	bevy_render::view::Msaa	1/1;@0:1{Off=1,Sample2=2,Sample4=4,Sample8=8}
 component	bevy_render::view::Tonemapping	Tonemapping
 field	bevy_render::view::Tonemapping	value		Enum	Tonemapping	None,Linear,Reinhard,ReinhardLuminance,AcesFitted,AgX,SomewhatBoringDisplayTransform,TonyMcMapface,BlenderFilmic,KhronosPbrNeutral
+layout	bevy_render::view::Tonemapping	1/1;@0:1{None=0,Linear=1,Reinhard=2,ReinhardLuminance=3,AcesFitted=4,AgX=5,SomewhatBoringDisplayTransform=6,TonyMcMapface=7,BlenderFilmic=8,KhronosPbrNeutral=9}
 component	bevy_render::view::visibility::RenderShadowMapVisibleEntities	RenderShadowMapVisibleEntities
 component	bevy_render::view::window::screenshot::Screenshot	Screenshot
 field	bevy_render::view::window::screenshot::Screenshot	0	.0	Enum	RenderTarget	Window,Image,TextureView,None
@@ -710,8 +768,10 @@ variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.x	.0.size.
 variant	bevy_render::view::window::screenshot::Screenshot	0	None	size.y	.0.size.y	Int	u32	
 component	bevy_scene::scene_component::SceneComponentInfo	SceneComponentInfo
 field	bevy_scene::scene_component::SceneComponentInfo	spawned_from_scene	.spawned_from_scene	Bool	bool	
+layout	bevy_scene::scene_component::SceneComponentInfo	1/1;.spawned_from_scene@0:1
 component	bevy_solari::pathtracer::Pathtracer	Pathtracer
 field	bevy_solari::pathtracer::Pathtracer	reset	.reset	Bool	bool	
+layout	bevy_solari::pathtracer::Pathtracer	1/1;.reset@0:1
 component	bevy_solari::realtime::SolariLighting	SolariLighting
 field	bevy_solari::realtime::SolariLighting	restir	.restir	Bool	bool	
 field	bevy_solari::realtime::SolariLighting	confidence_weight_cap	.confidence_weight_cap	Float	f32	
@@ -725,6 +785,7 @@ field	bevy_solari::realtime::SolariLighting	world_cache_cell_updates_soft_target
 field	bevy_solari::realtime::SolariLighting	world_cache_position_base_cell_size	.world_cache_position_base_cell_size	Float	f32	
 field	bevy_solari::realtime::SolariLighting	world_cache_position_lod_scale	.world_cache_position_lod_scale	Float	f32	
 field	bevy_solari::realtime::SolariLighting	reset	.reset	Bool	bool	
+layout	bevy_solari::realtime::SolariLighting	44/4;.restir@40:1;.confidence_weight_cap@0:4;.primary_di_samples@4:4;.secondary_di_samples@8:4;.max_bounces@12:4;.world_cache_max_temporal_samples@16:4;.world_cache_direct_light_sample_count@20:4;.world_cache_max_gi_ray_distance@24:4;.world_cache_cell_updates_soft_target@28:4;.world_cache_position_base_cell_size@32:4;.world_cache_position_lod_scale@36:4;.reset@41:1
 component	bevy_solari::scene::types::RaytracingMesh3d	RaytracingMesh3d
 field	bevy_solari::scene::types::RaytracingMesh3d	0	.0	Asset	Handle<Mesh>	Mesh
 component	bevy_sprite::picking_backend::SpritePickingCamera	SpritePickingCamera
@@ -734,6 +795,7 @@ field	bevy_sprite::picking_backend::SpritePickingSettings	picking_mode	.picking_
 variant	bevy_sprite::picking_backend::SpritePickingSettings	picking_mode	AlphaThreshold		.picking_mode.0	Float	f32	
 component	bevy_sprite::sprite::Anchor	Anchor
 field	bevy_sprite::sprite::Anchor	0	.0	Vec2	glam::Vec2	
+layout	bevy_sprite::sprite::Anchor	8/4;.0@0:8
 component	bevy_sprite::sprite::Sprite	Sprite
 field	bevy_sprite::sprite::Sprite	image	.image	Asset	Handle<Image>	Image
 field	bevy_sprite::sprite::Sprite	texture_atlas	.texture_atlas	Enum	Option<TextureAtlas>	None,Some
@@ -811,8 +873,10 @@ field	bevy_text::text::ComputedTextBlock	uses_viewport_sizes	.uses_viewport_size
 field	bevy_text::text::ComputedTextBlock	uses_rem_sizes	.uses_rem_sizes	Bool	bool	
 component	bevy_text::text::EmSize	EmSize
 field	bevy_text::text::EmSize	0	.0	Float	f32	
+layout	bevy_text::text::EmSize	4/4;.0@0:4
 component	bevy_text::text::FontHinting	FontHinting
 field	bevy_text::text::FontHinting	value		Enum	FontHinting	Disabled,Enabled
+layout	bevy_text::text::FontHinting	1/1;@0:1{Disabled=0,Enabled=1}
 component	bevy_text::text::LetterSpacing	LetterSpacing
 field	bevy_text::text::LetterSpacing	value		Enum	LetterSpacing	Px,Rem
 variant	bevy_text::text::LetterSpacing	value	Px		.0	Float	f32	
@@ -850,6 +914,7 @@ field	bevy_text::text::TextFont	font_variations.variations	.font_variations.vari
 component	bevy_text::text::TextLayout	TextLayout
 field	bevy_text::text::TextLayout	justify	.justify	Enum	Justify	Left,Center,Right,Justified,Start,End
 field	bevy_text::text::TextLayout	linebreak	.linebreak	Enum	LineBreak	WordBoundary,AnyCharacter,WordOrCharacter,NoWrap
+layout	bevy_text::text::TextLayout	2/1;.justify@1:1{Left=0,Center=1,Right=2,Justified=3,Start=4,End=5};.linebreak@0:1{WordBoundary=0,AnyCharacter=1,WordOrCharacter=2,NoWrap=3}
 component	bevy_text::text::TextSpan	TextSpan
 field	bevy_text::text::TextSpan	0	.0	String	alloc::string::String	
 component	bevy_text::text::UnderlineColor	UnderlineColor
@@ -867,6 +932,7 @@ field	bevy_time::time::Time<()>	elapsed_secs_f64	.elapsed_secs_f64	Double	f64
 field	bevy_time::time::Time<()>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<()>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<()>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
+layout	bevy_time::time::Time<()>	104/8;.wrap_period@0:16;.delta@16:16;.delta_secs@88:4;.delta_secs_f64@64:8;.elapsed@32:16;.elapsed_secs@92:4;.elapsed_secs_f64@72:8;.elapsed_wrapped@48:16;.elapsed_secs_wrapped@96:4;.elapsed_secs_wrapped_f64@80:8
 component	bevy_time::time::Time<bevy_time::fixed::Fixed>	Time<Fixed>
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	context.timestep	.context.timestep	Double	Duration	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	context.overstep	.context.overstep	Double	Duration	
@@ -880,6 +946,7 @@ field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_f64	.elapsed_s
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::fixed::Fixed>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
+layout	bevy_time::time::Time<bevy_time::fixed::Fixed>	136/8;.context.timestep@64:16;.context.overstep@80:16;.wrap_period@0:16;.delta@16:16;.delta_secs@120:4;.delta_secs_f64@96:8;.elapsed@32:16;.elapsed_secs@124:4;.elapsed_secs_f64@104:8;.elapsed_wrapped@48:16;.elapsed_secs_wrapped@128:4;.elapsed_secs_wrapped_f64@112:8
 component	bevy_time::time::Time<bevy_time::real::Real>	Time<Real>
 field	bevy_time::time::Time<bevy_time::real::Real>	context.startup	.context.startup	Double	Instant	
 field	bevy_time::time::Time<bevy_time::real::Real>	context.first_update	.context.first_update	Enum	Option<Instant>	None,Some
@@ -911,29 +978,37 @@ field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_f64	.elapsed_
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_wrapped	.elapsed_wrapped	Double	Duration	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_wrapped	.elapsed_secs_wrapped	Float	f32	
 field	bevy_time::time::Time<bevy_time::virt::Virtual>	elapsed_secs_wrapped_f64	.elapsed_secs_wrapped_f64	Double	f64	
+layout	bevy_time::time::Time<bevy_time::virt::Virtual>	144/8;.context.max_delta@0:16;.context.paused@32:1;.context.relative_speed@16:8;.context.effective_speed@24:8;.wrap_period@40:16;.delta@56:16;.delta_secs@128:4;.delta_secs_f64@104:8;.elapsed@72:16;.elapsed_secs@132:4;.elapsed_secs_f64@112:8;.elapsed_wrapped@88:16;.elapsed_secs_wrapped@136:4;.elapsed_secs_wrapped_f64@120:8
 component	bevy_transform::components::global_transform::GlobalTransform	GlobalTransform
 field	bevy_transform::components::global_transform::GlobalTransform	0.matrix3.x_axis	.0.matrix3.x_axis	Vec3	glam::Vec3A	
 field	bevy_transform::components::global_transform::GlobalTransform	0.matrix3.y_axis	.0.matrix3.y_axis	Vec3	glam::Vec3A	
 field	bevy_transform::components::global_transform::GlobalTransform	0.matrix3.z_axis	.0.matrix3.z_axis	Vec3	glam::Vec3A	
 field	bevy_transform::components::global_transform::GlobalTransform	0.translation	.0.translation	Vec3	glam::Vec3A	
+layout	bevy_transform::components::global_transform::GlobalTransform	64/16;.0.matrix3.x_axis@0:16;.0.matrix3.y_axis@16:16;.0.matrix3.z_axis@32:16;.0.translation@48:16
 component	bevy_transform::components::transform::Transform	Transform
 field	bevy_transform::components::transform::Transform	translation	.translation	Vec3	glam::Vec3	
 field	bevy_transform::components::transform::Transform	rotation	.rotation	Quat	glam::Quat	
 field	bevy_transform::components::transform::Transform	scale	.scale	Vec3	glam::Vec3	
+layout	bevy_transform::components::transform::Transform	48/16;.translation@16:12;.rotation@0:16;.scale@28:12
 component	bevy_transform::components::transform::TransformTreeChanged	TransformTreeChanged
 component	bevy_transform::systems::StaticTransformOptimizations	StaticTransformOptimizations
 field	bevy_transform::systems::StaticTransformOptimizations	value		Enum	StaticTransformOptimizations	Enabled,Disabled
+layout	bevy_transform::systems::StaticTransformOptimizations	1/1;@0:1{Enabled=0,Disabled=1}
 component	bevy_ui::UiScale	UiScale
 field	bevy_ui::UiScale	0	.0	Float	f32	
+layout	bevy_ui::UiScale	4/4;.0@0:4
 component	bevy_ui::accessibility::AccessibleLabel	AccessibleLabel
 field	bevy_ui::accessibility::AccessibleLabel	0	.0	String	alloc::string::String	
 component	bevy_ui::auto_directional_navigation::AutoDirectionalNavigation	AutoDirectionalNavigation
 field	bevy_ui::auto_directional_navigation::AutoDirectionalNavigation	respect_tab_order	.respect_tab_order	Bool	bool	
+layout	bevy_ui::auto_directional_navigation::AutoDirectionalNavigation	1/1;.respect_tab_order@0:1
 component	bevy_ui::experimental::ghost_hierarchy::GhostNode	GhostNode
 component	bevy_ui::focus::DeprecatedInteraction	DeprecatedInteraction
 field	bevy_ui::focus::DeprecatedInteraction	value		Enum	DeprecatedInteraction	Pressed,Hovered,None
+layout	bevy_ui::focus::DeprecatedInteraction	1/1;@0:1{Pressed=0,Hovered=1,None=2}
 component	bevy_ui::focus::FocusPolicy	FocusPolicy
 field	bevy_ui::focus::FocusPolicy	value		Enum	FocusPolicy	Block,Pass
+layout	bevy_ui::focus::FocusPolicy	1/1;@0:1{Block=0,Pass=1}
 component	bevy_ui::focus::RelativeCursorPosition	RelativeCursorPosition
 field	bevy_ui::focus::RelativeCursorPosition	cursor_over	.cursor_over	Bool	bool	
 field	bevy_ui::focus::RelativeCursorPosition	normalized	.normalized	Enum	Option<Vec2>	None,Some
@@ -950,8 +1025,10 @@ component	bevy_ui::measurement::ContentSize	ContentSize
 component	bevy_ui::picking_backend::UiPickingCamera	UiPickingCamera
 component	bevy_ui::picking_backend::UiPickingSettings	UiPickingSettings
 field	bevy_ui::picking_backend::UiPickingSettings	require_markers	.require_markers	Bool	bool	
+layout	bevy_ui::picking_backend::UiPickingSettings	1/1;.require_markers@0:1
 component	bevy_ui::stack::ComputedStackIndex	ComputedStackIndex
 field	bevy_ui::stack::ComputedStackIndex	0	.0	Int	u32	
+layout	bevy_ui::stack::ComputedStackIndex	4/4;.0@0:4
 component	bevy_ui::stack::UiStack	UiStack
 field	bevy_ui::stack::UiStack	partition	.partition	List	Vec<Range<usize>>	core::ops::Range<usize>
 field	bevy_ui::stack::UiStack	uinodes	.uinodes	List	Vec<Entity>	Entity
@@ -986,22 +1063,27 @@ field	bevy_ui::ui_node::ComputedNode	padding.max_inset	.padding.max_inset	Vec2	g
 field	bevy_ui::ui_node::ComputedNode	inverse_scale_factor	.inverse_scale_factor	Float	f32	
 field	bevy_ui::ui_node::ComputedNode	em_size	.em_size.0	Float	f32	
 field	bevy_ui::ui_node::ComputedNode	rem_size	.rem_size.0	Float	f32	
+layout	bevy_ui::ui_node::ComputedNode	124/4;.size@64:8;.content_size@72:8;.scrollbar_size@80:8;.scroll_position@88:8;.outline_width@104:4;.outline_offset@108:4;.unrounded_size@96:8;.border.min_inset@32:8;.border.max_inset@40:8;.border_radius.top_left@0:8;.border_radius.top_right@8:8;.border_radius.bottom_right@16:8;.border_radius.bottom_left@24:8;.padding.min_inset@48:8;.padding.max_inset@56:8;.inverse_scale_factor@112:4;.em_size.0@116:4;.rem_size.0@120:4
 component	bevy_ui::ui_node::ComputedUiRenderTargetInfo	ComputedUiRenderTargetInfo
 field	bevy_ui::ui_node::ComputedUiRenderTargetInfo	scale_factor	.scale_factor	Float	f32	
 field	bevy_ui::ui_node::ComputedUiRenderTargetInfo	physical_size.x	.physical_size.x	Int	u32	
 field	bevy_ui::ui_node::ComputedUiRenderTargetInfo	physical_size.y	.physical_size.y	Int	u32	
+layout	bevy_ui::ui_node::ComputedUiRenderTargetInfo	12/4;.scale_factor@8:4;.physical_size.x@0:4;.physical_size.y@4:4
 component	bevy_ui::ui_node::ComputedUiTargetCamera	ComputedUiTargetCamera
 field	bevy_ui::ui_node::ComputedUiTargetCamera	camera	.camera	Enum	Option<Entity>	None,Some
 variant	bevy_ui::ui_node::ComputedUiTargetCamera	camera	Some		.camera.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_ui::ui_node::FixedNode	FixedNode
 component	bevy_ui::ui_node::GlobalZIndex	GlobalZIndex
 field	bevy_ui::ui_node::GlobalZIndex	0	.0	Int	i32	
+layout	bevy_ui::ui_node::GlobalZIndex	4/4;.0@0:4
 component	bevy_ui::ui_node::IgnoreScroll	IgnoreScroll
 field	bevy_ui::ui_node::IgnoreScroll	0.x	.0.x	Bool	bool	
 field	bevy_ui::ui_node::IgnoreScroll	0.y	.0.y	Bool	bool	
+layout	bevy_ui::ui_node::IgnoreScroll	2/1;.0.x@0:1;.0.y@1:1
 component	bevy_ui::ui_node::IsDefaultUiCamera	IsDefaultUiCamera
 component	bevy_ui::ui_node::LayoutConfig	LayoutConfig
 field	bevy_ui::ui_node::LayoutConfig	use_rounding	.use_rounding	Bool	bool	
+layout	bevy_ui::ui_node::LayoutConfig	1/1;.use_rounding@0:1
 component	bevy_ui::ui_node::Node	Node
 field	bevy_ui::ui_node::Node	display	.display	Enum	Display	Flex,Grid,Block,None
 field	bevy_ui::ui_node::Node	box_sizing	.box_sizing	Enum	BoxSizing	BorderBox,ContentBox
@@ -1363,14 +1445,18 @@ field	bevy_ui::ui_node::Outline	color	.color	Color	Color
 component	bevy_ui::ui_node::OverrideClip	OverrideClip
 component	bevy_ui::ui_node::ScrollPosition	ScrollPosition
 field	bevy_ui::ui_node::ScrollPosition	0	.0	Vec2	glam::Vec2	
+layout	bevy_ui::ui_node::ScrollPosition	8/4;.0@0:8
 component	bevy_ui::ui_node::UiTargetCamera	UiTargetCamera
 field	bevy_ui::ui_node::UiTargetCamera	0	.0	Entity	bevy_ecs::entity::Entity	
+layout	bevy_ui::ui_node::UiTargetCamera	8/8;.0@0:8
 component	bevy_ui::ui_node::ZIndex	ZIndex
 field	bevy_ui::ui_node::ZIndex	0	.0	Int	i32	
+layout	bevy_ui::ui_node::ZIndex	4/4;.0@0:4
 component	bevy_ui::ui_transform::UiGlobalTransform	UiGlobalTransform
 field	bevy_ui::ui_transform::UiGlobalTransform	0.matrix2.x_axis	.0.matrix2.x_axis	Vec2	glam::Vec2	
 field	bevy_ui::ui_transform::UiGlobalTransform	0.matrix2.y_axis	.0.matrix2.y_axis	Vec2	glam::Vec2	
 field	bevy_ui::ui_transform::UiGlobalTransform	0.translation	.0.translation	Vec2	glam::Vec2	
+layout	bevy_ui::ui_transform::UiGlobalTransform	32/16;.0.matrix2.x_axis@0:8;.0.matrix2.y_axis@8:8;.0.translation@16:8
 component	bevy_ui::ui_transform::UiTransform	UiTransform
 field	bevy_ui::ui_transform::UiTransform	translation.x	.translation.x	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax,Em,Rem
 variant	bevy_ui::ui_transform::UiTransform	translation.x	Px		.translation.x.0	Float	f32	
@@ -1419,6 +1505,7 @@ field	bevy_ui::widget::image::ImageNode	visual_box	.visual_box	Enum	VisualBox	Co
 component	bevy_ui::widget::image::ImageNodeSize	ImageNodeSize
 field	bevy_ui::widget::image::ImageNodeSize	size.x	.size.x	Int	u32	
 field	bevy_ui::widget::image::ImageNodeSize	size.y	.size.y	Int	u32	
+layout	bevy_ui::widget::image::ImageNodeSize	8/4;.size.x@0:4;.size.y@4:4
 component	bevy_ui::widget::inline_image::InlineImage	InlineImage
 field	bevy_ui::widget::inline_image::InlineImage	color	.color	Color	Color	
 field	bevy_ui::widget::inline_image::InlineImage	image	.image	Asset	Handle<Image>	Image
@@ -1444,8 +1531,10 @@ field	bevy_ui::widget::viewport::ViewportNode	camera	.camera	Enum	Option<Entity>
 variant	bevy_ui::widget::viewport::ViewportNode	camera	Some		.camera.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_ui_render::BoxShadowSamples	BoxShadowSamples
 field	bevy_ui_render::BoxShadowSamples	0	.0	Int	u32	
+layout	bevy_ui_render::BoxShadowSamples	4/4;.0@0:4
 component	bevy_ui_render::UiAntiAlias	UiAntiAlias
 field	bevy_ui_render::UiAntiAlias	value		Enum	UiAntiAlias	On,Off
+layout	bevy_ui_render::UiAntiAlias	1/1;@0:1{On=0,Off=1}
 component	bevy_ui_render::debug_overlay::GlobalUiDebugOptions	GlobalUiDebugOptions
 field	bevy_ui_render::debug_overlay::GlobalUiDebugOptions	enabled	.enabled	Bool	bool	
 field	bevy_ui_render::debug_overlay::GlobalUiDebugOptions	outline_border_box	.outline_border_box	Bool	bool	
@@ -1513,6 +1602,7 @@ variant	bevy_ui_widgets::menu::MenuFocusState	value	Opening		.0	Enum	NavAction	N
 component	bevy_ui_widgets::menu::MenuItem	MenuItem
 component	bevy_ui_widgets::menu::MenuPopup	MenuPopup
 field	bevy_ui_widgets::menu::MenuPopup	layout	.layout	Enum	MenuLayout	Column,Row,Grid
+layout	bevy_ui_widgets::menu::MenuPopup	1/1;.layout@0:1{Column=0,Row=1,Grid=2}
 component	bevy_ui_widgets::modal::ModalDialog	ModalDialog
 component	bevy_ui_widgets::modal::ModalDialogBarrier	ModalDialogBarrier
 component	bevy_ui_widgets::popover::Popover	Popover
@@ -1525,9 +1615,11 @@ component	bevy_ui_widgets::scrollbar::Scrollbar	Scrollbar
 field	bevy_ui_widgets::scrollbar::Scrollbar	target	.target	Entity	bevy_ecs::entity::Entity	
 field	bevy_ui_widgets::scrollbar::Scrollbar	orientation	.orientation	Enum	ControlOrientation	Horizontal,Vertical
 field	bevy_ui_widgets::scrollbar::Scrollbar	min_thumb_length	.min_thumb_length	Float	f32	
+layout	bevy_ui_widgets::scrollbar::Scrollbar	16/8;.target@0:8;.orientation@12:1{Horizontal=0,Vertical=1};.min_thumb_length@8:4
 component	bevy_ui_widgets::scrollbar::ScrollbarDragState	ScrollbarDragState
 field	bevy_ui_widgets::scrollbar::ScrollbarDragState	dragging	.dragging	Bool	bool	
 field	bevy_ui_widgets::scrollbar::ScrollbarDragState	drag_origin	.drag_origin	Float	f32	
+layout	bevy_ui_widgets::scrollbar::ScrollbarDragState	8/4;.dragging@4:1;.drag_origin@0:4
 component	bevy_ui_widgets::scrollbar::ScrollbarThumb	ScrollbarThumb
 field	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left.x	.border_radius.top_left.x	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax,Em,Rem
 variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border_radius.top_left.x	Px		.border_radius.top_left.x.0	Float	f32	
@@ -1640,19 +1732,25 @@ variant	bevy_ui_widgets::scrollbar::ScrollbarThumb	border.bottom	Rem		.border.bo
 component	bevy_ui_widgets::slider::Slider	Slider
 field	bevy_ui_widgets::slider::Slider	track_click	.track_click	Enum	TrackClick	Drag,Step,Snap
 field	bevy_ui_widgets::slider::Slider	orientation	.orientation	Enum	SliderOrientation	Auto,Horizontal,Vertical
+layout	bevy_ui_widgets::slider::Slider	2/1;.track_click@0:1{Drag=0,Step=1,Snap=2};.orientation@1:1{Auto=0,Horizontal=1,Vertical=2}
 component	bevy_ui_widgets::slider::SliderDragState	SliderDragState
 field	bevy_ui_widgets::slider::SliderDragState	dragging	.dragging	Bool	bool	
 field	bevy_ui_widgets::slider::SliderDragState	offset	.offset	Float	f32	
+layout	bevy_ui_widgets::slider::SliderDragState	8/4;.dragging@4:1;.offset@0:4
 component	bevy_ui_widgets::slider::SliderPrecision	SliderPrecision
 field	bevy_ui_widgets::slider::SliderPrecision	0	.0	Int	i32	
+layout	bevy_ui_widgets::slider::SliderPrecision	4/4;.0@0:4
 component	bevy_ui_widgets::slider::SliderRange	SliderRange
 field	bevy_ui_widgets::slider::SliderRange	start	.start	Float	f32	
 field	bevy_ui_widgets::slider::SliderRange	end	.end	Float	f32	
+layout	bevy_ui_widgets::slider::SliderRange	8/4;.start@0:4;.end@4:4
 component	bevy_ui_widgets::slider::SliderStep	SliderStep
 field	bevy_ui_widgets::slider::SliderStep	0	.0	Float	f32	
+layout	bevy_ui_widgets::slider::SliderStep	4/4;.0@0:4
 component	bevy_ui_widgets::slider::SliderThumb	SliderThumb
 component	bevy_ui_widgets::slider::SliderValue	SliderValue
 field	bevy_ui_widgets::slider::SliderValue	0	.0	Float	f32	
+layout	bevy_ui_widgets::slider::SliderValue	4/4;.0@0:4
 component	bevy_ui_widgets::tabs::SelectedTab	SelectedTab
 field	bevy_ui_widgets::tabs::SelectedTab	0	.0	Enum	Option<Entity>	None,Some
 variant	bevy_ui_widgets::tabs::SelectedTab	0	Some		.0.0	Entity	bevy_ecs::entity::Entity	
@@ -1660,6 +1758,7 @@ component	bevy_ui_widgets::tabs::Tab	Tab
 component	bevy_ui_widgets::tabs::TabList	TabList
 field	bevy_ui_widgets::tabs::TabList	orientation	.orientation	Enum	ControlOrientation	Horizontal,Vertical
 field	bevy_ui_widgets::tabs::TabList	activation	.activation	Enum	TabActivation	Manual,Automatic
+layout	bevy_ui_widgets::tabs::TabList	2/1;.orientation@0:1{Horizontal=0,Vertical=1};.activation@1:1{Manual=0,Automatic=1}
 component	bevy_ui_widgets::text_input::QueuedSelectAll	QueuedSelectAll
 field	bevy_ui_widgets::text_input::QueuedSelectAll	0	.0	Enum	Option<Entity>	None,Some
 variant	bevy_ui_widgets::text_input::QueuedSelectAll	0	Some		.0.0	Entity	bevy_ecs::entity::Entity	
@@ -1703,8 +1802,10 @@ field	bevy_weather::celestial::CelestialBodies	daylight	.daylight	Float	f32
 field	bevy_weather::celestial::CelestialBodies	sun_color	.sun_color	Color	LinearRgba	
 field	bevy_weather::celestial::CelestialBodies	sun_angular_radius	.sun_angular_radius	Float	f32	
 field	bevy_weather::celestial::CelestialBodies	moon_angular_radius	.moon_angular_radius	Float	f32	
+layout	bevy_weather::celestial::CelestialBodies	68/4;.sun_direction@16:12;.moon_direction@28:12;.sun_altitude@40:4;.moon_altitude@44:4;.moon_phase@48:4;.moon_illumination@52:4;.daylight@56:4;.sun_color@0:16;.sun_angular_radius@60:4;.moon_angular_radius@64:4
 component	bevy_weather::celestial::DayPhase	DayPhase
 field	bevy_weather::celestial::DayPhase	value		Enum	DayPhase	Day,Dusk,Night,Dawn
+layout	bevy_weather::celestial::DayPhase	1/1;@0:1{Day=0,Dusk=1,Night=2,Dawn=3}
 component	bevy_weather::celestial::MoonLight	MoonLight
 component	bevy_weather::celestial::MoonLightConfig	MoonLightConfig
 field	bevy_weather::celestial::MoonLightConfig	illuminance	.illuminance	Float	f32	
@@ -1719,6 +1820,7 @@ field	bevy_weather::celestial::SunConfig	shadow_distance	.shadow_distance	Float	
 field	bevy_weather::celestial::SunConfig	shadow_near_distance	.shadow_near_distance	Float	f32	
 field	bevy_weather::celestial::SunConfig	shadow_cascades	.shadow_cascades	Int	usize	
 field	bevy_weather::celestial::SunConfig	shadow_cascade_overlap	.shadow_cascade_overlap	Float	f32	
+layout	bevy_weather::celestial::SunConfig	40/8;.disk@32:1;.angular_radius@8:4;.disk_intensity@12:4;.light_tint@16:4;.shadow_distance@20:4;.shadow_near_distance@24:4;.shadow_cascades@0:8;.shadow_cascade_overlap@28:4
 component	bevy_weather::celestial::SunLight	SunLight
 component	bevy_weather::cloud_shadows::CloudShadowConfig	CloudShadowConfig
 field	bevy_weather::cloud_shadows::CloudShadowConfig	enabled	.enabled	Bool	bool	
@@ -1726,6 +1828,7 @@ field	bevy_weather::cloud_shadows::CloudShadowConfig	resolution	.resolution	Int	
 field	bevy_weather::cloud_shadows::CloudShadowConfig	tile_size	.tile_size	Float	f32	
 field	bevy_weather::cloud_shadows::CloudShadowConfig	strength	.strength	Float	f32	
 field	bevy_weather::cloud_shadows::CloudShadowConfig	update_seconds	.update_seconds	Float	f32	
+layout	bevy_weather::cloud_shadows::CloudShadowConfig	20/4;.enabled@16:1;.resolution@0:4;.tile_size@4:4;.strength@8:4;.update_seconds@12:4
 component	bevy_weather::clouds::CloudConfig	CloudConfig
 field	bevy_weather::clouds::CloudConfig	quality	.quality	Enum	Option<Quality>	None,Some
 variant	bevy_weather::clouds::CloudConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
@@ -1762,6 +1865,7 @@ field	bevy_weather::config::WeatherConfig	thunder	.thunder	Bool	bool
 field	bevy_weather::config::WeatherConfig	celestial_lights	.celestial_lights	Bool	bool	
 field	bevy_weather::config::WeatherConfig	light_intensity_scale	.light_intensity_scale	Float	f32	
 field	bevy_weather::config::WeatherConfig	units_per_meter	.units_per_meter	Float	f32	
+layout	bevy_weather::config::WeatherConfig	20/4;.quality@8:1{Potato=0,Low=1,Medium=2,High=3,Ultra=4};.atmosphere@9:1;.sky@10:1;.clouds@11:1;.volumetric_fog@12:1;.distance_fog@13:1;.precipitation@14:1;.thunder@15:1;.celestial_lights@16:1;.light_intensity_scale@0:4;.units_per_meter@4:4
 component	bevy_weather::fog::FogConfig	FogConfig
 field	bevy_weather::fog::FogConfig	quality	.quality	Enum	Option<Quality>	None,Some
 variant	bevy_weather::fog::FogConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
@@ -1782,6 +1886,7 @@ component	bevy_weather::fog::WeatherFogVolume	WeatherFogVolume
 component	bevy_weather::ground::GroundConditions	GroundConditions
 field	bevy_weather::ground::GroundConditions	wetness	.wetness	Float	f32	
 field	bevy_weather::ground::GroundConditions	snow_cover	.snow_cover	Float	f32	
+layout	bevy_weather::ground::GroundConditions	8/4;.wetness@0:4;.snow_cover@4:4
 component	bevy_weather::ground::GroundConfig	GroundConfig
 field	bevy_weather::ground::GroundConfig	enabled	.enabled	Bool	bool	
 field	bevy_weather::ground::GroundConfig	wetting_seconds	.wetting_seconds	Float	f32	
@@ -1789,6 +1894,7 @@ field	bevy_weather::ground::GroundConfig	drying_seconds	.drying_seconds	Float	f3
 field	bevy_weather::ground::GroundConfig	snowfall_seconds	.snowfall_seconds	Float	f32	
 field	bevy_weather::ground::GroundConfig	melt_seconds	.melt_seconds	Float	f32	
 field	bevy_weather::ground::GroundConfig	settling_temperature	.settling_temperature	Float	f32	
+layout	bevy_weather::ground::GroundConfig	24/4;.enabled@20:1;.wetting_seconds@0:4;.drying_seconds@4:4;.snowfall_seconds@8:4;.melt_seconds@12:4;.settling_temperature@16:4
 component	bevy_weather::precipitation::PrecipitationConfig	PrecipitationConfig
 field	bevy_weather::precipitation::PrecipitationConfig	quality	.quality	Enum	Option<Quality>	None,Some
 variant	bevy_weather::precipitation::PrecipitationConfig	quality	Some		.quality.0	Enum	Quality	Potato,Low,Medium,High,Ultra
@@ -1809,6 +1915,7 @@ field	bevy_weather::precipitation::PrecipitationConfig	ambient	.ambient	Float	f3
 field	bevy_weather::precipitation::PrecipitationConfig	seed	.seed	Int	u32	
 component	bevy_weather::precipitation::PrecipitationKind	PrecipitationKind
 field	bevy_weather::precipitation::PrecipitationKind	value		Enum	PrecipitationKind	Rain,Snow
+layout	bevy_weather::precipitation::PrecipitationKind	1/1;@0:1{Rain=0,Snow=1}
 component	bevy_weather::procedural::ProceduralWeather	ProceduralWeather
 field	bevy_weather::procedural::ProceduralWeather	enabled	.enabled	Bool	bool	
 field	bevy_weather::procedural::ProceduralWeather	seed	.seed	Int	u32	
@@ -1824,6 +1931,7 @@ field	bevy_weather::procedural::ProceduralWeather	climate.prevailing_wind	.clima
 field	bevy_weather::procedural::ProceduralWeather	climate.mean_wind_speed	.climate.mean_wind_speed	Float	f32	
 field	bevy_weather::procedural::ProceduralWeather	transition_half_life	.transition_half_life	Float	f32	
 field	bevy_weather::procedural::ProceduralWeather	variability	.variability	Float	f32	
+layout	bevy_weather::procedural::ProceduralWeather	56/4;.enabled@52:1;.seed@0:4;.systems_per_day@4:4;.climate.mean_temperature@8:4;.climate.seasonal_swing@12:4;.climate.diurnal_swing@16:4;.climate.base_humidity@20:4;.climate.storminess@24:4;.climate.cloudiness_bias@28:4;.climate.fogginess@32:4;.climate.prevailing_wind@36:4;.climate.mean_wind_speed@40:4;.transition_half_life@44:4;.variability@48:4
 component	bevy_weather::sky::GalaxyConfig	GalaxyConfig
 field	bevy_weather::sky::GalaxyConfig	enabled	.enabled	Bool	bool	
 field	bevy_weather::sky::GalaxyConfig	brightness	.brightness	Float	f32	
@@ -1841,6 +1949,7 @@ field	bevy_weather::sky::MeteorConfig	rate	.rate	Float	f32
 field	bevy_weather::sky::MeteorConfig	arc_length	.arc_length	Float	f32	
 field	bevy_weather::sky::MeteorConfig	width	.width	Float	f32	
 field	bevy_weather::sky::MeteorConfig	brightness	.brightness	Float	f32	
+layout	bevy_weather::sky::MeteorConfig	20/4;.enabled@16:1;.rate@0:4;.arc_length@4:4;.width@8:4;.brightness@12:4
 component	bevy_weather::sky::MoonConfig	MoonConfig
 field	bevy_weather::sky::MoonConfig	enabled	.enabled	Bool	bool	
 field	bevy_weather::sky::MoonConfig	brightness	.brightness	Float	f32	
@@ -1860,6 +1969,7 @@ field	bevy_weather::sky::StarConfig	size	.size	Float	f32
 field	bevy_weather::sky::StarConfig	color_variation	.color_variation	Float	f32	
 field	bevy_weather::sky::StarConfig	twinkle_speed	.twinkle_speed	Float	f32	
 field	bevy_weather::sky::StarConfig	twinkle_amount	.twinkle_amount	Float	f32	
+layout	bevy_weather::sky::StarConfig	36/4;.enabled@32:1;.density@0:4;.brightness@4:4;.occupancy@8:4;.magnitude_falloff@12:4;.size@16:4;.color_variation@20:4;.twinkle_speed@24:4;.twinkle_amount@28:4
 component	bevy_weather::state::Weather	Weather
 field	bevy_weather::state::Weather	current.cloud_coverage	.current.cloud_coverage	Float	f32	
 field	bevy_weather::state::Weather	current.cloud_density	.current.cloud_density	Float	f32	
@@ -1888,11 +1998,13 @@ field	bevy_weather::state::Weather	target.turbulence	.target.turbulence	Float	f3
 field	bevy_weather::state::Weather	target.humidity	.target.humidity	Float	f32	
 field	bevy_weather::state::Weather	target.temperature	.target.temperature	Float	f32	
 field	bevy_weather::state::Weather	transition_half_life	.transition_half_life	Float	f32	
+layout	bevy_weather::state::Weather	108/4;.current.cloud_coverage@0:4;.current.cloud_density@4:4;.current.cloud_altitude@8:4;.current.cloud_thickness@12:4;.current.rain@16:4;.current.snow@20:4;.current.fog@24:4;.current.thunder@28:4;.current.wind_speed@32:4;.current.wind_direction@36:4;.current.turbulence@40:4;.current.humidity@44:4;.current.temperature@48:4;.target.cloud_coverage@52:4;.target.cloud_density@56:4;.target.cloud_altitude@60:4;.target.cloud_thickness@64:4;.target.rain@68:4;.target.snow@72:4;.target.fog@76:4;.target.thunder@80:4;.target.wind_speed@84:4;.target.wind_direction@88:4;.target.turbulence@92:4;.target.humidity@96:4;.target.temperature@100:4;.transition_half_life@104:4
 component	bevy_weather::thunder::LightningLight	LightningLight
 field	bevy_weather::thunder::LightningLight	remaining	.remaining	Float	f32	
 field	bevy_weather::thunder::LightningLight	peak_intensity	.peak_intensity	Float	f32	
 field	bevy_weather::thunder::LightningLight	duration	.duration	Float	f32	
 field	bevy_weather::thunder::LightningLight	seed	.seed	Int	u32	
+layout	bevy_weather::thunder::LightningLight	16/4;.remaining@0:4;.peak_intensity@4:4;.duration@8:4;.seed@12:4
 component	bevy_weather::thunder::LightningState	LightningState
 field	bevy_weather::thunder::LightningState	color	.color	Color	LinearRgba	
 field	bevy_weather::thunder::LightningState	intensity	.intensity	Float	f32	
@@ -1901,6 +2013,7 @@ field	bevy_weather::thunder::LightningState	elapsed	.elapsed	Float	f32
 field	bevy_weather::thunder::LightningState	duration	.duration	Float	f32	
 field	bevy_weather::thunder::LightningState	strike_count	.strike_count	Int	u32	
 field	bevy_weather::thunder::LightningState	active	.active	Bool	bool	
+layout	bevy_weather::thunder::LightningState	40/4;.color@0:16;.intensity@16:4;.next_strike_in@20:4;.elapsed@24:4;.duration@28:4;.strike_count@32:4;.active@36:1
 component	bevy_weather::thunder::ThunderConfig	ThunderConfig
 field	bevy_weather::thunder::ThunderConfig	flash_color	.flash_color	Color	Color	
 field	bevy_weather::thunder::ThunderConfig	flash_intensity	.flash_intensity	Float	f32	
@@ -1926,6 +2039,7 @@ field	bevy_weather::time::WeatherTime	latitude	.latitude	Float	f32
 field	bevy_weather::time::WeatherTime	axial_tilt	.axial_tilt	Float	f32	
 field	bevy_weather::time::WeatherTime	year_offset	.year_offset	Float	f32	
 field	bevy_weather::time::WeatherTime	moon_phase_offset	.moon_phase_offset	Float	f32	
+layout	bevy_weather::time::WeatherTime	32/4;.time_of_day@0:4;.day@4:4;.day_length_secs@8:4;.paused@28:1;.latitude@12:4;.axial_tilt@16:4;.year_offset@20:4;.moon_phase_offset@24:4
 component	bevy_weather::wind::Wind	Wind
 field	bevy_weather::wind::Wind	velocity	.velocity	Vec2	glam::Vec2	
 field	bevy_weather::wind::Wind	base_velocity	.base_velocity	Vec2	glam::Vec2	
@@ -1933,6 +2047,7 @@ field	bevy_weather::wind::Wind	gust	.gust	Float	f32
 field	bevy_weather::wind::Wind	offset	.offset	Vec2	glam::Vec2	
 field	bevy_weather::wind::Wind	seed	.seed	Int	u32	
 field	bevy_weather::wind::Wind	offset_wrap	.offset_wrap	Float	f32	
+layout	bevy_weather::wind::Wind	36/4;.velocity@0:8;.base_velocity@8:8;.gust@24:4;.offset@16:8;.seed@28:4;.offset_wrap@32:4
 component	bevy_window::cursor::CursorIcon	CursorIcon
 field	bevy_window::cursor::CursorIcon	value		Enum	CursorIcon	Custom,System
 variant	bevy_window::cursor::CursorIcon	value	Custom		.0	Enum	CustomCursor	Image,Url
@@ -1968,6 +2083,7 @@ component	bevy_window::window::CursorOptions	CursorOptions
 field	bevy_window::window::CursorOptions	visible	.visible	Bool	bool	
 field	bevy_window::window::CursorOptions	grab_mode	.grab_mode	Enum	CursorGrabMode	None,Confined,Locked
 field	bevy_window::window::CursorOptions	hit_test	.hit_test	Bool	bool	
+layout	bevy_window::window::CursorOptions	3/1;.visible@0:1;.grab_mode@2:1{None=0,Confined=1,Locked=2};.hit_test@1:1
 component	bevy_window::window::PrimaryWindow	PrimaryWindow
 component	bevy_window::window::Window	Window
 field	bevy_window::window::Window	present_mode	.present_mode	Enum	PresentMode	AutoVsync,AutoNoVsync,Fifo,FifoRelaxed,Immediate,Mailbox

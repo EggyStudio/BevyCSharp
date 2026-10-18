@@ -14,18 +14,27 @@ namespace Bevy;
 /// fields, as a number is, and <c>variant</c>, <c>list</c>, <c>array</c>, <c>map</c> or <c>set</c>
 /// for one whose bytes say nothing a mirror could read.
 /// </param>
-internal readonly record struct LayoutField(string Path, int Offset, int Size, int Align, string Kind);
+/// <param name="Variants">For an <c>enum</c>, the number each variant is stored as, by name.</param>
+internal readonly record struct LayoutField(
+    string Path, int Offset, int Size, int Align, string Kind, IReadOnlyDictionary<string, ulong>? Variants = null);
 
 /// <summary>Where the compiler put each field of one of Bevy's types, as the bridge read it from a value.</summary>
 /// <param name="Size">The type's size, as the world stores it.</param>
 /// <param name="Align">The type's alignment.</param>
 /// <param name="Kind">What the type itself is to reflection, as a field's <see cref="LayoutField.Kind"/> is.</param>
 /// <param name="Fields">Every field reflection reaches, walked into the structs and tuples among them.</param>
-internal sealed record ReflectedLayout(int Size, int Align, string Kind, IReadOnlyList<LayoutField> Fields)
+/// <param name="Variants">For a type that is itself an <c>enum</c>, the number each variant is stored as, by name.</param>
+internal sealed record ReflectedLayout(
+    int Size, int Align, string Kind, IReadOnlyList<LayoutField> Fields, IReadOnlyDictionary<string, ulong>? Variants = null)
 {
-    /// <summary>The field at a reflect path, or nothing where reflection reaches none there.</summary>
+    /// <summary>
+    /// The field at a reflect path, the type itself at the empty one, or nothing where reflection
+    /// reaches none there.
+    /// </summary>
     public LayoutField? Field(string path)
     {
+        if (path.Length == 0) return new LayoutField(string.Empty, 0, Size, Align, Kind, Variants);
+
         foreach (var field in Fields)
         {
             if (field.Path == path) return field;
@@ -74,11 +83,59 @@ internal static class ReflectedLayouts
                 field.GetProperty("offset").GetInt32(),
                 field.GetProperty("size").GetInt32(),
                 field.GetProperty("align").GetInt32(),
-                field.GetProperty("kind").GetString()!))
+                field.GetProperty("kind").GetString()!,
+                Numbers(field)))
             .ToList();
         return new ReflectedLayout(
-            root.GetProperty("size").GetInt32(), root.GetProperty("align").GetInt32(), root.GetProperty("kind").GetString()!, fields);
+            root.GetProperty("size").GetInt32(),
+            root.GetProperty("align").GetInt32(),
+            root.GetProperty("kind").GetString()!,
+            fields,
+            Numbers(root));
+
+        static IReadOnlyDictionary<string, ulong>? Numbers(JsonElement owner) =>
+            owner.TryGetProperty("variants", out var variants)
+                ? variants.EnumerateObject().ToDictionary(variant => variant.Name, variant => variant.Value.GetUInt64(), StringComparer.Ordinal)
+                : null;
     }
+
+    /// <summary>
+    /// The layout of a type at the paths a mirror reads, as one line of text, or <see langword="null"/>
+    /// where reflection reaches no field at one of them.
+    /// </summary>
+    /// <remarks>
+    /// The schema dump writes it into the description as a mirror's layout, the generator reads
+    /// each field's offset from it, and the bridge's reading is turned into it again and compared
+    /// whole, at the mirror's first use and in a test of the suite, so the two agree only where every
+    /// number does. It is the size and the alignment, then for each path its offset and its size,
+    /// and for an enum the number each variant is stored as, in the order of those numbers:
+    /// <c>48/16;.translation@16:12;.rotation@0:16;.scale@28:12</c>, or
+    /// <c>1/1;@0:1{Inherited=0,Hidden=1,Visible=2}</c> for a type that is itself an enum.
+    /// </remarks>
+    internal static string? Signature(ReflectedLayout layout, IEnumerable<string> paths)
+    {
+        ArgumentNullException.ThrowIfNull(layout);
+        ArgumentNullException.ThrowIfNull(paths);
+
+        var text = new System.Text.StringBuilder(FormattableString.Invariant($"{layout.Size}/{layout.Align}"));
+        foreach (var path in paths)
+        {
+            if (layout.Field(path) is not { } field) return null;
+
+            text.Append(FormattableString.Invariant($";{path}@{field.Offset}:{field.Size}"));
+            if (field.Variants is { } variants)
+                text.Append('{')
+                    .AppendJoin(',', variants.OrderBy(v => v.Value).ThenBy(v => v.Key, StringComparer.Ordinal)
+                        .Select(v => FormattableString.Invariant($"{v.Key}={v.Value}")))
+                    .Append('}');
+        }
+
+        return text.ToString();
+    }
+
+    /// <summary>The reflect paths a <see cref="Signature"/> names, in its order.</summary>
+    internal static IEnumerable<string> PathsOf(string signature) =>
+        signature.Split(';').Skip(1).Select(entry => entry.Substring(0, entry.IndexOf('@', StringComparison.Ordinal)));
 
     /// <summary>
     /// Why a byte mirror could not hold a type of this layout, or <see langword="null"/> where every

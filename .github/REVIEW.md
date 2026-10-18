@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c3bd5349`, item 26 done and item 22's eight rewordings with it, 19 files, no export
+Reviewed up to `5f8e4e07`, item 27's first step done and nothing else, 13 files, the ABI 281 to 282.
+`bcs_reflect_layout` of a type path, in a module of its own, answers the type's size and alignment
+from the world's registered layout where it is a component, its kind, and for each reachable field
+path its offset, size, alignment and kind, from a value made at its default through `ReflectDefault`
+or the dynamic build made concrete through `ReflectFromReflect`, a field reflected from outside the
+value refused; the bridge's test holds `Transform`'s three offsets to `offset_of!`'s and refuses an
+unknown path. On the managed side `ReflectedLayouts` measures and parses, `Unmirrored` says why a
+mirror could not hold a layout, a variant's value, a list, map or set, bytes no reflected field
+covers or an overlap, struct by struct so a SIMD vector's trailing bytes are padding, and
+`schema.layouts` counts. `ReflectedLayoutTests` hold the five hand layouts, `Transform`'s rotation,
+translation and scale, `GlobalTransform`'s three axes and translation through its private affine,
+`Visibility`'s size as an enum and the two one-byte visibility types, every one mirrorable, and a
+reason test for padding, a vector's tail, a variant, a gap, a trailing gap and an overlap. The
+count, from an editor session, is 140 candidates holding fixed-size values, 115 mirrorable, 24 left
+out for a variant's value, a `Color` or an enum whose variants hold values, the lights, the clear
+color, the text and border colors, the wireframe configs, the vignette and the sky's configs among
+them, and 1 for an ignored field, the delayed command queue, none lacking a default. COMPONENTS.md's
+third tier says the layout is the compiler's read from a value, gives the count and the reasons and
+marks the dump-and-check bullet as not built, and TODO.md's line says what is left with the command
+for its number. Checked on the working machine was the whole suite, 1,482 passed and 3 skipped of
+1,485, with the bridge rebuilt. Right. Next step two, the dump writing the 115 layouts into the
+description and the generator making mirrors from them, with the suite's test and the first-use
+check against the running bridge; and the owner's push of the three commits since `b50890cb`.
+
+Before it, `c3bd5349` came, item 26 done and item 22's eight rewordings with it, 19 files, no export
 changed. The bridge describes a tuple's values by index as a tuple struct's, makes a tuple's default
 from each value's, where choosing `Some` was refused before, and an instant at the present to be
 written over, reads and writes an instant as seconds after the real clock's startup, negative before
@@ -51,29 +75,6 @@ working machine was the whole suite, 1,475 passed and 3 skipped of 1,478. Right.
 second of three toward Verdict 29 and the feature test's course taking 47 minutes. Next the owner's
 push of this commit, and item 26, the reflected variants, chosen at 02:05 since every other row
 waits on a crate, a word the owner types in the working session or the owner's screens.
-
-Before it, `b50890cb` came, Verdict 29's addition done and nothing else, 3 files. The test script's
-table of processes carries each one's creation time beside its parent and resident bytes, read on
-Windows through `GetProcessTimes` as a FILETIME and none on Linux and macOS, which hand an orphan to
-another parent; one walk, `tree_under`, takes a process as a child only where it was not created
-before the parent its recorded id names, with the reason in its docstring, and both the memory
-reading, the suite's own cap with a test's, and the kill of a tree go through it; a test feeds a
-table in which a 900 MB process made before the watched one names it as parent and finds the tree
-without it and its largest process at 40 MB, an entry with no creation time taken by id alone.
-Checked on the working machine were the whole suite, 1,475 passed and 3 skipped of 1,478, and the
-grow case through the real table reading 210 MB past the 200 allowed; the Windows path runs on the
-next Windows suite. Right. The owner pushed `b50890cb` at 00:37 and started a pack run on it, which
-waits on the pack run of `b4d45938`, started 00:05, whose natives, suites, digest, storm, README
-walk, play job and two shards are green at 00:50, the play job's soak of three games passing in 18
-minutes, which settles Verdict 28, its two other shards and the feature test's course still running.
-At 01:07 the push run of `b50890cb` has ended whole green, its Windows suite the first of three
-toward Verdict 29, and the pack run of `b4d45938` has its four shards green, which settles Verdict
-26, with the feature test's course still running and the pack job after it; the second pack run
-waits behind. At 01:29 the pack run of `b4d45938` ended whole green, the feature test's course in 65
-minutes and the pack job with its package in two, which with the whole green push run of the same
-commit is Decision 35's gate met, so Decision 33 is lifted here and development resumes, item 22
-first and then the owner's items; item 23 is proven. The second pack run, on `b50890cb`, started at
-01:29 and is read when it ends, its Windows suite the second toward Verdict 29.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -731,7 +732,10 @@ from [SHARED.md](SHARED.md).
     private, and counts of the 141 how many have a default and every byte in a reflected field or
     padding, naming the types left out and why, no default, an ignored field or a variant's field.
     The hand mirrors stay for a type reflection cannot measure, and COMPONENTS.md's bullet says the
-    layout is the compiler's, read from a value rather than written at build time.
+    layout is the compiler's, read from a value rather than written at build time. The first step is
+    done at `5f8e4e07`, the export holding every hand layout and 115 of 140 candidates mirrorable,
+    24 left out for a variant's value and 1 for an ignored field; step two, the dumped layouts, the
+    generated mirrors and the two checks, follows.
 
 ## Verdicts
 
