@@ -147,14 +147,27 @@ them where it can.
 - **Only plain data.** A type qualifies when the dump shows only fixed-size fields, such as numbers,
   vectors, quaternions, colors, fieldless enums, and structs of those. A handle, a `Vec`, a
   `String` or an `Option` of a non-plain type rules it out, and it stays on tier 2.
-- **Layout from the compiler.** A mirror needs the offsets Rust chose, which Rust does not
-  promise between versions. So for each qualifying type the build generates a Rust export that
-  reports `size_of`, `align_of` and `offset_of!` for every field, and the managed side checks the
-  mirror against it at startup, as it checks the hand mirrors today. The hand `bcs_*_layout`
-  functions become generated ones.
+- **Layout from the compiler, read from a value.** A mirror needs the offsets Rust chose, which
+  Rust does not promise between versions. `bcs_reflect_layout` reads them from a value of the type
+  made at its default, each reflected field's address less the value's, with the size and alignment
+  the world registered for the type, so the layout is the compiler's, read rather than written down
+  when the bridge is built, and it reaches a private field and one inside a struct inside the value,
+  where `offset_of!` reaches only the fields the bridge can name. It agrees with every hand layout
+  (`ReflectedLayoutTests`), a transform's rotation ahead of its translation, a global transform's
+  four axes inside the affine it wraps privately, and the three visibility types.
+  `./bcs command schema.layouts` counts the components whose rows hold fixed-size values alone, and
+  of its 140, 115 can be mirrored, 24 hold a `Color`, an enum whose variants hold values, which lie
+  where the variant held puts them, and `DelayedCommandQueue` holds 32 bytes no reflected field
+  covers. None lacks a default to measure.
+- **Generated from the description, checked against the bridge.** The mirrors are generated from
+  layouts the schema dump writes into the description beside the components, as the wrappers are,
+  so the generator needs no running bridge, and a test of the suite and a check at a mirror's first
+  use compare the dumped layout with the running bridge's and refuse a difference, so a Bevy
+  upgrade that moves a field fails a test rather than a game's bytes. Neither is built yet.
 - **Lookup by type path.** `bcs_component_id_of` resolves any reflected type path through the
   registry, and keeps its arms only for the short names the hand mirrors use. A generated
-  mirror names its type by path, so it needs no arm, and the arms go with the hand mirrors.
+  mirror names its type by path, so it needs no arm, and the arms go with the hand mirrors that a
+  generated one replaces, a type reflection cannot measure keeping its hand mirror. Not built yet.
 
 The camera, light and mesh exports stay as helpers that set several components at once, and read
 back through tier 1.
@@ -300,5 +313,6 @@ field does, and counts among what shares the asset, items being searched three l
 
 Each step is usable on its own and tested before the next.
 
-1. **Tier 3**: generated mirrors and layout probes replacing the hand ones, with the existing
-   mirror tests passing unchanged.
+1. **Tier 3**: generated mirrors from the layouts the schema dump writes, checked against the
+   bridge's reading, replacing the hand ones a reading measures, with the existing mirror tests
+   passing unchanged.

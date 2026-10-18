@@ -42,6 +42,14 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_reflect_types(byte* buffer, int capacity);
 
+    /// <summary>
+    /// Describes where the compiler put each field of a reflected type, read from a value made at
+    /// its default, as JSON.
+    /// </summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_reflect_layout(string typePath, byte* buffer, int capacity);
+
     /// <summary>Writes a component, or one field of it, as JSON.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

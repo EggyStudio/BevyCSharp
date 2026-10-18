@@ -69,8 +69,10 @@ the inspector and `./bcs entity.get` and `entity.set` cover cameras, lights and 
 code per type. What [COMPONENTS.md](COMPONENTS.md) has left:
 
 - **Bytes in place need a mirror.** Five components (`Transform`, `GlobalTransform` and the three
-  visibility types) are mirrored by hand, for systems that read them every frame. Generating
-  mirrors and their layout checks is tier 3.
+  visibility types) are mirrored by hand, for systems that read them every frame. The layout of any
+  reflected type is read from a value of it, and 115 components of fixed-size values could be
+  mirrored (`./bcs command schema.layouts`). Generating the mirrors from layouts dumped into the
+  description, with their checks against the bridge and the lookup by path, is the rest of tier 3.
 
 ### Collections in components
 

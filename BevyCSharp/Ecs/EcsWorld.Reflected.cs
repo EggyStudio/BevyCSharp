@@ -526,6 +526,20 @@ public sealed unsafe partial class EcsWorld
             "Describing Bevy's reflected components");
     }
 
+    /// <summary>
+    /// Where the compiler put each field of a reflected type, as the JSON the bridge answers, or
+    /// <see langword="null"/> outside a frame, where there is no registry to read.
+    /// </summary>
+    /// <exception cref="BevyNativeException">The type is not registered, or has no default to measure a value of.</exception>
+    internal static string? DescribeLayout(string typePath)
+    {
+        if (Native.bcs_reflect_layout(typePath, null, 0) == NativeStatus.NoWorld) return null;
+
+        return ReflectedText(
+            (buffer, capacity) => Native.bcs_reflect_layout(typePath, buffer, capacity),
+            $"Reading the layout of {typePath}");
+    }
+
     /// <summary>Names a component, or one field of it, for a message.</summary>
     private static string Described(string typePath, string? path) =>
         path is { Length: > 0 } ? $"'{path}' of {typePath}" : typePath;

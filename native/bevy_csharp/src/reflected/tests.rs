@@ -1,6 +1,7 @@
 use super::*;
 use super::describe::*;
 use super::entities::*;
+use super::layout::*;
 use super::lists::*;
 use super::resources::*;
 use super::values::*;
@@ -641,4 +642,44 @@ fn a_graph_node_is_read_and_written_as_its_index() {
         Some(bevy::animation::graph::AnimationNodeIndex::new(4)),
         app.world().get::<Played>(entity).unwrap().node
     );
+}
+
+/// A type's layout is read from a value of it, each field at the offset the compiler gave it, the
+/// rotation Rust moves ahead of a transform's translation among them, and an enum whose variants
+/// hold values is one row, since where a variant's values lie depends on the variant held.
+#[test]
+fn a_types_layout_is_read_from_a_value_of_it() {
+    use bevy::transform::components::Transform;
+
+    let (mut app, _) = probe_app();
+    app.register_type::<Transform>();
+    let read = |app: &mut App, path: &str| -> Value {
+        let path = c(path);
+        let text = loan_world(app.world_mut(), || text(|out, capacity| unsafe { bcs_reflect_layout(path.as_ptr(), out, capacity) }));
+        serde_json::from_str(&text.unwrap()).unwrap()
+    };
+    let row = |layout: &Value, path: &str| -> Value {
+        layout["fields"].as_array().unwrap().iter().find(|f| f["path"] == path).cloned().unwrap()
+    };
+
+    let transform = read(&mut app, "bevy_transform::components::transform::Transform");
+    assert_eq!(core::mem::size_of::<Transform>() as u64, transform["size"].as_u64().unwrap());
+    assert_eq!(core::mem::align_of::<Transform>() as u64, transform["align"].as_u64().unwrap());
+    for (path, offset) in [
+        (".translation", core::mem::offset_of!(Transform, translation)),
+        (".rotation", core::mem::offset_of!(Transform, rotation)),
+        (".scale", core::mem::offset_of!(Transform, scale)),
+    ] {
+        assert_eq!(offset as u64, row(&transform, path)["offset"].as_u64().unwrap(), "{path}");
+    }
+    assert_eq!(16, row(&transform, ".rotation")["size"]);
+
+    let probe = read(&mut app, PROBE);
+    assert_eq!("variant", row(&probe, ".mode")["kind"]);
+    assert_eq!("struct", row(&probe, ".inner")["kind"]);
+    assert_eq!("list", row(&probe, ".speeds")["kind"]);
+
+    let unknown = c("bevy_csharp::reflected::tests::Nothing");
+    let refused = loan_world(app.world_mut(), || unsafe { bcs_reflect_layout(unknown.as_ptr(), core::ptr::null_mut(), 0) });
+    assert_eq!(status::NO_COMPONENT, refused);
 }

@@ -10,7 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5e750133`, item 22 done and nothing else, 8 files, the first item taken since
+Reviewed up to `c3bd5349`, item 26 done and item 22's eight rewordings with it, 19 files, no export
+changed. The bridge describes a tuple's values by index as a tuple struct's, makes a tuple's default
+from each value's, where choosing `Some` was refused before, and an instant at the present to be
+written over, reads and writes an instant as seconds after the real clock's startup, negative before
+it, and an animation node index as an integer refusing a negative, with three tests of its own; the
+managed walk takes a tuple as a struct, a node index as an integer and an instant as a moment
+through the bridge's float calls, since JSON carries no instant, and the description dumped again
+from an editor session gains 28 lines; the generator makes an `Option` of a tuple a nullable C#
+tuple, a list of them read and written whole through `ReadItems` and `WriteItems` with static
+lambdas, an instant a `TimeSpan` and a node index a `uint` as `Animation.PlayGraph` takes. The
+surface gains the text layout's cursor, the window's pan gesture, the focus's recorded changes, the
+real clock's first and last update and startup, a transition's main animation and animation, and the
+custom cursors' hotspot, `PublicApi.txt` written again; four tests in `ReflectedWrapperTests`, one a
+kind; TODO.md's line is gone, COMPONENTS.md says the three kinds and names the lists of tuples whose
+items still have no record, and `docs/components.md` says each kind. Checked on the working machine
+were the whole suite, 1,479 passed and 3 skipped of 1,482, the bridge rebuilt with the editor,
+meshlets and Solari, and the bridge's tests headless and with render in the container. Right. Next
+the owner's push of `5e750133` and this commit, a word of the owner's typed in the working session
+for the items that wait on one, and item 27, the byte mirrors, chosen at 03:10 from TODO.md as the
+next line that needs no crate and no word, its first step bounded.
+
+Before it, `5e750133` came, item 22 done and nothing else, 8 files, the first item taken since
 Decision 33 lifted. Courtyard, the stress program and the first game name 0.4.129, the newest
 published version, and each built on it from nuget.org; Swarm names 0.5.0, which NuGet reads as the
 lowest published version at or past it, so the first publish of 0.5 restores it with no commit, and
@@ -53,17 +74,6 @@ minutes and the pack job with its package in two, which with the whole green pus
 commit is Decision 35's gate met, so Decision 33 is lifted here and development resumes, item 22
 first and then the owner's items; item 23 is proven. The second pack run, on `b50890cb`, started at
 01:29 and is read when it ends, its Windows suite the second toward Verdict 29.
-
-Before it, `c9d2bf3d` came, Verdict 29 mended and nothing else, 4 files. The lost-suite theory's
-hang case runs under a memory limit of a terabyte, which no process of a runner holds, so its time
-limit alone can end it, the other three cases keeping 200 MB, each case's limit an argument of the
-theory with the reason in a comment, the sleeping stand-in measured at 10 MB on Linux; a loss to the
-memory limit says the reading against the limit in the part's summary line and in its heading, "its
-largest process read at 210 MB past the 200 MB allowed", which the grow case asserts, the digest's
-JSON carrying it and BUILDING.md saying so. Checked on the working machine was the whole suite,
-1,474 passed and 3 skipped of 1,477. Right. The working session read a possible cause and left it,
-which Verdict 29 takes up. Next the owner's push and a pack run, Decision 35's gate, whose push half
-the run of `b4d45938` met.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -677,18 +687,51 @@ from [SHARED.md](SHARED.md).
     count the code gives, and the literal senses kept.
 
 26. **The reflected variants holding a tuple, an instant or a graph's index get typed properties,
-    TODO.md's open line under the components through reflection, item 4's remainder.** Chosen on
-    2026-10-18 as the next work, since every other row of the Now list and of TODO.md waits on a
-    crate the lock lacks, on a word the owner types in the working session (Decisions 11, 12 and 20;
-    Feathers, the camera controllers, the dev tools, `sysinfo`, `ctt`, `ureq`, the template's
-    publishing) or on a run on the owner's screens (`monitor_info`), and the font examples stay off
-    under Decision 13. The generated wrappers type an enum inside a variant, a list, a duration and
-    an integer that holds no zero, and leave an `Option` of a tuple (a text layout's cursor, a
-    window's pan gesture, the focus and its cause), of Rust's `Instant` (the real clock's first and
-    last update) or of a node index (animation transitions' main animation) with its variant names
-    alone, the value on a string path checked when it runs; each gets a typed property, with a test
-    a kind, and TODO.md's line and COMPONENTS.md follow. One commit, the eight register rewordings
-    riding along.
+    TODO.md's open line under the components through reflection, item 4's remainder, done at
+    `c3bd5349`.** Chosen on 2026-10-18 as the next work, since every other row of the Now list and
+    of TODO.md waits on a crate the lock lacks, on a word the owner types in the working session
+    (Decisions 11, 12 and 20; Feathers, the camera controllers, the dev tools, `sysinfo`, `ctt`,
+    `ureq`, the template's publishing) or on a run on the owner's screens (`monitor_info`), and the
+    font examples stay off under Decision 13. The generated wrappers type an enum inside a variant,
+    a list, a duration and an integer that holds no zero, and leave an `Option` of a tuple (a text
+    layout's cursor, a window's pan gesture, the focus and its cause), of Rust's `Instant` (the real
+    clock's first and last update) or of a node index (animation transitions' main animation) with
+    its variant names alone, the value on a string path checked when it runs; each gets a typed
+    property, with a test a kind, and TODO.md's line and COMPONENTS.md follow. One commit, the eight
+    register rewordings riding along. Done at `c3bd5349` as asked, a test a kind and the lists of
+    tuples left named in COMPONENTS.md.
+
+27. **Byte mirrors for the components that are plain data, COMPONENTS.md's third tier, TODO.md's
+    next open line, in steps.** Chosen on 2026-10-18 at 03:10 over the smaller atmosphere line, by
+    the list's order, the working session having measured that 141 of the 352 described components
+    hold only fixed-size fields or fieldless enums. The build generates a Rust export a type
+    reporting its size, alignment and each field's offset, which replace the hand layout functions,
+    the generator writes a byte mirror for each type that qualifies, and `bcs_component_id_of`
+    resolves any reflected path, its short-name arms leaving with the hand mirrors. The first step
+    is a commit of its own and bounded, since `offset_of!` from the bridge's crate wants each field
+    public and a Bevy type with private fields does not qualify, two of the five hand mirrors
+    perhaps among them: it counts the qualifying types with public fields, emits their layout
+    exports and the checks that hold them, and reports the count and the types left out before the
+    mirrors are written; the mirrors and the lookup by path follow in commits of their own, the hand
+    mirrors staying for the types that do not qualify. The atmosphere's custom medium, a bridge
+    call, a settings record, a test and the guide's line, is the line after. Changed at 03:10 on the
+    working session's finding, before the first step. `offset_of!` compiles only where every field
+    on the path is public from the bridge's crate and reaches no field inside a variant, so choosing
+    the types would mean parsing Bevy's sources; instead the layout is read through reflection on a
+    value made at its default, a reflected field being a reference into the value whose address less
+    the value's is the offset the compiler chose, private fields included, which a spike on
+    `Transform` gave as 0, 16 and 28, `offset_of!`'s answers, with the size and alignment from the
+    component's registered layout. One export, `bcs_reflect_layout` of a type path, an ABI bump; the
+    mirrors are generated from layouts dumped into the description as the wrappers are, and a test
+    of the suite and a check at a mirror's first use compare the dumped layout with the running
+    bridge's measurement, refusing on a difference, so a Bevy upgrade that moves a field fails a
+    test and not a game's bytes. The first step holds the export against the hand layouts,
+    `Transform`'s three offsets, `GlobalTransform`'s four, `Visibility`'s size with its
+    discriminants staying on their own function, and the two visibility types whose field is
+    private, and counts of the 141 how many have a default and every byte in a reflected field or
+    padding, naming the types left out and why, no default, an ignored field or a variant's field.
+    The hand mirrors stay for a type reflection cannot measure, and COMPONENTS.md's bullet says the
+    layout is the compiler's, read from a value rather than written at build time.
 
 ## Verdicts
 

@@ -1,4 +1,5 @@
 using System.Text;
+using Bevy.Interop;
 
 namespace Bevy;
 
@@ -49,6 +50,67 @@ internal static class ConsoleSchemaCommands
         var components = lines.Count(line => line.StartsWith("component\t", StringComparison.Ordinal));
         return $"wrote {components} components and {lines.Count - components} fields to {full}";
     }
+
+    /// <summary>
+    /// Says how many of Bevy's components holding only values of a fixed size a byte mirror could
+    /// hold, and names each of the rest with why.
+    /// </summary>
+    /// <remarks>
+    /// A component is counted when every field the inspector draws is a number, a flag, a vector, a
+    /// quaternion, a color, an entity or an enum none of whose variants holds a value, and none is
+    /// drawn as JSON, which are the components the description holds fixed-size rows alone for. Its layout is read from a value of it (<see cref="ReflectedLayouts"/>), and it is left
+    /// out where it has no default to make that value from, holds an enum whose variants hold
+    /// values, or has bytes no reflected field covers.
+    /// </remarks>
+    [Command("schema.layouts", "Counts Bevy's components of fixed-size values a byte mirror could hold, naming the rest and why")]
+    internal static string Layouts()
+    {
+        var description = EcsWorld.DescribeReflected();
+        if (description is null)
+        {
+            ConsoleHost.Fail("NO_WORLD", "Bevy's registry is read inside a frame.");
+            return "Bevy's registry is read inside a frame";
+        }
+
+        var candidates = ReflectedSchemas.Build(description, new HashSet<int>(), new HashSet<string>())
+            .Where(schema => !schema.QualifiedName.Contains("bevy_csharp::", StringComparison.Ordinal))
+            .Where(schema => schema.Fields.Count > 0 && schema.Fields.All(Fixed))
+            .OrderBy(schema => schema.QualifiedName, StringComparer.Ordinal)
+            .ToList();
+
+        var held = 0;
+        var left = new List<string>();
+        foreach (var schema in candidates)
+        {
+            string? why;
+            try
+            {
+                why = ReflectedLayouts.Measure(schema.QualifiedName) is { } layout
+                    ? ReflectedLayouts.Unmirrored(layout)
+                    : "its layout was not read";
+            }
+            catch (BevyNativeException error)
+            {
+                why = error.Message;
+            }
+
+            if (why is null) held++;
+            else left.Add($"{schema.Name}: {why}");
+        }
+
+        return $"{held} of {candidates.Count} components of fixed-size values can be mirrored"
+            + (left.Count == 0 ? "" : ", and these are left out:\n" + string.Join('\n', left));
+    }
+
+    /// <summary>Whether a row holds a value of a fixed size the inspector draws as its own, rather than JSON or a variant's value.</summary>
+    private static bool Fixed(ComponentField field) =>
+        field.ReflectPath is not null
+        && field.ItemType is null
+        && field.Hints.Conditions.Count == 0
+        && field.Type != "Instant"
+        && field.Kind is FieldKind.Float or FieldKind.Double or FieldKind.Bool or FieldKind.Int
+            or FieldKind.Vec2 or FieldKind.Vec3 or FieldKind.Vec4 or FieldKind.Quat or FieldKind.Color or FieldKind.Entity
+            or FieldKind.Enum;
 
     /// <summary>
     /// The lines of the description, each component, then its fields in the order Bevy declares
