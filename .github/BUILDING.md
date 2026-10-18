@@ -358,6 +358,27 @@ are kept as the run's artifact, to download and upload to nuget.org by hand. Tic
 **publish** box pushes both to nuget.org from the run instead, which needs the `NUGET_API_KEY`
 secret.
 
+A game under `games/` names in its own project the version it builds on where nothing sets
+`BevyCSharpVersion`, the newest published on nuget.org it builds on, so a reader cloning the
+repository builds it from nuget.org with nothing of the repository's but its own folder, as a game
+outside the repository is built. After a publish, raising a game to the version just published is
+a commit of one line a game. A game that calls what no published version carries names the version
+it needs as a minimum, which NuGet takes as the lowest published version at or past it, as Swarm
+names 0.5.0 for `MainThread`, and until that is published it is built on a pack of the checkout
+under a version of its own, new for each pack, since NuGet keeps the first package it restored
+under a version:
+
+```bash
+build/build-native.sh --render
+dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.1-local1
+dotnet build games/Swarm -p:BevyCSharpVersion=0.0.1-local1
+```
+
+A run that publishes then builds each game on its own default from nuget.org alone, once the
+package it pushed is listed there, waiting as long as twenty minutes for that
+(`build/games-on-defaults.sh <version>`), and names in an error each game whose default does not
+build, with the version just pushed as the one to raise it to.
+
 The feature test is run through Intel Sponza by hand on a machine with a GPU rather than in a
 workflow, since its pack is hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets
 and ray-traced lighting, fetches `slangc` and the pack (`./bcs scenes fetch intel-sponza`), builds

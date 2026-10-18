@@ -10,16 +10,39 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c9d2bf3d`, Verdict 29 mended and nothing else, 4 files. The lost-suite theory's hang
-case runs under a memory limit of a terabyte, which no process of a runner holds, so its time limit
-alone can end it, the other three cases keeping 200 MB, each case's limit an argument of the theory
-with the reason in a comment, the sleeping stand-in measured at 10 MB on Linux; a loss to the memory
-limit says the reading against the limit in the part's summary line and in its heading, "its largest
-process read at 210 MB past the 200 MB allowed", which the grow case asserts, the digest's JSON
-carrying it and BUILDING.md saying so. Checked on the working machine was the whole suite, 1,474
-passed and 3 skipped of 1,477. Right. The working session read a possible cause and left it, which
-Verdict 29 takes up. Next the owner's push and a pack run, Decision 35's gate, whose push half the
-run of `b4d45938` met.
+Reviewed up to `b50890cb`, Verdict 29's addition done and nothing else, 3 files. The test script's
+table of processes carries each one's creation time beside its parent and resident bytes, read on
+Windows through `GetProcessTimes` as a FILETIME and none on Linux and macOS, which hand an orphan to
+another parent; one walk, `tree_under`, takes a process as a child only where it was not created
+before the parent its recorded id names, with the reason in its docstring, and both the memory
+reading, the suite's own cap with a test's, and the kill of a tree go through it; a test feeds a
+table in which a 900 MB process made before the watched one names it as parent and finds the tree
+without it and its largest process at 40 MB, an entry with no creation time taken by id alone.
+Checked on the working machine were the whole suite, 1,475 passed and 3 skipped of 1,478, and the
+grow case through the real table reading 210 MB past the 200 allowed; the Windows path runs on the
+next Windows suite. Right. The owner pushed `b50890cb` at 00:37 and started a pack run on it, which
+waits on the pack run of `b4d45938`, started 00:05, whose natives, suites, digest, storm, README
+walk, play job and two shards are green at 00:50, the play job's soak of three games passing in 18
+minutes, which settles Verdict 28, its two other shards and the feature test's course still running.
+At 01:07 the push run of `b50890cb` has ended whole green, its Windows suite the first of three
+toward Verdict 29, and the pack run of `b4d45938` has its four shards green, which settles Verdict
+26, with the feature test's course still running and the pack job after it; the second pack run
+waits behind. At 01:29 the pack run of `b4d45938` ended whole green, the feature test's course in 65
+minutes and the pack job with its package in two, which with the whole green push run of the same
+commit is Decision 35's gate met, so Decision 33 is lifted here and development resumes, item 22
+first and then the owner's items; item 23 is proven. The second pack run, on `b50890cb`, started at
+01:29 and is read when it ends, its Windows suite the second toward Verdict 29.
+
+Before it, `c9d2bf3d` came, Verdict 29 mended and nothing else, 4 files. The lost-suite theory's
+hang case runs under a memory limit of a terabyte, which no process of a runner holds, so its time
+limit alone can end it, the other three cases keeping 200 MB, each case's limit an argument of the
+theory with the reason in a comment, the sleeping stand-in measured at 10 MB on Linux; a loss to the
+memory limit says the reading against the limit in the part's summary line and in its heading, "its
+largest process read at 210 MB past the 200 MB allowed", which the grow case asserts, the digest's
+JSON carrying it and BUILDING.md saying so. Checked on the working machine was the whole suite,
+1,474 passed and 3 skipped of 1,477. Right. The working session read a possible cause and left it,
+which Verdict 29 takes up. Next the owner's push and a pack run, Decision 35's gate, whose push half
+the run of `b4d45938` met.
 
 Before it, `b4d45938` came, Verdict 26 mended at `01f448b9`, Verdict 28's addition done at
 `a62e96c8` and item 25 done, in three commits. At `01f448b9` `many_lights` and `many_cubes` are
@@ -47,18 +70,6 @@ green, the macOS suite the second of three toward Verdict 27; the pack run of `c
 the feature test's course green in 68 minutes, the pack job not run. The push run of `b4d45938`
 ended at 23:38 whole green, Linux in 15 minutes, Windows in 15 and macOS in 12, the macOS suite the
 third green in a row since `cd2d542d`, which settles Verdict 27.
-
-Before it, `dd2149ee` came, Verdict 28 mended and nothing else, 7 files. The memory command answers
-`live`, the bytes its last full blocking collection kept, beside `managed` and `heap`, which the
-soak check says and no longer judges, with the reasons in its header, the first reading below zero
-with objects pinned and the second counting free space; the check judges `live` at five percent and
-256 KiB, four times what a ten-minute soak of the three games on lavapipe moved; BUILDING.md,
-`docs/tools.md` and `MemoryCommandTests` follow. Checked on the working machine were the whole
-suite, 1,474 passed and 3 skipped of 1,477, the ten-minute soak of the three games and the feature
-test's fifteen minutes, all passing. Right. Verdict 26's cause is the bridge's features and not the
-clock, read from the Replies and chosen under it, the pictures taken on the package's bridge; item
-25 is applied and awaits its commit. Next that commit and Verdict 26's, the owner's push, and a push
-run and a pack run whole green, Decision 35's gate.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -564,22 +575,37 @@ from [SHARED.md](SHARED.md).
     workflow builds it on 0.0.0-ci, so no job sees it, and a reader cloning the game does. After
     Decision 33 lifts: the default follows the package the game was last played on, or the games
     take their version from one place the pack writes, and a check that each game builds on its own
-    default where the package is published. Found at `9f76fded`.
+    default where the package is published. Found at `9f76fded`. Read again on 2026-10-18 with
+    Decision 33 lifted, from the working session's measurement. All four games name versions
+    nuget.org has not, local packs of earlier sessions, Courtyard and Swarm 0.0.14-game, the stress
+    program 0.0.25-game and the first game 0.0.38-game, so a reader cloning the repository builds
+    none of them; Courtyard, the stress program and the first game build on 0.4.129, the newest of
+    the ten published, and Swarm does not, wanting `MainThread`, which no published version carries
+    yet. The shape chosen is the session's. Each game's default names the newest published version
+    it builds on, three at 0.4.129 and Swarm at the version it needs until the next publish carries
+    it, its project's comment saying the checkout is packed under that version to build it; the pack
+    job, when it publishes, builds each game on its own default from nuget.org after the push,
+    waiting on the index with a bounded retry whose cost the job's limit comment counts (N 6.8), and
+    fails with an error naming each game whose default does not build and the version that push
+    carried as the one to raise it to, the raise being a one-line commit a game; and BUILDING.md
+    says what a game's default is and how a game whose default awaits a publish is built. No shared
+    version file, since a game here is built as one outside the repository is, from the package and
+    its own project file alone, and the version last played is 0.0.0-ci, never published.
 
 23. **Two workflows an engine, `build.yml` on a push and `pack.yml` by hand (Decision 34), done at
-    `b178ae3f` over `0dff9601`; proven when its push run and pack run are green.** `package.yml`
-    folds into `build.yml`, which gains `push`, `pull_request` and `workflow_call` with one input,
-    `pack`, and the `docs` job, its inputs `version`, `targets` and `test_os` gone and the matrices
-    literal: `native (rid)` (pack only), `test (os)`, `digest`, `docs`, and pack-only `game`,
-    `drive`, `examples`, `storm` and `readme`, each needing `native`; the push's paths filter
-    becomes 3DEngine's (`['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md',
-    '!games/**.md', '!.github/assets/**']`), so a docs-only push runs the docs check it skipped
-    under `paths-ignore`, and `branches` goes. `pack.yml` keeps `workflow_dispatch` with `publish`
-    and runs `build` (uses `build.yml` with `pack: true`) then `pack` (needs `build`, 20 minutes,
-    through `step.py`): the version read in it with `fetch-depth: 0`, the six `native-*` artifacts
-    laid out under `build/artifacts`, the notices check, the release notes, `dotnet pack`, the
-    templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked and
-    the summary, so a package is made only when every job passed, where today's pack job needs
+    `b178ae3f` over `0dff9601`; proven by the push run and the pack run of `b4d45938` on
+    2026-10-18.** `package.yml` folds into `build.yml`, which gains `push`, `pull_request` and
+    `workflow_call` with one input, `pack`, and the `docs` job, its inputs `version`, `targets` and
+    `test_os` gone and the matrices literal: `native (rid)` (pack only), `test (os)`, `digest`,
+    `docs`, and pack-only `game`, `drive`, `examples`, `storm` and `readme`, each needing `native`;
+    the push's paths filter becomes 3DEngine's (`['**', '!.github/**.md', '.github/BUILDING.md',
+    '!AGENTS.md', '!games/**.md', '!.github/assets/**']`), so a docs-only push runs the docs check
+    it skipped under `paths-ignore`, and `branches` goes. `pack.yml` keeps `workflow_dispatch` with
+    `publish` and runs `build` (uses `build.yml` with `pack: true`) then `pack` (needs `build`, 20
+    minutes, through `step.py`): the version read in it with `fetch-depth: 0`, the six `native-*`
+    artifacts laid out under `build/artifacts`, the notices check, the release notes, `dotnet pack`,
+    the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked
+    and the summary, so a package is made only when every job passed, where today's pack job needs
     `native` and `test` alone; the `version` and `publish` jobs go. `feature-test.yml` and
     `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the owner's
     machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip needs a
@@ -652,7 +678,7 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 3, 14 to 25 and 27 are settled: 15, the native job's four targets, on the pack run of
+Verdicts 3 and 14 to 28 are settled: 15, the native job's four targets, on the pack run of
 `292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
 commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
 green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
@@ -671,7 +697,11 @@ its four shards, on the pack run of `afcf8301` the same day, the four shards cap
 with none blank and ending in 19 to 28 minutes of their 60, each comparing its own, two of them
 failing on one picture apiece, which is Verdict 26's; and 27, the memory guard's figure on macOS, on
 the push of `b4d45938` on 2026-10-17, the third green macOS suite in a row after `cd2d542d` settled
-the heap before the test's first reading and forbade a collection until its second.
+the heap before the test's first reading and forbade a collection until its second; and 28, the
+soak's heap figure, on the pack run of `b4d45938` on 2026-10-18, the play job's ten-minute soak of
+three games passing with the live bytes judged; and 26, the captures apart from the checked-in
+pictures, on the same pack run, the four shards passing with the two pictures taken again on a
+`--render` bridge.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -685,97 +715,6 @@ the heap before the test's first reading and forbade a collection until its seco
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
-
-26. **Eighteen captures stand between the runner and the checked-in pictures once Bevy's files are
-    in place.** On the pack run of `b178ae3f`, 2026-10-17, the one capture job ran 77 minutes to its
-    end with Bevy's files and `slangc` in place, where the 58 blank captures of `d2a20b6a` are three
-    and the 152 differences fourteen, which is Verdict 22's mend at work. What stands: `decodable`,
-    `pitch` and `many_meshlet_materials` blank and `clustered_decals` not captured; `meshlet`,
-    `test_meshlet`, `solari` and `solari_reflections` apart by 29 to 96 percent, drawn with features
-    lavapipe has not, meshlets and ray queries; `many_lights` apart by 84 where 40 is allowed,
-    `many_foxes` by 10, `removal_detection` by 6, `many_cubes` by 4 and `async_compute` by 2.2 where
-    2 is; `change_detection`, `ecs_guide` and `system_closure` printing 5 to 65 percent of their
-    lines otherwise; and `resizing` and `window_settings` captured at their windows' sizes, 401 by
-    401 and 500 by 300, where the script scales a capture of another shape to 1280 by 720 through
-    ImageMagick, which the runner has not, so the `cwebp` fallback kept the size. Four things: an
-    example drawn with a feature the device lacks, meshlets or ray queries, is captured with the
-    words that say so and compared with nothing, by the device's own answer; the printed examples'
-    lines read for what varies between runs, an entity's id or a system's order, and the print made
-    the same each run or the comparison taught the lines that vary; the job installing ImageMagick
-    so a capture of another shape is scaled as the script means, or the script scaling with Python's
-    own; and the rest read one by one from the run's `examples` artifact, each difference the
-    runner's own allowed in `build/captures-differ.txt` with its share and reason or a fault mended,
-    `clustered_decals`' failed shot and the two audio examples' blank pictures read from their logs.
-    Settled when the capture jobs pass in a pack run. Mended at `ea6b95ae`, each of the eighteen
-    read in the runner's image and answered as the head paragraph says. On the pack run of
-    `afcf8301`, 2026-10-17, two of the four shards failed at the comparison on one picture each,
-    `many_lights` apart by 45.4 percent and `many_cubes` by 4.6 where 2 is allowed, the two the head
-    paragraph says matched in the runner's image, and the rest of the four shards' captures matched
-    or stood allowed. Both turn their camera by `Time.Delta`, the machine's clock, `many_lights` at
-    its line 89 and `many_cubes` at 266 outside its benchmark mode, and `many_cubes` colors by
-    `Time.Elapsed` at 289, so the frame taken shows the camera where that machine's frame times put
-    it, which a seed does not fix and a container matches only while its frames take as long as the
-    runner's. `Config.FrameSeconds` is Bevy's manual time step, offered in its own remark for a
-    capture of something moving to be the same on every machine, and `build/capture-example.sh:41`
-    sets it through `BCS_FRAME_TIME` for a printed example's run alone, while a picture is taken on
-    the machine's clock. The mend is one thing. A picture's run is taken on the set clock as a
-    printed one is, every example, so a capture is the same frame of the same clock on every
-    machine, the two pictures taken again if they change on the working machine, and the lines of
-    `build/captures-differ.txt` whose reason was the clock are read again under it, a load still
-    ending in whichever frame the machine reaches. Settled when the four shards pass on a pack run.
-    The mend named was in place, which the reading here missed, `build/capture-example.sh:94`
-    opening every picture with `--frame-time 0.0166667`, which `BevyCSharp.Cli/Launch.cs:268` hands
-    the app as `BCS_FRAME_TIME`, and two captures of each example in the runner's image matched to
-    the pixel; the working session found the cause instead, read under Replies on 2026-10-17 and
-    recorded here. The runner's bridge is built with `--render` alone, where the checkout's carries
-    the editor, meshlets and Solari, and `bevy_solari` turns on `bevy_pbr`'s `dfg_lut`, which lights
-    the specular term of every standard material from Bevy's precomputed table where its absence
-    leaves a fitted curve and which Bevy's default features leave off; the checked-in pictures were
-    taken on a bridge with Solari, so the `--render` bridge draws `many_lights` 45.455 percent and
-    `many_cubes` 4.570 apart, the runner's figures, a `render,solari` bridge draws them to the pixel
-    as the full one does, and these two show it past the allowance since every pixel of theirs is a
-    light's spot or a cube's edge; the session's earlier word that `many_lights` matched in the
-    runner's image was read while its allowance line still stood, and is withdrawn. The choice
-    between the two mends offered is the pictures, not the package. The package lights a material as
-    Bevy's default features do, and a tester's bridge built with Solari lights it as Bevy's does
-    with Solari, which is Bevy's own behavior and not this engine's to change for its pictures; so
-    the pictures of the examples that need no Solari are taken on a bridge built without it,
-    `--render`, as the native job builds it and as a user of the package draws, these two taken
-    again, and BUILDING.md says which bridge a picture is taken on and why. Turning `dfg_lut` on in
-    the render profile stays a question for the owner's eye, since it changes how every game built
-    on the package lights its materials; Decision 25 lets the working session turn it on the day the
-    owner wants the table's lighting in the package. Settled when the four shards pass on a pack
-    run. Mended at `01f448b9`, the two pictures taken again on a `--render` bridge and BUILDING.md
-    saying which bridge a picture is taken on.
-
-28. **The soak judges the collector's heap size, which grows with its budget and holds garbage, so
-    Swarm's soak failed with nothing leaking.** On the pack run of `afcf8301`, 2026-10-17, the play
-    job's ten-minute soak of three games failed Swarm, its `heap` 751,256 bytes at the most of the
-    first half and 4,608,176 at the most of the second, past the bound of 2,961,096, while
-    `managed`, the entities, the handles and the native bytes held within their slack. The `heap`
-    the memory command answers is `GCMemoryInfo.HeapSizeBytes` (`ConsoleMemoryCommands.cs:40`), the
-    heap's size at the collector's last collection with its garbage and free space in it, and the
-    collector widens generation 0's budget as a run goes on, so the size at a collection climbs
-    sixfold in a steady game; the soak passed on the pack run of `b178ae3f` (Verdict 24) and failed
-    here with the game unchanged, by that budget's course. The mend is one thing. The soak judges a
-    figure of live memory, the total after a full collection the command answers when asked
-    (`GC.GetTotalMemory(true)`, a pause once a reading, which a reading every ten seconds affords)
-    or the bytes promoted at the last collection, `heap` is said and not judged, as `gen2` is, with
-    the reason in `soak-check.py`, and the slack of the new figure is measured on a ten-minute soak
-    of the three games before it is set (N 3.5). Settled when the play job's soak passes on a pack
-    run. Mended at `dd2149ee`, the memory command answering `live`, the bytes the last full blocking
-    collection kept, which the soak judges at five percent and 256 KiB, a ten-minute soak of the
-    three games on lavapipe holding it within 60,712 bytes of where each settled and the feature
-    test's fifteen minutes at 1.10 to 1.13 MB; `managed` and `heap` are said and not judged, the
-    first reading below zero with objects pinned, -481,448 bytes in the stress program and -160,896
-    in Swarm after a full collection, the second counting free space. One thing more, since Swarm's
-    soak gave five readings on a loaded four-processor machine where the check needs six and the
-    runner gave enough with a thin margin. The soak runs on past its seconds until each game has its
-    six readings, within a cap it names, or the check's too-few line says the round's length, so a
-    slow runner does not fail for want of readings. Settled when the play job's soak passes on a
-    pack run. The readings' addition is done at `a62e96c8`, the soak playing on by at most half its
-    seconds again until each game has its six readings, and the check naming the round's length
-    where it has fewer.
 
 29. **The script's lost-suite test asked for the time limit and the script named the memory limit,
     on Windows, once.** On the push of `dd2149ee`, 2026-10-17, the Windows suite failed one of the
@@ -799,7 +738,10 @@ the heap before the test's first reading and forbade a collection until its seco
     stand-in's tree read past 200 MB and how the suite's own cap could be passed by a stranger. One
     thing more. The tree takes a process as a child only when it was created after its recorded
     parent (`GetProcessTimes`), as psutil's walk does, so a reused id pulls no stranger in. Settled
-    at three green Windows suites in a row after that.
+    at three green Windows suites in a row after that. Done at `b50890cb`, the tree taking a process
+    as a child only where it was not created before the parent its id names, on Windows by
+    `GetProcessTimes`, for the memory reading and the kill alike, with a test of a stranger left
+    out; settled at three green Windows suites in a row after it.
 
 ## Decisions
 
@@ -985,7 +927,9 @@ the heap before the test's first reading and forbade a collection until its seco
     different job while the code stood still, stopped development on both: the working sessions mend
     what the verdicts name and nothing else, every push must be green on every job, three in a row,
     and the pack run after them, before an item is taken again, on 3DEngine as here (its Decision
-    39).
+    39). Lifted for this engine on 2026-10-18 under Decision 35, the push run and the pack run of
+    `b4d45938` whole green under the two workflows; 3DEngine's Decision 39 stands until its own
+    gate.
 
 34. **Two workflows an engine, build and pack, the same shape in both; the tester zips and the scene
     packs are runs on the owner's machine.** The owner found on 2026-10-17 that the two engines'
@@ -999,7 +943,10 @@ the heap before the test's first reading and forbade a collection until its seco
 35. **Decision 33's gate is the new workflows.** The owner chose on 2026-10-17 that the rework of
     item 23 starts that day as the first work on both engines, after the verdicts open are mended,
     and that the green lights Decision 33 asks are then asked of the new workflows: a green push and
-    a green pack run under them on each engine before features resume (3DEngine's Decision 42).
+    a green pack run under them on each engine before features resume (3DEngine's Decision 42). Met
+    here on 2026-10-18, the push run of `b4d45938` whole green at 23:38 the day before and its pack
+    run whole green at 01:29 with the package made, so Decision 33 is lifted for this engine and
+    development resumes with item 22 and the owner's items, the verdicts open mended as they come.
 
 36. **The docs job goes; the repository's links are the suite's to check.** The owner asked on
     2026-10-17 whether the build workflow needs a job that follows the README's and the guide's

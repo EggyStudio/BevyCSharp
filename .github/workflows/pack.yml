@@ -42,9 +42,11 @@ jobs:
     name: pack
     needs: [build]
     runs-on: ubuntu-24.04
-    # Twenty minutes, where the pack, the templates, the listing and the package's tests take a few,
-    # so a step that waits fails within the run's patience rather than at GitHub's six hours.
-    timeout-minutes: 20
+    # Forty-five minutes, where the pack, the templates, the listing and the package's tests take a
+    # few, and a run that publishes then waits as long as twenty minutes for nuget.org to list the
+    # package and builds the four games on it, a minute or two each, so a step that waits fails
+    # within the run's patience rather than at GitHub's six hours.
+    timeout-minutes: 45
     # Each step through build/step.py, as the build workflow's jobs that run programs have it.
     defaults:
       run:
@@ -121,6 +123,14 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      # Each game built on the version its own project names, from nuget.org alone, as a reader
+      # cloning the repository builds it, once nuget.org lists the package just pushed, which a
+      # game's default may resolve to (build/games-on-defaults.sh). A game whose default does not
+      # build is named in an error with this version as the one to raise it to (BUILDING.md).
+      - name: Build each game on its own default from nuget.org
+        if: ${{ inputs.publish }}
+        run: build/games-on-defaults.sh ${{ steps.version.outputs.version }}
 
       - name: Say what was made
         run: |

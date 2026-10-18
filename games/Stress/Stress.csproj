@@ -11,10 +11,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!--
-          The version packed into build/package, which a build can name instead, as continuous
+          The newest version published on nuget.org this game builds on, raised in a commit after a
+          publish (BUILDING.md). A build names another with -p:BevyCSharpVersion, as continuous
           integration does with the package it packs for the run.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.0.25-game</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.4.129</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>
