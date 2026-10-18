@@ -10,7 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c5f19669`, item 28 done and nothing else, 16 files, the ABI 284 to 285. The
+Reviewed up to `3d147d49`, Verdict 30's mend and nothing else, 6 files. The visibility test holds
+the three components to resolving on every build, each id asked and each mirror verified against the
+bridge's reading on the way, and the round trip through the mesh stays behind the renderer, the test
+named for both; the three remarks in `NativeComponents.cs`, the paragraph of `Visibility.cs` and the
+guide's say every build has the component, a headless one through Bevy's world serialization, and
+that a render build draws by it, claiming nothing of what a headless world computes. Checked on the
+working machine, as B 2 asks, were the headless bridge built in the container with
+`NativeComponentTests` and `ReflectedLayoutTests` run on it, 16 passed and 6 skipped of 22, the
+visibility test's three resolutions passing before its skip at the renderer, and the editor bridge
+with meshlets and Solari with the whole suite, 1,488 passed and 3 skipped of 1,491. Right. The owner
+pushed `3d147d49` at 11:28 on 2026-10-18 and started its pack run at 11:34, before Verdict 31's
+line. The push run ended at 11:42 whole green, the three suites passing every test, 1,221 on Linux,
+1,048 on Windows and 1,041 on macOS, which settles Verdict 30 and, the Windows suite the third green
+in a row, Verdict 29. On the pack run of `c5f19669` the four shards ended with `async_compute` the
+one picture apart, the play, storm and README jobs passed, and the feature test's course was still
+running at 11:48. Next Verdict 31's line and its push, and the pack run of `3d147d49` read, whose
+first shard may fail on the same picture.
+
+Before it, `c5f19669` came, item 28 done and nothing else, 16 files, the ABI 284 to 285. The
 atmosphere's config carries a count and a pointer of scattering terms, each 44 bytes of absorption,
 scattering, a falloff of three kinds with two parameters, a phase of three kinds and an asymmetry,
 and the bridge builds Bevy's terms from them into a medium of the game's own at 256 by 256 with the
@@ -59,29 +77,6 @@ antialiasing mirror where they named the transform's. Checked on the working mac
 suite, 1,486 passed and 3 skipped of 1,489, and the bridge's 98 headless tests with the bridge
 rebuilt. Right. Next item 28, the atmosphere's custom medium, and the owner's push of the six
 commits since `b50890cb`.
-
-Before it, `9b539deb` came, item 27's second step done and nothing else, 19 files, the ABI 282 to
-283. The bridge's layout answer gives each fieldless enum the number each variant is stored as,
-every variant made through `FromReflect` and its bytes read little-endian since Rust promises no
-discriminant, held to `as` casts by the bridge's test; the schema dump writes a layout line after
-each of the 115 measurable components, a signature of the size, the alignment and each row's offset,
-size and variant numbers; the generator makes an explicit-layout mirror struct beside each wrapper
-for 100 of them, each row at its offset, floats, doubles, booleans, integers by width, the vector
-and quaternion types with a SIMD vector as its 12 bytes of 16, and fieldless enums as C# enums of
-the measured numbers, one a Rust type, while 15 keep their layout without a mirror, 6 holding an
-entity whose raw write would pass the relationship hooks by, 4 a duration and 3 a range in Rust's
-own byte form and 2 a color. A mirror carries its signature, and at its first use in a world the
-component is measured again and a difference refuses the mirror naming both signatures, the id cache
-keyed by name and layout; `ReflectedLayoutTests` hold every layout line of the checked-in
-description to the running bridge's reading, naming each that moved, a transform mirror reading what
-the wrapper wrote and the reverse, an antialiasing mirror reading and writing its enum, and a struct
-with a moved field refused at first use. COMPONENTS.md's third tier says how the mirrors are made
-and checked and which 15 have none, BUILDING.md's dump paragraph names the layouts and the test,
-`docs/components.md` has a paragraph and a block on mirrors, and `PublicApi.txt` carries the
-hundred. Checked on the working machine was the whole suite, 1,485 passed and 3 skipped of 1,488,
-with the bridge rebuilt. Right. Next step three, the lookup of a component by its reflected path
-retiring the hand mirrors where a generated one stands; and the owner's push of the four commits
-since `b50890cb`.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -769,7 +764,7 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 3 and 14 to 28 are settled: 15, the native job's four targets, on the pack run of
+Verdicts 3 and 14 to 30 are settled: 15, the native job's four targets, on the pack run of
 `292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
 commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
 green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
@@ -792,7 +787,12 @@ the heap before the test's first reading and forbade a collection until its seco
 soak's heap figure, on the pack run of `b4d45938` on 2026-10-18, the play job's ten-minute soak of
 three games passing with the live bytes judged; and 26, the captures apart from the checked-in
 pictures, on the same pack run, the four shards passing with the two pictures taken again on a
-`--render` bridge.
+`--render` bridge; and 29, the lost-suite test's Windows figure, on the push of `3d147d49` on
+2026-10-18, the third green Windows suite in a row after `b50890cb` held the hang case to a
+terabyte, said the reading beside the limit and took a process as a child only where it was not
+created before its parent; and 30, the visibility test on a headless build, on the same push, the
+three suites passing with the test asking the three ids on every build and the remarks saying every
+build has the component.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -806,66 +806,6 @@ pictures, on the same pack run, the four shards passing with the two pictures ta
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
-
-29. **The script's lost-suite test asked for the time limit and the script named the memory limit,
-    on Windows, once.** On the push of `dd2149ee`, 2026-10-17, the Windows suite failed one of the
-    1,041 tests it ran, `TestScriptTests`' theory that a lost suite is said first and run again in
-    parts, in its hang case, where the stand-in sleeps ten minutes under a limit of 0.1 minutes and
-    200 MB, and the page read "ended at its memory limit" where "ended at its time limit" was asked;
-    Linux and macOS passed it, and so had every Windows suite before, the push of `cd2d542d` among
-    them. `build/test.py:164-166` reads the clock first and the memory second on each poll, so the
-    memory limit was passed before the six seconds were, the stand-in's process tree holding more
-    than 200 MB on that runner for a moment, python and whatever the watch counts under it. One
-    thing. The hang case's memory limit is set where nothing the stand-in holds can reach it,
-    measured, so the time limit alone can end it, and the script's lost line says the figure it read
-    against the limit, as the cap case's does, so a reading that passes a limit is read on the page
-    rather than guessed. Settled at three green Windows suites in a row after the mend. Mended at
-    `c9d2bf3d`, the hang case held to a terabyte so its time limit alone ends it, and the page
-    saying the reading that passed a memory limit beside the limit. The working session read a cause
-    it did not act on, and it is asked here. On Windows `build/test.py` builds the process tree from
-    the parent ids Toolhelp records (line 318), and Windows neither reparents an orphan nor keeps an
-    id from reuse, so a process left from an earlier run whose recorded parent id is one the
-    stand-in's tree reuses is counted under it, a test host among them, which is how a sleeping
-    stand-in's tree read past 200 MB and how the suite's own cap could be passed by a stranger. One
-    thing more. The tree takes a process as a child only when it was created after its recorded
-    parent (`GetProcessTimes`), as psutil's walk does, so a reused id pulls no stranger in. Settled
-    at three green Windows suites in a row after that. Done at `b50890cb`, the tree taking a process
-    as a child only where it was not created before the parent its id names, on Windows by
-    `GetProcessTimes`, for the memory reading and the kill alike, with a test of a stranger left
-    out; settled at three green Windows suites in a row after it. On the push and the pack run of
-    `c5f19669`, 2026-10-18, both Windows suites passed the lost-suite test and were red on Verdict
-    30's test alone, so the row stands at two green Windows suites until the next, which Verdict
-    30's mend brings.
-
-30. **The suite's visibility test expects a headless build to refuse the component, and a headless
-    build has it.** On the push and the pack run of `c5f19669`, 2026-10-18, all six suites failed
-    one test, `NativeComponentTests.VisibilityRoundTripsOnARenderBuild`, whose headless branch
-    (`NativeComponentTests.cs:423-431`) asserts that `NativeComponents.Visibility` throws
-    `BevyNativeException` naming a feature the build was compiled without, and nothing was thrown;
-    the rest passed, and the suite's bridge is the headless profile (`build.yml:139-142`). Until
-    `1a6c5d22` the three visibility mirrors named their component by short name, and the arms of
-    `bcs_component_id_of` for those names were behind the render feature, so on a headless build
-    "Visibility" fell through to the lookup by type path (`reflected.rs:318-323`), which knows no
-    such path, and the test's refusal came from the short name and not from the component's absence.
-    Since `1a6c5d22` the mirrors name `bevy_camera::visibility::Visibility` and its two companions,
-    and the path is found on a headless build, since `bevy_world_serialization`, which the headless
-    profile lists, depends on `bevy_camera`, and `reflect_auto_register` puts its types in the
-    registry with their `ReflectComponent`, so the lookup registers the component and answers its id
-    and the mirror's layout verifies against it. The component has been on every build for as long
-    as the world serialization has, and the test's premise, its comment, the remarks "Render builds
-    only" at `NativeComponents.cs:54, 58, 62` and the paragraph of `docs/components.md:309-310`,
-    which says a headless bridge has no such component and says so when the id is resolved, held by
-    an accident of naming. The commit's suite ran on a render build on the working machine, 3
-    skipped, where the branch is not taken, and B 2 asks the three profiles to compile and not the
-    suite to run on the one the push tests. The mend is one thing, with its words. The test's
-    headless branch asserts that the id resolves and the mirror verifies on a headless build, since
-    the component is on every build, and the round trip through the mesh stays behind
-    `Needs.Renderer()`, the test named for both; the three remarks and the paragraph of
-    `docs/components.md` say the component is on every build, the headless one through its world
-    serialization, drawn on a render build, and claim nothing of what a headless world computes from
-    it; and B 2 widens here to say that a change to how a component is found or read runs the
-    suite's tests of it on the headless profile before the commit, as the push does. Settled when
-    the three suites pass on a push run.
 
 31. **The capture of `async_compute` depends on the machine's clock, as its listed sibling's does,
     and is not listed.** On the pack run of `c5f19669`, 2026-10-18, the first capture shard failed
