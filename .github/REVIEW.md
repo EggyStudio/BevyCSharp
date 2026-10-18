@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1a6c5d22`, item 27's third step done and the item with it, 19 files, the ABI 283 to
+Reviewed up to `c5f19669`, item 28 done and nothing else, 16 files, the ABI 284 to 285. The
+atmosphere's config carries a count and a pointer of scattering terms, each 44 bytes of absorption,
+scattering, a falloff of three kinds with two parameters, a phase of three kinds and an asymmetry,
+and the bridge builds Bevy's terms from them into a medium of the game's own at 256 by 256 with the
+density multiplier, the planet keeping its size and Mars's dust phase unneeded with an air of the
+game's own, refusing a negative or non-finite amount, an unknown falloff or phase, a tent outside 0
+to 1 and an asymmetry outside the open interval; on the managed side the settings gain `Medium`, a
+list of `ScatteringTerm`, the falloff and phase enums each in a file of their own as N 1.2 asks,
+`Render.SetAtmosphere` checking each term and naming the term and the reason it refuses before
+passing them pinned, and `PublicApi.txt` written again. `AtmosphereTests` hold the two layouts, a 32
+by 32 offscreen sky under a high sun whose blue is over its red by more than 10 for earth's air and
+whose red is over its blue by the same for a single Rayleigh gas with earth's coefficients reversed,
+and two terms refused with their reasons. The sky guide has a paragraph and a compiled block, and
+TODO.md's line names what is left, a falloff or a phase given as a curve or a picture, which cross
+the bridge as no number. Checked on the working machine were the whole suite, 1,488 passed and 3
+skipped of 1,491, and the render and editor builds checked in the container. Right. The owner pushed
+the six commits since `b50890cb`, four ABI moves among them, at 10:21 on 2026-10-18 and started the
+pack run with them. The push run ended at 10:38 red on all three suites, each failing one test,
+`NativeComponentTests`' visibility round trip in its headless branch, where a headless build is
+expected to refuse the component and no longer does (Verdict 30, of `1a6c5d22`), Linux passing 1,221
+beside it, macOS 1,041 and Windows 1,048; the pack run's three suites failed the same way by 10:35
+with its digest, its natives passing as they end, and its pack job will not run, so the package
+waits. Verdict 29's test passed on both Windows suites. By 11:14 the pack run's six natives, the
+play job, the storm and the README walk had passed, the second capture shard too, and the first had
+failed on one picture, `async_compute` differing by 2.6 percent where 2 is allowed, its cubes
+arriving after waits on the machine's clock as its listed sibling's do (Verdict 31), with the other
+two shards and the feature test's course still running. Next Verdicts 30 and 31's mends, their push,
+and a push run and a pack run whole green.
+
+Before it, `1a6c5d22` came, item 27's third step done and the item with it, 19 files, the ABI 283 to
 284. The library's transform, global transform and three visibility types name their components by
 reflected path and carry the description's layout through `DescribedLayouts`, an internal class the
 generator writes from the description's lines for the five, so no signature is copied by hand, and
@@ -53,31 +82,6 @@ hundred. Checked on the working machine was the whole suite, 1,485 passed and 3 
 with the bridge rebuilt. Right. Next step three, the lookup of a component by its reflected path
 retiring the hand mirrors where a generated one stands; and the owner's push of the four commits
 since `b50890cb`.
-
-Before it, `5f8e4e07` came, item 27's first step done and nothing else, 13 files, the ABI 281 to
-282. `bcs_reflect_layout` of a type path, in a module of its own, answers the type's size and
-alignment from the world's registered layout where it is a component, its kind, and for each
-reachable field path its offset, size, alignment and kind, from a value made at its default through
-`ReflectDefault` or the dynamic build made concrete through `ReflectFromReflect`, a field reflected
-from outside the value refused; the bridge's test holds `Transform`'s three offsets to
-`offset_of!`'s and refuses an unknown path. On the managed side `ReflectedLayouts` measures and
-parses, `Unmirrored` says why a mirror could not hold a layout, a variant's value, a list, map or
-set, bytes no reflected field covers or an overlap, struct by struct so a SIMD vector's trailing
-bytes are padding, and `schema.layouts` counts. `ReflectedLayoutTests` hold the five hand layouts,
-`Transform`'s rotation, translation and scale, `GlobalTransform`'s three axes and translation
-through its private affine, `Visibility`'s size as an enum and the two one-byte visibility types,
-every one mirrorable, and a reason test for padding, a vector's tail, a variant, a gap, a trailing
-gap and an overlap. The count, from an editor session, is 140 candidates holding fixed-size values,
-115 mirrorable, 24 left out for a variant's value, a `Color` or an enum whose variants hold values,
-the lights, the clear color, the text and border colors, the wireframe configs, the vignette and the
-sky's configs among them, and 1 for an ignored field, the delayed command queue, none lacking a
-default. COMPONENTS.md's third tier says the layout is the compiler's read from a value, gives the
-count and the reasons and marks the dump-and-check bullet as not built, and TODO.md's line says what
-is left with the command for its number. Checked on the working machine was the whole suite, 1,482
-passed and 3 skipped of 1,485, with the bridge rebuilt. Right. Next step two, the dump writing the
-115 layouts into the description and the generator making mirrors from them, with the suite's test
-and the first-use check against the running bridge; and the owner's push of the three commits since
-`b50890cb`.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -756,11 +760,12 @@ from [SHARED.md](SHARED.md).
     description's layouts and the hand machinery gone, which ends the item, 95 generated mirrors
     beside the five of the library's.
 
-28. **An atmosphere takes a medium of the game's own, TODO.md's rendering line, one commit.** Chosen
-    on 2026-10-18 as the line after item 27. Bevy's `ScatteringMedium::new` takes a game's own
-    scattering and absorption terms where the bridge offers earth's and Mars's alone; a bridge call,
-    a C# settings record, a test that a custom medium draws otherwise than earth's, and the guide's
-    line.
+28. **An atmosphere takes a medium of the game's own, TODO.md's rendering line, one commit, done at
+    `c5f19669`.** Chosen on 2026-10-18 as the line after item 27. Bevy's `ScatteringMedium::new`
+    takes a game's own scattering and absorption terms where the bridge offers earth's and Mars's
+    alone; a bridge call, a C# settings record, a test that a custom medium draws otherwise than
+    earth's, and the guide's line. Done at `c5f19669` as asked, with a curve or a picture for a
+    falloff or a phase left named in TODO.md.
 
 ## Verdicts
 
@@ -827,7 +832,56 @@ pictures, on the same pack run, the four shards passing with the two pictures ta
     at three green Windows suites in a row after that. Done at `b50890cb`, the tree taking a process
     as a child only where it was not created before the parent its id names, on Windows by
     `GetProcessTimes`, for the memory reading and the kill alike, with a test of a stranger left
-    out; settled at three green Windows suites in a row after it.
+    out; settled at three green Windows suites in a row after it. On the push and the pack run of
+    `c5f19669`, 2026-10-18, both Windows suites passed the lost-suite test and were red on Verdict
+    30's test alone, so the row stands at two green Windows suites until the next, which Verdict
+    30's mend brings.
+
+30. **The suite's visibility test expects a headless build to refuse the component, and a headless
+    build has it.** On the push and the pack run of `c5f19669`, 2026-10-18, all six suites failed
+    one test, `NativeComponentTests.VisibilityRoundTripsOnARenderBuild`, whose headless branch
+    (`NativeComponentTests.cs:423-431`) asserts that `NativeComponents.Visibility` throws
+    `BevyNativeException` naming a feature the build was compiled without, and nothing was thrown;
+    the rest passed, and the suite's bridge is the headless profile (`build.yml:139-142`). Until
+    `1a6c5d22` the three visibility mirrors named their component by short name, and the arms of
+    `bcs_component_id_of` for those names were behind the render feature, so on a headless build
+    "Visibility" fell through to the lookup by type path (`reflected.rs:318-323`), which knows no
+    such path, and the test's refusal came from the short name and not from the component's absence.
+    Since `1a6c5d22` the mirrors name `bevy_camera::visibility::Visibility` and its two companions,
+    and the path is found on a headless build, since `bevy_world_serialization`, which the headless
+    profile lists, depends on `bevy_camera`, and `reflect_auto_register` puts its types in the
+    registry with their `ReflectComponent`, so the lookup registers the component and answers its id
+    and the mirror's layout verifies against it. The component has been on every build for as long
+    as the world serialization has, and the test's premise, its comment, the remarks "Render builds
+    only" at `NativeComponents.cs:54, 58, 62` and the paragraph of `docs/components.md:309-310`,
+    which says a headless bridge has no such component and says so when the id is resolved, held by
+    an accident of naming. The commit's suite ran on a render build on the working machine, 3
+    skipped, where the branch is not taken, and B 2 asks the three profiles to compile and not the
+    suite to run on the one the push tests. The mend is one thing, with its words. The test's
+    headless branch asserts that the id resolves and the mirror verifies on a headless build, since
+    the component is on every build, and the round trip through the mesh stays behind
+    `Needs.Renderer()`, the test named for both; the three remarks and the paragraph of
+    `docs/components.md` say the component is on every build, the headless one through its world
+    serialization, drawn on a render build, and claim nothing of what a headless world computes from
+    it; and B 2 widens here to say that a change to how a component is found or read runs the
+    suite's tests of it on the headless profile before the commit, as the push does. Settled when
+    the three suites pass on a push run.
+
+31. **The capture of `async_compute` depends on the machine's clock, as its listed sibling's does,
+    and is not listed.** On the pack run of `c5f19669`, 2026-10-18, the first capture shard failed
+    on one picture, `async_compute` differing in 2.6 percent of its pixels where 2 is allowed,
+    within x 409 to 870 and y 128 to 590, where its cubes stand; the pack runs of `b4d45938` and
+    `b50890cb` passed it within the 2. The example's 216 tasks each wait 0.05 to 5 seconds of
+    `Task.Delay` on the machine's clock, the wait drawn from `Random.Shared` unseeded
+    (`async_compute.cs:41`), and a cube appears when its task is done, so how many stand in the
+    frame taken, the hundred and twentieth at a sixtieth of a second each, is however many waits
+    ended in the machine's time that frame took to reach, more on a slow device, which is the cause
+    `build/captures-differ.txt:8` names for `async_channel_pattern`, its sibling written the same
+    way with waits of 2 to 8 seconds, listed at 0.25 with 14.9 percent measured. The mend is one
+    thing. `async_compute` is listed beside its sibling with the same reason and a room measured on
+    lavapipe (N 3.5), this run's 2.6 percent and what a run of the capture in the working machine's
+    container gives, and nothing in the example changes, since waits on the machine's clock, random,
+    are what Bevy's example does. Settled when the four shards pass on a pack run.
 
 ## Decisions
 

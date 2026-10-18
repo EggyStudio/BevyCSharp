@@ -12,9 +12,10 @@ namespace Bevy;
 /// <see cref="ViewVisibility"/>, so hiding a parent hides its children without touching them.
 /// </para>
 /// <para>
-/// Needs a render build; a headless one has no such component and says so when the id is resolved.
-/// Set it on an entity that is already drawable, because adding it writes the component but does
-/// not pull in the two Bevy computes from it, which arrive with the mesh.
+/// Every build has the component, a headless one through Bevy's world serialization, which brings
+/// it, and a render build draws by it. Set it on an entity that is already drawable, because adding
+/// it writes the component but does not pull in the two Bevy computes from it, which arrive with
+/// the mesh.
 /// </para>
 /// </remarks>
 /// <example>

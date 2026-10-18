@@ -51,15 +51,24 @@ public static class NativeComponents
     public static int Children => ComponentType<Bevy.Children>.Id;
 
     /// <summary>Bevy's <c>Visibility</c>: whether an entity asks to be drawn.</summary>
-    /// <remarks>Render builds only. The id behind <see cref="Bevy.Visibility"/>.</remarks>
+    /// <remarks>
+    /// The id behind <see cref="Bevy.Visibility"/>. Every build has the component, a headless
+    /// one through Bevy's world serialization, which brings it, and a render build draws by it.
+    /// </remarks>
     public static int Visibility => ComponentType<Bevy.Visibility>.Id;
 
     /// <summary>Bevy's <c>InheritedVisibility</c>: the propagated answer.</summary>
-    /// <remarks>Render builds only. The id behind <see cref="Bevy.InheritedVisibility"/>.</remarks>
+    /// <remarks>
+    /// The id behind <see cref="Bevy.InheritedVisibility"/>. Every build has the component, a
+    /// headless one through Bevy's world serialization, which brings it.
+    /// </remarks>
     public static int InheritedVisibility => ComponentType<Bevy.InheritedVisibility>.Id;
 
     /// <summary>Bevy's <c>ViewVisibility</c>: whether a camera actually saw the entity.</summary>
-    /// <remarks>Render builds only. The id behind <see cref="Bevy.ViewVisibility"/>.</remarks>
+    /// <remarks>
+    /// The id behind <see cref="Bevy.ViewVisibility"/>. Every build has the component, a headless one
+    /// through Bevy's world serialization, which brings it.
+    /// </remarks>
     public static int ViewVisibility => ComponentType<Bevy.ViewVisibility>.Id;
 
     /// <summary>Bevy's <c>WorldInstance</c>: present once a scene has been spawned.</summary>

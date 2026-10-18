@@ -306,8 +306,8 @@ text field.
 
 ## Visibility
 
-Whether an entity is drawn. Render builds only, since a headless bridge has no such component and
-says so when the id is resolved.
+Whether an entity is drawn. Every build has the component, a headless one through Bevy's world
+serialization, which brings it, and a render build draws by it.
 
 <!-- compiled with:
 Entity entity = default;

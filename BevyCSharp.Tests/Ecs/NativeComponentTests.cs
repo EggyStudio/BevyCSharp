@@ -412,7 +412,7 @@ public sealed class NativeComponentTests
     }
 
     [SkippableFact]
-    public void VisibilityRoundTripsOnARenderBuild()
+    public void VisibilityResolvesOnEveryBuildAndRoundTripsOnARenderBuild()
     {
         using var harness = new EngineHarness(frames: 3);
         var read = Visibility.Inherited;
@@ -420,15 +420,14 @@ public sealed class NativeComponentTests
 
         harness.OnContext(Stage.Startup, ctx =>
         {
-            if (!App.HasRenderer)
-            {
-                // The component belongs to a crate a headless build does not compile, so the
-                // failure names that rather than pretending the component is merely absent.
-                var ex = Assert.Throws<BevyNativeException>(() => NativeComponents.Visibility);
-                Assert.Equal(NativeStatus.NoComponent, ex.Status);
-                Assert.Contains("compiled without", ex.Message);
-                return;
-            }
+            // A headless build has the three components too, since its world serialization depends
+            // on the crate that declares them and registers its types. Resolving each id holds its
+            // mirror to the bridge's reading of the layout, which throws where they disagree.
+            Assert.True(NativeComponents.Visibility >= 0);
+            Assert.True(NativeComponents.InheritedVisibility >= 0);
+            Assert.True(NativeComponents.ViewVisibility >= 0);
+
+            if (!App.HasRenderer) return;
 
             // Spawned through Render so Bevy's own insert brings the components it computes
             // visibility from; a byte copy of Visibility alone would leave them missing.
