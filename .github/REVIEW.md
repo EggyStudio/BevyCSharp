@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3d147d49`, Verdict 30's mend and nothing else, 6 files. The visibility test holds
+Reviewed up to `6bac018b`, Verdict 31's line and nothing else. `build/captures-differ.txt` lists
+`async_compute` at 0.04 beside its sibling with the sibling's reason word for word, the example
+unchanged, and the room is measured (N 3.5), 2.6 percent on the runner's pack run of `c5f19669` and
+1.36, 1.58, 1.51 and 1.54 in four runs of `build/capture-example.sh` in a container of the runner's
+image on lavapipe held to four cores with a `--render` bridge, the box of every difference the
+runner's, where the cubes stand; the cubes cover 4.6 percent of the checked-in picture and 5.1 to
+5.6 of the captures, so a capture with none of the reference's cubes stays near 4.6, and 0.04 stands
+to the runner's 2.6 as the other lines stand to their measures. The slower lavapipe of the container
+reaches the frame with more of the waits ended, nearer the reference than the runner's. Checked on
+the working machine was the whole suite, 1,488 passed and 3 skipped of 1,491. Right. The owner
+pushed `6bac018b` at 12:27 on 2026-10-18 and started its pack run; the push run ended at 12:39 whole
+green. The pack run of `3d147d49` ended at 13:24 whole green with its package made, the course
+passing and `async_compute` within its 2 percent this time; the pack run of `6bac018b` had by 13:49
+its six natives and three suites green with the four shards, the play job and the course running. By
+14:25 that run's four shards had passed with the line in, which settles Verdict 31, and its play
+job, and the run ended at 14:56 whole green with its package, the course passing in 71 minutes. Open
+is Verdict 2 alone. At 22:25 on 2026-10-18 the owner resumed development (Decision 38): first the
+bridge is completed, every gap of item 4 closed, and then what was mended for the time being is
+mended for good (item 29). At 22:31 the working session read item 4 against the table and found no
+gap left that needs no word, the twenty rows left each waiting on the owner's word for a crate,
+declined, or on the owner's screens, the crates measured in a scratch copy of the manifests and said
+under the item. Next the owner's words typed in the working session, the camera controllers first,
+each gap bridged as its word comes, and item 29's list meanwhile.
+
+Before it, `3d147d49` came, Verdict 30's mend and nothing else, 6 files. The visibility test holds
 the three components to resolving on every build, each id asked and each mirror verified against the
 bridge's reading on the way, and the round trip through the mesh stays behind the renderer, the test
 named for both; the three remarks in `NativeComponents.cs`, the paragraph of `Visibility.cs` and the
@@ -25,8 +49,8 @@ line. The push run ended at 11:42 whole green, the three suites passing every te
 1,048 on Windows and 1,041 on macOS, which settles Verdict 30 and, the Windows suite the third green
 in a row, Verdict 29. On the pack run of `c5f19669` the four shards ended with `async_compute` the
 one picture apart, the play, storm and README jobs passed, and the feature test's course was still
-running at 11:48. Next Verdict 31's line and its push, and the pack run of `3d147d49` read, whose
-first shard may fail on the same picture.
+running at 11:48. The pack run of `c5f19669` ended at 11:52 with the feature test's course passing,
+red on its three suites and the first shard alone.
 
 Before it, `c5f19669` came, item 28 done and nothing else, 16 files, the ABI 284 to 285. The
 atmosphere's config carries a count and a pointer of scattering terms, each 44 bytes of absorption,
@@ -56,27 +80,6 @@ failed on one picture, `async_compute` differing by 2.6 percent where 2 is allow
 arriving after waits on the machine's clock as its listed sibling's do (Verdict 31), with the other
 two shards and the feature test's course still running. Next Verdicts 30 and 31's mends, their push,
 and a push run and a pack run whole green.
-
-Before it, `1a6c5d22` came, item 27's third step done and the item with it, 19 files, the ABI 283 to
-284. The library's transform, global transform and three visibility types name their components by
-reflected path and carry the description's layout through `DescribedLayouts`, an internal class the
-generator writes from the description's lines for the five, so no signature is copied by hand, and
-the first-use check and the every-layout test hold them as they hold a generated mirror; a new test
-holds each type's layout to the description's line, its size to the signature's and each declared
-field's offset to its path's, the visibility mode's values to the described numbers. The three hand
-layout exports with their imports, the three verify functions and the extra check, and the five
-short-name arms are gone, 426 lines less; the arms for the name-only handles and the interaction
-type stay, and the size check through the component layout stays for a mirror with no described
-layout, the kind a game writes by the documented example, which no mirror of the library's reaches.
-The generator writes no mirror for a component a hand type covers, 95 where 100 were, and
-`PublicApi.txt` loses the five and lists the hand types' interface. COMPONENTS.md's third tier says
-every mirror is held alike and its order reads that every step is built, TODO.md's components
-section says the mirrors are generated, the native component interface's documentation looks a
-component up by path with its example, and the guide, BUILDING.md and COMPONENTS.md name the
-antialiasing mirror where they named the transform's. Checked on the working machine were the whole
-suite, 1,486 passed and 3 skipped of 1,489, and the bridge's 98 headless tests with the bridge
-rebuilt. Right. Next item 28, the atmosphere's custom medium, and the owner's push of the six
-commits since `b50890cb`.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -300,46 +303,68 @@ from [SHARED.md](SHARED.md).
    forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and error_handling at `6641dbcc`,
    the custom projection at `6e28c3cc` and the depth to a texture at `b134dd4d`, the table at 346
    written and 34 missing; the rows that need no crate and no word follow in TODO.md's order, the
-   interface material next, the last four of the list read against the lock first.
-5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
-   (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
-   is handed over, and each is mended to report it instead, so no exception crosses the bridge from
-   a system, an observer or a loader's callback. Done at `f12a5879`: the test has had the first two
-   sources since `869c9fbe` and takes the third, the overrides a binding's callbacks reach, finding
-   none, and every method it finds catches every exception.
-6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
-   (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
-   workflow, as the first game's first step would have a newcomer do. Done at `fef6bbeb`, `dotnet
-   new bevycsharp` making the README's first program, packed beside the engine and walked by the
-   README job; its publishing on nuget.org beside the engine, a second package in the owner's name,
-   waits on the owner's word (Decision 8), and the README's install line needs it;
-   `docs/first-game.md` starts from a second template, `bevycsharp-empty`, since `c67c7981`, as
-   3DEngine's does.
-7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
-   (`ab052859`): a query's filter or a world call answering the entities a component was removed
-   from since the system's last run, beside the added and changed ones a behavior reads. Done at
-   `7a2a99ac`, `EcsWorld.Removed<T>()` and `RemovedById` with a cursor a system, as Bevy's
-   `RemovedComponents<T>`.
-8. **Every example compiles on the package alone**, from 3DEngine's `build/examples-on-package.sh`
-   (`a61308b0`): some 55 of 331 examples reach a helper of the examples project, so what they share
-   to say a thing in one word becomes the package's own calls or stays in the example, and the
-   workflow builds every example on the packed package with the shared files left out, so a reach
-   into the project fails the build. The capture drivers move to one file beside the catalog,
-   `StressTest.Warn` and the transforms' cube scene are written into each example as Bevy's carry
-   theirs, and the opened size comes from a library call or is read as Bevy's read it; `FreeCamera`
-   and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on the
-   owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
-   second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
-   list only getting shorter. Done at `5d955562`, the two helpers listed.
-9. **A script that more than one system runs is read for the forms only GNU's tools or a later bash
-   read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows and a
-   developer run on Linux, macOS and Windows' Git bash, where one line was found there. Done at
-   `8f02d976`, every script of the checkout read for ten forms, none found.
-10. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
-    `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
-    generators report, so an editor offers the mend. Done at `d328fdc3`, `BevyCSharp.CodeFixes`
-    fixing the five diagnostics with one clear mend and naming the seven without, packed beside the
-    generator.
+   interface material next, the last four of the list read against the lock first. 5. **Every method
+   native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10` (`48fbb663`): a
+   test finds a callback the bridge calls that lets an exception through, by how it is handed over,
+   and each is mended to report it instead, so no exception crosses the bridge from a system, an
+   observer or a loader's callback. Done at `f12a5879`: the test has had the first two sources since
+   `869c9fbe` and takes the third, the overrides a binding's callbacks reach, finding none, and
+   every method it finds catches every exception. 6. **A template package, so `dotnet new` starts a
+   game**, from 3DEngine's `3DEngine.Templates` (`ec7e6c3c`): a template of a console game on the
+   package, installed and used by the pack workflow, as the first game's first step would have a
+   newcomer do. Done at `fef6bbeb`, `dotnet new bevycsharp` making the README's first program,
+   packed beside the engine and walked by the README job; its publishing on nuget.org beside the
+   engine, a second package in the owner's name, waits on the owner's word (Decision 8), and the
+   README's install line needs it; `docs/first-game.md` starts from a second template,
+   `bevycsharp-empty`, since `c67c7981`, as 3DEngine's does. 7. **The entities that lost a component
+   since a system last ran**, from 3DEngine's `Removed` (`ab052859`): a query's filter or a world
+   call answering the entities a component was removed from since the system's last run, beside the
+   added and changed ones a behavior reads. Done at `7a2a99ac`, `EcsWorld.Removed<T>()` and
+   `RemovedById` with a cursor a system, as Bevy's `RemovedComponents<T>`. 8. **Every example
+   compiles on the package alone**, from 3DEngine's `build/examples-on-package.sh` (`a61308b0`):
+   some 55 of 331 examples reach a helper of the examples project, so what they share to say a thing
+   in one word becomes the package's own calls or stays in the example, and the workflow builds
+   every example on the packed package with the shared files left out, so a reach into the project
+   fails the build. The capture drivers move to one file beside the catalog, `StressTest.Warn` and
+   the transforms' cube scene are written into each example as Bevy's carry theirs, and the opened
+   size comes from a library call or is read as Bevy's read it; `FreeCamera` and `RadioButtons` stay
+   helpers on the script's list with their reasons, the first waiting on the owner's word for Bevy's
+   camera controller crate (Decision 12), whose camera then replaces it, the second a helper Bevy's
+   own examples share and Feathers' radio would replace (Decision 11), the list only getting
+   shorter. Done at `5d955562`, the two helpers listed. 9. **A script that more than one system runs
+   is read for the forms only GNU's tools or a later bash read**, from 3DEngine's `ScriptTests`
+   (`fd7b17f3`): one test over the scripts the workflows and a developer run on Linux, macOS and
+   Windows' Git bash, where one line was found there. Done at `8f02d976`, every script of the
+   checkout read for ten forms, none found. 10. **Fixes for the generator's diagnostics offered in
+   an editor**, from 3DEngine's `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic
+   the behavior and command generators report, so an editor offers the mend. Done at `d328fdc3`,
+   `BevyCSharp.CodeFixes` fixing the five diagnostics with one clear mend and naming the seven
+   without, packed beside the generator. Open again in full on 2026-10-18 at 22:25 (Decision 38).
+   Every gap closes, in the table's order by how many rows each holds, with the examples each
+   unlocks written in its batch and the comparison kept green; the gaps that need a crate, Feathers'
+   widgets and theming, the three camera controllers, the dev tools' three and the system
+   information, wait each on the owner's word typed in the working session (Decisions 11, 12 and 20,
+   AGENTS.md), which the working session asks for by name as it reaches them, taking the gaps that
+   need no word first; the remote protocol's three stay as they are. One batch a commit, as before,
+   and the bridge is complete when the table names no gap but those the owner declines. Read against
+   `triage.tsv` on 2026-10-18 at 22:31, no gap is left that needs no word. The twenty rows not
+   written whole are the camera controllers, five (free, pan and the three pan-orbit); Feathers,
+   four (counter, gallery, virtual keyboard, number input); the dev tools, four (the FPS overlay,
+   the infinite grid, the scene viewer, debug picking); the system information, one
+   (`log_diagnostics` in part); `web_asset`, one; `compressed_image_saver`, one; the system fonts,
+   three, which Decision 13 declined; and `monitor_info` in part, which waits on the owner's
+   screens; the remote protocol's rows stay as they are. None of the crates needed is in
+   `native/Cargo.lock`, and each was measured in a scratch copy of `native/` by adding the Bevy
+   feature to the editor profile and comparing the lock's package names: the camera controllers add
+   one package, `bevy_camera_controller`; Feathers one; the dev tools one; the system information
+   five, `sysinfo` with `ntapi`, `winapi` and its two shims; `web_asset` over https twenty-one,
+   `ureq` with `rustls`, `ring`, `webpki` and the platform verifiers, where plain http adds five and
+   the example loads an https address; and `compressed_image_saver` seventeen, `ctt` with its five
+   compressors, some prebuilt, `ispc-build-utils`, `zstd` and `fast_image_resize`. The working
+   session asks the owner for each word by name in the table's order, the camera controllers first,
+   then Feathers and the dev tools, then the system information, `web_asset` and the image saver,
+   and bridges each as its word is typed; item 29's list, which is reading and no mend, may be
+   written meanwhile.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -762,9 +787,20 @@ from [SHARED.md](SHARED.md).
     earth's, and the guide's line. Done at `c5f19669` as asked, with a curve or a picture for a
     falloff or a phase left named in TODO.md.
 
+29. **What was mended for the time being is mended for good (Decision 38), after item 4.** The owner
+    said on 2026-10-18 at 22:25 that once everything is bridged, the places where a mend of the
+    moment stands are to be mended fundamentally. First the list, in a commit of its own: every
+    place mended for the time being, in the code's comments and TODO.md's lines, and in the
+    verdicts' mends that bounded, listed or said a figure in place of removing a cause, among them
+    the captures' differ lines whose cause is the machine's clock, the pictures taken on a bridge
+    without Solari for the `dfg_lut` it enables, the measure's rooms and the figures said and not
+    judged, each with what the lasting mend is and what it costs, written here as parts of this
+    item, and the reviewer orders them with the owner. Then each part is mended on its own, one
+    commit a part, measured where a figure moves (N 3.5).
+
 ## Verdicts
 
-Verdicts 3 and 14 to 30 are settled: 15, the native job's four targets, on the pack run of
+Verdicts 3 and 14 to 31 are settled: 15, the native job's four targets, on the pack run of
 `292eead2` on 2026-10-16, all six built after winit became a dependency on every system at that
 commit; 14, the memory guard's figure on Windows, on the push of `d2a20b6a` on 2026-10-17, the third
 green Windows suite in a row after the private bytes were read at `292eead2`; and on the pack run of
@@ -792,7 +828,9 @@ pictures, on the same pack run, the four shards passing with the two pictures ta
 terabyte, said the reading beside the limit and took a process as a child only where it was not
 created before its parent; and 30, the visibility test on a headless build, on the same push, the
 three suites passing with the test asking the three ids on every build and the remarks saying every
-build has the component.
+build has the component; and 31, the capture of `async_compute` on the machine's clock, on the pack
+run of `6bac018b` on 2026-10-18, the four shards passing with the example listed beside its sibling
+at a room measured on the runner and in a container of its image.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -806,22 +844,6 @@ build has the component.
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
-
-31. **The capture of `async_compute` depends on the machine's clock, as its listed sibling's does,
-    and is not listed.** On the pack run of `c5f19669`, 2026-10-18, the first capture shard failed
-    on one picture, `async_compute` differing in 2.6 percent of its pixels where 2 is allowed,
-    within x 409 to 870 and y 128 to 590, where its cubes stand; the pack runs of `b4d45938` and
-    `b50890cb` passed it within the 2. The example's 216 tasks each wait 0.05 to 5 seconds of
-    `Task.Delay` on the machine's clock, the wait drawn from `Random.Shared` unseeded
-    (`async_compute.cs:41`), and a cube appears when its task is done, so how many stand in the
-    frame taken, the hundred and twentieth at a sixtieth of a second each, is however many waits
-    ended in the machine's time that frame took to reach, more on a slow device, which is the cause
-    `build/captures-differ.txt:8` names for `async_channel_pattern`, its sibling written the same
-    way with waits of 2 to 8 seconds, listed at 0.25 with 14.9 percent measured. The mend is one
-    thing. `async_compute` is listed beside its sibling with the same reason and a room measured on
-    lavapipe (N 3.5), this run's 2.6 percent and what a run of the capture in the working machine's
-    container gives, and nothing in the example changes, since waits on the machine's clock, random,
-    are what Bevy's example does. Settled when the four shards pass on a pack run.
 
 ## Decisions
 
@@ -1057,5 +1079,13 @@ build has the component.
     great deal of, the knob, the plumbing and a long way among them, items 25 here, 29 in 3DEngine
     and 5 in Voxel-Sandbox; a word in its literal sense stays, a box a joint leaves or a road to a
     signpost.
+
+38. **Development resumes, the bridge completed first and the mends of the moment made lasting
+    after.** On 2026-10-18 at 22:25, with every run green and the pack run of `6bac018b` whole green
+    with its package, the owner resumed development on both engines and the voxel game. For this
+    engine the order is to bridge everything first, every gap of item 4, and then to mend
+    fundamentally what was mended for the time being (item 29). The gaps that need a crate still
+    wait on the owner's word typed in the working session (Decisions 11, 12 and 20); the verdicts
+    open are mended as they come.
 
 ## Replies

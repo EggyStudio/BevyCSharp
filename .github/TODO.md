@@ -575,6 +575,102 @@ follows the README's install in a container holding the SDK and the package alon
 (`build/readme-walk.sh`), the first program taken out of README.md, so a README that stops working
 fails there.
 
+### Mended for the time being
+
+Some places hold a mend of the moment, a share allowed, a case listed or a figure said, where the
+cause is still there. Each is below with the mend that removes its cause and what that costs. They
+are taken once the gaps of Bevy's examples above are bridged, one a commit, each measured where a
+figure moves.
+
+- **Two examples wait on the machine's clock.** `async_channel_pattern` and `async_compute` wait in
+  `Task.Delay` for random spans of the machine's time, so how many cubes stand in the frame a
+  capture takes turns on how fast the device reached it, and `build/captures-differ.txt` allows
+  each a share of its pixels for that. A `TimeProvider` that follows the app's clock, its timers
+  fired from the frame loop, given to `Task.Delay` in both, with their generators seeded under the
+  workflow as `alien_cake_addict`'s is, ends every wait in the same frame of the capture's set
+  clock on every device, and both lines come off. It costs a public type with its tests, timers
+  checked every frame, and two examples that wait on the app's time where Bevy's wait on the
+  system's, which agree while the app keeps its own pace.
+- **Two examples start their animation when their model has loaded.** `animated_mesh_control` and
+  `many_foxes` play from the frame their glTF file finishes loading, which a slow device reaches in
+  fewer frames, so the pose captured differs and the list allows it. A set clock that stands still
+  while an asset the app asked for is loading counts every example's frames from its loads, and
+  both lines come off. It costs a hold in the bridge's clock with a way for `./bcs open` to ask for
+  it, and every capture taken again, since each example's frame then falls after its loads.
+- **Two examples place their sprites at random.** `many_sprites` and `many_animated_sprites` place
+  and color each sprite from an unseeded generator as Bevy's do, so each run draws another crowd.
+  Seeding them under the workflow as `alien_cake_addict` is seeded takes both lines off, at the cost
+  of two examples that differ from Bevy's under the workflow and two pictures taken again.
+- **Lavapipe draws some of the meshlet bunnies.** `many_meshlet_materials` drawn on Mesa's software
+  device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
+  Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
+  draws them all, a cost outside this repository whose size is known only once it is traced.
+- **Solari's capture holds the device's timings and its noise.** `solari` is path traced with few
+  samples a pixel, whose noise falls otherwise on each device, and its panel shows the device's
+  timings, so the list allows it. Leaving the timings out of the panel under the workflow leaves the
+  noise alone, a difference between devices of the kind the shared tolerance is for, and the line
+  comes down to what the noise measures. It costs a panel that hides a figure when captured, and a
+  room measured again.
+- **Pictures are taken on a bridge without Solari.** Solari turns on Bevy's `dfg_lut`, which lights
+  the specular term of every standard material from a table where a bridge without it uses a fitted
+  curve, so a picture is taken on a `--render` bridge as the runner's is (BUILDING.md), and one
+  taken on a bridge with Solari differs. Turning `dfg_lut` on in the render profile lights every
+  bridge from the same table, and since the image features it needs, `ktx2` and `zstd_rust`, are on
+  already, the lock does not change. Any bridge then takes a picture, and BUILDING.md's paragraph
+  comes out. It costs a small table in every render bridge, every 3D picture with a standard
+  material taken again and read, the pixel tests that measure a lit color measured again, and games
+  on the package lit a little otherwise than before, which the release notes say.
+- **The runner's software device leaves six examples uncompared.** The pack run captures on Mesa
+  25.2's lavapipe with a `--render` bridge, so `clustered_decals`, which ends that lavapipe with a
+  fault in its rasterizer, and the five examples drawn with meshlets or Solari are captured as words
+  and compared with nothing (`build/capture-example.sh`), and the decal tests skip there. A newer
+  Mesa on the runner, as Mesa 26.2's lavapipe draws the decals, with a bridge built with
+  `--meshlet --solari` for those five, compares all six. It costs the jobs run in a container
+  of a newer image or Mesa from an archive outside Ubuntu's, a second Linux bridge built in the
+  native job, and those six measured first on that Mesa.
+- **The soak says two figures and does not judge them.** `build/soak-check.py` judges the live
+  bytes after a full collection and says the heap's size and the runtime's managed total beside
+  them, since the collector leaves the heap larger or smaller as it sees fit and the managed total
+  reads below zero with pinned objects. A compacting collection in `memory.collect` leaves the heap
+  at what is alive and what pinned objects hold apart, which can be judged as the live bytes are,
+  and the managed total leaves the answer, which says nothing the live bytes do not. It costs a
+  longer pause at each of a soak's collections, and an answer to `memory` without a field it had,
+  with docs/tools.md.
+- **The soak's rooms but one are not measured.** `build/soak-check.py` gives each figure a room
+  past the first half's most, and only the live bytes' is written with the soaks it was measured
+  from. The process's resident size, the bridge's bytes and blocks, the entities and the handles
+  are given theirs without one. Measuring each from soaks of the three programs, and reading the
+  process's own private memory without the graphics driver's mappings, lets each room shrink to
+  what its figure moves by. It costs a set of soaks of the three programs on lavapipe, and a process
+  figure read otherwise on each platform.
+- **The drive reads a swing at its farthest.** `build/drive-feature-test.sh` judges the moving
+  platform and the elevator by the farthest each took the player over a wait, since the feature
+  test runs freely between two commands and a software device puts fewer frames between them, so
+  each command lands at another point of the swing. A clock that stands still between commands,
+  advancing only while a wait runs, lands each command on the same frame on every device, and the
+  check reads where the player stands after a set count of frames. It costs a hold in the bridge's
+  clock that `./bcs` drives, the one the loads above need, and the drive's other checks read again
+  under it.
+- **Bevy's anisotropy under a normal prepass is pinned, not mended.** An anisotropic material
+  drawn forward on a camera with a normal prepass comes out blown white, because Bevy's shader
+  skips the tangent frame anisotropy needs (`AnisotropyPrepassTests`, whose second test fails once
+  Bevy mends it). Bevy's `pbr_fragment` shader building the tangent frame wherever anisotropy is
+  on mends it at its cause. It costs a change to Bevy, which is not reported from this repository,
+  or else a patched shader in the bridge that has to follow every release of Bevy's.
+- **Two helpers stand where Bevy's crates would.** `FreeCamera` and the radio buttons of
+  `Widgets.cs` in `BevyCSharp.Examples`, listed in `build/examples-on-package.sh`, stand where
+  Bevy's free camera controller and Feathers' radio would, and go with those gaps above at their
+  cost.
+- **The norm's lists.** The places listed in `build/norm/` as not yet keeping a rule of NORM.md are
+  mended as a batch next touches each, in a commit that moves code alone, and the lists only get
+  shorter.
+- **The pack run's limits are sized for a software device.** The runner has no graphics card, so
+  the capture shards, the game job and each capture command's wait are sized for lavapipe's few
+  frames a second (`.github/workflows/build.yml`, `build/capture-example.sh`), and the drive's swing
+  and the six uncompared examples above follow from it. A runner with a graphics card removes the
+  cause beneath them. It costs GitHub's runners with a GPU, paid by the minute, and every capture
+  then compared between two graphics cards, with lavapipe kept for the suite.
+
 ### Build and release
 
 - **The portable build is not cached.** `Swatinem/rust-cache` now names the directory
