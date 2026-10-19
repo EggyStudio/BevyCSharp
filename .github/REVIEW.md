@@ -23,7 +23,8 @@ norm tests pass, the README at 283 lines of prose. Right. Next part (g), whose r
 the lookup table is built with the lock byte-identical and three profiles clean, the 373 captures
 being taken on it. At 22:45 the owner wrote that the release notes include everything and append to
 the older ones (Decision 41, item 32), and at 22:51, quoting nuget.org's notice, that the pack run
-publishes through trusted publishing (Decision 42, item 33).
+publishes through trusted publishing (Decision 42, item 33), and at 22:57 that the reviewer starts
+the pack runs as well (Decision 43), the first with publish on once item 33 is in.
 
 Before it, `b68da75c` came, item 31 and nothing else, 344 files, the README's head one centered
 block of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first
@@ -1302,6 +1303,16 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     package owner and repository owner `EggyStudio`, the workflow `pack.yml`, the push scope and its
     pattern, the feed holding the permanent GitHub ids of the owner and the repository for its
     check.
+
+43. **The reviewer starts the pack runs when a package is due.** The owner wrote at 22:57 on
+    2026-10-19 that the reviewer is to start the pack workflow as well, so no one waits on the owner
+    for a package and a pack can be made and checked as part of the review; the owner's GitHub login
+    on the machine carries the workflow scope, and the pushes were the reviewer's since 22:20. So
+    the reviewer starts a pack run with publish on when a package is due: after a commit the voxel
+    game or the other engine waits on, after the mend of a fault that made a pack run red, at the
+    end of a day's batch, and when the owner asks, and not after every commit, since a pack run is
+    more than an hour of the runners' time; the run is read and recorded as every run is, and its
+    package is what the game and the other engine take.
 
 ## Replies
 
