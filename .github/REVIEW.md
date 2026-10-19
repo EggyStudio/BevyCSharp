@@ -22,7 +22,8 @@ nuget.org, as the block's other lines do; the documents' links, the table script
 norm tests pass, the README at 283 lines of prose. Right. Next part (g), whose render bridge with
 the lookup table is built with the lock byte-identical and three profiles clean, the 373 captures
 being taken on it. At 22:45 the owner wrote that the release notes include everything and append to
-the older ones (Decision 41, item 32).
+the older ones (Decision 41, item 32), and at 22:51, quoting nuget.org's notice, that the pack run
+publishes through trusted publishing (Decision 42, item 33).
 
 Before it, `b68da75c` came, item 31 and nothing else, 344 files, the README's head one centered
 block of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first
@@ -945,6 +946,17 @@ from [SHARED.md](SHARED.md).
     says which commit the notes start from. Held by a test of the script on a scratch history with a
     feed answer given to it, and read on the next package's page. One commit, after part (g).
 
+33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
+    42).** The pack job gains the identity token's write permission beside its read of the contents,
+    a step with the feed's login action, `NuGet/login@v1`, given the nuget.org user name the policy
+    belongs to, `EggyStudio` unless the owner says another, which answers a short-lived key, and the
+    push step takes that key where it took the secret, the input's description and the head comment
+    saying the run publishes through the trusted publisher policy and needs no secret, BUILDING.md's
+    publishing section saying the same with the policy's values, workflow `pack.yml`, no environment
+    and the package pattern; the step with the secret goes. Checked by a pack run with publish on,
+    whose push the feed accepts, the first the owner starts after the policy stands. One commit,
+    with item 32 after part (g), the pattern `BevyCSharp*`.
+
 ## Verdicts
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -1276,6 +1288,16 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     record of the latest version names, read by the pack run from the feed, and the whole minor's
     where the feed answers nothing or lists no version of the minor, a reader of the notes being
     told what changed since what they could have had.
+
+42. **The pack workflow publishes through nuget.org's trusted publishing.** On 2026-10-19 at 22:51
+    the owner, making nuget.org's trusted publisher policies for the two repositories, quoted the
+    feed's notice that API keys are strongly discouraged for automated publishing and trusted
+    publishing is the way for GitHub Actions, and so the pack workflow publishes through it: the
+    policy on nuget.org names the package owner `EggyStudio`, the repository owner `EggyStudio`, the
+    repository, the workflow file `pack.yml`, no environment, the push scope and the package
+    pattern, and the pack job proves it is that workflow with its identity token, takes a
+    short-lived key from the feed's login action and pushes with it, so no key is stored in the
+    repository.
 
 ## Replies
 
