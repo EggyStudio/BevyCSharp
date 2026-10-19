@@ -562,6 +562,10 @@ enum Bevy.ButtonLine : int
 enum Bevy.ButtonState : int
   Pressed = 0
   Released = 1
+enum Bevy.ButtonVariant : int
+  Normal = 0
+  Plain = 2
+  Primary = 1
 enum Bevy.CameraControllers : int
   Free = 1
   None = 0
@@ -973,6 +977,7 @@ sealed class Bevy.Config
   bool AudioWithoutWindow { get; set; }
   bool DesktopTitleBar { get; set; }
   bool FailFastOnSystemException { get; set; }
+  bool Feathers { get; set; }
   bool GpuTimings { get; set; }
   bool Gui { get; set; }
   bool Headless { get; set; }
@@ -1721,6 +1726,169 @@ readonly struct Bevy.Entity : IEquatable<Entity>
   static bool op_Inequality(Entity left, Entity right)
   uint Generation { get; }
   uint Index { get; }
+static class Bevy.Feathers
+  static Entity Button(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
+  static Entity Caption(Entity parent, string text)
+  static Entity Checkbox(Entity parent, string caption)
+  static Entity Label(Entity parent, string text)
+  static Entity LabelDim(Entity parent, string text)
+  static Entity LabelSmall(Entity parent, string text)
+  static Entity Radio(Entity parent, string caption)
+  static Entity Slider(Entity parent, float min = 0f, float max = 1f)
+  static Entity ToggleSwitch(Entity parent)
+  static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
+  static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background)
+static class Bevy.FeathersToken
+  const string ButtonBg = "feathers.button.bg"
+  const string ButtonBgDisabled = "feathers.button.bg.disabled"
+  const string ButtonBgHover = "feathers.button.bg.hover"
+  const string ButtonBgPressed = "feathers.button.bg.pressed"
+  const string ButtonPlainBg = "feathers.button.plain.bg"
+  const string ButtonPlainBgDisabled = "feathers.button.plain.bg.disabled"
+  const string ButtonPlainBgHover = "feathers.button.plain.bg.hover"
+  const string ButtonPlainBgPressed = "feathers.button.plain.bg.pressed"
+  const string ButtonPrimaryBg = "feathers.button.primary.bg"
+  const string ButtonPrimaryBgDisabled = "feathers.button.primary.bg.disabled"
+  const string ButtonPrimaryBgHover = "feathers.button.primary.bg.hover"
+  const string ButtonPrimaryBgPressed = "feathers.button.primary.bg.pressed"
+  const string ButtonPrimaryText = "feathers.button.primary.txt"
+  const string ButtonPrimaryTextDisabled = "feathers.button.primary.txt.disabled"
+  const string ButtonText = "feathers.button.txt"
+  const string ButtonTextDisabled = "feathers.button.txt.disabled"
+  const string CheckboxBg = "feathers.checkbox.bg"
+  const string CheckboxBgChecked = "feathers.checkbox.bg.checked"
+  const string CheckboxBgCheckedDisabled = "feathers.checkbox.bg.checked.disabled"
+  const string CheckboxBgCheckedHover = "feathers.checkbox.bg.checked.hover"
+  const string CheckboxBgCheckedPressed = "feathers.checkbox.bg.checked.pressed"
+  const string CheckboxBgDisabled = "feathers.checkbox.bg.disabled"
+  const string CheckboxBgHover = "feathers.checkbox.bg.hover"
+  const string CheckboxBgPressed = "feathers.checkbox.bg.pressed"
+  const string CheckboxBorder = "feathers.checkbox.border"
+  const string CheckboxBorderChecked = "feathers.checkbox.border.checked"
+  const string CheckboxBorderCheckedDisabled = "feathers.checkbox.border.checked.disabled"
+  const string CheckboxBorderCheckedHover = "feathers.checkbox.border.checked.hover"
+  const string CheckboxBorderCheckedPressed = "feathers.checkbox.border.checked.pressed"
+  const string CheckboxBorderDisabled = "feathers.checkbox.border.disabled"
+  const string CheckboxBorderHover = "feathers.checkbox.border.hover"
+  const string CheckboxBorderPressed = "feathers.checkbox.border.pressed"
+  const string CheckboxMark = "feathers.checkbox.mark"
+  const string CheckboxMarkDisabled = "feathers.checkbox.mark.disabled"
+  const string CheckboxText = "feathers.checkbox.text"
+  const string CheckboxTextDisabled = "feathers.checkbox.text.disabled"
+  const string ColorPlaneBg = "feathers.colorplane.bg"
+  const string DialogBg = "feathers.dialog.bg"
+  const string DialogBorder = "feathers.dialog.border"
+  const string DialogHeaderBg = "feathers.dialog.header.bg"
+  const string DialogHeaderText = "feathers.dialog.header.text"
+  const string DialogText = "feathers.dialog.text"
+  const string FocusRing = "feathers.focus.ring"
+  const string GroupBg = "feathers.group.bg"
+  const string GroupBorder = "feathers.group.border"
+  const string GroupHeaderText = "feathers.group.header.text"
+  const string ListrowBg = "feathers.listrow.bg"
+  const string ListrowBgHover = "feathers.listrow.bg.hover"
+  const string ListrowBgSelected = "feathers.listrow.bg.selected"
+  const string ListrowText = "feathers.listrow.text"
+  const string ListrowTextDisabled = "feathers.listrow.text.disabled"
+  const string MenuBg = "feathers.menu.bg"
+  const string MenuBorder = "feathers.menu.border"
+  const string MenuitemBg = "feathers.menuitem.bg"
+  const string MenuitemBgFocused = "feathers.menuitem.bg.focused"
+  const string MenuitemBgHover = "feathers.menuitem.bg.hover"
+  const string MenuitemBgPressed = "feathers.menuitem.bg.pressed"
+  const string MenuitemText = "feathers.menuitem.text"
+  const string MenuitemTextDisabled = "feathers.menuitem.text.disabled"
+  const string PaneBodyBg = "feathers.pane.body.bg"
+  const string PaneHeaderBg = "feathers.pane.header.bg"
+  const string PaneHeaderBorder = "feathers.pane.header.border"
+  const string PaneHeaderDivider = "feathers.pane.header.divider"
+  const string PaneHeaderText = "feathers.pane.header.text"
+  const string RadioBg = "feathers.radio.bg"
+  const string RadioBgChecked = "feathers.radio.bg.checked"
+  const string RadioBgCheckedDisabled = "feathers.radio.bg.checked.disabled"
+  const string RadioBgCheckedHover = "feathers.radio.bg.checked.hover"
+  const string RadioBgCheckedPressed = "feathers.radio.bg.checked.pressed"
+  const string RadioBgDisabled = "feathers.radio.bg.disabled"
+  const string RadioBgHover = "feathers.radio.bg.hover"
+  const string RadioBgPressed = "feathers.radio.bg.pressed"
+  const string RadioBorder = "feathers.radio.border"
+  const string RadioBorderChecked = "feathers.radio.border.checked"
+  const string RadioBorderCheckedDisabled = "feathers.radio.border.checked.disabled"
+  const string RadioBorderCheckedHover = "feathers.radio.border.checked.hover"
+  const string RadioBorderCheckedPressed = "feathers.radio.border.checked.pressed"
+  const string RadioBorderDisabled = "feathers.radio.border.disabled"
+  const string RadioBorderHover = "feathers.radio.border.hover"
+  const string RadioBorderPressed = "feathers.radio.border.pressed"
+  const string RadioMark = "feathers.radio.mark"
+  const string RadioMarkDisabled = "feathers.radio.mark.disabled"
+  const string RadioMarkHover = "feathers.radio.mark.hover"
+  const string RadioMarkPressed = "feathers.radio.mark.pressed"
+  const string RadioText = "feathers.radio.text"
+  const string RadioTextDisabled = "feathers.radio.text.disabled"
+  const string ScrollbarBg = "feathers.scrollbar.bg"
+  const string ScrollbarThumb = "feathers.scrollbar.thumb"
+  const string ScrollbarThumbHover = "feathers.scrollbar.thumb.hover"
+  const string SliderBar = "feathers.slider.bar"
+  const string SliderBarDisabled = "feathers.slider.bar.disabled"
+  const string SliderBarHover = "feathers.slider.bar.hover"
+  const string SliderBarPressed = "feathers.slider.bar.pressed"
+  const string SliderBg = "feathers.slider.bg"
+  const string SliderBgDisabled = "feathers.slider.bg.disabled"
+  const string SliderBgHover = "feathers.slider.bg.hover"
+  const string SliderBgPressed = "feathers.slider.bg.pressed"
+  const string SliderText = "feathers.slider.text"
+  const string SliderTextDisabled = "feathers.slider.text.disabled"
+  const string SubpaneBodyBg = "feathers.subpane.body.bg"
+  const string SubpaneBodyBorder = "feathers.subpane.body.border"
+  const string SubpaneHeaderBg = "feathers.subpane.header.bg"
+  const string SubpaneHeaderBorder = "feathers.subpane.header.border"
+  const string SubpaneHeaderText = "feathers.subpane.header.text"
+  const string SwitchBg = "feathers.switch.bg"
+  const string SwitchBgChecked = "feathers.switch.bg.checked"
+  const string SwitchBgCheckedDisabled = "feathers.switch.bg.checked.disabled"
+  const string SwitchBgCheckedHover = "feathers.switch.bg.checked.hover"
+  const string SwitchBgCheckedPressed = "feathers.switch.bg.checked.pressed"
+  const string SwitchBgDisabled = "feathers.switch.bg.disabled"
+  const string SwitchBgHover = "feathers.switch.bg.hover"
+  const string SwitchBgPressed = "feathers.switch.bg.pressed"
+  const string SwitchBorder = "feathers.switch.border"
+  const string SwitchBorderChecked = "feathers.switch.border.checked"
+  const string SwitchBorderCheckedDisabled = "feathers.switch.border.checked.disabled"
+  const string SwitchBorderCheckedHover = "feathers.switch.border.checked.hover"
+  const string SwitchBorderCheckedPressed = "feathers.switch.border.checked.pressed"
+  const string SwitchBorderDisabled = "feathers.switch.border.disabled"
+  const string SwitchBorderHover = "feathers.switch.border.hover"
+  const string SwitchBorderPressed = "feathers.switch.border.hover.pressed"
+  const string SwitchSlideBg = "feathers.switch.slide.bg"
+  const string SwitchSlideBgChecked = "feathers.switch.slide.bg.checked"
+  const string SwitchSlideBgCheckedDisabled = "feathers.switch.slide.bg.checked.disabled"
+  const string SwitchSlideBgCheckedHover = "feathers.switch.slide.bg.checked.hover"
+  const string SwitchSlideBgCheckedPressed = "feathers.switch.slide.bg.checked.pressed"
+  const string SwitchSlideBgDisabled = "feathers.switch.slide.bg.disabled"
+  const string SwitchSlideBgHover = "feathers.switch.slide.bg.hover"
+  const string SwitchSlideBgPressed = "feathers.switch.slide.bg.pressed"
+  const string SwitchSlideBorder = "feathers.switch.slide.border"
+  const string SwitchSlideBorderChecked = "feathers.switch.slide.border.checked"
+  const string SwitchSlideBorderCheckedDisabled = "feathers.switch.slide.border.checked.disabled"
+  const string SwitchSlideBorderCheckedHover = "feathers.switch.slide.border.checked.hover"
+  const string SwitchSlideBorderCheckedPressed = "feathers.switch.slide.border.checked.pressed"
+  const string SwitchSlideBorderDisabled = "feathers.switch.slide.border.disabled"
+  const string SwitchSlideBorderHover = "feathers.switch.slide.border.hover"
+  const string SwitchSlideBorderPressed = "feathers.switch.slide.border.pressed"
+  const string TextDim = "feathers.text.dim"
+  const string TextInputBg = "feathers.textinput.bg"
+  const string TextInputCursor = "feathers.textinput.cursor"
+  const string TextInputLabelBg = "feathers.textinput.label.bg"
+  const string TextInputSelection = "feathers.textinput.selection"
+  const string TextInputSelectionUnfocused = "feathers.textinput.selection.unfocused"
+  const string TextInputText = "feathers.textinput.text"
+  const string TextInputTextDisabled = "feathers.textinput.text.disabled"
+  const string TextInputWAxis = "feathers.textinput.axis.w"
+  const string TextInputXAxis = "feathers.textinput.axis.x"
+  const string TextInputYAxis = "feathers.textinput.axis.y"
+  const string TextInputZAxis = "feathers.textinput.axis.z"
+  const string TextMain = "feathers.text.main"
+  const string WindowBg = "feathers.window.bg"
 readonly struct Bevy.FieldCondition : IEquatable<FieldCondition>
   FieldCondition(string Field, string? Value = null, bool Not = false)
   bool Equals(FieldCondition other)
@@ -2613,6 +2781,7 @@ struct Bevy.Interop.NativeConfig
   uint CameraControllers
   uint DesktopTitleBar
   uint Diagnostics
+  uint Feathers
   uint GpuTimings
   uint Gui
   uint HasPosition
@@ -2688,6 +2857,11 @@ struct Bevy.Interop.NativeEffectsConfig
   uint MotionBlurSamples
 struct Bevy.Interop.NativeEffectsConfig.<CompensationCurve>e__FixedBuffer
   float FixedElementField
+struct Bevy.Interop.NativeFeathersProps
+  float Max
+  float Min
+  int Corners
+  int Variant
 struct Bevy.Interop.NativeFocusedKey
   NativeFocusedKey.<Logical>e__FixedBuffer Logical
   NativeFocusedKey.<Text>e__FixedBuffer Text
@@ -4707,6 +4881,10 @@ readonly struct Bevy.Reflected.ActiveDescendantRef : IReflectedComponent<ActiveD
   Entity? Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::list::ActiveDescendant"
+readonly struct Bevy.Reflected.ActiveRowOutlineRef : IReflectedComponent<ActiveRowOutlineRef>, IReflectedWrapper<ActiveRowOutlineRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::listview::ActiveRowOutline"
 abstract class Bevy.Reflected.AlphaMode2dValue : IEquatable<AlphaMode2dValue>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -4752,6 +4930,10 @@ sealed class Bevy.Reflected.AlphaMode2dValue.Opaque : AlphaMode2dValue, IEquatab
   protected override bool PrintMembers(StringBuilder builder)
   static bool op_Equality(AlphaMode2dValue.Opaque? left, AlphaMode2dValue.Opaque? right)
   static bool op_Inequality(AlphaMode2dValue.Opaque? left, AlphaMode2dValue.Opaque? right)
+readonly struct Bevy.Reflected.AlphaPatternRef : IReflectedComponent<AlphaPatternRef>, IReflectedWrapper<AlphaPatternRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::alpha_pattern::AlphaPattern"
 readonly struct Bevy.Reflected.AmbientLightRef : IReflectedComponent<AmbientLightRef>, IReflectedWrapper<AmbientLightRef>
   Color Color { get; set; }
   Entity Entity { get; }
@@ -4990,6 +5172,21 @@ readonly struct Bevy.Reflected.ButtonRef : IReflectedComponent<ButtonRef>, IRefl
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::button::Button"
+struct Bevy.Reflected.ButtonVariantMirror : IMirroredLayout, INativeComponent
+  ButtonVariantMirror.ButtonVariant Value
+enum Bevy.Reflected.ButtonVariantMirror.ButtonVariant : byte
+  Normal = 0
+  Plain = 2
+  Primary = 1
+readonly struct Bevy.Reflected.ButtonVariantRef : IReflectedComponent<ButtonVariantRef>, IReflectedWrapper<ButtonVariantRef>
+  ButtonVariantRef.ValueVariant Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::button::ButtonVariant"
+enum Bevy.Reflected.ButtonVariantRef.ValueVariant : int
+  Normal = 0
+  Plain = 2
+  Primary = 1
 abstract class Bevy.Reflected.CalculatedClip : IEquatable<CalculatedClip>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -5190,6 +5387,18 @@ readonly struct Bevy.Reflected.CheckableRef : IReflectedComponent<CheckableRef>,
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui::interaction_states::Checkable"
+readonly struct Bevy.Reflected.CheckboxFrameRef : IReflectedComponent<CheckboxFrameRef>, IReflectedWrapper<CheckboxFrameRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::checkbox::CheckboxFrame"
+readonly struct Bevy.Reflected.CheckboxMarkRef : IReflectedComponent<CheckboxMarkRef>, IReflectedWrapper<CheckboxMarkRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::checkbox::CheckboxMark"
+readonly struct Bevy.Reflected.CheckboxOutlineRef : IReflectedComponent<CheckboxOutlineRef>, IReflectedWrapper<CheckboxOutlineRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::checkbox::CheckboxOutline"
 readonly struct Bevy.Reflected.CheckboxRef : IReflectedComponent<CheckboxRef>, IReflectedWrapper<CheckboxRef>
   Entity Entity { get; }
   bool Remove()
@@ -5418,6 +5627,35 @@ readonly struct Bevy.Reflected.ClusteredDecalRef : IReflectedComponent<Clustered
   bool Remove()
   const string TypePath = "bevy_light::cluster::ClusteredDecal"
   uint Tag { get; set; }
+struct Bevy.Reflected.ColorChannelMirror : IMirroredLayout, INativeComponent
+  ColorChannelMirror.ColorChannel Value
+enum Bevy.Reflected.ColorChannelMirror.ColorChannel : byte
+  Alpha = 6
+  Blue = 2
+  Green = 1
+  HslHue = 3
+  HslLightness = 5
+  HslSaturation = 4
+  OkhslHue = 7
+  OkhslLightness = 9
+  OkhslSaturation = 8
+  Red = 0
+readonly struct Bevy.Reflected.ColorChannelRef : IReflectedComponent<ColorChannelRef>, IReflectedWrapper<ColorChannelRef>
+  ColorChannelRef.ValueVariant Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::ColorChannel"
+enum Bevy.Reflected.ColorChannelRef.ValueVariant : int
+  Alpha = 6
+  Blue = 2
+  Green = 1
+  HslHue = 3
+  HslLightness = 5
+  HslSaturation = 4
+  OkhslHue = 7
+  OkhslLightness = 9
+  OkhslSaturation = 8
+  Red = 0
 readonly struct Bevy.Reflected.ColorGradingRef : IReflectedComponent<ColorGradingRef>, IReflectedWrapper<ColorGradingRef>
   Entity Entity { get; }
   FloatRange GlobalMidtonesRange { get; set; }
@@ -5443,6 +5681,70 @@ readonly struct Bevy.Reflected.ColorGradingRef : IReflectedComponent<ColorGradin
   float ShadowsGamma { get; set; }
   float ShadowsLift { get; set; }
   float ShadowsSaturation { get; set; }
+readonly struct Bevy.Reflected.ColorInputValueRef : IReflectedComponent<ColorInputValueRef>, IReflectedWrapper<ColorInputValueRef>
+  Color Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_input::ColorInputValue"
+struct Bevy.Reflected.ColorPlaneDragStateMirror : IMirroredLayout, INativeComponent
+  bool Value
+readonly struct Bevy.Reflected.ColorPlaneDragStateRef : IReflectedComponent<ColorPlaneDragStateRef>, IReflectedWrapper<ColorPlaneDragStateRef>
+  Entity Entity { get; }
+  bool Remove()
+  bool Value { get; set; }
+  const string TypePath = "bevy_feathers::controls::color_plane::ColorPlaneDragState"
+readonly struct Bevy.Reflected.ColorPlaneInnerRef : IReflectedComponent<ColorPlaneInnerRef>, IReflectedWrapper<ColorPlaneInnerRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_plane::ColorPlaneInner"
+readonly struct Bevy.Reflected.ColorPlaneThumbRef : IReflectedComponent<ColorPlaneThumbRef>, IReflectedWrapper<ColorPlaneThumbRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_plane::ColorPlaneThumb"
+struct Bevy.Reflected.ColorPlaneValueMirror : IMirroredLayout, INativeComponent
+  Vec3 Value
+readonly struct Bevy.Reflected.ColorPlaneValueRef : IReflectedComponent<ColorPlaneValueRef>, IReflectedWrapper<ColorPlaneValueRef>
+  Entity Entity { get; }
+  Vec3 Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_plane::ColorPlaneValue"
+struct Bevy.Reflected.ColorSliderMirror : IMirroredLayout, INativeComponent
+  ColorSliderMirror.ColorChannel Channel
+enum Bevy.Reflected.ColorSliderMirror.ColorChannel : byte
+  Alpha = 6
+  Blue = 2
+  Green = 1
+  HslHue = 3
+  HslLightness = 5
+  HslSaturation = 4
+  OkhslHue = 7
+  OkhslLightness = 9
+  OkhslSaturation = 8
+  Red = 0
+readonly struct Bevy.Reflected.ColorSliderRef : IReflectedComponent<ColorSliderRef>, IReflectedWrapper<ColorSliderRef>
+  ColorSliderRef.ChannelVariant Channel { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::ColorSlider"
+enum Bevy.Reflected.ColorSliderRef.ChannelVariant : int
+  Alpha = 6
+  Blue = 2
+  Green = 1
+  HslHue = 3
+  HslLightness = 5
+  HslSaturation = 4
+  OkhslHue = 7
+  OkhslLightness = 9
+  OkhslSaturation = 8
+  Red = 0
+readonly struct Bevy.Reflected.ColorSliderThumbRef : IReflectedComponent<ColorSliderThumbRef>, IReflectedWrapper<ColorSliderThumbRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::ColorSliderThumb"
+readonly struct Bevy.Reflected.ColorSliderTrackRef : IReflectedComponent<ColorSliderTrackRef>, IReflectedWrapper<ColorSliderTrackRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::ColorSliderTrack"
 sealed class Bevy.Reflected.ColorStop : IEquatable<ColorStop>
   Color Color { get; init; }
   ColorStop(Color Color, Val Point, float Hint)
@@ -5455,6 +5757,51 @@ sealed class Bevy.Reflected.ColorStop : IEquatable<ColorStop>
   static bool op_Equality(ColorStop? left, ColorStop? right)
   static bool op_Inequality(ColorStop? left, ColorStop? right)
   void Deconstruct(out Color Color, out Val Point, out float Hint)
+readonly struct Bevy.Reflected.ColorSwatchFgRef : IReflectedComponent<ColorSwatchFgRef>, IReflectedWrapper<ColorSwatchFgRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch::ColorSwatchFg"
+readonly struct Bevy.Reflected.ColorSwatchGridCellRingRef : IReflectedComponent<ColorSwatchGridCellRingRef>, IReflectedWrapper<ColorSwatchGridCellRingRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch_grid::ColorSwatchGridCellRing"
+readonly struct Bevy.Reflected.ColorSwatchValueRef : IReflectedComponent<ColorSwatchValueRef>, IReflectedWrapper<ColorSwatchValueRef>
+  Color Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch::ColorSwatchValue"
+readonly struct Bevy.Reflected.ColorWheelDragStateRef : IReflectedComponent<ColorWheelDragStateRef>, IReflectedWrapper<ColorWheelDragStateRef>
+  ColorWheelSegment? Segment { get; set; }
+  Entity Entity { get; }
+  bool Dragging { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::ColorWheelDragState"
+readonly struct Bevy.Reflected.ColorWheelInnerRef : IReflectedComponent<ColorWheelInnerRef>, IReflectedWrapper<ColorWheelInnerRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::ColorWheelInner"
+readonly struct Bevy.Reflected.ColorWheelRingThumbRef : IReflectedComponent<ColorWheelRingThumbRef>, IReflectedWrapper<ColorWheelRingThumbRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::ColorWheelRingThumb"
+enum Bevy.Reflected.ColorWheelSegment : int
+  Ring = 0
+  Triangle = 1
+readonly struct Bevy.Reflected.ColorWheelTriangleThumbRef : IReflectedComponent<ColorWheelTriangleThumbRef>, IReflectedWrapper<ColorWheelTriangleThumbRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::ColorWheelTriangleThumb"
+struct Bevy.Reflected.ColorWheelValueMirror : IMirroredLayout, INativeComponent
+  float Blackness
+  float Hue
+  float Whiteness
+readonly struct Bevy.Reflected.ColorWheelValueRef : IReflectedComponent<ColorWheelValueRef>, IReflectedWrapper<ColorWheelValueRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::ColorWheelValue"
+  float Blackness { get; set; }
+  float Hue { get; set; }
+  float Whiteness { get; set; }
 enum Bevy.Reflected.CompassOctantValue : int
   East = 2
   North = 0
@@ -5956,6 +6303,19 @@ readonly struct Bevy.Reflected.DistanceFogRef : IReflectedComponent<DistanceFogR
   bool Remove()
   const string TypePath = "bevy_pbr::fog::DistanceFog"
   float DirectionalLightExponent { get; set; }
+readonly struct Bevy.Reflected.DragStateRef : IReflectedComponent<DragStateRef>, IReflectedWrapper<DragStateRef>
+  DragStateRef.ModeVariant Mode { get; set; }
+  Entity Entity { get; }
+  NumberInputValue BaseValue { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::DragState"
+  double DragSpeed { get; set; }
+  double ValueOffset { get; set; }
+  float MaxDistance { get; set; }
+enum Bevy.Reflected.DragStateRef.ModeVariant : int
+  Editing = 2
+  Idle = 0
+  Scrubbing = 1
 readonly struct Bevy.Reflected.DynamicSkinnedMeshBoundsRef : IReflectedComponent<DynamicSkinnedMeshBoundsRef>, IReflectedWrapper<DynamicSkinnedMeshBoundsRef>
   Entity Entity { get; }
   bool Remove()
@@ -6025,6 +6385,175 @@ readonly struct Bevy.Reflected.ExposureRef : IReflectedComponent<ExposureRef>, I
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::camera::Exposure"
+readonly struct Bevy.Reflected.FeathersButtonRef : IReflectedComponent<FeathersButtonRef>, IReflectedWrapper<FeathersButtonRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::button::FeathersButton"
+readonly struct Bevy.Reflected.FeathersCheckboxRef : IReflectedComponent<FeathersCheckboxRef>, IReflectedWrapper<FeathersCheckboxRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::checkbox::FeathersCheckbox"
+readonly struct Bevy.Reflected.FeathersColorInputRef : IReflectedComponent<FeathersColorInputRef>, IReflectedWrapper<FeathersColorInputRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_input::FeathersColorInput"
+struct Bevy.Reflected.FeathersColorPlaneMirror : IMirroredLayout, INativeComponent
+  FeathersColorPlaneMirror.FeathersColorPlane Value
+enum Bevy.Reflected.FeathersColorPlaneMirror.FeathersColorPlane : byte
+  GreenBlue = 2
+  HueLightness = 4
+  HueSaturation = 3
+  OkhslHueLightness = 6
+  OkhslHueSaturation = 5
+  RedBlue = 1
+  RedGreen = 0
+readonly struct Bevy.Reflected.FeathersColorPlaneRef : IReflectedComponent<FeathersColorPlaneRef>, IReflectedWrapper<FeathersColorPlaneRef>
+  Entity Entity { get; }
+  FeathersColorPlaneRef.ValueVariant Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_plane::FeathersColorPlane"
+enum Bevy.Reflected.FeathersColorPlaneRef.ValueVariant : int
+  GreenBlue = 2
+  HueLightness = 4
+  HueSaturation = 3
+  OkhslHueLightness = 6
+  OkhslHueSaturation = 5
+  RedBlue = 1
+  RedGreen = 0
+readonly struct Bevy.Reflected.FeathersColorSliderRef : IReflectedComponent<FeathersColorSliderRef>, IReflectedWrapper<FeathersColorSliderRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::FeathersColorSlider"
+readonly struct Bevy.Reflected.FeathersColorSwatchEmptyCellRef : IReflectedComponent<FeathersColorSwatchEmptyCellRef>, IReflectedWrapper<FeathersColorSwatchEmptyCellRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchEmptyCell"
+readonly struct Bevy.Reflected.FeathersColorSwatchGridCellRef : IReflectedComponent<FeathersColorSwatchGridCellRef>, IReflectedWrapper<FeathersColorSwatchGridCellRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGridCell"
+struct Bevy.Reflected.FeathersColorSwatchGridMirror : IMirroredLayout, INativeComponent
+  float OpaqueColorPercentage
+  uint SizeX
+  uint SizeY
+readonly struct Bevy.Reflected.FeathersColorSwatchGridRef : IReflectedComponent<FeathersColorSwatchGridRef>, IReflectedWrapper<FeathersColorSwatchGridRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid"
+  float OpaqueColorPercentage { get; set; }
+  uint SizeX { get; set; }
+  uint SizeY { get; set; }
+readonly struct Bevy.Reflected.FeathersColorSwatchRef : IReflectedComponent<FeathersColorSwatchRef>, IReflectedWrapper<FeathersColorSwatchRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_swatch::FeathersColorSwatch"
+readonly struct Bevy.Reflected.FeathersColorWheelRef : IReflectedComponent<FeathersColorWheelRef>, IReflectedWrapper<FeathersColorWheelRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_wheel::FeathersColorWheel"
+readonly struct Bevy.Reflected.FeathersDialogBodyRef : IReflectedComponent<FeathersDialogBodyRef>, IReflectedWrapper<FeathersDialogBodyRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersDialogBody"
+readonly struct Bevy.Reflected.FeathersDialogCloseRef : IReflectedComponent<FeathersDialogCloseRef>, IReflectedWrapper<FeathersDialogCloseRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersDialogClose"
+readonly struct Bevy.Reflected.FeathersDialogFooterRef : IReflectedComponent<FeathersDialogFooterRef>, IReflectedWrapper<FeathersDialogFooterRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersDialogFooter"
+readonly struct Bevy.Reflected.FeathersDialogHeaderRef : IReflectedComponent<FeathersDialogHeaderRef>, IReflectedWrapper<FeathersDialogHeaderRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersDialogHeader"
+readonly struct Bevy.Reflected.FeathersDialogRef : IReflectedComponent<FeathersDialogRef>, IReflectedWrapper<FeathersDialogRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersDialog"
+readonly struct Bevy.Reflected.FeathersDisclosureToggleRef : IReflectedComponent<FeathersDisclosureToggleRef>, IReflectedWrapper<FeathersDisclosureToggleRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::disclosure_toggle::FeathersDisclosureToggle"
+readonly struct Bevy.Reflected.FeathersFloatingDialogRef : IReflectedComponent<FeathersFloatingDialogRef>, IReflectedWrapper<FeathersFloatingDialogRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::dialog::FeathersFloatingDialog"
+readonly struct Bevy.Reflected.FeathersListRowRef : IReflectedComponent<FeathersListRowRef>, IReflectedWrapper<FeathersListRowRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::listview::FeathersListRow"
+readonly struct Bevy.Reflected.FeathersListViewRef : IReflectedComponent<FeathersListViewRef>, IReflectedWrapper<FeathersListViewRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::listview::FeathersListView"
+readonly struct Bevy.Reflected.FeathersMenuButtonRef : IReflectedComponent<FeathersMenuButtonRef>, IReflectedWrapper<FeathersMenuButtonRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenuButton"
+readonly struct Bevy.Reflected.FeathersMenuDividerRef : IReflectedComponent<FeathersMenuDividerRef>, IReflectedWrapper<FeathersMenuDividerRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenuDivider"
+readonly struct Bevy.Reflected.FeathersMenuItemRef : IReflectedComponent<FeathersMenuItemRef>, IReflectedWrapper<FeathersMenuItemRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenuItem"
+readonly struct Bevy.Reflected.FeathersMenuPopupRef : IReflectedComponent<FeathersMenuPopupRef>, IReflectedWrapper<FeathersMenuPopupRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenuPopup"
+readonly struct Bevy.Reflected.FeathersMenuRef : IReflectedComponent<FeathersMenuRef>, IReflectedWrapper<FeathersMenuRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenu"
+readonly struct Bevy.Reflected.FeathersMenuToolButtonRef : IReflectedComponent<FeathersMenuToolButtonRef>, IReflectedWrapper<FeathersMenuToolButtonRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::menu::FeathersMenuToolButton"
+readonly struct Bevy.Reflected.FeathersNumberInputRef : IReflectedComponent<FeathersNumberInputRef>, IReflectedWrapper<FeathersNumberInputRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::FeathersNumberInput"
+readonly struct Bevy.Reflected.FeathersRadioRef : IReflectedComponent<FeathersRadioRef>, IReflectedWrapper<FeathersRadioRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::radio::FeathersRadio"
+struct Bevy.Reflected.FeathersScrollbarMirror : IMirroredLayout, INativeComponent
+  bool AutoHide
+readonly struct Bevy.Reflected.FeathersScrollbarRef : IReflectedComponent<FeathersScrollbarRef>, IReflectedWrapper<FeathersScrollbarRef>
+  Entity Entity { get; }
+  bool AutoHide { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::scrollbar::FeathersScrollbar"
+readonly struct Bevy.Reflected.FeathersScrollbarThumbRef : IReflectedComponent<FeathersScrollbarThumbRef>, IReflectedWrapper<FeathersScrollbarThumbRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::scrollbar::FeathersScrollbarThumb"
+readonly struct Bevy.Reflected.FeathersSelectRef : IReflectedComponent<FeathersSelectRef>, IReflectedWrapper<FeathersSelectRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::select::FeathersSelect"
+readonly struct Bevy.Reflected.FeathersSliderRef : IReflectedComponent<FeathersSliderRef>, IReflectedWrapper<FeathersSliderRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::slider::FeathersSlider"
+readonly struct Bevy.Reflected.FeathersTextInputContainerRef : IReflectedComponent<FeathersTextInputContainerRef>, IReflectedWrapper<FeathersTextInputContainerRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::text_input::FeathersTextInputContainer"
+readonly struct Bevy.Reflected.FeathersTextInputRef : IReflectedComponent<FeathersTextInputRef>, IReflectedWrapper<FeathersTextInputRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::text_input::FeathersTextInput"
+readonly struct Bevy.Reflected.FeathersToggleSwitchRef : IReflectedComponent<FeathersToggleSwitchRef>, IReflectedWrapper<FeathersToggleSwitchRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::toggle_switch::FeathersToggleSwitch"
+readonly struct Bevy.Reflected.FeathersToolButtonRef : IReflectedComponent<FeathersToolButtonRef>, IReflectedWrapper<FeathersToolButtonRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::button::FeathersToolButton"
 readonly struct Bevy.Reflected.FixedNodeRef : IReflectedComponent<FixedNodeRef>, IReflectedWrapper<FixedNodeRef>
   Entity Entity { get; }
   bool Remove()
@@ -6033,6 +6562,10 @@ enum Bevy.Reflected.FocusCauseValue : int
   Auto = 2
   Navigated = 0
   Pressed = 1
+readonly struct Bevy.Reflected.FocusIndicatorRef : IReflectedComponent<FocusIndicatorRef>, IReflectedWrapper<FocusIndicatorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::focus::FocusIndicator"
 struct Bevy.Reflected.FocusPolicyMirror : IMirroredLayout, INativeComponent
   FocusPolicyMirror.FocusPolicy Value
 enum Bevy.Reflected.FocusPolicyMirror.FocusPolicy : byte
@@ -6046,6 +6579,10 @@ readonly struct Bevy.Reflected.FocusPolicyRef : IReflectedComponent<FocusPolicyR
 enum Bevy.Reflected.FocusPolicyRef.ValueVariant : int
   Block = 0
   Pass = 1
+readonly struct Bevy.Reflected.FocusWithinIndicatorRef : IReflectedComponent<FocusWithinIndicatorRef>, IReflectedWrapper<FocusWithinIndicatorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::focus::FocusWithinIndicator"
 readonly struct Bevy.Reflected.FogConfigRef : IReflectedComponent<FogConfigRef>, IReflectedWrapper<FogConfigRef>
   Color DayColor { get; set; }
   Color NightColor { get; set; }
@@ -6850,6 +7387,17 @@ readonly struct Bevy.Reflected.IndependentSkyboxRef : IReflectedComponent<Indepe
   const string TypePath = "bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox"
   float Brightness { get; set; }
   long SkyboxCamOrderOffset { get; set; }
+readonly struct Bevy.Reflected.InheritableFontRef : IReflectedComponent<InheritableFontRef>, IReflectedWrapper<InheritableFontRef>
+  AssetHandle Font { get; set; }
+  Entity Entity { get; }
+  FontSize FontSize { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::font_styles::InheritableFont"
+  ushort Weight { get; set; }
+readonly struct Bevy.Reflected.InheritableThemeTextColorRef : IReflectedComponent<InheritableThemeTextColorRef>, IReflectedWrapper<InheritableThemeTextColorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::InheritableThemeTextColor"
 readonly struct Bevy.Reflected.InheritedVisibilityRef : IReflectedComponent<InheritedVisibilityRef>, IReflectedWrapper<InheritedVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -8197,6 +8745,107 @@ readonly struct Bevy.Reflected.NotShadowReceiverRef : IReflectedComponent<NotSha
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_light::NotShadowReceiver"
+readonly struct Bevy.Reflected.NumberInputDecrementRef : IReflectedComponent<NumberInputDecrementRef>, IReflectedWrapper<NumberInputDecrementRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputDecrement"
+readonly struct Bevy.Reflected.NumberInputIncrementRef : IReflectedComponent<NumberInputIncrementRef>, IReflectedWrapper<NumberInputIncrementRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputIncrement"
+struct Bevy.Reflected.NumberInputPrecisionMirror : IMirroredLayout, INativeComponent
+  int Value
+readonly struct Bevy.Reflected.NumberInputPrecisionRef : IReflectedComponent<NumberInputPrecisionRef>, IReflectedWrapper<NumberInputPrecisionRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputPrecision"
+  int Value { get; set; }
+struct Bevy.Reflected.NumberInputStepMirror : IMirroredLayout, INativeComponent
+  double Value
+readonly struct Bevy.Reflected.NumberInputStepRef : IReflectedComponent<NumberInputStepRef>, IReflectedWrapper<NumberInputStepRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputStep"
+  double Value { get; set; }
+readonly struct Bevy.Reflected.NumberInputUnitsRef : IReflectedComponent<NumberInputUnitsRef>, IReflectedWrapper<NumberInputUnitsRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputUnits"
+abstract class Bevy.Reflected.NumberInputValue : IEquatable<NumberInputValue>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected NumberInputValue(NumberInputValue original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(NumberInputValue? left, NumberInputValue? right)
+  static bool op_Inequality(NumberInputValue? left, NumberInputValue? right)
+  virtual bool Equals(NumberInputValue? other)
+sealed class Bevy.Reflected.NumberInputValue.F32 : NumberInputValue, IEquatable<NumberInputValue.F32>, IEquatable<NumberInputValue>
+  F32(float Value)
+  bool Equals(NumberInputValue.F32? other)
+  bool Equals(NumberInputValue? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(NumberInputValue.F32? left, NumberInputValue.F32? right)
+  static bool op_Inequality(NumberInputValue.F32? left, NumberInputValue.F32? right)
+  void Deconstruct(out float Value)
+sealed class Bevy.Reflected.NumberInputValue.F64 : NumberInputValue, IEquatable<NumberInputValue.F64>, IEquatable<NumberInputValue>
+  F64(double Value)
+  bool Equals(NumberInputValue.F64? other)
+  bool Equals(NumberInputValue? other)
+  double Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(NumberInputValue.F64? left, NumberInputValue.F64? right)
+  static bool op_Inequality(NumberInputValue.F64? left, NumberInputValue.F64? right)
+  void Deconstruct(out double Value)
+sealed class Bevy.Reflected.NumberInputValue.I32 : NumberInputValue, IEquatable<NumberInputValue.I32>, IEquatable<NumberInputValue>
+  I32(int Value)
+  bool Equals(NumberInputValue.I32? other)
+  bool Equals(NumberInputValue? other)
+  int Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(NumberInputValue.I32? left, NumberInputValue.I32? right)
+  static bool op_Inequality(NumberInputValue.I32? left, NumberInputValue.I32? right)
+  void Deconstruct(out int Value)
+sealed class Bevy.Reflected.NumberInputValue.I64 : NumberInputValue, IEquatable<NumberInputValue.I64>, IEquatable<NumberInputValue>
+  I64(long Value)
+  bool Equals(NumberInputValue.I64? other)
+  bool Equals(NumberInputValue? other)
+  long Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(NumberInputValue.I64? left, NumberInputValue.I64? right)
+  static bool op_Inequality(NumberInputValue.I64? left, NumberInputValue.I64? right)
+  void Deconstruct(out long Value)
+struct Bevy.Reflected.NumberInputWrapMirror : IMirroredLayout, INativeComponent
+  NumberInputWrapMirror.NumberInputWrap Value
+enum Bevy.Reflected.NumberInputWrapMirror.NumberInputWrap : byte
+  NoWrap = 0
+  Wrap = 1
+readonly struct Bevy.Reflected.NumberInputWrapRef : IReflectedComponent<NumberInputWrapRef>, IReflectedWrapper<NumberInputWrapRef>
+  Entity Entity { get; }
+  NumberInputWrapRef.ValueVariant Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::number_input::NumberInputWrap"
+enum Bevy.Reflected.NumberInputWrapRef.ValueVariant : int
+  NoWrap = 0
+  Wrap = 1
 readonly struct Bevy.Reflected.ObservedByRef : IReflectedComponent<ObservedByRef>, IReflectedWrapper<ObservedByRef>
   Entity Entity { get; }
   IReadOnlyList<Entity> Value { get; set; }
@@ -8209,6 +8858,13 @@ readonly struct Bevy.Reflected.OcclusionCullingRef : IReflectedComponent<Occlusi
 enum Bevy.Reflected.OptionBlendState : int
   None = 0
   Some = 1
+struct Bevy.Reflected.OptionIndexMirror : IMirroredLayout, INativeComponent
+  ulong Value
+readonly struct Bevy.Reflected.OptionIndexRef : IReflectedComponent<OptionIndexRef>, IReflectedWrapper<OptionIndexRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::select::OptionIndex"
+  ulong Value { get; set; }
 abstract class Bevy.Reflected.OptionTextureAtlas : IEquatable<OptionTextureAtlas>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -8919,6 +9575,14 @@ readonly struct Bevy.Reflected.RadioGroupRef : IReflectedComponent<RadioGroupRef
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::radio::RadioGroup"
+readonly struct Bevy.Reflected.RadioMarkRef : IReflectedComponent<RadioMarkRef>, IReflectedWrapper<RadioMarkRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::radio::RadioMark"
+readonly struct Bevy.Reflected.RadioOutlineRef : IReflectedComponent<RadioOutlineRef>, IReflectedWrapper<RadioOutlineRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::radio::RadioOutline"
 readonly struct Bevy.Reflected.RayCastBackfacesRef : IReflectedComponent<RayCastBackfacesRef>, IReflectedWrapper<RayCastBackfacesRef>
   Entity Entity { get; }
   bool Remove()
@@ -9306,6 +9970,11 @@ readonly struct Bevy.Reflected.ScrollbarDragStateRef : IReflectedComponent<Scrol
   bool Remove()
   const string TypePath = "bevy_ui_widgets::scrollbar::ScrollbarDragState"
   float DragOrigin { get; set; }
+readonly struct Bevy.Reflected.ScrollbarGutterRef : IReflectedComponent<ScrollbarGutterRef>, IReflectedWrapper<ScrollbarGutterRef>
+  Entity Entity { get; }
+  Val Value { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::scrollbar::ScrollbarGutter"
 readonly struct Bevy.Reflected.ScrollbarRef : IReflectedComponent<ScrollbarRef>, IReflectedWrapper<ScrollbarRef>
   Entity Entity { get; }
   Entity Target { get; set; }
@@ -9336,6 +10005,10 @@ readonly struct Bevy.Reflected.SelectAllOnFocusRef : IReflectedComponent<SelectA
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_widgets::text_input::SelectAllOnFocus"
+readonly struct Bevy.Reflected.SelectCaptionRef : IReflectedComponent<SelectCaptionRef>, IReflectedWrapper<SelectCaptionRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::select::SelectCaption"
 readonly struct Bevy.Reflected.SelectedTabRef : IReflectedComponent<SelectedTabRef>, IReflectedWrapper<SelectedTabRef>
   Entity Entity { get; }
   Entity? Value { get; set; }
@@ -9483,6 +10156,11 @@ sealed class Bevy.Reflected.SliceScaleMode.Tile : SliceScaleMode, IEquatable<Sli
   static bool op_Equality(SliceScaleMode.Tile? left, SliceScaleMode.Tile? right)
   static bool op_Inequality(SliceScaleMode.Tile? left, SliceScaleMode.Tile? right)
   void Deconstruct(out float StretchValue)
+readonly struct Bevy.Reflected.SliderBaseColorRef : IReflectedComponent<SliderBaseColorRef>, IReflectedWrapper<SliderBaseColorRef>
+  Color Value { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::color_slider::SliderBaseColor"
 struct Bevy.Reflected.SliderDragStateMirror : IMirroredLayout, INativeComponent
   bool Dragging
   float Offset
@@ -9551,6 +10229,10 @@ readonly struct Bevy.Reflected.SliderValueRef : IReflectedComponent<SliderValueR
   bool Remove()
   const string TypePath = "bevy_ui_widgets::slider::SliderValue"
   float Value { get; set; }
+readonly struct Bevy.Reflected.SliderValueTextRef : IReflectedComponent<SliderValueTextRef>, IReflectedWrapper<SliderValueTextRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::slider::SliderValueText"
 struct Bevy.Reflected.SmaaMirror : IMirroredLayout, INativeComponent
   SmaaMirror.SmaaPreset Preset
 enum Bevy.Reflected.SmaaMirror.SmaaPreset : byte
@@ -10115,6 +10797,26 @@ sealed class Bevy.Reflected.TextureAtlas : IEquatable<TextureAtlas>
   static bool op_Inequality(TextureAtlas? left, TextureAtlas? right)
   ulong Index { get; init; }
   void Deconstruct(out ulong Index)
+readonly struct Bevy.Reflected.ThemeBackgroundColorRef : IReflectedComponent<ThemeBackgroundColorRef>, IReflectedWrapper<ThemeBackgroundColorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::ThemeBackgroundColor"
+readonly struct Bevy.Reflected.ThemeBorderColorRef : IReflectedComponent<ThemeBorderColorRef>, IReflectedWrapper<ThemeBorderColorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::ThemeBorderColor"
+readonly struct Bevy.Reflected.ThemeTextColorRef : IReflectedComponent<ThemeTextColorRef>, IReflectedWrapper<ThemeTextColorRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::ThemeTextColor"
+readonly struct Bevy.Reflected.ThemedIconRef : IReflectedComponent<ThemedIconRef>, IReflectedWrapper<ThemedIconRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::display::icon::ThemedIcon"
+readonly struct Bevy.Reflected.ThemedTextRef : IReflectedComponent<ThemedTextRef>, IReflectedWrapper<ThemedTextRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::ThemedText"
 readonly struct Bevy.Reflected.ThunderConfigRef : IReflectedComponent<ThunderConfigRef>, IReflectedWrapper<ThunderConfigRef>
   AssetHandle? Sound { get; set; }
   Color FlashColor { get; set; }
@@ -10226,6 +10928,10 @@ readonly struct Bevy.Reflected.TimeVirtualRef : IReflectedComponent<TimeVirtualR
   float DeltaSecs { get; set; }
   float ElapsedSecs { get; set; }
   float ElapsedSecsWrapped { get; set; }
+readonly struct Bevy.Reflected.ToggleSwitchSlideRef : IReflectedComponent<ToggleSwitchSlideRef>, IReflectedWrapper<ToggleSwitchSlideRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::controls::toggle_switch::ToggleSwitchSlide"
 enum Bevy.Reflected.Tonemapping : int
   AcesFitted = 4
   AgX = 5
@@ -10406,6 +11112,10 @@ readonly struct Bevy.Reflected.UiTargetCameraRef : IReflectedComponent<UiTargetC
   Entity Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::ui_node::UiTargetCamera"
+readonly struct Bevy.Reflected.UiThemeRef : IReflectedComponent<UiThemeRef>, IReflectedWrapper<UiThemeRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_feathers::theme::UiTheme"
 readonly struct Bevy.Reflected.UiTransformRef : IReflectedComponent<UiTransformRef>, IReflectedWrapper<UiTransformRef>
   Entity Entity { get; }
   Val TranslationX { get; set; }
@@ -11425,6 +12135,17 @@ readonly struct Bevy.RotationGesture : IEquatable<RotationGesture>
   static bool op_Equality(RotationGesture left, RotationGesture right)
   static bool op_Inequality(RotationGesture left, RotationGesture right)
   void Deconstruct(out float Delta)
+enum Bevy.RoundedCorners : int
+  All = 1
+  Bottom = 8
+  BottomLeft = 5
+  BottomRight = 4
+  Left = 9
+  None = 0
+  Right = 7
+  Top = 6
+  TopLeft = 2
+  TopRight = 3
 sealed class Bevy.RunIfAttribute : Attribute
   RunIfAttribute(string memberName)
   string MemberName { get; }
@@ -12233,6 +12954,11 @@ enum Bevy.TextureWrap : int
   Clamp = 0
   Mirror = 2
   Repeat = 1
+enum Bevy.ThemedPart : int
+  Background = 0
+  Border = 1
+  OwnText = 3
+  Text = 2
 readonly struct Bevy.TileData : IEquatable<TileData>
   Color Color { get; init; }
   TileData(ushort TilesetIndex, Color Color, bool Visible, TileOrientation Orientation)

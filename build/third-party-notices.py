@@ -48,7 +48,7 @@ TAKEN = [
 # A line that names who holds a work, rather than one of a license's own lines about copyright,
 # such as Apache's "copyright owner" or a template's "[yyyy]".
 HOLDER = re.compile(r"^\W{0,3}(copyright|\(c\)|©)\b", re.I)
-NOT_A_HOLDER = re.compile(r"notice|owner|\[yyyy\]|\{yyyy\}|<year>|holders? and contributors|statement|license|the above", re.I)
+NOT_A_HOLDER = re.compile(r"notice|owner|copyright holder|\[yyyy\]|\{yyyy\}|<year>|holders? and contributors|statement|license|the above", re.I)
 
 # What a text is, by words only its license has, for a crate that carries no text of its own.
 KINDS = [

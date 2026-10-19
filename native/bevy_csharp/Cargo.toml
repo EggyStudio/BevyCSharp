@@ -206,6 +206,10 @@ render = [
     "bevy/pan_orbit_gizmo",
     "dep:bevy_camera_controller",
     "bevy_camera_controller/bevy_reflect",
+    # Feathers, Bevy's styled widgets over its headless ones, with their dark theme and the fonts,
+    # icons and shaders they draw with, embedded. One crate of plain Rust over the interface Bevy
+    # draws already, whose plugins an app asks for (`Config.Feathers`).
+    "bevy/bevy_feathers",
     # A pointer drawn from an image of the game's own, as Bevy's window_settings shows one. The
     # image and asset crates and wgpu's types it reaches are in the profile already, so it adds
     # nothing to the build.

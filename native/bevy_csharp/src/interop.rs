@@ -289,6 +289,9 @@ pub struct BcsConfig {
     /// Bevy's camera controllers to add, a bit each (`camera_controllers::FREE`, `PAN` and
     /// `PAN_ORBIT`). Needs the `render` feature. Each moves only a camera given its component.
     pub camera_controllers: u32,
+    /// Non-zero to add Feathers, Bevy's styled widgets, with its dark theme. Needs the `render`
+    /// feature. See `feathers`.
+    pub feathers: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

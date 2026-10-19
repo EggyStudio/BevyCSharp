@@ -475,6 +475,32 @@ wrapper inserts it again, which is how Bevy means them to change. A widget is wo
 through Bevy's picking, which an offscreen run points at through the image it draws into, so a test
 or `./bcs command input.click` works a widget there as a hand would.
 
+Feathers, Bevy's styled widgets, draws the same widgets in the colors of Bevy's dark theme. The app
+asks for it with `Config.Feathers`, and each control is spawned under a node, its caption given as
+text, and reports what is done with it as the widget it is drawn over does:
+
+<!-- compiled with:
+Config config = new();
+Entity row = default;
+var count = 0;
+-->
+```csharp
+config.Feathers = true;                                   // before the app is built
+
+Feathers.ThemeColor(row, FeathersToken.WindowBg);         // a node of the game's in the theme
+var plus = Feathers.Button(row, "+1", ButtonVariant.Primary);
+ctx.Ecs.Observe<Activate>(plus, _ => count++);
+
+var mute = Feathers.Checkbox(row, "Mute");
+Ui.SelfUpdate(mute, UiWidgetKind.Checkbox);               // checked as it is clicked
+var volume = Feathers.Slider(row, min: 0f, max: 100f);
+```
+
+`Feathers.ThemeColor` colors a node of the game's own by one of `FeathersToken`'s tokens, Bevy's
+names for the parts of a control the theme colors, so it follows the theme as the controls do.
+`Feathers.Caption` and the labels are text in the theme's font, which `Ui.SetText` changes. Bevy
+writes Feathers for tools and editors, and a game's own interface is drawn with the plain widgets.
+
 ---
 
 Before this, [Gizmos](gizmos.md).

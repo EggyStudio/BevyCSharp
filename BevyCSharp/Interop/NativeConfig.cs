@@ -104,4 +104,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Bevy's camera controllers to add, a bit each, as <see cref="Bevy.CameraControllers"/> numbers them.</summary>
     public uint CameraControllers;
+
+    /// <summary>Non-zero to add Feathers, Bevy's styled widgets, with its dark theme.</summary>
+    public uint Feathers;
 }

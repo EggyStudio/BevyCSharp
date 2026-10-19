@@ -388,6 +388,7 @@ internal static class Catalog
         new("directional_navigation_overrides", DirectionalNavigationOverrides.Build),
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("editable_text_filter", EditableTextFilter.Build),
+        new("feathers_counter", FeathersCounter.Build, FeathersCounter.Configure),
         new("flex_layout", FlexLayout.Build),
         new("ghost_nodes", GhostNodes.Build),
         new("grid", Grid.Build),

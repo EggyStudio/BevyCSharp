@@ -357,6 +357,11 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // each idle until a camera is given its component.
             crate::camera_controllers::install(&mut app, config.camera_controllers);
 
+            // Feathers, Bevy's styled widgets, which its default plugins leave out, with its theme.
+            if config.feathers != 0 {
+                crate::feathers::install(&mut app);
+            }
+
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();
             app.init_resource::<crate::events::FileDrops>();

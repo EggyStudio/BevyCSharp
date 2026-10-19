@@ -1302,6 +1302,22 @@ static void Set(Entity node, GridSettings settings);            // Lays a node's
 static void Place(Entity node, GridPlacement placement);        // Places one child on its parent's grid
 ```
 
+### `Feathers`
+
+```csharp
+static Entity Button(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All);  // A button with its caption, Bevy's FeathersButton
+static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All);  // A square button for an icon or a symbol, Bevy's FeathersToolButton
+static Entity Checkbox(Entity parent, string caption);          // A checkbox with its caption beside it, Bevy's FeathersCheckbox
+static Entity Radio(Entity parent, string caption);             // A radio button with its caption beside it, Bevy's FeathersRadio, one of those under a node carrying Bevy's RadioGroup
+static Entity ToggleSwitch(Entity parent);                      // A toggle switch, Bevy's FeathersToggleSwitch, a checkbox drawn as a switch
+static Entity Slider(Entity parent, float min = 0f, float max = 1f);  // A slider showing its value, Bevy's FeathersSlider, starting at its least value
+static Entity Caption(Entity parent, string text);              // Text in the theme's font and color, as a control's caption is, Bevy's caption
+static Entity Label(Entity parent, string text);                // A label beside a control, Bevy's label
+static Entity LabelDim(Entity parent, string text);             // A label in the theme's dimmer text, Bevy's label_dim
+static Entity LabelSmall(Entity parent, string text);           // A smaller label, Bevy's label_small
+static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background);  // Colors a node of the game's own from the theme, by one of FeathersToken's tokens, so it follows the theme as the controls do
+```
+
 ### `Length`
 
 ```csharp

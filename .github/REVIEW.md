@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2b355276`, item 29's list and nothing else, a section of TODO.md. "Mended for the
+Reviewed up to `670ecf2c`, item 4's first batch and nothing else, 63 files, the ABI 285 to 286, the
+lock gaining `bevy_camera_controller` alone. The render profile turns on Bevy's free, pan and
+pan-orbit cameras and the pan-orbit gizmo, the bridge naming the crate for its reflection feature,
+which pulls no crate in; `camera_controllers.rs` adds the plugins an app asks for through
+`Config.CameraControllers`, the free and pan cameras crossing as one plain struct each with keys as
+places in the key table and set, get, remove, state and Bevy's own text, the pan-orbit camera, its
+anchor indicator and its skybox reflected so the schema dump gains the three components and nothing
+else, a dolly zoom and a look-to sending Bevy's two messages, Bevy's example input mapping ported
+under its notice, and a viewport test of the bridge's own since Bevy's answers no without a primary
+window, as an offscreen run has none. The managed side gains the settings and state types with
+twelve calls on `Render` and the guide's section; the five examples are written, the table at 363
+written and 13 missing, the pan-orbit ones loading a model fetched at a pinned commit where Bevy's
+load it over https; the sixteen examples that flew the examples' own free camera take Bevy's with
+Bevy's settings, and that helper is gone from the tree and from the package script's list, item 29's
+part (k) half done, SHARED.md's row on the package saying one helper where it said two, the
+reviewer's; the notices credit the model and the Solari example's scene, loaded uncredited until
+this commit, both under a license asking credit. Five camera controller tests hold the mirrors'
+layout, the defaults byte for byte Bevy's, the free camera moving while a key is held and not once
+off, the pan camera's zoom key and the pan-orbit camera's look-to and orbit under a drag offscreen;
+the five pictures are taken on the GPU with a render bridge as BUILDING.md has it. Checked were
+`cargo check` on the four profiles with Windows and macOS on the editor's with Solari, `cargo test`
+headless and on render, the headless bridge with the changed tests under B 2, the examples on a
+fresh package, and the whole suite on the editor bridge with meshlets and Solari, 1,493 passed and 3
+skipped of 1,496. Right. Next Feathers, the dev tools, the system information, the declined rows
+marked and `monitor_info`, one batch a commit, and the owner's push.
+
+Before it, `2b355276` came, item 29's list and nothing else, a section of TODO.md. "Mended for the
 time being" stands between Testing and Build and release with thirteen parts, each saying where a
 mend of the moment stands, the mend that removes its cause and what that costs: the two async
 examples waiting on the machine's clock, the two whose animation starts at the end of a load, the
@@ -56,24 +82,6 @@ gap left that needs no word, the twenty rows left each waiting on the owner's wo
 declined, or on the owner's screens, the crates measured in a scratch copy of the manifests and said
 under the item. Next the owner's words typed in the working session, the camera controllers first,
 each gap bridged as its word comes, and item 29's list meanwhile.
-
-Before it, `3d147d49` came, Verdict 30's mend and nothing else, 6 files. The visibility test holds
-the three components to resolving on every build, each id asked and each mirror verified against the
-bridge's reading on the way, and the round trip through the mesh stays behind the renderer, the test
-named for both; the three remarks in `NativeComponents.cs`, the paragraph of `Visibility.cs` and the
-guide's say every build has the component, a headless one through Bevy's world serialization, and
-that a render build draws by it, claiming nothing of what a headless world computes. Checked on the
-working machine, as B 2 asks, were the headless bridge built in the container with
-`NativeComponentTests` and `ReflectedLayoutTests` run on it, 16 passed and 6 skipped of 22, the
-visibility test's three resolutions passing before its skip at the renderer, and the editor bridge
-with meshlets and Solari with the whole suite, 1,488 passed and 3 skipped of 1,491. Right. The owner
-pushed `3d147d49` at 11:28 on 2026-10-18 and started its pack run at 11:34, before Verdict 31's
-line. The push run ended at 11:42 whole green, the three suites passing every test, 1,221 on Linux,
-1,048 on Windows and 1,041 on macOS, which settles Verdict 30 and, the Windows suite the third green
-in a row, Verdict 29. On the pack run of `c5f19669` the four shards ended with `async_compute` the
-one picture apart, the play, storm and README jobs passed, and the feature test's course was still
-running at 11:48. The pack run of `c5f19669` ended at 11:52 with the feature test's course passing,
-red on its three suites and the first shard alone.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -362,7 +370,9 @@ from [SHARED.md](SHARED.md).
    crate, Feathers', the dev tools' and the system information's come in, the https asset loading
    and the image saver are declined and their rows stay missing as declined, and `monitor_info` is
    captured on virtual monitors in a headless display and never on the owner's screens. The batches
-   go in that order, one a commit.
+   go in that order, one a commit. The camera controllers came at `670ecf2c` on 2026-10-19, five
+   rows written, the table at 363 written and 13 missing, the lock gaining the one crate, the ABI
+   286, the five examples captured and the examples' own free camera gone for Bevy's.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -819,7 +829,9 @@ from [SHARED.md](SHARED.md).
     distribution image with a newer Mesa and a Linux bridge built with meshlets and Solari, no
     runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
     anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
-    earlier decline, with a test that fails when Bevy's original changes.
+    earlier decline, with a test that fails when Bevy's original changes. Part (k) is half done at
+    `670ecf2c`, the free camera helper gone for Bevy's controller; the radio buttons go with
+    Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes

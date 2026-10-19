@@ -4,9 +4,9 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**363 written, 2 written in part, 0 can be written, 13 missing and 60 do not apply.** Of the 378 that apply, 365 can be written with what is bridged, 2 of them leaving something out.
+**364 written, 2 written in part, 0 can be written, 12 missing and 60 do not apply.** Of the 378 that apply, 366 can be written with what is bridged, 2 of them leaving something out.
 
-**164 of the 178 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
+**164 of the 179 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
 | Group | Written | Written in part | Can be written | Missing | Does not apply | In behaviors |
 |---|---:|---:|---:|---:|---:|---:|
@@ -38,12 +38,12 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
 | [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
-| [UI (User Interface)](#ui-user-interface) | 58 | 0 | 0 | 7 | 0 | 22 of 24 |
+| [UI (User Interface)](#ui-user-interface) | 59 | 0 | 0 | 6 | 0 | 22 of 25 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **363** | **2** | **0** | **13** | **60** | **164 of 178** |
+| **All** | **364** | **2** | **0** | **12** | **60** | **164 of 179** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -535,7 +535,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | [`display_and_visibility`](https://github.com/bevyengine/bevy/blob/v0.19.1/examples/ui/layout/display_and_visibility.rs) | Demonstrates how Display and Visibility work in the UI. | [written](../BevyCSharp.Examples/ui/display_and_visibility.cs) |
 | [`drag_to_scroll`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/scroll_and_overflow/drag_to_scroll.rs) | This example tests scale factor, dragging and scrolling | [written](../BevyCSharp.Examples/ui/drag_to_scroll.cs) |
 | [`editable_text_filter`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/text/editable_text_filter.rs) | Demonstrates an 8-character hex input using EditableTextFilter | [written](../BevyCSharp.Examples/ui/editable_text_filter.cs), the filter the characters the field takes, where Bevy's is a function of the example's own |
-| [`feathers_counter`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/feathers_counter.rs) | Simple counter using feathers | missing, Bevy's Feathers widgets |
+| [`feathers_counter`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/feathers_counter.rs) | Simple counter using feathers | [written](../BevyCSharp.Examples/ui/feathers_counter.cs) |
 | [`feathers_gallery`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/feathers_gallery.rs) | Gallery of Feathers Widgets | missing, Bevy's Feathers widgets |
 | [`feathers_number_input`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/widgets/feathers_number_input.rs) | Feathers Number Input Options | missing, Feathers' number input, whose crate the bridge does not compile in |
 | [`fixed_node`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/ui/layout/fixed_node.rs) | Demonstrates how to use FixedNode to lay out a UI node as a root node | [written](../BevyCSharp.Examples/ui/fixed_node.cs), through Bevy's reflected FixedNode |

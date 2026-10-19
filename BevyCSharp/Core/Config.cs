@@ -251,6 +251,17 @@ public sealed class Config
     public CameraControllers CameraControllers { get; set; }
 
     /// <summary>
+    /// Add Feathers, Bevy's styled widgets, which <see cref="Bevy.Feathers"/> spawns, with Bevy's dark
+    /// theme.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's default plugins leave Feathers out. Its controls are Bevy's headless widgets drawn in
+    /// the theme's colors, reporting what is done with them as those do, and Bevy writes them for
+    /// tools and editors rather than a game's own interface. A bridge with the renderer is needed.
+    /// </remarks>
+    public bool Feathers { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>

@@ -280,6 +280,152 @@ layout	bevy_ecs::resource::IsResource	8/8;.0.0@0:8
 component	bevy_extract::sync_world::MainEntity	MainEntity
 field	bevy_extract::sync_world::MainEntity	0	.0	Entity	bevy_ecs::entity::Entity	
 layout	bevy_extract::sync_world::MainEntity	8/8;.0@0:8
+component	bevy_feathers::alpha_pattern::AlphaPattern	AlphaPattern
+component	bevy_feathers::controls::button::ButtonVariant	ButtonVariant
+field	bevy_feathers::controls::button::ButtonVariant	value		Enum	ButtonVariant	Normal,Primary,Plain
+layout	bevy_feathers::controls::button::ButtonVariant	1/1;@0:1{Normal=0,Primary=1,Plain=2}
+component	bevy_feathers::controls::button::FeathersButton	FeathersButton
+component	bevy_feathers::controls::button::FeathersToolButton	FeathersToolButton
+component	bevy_feathers::controls::checkbox::CheckboxFrame	CheckboxFrame
+component	bevy_feathers::controls::checkbox::CheckboxMark	CheckboxMark
+component	bevy_feathers::controls::checkbox::CheckboxOutline	CheckboxOutline
+component	bevy_feathers::controls::checkbox::FeathersCheckbox	FeathersCheckbox
+component	bevy_feathers::controls::color_input::ColorInputValue	ColorInputValue
+field	bevy_feathers::controls::color_input::ColorInputValue	0	.0	Color	Color	
+component	bevy_feathers::controls::color_input::FeathersColorInput	FeathersColorInput
+component	bevy_feathers::controls::color_plane::ColorPlaneDragState	ColorPlaneDragState
+field	bevy_feathers::controls::color_plane::ColorPlaneDragState	0	.0	Bool	bool	
+layout	bevy_feathers::controls::color_plane::ColorPlaneDragState	1/1;.0@0:1
+component	bevy_feathers::controls::color_plane::ColorPlaneInner	ColorPlaneInner
+component	bevy_feathers::controls::color_plane::ColorPlaneThumb	ColorPlaneThumb
+component	bevy_feathers::controls::color_plane::ColorPlaneValue	ColorPlaneValue
+field	bevy_feathers::controls::color_plane::ColorPlaneValue	0	.0	Vec3	glam::Vec3	
+layout	bevy_feathers::controls::color_plane::ColorPlaneValue	12/4;.0@0:12
+component	bevy_feathers::controls::color_plane::FeathersColorPlane	FeathersColorPlane
+field	bevy_feathers::controls::color_plane::FeathersColorPlane	value		Enum	FeathersColorPlane	RedGreen,RedBlue,GreenBlue,HueSaturation,HueLightness,OkhslHueSaturation,OkhslHueLightness
+layout	bevy_feathers::controls::color_plane::FeathersColorPlane	1/1;@0:1{RedGreen=0,RedBlue=1,GreenBlue=2,HueSaturation=3,HueLightness=4,OkhslHueSaturation=5,OkhslHueLightness=6}
+component	bevy_feathers::controls::color_slider::ColorChannel	ColorChannel
+field	bevy_feathers::controls::color_slider::ColorChannel	value		Enum	ColorChannel	Red,Green,Blue,HslHue,HslSaturation,HslLightness,Alpha,OkhslHue,OkhslSaturation,OkhslLightness
+layout	bevy_feathers::controls::color_slider::ColorChannel	1/1;@0:1{Red=0,Green=1,Blue=2,HslHue=3,HslSaturation=4,HslLightness=5,Alpha=6,OkhslHue=7,OkhslSaturation=8,OkhslLightness=9}
+component	bevy_feathers::controls::color_slider::ColorSlider	ColorSlider
+field	bevy_feathers::controls::color_slider::ColorSlider	channel	.channel	Enum	ColorChannel	Red,Green,Blue,HslHue,HslSaturation,HslLightness,Alpha,OkhslHue,OkhslSaturation,OkhslLightness
+layout	bevy_feathers::controls::color_slider::ColorSlider	1/1;.channel@0:1{Red=0,Green=1,Blue=2,HslHue=3,HslSaturation=4,HslLightness=5,Alpha=6,OkhslHue=7,OkhslSaturation=8,OkhslLightness=9}
+component	bevy_feathers::controls::color_slider::ColorSliderThumb	ColorSliderThumb
+component	bevy_feathers::controls::color_slider::ColorSliderTrack	ColorSliderTrack
+component	bevy_feathers::controls::color_slider::FeathersColorSlider	FeathersColorSlider
+component	bevy_feathers::controls::color_slider::SliderBaseColor	SliderBaseColor
+field	bevy_feathers::controls::color_slider::SliderBaseColor	0	.0	Color	Color	
+component	bevy_feathers::controls::color_swatch::ColorSwatchFg	ColorSwatchFg
+component	bevy_feathers::controls::color_swatch::ColorSwatchValue	ColorSwatchValue
+field	bevy_feathers::controls::color_swatch::ColorSwatchValue	0	.0	Color	Color	
+component	bevy_feathers::controls::color_swatch::FeathersColorSwatch	FeathersColorSwatch
+component	bevy_feathers::controls::color_swatch_grid::ColorSwatchGridCellRing	ColorSwatchGridCellRing
+component	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchEmptyCell	FeathersColorSwatchEmptyCell
+component	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid	FeathersColorSwatchGrid
+field	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid	opaque_color_percentage	.opaque_color_percentage	Float	f32	
+field	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid	size.x	.size.x	Int	u32	
+field	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid	size.y	.size.y	Int	u32	
+layout	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGrid	12/4;.opaque_color_percentage@8:4;.size.x@0:4;.size.y@4:4
+component	bevy_feathers::controls::color_swatch_grid::FeathersColorSwatchGridCell	FeathersColorSwatchGridCell
+component	bevy_feathers::controls::color_wheel::ColorWheelDragState	ColorWheelDragState
+field	bevy_feathers::controls::color_wheel::ColorWheelDragState	segment	.segment	Enum	Option<ColorWheelSegment>	None,Some
+variant	bevy_feathers::controls::color_wheel::ColorWheelDragState	segment	Some		.segment.0	Enum	ColorWheelSegment	Ring,Triangle
+field	bevy_feathers::controls::color_wheel::ColorWheelDragState	dragging	.dragging	Bool	bool	
+component	bevy_feathers::controls::color_wheel::ColorWheelInner	ColorWheelInner
+component	bevy_feathers::controls::color_wheel::ColorWheelRingThumb	ColorWheelRingThumb
+component	bevy_feathers::controls::color_wheel::ColorWheelTriangleThumb	ColorWheelTriangleThumb
+component	bevy_feathers::controls::color_wheel::ColorWheelValue	ColorWheelValue
+field	bevy_feathers::controls::color_wheel::ColorWheelValue	hue	.hue	Float	f32	
+field	bevy_feathers::controls::color_wheel::ColorWheelValue	whiteness	.whiteness	Float	f32	
+field	bevy_feathers::controls::color_wheel::ColorWheelValue	blackness	.blackness	Float	f32	
+layout	bevy_feathers::controls::color_wheel::ColorWheelValue	12/4;.hue@0:4;.whiteness@4:4;.blackness@8:4
+component	bevy_feathers::controls::color_wheel::FeathersColorWheel	FeathersColorWheel
+component	bevy_feathers::controls::dialog::FeathersDialog	FeathersDialog
+component	bevy_feathers::controls::dialog::FeathersDialogBody	FeathersDialogBody
+component	bevy_feathers::controls::dialog::FeathersDialogClose	FeathersDialogClose
+component	bevy_feathers::controls::dialog::FeathersDialogFooter	FeathersDialogFooter
+component	bevy_feathers::controls::dialog::FeathersDialogHeader	FeathersDialogHeader
+component	bevy_feathers::controls::dialog::FeathersFloatingDialog	FeathersFloatingDialog
+component	bevy_feathers::controls::disclosure_toggle::FeathersDisclosureToggle	FeathersDisclosureToggle
+component	bevy_feathers::controls::listview::ActiveRowOutline	ActiveRowOutline
+component	bevy_feathers::controls::listview::FeathersListRow	FeathersListRow
+component	bevy_feathers::controls::listview::FeathersListView	FeathersListView
+component	bevy_feathers::controls::menu::FeathersMenu	FeathersMenu
+component	bevy_feathers::controls::menu::FeathersMenuButton	FeathersMenuButton
+component	bevy_feathers::controls::menu::FeathersMenuDivider	FeathersMenuDivider
+component	bevy_feathers::controls::menu::FeathersMenuItem	FeathersMenuItem
+component	bevy_feathers::controls::menu::FeathersMenuPopup	FeathersMenuPopup
+component	bevy_feathers::controls::menu::FeathersMenuToolButton	FeathersMenuToolButton
+component	bevy_feathers::controls::number_input::DragState	DragState
+field	bevy_feathers::controls::number_input::DragState	mode	.mode	Enum	EditMode	Idle,Scrubbing,Editing
+field	bevy_feathers::controls::number_input::DragState	drag_speed	.drag_speed	Double	f64	
+field	bevy_feathers::controls::number_input::DragState	value_offset	.value_offset	Double	f64	
+field	bevy_feathers::controls::number_input::DragState	max_distance	.max_distance	Float	f32	
+field	bevy_feathers::controls::number_input::DragState	base_value	.base_value	Enum	NumberInputValue	F32,F64,I32,I64
+variant	bevy_feathers::controls::number_input::DragState	base_value	F32		.base_value.0	Float	f32	
+variant	bevy_feathers::controls::number_input::DragState	base_value	F64		.base_value.0	Double	f64	
+variant	bevy_feathers::controls::number_input::DragState	base_value	I32		.base_value.0	Int	i32	
+variant	bevy_feathers::controls::number_input::DragState	base_value	I64		.base_value.0	Int	i64	
+component	bevy_feathers::controls::number_input::FeathersNumberInput	FeathersNumberInput
+component	bevy_feathers::controls::number_input::NumberInputDecrement	NumberInputDecrement
+component	bevy_feathers::controls::number_input::NumberInputIncrement	NumberInputIncrement
+component	bevy_feathers::controls::number_input::NumberInputPrecision	NumberInputPrecision
+field	bevy_feathers::controls::number_input::NumberInputPrecision	0	.0	Int	i32	
+layout	bevy_feathers::controls::number_input::NumberInputPrecision	4/4;.0@0:4
+component	bevy_feathers::controls::number_input::NumberInputStep	NumberInputStep
+field	bevy_feathers::controls::number_input::NumberInputStep	0	.0	Double	f64	
+layout	bevy_feathers::controls::number_input::NumberInputStep	8/8;.0@0:8
+component	bevy_feathers::controls::number_input::NumberInputUnits	NumberInputUnits
+component	bevy_feathers::controls::number_input::NumberInputWrap	NumberInputWrap
+field	bevy_feathers::controls::number_input::NumberInputWrap	value		Enum	NumberInputWrap	NoWrap,Wrap
+layout	bevy_feathers::controls::number_input::NumberInputWrap	1/1;@0:1{NoWrap=0,Wrap=1}
+component	bevy_feathers::controls::radio::FeathersRadio	FeathersRadio
+component	bevy_feathers::controls::radio::RadioMark	RadioMark
+component	bevy_feathers::controls::radio::RadioOutline	RadioOutline
+component	bevy_feathers::controls::scrollbar::FeathersScrollbar	FeathersScrollbar
+field	bevy_feathers::controls::scrollbar::FeathersScrollbar	auto_hide	.auto_hide	Bool	bool	
+layout	bevy_feathers::controls::scrollbar::FeathersScrollbar	1/1;.auto_hide@0:1
+component	bevy_feathers::controls::scrollbar::FeathersScrollbarThumb	FeathersScrollbarThumb
+component	bevy_feathers::controls::scrollbar::ScrollbarGutter	ScrollbarGutter
+field	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	.0	Enum	Val	Auto,Px,Percent,Vw,Vh,VMin,VMax,Em,Rem
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Px		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Percent		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Vw		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Vh		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	VMin		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	VMax		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Em		.0.0	Float	f32	
+variant	bevy_feathers::controls::scrollbar::ScrollbarGutter	0	Rem		.0.0	Float	f32	
+component	bevy_feathers::controls::select::FeathersSelect	FeathersSelect
+component	bevy_feathers::controls::select::OptionIndex	OptionIndex
+field	bevy_feathers::controls::select::OptionIndex	0	.0	Int	usize	
+layout	bevy_feathers::controls::select::OptionIndex	8/8;.0@0:8
+component	bevy_feathers::controls::select::SelectCaption	SelectCaption
+component	bevy_feathers::controls::slider::FeathersSlider	FeathersSlider
+component	bevy_feathers::controls::slider::SliderValueText	SliderValueText
+component	bevy_feathers::controls::text_input::FeathersTextInput	FeathersTextInput
+component	bevy_feathers::controls::text_input::FeathersTextInputContainer	FeathersTextInputContainer
+component	bevy_feathers::controls::toggle_switch::FeathersToggleSwitch	FeathersToggleSwitch
+component	bevy_feathers::controls::toggle_switch::ToggleSwitchSlide	ToggleSwitchSlide
+component	bevy_feathers::display::icon::ThemedIcon	ThemedIcon
+component	bevy_feathers::focus::FocusIndicator	FocusIndicator
+component	bevy_feathers::focus::FocusWithinIndicator	FocusWithinIndicator
+component	bevy_feathers::font_styles::InheritableFont	InheritableFont
+field	bevy_feathers::font_styles::InheritableFont	font	.font	Asset	Handle<Font>	Font
+field	bevy_feathers::font_styles::InheritableFont	font_size	.font_size	Enum	FontSize	Px,Vw,Vh,VMin,VMax,Rem
+variant	bevy_feathers::font_styles::InheritableFont	font_size	Px		.font_size.0	Float	f32	
+variant	bevy_feathers::font_styles::InheritableFont	font_size	Vw		.font_size.0	Float	f32	
+variant	bevy_feathers::font_styles::InheritableFont	font_size	Vh		.font_size.0	Float	f32	
+variant	bevy_feathers::font_styles::InheritableFont	font_size	VMin		.font_size.0	Float	f32	
+variant	bevy_feathers::font_styles::InheritableFont	font_size	VMax		.font_size.0	Float	f32	
+variant	bevy_feathers::font_styles::InheritableFont	font_size	Rem		.font_size.0	Float	f32	
+field	bevy_feathers::font_styles::InheritableFont	weight	.weight.0	Int	u16	
+component	bevy_feathers::theme::InheritableThemeTextColor	InheritableThemeTextColor
+component	bevy_feathers::theme::ThemeBackgroundColor	ThemeBackgroundColor
+component	bevy_feathers::theme::ThemeBorderColor	ThemeBorderColor
+component	bevy_feathers::theme::ThemeTextColor	ThemeTextColor
+component	bevy_feathers::theme::ThemedText	ThemedText
+component	bevy_feathers::theme::UiTheme	UiTheme
 component	bevy_gizmos::aabb::ShowAabbGizmo	ShowAabbGizmo
 field	bevy_gizmos::aabb::ShowAabbGizmo	color	.color	Enum	Option<Color>	None,Some
 variant	bevy_gizmos::aabb::ShowAabbGizmo	color	Some		.color.0	Color	Color	
