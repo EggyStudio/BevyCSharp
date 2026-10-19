@@ -37,11 +37,8 @@ their discovery off.
 - **Compressed images saved, one example.** Bevy's asset processor and its compressing image saver
   (`compressed_image_saver`), which pull in `ctt`.
 
-Two examples are written in part, leaving out a feature named in each row.
+One example is written in part, leaving out a feature named in its row.
 
-- **Bevy's system information**, which `log_diagnostics` leaves out of what it logs, the CPU and
-  memory of the process and of the machine. Bevy reads them through `sysinfo`, a crate the bridge
-  does not build.
 - **A run on a display**, which `monitor_info` has not had. It opens a window filling each monitor
   the platform reports, and an offscreen run reports none, so its test fills a monitor it made
   itself, and only a run with monitors shows each window on its screen.

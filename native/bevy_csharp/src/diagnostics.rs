@@ -19,6 +19,9 @@ pub const ENTITY_COUNT: u32 = 4;
 /// Bevy's render passes' times, CPU and GPU, copied from the render world
 /// (`RenderDiagnosticsPlugin`).
 pub const RENDER: u32 = 8;
+/// Bevy's measures of the process's and the machine's CPU and memory
+/// (`SystemInformationDiagnosticsPlugin`).
+pub const SYSTEM_INFORMATION: u32 = 16;
 
 /// Adds the diagnostics plugins an app asks for, one bit each, after Bevy's own plugins, since
 /// they read Bevy's clock and the render one reads the render world.
@@ -53,6 +56,12 @@ pub fn install(app: &mut bevy::app::App, plugins: u32) {
         && !app.is_plugin_added::<bevy::render::diagnostic::RenderDiagnosticsPlugin>()
     {
         app.add_plugins(bevy::render::diagnostic::RenderDiagnosticsPlugin);
+    }
+
+    // Read on a task of Bevy's own, no oftener than sysinfo can measure the CPU, so the first
+    // measures come some frames after the app starts.
+    if plugins & SYSTEM_INFORMATION != 0 {
+        app.add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin);
     }
 
     if plugins & LOG != 0 {

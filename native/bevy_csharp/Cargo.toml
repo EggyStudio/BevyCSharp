@@ -100,6 +100,10 @@ headless = [
     # no `Stepping` resource to ask pays one lookup each time it runs.
     "bevy/bevy_debug_stepping",
     "bevy/bevy_world_serialization",
+    # Bevy's measures of the process's and the machine's CPU and memory, which an app asks for with
+    # `DiagnosticPlugins.SystemInformation`. The sysinfo crate reads them from the system, with
+    # ntapi and winapi under it on Windows, and nothing draws, so every profile has them.
+    "bevy/sysinfo_plugin",
     # Every reflected type Bevy has, registered at startup without a plugin naming it. The bridge
     # reads components through that registry, so a headless run and the test suite see the same
     # types a window does rather than only the ones some plugin happened to register.

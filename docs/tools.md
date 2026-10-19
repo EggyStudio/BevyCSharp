@@ -162,8 +162,9 @@ away, and everything it knows about the log and the commands it asks the library
 Bevy keeps a store of named measures, each a history of numbers with a value smoothed over time and
 an average over what it keeps. Bevy's own plugins measure into it where `Config.DiagnosticPlugins`
 asks for them, `FrameTime` for the frame time, frames a second and the frame count, `EntityCount`
-for the entities, and `Render` for each render pass's CPU and GPU time. `Log` prints every
-diagnostic once a second to Bevy's log. A game's own measures go in the same store and are printed
+for the entities, `SystemInformation` for how much of the CPU and memory the machine and the
+process use, and `Render` for each render pass's CPU and GPU time. `Log` prints every diagnostic
+once a second to Bevy's log. A game's own measures go in the same store and are printed
 beside Bevy's, a suffix after each number:
 
 <!-- compiled with:
@@ -179,9 +180,9 @@ does not have. A path is names apart by slashes. `Diagnostics.TryRead` gives one
 and average values, and `Diagnostics.All` gives every one, which an overlay of the frame rate reads.
 `Diagnostics.SetEnabled` stops one being measured and logged and keeps its history, and
 `Diagnostics.SetLogFilter` has the log print only the paths it is given, or none for an empty list,
-or all of them again for null. Bevy's measures of the process's and the machine's CPU and memory
-need a crate the bridge does not compile in, so they are not in the store. The `diagnostics` command
-lists the store as the log prints it.
+or all of them again for null. The system's measures are read on a task of Bevy's own no oftener
+than the system can measure the CPU, so their first values come some frames after the app starts.
+The `diagnostics` command lists the store as the log prints it.
 
 ## Bevy's dev tools
 

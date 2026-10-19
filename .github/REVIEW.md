@@ -10,7 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `319624bf`, Feathers' last step and nothing else, 47 files, the ABI 291 to 292, the
+Reviewed up to `64c1b25d`, item 4's dev tools batch and nothing else, 42 files, the ABI 292 to 293,
+the lock gaining `bevy_dev_tools` alone through Bevy's two features on the render profile, no direct
+dependency, so BUILDING.md's crate table has no row, as with Feathers. `dev_tools.rs` adds the frame
+rate overlay, the infinite grid and the picking debug plugins a bit each through `Config.DevTools`;
+the overlay's and the grid's settings are reflected and come in through the schema dump, picking's
+debug mode reflects nothing and gets a set and read pair with a `cargo` test of its numbering, and
+the gizmo settings gain the frusta and the skinned bounds beside the bounds, which the scene
+viewer's keys toggle. The managed side gains the flags, the picking mode, the two gizmo flags, a
+section in the tools guide and a sentence in the gizmos guide, the surface listing, the cheat sheet
+and the notices written again. The four examples are written, the overlay and the grid in a dev
+tools folder, the picking debug and the scene viewer in one file mirroring Bevy's four, driven live
+on the helmet, the fox and the morph test, the four rows at can with notes on two, the picking
+debug's events reaching Bevy's log at its debug and trace levels where Bevy's example sets that
+filter in its log plugin, and the scene viewer taking a path inside the asset folder without the
+glTF coordinate switches or the scene count and playing the clips by the scene as a whole, the table
+at 371 written and 5 missing; the capture script clicks for a cube and moves the pointer so the
+picking overlay shows. Four dev tools tests hold a tool absent where not asked for, the overlay
+drawn in its resource's color with Bevy's defaults read back, the grid's defaults and its lines gone
+once hidden and picking's modes, and two gizmo shape tests a second camera's frustum and a skinned
+model's joint bounds; the overlay test failed once under load in a combined run and passed ten times
+after, its picture widened so the frame rate's text cannot wrap into the corner it checks. The N 1.4
+list's head carries the reviewer's sentence on tests of no library area. Checked were `cargo check`
+on the four profiles with Windows and macOS on the editor's with Solari, `cargo test` headless and
+on render, the headless bridge under B 2, the examples on a fresh package with N 6.5 passing on it,
+the four pictures on a render bridge with the scene viewer's retaken twice and matching, and the
+whole suite with a clean build, 1,513 passed, 3 skipped and none failed of 1,516. Right. Next the
+system information, `sysinfo_plugin` and `log_diagnostics` whole, then the declined rows marked and
+`monitor_info` on virtual monitors, one batch a commit, and the owner's push of the seven commits.
+
+Before it, `319624bf` came, Feathers' last step and nothing else, 47 files, the ABI 291 to 292, the
 lock unchanged. The bridge gains a call setting the theme from token colors through Bevy's own
 constructor, a count of none restoring the dark theme, and the managed side the two calls with a
 test; `Helpers.cs` mirrors Bevy 0.20's three helper files the examples take in by path, the radio
@@ -75,34 +104,6 @@ fourteen examples moved to Feathers' radio with their pictures taken again and c
 helper gone and the mirror in its place, item 29's part (k) whole and SHARED.md's row on the package
 saying so, the reviewer's; then the dev tools, the system information, the declined rows marked and
 `monitor_info`, one batch a commit, and the owner's push of the five commits.
-
-Before it, `5452a595` came, Feathers' second step and nothing else, 33 files, the ABI 287 to 289,
-the lock unchanged. The bridge spawns two more kinds, the number input and the virtual keyboard, the
-props gaining a token for the input's sigil and growing to 32 bytes; a number input's letter is a
-static string in Bevy's props, so each distinct letter is leaked once and kept; the keyboard is
-Bevy's over a key type of the bridge's own carrying its row and place, so a report names a key by
-where it stands and C# reads back the text it gave; the input's value, two limits and units are not
-reachable by reflection, the first three reflecting without the component trait and the last holding
-a small string the description leaves out, so four calls set, get, limit and name them; the widget
-report gains the value change of a double, an int and a long, carried as bits in its other field so
-the layout stays 40 bytes, and the key pressed; and one general call queues any of Bevy's text edits
-on a field but the input method's preedit, which its own messages set. The managed side gains the
-two controls, the number setters and getter for four types, the limit and units, with angles held in
-radians and shown in degrees as Bevy's, the two events, and `Ui.EditText` with the edit kinds; a
-number input writes its text as its value changes, so its settings come before its value, which the
-example first got wrong and showed no units, and the remarks and the guide say so.
-`feathers_number_input` and `virtual_keyboard` are written, the table at 366 written and 10 missing.
-Two tests join the four, a number input holding each type exactly, a long beyond a double among
-them, and a click on a virtual key reported with its text, row and place and typed into a field
-through the edit call. Checked were `cargo check` on every profile, `cargo test` headless and on
-render, the headless bridge with the Feathers and layout tests under B 2, the examples on a fresh
-package, the pictures on a render bridge on the GPU, and the whole suite, 1,498 passed, 3 skipped
-and 1 failed of 1,502, the failure N 1.2's, two enums in the file of the record that uses them, each
-moved to its own file with no code changed and the norm and public surface tests passing after.
-Right. Next Feathers' third step, the gallery's controls, color sliders, swatches, plane and input,
-select and list view, menus, dialogs, panes and groups, text input, scrollbar and disclosure toggle,
-then the fifteen examples, then the dev tools, the system information, the declined rows marked and
-`monitor_info`, one step a commit, and the owner's push of the four commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -371,7 +372,10 @@ from [SHARED.md](SHARED.md).
    Feathers' four rows all in, the ABI 291, the lock unchanged. The last came at `319624bf`, the
    fourteen examples with option rows at Bevy's v0.20.0 on Feathers' radio, a theme call in the
    package, the port's own helper gone for one file mirroring Bevy's three shared helper files, the
-   ABI 292, the lock unchanged, Feathers whole in four steps; the dev tools are next.
+   ABI 292, the lock unchanged, Feathers whole in four steps. The dev tools came at `64c1b25d` the
+   same day, the overlay, the grid, the picking debug and the scene viewer with their four examples,
+   the table at 371 written and 5 missing, the lock gaining `bevy_dev_tools`, the ABI 293; the
+   system information is next, then the declined rows marked and `monitor_info`.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

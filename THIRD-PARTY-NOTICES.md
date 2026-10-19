@@ -345,14 +345,15 @@ hold, or for a crate whose package holds none, the standard text of each license
 | notify | 8.2.0 | CC0-1.0 | by Félix Saparelli &lt;me@passcod.name&gt;, Daniel Faust &lt;hessijames@gmail.com&gt;, Aron Heinecke &lt;Ox0p54r36@t-online.de&gt; | [46](#text-46) |
 | notify-debouncer-full | 0.7.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [20](#text-20), [4](#text-4) |
 | notify-types | 2.1.0 | MIT OR Apache-2.0 | Copyright 2023 Notify Contributors<br>Copyright (c) 2023 Notify Contributors | [20](#text-20), [4](#text-4) |
+| ntapi | 0.4.3 | Apache-2.0 OR MIT | by MSxDOS &lt;melcodos@gmail.com&gt; | [5](#text-5), [47](#text-47) |
 | nu-ansi-term | 0.50.3 | MIT | Copyright (c) 2014 Benjamin Sago<br>Copyright (c) 2021-2022 The Nushell Project Developers | [7](#text-7) |
 | num-bigint | 0.4.8 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-derive | 0.4.2 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-integer | 0.1.47 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-rational | 0.4.2 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | num-traits | 0.2.19 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| num_enum | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [47](#text-47), [4](#text-4) |
-| num_enum_derive | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [47](#text-47), [4](#text-4) |
+| num_enum | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [48](#text-48), [4](#text-4) |
+| num_enum_derive | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 | Copyright (c) 2018, Daniel Wagner-Hall | [1](#text-1), [48](#text-48), [4](#text-4) |
 | objc-sys | 0.3.5 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.5.2 | MIT | by Steven Sheldon, Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
 | objc2 | 0.6.4 | MIT | by Mads Marquart &lt;mads@marquart.dk&gt; | [4](#text-4) |
@@ -384,21 +385,21 @@ hold, or for a crate whose package holds none, the standard text of each license
 | objc2-uniform-type-identifiers | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | objc2-user-notifications | 0.2.2 | MIT | the contributors to https://github.com/madsmtm/objc2 | [4](#text-4) |
 | offset-allocator | 0.2.0 | MIT | Copyright (c) 2023 Sebastian Aaltonen, Patrick Walton | [9](#text-9) |
-| ogg | 0.8.0 | BSD-3-Clause | Copyright (c) 2016-2017 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2002-2015 Xiph.org Foundation | [48](#text-48) |
+| ogg | 0.8.0 | BSD-3-Clause | Copyright (c) 2016-2017 est31 &lt;MTest31@outlook.com&gt; and contributors<br>Copyright (c) 2002-2015 Xiph.org Foundation | [49](#text-49) |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 | by Aleksey Kladov &lt;aleksey.kladov@gmail.com&gt; | [5](#text-5), [4](#text-4) |
 | once_cell_polyfill | 1.70.2 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [13](#text-13), [4](#text-4) |
-| orbclient | 0.3.55 | MIT | Copyright (c) 2015-2019 Jeremy Soller<br>Copyright (C) 1989, 1991 Free Software Foundation, Inc., | [7](#text-7), [49](#text-49) |
+| orbclient | 0.3.55 | MIT | Copyright (c) 2015-2019 Jeremy Soller<br>Copyright (C) 1989, 1991 Free Software Foundation, Inc., | [7](#text-7), [50](#text-50) |
 | ordered-float | 5.5.0 | MIT | Copyright (c) 2015 Jonathan Reem | [4](#text-4) |
 | os_pipe | 1.2.3 | MIT | by Jack O'Connor | [7](#text-7) |
 | owned_ttf_parser | 0.25.1 | Apache-2.0 | by Alex Butler &lt;alexheretic@gmail.com&gt; | [1](#text-1) |
-| parking | 2.2.1 | Apache-2.0 OR MIT | Copyright 2014-2020 The Rust Project Developers | [5](#text-5), [4](#text-4), [50](#text-50) |
+| parking | 2.2.1 | Apache-2.0 OR MIT | Copyright 2014-2020 The Rust Project Developers | [5](#text-5), [4](#text-4), [51](#text-51) |
 | parking_lot | 0.12.5 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | parking_lot_core | 0.9.12 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | parlance | 0.1.0 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
 | parley | 0.11.1 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
 | parley_data | 0.11.1 | Apache-2.0 OR MIT | Copyright 2020 the Parley Authors | [5](#text-5), [4](#text-4) |
 | percent-encoding | 2.3.2 | MIT OR Apache-2.0 | Copyright (c) 2013-2025 The rust-url developers | [5](#text-5), [4](#text-4) |
-| petgraph | 0.8.3 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4), [51](#text-51) |
+| petgraph | 0.8.3 | MIT OR Apache-2.0 | Copyright (c) 2015 | [5](#text-5), [4](#text-4), [52](#text-52) |
 | pin-project | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
 | pin-project-internal | 1.1.13 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project | [1](#text-1), [4](#text-4) |
 | pin-project-lite | 0.2.17 | Apache-2.0 OR MIT | the contributors to https://github.com/taiki-e/pin-project-lite | [1](#text-1), [4](#text-4) |
@@ -421,9 +422,9 @@ hold, or for a crate whose package holds none, the standard text of each license
 | r-efi | 6.0.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | the contributors to https://github.com/r-efi/r-efi | [4](#text-4), [5](#text-5) |
 | radium | 0.7.0 | MIT | Copyright (c) 2019 kneecaw (Nika Layzell) | [9](#text-9) |
 | radsort | 0.1.1 | MIT OR Apache-2.0 | Copyright 2020 Jakub Valtar | [5](#text-5), [4](#text-4) |
-| rand | 0.10.2 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project<br>Copyright (c) 2014 The Rust Project Developers | [52](#text-52), [53](#text-53), [4](#text-4) |
-| rand_core | 0.10.1 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright (c) 2018-2026 The Rand Project Developers | [54](#text-54), [55](#text-55), [4](#text-4) |
-| rand_distr | 0.6.0 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project | [52](#text-52), [55](#text-55), [4](#text-4) |
+| rand | 0.10.2 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project<br>Copyright (c) 2014 The Rust Project Developers | [53](#text-53), [54](#text-54), [4](#text-4) |
+| rand_core | 0.10.1 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright (c) 2018-2026 The Rand Project Developers | [55](#text-55), [56](#text-56), [4](#text-4) |
+| rand_distr | 0.6.0 | MIT OR Apache-2.0 | copyright assignment is required to contribute to the Rand project.<br>Copyright 2018 Developers of the Rand project | [53](#text-53), [56](#text-56), [4](#text-4) |
 | range-alloc | 0.1.5 | MIT OR Apache-2.0 | Copyright (c) 2023 The gfx-rs developers | [1](#text-1), [9](#text-9) |
 | raw-window-handle | 0.6.2 | MIT OR Apache-2.0 OR Zlib | Copyright (c) 2019 Osspial<br>Copyright (c) 2020 Osspial | [1](#text-1), [9](#text-9), [24](#text-24) |
 | raw-window-metal | 1.1.0 | MIT OR Apache-2.0 | the contributors to https://github.com/rust-windowing/raw-window-metal | [5](#text-5), [4](#text-4) |
@@ -433,15 +434,15 @@ hold, or for a crate whose package holds none, the standard text of each license
 | redox_syscall | 0.5.18 | MIT | Copyright (c) 2017 Redox OS Developers | [9](#text-9) |
 | redox_syscall | 0.9.3 | MIT | Copyright (c) 2017 Redox OS Developers | [9](#text-9) |
 | regex-automata | 0.4.18 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| regex-syntax | 0.8.11 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers<br>Copyright © 1991-2018 Unicode, Inc. All rights reserved. | [5](#text-5), [4](#text-4), [56](#text-56) |
+| regex-syntax | 0.8.11 | MIT OR Apache-2.0 | Copyright (c) 2014 The Rust Project Developers<br>Copyright © 1991-2018 Unicode, Inc. All rights reserved. | [5](#text-5), [4](#text-4), [57](#text-57) |
 | renderdoc-sys | 1.1.0 | MIT OR Apache-2.0 | Copyright (c) 2022 Eyal Kalderon | [5](#text-5), [4](#text-4) |
 | rodio | 0.22.2 | MIT OR Apache-2.0 | Copyright (c) The Rodio Project Contributors | [1](#text-1), [4](#text-4) |
 | ron | 0.12.2 | MIT OR Apache-2.0 | Copyright (c) 2017 RON developers | [5](#text-5), [4](#text-4) |
 | rustc-hash | 1.1.0 | Apache-2.0/MIT | by The Rust Project Developers | [5](#text-5), [4](#text-4) |
 | rustc-hash | 2.1.3 | Apache-2.0 OR MIT | by The Rust Project Developers | [1](#text-1), [4](#text-4) |
 | rustc_version | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| rustix | 0.38.44 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [57](#text-57), [5](#text-5), [43](#text-43), [4](#text-4) |
-| rustix | 1.1.4 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [57](#text-57), [5](#text-5), [43](#text-43), [4](#text-4) |
+| rustix | 0.38.44 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [58](#text-58), [5](#text-5), [43](#text-43), [4](#text-4) |
+| rustix | 1.1.4 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Dan Gohman &lt;dev@sunfishcode.online&gt;, Jakub Konka &lt;kubkon@jakubkonka.com&gt; | [58](#text-58), [5](#text-5), [43](#text-43), [4](#text-4) |
 | rustversion | 1.0.23 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | ruzstd | 0.8.3 | MIT | Copyright (c) 2019 Moritz Borcherding | [9](#text-9) |
 | same-file | 1.0.6 | Unlicense/MIT | Copyright (c) 2017 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
@@ -469,18 +470,19 @@ hold, or for a crate whose package holds none, the standard text of each license
 | spin | 0.12.3 | MIT | Copyright (c) 2014 Mathijs van de Nes | [7](#text-7) |
 | spirv | 0.4.0+sdk-1.4.341.0 | Apache-2.0 | by Lei Zhang &lt;antiagainst@gmail.com&gt; | [5](#text-5) |
 | stable_deref_trait | 1.2.1 | MIT OR Apache-2.0 | Copyright (c) 2017 Robert Grosse | [5](#text-5), [4](#text-4) |
-| stackfuture | 0.3.1 | MIT | Copyright (c) Microsoft Corporation. | [58](#text-58) |
+| stackfuture | 0.3.1 | MIT | Copyright (c) Microsoft Corporation. | [59](#text-59) |
 | static_assertions | 1.1.0 | MIT OR Apache-2.0 | Copyright (c) 2017 Nikolai Vazquez | [5](#text-5), [9](#text-9) |
 | strict-num | 0.1.1 | MIT | Copyright (c) 2022 Yevhenii Reizner | [4](#text-4) |
 | swash | 0.2.10 | Apache-2.0 OR MIT | Copyright (c) 2020 Chad Brokaw | [5](#text-5), [4](#text-4) |
-| symphonia | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [69](#text-69) |
-| symphonia-bundle-mp3 | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [69](#text-69) |
-| symphonia-core | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [69](#text-69) |
-| symphonia-metadata | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [69](#text-69) |
+| symphonia | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [70](#text-70) |
+| symphonia-bundle-mp3 | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [70](#text-70) |
+| symphonia-core | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [70](#text-70) |
+| symphonia-metadata | 0.5.5 | MPL-2.0 | by Philip Deljanov &lt;philip.deljanov@gmail.com&gt; | [70](#text-70) |
 | syn | 2.0.119 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | syn | 3.0.4 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | synstructure | 0.13.2 | MIT | Copyright 2016 Nika Layzell | [4](#text-4) |
 | sys-locale | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) 2021 1Password | [5](#text-5), [9](#text-9) |
+| sysinfo | 0.39.6 | MIT | Copyright (c) 2015 Guillaume Gomez | [7](#text-7) |
 | taffy | 0.14.0 | MIT | by Alice Cecile &lt;alice.i.cecile@gmail.com&gt;, Johnathan Kelley &lt;jkelleyrtp@gmail.com&gt;, Nico Burns &lt;nico@nicoburns.com&gt; | [4](#text-4) |
 | tap | 1.0.1 | MIT | Copyright (c) 2017 Elliot Linder &lt;darfink@gmail.com&gt; | [9](#text-9) |
 | termcolor | 1.4.1 | Unlicense OR MIT | Copyright (c) 2015 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
@@ -489,11 +491,11 @@ hold, or for a crate whose package holds none, the standard text of each license
 | thiserror-impl | 1.0.69 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | thiserror-impl | 2.0.20 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | thread_local | 1.1.10 | MIT OR Apache-2.0 | Copyright (c) 2016 The Rust Project Developers | [5](#text-5), [4](#text-4) |
-| tiny-skia | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [59](#text-59) |
-| tiny-skia-path | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [59](#text-59) |
+| tiny-skia | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [60](#text-60) |
+| tiny-skia-path | 0.11.4 | BSD-3-Clause | Copyright (c) 2011 Google Inc. All rights reserved.<br>Copyright (c) 2020 Yevhenii Reizner All rights reserved. | [60](#text-60) |
 | tinystr | 0.8.4 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | tinyvec | 1.12.0 | Zlib OR Apache-2.0 OR MIT | Copyright (c) 2019 Daniel "Lokathor" Gee. | [5](#text-5), [4](#text-4), [24](#text-24) |
-| tinyvec_macros | 0.1.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2020 Tomasz "Soveu" Marx<br>Copyright (c) 2020 Soveu | [20](#text-20), [9](#text-9), [60](#text-60) |
+| tinyvec_macros | 0.1.1 | MIT OR Apache-2.0 OR Zlib | Copyright 2020 Tomasz "Soveu" Marx<br>Copyright (c) 2020 Soveu | [20](#text-20), [9](#text-9), [61](#text-61) |
 | toml | 1.1.8+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
 | toml_datetime | 1.1.2+spec-1.1.0 | MIT OR Apache-2.0 | Copyright Individual contributors<br>Copyright (c) Individual contributors | [11](#text-11), [4](#text-4) |
 | toml_edit | 0.25.13+spec-1.1.0 | MIT OR Apache-2.0 | Copyright (c) Individual contributors | [13](#text-13), [4](#text-4) |
@@ -503,7 +505,7 @@ hold, or for a crate whose package holds none, the standard text of each license
 | tracing-attributes | 0.1.31 | MIT | Copyright (c) 2019 Tokio Contributors | [4](#text-4) |
 | tracing-core | 0.1.36 | MIT | Copyright (c) 2019 Tokio Contributors<br>Copyright (c) 2014 Mathijs van de Nes | [4](#text-4), [7](#text-7) |
 | tracing-log | 0.2.0 | MIT | Copyright (c) 2019 Tokio Contributors | [4](#text-4) |
-| tracing-oslog | 0.3.0 | Zlib | Copyright (c) 2021 Lucy &lt;lucy@absolucy.moe&gt; | [61](#text-61) |
+| tracing-oslog | 0.3.0 | Zlib | Copyright (c) 2021 Lucy &lt;lucy@absolucy.moe&gt; | [62](#text-62) |
 | tracing-subscriber | 0.3.23 | MIT | Copyright (c) 2019 Tokio Contributors | [4](#text-4) |
 | tracing-wasm | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) 2020 Story.ai | [5](#text-5), [4](#text-4) |
 | tree_magic_mini | 3.2.2 | MIT | Copyright (c) 2017 Aaron Hancock | [9](#text-9) |
@@ -511,12 +513,12 @@ hold, or for a crate whose package holds none, the standard text of each license
 | twox-hash | 2.1.4 | MIT | Copyright (c) 2015 Jake Goulding | [7](#text-7) |
 | typeid | 1.0.3 | MIT OR Apache-2.0 | by David Tolnay &lt;dtolnay@gmail.com&gt; | [1](#text-1), [4](#text-4) |
 | typewit | 1.15.2 | Zlib | Copyright (c) 2023 Matias Rodriguez. | [24](#text-24) |
-| unicode-ident | 1.0.24 | (MIT OR Apache-2.0) AND Unicode-3.0 | Copyright © 1991-2023 Unicode, Inc. | [1](#text-1), [4](#text-4), [62](#text-62) |
+| unicode-ident | 1.0.24 | (MIT OR Apache-2.0) AND Unicode-3.0 | Copyright © 1991-2023 Unicode, Inc. | [1](#text-1), [4](#text-4), [63](#text-63) |
 | unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [28](#text-28), [5](#text-5), [4](#text-4) |
 | unicode-width | 0.2.2 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [28](#text-28), [5](#text-5), [4](#text-4) |
 | unicode-xid | 0.2.6 | MIT OR Apache-2.0 | Copyright (c) 2015 The Rust Project Developers | [28](#text-28), [5](#text-5), [4](#text-4) |
 | unsynn | 0.3.0 | MIT OR Apache-2.0 | by Christian Thäter &lt;ct@pipapo.org&gt; | [5](#text-5), [4](#text-4) |
-| utf8_iter | 1.0.4 | Apache-2.0 OR MIT | Copyright Mozilla Foundation | [63](#text-63), [5](#text-5), [4](#text-4) |
+| utf8_iter | 1.0.4 | Apache-2.0 OR MIT | Copyright Mozilla Foundation | [64](#text-64), [5](#text-5), [4](#text-4) |
 | utf8parse | 0.2.2 | Apache-2.0 OR MIT | Copyright (c) 2016 Joe Wilm | [1](#text-1), [4](#text-4) |
 | uuid | 1.26.0 | Apache-2.0 OR MIT | Copyright (c) 2014 The Rust Project Developers<br>Copyright (c) 2018 Ashley Mannix, Christopher Armstrong, Dylan DPC, Hunar Roop Kahlon | [5](#text-5), [4](#text-4) |
 | valuable | 0.1.1 | MIT | the contributors to https://github.com/tokio-rs/valuable | [4](#text-4) |
@@ -535,8 +537,8 @@ hold, or for a crate whose package holds none, the standard text of each license
 | wayland-client | 0.31.15 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
 | wayland-csd-frame | 0.3.0 | MIT | Copyright (c) 2023 Kirill Chibisov | [4](#text-4) |
 | wayland-cursor | 0.31.14 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
-| wayland-protocols | 0.32.13 | MIT | Copyright (c) 2015 Elinor Berger<br>Copyright © 2008-2013 Kristian Høgsberg<br>Copyright © 2010-2013 Intel Corporation<br>Copyright © 2013      Rafael Antognolli<br>Copyright © 2013      Jasper St. Pierre<br>Copyright © 2014      Jonas Ådahl<br>Copyright © 2014      Jason Ekstrand<br>Copyright © 2014-2015 Collabora, Ltd.<br>Copyright © 2015      Red Hat Inc. | [4](#text-4), [64](#text-64) |
-| wayland-protocols-plasma | 0.3.12 | MIT | Copyright (c) 2015 Elinor Berger<br>Copyright (C) 1991, 1999 Free Software Foundation, Inc.<br>copyright law: that is to say, a work containing the Library or a | [4](#text-4), [65](#text-65) |
+| wayland-protocols | 0.32.13 | MIT | Copyright (c) 2015 Elinor Berger<br>Copyright © 2008-2013 Kristian Høgsberg<br>Copyright © 2010-2013 Intel Corporation<br>Copyright © 2013      Rafael Antognolli<br>Copyright © 2013      Jasper St. Pierre<br>Copyright © 2014      Jonas Ådahl<br>Copyright © 2014      Jason Ekstrand<br>Copyright © 2014-2015 Collabora, Ltd.<br>Copyright © 2015      Red Hat Inc. | [4](#text-4), [65](#text-65) |
+| wayland-protocols-plasma | 0.3.12 | MIT | Copyright (c) 2015 Elinor Berger<br>Copyright (C) 1991, 1999 Free Software Foundation, Inc.<br>copyright law: that is to say, a work containing the Library or a | [4](#text-4), [66](#text-66) |
 | wayland-protocols-wlr | 0.3.12 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
 | wayland-scanner | 0.31.11 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
 | wayland-sys | 0.31.11 | MIT | Copyright (c) 2015 Elinor Berger | [4](#text-4) |
@@ -556,49 +558,52 @@ hold, or for a crate whose package holds none, the standard text of each license
 | wgpu-types | 30.0.1 | MIT OR Apache-2.0 | Copyright (c) 2025 The gfx-rs developers | [1](#text-1), [9](#text-9) |
 | wgsl-parse | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
 | wgsl-types | 0.6.0 | MIT OR Apache-2.0 | the contributors to https://github.com/webgpu-tools/wesl-rs | [4](#text-4), [5](#text-5) |
+| winapi | 0.3.9 | MIT/Apache-2.0 | Copyright (c) 2015-2018 The winapi-rs Developers | [13](#text-13), [4](#text-4) |
+| winapi-i686-pc-windows-gnu | 0.4.0 | MIT/Apache-2.0 | by Peter Atashian &lt;retep998@gmail.com&gt; | [4](#text-4), [5](#text-5) |
 | winapi-util | 0.1.11 | Unlicense OR MIT | Copyright (c) 2017 Andrew Gallant | [6](#text-6), [7](#text-7), [8](#text-8) |
-| windows | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-collections | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-core | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-future | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-implement | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-interface | 0.59.3 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-link | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-numerics | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-result | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-strings | 0.5.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-sys | 0.45.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-sys | 0.52.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-sys | 0.59.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-sys | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-sys | 0.61.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-targets | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-targets | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-targets | 0.53.5 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows-threading | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_aarch64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_i686_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
-| windows_x86_64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [66](#text-66) |
+| winapi-x86_64-pc-windows-gnu | 0.4.0 | MIT/Apache-2.0 | by Peter Atashian &lt;retep998@gmail.com&gt; | [4](#text-4), [5](#text-5) |
+| windows | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-collections | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-core | 0.62.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-future | 0.3.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-implement | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-interface | 0.59.3 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-link | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-numerics | 0.3.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-result | 0.4.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-strings | 0.5.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-sys | 0.45.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-sys | 0.52.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-sys | 0.59.0 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-sys | 0.60.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-sys | 0.61.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-targets | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-targets | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-targets | 0.53.5 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows-threading | 0.2.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_aarch64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_i686_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnu | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnu | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnu | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnullvm | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnullvm | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_gnullvm | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
+| windows_x86_64_msvc | 0.53.1 | MIT OR Apache-2.0 | Copyright (c) Microsoft Corporation. | [20](#text-20), [67](#text-67) |
 | winit | 0.30.13 | Apache-2.0 | by The winit contributors, Pierre Krieger &lt;pierre.krieger1708@gmail.com&gt; | [13](#text-13) |
 | winnow | 1.0.4 | MIT | the contributors to https://github.com/winnow-rs/winnow | [4](#text-4) |
 | wit-bindgen | 0.57.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | by Alex Crichton &lt;alex@alexcrichton.com&gt; | [5](#text-5), [43](#text-43), [4](#text-4) |
@@ -615,14 +620,14 @@ hold, or for a crate whose package holds none, the standard text of each license
 | yoke | 0.8.3 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | yoke-derive | 0.8.2 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | zeno | 0.3.3 | Apache-2.0 OR MIT | Copyright (c) 2020 Chad Brokaw | [5](#text-5), [4](#text-4) |
-| zerocopy | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [20](#text-20), [67](#text-67), [4](#text-4) |
-| zerocopy-derive | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [20](#text-20), [67](#text-67), [4](#text-4) |
+| zerocopy | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [20](#text-20), [68](#text-68), [4](#text-4) |
+| zerocopy-derive | 0.8.56 | BSD-2-Clause OR Apache-2.0 OR MIT | Copyright 2023 The Fuchsia Authors<br>Copyright 2019 The Fuchsia Authors. | [20](#text-20), [68](#text-68), [4](#text-4) |
 | zerofrom | 0.1.8 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | zerofrom-derive | 0.1.7 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | zerotrie | 0.2.5 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | zerovec | 0.11.8 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
 | zerovec-derive | 0.11.6 | Unicode-3.0 | Copyright © 2020-2024 Unicode, Inc. | [37](#text-37) |
-| zlib-rs | 0.6.7 | Zlib | the contributors to https://github.com/trifectatechfoundation/zlib-rs | [68](#text-68) |
+| zlib-rs | 0.6.7 | Zlib | the contributors to https://github.com/trifectatechfoundation/zlib-rs | [69](#text-69) |
 | zmij | 1.0.23 | MIT | by David Tolnay &lt;dtolnay@gmail.com&gt; | [4](#text-4) |
 | zune-core | 0.4.12 | MIT OR Apache-2.0 OR Zlib | the contributors to https://github.com/etemesi254/zune-image/tree/dev/zune-core | [4](#text-4), [5](#text-5), [24](#text-24) |
 | zune-jpeg | 0.4.21 | MIT OR Apache-2.0 OR Zlib | by caleb &lt;etemesicaleb@gmail.com&gt; | [4](#text-4), [5](#text-5), [24](#text-24) |
@@ -1099,7 +1104,7 @@ limitations under the License.
 
 ### Text 4
 
-MIT, as adler2 2.0.1, ahash 0.8.12, allocator-api2 0.2.21, android_log-sys 0.3.2, annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, ash 0.38.0+1.3.281, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, bevy_mikktspace 1.0.0, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytes 1.12.1, calloop 0.13.0, calloop-wayland-source 0.3.0, cc 1.4.4, cfg-if 1.0.4, colorchoice 1.0.5, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, const_soft_float 0.1.4, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpufeatures 0.3.1, critical-section 1.2.0, ctrlc 3.5.2, cursor-icon 1.2.0, displaydoc 0.2.7, dlib 0.5.3, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, erased-serde 0.4.10, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, file-id 0.2.3, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, float-cmp 0.10.0, fnv 1.0.7, font-types 0.12.4, fontique 0.11.1, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-lite 2.6.1, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, getrandom 0.3.4, getrandom 0.4.3, glam 0.33.12, glob 0.3.4, gltf 1.4.1, gltf-json 1.4.1, gpu-allocator 0.28.0, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hexasphere 19.0.0, indexmap 2.14.1, inflections 1.1.1, inventory 0.3.24, is_terminal_polyfill 1.70.2, itertools 0.14.0, itertools 0.15.0, itoa 1.0.18, jni-sys 0.3.1, jni-sys 0.4.1, jobserver 0.1.35, js-sys 0.3.104, kqueue 1.2.1, kqueue-sys 1.1.2, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, libc 0.2.189, libudev-sys 0.1.4, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, litrs 1.0.0, lock_api 0.4.14, log 0.4.34, mach2 0.5.0, matchers 0.2.0, memmap2 0.9.11, mio 1.2.3, nom 8.0.0, nonmax 0.5.5, notify-debouncer-full 0.7.0, notify-types 2.1.0, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, num_enum 0.7.6, num_enum_derive 0.7.6, once_cell 1.21.4, once_cell_polyfill 1.70.2, ordered-float 5.5.0, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, portable-atomic 1.15.0, portable-atomic-util 0.2.7, presser 0.3.1, proc-macro-crate 3.5.0, proc-macro2 1.0.107, quick-error 2.0.1, quote 1.0.47, radsort 0.1.1, rand 0.10.2, rand_core 0.10.1, rand_distr 0.6.0, raw-window-metal 1.1.0, read-fonts 0.41.0, rectangle-pack 0.4.2, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, rodio 0.22.2, ron 0.12.2, rustc-hash 1.1.0, rustc-hash 2.1.3, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, rustversion 1.0.23, scoped-tls 1.0.1, scopeguard 1.2.0, semver 1.0.28, send_wrapper 0.6.0, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, serde_spanned 1.1.2, sharded-slab 0.1.7, simd_cesu8 1.2.0, skrifa 0.44.0, slab 0.4.12, smallvec 1.15.2, smithay-client-toolkit 0.19.2, smol_str 0.2.2, stable_deref_trait 1.2.1, strict-num 0.1.1, swash 0.2.10, syn 2.0.119, syn 3.0.4, synstructure 0.13.2, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, thread_local 1.1.10, tinyvec 1.12.0, toml 1.1.8+spec-1.1.0, toml_datetime 1.1.2+spec-1.1.0, toml_edit 0.25.13+spec-1.1.0, toml_parser 1.1.5+spec-1.1.0, toml_writer 1.1.3+spec-1.1.0, tracing 0.1.44, tracing-attributes 0.1.31, tracing-core 0.1.36, tracing-log 0.2.0, tracing-subscriber 0.3.23, tracing-wasm 0.2.1, ttf-parser 0.25.1, typeid 1.0.3, unicode-ident 1.0.24, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, utf8parse 0.2.2, uuid 1.26.0, vec_map 0.8.2, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, wayland-backend 0.3.17, wayland-client 0.31.15, wayland-csd-frame 0.3.0, wayland-cursor 0.31.14, wayland-protocols 0.32.13, wayland-protocols-plasma 0.3.12, wayland-protocols-wlr 0.3.12, wayland-scanner 0.31.11, wayland-sys 0.31.11, web-sys 0.3.104, web-task 1.1.3, winnow 1.0.4, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11-dl 2.21.0, x11rb 0.13.2, x11rb-protocol 0.13.2, xkeysym 0.2.1, yazi 0.2.1, zeno 0.3.3, zerocopy 0.8.56, zerocopy-derive 0.8.56, zmij 1.0.23 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, bevy_scene_macros 0.20.0, block2 0.5.1, block2 0.6.2, constgebra 0.1.4, dasp_sample 0.11.0, dispatch 0.2.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, mutants 0.0.3, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc-sys 0.3.5, objc2 0.5.2, objc2 0.6.4, objc2-app-kit 0.2.2, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-cloud-kit 0.2.2, objc2-contacts 0.2.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-data 0.2.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-core-image 0.2.2, objc2-core-location 0.2.2, objc2-encode 4.1.0, objc2-foundation 0.2.2, objc2-foundation 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-link-presentation 0.2.2, objc2-metal 0.2.2, objc2-metal 0.3.2, objc2-quartz-core 0.2.2, objc2-quartz-core 0.3.2, objc2-symbols 0.2.2, objc2-ui-kit 0.2.2, objc2-uniform-type-identifiers 0.2.2, objc2-user-notifications 0.2.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, taffy 0.14.0, valuable 0.1.1, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
+MIT, as adler2 2.0.1, ahash 0.8.12, allocator-api2 0.2.21, android_log-sys 0.3.2, annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, ash 0.38.0+1.3.281, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, bevy_mikktspace 1.0.0, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytes 1.12.1, calloop 0.13.0, calloop-wayland-source 0.3.0, cc 1.4.4, cfg-if 1.0.4, colorchoice 1.0.5, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, const_soft_float 0.1.4, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpufeatures 0.3.1, critical-section 1.2.0, ctrlc 3.5.2, cursor-icon 1.2.0, displaydoc 0.2.7, dlib 0.5.3, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, erased-serde 0.4.10, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, file-id 0.2.3, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, float-cmp 0.10.0, fnv 1.0.7, font-types 0.12.4, fontique 0.11.1, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, futures-channel 0.3.34, futures-core 0.3.34, futures-io 0.3.34, futures-lite 2.6.1, futures-macro 0.3.34, futures-task 0.3.34, futures-util 0.3.34, getrandom 0.3.4, getrandom 0.4.3, glam 0.33.12, glob 0.3.4, gltf 1.4.1, gltf-json 1.4.1, gpu-allocator 0.28.0, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hexasphere 19.0.0, indexmap 2.14.1, inflections 1.1.1, inventory 0.3.24, is_terminal_polyfill 1.70.2, itertools 0.14.0, itertools 0.15.0, itoa 1.0.18, jni-sys 0.3.1, jni-sys 0.4.1, jobserver 0.1.35, js-sys 0.3.104, kqueue 1.2.1, kqueue-sys 1.1.2, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, libc 0.2.189, libudev-sys 0.1.4, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, litrs 1.0.0, lock_api 0.4.14, log 0.4.34, mach2 0.5.0, matchers 0.2.0, memmap2 0.9.11, mio 1.2.3, nom 8.0.0, nonmax 0.5.5, notify-debouncer-full 0.7.0, notify-types 2.1.0, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, num_enum 0.7.6, num_enum_derive 0.7.6, once_cell 1.21.4, once_cell_polyfill 1.70.2, ordered-float 5.5.0, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, pin-project 1.1.13, pin-project-internal 1.1.13, pin-project-lite 0.2.17, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, portable-atomic 1.15.0, portable-atomic-util 0.2.7, presser 0.3.1, proc-macro-crate 3.5.0, proc-macro2 1.0.107, quick-error 2.0.1, quote 1.0.47, radsort 0.1.1, rand 0.10.2, rand_core 0.10.1, rand_distr 0.6.0, raw-window-metal 1.1.0, read-fonts 0.41.0, rectangle-pack 0.4.2, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, rodio 0.22.2, ron 0.12.2, rustc-hash 1.1.0, rustc-hash 2.1.3, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, rustversion 1.0.23, scoped-tls 1.0.1, scopeguard 1.2.0, semver 1.0.28, send_wrapper 0.6.0, serde 1.0.229, serde_core 1.0.229, serde_derive 1.0.229, serde_json 1.0.151, serde_spanned 1.1.2, sharded-slab 0.1.7, simd_cesu8 1.2.0, skrifa 0.44.0, slab 0.4.12, smallvec 1.15.2, smithay-client-toolkit 0.19.2, smol_str 0.2.2, stable_deref_trait 1.2.1, strict-num 0.1.1, swash 0.2.10, syn 2.0.119, syn 3.0.4, synstructure 0.13.2, thiserror 1.0.69, thiserror 2.0.20, thiserror-impl 1.0.69, thiserror-impl 2.0.20, thread_local 1.1.10, tinyvec 1.12.0, toml 1.1.8+spec-1.1.0, toml_datetime 1.1.2+spec-1.1.0, toml_edit 0.25.13+spec-1.1.0, toml_parser 1.1.5+spec-1.1.0, toml_writer 1.1.3+spec-1.1.0, tracing 0.1.44, tracing-attributes 0.1.31, tracing-core 0.1.36, tracing-log 0.2.0, tracing-subscriber 0.3.23, tracing-wasm 0.2.1, ttf-parser 0.25.1, typeid 1.0.3, unicode-ident 1.0.24, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, utf8parse 0.2.2, uuid 1.26.0, vec_map 0.8.2, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, wayland-backend 0.3.17, wayland-client 0.31.15, wayland-csd-frame 0.3.0, wayland-cursor 0.31.14, wayland-protocols 0.32.13, wayland-protocols-plasma 0.3.12, wayland-protocols-wlr 0.3.12, wayland-scanner 0.31.11, wayland-sys 0.31.11, web-sys 0.3.104, web-task 1.1.3, winapi 0.3.9, winnow 1.0.4, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11-dl 2.21.0, x11rb 0.13.2, x11rb-protocol 0.13.2, xkeysym 0.2.1, yazi 0.2.1, zeno 0.3.3, zerocopy 0.8.56, zerocopy-derive 0.8.56, zmij 1.0.23 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, bevy_scene_macros 0.20.0, block2 0.5.1, block2 0.6.2, constgebra 0.1.4, dasp_sample 0.11.0, dispatch 0.2.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, mutants 0.0.3, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc-sys 0.3.5, objc2 0.5.2, objc2 0.6.4, objc2-app-kit 0.2.2, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-cloud-kit 0.2.2, objc2-contacts 0.2.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-data 0.2.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-core-image 0.2.2, objc2-core-location 0.2.2, objc2-encode 4.1.0, objc2-foundation 0.2.2, objc2-foundation 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-link-presentation 0.2.2, objc2-metal 0.2.2, objc2-metal 0.3.2, objc2-quartz-core 0.2.2, objc2-quartz-core 0.3.2, objc2-symbols 0.2.2, objc2-ui-kit 0.2.2, objc2-uniform-type-identifiers 0.2.2, objc2-user-notifications 0.2.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, taffy 0.14.0, valuable 0.1.1, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, winapi-i686-pc-windows-gnu 0.4.0, winapi-x86_64-pc-windows-gnu 0.4.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
 
 ~~~~
 Permission is hereby granted, free of charge, to any
@@ -1129,7 +1134,7 @@ DEALINGS IN THE SOFTWARE.
 
 ### Text 5
 
-Apache-2.0, as ahash 0.8.12, approx 0.5.1, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, assert_type_match 0.1.1, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, base64 0.23.1, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytemuck 1.25.2, bytemuck_derive 1.12.0, cc 1.4.4, cfg-if 1.0.4, claxon 0.4.3, codespan-reporting 0.13.1, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpal 0.17.3, cpufeatures 0.3.1, critical-section 1.2.0, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, displaydoc 0.2.7, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, fnv 1.0.7, fontique 0.11.1, futures-lite 2.6.1, gethostname 1.1.0, glob 0.3.4, gltf 1.4.1, gltf-derive 1.4.1, gltf-json 1.4.1, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hound 3.5.1, indexmap 2.14.1, itertools 0.14.0, itertools 0.15.0, jni 0.21.1, jobserver 0.1.35, js-sys 0.3.104, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, lock_api 0.4.14, log 0.4.34, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, once_cell 1.21.4, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, presser 0.3.1, radsort 0.1.1, raw-window-metal 1.1.0, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, ron 0.12.2, rustc-hash 1.1.0, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, scoped-tls 1.0.1, scopeguard 1.2.0, send_wrapper 0.6.0, simd_cesu8 1.2.0, smallvec 1.15.2, smol_str 0.2.2, stable_deref_trait 1.2.1, static_assertions 1.1.0, swash 0.2.10, sys-locale 0.3.2, thread_local 1.1.10, tinyvec 1.12.0, tracing-wasm 0.2.1, ttf-parser 0.25.1, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, uuid 1.26.0, vec_map 0.8.2, version_check 0.9.5, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, web-sys 0.3.104, web-task 1.1.3, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11rb 0.13.2, x11rb-protocol 0.13.2, yazi 0.2.1, zeno 0.3.3 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, accesskit_winit 0.33.2, bevy_scene_macros 0.20.0, constgebra 0.1.4, dasp_sample 0.11.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-metal 0.3.2, objc2-quartz-core 0.3.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, spirv 0.4.0+sdk-1.4.341.0, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
+Apache-2.0, as ahash 0.8.12, approx 0.5.1, arrayvec 0.7.8, as-raw-xcb-connection 1.0.1, assert_type_match 0.1.1, async-channel 2.5.0, async-executor 1.14.0, async-fs 2.2.0, async-io 2.6.0, async-lock 3.4.2, async-task 4.7.1, atomic-waker 1.1.2, autocfg 1.5.1, base64 0.23.1, bit-set 0.10.0, bit-vec 0.9.1, bitflags 1.3.2, bitflags 2.13.1, blocking 1.7.0, bumpalo 3.20.3, bytemuck 1.25.2, bytemuck_derive 1.12.0, cc 1.4.4, cfg-if 1.0.4, claxon 0.4.3, codespan-reporting 0.13.1, concurrent-queue 2.5.0, console_error_panic_hook 0.1.7, core-foundation 0.9.4, core-foundation-sys 0.8.7, core-graphics 0.23.2, core-graphics-types 0.1.3, coreaudio-rs 0.14.2, cpal 0.17.3, cpufeatures 0.3.1, critical-section 1.2.0, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, displaydoc 0.2.7, document-features 0.2.12, downcast-rs 1.2.1, downcast-rs 2.0.2, either 1.18.0, encoding_rs 0.8.35, equivalent 1.0.2, errno 0.3.14, euclid 0.22.14, event-listener 5.4.2, event-listener-strategy 0.5.4, fastrand 2.5.0, find-msvc-tools 0.1.11, fixedbitset 0.5.7, flate2 1.1.10, fnv 1.0.7, fontique 0.11.1, futures-lite 2.6.1, gethostname 1.1.0, glob 0.3.4, gltf 1.4.1, gltf-derive 1.4.1, gltf-json 1.4.1, hash32 0.3.1, hashbrown 0.15.5, hashbrown 0.16.1, hashbrown 0.17.1, heapless 0.9.3, hermit-abi 0.5.2, hound 3.5.1, indexmap 2.14.1, itertools 0.14.0, itertools 0.15.0, jni 0.21.1, jobserver 0.1.35, js-sys 0.3.104, lalrpop-util 0.23.1, lazy_static 1.5.0, lexical 7.0.5, lexical-core 1.0.6, lexical-parse-float 1.0.6, lexical-parse-integer 1.0.6, lexical-util 1.0.7, lexical-write-float 1.0.6, lexical-write-integer 1.0.6, linux-raw-sys 0.4.15, linux-raw-sys 0.12.1, lock_api 0.4.14, log 0.4.34, ntapi 0.4.3, num-bigint 0.4.8, num-derive 0.4.2, num-integer 0.1.47, num-rational 0.4.2, num-traits 0.2.19, once_cell 1.21.4, parking 2.2.1, parking_lot 0.12.5, parking_lot_core 0.9.12, parlance 0.1.0, parley 0.11.1, parley_data 0.11.1, percent-encoding 2.3.2, petgraph 0.8.3, piper 0.2.5, pkg-config 0.3.34, plain 0.2.3, png 0.17.16, polling 3.11.0, presser 0.3.1, radsort 0.1.1, raw-window-metal 1.1.0, regex-automata 0.4.18, regex-syntax 0.8.11, renderdoc-sys 1.1.0, ron 0.12.2, rustc-hash 1.1.0, rustc_version 0.4.1, rustix 0.38.44, rustix 1.1.4, scoped-tls 1.0.1, scopeguard 1.2.0, send_wrapper 0.6.0, simd_cesu8 1.2.0, smallvec 1.15.2, smol_str 0.2.2, stable_deref_trait 1.2.1, static_assertions 1.1.0, swash 0.2.10, sys-locale 0.3.2, thread_local 1.1.10, tinyvec 1.12.0, tracing-wasm 0.2.1, ttf-parser 0.25.1, unicode-segmentation 1.13.3, unicode-width 0.2.2, unicode-xid 0.2.6, unsynn 0.3.0, utf8_iter 1.0.4, uuid 1.26.0, vec_map 0.8.2, version_check 0.9.5, wasi 0.11.1+wasi-snapshot-preview1, wasip2 1.0.4+wasi-0.2.12, wasm-bindgen 0.2.127, wasm-bindgen-futures 0.4.77, wasm-bindgen-macro 0.2.127, wasm-bindgen-macro-support 0.2.127, wasm-bindgen-shared 0.2.127, web-sys 0.3.104, web-task 1.1.3, wit-bindgen 0.57.1, wl-clipboard-rs 0.9.3, x11rb 0.13.2, x11rb-protocol 0.13.2, yazi 0.2.1, zeno 0.3.3 carry it, and the text taken for accesskit 0.24.1, accesskit_consumer 0.38.0, accesskit_ios 0.1.2, accesskit_macos 0.26.3, accesskit_windows 0.34.0, accesskit_winit 0.33.2, bevy_scene_macros 0.20.0, constgebra 0.1.4, dasp_sample 0.11.0, dispatch2 0.3.1, gilrs-core 0.6.8, jni 0.22.4, jni-macros 0.22.4, jni-sys-macros 0.4.1, meshopt 0.6.2, ndk 0.9.0, ndk-context 0.1.1, ndk-sys 0.6.0+11769913, objc2-app-kit 0.3.2, objc2-audio-toolbox 0.3.2, objc2-avf-audio 0.3.2, objc2-core-audio 0.3.2, objc2-core-audio-types 0.3.2, objc2-core-foundation 0.3.2, objc2-core-graphics 0.3.2, objc2-io-kit 0.3.2, objc2-io-surface 0.3.2, objc2-metal 0.3.2, objc2-quartz-core 0.3.2, profiling 1.0.18, r-efi 5.3.0, r-efi 6.0.0, spirv 0.4.0+sdk-1.4.341.0, wesl 0.6.0, wesl-core 0.1.0, wesl-macros 0.6.0, wgsl-parse 0.6.0, wgsl-types 0.6.0, winapi-i686-pc-windows-gnu 0.4.0, winapi-x86_64-pc-windows-gnu 0.4.0, zune-core 0.4.12, zune-jpeg 0.4.21, bevy_embedded_assets 0.16.0, whose packages hold none.
 
 ~~~~
                               Apache License
@@ -1347,7 +1352,7 @@ You may use this code under the terms of either license.
 
 ### Text 7
 
-MIT, as aho-corasick 1.1.5, android_system_properties 0.1.6, async-broadcast 0.7.2, base64 0.23.1, byteorder 1.5.0, byteorder-lite 0.1.0, combine 4.6.8, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, crunchy 0.2.4, derive_more 2.1.1, derive_more-impl 2.1.1, fsevent-sys 4.1.0, guillotiere 0.7.0, harfrust 0.12.0, jni 0.21.1, logos 0.16.1, logos-codegen 0.16.1, logos-derive 0.16.1, lz4_flex 0.13.1, memchr 2.8.3, nix 0.31.3, nu-ansi-term 0.50.3, orbclient 0.3.55, os_pipe 1.2.3, quick-xml 0.41.0, same-file 1.0.6, shlex 2.0.1, spin 0.12.3, termcolor 1.4.1, tracing-core 0.1.36, twox-hash 2.1.4, version_check 0.9.5, walkdir 2.5.0, winapi-util 0.1.11, xkbcommon-dl 0.4.2 carry it.
+MIT, as aho-corasick 1.1.5, android_system_properties 0.1.6, async-broadcast 0.7.2, base64 0.23.1, byteorder 1.5.0, byteorder-lite 0.1.0, combine 4.6.8, crossbeam-channel 0.5.16, crossbeam-queue 0.3.13, crossbeam-utils 0.8.22, crunchy 0.2.4, derive_more 2.1.1, derive_more-impl 2.1.1, fsevent-sys 4.1.0, guillotiere 0.7.0, harfrust 0.12.0, jni 0.21.1, logos 0.16.1, logos-codegen 0.16.1, logos-derive 0.16.1, lz4_flex 0.13.1, memchr 2.8.3, nix 0.31.3, nu-ansi-term 0.50.3, orbclient 0.3.55, os_pipe 1.2.3, quick-xml 0.41.0, same-file 1.0.6, shlex 2.0.1, spin 0.12.3, sysinfo 0.39.6, termcolor 1.4.1, tracing-core 0.1.36, twox-hash 2.1.4, version_check 0.9.5, walkdir 2.5.0, winapi-util 0.1.11, xkbcommon-dl 0.4.2 carry it.
 
 ~~~~
 The MIT License (MIT)
@@ -1688,7 +1693,7 @@ limitations under the License.
 
 ### Text 13
 
-Apache-2.0, as annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, colorchoice 1.0.5, crc32fast 1.5.1, dpi 0.1.2, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, is_terminal_polyfill 1.70.2, jni-sys 0.3.1, jni-sys 0.4.1, once_cell_polyfill 1.70.2, quick-error 2.0.1, toml_edit 0.25.13+spec-1.1.0, winit 0.30.13 carry it.
+Apache-2.0, as annotate-snippets 0.12.16, anstream 1.0.0, anstyle 1.0.14, anstyle-parse 1.0.0, anstyle-query 1.1.5, anstyle-wincon 3.0.11, colorchoice 1.0.5, crc32fast 1.5.1, dpi 0.1.2, foreign-types 0.5.0, foreign-types-macros 0.2.4, foreign-types-shared 0.3.1, is_terminal_polyfill 1.70.2, jni-sys 0.3.1, jni-sys 0.4.1, once_cell_polyfill 1.70.2, quick-error 2.0.1, toml_edit 0.25.13+spec-1.1.0, winapi 0.3.9, winit 0.30.13 carry it.
 
 ~~~~
                                  Apache License
@@ -5948,6 +5953,30 @@ For these and/or other purposes and motivations, and without any expectation of 
 
 ### Text 47
 
+MIT, as ntapi 0.4.3 carries it.
+
+~~~~
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"),to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+~~~~
+
+### Text 48
+
 BSD-3-Clause, as num_enum 0.7.6, num_enum_derive 0.7.6 carry it.
 
 ~~~~
@@ -5979,7 +6008,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 48
+### Text 49
 
 BSD-3-Clause, as ogg 0.8.0 carries it.
 
@@ -6020,7 +6049,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 49
+### Text 50
 
 LGPL-2.1, as orbclient 0.3.55 carries it.
 
@@ -6397,7 +6426,7 @@ library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
 ~~~~
 
-### Text 50
+### Text 51
 
 Apache-2.0, as parking 2.2.1 carries it.
 
@@ -6412,7 +6441,7 @@ option. All files in the project carrying such notice may not be
 copied, modified, or distributed except according to those terms.
 ~~~~
 
-### Text 51
+### Text 52
 
 A notice, as petgraph 0.8.3 carries it.
 
@@ -6426,7 +6455,7 @@ You should have received a copy of the license along with this
 work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
 ~~~~
 
-### Text 52
+### Text 53
 
 Apache-2.0, as rand 0.10.2, rand_distr 0.6.0 carry it.
 
@@ -6444,7 +6473,7 @@ The Rand project includes code from the Rust project
 published under these same licenses.
 ~~~~
 
-### Text 53
+### Text 54
 
 Apache-2.0, as rand 0.10.2 carries it.
 
@@ -6627,7 +6656,7 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 END OF TERMS AND CONDITIONS
 ~~~~
 
-### Text 54
+### Text 55
 
 Apache-2.0, as rand_core 0.10.1 carries it.
 
@@ -6642,7 +6671,7 @@ licensed under the Apache License, Version 2.0 <LICENSE-APACHE> or
 <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your option.
 ~~~~
 
-### Text 55
+### Text 56
 
 Apache-2.0, as rand_core 0.10.1, rand_distr 0.6.0 carry it.
 
@@ -6836,7 +6865,7 @@ APPENDIX: How to apply the Apache License to your work.
    identification within third-party archives.
 ~~~~
 
-### Text 56
+### Text 57
 
 Unicode-DFS-2016, as regex-syntax 0.8.11 carries it.
 
@@ -6899,7 +6928,7 @@ use or other dealings in these Data Files or Software without prior
 written authorization of the copyright holder.
 ~~~~
 
-### Text 57
+### Text 58
 
 Apache-2.0, as rustix 0.38.44, rustix 1.1.4 carry it.
 
@@ -6935,7 +6964,7 @@ is licensed under:
 at your option.
 ~~~~
 
-### Text 58
+### Text 59
 
 MIT, as stackfuture 0.3.1 carries it.
 
@@ -6963,7 +6992,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ~~~~
 
-### Text 59
+### Text 60
 
 BSD-3-Clause, as tiny-skia 0.11.4, tiny-skia-path 0.11.4 carry it.
 
@@ -6997,7 +7026,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 60
+### Text 61
 
 Zlib, as tinyvec_macros 0.1.1 carries it.
 
@@ -7023,7 +7052,7 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 ~~~~
 
-### Text 61
+### Text 62
 
 Zlib, as tracing-oslog 0.3.0 carries it.
 
@@ -7051,7 +7080,7 @@ the following restrictions:
 3.  This notice may not be removed or altered from any source distribution.
 ~~~~
 
-### Text 62
+### Text 63
 
 Unicode-3.0, as unicode-ident 1.0.24 carries it.
 
@@ -7096,7 +7125,7 @@ dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 ~~~~
 
-### Text 63
+### Text 64
 
 Apache-2.0, as utf8_iter 1.0.4 carries it.
 
@@ -7143,7 +7172,7 @@ licensed under the Apache License, Version 2.0 <LICENSE-APACHE> or
 <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your option.
 ~~~~
 
-### Text 64
+### Text 65
 
 MIT, as wayland-protocols 0.32.13 carries it.
 
@@ -7174,7 +7203,7 @@ The above is the version of the MIT "Expat" License used by X.org:
     http://cgit.freedesktop.org/xorg/xserver/tree/COPYING
 ~~~~
 
-### Text 65
+### Text 66
 
 LGPL-2.1, as wayland-protocols-plasma 0.3.12 carries it.
 
@@ -7695,7 +7724,7 @@ if necessary.  Here is a sample; alter the names:
 That's all there is to it!
 ~~~~
 
-### Text 66
+### Text 67
 
 MIT, as windows 0.62.2, windows-collections 0.3.2, windows-core 0.62.2, windows-future 0.3.2, windows-implement 0.60.2, windows-interface 0.59.3, windows-link 0.2.1, windows-numerics 0.3.1, windows-result 0.4.1, windows-strings 0.5.1, windows-sys 0.45.0, windows-sys 0.52.0, windows-sys 0.59.0, windows-sys 0.60.2, windows-sys 0.61.2, windows-targets 0.42.2, windows-targets 0.52.6, windows-targets 0.53.5, windows-threading 0.2.1, windows_aarch64_gnullvm 0.42.2, windows_aarch64_gnullvm 0.52.6, windows_aarch64_gnullvm 0.53.1, windows_aarch64_msvc 0.42.2, windows_aarch64_msvc 0.52.6, windows_aarch64_msvc 0.53.1, windows_i686_gnu 0.42.2, windows_i686_gnu 0.52.6, windows_i686_gnu 0.53.1, windows_i686_gnullvm 0.52.6, windows_i686_gnullvm 0.53.1, windows_i686_msvc 0.42.2, windows_i686_msvc 0.52.6, windows_i686_msvc 0.53.1, windows_x86_64_gnu 0.42.2, windows_x86_64_gnu 0.52.6, windows_x86_64_gnu 0.53.1, windows_x86_64_gnullvm 0.42.2, windows_x86_64_gnullvm 0.52.6, windows_x86_64_gnullvm 0.53.1, windows_x86_64_msvc 0.42.2, windows_x86_64_msvc 0.52.6, windows_x86_64_msvc 0.53.1 carry it.
 
@@ -7723,7 +7752,7 @@ MIT, as windows 0.62.2, windows-collections 0.3.2, windows-core 0.62.2, windows-
     SOFTWARE
 ~~~~
 
-### Text 67
+### Text 68
 
 BSD-2-Clause, as zerocopy 0.8.56, zerocopy-derive 0.8.56 carry it.
 
@@ -7752,7 +7781,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ~~~~
 
-### Text 68
+### Text 69
 
 Zlib, as zlib-rs 0.6.7 carries it.
 
@@ -7778,7 +7807,7 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 ~~~~
 
-### Text 69
+### Text 70
 
 MPL-2.0, from this repository's own LICENSE, and the text taken for symphonia 0.5.5, symphonia-bundle-mp3 0.5.5, symphonia-core 0.5.5, symphonia-metadata 0.5.5, whose packages hold none.
 

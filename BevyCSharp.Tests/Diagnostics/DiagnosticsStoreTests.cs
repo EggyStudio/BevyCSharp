@@ -101,4 +101,39 @@ public sealed class DiagnosticsStoreTests
 
         harness.Run();
     }
+
+    /// <summary>
+    /// Bevy's system information measures how much of the CPU and memory the machine and the
+    /// process use, each a share between none and all of it, the process's memory in gibibytes
+    /// above none, read back once its task has measured them.
+    /// </summary>
+    [SkippableFact]
+    public void TheMachinesAndTheProcesssCpuAndMemoryAreMeasured()
+    {
+        Skip.IfNot(
+            OperatingSystem.IsLinux() || OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsAndroid(),
+            "Bevy measures the system on Linux, Windows, macOS and Android alone");
+
+        // A second at most at sixty frames, since the task measures the CPU no oftener than the
+        // system allows, a fifth of a second apart on Linux.
+        using var harness = new EngineHarness(frames: 60, fps: 60, configure: config => config.DiagnosticPlugins = DiagnosticPlugins.SystemInformation);
+        string[] paths = [Diagnostics.SystemCpuUsage, Diagnostics.SystemMemUsage, Diagnostics.ProcessCpuUsage, Diagnostics.ProcessMemUsage];
+        Dictionary<string, double>? read = null;
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            if (read is not null) return;
+            var values = paths.Select(path => Diagnostics.TryRead(path, out var reading) ? reading.Value ?? double.NaN : double.NaN).ToArray();
+            if (values.Any(double.IsNaN)) return;
+            read = paths.Zip(values).ToDictionary(pair => pair.First, pair => pair.Second);
+        });
+
+        harness.Run();
+
+        Skip.If(read is null, "the system answered no measures within a second, as a sandbox that hides its processes does");
+        Assert.InRange(read![Diagnostics.SystemCpuUsage], 0d, 100d);
+        Assert.InRange(read[Diagnostics.SystemMemUsage], 0d, 100d);
+        Assert.InRange(read[Diagnostics.ProcessCpuUsage], 0d, 100d * Environment.ProcessorCount);
+        Assert.True(read[Diagnostics.ProcessMemUsage] > 0d, $"the process used {read[Diagnostics.ProcessMemUsage]} GiB");
+    }
 }

@@ -1340,6 +1340,7 @@ enum Bevy.DiagnosticPlugins : int
   Log = 1
   None = 0
   Render = 8
+  SystemInformation = 16
 readonly struct Bevy.DiagnosticReading : IEquatable<DiagnosticReading>
   DiagnosticReading(string Path, string Suffix, bool Enabled, int History, double? Value, double? Smoothed, double? Average)
   bool Enabled { get; init; }
@@ -1361,6 +1362,10 @@ static class Bevy.Diagnostics
   const string Fps = "fps"
   const string FrameCount = "frame_count"
   const string FrameTime = "frame_time"
+  const string ProcessCpuUsage = "process/cpu_usage"
+  const string ProcessMemUsage = "process/mem_usage"
+  const string SystemCpuUsage = "system/cpu_usage"
+  const string SystemMemUsage = "system/mem_usage"
   static IReadOnlyList<DiagnosticReading> All()
   static bool Measure(string path, double value)
   static bool SetEnabled(string path, bool on)

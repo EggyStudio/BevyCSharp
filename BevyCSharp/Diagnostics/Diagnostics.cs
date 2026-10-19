@@ -45,6 +45,30 @@ public static unsafe class Diagnostics
     /// </summary>
     public const string EntityCount = "entity_count";
 
+    /// <summary>
+    /// The percentage of the machine's CPU in use, which <see cref="DiagnosticPlugins.SystemInformation"/>
+    /// measures.
+    /// </summary>
+    public const string SystemCpuUsage = "system/cpu_usage";
+
+    /// <summary>
+    /// The percentage of the machine's memory in use, which
+    /// <see cref="DiagnosticPlugins.SystemInformation"/> measures.
+    /// </summary>
+    public const string SystemMemUsage = "system/mem_usage";
+
+    /// <summary>
+    /// The percentage of the machine's CPU the process uses, which
+    /// <see cref="DiagnosticPlugins.SystemInformation"/> measures.
+    /// </summary>
+    public const string ProcessCpuUsage = "process/cpu_usage";
+
+    /// <summary>
+    /// The gibibytes of memory the process uses, which <see cref="DiagnosticPlugins.SystemInformation"/>
+    /// measures.
+    /// </summary>
+    public const string ProcessMemUsage = "process/mem_usage";
+
     /// <summary>Registers a diagnostic, so measurements of it are kept. Only valid inside a system.</summary>
     /// <remarks>
     /// Registering a path again starts its history over. A path is made of names apart by slashes,

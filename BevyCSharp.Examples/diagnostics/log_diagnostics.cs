@@ -6,18 +6,15 @@ using Bevy.Reflected;
 
 namespace BevyCSharp.Examples.Measuring;
 
-// Bevy's diagnostics of frame times, the entity count and the render passes, which its log prints
-// once a second over a small scene, the render passes' only while something is drawn. Q filters the
-// log to the groups 1, 2 and 3 choose, and the rows at the top left say which.
-//
-// Bevy's system information diagnostics, its row 3, measure the process's and the machine's CPU and
-// memory through a crate the bridge does not compile in, so filtering to them here leaves them out
-// of a log that has none of them.
+// Bevy's diagnostics of frame times, the entity count, the process's and the machine's CPU and
+// memory and the render passes, which its log prints once a second over a small scene, the render
+// passes' only while something is drawn. Q filters the log to the groups 1, 2 and 3 choose, and the
+// rows at the top left say which.
 internal static class LogDiagnostics
 {
     private static readonly string[] FrameTimeDiagnostics = [Diagnostics.Fps, Diagnostics.FrameCount, Diagnostics.FrameTime];
     private static readonly string[] EntityCountDiagnostics = [Diagnostics.EntityCount];
-    private static readonly string[] SystemInfoDiagnostics = ["process/cpu_usage", "process/mem_usage", "system/cpu_usage", "system/mem_usage"];
+    private static readonly string[] SystemInfoDiagnostics = [Diagnostics.ProcessCpuUsage, Diagnostics.ProcessMemUsage, Diagnostics.SystemCpuUsage, Diagnostics.SystemMemUsage];
 
     // Tailwind's green-400 and red-400.
     private static readonly Color Green = Color.FromHex("4ade80");
@@ -29,7 +26,8 @@ internal static class LogDiagnostics
     private static readonly HashSet<string> Filter = [];
 
     public static void Configure(Config config) =>
-        config.DiagnosticPlugins = DiagnosticPlugins.Log | DiagnosticPlugins.FrameTime | DiagnosticPlugins.EntityCount | DiagnosticPlugins.Render;
+        config.DiagnosticPlugins = DiagnosticPlugins.Log | DiagnosticPlugins.FrameTime | DiagnosticPlugins.EntityCount
+            | DiagnosticPlugins.SystemInformation | DiagnosticPlugins.Render;
 
     public static void Build(App app)
     {

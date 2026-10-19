@@ -37,4 +37,18 @@ public enum DiagnosticPlugins
     /// same plugin and reads its numbers into <see cref="Render.Timings"/> as well.
     /// </remarks>
     Render = 8,
+
+    /// <summary>
+    /// How much of the CPU and the memory the machine and the process use
+    /// (<c>SystemInformationDiagnosticsPlugin</c>), as <see cref="Diagnostics.SystemCpuUsage"/>,
+    /// <see cref="Diagnostics.SystemMemUsage"/>, <see cref="Diagnostics.ProcessCpuUsage"/> and
+    /// <see cref="Diagnostics.ProcessMemUsage"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read on a task of Bevy's own no oftener than the system can measure the CPU, so the first
+    /// measures come some frames after the app starts. Bevy logs the machine's system, kernel,
+    /// CPU, cores and memory as it starts. On a system other than Linux, Windows, Android and
+    /// macOS, Bevy warns that it is not supported and measures nothing.
+    /// </remarks>
+    SystemInformation = 16,
 }

@@ -167,7 +167,7 @@ infinite_grid	can
 schedule_data	n/a	reads Bevy's schedule graphs from Rust
 custom_diagnostic	can
 enabling_disabling_diagnostic	can
-log_diagnostics	part	Bevy's system information diagnostics, the process's and the machine's CPU and memory, whose crate the bridge does not compile in
+log_diagnostics	can
 callbacks	can
 change_detection	can	its changes named by the C# file and line that made them, and its chances drawn from a generator the captures seed
 component_hooks	can	the hooks' change of the world queued on the app's commands, applied after the frame's systems, where Bevy's apply as the hook's command ends

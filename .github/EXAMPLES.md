@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**371 written, 2 written in part, 0 can be written, 5 missing and 60 do not apply.** Of the 378 that apply, 373 can be written with what is bridged, 2 of them leaving something out.
+**372 written, 1 written in part, 0 can be written, 5 missing and 60 do not apply.** Of the 378 that apply, 373 can be written with what is bridged, 1 of them leaving something out.
 
 **164 of the 180 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -19,7 +19,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Audio](#audio) | 8 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Camera](#camera) | 12 | 0 | 0 | 0 | 0 | 3 of 5 |
 | [Dev tools](#dev-tools) | 2 | 0 | 0 | 0 | 1 |  |
-| [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
+| [Diagnostics](#diagnostics) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 26 | 0 | 0 | 0 | 9 | 13 of 14 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
 | [Games](#games) | 7 | 0 | 0 | 0 | 0 | 6 of 6 |
@@ -43,7 +43,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **371** | **2** | **0** | **5** | **60** | **164 of 180** |
+| **All** | **372** | **1** | **0** | **5** | **60** | **164 of 180** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -271,7 +271,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 |---|---|---|
 | [`custom_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/custom_diagnostic.rs) | Shows how to create a custom diagnostic | [written](../BevyCSharp.Examples/diagnostics/custom_diagnostic.cs), prints [its output](assets/examples/custom_diagnostic.txt) |
 | [`enabling_disabling_diagnostic`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/enabling_disabling_diagnostic.rs) | Shows how to disable/re-enable a Diagnostic during runtime | [written](../BevyCSharp.Examples/diagnostics/enabling_disabling_diagnostic.cs), prints [its output](assets/examples/enabling_disabling_diagnostic.txt) |
-| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | [written in part](../BevyCSharp.Examples/diagnostics/log_diagnostics.cs), Bevy's system information diagnostics, the process's and the machine's CPU and memory, whose crate the bridge does not compile in |
+| [`log_diagnostics`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/diagnostics/log_diagnostics.rs) | Add a plugin that logs diagnostics, like frames per second (FPS), to the console | [written](../BevyCSharp.Examples/diagnostics/log_diagnostics.cs) |
 
 ## ECS (Entity Component System)
 
