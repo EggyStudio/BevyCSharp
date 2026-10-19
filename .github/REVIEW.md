@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `142dc131`, `monitor_info` and nothing else, 17 files, the last batch of item 4, the
+Reviewed up to `024c1113`, item 29's part (a) and nothing else, 7 files. The two sprite examples
+take a seeded generator where the workflow runs, as the cake example does, and an unseeded one
+otherwise, the capture script exporting the workflow's variable so a local capture is seeded too,
+each header remark saying that where the workflow runs the sprites come from a seeded generator so
+the picture is the same crowd every time, where Bevy's places another crowd each run; the two lines
+leave the differ file and the paragraph leaves TODO.md's section of mends of the moment. Before,
+44.1 and 58.6 percent of the pictures' pixels stood apart on lavapipe by the lines removed; after,
+the pictures retaken on a render bridge and taken again on the editor bridge differ in none of their
+921,600 pixels and the comparison reports both matching. The norm and script tests passed, 57 of 57.
+Right. Next part (b), Solari's panel under the workflow, then the parts in order, one a commit, the
+section only getting shorter; the owner's push of the eleven commits; and a pack run.
+
+Before it, `142dc131` came, `monitor_info` and nothing else, 17 files, the last batch of item 4, the
 ABI unchanged at 294. `build/capture-monitor-info.sh` runs the example in the SDK's container image
 through whichever container runtime is found, a headless compositor with four outputs of 1280 by 720
 in a two-by-two grid from the configuration beside it, lavapipe drawing, the grid captured at 2560
@@ -56,30 +68,6 @@ and the whole layout captured, four outputs of 1280 by 720 in a two-by-two grid 
 gallery's size, each window naming its monitor. Right. Next `monitor_info` so, the capture job
 running the container where it can and otherwise a script under `build/` that takes the picture the
 same way on any machine with the container runtime, and the owner's push of the nine commits.
-
-Before it, `8ae312a4` came, item 4's system information batch and nothing else, 17 files, the ABI
-293 to 294, the lock gaining the five crates measured, `sysinfo` with `ntapi`, `winapi` and its two
-shims, through Bevy's feature on the headless profile, since nothing draws, so every profile has it.
-`diagnostics.rs` adds Bevy's system information plugin for a new bit of the diagnostics flags the
-config carries, no export changing, the ABI bumped since an older bridge would ignore the bit
-without a word; the managed side gains the flag and the four diagnostic paths, the machine's and the
-process's CPU and memory, the surface listing written again, the tools guide listing the flag among
-Bevy's measuring plugins with a sentence that its first values come some frames after start and
-losing its line on the crate not compiled in. `log_diagnostics` asks for the flag and loses its
-header on the missing crate, its row from part to can, run live with Bevy's system line and all four
-measures in the log, its picture matching the checked-in one; the table at 372 written, 1 written in
-part, which is `monitor_info`, and 5 missing, TODO.md's entry on the system information removed. One
-test joins the diagnostics store's, skipping on systems Bevy does not measure or where no measure
-answers within a second at sixty frames, with the reason, and otherwise holding the CPU shares
-between 0 and 100, the process's up to 100 a core, and the process's memory above zero, run and not
-skipped on the editor and the headless bridges. The README's gallery, which the dev tools commit
-wrote before its four pictures were taken, gains the dev tools section and the two pictures in the
-picking and tools rows. Checked were `cargo check` on the four profiles with Windows and macOS on
-the headless and the editor's with Solari, the two Windows crates compiled, `cargo test` headless
-and on render, the headless bridge under B 2, the examples on a fresh package, and the whole suite
-with a clean build, 1,514 passed, 3 skipped and none failed of 1,517. Right. Next the two declined
-rows marked in one commit of documents with the norm tests run first, then `monitor_info` on virtual
-monitors, and the owner's push of the eight commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -840,7 +828,8 @@ from [SHARED.md](SHARED.md).
     commit a part, measured where a figure moves (N 3.5). Listed at `2b355276` in TODO.md's section
     "Mended for the time being", thirteen parts, taken here in the reviewer's order, the cheap and
     self-contained first and the ones that are the owner's to decide last: (a) `many_sprites` and
-    `many_animated_sprites` seeded under the workflow, two lines off the differ list; (b) Solari's
+    `many_animated_sprites` seeded under the workflow, two lines off the differ list, done at
+    `024c1113` on 2026-10-19, the pictures matching in every pixel across two bridges; (b) Solari's
     panel hiding the device's timings under the workflow, its room measured again for the noise
     alone; (c) the soak's heap judged after a compacting collection in `memory.collect`, the managed
     total dropped from the answer; (d) the soak's other rooms measured from soaks of the three

@@ -9,7 +9,8 @@ namespace BevyCSharp.Examples.ThreeD;
 
 // Demonstrates realtime dynamic raytraced lighting using Bevy Solari, in the pica pica diorama with
 // a robot patrolling it, its own light lit or dark, the sun on or off, and how long each of
-// Solari's passes takes and how many cells its world cache holds in the corner. --many-lights
+// Solari's passes takes and how many cells its world cache holds in the corner, the times left out
+// where the workflow runs, as a capture does, since they are the device's own. --many-lights
 // draws a plain of eight thousand boxes under four hundred emissive spheres instead, and
 // --pathtracer draws either with Bevy's reference path tracer in the lighting's place.
 //
@@ -299,23 +300,26 @@ internal static class Solari
 
     // Each of Solari's passes as the GPU timed it, and how many of the world cache's cells are in
     // use, each smoothed over the last frames as Bevy reads them from its store of diagnostics.
+    // Where the workflow runs, as a capture does, the timings are left out, since they are the
+    // device's own and a picture compared between devices would hold them.
     internal static string Performance()
     {
         var performance = new StringBuilder();
         var total = 0.0;
-        foreach (var (label, path) in new[]
+        var timed = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true";
+        foreach (var (label, path) in timed ? new[]
         {
             ("Light tiles", "render/solari_lighting/presample_light_tiles/elapsed_gpu"),
             ("World cache", "render/solari_lighting/world_cache/elapsed_gpu"),
             ("Lighting", "render/solari_lighting/lighting/elapsed_gpu"),
-        })
+        } : [])
         {
             if (!Diagnostics.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
             performance.Append(FormattableString.Invariant($"{label,-17}  {milliseconds:0.00} ms\n"));
             total += milliseconds;
         }
 
-        performance.Append(FormattableString.Invariant($"{"Total",-17}  {total:0.00} ms\n"));
+        if (timed) performance.Append(FormattableString.Invariant($"{"Total",-17}  {total:0.00} ms\n"));
 
         // Out of the cache's two to the twentieth.
         if (Diagnostics.TryRead("render/solari_lighting/world_cache_active_cells_count", out var cells) && cells.Smoothed is { } count)

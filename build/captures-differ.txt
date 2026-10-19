@@ -9,4 +9,3 @@ async_channel_pattern 0.25	Its cubes arrive as tasks finish after delays of the 
 async_compute 0.04	Its cubes arrive as tasks finish after delays of the machine's time, random as Bevy's are, so how many stand by the frame taken differs. 2.6% on the runner's lavapipe, 1.4% to 1.6% on lavapipe in a container of the runner's image.
 many_foxes 0.12	The foxes' run starts once their model has loaded, in whichever frame the load finishes, which a device drawing slowly reaches in fewer frames, so each fox stands in another pose. 10.2% on lavapipe, in a container of the runner's image.
 many_meshlet_materials 0.10	Lavapipe draws some of the meshlet bunnies, a device drawing less of meshlets. 7.3% on lavapipe.
-solari 0.03	Path traced, the noise of its few samples a pixel falling otherwise on each device, and its panel shows the device's timings. 2.1% on lavapipe.

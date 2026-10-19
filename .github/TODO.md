@@ -578,12 +578,6 @@ figure moves.
   device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
   Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
   draws them all, a cost outside this repository whose size is known only once it is traced.
-- **Solari's capture holds the device's timings and its noise.** `solari` is path traced with few
-  samples a pixel, whose noise falls otherwise on each device, and its panel shows the device's
-  timings, so the list allows it. Leaving the timings out of the panel under the workflow leaves the
-  noise alone, a difference between devices of the kind the shared tolerance is for, and the line
-  comes down to what the noise measures. It costs a panel that hides a figure when captured, and a
-  room measured again.
 - **Pictures are taken on a bridge without Solari.** Solari turns on Bevy's `dfg_lut`, which lights
   the specular term of every standard material from a table where a bridge without it uses a fitted
   curve, so a picture is taken on a `--render` bridge as the runner's is (BUILDING.md), and one
