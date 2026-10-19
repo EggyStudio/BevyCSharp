@@ -513,7 +513,7 @@ dotnet build BevyCSharp.Examples
 ./bcs open --example 3d_scene              # or dotnet run --project BevyCSharp.Examples -- 3d_scene
 build/capture-example.sh 3d_scene          # its picture in .github/assets/examples
 build/capture-examples.sh                  # every one, failing on one that does not start or is blank
-build/examples-table.py                    # .github/EXAMPLES.md, the README's count and each example's head
+build/examples-table.py                    # .github/EXAMPLES.md, the README's count and gallery, each example's head
 build/measure-stress.sh many_sprites       # a stress test beside Bevy's own program, as PERFORMANCE.md has them
 ```
 
@@ -521,15 +521,19 @@ build/measure-stress.sh many_sprites       # a stress test beside Bevy's own pro
 bridge's Bevy once the bridge has been built, and `BevyCSharp.Examples/triage.tsv`, where each
 example not yet written has its state and what it waits on. It also writes the comment each written
 example opens with, naming the example of Bevy's it is written from, at which version and under
-Bevy's licenses. A head naming an earlier release than the lock's is kept, the example following
-that release's code until it is written again from the current one with its head taken off, and its
-row in EXAMPLES.md links Bevy's source at that release. The pack run captures every example on the
-Linux bridge it built, in four jobs that each take every fourth example of the list
-(`build/capture-examples.sh <folder> --shard <n>/4`), each given 40 minutes in `CAPTURE_MINUTES`,
-past which the script starts no example and names how far it got. An example drawn with what the
-device or the bridge has not, meshlets or ray-traced lighting, is captured as the words its log
-gives of that, and one a device ends the process drawing as the words saying so with the device's
-own description, each beside where its picture would be and compared with nothing.
+Bevy's licenses, and the README's gallery, each capture made small into `.github/assets/gallery` at
+the 260 by 146 the gallery shows it at, made again where `captures.tsv` there names another SHA-256
+than its capture's, so a capture taken again is followed by the script. The gallery is Markdown,
+which GitHub and nuget.org both draw, where nuget.org prints an HTML table as its text, and a
+Markdown picture is shown at its own size. A head naming an earlier release than the lock's is kept,
+the example following that release's code until it is written again from the current one with its
+head taken off, and its row in EXAMPLES.md links Bevy's source at that release. The pack run
+captures every example on the Linux bridge it built, in four jobs that each take every fourth
+example of the list (`build/capture-examples.sh <folder> --shard <n>/4`), each given 40 minutes in
+`CAPTURE_MINUTES`, past which the script starts no example and names how far it got. An example
+drawn with what the device or the bridge has not, meshlets or ray-traced lighting, is captured as
+the words its log gives of that, and one a device ends the process drawing as the words saying so
+with the device's own description, each beside where its picture would be and compared with nothing.
 
 `monitor_info` opens a window on each monitor the platform reports, and an offscreen run reports
 none, so `build/capture-example.sh` hands it to `build/capture-monitor-info.sh`, which runs it on

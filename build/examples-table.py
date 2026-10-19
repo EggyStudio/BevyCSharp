@@ -14,8 +14,10 @@ list come last.
 The README's gallery shows every written example's capture, each picture opening the C# program
 that drew it, so a reader goes from what an example draws to the code that draws it. It is a table
 a group under a heading naming it, in the groups' order, each table one row of the group's examples
-in the order Bevy's README lists them, which scrolls sideways on GitHub where it is wider than the
-page.
+in the order Bevy's README lists them, which scrolls sideways on GitHub and on nuget.org where it is
+wider than the page. Each picture is the capture made small, into .github/assets/gallery, at the
+width the gallery shows it, since the tables are Markdown, which nuget.org draws, where it prints
+HTML as its text, and a Markdown picture is shown at its own size.
 
 Each written example says at its head which of Bevy's it is written from, at which version and
 under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
@@ -26,8 +28,11 @@ includes taking the old head off, for this to write the current one.
 """
 
 import glob
+import hashlib
 import os
 import re
+import shutil
+import subprocess
 import sys
 import textwrap
 import tomllib
@@ -38,6 +43,15 @@ README = os.path.join(ROOT, "README.md")
 TRIAGE = os.path.join(ROOT, "BevyCSharp.Examples", "triage.tsv")
 EXAMPLES = os.path.join(ROOT, "BevyCSharp.Examples")
 CAPTURES = os.path.join(ROOT, ".github", "assets", "examples")
+GALLERY = os.path.join(ROOT, ".github", "assets", "gallery")
+
+# The capture each of the gallery's pictures was made from, by its SHA-256, so a check finds a
+# picture whose capture was taken again without making it again, which another ImageMagick would
+# make in other bytes.
+MADE_FROM = os.path.join(GALLERY, "captures.tsv")
+
+# A capture made small to the width the gallery shows it at, and Bevy's window's shape.
+THUMBNAIL = (260, 146)
 
 HIDDEN = "Kept out of Bevy's list"
 
@@ -274,28 +288,29 @@ def build(version, examples, order, triage, written, source, followed):
     # Every written example's capture for the README, a table a group in the order of the groups
     # above, each one row of the group's examples in the order Bevy's examples/README.md lists them,
     # so a group wider than the page scrolls sideways rather than wrapping onto rows of its own. Each
-    # picture opens the C# file that drew it.
+    # picture opens the C# file that drew it. The tables are Markdown, since nuget.org prints an
+    # HTML table as its text, where GitHub and nuget.org each draw a Markdown one as a block that
+    # scrolls sideways, measured on both on 2026-10-19.
     sections = []
+    shown = []
     for group in groups:
-        shown = sorted(
+        pictured = sorted(
             (example for example in examples if example["group"] == group and example["state"] in ("written", "part")
              and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))),
             key=lambda example: (places.get(example["name"], len(places)), example["name"]))
-        if not shown:
+        if not pictured:
             continue
-        cells = []
-        for example in shown:
-            picture = f'<img src="{RAW}.github/assets/examples/{example["name"]}.webp" width="260" height="146"/>'
-            picture = f'<a href="{BLOB}{written[example["name"]]}">{picture}</a>'
-            # The caption sets each cell's width, its name padded with spaces that do not break to
-            # thirty-two characters and drawn small, and the picture asks to be wider than any font
-            # draws that, so GitHub, which keeps a picture no wider than its cell, has it fill the
-            # cell edge to edge with the caption on every device. A browser laying out a table wider
-            # than the page shrinks each cell to the widest thing in it that cannot break, a width
-            # given or not, so the caption is that thing, the same in every cell but the one whose
-            # name is longer, which is a little wider.
-            name = example["name"] + "\u00a0" * max(0, 32 - len(example["name"]))
-            cells.append(f'<td width="260">{picture}<br><small><code>{name}</code></small></td>')
+        heads, captions = [], []
+        for example in pictured:
+            name, link = example["name"], BLOB + written[example["name"]]
+            shown.append(name)
+            heads.append(f"[![{name}]({RAW}.github/assets/gallery/{name}.webp)]({link})")
+            # The caption sets each column's width, its name padded with spaces that do not break to
+            # thirty-two characters, about the picture's width in code, so a column is as wide as
+            # its picture whatever the name. A browser laying out a table wider than the page shrinks
+            # each column to the widest thing in it that cannot break, and a picture that may be no
+            # wider than its column, as both sites have it, shrank to its name in a column without.
+            captions.append(f"[`{name}" + "\u00a0" * max(0, 32 - len(name)) + f"`]({link})")
         # The heading says how many of the group's examples are written, and how many Bevy's group
         # holds where that is more, so a reader sees how far each group has come without counting
         # pictures across a row wider than the page. Written ones rather than the pictures in the
@@ -304,15 +319,66 @@ def build(version, examples, order, triage, written, source, followed):
         rows = [example for example in examples if example["group"] == group]
         done = sum(1 for example in rows if example["state"] == "written")
         count = f"{done} of {len(rows)}" if len(rows) > done or done == 1 else f"all {done}"
-        # The heading and its table on a line each, since NORM.md's N 4.2 counts every line of the
-        # README but a table's rows as prose, and four lines a group would take the gallery past it.
-        sections.append(f"### {group}, {count}\n<table><tr>" + "".join(cells) + "</tr></table>")
+        # The pictures are the table's head, so each name stands under its picture.
+        sections.append(f"### {group}, {count}\n| " + " | ".join(heads) + " |\n|" + "---|" * len(heads)
+                        + "\n| " + " | ".join(captions) + " |")
     gallery = "\n\n".join(sections)
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
         f"{total['part']} more in part, {total['can']} more can be with what is bridged, {total['missing'] - declined} wait on something "
         f"the bridge lacks, {declined} are declined and {total['n/a']} are about Rust itself ([EXAMPLES.md]({BLOB}.github/EXAMPLES.md)).")
-    return table, status, gallery
+    return table, status, gallery, shown
+
+
+def made_from():
+    """The capture each picture of the gallery was made from, as its SHA-256 by the example's name."""
+    if not os.path.exists(MADE_FROM):
+        return {}
+    with open(MADE_FROM, encoding="utf-8") as listed:
+        return dict(line.rstrip("\n").split("\t") for line in listed if line.strip() and not line.startswith("#"))
+
+
+def digest(path):
+    with open(path, "rb") as file:
+        return hashlib.sha256(file.read()).hexdigest()
+
+
+def make_pictures(shown, check):
+    """Makes the gallery's pictures whose captures changed, or names them where only checking.
+
+    A picture is made again where it is missing or its capture's SHA-256 is not the one it was made
+    from, and one no example shows any longer is taken away. ImageMagick makes it where there is
+    one, and libwebp's cwebp where ImageMagick was built without WebP, as the captures are written.
+    """
+    listed = made_from()
+    wanted = {name: digest(os.path.join(CAPTURES, name + ".webp")) for name in shown}
+    stale = [name for name, sha in wanted.items()
+             if listed.get(name) != sha or not os.path.exists(os.path.join(GALLERY, name + ".webp"))]
+    present = {os.path.basename(path)[:-5] for path in glob.glob(os.path.join(GALLERY, "*.webp"))}
+    gone = sorted((present | set(listed)) - set(wanted))
+    if check:
+        return [os.path.join(GALLERY, name + ".webp") for name in sorted(stale) + gone]
+
+    os.makedirs(GALLERY, exist_ok=True)
+    magick = shutil.which("magick") or shutil.which("convert")
+    width, height = THUMBNAIL
+    for name in stale:
+        source, picture = os.path.join(CAPTURES, name + ".webp"), os.path.join(GALLERY, name + ".webp")
+        if magick:
+            command = [magick, source, "-resize", f"{width}x{height}!", "-quality", "85", "-strip", picture]
+        elif shutil.which("cwebp"):
+            command = ["cwebp", "-quiet", "-q", "85", "-resize", str(width), str(height), source, "-o", picture]
+        else:
+            sys.exit("ImageMagick or cwebp is needed to make the gallery's pictures")
+        subprocess.run(command, check=True)
+    for name in gone:
+        if os.path.exists(os.path.join(GALLERY, name + ".webp")):
+            os.remove(os.path.join(GALLERY, name + ".webp"))
+    with open(MADE_FROM, "w", encoding="utf-8") as out:
+        out.write("# The capture each picture here was made from, by its SHA-256, which build/examples-table.py\n"
+                  "# reads to make a picture again where its capture was taken again.\n")
+        out.writelines(f"{name}\t{wanted[name]}\n" for name in sorted(wanted))
+    return []
 
 
 def head(example, version):
@@ -366,7 +432,7 @@ def main():
     source = bevy_source(version)
     examples = read_examples(source)
     followed = followed_releases(written_examples(), version)
-    table, status, gallery = build(version, examples, group_order(source), read_triage(), written_examples(), source, followed)
+    table, status, gallery, shown = build(version, examples, group_order(source), read_triage(), written_examples(), source, followed)
 
     with open(README, encoding="utf-8") as readme:
         text = readme.read()
@@ -385,10 +451,12 @@ def main():
     if check:
         stale = [path for path, old, new in ((TABLE, current, table), (README, text, readme_text)) if old != new]
         stale += [os.path.join(ROOT, path) for path in sorted(changed)]
+        stale += make_pictures(shown, check=True)
         if stale:
             sys.exit("out of date, run build/examples-table.py: " + ", ".join(os.path.relpath(p, ROOT) for p in stale))
         return
 
+    make_pictures(shown, check=False)
     with open(TABLE, "w", encoding="utf-8") as out:
         out.write(table)
     with open(README, "w", encoding="utf-8") as out:

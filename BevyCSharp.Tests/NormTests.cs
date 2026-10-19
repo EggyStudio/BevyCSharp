@@ -213,8 +213,8 @@ public sealed partial class NormTests
         Hold("4.2", found, "a page of docs/ the README does not link, or a README over 320 lines of prose");
     }
 
-    // The lines a reader reads, which leaves out each row of a table, an HTML one's as the gallery
-    // writes them and a Markdown one's, since a row is read in the time a line of prose is.
+    // The lines a reader reads, which leaves out each row of a table, an HTML one's and a Markdown
+    // one's as the gallery writes them, since a row is read in the time a line of prose is.
     private static int ProseLines(string text) =>
         text.Split('\n')[..^1].Count(line => !line.TrimStart().StartsWith("<tr>", StringComparison.Ordinal) && !line.TrimStart().StartsWith('|'));
 
@@ -228,11 +228,14 @@ public sealed partial class NormTests
             if ((width, height) != (1280, 720)) found.Add($"{Path.GetFileNameWithoutExtension(capture)} {width}x{height}");
         }
 
-        // Each picture in the README's gallery opens the program that drew it.
+        // Each picture in the README's gallery opens the program that drew it, a picture there
+        // being a Markdown picture of the capture made small inside a link.
         var readme = Text("README.md");
-        foreach (Match picture in Regex.Matches(readme, @"<td[^>]*>(?:<a href=""([^""]*)"">)?<img src=""[^""]*/examples/([^""/]+)\.webp"""))
+        var gallery = Regex.Matches(readme, @"\[!\[[^\]]*\]\([^)]*/gallery/([^)/]+)\.webp\)\]\(([^)]*)\)");
+        if (gallery.Count == 0) found.Add("README.md has no gallery picture to read");
+        foreach (Match picture in gallery)
         {
-            var (link, name) = (picture.Groups[1].Value, picture.Groups[2].Value);
+            var (name, link) = (picture.Groups[1].Value, picture.Groups[2].Value);
             if (!link.EndsWith("/" + name + ".cs", StringComparison.Ordinal)) found.Add($"README.md {name}");
         }
 

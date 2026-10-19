@@ -10,7 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3a2e403a`, item 29's part (e) and nothing else, 13 files. A time provider on the
+Reviewed up to `714451b0`, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
+bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
+recursive dependency state and one holding until cleared, a system before Bevy's time systems
+setting the manual step to nothing for the frame and one after them putting it back before the sync,
+so only Bevy's time system sees it and the machine's clock is never held; the managed side counts
+the frames whose real step is more than nothing as the clock's frames, the waits, the held inputs, a
+shot at a frame and the command queue's release and give-up counting them while the envelope keeps
+the frame count, the command pump holding the clock still while no command waits under the commands
+hold, asked for by an open flag, an environment variable applied at startup and a command in a new
+partial file under N 1.3, and the status saying the clock's count where it trails. The capture
+script opens with the loads hold and the drive sets the commands hold, the platform and the elevator
+each read after 90 frames carrying the player, and the drive's 25 player readings came out identical
+on the development machine's GPU and on lavapipe at 54.23 seconds of game time at the platform, 199
+seconds of the machine's against 2,907; the drive's frame times had read the status's rate since
+`87798b74`, the set clock's own, so every figure read 16.7 ms whatever the device, and they come
+from the frame profile since, 29.2 ms on the GPU and 423 on lavapipe. All 373 captures were taken
+again, 297 identical, 23 pictures and 7 texts replaced after two takes matching in every pixel, six
+moved by the hold, seventeen drifted since they were taken on examples holding no frame or one, a
+resource kept as an entity adding one to every text and one example's unordered systems printing in
+another order; in a container of the SDK's image with Mesa 25.2.8 the three held examples read 31,
+under one and under one pixel from the GPU's pictures where their lines allowed 10.2 and 7.4
+percent, and the two lines leave the differ file; the meshlet bunnies' line stays with its reason
+found incomplete, the GPU drawing a different subset of the 2,500 at each take, 64,000 pixels apart,
+which is part (i)'s. Six tests join, a load holding the frame after the one that found it loading,
+the still hold running no fixed step, the machine's clock not held, the wait moving the clock
+exactly and standing still between asks, the environment variable and the two systems in Rust.
+Checked were the whole suite with a clean build, 1,522 passed and 3 skipped of 1,525, the headless
+bridge's changed tests, `cargo check` in the container and crossed for Windows and macOS, `cargo
+test` on three profiles, and the norm and public surface tests with the cheat sheet written again;
+the shared line stands under Replies and is taken into SHARED.md's row on the set clock. Right. Item
+30 was tried from nuget.org's `0.5.120` at 22:01 and is done with no commit, the install line
+working as written. Next item 31, then part (g), and the owner's push of `714451b0` with them.
+
+Before it, `3a2e403a` came, item 29's part (e) and nothing else, 13 files. A time provider on the
 game's clock, internal and handed out as `Time.Provider`, its timestamps the ticks of the elapsed
 seconds, its moment the app's start plus that, its timers kept until the frame whose clock reaches
 them and advanced after the clock refreshes, so a wait's callback and an awaited continuation run on
@@ -70,34 +103,6 @@ is in the commit's message; there is no macOS machine here for a local reading. 
 diagnostics store tests on Linux, where the other branch runs; the norm and public surface tests
 failed only on part (e)'s uncommitted files, mended in (e). Verdict 32 settles at three green macOS
 suites in a row. Right. Next part (e), then the parts in order, and the runs' ends.
-
-Before it, `b9069e8c` came, item 29's part (d) and nothing else, 6 files. The memory guard's process
-figure on Linux is the anonymous resident pages from the process's status, heaps, stacks and a
-software device's memory, leaving out the files' pages and what is shared with a graphics driver,
-falling back to the working set where the system answers nothing, macOS keeping the footprint and
-Windows the private bytes, the peak the most of the guard's own readings since no system keeps a
-peak of these, the cap on the same figure, and the remarks, the memory command's class remark and
-the tools guide saying what the figure counts; it fell from about 650 MB to about 290 MB for the
-three games as the files' pages left it. From ten-minute soaks of Courtyard, Stress and Swarm and a
-fifteen-minute soak of the feature test on lavapipe under Mesa 26.2.2, the process figure moved by
-15,855,616, 9,125,888, 22,401,024 and 21,262,336 bytes, the bridge's bytes by 2,076,749 and its
-blocks by 12,011 at most, and the entities, their indices and the handles not at all, so the soak
-check's rooms are twice the most each moved with no share, 44 MiB, 4 MiB, 25,000 and two apiece,
-where they stood at a tenth and 48 MiB, a tenth and 4 MiB, a tenth and 4,000, a twentieth and eight
-twice, and two, its comment naming the two soak commands and the spreads (N 3.5 and 3.6), both soaks
-passing under the new rooms; TODO.md's paragraph leaves and the temporary package is removed. Noted
-for later and not changed, Courtyard's bridge bytes rose 931,559 and its blocks 6,339 from the first
-half to the second within the room, and one reading of Stress came without its entities pair.
-Checked were the guard, memory, norm, script and documents tests, 63 of 63, and the whole suite with
-a clean build, 1,514 passed, 3 skipped and none failed of 1,517. Right. Next part (e), a time
-provider on the app's clock for the two async examples, then the parts in order, and the runs. The
-owner pushed `b9069e8c` at 18:08 and restarted the machine, the three sessions resuming at 18:15.
-Read at 18:18, the push run of `30b87d1f` ended red, its Linux and Windows suites green and its
-macOS suite failing one test of 1,618, the system information test on the process's memory reading
-zero (Verdict 32), the digest red after it; the pack run's six natives and its Linux and Windows
-suites passed, its macOS suite failed the same test and the digest after it, and the drive, the
-storm, the four capture shards, the play and the README jobs were running or queued; the push run of
-`b9069e8c` was queued. Next part (e), Verdict 32's mend, and the runs' ends.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -874,40 +879,49 @@ from [SHARED.md](SHARED.md).
     off, done at `3a2e403a` on 2026-10-19, a time provider on the game's clock as `Time.Provider`,
     the two pictures matching in every pixel across three devices; (f) the bridge's clock held while
     an asset loads and between the drive's commands, one hold serving the two animation examples and
-    the drive's swing, every capture taken again; (g) `dfg_lut` on in the render profile, the
-    owner's decision, since games on the package are then lit a little otherwise and every 3D
-    picture is taken again (Decision 25); (h) a newer Mesa on the runner with a `--meshlet --solari`
-    bridge for the six uncompared examples, the owner's decision on the jobs' image; (i) lavapipe's
-    dropped bunnies traced and reported to Mesa, outside the repository; (j) the anisotropy fault
-    reported to Bevy, the owner's decision, a patched shader declined; (k) the two helpers go with
-    item 4's gaps; (l) runners with a graphics card, the owner's purchase; (m) the norm's lists are
-    item 2's. The mends follow item 4 as Decision 38 orders, unless the owner says the parts that
-    need no decision may start while the words for item 4 are awaited. On 2026-10-19 the owner
-    decided (Decision 39): item 4 comes first and then this item in the order above; (g) `dfg_lut`
-    goes on in the render profile with the lock byte for byte the same; (h) and (l) are one, the
-    capture jobs in a container of a distribution image with a newer Mesa and a Linux bridge built
-    with meshlets and Solari, no runner with a graphics card and no Mesa from an archive outside the
-    distribution; (j) the anisotropy fault is mended by a patched shader of Bevy's in the bridge,
-    which overrides the earlier decline, with a test that fails when Bevy's original changes. Part
-    (k) is whole at `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's
-    controller, the radio buttons helper gone in Feathers' last step, where Bevy 0.20's own fourteen
-    examples with option rows share three files by path, a radio row of Feathers' radios under a
-    group, a theme of some sixty token colors replacing the whole and, in two of the fourteen, a
-    labeled number input holding a float with its precision and limit, ten of the fourteen written
-    from 0.19.1 differing from their sources by 100 to 560 lines in that swap, so the reviewer
-    decided on 2026-10-19 that the theme's setting from token colors is the package's own call, the
-    port's helper of its own goes, and one file mirroring Bevy's helper files the examples use at
-    the pinned version, the three, stays on the package script's list with the reason naming them,
-    carrying what they carry and nothing of the port's own, since the list's rule is against helpers
-    of the port's own and a mirror of what Bevy's examples share is the port's fidelity, not its
-    shortcut; the radio buttons go with Feathers.
+    the drive's swing, every capture taken again, done at `714451b0` on 2026-10-19, the clock held
+    while a load runs and between a served session's commands, the drive's readings identical on two
+    devices and two differ lines off; (g) `dfg_lut` on in the render profile, the owner's decision,
+    since games on the package are then lit a little otherwise and every 3D picture is taken again
+    (Decision 25); (h) a newer Mesa on the runner with a `--meshlet --solari` bridge for the six
+    uncompared examples, the owner's decision on the jobs' image; (i) lavapipe's dropped bunnies
+    traced and reported to Mesa, outside the repository, and found at `714451b0` on the GPU as well,
+    a different subset of the 2,500 bunnies drawn at each take, so the differ line's reason is
+    incomplete; (j) the anisotropy fault reported to Bevy, the owner's decision, a patched shader
+    declined; (k) the two helpers go with item 4's gaps; (l) runners with a graphics card, the
+    owner's purchase; (m) the norm's lists are item 2's. The mends follow item 4 as Decision 38
+    orders, unless the owner says the parts that need no decision may start while the words for item
+    4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes first and then this
+    item in the order above; (g) `dfg_lut` goes on in the render profile with the lock byte for byte
+    the same; (h) and (l) are one, the capture jobs in a container of a distribution image with a
+    newer Mesa and a Linux bridge built with meshlets and Solari, no runner with a graphics card and
+    no Mesa from an archive outside the distribution; (j) the anisotropy fault is mended by a
+    patched shader of Bevy's in the bridge, which overrides the earlier decline, with a test that
+    fails when Bevy's original changes. Part (k) is whole at `319624bf`, half done at `670ecf2c`
+    with the free camera helper gone for Bevy's controller, the radio buttons helper gone in
+    Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three files
+    by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
+    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
+    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
+    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
+    token colors is the package's own call, the port's helper of its own goes, and one file
+    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
+    package script's list with the reason naming them, carrying what they carry and nothing of the
+    port's own, since the list's rule is against helpers of the port's own and a mirror of what
+    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
+    Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
     `BevyCSharp.Templates` beside the engine's package, which `pack.yml`'s glob over the packed
     files already takes, and that the README's `dotnet new install` line stands once nuget.org lists
     the package. Checked by the publishing pack run's page naming both packages and the README's
-    line tried from nuget.org. After item 4; one commit where anything changes.
+    line tried from nuget.org. Done on 2026-10-19 at 22:01 with no commit: the owner uploaded
+    `BevyCSharp.Templates` `0.5.120` beside the engine's `0.5.120`, and the README's two program
+    blocks ran as written in a clean container of the SDK's image with nothing of the repository's,
+    the install from the feed, the project made from the template with the README's first program to
+    the letter, a clean build, 120 frames offscreen on lavapipe with exit 0, and the guide's empty
+    template built and run the same; no document said the templates waited, so nothing changes.
 
 31. **The README's centered parts are markdown inside one centering block (Decision 40), and
     nuget.org draws them.** The heading, the description and the banners at the README's head stand
