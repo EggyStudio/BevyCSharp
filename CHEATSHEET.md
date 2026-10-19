@@ -886,6 +886,18 @@ The guide's page is [drawing.md](https://github.com/EggyStudio/BevyCSharp/blob/m
 ### `Render`
 
 ```csharp
+static void SetFreeCamera(Entity camera, FreeCameraSettings settings);  // Puts Bevy's free camera on a camera, or changes the settings of the one there
+static FreeCameraSettings? FreeCameraOf(Entity camera);         // The free camera's settings on a camera, or null where it has none
+static void ClearFreeCamera(Entity camera);                     // Takes the free camera off a camera, which then stays where it is
+static FreeCameraState? FreeCameraStateOf(Entity camera);       // What the free camera holds about a camera as it moves it, or null where it has no free camera
+static void SetFreeCameraState(Entity camera, FreeCameraState state);  // Writes what the free camera holds about a camera, as a settings screen turns it off or a game resets its speed
+static string FreeCameraControls(Entity camera);                // Bevy's own description of the free camera's controls on a camera, a line a control with Bevy's names for the keys, which its example shows
+static void SetPanCamera(Entity camera, PanCameraSettings settings);  // Puts Bevy's pan camera on a 2D camera, or changes the settings of the one there
+static PanCameraSettings? PanCameraOf(Entity camera);           // The pan camera's settings on a camera, the zoom it has come to among them, or null where it has none
+static void ClearPanCamera(Entity camera);                      // Takes the pan camera off a camera, which then stays where it is
+static string PanCameraControls(Entity camera);                 // Bevy's own description of the pan camera's controls on a camera, a line a control with Bevy's names for the keys, which its example shows
+static void DollyZoom(Entity camera, CameraProjection projection);  // Moves a pan-orbit camera to another projection over Bevy's dolly zoom, keeping the point it orbits the same size on the screen as the field of view narrows or widens
+static void LookTo(Entity camera, Vec3 direction);              // Turns a pan-orbit camera to face a direction, about the point it orbits, over Bevy's look-to animation
 static Entity SpawnCamera3d();                                  // Spawns a 3D camera and returns it
 static void SetViewport(Entity camera, uint x, uint y, uint width, uint height);  // Gives a camera part of the window to draw into, or the whole of it
 static void SetPerspective(Entity camera, float fieldOfView, float near, float far);  // Sets a camera's field of view and how near and how far it sees, making it a perspective camera if it was not one

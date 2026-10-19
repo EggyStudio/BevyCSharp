@@ -15,7 +15,7 @@ namespace BevyCSharp.Examples.ThreeD;
 internal static class Meshlet
 {
     // Room for the clusters Bevy's example asks for, which turns meshlets on.
-    public static void Configure(Config config) => config.MeshletClusters = 1 << 14;
+    public static void Configure(Config config) => (config.MeshletClusters, config.CameraControllers) = (1 << 14, CameraControllers.Free);
 
     public static void Build(App app) => app.Startup(Setup, "meshlet.Setup");
 
@@ -31,7 +31,7 @@ internal static class Meshlet
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
             AssetServer.Load(AssetKind.Image, "environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
             150f);
-        ecs.Add(camera, new FreeCamera());
+        Render.SetFreeCamera(camera, new FreeCameraSettings());
 
         // Bevy's FULL_DAYLIGHT, turned by its EulerRot::ZYX, with one cascade reaching fifteen
         // meters.

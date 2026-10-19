@@ -20,7 +20,7 @@ internal static class TestMeshlet
     private static bool _showingDebug;
 
     // Room for the clusters Bevy's example asks for, which turns meshlets on.
-    public static void Configure(Config config) => config.MeshletClusters = 1 << 14;
+    public static void Configure(Config config) => (config.MeshletClusters, config.CameraControllers) = (1 << 14, CameraControllers.Free);
 
     public static void Build(App app)
     {
@@ -35,7 +35,7 @@ internal static class TestMeshlet
 
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, -3f), new Vec3(0f, 0f, 1.5f), Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
-        ecs.Add(camera, new FreeCamera());
+        Render.SetFreeCamera(camera, new FreeCameraSettings());
         Render.SetAmbientLight((1f, 1f, 1f), 500f);
 
         // Bevy's FULL_DAYLIGHT, from above and a little behind, looking at the middle with Z up.

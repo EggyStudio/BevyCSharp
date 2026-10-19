@@ -103,6 +103,45 @@ and there the window is made opaque, what would have been clear is black, and th
 got. A clear corner on an opaque window is black too, so a corner meant to show some other color is
 better painted by whatever draws over it.
 
+### Camera controllers
+
+Bevy's camera controllers move a camera from the keyboard and the mouse. The app asks for the ones
+it uses, and each moves only a camera it is given:
+
+<!-- compiled with:
+Config config = new();
+-->
+```csharp
+config.CameraControllers = CameraControllers.Free;     // before the app is built
+
+var camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 2f, 8f), Vec3.Zero, Vec3.UnitY));
+Render.SetFreeCamera(camera, new FreeCameraSettings { WalkSpeed = 3f, RunSpeed = 9f });
+```
+
+The free camera moves with W, A, S and D, rises and sinks with E and Q, and turns with the mouse
+while the right button is held, as Bevy's `FreeCamera` does, with Bevy's keys and speeds where the
+settings say nothing. `Render.FreeCameraStateOf` reads the turn and the speed it has come to, and
+`Render.SetFreeCameraState` turns it off or puts its turn where the game has placed the camera.
+Bevy's controller moves one camera, so with the free camera on two it moves neither. The pan camera
+(`CameraControllers.Pan`, `Render.SetPanCamera`) moves a 2D view with the keys, zooms it with the
+wheel and drags it with a button, its zoom the camera's scale.
+
+The pan-orbit camera (`CameraControllers.PanOrbit`) pans with the left button, orbits with the
+right and zooms with the wheel, about the point under the pointer, which `Config.MeshPicking` finds
+on a mesh. It is Bevy's reflected component, and two calls turn it over Bevy's animations:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+using Bevy.Reflected;
+
+var orbit = ctx.Ecs.Insert<PanOrbitCameraRef>(camera);
+orbit.ZoomLimitsZoomThroughObjects = true;                  // a zoom may pass through a surface
+Render.LookTo(camera, -Vec3.UnitY);                         // look down from the top
+Render.DollyZoom(camera, CameraProjection.Orthographic);    // narrow to an orthographic view
+```
+
 ### Shadows
 
 Shadows are tuned per light and sized globally:

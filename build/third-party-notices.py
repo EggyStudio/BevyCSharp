@@ -271,6 +271,11 @@ def build(packages):
     for line in bevy_credits():
         out.append(f"> {line}".rstrip())
     out.append("")
+    out.append("Some are fetched from Bevy's asset_files repository (https://github.com/bevyengine/bevy_asset_files),")
+    out.append("where a folder may hold a license of its own, and those that do are credited as they ask:\n")
+    for folder, credit in ASSET_FILES_CREDITS:
+        out.append(f"- `{folder}`, {credit}")
+    out.append("")
 
     packs = scene_packs()
     if packs:
@@ -325,6 +330,20 @@ def bevy_version():
             if package["name"] == "bevy":
                 return package["version"]
     sys.exit("native/Cargo.lock names no bevy package")
+
+
+# The folders of Bevy's asset_files repository the examples fetch whose license asks for credit,
+# each with the credit its license file gives, since the files are fetched only where the examples
+# are built and the notices are written and checked without them.
+ASSET_FILES_CREDITS = [
+    ("PlaneEngine", 'which the `pan_orbit_camera_*` examples load. This work is based on "Plane Engine" '
+     "(https://sketchfab.com/3d-models/plane-engine-3a3e71ec7f6e4f24963f63cf6bd22358) by T-FLEX CAD ST "
+     "(Free) (https://sketchfab.com/tflexcad) licensed under CC-BY-NC-4.0 "
+     "(http://creativecommons.org/licenses/by-nc/4.0/)"),
+    ("pica_pica", "which `solari` loads. "
+     "[PICA PICA Assets](https://github.com/SEED-EA/pica-pica-assets) by SEED-EA "
+     "([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/))"),
+]
 
 
 def bevy_credits():

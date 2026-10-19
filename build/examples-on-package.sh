@@ -31,7 +31,6 @@ rm "$work/Examples/Catalog.cs" "$work/Examples/Program.cs" "$work/Examples/Examp
 # The helpers an example may still use, each with why, which only gets shorter. Each stands in
 # for something Bevy's examples take from a crate the bridge does not compile in, and goes when it
 # can be asked for.
-#   FreeCamera.cs  the free camera of Bevy's camera controller crate
 #   Widgets.cs     the radio buttons Bevy's examples share by path, which Feathers' replace
 
 # What the repository's Directory.Build.props sets that the examples read, written into their own
@@ -72,4 +71,4 @@ cat > "$work/Examples/nuget.config" <<EOF
 EOF
 
 dotnet build "$work/Examples"
-echo "every example builds on the package alone, beside the two helpers listed"
+echo "every example builds on the package alone, beside the helper listed"

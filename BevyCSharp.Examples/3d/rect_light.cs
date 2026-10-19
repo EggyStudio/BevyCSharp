@@ -16,6 +16,8 @@ internal static class RectLight
     private static AssetHandle _floorMaterial;
     private static bool _gizmos = true;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -33,7 +35,7 @@ internal static class RectLight
             Spawn(ecs, Color.FromSrgb(0.5f, 0.7f, 1f), 800_000f, 1.5f, 4f, new Transform(new Vec3(-2f, 1.5f, -3f), Quat.FromRotationY(MathF.PI), Vec3.One));
 
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-8f, 5f, 8f), Vec3.UnitY, Vec3.UnitY));
-            ecs.Add(camera, new FreeCamera());
+            Render.SetFreeCamera(camera, new FreeCameraSettings());
 
             var gray = Color.FromSrgb(0.9f, 0.9f, 0.9f);
             ecs.Add(Ui.SpawnText(Text(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f), Color = (gray.R, gray.G, gray.B, 1f) }, 18f), new RoughnessDisplay());

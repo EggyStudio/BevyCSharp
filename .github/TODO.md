@@ -24,13 +24,9 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-Each of the eighteen waits on a crate the lock does not hold, or, for the system fonts, on the
+Each of the thirteen waits on a crate the lock does not hold, or, for the system fonts, on the
 decision to keep their discovery off.
 
-- **Bevy's camera controllers, five examples.** Its free, pan and pan-orbit cameras, their plugins
-  and their settings (`free_camera_controller`, `pan_camera_controller`, `pan_orbit_camera_cad`,
-  `pan_orbit_camera_minimal`, `pan_orbit_camera_ortho`), where `BevyCSharp.Examples` has a free
-  camera of its own written as a behavior.
 - **Bevy's styled widgets, four examples.** Feathers, Bevy's styled widgets over its core ones,
   which Bevy spawns from its scene templates (`feathers_counter`, `feathers_gallery`,
   `feathers_number_input`, `virtual_keyboard`). The core widgets are built and reached through their
@@ -657,10 +653,9 @@ figure moves.
   Bevy mends it). Bevy's `pbr_fragment` shader building the tangent frame wherever anisotropy is
   on mends it at its cause. It costs a change to Bevy, which is not reported from this repository,
   or else a patched shader in the bridge that has to follow every release of Bevy's.
-- **Two helpers stand where Bevy's crates would.** `FreeCamera` and the radio buttons of
-  `Widgets.cs` in `BevyCSharp.Examples`, listed in `build/examples-on-package.sh`, stand where
-  Bevy's free camera controller and Feathers' radio would, and go with those gaps above at their
-  cost.
+- **A helper stands where Bevy's crate would.** The radio buttons of `Widgets.cs` in
+  `BevyCSharp.Examples`, listed in `build/examples-on-package.sh`, stand where Feathers' radio
+  would, and go with that gap above at its cost.
 - **The norm's lists.** The places listed in `build/norm/` as not yet keeping a rule of NORM.md are
   mended as a batch next touches each, in a commit that moves code alone, and the lists only get
   shorter.

@@ -239,6 +239,18 @@ public sealed class Config
     public bool TransformGizmo { get; set; }
 
     /// <summary>
+    /// Add Bevy's camera controllers, the free camera, the pan camera and the pan-orbit camera,
+    /// none by default.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's default plugins leave each out, and each moves only a camera given its controller,
+    /// with <see cref="Render.SetFreeCamera"/>, <see cref="Render.SetPanCamera"/> or the reflected
+    /// <c>PanOrbitCameraRef</c>. A camera given a controller the app did not ask for stands still.
+    /// A bridge with the renderer is needed.
+    /// </remarks>
+    public CameraControllers CameraControllers { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>

@@ -23,6 +23,8 @@ internal static class Skybox
     private static int _index;
     private static float _nextSwap;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -35,7 +37,7 @@ internal static class Skybox
             ecs.Add(sun, new Sun());
 
             _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 8f), Vec3.Zero, Vec3.UnitY));
-            ecs.Add(_camera, new FreeCamera());
+            Render.SetFreeCamera(_camera, new FreeCameraSettings());
             Render.SetPostProcessing(_camera, new PostSettings { Msaa = 1, AntiAlias = AntiAliasPass.Temporal });
             Render.SetAmbientOcclusion(_camera, AmbientOcclusionQuality.High);
             Show(Cubemaps[0].Path);

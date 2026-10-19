@@ -101,4 +101,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to add Bevy's interactive transform gizmo.</summary>
     public uint TransformGizmo;
+
+    /// <summary>Bevy's camera controllers to add, a bit each, as <see cref="Bevy.CameraControllers"/> numbers them.</summary>
+    public uint CameraControllers;
 }

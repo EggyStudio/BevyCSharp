@@ -562,6 +562,11 @@ enum Bevy.ButtonLine : int
 enum Bevy.ButtonState : int
   Pressed = 0
   Released = 1
+enum Bevy.CameraControllers : int
+  Free = 1
+  None = 0
+  Pan = 2
+  PanOrbit = 4
 enum Bevy.CameraFlags : uint
   NoCpuCulling = 2
   NoIndirectDrawing = 1
@@ -960,6 +965,7 @@ sealed class Bevy.ComputedFromAttribute : Attribute
   bool IsJoint { get; }
 sealed class Bevy.Config
   Assembly? AssetAssembly { get; set; }
+  CameraControllers CameraControllers { get; set; }
   Config()
   DiagnosticPlugins DiagnosticPlugins { get; set; }
   Dictionary<string, string> AssetSources { get; }
@@ -1890,6 +1896,34 @@ static class Bevy.FrameProfile
   static bool On { get; }
   static void Start()
   static void Stop()
+sealed class Bevy.FreeCameraSettings
+  FreeCameraSettings()
+  Key Back { get; set; }
+  Key Down { get; set; }
+  Key Forward { get; set; }
+  Key Left { get; set; }
+  Key Right { get; set; }
+  Key Run { get; set; }
+  Key SnapFront { get; set; }
+  Key SnapReverse { get; set; }
+  Key SnapRight { get; set; }
+  Key SnapTop { get; set; }
+  Key ToggleGrab { get; set; }
+  Key Up { get; set; }
+  MouseButton GrabButton { get; set; }
+  bool LocalVerticalMovement { get; set; }
+  float Friction { get; set; }
+  float RotationSpeed { get; set; }
+  float RunSpeed { get; set; }
+  float ScrollFactor { get; set; }
+  float Sensitivity { get; set; }
+  float WalkSpeed { get; set; }
+struct Bevy.FreeCameraState
+  Vec3 Velocity { get; set; }
+  bool Enabled { get; set; }
+  float Pitch { get; set; }
+  float SpeedMultiplier { get; set; }
+  float Yaw { get; set; }
 struct Bevy.GameTimer : IEquatable<GameTimer>
   GameTimer Tick(float delta)
   TimerMode Mode
@@ -2576,6 +2610,7 @@ struct Bevy.Interop.NativeConfig
   int Y
   uint AudioWithoutWindow
   uint Backend
+  uint CameraControllers
   uint DesktopTitleBar
   uint Diagnostics
   uint GpuTimings
@@ -2677,6 +2712,27 @@ struct Bevy.Interop.NativeFontTag.<Tag>e__FixedBuffer
 struct Bevy.Interop.NativeFrameState
   NativeInput Input
   NativeTime Time
+struct Bevy.Interop.NativeFreeCamera
+  NativeFreeCamera.<Keys>e__FixedBuffer Keys
+  const int KeyCount = 12
+  float Friction
+  float RotationSpeed
+  float RunSpeed
+  float ScrollFactor
+  float Sensitivity
+  float WalkSpeed
+  int GrabButton
+  int VerticalMovement
+struct Bevy.Interop.NativeFreeCamera.<Keys>e__FixedBuffer
+  int FixedElementField
+struct Bevy.Interop.NativeFreeCameraState
+  float Pitch
+  float SpeedMultiplier
+  float VelocityX
+  float VelocityY
+  float VelocityZ
+  float Yaw
+  uint Enabled
 struct Bevy.Interop.NativeGamepad
   NativeGamepad.<Axes>e__FixedBuffer Axes
   NativeGamepad.<Name>e__FixedBuffer Name
@@ -2975,6 +3031,21 @@ struct Bevy.Interop.NativeMonitor
   uint Height
   uint RefreshMillihertz
   uint Width
+struct Bevy.Interop.NativePanCamera
+  NativePanCamera.<Keys>e__FixedBuffer Keys
+  const int KeyCount = 8
+  float MaxZoom
+  float MinZoom
+  float PanSpeed
+  float RotationSpeed
+  float ZoomFactor
+  float ZoomSpeed
+  int MousePanButton
+  uint Enabled
+  uint MousePan
+  uint ZoomToCursor
+struct Bevy.Interop.NativePanCamera.<Keys>e__FixedBuffer
+  int FixedElementField
 struct Bevy.Interop.NativePointerEvent
   double Duration
   float DeltaX
@@ -4108,6 +4179,26 @@ sealed class Bevy.PackedAtlas : IEquatable<PackedAtlas>
   static bool op_Inequality(PackedAtlas? left, PackedAtlas? right)
   uint[] Indices { get; init; }
   void Deconstruct(out AssetHandle Image, out AssetHandle Layout, out uint[] Indices)
+sealed class Bevy.PanCameraSettings
+  Key? Down { get; set; }
+  Key? Left { get; set; }
+  Key? Right { get; set; }
+  Key? RotateClockwise { get; set; }
+  Key? RotateCounterclockwise { get; set; }
+  Key? Up { get; set; }
+  Key? ZoomIn { get; set; }
+  Key? ZoomOut { get; set; }
+  MouseButton MousePanButton { get; set; }
+  PanCameraSettings()
+  bool Enabled { get; set; }
+  bool MousePan { get; set; }
+  bool ZoomToCursor { get; set; }
+  float MaxZoom { get; set; }
+  float MinZoom { get; set; }
+  float PanSpeed { get; set; }
+  float RotationSpeed { get; set; }
+  float ZoomFactor { get; set; }
+  float ZoomSpeed { get; set; }
 enum Bevy.ParallaxMethod : int
   Occlusion = 0
   Relief = 1
@@ -4668,6 +4759,13 @@ readonly struct Bevy.Reflected.AmbientLightRef : IReflectedComponent<AmbientLigh
   bool Remove()
   const string TypePath = "bevy_light::ambient_light::AmbientLight"
   float Brightness { get; set; }
+struct Bevy.Reflected.AnchorIndicatorMirror : IMirroredLayout, INativeComponent
+  bool Enabled
+readonly struct Bevy.Reflected.AnchorIndicatorRef : IReflectedComponent<AnchorIndicatorRef>, IReflectedWrapper<AnchorIndicatorRef>
+  Entity Entity { get; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_camera_controller::pan_orbit_camera::extensions::anchor_indicator::AnchorIndicator"
 struct Bevy.Reflected.AnchorMirror : IMirroredLayout, INativeComponent
   Vec2 Value
 readonly struct Bevy.Reflected.AnchorRef : IReflectedComponent<AnchorRef>, IReflectedWrapper<AnchorRef>
@@ -5497,6 +5595,57 @@ readonly struct Bevy.Reflected.CubemapVisibleEntitiesRef : IReflectedComponent<C
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_camera::visibility::CubemapVisibleEntities"
+abstract class Bevy.Reflected.CurrentMotion : IEquatable<CurrentMotion>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected CurrentMotion(CurrentMotion original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CurrentMotion? left, CurrentMotion? right)
+  static bool op_Inequality(CurrentMotion? left, CurrentMotion? right)
+  virtual bool Equals(CurrentMotion? other)
+sealed class Bevy.Reflected.CurrentMotion.Momentum : CurrentMotion, IEquatable<CurrentMotion.Momentum>, IEquatable<CurrentMotion>
+  Momentum(Velocity Velocity, TimeSpan MomentumStart)
+  TimeSpan MomentumStart { get; init; }
+  Velocity Velocity { get; init; }
+  bool Equals(CurrentMotion.Momentum? other)
+  bool Equals(CurrentMotion? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CurrentMotion.Momentum? left, CurrentMotion.Momentum? right)
+  static bool op_Inequality(CurrentMotion.Momentum? left, CurrentMotion.Momentum? right)
+  void Deconstruct(out Velocity Velocity, out TimeSpan MomentumStart)
+sealed class Bevy.Reflected.CurrentMotion.Stationary : CurrentMotion, IEquatable<CurrentMotion.Stationary>, IEquatable<CurrentMotion>
+  Stationary()
+  bool Equals(CurrentMotion.Stationary? other)
+  bool Equals(CurrentMotion? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CurrentMotion.Stationary? left, CurrentMotion.Stationary? right)
+  static bool op_Inequality(CurrentMotion.Stationary? left, CurrentMotion.Stationary? right)
+sealed class Bevy.Reflected.CurrentMotion.UserControlled : CurrentMotion, IEquatable<CurrentMotion.UserControlled>, IEquatable<CurrentMotion>
+  MotionInputs MotionInputs { get; init; }
+  UserControlled(double AnchorX, double AnchorY, double AnchorZ, MotionInputs MotionInputs)
+  bool Equals(CurrentMotion.UserControlled? other)
+  bool Equals(CurrentMotion? other)
+  double AnchorX { get; init; }
+  double AnchorY { get; init; }
+  double AnchorZ { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(CurrentMotion.UserControlled? left, CurrentMotion.UserControlled? right)
+  static bool op_Inequality(CurrentMotion.UserControlled? left, CurrentMotion.UserControlled? right)
+  void Deconstruct(out double AnchorX, out double AnchorY, out double AnchorZ, out MotionInputs MotionInputs)
 abstract class Bevy.Reflected.CursorIcon : IEquatable<CursorIcon>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -6691,6 +6840,16 @@ readonly struct Bevy.Reflected.ImageNodeTextureAtlasLayoutRef : IReflectedCompon
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_ui_render::image::ImageNodeTextureAtlasLayout"
+readonly struct Bevy.Reflected.IndependentSkyboxRef : IReflectedComponent<IndependentSkyboxRef>, IReflectedWrapper<IndependentSkyboxRef>
+  AssetHandle Skybox { get; set; }
+  Entity Entity { get; }
+  Entity? SkyboxCam { get; set; }
+  Quat Rotation { get; set; }
+  SkyboxFov Fov { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox"
+  float Brightness { get; set; }
+  long SkyboxCamOrderOffset { get; set; }
 readonly struct Bevy.Reflected.InheritedVisibilityRef : IReflectedComponent<InheritedVisibilityRef>, IReflectedWrapper<InheritedVisibilityRef>
   Entity Entity { get; }
   bool Remove()
@@ -6720,6 +6879,32 @@ readonly struct Bevy.Reflected.InputFocusVisibleRef : IReflectedComponent<InputF
   bool Remove()
   bool Value { get; set; }
   const string TypePath = "bevy_input_focus::InputFocusVisible"
+sealed class Bevy.Reflected.InputStreamEntryF32 : IEquatable<InputStreamEntryF32>
+  InputStreamEntryF32(TimeSpan Time, float Sample, float FractionRemaining, float SmoothedValue)
+  TimeSpan Time { get; init; }
+  bool Equals(InputStreamEntryF32? other)
+  float FractionRemaining { get; init; }
+  float Sample { get; init; }
+  float SmoothedValue { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(InputStreamEntryF32? left, InputStreamEntryF32? right)
+  static bool op_Inequality(InputStreamEntryF32? left, InputStreamEntryF32? right)
+  void Deconstruct(out TimeSpan Time, out float Sample, out float FractionRemaining, out float SmoothedValue)
+sealed class Bevy.Reflected.InputStreamEntryGlamVec2 : IEquatable<InputStreamEntryGlamVec2>
+  InputStreamEntryGlamVec2(TimeSpan Time, Vec2 Sample, float FractionRemaining, Vec2 SmoothedValue)
+  TimeSpan Time { get; init; }
+  Vec2 Sample { get; init; }
+  Vec2 SmoothedValue { get; init; }
+  bool Equals(InputStreamEntryGlamVec2? other)
+  float FractionRemaining { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(InputStreamEntryGlamVec2? left, InputStreamEntryGlamVec2? right)
+  static bool op_Inequality(InputStreamEntryGlamVec2? left, InputStreamEntryGlamVec2? right)
+  void Deconstruct(out TimeSpan Time, out Vec2 Sample, out float FractionRemaining, out Vec2 SmoothedValue)
 readonly struct Bevy.Reflected.InteractionDisabledRef : IReflectedComponent<InteractionDisabledRef>, IReflectedWrapper<InteractionDisabledRef>
   Entity Entity { get; }
   bool Remove()
@@ -7649,6 +7834,57 @@ readonly struct Bevy.Reflected.MotionBlurRef : IReflectedComponent<MotionBlurRef
   const string TypePath = "bevy_post_process::motion_blur::MotionBlur"
   float ShutterAngle { get; set; }
   uint Samples { get; set; }
+abstract class Bevy.Reflected.MotionInputs : IEquatable<MotionInputs>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected MotionInputs(MotionInputs original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MotionInputs? left, MotionInputs? right)
+  static bool op_Inequality(MotionInputs? left, MotionInputs? right)
+  virtual bool Equals(MotionInputs? other)
+sealed class Bevy.Reflected.MotionInputs.OrbitZoom : MotionInputs, IEquatable<MotionInputs.OrbitZoom>, IEquatable<MotionInputs>
+  IReadOnlyList<InputStreamEntryF32> ZoomInputs { get; init; }
+  IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs { get; init; }
+  OrbitZoom(IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs, IReadOnlyList<InputStreamEntryF32> ZoomInputs)
+  bool Equals(MotionInputs.OrbitZoom? other)
+  bool Equals(MotionInputs? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MotionInputs.OrbitZoom? left, MotionInputs.OrbitZoom? right)
+  static bool op_Inequality(MotionInputs.OrbitZoom? left, MotionInputs.OrbitZoom? right)
+  void Deconstruct(out IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs, out IReadOnlyList<InputStreamEntryF32> ZoomInputs)
+sealed class Bevy.Reflected.MotionInputs.PanZoom : MotionInputs, IEquatable<MotionInputs.PanZoom>, IEquatable<MotionInputs>
+  IReadOnlyList<InputStreamEntryF32> ZoomInputs { get; init; }
+  IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs { get; init; }
+  PanZoom(IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs, IReadOnlyList<InputStreamEntryF32> ZoomInputs)
+  bool Equals(MotionInputs.PanZoom? other)
+  bool Equals(MotionInputs? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MotionInputs.PanZoom? left, MotionInputs.PanZoom? right)
+  static bool op_Inequality(MotionInputs.PanZoom? left, MotionInputs.PanZoom? right)
+  void Deconstruct(out IReadOnlyList<InputStreamEntryGlamVec2> ScreenspaceInputs, out IReadOnlyList<InputStreamEntryF32> ZoomInputs)
+sealed class Bevy.Reflected.MotionInputs.Zoom : MotionInputs, IEquatable<MotionInputs.Zoom>, IEquatable<MotionInputs>
+  IReadOnlyList<InputStreamEntryF32> ZoomInputs { get; init; }
+  Zoom(IReadOnlyList<InputStreamEntryF32> ZoomInputs)
+  bool Equals(MotionInputs.Zoom? other)
+  bool Equals(MotionInputs? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(MotionInputs.Zoom? left, MotionInputs.Zoom? right)
+  static bool op_Inequality(MotionInputs.Zoom? left, MotionInputs.Zoom? right)
+  void Deconstruct(out IReadOnlyList<InputStreamEntryF32> ZoomInputs)
 readonly struct Bevy.Reflected.MotionVectorPrepassRef : IReflectedComponent<MotionVectorPrepassRef>, IReflectedWrapper<MotionVectorPrepassRef>
   Entity Entity { get; }
   bool Remove()
@@ -8081,6 +8317,43 @@ sealed class Bevy.Reflected.OptionURect.Some : OptionURect, IEquatable<OptionURe
   uint MinX { get; init; }
   uint MinY { get; init; }
   void Deconstruct(out uint MinX, out uint MinY, out uint MaxX, out uint MaxY)
+abstract class Bevy.Reflected.OrbitConstraint : IEquatable<OrbitConstraint>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected OrbitConstraint(OrbitConstraint original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OrbitConstraint? left, OrbitConstraint? right)
+  static bool op_Inequality(OrbitConstraint? left, OrbitConstraint? right)
+  virtual bool Equals(OrbitConstraint? other)
+sealed class Bevy.Reflected.OrbitConstraint.Fixed : OrbitConstraint, IEquatable<OrbitConstraint.Fixed>, IEquatable<OrbitConstraint>
+  Fixed(double UpX, double UpY, double UpZ, bool CanPassTdc)
+  bool CanPassTdc { get; init; }
+  bool Equals(OrbitConstraint.Fixed? other)
+  bool Equals(OrbitConstraint? other)
+  double UpX { get; init; }
+  double UpY { get; init; }
+  double UpZ { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OrbitConstraint.Fixed? left, OrbitConstraint.Fixed? right)
+  static bool op_Inequality(OrbitConstraint.Fixed? left, OrbitConstraint.Fixed? right)
+  void Deconstruct(out double UpX, out double UpY, out double UpZ, out bool CanPassTdc)
+sealed class Bevy.Reflected.OrbitConstraint.Free : OrbitConstraint, IEquatable<OrbitConstraint.Free>, IEquatable<OrbitConstraint>
+  Free()
+  bool Equals(OrbitConstraint.Free? other)
+  bool Equals(OrbitConstraint? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(OrbitConstraint.Free? left, OrbitConstraint.Free? right)
+  static bool op_Inequality(OrbitConstraint.Free? left, OrbitConstraint.Free? right)
 readonly struct Bevy.Reflected.OuterColorRef : IReflectedComponent<OuterColorRef>, IReflectedWrapper<OuterColorRef>
   Color Value { get; set; }
   Entity Entity { get; }
@@ -8102,6 +8375,36 @@ readonly struct Bevy.Reflected.OverrideCursorRef : IReflectedComponent<OverrideC
   EntityCursor? Value { get; set; }
   bool Remove()
   const string TypePath = "bevy_picking::cursor::OverrideCursor"
+readonly struct Bevy.Reflected.PanOrbitCameraRef : IReflectedComponent<PanOrbitCameraRef>, IReflectedWrapper<PanOrbitCameraRef>
+  CurrentMotion CurrentMotion { get; set; }
+  Entity Entity { get; }
+  FloatRange OrthographicNearClipLimits { get; set; }
+  FloatRange PerspectiveNearClipLimits { get; set; }
+  OrbitConstraint OrbitConstraint { get; set; }
+  TimeSpan InputDebounce { get; set; }
+  TimeSpan MomentumInitOrbit { get; set; }
+  TimeSpan MomentumInitPan { get; set; }
+  TimeSpan SmoothingOrbit { get; set; }
+  TimeSpan SmoothingPan { get; set; }
+  TimeSpan SmoothingZoom { get; set; }
+  Vec2 SensitivityOrbit { get; set; }
+  bool EnabledMotionOrbit { get; set; }
+  bool EnabledMotionPan { get; set; }
+  bool EnabledMotionZoom { get; set; }
+  bool Remove()
+  bool ZoomLimitsZoomThroughObjects { get; set; }
+  byte MomentumOrbitDamping { get; set; }
+  byte MomentumPanDamping { get; set; }
+  const string TypePath = "bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera"
+  double LastAnchorDepth { get; set; }
+  double MomentumOrbitFriction { get; set; }
+  double MomentumPanFriction { get; set; }
+  double ZoomLimitsMaxSizePerPixel { get; set; }
+  double ZoomLimitsMinSizePerPixel { get; set; }
+  float OrthographicFarClipMultiplier { get; set; }
+  float OrthographicScaleToNearClip { get; set; }
+  float PerspectiveNearClipMultiplier { get; set; }
+  float SensitivityZoom { get; set; }
 abstract class Bevy.Reflected.ParallaxCorrection : IEquatable<ParallaxCorrection>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -9105,6 +9408,40 @@ readonly struct Bevy.Reflected.SkyDomeRef : IReflectedComponent<SkyDomeRef>, IRe
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_weather::sky::SkyDome"
+abstract class Bevy.Reflected.SkyboxFov : IEquatable<SkyboxFov>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected SkyboxFov(SkyboxFov original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(SkyboxFov? left, SkyboxFov? right)
+  static bool op_Inequality(SkyboxFov? left, SkyboxFov? right)
+  virtual bool Equals(SkyboxFov? other)
+sealed class Bevy.Reflected.SkyboxFov.Auto : SkyboxFov, IEquatable<SkyboxFov.Auto>, IEquatable<SkyboxFov>
+  Auto()
+  bool Equals(SkyboxFov.Auto? other)
+  bool Equals(SkyboxFov? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(SkyboxFov.Auto? left, SkyboxFov.Auto? right)
+  static bool op_Inequality(SkyboxFov.Auto? left, SkyboxFov.Auto? right)
+sealed class Bevy.Reflected.SkyboxFov.Fixed : SkyboxFov, IEquatable<SkyboxFov.Fixed>, IEquatable<SkyboxFov>
+  Fixed(float Value)
+  bool Equals(SkyboxFov.Fixed? other)
+  bool Equals(SkyboxFov? other)
+  float Value { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(SkyboxFov.Fixed? left, SkyboxFov.Fixed? right)
+  static bool op_Inequality(SkyboxFov.Fixed? left, SkyboxFov.Fixed? right)
+  void Deconstruct(out float Value)
 readonly struct Bevy.Reflected.SkyboxRef : IReflectedComponent<SkyboxRef>, IReflectedWrapper<SkyboxRef>
   AssetHandle? Image { get; set; }
   Entity Entity { get; }
@@ -10208,6 +10545,61 @@ sealed class Bevy.Reflected.Val.Vw : Val, IEquatable<Val.Vw>, IEquatable<Val>
   static bool op_Equality(Val.Vw? left, Val.Vw? right)
   static bool op_Inequality(Val.Vw? left, Val.Vw? right)
   void Deconstruct(out float Value)
+abstract class Bevy.Reflected.Velocity : IEquatable<Velocity>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected Velocity(Velocity original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Velocity? left, Velocity? right)
+  static bool op_Inequality(Velocity? left, Velocity? right)
+  virtual bool Equals(Velocity? other)
+sealed class Bevy.Reflected.Velocity.None : Velocity, IEquatable<Velocity.None>, IEquatable<Velocity>
+  None()
+  bool Equals(Velocity.None? other)
+  bool Equals(Velocity? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Velocity.None? left, Velocity.None? right)
+  static bool op_Inequality(Velocity.None? left, Velocity.None? right)
+sealed class Bevy.Reflected.Velocity.Orbit : Velocity, IEquatable<Velocity.Orbit>, IEquatable<Velocity>
+  Orbit(double AnchorX, double AnchorY, double AnchorZ, double VelocityX, double VelocityY)
+  bool Equals(Velocity.Orbit? other)
+  bool Equals(Velocity? other)
+  double AnchorX { get; init; }
+  double AnchorY { get; init; }
+  double AnchorZ { get; init; }
+  double VelocityX { get; init; }
+  double VelocityY { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Velocity.Orbit? left, Velocity.Orbit? right)
+  static bool op_Inequality(Velocity.Orbit? left, Velocity.Orbit? right)
+  void Deconstruct(out double AnchorX, out double AnchorY, out double AnchorZ, out double VelocityX, out double VelocityY)
+sealed class Bevy.Reflected.Velocity.Pan : Velocity, IEquatable<Velocity.Pan>, IEquatable<Velocity>
+  Pan(double AnchorX, double AnchorY, double AnchorZ, double VelocityX, double VelocityY)
+  bool Equals(Velocity.Pan? other)
+  bool Equals(Velocity? other)
+  double AnchorX { get; init; }
+  double AnchorY { get; init; }
+  double AnchorZ { get; init; }
+  double VelocityX { get; init; }
+  double VelocityY { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(Velocity.Pan? left, Velocity.Pan? right)
+  static bool op_Inequality(Velocity.Pan? left, Velocity.Pan? right)
+  void Deconstruct(out double AnchorX, out double AnchorY, out double AnchorZ, out double VelocityX, out double VelocityY)
 abstract class Bevy.Reflected.VideoModeSelection : IEquatable<VideoModeSelection>
   override bool Equals(object? obj)
   override int GetHashCode()
@@ -10881,9 +11273,12 @@ static class Bevy.Render
   static Entity SpawnCamera3d(CameraSettings settings)
   static Entity SpawnLight(LightKind kind, float intensity)
   static Entity SpawnLight(LightSettings settings)
+  static FreeCameraSettings? FreeCameraOf(Entity camera)
+  static FreeCameraState? FreeCameraStateOf(Entity camera)
   static IReadOnlyList<PassTiming> Timings()
   static MeshData? DataOf(AssetHandle mesh)
   static MeshRecipe? RecipeOf(AssetHandle mesh)
+  static PanCameraSettings? PanCameraOf(Entity camera)
   static RenderErrorPolicy ErrorPolicy { get; set; }
   static bool CompressMesh(AssetHandle mesh)
   static bool GenerateTangents(AssetHandle mesh)
@@ -10905,13 +11300,19 @@ static class Bevy.Render
   static bool TryReadNormals(AssetHandle mesh, out Vec3[] positions, out Vec3[] normals)
   static bool WriteMaterial(AssetHandle material, MaterialSettings settings)
   static int ErrorCount { get; }
+  static string FreeCameraControls(Entity camera)
   static string MaterialPathOf(Entity entity)
   static string MeshPathOf(Entity entity)
+  static string PanCameraControls(Entity camera)
   static string[]? MorphTargetNames(AssetHandle mesh)
   static void CauseError(RenderErrorCause cause)
   static void ClearAtmosphere(Entity camera)
+  static void ClearFreeCamera(Entity camera)
+  static void ClearPanCamera(Entity camera)
   static void ClearSkyLighting(Entity camera)
   static void CountDrawnMeshes(bool on)
+  static void DollyZoom(Entity camera, CameraProjection projection)
+  static void LookTo(Entity camera, Vec3 direction)
   static void MakeCubemap(AssetHandle image)
   static void MakeTextureArray(AssetHandle image, int layers)
   static void MakeVolume(AssetHandle image, int slices)
@@ -10937,6 +11338,8 @@ static class Bevy.Render
   static void SetEnvironmentMap(Entity camera, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Quat? rotation = null)
   static void SetExposure(Entity camera, float ev100)
   static void SetForwardDecal(Entity entity, AssetHandle material)
+  static void SetFreeCamera(Entity camera, FreeCameraSettings settings)
+  static void SetFreeCameraState(Entity camera, FreeCameraState state)
   static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null)
   static void SetIrradianceVolume(Entity probe, AssetHandle voxels, float intensity = 1000f, Vec3? falloff = null)
   static void SetLayers(EcsWorld world, Entity entity, uint layers)
@@ -10949,6 +11352,7 @@ static class Bevy.Render
   static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights)
   static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet)
   static void SetMipGeneration(AssetHandle image, bool on)
+  static void SetPanCamera(Entity camera, PanCameraSettings settings)
   static void SetPathTraced(Entity camera, bool on)
   static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
   static void SetPostProcessing(Entity camera, PostSettings settings)

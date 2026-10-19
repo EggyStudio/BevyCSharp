@@ -26,6 +26,8 @@ internal static class ShadowBiases
     private static ShadowFiltering _filter;
     private static float _pointDepth, _pointNormal, _directionalDepth, _directionalNormal;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         (LightAt, _pointOn, _filter) = (new Vec3(5f, 5f, 0f), false, ShadowFiltering.Hardware2x2);
@@ -73,7 +75,7 @@ internal static class ShadowBiases
         }
 
         _camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-1f, 1f, 1f), new Vec3(-1f, 1f, 0f), Vec3.UnitY));
-        ecs.Add(_camera, new FreeCamera());
+        Render.SetFreeCamera(_camera, new FreeCameraSettings());
         Render.SetShadowFiltering(_camera, _filter);
 
         // Every other sphere raised, so the shadows fall at two distances from what casts them.

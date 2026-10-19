@@ -26,6 +26,8 @@ internal static class AtmosphereExample
     private static AssetHandle _marsPhase;
     private static AtmosphereSettings _sky = new();
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         (_paused, _ev100, _sky) = (false, 13f, new AtmosphereSettings());
@@ -135,7 +137,7 @@ internal static class AtmosphereExample
         ecs.Insert<VolumetricFogRef>(_camera).AmbientIntensity = 0f;
         Render.SetScreenSpaceReflections(_camera, new ReflectionSettings { FadeInRoughness = (0f, 0f) });
 
-        ecs.Add(_camera, new FreeCamera { Speed = 1f });
+        Render.SetFreeCamera(_camera, new FreeCameraSettings());
     }
 
     private static void SetupTerrainScene(BehaviorContext ctx)

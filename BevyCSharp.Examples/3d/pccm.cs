@@ -17,6 +17,8 @@ internal static class Pccm
     private static bool _enabled;
     private static RadioButtons<bool>? _buttons;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         _enabled = true;
@@ -27,7 +29,7 @@ internal static class Pccm
 
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 4f), new Vec3(0f, -2.5f, 0f), Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
-            ecs.Add(camera, new FreeCamera());
+            Render.SetFreeCamera(camera, new FreeCameraSettings());
 
             // Bevy's cuboid of half size 5 by 1 by 2, a perfect mirror.
             var slab = Render.CreateMaterial(new MaterialSettings

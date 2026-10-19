@@ -334,6 +334,7 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 | `serde_json` | Components read and written through Bevy's reflection, which cross as JSON, and the reflection slangc writes beside a compile. |
 | `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
 | `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
+| `bevy_camera_controller` | The reflection of Bevy's camera controllers, named for its `bevy_reflect` feature, which Bevy builds the crate without, so the pan-orbit camera is written from C# as Bevy's other components are (render). |
 | `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). Vendored at 0.2.0 in `native/bevy_weather`, a member of the workspace, under its own license. |
 | `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 

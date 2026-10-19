@@ -250,6 +250,7 @@ public sealed unsafe partial class App : IDisposable
                 AudioWithoutWindow = Config.AudioWithoutWindow ? 1u : 0u,
                 NoPrimaryWindow = Config.PrimaryWindow ? 0u : 1u,
                 TransformGizmo = Config.TransformGizmo ? 1u : 0u,
+                CameraControllers = (uint)Config.CameraControllers,
             };
             _handle = Native.bcs_app_create(&native);
         }

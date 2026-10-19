@@ -46,6 +46,7 @@ internal static class Solari
         config.RayTracedLighting = true;
         config.PathTracer = PathTracer;
         config.GpuTimings = true;
+        config.CameraControllers = CameraControllers.Free;
     }
 
     public static void Build(App app)
@@ -159,7 +160,7 @@ internal static class Solari
     private static Entity SpawnCamera(EcsWorld ecs, Transform transform)
     {
         var camera = ecs.SpawnCamera3d(transform, new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
-        ecs.Add(camera, new FreeCamera { Speed = 3f });
+        Render.SetFreeCamera(camera, new FreeCameraSettings { WalkSpeed = 3f, RunSpeed = 10f });
         if (Render.RayTracingActive)
         {
             if (PathTracer) Render.SetPathTraced(camera, true);

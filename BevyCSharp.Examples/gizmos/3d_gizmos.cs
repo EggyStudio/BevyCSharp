@@ -19,6 +19,8 @@ internal static class Gizmos3d
     private static GizmoLines _straight = new(GizmoGroup.Behind), _round = new(GizmoGroup.InFront);
     private static bool _onTop, _bounds;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         (_straight, _round, _onTop, _bounds) = (new GizmoLines(GizmoGroup.Behind), new GizmoLines(GizmoGroup.InFront), false, false);
@@ -40,7 +42,7 @@ internal static class Gizmos3d
         ecs.Wrap<Bevy.Reflected.GizmoRef>(holder).LineConfigWidth = 5f;
 
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 1.5f, 6f), Vec3.Zero, Vec3.UnitY));
-        ecs.Add(camera, new FreeCamera());
+        Render.SetFreeCamera(camera, new FreeCameraSettings());
 
         ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 5f, 5f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.Identity);
         ecs.SpawnMesh(Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f), Render.CreateMaterial(Color.FromSrgb(0.8f, 0.7f, 0.6f)), Transform.At(0f, 0.5f, 0f));

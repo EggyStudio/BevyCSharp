@@ -27,6 +27,8 @@ internal static class LightProbeBlending
     private static bool _gizmos, _sphereShown, _orbit;
     private static RadioButtons<bool>? _gizmoButtons, _objectButtons, _cameraButtons;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         Probes.Clear();
@@ -104,7 +106,7 @@ internal static class LightProbeBlending
             if (orbit)
             {
                 // Taken up again from where the free camera left it.
-                ecs.Remove<FreeCamera>(_camera);
+                Render.ClearFreeCamera(_camera);
                 var sphere = ecs.EntitiesWith<ReflectiveSphere>() is [var first, ..] ? ecs.GetOrDefault<Transform>(first).Translation : Vec3.Zero;
                 var relative = ecs.GetOrDefault<Transform>(_camera).Translation - sphere;
                 var radius = relative.Length;
@@ -119,7 +121,7 @@ internal static class LightProbeBlending
             else
             {
                 ecs.Remove<OrbitCamera>(_camera);
-                ecs.Add(_camera, new FreeCamera());
+                Render.SetFreeCamera(_camera, new FreeCameraSettings());
             }
 
             _cameraButtons.Select(ecs, orbit);

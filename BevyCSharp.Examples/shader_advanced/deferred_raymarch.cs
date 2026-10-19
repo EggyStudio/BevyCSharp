@@ -15,6 +15,8 @@ namespace BevyCSharp.Examples.Shading;
 // stage draws the same triangle into the shadow maps.
 internal static class DeferredRaymarch
 {
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>
@@ -29,7 +31,7 @@ internal static class DeferredRaymarch
             Render.SetPostProcessing(camera, new PostSettings { Msaa = 1 });
             Shaders.SetPrepass(camera, depth: true, deferred: true);
             Render.SetAmbientLight(camera, (1f, 1f, 1f), 200f);
-            ecs.Add(camera, new FreeCamera());
+            Render.SetFreeCamera(camera, new FreeCameraSettings());
 
             // A ground plane that catches the field's shadow.
             ecs.SpawnMesh(Render.CreateMesh(MeshShape.Plane, 20f, 20f), Render.CreateMaterial(Color.FromSrgb(0.3f, 0.5f, 0.3f)), Transform.At(0f, -1.5f, 0f));

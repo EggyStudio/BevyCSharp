@@ -22,7 +22,7 @@ internal static class TransformGizmoExample
     private static Entity _sensitivityRow, _slider, _fill, _value;
 
     // Bevy's TransformGizmoPlugin and MeshPickingPlugin, the gizmo and the clicks that select.
-    public static void Configure(Config config) => (config.TransformGizmo, config.MeshPicking) = (true, true);
+    public static void Configure(Config config) => (config.TransformGizmo, config.MeshPicking, config.CameraControllers) = (true, true, CameraControllers.Free);
 
     public static void Build(App app)
     {
@@ -67,7 +67,7 @@ internal static class TransformGizmoExample
         ecs.Add(light, new Transform(Vec3.Zero, Quat.FromRotationX(-0.8f) * Quat.FromRotationY(0.4f), Vec3.One));
 
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 4f, 8f), Vec3.Zero, Vec3.UnitY));
-        ecs.Add(camera, new FreeCamera());
+        Render.SetFreeCamera(camera, new FreeCameraSettings());
         ecs.Insert<TransformGizmoCameraRef>(camera);
     }
 

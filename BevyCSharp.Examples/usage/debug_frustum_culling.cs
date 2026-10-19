@@ -26,6 +26,8 @@ internal static class DebugFrustumCulling
     private static Entity _freeCamera;
     internal static GameTimer WallTimer;
 
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app)
     {
         app.Startup(Setup, "debug_frustum_culling.Setup");
@@ -34,10 +36,22 @@ internal static class DebugFrustumCulling
             WallTimer.Tick(ctx.Time.Delta);
             foreach (var camera in ctx.Ecs.Query<MyCamera>(markChanged: false))
             {
-                if (ctx.Input.KeyPressed(Key.Digit1)) ctx.Ecs.Set(_freeCamera, ctx.Ecs.GetOrDefault<Transform>(camera.Entity));
-                if (ctx.Input.KeyPressed(Key.Digit2)) ctx.Ecs.Set(_freeCamera, Transform.LookingAt(FreeCameraStart, FreeCameraTarget, Vec3.UnitY));
+                if (ctx.Input.KeyPressed(Key.Digit1)) MoveFreeCamera(ctx.Ecs, ctx.Ecs.GetOrDefault<Transform>(camera.Entity));
+                if (ctx.Input.KeyPressed(Key.Digit2)) MoveFreeCamera(ctx.Ecs, Transform.LookingAt(FreeCameraStart, FreeCameraTarget, Vec3.UnitY));
             }
         }, "debug_frustum_culling.MoveFreeCamera");
+    }
+
+    // The free camera's yaw and pitch go with its transform, so the mouse turns it on from where
+    // it was put rather than from where the controller last left it.
+    private static void MoveFreeCamera(EcsWorld ecs, Transform to)
+    {
+        ecs.Set(_freeCamera, to);
+        if (Render.FreeCameraStateOf(_freeCamera) is not { } state) return;
+
+        var euler = to.Rotation.ToEuler();
+        (state.Pitch, state.Yaw) = (euler.X, euler.Y);
+        Render.SetFreeCameraState(_freeCamera, state);
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -47,7 +61,7 @@ internal static class DebugFrustumCulling
         if (Window.Entity() != Entity.None) Window.SetStyle(resizable: false);
 
         _freeCamera = ecs.SpawnCamera3d(Transform.LookingAt(FreeCameraStart, FreeCameraTarget, Vec3.UnitY));
-        ecs.Add(_freeCamera, new FreeCamera());
+        Render.SetFreeCamera(_freeCamera, new FreeCameraSettings());
 
         // A third of the window, in its bottom right corner, drawn over the big camera's picture.
         var (width, height) = Window.Size();

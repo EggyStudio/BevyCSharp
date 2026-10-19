@@ -353,6 +353,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 app.add_plugins(bevy::gizmos::transform_gizmo::TransformGizmoPlugin);
             }
 
+            // Bevy's camera controllers, which its default plugins leave out and an app asks for,
+            // each idle until a camera is given its component.
+            crate::camera_controllers::install(&mut app, config.camera_controllers);
+
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();
             app.init_resource::<crate::events::FileDrops>();
@@ -489,6 +493,8 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
     // Reflection data Bevy leaves off types a C# program reads or writes.
     crate::reflected::type_data::register(&mut app);
+    #[cfg(feature = "render")]
+    crate::camera_controllers::register_types(&mut app);
 
     // Where the typed-text reader keeps its place between frames.
     app.init_resource::<crate::sync::TextCursor>();

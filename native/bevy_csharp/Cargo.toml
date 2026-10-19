@@ -195,6 +195,17 @@ render = [
     "bevy/bevy_picking",
     "bevy/sprite_picking",
     "bevy/mesh_picking",
+    # Bevy's camera controllers, the free camera that flies with the keys and turns with the
+    # mouse, the pan camera that moves a 2D view, and the pan-orbit camera that turns about the
+    # point under the pointer, with the dot its gizmo draws there. One crate of plain Rust, whose
+    # plugins an app asks for (`Config.CameraControllers`) and whose systems do nothing for a camera
+    # without the controller's component.
+    "bevy/free_camera",
+    "bevy/pan_camera",
+    "bevy/pan_orbit_camera",
+    "bevy/pan_orbit_gizmo",
+    "dep:bevy_camera_controller",
+    "bevy_camera_controller/bevy_reflect",
     # A pointer drawn from an image of the game's own, as Bevy's window_settings shows one. The
     # image and asset crates and wgpu's types it reaches are in the profile already, so it adds
     # nothing to the build.
@@ -244,6 +255,10 @@ nonmax = { version = "0.5", default-features = false }
 # version is already in the tree.
 bytemuck = { version = "1", features = ["derive"] }
 naga = { version = "30", default-features = false, features = ["wgsl-in"], optional = true }
+# Bevy's camera controllers, named directly for their reflection, which Bevy builds the crate
+# without, so the pan-orbit camera's components could not be read or written from C#. The crate is
+# in the tree through Bevy and its reflection crate is too, so this adds no crate.
+bevy_camera_controller = { version = "0.20.0", default-features = false, optional = true }
 # Components read and written through Bevy's reflection cross the boundary as JSON, in every
 # profile, and the render profile also reads the reflection slangc writes beside every compile.
 # Already in the tree through Bevy.

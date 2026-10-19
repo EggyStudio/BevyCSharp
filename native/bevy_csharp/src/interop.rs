@@ -286,6 +286,9 @@ pub struct BcsConfig {
     /// otherwise, since Bevy spawns its handles and a camera to draw them over the scene as an app
     /// starts, which every other app would carry for nothing.
     pub transform_gizmo: u32,
+    /// Bevy's camera controllers to add, a bit each (`camera_controllers::FREE`, `PAN` and
+    /// `PAN_ORBIT`). Needs the `render` feature. Each moves only a camera given its component.
+    pub camera_controllers: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

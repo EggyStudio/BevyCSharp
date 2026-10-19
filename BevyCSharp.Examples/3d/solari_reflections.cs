@@ -85,6 +85,7 @@ internal static class SolariReflections
         config.RayTracedLighting = true;
         config.PathTracer = true;
         config.GpuTimings = true;
+        config.CameraControllers = CameraControllers.Free;
     }
 
     public static void Build(App app)
@@ -158,7 +159,7 @@ internal static class SolariReflections
         _camera = ecs.SpawnCamera3d(
             Transform.LookingAt(new Vec3(0f, 2.8f, 9.5f), new Vec3(0f, 1.6f, -1f), Vec3.UnitY),
             new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
-        ecs.Add(_camera, new FreeCamera { Speed = 3f });
+        Render.SetFreeCamera(_camera, new FreeCameraSettings { WalkSpeed = 3f, RunSpeed = 10f });
         Render.SetExposure(_camera, 7f);
         if (Render.RayTracingActive) Render.SetRayTracedLighting(_camera, true);
 

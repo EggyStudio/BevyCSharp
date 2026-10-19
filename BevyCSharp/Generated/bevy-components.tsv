@@ -191,6 +191,70 @@ field	bevy_camera::visibility::range::VisibilityRange	use_aabb	.use_aabb	Bool	bo
 layout	bevy_camera::visibility::range::VisibilityRange	20/4;.start_margin@0:8;.end_margin@8:8;.use_aabb@16:1
 component	bevy_camera::visibility::render_layers::RenderLayers	RenderLayers
 field	bevy_camera::visibility::render_layers::RenderLayers	0	.0	List	SmallVec<[u64; 1]>	Int
+component	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	PanOrbitCamera
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	enabled_motion.pan	.enabled_motion.pan	Bool	bool	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	enabled_motion.orbit	.enabled_motion.orbit	Bool	bool	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	enabled_motion.zoom	.enabled_motion.zoom	Bool	bool	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orbit_constraint	.orbit_constraint	Enum	OrbitConstraint	Fixed,Free
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orbit_constraint	Fixed	up.x	.orbit_constraint.up.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orbit_constraint	Fixed	up.y	.orbit_constraint.up.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orbit_constraint	Fixed	up.z	.orbit_constraint.up.z	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orbit_constraint	Fixed	can_pass_tdc	.orbit_constraint.can_pass_tdc	Bool	bool	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	zoom_limits.min_size_per_pixel	.zoom_limits.min_size_per_pixel	Double	f64	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	zoom_limits.max_size_per_pixel	.zoom_limits.max_size_per_pixel	Double	f64	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	zoom_limits.zoom_through_objects	.zoom_limits.zoom_through_objects	Bool	bool	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	smoothing.pan	.smoothing.pan	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	smoothing.orbit	.smoothing.orbit	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	smoothing.zoom	.smoothing.zoom	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	sensitivity.orbit	.sensitivity.orbit	Vec2	glam::Vec2	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	sensitivity.zoom	.sensitivity.zoom	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.pan_damping	.momentum.pan_damping	Int	u8	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.pan_friction	.momentum.pan_friction	Double	f64	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.init_pan	.momentum.init_pan	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.orbit_damping	.momentum.orbit_damping	Int	u8	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.orbit_friction	.momentum.orbit_friction	Double	f64	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	momentum.init_orbit	.momentum.init_orbit	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	input_debounce	.input_debounce	Double	Duration	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	perspective.near_clip_limits	.perspective.near_clip_limits	Vec2	Range<f32>	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	perspective.near_clip_multiplier	.perspective.near_clip_multiplier	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orthographic.scale_to_near_clip	.orthographic.scale_to_near_clip	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orthographic.near_clip_limits	.orthographic.near_clip_limits	Vec2	Range<f32>	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	orthographic.far_clip_multiplier	.orthographic.far_clip_multiplier	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	last_anchor_depth	.last_anchor_depth	Double	f64	
+field	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	.current_motion	Enum	CurrentMotion	Stationary,Momentum,UserControlled
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	Momentum	velocity	.current_motion.velocity	Enum	Velocity	None,Orbit,Pan
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Orbit	anchor.x	.current_motion.velocity.anchor.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Orbit	anchor.y	.current_motion.velocity.anchor.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Orbit	anchor.z	.current_motion.velocity.anchor.z	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Orbit	velocity.x	.current_motion.velocity.velocity.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Orbit	velocity.y	.current_motion.velocity.velocity.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Pan	anchor.x	.current_motion.velocity.anchor.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Pan	anchor.y	.current_motion.velocity.anchor.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Pan	anchor.z	.current_motion.velocity.anchor.z	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Pan	velocity.x	.current_motion.velocity.velocity.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.Momentum.velocity	Pan	velocity.y	.current_motion.velocity.velocity.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	Momentum	momentum_start	.current_motion.momentum_start	Double	Instant	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	UserControlled	anchor.x	.current_motion.anchor.x	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	UserControlled	anchor.y	.current_motion.anchor.y	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	UserControlled	anchor.z	.current_motion.anchor.z	Double	f64	
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion	UserControlled	motion_inputs	.current_motion.motion_inputs	Enum	MotionInputs	OrbitZoom,PanZoom,Zoom
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.UserControlled.motion_inputs	OrbitZoom	screenspace_inputs	.current_motion.motion_inputs.screenspace_inputs.0	List	VecDeque<InputStreamEntry<Vec2>>	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.UserControlled.motion_inputs	OrbitZoom	zoom_inputs	.current_motion.motion_inputs.zoom_inputs.0	List	VecDeque<InputStreamEntry<f32>>	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.UserControlled.motion_inputs	PanZoom	screenspace_inputs	.current_motion.motion_inputs.screenspace_inputs.0	List	VecDeque<InputStreamEntry<Vec2>>	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.UserControlled.motion_inputs	PanZoom	zoom_inputs	.current_motion.motion_inputs.zoom_inputs.0	List	VecDeque<InputStreamEntry<f32>>	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>
+variant	bevy_camera_controller::pan_orbit_camera::controller::component::PanOrbitCamera	current_motion.UserControlled.motion_inputs	Zoom	zoom_inputs	.current_motion.motion_inputs.zoom_inputs.0	List	VecDeque<InputStreamEntry<f32>>	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>
+component	bevy_camera_controller::pan_orbit_camera::extensions::anchor_indicator::AnchorIndicator	AnchorIndicator
+field	bevy_camera_controller::pan_orbit_camera::extensions::anchor_indicator::AnchorIndicator	enabled	.enabled	Bool	bool	
+layout	bevy_camera_controller::pan_orbit_camera::extensions::anchor_indicator::AnchorIndicator	1/1;.enabled@0:1
+component	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	IndependentSkybox
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	skybox	.skybox	Asset	Handle<Image>	Image
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	brightness	.brightness	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	rotation	.rotation	Quat	glam::Quat	
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	skybox_cam_order_offset	.skybox_cam_order_offset	Int	isize	
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	fov	.fov	Enum	SkyboxFov	Auto,Fixed
+variant	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	fov	Fixed		.fov.0	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	skybox_cam	.skybox_cam	Enum	Option<Entity>	None,Some
+variant	bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox	skybox_cam	Some		.skybox_cam.0	Entity	bevy_ecs::entity::Entity	
 component	bevy_core_pipeline::prepass::DeferredPrepass	DeferredPrepass
 component	bevy_core_pipeline::prepass::DeferredPrepassDoubleBuffer	DeferredPrepassDoubleBuffer
 component	bevy_core_pipeline::prepass::DepthPrepass	DepthPrepass
@@ -2173,6 +2237,16 @@ item	bevy_animation::transition::AnimationTransition	AnimationTransition
 field	bevy_animation::transition::AnimationTransition	current_weight	.current_weight	Float	f32	
 field	bevy_animation::transition::AnimationTransition	weight_decline_per_sec	.weight_decline_per_sec	Float	f32	
 field	bevy_animation::transition::AnimationTransition	animation	.animation	Int	petgraph::graph::NodeIndex	
+item	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>	InputStreamEntry<f32>
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>	time	.time	Double	Instant	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>	sample	.sample	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>	fraction_remaining	.fraction_remaining	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<f32>	smoothed_value	.smoothed_value	Float	f32	
+item	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>	InputStreamEntry<glam::Vec2>
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>	time	.time	Double	Instant	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>	sample	.sample	Vec2	glam::Vec2	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>	fraction_remaining	.fraction_remaining	Float	f32	
+field	bevy_camera_controller::pan_orbit_camera::controller::smoothing::InputStreamEntry<glam::Vec2>	smoothed_value	.smoothed_value	Vec2	glam::Vec2	
 item	bevy_ecs::component::info::ComponentId	ComponentId
 field	bevy_ecs::component::info::ComponentId	0	.0	Int	usize	
 item	bevy_math::rects::rect::Rect	Rect

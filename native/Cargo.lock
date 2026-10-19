@@ -655,6 +655,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_camera_controller"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1800e6db2bc6707f56001ac0ef4c13aa37ad24b8b0ef8824bd1861ca3433526"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_camera",
+ "bevy_color",
+ "bevy_core_pipeline",
+ "bevy_curve",
+ "bevy_derive",
+ "bevy_ecs",
+ "bevy_gizmos",
+ "bevy_image",
+ "bevy_input",
+ "bevy_log",
+ "bevy_math",
+ "bevy_picking",
+ "bevy_platform",
+ "bevy_reflect",
+ "bevy_render",
+ "bevy_time",
+ "bevy_transform",
+ "bevy_window",
+]
+
+[[package]]
 name = "bevy_clipboard"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -722,6 +750,7 @@ name = "bevy_csharp"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_camera_controller",
  "bevy_weather",
  "bytemuck",
  "naga",
@@ -1067,6 +1096,7 @@ dependencies = [
  "bevy_asset",
  "bevy_audio",
  "bevy_camera",
+ "bevy_camera_controller",
  "bevy_clipboard",
  "bevy_color",
  "bevy_core_pipeline",

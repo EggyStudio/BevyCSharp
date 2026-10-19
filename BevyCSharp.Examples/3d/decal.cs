@@ -15,6 +15,8 @@ namespace BevyCSharp.Examples.ThreeD;
 // run is the same and the cubes are turned otherwise.
 internal static class DecalExample
 {
+    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+
     public static void Build(App app) => app.Startup(ctx =>
     {
         var ecs = ctx.Ecs;
@@ -38,7 +40,7 @@ internal static class DecalExample
         var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(2f, 9.5f, 2.5f), Vec3.Zero, Vec3.UnitY));
         ecs.SetName(camera, "Camera");
         ecs.Insert<DepthPrepassRef>(camera);
-        ecs.Add(camera, new FreeCamera());
+        Render.SetFreeCamera(camera, new FreeCameraSettings());
 
         var white = Render.CreateMaterial(Color.White);
         ecs.SpawnMesh(Render.CreateMesh(MeshShape.Rectangle, 10f, 10f), white,

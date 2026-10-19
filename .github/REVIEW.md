@@ -10,7 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6bac018b`, Verdict 31's line and nothing else. `build/captures-differ.txt` lists
+Reviewed up to `2b355276`, item 29's list and nothing else, a section of TODO.md. "Mended for the
+time being" stands between Testing and Build and release with thirteen parts, each saying where a
+mend of the moment stands, the mend that removes its cause and what that costs: the two async
+examples waiting on the machine's clock, the two whose animation starts at the end of a load, the
+two placing sprites unseeded, lavapipe's dropped meshlet bunnies, Solari's panel showing the
+device's timings, the pictures taken on a bridge without Solari for the `dfg_lut` it turns on, the
+six examples the runner's Mesa 25.2 leaves uncompared, the soak's two figures said and not judged,
+the soak's rooms set without a measurement, the drive reading a swing at its farthest, the
+anisotropy fault pinned and not mended, the two helpers standing where crates would, and the pack
+run's limits sized for a software device, with the norm's lists said in passing as item 2's; left
+out as no mend of the moment are the captures' shared tolerance, the skips for a device or profile
+lacking something, the wait for nuget.org's index, the memory guard's no-GC region and the test
+script's memory cap. The working session writes nothing under item 29 itself, AGENTS.md letting it
+edit Replies alone, so the parts are taken into the item below in the reviewer's order. `NormTests`
+passed. Right. On 2026-10-19 the owner typed the words in the working session (Decision 39): the
+camera controllers, Feathers, the dev tools and the system information may come in, the https asset
+loading and the image saver stay declined, item 4 comes before item 29 in the reviewer's order,
+`dfg_lut` goes on, the captures move to a container of a distribution image with a newer Mesa and a
+meshlet and Solari bridge with no runner with a graphics card, the anisotropy fault is mended by a
+patched shader with a test, the templates are published beside the engine (item 30), and
+`monitor_info` is captured on virtual monitors. Next item 4's batches in order, the camera
+controllers first, one a commit.
+
+Before it, `6bac018b` came, Verdict 31's line and nothing else. `build/captures-differ.txt` lists
 `async_compute` at 0.04 beside its sibling with the sibling's reason word for word, the example
 unchanged, and the room is measured (N 3.5), 2.6 percent on the runner's pack run of `c5f19669` and
 1.36, 1.58, 1.51 and 1.54 in four runs of `build/capture-example.sh` in a container of the runner's
@@ -51,35 +74,6 @@ in a row, Verdict 29. On the pack run of `c5f19669` the four shards ended with `
 one picture apart, the play, storm and README jobs passed, and the feature test's course was still
 running at 11:48. The pack run of `c5f19669` ended at 11:52 with the feature test's course passing,
 red on its three suites and the first shard alone.
-
-Before it, `c5f19669` came, item 28 done and nothing else, 16 files, the ABI 284 to 285. The
-atmosphere's config carries a count and a pointer of scattering terms, each 44 bytes of absorption,
-scattering, a falloff of three kinds with two parameters, a phase of three kinds and an asymmetry,
-and the bridge builds Bevy's terms from them into a medium of the game's own at 256 by 256 with the
-density multiplier, the planet keeping its size and Mars's dust phase unneeded with an air of the
-game's own, refusing a negative or non-finite amount, an unknown falloff or phase, a tent outside 0
-to 1 and an asymmetry outside the open interval; on the managed side the settings gain `Medium`, a
-list of `ScatteringTerm`, the falloff and phase enums each in a file of their own as N 1.2 asks,
-`Render.SetAtmosphere` checking each term and naming the term and the reason it refuses before
-passing them pinned, and `PublicApi.txt` written again. `AtmosphereTests` hold the two layouts, a 32
-by 32 offscreen sky under a high sun whose blue is over its red by more than 10 for earth's air and
-whose red is over its blue by the same for a single Rayleigh gas with earth's coefficients reversed,
-and two terms refused with their reasons. The sky guide has a paragraph and a compiled block, and
-TODO.md's line names what is left, a falloff or a phase given as a curve or a picture, which cross
-the bridge as no number. Checked on the working machine were the whole suite, 1,488 passed and 3
-skipped of 1,491, and the render and editor builds checked in the container. Right. The owner pushed
-the six commits since `b50890cb`, four ABI moves among them, at 10:21 on 2026-10-18 and started the
-pack run with them. The push run ended at 10:38 red on all three suites, each failing one test,
-`NativeComponentTests`' visibility round trip in its headless branch, where a headless build is
-expected to refuse the component and no longer does (Verdict 30, of `1a6c5d22`), Linux passing 1,221
-beside it, macOS 1,041 and Windows 1,048; the pack run's three suites failed the same way by 10:35
-with its digest, its natives passing as they end, and its pack job will not run, so the package
-waits. Verdict 29's test passed on both Windows suites. By 11:14 the pack run's six natives, the
-play job, the storm and the README walk had passed, the second capture shard too, and the first had
-failed on one picture, `async_compute` differing by 2.6 percent where 2 is allowed, its cubes
-arriving after waits on the machine's clock as its listed sibling's do (Verdict 31), with the other
-two shards and the feature test's course still running. Next Verdicts 30 and 31's mends, their push,
-and a push run and a pack run whole green.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -364,7 +358,11 @@ from [SHARED.md](SHARED.md).
    session asks the owner for each word by name in the table's order, the camera controllers first,
    then Feathers and the dev tools, then the system information, `web_asset` and the image saver,
    and bridges each as its word is typed; item 29's list, which is reading and no mend, may be
-   written meanwhile.
+   written meanwhile. On 2026-10-19 the owner typed the words (Decision 39): the camera controllers'
+   crate, Feathers', the dev tools' and the system information's come in, the https asset loading
+   and the image saver are declined and their rows stay missing as declined, and `monitor_info` is
+   captured on virtual monitors in a headless display and never on the owner's screens. The batches
+   go in that order, one a commit.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -796,7 +794,39 @@ from [SHARED.md](SHARED.md).
     without Solari for the `dfg_lut` it enables, the measure's rooms and the figures said and not
     judged, each with what the lasting mend is and what it costs, written here as parts of this
     item, and the reviewer orders them with the owner. Then each part is mended on its own, one
-    commit a part, measured where a figure moves (N 3.5).
+    commit a part, measured where a figure moves (N 3.5). Listed at `2b355276` in TODO.md's section
+    "Mended for the time being", thirteen parts, taken here in the reviewer's order, the cheap and
+    self-contained first and the ones that are the owner's to decide last: (a) `many_sprites` and
+    `many_animated_sprites` seeded under the workflow, two lines off the differ list; (b) Solari's
+    panel hiding the device's timings under the workflow, its room measured again for the noise
+    alone; (c) the soak's heap judged after a compacting collection in `memory.collect`, the managed
+    total dropped from the answer; (d) the soak's other rooms measured from soaks of the three
+    programs, the process figure read as private memory without the driver's mappings; (e) a
+    `TimeProvider` on the app's clock for the two async examples, their generators seeded under the
+    workflow, two lines off; (f) the bridge's clock held while an asset loads and between the
+    drive's commands, one hold serving the two animation examples and the drive's swing, every
+    capture taken again; (g) `dfg_lut` on in the render profile, the owner's decision, since games
+    on the package are then lit a little otherwise and every 3D picture is taken again (Decision
+    25); (h) a newer Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared
+    examples, the owner's decision on the jobs' image; (i) lavapipe's dropped bunnies traced and
+    reported to Mesa, outside the repository; (j) the anisotropy fault reported to Bevy, the owner's
+    decision, a patched shader declined; (k) the two helpers go with item 4's gaps; (l) runners with
+    a graphics card, the owner's purchase; (m) the norm's lists are item 2's. The mends follow item
+    4 as Decision 38 orders, unless the owner says the parts that need no decision may start while
+    the words for item 4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes
+    first and then this item in the order above; (g) `dfg_lut` goes on in the render profile with
+    the lock byte for byte the same; (h) and (l) are one, the capture jobs in a container of a
+    distribution image with a newer Mesa and a Linux bridge built with meshlets and Solari, no
+    runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
+    anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
+    earlier decline, with a test that fails when Bevy's original changes.
+
+30. **The templates package is published beside the engine, and the README's install line follows
+    (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
+    `BevyCSharp.Templates` beside the engine's package, which `pack.yml`'s glob over the packed
+    files already takes, and that the README's `dotnet new install` line stands once nuget.org lists
+    the package. Checked by the publishing pack run's page naming both packages and the README's
+    line tried from nuget.org. After item 4; one commit where anything changes.
 
 ## Verdicts
 
@@ -1087,5 +1117,18 @@ at a room measured on the runner and in a container of its image.
     fundamentally what was mended for the time being (item 29). The gaps that need a crate still
     wait on the owner's word typed in the working session (Decisions 11, 12 and 20); the verdicts
     open are mended as they come.
+
+39. **The owner's words of 2026-10-19 on the crates, the order and the mends of the moment.** Typed
+    in the working session as AGENTS.md asks: the crates for the camera controllers, free, pan and
+    the three pan-orbit, Feathers, the dev tools and the system information may be added; https
+    asset loading and the compressed image saver are declined, their rows missing as declined; item
+    4 comes first and item 29 after in the reviewer's order, as Decision 38 has it; `dfg_lut` goes
+    on in the render profile; the capture jobs move to a container of a distribution image with a
+    newer Mesa and a Linux bridge built with meshlets and Solari, with no runner with a graphics
+    card and no Mesa from an archive outside the distribution; the anisotropy fault is mended by a
+    patched shader of Bevy's in the bridge, held by a test that fails when Bevy's original changes;
+    a publishing pack run pushes the templates package beside the engine's, the README's install
+    line following once nuget.org lists it (item 30); and `monitor_info` is captured on virtual
+    monitors in a headless display.
 
 ## Replies
