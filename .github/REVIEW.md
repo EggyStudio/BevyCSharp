@@ -26,8 +26,12 @@ eleven pictures and their thumbnails are in with the decal maps kept. Checked we
 the container on three profiles, `cargo test` headless and on render, the whole suite on the render
 bridge with the table, 1,509 passed and 17 skipped with the one failure the layouts test since
 mended and the lit-color pixel tests passing with their figures as they stand, the notices' and the
-table script's checks, the norm tests and the comparison matching 373. Right. Next (h), then (i) and
-(j), item 29's last three parts.
+table script's checks, the norm tests and the comparison matching 373. At 00:43 on 2026-10-20 the
+push run of `3eaa0a44` was whole green and the pack run's three suites and digest green with its
+natives finishing, so the Linux suites of `e7ea1a06`'s run and both runs of `3eaa0a44` settle
+Verdict 33, and the Windows and macOS suites of the two runs are Verdicts 34's and 35's second of
+three. Right. Next (h), then (i) and (j), item 29's last three parts, and the pack job's push read
+when the run ends.
 
 Before it, `a7895887` came, item 32's rule and nothing else, with the review's commit between. The
 notes script walks the commits after the start and leaves out one whose files all lie under
@@ -1001,8 +1005,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     absent, with the run's output if the artifact holds it; then the test made to hold what the hold
     promises without reading a frame that may not come, or the server mended where it answers a
     frame it did not run. Mended at `8e9c20b7` the same day, the test reading its times after the
-    app has stopped, the server unchanged, as the head says. Settled at three green Linux suites in
-    a row after the mend.
+    app has stopped, the server unchanged, as the head says. Settled on the Linux suites of the push
+    run of `e7ea1a06` and the push run and the pack run of `3eaa0a44`, 2026-10-19 and 2026-10-20,
+    three green in a row after the mend.
 
 34. **The release notes tests cannot delete their scratch repositories on Windows, since git writes
     its objects read-only.** On the pack run of `987676b5` and the push run of `e7ea1a06`,
@@ -1017,7 +1022,7 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     release notes tests sweep their repositories through git, whichever the other tests that make
     repositories, if any, already do. Mended at `7a0f07ea` the same day, the test folder's sweep
     clearing the read-only attribute on a refusal. Settled at three green Windows suites in a row
-    after the mend.
+    after the mend. The push run and the pack run of `3eaa0a44` passed the suite, two of three.
 
 35. **The load hold test's image never loaded on the macOS runner.** On the pack run of `987676b5`,
     2026-10-19, the macOS suite failed `ClockHoldTests.AClockHeldForLoadsStandsStillUntilTheyEnd` at
@@ -1031,7 +1036,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     whichever the reading supports, with the reason in the remark. Read and mended at `17487d27` the
     same day: the held clock holds nothing the load waits on, the test had given the load a few
     milliseconds unpaced, and it paces its frames at sixty a second up to six hundred. Settled at
-    three green macOS suites in a row after the mend.
+    three green macOS suites in a row after the mend. The push run and the pack run of `3eaa0a44`
+    passed the suite, two of three.
 
 ## Decisions
 
