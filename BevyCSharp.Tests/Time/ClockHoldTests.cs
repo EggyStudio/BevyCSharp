@@ -15,18 +15,28 @@ public sealed class ClockHoldTests
     /// when the load ends.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Bevy moves a load on before the frame's systems, so a system finds the load as the engine
     /// finds it before the next frame's clock moves. The image is asked for in the third frame's
     /// systems, since one this small asked for at startup has loaded before the first frame's
     /// systems run, and an asset is loading from the moment it is asked for, so the frame after
     /// stands still however fast the load is.
+    /// </para>
+    /// <para>
+    /// The load runs on Bevy's threads for loading and is taken in before each frame's systems, with
+    /// no step of the clock in it, so a held clock holds nothing the load waits on. Its length is the
+    /// machine's, so the frames are paced at sixty a second for as long as ten seconds, the run
+    /// ending three frames after the load, where twenty seven frames as fast as they ran had ended
+    /// before it on a macOS runner of the pack run 39324217456.
+    /// </para>
     /// </remarks>
     [Fact]
     public void AClockHeldForLoadsStandsStillUntilTheyEnd()
     {
-        using var harness = new EngineHarness(frames: 30, frameSeconds: 0.1);
+        using var harness = new EngineHarness(frames: 600, fps: 60, frameSeconds: 0.1);
         var image = AssetHandle.None;
         var seen = new List<(double Elapsed, ulong Clock, bool Loading)>();
+        var after = 0;
 
         harness.OnContext(Stage.Startup, ctx => ctx.Time.Holds = ClockHolds.Loads);
         harness.OnContext(Stage.Update, ctx =>
@@ -34,6 +44,7 @@ public sealed class ClockHoldTests
             if (ctx.Time.FrameCount == 3) image = AssetServer.Load(AssetKind.Image, "textures/checker.png");
             var loading = image.IsValid && AssetServer.StateWithDependenciesOf(image) == AssetLoadState.Loading;
             seen.Add((ctx.Time.ElapsedSeconds, ctx.Time.ClockFrames, loading));
+            if (image.IsValid && !loading && ++after == 3) ctx.Exit();
         });
 
         harness.Run();
