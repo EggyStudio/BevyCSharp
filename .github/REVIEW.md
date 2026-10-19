@@ -954,8 +954,9 @@ from [SHARED.md](SHARED.md).
     saying the run publishes through the trusted publisher policy and needs no secret, BUILDING.md's
     publishing section saying the same with the policy's values, workflow `pack.yml`, no environment
     and the package pattern; the step with the secret goes. Checked by a pack run with publish on,
-    whose push the feed accepts, the first the owner starts after the policy stands. One commit,
-    with item 32 after part (g), the pattern `BevyCSharp*`.
+    whose push the feed accepts, the first the owner starts after the policy stands. One commit, the
+    pattern `BevyCSharp*`; at 22:54 the owner asked whether the pack could upload by itself, so this
+    comes first, right after the step of (g) in hand, and item 32 with it.
 
 ## Verdicts
 
