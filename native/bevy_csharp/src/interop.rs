@@ -106,11 +106,11 @@ pub struct BcsInput {
     /// Vertical scroll since the previous frame.
     pub wheel_y: f32,
     /// Bit `n` set while key `n` is held.
-    pub keys_down: [u64; crate::input::KEY_WORDS],
+    pub keys_down: [u64; crate::input::KEY_BITSET_U64S],
     /// Bit `n` set on the frame key `n` went down.
-    pub keys_pressed: [u64; crate::input::KEY_WORDS],
+    pub keys_pressed: [u64; crate::input::KEY_BITSET_U64S],
     /// Bit `n` set on the frame key `n` went up.
-    pub keys_released: [u64; crate::input::KEY_WORDS],
+    pub keys_released: [u64; crate::input::KEY_BITSET_U64S],
     /// Bit `n` set while mouse button `n` is held.
     pub mouse_down: u32,
     /// Bit `n` set on the frame mouse button `n` went down.
@@ -161,9 +161,9 @@ impl Default for BcsInput {
             mouse_delta_y: 0.0,
             wheel_x: 0.0,
             wheel_y: 0.0,
-            keys_down: [0; crate::input::KEY_WORDS],
-            keys_pressed: [0; crate::input::KEY_WORDS],
-            keys_released: [0; crate::input::KEY_WORDS],
+            keys_down: [0; crate::input::KEY_BITSET_U64S],
+            keys_pressed: [0; crate::input::KEY_BITSET_U64S],
+            keys_released: [0; crate::input::KEY_BITSET_U64S],
             mouse_down: 0,
             mouse_pressed: 0,
             mouse_released: 0,

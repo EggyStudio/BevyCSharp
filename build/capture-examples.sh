@@ -48,8 +48,9 @@ printing=$("$program" --printing)
 
 # Examples that show and print nothing by design, Bevy's two empty applications and its four that
 # play sound in a window with no camera, those that wait for a file dropped, the mouse or a touch,
-# which a capture has none of, and monitor_info, which opens a window on each monitor and finds none
-# in a run with no display, so their capture is not held to saying something.
+# which a capture has none of, and monitor_info, which opens a window on each monitor and is
+# captured on a compositor's monitors in a container, or as words where no container runs, so their
+# capture is not held to saying something.
 empty="audio decodable drag_and_drop empty empty_defaults monitor_info mouse_grab mouse_input pitch soundtrack touch_input touch_input_events"
 
 # Examples whose picture is a color or two by their design, as Bevy's is, which the count of colors

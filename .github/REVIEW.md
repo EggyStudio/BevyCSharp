@@ -10,8 +10,27 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8ae312a4`, item 4's system information batch and nothing else, 17 files, the ABI 293
-to 294, the lock gaining the five crates measured, `sysinfo` with `ntapi`, `winapi` and its two
+Reviewed up to `b7cd83db`, the two declined rows marked and nothing else, a commit of documents and
+one comment, amended once before it was reported or pushed. `web_asset`'s row reads declined, since
+loading assets over https brings twenty-one crates into the bridge, an HTTP client with its TLS
+stack and the platform's certificate verifiers, for one example, and `compressed_image_saver`'s the
+same with seventeen crates and the texture compressors, some prebuilt; the table script counts a
+missing row whose note begins with declined as declined, EXAMPLES.md's summary reads 5 missing, 2 of
+them declined, its explanation adds why a crate is declined, and the README's status says three wait
+on something the bridge lacks and two are declined; TODO.md's two entries go and its paragraph says
+the system fonts wait on the decision to keep discovery off and the two are declined. The keyboard
+bitset's comment names its count as ulongs, the constant keeping its name for the surface until the
+next commit that changes it. The norm and documents script tests passed, 21 of 21, and the library
+builds with no warnings. Read before `monitor_info`, winit lists X11 monitors from the display's
+CRTCs and not from RandR 1.5's monitors, so a virtual X display with monitors set still gives one,
+and the route is a headless compositor in a container with its outputs laid out by its configuration
+and the whole layout captured, four outputs of 1280 by 720 in a two-by-two grid scaled to the
+gallery's size, each window naming its monitor. Right. Next `monitor_info` so, the capture job
+running the container where it can and otherwise a script under `build/` that takes the picture the
+same way on any machine with the container runtime, and the owner's push of the nine commits.
+
+Before it, `8ae312a4` came, item 4's system information batch and nothing else, 17 files, the ABI
+293 to 294, the lock gaining the five crates measured, `sysinfo` with `ntapi`, `winapi` and its two
 shims, through Bevy's feature on the headless profile, since nothing draws, so every profile has it.
 `diagnostics.rs` adds Bevy's system information plugin for a new bit of the diagnostics flags the
 config carries, no export changing, the ABI bumped since an older bridge would ignore the bit
@@ -62,31 +81,6 @@ the four pictures on a render bridge with the scene viewer's retaken twice and m
 whole suite with a clean build, 1,513 passed, 3 skipped and none failed of 1,516. Right. Next the
 system information, `sysinfo_plugin` and `log_diagnostics` whole, then the declined rows marked and
 `monitor_info` on virtual monitors, one batch a commit, and the owner's push of the seven commits.
-
-Before it, `319624bf` came, Feathers' last step and nothing else, 47 files, the ABI 291 to 292, the
-lock unchanged. The bridge gains a call setting the theme from token colors through Bevy's own
-constructor, a count of none restoring the dark theme, and the managed side the two calls with a
-test; `Helpers.cs` mirrors Bevy 0.20's three helper files the examples take in by path, the radio
-row, the theme and the labeled number input, and nothing of the port's own, its header naming the
-three, the package script's list carrying it with that reason, `Widgets.cs` gone and TODO.md's line
-on a helper standing where a crate would removed. The fourteen examples stand at Bevy's v0.20.0,
-each header naming the helper files it mirrors, three keeping Feathers' dark theme as Bevy's do, two
-taking number inputs in place of drag buttons with one adding its visibility row and the point
-light's scale, the reflections example's range rows as number inputs, the shadow example's filter
-order Bevy's and the gizmo's slider Feathers', four triage notes losing their clause on Feathers;
-eleven of the fourteen had a configuration the catalog never passed, so Feathers was off and their
-startup threw, mended in the entries and held by a test reading the sources with the compiler's
-syntax trees that fails when an example's configuration is missing from its entry, listed under N
-1.4 with the string-path test's reason, a test of no library area, which is no widening of the list.
-The fourteen pictures are retaken on a render bridge, seven within 2 percent of their old ones and
-seven apart by 2.2 to 6.4 where their rows changed, each read, with no line added to the differ
-file. Checked were `cargo check` on the four profiles, `cargo test` headless and on render, the
-headless bridge under B 2, the examples on a fresh package, the whole suite, 1,506 passed, 3 skipped
-and 1 failed of 1,510, the failure N 1.4 on the new test, mended by its list line and the norm and
-catalog tests then passing, and a clean build with warnings as errors. Feathers is whole in four
-steps and item 29's part (k) with it. Right. Next the dev tools' crate with its four examples, the
-system information with `log_diagnostics` whole, the declined rows marked and `monitor_info` on
-virtual monitors, one batch a commit, and the owner's push of the six commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -359,8 +353,10 @@ from [SHARED.md](SHARED.md).
    same day, the overlay, the grid, the picking debug and the scene viewer with their four examples,
    the table at 371 written and 5 missing, the lock gaining `bevy_dev_tools`, the ABI 293. The
    system information came at `8ae312a4` the same day, `log_diagnostics` whole, the table at 372
-   written, 1 in part and 5 missing, the lock gaining `sysinfo` and its four, the ABI 294; the
-   declined rows marked are next, then `monitor_info`.
+   written, 1 in part and 5 missing, the lock gaining `sysinfo` and its four, the ABI 294. The two
+   declined rows are marked at `b7cd83db` the same day with Decision 39's reasons, the table at 5
+   missing with 2 declined; `monitor_info` on a headless compositor's four virtual outputs in a
+   container is next, the last of the batches.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

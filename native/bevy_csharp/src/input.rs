@@ -69,12 +69,12 @@ key_table![
     PrintScreen, ScrollLock, Pause, ContextMenu,
 ];
 
-/// Number of `u64` words needed to hold [`KEY_COUNT`] bits.
-pub const KEY_WORDS: usize = KEY_COUNT.div_ceil(64);
+/// Number of `u64`s needed to hold [`KEY_COUNT`] bits.
+pub const KEY_BITSET_U64S: usize = KEY_COUNT.div_ceil(64);
 
 /// Sets the bit for `key` in a bitset, ignoring keys outside the table.
 #[inline]
-pub fn set_key(bits: &mut [u64; KEY_WORDS], key: KeyCode) {
+pub fn set_key(bits: &mut [u64; KEY_BITSET_U64S], key: KeyCode) {
     if let Some(bit) = key_bit(key) {
         bits[bit / 64] |= 1u64 << (bit % 64);
     }

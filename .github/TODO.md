@@ -35,12 +35,6 @@ saving compressed textures (`compressed_image_saver`), are declined, and their r
   axes, its underline and strikethrough and its background color are reached, and the atlases Bevy
   lays a font's glyphs out in are read.
 
-One example is written in part, leaving out a feature named in its row.
-
-- **A run on a display**, which `monitor_info` has not had. It opens a window filling each monitor
-  the platform reports, and an offscreen run reports none, so its test fills a monitor it made
-  itself, and only a run with monitors shows each window on its screen.
-
 ## Content
 
 ### Bevy's components through reflection

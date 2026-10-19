@@ -531,6 +531,13 @@ device or the bridge has not, meshlets or ray-traced lighting, is captured as th
 gives of that, and one a device ends the process drawing as the words saying so with the device's
 own description, each beside where its picture would be and compared with nothing.
 
+`monitor_info` opens a window on each monitor the platform reports, and an offscreen run reports
+none, so `build/capture-example.sh` hands it to `build/capture-monitor-info.sh`, which runs it on
+four virtual monitors of sway in a container of Ubuntu 24.04 with .NET's SDK, drawn by Mesa's
+lavapipe and laid out by `build/capture-monitor-info.sway`, so its picture is the same on any
+machine with podman or docker and no window opens on the machine's own screens. Where neither runs,
+it is captured as the words saying so.
+
 A picture is taken on a bridge built without Solari, `build/build-native.sh --render`, with
 `--meshlet` for `meshlet`, `test_meshlet` and `many_meshlet_materials`, as the native job builds the
 bridge the runner captures with and a game's package carries, and only `solari` and

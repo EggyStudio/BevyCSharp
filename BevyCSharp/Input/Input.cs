@@ -23,9 +23,9 @@ namespace Bevy;
 /// </example>
 public sealed class Input
 {
-    private readonly ulong[] _down = new ulong[NativeInput.KeyWords];
-    private readonly ulong[] _pressed = new ulong[NativeInput.KeyWords];
-    private readonly ulong[] _released = new ulong[NativeInput.KeyWords];
+    private readonly ulong[] _down = new ulong[NativeInput.KeyBitsetUlongs];
+    private readonly ulong[] _pressed = new ulong[NativeInput.KeyBitsetUlongs];
+    private readonly ulong[] _released = new ulong[NativeInput.KeyBitsetUlongs];
     private readonly HashSet<LogicalKey> _logicalDown = [];
     private readonly HashSet<LogicalKey> _logicalPressed = [];
     private readonly HashSet<LogicalKey> _logicalReleased = [];
@@ -163,8 +163,8 @@ public sealed class Input
 
     private static bool AnyBit(ulong[] bits)
     {
-        foreach (var word in bits)
-            if (word != 0)
+        foreach (var packed in bits)
+            if (packed != 0)
                 return true;
 
         return false;
@@ -183,11 +183,11 @@ public sealed class Input
         _mousePressed = snapshot.MousePressed;
         _mouseReleased = snapshot.MouseReleased;
 
-        for (var word = 0; word < NativeInput.KeyWords; word++)
+        for (var slot = 0; slot < NativeInput.KeyBitsetUlongs; slot++)
         {
-            _down[word] = snapshot.KeysDown[word];
-            _pressed[word] = snapshot.KeysPressed[word];
-            _released[word] = snapshot.KeysReleased[word];
+            _down[slot] = snapshot.KeysDown[slot];
+            _pressed[slot] = snapshot.KeysPressed[slot];
+            _released[slot] = snapshot.KeysReleased[slot];
         }
 
         UpdateTextAndTouches(snapshot);

@@ -3151,7 +3151,7 @@ struct Bevy.Interop.NativeInput
   NativeInput.<KeysReleased>e__FixedBuffer KeysReleased
   NativeInput.<Text>e__FixedBuffer Text
   NativeTouchArray Touches
-  const int KeyWords = 2
+  const int KeyBitsetUlongs = 2
   const int TextCapacity = 32
   const int TouchCapacity = 8
   float MouseDeltaX

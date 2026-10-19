@@ -13,7 +13,7 @@ namespace Bevy.Interop;
 public unsafe struct NativeInput
 {
     /// <summary>Number of ulongs in each keyboard bitset.</summary>
-    public const int KeyWords = 2;
+    public const int KeyBitsetUlongs = 2;
 
     /// <summary>Cursor X in physical window pixels.</summary>
     public float MouseX;
@@ -34,13 +34,13 @@ public unsafe struct NativeInput
     public float WheelY;
 
     /// <summary>Bit per key currently held.</summary>
-    public fixed ulong KeysDown[KeyWords];
+    public fixed ulong KeysDown[KeyBitsetUlongs];
 
     /// <summary>Bit per key that went down this frame.</summary>
-    public fixed ulong KeysPressed[KeyWords];
+    public fixed ulong KeysPressed[KeyBitsetUlongs];
 
     /// <summary>Bit per key that went up this frame.</summary>
-    public fixed ulong KeysReleased[KeyWords];
+    public fixed ulong KeysReleased[KeyBitsetUlongs];
 
     /// <summary>Bytes of typed text one frame can carry.</summary>
     public const int TextCapacity = 32;

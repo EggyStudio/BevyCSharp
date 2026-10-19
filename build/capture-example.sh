@@ -50,6 +50,15 @@ fi
 example="$1"
 out="${2:-.github/assets/examples/$example.webp}"
 mkdir -p "$(dirname "$out")"
+
+# monitor_info opens a window on each monitor, and an offscreen run has none, so it is captured on
+# the virtual monitors of a compositor in a container where podman or docker runs one, and as the
+# words that say why where none does, which build/capture-examples.sh counts as captured.
+if [ "$example" = monitor_info ]; then
+    build/capture-monitor-info.sh "$out" && exit 0
+    printf '%s\n' "Not drawn, since no compositor ran in a container to give it monitors, and an offscreen run has none." > "${out%.webp}.txt"
+    exit 4
+fi
 magick=$(command -v magick || command -v convert || true)
 if [ -z "$magick" ] && ! command -v cwebp >/dev/null 2>&1; then
     echo "capture-example.sh: ImageMagick or cwebp is needed to write the WebP" >&2

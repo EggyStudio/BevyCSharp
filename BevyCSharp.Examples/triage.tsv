@@ -391,7 +391,7 @@ debug_frustum_culling	can	each shape's box tested against the small camera's fru
 clear_color	can
 custom_cursor_image	can	the sheet's atlas and its hotspot set through Window.SetCursorAtlas, and the frame, the flips and the quarter written through Bevy's reflected CursorIcon
 low_power	can	the modes set through Window.SetUpdateSettings, and a redraw asked for and the loop woken through Window.RequestRedraw and Window.WakeUp
-monitor_info	part	a run on a display, whose monitors its windows fill, where an offscreen run reports none and opens nothing
+monitor_info	can	its picture taken by build/capture-monitor-info.sh on four virtual monitors of a compositor run in a container, since an offscreen run has no monitors to fill
 multiple_windows	can
 scale_factor_override	can	through the resolution of Bevy's reflected Window, its window 512 by 288 rather than Bevy's 500 by 300, so its picture is sixteen by nine
 screenshot	can	the pictures saved beside the program

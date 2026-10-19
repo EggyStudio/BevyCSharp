@@ -1,0 +1,16 @@
+# The compositor build/capture-monitor-info.sh runs monitor_info in, sway with four outputs of
+# Bevy's window size in a grid of two by two, black behind, with no bar and no borders.
+output HEADLESS-1 resolution 1280x720 position 0 0
+output HEADLESS-2 resolution 1280x720 position 1280 0
+output HEADLESS-3 resolution 1280x720 position 0 720
+output HEADLESS-4 resolution 1280x720 position 1280 720
+output * bg #000000 solid_color
+default_border none
+
+# Sway tiles a window on the output in focus rather than placing it where it asks, as a desktop
+# that places windows does, so each window, titled after its monitor, is sent to that output, where
+# it fills the output as it asked.
+for_window [title="^HEADLESS-1$"] move container to output HEADLESS-1, fullscreen enable
+for_window [title="^HEADLESS-2$"] move container to output HEADLESS-2, fullscreen enable
+for_window [title="^HEADLESS-3$"] move container to output HEADLESS-3, fullscreen enable
+for_window [title="^HEADLESS-4$"] move container to output HEADLESS-4, fullscreen enable

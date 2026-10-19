@@ -349,9 +349,9 @@ public sealed class UnitTests
     [Fact]
     public void KeyTableMatchesTheNativeBitsetWidth()
     {
-        // Each bitset word carries 64 keys; the native struct sizes itself from KEY_COUNT.
-        var wordsNeeded = (KeyTable.Count + 63) / 64;
-        Assert.Equal(NativeInput.KeyWords, wordsNeeded);
+        // Each ulong of a bitset carries 64 keys, and the native struct sizes itself from KEY_COUNT.
+        var ulongsNeeded = (KeyTable.Count + 63) / 64;
+        Assert.Equal(NativeInput.KeyBitsetUlongs, ulongsNeeded);
     }
 
     [Fact]
