@@ -31,7 +31,12 @@ covers it on a scratch history with file feeds, two commits after the built one,
 four for no version of the minor, an absent commit and no feed, each with its sentence, listed under
 N 1.4 by its nature; 67 tests pass across the four classes after a clean build. Right. The reviewer
 starts the pack run with publish on as the check of both (Decision 43), its package's page the
-proof. Next part (g).
+proof. At 23:06 the push run of `97ea3055`, the banners' commit with the review's, had ended red on
+its Linux suite's one test, the command line server's held clock (Verdict 33), its macOS and Windows
+suites green; the pack run with publish on, 39324217456 on `987676b5`, had its natives and suites
+running with the push run of the same commit beside it; and a review-only push, `0bdbc05d`, had
+started a build run where the paths filter should have left it, cancelled by the next, read again if
+it recurs. Next part (g), with Verdict 33's reading first.
 
 Before it, `8fe38f60` came, item 31's banners and nothing else, the README alone, with the review's
 commits between. The five banners stand in one row under the description inside the centered block
@@ -1001,6 +1006,20 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
+
+33. **The command line server's held-clock test fails on the Linux runner with a frame it never
+    read.** On the push run of `97ea3055`, 2026-10-19, the Linux suite failed
+    `CliServerTests.AClockHeldBetweenCommandsMovesOnlyWhileOneWaits` at its line 297 with a key of
+    15 not present in its dictionary, 1,246 passed and 556 skipped in 4 minutes 30 seconds, the
+    macOS and Windows suites of the same commit green; the test came with part (f) at `714451b0`,
+    whose push run passed it on the three systems, so the fault shows on one runner of two. The test
+    reads a frame by its number from what the server answered and the frame it asks for was not
+    among them, which a wait that ended on another frame, a reading taken before the server's answer
+    or the clock's frames counted apart from the frame count would each give. The mend is read
+    before it is chosen: the test's dictionary and what fills it, which frame 15 is and why it was
+    absent, with the run's output if the artifact holds it; then the test made to hold what the hold
+    promises without reading a frame that may not come, or the server mended where it answers a
+    frame it did not run. Settled at three green Linux suites in a row after the mend.
 
 ## Decisions
 
