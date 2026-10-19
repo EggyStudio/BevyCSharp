@@ -574,10 +574,6 @@ figure moves.
   while an asset the app asked for is loading counts every example's frames from its loads, and
   both lines come off. It costs a hold in the bridge's clock with a way for `./bcs open` to ask for
   it, and every capture taken again, since each example's frame then falls after its loads.
-- **Two examples place their sprites at random.** `many_sprites` and `many_animated_sprites` place
-  and color each sprite from an unseeded generator as Bevy's do, so each run draws another crowd.
-  Seeding them under the workflow as `alien_cake_addict` is seeded takes both lines off, at the cost
-  of two examples that differ from Bevy's under the workflow and two pictures taken again.
 - **Lavapipe draws some of the meshlet bunnies.** `many_meshlet_materials` drawn on Mesa's software
   device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
   Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release

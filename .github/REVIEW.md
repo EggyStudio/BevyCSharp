@@ -10,7 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b7cd83db`, the two declined rows marked and nothing else, a commit of documents and
+Reviewed up to `142dc131`, `monitor_info` and nothing else, 17 files, the last batch of item 4, the
+ABI unchanged at 294. `build/capture-monitor-info.sh` runs the example in the SDK's container image
+through whichever container runtime is found, a headless compositor with four outputs of 1280 by 720
+in a two-by-two grid from the configuration beside it, lavapipe drawing, the grid captured at 2560
+by 1440 and scaled losslessly to the gallery's size; two findings shaped it, that winit ignores an
+exclusive fullscreen on native Wayland so the example runs through the compositor's X server, whose
+outputs winit lists as monitors, and that a tiling compositor puts each fullscreen window on the
+focused output, so rules send each window, titled after its monitor, to its own, said in the
+configuration; each window names its monitor, size, refresh rate, position and scale, two runs gave
+the same picture, and the compositor needs its unsupported-GPU flag where the host kernel has the
+proprietary module, said in the script. The capture script hands the example to it and, where it
+fails or no runtime exists, writes beside the picture's place that it was not drawn since no
+compositor ran in a container to give it monitors, exiting as the lacking examples do, so a blank
+picture is never compared; the host side uses the plain commands under N 6.6, and the norm and
+script tests pass. The row moves to written with its note, TODO.md's entry on a written-in-part
+example goes, BUILDING.md's captures section gains a paragraph, and the monitor walk stays held by
+the headless test. The keyboard bitset's constant is renamed by what it counts, with its line in the
+surface listing, the loop variables and the bridge's constant renamed with it, no layout changing.
+Checked were `cargo check` on the four profiles, `cargo test` headless and on render, the headless
+bridge under B 2, and the whole suite with a clean build, 1,514 passed, 3 skipped and none failed of
+1,517; the pack run's capture shards were not run here and reach the container on the runner at
+about a minute's cost, the words taking the picture's place where that fails. The table stands at
+373 written, 5 missing of which 2 are declined and 3 are the system fonts Decision 13 declined, and
+60 that do not apply, so item 4 is done and the bridge is complete but for what the owner declines,
+Decision 38's first half. Right. Next item 29's parts in order, (a) first, the two sprite examples
+seeded on the runner; the owner's push of the ten commits; and a pack run, whose capture shards take
+the container for the first time.
+
+Before it, `b7cd83db` came, the two declined rows marked and nothing else, a commit of documents and
 one comment, amended once before it was reported or pushed. `web_asset`'s row reads declined, since
 loading assets over https brings twenty-one crates into the bridge, an HTTP client with its TLS
 stack and the platform's certificate verifiers, for one example, and `compressed_image_saver`'s the
@@ -52,35 +80,6 @@ and on render, the headless bridge under B 2, the examples on a fresh package, a
 with a clean build, 1,514 passed, 3 skipped and none failed of 1,517. Right. Next the two declined
 rows marked in one commit of documents with the norm tests run first, then `monitor_info` on virtual
 monitors, and the owner's push of the eight commits.
-
-Before it, `64c1b25d` came, item 4's dev tools batch and nothing else, 42 files, the ABI 292 to 293,
-the lock gaining `bevy_dev_tools` alone through Bevy's two features on the render profile, no direct
-dependency, so BUILDING.md's crate table has no row, as with Feathers. `dev_tools.rs` adds the frame
-rate overlay, the infinite grid and the picking debug plugins a bit each through `Config.DevTools`;
-the overlay's and the grid's settings are reflected and come in through the schema dump, picking's
-debug mode reflects nothing and gets a set and read pair with a `cargo` test of its numbering, and
-the gizmo settings gain the frusta and the skinned bounds beside the bounds, which the scene
-viewer's keys toggle. The managed side gains the flags, the picking mode, the two gizmo flags, a
-section in the tools guide and a sentence in the gizmos guide, the surface listing, the cheat sheet
-and the notices written again. The four examples are written, the overlay and the grid in a dev
-tools folder, the picking debug and the scene viewer in one file mirroring Bevy's four, driven live
-on the helmet, the fox and the morph test, the four rows at can with notes on two, the picking
-debug's events reaching Bevy's log at its debug and trace levels where Bevy's example sets that
-filter in its log plugin, and the scene viewer taking a path inside the asset folder without the
-glTF coordinate switches or the scene count and playing the clips by the scene as a whole, the table
-at 371 written and 5 missing; the capture script clicks for a cube and moves the pointer so the
-picking overlay shows. Four dev tools tests hold a tool absent where not asked for, the overlay
-drawn in its resource's color with Bevy's defaults read back, the grid's defaults and its lines gone
-once hidden and picking's modes, and two gizmo shape tests a second camera's frustum and a skinned
-model's joint bounds; the overlay test failed once under load in a combined run and passed ten times
-after, its picture widened so the frame rate's text cannot wrap into the corner it checks. The N 1.4
-list's head carries the reviewer's sentence on tests of no library area. Checked were `cargo check`
-on the four profiles with Windows and macOS on the editor's with Solari, `cargo test` headless and
-on render, the headless bridge under B 2, the examples on a fresh package with N 6.5 passing on it,
-the four pictures on a render bridge with the scene viewer's retaken twice and matching, and the
-whole suite with a clean build, 1,513 passed, 3 skipped and none failed of 1,516. Right. Next the
-system information, `sysinfo_plugin` and `log_diagnostics` whole, then the declined rows marked and
-`monitor_info` on virtual monitors, one batch a commit, and the owner's push of the seven commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -355,8 +354,10 @@ from [SHARED.md](SHARED.md).
    system information came at `8ae312a4` the same day, `log_diagnostics` whole, the table at 372
    written, 1 in part and 5 missing, the lock gaining `sysinfo` and its four, the ABI 294. The two
    declined rows are marked at `b7cd83db` the same day with Decision 39's reasons, the table at 5
-   missing with 2 declined; `monitor_info` on a headless compositor's four virtual outputs in a
-   container is next, the last of the batches.
+   missing with 2 declined. `monitor_info` came at `142dc131` the same day, its picture taken on a
+   headless compositor's four virtual outputs in a container by a script under `build/`, the row
+   written. Done at `142dc131`, the table at 373 written and 5 missing, 2 declined by Decision 39
+   and 3 by Decision 13, no gap left that a word could open.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

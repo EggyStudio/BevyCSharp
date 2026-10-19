@@ -7,7 +7,9 @@ namespace BevyCSharp.Examples.StressTests;
 
 // Draws a great many sprites at different sizes, turns and scales, and moves the camera over them
 // to see how well what is off screen is left out of the drawing. With --colored the sprites are
-// tinted in three colors, which draws them in more batches and so more slowly.
+// tinted in three colors, which draws them in more batches and so more slowly. Where the workflow
+// runs, as a capture does, they are placed from a seeded generator, so the picture is the same crowd
+// every time, where Bevy's places another crowd each run.
 internal static class ManySprites
 {
     private const float CameraSpeed = 1000f;
@@ -49,7 +51,8 @@ internal static class ManySprites
         // Bevy's warning_string.txt, which its stress tests say as they start.
         Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         var ecs = ctx.Ecs;
-        var random = new Random();
+        // Seeded where the workflow runs, as alien_cake_addict is.
+        var random = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? new Random(19878367) : new Random();
         const float TileSize = 64f;
         const int Half = 320 / 2;
         var image = AssetServer.Load(AssetKind.Image, "branding/icon.png");

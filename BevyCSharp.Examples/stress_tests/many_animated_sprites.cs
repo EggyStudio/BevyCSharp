@@ -8,7 +8,9 @@ namespace BevyCSharp.Examples.StressTests;
 
 // Draws a great many sprites, each running through the frames of a sheet on a timer of its own, at
 // different sizes, turns and scales, and moves the camera over them to see how well what is off
-// screen is left out of the drawing.
+// screen is left out of the drawing. Where the workflow runs, as a capture does, they are placed
+// from a seeded generator, so the picture is the same crowd every time, where Bevy's places another
+// crowd each run.
 internal static class ManyAnimatedSprites
 {
     private const float CameraSpeed = 1000f;
@@ -45,7 +47,8 @@ internal static class ManyAnimatedSprites
         // Bevy's warning_string.txt, which its stress tests say as they start.
         Console.Error.WriteLine("This is a stress test used to push Bevy to its limit and debug performance issues. It is not representative of an actual game. It must be built in Release or it will be very slow.");
         var ecs = ctx.Ecs;
-        var random = new Random();
+        // Seeded where the workflow runs, as alien_cake_addict is.
+        var random = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? new Random(19878367) : new Random();
         const int Half = 320 / 2;
 
         _texture = AssetServer.Load(AssetKind.Image, "textures/rpg/chars/gabe/gabe-idle-run.png");
