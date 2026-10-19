@@ -262,8 +262,16 @@ public sealed class CliServerTests : IDisposable
     /// it five frames' time and one of three, three, and stands still through the frames between.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The asks between the two waits each take a frame or more, frames in which the clock must not
     /// move, as a script's commands come a few frames apart on a slow device and many on a fast one.
+    /// </para>
+    /// <para>
+    /// Each frame's time is kept from its update, after the server has answered in that frame's
+    /// first stage, so the times are read once the app has stopped, when every frame an answer
+    /// named has run its systems. Read as each answer came, the last was missing on a runner of the
+    /// push run of 97ea3055, whose app had not reached that frame's update when the test asked.
+    /// </para>
     /// </remarks>
     [Fact]
     public void AClockHeldBetweenCommandsMovesOnlyWhileOneWaits()
@@ -276,6 +284,7 @@ public sealed class CliServerTests : IDisposable
 
         var running = Start(app);
         var session = Ready();
+        ulong from, five, between = 0, three;
 
         try
         {
@@ -284,22 +293,21 @@ public sealed class CliServerTests : IDisposable
 
             var held = Ask(session, "run", "app.hold commands");
             Assert.True(held.GetProperty("success").GetBoolean(), held.GetRawText());
-            var from = Frame(held);
+            from = Frame(held);
 
-            var five = Frame(Ask(session, "run", "frames.wait 5"));
-            var between = 0ul;
+            five = Frame(Ask(session, "run", "frames.wait 5"));
             for (var ask = 0; ask < 3; ask++) between = Frame(Ask(session, "run", "app.status"));
-            var three = Frame(Ask(session, "run", "frames.wait 3"));
-
-            Assert.True(between > five, $"no frame passed between the waits, which answered in {five} and asked again in {between}");
-            Assert.Equal(0.5, elapsed[five] - elapsed[from], 9);
-            Assert.Equal(elapsed[five], elapsed[between], 9);
-            Assert.Equal(0.3, elapsed[three] - elapsed[five], 9);
+            three = Frame(Ask(session, "run", "frames.wait 3"));
         }
         finally
         {
             Stop(session, running);
         }
+
+        Assert.True(between > five, $"no frame passed between the waits, which answered in {five} and asked again in {between}");
+        Assert.Equal(0.5, elapsed[five] - elapsed[from], 9);
+        Assert.Equal(elapsed[five], elapsed[between], 9);
+        Assert.Equal(0.3, elapsed[three] - elapsed[five], 9);
 
         static ulong Frame(JsonElement answer) => answer.GetProperty("data").GetProperty("frame").GetUInt64();
     }
