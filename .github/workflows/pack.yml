@@ -3,7 +3,9 @@
 # bridge built for all six platforms, Courtyard and Swarm played from a package of this commit, the
 # feature test run through its course, every example captured, a window stormed and the README
 # walked (build.yml). Then it packs, only once every one of those passed, so no package is made
-# before its games are played on it, and pushes the package to nuget.org when asked to.
+# before its games are played on it, and pushes the packages to nuget.org when asked to, through
+# nuget.org's trusted publishing, a policy on nuget.org for this repository and this file that
+# trades the job's token from GitHub for a key lasting an hour, so no key is stored as a secret.
 #
 # The version is build/version.sh's, the major and minor in build/version.txt and as the patch the
 # commits since that file last changed. The package is kept as the run's artifact either way, so a
@@ -14,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Push the package to nuget.org (needs the NUGET_API_KEY secret)'
+        description: 'Push the packages to nuget.org, through its trusted publishing policy and no secret'
         type: boolean
         default: false
 
@@ -42,6 +44,10 @@ jobs:
     name: pack
     needs: [build]
     runs-on: ubuntu-24.04
+    # The token GitHub issues the job, which nuget.org's trusted publishing policy takes for a key.
+    permissions:
+      contents: read
+      id-token: write
     # Forty-five minutes, where the pack, the templates, the listing and the package's tests take a
     # few, and a run that publishes then waits as long as twenty minutes for nuget.org to list the
     # package and builds the four games on it, a minute or two each, so a step that waits fails
@@ -117,11 +123,22 @@ jobs:
           path: build/package/*.nupkg
           if-no-files-found: error
 
+      # A key for this push alone, which nuget.org gives for the job's token where its trusted
+      # publishing policy names the user, this repository and this workflow, and which lasts an
+      # hour, so it is asked for right before the push. The policy belongs to the EggyStudio account,
+      # with the push scope over the packages named BevyCSharp*, which takes the templates as well.
+      - name: Log in to nuget.org through its trusted publishing
+        id: login
+        if: ${{ inputs.publish }}
+        uses: NuGet/login@v1
+        with:
+          user: EggyStudio
+
       # The key through the environment, so the command a failure names holds its name and not it.
       - name: Push to nuget.org
         if: ${{ inputs.publish }}
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       # Each game built on the version its own project names, from nuget.org alone, as a reader

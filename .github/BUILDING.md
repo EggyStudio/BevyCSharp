@@ -360,8 +360,11 @@ player through each station of its course, built on the package as Courtyard is
 install in a container, the template installed and a game made from it (`build/readme-walk.sh`).
 Its pack job packs only once every one of those passed. The engine's package and the template's
 are kept as the run's artifact, to download and upload to nuget.org by hand. Ticking its
-**publish** box pushes both to nuget.org from the run instead, which needs the `NUGET_API_KEY`
-secret.
+**publish** box pushes both to nuget.org from the run instead, through nuget.org's trusted
+publishing, which needs no secret. A policy on nuget.org, made by the EggyStudio account for the
+repository EggyStudio/BevyCSharp and the workflow `pack.yml`, with no environment, the push scope
+and the packages `BevyCSharp*`, lets the pack job trade the token GitHub issues it (`id-token:
+write`) for a key that lasts an hour, through `NuGet/login`, right before the push.
 
 A game under `games/` names in its own project the version it builds on where nothing sets
 `BevyCSharpVersion`, the newest published on nuget.org it builds on, so a reader cloning the

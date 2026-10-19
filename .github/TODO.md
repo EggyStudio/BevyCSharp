@@ -610,5 +610,5 @@ figure moves.
   this machine, so an export for another platform needs that platform's toolchain, as packing
   does. The project's icon is worn by the window as the game runs, and the executable's own icon
   and a macOS bundle's, each platform's own format, are not made from it.
-- **Publishing is manual by choice.** The workflow builds and uploads; the upload to nuget.org is
-  done by hand.
+- **Publishing is started by hand by choice.** A pack run is started from the Actions tab, and with
+  its publish box ticked it pushes the packages to nuget.org through the trusted publishing policy.
