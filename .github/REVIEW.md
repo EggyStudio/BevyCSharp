@@ -10,7 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8e9c20b7`, Verdict 33's mend and nothing else, the test file alone. The test filled
+Reviewed up to `17487d27`, Verdict 35's mend, and `7a0f07ea` before it, Verdict 34's, with the
+review's commits between, part (g) still in the tree. Verdict 34: the test folder's deletion, on the
+first refusal, takes the read-only attribute off every file left in the folder and tries again
+before its usual two seconds of retries, the remarks giving git's read-only objects as the reason
+and naming the runs, no other test making a repository; the release notes, norm and other test
+folder tests pass on Linux, 73 of 73, and the three Windows suites are the check since no Windows
+stands here. Verdict 35: the old test ran thirty frames unpaced, the image asked for in the third,
+so the load had a few milliseconds of the machine's time, while the load runs on Bevy's task pool
+and is collected before the update with no step of the clock in it, so the held clock holds nothing
+the load waits on, as the other runners and the test's own frames agree; the mend paces the frames
+at sixty a second up to six hundred and exits three frames after the load, the remarks saying why,
+as the asset tests bound a load already; the failure did not reproduce here on one core or a loaded
+one, so the three macOS suites are the evidence. A correction to part (f)'s record: five of the
+seventeen pictures called drift were the lookup table's difference, taken before on a bridge with it
+and by (f) on a render bridge without, and five more held a frame in (f)'s probe, so the hold moved
+them. Part (g) so far: all 373 taken on the render bridge with the table, 316 of 332 pictures
+identical, eleven moving by a pixel or more, most the many lights' 711 pixels, the specular tint's
+463 on the highlight and the many cubes' 138, copied in with their thumbnails, the decal maps kept
+for flipping between two states; in the runner's image the many lights and the specular tint come
+within a pixel of the GPU's and the many cubes within 0.15 percent where the bridges stood 45.4 and
+4.6 apart; the suite on that bridge passed 1,509 of 1,527 with one failure older than the batch, the
+reflected layouts test asking the bridge for every type of the description, dumped from the fullest
+bridge, so a bridge without Solari refuses the path tracer's and the test throws, which the headless
+suites skip and the editor bridge hides, to be mended in a small commit, a type the bridge does not
+register left out and more than a hundred layouts still required. Right. Next the notes' rule on
+commits under `.github/`, item 32's, in a small commit before (g)'s, then the pack run with publish
+on, then the layouts test's mend and (g)'s commit, then (h).
+
+Before it, `8e9c20b7` came, Verdict 33's mend and nothing else, the test file alone. The test filled
 its table of elapsed times from an update system keyed by the frame count while the server answered
 from the command pump in the same frame's first stage, so the socket's answer went out before that
 frame's update had run, and the test read the table as each answer came, which on a slow runner
@@ -56,22 +84,6 @@ suites green; the pack run with publish on, 39324217456 on `987676b5`, had its n
 running with the push run of the same commit beside it; and a review-only push, `0bdbc05d`, had
 started a build run where the paths filter should have left it, cancelled by the next, read again if
 it recurs. Next part (g), with Verdict 33's reading first.
-
-Before it, `8fe38f60` came, item 31's banners and nothing else, the README alone, with the review's
-commits between. The five banners stand in one row under the description inside the centered block
-as markdown pictures from the badge service in 3DEngine's colors: .NET 10.0; Graphics wgpu with
-Vulkan, DX12 and Metal, which the render profile's dependency tree gives as its backends on the
-three systems; Windowing winit; Shaders Slang, which the shaders guide says a game's materials are
-written in; and Status Early, as the README's own section opens. Each address answers with the right
-title, GitHub's markdown API gives five images, nuget.org's pipeline five in one paragraph, and the
-screenshots show the row centered on GitHub and standing left under the printed tag line on
-nuget.org, as the block's other lines do; the documents' links, the table script's check and the
-norm tests pass, the README at 283 lines of prose. Right. Next part (g), whose render bridge with
-the lookup table is built with the lock byte-identical and three profiles clean, the 373 captures
-being taken on it. At 22:45 the owner wrote that the release notes include everything and append to
-the older ones (Decision 41, item 32), and at 22:51, quoting nuget.org's notice, that the pack run
-publishes through trusted publishing (Decision 42, item 33), and at 22:57 that the reviewer starts
-the pack runs as well (Decision 43), the first with publish on once item 33 is in.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1016,7 +1028,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     repository cannot be swept there. The mend is one thing: the test folder's deletion clears the
     read-only attribute of what it sweeps before deleting, with the reason in its remark, or the
     release notes tests sweep their repositories through git, whichever the other tests that make
-    repositories, if any, already do. Settled at three green Windows suites in a row after the mend.
+    repositories, if any, already do. Mended at `7a0f07ea` the same day, the test folder's sweep
+    clearing the read-only attribute on a refusal. Settled at three green Windows suites in a row
+    after the mend.
 
 35. **The load hold test's image never loaded on the macOS runner.** On the pack run of `987676b5`,
     2026-10-19, the macOS suite failed `ClockHoldTests.AClockHeldForLoadsStandsStillUntilTheyEnd` at
@@ -1027,8 +1041,10 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     machine's time, and whether a held clock can hold what the load itself waits on, since a load
     that waits on a frame's step while the step is held would never end; then the test given the
     patience a slow runner needs in the machine's time, or the hold mended where it holds the load,
-    whichever the reading supports, with the reason in the remark. Settled at three green macOS
-    suites in a row after the mend.
+    whichever the reading supports, with the reason in the remark. Read and mended at `17487d27` the
+    same day: the held clock holds nothing the load waits on, the test had given the load a few
+    milliseconds unpaced, and it paces its frames at sixty a second up to six hundred. Settled at
+    three green macOS suites in a row after the mend.
 
 ## Decisions
 
