@@ -1,4 +1,4 @@
-// Bevy's ssr example, examples/3d/ssr.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's ssr example, examples/3d/ssr.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using System.Numerics;
@@ -44,9 +44,8 @@ internal static class Ssr
     private static readonly float[] Ends = new float[6];
 
     private static Entity _camera;
-    private static RadioButtons<bool>? _ssrButtons;
-    private static RadioButtons<DisplayedModel>? _modelButtons;
-    private static RadioButtons<DisplayedBase>? _baseButtons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -66,7 +65,6 @@ internal static class Ssr
         });
 
         app.Update(MoveCamera, "ssr.MoveCamera");
-        app.Update(AdjustAppSettings, "ssr.AdjustAppSettings");
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -147,12 +145,16 @@ internal static class Ssr
         Render.SetSkybox(_camera, specular, 5000f);
         Reflect();
 
-        var column = RadioButtons<bool>.Column();
-        _ssrButtons = new RadioButtons<bool>(ecs, column, "SSR", [(true, "On"), (false, "Off")], _ssrOn);
-        _modelButtons = new RadioButtons<DisplayedModel>(ecs, column, "Model",
-            [(DisplayedModel.Cube, "Cube"), (DisplayedModel.FlightHelmet, "Flight Helmet"), (DisplayedModel.Capsules, "Capsules")], _model);
-        _baseButtons = new RadioButtons<DisplayedBase>(ecs, column, "Base",
-            [(DisplayedBase.Water, "Water"), (DisplayedBase.Metallic, "Metallic"), (DisplayedBase.RedPlane, "Red Plane")], _base);
+        Theme.BasicExampleTheme(Color.White);
+        var column = Radio.MainUiNode();
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "SSR", [(true, "On"), (false, "Off")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Model",
+            [(DisplayedModel.Cube, "Cube"), (DisplayedModel.FlightHelmet, "Flight Helmet"), (DisplayedModel.Capsules, "Capsules")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Base",
+            [(DisplayedBase.Water, "Water"), (DisplayedBase.Metallic, "Metallic"), (DisplayedBase.RedPlane, "Red Plane")], 0), UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => HandleValueChangeSsrOn(on.Event.Value));
+        ecs.Observe<ValueChange<Entity>>(on => HandleValueChangeDisplayedModel(on.Ecs, on.Event.Value));
+        ecs.Observe<ValueChange<Entity>>(on => HandleValueChangeDisplayedBase(on.Ecs, on.Event.Value));
         RangeRow(ecs, column, "Min Roughness", RangeEnd.MinRoughnessStart, RangeEnd.MinRoughnessEnd);
         RangeRow(ecs, column, "Max Roughness", RangeEnd.MaxRoughnessStart, RangeEnd.MaxRoughnessEnd);
         RangeRow(ecs, column, "Edge Fadeout", RangeEnd.EdgeFadeoutStart, RangeEnd.EdgeFadeoutEnd);
@@ -182,45 +184,42 @@ internal static class Ssr
         if (distanceDelta != 0f || thetaDelta != 0f) ctx.Ecs.Set(_camera, transform);
     }
 
-    // Bevy's buttons send a message each frame one is held down, and its system answers each. Here
-    // the buttons are asked each frame instead, the range buttons through what each carries, so a
-    // range button held down moves its end each frame as Bevy's does.
-    private static void AdjustAppSettings(BehaviorContext ctx)
+    private static void HandleValueChangeSsrOn(Entity button)
     {
-        var ecs = ctx.Ecs;
-        var anyChanges = false;
+        if (!Radio.OptionValue<bool>(button, out var on)) return;
 
-        if (_ssrButtons!.Pressed(out var on)) (_ssrOn, anyChanges) = (on, true);
-        if (_modelButtons!.Pressed(out var model)) (_model, anyChanges) = (model, true);
-        if (_baseButtons!.Pressed(out var floor)) (_base, anyChanges) = (floor, true);
-        foreach (var button in ecs.EntitiesWith<RangeAdjustment>())
-        {
-            if (Ui.InteractionOf(button) != UiInteraction.Pressed) continue;
-            var adjustment = ecs.GetOrDefault<RangeAdjustment>(button);
-            var amount = adjustment.End is RangeEnd.EdgeFadeoutStart or RangeEnd.EdgeFadeoutEnd ? 0.001f : 0.005f;
-            ref var end = ref Ends[(int)adjustment.End];
-            end = adjustment.Increase ? MathF.Min(end + amount, 1f) : MathF.Max(end - amount, 0f);
-            anyChanges = true;
-        }
-
-        if (!anyChanges) return;
-
+        _ssrOn = on;
         Reflect();
+    }
 
+    private static void HandleValueChangeDisplayedModel(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<DisplayedModel>(button, out var model)) return;
+
+        _model = model;
         Show<CubeModel>(ecs, _model == DisplayedModel.Cube);
         Show<FlightHelmetModel>(ecs, _model == DisplayedModel.FlightHelmet);
         Show<CapsuleModel>(ecs, _model == DisplayedModel.Capsules);
         Show<CapsulesParent>(ecs, _model == DisplayedModel.Capsules);
+    }
+
+    private static void HandleValueChangeDisplayedBase(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<DisplayedBase>(button, out var floor)) return;
+
+        _base = floor;
         Show<MetallicBaseModel>(ecs, _base == DisplayedBase.Metallic);
         Show<RedPlaneBaseModel>(ecs, _base == DisplayedBase.RedPlane);
         Show<WaterModel>(ecs, _base == DisplayedBase.Water);
+    }
 
-        _ssrButtons.Select(ecs, _ssrOn);
-        _modelButtons.Select(ecs, _model);
-        _baseButtons.Select(ecs, _base);
-
-        foreach (var box in ecs.EntitiesWith<RangeValueText>())
-            Ui.SetText(ecs.ChildrenOf(box)[0], $"{Ends[(int)ecs.GetOrDefault<RangeValueText>(box).End]:0.00}");
+    // Bevy's handle_value_change_number_input, the end of the range its input sets written back to
+    // the input and to the reflections.
+    private static void HandleValueChangeNumberInput(On<ValueChange<float>> on, RangeEnd end)
+    {
+        Ends[(int)end] = on.Event.Value;
+        Feathers.SetNumber(on.Event.Source, on.Event.Value);
+        Reflect();
     }
 
     // The reflections with the ranges chosen, or none.
@@ -240,66 +239,40 @@ internal static class Ssr
             ecs.Wrap<VisibilityRef>(entity).Value = shown ? Visibility.Visible : Visibility.Hidden;
     }
 
-    // A row setting a range, its title, then the start and the end each in a box between a button
-    // that lowers it and one that raises it, as Bevy's range_row lays one out.
+    // A row setting a range, its title, then the start and the end each a number input, as Bevy's
+    // range_row lays one out.
     private static void RangeRow(EcsWorld ecs, Entity column, string title, RangeEnd start, RangeEnd end)
     {
         var row = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center });
         ecs.SetParent(row, column);
-        ecs.SetParent(Ui.SpawnText(title, new UiSettings { Width = Length.Px(150f) }, 18f), row);
+
+        var name = Ui.SpawnNode(new UiSettings { Width = Length.Px(150f) });
+        ecs.SetParent(name, row);
+        Feathers.Label(name, title);
+
         RangeControls(ecs, row, start);
-        ecs.SetParent(Ui.SpawnText("to", new UiSettings { Margin = new Sides(Length.Px(10f), Length.Zero, Length.Px(10f), Length.Zero) }, 18f), row);
+
+        var to = Ui.SpawnNode(new UiSettings { Margin = new Sides(Length.Px(10f), Length.Zero, Length.Px(10f), Length.Zero) });
+        ecs.SetParent(to, row);
+        Feathers.LabelSmall(to, "to");
+
         RangeControls(ecs, row, end);
     }
 
+    // Bevy's range_controls, a number input of three digits held between 0 and 1. Its settings are
+    // written before its value, since it writes its text as its value changes.
     private static void RangeControls(EcsWorld ecs, Entity row, RangeEnd end)
     {
-        var controls = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center });
-        ecs.SetParent(controls, row);
-
-        AdjustmentButton(ecs, controls, end, increase: false);
-        var box = Ui.SpawnNode(new UiSettings
-        {
-            Width = Length.Px(50f),
-            Height = Length.Px(33f),
-            Justify = UiJustify.Center,
-            Align = UiAlign.Center,
-            Color = (1f, 1f, 1f, 1f),
-            Border = new Sides(Length.Zero, Length.Px(1f), Length.Zero, Length.Px(1f)),
-            BorderColor = (1f, 1f, 1f, 1f),
-        });
-        ecs.SetParent(box, controls);
-        ecs.Add(box, new RangeValueText { End = end });
-        var text = Ui.SpawnText($"{Ends[(int)end]:0.00}", new UiSettings(), 18f);
-        ecs.SetParent(text, box);
-        ecs.Wrap<TextColorRef>(text).Value = Color.Black;
-        AdjustmentButton(ecs, controls, end, increase: true);
-    }
-
-    // The lowering button rounded on the left and the raising one on the right, so the two and the
-    // box between them read as one control.
-    private static void AdjustmentButton(EcsWorld ecs, Entity parent, RangeEnd end, bool increase)
-    {
-        var (left, rounded) = (!increase, Length.Px(6f));
-        var button = Ui.SpawnNode(new UiSettings
-        {
-            Interactive = true,
-            Height = Length.Px(33f),
-            Color = (0f, 0f, 0f, 1f),
-            Border = new Sides(left ? Length.Px(1f) : Length.Zero, Length.Px(1f), left ? Length.Zero : Length.Px(1f), Length.Px(1f)),
-            BorderColor = (1f, 1f, 1f, 1f),
-            Justify = UiJustify.Center,
-            Align = UiAlign.Center,
-            Padding = new Sides(Length.Px(12f), Length.Px(6f), Length.Px(12f), Length.Px(6f)),
-            Corners = new Corners(left ? rounded : Length.Zero, left ? Length.Zero : rounded, left ? Length.Zero : rounded, left ? rounded : Length.Zero),
-        });
-        ecs.SetParent(button, parent);
-        ecs.Add(button, new RangeAdjustment { End = end, Increase = increase });
-        ecs.SetParent(Ui.SpawnText(increase ? ">" : "<", new UiSettings(), 18f), button);
+        var input = Feathers.NumberInput(row);
+        ecs.Insert<NumberInputPrecisionRef>(input).Value = 3;
+        Feathers.SetNumberLimit(input, 0f, 1f, hard: true);
+        Feathers.SetNumber(input, Ends[(int)end]);
+        ecs.Wrap<NodeRef>(input).AlignItems = NodeRef.AlignItemsVariant.Center;
+        ecs.Observe<ValueChange<float>>(input, on => HandleValueChangeNumberInput(on, end));
     }
 }
 
-/// <summary>Which end of which of the ssr example's ranges a box shows or a button moves.</summary>
+/// <summary>Which end of which of the ssr example's ranges a number input sets.</summary>
 public enum RangeEnd
 {
     /// <summary>Where reflections begin to fade in with roughness.</summary>
@@ -362,25 +335,3 @@ public partial struct RedPlaneBaseModel;
 /// <summary>The water.</summary>
 [Behavior]
 public partial struct WaterModel;
-
-/// <summary>The box that shows one end of a range.</summary>
-[Behavior]
-public partial struct RangeValueText
-{
-    /// <summary>Which end.</summary>
-    public RangeEnd End;
-}
-
-/// <summary>
-/// A button that moves one end of a range while it is held down, what Bevy's
-/// <c>WidgetClickSender</c> carries for one.
-/// </summary>
-[Behavior]
-public partial struct RangeAdjustment
-{
-    /// <summary>Which end.</summary>
-    public RangeEnd End;
-
-    /// <summary>Whether it raises the end rather than lowering it.</summary>
-    public bool Increase;
-}

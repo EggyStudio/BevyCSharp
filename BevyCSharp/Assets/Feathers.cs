@@ -577,6 +577,55 @@ public static unsafe class Feathers
     }
 
     /// <summary>
+    /// Replaces the theme with one that colors each of the tokens given and nothing else, as Bevy's
+    /// examples' basic theme does, Bevy's <c>ThemeProps::new_non_contextual</c>.
+    /// </summary>
+    /// <remarks>
+    /// A token the theme is not given draws in no color, so a theme of the game's own names every
+    /// part of the controls it shows. The controls take the new colors in the frame after.
+    /// <see cref="SetDarkTheme"/> puts Bevy's dark theme back.
+    /// </remarks>
+    /// <param name="colors">Each token, one of <see cref="FeathersToken"/>'s, with its color.</param>
+    /// <exception cref="ArgumentException">A token is empty or holds a line break.</exception>
+    /// <exception cref="BevyNativeException">
+    /// The app did not ask for <see cref="Config.Feathers"/>, or this build has no renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// Feathers.SetTheme(
+    ///     (FeathersToken.TextMain, Color.White),
+    ///     (FeathersToken.RadioBg, Color.White),
+    ///     (FeathersToken.RadioMark, Color.Black));
+    /// </code>
+    /// </example>
+    public static void SetTheme(params ReadOnlySpan<(string Token, Color Color)> colors)
+    {
+        if (colors.IsEmpty) throw new ArgumentException("a theme names at least one token", nameof(colors));
+
+        var names = new string[colors.Length];
+        var linear = new float[colors.Length * 4];
+        for (var i = 0; i < colors.Length; i++)
+        {
+            names[i] = colors[i].Token;
+            (linear[i * 4], linear[i * 4 + 1], linear[i * 4 + 2], linear[i * 4 + 3]) = colors[i].Color;
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(Lines(names, nameof(colors)));
+        if (names.Any(string.IsNullOrEmpty)) throw new ArgumentException("a token is empty", nameof(colors));
+        fixed (byte* text = bytes)
+        fixed (float* values = linear)
+        {
+            Native.Check(Native.bcs_feathers_set_theme(text, bytes.Length, values, names.Length), "setting the theme");
+        }
+    }
+
+    /// <summary>Puts Bevy's dark theme back, the one the app begins with.</summary>
+    /// <exception cref="BevyNativeException">
+    /// The app did not ask for <see cref="Config.Feathers"/>, or this build has no renderer.
+    /// </exception>
+    public static void SetDarkTheme() => Native.Check(Native.bcs_feathers_set_theme(null, 0, null, 0), "setting the dark theme");
+
+    /// <summary>
     /// Colors a node of the game's own from the theme, by one of <see cref="FeathersToken"/>'s
     /// tokens, so it follows the theme as the controls do.
     /// </summary>

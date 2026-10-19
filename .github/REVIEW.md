@@ -10,8 +10,49 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5452a595`, Feathers' second step and nothing else, 33 files, the ABI 287 to 289, the
-lock unchanged. The bridge spawns two more kinds, the number input and the virtual keyboard, the
+Reviewed up to `1e8c4750`, Feathers' third step and nothing else, 34 files, the ABI 289 to 291, the
+lock unchanged. The bridge spawns thirty-four more kinds, the menus with their button, tool button,
+popup, item and divider, the select, the list view and its row, the disclosure toggle, the text
+input and its container, the color swatch, plane, slider and input, the pane, subpane and group with
+their headers and bodies, the flex spacer, the icon, and the modal and floating dialogs with their
+header, body, footer and close, every one through its own scene, the color plane's variant inserted
+after its scene as Bevy's notation patches it over the default; the props grow to 56 bytes, and
+`feathers.rs`'s head comment names the plain form of each prop that holds a scene or a closure in
+Bevy, a caption as text, a select's options and a list's rows as lines with the chosen place made
+rows by Bevy's own helper, the keyboard's keys as lines and tabs, the number input's letter kept
+static, a dialog's contents spawned by C# under the node a call names, and the lazy menu whose popup
+a closure builds not offered, a popup spawned with its menu instead, which the gallery's triage note
+says of its second menu. The number calls moved unchanged to `feathers/number.rs` under N 1.3, the
+file at 721 lines after; the widget report gains a four-float vector and grows to 56 bytes with
+kinds for a point's, a linear color's and a close request's change, the self-updating observers gain
+the list box's selection and the color input's, and a new `color.rs` converts across Bevy's thirteen
+color spaces through Bevy's own types, which the gallery's two hue spaces need. The managed side
+gains the thirty-four calls with a contents call, the channel, plane axes, icon and close request
+types, the color conversions with a hex as Bevy writes it, and the two value changes;
+`feathers_gallery` is written with Bevy's color update kept, its override cursor through the
+reference type after the suite's string-path test named the path first written, and clicked live
+offscreen, the override toggle logging, the dialog toggle opening the floating dialog and its cross
+closing it, quit opening the modal dialog and cancel closing it with the picture then equal to the
+first pixel for pixel; the table at 367 written and 9 missing, Feathers' four all in. Four tests
+join the six, the margin guard over all 46 kinds written and read back as each is spawned, contents
+going where Bevy's props put them, a color plane's press reported as its point and a dialog's close
+as the request, and a color through Bevy's spaces with its hex, and the widget tests pin the
+report's 56 bytes. Checked were `cargo check` on every profile, `cargo test` headless and on render
+with the color round trip through every space, the headless bridge with the Feathers, widget and
+layout tests under B 2, the examples on a fresh package, the picture on a render bridge equal to the
+editor bridge's, and the whole suite, 1,503 passed, 3 skipped and 2 failed of 1,508, N 1.3 at 887
+lines of `feathers.rs` and the gallery's string path, both mended before the commit and the four
+test classes passing after, 31 of 31. Right. Read at 09:59, Bevy 0.20's fourteen examples with
+option rows share three files by path, a radio row, a theme of some sixty token colors and, in two
+of them, a labeled number input, so the port's helper of its own goes and one file mirroring Bevy's
+three stays listed with that reason, said under item 29's part (k). Next Feathers' last step, the
+fourteen examples moved to Feathers' radio with their pictures taken again and compared, the port's
+helper gone and the mirror in its place, item 29's part (k) whole and SHARED.md's row on the package
+saying so, the reviewer's; then the dev tools, the system information, the declined rows marked and
+`monitor_info`, one batch a commit, and the owner's push of the five commits.
+
+Before it, `5452a595` came, Feathers' second step and nothing else, 33 files, the ABI 287 to 289,
+the lock unchanged. The bridge spawns two more kinds, the number input and the virtual keyboard, the
 props gaining a token for the input's sigil and growing to 32 bytes; a number input's letter is a
 static string in Bevy's props, so each distinct letter is leaked once and kept; the keyboard is
 Bevy's over a key type of the bridge's own carrying its row and place, so a report names a key by
@@ -67,32 +108,6 @@ suite, 1,497 passed and 3 skipped of 1,500, the picture taken on a render bridge
 Next Feathers' second step, the number input and the virtual keyboard, then the gallery's controls,
 then the fifteen examples, then the dev tools, the system information, the declined rows marked and
 `monitor_info`, one step a commit, and the owner's push of the three commits.
-
-Before it, `670ecf2c` came, item 4's first batch and nothing else, 63 files, the ABI 285 to 286, the
-lock gaining `bevy_camera_controller` alone. The render profile turns on Bevy's free, pan and
-pan-orbit cameras and the pan-orbit gizmo, the bridge naming the crate for its reflection feature,
-which pulls no crate in; `camera_controllers.rs` adds the plugins an app asks for through
-`Config.CameraControllers`, the free and pan cameras crossing as one plain struct each with keys as
-places in the key table and set, get, remove, state and Bevy's own text, the pan-orbit camera, its
-anchor indicator and its skybox reflected so the schema dump gains the three components and nothing
-else, a dolly zoom and a look-to sending Bevy's two messages, Bevy's example input mapping ported
-under its notice, and a viewport test of the bridge's own since Bevy's answers no without a primary
-window, as an offscreen run has none. The managed side gains the settings and state types with
-twelve calls on `Render` and the guide's section; the five examples are written, the table at 363
-written and 13 missing, the pan-orbit ones loading a model fetched at a pinned commit where Bevy's
-load it over https; the sixteen examples that flew the examples' own free camera take Bevy's with
-Bevy's settings, and that helper is gone from the tree and from the package script's list, item 29's
-part (k) half done, SHARED.md's row on the package saying one helper where it said two, the
-reviewer's; the notices credit the model and the Solari example's scene, loaded uncredited until
-this commit, both under a license asking credit. Five camera controller tests hold the mirrors'
-layout, the defaults byte for byte Bevy's, the free camera moving while a key is held and not once
-off, the pan camera's zoom key and the pan-orbit camera's look-to and orbit under a drag offscreen;
-the five pictures are taken on the GPU with a render bridge as BUILDING.md has it. Checked were
-`cargo check` on the four profiles with Windows and macOS on the editor's with Solari, `cargo test`
-headless and on render, the headless bridge with the changed tests under B 2, the examples on a
-fresh package, and the whole suite on the editor bridge with meshlets and Solari, 1,493 passed and 3
-skipped of 1,496. Right. Next Feathers, the dev tools, the system information, the declined rows
-marked and `monitor_info`, one batch a commit, and the owner's push.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -390,7 +405,10 @@ from [SHARED.md](SHARED.md).
    keyboard, the gallery's controls, and the fifteen examples moved to Feathers' radio, each a
    commit with its examples. The second step came at `5452a595`, the number input and the virtual
    keyboard with their two examples, the table at 366 written and 10 missing, the ABI 289, the lock
-   unchanged; the gallery's controls are next.
+   unchanged. The third came at `1e8c4750`, the gallery's thirty-four controls with the gallery
+   written, the color conversions across Bevy's spaces, the table at 367 written and 9 missing,
+   Feathers' four rows all in, the ABI 291, the lock unchanged; the last step, the fifteen examples
+   moved to Feathers' radio and the helper gone, is next.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -849,7 +867,17 @@ from [SHARED.md](SHARED.md).
     anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
     earlier decline, with a test that fails when Bevy's original changes. Part (k) is half done at
     `670ecf2c`, the free camera helper gone for Bevy's controller, and the radio buttons helper goes
-    in Feathers' last step; the radio buttons go with Feathers.
+    in Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three
+    files by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
+    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
+    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
+    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
+    token colors is the package's own call, the port's helper of its own goes, and one file
+    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
+    package script's list with the reason naming them, carrying what they carry and nothing of the
+    port's own, since the list's rule is against helpers of the port's own and a mirror of what
+    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
+    Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes

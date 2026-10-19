@@ -451,4 +451,41 @@ public sealed class FeathersTests
         Assert.Equal("#FF8000", Color.FromSrgb8(255, 128, 0).ToHex());
         Assert.Equal("#FF800080", Color.FromSrgb8(255, 128, 0, 128).ToHex());
     }
+
+    /// <summary>
+    /// A theme of the game's own colors a node by the token it names, in place of the dark theme's
+    /// color, and the dark theme comes back when it is asked for.
+    /// </summary>
+    [SkippableFact]
+    public void AThemeOfTheGamesOwnColorsByItsTokens()
+    {
+        Needs.Renderer();
+
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Configure = config => config.Feathers = true,
+            Scene = _ =>
+            {
+                Render2d.SpawnCamera2d();
+                var node = Ui.SpawnNode(new UiSettings { Width = Length.Percent(100f), Height = Length.Percent(100f) });
+                Feathers.ThemeColor(node, FeathersToken.WindowBg);
+            },
+        };
+
+        run.Until("compiled", world => world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady()).Wait(3)
+            .Capture("dark")
+            .Do("own theme", _ => Feathers.SetTheme((FeathersToken.WindowBg, new Color(1f, 0f, 0f))))
+            .Wait(3)
+            .Capture("own")
+            .Do("dark again", _ => Feathers.SetDarkTheme())
+            .Wait(3)
+            .Capture("dark again")
+            .Go();
+
+        var (dark, own, again) = (run.Picture("dark").At(32, 32), run.Picture("own").At(32, 32), run.Picture("dark again").At(32, 32));
+        Assert.True(own is { R: > 240, G: < 15, B: < 15 }, $"the theme's red came out {own}");
+        Assert.True(dark.R < 100 && dark == again, $"the dark theme came out {dark}, and {again} once it was back");
+    }
 }

@@ -1,4 +1,4 @@
-// Bevy's pccm example, examples/3d/pccm.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's pccm example, examples/3d/pccm.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using Bevy;
@@ -13,19 +13,18 @@ internal static class Pccm
 {
     private const float EnvironmentMapIntensity = 100f;
 
-    private static Entity _probe;
-    private static bool _enabled;
-    private static RadioButtons<bool>? _buttons;
+    private enum PccmEnableStatus { Enabled, Disabled }
 
-    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+    private static Entity _probe;
+
+    public static void Configure(Config config) => (config.CameraControllers, config.Feathers) = (CameraControllers.Free, true);
 
     public static void Build(App app)
     {
-        _enabled = true;
-
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
+            Theme.BasicExampleTheme(Color.White);
 
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(0f, 0f, 4f), new Vec3(0f, -2.5f, 0f), Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
@@ -50,26 +49,21 @@ internal static class Pccm
                 AssetServer.Load(AssetKind.Image, "pccm_example/env_specular.ktx2"),
                 EnvironmentMapIntensity);
 
-            _buttons = new RadioButtons<bool>(ecs, RadioButtons<bool>.Column(), "Parallax Correction",
-                [(true, "On"), (false, "Off")], _enabled);
+            var row = Radio.FeathersOptionButtons(ecs, Radio.MainUiNode(), "Parallax Correction",
+                [(PccmEnableStatus.Enabled, "On"), (PccmEnableStatus.Disabled, "Off")], 0);
+            Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+            ecs.Observe<ValueChange<Entity>>(on => HandlePccmEnableChange(on.Ecs, on.Event.Value));
         }, "pccm.Setup");
 
         app.SpawnGltf("pccm_example/outer_cube.glb");
+    }
 
-        app.Update(ctx =>
-        {
-            if (_buttons is not null && _buttons.Pressed(out var enabled) && enabled != _enabled)
-            {
-                _enabled = enabled;
-                _buttons.Select(ctx.Ecs, _enabled);
-            }
-
-            // Bevy gives a probe ParallaxCorrection::Auto itself once its maps have loaded and it
-            // is a probe, so the choice is that component's variant, set once it is there.
-            ParallaxCorrection wanted = _enabled ? new ParallaxCorrection.Auto() : new ParallaxCorrection.None();
-            if (ctx.Ecs.Get<ParallaxCorrectionRef>(_probe) is { } correction && correction.Value != wanted)
-                correction.Value = wanted;
-        }, "pccm.HandlePccmEnableChange");
+    // The probe's ParallaxCorrection set to the variant chosen.
+    private static void HandlePccmEnableChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<PccmEnableStatus>(button, out var status)) return;
+        ParallaxCorrection wanted = status == PccmEnableStatus.Enabled ? new ParallaxCorrection.Auto() : new ParallaxCorrection.None();
+        (ecs.Get<ParallaxCorrectionRef>(_probe) ?? ecs.Insert<ParallaxCorrectionRef>(_probe)).Value = wanted;
     }
 }
 

@@ -1,4 +1,4 @@
-// Bevy's mirror example, examples/3d/mirror.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's mirror example, examples/3d/mirror.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using Bevy;
@@ -25,7 +25,8 @@ internal static class MirrorExample
     private static AssetHandle _mirrorImage;
     private static (uint Width, uint Height) _imageSize;
     private static bool _moveFox, _foxPlaying;
-    private static RadioButtons<bool>? _buttons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -38,7 +39,6 @@ internal static class MirrorExample
             _fox = root;
         });
         app.Update(HandleWindowResize, "mirror.HandleWindowResize");
-        app.Update(HandleButtons, "mirror.HandleButtons");
         app.Update(MoveCameraOnMouseDown, "mirror.MoveCamera");
         app.Update(MoveFoxOnMouseDown, "mirror.MoveFox");
         app.Update(PlayFoxAnimation, "mirror.PlayFoxAnimation");
@@ -74,8 +74,9 @@ internal static class MirrorExample
         ecs.Add(mirror, new Mirror());
         UpdateMirrorCamera(ecs);
 
-        var column = RadioButtons<bool>.Column();
-        _buttons = new RadioButtons<bool>(ecs, column, "Drag Action", [(false, "Move Camera"), (true, "Move Fox")], _moveFox);
+        var row = Radio.FeathersOptionButtons(ecs, Radio.MainUiNode(), "Drag Action", [(false, "Move Camera"), (true, "Move Fox")], 0);
+        Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => HandleDragActionChange(on.Ecs, on.Event.Value));
         ecs.Add(Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new MirrorHelpText());
     }
 
@@ -126,22 +127,26 @@ internal static class MirrorExample
         _mirrorMaterial.SetTexture("emissive_texture", _mirrorImage);
     }
 
-    private static void HandleButtons(BehaviorContext ctx)
+    // Bevy's handle_drag_action_change and update_help_text, what a drag moves and the help that
+    // says so.
+    private static void HandleDragActionChange(EcsWorld ecs, Entity button)
     {
-        if (!_buttons!.Pressed(out var moveFox) || moveFox == _moveFox) return;
+        if (!Radio.OptionValue<bool>(button, out var moveFox)) return;
         _moveFox = moveFox;
-        _buttons.Select(ctx.Ecs, moveFox);
-        foreach (var help in ctx.Ecs.EntitiesWith<MirrorHelpText>()) Ui.SetText(help, HelpText());
+        foreach (var help in ecs.EntitiesWith<MirrorHelpText>()) Ui.SetText(help, HelpText());
     }
+
+    // A drag over the radio buttons is a click on one, which moves neither, as in Bevy's.
+    private static bool OverRadio(EcsWorld ecs) => ecs.All<HoveredRef>().Any(hovered => hovered.Value);
 
     // As camera_orbit does, though about the origin, while it keeps looking where it was.
     private static void MoveCameraOnMouseDown(BehaviorContext ctx)
     {
         var input = ctx.Input;
-        if (_moveFox || !input.MouseDown(MouseButton.Left)) return;
+        var ecs = ctx.Ecs;
+        if (_moveFox || !input.MouseDown(MouseButton.Left) || OverRadio(ecs)) return;
         if (input.MouseDeltaX == 0f && input.MouseDeltaY == 0f) return;
 
-        var ecs = ctx.Ecs;
         var camera = ecs.GetOrDefault<Transform>(_camera);
         var euler = camera.Rotation.ToEuler();
         var pitch = Math.Clamp(euler.X + input.MouseDeltaY * CameraPitchSpeed, -CameraPitchLimit, CameraPitchLimit);
@@ -157,7 +162,7 @@ internal static class MirrorExample
     private static void MoveFoxOnMouseDown(BehaviorContext ctx)
     {
         var input = ctx.Input;
-        if (!_moveFox || _fox == Entity.None || !input.MouseDown(MouseButton.Left)) return;
+        if (!_moveFox || _fox == Entity.None || !input.MouseDown(MouseButton.Left) || OverRadio(ctx.Ecs)) return;
 
         var (x, y) = input.MousePosition;
         if (!Render.TryRay(_camera, x, y, out var origin, out var direction) || MathF.Abs(direction.Y) < 1e-6f) return;

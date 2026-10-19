@@ -1811,6 +1811,7 @@ static class Bevy.Feathers
   static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
   static Entity VirtualKeyboard(Entity parent, string[][] keys)
   static NumberInputValue? NumberOf(Entity input)
+  static void SetDarkTheme()
   static void SetNumber(Entity input, double value)
   static void SetNumber(Entity input, float value)
   static void SetNumber(Entity input, int value)
@@ -1820,6 +1821,7 @@ static class Bevy.Feathers
   static void SetNumberLimit(Entity input, int min, int max, bool hard = false)
   static void SetNumberLimit(Entity input, long min, long max, bool hard = false)
   static void SetNumberUnits(Entity input, NumberUnits units)
+  static void SetTheme(ReadOnlySpan<(string, Color)> colors)
   static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background)
 static class Bevy.FeathersIcon
   const string ChevronDown = "embedded://bevy_feathers/assets/icons/chevron-down.png"

@@ -1,4 +1,4 @@
-// Bevy's light_probe_blending example, examples/3d/light_probe_blending.rs at v0.19.1, by Bevy's
+// Bevy's light_probe_blending example, examples/3d/light_probe_blending.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -25,9 +25,13 @@ internal static class LightProbeBlending
     private static Entity _camera;
     private static readonly List<Entity> Probes = [];
     private static bool _gizmos, _sphereShown, _orbit;
-    private static RadioButtons<bool>? _gizmoButtons, _objectButtons, _cameraButtons;
 
-    public static void Configure(Config config) => config.CameraControllers = CameraControllers.Free;
+    // Bevy's three settings, a type for each row, since a row's handler knows its own by its type.
+    private enum GizmosEnabled { On, Off }
+    private enum ObjectToShow { Sphere, Prism }
+    private enum CameraMode { Orbit, Free }
+
+    public static void Configure(Config config) => (config.CameraControllers, config.Feathers) = (CameraControllers.Free, true);
 
     public static void Build(App app)
     {
@@ -36,7 +40,6 @@ internal static class LightProbeBlending
 
         app.Startup(Setup, "light_probe_blending.Setup");
         app.SpawnGltf("light_probe_blending/two_rooms.glb");
-        app.Update(HandleButtons, "light_probe_blending.HandleButtons");
         app.Update(DrawGizmos, "light_probe_blending.DrawGizmos");
     }
 
@@ -72,63 +75,68 @@ internal static class LightProbeBlending
             Probes.Add(probe);
         }
 
-        var column = RadioButtons<bool>.Column();
-        _gizmoButtons = new RadioButtons<bool>(ecs, column, "Gizmos", [(true, "On"), (false, "Off")], _gizmos);
-        _objectButtons = new RadioButtons<bool>(ecs, column, "Object to Show", [(true, "Sphere"), (false, "Prism")], _sphereShown);
-        _cameraButtons = new RadioButtons<bool>(ecs, column, "Camera Mode", [(true, "Orbit"), (false, "Free")], _orbit);
+        Theme.BasicExampleTheme(Color.White);
+        var column = Radio.MainUiNode();
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Gizmos", [(GizmosEnabled.On, "On"), (GizmosEnabled.Off, "Off")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Object to Show", [(ObjectToShow.Sphere, "Sphere"), (ObjectToShow.Prism, "Prism")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Camera Mode", [(CameraMode.Orbit, "Orbit"), (CameraMode.Free, "Free")], 0), UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => HandleGizmosEnabledChange(on.Ecs, on.Event.Value));
+        ecs.Observe<ValueChange<Entity>>(on => HandleObjectToShowChange(on.Ecs, on.Event.Value));
+        ecs.Observe<ValueChange<Entity>>(on => HandleCameraModeChange(on.Ecs, on.Event.Value));
 
         // Empty until a setting changes, as Bevy's is.
         ecs.Add(Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new ProbeBlendingHelpText());
     }
 
-    private static void HandleButtons(BehaviorContext ctx)
+    private static void HandleGizmosEnabledChange(EcsWorld ecs, Entity button)
     {
-        var ecs = ctx.Ecs;
-        var changed = false;
+        if (!Radio.OptionValue<GizmosEnabled>(button, out var enabled)) return;
 
-        if (_gizmoButtons!.Pressed(out var gizmos) && gizmos != _gizmos)
-        {
-            (_gizmos, changed) = (gizmos, true);
-            _gizmoButtons.Select(ecs, gizmos);
-        }
+        _gizmos = enabled == GizmosEnabled.On;
+        SetHelpText(ecs);
+    }
 
-        if (_objectButtons!.Pressed(out var sphereShown) && sphereShown != _sphereShown)
-        {
-            _sphereShown = sphereShown;
-            foreach (var sphere in ecs.EntitiesWith<ReflectiveSphere>()) ecs.Wrap<VisibilityRef>(sphere).Value = sphereShown ? Visibility.Inherited : Visibility.Hidden;
-            foreach (var prism in ecs.EntitiesWith<ReflectivePrism>()) ecs.Wrap<VisibilityRef>(prism).Value = sphereShown ? Visibility.Hidden : Visibility.Inherited;
-            _objectButtons.Select(ecs, sphereShown);
-        }
+    private static void HandleObjectToShowChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<ObjectToShow>(button, out var shown)) return;
 
-        if (_cameraButtons!.Pressed(out var orbit) && orbit != _orbit)
+        _sphereShown = shown == ObjectToShow.Sphere;
+        foreach (var sphere in ecs.EntitiesWith<ReflectiveSphere>()) ecs.Wrap<VisibilityRef>(sphere).Value = _sphereShown ? Visibility.Inherited : Visibility.Hidden;
+        foreach (var prism in ecs.EntitiesWith<ReflectivePrism>()) ecs.Wrap<VisibilityRef>(prism).Value = _sphereShown ? Visibility.Hidden : Visibility.Inherited;
+    }
+
+    private static void HandleCameraModeChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<CameraMode>(button, out var mode)) return;
+
+        _orbit = mode == CameraMode.Orbit;
+        if (_orbit)
         {
-            _orbit = orbit;
-            if (orbit)
+            // Taken up again from where the free camera left it.
+            Render.ClearFreeCamera(_camera);
+            var sphere = ecs.EntitiesWith<ReflectiveSphere>() is [var first, ..] ? ecs.GetOrDefault<Transform>(first).Translation : Vec3.Zero;
+            var relative = ecs.GetOrDefault<Transform>(_camera).Translation - sphere;
+            var radius = relative.Length;
+            var flat = MathF.Sqrt(relative.X * relative.X + relative.Z * relative.Z);
+            ecs.Add(_camera, new OrbitCamera
             {
-                // Taken up again from where the free camera left it.
-                Render.ClearFreeCamera(_camera);
-                var sphere = ecs.EntitiesWith<ReflectiveSphere>() is [var first, ..] ? ecs.GetOrDefault<Transform>(first).Translation : Vec3.Zero;
-                var relative = ecs.GetOrDefault<Transform>(_camera).Translation - sphere;
-                var radius = relative.Length;
-                var flat = MathF.Sqrt(relative.X * relative.X + relative.Z * relative.Z);
-                ecs.Add(_camera, new OrbitCamera
-                {
-                    Radius = radius,
-                    Inclination = MathF.Atan2(flat / radius, relative.Y / radius),
-                    Azimuth = MathF.Atan2(relative.Z / flat, relative.X / flat),
-                });
-            }
-            else
-            {
-                ecs.Remove<OrbitCamera>(_camera);
-                Render.SetFreeCamera(_camera, new FreeCameraSettings());
-            }
-
-            _cameraButtons.Select(ecs, orbit);
-            changed = true;
+                Radius = radius,
+                Inclination = MathF.Atan2(flat / radius, relative.Y / radius),
+                Azimuth = MathF.Atan2(relative.Z / flat, relative.X / flat),
+            });
+        }
+        else
+        {
+            ecs.Remove<OrbitCamera>(_camera);
+            Render.SetFreeCamera(_camera, new FreeCameraSettings());
         }
 
-        if (changed) foreach (var help in ecs.EntitiesWith<ProbeBlendingHelpText>()) Ui.SetText(help, HelpText());
+        SetHelpText(ecs);
+    }
+
+    private static void SetHelpText(EcsWorld ecs)
+    {
+        foreach (var help in ecs.EntitiesWith<ProbeBlendingHelpText>()) Ui.SetText(help, HelpText());
     }
 
     // Each probe's bounds in tan, the bounds its falloff starts at in crimson, and its parallax

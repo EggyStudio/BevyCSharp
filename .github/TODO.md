@@ -648,9 +648,6 @@ figure moves.
   Bevy mends it). Bevy's `pbr_fragment` shader building the tangent frame wherever anisotropy is
   on mends it at its cause. It costs a change to Bevy, which is not reported from this repository,
   or else a patched shader in the bridge that has to follow every release of Bevy's.
-- **A helper stands where Bevy's crate would.** The radio buttons of `Widgets.cs` in
-  `BevyCSharp.Examples`, listed in `build/examples-on-package.sh`, stand where Feathers' radio
-  would, and go with that gap above at its cost.
 - **The norm's lists.** The places listed in `build/norm/` as not yet keeping a rule of NORM.md are
   mended as a batch next touches each, in a commit that moves code alone, and the lists only get
   shorter.

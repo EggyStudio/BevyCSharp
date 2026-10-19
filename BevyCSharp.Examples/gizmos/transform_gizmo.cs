@@ -17,29 +17,30 @@ using Space = Bevy.Reflected.TransformGizmoSettingsRef.SpaceVariant;
 // is held, as Bevy's free camera does.
 internal static class TransformGizmoExample
 {
-    private static RadioButtons<Mode>? _modes;
-    private static RadioButtons<Space>? _spaces;
-    private static Entity _sensitivityRow, _slider, _fill, _value;
+    private static Entity _sensitivityRow;
 
     // Bevy's TransformGizmoPlugin and MeshPickingPlugin, the gizmo and the clicks that select.
-    public static void Configure(Config config) => (config.TransformGizmo, config.MeshPicking, config.CameraControllers) = (true, true, CameraControllers.Free);
+    public static void Configure(Config config) =>
+        (config.TransformGizmo, config.MeshPicking, config.CameraControllers, config.Feathers) = (true, true, CameraControllers.Free, true);
 
     public static void Build(App app)
     {
         app.Startup(Setup, "transform_gizmo.Setup");
-        app.Update(UpdateRadioButtons, "transform_gizmo.UpdateRadioButtons");
-        app.Update(SliderUpdate, "transform_gizmo.SliderUpdate");
         app.Update(ToggleScaleSlider, "transform_gizmo.ToggleScaleSlider");
     }
 
     private static void Setup(BehaviorContext ctx)
     {
         var ecs = ctx.Ecs;
+        Theme.BasicExampleTheme(Color.White);
 
-        var column = RadioButtons<Mode>.Column();
-        ecs.SetParent(Ui.SpawnText("Click an object to select it", new UiSettings(), 18f), column);
-        _modes = new RadioButtons<Mode>(ecs, column, string.Empty, [(Mode.Translate, "Translate"), (Mode.Rotate, "Rotate"), (Mode.Scale, "Scale")], Mode.Translate);
-        _spaces = new RadioButtons<Space>(ecs, column, string.Empty, [(Space.World, "World"), (Space.Local, "Local")], Space.World);
+        var column = Radio.MainUiNode();
+        Feathers.Label(column, "Click an object to select it");
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, string.Empty,
+            [(Mode.Translate, "Translate"), (Mode.Rotate, "Rotate"), (Mode.Scale, "Scale")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, string.Empty,
+            [(Space.World, "World"), (Space.Local, "Local")], 0), UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => UpdateRadioButton(on.Ecs, on.Event.Value));
         SpawnSensitivitySlider(ecs, column);
 
         // The ground, which no click selects.
@@ -87,34 +88,21 @@ internal static class TransformGizmoExample
         ecs.Insert<TransformGizmoFocusRef>(on.Entity);
     }
 
-    // Bevy's update_radio_button, the gizmo's mode and axes from the buttons.
-    private static void UpdateRadioButtons(BehaviorContext ctx)
+    // Bevy's update_radio_button, the gizmo's mode or axes from the button checked.
+    private static void UpdateRadioButton(EcsWorld ecs, Entity button)
     {
-        if (ctx.Ecs.Resource<TransformGizmoSettingsRef>() is not { } settings) return;
-
-        if (_modes!.Pressed(out var mode) && mode != settings.Mode)
-        {
-            settings.Mode = mode;
-            _modes.Select(ctx.Ecs, mode);
-        }
-        if (_spaces!.Pressed(out var space) && space != settings.Space)
-        {
-            settings.Space = space;
-            _spaces.Select(ctx.Ecs, space);
-        }
-    }
-
-    // Bevy's slider_update, the scaling's speed from the slider, shown as its bar and number.
-    private static void SliderUpdate(BehaviorContext ctx)
-    {
-        var ecs = ctx.Ecs;
         if (ecs.Resource<TransformGizmoSettingsRef>() is not { } settings) return;
 
-        var value = ecs.Wrap<SliderValueRef>(_slider).Value;
-        if (value != settings.ScaleSensitivity) settings.ScaleSensitivity = value;
+        if (Radio.OptionValue<Mode>(button, out var mode)) settings.Mode = mode;
+        else if (Radio.OptionValue<Space>(button, out var space)) settings.Space = space;
+    }
 
-        ecs.Wrap<NodeRef>(_fill).Width = new Val.Percent((value - 0.1f) / (2f - 0.1f) * 100f);
-        Ui.SetText(_value, value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+    // Bevy's slider_update, the value asked for written to the slider and taken as the scaling's
+    // speed.
+    private static void SliderUpdate(On<ValueChange<float>> on)
+    {
+        on.Ecs.Wrap<SliderValueRef>(on.Event.Source).Value = on.Event.Value;
+        if (on.Ecs.Resource<TransformGizmoSettingsRef>() is { } settings) settings.ScaleSensitivity = on.Event.Value;
     }
 
     // Bevy's toggle_scale_slider, the slider shown only while the gizmo scales.
@@ -124,37 +112,17 @@ internal static class TransformGizmoExample
         ctx.Ecs.Wrap<NodeRef>(_sensitivityRow).Display = settings.Mode == Mode.Scale ? NodeRef.DisplayVariant.Flex : NodeRef.DisplayVariant.None;
     }
 
-    // The sensitivity slider, from 0.1 to 2 in steps of 0.1, a bar filled to its value with the
-    // value written over it, as Feathers draws its slider.
+    // The sensitivity slider, Feathers' from 0.1 to 2 in steps of 0.1, beside its label.
     private static void SpawnSensitivitySlider(EcsWorld ecs, Entity column)
     {
-        _sensitivityRow = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, ColumnGap = Length.Px(4f), Display = UiDisplay.None });
+        _sensitivityRow = Ui.SpawnNode(new UiSettings { Align = UiAlign.Center, ColumnGap = Length.Px(4f) });
         ecs.SetParent(_sensitivityRow, column);
-        ecs.SetParent(Ui.SpawnText("Sensitivity", new UiSettings(), 18f), _sensitivityRow);
+        Feathers.Label(_sensitivityRow, "Sensitivity");
 
-        _slider = Ui.SpawnNode(new UiSettings
-        {
-            Width = Length.Px(160f),
-            Height = Length.Px(24f),
-            Justify = UiJustify.Center,
-            Align = UiAlign.Center,
-            Color = (0.15f, 0.15f, 0.15f, 1f),
-            Corners = Length.Px(4f),
-            OverflowX = UiOverflow.Clip,
-            OverflowY = UiOverflow.Clip,
-        });
-        ecs.SetParent(_slider, _sensitivityRow);
-        ecs.Insert<SliderRef>(_slider).TrackClick = SliderRef.TrackClickVariant.Drag;
-        ecs.Insert<SliderValueRef>(_slider).Value = 1f;
-        var range = ecs.Insert<SliderRangeRef>(_slider);
-        (range.Start, range.End) = (0.1f, 2f);
-        ecs.Insert<SliderStepRef>(_slider).Value = 0.1f;
-        ecs.Insert<SliderPrecisionRef>(_slider).Value = 2;
-        Ui.SelfUpdate(_slider, UiWidgetKind.Slider);
-
-        _fill = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Zero, Top = Length.Zero, Height = Length.Percent(100f), Color = (0.2f, 0.4f, 0.8f, 1f) });
-        ecs.SetParent(_fill, _slider);
-        _value = Ui.SpawnText("1.00", new UiSettings(), 16f);
-        ecs.SetParent(_value, _slider);
+        var slider = Feathers.Slider(_sensitivityRow, 0.1f, 2f);
+        ecs.Insert<SliderValueRef>(slider).Value = 1f;
+        ecs.Insert<SliderPrecisionRef>(slider).Value = 2;
+        ecs.Insert<SliderStepRef>(slider).Value = 0.1f;
+        ecs.Observe<ValueChange<float>>(slider, SliderUpdate);
     }
 }

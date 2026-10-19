@@ -510,7 +510,9 @@ var volume = Feathers.Slider(row, min: 0f, max: 100f);
 
 `Feathers.ThemeColor` colors a node of the game's own by one of `FeathersToken`'s tokens, Bevy's
 names for the parts of a control the theme colors, so it follows the theme as the controls do.
-`Feathers.Caption` and the labels are text in the theme's font, which `Ui.SetText` changes. Bevy
+`Feathers.SetTheme` replaces the theme with colors of the game's own, each given with its token, and
+a token it is not given draws in no color, so a theme names every part of the controls it shows.
+`Feathers.SetDarkTheme` puts Bevy's back. `Feathers.Caption` and the labels are text in the theme's font, which `Ui.SetText` changes. Bevy
 writes Feathers for tools and editors, and a game's own interface is drawn with the plain widgets.
 
 A number input holds a `float`, a `double`, an `int` or a `long`, whichever `Feathers.SetNumber`

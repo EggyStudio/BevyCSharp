@@ -704,6 +704,62 @@ pub unsafe extern "C" fn bcs_feathers_contents(entity: u64, out: *mut u64) -> i3
     })
 }
 
+/// Replaces the theme with one that colors each of `count` tokens by its color and nothing else,
+/// Bevy's `ThemeProps::new_non_contextual`, as Bevy's examples' basic theme is made, or with Bevy's
+/// dark theme again where `count` is zero. `tokens` are the tokens' names, a line each, and
+/// `colors` four linear numbers a token, red, green, blue and alpha.
+///
+/// # Safety
+/// `tokens` must be valid for `len` bytes of UTF-8 and `colors` for reads of `4 * count` `f32`s.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_feathers_set_theme(tokens: *const u8, len: i32, colors: *const f32, count: i32) -> i32 {
+    crate::interop::guard(|| {
+        if count < 0 || len < 0 || (count > 0 && (tokens.is_null() || colors.is_null())) {
+            return status::NULL_ARG;
+        }
+        let names: &[u8] = if len == 0 { &[] } else { unsafe { core::slice::from_raw_parts(tokens, len as usize) } };
+        let Ok(names) = core::str::from_utf8(names) else {
+            return status::NULL_ARG;
+        };
+        let names: Vec<&str> = if count == 0 { Vec::new() } else { names.lines().collect() };
+        if names.len() != count as usize {
+            return status::NULL_ARG;
+        }
+        let colors: &[f32] = if count == 0 { &[] } else { unsafe { core::slice::from_raw_parts(colors, 4 * count as usize) } };
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (names, colors);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::{Color, LinearRgba};
+            use bevy::feathers::dark_theme::create_dark_theme;
+            use bevy::feathers::theme::{ThemeProps, ThemeToken, UiTheme};
+            use bevy::platform::collections::HashMap;
+
+            crate::state::with_world(|world| {
+                let Some(mut theme) = world.get_resource_mut::<UiTheme>() else {
+                    return status::INVALID_STATE;
+                };
+                theme.0 = if names.is_empty() {
+                    create_dark_theme()
+                } else {
+                    let assigned: HashMap<ThemeToken, Color> = names
+                        .iter()
+                        .zip(colors.chunks_exact(4))
+                        .map(|(name, c)| (ThemeToken::new((*name).into()), Color::from(LinearRgba::new(c[0], c[1], c[2], c[3]))))
+                        .collect();
+                    ThemeProps::new_non_contextual(assigned)
+                };
+                status::OK
+            })
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -39,4 +39,9 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_feathers_contents(ulong entity, ulong* contents);
+
+    /// <summary>Replaces the theme with token colors alone, or with Bevy's dark theme for none.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_feathers_set_theme(byte* tokens, int length, float* colors, int count);
 }

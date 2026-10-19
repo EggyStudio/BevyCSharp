@@ -28,10 +28,10 @@ mkdir -p "$work/Examples"
 # so an example reaching into any of them fails to build here.
 rm "$work/Examples/Catalog.cs" "$work/Examples/Program.cs" "$work/Examples/Example.cs" "$work/Examples/Drives.cs"
 
-# The helpers an example may still use, each with why, which only gets shorter. Each stands in
-# for something Bevy's examples take from a crate the bridge does not compile in, and goes when it
-# can be asked for.
-#   Widgets.cs     the radio buttons Bevy's examples share by path, which Feathers' replace
+# The helpers an example may use, each with why, which only gets shorter. Each mirrors something
+# Bevy's examples take in by path rather than from a crate, so it stays while Bevy's does.
+#   Helpers.cs     Bevy's examples/helpers/radio.rs, theme.rs and number_input_f32.rs, the row of
+#                  Feathers' radio buttons, the plain theme and the labeled number input
 
 # What the repository's Directory.Build.props sets that the examples read, written into their own
 # project, which takes the package in place of the library's project and its generator.

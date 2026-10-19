@@ -1,4 +1,4 @@
-// Bevy's pcss example, examples/3d/pcss.rs at v0.19.1, by Bevy's contributors under MIT or
+// Bevy's pcss example, examples/3d/pcss.rs at v0.20.0, by Bevy's contributors under MIT or
 // Apache-2.0, written again in C#.
 
 using Bevy;
@@ -29,9 +29,8 @@ internal static class Pcss
     private static ShadowFilter _filter;
     private static bool _soft;
     private static Entity _camera, _light;
-    private static RadioButtons<LightType>? _lightButtons;
-    private static RadioButtons<ShadowFilter>? _filterButtons;
-    private static RadioButtons<bool>? _softButtons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -49,52 +48,55 @@ internal static class Pcss
 
             _light = SpawnLight(ecs);
 
-            var column = RadioButtons<LightType>.Column();
-            _lightButtons = new RadioButtons<LightType>(ecs, column, "Light Type",
-                [(LightType.Directional, "Directional"), (LightType.Point, "Point"), (LightType.Spot, "Spot")], _lightType);
-            _filterButtons = new RadioButtons<ShadowFilter>(ecs, column, "Shadow Filter",
-                [(ShadowFilter.Temporal, "Temporal"), (ShadowFilter.NonTemporal, "Non-Temporal")], _filter);
-            _softButtons = new RadioButtons<bool>(ecs, column, "Soft Shadows", [(true, "On"), (false, "Off")], _soft);
+            Theme.BasicExampleTheme(Color.Black);
+            var column = Radio.MainUiNode();
+            Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Light Type",
+                [(LightType.Directional, "Directional"), (LightType.Point, "Point"), (LightType.Spot, "Spot")], 0), UiWidgetKind.RadioGroup);
+            Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Shadow Filter",
+                [(ShadowFilter.NonTemporal, "Non-Temporal"), (ShadowFilter.Temporal, "Temporal")], 0), UiWidgetKind.RadioGroup);
+            Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Soft Shadows", [(true, "On"), (false, "Off")], 0), UiWidgetKind.RadioGroup);
+            ecs.Observe<ValueChange<Entity>>(on => HandleLightTypeChange(on.Ecs, on.Event.Value));
+            ecs.Observe<ValueChange<Entity>>(on => HandleShadowFilterChange(on.Ecs, on.Event.Value));
+            ecs.Observe<ValueChange<Entity>>(on => HandlePcssToggle(on.Ecs, on.Event.Value));
         });
 
         app.SpawnGltf("models/PalmTree/PalmTree.gltf");
+    }
 
-        app.Update(ctx =>
+    private static void HandleLightTypeChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<LightType>(button, out var lightType)) return;
+
+        _lightType = lightType;
+        ecs.Despawn(_light);
+        _light = SpawnLight(ecs);
+    }
+
+    private static void HandleShadowFilterChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<ShadowFilter>(button, out var filter)) return;
+
+        _filter = filter;
+        if (_filter == ShadowFilter.Temporal)
         {
-            var ecs = ctx.Ecs;
+            Render.SetShadowFiltering(_camera, ShadowFiltering.Temporal);
+            ecs.Insert<TemporalAntiAliasingRef>(_camera);
+        }
+        else
+        {
+            Render.SetShadowFiltering(_camera, ShadowFiltering.Gaussian);
+            ecs.Wrap<TemporalAntiAliasingRef>(_camera).Remove();
+        }
+    }
 
-            if (_lightButtons!.Pressed(out var lightType) && lightType != _lightType)
-            {
-                _lightType = lightType;
-                _lightButtons.Select(ecs, _lightType);
-                ecs.Despawn(_light);
-                _light = SpawnLight(ecs);
-            }
+    // Making the light again is the plainest way to turn its soft shadows on or off, as Bevy's says.
+    private static void HandlePcssToggle(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<bool>(button, out var soft)) return;
 
-            if (_filterButtons!.Pressed(out var filter) && filter != _filter)
-            {
-                _filter = filter;
-                _filterButtons.Select(ecs, _filter);
-                if (_filter == ShadowFilter.Temporal)
-                {
-                    Render.SetShadowFiltering(_camera, ShadowFiltering.Temporal);
-                    ecs.Insert<TemporalAntiAliasingRef>(_camera);
-                }
-                else
-                {
-                    Render.SetShadowFiltering(_camera, ShadowFiltering.Gaussian);
-                    ecs.Wrap<TemporalAntiAliasingRef>(_camera).Remove();
-                }
-            }
-
-            if (_softButtons!.Pressed(out var soft) && soft != _soft)
-            {
-                _soft = soft;
-                _softButtons.Select(ecs, _soft);
-                ecs.Despawn(_light);
-                _light = SpawnLight(ecs);
-            }
-        }, "pcss.Update");
+        _soft = soft;
+        ecs.Despawn(_light);
+        _light = SpawnLight(ecs);
     }
 
     // A light of the chosen kind, made again whenever the kind or its softness changes, as Bevy's

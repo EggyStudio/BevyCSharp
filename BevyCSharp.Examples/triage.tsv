@@ -25,7 +25,7 @@ bloom_3d	can
 decal	can	its cubes turned by .NET's generator rather than Bevy's ChaCha8
 deferred_rendering	can	compared with bare Bevy drawn offscreen, which drew only one kind of its forward and deferred materials, the kind depending on when its camera was given its image, and drew this frame once every material was deferred
 motion_blur	can
-occlusion_culling	can	its choice drawn as the examples' own buttons, where Bevy draws it with Feathers
+occlusion_culling	can
 order_independent_transparency	can
 tonemapping	can
 orthographic	can
@@ -62,7 +62,7 @@ post_processing	can
 rotate_environment_map	can
 pcss	can
 mixed_lighting	can	through Bevy's reflected Lightmap
-specular_tint	can	its two choices drawn as the examples' own radio buttons, where Bevy draws them with Feathers
+specular_tint	can
 clustered_decals	can
 light_textures	can
 clustered_decal_maps	can
@@ -73,7 +73,7 @@ light_probe_blending	can
 2d_viewport_to_world	can	zoomed by the camera's scale where Bevy's sets its projection's, which sits beside a scaling mode no wrapper types
 bloom_2d	can	through Bevy's reflected Bloom
 cpu_draw	can
-dynamic_mip_generation	can	its colors drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's, and its choices drawn as the examples' own buttons, where Bevy draws them with Feathers
+dynamic_mip_generation	can	its colors drawn from .NET's generator seeded as Bevy's is, which deals other numbers than Bevy's
 mesh2d_alpha_mode	can
 mesh2d_arcs	can
 mesh2d_manual	n/a	writes a render pipeline in Rust with the mid-level render API
@@ -216,7 +216,7 @@ anchored_text_gizmos	can
 axes	can	reading each cube's bounding box through Bevy's reflected Aabb
 light_gizmos	can
 text_gizmos_font	can
-transform_gizmo	can	its choices and slider drawn as the examples' own, where Bevy draws them with Feathers
+transform_gizmo	can
 custom_gltf_vertex_attribute	n/a	maps a glTF attribute to a Rust-defined vertex attribute and 2D material
 edit_material_on_gltf	can	each helmet changed once its parts carry their material names and those have loaded, where Bevy changes them as its scene is ready
 gltf_extension_animation_graph	n/a	writes a Rust glTF extension handler

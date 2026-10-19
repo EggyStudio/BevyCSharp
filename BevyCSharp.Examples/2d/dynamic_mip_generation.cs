@@ -26,20 +26,23 @@ internal static class DynamicMipGeneration
     private static uint _width = 640, _height = 480;
     private static readonly Random Rng = new(unchecked((int)19878367467713L));
 
+    // Bevy's option values, a type for each row, since a row's handler knows its own by its type.
+    private enum EnableMipGeneration { On, Off }
+    private readonly record struct ImageWidth(uint Size);
+    private readonly record struct ImageHeight(uint Size);
+
     private static AssetHandle _rectangle, _font;
-    private static Entity _regenerate;
-    private static bool _regenerateHeld;
-    private static RadioButtons<bool>? _generation;
-    private static RadioButtons<uint>? _widths, _heights;
     private static Entity _animated;
     private static readonly List<Entity> Views = [];
     private static (uint, uint) _window;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
         app.Startup(Setup, "dynamic_mip_generation.Setup");
         app.Update(AnimateImageScale, "dynamic_mip_generation.AnimateImageScale");
-        app.Update(HandleButtons, "dynamic_mip_generation.HandleButtons");
+        app.Update(HandleWindowResizeEvents, "dynamic_mip_generation.HandleWindowResizeEvents");
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -51,57 +54,43 @@ internal static class DynamicMipGeneration
         _font = AssetServer.Load(AssetKind.Font, "fonts/FiraSans-Bold.ttf");
 
         // Bevy's spawn_ui, the button and the three rows of choices at the bottom left.
-        var column = RadioButtons<bool>.Column();
-        _regenerate = Ui.SpawnNode(new UiSettings
-        {
-            Interactive = true,
-            Color = (0f, 0f, 0f, 1f),
-            Justify = UiJustify.Center,
-            Align = UiAlign.Center,
-            Padding = new Sides(Length.Px(12f), Length.Px(6f), Length.Px(12f), Length.Px(6f)),
-            Corners = Length.Px(6f),
-        });
-        ecs.SetParent(_regenerate, column);
-        ecs.SetParent(Ui.SpawnText("Regenerate Top Mip Level", new UiSettings(), 18f), _regenerate);
+        Theme.BasicExampleTheme(Color.White);
+        var column = Radio.MainUiNode();
+        var regenerate = Feathers.Button(column, "Regenerate Top Mip Level");
+        var node = ecs.Wrap<NodeRef>(regenerate);
+        (node.JustifyContent, node.AlignItems) = (NodeRef.JustifyContentVariant.Center, NodeRef.AlignItemsVariant.Center);
+        ecs.Wrap<BackgroundColorRef>(regenerate).Value = Color.Black;
+        ecs.Observe<Activate>(regenerate, on => Regenerate(on.Ecs));
 
-        _generation = new RadioButtons<bool>(ecs, column, "Mip Generation", [(true, "On"), (false, "Off")], true);
-        _widths = new RadioButtons<uint>(ecs, column, "Image Width", [.. Sizes.Select(size => (size, size.ToString()))], _width);
-        _heights = new RadioButtons<uint>(ecs, column, "Image Height", [.. Sizes.Select(size => (size, size.ToString()))], _height);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Mip Generation", [(EnableMipGeneration.On, "On"), (EnableMipGeneration.Off, "Off")], 0), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Image Width", [.. Sizes.Select(size => (new ImageWidth(size), size.ToString()))], 2), UiWidgetKind.RadioGroup);
+        Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, "Image Height", [.. Sizes.Select(size => (new ImageHeight(size), size.ToString()))], 1), UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => HandleEnableMipGenerationChange(on.Event.Value));
+        ecs.Observe<ValueChange<Entity>>(on => HandleImageSizeSettingChange(on.Ecs, on.Event.Value));
 
         Regenerate(ecs);
     }
 
-    // The button and the choices, each press handled as Bevy's observers handle it, and a window
-    // resized drawing the image again as Bevy's handle_window_resize_events does. A button reads as
-    // pressed for as long as it is held, so the button counts the frame it went down, and a choice
-    // already made changes nothing.
-    private static void HandleButtons(BehaviorContext ctx)
+    // Turning the making of levels on or off draws nothing again, as in Bevy's.
+    private static void HandleEnableMipGenerationChange(Entity button)
     {
-        var ecs = ctx.Ecs;
-        var regenerate = Window.Size() != _window;
+        if (Radio.OptionValue<EnableMipGeneration>(button, out var enable))
+            _generate = enable == EnableMipGeneration.On;
+    }
 
-        var held = Ui.InteractionOf(_regenerate) == UiInteraction.Pressed;
-        regenerate |= held && !_regenerateHeld;
-        _regenerateHeld = held;
+    private static void HandleImageSizeSettingChange(EcsWorld ecs, Entity button)
+    {
+        if (Radio.OptionValue<ImageWidth>(button, out var width)) _width = width.Size;
+        else if (Radio.OptionValue<ImageHeight>(button, out var height)) _height = height.Size;
+        else return;
 
-        // Turning the making of levels on or off draws nothing again, as in Bevy's.
-        if (_generation!.Pressed(out var generate) && generate != _generate)
-        {
-            _generate = generate;
-            _generation.Select(ecs, generate);
-        }
-        if (_widths!.Pressed(out var width) && width != _width)
-        {
-            (_width, regenerate) = (width, true);
-            _widths.Select(ecs, width);
-        }
-        if (_heights!.Pressed(out var height) && height != _height)
-        {
-            (_height, regenerate) = (height, true);
-            _heights.Select(ecs, height);
-        }
+        Regenerate(ecs);
+    }
 
-        if (regenerate) Regenerate(ecs);
+    // A window resized draws the image again, as Bevy's handle_window_resize_events does.
+    private static void HandleWindowResizeEvents(BehaviorContext ctx)
+    {
+        if (Window.Size() != _window) Regenerate(ctx.Ecs);
     }
 
     // Bevy's animate_image_scale, the image on the left grown and shrunk by a triangle wave.

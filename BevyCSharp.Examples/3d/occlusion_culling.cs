@@ -18,9 +18,9 @@ internal static class OcclusionCullingExample
     private const float LargeCubeSize = 2f;
 
     private static Entity _sphereParent, _largeCube, _camera, _status;
-    private static RadioButtons<bool>? _buttons;
-    private static bool _culling = true;
     private static int _meshes;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -28,7 +28,6 @@ internal static class OcclusionCullingExample
         app.Update(SpinSmallCubes, "occlusion_culling.SpinSmallCubes");
         app.Update(SpinLargeCube, "occlusion_culling.SpinLargeCube");
         app.Update(UpdateStatusText, "occlusion_culling.UpdateStatusText");
-        app.Update(HandleSelectionChange, "occlusion_culling.HandleSelectionChange");
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -66,7 +65,10 @@ internal static class OcclusionCullingExample
         Render.CountDrawnMeshes(true);
 
         _status = Ui.SpawnText(string.Empty, new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) });
-        _buttons = new RadioButtons<bool>(ecs, RadioButtons<bool>.Column(), "Toggle occlusion culling", [(true, "ON"), (false, "OFF")], true);
+        Theme.BasicExampleTheme(Color.White);
+        var row = Radio.FeathersOptionButtons(ecs, Radio.MainUiNode(), "Toggle occlusion culling", [(true, "ON"), (false, "OFF")], 0);
+        Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+        ecs.Observe<ValueChange<Entity>>(on => HandleSelectionChange(on.Ecs, on.Event.Value));
     }
 
     // Bevy's spin_small_cubes and spin_large_cube, by a step each frame as Bevy's turn.
@@ -96,21 +98,19 @@ internal static class OcclusionCullingExample
     }
 
     // Bevy's handle_selection_change, the culling and its prepass put on the camera or taken off.
-    private static void HandleSelectionChange(BehaviorContext ctx)
+    private static void HandleSelectionChange(EcsWorld ecs, Entity button)
     {
-        if (_buttons is null || !_buttons.Pressed(out var culling) || culling == _culling) return;
+        if (!Radio.OptionValue<bool>(button, out var culling)) return;
 
-        _culling = culling;
-        _buttons.Select(ctx.Ecs, culling);
         if (culling)
         {
-            ctx.Ecs.Insert<DepthPrepassRef>(_camera);
-            ctx.Ecs.Insert<OcclusionCullingRef>(_camera);
+            ecs.Insert<DepthPrepassRef>(_camera);
+            ecs.Insert<OcclusionCullingRef>(_camera);
         }
         else
         {
-            ctx.Ecs.Wrap<DepthPrepassRef>(_camera).Remove();
-            ctx.Ecs.Wrap<OcclusionCullingRef>(_camera).Remove();
+            ecs.Wrap<DepthPrepassRef>(_camera).Remove();
+            ecs.Wrap<OcclusionCullingRef>(_camera).Remove();
         }
     }
 }

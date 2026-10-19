@@ -1,4 +1,4 @@
-// Bevy's clustered_decal_maps example, examples/3d/clustered_decal_maps.rs at v0.19.1, by Bevy's
+// Bevy's clustered_decal_maps example, examples/3d/clustered_decal_maps.rs at v0.20.0, by Bevy's
 // contributors under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -19,7 +19,8 @@ internal static class ClusteredDecalMaps
     private static bool _emissiveDecals;
     private static float _nextSpawn;
     private static Random _random = new();
-    private static RadioButtons<bool>? _buttons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -51,16 +52,18 @@ internal static class ClusteredDecalMaps
             var camera = ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(2f, 0f, -7f), Vec3.Zero, Vec3.UnitY));
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
 
-            _buttons = new RadioButtons<bool>(ecs, RadioButtons<bool>.Column(), "Emissive Decals", [(true, "On"), (false, "Off")], _emissiveDecals);
+            var row = Radio.FeathersOptionButtons(ecs, Radio.MainUiNode(), "Emissive Decals", [(false, "Off"), (true, "On")], 0);
+            Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+            ecs.Observe<ValueChange<Entity>>(on => HandleEmissionTypeChange(on.Event.Value));
         }, "clustered_decal_maps.Setup");
 
         app.Update(SpawnDecal, "clustered_decal_maps.SpawnDecal");
-        app.Update(ctx =>
-        {
-            if (_buttons is null || !_buttons.Pressed(out var on) || on == _emissiveDecals) return;
-            _emissiveDecals = on;
-            _buttons.Select(ctx.Ecs, on);
-        }, "clustered_decal_maps.HandleEmissionTypeChange");
+    }
+
+    // Bevy's handle_emission_type_change, whether the decals spawned after the choice are emissive.
+    private static void HandleEmissionTypeChange(Entity button)
+    {
+        if (Radio.OptionValue<bool>(button, out var on)) _emissiveDecals = on;
     }
 
     // A decal each second somewhere on the wall, turned a random way and given a random size.

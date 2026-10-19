@@ -1,4 +1,4 @@
-// Bevy's contact_shadows example, examples/3d/contact_shadows.rs at v0.19.1, by Bevy's contributors
+// Bevy's contact_shadows example, examples/3d/contact_shadows.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -22,14 +22,24 @@ internal static class ContactShadows
         Spot,
     }
 
+    // Each setting the buttons change, Bevy's ExampleSetting, a case for each row.
+    private abstract record ExampleSetting
+    {
+        public sealed record ContactShadows(bool On) : ExampleSetting;
+        public sealed record ShadowMaps(bool On) : ExampleSetting;
+        public sealed record LightRotation(bool Rotating) : ExampleSetting;
+        public sealed record LightKind(LightType Type) : ExampleSetting;
+        public sealed record ReceiveShadows(bool On) : ExampleSetting;
+    }
+
     private static readonly Dictionary<LightType, Entity> Lights = [];
     private static Entity _camera, _helmet;
     private static CursorShape _cursor;
     private static bool _contactShadows, _shadowMaps, _receive, _dragging;
     internal static bool Rotating;
     private static LightType _lightType;
-    private static RadioButtons<bool>? _contactButtons, _shadowMapButtons, _rotationButtons, _receiveButtons;
-    private static RadioButtons<LightType>? _typeButtons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -45,7 +55,6 @@ internal static class ContactShadows
         });
 
         app.Update(SpinModel, "contact_shadows.SpinModel");
-        app.Update(HandleSettingChange, "contact_shadows.HandleSettingChange");
     }
 
     private static void Setup(BehaviorContext ctx)
@@ -91,13 +100,7 @@ internal static class ContactShadows
             new Transform(Vec3.Zero, Quat.FromAxisAngle(Vec3.UnitX, -MathF.PI / 2f), Vec3.One));
         ecs.Add(ground, new GroundPlane());
 
-        var column = RadioButtons<bool>.Column();
-        _contactButtons = new RadioButtons<bool>(ecs, column, "Contact Shadows", [(true, "On"), (false, "Off")], _contactShadows);
-        _shadowMapButtons = new RadioButtons<bool>(ecs, column, "Shadow Maps", [(true, "On"), (false, "Off")], _shadowMaps);
-        _rotationButtons = new RadioButtons<bool>(ecs, column, "Light Rotation", [(true, "On"), (false, "Off")], Rotating);
-        _typeButtons = new RadioButtons<LightType>(ecs, column, "Light Type",
-            [(LightType.Directional, "Directional"), (LightType.Point, "Point"), (LightType.Spot, "Spot")], _lightType);
-        _receiveButtons = new RadioButtons<bool>(ecs, column, "Receive Shadows", [(true, "On"), (false, "Off")], _receive);
+        SpawnButtons(ecs);
 
         var top = Ui.SpawnNode(new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Zero, Right = Length.Zero, Justify = UiJustify.Center });
         ecs.SetParent(Ui.SpawnText("Drag model to spin", new UiSettings(), 18f), top);
@@ -129,47 +132,59 @@ internal static class ContactShadows
         if (cursor != _cursor) TrySetCursor(_cursor = cursor);
     }
 
-    private static void HandleSettingChange(BehaviorContext ctx)
+    // Bevy's spawn_buttons, each row's checked option the one the example starts with.
+    private static void SpawnButtons(EcsWorld ecs)
     {
-        var ecs = ctx.Ecs;
+        Theme.BasicExampleTheme(Color.White);
+        var column = Radio.MainUiNode();
+        void Row(string title, (ExampleSetting, string)[] options, int selected) =>
+            Ui.SelfUpdate(Radio.FeathersOptionButtons(ecs, column, title, options, selected), UiWidgetKind.RadioGroup);
 
-        if (_contactButtons!.Pressed(out var contact) && contact != _contactShadows)
-        {
-            _contactShadows = contact;
-            ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ContactShadowsEnabled = contact;
-            ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ContactShadowsEnabled = contact;
-            ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ContactShadowsEnabled = contact;
-            _contactButtons.Select(ecs, contact);
-        }
+        Row("Contact Shadows", [(new ExampleSetting.ContactShadows(true), "On"), (new ExampleSetting.ContactShadows(false), "Off")], _contactShadows ? 0 : 1);
+        Row("Shadow Maps", [(new ExampleSetting.ShadowMaps(true), "On"), (new ExampleSetting.ShadowMaps(false), "Off")], _shadowMaps ? 0 : 1);
+        Row("Light Rotation", [(new ExampleSetting.LightRotation(true), "On"), (new ExampleSetting.LightRotation(false), "Off")], Rotating ? 0 : 1);
+        Row("Light Type",
+            [
+                (new ExampleSetting.LightKind(LightType.Directional), "Directional"),
+                (new ExampleSetting.LightKind(LightType.Point), "Point"),
+                (new ExampleSetting.LightKind(LightType.Spot), "Spot"),
+            ],
+            (int)_lightType);
+        Row("Receive Shadows", [(new ExampleSetting.ReceiveShadows(true), "On"), (new ExampleSetting.ReceiveShadows(false), "Off")], _receive ? 0 : 1);
 
-        if (_shadowMapButtons!.Pressed(out var maps) && maps != _shadowMaps)
-        {
-            _shadowMaps = maps;
-            ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ShadowMapsEnabled = maps;
-            ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ShadowMapsEnabled = maps;
-            ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ShadowMapsEnabled = maps;
-            _shadowMapButtons.Select(ecs, maps);
-        }
+        ecs.Observe<ValueChange<Entity>>(on => HandleSettingChange(on.Ecs, on.Event.Value));
+    }
 
-        if (_rotationButtons!.Pressed(out var rotating) && rotating != Rotating)
-        {
-            Rotating = rotating;
-            _rotationButtons.Select(ecs, rotating);
-        }
+    private static void HandleSettingChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<ExampleSetting>(button, out var setting)) return;
 
-        if (_typeButtons!.Pressed(out var lightType) && lightType != _lightType)
+        switch (setting)
         {
-            _lightType = lightType;
-            foreach (var (type, light) in Lights)
-                ecs.Wrap<VisibilityRef>(light).Value = type == lightType ? Visibility.Visible : Visibility.Hidden;
-            _typeButtons.Select(ecs, lightType);
-        }
-
-        if (_receiveButtons!.Pressed(out var receive) && receive != _receive)
-        {
-            _receive = receive;
-            foreach (var ground in ecs.EntitiesWith<GroundPlane>()) Render.SetMeshFlags(ecs, ground, receive ? MeshFlags.None : MeshFlags.NoShadowReceiving);
-            _receiveButtons.Select(ecs, receive);
+            case ExampleSetting.ContactShadows(var contact):
+                _contactShadows = contact;
+                ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ContactShadowsEnabled = contact;
+                ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ContactShadowsEnabled = contact;
+                ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ContactShadowsEnabled = contact;
+                break;
+            case ExampleSetting.ShadowMaps(var maps):
+                _shadowMaps = maps;
+                ecs.Wrap<DirectionalLightRef>(Lights[LightType.Directional]).ShadowMapsEnabled = maps;
+                ecs.Wrap<PointLightRef>(Lights[LightType.Point]).ShadowMapsEnabled = maps;
+                ecs.Wrap<SpotLightRef>(Lights[LightType.Spot]).ShadowMapsEnabled = maps;
+                break;
+            case ExampleSetting.LightRotation(var rotating):
+                Rotating = rotating;
+                break;
+            case ExampleSetting.LightKind(var lightType):
+                _lightType = lightType;
+                foreach (var (type, light) in Lights)
+                    ecs.Wrap<VisibilityRef>(light).Value = type == lightType ? Visibility.Visible : Visibility.Hidden;
+                break;
+            case ExampleSetting.ReceiveShadows(var receive):
+                _receive = receive;
+                foreach (var ground in ecs.EntitiesWith<GroundPlane>()) Render.SetMeshFlags(ecs, ground, receive ? MeshFlags.None : MeshFlags.NoShadowReceiving);
+                break;
         }
     }
 

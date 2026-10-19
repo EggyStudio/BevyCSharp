@@ -1,4 +1,4 @@
-// Bevy's mixed_lighting example, examples/3d/mixed_lighting.rs at v0.19.1, by Bevy's contributors
+// Bevy's mixed_lighting example, examples/3d/mixed_lighting.rs at v0.20.0, by Bevy's contributors
 // under MIT or Apache-2.0, written again in C#.
 
 using Bevy;
@@ -30,9 +30,10 @@ internal static class MixedLighting
     private static readonly (float X, float Y, float W, float H) SphereRect = (0.788f, 0.484f, 0.062f, 0.062f);
 
     private static LightingMode _mode;
-    private static RadioButtons<LightingMode>? _buttons;
     private static Entity _camera, _scene = Entity.None;
     private static bool _ready;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
@@ -45,9 +46,12 @@ internal static class MixedLighting
             Render.SetAmbientLight((clear.R, clear.G, clear.B), 10000f);
             _camera = ctx.Ecs.SpawnCamera3d(Transform.LookingAt(new Vec3(-0.7f, 0.7f, 1f), new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
 
-            _buttons = new RadioButtons<LightingMode>(ctx.Ecs, RadioButtons<LightingMode>.Column(), "Lighting",
+            Theme.BasicExampleTheme(Color.Black);
+            var row = Radio.FeathersOptionButtons(ctx.Ecs, Radio.MainUiNode(), "Lighting",
                 [(LightingMode.Baked, "Baked"), (LightingMode.MixedDirect, "Mixed (Direct)"), (LightingMode.MixedIndirect, "Mixed (Indirect)"), (LightingMode.RealTime, "Real-Time")],
-                _mode);
+                (int)LightingMode.MixedIndirect);
+            Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+            ctx.Ecs.Observe<ValueChange<Entity>>(on => HandleLightingModeChange(on.Ecs, on.Event.Value));
             ctx.Ecs.Add(Ui.SpawnText(HelpText(), new UiSettings { Absolute = true, Top = Length.Px(12f), Left = Length.Px(12f) }), new MixedLightingHelpText());
         });
 
@@ -67,19 +71,22 @@ internal static class MixedLighting
                 ChangeMode(ecs);
             }
 
-            if (_buttons!.Pressed(out var mode) && mode != _mode)
-            {
-                _mode = mode;
-                ChangeMode(ecs);
-            }
-
             MoveSphere(ctx);
         }, "mixed_lighting.Update");
     }
 
+    // Bevy's handle_lighting_mode_change, the mode taken at once where the scene is ready, and
+    // otherwise once it is.
+    private static void HandleLightingModeChange(EcsWorld ecs, Entity button)
+    {
+        if (!Radio.OptionValue<LightingMode>(button, out var mode)) return;
+
+        _mode = mode;
+        if (_ready) ChangeMode(ecs);
+    }
+
     private static void ChangeMode(EcsWorld ecs)
     {
-        _buttons!.Select(ecs, _mode);
         foreach (var help in ecs.EntitiesWith<MixedLightingHelpText>()) Ui.SetText(help, HelpText());
 
         var image = _mode switch

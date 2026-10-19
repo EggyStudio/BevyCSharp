@@ -8,9 +8,6 @@ namespace BevyCSharp.Examples.ThreeD;
 // A black, mirror-smooth sphere that shows only what it reflects of an environment map, its
 // reflection tinted by one color or by a noise texture, chosen by two buttons at the bottom left,
 // while the camera goes round it.
-//
-// Bevy draws the buttons with Feathers. Here they are the examples' own row of radio buttons, as
-// Bevy's examples drew them before Feathers.
 internal static class SpecularTint
 {
     // Radians the camera goes round each frame.
@@ -29,15 +26,17 @@ internal static class SpecularTint
     private static AssetHandle _material, _noise;
     private static TintType _tintType;
     private static float _hue;
-    private static RadioButtons<TintType>? _buttons;
+
+    public static void Configure(Config config) => config.Feathers = true;
 
     public static void Build(App app)
     {
-        (_tintType, _hue, _buttons) = (TintType.Solid, 0f, null);
+        (_tintType, _hue) = (TintType.Solid, 0f);
 
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
+            Theme.BasicExampleTheme(Color.White);
             _noise = AssetServer.Load(AssetKind.Image, "textures/AlphaNoise.png");
             Render.SetAmbientLight((0f, 0f, 0f), 0f);
 
@@ -64,8 +63,10 @@ internal static class SpecularTint
                 _material,
                 new Transform(Vec3.Zero, Quat.FromRotationX(MathF.PI * 0.5f), Vec3.One));
 
-            _buttons = new RadioButtons<TintType>(ecs, RadioButtons<TintType>.Column(), "Toggle specular tint",
-                [(TintType.Solid, "SOLID"), (TintType.Map, "MAP")], _tintType);
+            var row = Radio.FeathersOptionButtons(ecs, Radio.MainUiNode(), "Toggle specular tint",
+                [(TintType.Solid, "SOLID"), (TintType.Map, "MAP")], 0);
+            Ui.SelfUpdate(row, UiWidgetKind.RadioGroup);
+            ecs.Observe<ValueChange<Entity>>(on => ToggleSpecularMap(on.Event.Value));
         }, "specular_tint.Setup");
 
         app.Update(ctx =>
@@ -73,20 +74,15 @@ internal static class SpecularTint
             var transform = ctx.Ecs.GetOrDefault<Transform>(_camera);
             ctx.Ecs.Set(_camera, Transform.LookingAt(Quat.FromRotationY(RotationSpeed) * transform.Translation, Vec3.Zero, Vec3.UnitY));
         }, "specular_tint.RotateCamera");
-
-        app.Update(ToggleSpecularMap, "specular_tint.ToggleSpecularMap");
     }
 
     // A choice of the solid tint takes the map away and moves the hue on, and a choice of the map
     // spreads its reflectance over the whole range and leaves the color to the map.
-    private static void ToggleSpecularMap(BehaviorContext ctx)
+    private static void ToggleSpecularMap(Entity button)
     {
-        // A button reads as pressed for as long as it is held, and Bevy's radio group says nothing
-        // of the one already chosen.
-        if (_buttons is null || !_buttons.Pressed(out var selection) || selection == _tintType) return;
+        if (!Radio.OptionValue<TintType>(button, out var selection)) return;
 
         _tintType = selection;
-        _buttons.Select(ctx.Ecs, selection);
         if (!Render.TryReadMaterial(_material, out var settings)) return;
 
         if (_tintType == TintType.Solid)

@@ -1376,6 +1376,8 @@ static void SetNumberLimit(Entity input, double min, double max, bool hard = fal
 static void SetNumberLimit(Entity input, int min, int max, bool hard = false);  // Bounds a number input's Int32 value, hard or soft
 static void SetNumberLimit(Entity input, long min, long max, bool hard = false);  // Bounds a number input's Int64 value, hard or soft
 static void SetNumberUnits(Entity input, NumberUnits units);    // Has a number input show its value in units, typed in any of their dimension
+static void SetTheme(ReadOnlySpan<(string, Color)> colors);     // Replaces the theme with one that colors each of the tokens given and nothing else, as Bevy's examples' basic theme does, Bevy's ThemeProps::new_non_contextual
+static void SetDarkTheme();                                     // Puts Bevy's dark theme back, the one the app begins with
 static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background);  // Colors a node of the game's own from the theme, by one of FeathersToken's tokens, so it follows the theme as the controls do
 ```
 
