@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a7895887`, item 32's rule and nothing else, with the review's commit between. The
+Reviewed up to `93600e85`, item 29's part (g), and `93b19994` before it, the layouts test's mend,
+both in the pack run with publish on started at 23:55, 39331259657 on the review's commit after
+them. The layouts test catches the bridge's refusal of a type it does not register and leaves the
+type out, counts the layouts read and asks for more than a hundred, its remarks saying the
+description comes from the fullest bridge, passing on the editor bridge and the render bridge with
+the table, 7 of 7 on each. Part (g): the lookup table's feature is in the render profile, its
+comment giving the table as 64 by 64 pairs of half floats, 14 KB compressed, read from the header of
+Bevy's texture, and saying Solari turns it on as well and it adds no crate, the image crate's
+compression feature an empty marker already on, the lock byte-identical by comparison and by the
+locked build, the render bridge grown 14,920 bytes with the decode; BUILDING.md's paragraph says a
+picture is the same on any bridge with the renderer and the meshlet and Solari five need the bridges
+built with them, TODO.md's paragraph on pictures taken on a bridge without Solari goes, and the
+eleven pictures and their thumbnails are in with the decal maps kept. Checked were `cargo check` in
+the container on three profiles, `cargo test` headless and on render, the whole suite on the render
+bridge with the table, 1,509 passed and 17 skipped with the one failure the layouts test since
+mended and the lit-color pixel tests passing with their figures as they stand, the notices' and the
+table script's checks, the norm tests and the comparison matching 373. Right. Next (h), then (i) and
+(j), item 29's last three parts.
+
+Before it, `a7895887` came, item 32's rule and nothing else, with the review's commit between. The
 notes script walks the commits after the start and leaves out one whose files all lie under
 `.github/`, a commit with no files or with any file elsewhere staying in, as 3DEngine's `8e3ff67a`
 has it, the docstring and BUILDING.md saying why; the test's history gains a review record touching
@@ -49,25 +68,6 @@ suites skip and the editor bridge hides, to be mended in a small commit, a type 
 register left out and more than a hundred layouts still required. Right. Next the notes' rule on
 commits under `.github/`, item 32's, in a small commit before (g)'s, then the pack run with publish
 on, then the layouts test's mend and (g)'s commit, then (h).
-
-Before it, `8e9c20b7` came, Verdict 33's mend and nothing else, the test file alone. The test filled
-its table of elapsed times from an update system keyed by the frame count while the server answered
-from the command pump in the same frame's first stage, so the socket's answer went out before that
-frame's update had run, and the test read the table as each answer came, which on a slow runner
-asked for a frame the app had not reached, the key 15, none of the three causes named; the committed
-form run twenty times on one core failed eighteen with the keys 16 to 18. The mend holds the
-answers' frames in locals, stops the app and joins its thread, and reads the times after that, when
-every frame an answer named has run its update, the remarks saying why and naming the run; the
-hold's promise is asserted as before, 0.5 over five frames, still through three asks, 0.3 over
-three, and the new form passed twenty of twenty on one core, the server unchanged. The command line
-and norm tests pass, 28 of 28, after a clean build. The pack run with publish on in flight carries
-the old form of the test, so its Linux suite may fail on it, in which case the next pack run is this
-commit's. At 23:39 the pack run with publish on, 39324217456, had its Linux suite and five natives
-green and its macOS and Windows suites red, so its pack job will not run: Windows failed the two
-release notes tests on deleting their scratch repositories (Verdict 34), as the push run of
-`e7ea1a06` did at 23:31, and macOS failed the load hold test, the image never loading (Verdict 35);
-the push run of `97ea3055` was Verdict 33's. The next pack run with publish on comes after the two
-mends. Right. Next Verdicts 34 and 35, then part (g)'s comparison, then (h).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -848,33 +848,35 @@ from [SHARED.md](SHARED.md).
     while a load runs and between a served session's commands, the drive's readings identical on two
     devices and two differ lines off; (g) `dfg_lut` on in the render profile, the owner's decision,
     since games on the package are then lit a little otherwise and every 3D picture is taken again
-    (Decision 25); (h) a newer Mesa on the runner with a `--meshlet --solari` bridge for the six
-    uncompared examples, the owner's decision on the jobs' image; (i) lavapipe's dropped bunnies
-    traced and reported to Mesa, outside the repository, and found at `714451b0` on the GPU as well,
-    a different subset of the 2,500 bunnies drawn at each take, so the differ line's reason is
-    incomplete; (j) the anisotropy fault reported to Bevy, the owner's decision, a patched shader
-    declined; (k) the two helpers go with item 4's gaps; (l) runners with a graphics card, the
-    owner's purchase; (m) the norm's lists are item 2's. The mends follow item 4 as Decision 38
-    orders, unless the owner says the parts that need no decision may start while the words for item
-    4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes first and then this
-    item in the order above; (g) `dfg_lut` goes on in the render profile with the lock byte for byte
-    the same; (h) and (l) are one, the capture jobs in a container of a distribution image with a
-    newer Mesa and a Linux bridge built with meshlets and Solari, no runner with a graphics card and
-    no Mesa from an archive outside the distribution; (j) the anisotropy fault is mended by a
-    patched shader of Bevy's in the bridge, which overrides the earlier decline, with a test that
-    fails when Bevy's original changes. Part (k) is whole at `319624bf`, half done at `670ecf2c`
-    with the free camera helper gone for Bevy's controller, the radio buttons helper gone in
-    Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three files
-    by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
-    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
-    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
-    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
-    token colors is the package's own call, the port's helper of its own goes, and one file
-    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
-    package script's list with the reason naming them, carrying what they carry and nothing of the
-    port's own, since the list's rule is against helpers of the port's own and a mirror of what
-    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
-    Feathers.
+    (Decision 25), done at `93600e85` on 2026-10-19, the lookup table's feature on in the render
+    profile with no crate added and the lock unchanged, eleven pictures retaken on a bridge with it,
+    the three that stood apart between bridges within a pixel in the runner's image; (h) a newer
+    Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared examples, the
+    owner's decision on the jobs' image; (i) lavapipe's dropped bunnies traced and reported to Mesa,
+    outside the repository, and found at `714451b0` on the GPU as well, a different subset of the
+    2,500 bunnies drawn at each take, so the differ line's reason is incomplete; (j) the anisotropy
+    fault reported to Bevy, the owner's decision, a patched shader declined; (k) the two helpers go
+    with item 4's gaps; (l) runners with a graphics card, the owner's purchase; (m) the norm's lists
+    are item 2's. The mends follow item 4 as Decision 38 orders, unless the owner says the parts
+    that need no decision may start while the words for item 4 are awaited. On 2026-10-19 the owner
+    decided (Decision 39): item 4 comes first and then this item in the order above; (g) `dfg_lut`
+    goes on in the render profile with the lock byte for byte the same; (h) and (l) are one, the
+    capture jobs in a container of a distribution image with a newer Mesa and a Linux bridge built
+    with meshlets and Solari, no runner with a graphics card and no Mesa from an archive outside the
+    distribution; (j) the anisotropy fault is mended by a patched shader of Bevy's in the bridge,
+    which overrides the earlier decline, with a test that fails when Bevy's original changes. Part
+    (k) is whole at `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's
+    controller, the radio buttons helper gone in Feathers' last step, where Bevy 0.20's own fourteen
+    examples with option rows share three files by path, a radio row of Feathers' radios under a
+    group, a theme of some sixty token colors replacing the whole and, in two of the fourteen, a
+    labeled number input holding a float with its precision and limit, ten of the fourteen written
+    from 0.19.1 differing from their sources by 100 to 560 lines in that swap, so the reviewer
+    decided on 2026-10-19 that the theme's setting from token colors is the package's own call, the
+    port's helper of its own goes, and one file mirroring Bevy's helper files the examples use at
+    the pinned version, the three, stays on the package script's list with the reason naming them,
+    carrying what they carry and nothing of the port's own, since the list's rule is against helpers
+    of the port's own and a mirror of what Bevy's examples share is the port's fidelity, not its
+    shortcut; the radio buttons go with Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
