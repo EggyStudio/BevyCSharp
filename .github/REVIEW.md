@@ -10,7 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `714451b0`, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
+Reviewed up to `b68da75c`, item 31 and nothing else, 344 files, the README's head one centered block
+of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first from
+nuget.org's page of `0.5.120`, its renderer builds the markdown library with HTML off and its style
+framework on, so the showcase picture draws, the superscript caption and all thirty gallery tables
+print as escaped source, the comment markers print nothing, and the headings draw a level down. The
+head is a centering block, a blank line, the heading, the description, the picture and the caption
+as code spans, a blank line and the closing tag, rendered with the same library on nuget.org's exact
+pipeline and screenshotted in the saved page with its stylesheets, only the two tag lines printing
+as text, and centered by GitHub's markdown API; the markers stay since both sites show nothing for
+them. The gallery was measured three ways on two groups with GitHub's API and its stylesheet at a
+900-pixel article and in nuget.org's page and style, screenshotted headless: the HTML as it stood
+shows three pictures and scrolls on GitHub and prints source on nuget.org; a plain markdown table of
+260 by 146 thumbnails shrinks the long row's pictures to their names' widths on both; and names
+padded with no-break spaces to 32, as the HTML captions were, draw 260-pixel pictures three in view
+with each row scrolling sideways on both, nuget.org's table a block of its content's width with
+overflow, so that form is taken, the pictures as the table's head so each name stands under its
+picture. The table script writes each group as a heading, a row of linked pictures, a delimiter and
+a row of padded names, makes the 337 thumbnails into `.github/assets/gallery`, 1.9 MB, with the
+image tool or else the encoder, and records each capture's hash so a thumbnail is made again only
+when its capture changed and another machine's tool does not churn the bytes, the check needing no
+image tool and failing on a missing, stale or orphaned thumbnail; the folder stands beside the
+captures so N 4.5's size rule does not take it. N 4.5's test reads the markdown gallery, all 337
+pictures each opening its program, and fails on none found; the README is at 281 lines of prose
+against 320, and BUILDING.md describes the thumbnails and their hashes. One cost, a thumbnail at the
+shown width is softer on a doubled display than the scaled capture was, for 1.9 MB of page where the
+full captures were. Checked were the documents' links with the 337 thumbnails against the checkout,
+the headings, the norm tests after a clean build, 18 of 18, and the table script's check. Right.
+Next part (g), then the parts in order, and the owner's push of `714451b0` and `b68da75c`, whose
+README nuget.org draws at the next upload.
+
+Before it, `714451b0` came, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
 bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
 recursive dependency state and one holding until cleared, a system before Bevy's time systems
 setting the manual step to nothing for the frame and one after them putting it back before the sync,
@@ -87,22 +117,6 @@ and by 20:53 the owner had uploaded `0.5.120` and the templates `0.5.120`, the p
 of `35ca43b1`, the templates beside the engine for the first time, so item 30's install line is
 tried from nuget.org and the item closes, and asked for the README's centered parts as markdown in a
 centering block (Decision 40, item 31).
-
-Before it, `35ca43b1` came, Verdict 32's mend and nothing else, ahead of part (e), the tree having
-lost nothing in the restart. Read first, Bevy's diagnostics crate builds the sysinfo crate on macOS
-with its App Store feature, which turns on its sandbox, under which the crate's process refresh
-returns nothing and refreshes no process, so Bevy's plugin finds no process and gives both process
-measures as zero, the CPU's passing before only because its range began at zero; Bevy's choice for
-the App Store and no fault of the runner's. So the test holds the system's two measures everywhere
-and on macOS asserts both process measures equal zero, so a Bevy release that measures the process
-there fails it and is read, as the anisotropy prepass test pins its fault; the bridge measuring the
-process itself was not taken, since it adds a measure Bevy chose not to make there and the memory
-command's process figure reads the footprint on macOS already. The flag's remarks, the two process
-paths and the tools guide say the process's two are zero on macOS and why, and the runner's figure
-is in the commit's message; there is no macOS machine here for a local reading. Checked were the
-diagnostics store tests on Linux, where the other branch runs; the norm and public surface tests
-failed only on part (e)'s uncommitted files, mended in (e). Verdict 32 settles at three green macOS
-suites in a row. Right. Next part (e), then the parts in order, and the runs' ends.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -930,7 +944,10 @@ from [SHARED.md](SHARED.md).
     it, the gallery's tables staying HTML unless thumbnails at the shown width make a markdown table
     render alike on GitHub and nuget.org, measured first; checked on GitHub's rendering and on
     nuget.org's page of `0.5.105` for what it draws today and of the next version uploaded,
-    `build/examples-table.py` writing the same. One commit, after part (f) and before (g).
+    `build/examples-table.py` writing the same. Done at `b68da75c` on 2026-10-19, the head one
+    centering block of markdown and the gallery markdown tables of 260 by 146 thumbnails with padded
+    names, measured on both sites before it was taken, nuget.org's page of the next upload the
+    check.
 
 ## Verdicts
 
