@@ -10,36 +10,49 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b68da75c`, item 31 and nothing else, 344 files, the README's head one centered block
-of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first from
-nuget.org's page of `0.5.120`, its renderer builds the markdown library with HTML off and its style
-framework on, so the showcase picture draws, the superscript caption and all thirty gallery tables
-print as escaped source, the comment markers print nothing, and the headings draw a level down. The
-head is a centering block, a blank line, the heading, the description, the picture and the caption
-as code spans, a blank line and the closing tag, rendered with the same library on nuget.org's exact
-pipeline and screenshotted in the saved page with its stylesheets, only the two tag lines printing
-as text, and centered by GitHub's markdown API; the markers stay since both sites show nothing for
-them. The gallery was measured three ways on two groups with GitHub's API and its stylesheet at a
-900-pixel article and in nuget.org's page and style, screenshotted headless: the HTML as it stood
-shows three pictures and scrolls on GitHub and prints source on nuget.org; a plain markdown table of
-260 by 146 thumbnails shrinks the long row's pictures to their names' widths on both; and names
-padded with no-break spaces to 32, as the HTML captions were, draw 260-pixel pictures three in view
-with each row scrolling sideways on both, nuget.org's table a block of its content's width with
-overflow, so that form is taken, the pictures as the table's head so each name stands under its
-picture. The table script writes each group as a heading, a row of linked pictures, a delimiter and
-a row of padded names, makes the 337 thumbnails into `.github/assets/gallery`, 1.9 MB, with the
-image tool or else the encoder, and records each capture's hash so a thumbnail is made again only
-when its capture changed and another machine's tool does not churn the bytes, the check needing no
-image tool and failing on a missing, stale or orphaned thumbnail; the folder stands beside the
-captures so N 4.5's size rule does not take it. N 4.5's test reads the markdown gallery, all 337
-pictures each opening its program, and fails on none found; the README is at 281 lines of prose
-against 320, and BUILDING.md describes the thumbnails and their hashes. One cost, a thumbnail at the
-shown width is softer on a doubled display than the scaled capture was, for 1.9 MB of page where the
-full captures were. Checked were the documents' links with the 337 thumbnails against the checkout,
-the headings, the norm tests after a clean build, 18 of 18, and the table script's check. Right.
-Next part (g), then the parts in order, and the owner's push of `714451b0` and `b68da75c`, whose
-README nuget.org draws at the next upload. The owner pushed `714451b0` and `b68da75c` at 22:09 and
-22:11, the first run cancelled by the second as the build group has it and the second running at
+Reviewed up to `8fe38f60`, item 31's banners and nothing else, the README alone, with the review's
+commits between. The five banners stand in one row under the description inside the centered block
+as markdown pictures from the badge service in 3DEngine's colors: .NET 10.0; Graphics wgpu with
+Vulkan, DX12 and Metal, which the render profile's dependency tree gives as its backends on the
+three systems; Windowing winit; Shaders Slang, which the shaders guide says a game's materials are
+written in; and Status Early, as the README's own section opens. Each address answers with the right
+title, GitHub's markdown API gives five images, nuget.org's pipeline five in one paragraph, and the
+screenshots show the row centered on GitHub and standing left under the printed tag line on
+nuget.org, as the block's other lines do; the documents' links, the table script's check and the
+norm tests pass, the README at 283 lines of prose. Right. Next part (g), whose render bridge with
+the lookup table is built with the lock byte-identical and three profiles clean, the 373 captures
+being taken on it.
+
+Before it, `b68da75c` came, item 31 and nothing else, 344 files, the README's head one centered
+block of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first
+from nuget.org's page of `0.5.120`, its renderer builds the markdown library with HTML off and its
+style framework on, so the showcase picture draws, the superscript caption and all thirty gallery
+tables print as escaped source, the comment markers print nothing, and the headings draw a level
+down. The head is a centering block, a blank line, the heading, the description, the picture and the
+caption as code spans, a blank line and the closing tag, rendered with the same library on
+nuget.org's exact pipeline and screenshotted in the saved page with its stylesheets, only the two
+tag lines printing as text, and centered by GitHub's markdown API; the markers stay since both sites
+show nothing for them. The gallery was measured three ways on two groups with GitHub's API and its
+stylesheet at a 900-pixel article and in nuget.org's page and style, screenshotted headless: the
+HTML as it stood shows three pictures and scrolls on GitHub and prints source on nuget.org; a plain
+markdown table of 260 by 146 thumbnails shrinks the long row's pictures to their names' widths on
+both; and names padded with no-break spaces to 32, as the HTML captions were, draw 260-pixel
+pictures three in view with each row scrolling sideways on both, nuget.org's table a block of its
+content's width with overflow, so that form is taken, the pictures as the table's head so each name
+stands under its picture. The table script writes each group as a heading, a row of linked pictures,
+a delimiter and a row of padded names, makes the 337 thumbnails into `.github/assets/gallery`, 1.9
+MB, with the image tool or else the encoder, and records each capture's hash so a thumbnail is made
+again only when its capture changed and another machine's tool does not churn the bytes, the check
+needing no image tool and failing on a missing, stale or orphaned thumbnail; the folder stands
+beside the captures so N 4.5's size rule does not take it. N 4.5's test reads the markdown gallery,
+all 337 pictures each opening its program, and fails on none found; the README is at 281 lines of
+prose against 320, and BUILDING.md describes the thumbnails and their hashes. One cost, a thumbnail
+at the shown width is softer on a doubled display than the scaled capture was, for 1.9 MB of page
+where the full captures were. Checked were the documents' links with the 337 thumbnails against the
+checkout, the headings, the norm tests after a clean build, 18 of 18, and the table script's check.
+Right. Next part (g), then the parts in order, and the owner's push of `714451b0` and `b68da75c`,
+whose README nuget.org draws at the next upload. The owner pushed `714451b0` and `b68da75c` at 22:09
+and 22:11, the first run cancelled by the second as the build group has it and the second running at
 22:23; at 22:20 the owner gave the reviewer the pushes and the commits of its own edits, so the
 review's edits come in commits of their own from here on. The first of them, `ee38a573`, was pushed
 with its sentence in the subject line where COMMITS.md's three marks belong, the reviewer's fault,
@@ -82,51 +95,6 @@ test` on three profiles, and the norm and public surface tests with the cheat sh
 the shared line stands under Replies and is taken into SHARED.md's row on the set clock. Right. Item
 30 was tried from nuget.org's `0.5.120` at 22:01 and is done with no commit, the install line
 working as written. Next item 31, then part (g), and the owner's push of `714451b0` with them.
-
-Before it, `3a2e403a` came, item 29's part (e) and nothing else, 13 files. A time provider on the
-game's clock, internal and handed out as `Time.Provider`, its timestamps the ticks of the elapsed
-seconds, its moment the app's start plus that, its timers kept until the frame whose clock reaches
-them and advanced after the clock refreshes, so a wait's callback and an awaited continuation run on
-the frame's thread before any system, a periodic timer firing once a frame at most, change and
-disposal working; the two async examples draw their waits upfront from the seeded generator where
-the workflow runs and begin each delay in the startup system on that provider, their remarks saying
-they wait on the game's clock where Bevy's wait on the machine's, which agree while the game keeps
-its pace; the channel example's capture moves to frame 300 since at 120 none of its cubes had
-landed, with the reason in the script. Before, 14.9 and 2.6 percent of pixels stood apart on the
-runner's lavapipe by the lines removed; after, the pictures retaken on a render bridge and taken
-again on the editor bridge on the GPU and on Mesa 26.2.2's lavapipe differ in none of their 921,600
-pixels. Three time provider tests hold a wait ending in the frame whose clock reaches it with what
-awaited it done in the same frame, a periodic timer firing per period, moved by a change and silent
-once disposed, and the timestamps and moment following the game's time, the first driving the
-one-shot timer the runtime's delay asks a provider for, so N 3.3 is met with no list line; the
-behaviors guide gains a paragraph and a block on the provider, and the documents' blocks build on a
-fresh package after the new block gained its using. The two lines leave the differ file and
-TODO.md's paragraph leaves; the restart emptied the scratch folder's helper scripts, written again,
-and nothing in the repository. Checked were the whole suite with a clean build, 1,517 passed, 3
-skipped and none failed of 1,520, the norm, documents script, public surface and script tests, and
-the examples on the package. The runs read at 18:47: the push run of `b9069e8c` ended red on the
-macOS suite's one test of Verdict 32 with Linux and Windows green; the pack run of `30b87d1f` ended
-with its macOS suite and digest red and everything else green, the six natives, the two other
-suites, the drive in 46 minutes, the storm, the four capture shards in 22 to 36 minutes with the
-container's first use among them and their pages carrying no lines, the play and the README; the
-owner pushed `35ca43b1` at 18:27 and started a pack run, the push run whole green at 18:45 with the
-macOS suite green in 18 minutes, the first of Verdict 32's three, and the pack run's natives and
-suites running. Right. Next part (f), the bridge's clock held while an asset loads and between the
-drive's commands, then the parts in order; and the runs. The owner pushed `3a2e403a` at 19:03; at
-19:20 its push run had its Linux suite green and the other two running, and the pack run of
-`35ca43b1` had its six natives, three suites and digest green by 19:19, the macOS suite in 13
-minutes, the second of Verdict 32's three, with the drive, the storm, the four capture shards, the
-play and the README jobs started at 19:20. At 19:51 the push run of `3a2e403a` was whole green, its
-macOS suite in 18 minutes the third of Verdict 32's three, which settles it, and the pack run of
-`35ca43b1` had its play, storm, README and two capture shards green with the drive and two shards
-running. At 20:25 that pack run was whole green, the drive in 56 minutes, the four capture shards in
-26 to 36, and the pack job done at 20:18 with the package uploaded and not pushed to nuget.org, the
-first whole-green pack run with the container's captures and the first since `6bac018b`. At 20:47
-nuget.org listed `0.5.105` and `BevyCSharp.Templates` `0.5.105`, both `6bac018b`'s of 2026-10-18,
-and by 20:53 the owner had uploaded `0.5.120` and the templates `0.5.120`, the pack run's packages
-of `35ca43b1`, the templates beside the engine for the first time, so item 30's install line is
-tried from nuget.org and the item closes, and asked for the README's centered parts as markdown in a
-centering block (Decision 40, item 31).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -962,7 +930,8 @@ from [SHARED.md](SHARED.md).
     Status, as markdown images inside the block, each with this project's own value, .NET 10.0, the
     graphics by what Bevy draws with, the windowing by its window crate, the shaders by what the
     bridge compiles, and the status as the project stands, the labels' colors as 3DEngine's for the
-    labels the two share. One commit, between part (g)'s steps or with the next.
+    labels the two share. Done at `8fe38f60` on 2026-10-19, the five in one row with this project's
+    values and 3DEngine's colors.
 
 ## Verdicts
 
