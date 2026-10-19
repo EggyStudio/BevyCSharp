@@ -21,7 +21,8 @@ screenshots show the row centered on GitHub and standing left under the printed 
 nuget.org, as the block's other lines do; the documents' links, the table script's check and the
 norm tests pass, the README at 283 lines of prose. Right. Next part (g), whose render bridge with
 the lookup table is built with the lock byte-identical and three profiles clean, the 373 captures
-being taken on it.
+being taken on it. At 22:45 the owner wrote that the release notes include everything and append to
+the older ones (Decision 41, item 32).
 
 Before it, `b68da75c` came, item 31 and nothing else, 344 files, the README's head one centered
 block of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first
@@ -933,6 +934,17 @@ from [SHARED.md](SHARED.md).
     labels the two share. Done at `8fe38f60` on 2026-10-19, the five in one row with this project's
     values and 3DEngine's colors.
 
+32. **A package's release notes are the commits since the package last published (Decision 41).**
+    The pack run's notes are the commits since `build/version.txt` last changed
+    (`build/release-notes.sh`), the whole minor each time, 119 lines at `0.5.120`. The script takes
+    the latest version of the package the feed lists, from nuget.org's index of the package and that
+    version's nuspec, whose repository commit names where that package was built, and writes the
+    commits from that commit to the head, newest first, each commit's sentence a line as before;
+    where the feed answers nothing, lists no version of the minor, or names a commit the checkout
+    does not have, the notes are the minor's as before and the summary says why; the pack job's step
+    says which commit the notes start from. Held by a test of the script on a scratch history with a
+    feed answer given to it, and read on the next package's page. One commit, after part (g).
+
 ## Verdicts
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -1254,6 +1266,16 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     since a markdown table cannot size its pictures, unless the script that writes them makes
     thumbnails at the shown width, which is measured on GitHub and nuget.org before it is taken. The
     README is the package's, so what nuget.org draws is what a reader of the package sees.
+
+41. **A package's release notes are the commits since the package last published on nuget.org.** The
+    owner wrote at 22:45 on 2026-10-19 that the release notes include everything and the next
+    package appends them to the older ones: the notes a pack run writes are the commits since
+    `build/version.txt` last changed, so every package of a minor carries the whole minor's notes,
+    104 lines at `0.5.105` and 119 at `0.5.120`, 89 at the engine's `5.2.92`. So a package's release
+    notes are the commits since the package last published on nuget.org, whose commit the feed's own
+    record of the latest version names, read by the pack run from the feed, and the whole minor's
+    where the feed answers nothing or lists no version of the minor, a reader of the notes being
+    told what changed since what they could have had.
 
 ## Replies
 
