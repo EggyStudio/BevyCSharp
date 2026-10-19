@@ -916,7 +916,10 @@ from [SHARED.md](SHARED.md).
     says which commit the notes start from. Held by a test of the script on a scratch history with a
     feed answer given to it, and read on the next package's page. One commit, after part (g). Done
     at `d482caa3` on 2026-10-19, 14 lines where 134 against the feed's `0.5.120`; the next package's
-    page is its check.
+    page is its check. Widened on 2026-10-19 at 23:25 with 3DEngine's item 37: a commit whose every
+    file lies under `.github/` is left out, since the package carries nothing from there, which
+    takes the review's and the workflows' commits by what they touch, the README, the guides, the
+    license and the notices staying in; a small commit after (g)'s.
 
 33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
     42).** The pack job gains the identity token's write permission beside its read of the contents,
