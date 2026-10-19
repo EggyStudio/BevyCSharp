@@ -23,6 +23,13 @@ namespace Bevy.Tests;
 /// Linux and macOS delete an open file and never get that far, which <c>FileHandleTests</c> covers
 /// by looking for the handle itself.
 /// </para>
+/// <para>
+/// Windows also refuses to delete a file marked read-only, as git marks every object it writes, so
+/// a folder holding a repository, as <c>ReleaseNotesTests</c> makes one, is refused where Linux and
+/// macOS delete it with the rest. A refused delete clears the mark from each file and tries again,
+/// which the Windows suites of the pack run 39324217456 and the push run of e7ea1a06 found, 17 files
+/// left in a repository's objects.
+/// </para>
 /// </remarks>
 internal sealed class TestFolder : IDisposable
 {
@@ -55,6 +62,7 @@ internal sealed class TestFolder : IDisposable
     public static void Delete(string path)
     {
         var waited = Stopwatch.StartNew();
+        var cleared = false;
         while (true)
         {
             try
@@ -64,6 +72,13 @@ internal sealed class TestFolder : IDisposable
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException)
             {
+                if (error is UnauthorizedAccessException && !cleared)
+                {
+                    cleared = true;
+                    Writable(path);
+                    continue;
+                }
+
                 if (waited.Elapsed < Patience)
                 {
                     Thread.Sleep(50);
@@ -72,6 +87,16 @@ internal sealed class TestFolder : IDisposable
 
                 throw new IOException($"{error.Message} {Holders(path)}", error);
             }
+        }
+    }
+
+    /// <summary>Takes the read-only mark off each file left in the folder.</summary>
+    private static void Writable(string path)
+    {
+        foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+        {
+            var attributes = System.IO.File.GetAttributes(file);
+            if ((attributes & FileAttributes.ReadOnly) != 0) System.IO.File.SetAttributes(file, attributes & ~FileAttributes.ReadOnly);
         }
     }
 
