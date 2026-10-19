@@ -35,7 +35,14 @@ public static unsafe class Feathers
 {
     private const int ButtonKind = 0, ToolButtonKind = 1, CheckboxKind = 2, RadioKind = 3, ToggleSwitchKind = 4;
     private const int SliderKind = 5, CaptionKind = 6, LabelKind = 7, LabelDimKind = 8, LabelSmallKind = 9;
-    private const int NumberInputKind = 10, VirtualKeyboardKind = 11;
+    private const int NumberInputKind = 10, VirtualKeyboardKind = 11, MenuKind = 12, MenuButtonKind = 13, MenuToolButtonKind = 14;
+    private const int MenuPopupKind = 15, MenuItemKind = 16, MenuDividerKind = 17, SelectKind = 18, ListViewKind = 19;
+    private const int ListRowKind = 20, DisclosureToggleKind = 21, TextInputContainerKind = 22, TextInputKind = 23;
+    private const int ColorSwatchKind = 24, ColorPlaneKind = 25, ColorSliderKind = 26, ColorInputKind = 27, PaneKind = 28;
+    private const int PaneHeaderKind = 29, PaneHeaderDividerKind = 30, PaneBodyKind = 31, SubpaneKind = 32, SubpaneHeaderKind = 33;
+    private const int SubpaneBodyKind = 34, GroupKind = 35, GroupHeaderKind = 36, GroupBodyKind = 37, FlexSpacerKind = 38;
+    private const int IconKind = 39, DialogKind = 40, FloatingDialogKind = 41, DialogHeaderKind = 42, DialogBodyKind = 43;
+    private const int DialogFooterKind = 44, DialogCloseKind = 45;
 
     // Each keyboard's keys as it was given them, by the keyboard, since Bevy reports a key by where
     // it stands and the game reads it as the text it gave.
@@ -180,6 +187,310 @@ public static unsafe class Feathers
         return keyboard;
     }
 
+    /// <summary>
+    /// A menu, Bevy's <c>FeathersMenu</c>, which holds its button and its popup, spawned under it
+    /// with <see cref="MenuButton"/> and <see cref="MenuPopup"/>.
+    /// </summary>
+    /// <remarks>
+    /// The popup is spawned with the menu and shown as the button opens it, where Bevy's lazy menu
+    /// builds its popup as it opens, which this does not offer. An item reports
+    /// <see cref="Activate"/>.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Menu(Entity parent) => Spawn(MenuKind, parent, "", default);
+
+    /// <summary>A menu's button, Bevy's <c>FeathersMenuButton</c>, which opens its popup.</summary>
+    /// <param name="menu">The menu it opens, from <see cref="Menu"/>.</param>
+    /// <param name="caption">Its text.</param>
+    /// <param name="arrow">Whether a chevron follows the text.</param>
+    /// <param name="corners">Which of its corners are rounded.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity MenuButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All) =>
+        Spawn(MenuButtonKind, menu, caption, new NativeFeathersProps { Corners = (int)corners, Flag = arrow ? 1u : 0u });
+
+    /// <summary>A menu's square button for a symbol, Bevy's <c>FeathersMenuToolButton</c>.</summary>
+    /// <inheritdoc cref="MenuButton" path="/param"/>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity MenuToolButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All) =>
+        Spawn(MenuToolButtonKind, menu, caption, new NativeFeathersProps { Corners = (int)corners, Flag = arrow ? 1u : 0u });
+
+    /// <summary>A menu's popup, Bevy's <c>FeathersMenuPopup</c>, its items spawned under it.</summary>
+    /// <remarks>
+    /// Placed below its button by Bevy's reflected <c>PopoverRef</c>, whose places the game can set
+    /// otherwise, as above it or aligned to its button's right edge.
+    /// </remarks>
+    /// <param name="menu">The menu it belongs to, from <see cref="Menu"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity MenuPopup(Entity menu) => Spawn(MenuPopupKind, menu, "", default);
+
+    /// <summary>A menu's item, Bevy's <c>FeathersMenuItem</c>, which reports <see cref="Activate"/>.</summary>
+    /// <param name="popup">The popup it goes in, from <see cref="MenuPopup"/>.</param>
+    /// <param name="caption">Its text.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity MenuItem(Entity popup, string caption) => Spawn(MenuItemKind, popup, caption, default);
+
+    /// <summary>A line between a menu's items, Bevy's <c>FeathersMenuDivider</c>.</summary>
+    /// <param name="popup">The popup it goes in, from <see cref="MenuPopup"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity MenuDivider(Entity popup) => Spawn(MenuDividerKind, popup, "", default);
+
+    /// <summary>
+    /// A select, Bevy's <c>FeathersSelect</c>, a button showing the option chosen that opens a list
+    /// of its options.
+    /// </summary>
+    /// <remarks>
+    /// Reports the option chosen as a <see cref="ValueChange{T}"/> of the row's
+    /// <see cref="Entity"/>, which carries Bevy's reflected <c>OptionIndexRef</c>, the option's place
+    /// in <paramref name="options"/>. It moves its choice itself.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="options">Its options' text.</param>
+    /// <param name="selected">The place of the option chosen, or -1 for none.</param>
+    /// <param name="maxVisible">How many options the list shows before it scrolls.</param>
+    /// <param name="corners">Which of its button's corners are rounded.</param>
+    /// <exception cref="ArgumentException">An option holds a line break.</exception>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Select(Entity parent, string[] options, int selected = -1, int maxVisible = 8, RoundedCorners corners = RoundedCorners.All) =>
+        Spawn(SelectKind, parent, Lines(options, nameof(options)), new NativeFeathersProps { Selected = selected, Count = maxVisible, Corners = (int)corners });
+
+    /// <summary>
+    /// A list view, Bevy's <c>FeathersListView</c>, rows in a column that scrolls past its height,
+    /// which reports the row clicked as a <see cref="ValueChange{T}"/> of its <see cref="Entity"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Ui.SelfUpdate"/> with <see cref="UiWidgetKind.ListBox"/> moves Bevy's
+    /// <c>Selected</c> to the row clicked. More rows are spawned with <see cref="ListRow"/> under
+    /// <see cref="ContentsOf"/> the list.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="rows">Its rows' text.</param>
+    /// <param name="selected">The place of the row chosen, or -1 for none.</param>
+    /// <exception cref="ArgumentException">A row holds a line break.</exception>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ListView(Entity parent, string[] rows, int selected = -1) =>
+        Spawn(ListViewKind, parent, Lines(rows, nameof(rows)), new NativeFeathersProps { Selected = selected });
+
+    /// <summary>A row of a list view, Bevy's <c>FeathersListRow</c>, with its caption.</summary>
+    /// <param name="list">The node its rows go under, <see cref="ContentsOf"/> the list.</param>
+    /// <param name="caption">Its text.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ListRow(Entity list, string caption) => Spawn(ListRowKind, list, caption, default);
+
+    /// <summary>
+    /// A toggle drawn as a chevron pointing right or down, Bevy's <c>FeathersDisclosureToggle</c>,
+    /// a checkbox for showing what is folded under a heading.
+    /// </summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity DisclosureToggle(Entity parent) => Spawn(DisclosureToggleKind, parent, "", default);
+
+    /// <summary>
+    /// The frame a text input is drawn in, Bevy's <c>FeathersTextInputContainer</c>, its input spawned
+    /// under it with <see cref="TextInput"/>.
+    /// </summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity TextInputContainer(Entity parent) => Spawn(TextInputContainerKind, parent, "", default);
+
+    /// <summary>
+    /// A text input, Bevy's <c>FeathersTextInput</c>, a field as <see cref="Ui.SetEditableText"/>
+    /// makes one, in the theme's font and colors.
+    /// </summary>
+    /// <param name="container">Its frame, from <see cref="TextInputContainer"/>.</param>
+    /// <param name="visibleWidth">How many characters wide it is, or zero for the room it is given.</param>
+    /// <param name="maxCharacters">The most characters it takes, or zero for no bound.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity TextInput(Entity container, float visibleWidth = 0f, int maxCharacters = 0) =>
+        Spawn(TextInputKind, container, "", new NativeFeathersProps { Extent = visibleWidth, Count = maxCharacters });
+
+    /// <summary>
+    /// A swatch showing a color, Bevy's <c>FeathersColorSwatch</c>, the color its reflected
+    /// <c>ColorSwatchValueRef</c> holds.
+    /// </summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="opaquePercentage">
+    /// How much of it, from the left, shows the color without its alpha, the rest drawn over a
+    /// checkered pattern.
+    /// </param>
+    /// <param name="corners">Which of its corners are rounded.</param>
+    /// <param name="cornerRadius">How round they are, in pixels.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ColorSwatch(Entity parent, float opaquePercentage = 0f, RoundedCorners corners = RoundedCorners.All, float cornerRadius = 5f) =>
+        Spawn(ColorSwatchKind, parent, "", new NativeFeathersProps { Value = opaquePercentage, Corners = (int)corners, Extent = cornerRadius });
+
+    /// <summary>
+    /// A plane two parts of a color are picked on, Bevy's <c>FeathersColorPlane</c>, which reports
+    /// the point picked as a <see cref="ValueChange{T}"/> of a <see cref="Vec2"/>.
+    /// </summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="axes">The parts it sets, across and down.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ColorPlane(Entity parent, ColorPlaneAxes axes) =>
+        Spawn(ColorPlaneKind, parent, "", new NativeFeathersProps { Count = (int)axes });
+
+    /// <summary>
+    /// A slider of one part of a color, Bevy's <c>FeathersColorSlider</c>, which reports the value
+    /// asked for as a <see cref="ValueChange{T}"/> of a <c>float</c>.
+    /// </summary>
+    /// <remarks>
+    /// Its value is Bevy's reflected <c>SliderValueRef</c> and the color its track shows
+    /// <c>SliderBaseColorRef</c>, which the game writes as the color changes.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="channel">The part it sets.</param>
+    /// <param name="value">Its value.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ColorSlider(Entity parent, ColorChannel channel, float value = 0f) =>
+        Spawn(ColorSliderKind, parent, "", new NativeFeathersProps { Count = (int)channel, Value = value });
+
+    /// <summary>
+    /// A color input, Bevy's <c>FeathersColorInput</c>, a swatch that opens a picker of a wheel,
+    /// planes and sliders, and reports the color picked as a <see cref="ValueChange{T}"/> of a
+    /// <see cref="Color"/>.
+    /// </summary>
+    /// <remarks>
+    /// Its color is Bevy's reflected <c>ColorInputValueRef</c>, which <see cref="Ui.SelfUpdate"/>
+    /// with <see cref="UiWidgetKind.ColorInput"/> keeps as the color picked.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="opaquePercentage">How much of its swatch shows the color without its alpha.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity ColorInput(Entity parent, float opaquePercentage = 0f) =>
+        Spawn(ColorInputKind, parent, "", new NativeFeathersProps { Value = opaquePercentage });
+
+    /// <summary>An editor's pane, Bevy's <c>pane</c>, holding its header and its body.</summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Pane(Entity parent) => Spawn(PaneKind, parent, "", default);
+
+    /// <summary>A pane's header, Bevy's <c>pane_header</c>, a row of its tool buttons.</summary>
+    /// <param name="pane">The pane, from <see cref="Pane"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity PaneHeader(Entity pane) => Spawn(PaneHeaderKind, pane, "", default);
+
+    /// <summary>A line between a pane header's buttons, Bevy's <c>pane_header_divider</c>.</summary>
+    /// <param name="header">The header, from <see cref="PaneHeader"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity PaneHeaderDivider(Entity header) => Spawn(PaneHeaderDividerKind, header, "", default);
+
+    /// <summary>A pane's body, Bevy's <c>pane_body</c>.</summary>
+    /// <param name="pane">The pane, from <see cref="Pane"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity PaneBody(Entity pane) => Spawn(PaneBodyKind, pane, "", default);
+
+    /// <summary>A pane within a pane, Bevy's <c>subpane</c>, holding its header and its body.</summary>
+    /// <param name="parent">The node it goes under, usually a pane's body.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Subpane(Entity parent) => Spawn(SubpaneKind, parent, "", default);
+
+    /// <summary>A subpane's header, Bevy's <c>subpane_header</c>.</summary>
+    /// <param name="subpane">The subpane, from <see cref="Subpane"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity SubpaneHeader(Entity subpane) => Spawn(SubpaneHeaderKind, subpane, "", default);
+
+    /// <summary>A subpane's body, Bevy's <c>subpane_body</c>.</summary>
+    /// <param name="subpane">The subpane, from <see cref="Subpane"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity SubpaneBody(Entity subpane) => Spawn(SubpaneBodyKind, subpane, "", default);
+
+    /// <summary>A group of properties, Bevy's <c>group</c>, holding its header and its body.</summary>
+    /// <param name="parent">The node it goes under, usually a pane's or a subpane's body.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Group(Entity parent) => Spawn(GroupKind, parent, "", default);
+
+    /// <summary>A group's header, Bevy's <c>group_header</c>.</summary>
+    /// <param name="group">The group, from <see cref="Group"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity GroupHeader(Entity group) => Spawn(GroupHeaderKind, group, "", default);
+
+    /// <summary>A group's body, Bevy's <c>group_body</c>.</summary>
+    /// <param name="group">The group, from <see cref="Group"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity GroupBody(Entity group) => Spawn(GroupBodyKind, group, "", default);
+
+    /// <summary>A node that takes the room left in its row, Bevy's <c>flex_spacer</c>.</summary>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity FlexSpacer(Entity parent) => Spawn(FlexSpacerKind, parent, "", default);
+
+    /// <summary>
+    /// An icon fourteen pixels tall, Bevy's <c>icon</c>, tinted as the text around it is, or Bevy's
+    /// <c>icon_untinted</c>.
+    /// </summary>
+    /// <param name="parent">The node it goes under, as a tool button.</param>
+    /// <param name="image">The image's path, one of <see cref="FeathersIcon"/> or the game's own.</param>
+    /// <param name="tinted">Whether it takes the color of the text around it.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Icon(Entity parent, string image, bool tinted = true)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(image);
+        return Spawn(IconKind, parent, image, new NativeFeathersProps { Flag = tinted ? 0u : 1u });
+    }
+
+    /// <summary>
+    /// A modal dialog over the window, Bevy's <c>FeathersDialog</c>, its contents spawned under
+    /// <see cref="ContentsOf"/> it, as <see cref="DialogHeader"/>, <see cref="DialogBody"/> and
+    /// <see cref="DialogFooter"/>.
+    /// </summary>
+    /// <remarks>
+    /// It covers the window and takes the pointer from what is under it until it is despawned, which
+    /// the game does as it is asked to close, observing <see cref="RequestClose"/> on it.
+    /// </remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="width">Its width in pixels, or zero for its contents' width.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity Dialog(Entity parent, float width = 0f) =>
+        Spawn(DialogKind, parent, "", new NativeFeathersProps { Extent = width });
+
+    /// <summary>
+    /// A dialog floating over the window, dragged by its title, Bevy's
+    /// <c>FeathersFloatingDialog</c>, its contents spawned under <see cref="ContentsOf"/> it.
+    /// </summary>
+    /// <remarks>Its close button despawns it, reporting <see cref="RequestClose"/> as it does.</remarks>
+    /// <param name="parent">The node it goes under, or <see cref="Entity.None"/> for the root.</param>
+    /// <param name="title">Its title.</param>
+    /// <param name="width">Its width in pixels, or zero for its contents' width.</param>
+    /// <param name="left">Its left edge, in pixels.</param>
+    /// <param name="top">Its top edge, in pixels.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity FloatingDialog(Entity parent, string title, float width = 0f, float left = 120f, float top = 120f) =>
+        Spawn(FloatingDialogKind, parent, title, new NativeFeathersProps { Extent = width, Left = left, Top = top });
+
+    /// <summary>A dialog's header, Bevy's <c>FeathersDialogHeader</c>, its title and close button in a row.</summary>
+    /// <param name="dialog">The node its contents go under, <see cref="ContentsOf"/> the dialog.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity DialogHeader(Entity dialog) => Spawn(DialogHeaderKind, dialog, "", default);
+
+    /// <summary>A dialog's body, Bevy's <c>FeathersDialogBody</c>.</summary>
+    /// <inheritdoc cref="DialogHeader" path="/param"/>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity DialogBody(Entity dialog) => Spawn(DialogBodyKind, dialog, "", default);
+
+    /// <summary>A dialog's footer, Bevy's <c>FeathersDialogFooter</c>, its buttons in a row.</summary>
+    /// <inheritdoc cref="DialogHeader" path="/param"/>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity DialogFooter(Entity dialog) => Spawn(DialogFooterKind, dialog, "", default);
+
+    /// <summary>A dialog's close button, Bevy's <c>FeathersDialogClose</c>, which reports <see cref="RequestClose"/>.</summary>
+    /// <param name="header">The header it goes in, from <see cref="DialogHeader"/>.</param>
+    /// <inheritdoc cref="Button" path="/exception"/>
+    public static Entity DialogClose(Entity header) => Spawn(DialogCloseKind, header, "", default);
+
+    /// <summary>
+    /// The node a control's contents go under, where Bevy's own props would hold them, a dialog's
+    /// panel, a floating dialog's body, or the part of a list view or a select that scrolls.
+    /// </summary>
+    /// <exception cref="BevyNativeException">
+    /// The control is gone, has no such node, or this build has no renderer.
+    /// </exception>
+    public static Entity ContentsOf(Entity control)
+    {
+        ulong contents;
+        Native.Check(Native.bcs_feathers_contents(control.Bits, &contents), $"finding where the contents of {control} go");
+        return new Entity(contents);
+    }
+
     /// <summary>The text of a keyboard's key by where it stands, or empty for a key it was not given.</summary>
     internal static string KeyAt(Entity keyboard, int row, int column) =>
         KeyTables.TryGetValue(keyboard, out var keys) && row < keys.Length && column < keys[row].Length ? keys[row][column] : "";
@@ -287,6 +598,17 @@ public static unsafe class Feathers
         {
             Native.Check(Native.bcs_feathers_theme_color(node.Bits, (int)part, text, bytes.Length), $"coloring {node} by {token}");
         }
+    }
+
+    private static string Lines(string[] items, string name)
+    {
+        ArgumentNullException.ThrowIfNull(items, name);
+        if (items.Any(item => item is null || item.AsSpan().IndexOfAny('\n', '\r') >= 0))
+        {
+            throw new ArgumentException("an item is null or holds a line break", name);
+        }
+
+        return string.Join('\n', items);
     }
 
     private static void SetNumber(Entity input, NumberKind kind, double value, long whole) =>

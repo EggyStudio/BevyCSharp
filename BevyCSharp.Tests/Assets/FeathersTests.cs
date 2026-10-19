@@ -21,7 +21,10 @@ public sealed class FeathersTests
         Assert.Equal(8, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Min)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Token)).ToInt32());
         Assert.Equal(24, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.TokenLength)).ToInt32());
-        Assert.Equal(32, Marshal.SizeOf<NativeFeathersProps>());
+        Assert.Equal(28, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Value)).ToInt32());
+        Assert.Equal(36, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Count)).ToInt32());
+        Assert.Equal(52, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Top)).ToInt32());
+        Assert.Equal(56, Marshal.SizeOf<NativeFeathersProps>());
     }
 
     /// <summary>
@@ -236,5 +239,216 @@ public sealed class FeathersTests
 
         Assert.Equal(new VirtualKeyPressed(pressed!.Value.Keyboard, "A", 1, 0), pressed);
         Assert.Equal("abA", typed);
+    }
+
+    /// <summary>
+    /// Every kind of control has its scene applied as it is spawned, so a margin written on it at
+    /// once is the one it keeps, rather than one its scene, applied later, writes over.
+    /// </summary>
+    [SkippableFact]
+    public void EveryKindKeepsWhatIsWrittenAsSoonAsItIsSpawned()
+    {
+        Needs.Renderer();
+
+        var spawned = new List<(string Kind, Entity Control)>();
+        var margins = new List<(string Kind, Val? Margin)>();
+
+        var run = new PictureRun
+        {
+            Configure = config => config.Feathers = true,
+            Scene = ecs =>
+            {
+                var root = Ui.SpawnNode(new UiSettings { Direction = UiDirection.Column });
+                var menu = Feathers.Menu(root);
+                var popup = Feathers.MenuPopup(menu);
+                var pane = Feathers.Pane(root);
+                var subpane = Feathers.Subpane(root);
+                var group = Feathers.Group(root);
+                var container = Feathers.TextInputContainer(root);
+                var dialog = Feathers.Dialog(root, 200f);
+                var list = Feathers.ListView(root, ["One", "Two"]);
+                var header = Feathers.DialogHeader(Feathers.ContentsOf(dialog));
+                (string, Func<Entity>)[] kinds =
+                [
+                    ("button", () => Feathers.Button(root, "Go")),
+                    ("tool button", () => Feathers.ToolButton(root, "+")),
+                    ("checkbox", () => Feathers.Checkbox(root, "Check")),
+                    ("radio", () => Feathers.Radio(root, "Pick")),
+                    ("toggle switch", () => Feathers.ToggleSwitch(root)),
+                    ("slider", () => Feathers.Slider(root)),
+                    ("caption", () => Feathers.Caption(root, "Caption")),
+                    ("label", () => Feathers.Label(root, "Label")),
+                    ("dim label", () => Feathers.LabelDim(root, "Dim")),
+                    ("small label", () => Feathers.LabelSmall(root, "Small")),
+                    ("number input", () => Feathers.NumberInput(root, "X")),
+                    ("virtual keyboard", () => Feathers.VirtualKeyboard(root, [["A"]])),
+                    ("menu", () => menu),
+                    ("menu button", () => Feathers.MenuButton(menu, "Menu")),
+                    ("menu tool button", () => Feathers.MenuToolButton(Feathers.Menu(root), "M")),
+                    ("menu popup", () => popup),
+                    ("menu item", () => Feathers.MenuItem(popup, "Item")),
+                    ("menu divider", () => Feathers.MenuDivider(popup)),
+                    ("select", () => Feathers.Select(root, ["One", "Two"], selected: 1)),
+                    ("list view", () => list),
+                    ("list row", () => Feathers.ListRow(Feathers.ContentsOf(list), "Three")),
+                    ("disclosure toggle", () => Feathers.DisclosureToggle(root)),
+                    ("text input container", () => container),
+                    ("text input", () => Feathers.TextInput(container, 10f, 9)),
+                    ("color swatch", () => Feathers.ColorSwatch(root, 30f)),
+                    ("color plane", () => Feathers.ColorPlane(root, ColorPlaneAxes.RedBlue)),
+                    ("color slider", () => Feathers.ColorSlider(root, ColorChannel.Red, 0.5f)),
+                    ("color input", () => Feathers.ColorInput(root)),
+                    ("pane", () => pane),
+                    ("pane header", () => Feathers.PaneHeader(pane)),
+                    ("pane header divider", () => Feathers.PaneHeaderDivider(Feathers.PaneHeader(pane))),
+                    ("pane body", () => Feathers.PaneBody(pane)),
+                    ("subpane", () => subpane),
+                    ("subpane header", () => Feathers.SubpaneHeader(subpane)),
+                    ("subpane body", () => Feathers.SubpaneBody(subpane)),
+                    ("group", () => group),
+                    ("group header", () => Feathers.GroupHeader(group)),
+                    ("group body", () => Feathers.GroupBody(group)),
+                    ("flex spacer", () => Feathers.FlexSpacer(root)),
+                    ("icon", () => Feathers.Icon(root, FeathersIcon.X)),
+                    ("dialog", () => dialog),
+                    ("floating dialog", () => Feathers.FloatingDialog(root, "Title", 200f)),
+                    ("dialog header", () => header),
+                    ("dialog body", () => Feathers.DialogBody(Feathers.ContentsOf(dialog))),
+                    ("dialog footer", () => Feathers.DialogFooter(Feathers.ContentsOf(dialog))),
+                    ("dialog close", () => Feathers.DialogClose(header)),
+                ];
+                foreach (var (kind, make) in kinds)
+                {
+                    var control = make();
+                    ecs.Wrap<NodeRef>(control).MarginLeft = new Val.Px(3f);
+                    spawned.Add((kind, control));
+                }
+            },
+        };
+
+        run.Until("started", world => world.Resource<Time>().FrameCount >= 3)
+            .Do("read", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                foreach (var (kind, control) in spawned) margins.Add((kind, ecs.Get<NodeRef>(control)?.MarginLeft));
+            })
+            .Go();
+
+        Assert.Equal(46, margins.Count);
+        Assert.All(margins, read => Assert.True(read.Margin == new Val.Px(3f), $"the {read.Kind} kept {read.Margin}"));
+    }
+
+    /// <summary>
+    /// What Bevy's props would hold as a scene goes where they would put it, a modal dialog's
+    /// contents in its panel, a floating dialog's in its body, and a list's and a select's rows in
+    /// the part that scrolls.
+    /// </summary>
+    [SkippableFact]
+    public void ContentsGoWhereBevysPropsWouldPutThem()
+    {
+        Needs.Renderer();
+
+        bool panel = false, body = false;
+        int listRows = 0, selectRows = 0;
+
+        var run = new PictureRun
+        {
+            Configure = config => config.Feathers = true,
+            Scene = ecs =>
+            {
+                panel = ecs.Get<ModalDialogRef>(Feathers.ContentsOf(Feathers.Dialog(Entity.None))) is not null;
+                body = ecs.Get<FeathersDialogBodyRef>(Feathers.ContentsOf(Feathers.FloatingDialog(Entity.None, "Title"))) is not null;
+
+                var rows = ecs.ChildrenOf(Feathers.ContentsOf(Feathers.ListView(Entity.None, ["One", "Two", "Three"], selected: 2)));
+                listRows = rows.Length;
+                selectRows = ecs.ChildrenOf(Feathers.ContentsOf(Feathers.Select(Entity.None, ["One", "Two"]))).Length;
+            },
+        };
+        run.Until("started", world => world.Resource<Time>().FrameCount >= 1).Go();
+
+        Assert.True(panel, "a dialog's contents do not go in its panel");
+        Assert.True(body, "a floating dialog's contents do not go in its body");
+        Assert.Equal(3, listRows);
+        Assert.Equal(2, selectRows);
+    }
+
+    /// <summary>
+    /// A press on a color plane reports the point as a <see cref="Vec2"/>, and a dialog's close
+    /// button reports <see cref="RequestClose"/> up to the dialog.
+    /// </summary>
+    [SkippableFact]
+    public void APlaneReportsThePointAndACloseButtonAsksTheDialogToClose()
+    {
+        Needs.Renderer();
+
+        Vec2? point = null;
+        Entity dialog = Entity.None, close = Entity.None;
+        RequestClose? asked = null;
+
+        var run = new PictureRun
+        {
+            Width = 400,
+            Height = 300,
+            Configure = config => config.Feathers = true,
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                var column = Ui.SpawnNode(new UiSettings
+                {
+                    Absolute = true,
+                    Left = Length.Px(0f),
+                    Top = Length.Px(0f),
+                    Width = Length.Px(200f),
+                    Direction = UiDirection.Column,
+                });
+                var plane = Feathers.ColorPlane(column, ColorPlaneAxes.RedGreen);
+                ecs.Observe<ValueChange<Vec2>>(plane, on => point = on.Event.Value);
+
+                dialog = Feathers.FloatingDialog(Entity.None, "Title", width: 120f, left: 250f, top: 100f);
+                ecs.Observe<RequestClose>(dialog, on => asked = on.Event);
+            },
+        };
+
+        run.Until("compiled", world => world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady()).Wait(5)
+            .Do("press the plane", _ => SyntheticInput.Press(100f, 50f))
+            .Wait(2)
+            .Do("release the plane", _ => SyntheticInput.Release(100f, 50f))
+            .Wait(2)
+            .Do("find the close button", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                close = ecs.Descendants(dialog).First(entity => ecs.Get<FeathersDialogCloseRef>(entity) is not null);
+            })
+            // The close button at the right of the title bar, six pixels in from its edges.
+            .Do("press the close button", _ => SyntheticInput.Press(352f, 118f))
+            .Wait(2)
+            .Do("release the close button", _ => SyntheticInput.Release(352f, 118f))
+            .Wait(4)
+            .Go();
+
+        Assert.True(point is { } p && MathF.Abs(p.X - 0.5f) < 0.1f && MathF.Abs(p.Y - 0.5f) < 0.1f, $"the plane reported {point}");
+        Assert.Equal(close, asked?.Source);
+    }
+
+    /// <summary>
+    /// A color crosses Bevy's color spaces as Bevy converts it, pure green in HSL, back again through
+    /// Okhsl, and out as hex as Bevy writes it.
+    /// </summary>
+    [Fact]
+    public void AColorCrossesBevysSpacesAsBevyConvertsIt()
+    {
+        var green = Color.From(ColorSpace.Hsl, new Vec4(120f, 1f, 0.5f, 1f));
+        Assert.Equal(0f, green.R, 4);
+        Assert.Equal(1f, green.G, 4);
+        Assert.Equal(0f, green.B, 4);
+
+        var amber = Color.FromSrgb(0.57254905f, 0.2509804f, 0.05490196f);
+        var back = Color.From(ColorSpace.Okhsl, amber.In(ColorSpace.Okhsl));
+        Assert.Equal(amber.R, back.R, 3);
+        Assert.Equal(amber.G, back.G, 3);
+        Assert.Equal(amber.B, back.B, 3);
+
+        Assert.Equal("#FF8000", Color.FromSrgb8(255, 128, 0).ToHex());
+        Assert.Equal("#FF800080", Color.FromSrgb8(255, 128, 0, 128).ToHex());
     }
 }

@@ -10,7 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `edee9686`, Feathers' first step and nothing else, 34 files, the ABI 286 to 287, the
+Reviewed up to `5452a595`, Feathers' second step and nothing else, 33 files, the ABI 287 to 289, the
+lock unchanged. The bridge spawns two more kinds, the number input and the virtual keyboard, the
+props gaining a token for the input's sigil and growing to 32 bytes; a number input's letter is a
+static string in Bevy's props, so each distinct letter is leaked once and kept; the keyboard is
+Bevy's over a key type of the bridge's own carrying its row and place, so a report names a key by
+where it stands and C# reads back the text it gave; the input's value, two limits and units are not
+reachable by reflection, the first three reflecting without the component trait and the last holding
+a small string the description leaves out, so four calls set, get, limit and name them; the widget
+report gains the value change of a double, an int and a long, carried as bits in its other field so
+the layout stays 40 bytes, and the key pressed; and one general call queues any of Bevy's text edits
+on a field but the input method's preedit, which its own messages set. The managed side gains the
+two controls, the number setters and getter for four types, the limit and units, with angles held in
+radians and shown in degrees as Bevy's, the two events, and `Ui.EditText` with the edit kinds; a
+number input writes its text as its value changes, so its settings come before its value, which the
+example first got wrong and showed no units, and the remarks and the guide say so.
+`feathers_number_input` and `virtual_keyboard` are written, the table at 366 written and 10 missing.
+Two tests join the four, a number input holding each type exactly, a long beyond a double among
+them, and a click on a virtual key reported with its text, row and place and typed into a field
+through the edit call. Checked were `cargo check` on every profile, `cargo test` headless and on
+render, the headless bridge with the Feathers and layout tests under B 2, the examples on a fresh
+package, the pictures on a render bridge on the GPU, and the whole suite, 1,498 passed, 3 skipped
+and 1 failed of 1,502, the failure N 1.2's, two enums in the file of the record that uses them, each
+moved to its own file with no code changed and the norm and public surface tests passing after.
+Right. Next Feathers' third step, the gallery's controls, color sliders, swatches, plane and input,
+select and list view, menus, dialogs, panes and groups, text input, scrollbar and disclosure toggle,
+then the fifteen examples, then the dev tools, the system information, the declined rows marked and
+`monitor_info`, one step a commit, and the owner's push of the four commits.
+
+Before it, `edee9686` came, Feathers' first step and nothing else, 34 files, the ABI 286 to 287, the
 lock gaining `bevy_feathers` alone through Bevy's feature on the render profile. Feathers is too
 large for one commit, the gallery alone using some twenty controls whose props hold scenes and
 closures, so it comes in steps, each a commit with its examples, this one, then the number input and
@@ -65,29 +93,6 @@ headless and on render, the headless bridge with the changed tests under B 2, th
 fresh package, and the whole suite on the editor bridge with meshlets and Solari, 1,493 passed and 3
 skipped of 1,496. Right. Next Feathers, the dev tools, the system information, the declined rows
 marked and `monitor_info`, one batch a commit, and the owner's push.
-
-Before it, `2b355276` came, item 29's list and nothing else, a section of TODO.md. "Mended for the
-time being" stands between Testing and Build and release with thirteen parts, each saying where a
-mend of the moment stands, the mend that removes its cause and what that costs: the two async
-examples waiting on the machine's clock, the two whose animation starts at the end of a load, the
-two placing sprites unseeded, lavapipe's dropped meshlet bunnies, Solari's panel showing the
-device's timings, the pictures taken on a bridge without Solari for the `dfg_lut` it turns on, the
-six examples the runner's Mesa 25.2 leaves uncompared, the soak's two figures said and not judged,
-the soak's rooms set without a measurement, the drive reading a swing at its farthest, the
-anisotropy fault pinned and not mended, the two helpers standing where crates would, and the pack
-run's limits sized for a software device, with the norm's lists said in passing as item 2's; left
-out as no mend of the moment are the captures' shared tolerance, the skips for a device or profile
-lacking something, the wait for nuget.org's index, the memory guard's no-GC region and the test
-script's memory cap. The working session writes nothing under item 29 itself, AGENTS.md letting it
-edit Replies alone, so the parts are taken into the item below in the reviewer's order. `NormTests`
-passed. Right. On 2026-10-19 the owner typed the words in the working session (Decision 39): the
-camera controllers, Feathers, the dev tools and the system information may come in, the https asset
-loading and the image saver stay declined, item 4 comes before item 29 in the reviewer's order,
-`dfg_lut` goes on, the captures move to a container of a distribution image with a newer Mesa and a
-meshlet and Solari bridge with no runner with a graphics card, the anisotropy fault is mended by a
-patched shader with a test, the templates are published beside the engine (item 30), and
-`monitor_info` is captured on virtual monitors. Next item 4's batches in order, the camera
-controllers first, one a commit.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -381,9 +386,11 @@ from [SHARED.md](SHARED.md).
    286, the five examples captured and the examples' own free camera gone for Bevy's. Feathers'
    first step came at `edee9686` the same day, the core plugin, the dark theme, ten controls and the
    theme tokens, `feathers_counter` written, the table at 364 written and 12 missing, the lock
-   gaining `bevy_feathers`, the ABI 287; its steps to come are the number input and the virtual
+   gaining `bevy_feathers`, the ABI 287; its steps to come were the number input and the virtual
    keyboard, the gallery's controls, and the fifteen examples moved to Feathers' radio, each a
-   commit with its examples.
+   commit with its examples. The second step came at `5452a595`, the number input and the virtual
+   keyboard with their two examples, the table at 366 written and 10 missing, the ABI 289, the lock
+   unchanged; the gallery's controls are next.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose

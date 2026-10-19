@@ -19,4 +19,10 @@ public enum UiWidgetKind
     /// where the list activates tabs as they are focused.
     /// </summary>
     TabList = 3,
+
+    /// <summary>A list box, its <c>Selected</c> marker moving to the row clicked (<c>listbox_update_selection</c>).</summary>
+    ListBox = 4,
+
+    /// <summary>A Feathers color input, its <c>ColorInputValue</c> following the color picked (<c>color_input_self_update</c>).</summary>
+    ColorInput = 5,
 }

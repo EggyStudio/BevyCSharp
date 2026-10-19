@@ -24,12 +24,14 @@ public sealed class WidgetTests
     [InlineData(nameof(NativeWidgetEvent.IsFinal), 28)]
     [InlineData(nameof(NativeWidgetEvent.Action), 32)]
     [InlineData(nameof(NativeWidgetEvent.Navigation), 36)]
+    [InlineData(nameof(NativeWidgetEvent.VectorX), 40)]
+    [InlineData(nameof(NativeWidgetEvent.VectorW), 52)]
     public void EveryFieldOfTheReportSitsWhereTheBridgePutsIt(string field, int offset) =>
         Assert.Equal(offset, Marshal.OffsetOf<NativeWidgetEvent>(field).ToInt32());
 
     /// <summary>The report is the size the bridge writes.</summary>
     [Fact]
-    public void TheReportIsTheSizeTheBridgeWrites() => Assert.Equal(40, Marshal.SizeOf<NativeWidgetEvent>());
+    public void TheReportIsTheSizeTheBridgeWrites() => Assert.Equal(56, Marshal.SizeOf<NativeWidgetEvent>());
 
     /// <summary>
     /// A button, a checkbox, a slider, a radio group and a menu button, each clicked, report what

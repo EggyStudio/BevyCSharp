@@ -7,12 +7,26 @@
 //! the notation's `@FeathersButton` would give. The control is spawned under the parent C# names,
 //! and what it reports reaches C# as the widgets' events do (`crate::widget`).
 //!
+//! Where Bevy's props hold a scene or a closure, the bridge takes a plain form of it:
+//!
+//! - a caption is its text, made Bevy's `caption` scene here
+//! - a select's options and a list view's rows are their text, a line each, with the place of the
+//!   one chosen, made rows as Bevy's `list_rows_from_strings` makes them
+//! - a virtual keyboard's keys are their text, a line a row and a tab between two keys
+//! - a number input's letter is its text, kept for as long as the app runs since Bevy holds it as
+//!   a static string
+//! - a dialog's contents are spawned by C# under the node [`bcs_feathers_contents`] names
+//! - a lazy menu, whose popup a closure builds as the menu opens, is not offered, and a menu's
+//!   popup is spawned with it instead
+//!
 //! A control's children are its scene's, so what C# adds under one afterwards follows them, and
 //! the theme's colors reach a node of C#'s own through [`bcs_feathers_theme_color`]. A number
 //! input's value, limits and units are Bevy components its reflection does not reach, so each has
 //! a call of its own.
 
 use crate::interop::status;
+
+mod number;
 
 /// A button, Bevy's `FeathersButton`.
 pub const BUTTON: i32 = 0;
@@ -39,6 +53,78 @@ pub const NUMBER_INPUT: i32 = 10;
 /// A virtual keyboard, `VirtualKeyboard`, its caption its keys, a line a row and a tab between
 /// two keys.
 pub const VIRTUAL_KEYBOARD: i32 = 11;
+/// A menu, `FeathersMenu`, holding its button and its popup.
+pub const MENU: i32 = 12;
+/// A menu's button, `FeathersMenuButton`, with its caption and an arrow where `flag` is non-zero.
+pub const MENU_BUTTON: i32 = 13;
+/// A menu's square button, `FeathersMenuToolButton`.
+pub const MENU_TOOL_BUTTON: i32 = 14;
+/// A menu's popup, `FeathersMenuPopup`, holding its items.
+pub const MENU_POPUP: i32 = 15;
+/// A menu's item, `FeathersMenuItem`, with its caption.
+pub const MENU_ITEM: i32 = 16;
+/// A line between a menu's items, `FeathersMenuDivider`.
+pub const MENU_DIVIDER: i32 = 17;
+/// A select, `FeathersSelect`, its caption its options, a line each, `selected` the one chosen.
+pub const SELECT: i32 = 18;
+/// A list view, `FeathersListView`, its caption its rows, a line each, `selected` the one chosen.
+pub const LIST_VIEW: i32 = 19;
+/// A row of a list view, `FeathersListRow`, with its caption.
+pub const LIST_ROW: i32 = 20;
+/// A toggle drawn as a chevron, `FeathersDisclosureToggle`.
+pub const DISCLOSURE_TOGGLE: i32 = 21;
+/// The frame around a text input, `FeathersTextInputContainer`.
+pub const TEXT_INPUT_CONTAINER: i32 = 22;
+/// A text input, `FeathersTextInput`, `extent` the characters it shows and `count` the most it
+/// takes, either zero for no bound.
+pub const TEXT_INPUT: i32 = 23;
+/// A color swatch, `FeathersColorSwatch`, `value` the percentage of it shown opaque.
+pub const COLOR_SWATCH: i32 = 24;
+/// A color plane, `FeathersColorPlane`, `count` its two axes in the order of Bevy's enum.
+pub const COLOR_PLANE: i32 = 25;
+/// A color slider, `FeathersColorSlider`, `value` its value and `count` its channel in the order
+/// of Bevy's `ColorChannel`.
+pub const COLOR_SLIDER: i32 = 26;
+/// A color input, `FeathersColorInput`, `value` the percentage of its swatch shown opaque.
+pub const COLOR_INPUT: i32 = 27;
+/// An editor's pane, `containers::pane`, and its header, the divider in its header, and its body.
+pub const PANE: i32 = 28;
+/// See [`PANE`].
+pub const PANE_HEADER: i32 = 29;
+/// See [`PANE`].
+pub const PANE_HEADER_DIVIDER: i32 = 30;
+/// See [`PANE`].
+pub const PANE_BODY: i32 = 31;
+/// A pane within a pane, `containers::subpane`, and its header and body.
+pub const SUBPANE: i32 = 32;
+/// See [`SUBPANE`].
+pub const SUBPANE_HEADER: i32 = 33;
+/// See [`SUBPANE`].
+pub const SUBPANE_BODY: i32 = 34;
+/// A group of properties, `containers::group`, and its header and body.
+pub const GROUP: i32 = 35;
+/// See [`GROUP`].
+pub const GROUP_HEADER: i32 = 36;
+/// See [`GROUP`].
+pub const GROUP_BODY: i32 = 37;
+/// A node that takes the room left in its row, `containers::flex_spacer`.
+pub const FLEX_SPACER: i32 = 38;
+/// An icon, `display::icon`, its caption the image's path, tinted as text unless `flag` is
+/// non-zero.
+pub const ICON: i32 = 39;
+/// A modal dialog over the window, `FeathersDialog`, `extent` its width, zero for its contents'.
+pub const DIALOG: i32 = 40;
+/// A dialog that floats over the window and is dragged by its title, `FeathersFloatingDialog`,
+/// its caption its title, `extent` its width, and `left` and `top` where it stands.
+pub const FLOATING_DIALOG: i32 = 41;
+/// A dialog's header, body, footer and close button, `FeathersDialogHeader` and its kin.
+pub const DIALOG_HEADER: i32 = 42;
+/// See [`DIALOG_HEADER`].
+pub const DIALOG_BODY: i32 = 43;
+/// See [`DIALOG_HEADER`].
+pub const DIALOG_FOOTER: i32 = 44;
+/// See [`DIALOG_HEADER`].
+pub const DIALOG_CLOSE: i32 = 45;
 
 /// What a control is made with, each kind reading the fields it has and leaving the rest.
 ///
@@ -61,11 +147,41 @@ pub struct BcsFeathersProps {
     pub token: *const u8,
     /// How many bytes `token` holds.
     pub token_len: i32,
+    /// A color slider's value, or the percentage of a swatch or a color input shown opaque.
+    pub value: f32,
+    /// A text input's width in characters, a dialog's width in pixels, or a swatch's corner radius,
+    /// zero for the control's own.
+    pub extent: f32,
+    /// A select's rows shown at once, a text input's most characters, a color slider's channel or a
+    /// color plane's axes, zero for the control's own where it has one.
+    pub count: i32,
+    /// The row chosen among a select's or a list view's, or -1 for none.
+    pub selected: i32,
+    /// A menu button's arrow, or an icon left untinted, where non-zero.
+    pub flag: u32,
+    /// A floating dialog's left edge, in pixels.
+    pub left: f32,
+    /// A floating dialog's top edge, in pixels.
+    pub top: f32,
 }
 
 impl Default for BcsFeathersProps {
     fn default() -> Self {
-        Self { variant: 0, corners: 1, min: 0.0, max: 1.0, token: core::ptr::null(), token_len: 0 }
+        Self {
+            variant: 0,
+            corners: 1,
+            min: 0.0,
+            max: 1.0,
+            token: core::ptr::null(),
+            token_len: 0,
+            value: 0.0,
+            extent: 0.0,
+            count: 0,
+            selected: -1,
+            flag: 1,
+            left: 120.0,
+            top: 120.0,
+        }
     }
 }
 
@@ -111,7 +227,22 @@ mod spawn {
         ButtonVariant, FeathersButton, FeathersButtonProps, FeathersCheckbox, FeathersCheckboxProps, FeathersRadio,
         FeathersRadioProps, FeathersSlider, FeathersSliderProps, FeathersToggleSwitch, FeathersToolButton,
     };
-    use bevy::feathers::controls::{FeathersNumberInput, FeathersNumberInputProps, VirtualKeyboard, VirtualKeyboardProps};
+    use bevy::feathers::containers::{
+        flex_spacer, group, group_body, group_header, pane, pane_body, pane_header, pane_header_divider, subpane,
+        subpane_body, subpane_header,
+    };
+    use bevy::feathers::controls::{
+        list_rows_from_strings, ColorChannel, FeathersColorInput, FeathersColorInputProps, FeathersColorPlane,
+        FeathersColorSlider, FeathersColorSliderProps, FeathersColorSwatch, FeathersColorSwatchProps, FeathersDialog,
+        FeathersDialogBody, FeathersDialogClose, FeathersDialogFooter, FeathersDialogHeader, FeathersDialogProps,
+        FeathersDisclosureToggle, FeathersFloatingDialog, FeathersFloatingDialogProps, FeathersListRow,
+        FeathersListView, FeathersListViewProps, FeathersMenu, FeathersMenuButton, FeathersMenuButtonProps,
+        FeathersMenuDivider, FeathersMenuItem, FeathersMenuItemProps, FeathersMenuPopup, FeathersMenuToolButton,
+        FeathersNumberInput, FeathersNumberInputProps, FeathersSelect, FeathersSelectProps, FeathersTextInput,
+        FeathersTextInputContainer, FeathersTextInputProps, VirtualKeyboard, VirtualKeyboardProps,
+    };
+    use bevy::feathers::display::{icon, icon_untinted};
+    use bevy::ui::{px, Val};
     use bevy::feathers::display::{caption, label, label_dim, label_small};
     use bevy::feathers::theme::ThemeToken;
     use bevy::feathers::rounded_corners::RoundedCorners;
@@ -173,6 +304,43 @@ mod spawn {
         let leaked: &'static str = Box::leak(text.to_string().into_boxed_str());
         kept.insert(leaked);
         leaked
+    }
+
+    fn channel(place: i32) -> ColorChannel {
+        match place {
+            0 => ColorChannel::Red,
+            1 => ColorChannel::Green,
+            2 => ColorChannel::Blue,
+            3 => ColorChannel::HslHue,
+            4 => ColorChannel::HslSaturation,
+            5 => ColorChannel::HslLightness,
+            7 => ColorChannel::OkhslHue,
+            8 => ColorChannel::OkhslSaturation,
+            9 => ColorChannel::OkhslLightness,
+            _ => ColorChannel::Alpha,
+        }
+    }
+
+    fn plane(place: i32) -> FeathersColorPlane {
+        match place {
+            1 => FeathersColorPlane::RedBlue,
+            2 => FeathersColorPlane::GreenBlue,
+            3 => FeathersColorPlane::HueSaturation,
+            4 => FeathersColorPlane::HueLightness,
+            5 => FeathersColorPlane::OkhslHueSaturation,
+            6 => FeathersColorPlane::OkhslHueLightness,
+            _ => FeathersColorPlane::RedGreen,
+        }
+    }
+
+    /// A width in pixels, or the content's where it is zero.
+    fn width(extent: f32) -> Val {
+        if extent > 0.0 { px(extent) } else { Val::Auto }
+    }
+
+    /// The rows of a select or a list view from a line each, `selected` the one marked chosen.
+    fn rows(text: &str, selected: i32) -> Box<dyn SceneList> {
+        list_rows_from_strings(text.lines(), usize::try_from(selected).ok())
     }
 
     /// A keyboard's keys from a line a row and a tab between two keys.
@@ -246,6 +414,113 @@ mod spawn {
             VIRTUAL_KEYBOARD => spawn_under(world, parent, || {
                 <VirtualKeyboard<VirtualKey> as SceneComponent>::scene(VirtualKeyboardProps { keys: keys(text) })
             }),
+            MENU => spawn_under(world, parent, || <FeathersMenu as SceneComponent>::scene(())),
+            MENU_BUTTON => spawn_under(world, parent, || {
+                <FeathersMenuButton as SceneComponent>::scene(FeathersMenuButtonProps {
+                    caption: captioned(text),
+                    corners: corners(props.corners),
+                    arrow: props.flag != 0,
+                })
+            }),
+            MENU_TOOL_BUTTON => spawn_under(world, parent, || {
+                <FeathersMenuToolButton as SceneComponent>::scene(FeathersMenuButtonProps {
+                    caption: captioned(text),
+                    corners: corners(props.corners),
+                    arrow: props.flag != 0,
+                })
+            }),
+            MENU_POPUP => spawn_under(world, parent, || <FeathersMenuPopup as SceneComponent>::scene(())),
+            MENU_ITEM => spawn_under(world, parent, || {
+                <FeathersMenuItem as SceneComponent>::scene(FeathersMenuItemProps { caption: captioned(text) })
+            }),
+            MENU_DIVIDER => spawn_under(world, parent, || <FeathersMenuDivider as SceneComponent>::scene(())),
+            SELECT => spawn_under(world, parent, || {
+                <FeathersSelect as SceneComponent>::scene(FeathersSelectProps {
+                    options: rows(text, props.selected),
+                    corners: corners(props.corners),
+                    max_visible: if props.count > 0 { props.count as usize } else { 8 },
+                })
+            }),
+            LIST_VIEW => spawn_under(world, parent, || {
+                <FeathersListView as SceneComponent>::scene(FeathersListViewProps { rows: rows(text, props.selected) })
+            }),
+            LIST_ROW => {
+                let row = spawn_under(world, parent, || <FeathersListRow as SceneComponent>::scene(()));
+                if !text.is_empty() {
+                    spawn_under(world, Some(row), || caption(text.to_string()));
+                }
+                row
+            }
+            DISCLOSURE_TOGGLE => spawn_under(world, parent, || <FeathersDisclosureToggle as SceneComponent>::scene(())),
+            TEXT_INPUT_CONTAINER => {
+                spawn_under(world, parent, || <FeathersTextInputContainer as SceneComponent>::scene(()))
+            }
+            TEXT_INPUT => spawn_under(world, parent, || {
+                <FeathersTextInput as SceneComponent>::scene(FeathersTextInputProps {
+                    visible_width: (props.extent > 0.0).then_some(props.extent),
+                    max_characters: usize::try_from(props.count).ok().filter(|count| *count > 0),
+                })
+            }),
+            COLOR_SWATCH => spawn_under(world, parent, || {
+                <FeathersColorSwatch as SceneComponent>::scene(FeathersColorSwatchProps {
+                    opaque_color_percentage: props.value,
+                    corners: corners(props.corners),
+                    border_radius: if props.extent > 0.0 { props.extent } else { 5.0 },
+                })
+            }),
+            // Bevy's scene gives the plane its first axes, and its notation patches the variant
+            // over it, as this does once the scene is applied.
+            COLOR_PLANE => {
+                let entity = spawn_under(world, parent, || <FeathersColorPlane as SceneComponent>::scene(()));
+                world.entity_mut(entity).insert(plane(props.count));
+                entity
+            }
+            COLOR_SLIDER => spawn_under(world, parent, || {
+                <FeathersColorSlider as SceneComponent>::scene(FeathersColorSliderProps {
+                    value: props.value,
+                    channel: channel(props.count),
+                })
+            }),
+            COLOR_INPUT => spawn_under(world, parent, || {
+                <FeathersColorInput as SceneComponent>::scene(FeathersColorInputProps {
+                    opaque_color_percentage: props.value,
+                })
+            }),
+            PANE => spawn_under(world, parent, pane),
+            PANE_HEADER => spawn_under(world, parent, pane_header),
+            PANE_HEADER_DIVIDER => spawn_under(world, parent, pane_header_divider),
+            PANE_BODY => spawn_under(world, parent, pane_body),
+            SUBPANE => spawn_under(world, parent, subpane),
+            SUBPANE_HEADER => spawn_under(world, parent, subpane_header),
+            SUBPANE_BODY => spawn_under(world, parent, subpane_body),
+            GROUP => spawn_under(world, parent, group),
+            GROUP_HEADER => spawn_under(world, parent, group_header),
+            GROUP_BODY => spawn_under(world, parent, group_body),
+            FLEX_SPACER => spawn_under(world, parent, flex_spacer),
+            ICON => {
+                let path = kept(text);
+                if props.flag != 0 {
+                    spawn_under(world, parent, || icon_untinted(path))
+                } else {
+                    spawn_under(world, parent, || icon(path))
+                }
+            }
+            DIALOG => spawn_under(world, parent, || {
+                <FeathersDialog as SceneComponent>::scene(FeathersDialogProps { contents: Box::new(bsn_list! {}), width: width(props.extent) })
+            }),
+            FLOATING_DIALOG => spawn_under(world, parent, || {
+                <FeathersFloatingDialog as SceneComponent>::scene(FeathersFloatingDialogProps {
+                    title: text.to_string(),
+                    contents: Box::new(bsn_list! {}),
+                    width: width(props.extent),
+                    left: px(props.left),
+                    top: px(props.top),
+                })
+            }),
+            DIALOG_HEADER => spawn_under(world, parent, || <FeathersDialogHeader as SceneComponent>::scene(())),
+            DIALOG_BODY => spawn_under(world, parent, || <FeathersDialogBody as SceneComponent>::scene(())),
+            DIALOG_FOOTER => spawn_under(world, parent, || <FeathersDialogFooter as SceneComponent>::scene(())),
+            DIALOG_CLOSE => spawn_under(world, parent, || <FeathersDialogClose as SceneComponent>::scene(())),
             _ => return None,
         };
         Some(entity)
@@ -368,50 +643,18 @@ pub unsafe extern "C" fn bcs_feathers_theme_color(entity: u64, slot: i32, token:
     })
 }
 
-/// Writes a number input's value, of `kind` zero `f32`, one `f64`, two `i32` and three `i64`,
-/// from `value` for the first two and `whole` for the last two. The kind is the one its changes
-/// are then reported in.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_feathers_number_set(entity: u64, kind: i32, value: f64, whole: i64) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (entity, kind, value, whole);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use bevy::ecs::entity::Entity;
-            use bevy::feathers::controls::NumberInputValue;
-
-            let number = match kind {
-                0 => NumberInputValue::F32(value as f32),
-                1 => NumberInputValue::F64(value),
-                2 => NumberInputValue::I32(whole as i32),
-                3 => NumberInputValue::I64(whole),
-                _ => return status::NULL_ARG,
-            };
-            crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
-                    return status::NO_ENTITY;
-                };
-                input.insert(number);
-                status::OK
-            })
-        }
-    })
-}
-
-/// Reads a number input's value into `kind`, `value` and `whole`, as
-/// [`bcs_feathers_number_set`] writes them, or answers [`status::NOT_PRESENT`] where it holds none.
+/// Writes into `out` the node a control's contents go under, where Bevy's props would hold them as
+/// a scene. A modal dialog's panel, a floating dialog's body, and the scrolling part of a list
+/// view or of a select's list, the first such node below the control, so what C# spawns there is
+/// laid out as Bevy's props would have it. Answers [`status::NOT_PRESENT`] for a control with no
+/// such node.
 ///
 /// # Safety
-/// `kind`, `value` and `whole` must each be valid for one write.
+/// `out` must be valid for one write.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_feathers_number_get(entity: u64, kind: *mut i32, value: *mut f64, whole: *mut i64) -> i32 {
+pub unsafe extern "C" fn bcs_feathers_contents(entity: u64, out: *mut u64) -> i32 {
     crate::interop::guard(|| {
-        if kind.is_null() || value.is_null() || whole.is_null() {
+        if out.is_null() {
             return status::NULL_ARG;
         }
 
@@ -424,113 +667,38 @@ pub unsafe extern "C" fn bcs_feathers_number_get(entity: u64, kind: *mut i32, va
         #[cfg(feature = "render")]
         {
             use bevy::ecs::entity::Entity;
-            use bevy::feathers::controls::NumberInputValue;
+            use bevy::ecs::hierarchy::Children;
+            use bevy::ecs::world::EntityRef;
+            use bevy::feathers::controls::{FeathersDialog, FeathersDialogBody, FeathersFloatingDialog};
+            use bevy::ui_widgets::{ModalDialog, ScrollArea};
+            use std::collections::VecDeque;
 
             crate::state::with_world(|world| {
-                let Ok(input) = world.get_entity(Entity::from_bits(entity)) else {
+                let root = Entity::from_bits(entity);
+                let Ok(control) = world.get_entity(root) else {
                     return status::NO_ENTITY;
                 };
-                let Some(number) = input.get::<NumberInputValue>() else {
-                    return status::NOT_PRESENT;
-                };
-                let (read, as_float, as_whole) = match *number {
-                    NumberInputValue::F32(v) => (0, v as f64, 0),
-                    NumberInputValue::F64(v) => (1, v, 0),
-                    NumberInputValue::I32(v) => (2, v as f64, v as i64),
-                    NumberInputValue::I64(v) => (3, v as f64, v),
-                };
-                unsafe {
-                    *kind = read;
-                    *value = as_float;
-                    *whole = as_whole;
-                }
-                status::OK
-            })
-        }
-    })
-}
-
-/// Bounds a number input's value, Bevy's `HardLimit` where `hard` is non-zero, which typing and
-/// dragging cannot pass, and its `SoftLimit` otherwise, which a drag stays within and typing can
-/// pass. The range is of `kind` as [`bcs_feathers_number_set`] numbers it, from `min` to `max` for
-/// the floats and `min_whole` to `max_whole` for the integers.
-#[unsafe(no_mangle)]
-pub extern "C" fn bcs_feathers_number_limit(
-    entity: u64,
-    hard: i32,
-    kind: i32,
-    min: f64,
-    max: f64,
-    min_whole: i64,
-    max_whole: i64,
-) -> i32 {
-    crate::interop::guard(|| {
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (entity, hard, kind, min, max, min_whole, max_whole);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use bevy::ecs::entity::Entity;
-            use bevy::feathers::controls::{HardLimit, NumberInputRange, SoftLimit};
-
-            let range = match kind {
-                0 => NumberInputRange::F32(min as f32..=max as f32),
-                1 => NumberInputRange::F64(min..=max),
-                2 => NumberInputRange::I32(min_whole as i32..=max_whole as i32),
-                3 => NumberInputRange::I64(min_whole..=max_whole),
-                _ => return status::NULL_ARG,
-            };
-            crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
-                    return status::NO_ENTITY;
-                };
-                if hard != 0 {
-                    input.insert(HardLimit(range));
+                let wanted: fn(&EntityRef) -> bool = if control.contains::<FeathersDialog>() {
+                    |node| node.contains::<ModalDialog>()
+                } else if control.contains::<FeathersFloatingDialog>() {
+                    |node| node.contains::<FeathersDialogBody>()
                 } else {
-                    input.insert(SoftLimit(range));
-                }
-                status::OK
-            })
-        }
-    })
-}
-
-/// Has a number input show its value in units, Bevy's `NumberInputUnits` by the id its registry
-/// knows the units under, such as `length_meters`, `time_seconds` or `angle_degrees`, where typing
-/// a value takes it in any unit of that dimension and the value is held in the first.
-///
-/// # Safety
-/// `units` must be valid for `len` bytes of UTF-8.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_feathers_number_units(entity: u64, units: *const u8, len: i32) -> i32 {
-    crate::interop::guard(|| {
-        if units.is_null() || len <= 0 {
-            return status::NULL_ARG;
-        }
-        let Ok(units) = core::str::from_utf8(unsafe { core::slice::from_raw_parts(units, len as usize) }) else {
-            return status::NULL_ARG;
-        };
-
-        #[cfg(not(feature = "render"))]
-        {
-            let _ = (entity, units);
-            status::UNSUPPORTED
-        }
-
-        #[cfg(feature = "render")]
-        {
-            use bevy::ecs::entity::Entity;
-            use bevy::feathers::controls::NumberInputUnits;
-
-            crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
-                    return status::NO_ENTITY;
+                    |node| node.contains::<ScrollArea>()
                 };
-                input.insert(NumberInputUnits(units.into()));
-                status::OK
+
+                // Breadth first, so the nearest such node is the one taken.
+                let mut waiting = VecDeque::from([root]);
+                while let Some(next) = waiting.pop_front() {
+                    let Ok(node) = world.get_entity(next) else { continue };
+                    if next != root && wanted(&node) {
+                        unsafe { *out = next.to_bits() };
+                        return status::OK;
+                    }
+                    if let Some(children) = node.get::<Children>() {
+                        waiting.extend(children.iter());
+                    }
+                }
+                status::NOT_PRESENT
             })
         }
     })
@@ -545,6 +713,9 @@ mod tests {
         assert_eq!(core::mem::offset_of!(BcsFeathersProps, min), 8);
         assert_eq!(core::mem::offset_of!(BcsFeathersProps, token), 16);
         assert_eq!(core::mem::offset_of!(BcsFeathersProps, token_len), 24);
-        assert_eq!(core::mem::size_of::<BcsFeathersProps>(), 32);
+        assert_eq!(core::mem::offset_of!(BcsFeathersProps, value), 28);
+        assert_eq!(core::mem::offset_of!(BcsFeathersProps, count), 36);
+        assert_eq!(core::mem::offset_of!(BcsFeathersProps, top), 52);
+        assert_eq!(core::mem::size_of::<BcsFeathersProps>(), 56);
     }
 }

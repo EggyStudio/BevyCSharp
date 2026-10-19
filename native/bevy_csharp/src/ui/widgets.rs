@@ -4,7 +4,7 @@ use super::*;
 
 /// Makes one of Bevy's widgets keep its own state, `0` a slider its value, `1` a checkbox whether
 /// it is checked, `2` a radio group which of its buttons is, `3` a tab list which of its tabs is
-/// selected.
+/// selected, `4` a list box which of its rows is, and `5` a Feathers color input its color.
 ///
 /// A widget only reports a change, as an event, and Bevy's examples attach Bevy's own observer
 /// that writes it back, which a C# game cannot hold. This attaches it, so a slider follows a drag
@@ -20,8 +20,10 @@ pub extern "C" fn bcs_ui_widget_self_update(entity: u64, kind: i32) -> i32 {
 
         #[cfg(feature = "render")]
         {
+            use bevy::feathers::controls::color_input_self_update;
             use bevy::ui_widgets::{
-                checkbox_self_update, radio_self_update, slider_self_update, tablist_self_update,
+                checkbox_self_update, listbox_update_selection, radio_self_update, slider_self_update,
+                tablist_self_update,
             };
 
             with_world(|world| {
@@ -41,6 +43,12 @@ pub extern "C" fn bcs_ui_widget_self_update(entity: u64, kind: i32) -> i32 {
                     }
                     3 => {
                         entity_mut.observe(tablist_self_update);
+                    }
+                    4 => {
+                        entity_mut.observe(listbox_update_selection);
+                    }
+                    5 => {
+                        entity_mut.observe(color_input_self_update);
                     }
                     _ => return status::NULL_ARG,
                 }

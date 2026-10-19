@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Bevy.Interop;
 
 namespace Bevy;
 
@@ -126,6 +127,54 @@ public struct Color : IEquatable<Color>
 
     /// <summary>The color with another alpha.</summary>
     public readonly Color WithAlpha(float alpha) => new(R, G, B, alpha);
+
+    /// <summary>
+    /// A color from its four components in one of Bevy's color spaces, converted as Bevy converts it.
+    /// </summary>
+    /// <remarks>
+    /// The components are in the order Bevy's type for the space holds them, as
+    /// <see cref="ColorSpace"/> names them, the last always alpha. A hue is in degrees and the rest
+    /// mostly between zero and one, as Bevy's own types hold them.
+    /// </remarks>
+    /// <param name="space">The space the components are in.</param>
+    /// <param name="components">The four components.</param>
+    /// <example>
+    /// <code>
+    /// var amber = Color.From(ColorSpace.Okhsl, new Vec4(60f, 0.9f, 0.6f, 1f));
+    /// </code>
+    /// </example>
+    public static unsafe Color From(ColorSpace space, Vec4 components)
+    {
+        float* read = stackalloc float[4] { components.X, components.Y, components.Z, components.W };
+        float* linear = stackalloc float[4];
+        Native.Check(Native.bcs_color_from((int)space, read, linear), $"reading a color in {space}");
+        return new Color(linear[0], linear[1], linear[2], linear[3]);
+    }
+
+    /// <summary>
+    /// The color's four components in one of Bevy's color spaces, converted as Bevy converts it, in
+    /// the order <see cref="From"/> takes them.
+    /// </summary>
+    /// <param name="space">The space to read the color in.</param>
+    public readonly unsafe Vec4 In(ColorSpace space)
+    {
+        float* linear = stackalloc float[4] { R, G, B, A };
+        float* components = stackalloc float[4];
+        Native.Check(Native.bcs_color_to((int)space, linear, components), $"reading {this} in {space}");
+        return new Vec4(components[0], components[1], components[2], components[3]);
+    }
+
+    /// <summary>
+    /// The color as sRGB hex, <c>#RRGGBB</c>, or <c>#RRGGBBAA</c> where it is not opaque, as Bevy's
+    /// <c>Srgba::to_hex</c> writes it and <see cref="FromHex"/> reads it.
+    /// </summary>
+    public readonly string ToHex()
+    {
+        var srgb = ToSrgb();
+        static byte Byte(float value) => (byte)MathF.Round(Math.Clamp(value, 0f, 1f) * 255f);
+        var (r, g, b, a) = (Byte(srgb.X), Byte(srgb.Y), Byte(srgb.Z), Byte(srgb.W));
+        return a == 255 ? $"#{r:X2}{g:X2}{b:X2}" : $"#{r:X2}{g:X2}{b:X2}{a:X2}";
+    }
 
     // The sRGB transfer function, as Bevy's own Srgba applies it, so a color converted on this side
     // and one Bevy converted agree.

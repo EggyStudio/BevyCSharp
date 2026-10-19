@@ -1331,6 +1331,41 @@ static Entity LabelDim(Entity parent, string text);             // A label in th
 static Entity LabelSmall(Entity parent, string text);           // A smaller label, Bevy's label_small
 static Entity NumberInput(Entity parent, string? letter = null, string? sigil = null);  // A number input, Bevy's FeathersNumberInput, a field the value is typed into or dragged across, with a letter at its left and a strip in a theme color along its edge where given
 static Entity VirtualKeyboard(Entity parent, string[][] keys);  // A virtual keyboard, Bevy's VirtualKeyboard, a button a key in rows, which reports the key pressed as VirtualKeyPressed on the keyboard
+static Entity Menu(Entity parent);                              // A menu, Bevy's FeathersMenu, which holds its button and its popup, spawned under it with MenuButton and MenuPopup
+static Entity MenuButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All);  // A menu's button, Bevy's FeathersMenuButton, which opens its popup
+static Entity MenuToolButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All);  // A menu's square button for a symbol, Bevy's FeathersMenuToolButton
+static Entity MenuPopup(Entity menu);                           // A menu's popup, Bevy's FeathersMenuPopup, its items spawned under it
+static Entity MenuItem(Entity popup, string caption);           // A menu's item, Bevy's FeathersMenuItem, which reports Activate
+static Entity MenuDivider(Entity popup);                        // A line between a menu's items, Bevy's FeathersMenuDivider
+static Entity Select(Entity parent, string[] options, int selected = -1, int maxVisible = 8, RoundedCorners corners = RoundedCorners.All);  // A select, Bevy's FeathersSelect, a button showing the option chosen that opens a list of its options
+static Entity ListView(Entity parent, string[] rows, int selected = -1);  // A list view, Bevy's FeathersListView, rows in a column that scrolls past its height, which reports the row clicked as a ValueChange of its Entity
+static Entity ListRow(Entity list, string caption);             // A row of a list view, Bevy's FeathersListRow, with its caption
+static Entity DisclosureToggle(Entity parent);                  // A toggle drawn as a chevron pointing right or down, Bevy's FeathersDisclosureToggle, a checkbox for showing what is folded under a heading
+static Entity TextInputContainer(Entity parent);                // The frame a text input is drawn in, Bevy's FeathersTextInputContainer, its input spawned under it with TextInput
+static Entity TextInput(Entity container, float visibleWidth = 0f, int maxCharacters = 0);  // A text input, Bevy's FeathersTextInput, a field as SetEditableText makes one, in the theme's font and colors
+static Entity ColorSwatch(Entity parent, float opaquePercentage = 0f, RoundedCorners corners = RoundedCorners.All, float cornerRadius = 5f);  // A swatch showing a color, Bevy's FeathersColorSwatch, the color its reflected ColorSwatchValueRef holds
+static Entity ColorPlane(Entity parent, ColorPlaneAxes axes);   // A plane two parts of a color are picked on, Bevy's FeathersColorPlane, which reports the point picked as a ValueChange of a Vec2
+static Entity ColorSlider(Entity parent, ColorChannel channel, float value = 0f);  // A slider of one part of a color, Bevy's FeathersColorSlider, which reports the value asked for as a ValueChange of a float
+static Entity ColorInput(Entity parent, float opaquePercentage = 0f);  // A color input, Bevy's FeathersColorInput, a swatch that opens a picker of a wheel, planes and sliders, and reports the color picked as a ValueChange of a Color
+static Entity Pane(Entity parent);                              // An editor's pane, Bevy's pane, holding its header and its body
+static Entity PaneHeader(Entity pane);                          // A pane's header, Bevy's pane_header, a row of its tool buttons
+static Entity PaneHeaderDivider(Entity header);                 // A line between a pane header's buttons, Bevy's pane_header_divider
+static Entity PaneBody(Entity pane);                            // A pane's body, Bevy's pane_body
+static Entity Subpane(Entity parent);                           // A pane within a pane, Bevy's subpane, holding its header and its body
+static Entity SubpaneHeader(Entity subpane);                    // A subpane's header, Bevy's subpane_header
+static Entity SubpaneBody(Entity subpane);                      // A subpane's body, Bevy's subpane_body
+static Entity Group(Entity parent);                             // A group of properties, Bevy's group, holding its header and its body
+static Entity GroupHeader(Entity group);                        // A group's header, Bevy's group_header
+static Entity GroupBody(Entity group);                          // A group's body, Bevy's group_body
+static Entity FlexSpacer(Entity parent);                        // A node that takes the room left in its row, Bevy's flex_spacer
+static Entity Icon(Entity parent, string image, bool tinted = true);  // An icon fourteen pixels tall, Bevy's icon, tinted as the text around it is, or Bevy's icon_untinted
+static Entity Dialog(Entity parent, float width = 0f);          // A modal dialog over the window, Bevy's FeathersDialog, its contents spawned under ContentsOf it, as DialogHeader, DialogBody and DialogFooter
+static Entity FloatingDialog(Entity parent, string title, float width = 0f, float left = 120f, float top = 120f);  // A dialog floating over the window, dragged by its title, Bevy's FeathersFloatingDialog, its contents spawned under ContentsOf it
+static Entity DialogHeader(Entity dialog);                      // A dialog's header, Bevy's FeathersDialogHeader, its title and close button in a row
+static Entity DialogBody(Entity dialog);                        // A dialog's body, Bevy's FeathersDialogBody
+static Entity DialogFooter(Entity dialog);                      // A dialog's footer, Bevy's FeathersDialogFooter, its buttons in a row
+static Entity DialogClose(Entity header);                       // A dialog's close button, Bevy's FeathersDialogClose, which reports RequestClose
+static Entity ContentsOf(Entity control);                       // The node a control's contents go under, where Bevy's own props would hold them, a dialog's panel, a floating dialog's body, or the part of a list view or a select that scrolls
 static void SetNumber(Entity input, float value);               // Writes a number input's value as a Single, the type it then reports
 static void SetNumber(Entity input, double value);              // Writes a number input's value as a Double, the type it then reports
 static void SetNumber(Entity input, int value);                 // Writes a number input's value as an Int32, the type it then reports
@@ -1682,6 +1717,9 @@ static Color FromSrgb8(byte r, byte g, byte b, byte a = 255);   // A color from 
 static Color FromHsl(float hue, float saturation, float lightness, float alpha = 1f);  // A color from a hue in degrees, a saturation and a lightness between zero and one, as Bevy's Color::hsl gives it
 Vec4 ToSrgb();                                                  // The color as sRGB components between zero and one, alpha unchanged
 Color WithAlpha(float alpha);                                   // The color with another alpha
+static Color From(ColorSpace space, Vec4 components);           // A color from its four components in one of Bevy's color spaces, converted as Bevy converts it
+Vec4 In(ColorSpace space);                                      // The color's four components in one of Bevy's color spaces, converted as Bevy converts it, in the order From takes them
+string ToHex();                                                 // The color as sRGB hex, #RRGGBB, or #RRGGBBAA where it is not opaque, as Bevy's Srgba::to_hex writes it and FromHex reads it
 ```
 
 ### `Transform`

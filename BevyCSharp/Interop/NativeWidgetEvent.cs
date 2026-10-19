@@ -33,4 +33,16 @@ public struct NativeWidgetEvent
 
     /// <summary>For a menu opened, which item takes the focus, as <see cref="NavAction"/> numbers it.</summary>
     public int Navigation;
+
+    /// <summary>A color plane's two numbers, or a color input's linear red, green, blue and alpha.</summary>
+    public float VectorX;
+
+    /// <summary>The second of <see cref="VectorX"/>'s numbers.</summary>
+    public float VectorY;
+
+    /// <summary>The third of <see cref="VectorX"/>'s numbers.</summary>
+    public float VectorZ;
+
+    /// <summary>The fourth of <see cref="VectorX"/>'s numbers.</summary>
+    public float VectorW;
 }

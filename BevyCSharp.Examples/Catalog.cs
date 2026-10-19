@@ -389,6 +389,7 @@ internal static class Catalog
         new("display_and_visibility", DisplayAndVisibility.Build),
         new("editable_text_filter", EditableTextFilter.Build),
         new("feathers_counter", FeathersCounter.Build, FeathersCounter.Configure),
+        new("feathers_gallery", FeathersGallery.Build, FeathersGallery.Configure),
         new("feathers_number_input", FeathersNumberInput.Build, FeathersNumberInput.Configure),
         new("flex_layout", FlexLayout.Build),
         new("ghost_nodes", GhostNodes.Build),

@@ -818,6 +818,7 @@ delegate void Bevy.CloneHook<T>(ref T component)
 struct Bevy.Color : IEquatable<Color>
   Color WithAlpha(float alpha)
   Color(float r, float g, float b, float a = 1f)
+  Vec4 In(ColorSpace space)
   Vec4 ToSrgb()
   bool Equals(Color other)
   float A
@@ -829,6 +830,7 @@ struct Bevy.Color : IEquatable<Color>
   override string ToString()
   static (float, float, float, float) op_Implicit(Color color)
   static Color Black { get; }
+  static Color From(ColorSpace space, Vec4 components)
   static Color FromHex(string hex)
   static Color FromHsl(float hue, float saturation, float lightness, float alpha = 1f)
   static Color FromSrgb(float r, float g, float b, float a = 1f)
@@ -837,9 +839,21 @@ struct Bevy.Color : IEquatable<Color>
   static Color White { get; }
   static bool op_Equality(Color a, Color b)
   static bool op_Inequality(Color a, Color b)
+  string ToHex()
   void Deconstruct(out float r, out float g, out float b, out float a)
 sealed class Bevy.ColorAttribute : Attribute
   ColorAttribute()
+enum Bevy.ColorChannel : int
+  Alpha = 6
+  Blue = 2
+  Green = 1
+  HslHue = 3
+  HslLightness = 5
+  HslSaturation = 4
+  OkhslHue = 7
+  OkhslLightness = 9
+  OkhslSaturation = 8
+  Red = 0
 sealed class Bevy.ColorMaterialSettings
   (float, float, float, float) Color { get; set; }
   AlphaMode2d AlphaMode { get; set; }
@@ -849,6 +863,28 @@ sealed class Bevy.ColorMaterialSettings
   Vec2 UvScale { get; set; }
   float AlphaCutoff { get; set; }
   float UvRotation { get; set; }
+enum Bevy.ColorPlaneAxes : int
+  GreenBlue = 2
+  HueLightness = 4
+  HueSaturation = 3
+  OkhslHueLightness = 6
+  OkhslHueSaturation = 5
+  RedBlue = 1
+  RedGreen = 0
+enum Bevy.ColorSpace : int
+  Hsl = 2
+  Hsv = 3
+  Hwb = 4
+  Lab = 5
+  Lch = 6
+  LinearRgb = 1
+  Okhsl = 9
+  Okhsv = 10
+  Okhwb = 11
+  Oklab = 7
+  Oklch = 8
+  Srgb = 0
+  Xyz = 12
 sealed class Bevy.CommandAttribute : Attribute
   CommandAttribute(string name = "", string help = "")
   string Help { get; }
@@ -1730,12 +1766,47 @@ static class Bevy.Feathers
   static Entity Button(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
   static Entity Caption(Entity parent, string text)
   static Entity Checkbox(Entity parent, string caption)
+  static Entity ColorInput(Entity parent, float opaquePercentage = 0f)
+  static Entity ColorPlane(Entity parent, ColorPlaneAxes axes)
+  static Entity ColorSlider(Entity parent, ColorChannel channel, float value = 0f)
+  static Entity ColorSwatch(Entity parent, float opaquePercentage = 0f, RoundedCorners corners = RoundedCorners.All, float cornerRadius = 5f)
+  static Entity ContentsOf(Entity control)
+  static Entity Dialog(Entity parent, float width = 0f)
+  static Entity DialogBody(Entity dialog)
+  static Entity DialogClose(Entity header)
+  static Entity DialogFooter(Entity dialog)
+  static Entity DialogHeader(Entity dialog)
+  static Entity DisclosureToggle(Entity parent)
+  static Entity FlexSpacer(Entity parent)
+  static Entity FloatingDialog(Entity parent, string title, float width = 0f, float left = 120f, float top = 120f)
+  static Entity Group(Entity parent)
+  static Entity GroupBody(Entity group)
+  static Entity GroupHeader(Entity group)
+  static Entity Icon(Entity parent, string image, bool tinted = true)
   static Entity Label(Entity parent, string text)
   static Entity LabelDim(Entity parent, string text)
   static Entity LabelSmall(Entity parent, string text)
+  static Entity ListRow(Entity list, string caption)
+  static Entity ListView(Entity parent, string[] rows, int selected = -1)
+  static Entity Menu(Entity parent)
+  static Entity MenuButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All)
+  static Entity MenuDivider(Entity popup)
+  static Entity MenuItem(Entity popup, string caption)
+  static Entity MenuPopup(Entity menu)
+  static Entity MenuToolButton(Entity menu, string caption, bool arrow = true, RoundedCorners corners = RoundedCorners.All)
   static Entity NumberInput(Entity parent, string? letter = null, string? sigil = null)
+  static Entity Pane(Entity parent)
+  static Entity PaneBody(Entity pane)
+  static Entity PaneHeader(Entity pane)
+  static Entity PaneHeaderDivider(Entity header)
   static Entity Radio(Entity parent, string caption)
+  static Entity Select(Entity parent, string[] options, int selected = -1, int maxVisible = 8, RoundedCorners corners = RoundedCorners.All)
   static Entity Slider(Entity parent, float min = 0f, float max = 1f)
+  static Entity Subpane(Entity parent)
+  static Entity SubpaneBody(Entity subpane)
+  static Entity SubpaneHeader(Entity subpane)
+  static Entity TextInput(Entity container, float visibleWidth = 0f, int maxCharacters = 0)
+  static Entity TextInputContainer(Entity parent)
   static Entity ToggleSwitch(Entity parent)
   static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
   static Entity VirtualKeyboard(Entity parent, string[][] keys)
@@ -1750,6 +1821,10 @@ static class Bevy.Feathers
   static void SetNumberLimit(Entity input, long min, long max, bool hard = false)
   static void SetNumberUnits(Entity input, NumberUnits units)
   static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background)
+static class Bevy.FeathersIcon
+  const string ChevronDown = "embedded://bevy_feathers/assets/icons/chevron-down.png"
+  const string ChevronRight = "embedded://bevy_feathers/assets/icons/chevron-right.png"
+  const string X = "embedded://bevy_feathers/assets/icons/x.png"
 static class Bevy.FeathersToken
   const string ButtonBg = "feathers.button.bg"
   const string ButtonBgDisabled = "feathers.button.bg.disabled"
@@ -2871,11 +2946,18 @@ struct Bevy.Interop.NativeEffectsConfig.<CompensationCurve>e__FixedBuffer
   float FixedElementField
 struct Bevy.Interop.NativeFeathersProps
   byte* Token
+  float Extent
+  float Left
   float Max
   float Min
+  float Top
+  float Value
   int Corners
+  int Count
+  int Selected
   int TokenLength
   int Variant
+  uint Flag
 struct Bevy.Interop.NativeFocusedKey
   NativeFocusedKey.<Logical>e__FixedBuffer Logical
   NativeFocusedKey.<Text>e__FixedBuffer Text
@@ -3598,6 +3680,10 @@ struct Bevy.Interop.NativeViewImage
   int Mips
 struct Bevy.Interop.NativeWidgetEvent
   float Value
+  float VectorW
+  float VectorX
+  float VectorY
+  float VectorZ
   int Action
   int Kind
   int Navigation
@@ -12146,6 +12232,16 @@ enum Bevy.RenderErrorPolicy : int
   Quit = 0
   Recover = 3
   StopRendering = 2
+readonly struct Bevy.RequestClose : IEntityEvent, IEquatable<RequestClose>, IPropagatingEvent, IReportedEvent
+  Entity Source { get; init; }
+  RequestClose(Entity Source)
+  bool Equals(RequestClose other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(RequestClose left, RequestClose right)
+  static bool op_Inequality(RequestClose left, RequestClose right)
+  void Deconstruct(out Entity Source)
 readonly struct Bevy.Rot2 : IEquatable<Rot2>
   Rot2(float Cos, float Sin)
   bool Equals(Rot2 other)
@@ -13394,6 +13490,8 @@ sealed class Bevy.UiTextSettings
   float LineHeight { get; set; }
 enum Bevy.UiWidgetKind : int
   Checkbox = 1
+  ColorInput = 5
+  ListBox = 4
   RadioGroup = 2
   Slider = 0
   TabList = 3

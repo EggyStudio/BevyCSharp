@@ -30,6 +30,16 @@ var grass = Render.CreateMaterial(Color.FromSrgb8(76, 128, 76));
 var sky = new MaterialSettings { BaseColor = Color.FromHsl(210f, 0.6f, 0.7f), Unlit = true };
 ```
 
+Each of Bevy's other color spaces is reached by `Color.From` and `Color.In`, converted as Bevy
+converts it, so a palette made in Okhsl, whose steps of lightness look even, matches Bevy's, and
+`ToHex` writes a color as Bevy's `Srgba::to_hex` does:
+
+```csharp
+var amber = Color.From(ColorSpace.Okhsl, new Vec4(60f, 0.9f, 0.6f, 1f));   // hue, saturation, lightness, alpha
+Vec4 hsl = amber.In(ColorSpace.Hsl);
+string hex = amber.ToHex();                                                  // #RRGGBB
+```
+
 A texture is combined with its matching factor rather than replacing it, so a base color map on the
 default white shows unchanged and tinting it is a matter of setting a color. The image need not have
 finished loading, because the material holds a handle rather than pixels. Five maps are bound this

@@ -34,4 +34,9 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_feathers_number_units(ulong entity, byte* units, int length);
+
+    /// <summary>Writes the node a control's contents go under.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_feathers_contents(ulong entity, ulong* contents);
 }

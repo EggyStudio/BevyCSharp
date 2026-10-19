@@ -534,6 +534,30 @@ ctx.Ecs.Observe<VirtualKeyPressed>(keyboard, on =>
     Ui.EditText(field, on.Event.Key == "backspace" ? TextEdit.Backspace : TextEdit.Insert(on.Event.Key)));
 ```
 
+The rest of Feathers is spawned the same way, each part under the one that holds it. A menu holds
+its button and its popup, the popup its items. A select or a list view takes its rows as text with
+the one chosen, and reports a row clicked as a `ValueChange<Entity>`, a select's row carrying
+`OptionIndexRef`. A color slider, a plane and a swatch show a color the game keeps in step through
+their reflected `SliderBaseColorRef`, `ColorPlaneValueRef` and `ColorSwatchValueRef`, a plane
+reporting a `ValueChange<Vec2>` and a color input a `ValueChange<Color>`. A pane, a subpane and a
+group hold their header and body. A dialog's contents go under `Feathers.ContentsOf` it, where
+Bevy's props would put them, and it asks to close with `RequestClose`:
+
+<!-- compiled with:
+Entity column = default, quit = default;
+-->
+```csharp
+var menu = Feathers.Menu(column);
+Feathers.MenuButton(menu, "File");
+var popup = Feathers.MenuPopup(menu);
+ctx.Ecs.Observe<Activate>(Feathers.MenuItem(popup, "Quit"), _ => App.RequestExit());
+
+var dialog = Feathers.Dialog(quit, width: 320f);
+var contents = Feathers.ContentsOf(dialog);
+Feathers.Caption(Feathers.DialogBody(contents), "Quit now?");
+ctx.Ecs.Observe<RequestClose>(dialog, on => on.Ecs.Despawn(dialog));
+```
+
 ---
 
 Before this, [Gizmos](gizmos.md).

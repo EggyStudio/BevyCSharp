@@ -32,7 +32,7 @@ pub struct BcsWidgetEvent {
     /// the tab a tab list's did, the bits of a number input's `f64` or `i64`, its `i32` widened,
     /// or a virtual key's row above its place in the row.
     pub other: u64,
-    /// Which of the eleven kinds, in the order of [`spawn`]'s match.
+    /// Which of the fourteen kinds, in the order of [`spawn`]'s match.
     pub kind: i32,
     /// The value of a change that is a number, a slider's.
     pub value: f32,
@@ -48,6 +48,9 @@ pub struct BcsWidgetEvent {
     /// For a menu opened, which of its items takes the focus, zero the next, one the previous,
     /// two the first and three the last.
     pub navigation: i32,
+    /// The value of a change that is a vector, a color plane's two numbers or a color input's four,
+    /// linear red, green, blue and alpha.
+    pub vector: [f32; 4],
 }
 
 /// What C# is called with, the event, valid only for the call, and the handle C# finds its
@@ -214,6 +217,38 @@ mod observers {
                     forward(&mut world, target, report);
                 },
             ),
+            11 => Observer::new(move |event: On<ValueChange<bevy::math::Vec2>>, mut world: DeferredWorld| {
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    vector: [event.value.x, event.value.y, 0.0, 0.0],
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
+                forward(&mut world, target, report);
+            }),
+            12 => Observer::new(move |event: On<ValueChange<bevy::color::Color>>, mut world: DeferredWorld| {
+                let linear = event.value.to_linear();
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    vector: [linear.red, linear.green, linear.blue, linear.alpha],
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
+                forward(&mut world, target, report);
+            }),
+            // A dialog asked to close, which goes on up its parents, so it is reported at the
+            // first step alone, as a menu's event is, and C# takes it up the parents itself.
+            13 => Observer::new(move |event: On<bevy::ui_widgets::RequestClose>, mut world: DeferredWorld| {
+                use bevy::ecs::event::EntityEvent;
+
+                if event.event_target() != event.original_event_target() {
+                    return;
+                }
+                let report = BcsWidgetEvent { entity: event.event_target().to_bits(), kind, ..Default::default() };
+                forward(&mut world, target, report);
+            }),
             _ => return None,
         };
 
@@ -290,6 +325,7 @@ mod tests {
         assert_eq!(core::mem::offset_of!(BcsWidgetEvent, is_final), 28);
         assert_eq!(core::mem::offset_of!(BcsWidgetEvent, action), 32);
         assert_eq!(core::mem::offset_of!(BcsWidgetEvent, navigation), 36);
-        assert_eq!(core::mem::size_of::<BcsWidgetEvent>(), 40);
+        assert_eq!(core::mem::offset_of!(BcsWidgetEvent, vector), 40);
+        assert_eq!(core::mem::size_of::<BcsWidgetEvent>(), 56);
     }
 }

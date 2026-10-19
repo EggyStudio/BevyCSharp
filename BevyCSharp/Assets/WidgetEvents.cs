@@ -16,6 +16,9 @@ internal static class WidgetEvents
     internal const int Int = 8;
     internal const int Long = 9;
     internal const int VirtualKey = 10;
+    internal const int Vector2 = 11;
+    internal const int ColorValue = 12;
+    internal const int Close = 13;
 
     /// <summary>The number the bridge reports a <see cref="ValueChange{T}"/> of <typeparamref name="T"/> under.</summary>
     /// <exception cref="NotSupportedException">No widget of Bevy's reports a value of that type.</exception>
@@ -27,11 +30,13 @@ internal static class WidgetEvents
         : typeof(T) == typeof(double) ? Double
         : typeof(T) == typeof(int) ? Int
         : typeof(T) == typeof(long) ? Long
+        : typeof(T) == typeof(Vec2) ? Vector2
+        : typeof(T) == typeof(Color) ? ColorValue
         : throw new NotSupportedException(
             $"No widget of Bevy's reports a ValueChange of {typeof(T).Name}. A slider reports a float, a "
             + "checkbox or a radio button a bool, a radio group the Entity of the button chosen, a "
-            + "tab list the Entity? of the tab chosen, and a number input the float, double, int or "
-            + "long it holds.");
+            + "tab list the Entity? of the tab chosen, a number input the float, double, int or long it "
+            + "holds, a color plane a Vec2 and a color input a Color.");
 
     /// <summary>Runs the observers of what a widget reported, as the bridge reported it.</summary>
     internal static void Trigger(ObserverRegistry registry, in NativeWidgetEvent reported)
@@ -55,6 +60,9 @@ internal static class WidgetEvents
                 var (row, column) = ((int)(reported.Other >> 32), (int)(uint)reported.Other);
                 registry.Trigger(new VirtualKeyPressed(entity, Feathers.KeyAt(entity, row, column), row, column));
                 break;
+            case Vector2: registry.Trigger(new ValueChange<Vec2>(entity, new Vec2(reported.VectorX, reported.VectorY), final)); break;
+            case ColorValue: registry.Trigger(new ValueChange<Color>(entity, new Color(reported.VectorX, reported.VectorY, reported.VectorZ, reported.VectorW), final)); break;
+            case Close: registry.Trigger(new RequestClose(entity)); break;
         }
     }
 }
