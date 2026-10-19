@@ -551,13 +551,10 @@ lavapipe and laid out by `build/capture-monitor-info.sway`, so its picture is th
 machine with podman or docker and no window opens on the machine's own screens. Where neither runs,
 it is captured as the words saying so.
 
-A picture is taken on a bridge built without Solari, `build/build-native.sh --render`, with
-`--meshlet` for `meshlet`, `test_meshlet` and `many_meshlet_materials`, as the native job builds the
-bridge the runner captures with and a game's package carries, and only `solari` and
-`solari_reflections` are taken on one built with `--solari`. Solari brings in Bevy's `dfg_lut`,
-which lights the specular term of every standard material from a precomputed table where a bridge
-without it uses a fitted curve, so on the pack run of `afcf8301` the runner drew `many_lights` 45.4
-percent and `many_cubes` 4.6 percent apart from pictures taken with it.
+A picture is the same taken on any bridge with the renderer, since every one lights the specular
+term of a standard material from Bevy's `dfg_lut` table, which Solari turns on as well. The three
+meshlet examples need a bridge built with `--meshlet` and the two Solari ones one built with
+`--solari`, and elsewhere each is captured as the words saying so.
 
 An example with nothing to draw, as most of Bevy's ECS examples are, prints instead. It runs
 headless for the frames its line in `Catalog.cs` gives, needing no renderer, and its capture is the

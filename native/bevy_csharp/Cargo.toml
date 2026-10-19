@@ -250,6 +250,12 @@ render = [
     # The tables a rectangular area light is shaded with, 46 kilobytes, embedded. Without them Bevy
     # draws no light from a RectLight and says so once.
     "bevy/area_light_luts",
+    # The table a standard material's specular term is lit from, 64 by 64 pairs of half floats, 14
+    # kilobytes compressed with zstd, embedded, where a bridge without it lights the term from a
+    # fitted curve. Solari turns it on as well, so with it here a bridge built with --solari lights a
+    # standard material as one without does, and a picture taken on either is the same. It needs the
+    # image features above and adds no crate.
+    "bevy/dfg_lut",
     # Windowing backends. Both are harmless off-platform. Winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
     # the native window system is used instead.

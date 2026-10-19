@@ -563,15 +563,6 @@ figure moves.
   device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
   Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
   draws them all, a cost outside this repository whose size is known only once it is traced.
-- **Pictures are taken on a bridge without Solari.** Solari turns on Bevy's `dfg_lut`, which lights
-  the specular term of every standard material from a table where a bridge without it uses a fitted
-  curve, so a picture is taken on a `--render` bridge as the runner's is (BUILDING.md), and one
-  taken on a bridge with Solari differs. Turning `dfg_lut` on in the render profile lights every
-  bridge from the same table, and since the image features it needs, `ktx2` and `zstd_rust`, are on
-  already, the lock does not change. Any bridge then takes a picture, and BUILDING.md's paragraph
-  comes out. It costs a small table in every render bridge, every 3D picture with a standard
-  material taken again and read, the pixel tests that measure a lit color measured again, and games
-  on the package lit a little otherwise than before, which the release notes say.
 - **The runner's software device leaves six examples uncompared.** The pack run captures on Mesa
   25.2's lavapipe with a `--render` bridge, so `clustered_decals`, which ends that lavapipe with a
   fault in its rasterizer, and the five examples drawn with meshlets or Solari are captured as words
