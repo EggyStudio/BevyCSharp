@@ -82,7 +82,18 @@ internal sealed class CliServer : IDisposable
     /// </remarks>
     public static readonly TimeSpan LongestWait = TimeSpan.FromHours(1);
 
+    /// <summary>How long the accepting thread waits for a call before it looks whether to stop.</summary>
+    private const int PollMicroseconds = 250_000;
+
     /// <summary>Takes calls until the listener is closed.</summary>
+    /// <remarks>
+    /// A call is waited for by polling the listener, which pins nothing, and accepted only once one
+    /// is waiting. A blocking accept keeps the buffer it writes the caller's address into pinned for
+    /// as long as it waits, a new one after each call, so a young object sat pinned in the newest
+    /// generation whenever a collection ran and held the space in front of it, which left the heap
+    /// a full collection compacts megabytes larger from one reading to the next with nothing
+    /// growing, as a soak of the stress program showed.
+    /// </remarks>
     private void Accept()
     {
         while (!_stopping)
@@ -91,6 +102,7 @@ internal sealed class CliServer : IDisposable
 
             try
             {
+                if (!_listener.Server.Poll(PollMicroseconds, SelectMode.SelectRead)) continue;
                 caller = _listener.AcceptTcpClient();
             }
             catch (Exception error) when (error is SocketException or ObjectDisposedException

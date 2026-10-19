@@ -38,8 +38,14 @@ public sealed class MemoryCommandTests
 
         Assert.NotNull(before);
         Assert.NotNull(after);
-        foreach (var name in new[] { "managed", "live", "heap", "process", "peak", "nativeBytes", "nativeBlocks" })
+        foreach (var name in new[] { "live", "heap", "process", "peak", "nativeBytes", "nativeBlocks" })
             Assert.True(before[name] > 0, $"{name} is {before[name]}");
+
+        // The heap a compacting collection leaves holds what is alive and the space pinned objects
+        // hold apart, never less, and the runtime's own total, which reads below zero with objects
+        // pinned, is left out.
+        Assert.True(before["heap"] >= before["live"], $"the heap of {before["heap"]} bytes holds less than the {before["live"]} alive");
+        Assert.False(before.ContainsKey("managed"));
 
         Assert.Equal(before["entities"] + 10, after["entities"]);
         Assert.True(after["entityIds"] >= after["entities"]);

@@ -595,14 +595,6 @@ figure moves.
   `--meshlet --solari` for those five, compares all six. It costs the jobs run in a container
   of a newer image or Mesa from an archive outside Ubuntu's, a second Linux bridge built in the
   native job, and those six measured first on that Mesa.
-- **The soak says two figures and does not judge them.** `build/soak-check.py` judges the live
-  bytes after a full collection and says the heap's size and the runtime's managed total beside
-  them, since the collector leaves the heap larger or smaller as it sees fit and the managed total
-  reads below zero with pinned objects. A compacting collection in `memory.collect` leaves the heap
-  at what is alive and what pinned objects hold apart, which can be judged as the live bytes are,
-  and the managed total leaves the answer, which says nothing the live bytes do not. It costs a
-  longer pause at each of a soak's collections, and an answer to `memory` without a field it had,
-  with docs/tools.md.
 - **The soak's rooms but one are not measured.** `build/soak-check.py` gives each figure a room
   past the first half's most, and only the live bytes' is written with the soaks it was measured
   from. The process's resident size, the bridge's bytes and blocks, the entities and the handles

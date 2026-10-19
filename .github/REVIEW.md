@@ -10,7 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `024c1113`, item 29's part (a) and nothing else, 7 files. The two sprite examples
+Reviewed up to `ddce5717`, item 29's part (b) and nothing else. Solari's panel leaves out the three
+pass timings and the total where the workflow runs, keeping the world cache's cell count, the header
+remark and the method's comment saying the times are the device's own. Before, the differ line
+allowed 3 percent, measured at 2.1 on lavapipe at `d17f0d97` with the timings in the picture; after,
+with the timings hidden through the capture script's export, two runs on the development machine's
+GPU differ in 0.023 percent of pixels past the comparison's step, the GPU against Mesa 26.2.2's
+lavapipe, which ran Solari's ray queries, in 0.173, and the new picture against the old checked-in
+one in 0.126, the noise alone well inside the shared 2 percent, so the line leaves the differ file
+and the paragraph leaves TODO.md's section; the checked-in picture is retaken on the editor bridge
+with Solari as BUILDING.md has it and the lavapipe picture passes against it. For part (h) the same
+run is evidence, Mesa 26.2.2's lavapipe drawing Solari whole on this machine, so a distribution
+image carrying Mesa 26 serves the Solari captures. The norm and script tests passed, 57 of 57.
+Right. Next part (c), the soak's heap judged after a compacting collection, then the parts in order;
+the owner's push of the twelve commits; and a pack run.
+
+Before it, `024c1113` came, item 29's part (a) and nothing else, 7 files. The two sprite examples
 take a seeded generator where the workflow runs, as the cake example does, and an unseeded one
 otherwise, the capture script exporting the workflow's variable so a local capture is seeded too,
 each header remark saying that where the workflow runs the sprites come from a seeded generator so
@@ -49,25 +64,6 @@ about a minute's cost, the words taking the picture's place where that fails. Th
 Decision 38's first half. Right. Next item 29's parts in order, (a) first, the two sprite examples
 seeded on the runner; the owner's push of the ten commits; and a pack run, whose capture shards take
 the container for the first time.
-
-Before it, `b7cd83db` came, the two declined rows marked and nothing else, a commit of documents and
-one comment, amended once before it was reported or pushed. `web_asset`'s row reads declined, since
-loading assets over https brings twenty-one crates into the bridge, an HTTP client with its TLS
-stack and the platform's certificate verifiers, for one example, and `compressed_image_saver`'s the
-same with seventeen crates and the texture compressors, some prebuilt; the table script counts a
-missing row whose note begins with declined as declined, EXAMPLES.md's summary reads 5 missing, 2 of
-them declined, its explanation adds why a crate is declined, and the README's status says three wait
-on something the bridge lacks and two are declined; TODO.md's two entries go and its paragraph says
-the system fonts wait on the decision to keep discovery off and the two are declined. The keyboard
-bitset's comment names its count as ulongs, the constant keeping its name for the surface until the
-next commit that changes it. The norm and documents script tests passed, 21 of 21, and the library
-builds with no warnings. Read before `monitor_info`, winit lists X11 monitors from the display's
-CRTCs and not from RandR 1.5's monitors, so a virtual X display with monitors set still gives one,
-and the route is a headless compositor in a container with its outputs laid out by its configuration
-and the whole layout captured, four outputs of 1280 by 720 in a two-by-two grid scaled to the
-gallery's size, each window naming its monitor. Right. Next `monitor_info` so, the capture job
-running the container where it can and otherwise a script under `build/` that takes the picture the
-same way on any machine with the container runtime, and the owner's push of the nine commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -831,39 +827,41 @@ from [SHARED.md](SHARED.md).
     `many_animated_sprites` seeded under the workflow, two lines off the differ list, done at
     `024c1113` on 2026-10-19, the pictures matching in every pixel across two bridges; (b) Solari's
     panel hiding the device's timings under the workflow, its room measured again for the noise
-    alone; (c) the soak's heap judged after a compacting collection in `memory.collect`, the managed
-    total dropped from the answer; (d) the soak's other rooms measured from soaks of the three
-    programs, the process figure read as private memory without the driver's mappings; (e) a
-    `TimeProvider` on the app's clock for the two async examples, their generators seeded under the
-    workflow, two lines off; (f) the bridge's clock held while an asset loads and between the
-    drive's commands, one hold serving the two animation examples and the drive's swing, every
-    capture taken again; (g) `dfg_lut` on in the render profile, the owner's decision, since games
-    on the package are then lit a little otherwise and every 3D picture is taken again (Decision
-    25); (h) a newer Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared
-    examples, the owner's decision on the jobs' image; (i) lavapipe's dropped bunnies traced and
-    reported to Mesa, outside the repository; (j) the anisotropy fault reported to Bevy, the owner's
-    decision, a patched shader declined; (k) the two helpers go with item 4's gaps; (l) runners with
-    a graphics card, the owner's purchase; (m) the norm's lists are item 2's. The mends follow item
-    4 as Decision 38 orders, unless the owner says the parts that need no decision may start while
-    the words for item 4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes
-    first and then this item in the order above; (g) `dfg_lut` goes on in the render profile with
-    the lock byte for byte the same; (h) and (l) are one, the capture jobs in a container of a
-    distribution image with a newer Mesa and a Linux bridge built with meshlets and Solari, no
-    runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
-    anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
-    earlier decline, with a test that fails when Bevy's original changes. Part (k) is whole at
-    `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's controller, the
-    radio buttons helper gone in Feathers' last step, where Bevy 0.20's own fourteen examples with
-    option rows share three files by path, a radio row of Feathers' radios under a group, a theme of
-    some sixty token colors replacing the whole and, in two of the fourteen, a labeled number input
-    holding a float with its precision and limit, ten of the fourteen written from 0.19.1 differing
-    from their sources by 100 to 560 lines in that swap, so the reviewer decided on 2026-10-19 that
-    the theme's setting from token colors is the package's own call, the port's helper of its own
-    goes, and one file mirroring Bevy's helper files the examples use at the pinned version, the
-    three, stays on the package script's list with the reason naming them, carrying what they carry
-    and nothing of the port's own, since the list's rule is against helpers of the port's own and a
-    mirror of what Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons
-    go with Feathers.
+    alone, done at `ddce5717` on 2026-10-19, the noise at 0.17 percent of pixels across devices
+    where the line allowed 3, and Mesa 26.2.2's lavapipe drawing Solari whole, evidence for (h); (c)
+    the soak's heap judged after a compacting collection in `memory.collect`, the managed total
+    dropped from the answer; (d) the soak's other rooms measured from soaks of the three programs,
+    the process figure read as private memory without the driver's mappings; (e) a `TimeProvider` on
+    the app's clock for the two async examples, their generators seeded under the workflow, two
+    lines off; (f) the bridge's clock held while an asset loads and between the drive's commands,
+    one hold serving the two animation examples and the drive's swing, every capture taken again;
+    (g) `dfg_lut` on in the render profile, the owner's decision, since games on the package are
+    then lit a little otherwise and every 3D picture is taken again (Decision 25); (h) a newer Mesa
+    on the runner with a `--meshlet --solari` bridge for the six uncompared examples, the owner's
+    decision on the jobs' image; (i) lavapipe's dropped bunnies traced and reported to Mesa, outside
+    the repository; (j) the anisotropy fault reported to Bevy, the owner's decision, a patched
+    shader declined; (k) the two helpers go with item 4's gaps; (l) runners with a graphics card,
+    the owner's purchase; (m) the norm's lists are item 2's. The mends follow item 4 as Decision 38
+    orders, unless the owner says the parts that need no decision may start while the words for item
+    4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes first and then this
+    item in the order above; (g) `dfg_lut` goes on in the render profile with the lock byte for byte
+    the same; (h) and (l) are one, the capture jobs in a container of a distribution image with a
+    newer Mesa and a Linux bridge built with meshlets and Solari, no runner with a graphics card and
+    no Mesa from an archive outside the distribution; (j) the anisotropy fault is mended by a
+    patched shader of Bevy's in the bridge, which overrides the earlier decline, with a test that
+    fails when Bevy's original changes. Part (k) is whole at `319624bf`, half done at `670ecf2c`
+    with the free camera helper gone for Bevy's controller, the radio buttons helper gone in
+    Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three files
+    by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
+    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
+    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
+    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
+    token colors is the package's own call, the port's helper of its own goes, and one file
+    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
+    package script's list with the reason naming them, carrying what they carry and nothing of the
+    port's own, since the list's rule is against helpers of the port's own and a mirror of what
+    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
+    Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes

@@ -234,21 +234,22 @@ and asks it things:
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs command diagnostics              # Bevy's diagnostics store, as its log prints it
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition
-./bcs command memory.collect           # what it holds, after a full collection
+./bcs command memory.collect           # what it holds, after a full compacting collection
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
 ./bcs shot /tmp/settled.png 300        # in the app's 300th frame, the same moment on any device on a set clock
 ./bcs command window.list              # the windows past the first a game spawned, by #index
 ./bcs command window.shot '#402 /tmp/second.png'   # one of them, offscreen as well
 ```
 
-`memory` answers with what the program holds as name and number pairs, the managed heap with what
-its last full collection kept alive as `live`, the process's resident size and the most it has
-held, the bytes the bridge has allocated, the entities with the indices handed out, the asset
-handles held and the assets of each kind Bevy holds, and where a renderer runs, the GPU memory wgpu
-has allocated and how many buffers, textures, pipelines and other GPU resources are alive, as
-`gpu.` pairs. Read at intervals while a game is played, as
-`build/soak.sh` does, a value that keeps climbing is a leak, and a resident size that climbs while
-every `gpu.` count stands still is memory the graphics driver keeps for itself.
+`memory` answers with what the program holds as name and number pairs, the managed heap's bytes its
+last full collection kept alive as `live` and its size after that collection as `heap`, which after
+`memory.collect`, a compacting collection, is what is alive and the space pinned objects hold apart,
+the process's resident size and the most it has held, the bytes the bridge has allocated, the
+entities with the indices handed out, the asset handles held and the assets of each kind Bevy holds,
+and where a renderer runs, the GPU memory wgpu has allocated and how many buffers, textures,
+pipelines and other GPU resources are alive, as `gpu.` pairs. Read at intervals while a game is
+played, as `build/soak.sh` does, a value that keeps climbing is a leak, and a resident size that
+climbs while every `gpu.` count stands still is memory the graphics driver keeps for itself.
 
 Each of those is answered inside the next frame of the app that is already running, which is the
 point, because a fresh process per question costs a second of startup, a new world, and a guess

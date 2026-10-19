@@ -7,26 +7,31 @@ reached in the first by the slack its kind is given, and no more.
     python3 build/soak-check.py --fewest      # the readings it judges no fewer than
 
 A reading is a line of the seconds into the run and then names and numbers in pairs, as the memory
-command answers. A count that only ever grows, as the collections are, is not judged, and neither are
-the runtime's managed total and the heap's size, which are said beside the live figure.
+command answers. A count that only ever grows, as the collections are, is not judged.
 """
 
 import sys
 
 # How far past the first half's most each value may go, as a share of it and an amount.
 #
-# The live figure is the bytes the managed heap holds alive, those kept by the full collection
-# memory.collect makes, as build/soak.sh reads it after each round. The two beside it are said
-# and not judged. The heap's size is its size at that collection with the free space between its
-# objects counted, which the collector leaves larger or smaller as it sees fit, so on the pack run
-# of afcf8301 Swarm's grew from 751,256 bytes to 4,608,176 with nothing climbing. The managed
-# total, GC.GetTotalMemory, counts the free space around pinned objects against itself, and read
-# below zero in Stress and Swarm after a full collection, -481,448 and -160,896 bytes.
+# The live figure is the bytes the managed heap holds alive, those kept by the full compacting
+# collection memory.collect makes, as build/soak.sh reads it after each round, and the heap's size
+# is its size after that collection, what is alive and the free space pinned objects hold apart.
+# A compacting collection leaves no other free space, so a heap that climbs while the live bytes
+# stand still is space held by a pin that should have let go. On a ten-minute soak of Courtyard,
+# the stress program and Swarm on lavapipe before memory.collect compacted, the heap moved by as
+# much as 3,726,064 bytes, the stress program's, with nothing climbing, and compacting alone left
+# it moving by 3,330,864, held by the buffer a blocking accept of the command line's server kept
+# pinned in the newest generation, which the server's polling before it accepts lets go of.
 SLACK = {
     # A ten-minute soak of Courtyard, the stress program and Swarm on lavapipe held what each kept
     # alive within 60,712 bytes of where it settled, Courtyard's 2,191,664 to 2,253,432, so a
     # quarter of a megabyte past the first half's most is four times that.
     "live": (0.05, 256 << 10),
+    # The same soak after both mends held each heap within 8,672 bytes of its live bytes, and
+    # each moved by 23,416 bytes at most, Courtyard's, so an eighth of a megabyte past the first
+    # half's most is five times that.
+    "heap": (0.05, 128 << 10),
     # The process's resident size takes in the graphics driver's memory and the pages the runtime
     # has not given back, which move by megabytes from one reading to the next.
     "process": (0.10, 48 << 20),

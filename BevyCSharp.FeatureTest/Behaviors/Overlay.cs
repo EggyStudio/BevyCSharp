@@ -105,7 +105,7 @@ public static class Overlay
             if (!long.TryParse(words[i + 1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var number)) continue;
 
             var name = words[i];
-            var bytes = name is "managed" or "heap" or "process" or "nativeBytes";
+            var bytes = name is "live" or "heap" or "process" or "peak" or "nativeBytes";
             lines.Add(bytes
                 ? string.Create(CultureInfo.InvariantCulture, $"{name} {number / (1024.0 * 1024.0):0.0} MB")
                 : string.Create(CultureInfo.InvariantCulture, $"{name} {number}"));
