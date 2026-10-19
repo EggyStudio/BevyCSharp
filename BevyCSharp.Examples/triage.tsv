@@ -142,7 +142,7 @@ generated_assets	can	the cone's vertices worked out on a worker and made a mesh 
 hot_asset_reloading	can	the files watched only where the editor profile is built, which builds Bevy's file watcher
 multi_asset_sync	can	the loads asked for their state each frame, a task waiting on the count in place of Bevy's guards
 repeated_texture	can
-web_asset	missing	loading assets over HTTP
+web_asset	missing	declined, since loading assets over https brings twenty-one crates into the bridge, an HTTP client with its TLS stack and the platform's certificate verifiers, for one example
 async_channel_pattern	can	with .NET's tasks and channels
 async_compute	can	with .NET's tasks
 external_source_external_thread	can	with a .NET thread and channel
@@ -399,7 +399,7 @@ transparent_window	can
 window_drag_move	can
 window_resizing	can	the size read each frame and shown when it changes, where Bevy reads its resize messages
 inline_image	can	through Bevy's reflected InlineImage
-compressed_image_saver	missing	Bevy's asset processor and its compressing image saver, which the bridge does not run
+compressed_image_saver	missing	declined, since saving textures compressed with their mipmaps brings seventeen crates into the bridge, ctt's texture compressors, some of them prebuilt, for one example
 mines	can
 mutation_by_reflection	n/a	Rust's reflection over the types a Rust program declares, where a C# game reads its own types
 pipeline_constants	can

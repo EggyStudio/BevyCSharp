@@ -12,7 +12,7 @@ namespace Bevy.Interop;
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct NativeInput
 {
-    /// <summary>Number of 64-bit words in each keyboard bitset.</summary>
+    /// <summary>Number of ulongs in each keyboard bitset.</summary>
     public const int KeyWords = 2;
 
     /// <summary>Cursor X in physical window pixels.</summary>

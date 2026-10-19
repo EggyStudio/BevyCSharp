@@ -191,6 +191,8 @@ def build(version, examples, order, triage, written, source, followed):
         return sum(1 for row in rows if row["behaviors"]), sum(1 for row in rows if row["components"])
 
     total = counts(examples)
+    # A missing row declined rather than waiting says so first in its note.
+    declined = sum(1 for example in examples if example["state"] == "missing" and example["note"].startswith("declined"))
     listed = [example for example in examples if example["group"] != HIDDEN]
     applies = len(examples) - total["n/a"]
 
@@ -208,13 +210,14 @@ def build(version, examples, order, triage, written, source, followed):
         "by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. "
         "One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that "
         "`can be written` uses only what is bridged and waits for its turn. One that is `missing` "
-        "names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# "
+        "names what the bridge lacks, or why the crate it would bring is declined, and one that "
+        "`does not apply` says why it is not a thing a C# "
         "game does, most often because it is about Rust itself. A difference that is no feature, "
         "such as a view sized for another window, is said in a written row and keeps it written.")
     out.append("")
     out.append(
         f"**{total['written']} written, {total['part']} written in part, {total['can']} can be written, "
-        f"{total['missing']} missing and {total['n/a']} do not apply.** Of the {applies} that apply, "
+        f"{total['missing']} missing, {declined} of them declined, and {total['n/a']} do not apply.** Of the {applies} that apply, "
         f"{total['written'] + total['part'] + total['can']} can be written with what is bridged, "
         f"{total['part']} of them leaving something out.")
     out.append("")
@@ -307,8 +310,8 @@ def build(version, examples, order, triage, written, source, followed):
     gallery = "\n\n".join(sections)
     status = (
         f"Of Bevy's {len(examples)} examples, {total['written']} are written in C# here and "
-        f"{total['part']} more in part, {total['can']} more can be with what is bridged, {total['missing']} wait on something "
-        f"the bridge lacks and {total['n/a']} are about Rust itself ([EXAMPLES.md]({BLOB}.github/EXAMPLES.md)).")
+        f"{total['part']} more in part, {total['can']} more can be with what is bridged, {total['missing'] - declined} wait on something "
+        f"the bridge lacks, {declined} are declined and {total['n/a']} are about Rust itself ([EXAMPLES.md]({BLOB}.github/EXAMPLES.md)).")
     return table, status, gallery
 
 

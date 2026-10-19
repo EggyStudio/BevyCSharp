@@ -10,7 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `64c1b25d`, item 4's dev tools batch and nothing else, 42 files, the ABI 292 to 293,
+Reviewed up to `8ae312a4`, item 4's system information batch and nothing else, 17 files, the ABI 293
+to 294, the lock gaining the five crates measured, `sysinfo` with `ntapi`, `winapi` and its two
+shims, through Bevy's feature on the headless profile, since nothing draws, so every profile has it.
+`diagnostics.rs` adds Bevy's system information plugin for a new bit of the diagnostics flags the
+config carries, no export changing, the ABI bumped since an older bridge would ignore the bit
+without a word; the managed side gains the flag and the four diagnostic paths, the machine's and the
+process's CPU and memory, the surface listing written again, the tools guide listing the flag among
+Bevy's measuring plugins with a sentence that its first values come some frames after start and
+losing its line on the crate not compiled in. `log_diagnostics` asks for the flag and loses its
+header on the missing crate, its row from part to can, run live with Bevy's system line and all four
+measures in the log, its picture matching the checked-in one; the table at 372 written, 1 written in
+part, which is `monitor_info`, and 5 missing, TODO.md's entry on the system information removed. One
+test joins the diagnostics store's, skipping on systems Bevy does not measure or where no measure
+answers within a second at sixty frames, with the reason, and otherwise holding the CPU shares
+between 0 and 100, the process's up to 100 a core, and the process's memory above zero, run and not
+skipped on the editor and the headless bridges. The README's gallery, which the dev tools commit
+wrote before its four pictures were taken, gains the dev tools section and the two pictures in the
+picking and tools rows. Checked were `cargo check` on the four profiles with Windows and macOS on
+the headless and the editor's with Solari, the two Windows crates compiled, `cargo test` headless
+and on render, the headless bridge under B 2, the examples on a fresh package, and the whole suite
+with a clean build, 1,514 passed, 3 skipped and none failed of 1,517. Right. Next the two declined
+rows marked in one commit of documents with the norm tests run first, then `monitor_info` on virtual
+monitors, and the owner's push of the eight commits.
+
+Before it, `64c1b25d` came, item 4's dev tools batch and nothing else, 42 files, the ABI 292 to 293,
 the lock gaining `bevy_dev_tools` alone through Bevy's two features on the render profile, no direct
 dependency, so BUILDING.md's crate table has no row, as with Feathers. `dev_tools.rs` adds the frame
 rate overlay, the infinite grid and the picking debug plugins a bit each through `Config.DevTools`;
@@ -63,47 +87,6 @@ catalog tests then passing, and a clean build with warnings as errors. Feathers 
 steps and item 29's part (k) with it. Right. Next the dev tools' crate with its four examples, the
 system information with `log_diagnostics` whole, the declined rows marked and `monitor_info` on
 virtual monitors, one batch a commit, and the owner's push of the six commits.
-
-Before it, `1e8c4750` came, Feathers' third step and nothing else, 34 files, the ABI 289 to 291, the
-lock unchanged. The bridge spawns thirty-four more kinds, the menus with their button, tool button,
-popup, item and divider, the select, the list view and its row, the disclosure toggle, the text
-input and its container, the color swatch, plane, slider and input, the pane, subpane and group with
-their headers and bodies, the flex spacer, the icon, and the modal and floating dialogs with their
-header, body, footer and close, every one through its own scene, the color plane's variant inserted
-after its scene as Bevy's notation patches it over the default; the props grow to 56 bytes, and
-`feathers.rs`'s head comment names the plain form of each prop that holds a scene or a closure in
-Bevy, a caption as text, a select's options and a list's rows as lines with the chosen place made
-rows by Bevy's own helper, the keyboard's keys as lines and tabs, the number input's letter kept
-static, a dialog's contents spawned by C# under the node a call names, and the lazy menu whose popup
-a closure builds not offered, a popup spawned with its menu instead, which the gallery's triage note
-says of its second menu. The number calls moved unchanged to `feathers/number.rs` under N 1.3, the
-file at 721 lines after; the widget report gains a four-float vector and grows to 56 bytes with
-kinds for a point's, a linear color's and a close request's change, the self-updating observers gain
-the list box's selection and the color input's, and a new `color.rs` converts across Bevy's thirteen
-color spaces through Bevy's own types, which the gallery's two hue spaces need. The managed side
-gains the thirty-four calls with a contents call, the channel, plane axes, icon and close request
-types, the color conversions with a hex as Bevy writes it, and the two value changes;
-`feathers_gallery` is written with Bevy's color update kept, its override cursor through the
-reference type after the suite's string-path test named the path first written, and clicked live
-offscreen, the override toggle logging, the dialog toggle opening the floating dialog and its cross
-closing it, quit opening the modal dialog and cancel closing it with the picture then equal to the
-first pixel for pixel; the table at 367 written and 9 missing, Feathers' four all in. Four tests
-join the six, the margin guard over all 46 kinds written and read back as each is spawned, contents
-going where Bevy's props put them, a color plane's press reported as its point and a dialog's close
-as the request, and a color through Bevy's spaces with its hex, and the widget tests pin the
-report's 56 bytes. Checked were `cargo check` on every profile, `cargo test` headless and on render
-with the color round trip through every space, the headless bridge with the Feathers, widget and
-layout tests under B 2, the examples on a fresh package, the picture on a render bridge equal to the
-editor bridge's, and the whole suite, 1,503 passed, 3 skipped and 2 failed of 1,508, N 1.3 at 887
-lines of `feathers.rs` and the gallery's string path, both mended before the commit and the four
-test classes passing after, 31 of 31. Right. Read at 09:59, Bevy 0.20's fourteen examples with
-option rows share three files by path, a radio row, a theme of some sixty token colors and, in two
-of them, a labeled number input, so the port's helper of its own goes and one file mirroring Bevy's
-three stays listed with that reason, said under item 29's part (k). Next Feathers' last step, the
-fourteen examples moved to Feathers' radio with their pictures taken again and compared, the port's
-helper gone and the mirror in its place, item 29's part (k) whole and SHARED.md's row on the package
-saying so, the reviewer's; then the dev tools, the system information, the declined rows marked and
-`monitor_info`, one batch a commit, and the owner's push of the five commits.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -374,8 +357,10 @@ from [SHARED.md](SHARED.md).
    package, the port's own helper gone for one file mirroring Bevy's three shared helper files, the
    ABI 292, the lock unchanged, Feathers whole in four steps. The dev tools came at `64c1b25d` the
    same day, the overlay, the grid, the picking debug and the scene viewer with their four examples,
-   the table at 371 written and 5 missing, the lock gaining `bevy_dev_tools`, the ABI 293; the
-   system information is next, then the declined rows marked and `monitor_info`.
+   the table at 371 written and 5 missing, the lock gaining `bevy_dev_tools`, the ABI 293. The
+   system information came at `8ae312a4` the same day, `log_diagnostics` whole, the table at 372
+   written, 1 in part and 5 missing, the lock gaining `sysinfo` and its four, the ABI 294; the
+   declined rows marked are next, then `monitor_info`.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it

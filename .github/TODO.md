@@ -24,8 +24,9 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-Each waits on a crate the lock does not hold, or, for the system fonts, on the decision to keep
-their discovery off.
+The system fonts wait on the decision to keep their discovery off. Two examples that would each
+bring a large crate into the bridge for itself alone, loading assets over https (`web_asset`) and
+saving compressed textures (`compressed_image_saver`), are declined, and their rows say so.
 
 - **System fonts, three examples.** Bevy's system font discovery, which the bridge does not
   compile in, so a generic family such as sans-serif resolves to the system's font
@@ -33,9 +34,6 @@ their discovery off.
   each generic one stands for (`system_fonts`). A run's weight, width, style, OpenType features and
   axes, its underline and strikethrough and its background color are reached, and the atlases Bevy
   lays a font's glyphs out in are read.
-- **Assets over HTTP, one example.** Bevy's web asset source (`web_asset`), which pulls in `ureq`.
-- **Compressed images saved, one example.** Bevy's asset processor and its compressing image saver
-  (`compressed_image_saver`), which pull in `ctt`.
 
 One example is written in part, leaving out a feature named in its row.
 
