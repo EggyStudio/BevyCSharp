@@ -31,8 +31,8 @@
         </Description>
         <PackageTags>bevy;ecs;gamedev;engine;source-generator;behavior</PackageTags>
         <!--
-          The commits since the version was last raised, which build/release-notes.sh writes to the
-          file a pack names.
+          The commits since the package nuget.org lists last was built, which build/release-notes.py
+          writes to the file a pack names.
         -->
         <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != '' And Exists('$(ReleaseNotesFile)')">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
         <!-- The generator and the native binaries are carried inside this package. -->

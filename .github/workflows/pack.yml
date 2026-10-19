@@ -97,11 +97,12 @@ jobs:
       # The staleness guard in the csproj compares timestamps against the Rust sources, and a
       # fresh checkout writes those after the downloaded artifacts. The binaries came from this
       # very commit, so the check has nothing useful to say here.
-      # The release notes are the commits since build/version.txt last changed, newest first, each
-      # commit's sentence a line (build/release-notes.sh).
+      # The release notes are the commits since the package nuget.org lists last was built, newest
+      # first, each commit's sentence a line, or the minor's where the feed names no such commit, and
+      # the step and its summary say which commit they start from and why (build/release-notes.py).
       - name: Pack
         run: |
-          build/release-notes.sh "$PWD/build/release-notes.txt"
+          python3 build/release-notes.py "$PWD/build/release-notes.txt"
           dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=${{ steps.version.outputs.version }} -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/release-notes.txt"
           build/pack-templates.sh
 

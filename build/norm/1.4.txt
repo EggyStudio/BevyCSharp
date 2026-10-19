@@ -4,6 +4,7 @@
 # A test of what is no area of the library is listed by its nature, as N 1.4 has it, and is no debt.
 
 BevyCSharp.Tests/Build/DocsScriptTests.cs	tests the build scripts, which are no area of the library
+BevyCSharp.Tests/Build/ReleaseNotesTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/TestScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/WorkflowTests.cs	tests the workflows, which are no area of the library
