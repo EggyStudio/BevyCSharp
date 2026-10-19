@@ -10,7 +10,21 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d482caa3`, item 32, and `e1f516fa` before it, item 33, with the review's commits
+Reviewed up to `8e9c20b7`, Verdict 33's mend and nothing else, the test file alone. The test filled
+its table of elapsed times from an update system keyed by the frame count while the server answered
+from the command pump in the same frame's first stage, so the socket's answer went out before that
+frame's update had run, and the test read the table as each answer came, which on a slow runner
+asked for a frame the app had not reached, the key 15, none of the three causes named; the committed
+form run twenty times on one core failed eighteen with the keys 16 to 18. The mend holds the
+answers' frames in locals, stops the app and joins its thread, and reads the times after that, when
+every frame an answer named has run its update, the remarks saying why and naming the run; the
+hold's promise is asserted as before, 0.5 over five frames, still through three asks, 0.3 over
+three, and the new form passed twenty of twenty on one core, the server unchanged. The command line
+and norm tests pass, 28 of 28, after a clean build. The pack run with publish on in flight carries
+the old form of the test, so its Linux suite may fail on it, in which case the next pack run is this
+commit's. Right. Next part (g)'s comparison, then (h).
+
+Before it, `d482caa3` came, item 32, and `e1f516fa` before it, item 33, with the review's commits
 between, part (g)'s work staying in the tree outside both. Item 33: the pack job has the identity
 token's write permission beside its read of the contents, a step with the feed's login action given
 the user `EggyStudio` runs right before the push when publish is on and answers the key, which the
@@ -53,46 +67,6 @@ being taken on it. At 22:45 the owner wrote that the release notes include every
 the older ones (Decision 41, item 32), and at 22:51, quoting nuget.org's notice, that the pack run
 publishes through trusted publishing (Decision 42, item 33), and at 22:57 that the reviewer starts
 the pack runs as well (Decision 43), the first with publish on once item 33 is in.
-
-Before it, `b68da75c` came, item 31 and nothing else, 344 files, the README's head one centered
-block of markdown and the gallery markdown tables of thumbnails, taken on measurement. Read first
-from nuget.org's page of `0.5.120`, its renderer builds the markdown library with HTML off and its
-style framework on, so the showcase picture draws, the superscript caption and all thirty gallery
-tables print as escaped source, the comment markers print nothing, and the headings draw a level
-down. The head is a centering block, a blank line, the heading, the description, the picture and the
-caption as code spans, a blank line and the closing tag, rendered with the same library on
-nuget.org's exact pipeline and screenshotted in the saved page with its stylesheets, only the two
-tag lines printing as text, and centered by GitHub's markdown API; the markers stay since both sites
-show nothing for them. The gallery was measured three ways on two groups with GitHub's API and its
-stylesheet at a 900-pixel article and in nuget.org's page and style, screenshotted headless: the
-HTML as it stood shows three pictures and scrolls on GitHub and prints source on nuget.org; a plain
-markdown table of 260 by 146 thumbnails shrinks the long row's pictures to their names' widths on
-both; and names padded with no-break spaces to 32, as the HTML captions were, draw 260-pixel
-pictures three in view with each row scrolling sideways on both, nuget.org's table a block of its
-content's width with overflow, so that form is taken, the pictures as the table's head so each name
-stands under its picture. The table script writes each group as a heading, a row of linked pictures,
-a delimiter and a row of padded names, makes the 337 thumbnails into `.github/assets/gallery`, 1.9
-MB, with the image tool or else the encoder, and records each capture's hash so a thumbnail is made
-again only when its capture changed and another machine's tool does not churn the bytes, the check
-needing no image tool and failing on a missing, stale or orphaned thumbnail; the folder stands
-beside the captures so N 4.5's size rule does not take it. N 4.5's test reads the markdown gallery,
-all 337 pictures each opening its program, and fails on none found; the README is at 281 lines of
-prose against 320, and BUILDING.md describes the thumbnails and their hashes. One cost, a thumbnail
-at the shown width is softer on a doubled display than the scaled capture was, for 1.9 MB of page
-where the full captures were. Checked were the documents' links with the 337 thumbnails against the
-checkout, the headings, the norm tests after a clean build, 18 of 18, and the table script's check.
-Right. Next part (g), then the parts in order, and the owner's push of `714451b0` and `b68da75c`,
-whose README nuget.org draws at the next upload. The owner pushed `714451b0` and `b68da75c` at 22:09
-and 22:11, the first run cancelled by the second as the build group has it and the second running at
-22:23; at 22:20 the owner gave the reviewer the pushes and the commits of its own edits, so the
-review's edits come in commits of their own from here on. The first of them, `ee38a573`, was pushed
-with its sentence in the subject line where COMMITS.md's three marks belong, the reviewer's fault,
-so it stands on N 7.2's list with that reason as the list's head has it for a commit pushed before
-its fault was seen, since a pushed commit is not amended; the review's commits after it have the
-form. At 22:32 the push run of `b68da75c` was whole green, its three suites in 14 minutes, and the
-run of `2865032d`, started by the list's line, had its three suites running, the check that the norm
-test passes with the line. At 22:34 the owner asked for the five banners in the README's centered
-block, item 31 open again for them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1019,7 +993,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     before it is chosen: the test's dictionary and what fills it, which frame 15 is and why it was
     absent, with the run's output if the artifact holds it; then the test made to hold what the hold
     promises without reading a frame that may not come, or the server mended where it answers a
-    frame it did not run. Settled at three green Linux suites in a row after the mend.
+    frame it did not run. Mended at `8e9c20b7` the same day, the test reading its times after the
+    app has stopped, the server unchanged, as the head says. Settled at three green Linux suites in
+    a row after the mend.
 
 ## Decisions
 
