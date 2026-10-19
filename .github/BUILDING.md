@@ -472,7 +472,9 @@ and the pack job puts in the package. The latest version of the minor on nuget.o
 nuspec the commit it was built from, and the notes start after it. Where the feed answers nothing,
 lists no version of the minor, or names a commit the checkout does not have, the notes are the
 minor's, the commits since `build/version.txt` last changed, and the step and its summary say which
-commit the notes start from and why.
+commit the notes start from and why. A commit whose every file lies under `.github/` is left out,
+since the package carries nothing from there, so the review's records and the workflows' changes
+are not among the notes, and one touching the README, the guide or the notices stays in.
 
 Each message's first line is the three marks with a space between each, copied from the `printf`
 line in [COMMITS.md](COMMITS.md) and not typed, since marks typed run together look no different in

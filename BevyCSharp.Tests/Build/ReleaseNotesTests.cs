@@ -7,7 +7,9 @@ namespace Bevy.Tests;
 /// <summary>
 /// <c>build/release-notes.py</c> writes the commits since the package the feed lists last was
 /// built, read from the feed's index and that version's nuspec, and the minor's commits where the
-/// feed answers nothing, lists no version of the minor or names a commit the checkout does not have.
+/// feed answers nothing, lists no version of the minor or names a commit the checkout does not have,
+/// leaving out each commit whose every file lies under <c>.github/</c>, which the package does not
+/// carry.
 /// </summary>
 /// <remarks>
 /// The script is copied into a history of its own, a minor begun and four commits after it, with the
@@ -29,7 +31,7 @@ public sealed class ReleaseNotesTests : IDisposable
         var (built, _) = History();
         var (notes, said, summary) = Notes(python, Feed(["0.4.9", "0.5.1", "0.5.2"], "0.5.2", built));
 
-        Assert.Equal(["Fourth change.", "Third change."], notes);
+        Assert.Equal(["Fourth change.", "A workflow and the README change.", "Third change."], notes);
         Assert.Contains($"start after {built[..8]}, which 0.5.2", said);
         Assert.Contains(built[..8], summary);
     }
@@ -39,7 +41,7 @@ public sealed class ReleaseNotesTests : IDisposable
     {
         var python = Needs.Python();
         var (built, minor) = History();
-        string[] whole = ["Fourth change.", "Third change.", "Second change.", "First change."];
+        string[] whole = ["Fourth change.", "A workflow and the README change.", "Third change.", "Second change.", "First change."];
 
         // No version of the minor, only the one before.
         var (notes, said, _) = Notes(python, Feed(["0.4.8", "0.4.9"], "0.4.9", built));
@@ -59,7 +61,9 @@ public sealed class ReleaseNotesTests : IDisposable
 
     /// <summary>
     /// A history holding the script, the minor begun and four commits after it, each message in
-    /// COMMITS.md's form, and the commits the package was built at and the minor began at.
+    /// COMMITS.md's form, and the commits the package was built at and the minor began at. After the
+    /// third, a review's record touches <c>.github/</c> alone, which the notes leave out, and a commit
+    /// touches a workflow and the README, which they keep.
     /// </summary>
     private (string Built, string Minor) History()
     {
@@ -77,6 +81,14 @@ public sealed class ReleaseNotesTests : IDisposable
             File.AppendAllText(Path.Combine(work, "changes.txt"), change + "\n");
             var commit = Commit(work, change);
             if (change == "Second change.") built = commit;
+            if (change != "Third change.") continue;
+
+            Directory.CreateDirectory(Path.Combine(work, ".github", "workflows"));
+            File.WriteAllText(Path.Combine(work, ".github", "REVIEW.md"), "The review.\n");
+            Commit(work, "The review records the third change.");
+            File.WriteAllText(Path.Combine(work, ".github", "workflows", "pack.yml"), "name: pack\n");
+            File.WriteAllText(Path.Combine(work, "README.md"), "The README.\n");
+            Commit(work, "A workflow and the README change.");
         }
 
         return (built, minor);

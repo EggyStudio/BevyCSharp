@@ -17,6 +17,11 @@ checkout does not have, as a shallow clone has none, the notes are the minor's, 
 build/version.txt last changed. Either way the script says which commit the notes start from and
 why, in what it prints and in the step's summary where GitHub gives one.
 
+A commit whose every file lies under .github/ is left out, since the package carries nothing from
+there, which takes the review's records and the workflows' changes alike by what they touch and not
+by their words. The README, the guide, the license and the notices are carried, so a commit to them
+stays in.
+
 RELEASE_NOTES_FEED names the package's folder of the feed in place of nuget.org's, a file:// one
 for a test.
 """
@@ -85,8 +90,12 @@ def main():
 
     lines = []
     if start:
-        log = git("log", "--format=%b", f"{start}..HEAD")
-        lines = [line.rstrip() for line in log.stdout.splitlines() if line.strip()]
+        for commit in git("rev-list", f"{start}..HEAD").stdout.split():
+            files = [name for name in git("show", "--name-only", "--format=", commit).stdout.splitlines() if name]
+            if files and all(name.startswith(".github/") for name in files):
+                continue
+            body = git("log", "-1", "--format=%b", commit).stdout
+            lines += [line.rstrip() for line in body.splitlines() if line.strip()]
 
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w", encoding="utf-8") as notes:
