@@ -32,13 +32,19 @@ SLACK = {
     # each moved by 23,416 bytes at most, Courtyard's, so an eighth of a megabyte past the first
     # half's most is five times that.
     "heap": (0.05, 128 << 10),
-    # The process's resident size takes in the graphics driver's memory and the pages the runtime
-    # has not given back, which move by megabytes from one reading to the next.
-    "process": (0.10, 48 << 20),
-    "nativeBytes": (0.10, 4 << 20),
-    "nativeBlocks": (0.10, 4000),
-    "entities": (0.05, 8),
-    "entityIds": (0.05, 8),
+    # The rest are each twice the most the figure moved, from its least to its most, over a soak of
+    # Courtyard, the stress program and Swarm (build/soaks.sh 600 courtyard stress swarm) and one of
+    # the feature test (build/soaks.sh 900 feature-test), run on Mesa 26.2.2's lavapipe with
+    # VK_ICD_FILENAMES naming its driver. The process's figure is its anonymous resident pages,
+    # which take in the runtime's pages not given back and a software device's memory and moved by
+    # 22,401,024 bytes, Swarm's. The bridge's bytes moved by 2,076,749 and its blocks by 12,011,
+    # Courtyard's, and the entities, the indices and the handles not at all, so they are given the
+    # two an asset of each kind is.
+    "process": (0.0, 44 << 20),
+    "nativeBytes": (0.0, 4 << 20),
+    "nativeBlocks": (0.0, 25000),
+    "entities": (0.0, 2),
+    "entityIds": (0.0, 2),
     "handles": (0.0, 2),
 }
 

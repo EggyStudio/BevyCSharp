@@ -595,13 +595,6 @@ figure moves.
   `--meshlet --solari` for those five, compares all six. It costs the jobs run in a container
   of a newer image or Mesa from an archive outside Ubuntu's, a second Linux bridge built in the
   native job, and those six measured first on that Mesa.
-- **The soak's rooms but one are not measured.** `build/soak-check.py` gives each figure a room
-  past the first half's most, and only the live bytes' is written with the soaks it was measured
-  from. The process's resident size, the bridge's bytes and blocks, the entities and the handles
-  are given theirs without one. Measuring each from soaks of the three programs, and reading the
-  process's own private memory without the graphics driver's mappings, lets each room shrink to
-  what its figure moves by. It costs a set of soaks of the three programs on lavapipe, and a process
-  figure read otherwise on each platform.
 - **The drive reads a swing at its farthest.** `build/drive-feature-test.sh` judges the moving
   platform and the elevator by the farthest each took the player over a wait, since the feature
   test runs freely between two commands and a software device puts fewer frames between them, so

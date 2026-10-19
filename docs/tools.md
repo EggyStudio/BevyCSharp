@@ -244,12 +244,13 @@ and asks it things:
 `memory` answers with what the program holds as name and number pairs, the managed heap's bytes its
 last full collection kept alive as `live` and its size after that collection as `heap`, which after
 `memory.collect`, a compacting collection, is what is alive and the space pinned objects hold apart,
-the process's resident size and the most it has held, the bytes the bridge has allocated, the
-entities with the indices handed out, the asset handles held and the assets of each kind Bevy holds,
-and where a renderer runs, the GPU memory wgpu has allocated and how many buffers, textures,
-pipelines and other GPU resources are alive, as `gpu.` pairs. Read at intervals while a game is
-played, as `build/soak.sh` does, a value that keeps climbing is a leak, and a resident size that
-climbs while every `gpu.` count stands still is memory the graphics driver keeps for itself.
+the memory the process holds of its own, which leaves out the files it maps and the memory it shares
+with a graphics driver, and the most it has held, the bytes the bridge has allocated, the entities
+with the indices handed out, the asset handles held and the assets of each kind Bevy holds, and
+where a renderer runs, the GPU memory wgpu has allocated and how many buffers, textures, pipelines
+and other GPU resources are alive, as `gpu.` pairs. Read at intervals while a game is played, as
+`build/soak.sh` does, a value that keeps climbing is a leak, and a process figure that climbs while
+every `gpu.` count stands still is memory the graphics driver keeps for itself.
 
 Each of those is answered inside the next frame of the app that is already running, which is the
 point, because a fresh process per question costs a second of startup, a new world, and a guess

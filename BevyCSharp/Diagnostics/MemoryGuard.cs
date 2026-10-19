@@ -26,9 +26,9 @@ namespace Bevy;
 /// <para>
 /// What is counted is the memory the process holds of the machine, which takes in the bridge's
 /// allocations and the GPU driver's with the managed heap, and not what a GPU holds of its own. On
-/// Linux the resident pages, which the system's own last resort weighs a process by, on macOS the
-/// physical footprint, its resident pages with those the system compressed, and on Windows the
-/// private bytes committed, its commit charge (<see cref="ResidentBytes"/>). Once the console and
+/// Linux the anonymous resident pages, on macOS the physical footprint, its resident pages with
+/// those the system compressed, and on Windows the private bytes committed, its commit charge
+/// (<see cref="ResidentBytes"/>). Once the console and
 /// the crash file have said why, the process
 /// ends at once with <see cref="ExitCode"/>, running nothing an exit runs. Bevy's threads are still
 /// drawing then, and a GPU driver torn down under them by the handlers of an ordinary exit crashed
@@ -68,8 +68,13 @@ public static partial class MemoryGuard
     /// <summary>How many bytes of the machine's memory the process holds now.</summary>
     /// <remarks>
     /// <para>
-    /// The resident set on Linux, the pages in the machine's memory, which run it out and by which
-    /// it weighs a process when they do.
+    /// On Linux, the anonymous pages the process holds in the machine's memory, <c>RssAnon</c> of
+    /// <c>/proc/self/status</c>, its heaps and stacks and a software device's memory, without the
+    /// pages of the files it maps, its code among them, which the system drops and reads again as it
+    /// needs, or the memory it shares with a graphics driver, which the driver holds. The whole
+    /// resident set, which counts both, moved by megabytes from one reading of a soak to the next
+    /// with nothing the process held climbing. The resident set is read where the system does not
+    /// answer.
     /// </para>
     /// <para>
     /// On macOS, the physical footprint, which Activity Monitor shows as a process's memory: its
@@ -107,10 +112,36 @@ public static partial class MemoryGuard
     private static long Held()
     {
         if (OperatingSystem.IsMacOS() && Footprint() is > 0 and var footprint) return footprint;
+        if (OperatingSystem.IsLinux() && AnonymousResident() is > 0 and var anonymous) return anonymous;
         if (!OperatingSystem.IsWindows()) return Environment.WorkingSet;
 
         using var process = Process.GetCurrentProcess();
         return process.PrivateMemorySize64;
+    }
+
+    /// <summary>
+    /// The anonymous resident bytes Linux answers for this process in <c>/proc/self/status</c>, or
+    /// zero where it answers nothing.
+    /// </summary>
+    private static long AnonymousResident()
+    {
+        try
+        {
+            foreach (var line in File.ReadLines("/proc/self/status"))
+            {
+                if (!line.StartsWith("RssAnon:", StringComparison.Ordinal)) continue;
+                var kilobytes = line["RssAnon:".Length..].Trim();
+                if (kilobytes.EndsWith(" kB", StringComparison.Ordinal)) kilobytes = kilobytes[..^3];
+                return long.TryParse(kilobytes, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var held)
+                    ? held * 1024
+                    : 0;
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+        }
+
+        return 0;
     }
 
     /// <summary>
@@ -147,23 +178,13 @@ public static partial class MemoryGuard
     /// <see cref="ResidentBytes"/> read here, or what the system says where it says more.
     /// </summary>
     /// <remarks>
-    /// The readings here come first because they are the same on every system, and the same the
-    /// cap and the soak use, where the system's own peak, <see cref="Process.PeakWorkingSet64"/>,
-    /// is 0 on macOS. With a cap the watch reads four times a second, so a peak between two
-    /// readings of the command is caught. Without one, the readings are the ones taken, this call's
-    /// among them.
+    /// The readings here are all it has, because they are the same on every system, and the same
+    /// the cap and the soak use. No system keeps a peak of the figure read, the anonymous pages on
+    /// Linux, the private bytes on Windows, and the footprint on macOS, whose peak working set is 0.
+    /// With a cap the watch reads four times a second, so a peak between two readings of the
+    /// command is caught. Without one, the readings are the ones taken, this call's among them.
     /// </remarks>
-    internal static long PeakBytes()
-    {
-        var now = ResidentBytes();
-
-        // The system's own peak of the same figure where it keeps one, which Windows does not for
-        // the private bytes, so there the readings are all there is, as on macOS.
-        if (OperatingSystem.IsWindows()) return Math.Max(now, Interlocked.Read(ref _peak));
-
-        using var process = Process.GetCurrentProcess();
-        return Math.Max(Math.Max(now, Interlocked.Read(ref _peak)), process.PeakWorkingSet64);
-    }
+    internal static long PeakBytes() => Math.Max(ResidentBytes(), Interlocked.Read(ref _peak));
 
     /// <summary>
     /// Holds the process to a cap from here on, starting the watch the first time, or with zero
