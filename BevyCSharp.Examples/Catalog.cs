@@ -4,6 +4,7 @@ using BevyCSharp.Examples.Assets;
 using BevyCSharp.Examples.AsyncTasks;
 using BevyCSharp.Examples.Cameras;
 using BevyCSharp.Examples.Clocks;
+using BevyCSharp.Examples.DevTool;
 using BevyCSharp.Examples.Ecs;
 using BevyCSharp.Examples.Ecs.Changes;
 using BevyCSharp.Examples.Ecs.Hooks;
@@ -207,6 +208,10 @@ internal static class Catalog
         new("pan_orbit_camera_ortho", PanOrbitCameraOrtho.Build, PanOrbitCameraOrtho.Configure),
         new("projection_zoom", ProjectionZoom.Build),
 
+        // Dev tools
+        new("fps_overlay", FpsOverlay.Build, FpsOverlay.Configure),
+        new("infinite_grid", InfiniteGrid.Build, InfiniteGrid.Configure),
+
         // Diagnostics
         new("custom_diagnostic", CustomDiagnostic.Build, CustomDiagnostic.Configure, Prints: 150),
         new("enabling_disabling_diagnostic", EnablingDisablingDiagnostic.Build, EnablingDisablingDiagnostic.Configure, Prints: 690),
@@ -305,6 +310,7 @@ internal static class Catalog
         new("smooth_follow", SmoothFollow.Build),
 
         // Picking
+        new("debug_picking", DebugPicking.Build, DebugPicking.Configure),
         new("mesh_picking", MeshPicking.Build, MeshPicking.Configure),
         new("simple_picking", SimplePicking.Build, SimplePicking.Configure),
         new("sprite_picking", SpritePicking.Build),
@@ -347,6 +353,7 @@ internal static class Catalog
 
         // Tools
         new("gamepad_viewer", GamepadViewer.Build),
+        new("scene_viewer", SceneViewer.Build, SceneViewer.Configure),
 
         // Shaders
         new("animate_shader", AnimateShader.Build),

@@ -210,6 +210,12 @@ render = [
     # icons and shaders they draw with, embedded. One crate of plain Rust over the interface Bevy
     # draws already, whose plugins an app asks for (`Config.Feathers`).
     "bevy/bevy_feathers",
+    # Bevy's dev tools, the FPS overlay with its frame time graph, the infinite grid that stands for
+    # a ground plane in a tool, and the overlay and log of what picking finds under each pointer.
+    # One crate of plain Rust and shaders over the renderer and interface Bevy draws already, whose
+    # plugins an app asks for (`Config.DevTools`).
+    "bevy/bevy_dev_tools",
+    "bevy/render_dev_tools",
     # A pointer drawn from an image of the game's own, as Bevy's window_settings shows one. The
     # image and asset crates and wgpu's types it reaches are in the profile already, so it adds
     # nothing to the build.

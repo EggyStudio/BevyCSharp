@@ -167,6 +167,52 @@ public static unsafe partial class Gizmos
     }
 
     /// <summary>
+    /// Sets whether Bevy draws the frustum of every entity that has one, and in what color.
+    /// </summary>
+    /// <remarks>
+    /// The volume a camera or a spot light sees, the one to look at when what one should see is
+    /// culled. Without <paramref name="all"/> only entities carrying Bevy's <c>ShowFrustumGizmo</c>
+    /// are drawn, reached as <c>ShowFrustumGizmoRef</c>.
+    /// </remarks>
+    /// <param name="all">Whether every frustum is drawn.</param>
+    /// <param name="color">One color for all of them, linear RGBA, or null for a color of each one's own.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void ShowFrusta(bool all, (float R, float G, float B, float A)? color = null)
+    {
+        if (color is not { } c)
+        {
+            Native.Check(Native.bcs_gizmo_frusta(all ? 1 : 0, null), "showing frusta");
+            return;
+        }
+
+        var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
+        Native.Check(Native.bcs_gizmo_frusta(all ? 1 : 0, rgba), "showing frusta");
+    }
+
+    /// <summary>
+    /// Sets whether Bevy draws the bounds of every skinned mesh's joints, and in what color.
+    /// </summary>
+    /// <remarks>
+    /// A skinned mesh's bounds are made from a box about each joint it bends with, so they follow
+    /// the mesh as it moves. Without <paramref name="all"/> only entities carrying Bevy's
+    /// <c>ShowSkinnedMeshBoundsGizmo</c> are drawn, reached as <c>ShowSkinnedMeshBoundsGizmoRef</c>.
+    /// </remarks>
+    /// <param name="all">Whether every skinned mesh's bounds are drawn.</param>
+    /// <param name="color">One color for all of them, linear RGBA, or null for Bevy's white.</param>
+    /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
+    public static void ShowSkinnedBounds(bool all, (float R, float G, float B, float A)? color = null)
+    {
+        if (color is not { } c)
+        {
+            Native.Check(Native.bcs_gizmo_skinned_bounds(all ? 1 : 0, null), "showing skinned mesh bounds");
+            return;
+        }
+
+        var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
+        Native.Check(Native.bcs_gizmo_skinned_bounds(all ? 1 : 0, rgba), "showing skinned mesh bounds");
+    }
+
+    /// <summary>
     /// Keeps the shapes <paramref name="draw"/> asks for in an asset, rather than drawing them for
     /// one frame, for an entity to draw every frame with <see cref="Attach"/>.
     /// </summary>

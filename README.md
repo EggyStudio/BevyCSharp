@@ -78,7 +78,7 @@ Bevy's group written here, and one that prints rather than draws is in EXAMPLES.
 the row.
 
 <!-- examples -->
-Of Bevy's 438 examples, 367 are written in C# here and 2 more in part, 0 more can be with what is bridged, 9 wait on something the bridge lacks and 60 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
+Of Bevy's 438 examples, 371 are written in C# here and 2 more in part, 0 more can be with what is bridged, 5 wait on something the bridge lacks and 60 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
 <!-- /examples -->
 
 <!-- example-gallery -->
@@ -127,7 +127,7 @@ Of Bevy's 438 examples, 367 are written in C# here and 2 more in part, 0 more ca
 ### Movement, 1 of 1
 <table><tr><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/movement/physics_in_fixed_timestep.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/physics_in_fixed_timestep.webp" width="260" height="146"/></a><br><small><code>physics_in_fixed_timestep       </code></small></td></tr></table>
 
-### Picking, 5 of 7
+### Picking, 6 of 7
 <table><tr><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/picking/dragdrop_picking.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/dragdrop_picking.webp" width="260" height="146"/></a><br><small><code>dragdrop_picking                </code></small></td><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/picking/draggable_slider.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/draggable_slider.webp" width="260" height="146"/></a><br><small><code>draggable_slider                </code></small></td><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/picking/mesh_picking.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/mesh_picking.webp" width="260" height="146"/></a><br><small><code>mesh_picking                    </code></small></td><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/picking/simple_picking.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/simple_picking.webp" width="260" height="146"/></a><br><small><code>simple_picking                  </code></small></td><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/picking/sprite_picking.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/sprite_picking.webp" width="260" height="146"/></a><br><small><code>sprite_picking                  </code></small></td></tr></table>
 
 ### Scene, 1 of 2
@@ -148,7 +148,7 @@ Of Bevy's 438 examples, 367 are written in C# here and 2 more in part, 0 more ca
 ### Time, 2 of 3
 <table><tr><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/time/virtual_time.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/virtual_time.webp" width="260" height="146"/></a><br><small><code>virtual_time                    </code></small></td></tr></table>
 
-### Tools, 1 of 2
+### Tools, all 2
 <table><tr><td width="260"><a href="https://github.com/EggyStudio/BevyCSharp/blob/main/BevyCSharp.Examples/tools/gamepad_viewer.cs"><img src="https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/examples/gamepad_viewer.webp" width="260" height="146"/></a><br><small><code>gamepad_viewer                  </code></small></td></tr></table>
 
 ### Transforms, all 5

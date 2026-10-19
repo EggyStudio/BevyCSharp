@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Interop;
+using Bevy.Reflected;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -273,6 +274,82 @@ public sealed class GizmoShapeTests
 
         Assert.Equal(0, Lit(run.Picture("plain")));
         Assert.True(Lit(run.Picture("boxed")) > 50, "no bounding box was drawn");
+    }
+
+    /// <summary>
+    /// Every frustum is drawn once asked for, a second camera's seen by the first, in the color
+    /// given, and not before.
+    /// </summary>
+    [SkippableFact]
+    public void EveryFrustumIsDrawnOnceAskedFor()
+    {
+        Needs.Renderer();
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(6f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
+
+                // A camera drawing nothing, its frustum cut short so all of it is in view.
+                var seen = Render.SpawnCamera3d(new CameraSettings { Order = 1 });
+                ecs.Add(seen, Transform.LookingAt(Vec3.Zero, new Vec3(0f, 0f, -1f), Vec3.UnitY));
+                ecs.Wrap<CameraRef>(seen).IsActive = false;
+                var projection = ecs.Wrap<ProjectionRef>(seen);
+                if (projection.Value is Projection.Perspective perspective) projection.Value = perspective with { Far = 3f };
+            },
+        };
+        run.Wait((uint)Settled)
+            .Capture("plain")
+            .Do("showing the frusta", _ => Gizmos.ShowFrusta(true, (0f, 1f, 0f, 1f)))
+            .Wait(5)
+            .Capture("shown")
+            .Go();
+
+        Assert.Equal(0, Lit(run.Picture("plain")));
+        Assert.True(Lit(run.Picture("shown")) > 50, "no frustum was drawn");
+    }
+
+    /// <summary>
+    /// The bounds of a skinned mesh's joints are drawn once asked for, in the color given, where
+    /// the mesh alone drew none of that color.
+    /// </summary>
+    [SkippableFact]
+    public void EverySkinnedMeshsBoundsAreDrawnOnceAskedFor()
+    {
+        Needs.Renderer();
+
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1f, 6f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
+                ecs.SpawnScene(AssetServer.LoadGltfScene("models/bend.gltf"));
+            },
+        };
+        run.Wait((uint)Settled + 30)
+            .Capture("plain")
+            .Do("showing the bounds", _ => Gizmos.ShowSkinnedBounds(true, (0f, 1f, 0f, 1f)))
+            .Wait(5)
+            .Capture("shown")
+            .Go();
+
+        Assert.True(Green(run.Picture("shown")) > Green(run.Picture("plain")) + 50, "no skinned mesh's bounds were drawn");
+    }
+
+    /// <summary>How many pixels are a pure green, as the gizmos asked for above are drawn.</summary>
+    private static int Green(CapturedImage picture)
+    {
+        var drawn = 0;
+
+        for (var i = 0; i < picture.Pixels.Length; i += 4)
+        {
+            if (picture.Pixels[i + 1] > 100 && picture.Pixels[i] < 60 && picture.Pixels[i + 2] < 60) drawn++;
+        }
+
+        return drawn;
     }
 
     /// <summary>How many pixels the shape reached.</summary>

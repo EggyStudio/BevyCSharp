@@ -138,6 +138,10 @@ case "$example" in
     c input.axis 0 LeftY 0.4
     c input.axis 0 RightY -0.7
     c input.axis 0 RightTrigger 0.8 ;;
+  # A cube clicked for, and the pointer over the floor, where picking's overlay names what it finds.
+  debug_picking)
+    c input.click 300 100
+    c input.move 640 470 ;;
   # A hundred points sampled inside the cube and a hundred on its surface, which D scatters and M
   # turns from the one to the other.
   random_sampling)

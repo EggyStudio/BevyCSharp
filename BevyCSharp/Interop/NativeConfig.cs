@@ -107,4 +107,7 @@ public unsafe struct NativeConfig
 
     /// <summary>Non-zero to add Feathers, Bevy's styled widgets, with its dark theme.</summary>
     public uint Feathers;
+
+    /// <summary>Bevy's dev tools to add, a bit each, as <see cref="Bevy.DevTools"/> numbers them.</summary>
+    public uint DevTools;
 }

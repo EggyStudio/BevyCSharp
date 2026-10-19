@@ -183,6 +183,33 @@ or all of them again for null. Bevy's measures of the process's and the machine'
 need a crate the bridge does not compile in, so they are not in the store. The `diagnostics` command
 lists the store as the log prints it.
 
+## Bevy's dev tools
+
+Bevy's dev tools are plugins its defaults leave out, which an app asks for with `Config.DevTools`.
+The FPS overlay shows the frame rate at the window's top left over a graph of the frame times, and
+is set through Bevy's reflected `FpsOverlayConfigRef` resource. The infinite grid is a ground plane
+of lines fading with distance, drawn on an entity given `InfiniteGridRef` and set through its
+`InfiniteGridSettingsRef`. Picking's debug overlay names what picking finds under each pointer
+while `Picking.DebugMode` is normal or noisy, and logs picking's events at Bevy's debug and trace
+levels, which `RUST_LOG=bevy_dev_tools=trace` lets through:
+
+<!-- compiled with:
+Config config = new();
+-->
+```csharp
+config.DevTools = DevTools.FpsOverlay | DevTools.InfiniteGrid | DevTools.PickingDebug;
+
+app.Startup(ctx =>
+{
+    if (ctx.Ecs.Resource<FpsOverlayConfigRef>() is { } overlay) overlay.TextColor = Color.FromSrgb(0f, 1f, 0f);
+    ctx.Ecs.Insert<InfiniteGridRef>(ctx.Ecs.Spawn());
+    Picking.DebugMode = PickingDebugMode.Normal;
+});
+```
+
+The overlay adds Bevy's frame time diagnostics where the app has not, and how often its text
+changes is set as the app is built, so the resource's interval changes nothing after.
+
 ## Controlling a running app
 
 The same catalog is reachable from a terminal. `Config.Serve`, or `--serve`, or `BCS_SERVE` in the

@@ -27,9 +27,6 @@ the most examples, and the largest is taken between groups of examples. The coun
 Each waits on a crate the lock does not hold, or, for the system fonts, on the decision to keep
 their discovery off.
 
-- **Bevy's dev tools, four examples.** Its FPS overlay and frame time graph (`fps_overlay`), its
-  infinite grid (`infinite_grid`, `scene_viewer`) and its picking debug overlay (`debug_picking`),
-  all in `bevy_dev_tools`.
 - **System fonts, three examples.** Bevy's system font discovery, which the bridge does not
   compile in, so a generic family such as sans-serif resolves to the system's font
   (`generic_font_families`, `ime_support`), and the families Bevy's `FontCx` lists and the family

@@ -1007,6 +1007,7 @@ sealed class Bevy.Config
   Assembly? AssetAssembly { get; set; }
   CameraControllers CameraControllers { get; set; }
   Config()
+  DevTools DevTools { get; set; }
   DiagnosticPlugins DiagnosticPlugins { get; set; }
   Dictionary<string, string> AssetSources { get; }
   GraphicsBackend Backend { get; set; }
@@ -1328,6 +1329,11 @@ readonly struct Bevy.Despawn<T> : IEntityEvent, IEquatable<Despawn<T>>, IReporte
   static bool op_Equality(Despawn<T> left, Despawn<T> right)
   static bool op_Inequality(Despawn<T> left, Despawn<T> right)
   void Deconstruct(out Entity Entity, out T Value)
+enum Bevy.DevTools : int
+  FpsOverlay = 1
+  InfiniteGrid = 2
+  None = 0
+  PickingDebug = 4
 enum Bevy.DiagnosticPlugins : int
   EntityCount = 4
   FrameTime = 2
@@ -2410,7 +2416,9 @@ static class Bevy.Gizmos
   static void SetDepthBias(float bias, GizmoGroup which = GizmoGroup.Both)
   static void SetLineStyle(GizmoLine style = GizmoLine.Solid, float gapScale = 0f, float lineScale = 0f, GizmoJoint joint = GizmoJoint.None, uint jointResolution = 0u, bool perspective = false, GizmoGroup which = GizmoGroup.Both)
   static void ShowBounds(bool all, (float, float, float, float)? color = null)
+  static void ShowFrusta(bool all, (float, float, float, float)? color = null)
   static void ShowLights(bool all, LightGizmoColoring coloring = LightGizmoColoring.MatchLight, (float, float, float, float) color = default)
+  static void ShowSkinnedBounds(bool all, (float, float, float, float)? color = null)
   static void Sphere(Vec3 center, Quat rotation, float radius, (float, float, float, float) color, bool inFront = true, uint resolution = 0u)
   static void Sphere(Vec3 center, float radius, (float, float, float, float) color, bool inFront = true, uint resolution = 0u)
   static void Tetrahedron(Vec3 a, Vec3 b, Vec3 c, Vec3 d, (float, float, float, float) color, bool inFront = false)
@@ -2869,6 +2877,7 @@ struct Bevy.Interop.NativeConfig
   uint Backend
   uint CameraControllers
   uint DesktopTitleBar
+  uint DevTools
   uint Diagnostics
   uint Feathers
   uint GpuTimings
@@ -4749,6 +4758,7 @@ struct Bevy.Physics.RigidBody
   int Layer
 static class Bevy.Picking
   static Entity[] Drain()
+  static PickingDebugMode DebugMode { get; set; }
   static PointerId SpawnPointer()
   static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal)
   static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal, out Vec2? uv)
@@ -4757,6 +4767,10 @@ static class Bevy.Picking
   static void PressPointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary)
   static void ReleaseCapture(PointerId pointer)
   static void ReleasePointer(PointerId pointer, AssetHandle image, Vec2 position, PointerButton button = PointerButton.Primary)
+enum Bevy.PickingDebugMode : int
+  Disabled = 0
+  Noisy = 2
+  Normal = 1
 readonly struct Bevy.PinchGesture : IEquatable<PinchGesture>
   PinchGesture(float Delta)
   bool Equals(PinchGesture other)
@@ -7009,6 +7023,25 @@ sealed class Bevy.Reflected.FontStyle.Oblique : FontStyle, IEquatable<FontStyle.
   static bool op_Equality(FontStyle.Oblique? left, FontStyle.Oblique? right)
   static bool op_Inequality(FontStyle.Oblique? left, FontStyle.Oblique? right)
   void Deconstruct(out float? Value)
+readonly struct Bevy.Reflected.FpsOverlayConfigRef : IReflectedComponent<FpsOverlayConfigRef>, IReflectedWrapper<FpsOverlayConfigRef>
+  Color TextColor { get; set; }
+  Entity Entity { get; }
+  FontSize TextConfigFontSize { get; set; }
+  FontSource TextConfigFont { get; set; }
+  FontStyle TextConfigStyle { get; set; }
+  FpsOverlayConfigRef.TextConfigFontSmoothingVariant TextConfigFontSmoothing { get; set; }
+  TimeSpan RefreshInterval { get; set; }
+  bool Enabled { get; set; }
+  bool FrameTimeGraphConfigEnabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::fps_overlay::FpsOverlayConfig"
+  float FrameTimeGraphConfigMinFps { get; set; }
+  float FrameTimeGraphConfigTargetFps { get; set; }
+  float TextConfigWidth { get; set; }
+  ushort TextConfigWeight { get; set; }
+enum Bevy.Reflected.FpsOverlayConfigRef.TextConfigFontSmoothingVariant : int
+  AntiAliased = 1
+  None = 0
 readonly struct Bevy.Reflected.FrustumRef : IReflectedComponent<FrustumRef>, IReflectedWrapper<FrustumRef>
   Entity Entity { get; }
   bool Remove()
@@ -7225,6 +7258,13 @@ readonly struct Bevy.Reflected.GlobalAmbientLightRef : IReflectedComponent<Globa
   bool Remove()
   const string TypePath = "bevy_light::ambient_light::GlobalAmbientLight"
   float Brightness { get; set; }
+readonly struct Bevy.Reflected.GlobalRenderDebugOverlayRef : IReflectedComponent<GlobalRenderDebugOverlayRef>, IReflectedWrapper<GlobalRenderDebugOverlayRef>
+  Entity Entity { get; }
+  RenderDebugMode Mode { get; set; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::render_debug::GlobalRenderDebugOverlay"
+  float Opacity { get; set; }
 readonly struct Bevy.Reflected.GlobalTransformRef : IReflectedComponent<GlobalTransformRef>, IReflectedWrapper<GlobalTransformRef>
   Entity Entity { get; }
   Vec3 Item0Matrix3XAxis { get; set; }
@@ -7511,6 +7551,22 @@ readonly struct Bevy.Reflected.IndependentSkyboxRef : IReflectedComponent<Indepe
   const string TypePath = "bevy_camera_controller::pan_orbit_camera::extensions::independent_skybox::IndependentSkybox"
   float Brightness { get; set; }
   long SkyboxCamOrderOffset { get; set; }
+readonly struct Bevy.Reflected.InfiniteGridRef : IReflectedComponent<InfiniteGridRef>, IReflectedWrapper<InfiniteGridRef>
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::infinite_grid::InfiniteGrid"
+readonly struct Bevy.Reflected.InfiniteGridSettingsRef : IReflectedComponent<InfiniteGridSettingsRef>, IReflectedWrapper<InfiniteGridSettingsRef>
+  Color MajorLineColor { get; set; }
+  Color MinorLineColor { get; set; }
+  Color XAxisColor { get; set; }
+  Color ZAxisColor { get; set; }
+  Entity Entity { get; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::infinite_grid::InfiniteGridSettings"
+  float DotFadeoutStrength { get; set; }
+  float FadeoutDistance { get; set; }
+  float Scale { get; set; }
+  uint MajorLineInterval { get; set; }
 readonly struct Bevy.Reflected.InheritableFontRef : IReflectedComponent<InheritableFontRef>, IReflectedWrapper<InheritableFontRef>
   AssetHandle Font { get; set; }
   Entity Entity { get; }
@@ -9326,6 +9382,16 @@ enum Bevy.Reflected.PointLightTextureRef.CubemapLayoutVariant : int
   CrossVertical = 0
   SequenceHorizontal = 3
   SequenceVertical = 2
+readonly struct Bevy.Reflected.PointerDebugOverlayOfRef : IReflectedComponent<PointerDebugOverlayOfRef>, IReflectedWrapper<PointerDebugOverlayOfRef>
+  Entity Entity { get; }
+  Entity Pointer { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::picking_debug::PointerDebugOverlayOf"
+readonly struct Bevy.Reflected.PointerDebugOverlayRef : IReflectedComponent<PointerDebugOverlayRef>, IReflectedWrapper<PointerDebugOverlayRef>
+  Entity Entity { get; }
+  Entity Overlay { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::picking_debug::PointerDebugOverlay"
 readonly struct Bevy.Reflected.PointerIdRef : IReflectedComponent<PointerIdRef>, IReflectedWrapper<PointerIdRef>
   Entity Entity { get; }
   PointerIdValue Value { get; set; }
@@ -9746,6 +9812,113 @@ readonly struct Bevy.Reflected.RelativeCursorPositionRef : IReflectedComponent<R
   bool CursorOver { get; set; }
   bool Remove()
   const string TypePath = "bevy_ui::focus::RelativeCursorPosition"
+abstract class Bevy.Reflected.RenderDebugMode : IEquatable<RenderDebugMode>
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected RenderDebugMode(RenderDebugMode original)
+  protected virtual Type EqualityContract { get; }
+  protected virtual bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode? left, RenderDebugMode? right)
+  static bool op_Inequality(RenderDebugMode? left, RenderDebugMode? right)
+  virtual bool Equals(RenderDebugMode? other)
+sealed class Bevy.Reflected.RenderDebugMode.Deferred : RenderDebugMode, IEquatable<RenderDebugMode.Deferred>, IEquatable<RenderDebugMode>
+  Deferred()
+  bool Equals(RenderDebugMode.Deferred? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.Deferred? left, RenderDebugMode.Deferred? right)
+  static bool op_Inequality(RenderDebugMode.Deferred? left, RenderDebugMode.Deferred? right)
+sealed class Bevy.Reflected.RenderDebugMode.DeferredBaseColor : RenderDebugMode, IEquatable<RenderDebugMode.DeferredBaseColor>, IEquatable<RenderDebugMode>
+  DeferredBaseColor()
+  bool Equals(RenderDebugMode.DeferredBaseColor? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.DeferredBaseColor? left, RenderDebugMode.DeferredBaseColor? right)
+  static bool op_Inequality(RenderDebugMode.DeferredBaseColor? left, RenderDebugMode.DeferredBaseColor? right)
+sealed class Bevy.Reflected.RenderDebugMode.DeferredEmissive : RenderDebugMode, IEquatable<RenderDebugMode.DeferredEmissive>, IEquatable<RenderDebugMode>
+  DeferredEmissive()
+  bool Equals(RenderDebugMode.DeferredEmissive? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.DeferredEmissive? left, RenderDebugMode.DeferredEmissive? right)
+  static bool op_Inequality(RenderDebugMode.DeferredEmissive? left, RenderDebugMode.DeferredEmissive? right)
+sealed class Bevy.Reflected.RenderDebugMode.DeferredMetallicRoughness : RenderDebugMode, IEquatable<RenderDebugMode.DeferredMetallicRoughness>, IEquatable<RenderDebugMode>
+  DeferredMetallicRoughness()
+  bool Equals(RenderDebugMode.DeferredMetallicRoughness? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.DeferredMetallicRoughness? left, RenderDebugMode.DeferredMetallicRoughness? right)
+  static bool op_Inequality(RenderDebugMode.DeferredMetallicRoughness? left, RenderDebugMode.DeferredMetallicRoughness? right)
+sealed class Bevy.Reflected.RenderDebugMode.Depth : RenderDebugMode, IEquatable<RenderDebugMode.Depth>, IEquatable<RenderDebugMode>
+  Depth()
+  bool Equals(RenderDebugMode.Depth? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.Depth? left, RenderDebugMode.Depth? right)
+  static bool op_Inequality(RenderDebugMode.Depth? left, RenderDebugMode.Depth? right)
+sealed class Bevy.Reflected.RenderDebugMode.DepthPyramid : RenderDebugMode, IEquatable<RenderDebugMode.DepthPyramid>, IEquatable<RenderDebugMode>
+  DepthPyramid(uint MipLevel)
+  bool Equals(RenderDebugMode.DepthPyramid? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.DepthPyramid? left, RenderDebugMode.DepthPyramid? right)
+  static bool op_Inequality(RenderDebugMode.DepthPyramid? left, RenderDebugMode.DepthPyramid? right)
+  uint MipLevel { get; init; }
+  void Deconstruct(out uint MipLevel)
+sealed class Bevy.Reflected.RenderDebugMode.MotionVectors : RenderDebugMode, IEquatable<RenderDebugMode.MotionVectors>, IEquatable<RenderDebugMode>
+  MotionVectors()
+  bool Equals(RenderDebugMode.MotionVectors? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.MotionVectors? left, RenderDebugMode.MotionVectors? right)
+  static bool op_Inequality(RenderDebugMode.MotionVectors? left, RenderDebugMode.MotionVectors? right)
+sealed class Bevy.Reflected.RenderDebugMode.Normal : RenderDebugMode, IEquatable<RenderDebugMode.Normal>, IEquatable<RenderDebugMode>
+  Normal()
+  bool Equals(RenderDebugMode.Normal? other)
+  bool Equals(RenderDebugMode? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  protected override Type EqualityContract { get; }
+  protected override bool PrintMembers(StringBuilder builder)
+  static bool op_Equality(RenderDebugMode.Normal? left, RenderDebugMode.Normal? right)
+  static bool op_Inequality(RenderDebugMode.Normal? left, RenderDebugMode.Normal? right)
+readonly struct Bevy.Reflected.RenderDebugOverlayRef : IReflectedComponent<RenderDebugOverlayRef>, IReflectedWrapper<RenderDebugOverlayRef>
+  Entity Entity { get; }
+  RenderDebugMode Mode { get; set; }
+  bool Enabled { get; set; }
+  bool Remove()
+  const string TypePath = "bevy_dev_tools::render_debug::RenderDebugOverlay"
+  float Opacity { get; set; }
 readonly struct Bevy.Reflected.RenderLayersRef : IReflectedComponent<RenderLayersRef>, IReflectedWrapper<RenderLayersRef>
   Entity Entity { get; }
   IReadOnlyList<ulong> Value { get; set; }

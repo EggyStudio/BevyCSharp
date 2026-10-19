@@ -308,3 +308,79 @@ pub unsafe extern "C" fn bcs_gizmo_bounds(draw_all: i32, color: *const f32) -> i
         }
     })
 }
+
+/// Sets whether Bevy draws the frustum of every entity that has one, a camera's and a spot light's,
+/// rather than only those carrying `ShowFrustumGizmo`, and in what color, linear RGBA, or a color
+/// for each where `color` is null.
+///
+/// # Safety
+/// `color` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_frusta(draw_all: i32, color: *const f32) -> i32 {
+    crate::interop::guard(|| {
+        let color = (!color.is_null()).then(|| unsafe { core::slice::from_raw_parts(color, 4) }.to_vec());
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (draw_all, color);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::gizmos::frustum::FrustumGizmoConfigGroup;
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<bevy::gizmos::config::GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some((_, frusta)) = store.get_config_mut::<FrustumGizmoConfigGroup>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                frusta.draw_all = draw_all != 0;
+                frusta.default_color = color.map(|c| Color::linear_rgba(c[0], c[1], c[2], c[3]));
+                status::OK
+            })
+        }
+    })
+}
+
+/// Sets whether Bevy draws the bounds of every skinned mesh's joints, which its bounds are made
+/// from, rather than only those carrying `ShowSkinnedMeshBoundsGizmo`, and in what color, linear
+/// RGBA, or Bevy's white where `color` is null.
+///
+/// # Safety
+/// `color` must be null or point to four readable floats.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_gizmo_skinned_bounds(draw_all: i32, color: *const f32) -> i32 {
+    crate::interop::guard(|| {
+        let color = (!color.is_null()).then(|| unsafe { core::slice::from_raw_parts(color, 4) }.to_vec());
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (draw_all, color);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::color::Color;
+            use bevy::gizmos::skinned_mesh_bounds::SkinnedMeshBoundsGizmoConfigGroup;
+
+            crate::state::with_world(|world| {
+                let Some(mut store) = world.get_resource_mut::<bevy::gizmos::config::GizmoConfigStore>() else {
+                    return status::UNSUPPORTED;
+                };
+                let Some((_, bounds)) = store.get_config_mut::<SkinnedMeshBoundsGizmoConfigGroup>() else {
+                    return status::UNSUPPORTED;
+                };
+
+                bounds.draw_all = draw_all != 0;
+                bounds.default_color = color.map_or(Color::WHITE, |c| Color::linear_rgba(c[0], c[1], c[2], c[3]));
+                status::OK
+            })
+        }
+    })
+}

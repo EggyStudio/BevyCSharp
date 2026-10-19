@@ -215,6 +215,29 @@ public static unsafe class Picking
             Native.bcs_pointer_release_capture((int)pointer.Kind, pointer.Number),
             $"releasing {pointer}");
 
+    /// <summary>
+    /// What picking's debug tool shows, its overlay at each pointer and its log of picking's
+    /// events, Bevy's <c>DebugPickingMode</c>, disabled until it is set. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// The tool is there where the app asks for it with <see cref="DevTools.PickingDebug"/>. The
+    /// overlay names the entity under each pointer and where it was met, and the log is written at
+    /// Bevy's debug and trace levels, which <c>RUST_LOG</c> lets through.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">
+    /// The app did not ask for <see cref="DevTools.PickingDebug"/>, or this build has no renderer.
+    /// </exception>
+    public static PickingDebugMode DebugMode
+    {
+        get
+        {
+            int mode;
+            Native.Check(Native.bcs_dev_tools_picking_debug(&mode), "reading picking's debug mode");
+            return (PickingDebugMode)mode;
+        }
+        set => Native.Check(Native.bcs_dev_tools_set_picking_debug((int)value), "setting picking's debug mode");
+    }
+
     private static void Send(PointerId pointer, AssetHandle image, Vec2 position, int action, PointerButton button)
     {
         if (pointer.Kind != PointerKind.Custom)

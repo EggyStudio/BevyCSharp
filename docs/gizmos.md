@@ -84,12 +84,14 @@ own groups for what it draws itself, and `All` is every group at once.
 from -1, in front of everything, to 1, behind it. The in-front group sits at -1, and a key that
 sets every group there shows the lot through walls.
 
-Bevy draws two things of its own on request. `Gizmos.ShowLights` draws the shape of every light,
+Bevy draws four things of its own on request. `Gizmos.ShowLights` draws the shape of every light,
 a point light's sphere, a spot light's cone, a directional light's arrow and a rectangle light's
 rectangle, colored by the light, by its kind, by its entity or all alike. `Gizmos.ShowBounds` draws
 the bounding box Bevy culls each entity by, which is where to look when something vanishes at the
-edge of the screen. Without them, a light or an entity carrying `ShowLightGizmoRef` or
-`ShowAabbGizmoRef` is drawn alone.
+edge of the screen. `Gizmos.ShowFrusta` draws the volume each camera and spot light sees, and
+`Gizmos.ShowSkinnedBounds` the boxes about the joints a skinned mesh's bounds are made from. Without
+them, a light or an entity carrying `ShowLightGizmoRef`, `ShowAabbGizmoRef`, `ShowFrustumGizmoRef`
+or `ShowSkinnedMeshBoundsGizmoRef` is drawn alone.
 
 `Gizmos.SetLineStyle` decides what the line itself looks like. A dotted or dashed line tells one
 meaning from another without spending a second color on it, so a path already walked can be drawn

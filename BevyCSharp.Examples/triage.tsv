@@ -162,8 +162,8 @@ first_person_view_model	can
 free_camera_controller	can
 pan_camera_controller	can
 projection_zoom	can
-fps_overlay	missing	Bevy's FPS overlay and frame time graph, from its dev tools, which the bridge does not compile in
-infinite_grid	missing	Bevy's infinite grid
+fps_overlay	can
+infinite_grid	can
 schedule_data	n/a	reads Bevy's schedule graphs from Rust
 custom_diagnostic	can
 enabling_disabling_diagnostic	can
@@ -257,7 +257,7 @@ testbed_ui	n/a	Bevy's visual regression scenes, hidden from its list
 test_invalid_skinned_mesh	n/a	a test of skinned mesh validation, hidden from Bevy's list
 test_skinned_mesh_bounds	n/a	a test of skinned mesh bounds, hidden from Bevy's list
 custom_hit_data	n/a	writes a Rust picking backend
-debug_picking	missing	Bevy's picking debug overlay, in bevy_dev_tools, a crate the bridge does not compile in
+debug_picking	can	picking's events logged at Bevy's debug and trace levels, which RUST_LOG=bevy_dev_tools=trace shows, where Bevy's sets that filter in its log plugin
 dragdrop_picking	can
 mesh_picking	can	the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps
 simple_picking	can
@@ -320,7 +320,7 @@ time	n/a	replaces Bevy's runner with one stepping the app from the console, and 
 timers	can
 virtual_time	can
 gamepad_viewer	can
-scene_viewer	missing	Bevy's infinite grid, from its dev tools, which the bridge does not compile in
+scene_viewer	can	a scene path inside the asset folder, where Bevy's loads one from anywhere on disk, without the glTF coordinate switches Bevy's glTF plugin takes as it is built or the count of the file's scenes, and the scene's clips played by the scene as a whole, where Bevy gives each animation player its own
 3d_rotation	can
 align	can
 scale	can

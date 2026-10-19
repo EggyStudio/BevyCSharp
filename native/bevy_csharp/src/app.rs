@@ -362,6 +362,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::feathers::install(&mut app);
             }
 
+            // Bevy's dev tools, which its default plugins leave out and an app asks for.
+            crate::dev_tools::install(&mut app, config.dev_tools);
+
             // Where the readers of Bevy's window messages keep their place between frames.
             app.init_resource::<crate::events::WindowEventCursors>();
             app.init_resource::<crate::events::FileDrops>();

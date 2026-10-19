@@ -252,6 +252,7 @@ public sealed unsafe partial class App : IDisposable
                 TransformGizmo = Config.TransformGizmo ? 1u : 0u,
                 CameraControllers = (uint)Config.CameraControllers,
                 Feathers = Config.Feathers ? 1u : 0u,
+                DevTools = (uint)Config.DevTools,
             };
             _handle = Native.bcs_app_create(&native);
         }

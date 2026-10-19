@@ -1,6 +1,7 @@
 # N 1.4, a test in the folder of the area it tests.
 # A place a line, then a tab and why where that helps. The list only gets shorter, a place coming
 # off it in the batch that mends it, and NormTests fails for a line whose place keeps the rule.
+# A test of what is no area of the library is listed by its nature, as N 1.4 has it, and is no debt.
 
 BevyCSharp.Tests/Build/DocsScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library

@@ -725,6 +725,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gizmo_bounds(int drawAll, float* color);
 
+    /// <summary>Sets whether every frustum is drawn and in what color.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_frusta(int drawAll, float* color);
+
+    /// <summary>Sets whether every skinned mesh's joint bounds are drawn and in what color.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gizmo_skinned_bounds(int drawAll, float* color);
+
     /// <summary>Starts keeping the gizmo shapes asked for rather than drawing them.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

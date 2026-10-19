@@ -4,7 +4,7 @@ Bevy 0.20.0 has 438 examples, 424 of them in the list its `examples/README.md` k
 
 An example written here is a program in `BevyCSharp.Examples`, under Bevy's name, opened by `dotnet run --project BevyCSharp.Examples -- <name>` or `./bcs open --example <name>`. One `written in part` leaves out a feature of Bevy's the bridge lacks and names it. One that `can be written` uses only what is bridged and waits for its turn. One that is `missing` names what the bridge lacks, and one that `does not apply` says why it is not a thing a C# game does, most often because it is about Rust itself. A difference that is no feature, such as a view sized for another window, is said in a written row and keeps it written.
 
-**367 written, 2 written in part, 0 can be written, 9 missing and 60 do not apply.** Of the 378 that apply, 369 can be written with what is bridged, 2 of them leaving something out.
+**371 written, 2 written in part, 0 can be written, 5 missing and 60 do not apply.** Of the 378 that apply, 373 can be written with what is bridged, 2 of them leaving something out.
 
 **164 of the 180 written whose Bevy example keeps state on an entity, in a component of its own, keep it on the entity in a behavior here,** as B 4 of NORM.md has it, the rest keeping it in static fields until their group is brought over. The last column counts them by group.
 
@@ -18,7 +18,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Async Tasks](#async-tasks) | 3 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Audio](#audio) | 8 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Camera](#camera) | 12 | 0 | 0 | 0 | 0 | 3 of 5 |
-| [Dev tools](#dev-tools) | 0 | 0 | 0 | 2 | 1 |  |
+| [Dev tools](#dev-tools) | 2 | 0 | 0 | 0 | 1 |  |
 | [Diagnostics](#diagnostics) | 2 | 1 | 0 | 0 | 0 | 1 of 1 |
 | [ECS (Entity Component System)](#ecs-entity-component-system) | 26 | 0 | 0 | 0 | 9 | 13 of 14 |
 | [Embedded](#embedded) | 0 | 0 | 0 | 0 | 1 |  |
@@ -27,7 +27,7 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [Input](#input) | 12 | 0 | 0 | 0 | 0 |  |
 | [Math](#math) | 5 | 0 | 0 | 0 | 1 | 4 of 5 |
 | [Movement](#movement) | 1 | 0 | 0 | 0 | 0 | 1 of 1 |
-| [Picking](#picking) | 5 | 0 | 0 | 1 | 1 | 4 of 4 |
+| [Picking](#picking) | 6 | 0 | 0 | 0 | 1 | 4 of 4 |
 | [Reflection](#reflection) | 0 | 0 | 0 | 0 | 10 |  |
 | [Remote Protocol](#remote-protocol) | 0 | 0 | 0 | 0 | 4 |  |
 | [Scene](#scene) | 1 | 0 | 0 | 0 | 1 | 1 of 1 |
@@ -36,14 +36,14 @@ An example written here is a program in `BevyCSharp.Examples`, under Bevy's name
 | [State](#state) | 4 | 0 | 0 | 0 | 0 | 1 of 1 |
 | [Stress Tests](#stress-tests) | 19 | 0 | 0 | 0 | 1 | 9 of 9 |
 | [Time](#time) | 2 | 0 | 0 | 0 | 1 | 2 of 2 |
-| [Tools](#tools) | 1 | 0 | 0 | 1 | 0 |  |
+| [Tools](#tools) | 2 | 0 | 0 | 0 | 0 |  |
 | [Transforms](#transforms) | 5 | 0 | 0 | 0 | 0 | 5 of 5 |
 | [UI (User Interface)](#ui-user-interface) | 62 | 0 | 0 | 3 | 0 | 22 of 26 |
 | [Usage](#usage) | 4 | 0 | 0 | 0 | 0 | 4 of 4 |
 | [Window](#window) | 10 | 1 | 0 | 0 | 0 | 4 of 4 |
 | [glTF](#gltf) | 6 | 0 | 0 | 0 | 3 | 2 of 3 |
 | [Kept out of Bevy's list](#kept-out-of-bevys-list) | 4 | 0 | 0 | 0 | 10 |  |
-| **All** | **367** | **2** | **0** | **9** | **60** | **164 of 180** |
+| **All** | **371** | **2** | **0** | **5** | **60** | **164 of 180** |
 
 A row's example links to Bevy's source, at the release the bridge builds. A written one's state links to its program here, and its capture is in `.github/assets/examples`, a picture of what it draws or, for one with nothing to draw, the text it prints. Every picture is drawn at Bevy's window of 1280 by 720, or the size the example asks for, and kept at that size as WebP, lossless for a 2D or interface example and at quality 85 for a 3D one, so a label reads as Bevy draws it and a sky does not band. A picture of another shape than sixteen by nine is scaled to fill 1280 by 720 and cut around its middle, so the README shows every picture whole in a box of one shape.
 
@@ -261,8 +261,8 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 
 | Example | What it shows | State |
 |---|---|---|
-| [`fps_overlay`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/dev_tools/fps_overlay.rs) | Demonstrates FPS overlay | missing, Bevy's FPS overlay and frame time graph, from its dev tools, which the bridge does not compile in |
-| [`infinite_grid`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/dev_tools/infinite_grid.rs) | Demonstrates Bevy's infinite grid, suitable as a ground plane for editors | missing, Bevy's infinite grid |
+| [`fps_overlay`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/dev_tools/fps_overlay.rs) | Demonstrates FPS overlay | [written](../BevyCSharp.Examples/dev_tools/fps_overlay.cs) |
+| [`infinite_grid`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/dev_tools/infinite_grid.rs) | Demonstrates Bevy's infinite grid, suitable as a ground plane for editors | [written](../BevyCSharp.Examples/dev_tools/infinite_grid.cs) |
 | [`schedule_data`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/dev_tools/schedule_data.rs) | Extracts the schedule data from a default app and writes it to a file | does not apply, reads Bevy's schedule graphs from Rust |
 
 ## Diagnostics
@@ -384,7 +384,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | [`custom_hit_data`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/custom_hit_data.rs) | Demonstrates a custom picking backend with custom hit data. | does not apply, writes a Rust picking backend |
-| [`debug_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/debug_picking.rs) | Demonstrates picking debug overlay | missing, Bevy's picking debug overlay, in bevy_dev_tools, a crate the bridge does not compile in |
+| [`debug_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/debug_picking.rs) | Demonstrates picking debug overlay | [written](../BevyCSharp.Examples/picking/debug_picking.cs), picking's events logged at Bevy's debug and trace levels, which RUST_LOG=bevy_dev_tools=trace shows, where Bevy's sets that filter in its log plugin |
 | [`dragdrop_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/dragdrop_picking.rs) | Demonstrates drag and drop using picking events | [written](../BevyCSharp.Examples/picking/dragdrop_picking.cs) |
 | [`draggable_slider`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/draggable_slider.rs) | Demonstrates pointer capture using a draggable slider | [written](../BevyCSharp.Examples/picking/draggable_slider.cs), with the pointer captured through Picking.CapturePointer |
 | [`mesh_picking`](https://github.com/bevyengine/bevy/blob/v0.20.0/examples/picking/mesh_picking.rs) | Demonstrates picking meshes | [written](../BevyCSharp.Examples/picking/mesh_picking.cs), the point the pointer meets marked from a ray cast each frame, where Bevy reads the nearest hit its pointer keeps |
@@ -510,7 +510,7 @@ A row's example links to Bevy's source, at the release the bridge builds. A writ
 | Example | What it shows | State |
 |---|---|---|
 | `gamepad_viewer` | Shows a visualization of gamepad buttons, sticks, and triggers | [written](../BevyCSharp.Examples/tools/gamepad_viewer.cs) |
-| `scene_viewer` | A simple way to view glTF models with Bevy. Just run `cargo run --release --example scene_viewer /path/to/model.gltf#Scene0`, replacing the path as appropriate. With no arguments it will load the FieldHelmet glTF model from the repository assets subdirectory | missing, Bevy's infinite grid, from its dev tools, which the bridge does not compile in |
+| `scene_viewer` | A simple way to view glTF models with Bevy. Just run `cargo run --release --example scene_viewer /path/to/model.gltf#Scene0`, replacing the path as appropriate. With no arguments it will load the FieldHelmet glTF model from the repository assets subdirectory | [written](../BevyCSharp.Examples/tools/scene_viewer.cs), a scene path inside the asset folder, where Bevy's loads one from anywhere on disk, without the glTF coordinate switches Bevy's glTF plugin takes as it is built or the count of the file's scenes, and the scene's clips played by the scene as a whole, where Bevy gives each animation player its own |
 
 ## Transforms
 

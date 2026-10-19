@@ -1240,6 +1240,8 @@ static void SetLineStyle(GizmoLine style = GizmoLine.Solid, float gapScale = 0f,
 static void SetDepthBias(float bias, GizmoGroup which = GizmoGroup.Both);  // Moves a group's gizmos toward the camera or away from it before they are tested against the scene's depth
 static void ShowLights(bool all, LightGizmoColoring coloring = LightGizmoColoring.MatchLight, (float R, float G, float B, float A) color = default);  // Sets whether Bevy draws the shape of every light, and how it colors them
 static void ShowBounds(bool all, (float R, float G, float B, float A)? color = null);  // Sets whether Bevy draws every entity's bounding box, and in what color
+static void ShowFrusta(bool all, (float R, float G, float B, float A)? color = null);  // Sets whether Bevy draws the frustum of every entity that has one, and in what color
+static void ShowSkinnedBounds(bool all, (float R, float G, float B, float A)? color = null);  // Sets whether Bevy draws the bounds of every skinned mesh's joints, and in what color
 static AssetHandle Record(Action draw);                         // Keeps the shapes draw asks for in an asset, rather than drawing them for one frame, for an entity to draw every frame with Attach
 static void Attach(EcsWorld world, Entity entity, AssetHandle gizmo);  // Has an entity draw a gizmo asset Record made, every frame, placed by the entity's transform
 static void Axes(Transform transform, float length = 1f, bool inFront = true);  // Draws a set of axes, which show an orientation

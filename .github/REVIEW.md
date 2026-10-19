@@ -10,7 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1e8c4750`, Feathers' third step and nothing else, 34 files, the ABI 289 to 291, the
+Reviewed up to `319624bf`, Feathers' last step and nothing else, 47 files, the ABI 291 to 292, the
+lock unchanged. The bridge gains a call setting the theme from token colors through Bevy's own
+constructor, a count of none restoring the dark theme, and the managed side the two calls with a
+test; `Helpers.cs` mirrors Bevy 0.20's three helper files the examples take in by path, the radio
+row, the theme and the labeled number input, and nothing of the port's own, its header naming the
+three, the package script's list carrying it with that reason, `Widgets.cs` gone and TODO.md's line
+on a helper standing where a crate would removed. The fourteen examples stand at Bevy's v0.20.0,
+each header naming the helper files it mirrors, three keeping Feathers' dark theme as Bevy's do, two
+taking number inputs in place of drag buttons with one adding its visibility row and the point
+light's scale, the reflections example's range rows as number inputs, the shadow example's filter
+order Bevy's and the gizmo's slider Feathers', four triage notes losing their clause on Feathers;
+eleven of the fourteen had a configuration the catalog never passed, so Feathers was off and their
+startup threw, mended in the entries and held by a test reading the sources with the compiler's
+syntax trees that fails when an example's configuration is missing from its entry, listed under N
+1.4 with the string-path test's reason, a test of no library area, which is no widening of the list.
+The fourteen pictures are retaken on a render bridge, seven within 2 percent of their old ones and
+seven apart by 2.2 to 6.4 where their rows changed, each read, with no line added to the differ
+file. Checked were `cargo check` on the four profiles, `cargo test` headless and on render, the
+headless bridge under B 2, the examples on a fresh package, the whole suite, 1,506 passed, 3 skipped
+and 1 failed of 1,510, the failure N 1.4 on the new test, mended by its list line and the norm and
+catalog tests then passing, and a clean build with warnings as errors. Feathers is whole in four
+steps and item 29's part (k) with it. Right. Next the dev tools' crate with its four examples, the
+system information with `log_diagnostics` whole, the declined rows marked and `monitor_info` on
+virtual monitors, one batch a commit, and the owner's push of the six commits.
+
+Before it, `1e8c4750` came, Feathers' third step and nothing else, 34 files, the ABI 289 to 291, the
 lock unchanged. The bridge spawns thirty-four more kinds, the menus with their button, tool button,
 popup, item and divider, the select, the list view and its row, the disclosure toggle, the text
 input and its container, the color swatch, plane, slider and input, the pane, subpane and group with
@@ -79,36 +104,6 @@ select and list view, menus, dialogs, panes and groups, text input, scrollbar an
 then the fifteen examples, then the dev tools, the system information, the declined rows marked and
 `monitor_info`, one step a commit, and the owner's push of the four commits.
 
-Before it, `edee9686` came, Feathers' first step and nothing else, 34 files, the ABI 286 to 287, the
-lock gaining `bevy_feathers` alone through Bevy's feature on the render profile. Feathers is too
-large for one commit, the gallery alone using some twenty controls whose props hold scenes and
-closures, so it comes in steps, each a commit with its examples, this one, then the number input and
-the virtual keyboard, then the gallery's controls, then the fifteen examples moved from the
-examples' radio buttons helper to Feathers' radio, which is item 29's part (k) whole. `feathers.rs`
-adds Bevy's core plugin and dark theme on `Config.Feathers`, the core plugin alone since the bridge
-has the tab navigation plugin already and a second add of a unique plugin panics; each control is
-spawned from plain props and a caption's text through its own scene, the component with its marker
-and what Bevy's scene notation adds, applied at once and queued only where something it needs has
-not loaded, a first version having queued every scene so that its later application wrote over a
-margin set right after spawning, which a test holds; the button, tool button, checkbox, radio,
-toggle switch, slider, caption and three labels, and a call coloring a node of C#'s own by a theme
-token as Bevy's four theme components do. The managed side gains `Feathers` with its ten controls
-and a theme color call, the variant, corners and part enums and the 150 theme tokens with Bevy's
-notes, which a test holds to Feathers' own source in the cargo registry; the schema dump gains
-Feathers' 83 reflected components and nothing else; `feathers_counter` is written, the table at 364
-written and 12 missing; and the notices carry the two fonts Feathers embeds, Mozilla's and the Noto
-project's, under the Open Font License, `third-party-notices.py` leaving out a holder line that is
-the license's own wording, no other crate's holders changing. Four Feathers tests hold the props'
-layout, the tokens Bevy's, a control refused without `Config.Feathers`, and controls drawn on the
-theme's window color with a button's click reported once, a checkbox checked through Bevy's
-observer, the primary variant held and the margin kept. Checked were `cargo check` on the four
-profiles with meshlets and Solari on the editor's, `cargo test` headless and on render, the headless
-bridge with the Feathers and layout tests under B 2, the examples on a fresh package, and the whole
-suite, 1,497 passed and 3 skipped of 1,500, the picture taken on a render bridge on the GPU. Right.
-Next Feathers' second step, the number input and the virtual keyboard, then the gallery's controls,
-then the fifteen examples, then the dev tools, the system information, the declined rows marked and
-`monitor_info`, one step a commit, and the owner's push of the three commits.
-
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
 
@@ -158,6 +153,7 @@ from [SHARED.md](SHARED.md).
    comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`), so the
    comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each push's run
    is read by the reviewing session, and a failure it names comes first here.
+
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
    commit of its own that moves code alone, the largest first where there is a choice, and a batch
    reads the lists for the files it will touch before it starts. Every rule is checked or by review
@@ -172,6 +168,7 @@ from [SHARED.md](SHARED.md).
    them, beside the owner's `5a7f2c07`, and the list only gets shorter from there; `a0c8b1b0`, the
    owner's own one-line commit of the showcase's caption, pushed, joins it as the owner's with
    custom_schedule's commit, three left out.
+
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
    0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
@@ -331,57 +328,21 @@ from [SHARED.md](SHARED.md).
    forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and error_handling at `6641dbcc`,
    the custom projection at `6e28c3cc` and the depth to a texture at `b134dd4d`, the table at 346
    written and 34 missing; the rows that need no crate and no word follow in TODO.md's order, the
-   interface material next, the last four of the list read against the lock first. 5. **Every method
-   native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10` (`48fbb663`): a
-   test finds a callback the bridge calls that lets an exception through, by how it is handed over,
-   and each is mended to report it instead, so no exception crosses the bridge from a system, an
-   observer or a loader's callback. Done at `f12a5879`: the test has had the first two sources since
-   `869c9fbe` and takes the third, the overrides a binding's callbacks reach, finding none, and
-   every method it finds catches every exception. 6. **A template package, so `dotnet new` starts a
-   game**, from 3DEngine's `3DEngine.Templates` (`ec7e6c3c`): a template of a console game on the
-   package, installed and used by the pack workflow, as the first game's first step would have a
-   newcomer do. Done at `fef6bbeb`, `dotnet new bevycsharp` making the README's first program,
-   packed beside the engine and walked by the README job; its publishing on nuget.org beside the
-   engine, a second package in the owner's name, waits on the owner's word (Decision 8), and the
-   README's install line needs it; `docs/first-game.md` starts from a second template,
-   `bevycsharp-empty`, since `c67c7981`, as 3DEngine's does. 7. **The entities that lost a component
-   since a system last ran**, from 3DEngine's `Removed` (`ab052859`): a query's filter or a world
-   call answering the entities a component was removed from since the system's last run, beside the
-   added and changed ones a behavior reads. Done at `7a2a99ac`, `EcsWorld.Removed<T>()` and
-   `RemovedById` with a cursor a system, as Bevy's `RemovedComponents<T>`. 8. **Every example
-   compiles on the package alone**, from 3DEngine's `build/examples-on-package.sh` (`a61308b0`):
-   some 55 of 331 examples reach a helper of the examples project, so what they share to say a thing
-   in one word becomes the package's own calls or stays in the example, and the workflow builds
-   every example on the packed package with the shared files left out, so a reach into the project
-   fails the build. The capture drivers move to one file beside the catalog, `StressTest.Warn` and
-   the transforms' cube scene are written into each example as Bevy's carry theirs, and the opened
-   size comes from a library call or is read as Bevy's read it; `FreeCamera` and `RadioButtons` stay
-   helpers on the script's list with their reasons, the first waiting on the owner's word for Bevy's
-   camera controller crate (Decision 12), whose camera then replaces it, the second a helper Bevy's
-   own examples share and Feathers' radio would replace (Decision 11), the list only getting
-   shorter. Done at `5d955562`, the two helpers listed. 9. **A script that more than one system runs
-   is read for the forms only GNU's tools or a later bash read**, from 3DEngine's `ScriptTests`
-   (`fd7b17f3`): one test over the scripts the workflows and a developer run on Linux, macOS and
-   Windows' Git bash, where one line was found there. Done at `8f02d976`, every script of the
-   checkout read for ten forms, none found. 10. **Fixes for the generator's diagnostics offered in
-   an editor**, from 3DEngine's `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic
-   the behavior and command generators report, so an editor offers the mend. Done at `d328fdc3`,
-   `BevyCSharp.CodeFixes` fixing the five diagnostics with one clear mend and naming the seven
-   without, packed beside the generator. Open again in full on 2026-10-18 at 22:25 (Decision 38).
-   Every gap closes, in the table's order by how many rows each holds, with the examples each
-   unlocks written in its batch and the comparison kept green; the gaps that need a crate, Feathers'
-   widgets and theming, the three camera controllers, the dev tools' three and the system
-   information, wait each on the owner's word typed in the working session (Decisions 11, 12 and 20,
-   AGENTS.md), which the working session asks for by name as it reaches them, taking the gaps that
-   need no word first; the remote protocol's three stay as they are. One batch a commit, as before,
-   and the bridge is complete when the table names no gap but those the owner declines. Read against
-   `triage.tsv` on 2026-10-18 at 22:31, no gap is left that needs no word. The twenty rows not
-   written whole are the camera controllers, five (free, pan and the three pan-orbit); Feathers,
-   four (counter, gallery, virtual keyboard, number input); the dev tools, four (the FPS overlay,
-   the infinite grid, the scene viewer, debug picking); the system information, one
-   (`log_diagnostics` in part); `web_asset`, one; `compressed_image_saver`, one; the system fonts,
-   three, which Decision 13 declined; and `monitor_info` in part, which waits on the owner's
-   screens; the remote protocol's rows stay as they are. None of the crates needed is in
+   interface material next, the last four of the list read against the lock first. Open again in
+   full on 2026-10-18 at 22:25 (Decision 38). Every gap closes, in the table's order by how many
+   rows each holds, with the examples each unlocks written in its batch and the comparison kept
+   green; the gaps that need a crate, Feathers' widgets and theming, the three camera controllers,
+   the dev tools' three and the system information, wait each on the owner's word typed in the
+   working session (Decisions 11, 12 and 20, AGENTS.md), which the working session asks for by name
+   as it reaches them, taking the gaps that need no word first; the remote protocol's three stay as
+   they are. One batch a commit, as before, and the bridge is complete when the table names no gap
+   but those the owner declines. Read against `triage.tsv` on 2026-10-18 at 22:31, no gap is left
+   that needs no word. The twenty rows not written whole are the camera controllers, five (free, pan
+   and the three pan-orbit); Feathers, four (counter, gallery, virtual keyboard, number input); the
+   dev tools, four (the FPS overlay, the infinite grid, the scene viewer, debug picking); the system
+   information, one (`log_diagnostics` in part); `web_asset`, one; `compressed_image_saver`, one;
+   the system fonts, three, which Decision 13 declined; and `monitor_info` in part, which waits on
+   the owner's screens; the remote protocol's rows stay as they are. None of the crates needed is in
    `native/Cargo.lock`, and each was measured in a scratch copy of `native/` by adding the Bevy
    feature to the editor profile and comparing the lock's package names: the camera controllers add
    one package, `bevy_camera_controller`; Feathers one; the dev tools one; the system information
@@ -407,8 +368,58 @@ from [SHARED.md](SHARED.md).
    keyboard with their two examples, the table at 366 written and 10 missing, the ABI 289, the lock
    unchanged. The third came at `1e8c4750`, the gallery's thirty-four controls with the gallery
    written, the color conversions across Bevy's spaces, the table at 367 written and 9 missing,
-   Feathers' four rows all in, the ABI 291, the lock unchanged; the last step, the fifteen examples
-   moved to Feathers' radio and the helper gone, is next.
+   Feathers' four rows all in, the ABI 291, the lock unchanged. The last came at `319624bf`, the
+   fourteen examples with option rows at Bevy's v0.20.0 on Feathers' radio, a theme call in the
+   package, the port's own helper gone for one file mirroring Bevy's three shared helper files, the
+   ABI 292, the lock unchanged, Feathers whole in four steps; the dev tools are next.
+
+5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
+   (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
+   is handed over, and each is mended to report it instead, so no exception crosses the bridge from
+   a system, an observer or a loader's callback. Done at `f12a5879`: the test has had the first two
+   sources since `869c9fbe` and takes the third, the overrides a binding's callbacks reach, finding
+   none, and every method it finds catches every exception.
+
+6. **A template package, so `dotnet new` starts a game**, from 3DEngine's `3DEngine.Templates`
+   (`ec7e6c3c`): a template of a console game on the package, installed and used by the pack
+   workflow, as the first game's first step would have a newcomer do. Done at `fef6bbeb`, `dotnet
+   new bevycsharp` making the README's first program, packed beside the engine and walked by the
+   README job; its publishing on nuget.org beside the engine, a second package in the owner's name,
+   waits on the owner's word (Decision 8), and the README's install line needs it;
+   `docs/first-game.md` starts from a second template, `bevycsharp-empty`, since `c67c7981`, as
+   3DEngine's does.
+
+7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
+   (`ab052859`): a query's filter or a world call answering the entities a component was removed
+   from since the system's last run, beside the added and changed ones a behavior reads. Done at
+   `7a2a99ac`, `EcsWorld.Removed<T>()` and `RemovedById` with a cursor a system, as Bevy's
+   `RemovedComponents<T>`.
+
+8. **Every example compiles on the package alone**, from 3DEngine's `build/examples-on-package.sh`
+   (`a61308b0`): some 55 of 331 examples reach a helper of the examples project, so what they share
+   to say a thing in one word becomes the package's own calls or stays in the example, and the
+   workflow builds every example on the packed package with the shared files left out, so a reach
+   into the project fails the build. The capture drivers move to one file beside the catalog,
+   `StressTest.Warn` and the transforms' cube scene are written into each example as Bevy's carry
+   theirs, and the opened size comes from a library call or is read as Bevy's read it; `FreeCamera`
+   and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on the
+   owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
+   second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
+   list only getting shorter. Done at `5d955562`, the two helpers listed. The free camera helper
+   left at `670ecf2c` for Bevy's controller and the radio buttons helper at `319624bf` for Feathers'
+   radio, and one file mirroring the three helper files Bevy's own examples take in by path stands
+   on the list with that reason, by item 29's part (k).
+
+9. **A script that more than one system runs is read for the forms only GNU's tools or a later bash
+   read**, from 3DEngine's `ScriptTests` (`fd7b17f3`): one test over the scripts the workflows and a
+   developer run on Linux, macOS and Windows' Git bash, where one line was found there. Done at
+   `8f02d976`, every script of the checkout read for ten forms, none found.
+
+10. **Fixes for the generator's diagnostics offered in an editor**, from 3DEngine's
+    `3DEngine.CodeFixes` (`c6b529d4`): a code fix beside each diagnostic the behavior and command
+    generators report, so an editor offers the mend. Done at `d328fdc3`, `BevyCSharp.CodeFixes`
+    fixing the five diagnostics with one clear mend and naming the seven without, packed beside the
+    generator.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -865,19 +876,19 @@ from [SHARED.md](SHARED.md).
     distribution image with a newer Mesa and a Linux bridge built with meshlets and Solari, no
     runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
     anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
-    earlier decline, with a test that fails when Bevy's original changes. Part (k) is half done at
-    `670ecf2c`, the free camera helper gone for Bevy's controller, and the radio buttons helper goes
-    in Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three
-    files by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
-    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
-    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
-    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
-    token colors is the package's own call, the port's helper of its own goes, and one file
-    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
-    package script's list with the reason naming them, carrying what they carry and nothing of the
-    port's own, since the list's rule is against helpers of the port's own and a mirror of what
-    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
-    Feathers.
+    earlier decline, with a test that fails when Bevy's original changes. Part (k) is whole at
+    `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's controller, the
+    radio buttons helper gone in Feathers' last step, where Bevy 0.20's own fourteen examples with
+    option rows share three files by path, a radio row of Feathers' radios under a group, a theme of
+    some sixty token colors replacing the whole and, in two of the fourteen, a labeled number input
+    holding a float with its precision and limit, ten of the fourteen written from 0.19.1 differing
+    from their sources by 100 to 560 lines in that swap, so the reviewer decided on 2026-10-19 that
+    the theme's setting from token colors is the package's own call, the port's helper of its own
+    goes, and one file mirroring Bevy's helper files the examples use at the pinned version, the
+    three, stays on the package script's list with the reason naming them, carrying what they carry
+    and nothing of the port's own, since the list's rule is against helpers of the port's own and a
+    mirror of what Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons
+    go with Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
@@ -938,16 +949,21 @@ at a room measured on the runner and in a container of its image.
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
    commits and does not push, as COMMITS.md and AGENTS.md say. An earlier entry here that allowed
    pushing is withdrawn by the owner.
+
 2. **AGENTS.md's bullet on SHARED.md is the owner's.** They approved it on 2026-10-04, and it is
    committed like any other change.
+
 3. **A picture opens the example's own source, and not Bevy's live demo of it.** The owner chose
    it on 2026-10-05, and `57fc7e9` carried it out.
+
 4. **AGENTS.md's bullet on NORM.md is the owner's, with the exception N 7.4 makes.** They approved
    both on 2026-10-05 in the reviewing session, with the plan for the norm. A working session
    that commits a change to its instruction file only on the owner's word in its own session
    is right to, and waits for that word.
+
 5. **The examples written are brought to B 4 a group at a time.** The owner chose it on
    2026-10-05, over leaving them as they are and over doing them all before other work.
+
 6. **A run that fails says what failed in a page, and the reviewing session is given no log.**
    The owner chose it on 2026-10-05, after a log pasted into the reviewing session ended it.
    The suite runs whole, and in parts only after a process is lost, and a test in which the

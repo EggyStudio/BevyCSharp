@@ -262,6 +262,17 @@ public sealed class Config
     public bool Feathers { get; set; }
 
     /// <summary>
+    /// Add Bevy's dev tools, the FPS overlay, the infinite grid and picking's debug overlay, none by
+    /// default.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's default plugins leave each out. The overlay shows from the start, the grid is drawn on
+    /// an entity given its component, and picking's overlay shows once
+    /// <see cref="Picking.DebugMode"/> turns it on. A bridge with the renderer is needed.
+    /// </remarks>
+    public DevTools DevTools { get; set; }
+
+    /// <summary>
     /// Draw with no window, into an image a capture can be read back from.
     /// </summary>
     /// <remarks>

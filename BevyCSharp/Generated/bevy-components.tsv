@@ -263,6 +263,58 @@ component	bevy_core_pipeline::prepass::MotionVectorPrepass	MotionVectorPrepass
 component	bevy_core_pipeline::prepass::NormalPrepass	NormalPrepass
 component	bevy_core_pipeline::prepass::background_motion_vectors::NoBackgroundMotionVectors	NoBackgroundMotionVectors
 component	bevy_core_pipeline::schedule::RootNonCameraView	RootNonCameraView
+component	bevy_dev_tools::fps_overlay::FpsOverlayConfig	FpsOverlayConfig
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font	.text_config.font	Enum	FontSource	Handle,Family,Families,List,Generic
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font	Handle		.text_config.font.0	Asset	Handle<Font>	Font
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font	List		.text_config.font.0	List	Vec<FontSource>	bevy_text::text::FontSource
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font	Generic		.text_config.font.0	Enum	GenericFontFamily	Serif,SansSerif,Cursive,Fantasy,Monospace,SystemUi,UiSerif,UiSansSerif,UiMonospace,UiRounded,Emoji,Math,FangSong
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	.text_config.font_size	Enum	FontSize	Px,Vw,Vh,VMin,VMax,Rem
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	Px		.text_config.font_size.0	Float	f32	
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	Vw		.text_config.font_size.0	Float	f32	
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	Vh		.text_config.font_size.0	Float	f32	
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	VMin		.text_config.font_size.0	Float	f32	
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	VMax		.text_config.font_size.0	Float	f32	
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_size	Rem		.text_config.font_size.0	Float	f32	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.weight	.text_config.weight.0	Int	u16	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.width	.text_config.width.0	Float	f32	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.style	.text_config.style	Enum	FontStyle	Normal,Italic,Oblique
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.style	Oblique		.text_config.style.0	Enum	Option<f32>	None,Some
+variant	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.style.Oblique	Some		.text_config.style.0.0	Float	f32	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_smoothing	.text_config.font_smoothing	Enum	FontSmoothing	None,AntiAliased
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_features.features	.text_config.font_features.features	List	Vec<(FontFeatureTag, u32)>	(bevy_text::text::FontFeatureTag, u32)
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_config.font_variations.variations	.text_config.font_variations.variations	List	Vec<(FontVariationTag, f32)>	(bevy_text::text::FontVariationTag, f32)
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	text_color	.text_color	Color	Color	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	enabled	.enabled	Bool	bool	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	refresh_interval	.refresh_interval	Double	Duration	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	frame_time_graph_config.enabled	.frame_time_graph_config.enabled	Bool	bool	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	frame_time_graph_config.min_fps	.frame_time_graph_config.min_fps	Float	f32	
+field	bevy_dev_tools::fps_overlay::FpsOverlayConfig	frame_time_graph_config.target_fps	.frame_time_graph_config.target_fps	Float	f32	
+component	bevy_dev_tools::infinite_grid::InfiniteGrid	InfiniteGrid
+component	bevy_dev_tools::infinite_grid::InfiniteGridSettings	InfiniteGridSettings
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	x_axis_color	.x_axis_color	Color	Color	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	z_axis_color	.z_axis_color	Color	Color	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	minor_line_color	.minor_line_color	Color	Color	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	major_line_color	.major_line_color	Color	Color	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	fadeout_distance	.fadeout_distance	Float	f32	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	dot_fadeout_strength	.dot_fadeout_strength	Float	f32	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	scale	.scale	Float	f32	
+field	bevy_dev_tools::infinite_grid::InfiniteGridSettings	major_line_interval	.major_line_interval	Int	u32	
+component	bevy_dev_tools::picking_debug::PointerDebugOverlay	PointerDebugOverlay
+field	bevy_dev_tools::picking_debug::PointerDebugOverlay	overlay	.overlay	Entity	bevy_ecs::entity::Entity	
+layout	bevy_dev_tools::picking_debug::PointerDebugOverlay	8/8;.overlay@0:8
+component	bevy_dev_tools::picking_debug::PointerDebugOverlayOf	PointerDebugOverlayOf
+field	bevy_dev_tools::picking_debug::PointerDebugOverlayOf	pointer	.pointer	Entity	bevy_ecs::entity::Entity	
+layout	bevy_dev_tools::picking_debug::PointerDebugOverlayOf	8/8;.pointer@0:8
+component	bevy_dev_tools::render_debug::GlobalRenderDebugOverlay	GlobalRenderDebugOverlay
+field	bevy_dev_tools::render_debug::GlobalRenderDebugOverlay	enabled	.enabled	Bool	bool	
+field	bevy_dev_tools::render_debug::GlobalRenderDebugOverlay	mode	.mode	Enum	RenderDebugMode	Depth,Normal,MotionVectors,Deferred,DeferredBaseColor,DeferredEmissive,DeferredMetallicRoughness,DepthPyramid
+variant	bevy_dev_tools::render_debug::GlobalRenderDebugOverlay	mode	DepthPyramid	mip_level	.mode.mip_level	Int	u32	
+field	bevy_dev_tools::render_debug::GlobalRenderDebugOverlay	opacity	.opacity	Float	f32	
+component	bevy_dev_tools::render_debug::RenderDebugOverlay	RenderDebugOverlay
+field	bevy_dev_tools::render_debug::RenderDebugOverlay	enabled	.enabled	Bool	bool	
+field	bevy_dev_tools::render_debug::RenderDebugOverlay	mode	.mode	Enum	RenderDebugMode	Depth,Normal,MotionVectors,Deferred,DeferredBaseColor,DeferredEmissive,DeferredMetallicRoughness,DepthPyramid
+variant	bevy_dev_tools::render_debug::RenderDebugOverlay	mode	DepthPyramid	mip_level	.mode.mip_level	Int	u32	
+field	bevy_dev_tools::render_debug::RenderDebugOverlay	opacity	.opacity	Float	f32	
 component	bevy_ecs::entity_disabling::DefaultQueryFilters	DefaultQueryFilters
 field	bevy_ecs::entity_disabling::DefaultQueryFilters	disabling	.disabling	List	SmallVec<[ComponentId; 4]>	bevy_ecs::component::info::ComponentId
 component	bevy_ecs::entity_disabling::Disabled	Disabled

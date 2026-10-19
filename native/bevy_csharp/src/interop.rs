@@ -292,6 +292,9 @@ pub struct BcsConfig {
     /// Non-zero to add Feathers, Bevy's styled widgets, with its dark theme. Needs the `render`
     /// feature. See `feathers`.
     pub feathers: u32,
+    /// Bevy's dev tools to add, a bit each (`dev_tools::FPS_OVERLAY`, `INFINITE_GRID` and
+    /// `PICKING_DEBUG`). Needs the `render` feature. See `dev_tools`.
+    pub dev_tools: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.
