@@ -47,8 +47,11 @@ public enum DiagnosticPlugins
     /// <remarks>
     /// Read on a task of Bevy's own no oftener than the system can measure the CPU, so the first
     /// measures come some frames after the app starts. Bevy logs the machine's system, kernel,
-    /// CPU, cores and memory as it starts. On a system other than Linux, Windows, Android and
-    /// macOS, Bevy warns that it is not supported and measures nothing.
+    /// CPU, cores and memory as it starts. On macOS Bevy builds sysinfo for the App Store's
+    /// sandbox, which reads no process, so the process's two measures are zero there and the
+    /// machine's two are measured, where the <c>memory</c> command's process figure reads the
+    /// process's footprint. On a system other than Linux, Windows, Android and macOS, Bevy warns
+    /// that it is not supported and measures nothing.
     /// </remarks>
     SystemInformation = 16,
 }

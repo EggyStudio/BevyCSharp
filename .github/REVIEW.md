@@ -10,7 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `30b87d1f`, item 29's part (c) and nothing else, with a second cause found by its
+Reviewed up to `b9069e8c`, item 29's part (d) and nothing else, 6 files. The memory guard's process
+figure on Linux is the anonymous resident pages from the process's status, heaps, stacks and a
+software device's memory, leaving out the files' pages and what is shared with a graphics driver,
+falling back to the working set where the system answers nothing, macOS keeping the footprint and
+Windows the private bytes, the peak the most of the guard's own readings since no system keeps a
+peak of these, the cap on the same figure, and the remarks, the memory command's class remark and
+the tools guide saying what the figure counts; it fell from about 650 MB to about 290 MB for the
+three games as the files' pages left it. From ten-minute soaks of Courtyard, Stress and Swarm and a
+fifteen-minute soak of the feature test on lavapipe under Mesa 26.2.2, the process figure moved by
+15,855,616, 9,125,888, 22,401,024 and 21,262,336 bytes, the bridge's bytes by 2,076,749 and its
+blocks by 12,011 at most, and the entities, their indices and the handles not at all, so the soak
+check's rooms are twice the most each moved with no share, 44 MiB, 4 MiB, 25,000 and two apiece,
+where they stood at a tenth and 48 MiB, a tenth and 4 MiB, a tenth and 4,000, a twentieth and eight
+twice, and two, its comment naming the two soak commands and the spreads (N 3.5 and 3.6), both soaks
+passing under the new rooms; TODO.md's paragraph leaves and the temporary package is removed. Noted
+for later and not changed, Courtyard's bridge bytes rose 931,559 and its blocks 6,339 from the first
+half to the second within the room, and one reading of Stress came without its entities pair.
+Checked were the guard, memory, norm, script and documents tests, 63 of 63, and the whole suite with
+a clean build, 1,514 passed, 3 skipped and none failed of 1,517. Right. Next part (e), a time
+provider on the app's clock for the two async examples, then the parts in order, and the runs. The
+owner pushed `b9069e8c` at 18:08 and restarted the machine, the three sessions resuming at 18:15.
+Read at 18:18, the push run of `30b87d1f` ended red, its Linux and Windows suites green and its
+macOS suite failing one test of 1,618, the system information test on the process's memory reading
+zero (Verdict 32), the digest red after it; the pack run's six natives and its Linux and Windows
+suites passed, its macOS suite failed the same test and the digest after it, and the drive, the
+storm, the four capture shards, the play and the README jobs were running or queued; the push run of
+`b9069e8c` was queued. Next part (e), Verdict 32's mend, and the runs' ends.
+
+Before it, `30b87d1f` came, item 29's part (c) and nothing else, with a second cause found by its
 soaks and mended in the same commit. The memory command's collection is a forced, blocking,
 compacting collection of every generation with the large object heap compacted once, twice around
 the finalizers, the command reading live and heap from the collector's full blocking figures with
@@ -53,18 +81,6 @@ run is evidence, Mesa 26.2.2's lavapipe drawing Solari whole on this machine, so
 image carrying Mesa 26 serves the Solari captures. The norm and script tests passed, 57 of 57.
 Right. Next part (c), the soak's heap judged after a compacting collection, then the parts in order;
 the owner's push of the twelve commits; and a pack run.
-
-Before it, `024c1113` came, item 29's part (a) and nothing else, 7 files. The two sprite examples
-take a seeded generator where the workflow runs, as the cake example does, and an unseeded one
-otherwise, the capture script exporting the workflow's variable so a local capture is seeded too,
-each header remark saying that where the workflow runs the sprites come from a seeded generator so
-the picture is the same crowd every time, where Bevy's places another crowd each run; the two lines
-leave the differ file and the paragraph leaves TODO.md's section of mends of the moment. Before,
-44.1 and 58.6 percent of the pictures' pixels stood apart on lavapipe by the lines removed; after,
-the pictures retaken on a render bridge and taken again on the editor bridge differ in none of their
-921,600 pixels and the comparison reports both matching. The norm and script tests passed, 57 of 57.
-Right. Next part (b), Solari's panel under the workflow, then the parts in order, one a commit, the
-section only getting shorter; the owner's push of the eleven commits; and a pack run.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -834,37 +850,39 @@ from [SHARED.md](SHARED.md).
     dropped from the answer, done at `30b87d1f` on 2026-10-19 with a second cause mended, the CLI
     server's accept buffer pinned while it waited, the heap within 8,672 bytes of live over
     ten-minute soaks of three games; (d) the soak's other rooms measured from soaks of the three
-    programs, the process figure read as private memory without the driver's mappings; (e) a
-    `TimeProvider` on the app's clock for the two async examples, their generators seeded under the
-    workflow, two lines off; (f) the bridge's clock held while an asset loads and between the
-    drive's commands, one hold serving the two animation examples and the drive's swing, every
-    capture taken again; (g) `dfg_lut` on in the render profile, the owner's decision, since games
-    on the package are then lit a little otherwise and every 3D picture is taken again (Decision
-    25); (h) a newer Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared
-    examples, the owner's decision on the jobs' image; (i) lavapipe's dropped bunnies traced and
-    reported to Mesa, outside the repository; (j) the anisotropy fault reported to Bevy, the owner's
-    decision, a patched shader declined; (k) the two helpers go with item 4's gaps; (l) runners with
-    a graphics card, the owner's purchase; (m) the norm's lists are item 2's. The mends follow item
-    4 as Decision 38 orders, unless the owner says the parts that need no decision may start while
-    the words for item 4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes
-    first and then this item in the order above; (g) `dfg_lut` goes on in the render profile with
-    the lock byte for byte the same; (h) and (l) are one, the capture jobs in a container of a
-    distribution image with a newer Mesa and a Linux bridge built with meshlets and Solari, no
-    runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
-    anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
-    earlier decline, with a test that fails when Bevy's original changes. Part (k) is whole at
-    `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's controller, the
-    radio buttons helper gone in Feathers' last step, where Bevy 0.20's own fourteen examples with
-    option rows share three files by path, a radio row of Feathers' radios under a group, a theme of
-    some sixty token colors replacing the whole and, in two of the fourteen, a labeled number input
-    holding a float with its precision and limit, ten of the fourteen written from 0.19.1 differing
-    from their sources by 100 to 560 lines in that swap, so the reviewer decided on 2026-10-19 that
-    the theme's setting from token colors is the package's own call, the port's helper of its own
-    goes, and one file mirroring Bevy's helper files the examples use at the pinned version, the
-    three, stays on the package script's list with the reason naming them, carrying what they carry
-    and nothing of the port's own, since the list's rule is against helpers of the port's own and a
-    mirror of what Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons
-    go with Feathers.
+    programs, the process figure read as private memory without the driver's mappings, done at
+    `b9069e8c` on 2026-10-19, each room twice the most its figure moved over the soaks named in the
+    check's comment, the process figure the anonymous pages on Linux; (e) a `TimeProvider` on the
+    app's clock for the two async examples, their generators seeded under the workflow, two lines
+    off; (f) the bridge's clock held while an asset loads and between the drive's commands, one hold
+    serving the two animation examples and the drive's swing, every capture taken again; (g)
+    `dfg_lut` on in the render profile, the owner's decision, since games on the package are then
+    lit a little otherwise and every 3D picture is taken again (Decision 25); (h) a newer Mesa on
+    the runner with a `--meshlet --solari` bridge for the six uncompared examples, the owner's
+    decision on the jobs' image; (i) lavapipe's dropped bunnies traced and reported to Mesa, outside
+    the repository; (j) the anisotropy fault reported to Bevy, the owner's decision, a patched
+    shader declined; (k) the two helpers go with item 4's gaps; (l) runners with a graphics card,
+    the owner's purchase; (m) the norm's lists are item 2's. The mends follow item 4 as Decision 38
+    orders, unless the owner says the parts that need no decision may start while the words for item
+    4 are awaited. On 2026-10-19 the owner decided (Decision 39): item 4 comes first and then this
+    item in the order above; (g) `dfg_lut` goes on in the render profile with the lock byte for byte
+    the same; (h) and (l) are one, the capture jobs in a container of a distribution image with a
+    newer Mesa and a Linux bridge built with meshlets and Solari, no runner with a graphics card and
+    no Mesa from an archive outside the distribution; (j) the anisotropy fault is mended by a
+    patched shader of Bevy's in the bridge, which overrides the earlier decline, with a test that
+    fails when Bevy's original changes. Part (k) is whole at `319624bf`, half done at `670ecf2c`
+    with the free camera helper gone for Bevy's controller, the radio buttons helper gone in
+    Feathers' last step, where Bevy 0.20's own fourteen examples with option rows share three files
+    by path, a radio row of Feathers' radios under a group, a theme of some sixty token colors
+    replacing the whole and, in two of the fourteen, a labeled number input holding a float with its
+    precision and limit, ten of the fourteen written from 0.19.1 differing from their sources by 100
+    to 560 lines in that swap, so the reviewer decided on 2026-10-19 that the theme's setting from
+    token colors is the package's own call, the port's helper of its own goes, and one file
+    mirroring Bevy's helper files the examples use at the pinned version, the three, stays on the
+    package script's list with the reason naming them, carrying what they carry and nothing of the
+    port's own, since the list's rule is against helpers of the port's own and a mirror of what
+    Bevy's examples share is the port's fidelity, not its shortcut; the radio buttons go with
+    Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
@@ -919,6 +937,22 @@ at a room measured on the runner and in a container of its image.
    with a package in hand, which is why the test suite never showed it. The same job's build prints
    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
    mended, with `-warnaserror` on every managed build.
+
+32. **The system information test holds the process's memory above zero, and macOS answers zero for
+    it, so both macOS suites failed one test.** On the push run and the pack run of `30b87d1f`,
+    2026-10-19, the macOS suite failed
+    `DiagnosticsStoreTests.TheMachinesAndTheProcesssCpuAndMemoryAreMeasured` at its line 137, the
+    process used 0 GiB, 1,050 passed and 567 skipped each, in 5 minutes and 4 minutes 49 seconds,
+    the Linux and Windows suites of both runs green and the digests red after it. The test, from
+    `8ae312a4`, skips where Bevy measures nothing and where no measure answers within a second at
+    sixty frames, and on the runner's macOS the CPU measures answered while the process's memory
+    read zero, so neither skip took it, and the development machine, where it ran and passed on two
+    bridges, is Linux. The mend is one thing. Why Bevy's plugin, or the sysinfo crate under it,
+    answers zero for the process's memory on macOS is read first; then either the bridge reads the
+    process's memory itself where Bevy's answers zero, with the reason in the remark, or the test
+    says in a skip that macOS answers zero for that measure and holds the three that answer,
+    whichever the reading supports, the runner's figure said in the commit's message. Settled at
+    three green macOS suites in a row after the mend.
 
 ## Decisions
 

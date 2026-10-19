@@ -105,8 +105,16 @@ public sealed class DiagnosticsStoreTests
     /// <summary>
     /// Bevy's system information measures how much of the CPU and memory the machine and the
     /// process use, each a share between none and all of it, the process's memory in gibibytes
-    /// above none, read back once its task has measured them.
+    /// above none, read back once its task has measured them. On macOS the process's two read
+    /// zero, as Bevy builds them there.
     /// </summary>
+    /// <remarks>
+    /// Bevy builds sysinfo on macOS with its <c>apple-app-store</c> feature, whose sandboxed build
+    /// refreshes no process, so Bevy finds none and gives the process's memory and CPU as zero. The
+    /// macOS runner read the process's memory as 0 GiB. The zeros are held there, so a release of
+    /// Bevy that measures the process on macOS fails this, and the documents saying it does not are
+    /// read again.
+    /// </remarks>
     [SkippableFact]
     public void TheMachinesAndTheProcesssCpuAndMemoryAreMeasured()
     {
@@ -133,6 +141,13 @@ public sealed class DiagnosticsStoreTests
         Skip.If(read is null, "the system answered no measures within a second, as a sandbox that hides its processes does");
         Assert.InRange(read![Diagnostics.SystemCpuUsage], 0d, 100d);
         Assert.InRange(read[Diagnostics.SystemMemUsage], 0d, 100d);
+        if (OperatingSystem.IsMacOS())
+        {
+            Assert.Equal(0d, read[Diagnostics.ProcessCpuUsage]);
+            Assert.Equal(0d, read[Diagnostics.ProcessMemUsage]);
+            return;
+        }
+
         Assert.InRange(read[Diagnostics.ProcessCpuUsage], 0d, 100d * Environment.ProcessorCount);
         Assert.True(read[Diagnostics.ProcessMemUsage] > 0d, $"the process used {read[Diagnostics.ProcessMemUsage]} GiB");
     }

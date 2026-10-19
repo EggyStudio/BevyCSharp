@@ -182,6 +182,8 @@ and average values, and `Diagnostics.All` gives every one, which an overlay of t
 `Diagnostics.SetLogFilter` has the log print only the paths it is given, or none for an empty list,
 or all of them again for null. The system's measures are read on a task of Bevy's own no oftener
 than the system can measure the CPU, so their first values come some frames after the app starts.
+On macOS Bevy builds them for the App Store's sandbox, which reads no process, so the process's two
+are zero there.
 The `diagnostics` command lists the store as the log prints it.
 
 ## Bevy's dev tools

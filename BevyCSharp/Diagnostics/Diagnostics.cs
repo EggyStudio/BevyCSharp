@@ -59,13 +59,14 @@ public static unsafe class Diagnostics
 
     /// <summary>
     /// The percentage of the machine's CPU the process uses, which
-    /// <see cref="DiagnosticPlugins.SystemInformation"/> measures.
+    /// <see cref="DiagnosticPlugins.SystemInformation"/> measures, zero on macOS, where Bevy reads
+    /// no process.
     /// </summary>
     public const string ProcessCpuUsage = "process/cpu_usage";
 
     /// <summary>
     /// The gibibytes of memory the process uses, which <see cref="DiagnosticPlugins.SystemInformation"/>
-    /// measures.
+    /// measures, zero on macOS, where Bevy reads no process.
     /// </summary>
     public const string ProcessMemUsage = "process/mem_usage";
 
