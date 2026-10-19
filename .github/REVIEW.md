@@ -22,7 +22,12 @@ hold's promise is asserted as before, 0.5 over five frames, still through three 
 three, and the new form passed twenty of twenty on one core, the server unchanged. The command line
 and norm tests pass, 28 of 28, after a clean build. The pack run with publish on in flight carries
 the old form of the test, so its Linux suite may fail on it, in which case the next pack run is this
-commit's. Right. Next part (g)'s comparison, then (h).
+commit's. At 23:39 the pack run with publish on, 39324217456, had its Linux suite and five natives
+green and its macOS and Windows suites red, so its pack job will not run: Windows failed the two
+release notes tests on deleting their scratch repositories (Verdict 34), as the push run of
+`e7ea1a06` did at 23:31, and macOS failed the load hold test, the image never loading (Verdict 35);
+the push run of `97ea3055` was Verdict 33's. The next pack run with publish on comes after the two
+mends. Right. Next Verdicts 34 and 35, then part (g)'s comparison, then (h).
 
 Before it, `d482caa3` came, item 32, and `e1f516fa` before it, item 33, with the review's commits
 between, part (g)'s work staying in the tree outside both. Item 33: the pack job has the identity
@@ -999,6 +1004,31 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     frame it did not run. Mended at `8e9c20b7` the same day, the test reading its times after the
     app has stopped, the server unchanged, as the head says. Settled at three green Linux suites in
     a row after the mend.
+
+34. **The release notes tests cannot delete their scratch repositories on Windows, since git writes
+    its objects read-only.** On the pack run of `987676b5` and the push run of `e7ea1a06`,
+    2026-10-19, the Windows suite failed both release notes tests in their disposal, an access
+    denied on an object folder of the scratch repository with 17 files left in it and no process
+    holding one (`TestFolder.cs:73`, `ReleaseNotesTests.cs:23`), 1,067 passed and 560 skipped, the
+    Linux and macOS suites passing them; the tests came with item 32 at `d482caa3`, run on Linux
+    alone before the push. Git writes its loose objects read-only, and the folder's deletion on
+    Windows refuses a read-only file where Linux and macOS do not, so a test folder that holds a
+    repository cannot be swept there. The mend is one thing: the test folder's deletion clears the
+    read-only attribute of what it sweeps before deleting, with the reason in its remark, or the
+    release notes tests sweep their repositories through git, whichever the other tests that make
+    repositories, if any, already do. Settled at three green Windows suites in a row after the mend.
+
+35. **The load hold test's image never loaded on the macOS runner.** On the pack run of `987676b5`,
+    2026-10-19, the macOS suite failed `ClockHoldTests.AClockHeldForLoadsStandsStillUntilTheyEnd` at
+    its line 42, the image never loaded, 1,061 passed and 567 skipped in 5 minutes 44 seconds, the
+    Linux and Windows suites passing it; the test came with part (f) at `714451b0`, whose push run
+    passed it on the three systems, so it shows on one runner of two as Verdict 33's did. The mend
+    is read before it is chosen: how long the test waits for the load and in what, frames or the
+    machine's time, and whether a held clock can hold what the load itself waits on, since a load
+    that waits on a frame's step while the step is held would never end; then the test given the
+    patience a slow runner needs in the machine's time, or the hold mended where it holds the load,
+    whichever the reading supports, with the reason in the remark. Settled at three green macOS
+    suites in a row after the mend.
 
 ## Decisions
 
