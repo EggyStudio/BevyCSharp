@@ -169,6 +169,8 @@ frames=120
 case "$example" in
   # A cake that first appears after five seconds.
   alien_cake_addict) frames=420 ;;
+  # Cubes that arrive two to eight seconds in on the game's clock, half of them there by the fifth.
+  async_channel_pattern) frames=300 ;;
   # A contributor brought forward every three seconds.
   contributors) frames=240 ;;
   # Exposure that adapts as an eye does, which takes its time to settle.

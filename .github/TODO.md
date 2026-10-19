@@ -559,15 +559,6 @@ cause is still there. Each is below with the mend that removes its cause and wha
 are taken once the gaps of Bevy's examples above are bridged, one a commit, each measured where a
 figure moves.
 
-- **Two examples wait on the machine's clock.** `async_channel_pattern` and `async_compute` wait in
-  `Task.Delay` for random spans of the machine's time, so how many cubes stand in the frame a
-  capture takes turns on how fast the device reached it, and `build/captures-differ.txt` allows
-  each a share of its pixels for that. A `TimeProvider` that follows the app's clock, its timers
-  fired from the frame loop, given to `Task.Delay` in both, with their generators seeded under the
-  workflow as `alien_cake_addict`'s is, ends every wait in the same frame of the capture's set
-  clock on every device, and both lines come off. It costs a public type with its tests, timers
-  checked every frame, and two examples that wait on the app's time where Bevy's wait on the
-  system's, which agree while the app keeps its own pace.
 - **Two examples start their animation when their model has loaded.** `animated_mesh_control` and
   `many_foxes` play from the frame their glTF file finishes loading, which a slow device reaches in
   fewer frames, so the pose captured differs and the list allows it. A set clock that stands still

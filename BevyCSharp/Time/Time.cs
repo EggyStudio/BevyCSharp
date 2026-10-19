@@ -17,6 +17,9 @@ public sealed unsafe class Time
     /// <summary>How many more frames a step runs before the clock stops again, or zero.</summary>
     private int _stepping;
 
+    /// <summary>The game's clock as a provider, its timers fired as the frame refreshes this.</summary>
+    private readonly FrameTimeProvider _provider = new();
+
     /// <summary>Seconds since the app started.</summary>
     public double ElapsedSeconds { get; private set; }
 
@@ -58,6 +61,30 @@ public sealed unsafe class Time
     /// <summary><see cref="FixedDeltaSeconds"/> as a float, for a fixed-step behavior.</summary>
     public float FixedDelta => (float)FixedDeltaSeconds;
 
+    /// <summary>
+    /// The game's clock as a <see cref="TimeProvider"/>, for a task that waits on the game's time
+    /// rather than the machine's.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Given to <c>Task.Delay</c>, to a <c>PeriodicTimer</c> or to anything else that takes a
+    /// provider, its waits end in the frame whose <see cref="ElapsedSeconds"/> reaches them, on the
+    /// thread the frame runs on and before the frame's systems, so what a task hands over when its
+    /// wait ends is there for them. It stands still while the game is paused and runs at its
+    /// <see cref="Speed"/>, and on a set clock, as a capture runs on, a wait ends in the same frame
+    /// on any device, where one on the machine's clock ends in whichever frame a device has reached.
+    /// </para>
+    /// <para>
+    /// A timer fires once a frame at most, so a wait shorter than a frame ends in the next frame.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// await Task.Delay(TimeSpan.FromSeconds(2), ctx.Time.Provider);
+    /// </code>
+    /// </example>
+    public TimeProvider Provider => _provider;
+
     /// <summary>Copies a native snapshot into this frame's state.</summary>
     internal void Update(in NativeTime snapshot)
     {
@@ -75,6 +102,9 @@ public sealed unsafe class Time
         // Read after Bevy has advanced the clock for this frame, so the frame a step was asked for
         // in is followed by exactly the frames it asked for, each with a delta, and then a stop.
         if (_stepping > 0 && --_stepping == 0) Pause();
+
+        // The waits on the game's clock this frame has reached, ended before any system runs.
+        _provider.Advance(ElapsedSeconds);
     }
 
     /// <summary>

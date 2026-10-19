@@ -6,7 +6,11 @@ using Bevy;
 namespace BevyCSharp.Examples.AsyncTasks;
 
 // Shows work done off the frame, two hundred and sixteen tasks each waiting up to five seconds
-// before saying where its cube goes, the cubes appearing as their tasks finish.
+// before saying where its cube goes, the cubes appearing as their tasks finish. Each waits on the
+// game's clock (Time.Provider) where Bevy's waits on the machine's, which agree while the game keeps
+// its pace, so on a set clock, as a capture runs on, a cube appears in the same frame on any
+// device, and where the workflow runs, as a capture does, the waits are drawn from a seeded
+// generator.
 internal static class AsyncCompute
 {
     private const int Cubes = 6;
@@ -31,14 +35,19 @@ internal static class AsyncCompute
 
             // .NET's thread pool stands where Bevy's AsyncComputeTaskPool does, each task a wait
             // and then a result, and an empty entity holding each until it is done.
+            var clock = ctx.Time.Provider;
+            var random = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? new Random(19878367) : new Random();
             for (var x = 0; x < Cubes; x++)
             for (var y = 0; y < Cubes; y++)
             for (var z = 0; z < Cubes; z++)
             {
                 var at = new Vec3(x, y, z);
+                // The wait begun here, in the startup frame, so it is due a set time after it on
+                // every run, where begun on the task's thread it could start a frame later.
+                var wait = Task.Delay(TimeSpan.FromSeconds(0.05 + random.NextDouble() * 4.95), clock);
                 Tasks.Add(Task.Run(async () =>
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(0.05 + Random.Shared.NextDouble() * 4.95));
+                    await wait;
                     return at;
                 }));
                 ecs.Add(ecs.Spawn(), new ComputeTransform { Slot = Tasks.Count - 1 });

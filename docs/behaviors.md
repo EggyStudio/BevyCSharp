@@ -477,6 +477,31 @@ ctx.Cmd.Delayed(0.5f).Despawn(spark);              // gone half a second from no
 The delay counts the app's own time, so a game paused by its clock pauses its delays as well, and
 a delay of nothing lands the next frame.
 
+A task off the frame waits on the same clock through `ctx.Time.Provider`, the game's clock as .NET's
+`TimeProvider`. A `Task.Delay` given it ends in the frame whose clock reaches it, before that
+frame's systems, so what the task hands over is there for them, and on a set clock it ends in the
+same frame on any device, where a wait on the machine's clock ends in whichever frame a device has
+reached:
+
+<!-- compiled with:
+using System.Threading.Channels;
+using System.Threading.Tasks;
+var arrived = Channel.CreateUnbounded<string>();
+-->
+```csharp
+// Due two seconds after this frame.
+var wait = Task.Delay(TimeSpan.FromSeconds(2), ctx.Time.Provider);
+_ = Task.Run(async () =>
+{
+    await wait;
+    arrived.Writer.TryWrite("two seconds of the game's time later");
+});
+```
+
+A wait begun in a system is due a set time after its frame, where one begun on the task's own thread
+may start a frame later. It stands still while the game is paused, and `async_channel_pattern` and
+`async_compute` in the examples wait on it.
+
 ---
 
 Before this, [A first game](first-game.md).

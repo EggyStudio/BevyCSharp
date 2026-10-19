@@ -10,7 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b9069e8c`, item 29's part (d) and nothing else, 6 files. The memory guard's process
+Reviewed up to `35ca43b1`, Verdict 32's mend and nothing else, ahead of part (e), the tree having
+lost nothing in the restart. Read first, Bevy's diagnostics crate builds the sysinfo crate on macOS
+with its App Store feature, which turns on its sandbox, under which the crate's process refresh
+returns nothing and refreshes no process, so Bevy's plugin finds no process and gives both process
+measures as zero, the CPU's passing before only because its range began at zero; Bevy's choice for
+the App Store and no fault of the runner's. So the test holds the system's two measures everywhere
+and on macOS asserts both process measures equal zero, so a Bevy release that measures the process
+there fails it and is read, as the anisotropy prepass test pins its fault; the bridge measuring the
+process itself was not taken, since it adds a measure Bevy chose not to make there and the memory
+command's process figure reads the footprint on macOS already. The flag's remarks, the two process
+paths and the tools guide say the process's two are zero on macOS and why, and the runner's figure
+is in the commit's message; there is no macOS machine here for a local reading. Checked were the
+diagnostics store tests on Linux, where the other branch runs; the norm and public surface tests
+failed only on part (e)'s uncommitted files, mended in (e). Verdict 32 settles at three green macOS
+suites in a row. Right. Next part (e), then the parts in order, and the runs' ends.
+
+Before it, `b9069e8c` came, item 29's part (d) and nothing else, 6 files. The memory guard's process
 figure on Linux is the anonymous resident pages from the process's status, heaps, stacks and a
 software device's memory, leaving out the files' pages and what is shared with a graphics driver,
 falling back to the working set where the system answers nothing, macOS keeping the footprint and
@@ -66,21 +82,6 @@ soak's other rooms measured from soaks of the three programs, then the parts in 
 The owner pushed `2b355276` to `30b87d1f`, thirteen commits, at 17:22 and started the pack run with
 the push run, the push run running and the pack run queued at 17:29, the first runs since
 `6bac018b`; the pack run's capture shards take the container for the first time.
-
-Before it, `ddce5717` came, item 29's part (b) and nothing else. Solari's panel leaves out the three
-pass timings and the total where the workflow runs, keeping the world cache's cell count, the header
-remark and the method's comment saying the times are the device's own. Before, the differ line
-allowed 3 percent, measured at 2.1 on lavapipe at `d17f0d97` with the timings in the picture; after,
-with the timings hidden through the capture script's export, two runs on the development machine's
-GPU differ in 0.023 percent of pixels past the comparison's step, the GPU against Mesa 26.2.2's
-lavapipe, which ran Solari's ray queries, in 0.173, and the new picture against the old checked-in
-one in 0.126, the noise alone well inside the shared 2 percent, so the line leaves the differ file
-and the paragraph leaves TODO.md's section; the checked-in picture is retaken on the editor bridge
-with Solari as BUILDING.md has it and the lavapipe picture passes against it. For part (h) the same
-run is evidence, Mesa 26.2.2's lavapipe drawing Solari whole on this machine, so a distribution
-image carrying Mesa 26 serves the Solari captures. The norm and script tests passed, 57 of 57.
-Right. Next part (c), the soak's heap judged after a compacting collection, then the parts in order;
-the owner's push of the twelve commits; and a pack run.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -951,8 +952,13 @@ at a room measured on the runner and in a container of its image.
     answers zero for the process's memory on macOS is read first; then either the bridge reads the
     process's memory itself where Bevy's answers zero, with the reason in the remark, or the test
     says in a skip that macOS answers zero for that measure and holds the three that answer,
-    whichever the reading supports, the runner's figure said in the commit's message. Settled at
-    three green macOS suites in a row after the mend.
+    whichever the reading supports, the runner's figure said in the commit's message. Read and
+    mended at `35ca43b1` the same day: Bevy's diagnostics crate builds sysinfo on macOS with its App
+    Store feature, whose sandbox makes the process refresh return nothing, so Bevy's plugin gives
+    both process measures as zero there by Bevy's own choice; the test holds the system's two
+    measures everywhere and on macOS asserts the process's two equal zero, so a Bevy release that
+    measures the process there is read, and the remarks and the guide say so. Settled at three green
+    macOS suites in a row after the mend.
 
 ## Decisions
 

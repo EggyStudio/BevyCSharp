@@ -13365,6 +13365,7 @@ sealed class Bevy.TilemapChunk
   uint Width { get; set; }
 sealed class Bevy.Time
   Time()
+  TimeProvider Provider { get; }
   bool Paused { get; }
   double DeltaSeconds { get; }
   double ElapsedSeconds { get; }
