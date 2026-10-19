@@ -10,7 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8fe38f60`, item 31's banners and nothing else, the README alone, with the review's
+Reviewed up to `d482caa3`, item 32, and `e1f516fa` before it, item 33, with the review's commits
+between, part (g)'s work staying in the tree outside both. Item 33: the pack job has the identity
+token's write permission beside its read of the contents, a step with the feed's login action given
+the user `EggyStudio` runs right before the push when publish is on and answers the key, which the
+push takes through the environment where it took the secret, nothing reading the secret any more,
+the input's description and the head comment saying the run publishes through the trusted publishing
+policy and needs no secret, BUILDING.md's publishing section naming the policy's values and
+TODO.md's paragraph on publishing by choice saying a run started by hand pushes through the policy
+when its box is ticked; the workflow, script, documents script and norm tests pass. Item 32: the
+notes script becomes Python, reading the feed's flat index of the package for the latest version of
+the minor in `build/version.txt`, that version's nuspec for the commit it was built from, checked
+present in the checkout, and writing the commits' bodies from there to the head, newest first, a
+sentence a line, falling back to the minor's from where the version file last changed where the feed
+answers nothing, lists no version of the minor or names a commit the checkout lacks, printing which
+commit the notes start from and why and appending the sentence to the step summary; today it reads
+`0.5.120` built from `35ca43b1` and writes 14 lines where the old script wrote 134, the review's
+misformed commit giving none since its sentence stood in the subject; a release notes test class
+covers it on a scratch history with file feeds, two commits after the built one, and the minor's
+four for no version of the minor, an absent commit and no feed, each with its sentence, listed under
+N 1.4 by its nature; 67 tests pass across the four classes after a clean build. Right. The reviewer
+starts the pack run with publish on as the check of both (Decision 43), its package's page the
+proof. Next part (g).
+
+Before it, `8fe38f60` came, item 31's banners and nothing else, the README alone, with the review's
 commits between. The five banners stand in one row under the description inside the centered block
 as markdown pictures from the badge service in 3DEngine's colors: .NET 10.0; Graphics wgpu with
 Vulkan, DX12 and Metal, which the render profile's dependency tree gives as its backends on the
@@ -65,39 +88,6 @@ form. At 22:32 the push run of `b68da75c` was whole green, its three suites in 1
 run of `2865032d`, started by the list's line, had its three suites running, the check that the norm
 test passes with the line. At 22:34 the owner asked for the five banners in the README's centered
 block, item 31 open again for them.
-
-Before it, `714451b0` came, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
-bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
-recursive dependency state and one holding until cleared, a system before Bevy's time systems
-setting the manual step to nothing for the frame and one after them putting it back before the sync,
-so only Bevy's time system sees it and the machine's clock is never held; the managed side counts
-the frames whose real step is more than nothing as the clock's frames, the waits, the held inputs, a
-shot at a frame and the command queue's release and give-up counting them while the envelope keeps
-the frame count, the command pump holding the clock still while no command waits under the commands
-hold, asked for by an open flag, an environment variable applied at startup and a command in a new
-partial file under N 1.3, and the status saying the clock's count where it trails. The capture
-script opens with the loads hold and the drive sets the commands hold, the platform and the elevator
-each read after 90 frames carrying the player, and the drive's 25 player readings came out identical
-on the development machine's GPU and on lavapipe at 54.23 seconds of game time at the platform, 199
-seconds of the machine's against 2,907; the drive's frame times had read the status's rate since
-`87798b74`, the set clock's own, so every figure read 16.7 ms whatever the device, and they come
-from the frame profile since, 29.2 ms on the GPU and 423 on lavapipe. All 373 captures were taken
-again, 297 identical, 23 pictures and 7 texts replaced after two takes matching in every pixel, six
-moved by the hold, seventeen drifted since they were taken on examples holding no frame or one, a
-resource kept as an entity adding one to every text and one example's unordered systems printing in
-another order; in a container of the SDK's image with Mesa 25.2.8 the three held examples read 31,
-under one and under one pixel from the GPU's pictures where their lines allowed 10.2 and 7.4
-percent, and the two lines leave the differ file; the meshlet bunnies' line stays with its reason
-found incomplete, the GPU drawing a different subset of the 2,500 at each take, 64,000 pixels apart,
-which is part (i)'s. Six tests join, a load holding the frame after the one that found it loading,
-the still hold running no fixed step, the machine's clock not held, the wait moving the clock
-exactly and standing still between asks, the environment variable and the two systems in Rust.
-Checked were the whole suite with a clean build, 1,522 passed and 3 skipped of 1,525, the headless
-bridge's changed tests, `cargo check` in the container and crossed for Windows and macOS, `cargo
-test` on three profiles, and the norm and public surface tests with the cheat sheet written again;
-the shared line stands under Replies and is taken into SHARED.md's row on the set clock. Right. Item
-30 was tried from nuget.org's `0.5.120` at 22:01 and is done with no commit, the install line
-working as written. Next item 31, then part (g), and the owner's push of `714451b0` with them.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -945,7 +935,9 @@ from [SHARED.md](SHARED.md).
     where the feed answers nothing, lists no version of the minor, or names a commit the checkout
     does not have, the notes are the minor's as before and the summary says why; the pack job's step
     says which commit the notes start from. Held by a test of the script on a scratch history with a
-    feed answer given to it, and read on the next package's page. One commit, after part (g).
+    feed answer given to it, and read on the next package's page. One commit, after part (g). Done
+    at `d482caa3` on 2026-10-19, 14 lines where 134 against the feed's `0.5.120`; the next package's
+    page is its check.
 
 33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
     42).** The pack job gains the identity token's write permission beside its read of the contents,
@@ -957,7 +949,8 @@ from [SHARED.md](SHARED.md).
     and the package pattern; the step with the secret goes. Checked by a pack run with publish on,
     whose push the feed accepts, the first the owner starts after the policy stands. One commit, the
     pattern `BevyCSharp*`; at 22:54 the owner asked whether the pack could upload by itself, so this
-    comes first, right after the step of (g) in hand, and item 32 with it.
+    comes first, right after the step of (g) in hand, and item 32 with it. Done at `e1f516fa` on
+    2026-10-19; the first pack run with publish on is its check.
 
 ## Verdicts
 
