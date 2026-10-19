@@ -10,7 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `17487d27`, Verdict 35's mend, and `7a0f07ea` before it, Verdict 34's, with the
+Reviewed up to `a7895887`, item 32's rule and nothing else, with the review's commit between. The
+notes script walks the commits after the start and leaves out one whose files all lie under
+`.github/`, a commit with no files or with any file elsewhere staying in, as 3DEngine's `8e3ff67a`
+has it, the docstring and BUILDING.md saying why; the test's history gains a review record touching
+the review alone, left out, and a commit touching a workflow and the README, kept; the release
+notes, norm and script tests pass, 59 of 59, after a clean build. Against the feed's `0.5.120` the
+notes hold 9 lines from the commits after `35ca43b1`, the review's records and the trusted
+publishing commit, whose three files lie under the folder, left out and the list's commit kept for
+its file under the build folder. Right. The reviewer starts the pack run with publish on as the
+check of items 32 and 33 and of Verdicts 34 and 35 (Decision 43). Next the layouts test's mend,
+(g)'s commit, then (h).
+
+Before it, `17487d27` came, Verdict 35's mend, and `7a0f07ea` before it, Verdict 34's, with the
 review's commits between, part (g) still in the tree. Verdict 34: the test folder's deletion, on the
 first refusal, takes the read-only attribute off every file left in the folder and tries again
 before its usual two seconds of retries, the remarks giving git's read-only objects as the reason
@@ -56,34 +68,6 @@ release notes tests on deleting their scratch repositories (Verdict 34), as the 
 `e7ea1a06` did at 23:31, and macOS failed the load hold test, the image never loading (Verdict 35);
 the push run of `97ea3055` was Verdict 33's. The next pack run with publish on comes after the two
 mends. Right. Next Verdicts 34 and 35, then part (g)'s comparison, then (h).
-
-Before it, `d482caa3` came, item 32, and `e1f516fa` before it, item 33, with the review's commits
-between, part (g)'s work staying in the tree outside both. Item 33: the pack job has the identity
-token's write permission beside its read of the contents, a step with the feed's login action given
-the user `EggyStudio` runs right before the push when publish is on and answers the key, which the
-push takes through the environment where it took the secret, nothing reading the secret any more,
-the input's description and the head comment saying the run publishes through the trusted publishing
-policy and needs no secret, BUILDING.md's publishing section naming the policy's values and
-TODO.md's paragraph on publishing by choice saying a run started by hand pushes through the policy
-when its box is ticked; the workflow, script, documents script and norm tests pass. Item 32: the
-notes script becomes Python, reading the feed's flat index of the package for the latest version of
-the minor in `build/version.txt`, that version's nuspec for the commit it was built from, checked
-present in the checkout, and writing the commits' bodies from there to the head, newest first, a
-sentence a line, falling back to the minor's from where the version file last changed where the feed
-answers nothing, lists no version of the minor or names a commit the checkout lacks, printing which
-commit the notes start from and why and appending the sentence to the step summary; today it reads
-`0.5.120` built from `35ca43b1` and writes 14 lines where the old script wrote 134, the review's
-misformed commit giving none since its sentence stood in the subject; a release notes test class
-covers it on a scratch history with file feeds, two commits after the built one, and the minor's
-four for no version of the minor, an absent commit and no feed, each with its sentence, listed under
-N 1.4 by its nature; 67 tests pass across the four classes after a clean build. Right. The reviewer
-starts the pack run with publish on as the check of both (Decision 43), its package's page the
-proof. At 23:06 the push run of `97ea3055`, the banners' commit with the review's, had ended red on
-its Linux suite's one test, the command line server's held clock (Verdict 33), its macOS and Windows
-suites green; the pack run with publish on, 39324217456 on `987676b5`, had its natives and suites
-running with the push run of the same commit beside it; and a review-only push, `0bdbc05d`, had
-started a build run where the paths filter should have left it, cancelled by the next, read again if
-it recurs. Next part (g), with Verdict 33's reading first.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -936,7 +920,8 @@ from [SHARED.md](SHARED.md).
     page is its check. Widened on 2026-10-19 at 23:25 with 3DEngine's item 37: a commit whose every
     file lies under `.github/` is left out, since the package carries nothing from there, which
     takes the review's and the workflows' commits by what they touch, the README, the guides, the
-    license and the notices staying in; a small commit after (g)'s.
+    license and the notices staying in; a small commit after (g)'s. The rule is in at `a7895887`,
+    the notes at 9 lines of the engine's alone.
 
 33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
     42).** The pack job gains the identity token's write permission beside its read of the contents,
