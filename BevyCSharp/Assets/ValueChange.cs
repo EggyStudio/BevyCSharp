@@ -3,8 +3,10 @@ namespace Bevy;
 /// <summary>A widget that edits a value was asked to take a new one.</summary>
 /// <typeparam name="T">
 /// The value, a <see cref="float"/> for a slider, a <see cref="bool"/> for a checkbox or a radio
-/// button, an <see cref="Bevy.Entity"/> for a radio group, the button chosen, and an
-/// <see cref="Bevy.Entity"/>? for a tab list, the tab chosen, null for none.
+/// button, an <see cref="Bevy.Entity"/> for a radio group, the button chosen, an
+/// <see cref="Bevy.Entity"/>? for a tab list, the tab chosen, null for none, and for a Feathers
+/// number input the <see cref="float"/>, <see cref="double"/>, <see cref="int"/> or
+/// <see cref="long"/> it holds.
 /// </typeparam>
 /// <param name="Source">The widget.</param>
 /// <param name="Value">The value asked for.</param>

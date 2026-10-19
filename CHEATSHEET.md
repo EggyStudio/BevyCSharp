@@ -1292,6 +1292,7 @@ static TextViewport? TextViewportOf(Entity field);              // The part of a
 static void ScrollText(Entity field, Vec2 offset);              // Scrolls a text field to show its text from a point of its layout
 static void SetVisibleLines(Entity field, float lines);         // Sets how many lines tall a text field is, its text and cursor left as they are
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end
+static void EditText(Entity field, TextEdit edit);              // Queues one of Bevy's text edits on a field, applied with those the keyboard makes in the frame, so a button or a virtual key types into a field as a key would
 static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
 ```
 
@@ -1300,6 +1301,19 @@ static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of 
 ```csharp
 static void Set(Entity node, GridSettings settings);            // Lays a node's children out on a grid
 static void Place(Entity node, GridPlacement placement);        // Places one child on its parent's grid
+```
+
+### `TextEdit`
+
+```csharp
+static TextEdit Insert(string text);                            // Puts text at the cursor, in place of the selection where there is one
+static TextEdit Left(bool select = false);                      // Moves the cursor a character left, extending the selection where asked
+static TextEdit Right(bool select = false);                     // Moves the cursor a character right, extending the selection where asked
+static TextEdit Up(bool select = false);                        // Moves the cursor up a line as laid out, extending the selection where asked
+static TextEdit Down(bool select = false);                      // Moves the cursor down a line as laid out, extending the selection where asked
+static TextEdit LineStart(bool select = false);                 // Moves the cursor to the start of its line as laid out
+static TextEdit LineEnd(bool select = false);                   // Moves the cursor to the end of its line as laid out
+static TextEdit ScrollByLines(float lines);                     // Scrolls by lines lines as laid out, down where it is above zero
 ```
 
 ### `Feathers`
@@ -1315,6 +1329,18 @@ static Entity Caption(Entity parent, string text);              // Text in the t
 static Entity Label(Entity parent, string text);                // A label beside a control, Bevy's label
 static Entity LabelDim(Entity parent, string text);             // A label in the theme's dimmer text, Bevy's label_dim
 static Entity LabelSmall(Entity parent, string text);           // A smaller label, Bevy's label_small
+static Entity NumberInput(Entity parent, string? letter = null, string? sigil = null);  // A number input, Bevy's FeathersNumberInput, a field the value is typed into or dragged across, with a letter at its left and a strip in a theme color along its edge where given
+static Entity VirtualKeyboard(Entity parent, string[][] keys);  // A virtual keyboard, Bevy's VirtualKeyboard, a button a key in rows, which reports the key pressed as VirtualKeyPressed on the keyboard
+static void SetNumber(Entity input, float value);               // Writes a number input's value as a Single, the type it then reports
+static void SetNumber(Entity input, double value);              // Writes a number input's value as a Double, the type it then reports
+static void SetNumber(Entity input, int value);                 // Writes a number input's value as an Int32, the type it then reports
+static void SetNumber(Entity input, long value);                // Writes a number input's value as a Int64, the type it then reports
+static NumberInputValue? NumberOf(Entity input);                // What a number input holds, or null where nothing has been written to it
+static void SetNumberLimit(Entity input, float min, float max, bool hard = false);  // Bounds a number input's Single value, hard, which neither typing nor dragging passes, or soft, which a drag stays within and typing can pass
+static void SetNumberLimit(Entity input, double min, double max, bool hard = false);  // Bounds a number input's Double value, hard or soft
+static void SetNumberLimit(Entity input, int min, int max, bool hard = false);  // Bounds a number input's Int32 value, hard or soft
+static void SetNumberLimit(Entity input, long min, long max, bool hard = false);  // Bounds a number input's Int64 value, hard or soft
+static void SetNumberUnits(Entity input, NumberUnits units);    // Has a number input show its value in units, typed in any of their dimension
 static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background);  // Colors a node of the game's own from the theme, by one of FeathersToken's tokens, so it follows the theme as the controls do
 ```
 

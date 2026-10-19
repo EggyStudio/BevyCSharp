@@ -394,6 +394,18 @@ a scrollbar of a game's own reads `Ui.TextViewportOf` beside the text's laid out
 `TextLayoutInfoRef.Size`, and moves the text with `Ui.ScrollText`, as Bevy's multiline_text_input
 example does.
 
+`Ui.EditText` queues one of Bevy's text edits on a field, applied with the keyboard's in the frame,
+so a button or a virtual key types into a field, moves its cursor or selects, as a key would:
+
+<!-- compiled with:
+Entity name = default;
+-->
+```csharp
+Ui.EditText(name, TextEdit.Insert("a"));
+Ui.EditText(name, TextEdit.Left(select: true));             // the selection grows a character left
+Ui.EditText(name, TextEdit.Backspace);                      // and goes
+```
+
 Each key reaches the focused entity as Bevy's `FocusedInput<KeyboardInput>`, which goes on up its
 parents, so a game observes Enter in a field, or in any field of a row:
 
@@ -500,6 +512,27 @@ var volume = Feathers.Slider(row, min: 0f, max: 100f);
 names for the parts of a control the theme colors, so it follows the theme as the controls do.
 `Feathers.Caption` and the labels are text in the theme's font, which `Ui.SetText` changes. Bevy
 writes Feathers for tools and editors, and a game's own interface is drawn with the plain widgets.
+
+A number input holds a `float`, a `double`, an `int` or a `long`, whichever `Feathers.SetNumber`
+writes, and reports a change in that type, which the game writes back or refuses. Its limits, its
+units and Bevy's reflected `NumberInputPrecisionRef` and `NumberInputStepRef` shape it, written
+before its value, since it writes its text as its value changes. A virtual keyboard reports each key
+as `VirtualKeyPressed`, which `Ui.EditText` types into a field:
+
+<!-- compiled with:
+Entity row = default, field = default;
+-->
+```csharp
+var angle = Feathers.NumberInput(row, letter: "Y", sigil: FeathersToken.TextInputYAxis);
+Feathers.SetNumberUnits(angle, NumberUnits.AngleDegrees);       // held in radians, shown in degrees
+Feathers.SetNumberLimit(angle, -MathF.PI, MathF.PI, hard: true);
+Feathers.SetNumber(angle, MathF.PI / 2f);                       // 90°, written last
+ctx.Ecs.Observe<ValueChange<float>>(angle, on => Feathers.SetNumber(angle, on.Event.Value));
+
+var keyboard = Feathers.VirtualKeyboard(row, [["1", "2", "3"], ["backspace"]]);
+ctx.Ecs.Observe<VirtualKeyPressed>(keyboard, on =>
+    Ui.EditText(field, on.Event.Key == "backspace" ? TextEdit.Backspace : TextEdit.Insert(on.Event.Key)));
+```
 
 ---
 

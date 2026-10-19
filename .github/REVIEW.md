@@ -10,7 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `670ecf2c`, item 4's first batch and nothing else, 63 files, the ABI 285 to 286, the
+Reviewed up to `edee9686`, Feathers' first step and nothing else, 34 files, the ABI 286 to 287, the
+lock gaining `bevy_feathers` alone through Bevy's feature on the render profile. Feathers is too
+large for one commit, the gallery alone using some twenty controls whose props hold scenes and
+closures, so it comes in steps, each a commit with its examples, this one, then the number input and
+the virtual keyboard, then the gallery's controls, then the fifteen examples moved from the
+examples' radio buttons helper to Feathers' radio, which is item 29's part (k) whole. `feathers.rs`
+adds Bevy's core plugin and dark theme on `Config.Feathers`, the core plugin alone since the bridge
+has the tab navigation plugin already and a second add of a unique plugin panics; each control is
+spawned from plain props and a caption's text through its own scene, the component with its marker
+and what Bevy's scene notation adds, applied at once and queued only where something it needs has
+not loaded, a first version having queued every scene so that its later application wrote over a
+margin set right after spawning, which a test holds; the button, tool button, checkbox, radio,
+toggle switch, slider, caption and three labels, and a call coloring a node of C#'s own by a theme
+token as Bevy's four theme components do. The managed side gains `Feathers` with its ten controls
+and a theme color call, the variant, corners and part enums and the 150 theme tokens with Bevy's
+notes, which a test holds to Feathers' own source in the cargo registry; the schema dump gains
+Feathers' 83 reflected components and nothing else; `feathers_counter` is written, the table at 364
+written and 12 missing; and the notices carry the two fonts Feathers embeds, Mozilla's and the Noto
+project's, under the Open Font License, `third-party-notices.py` leaving out a holder line that is
+the license's own wording, no other crate's holders changing. Four Feathers tests hold the props'
+layout, the tokens Bevy's, a control refused without `Config.Feathers`, and controls drawn on the
+theme's window color with a button's click reported once, a checkbox checked through Bevy's
+observer, the primary variant held and the margin kept. Checked were `cargo check` on the four
+profiles with meshlets and Solari on the editor's, `cargo test` headless and on render, the headless
+bridge with the Feathers and layout tests under B 2, the examples on a fresh package, and the whole
+suite, 1,497 passed and 3 skipped of 1,500, the picture taken on a render bridge on the GPU. Right.
+Next Feathers' second step, the number input and the virtual keyboard, then the gallery's controls,
+then the fifteen examples, then the dev tools, the system information, the declined rows marked and
+`monitor_info`, one step a commit, and the owner's push of the three commits.
+
+Before it, `670ecf2c` came, item 4's first batch and nothing else, 63 files, the ABI 285 to 286, the
 lock gaining `bevy_camera_controller` alone. The render profile turns on Bevy's free, pan and
 pan-orbit cameras and the pan-orbit gizmo, the bridge naming the crate for its reflection feature,
 which pulls no crate in; `camera_controllers.rs` adds the plugins an app asks for through
@@ -58,30 +88,6 @@ meshlet and Solari bridge with no runner with a graphics card, the anisotropy fa
 patched shader with a test, the templates are published beside the engine (item 30), and
 `monitor_info` is captured on virtual monitors. Next item 4's batches in order, the camera
 controllers first, one a commit.
-
-Before it, `6bac018b` came, Verdict 31's line and nothing else. `build/captures-differ.txt` lists
-`async_compute` at 0.04 beside its sibling with the sibling's reason word for word, the example
-unchanged, and the room is measured (N 3.5), 2.6 percent on the runner's pack run of `c5f19669` and
-1.36, 1.58, 1.51 and 1.54 in four runs of `build/capture-example.sh` in a container of the runner's
-image on lavapipe held to four cores with a `--render` bridge, the box of every difference the
-runner's, where the cubes stand; the cubes cover 4.6 percent of the checked-in picture and 5.1 to
-5.6 of the captures, so a capture with none of the reference's cubes stays near 4.6, and 0.04 stands
-to the runner's 2.6 as the other lines stand to their measures. The slower lavapipe of the container
-reaches the frame with more of the waits ended, nearer the reference than the runner's. Checked on
-the working machine was the whole suite, 1,488 passed and 3 skipped of 1,491. Right. The owner
-pushed `6bac018b` at 12:27 on 2026-10-18 and started its pack run; the push run ended at 12:39 whole
-green. The pack run of `3d147d49` ended at 13:24 whole green with its package made, the course
-passing and `async_compute` within its 2 percent this time; the pack run of `6bac018b` had by 13:49
-its six natives and three suites green with the four shards, the play job and the course running. By
-14:25 that run's four shards had passed with the line in, which settles Verdict 31, and its play
-job, and the run ended at 14:56 whole green with its package, the course passing in 71 minutes. Open
-is Verdict 2 alone. At 22:25 on 2026-10-18 the owner resumed development (Decision 38): first the
-bridge is completed, every gap of item 4 closed, and then what was mended for the time being is
-mended for good (item 29). At 22:31 the working session read item 4 against the table and found no
-gap left that needs no word, the twenty rows left each waiting on the owner's word for a crate,
-declined, or on the owner's screens, the crates measured in a scratch copy of the manifests and said
-under the item. Next the owner's words typed in the working session, the camera controllers first,
-each gap bridged as its word comes, and item 29's list meanwhile.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -372,7 +378,12 @@ from [SHARED.md](SHARED.md).
    captured on virtual monitors in a headless display and never on the owner's screens. The batches
    go in that order, one a commit. The camera controllers came at `670ecf2c` on 2026-10-19, five
    rows written, the table at 363 written and 13 missing, the lock gaining the one crate, the ABI
-   286, the five examples captured and the examples' own free camera gone for Bevy's.
+   286, the five examples captured and the examples' own free camera gone for Bevy's. Feathers'
+   first step came at `edee9686` the same day, the core plugin, the dark theme, ten controls and the
+   theme tokens, `feathers_counter` written, the table at 364 written and 12 missing, the lock
+   gaining `bevy_feathers`, the ABI 287; its steps to come are the number input and the virtual
+   keyboard, the gallery's controls, and the fifteen examples moved to Feathers' radio, each a
+   commit with its examples.
 
 11. **The CLI server writes an answered request before it closes, done at `c3aaacac`.** `app.quit`'s
     answer is completed inside the frame, the app ends at the frame's end, and the server's dispose
@@ -830,8 +841,8 @@ from [SHARED.md](SHARED.md).
     runner with a graphics card and no Mesa from an archive outside the distribution; (j) the
     anisotropy fault is mended by a patched shader of Bevy's in the bridge, which overrides the
     earlier decline, with a test that fails when Bevy's original changes. Part (k) is half done at
-    `670ecf2c`, the free camera helper gone for Bevy's controller; the radio buttons go with
-    Feathers.
+    `670ecf2c`, the free camera helper gone for Bevy's controller, and the radio buttons helper goes
+    in Feathers' last step; the radio buttons go with Feathers.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes

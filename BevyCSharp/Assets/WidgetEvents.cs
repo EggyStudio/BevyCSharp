@@ -12,6 +12,10 @@ internal static class WidgetEvents
     internal const int Menu = 4;
     internal const int Tab = 5;
     internal const int TextEdit = 6;
+    internal const int Double = 7;
+    internal const int Int = 8;
+    internal const int Long = 9;
+    internal const int VirtualKey = 10;
 
     /// <summary>The number the bridge reports a <see cref="ValueChange{T}"/> of <typeparamref name="T"/> under.</summary>
     /// <exception cref="NotSupportedException">No widget of Bevy's reports a value of that type.</exception>
@@ -20,10 +24,14 @@ internal static class WidgetEvents
         : typeof(T) == typeof(bool) ? Flag
         : typeof(T) == typeof(Entity) ? Choice
         : typeof(T) == typeof(Entity?) ? Tab
+        : typeof(T) == typeof(double) ? Double
+        : typeof(T) == typeof(int) ? Int
+        : typeof(T) == typeof(long) ? Long
         : throw new NotSupportedException(
             $"No widget of Bevy's reports a ValueChange of {typeof(T).Name}. A slider reports a float, a "
-            + "checkbox or a radio button a bool, a radio group the Entity of the button chosen, and a "
-            + "tab list the Entity? of the tab chosen.");
+            + "checkbox or a radio button a bool, a radio group the Entity of the button chosen, a "
+            + "tab list the Entity? of the tab chosen, and a number input the float, double, int or "
+            + "long it holds.");
 
     /// <summary>Runs the observers of what a widget reported, as the bridge reported it.</summary>
     internal static void Trigger(ObserverRegistry registry, in NativeWidgetEvent reported)
@@ -40,6 +48,13 @@ internal static class WidgetEvents
             case Menu: registry.Trigger(new MenuEvent(entity, (MenuAction)reported.Action, (NavAction)reported.Navigation)); break;
             case Tab: registry.Trigger(new ValueChange<Entity?>(entity, reported.Flag != 0 ? new Entity(reported.Other) : null, final)); break;
             case TextEdit: registry.Trigger(new TextEditChange(entity)); break;
+            case Double: registry.Trigger(new ValueChange<double>(entity, BitConverter.Int64BitsToDouble((long)reported.Other), final)); break;
+            case Int: registry.Trigger(new ValueChange<int>(entity, (int)(long)reported.Other, final)); break;
+            case Long: registry.Trigger(new ValueChange<long>(entity, (long)reported.Other, final)); break;
+            case VirtualKey:
+                var (row, column) = ((int)(reported.Other >> 32), (int)(uint)reported.Other);
+                registry.Trigger(new VirtualKeyPressed(entity, Feathers.KeyAt(entity, row, column), row, column));
+                break;
         }
     }
 }

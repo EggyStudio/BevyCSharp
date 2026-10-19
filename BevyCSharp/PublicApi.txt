@@ -1733,10 +1733,22 @@ static class Bevy.Feathers
   static Entity Label(Entity parent, string text)
   static Entity LabelDim(Entity parent, string text)
   static Entity LabelSmall(Entity parent, string text)
+  static Entity NumberInput(Entity parent, string? letter = null, string? sigil = null)
   static Entity Radio(Entity parent, string caption)
   static Entity Slider(Entity parent, float min = 0f, float max = 1f)
   static Entity ToggleSwitch(Entity parent)
   static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All)
+  static Entity VirtualKeyboard(Entity parent, string[][] keys)
+  static NumberInputValue? NumberOf(Entity input)
+  static void SetNumber(Entity input, double value)
+  static void SetNumber(Entity input, float value)
+  static void SetNumber(Entity input, int value)
+  static void SetNumber(Entity input, long value)
+  static void SetNumberLimit(Entity input, double min, double max, bool hard = false)
+  static void SetNumberLimit(Entity input, float min, float max, bool hard = false)
+  static void SetNumberLimit(Entity input, int min, int max, bool hard = false)
+  static void SetNumberLimit(Entity input, long min, long max, bool hard = false)
+  static void SetNumberUnits(Entity input, NumberUnits units)
   static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background)
 static class Bevy.FeathersToken
   const string ButtonBg = "feathers.button.bg"
@@ -2858,9 +2870,11 @@ struct Bevy.Interop.NativeEffectsConfig
 struct Bevy.Interop.NativeEffectsConfig.<CompensationCurve>e__FixedBuffer
   float FixedElementField
 struct Bevy.Interop.NativeFeathersProps
+  byte* Token
   float Max
   float Min
   int Corners
+  int TokenLength
   int Variant
 struct Bevy.Interop.NativeFocusedKey
   NativeFocusedKey.<Logical>e__FixedBuffer Logical
@@ -4269,6 +4283,28 @@ enum Bevy.NoteKind : int
   Heading = 0
   Info = 1
   Warning = 2
+readonly struct Bevy.NumberInputValue : IEquatable<NumberInputValue>
+  NumberInputValue(NumberKind Kind, double Value, long Whole)
+  NumberKind Kind { get; init; }
+  bool Equals(NumberInputValue other)
+  double Value { get; init; }
+  long Whole { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(NumberInputValue left, NumberInputValue right)
+  static bool op_Inequality(NumberInputValue left, NumberInputValue right)
+  void Deconstruct(out NumberKind Kind, out double Value, out long Whole)
+enum Bevy.NumberKind : int
+  Double = 1
+  Float = 0
+  Int = 2
+  Long = 3
+enum Bevy.NumberUnits : int
+  AngleDegrees = 3
+  LengthMeters = 1
+  None = 0
+  TimeSeconds = 2
 sealed class Bevy.OnCleanupAttribute : Attribute
   OnCleanupAttribute()
 sealed class Bevy.OnEnterAttribute : Attribute
@@ -6306,7 +6342,7 @@ readonly struct Bevy.Reflected.DistanceFogRef : IReflectedComponent<DistanceFogR
 readonly struct Bevy.Reflected.DragStateRef : IReflectedComponent<DragStateRef>, IReflectedWrapper<DragStateRef>
   DragStateRef.ModeVariant Mode { get; set; }
   Entity Entity { get; }
-  NumberInputValue BaseValue { get; set; }
+  NumberInputValueValue BaseValue { get; set; }
   bool Remove()
   const string TypePath = "bevy_feathers::controls::number_input::DragState"
   double DragSpeed { get; set; }
@@ -8771,67 +8807,67 @@ readonly struct Bevy.Reflected.NumberInputUnitsRef : IReflectedComponent<NumberI
   Entity Entity { get; }
   bool Remove()
   const string TypePath = "bevy_feathers::controls::number_input::NumberInputUnits"
-abstract class Bevy.Reflected.NumberInputValue : IEquatable<NumberInputValue>
+abstract class Bevy.Reflected.NumberInputValueValue : IEquatable<NumberInputValueValue>
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
-  protected NumberInputValue(NumberInputValue original)
+  protected NumberInputValueValue(NumberInputValueValue original)
   protected virtual Type EqualityContract { get; }
   protected virtual bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(NumberInputValue? left, NumberInputValue? right)
-  static bool op_Inequality(NumberInputValue? left, NumberInputValue? right)
-  virtual bool Equals(NumberInputValue? other)
-sealed class Bevy.Reflected.NumberInputValue.F32 : NumberInputValue, IEquatable<NumberInputValue.F32>, IEquatable<NumberInputValue>
+  static bool op_Equality(NumberInputValueValue? left, NumberInputValueValue? right)
+  static bool op_Inequality(NumberInputValueValue? left, NumberInputValueValue? right)
+  virtual bool Equals(NumberInputValueValue? other)
+sealed class Bevy.Reflected.NumberInputValueValue.F32 : NumberInputValueValue, IEquatable<NumberInputValueValue.F32>, IEquatable<NumberInputValueValue>
   F32(float Value)
-  bool Equals(NumberInputValue.F32? other)
-  bool Equals(NumberInputValue? other)
+  bool Equals(NumberInputValueValue.F32? other)
+  bool Equals(NumberInputValueValue? other)
   float Value { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(NumberInputValue.F32? left, NumberInputValue.F32? right)
-  static bool op_Inequality(NumberInputValue.F32? left, NumberInputValue.F32? right)
+  static bool op_Equality(NumberInputValueValue.F32? left, NumberInputValueValue.F32? right)
+  static bool op_Inequality(NumberInputValueValue.F32? left, NumberInputValueValue.F32? right)
   void Deconstruct(out float Value)
-sealed class Bevy.Reflected.NumberInputValue.F64 : NumberInputValue, IEquatable<NumberInputValue.F64>, IEquatable<NumberInputValue>
+sealed class Bevy.Reflected.NumberInputValueValue.F64 : NumberInputValueValue, IEquatable<NumberInputValueValue.F64>, IEquatable<NumberInputValueValue>
   F64(double Value)
-  bool Equals(NumberInputValue.F64? other)
-  bool Equals(NumberInputValue? other)
+  bool Equals(NumberInputValueValue.F64? other)
+  bool Equals(NumberInputValueValue? other)
   double Value { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(NumberInputValue.F64? left, NumberInputValue.F64? right)
-  static bool op_Inequality(NumberInputValue.F64? left, NumberInputValue.F64? right)
+  static bool op_Equality(NumberInputValueValue.F64? left, NumberInputValueValue.F64? right)
+  static bool op_Inequality(NumberInputValueValue.F64? left, NumberInputValueValue.F64? right)
   void Deconstruct(out double Value)
-sealed class Bevy.Reflected.NumberInputValue.I32 : NumberInputValue, IEquatable<NumberInputValue.I32>, IEquatable<NumberInputValue>
+sealed class Bevy.Reflected.NumberInputValueValue.I32 : NumberInputValueValue, IEquatable<NumberInputValueValue.I32>, IEquatable<NumberInputValueValue>
   I32(int Value)
-  bool Equals(NumberInputValue.I32? other)
-  bool Equals(NumberInputValue? other)
+  bool Equals(NumberInputValueValue.I32? other)
+  bool Equals(NumberInputValueValue? other)
   int Value { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(NumberInputValue.I32? left, NumberInputValue.I32? right)
-  static bool op_Inequality(NumberInputValue.I32? left, NumberInputValue.I32? right)
+  static bool op_Equality(NumberInputValueValue.I32? left, NumberInputValueValue.I32? right)
+  static bool op_Inequality(NumberInputValueValue.I32? left, NumberInputValueValue.I32? right)
   void Deconstruct(out int Value)
-sealed class Bevy.Reflected.NumberInputValue.I64 : NumberInputValue, IEquatable<NumberInputValue.I64>, IEquatable<NumberInputValue>
+sealed class Bevy.Reflected.NumberInputValueValue.I64 : NumberInputValueValue, IEquatable<NumberInputValueValue.I64>, IEquatable<NumberInputValueValue>
   I64(long Value)
-  bool Equals(NumberInputValue.I64? other)
-  bool Equals(NumberInputValue? other)
+  bool Equals(NumberInputValueValue.I64? other)
+  bool Equals(NumberInputValueValue? other)
   long Value { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
   protected override Type EqualityContract { get; }
   protected override bool PrintMembers(StringBuilder builder)
-  static bool op_Equality(NumberInputValue.I64? left, NumberInputValue.I64? right)
-  static bool op_Inequality(NumberInputValue.I64? left, NumberInputValue.I64? right)
+  static bool op_Equality(NumberInputValueValue.I64? left, NumberInputValueValue.I64? right)
+  static bool op_Inequality(NumberInputValueValue.I64? left, NumberInputValueValue.I64? right)
   void Deconstruct(out long Value)
 struct Bevy.Reflected.NumberInputWrapMirror : IMirroredLayout, INativeComponent
   NumberInputWrapMirror.NumberInputWrap Value
@@ -12899,6 +12935,30 @@ sealed class Bevy.SystemToggleRegistry
 enum Bevy.TargetFormat : int
   Rgba16Float = 1
   Rgba8 = 0
+readonly struct Bevy.TextEdit : IEquatable<TextEdit>
+  TextEdit(TextEditKind Kind, string Text = "", bool Select = false, Vec2 Point = default)
+  TextEditKind Kind { get; init; }
+  Vec2 Point { get; init; }
+  bool Equals(TextEdit other)
+  bool Select { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static TextEdit Backspace { get; }
+  static TextEdit Delete { get; }
+  static TextEdit Down(bool select = false)
+  static TextEdit Insert(string text)
+  static TextEdit Left(bool select = false)
+  static TextEdit LineEnd(bool select = false)
+  static TextEdit LineStart(bool select = false)
+  static TextEdit Right(bool select = false)
+  static TextEdit ScrollByLines(float lines)
+  static TextEdit SelectAll { get; }
+  static TextEdit Up(bool select = false)
+  static bool op_Equality(TextEdit left, TextEdit right)
+  static bool op_Inequality(TextEdit left, TextEdit right)
+  string Text { get; init; }
+  void Deconstruct(out TextEditKind Kind, out string Text, out bool Select, out Vec2 Point)
 readonly struct Bevy.TextEditChange : IEntityEvent, IEquatable<TextEditChange>, IReportedEvent
   Entity Entity { get; init; }
   TextEditChange(Entity Entity)
@@ -12909,6 +12969,39 @@ readonly struct Bevy.TextEditChange : IEntityEvent, IEquatable<TextEditChange>, 
   static bool op_Equality(TextEditChange left, TextEditChange right)
   static bool op_Inequality(TextEditChange left, TextEditChange right)
   void Deconstruct(out Entity Entity)
+enum Bevy.TextEditKind : int
+  Backspace = 4
+  BackspaceWord = 5
+  CollapseSelection = 20
+  Copy = 0
+  Cut = 1
+  Delete = 6
+  DeleteWord = 7
+  Down = 13
+  ExtendSelectionToPoint = 27
+  HardLineEnd = 17
+  HardLineStart = 16
+  Insert = 3
+  Left = 8
+  LineEnd = 19
+  LineStart = 18
+  MoveToPoint = 23
+  Paste = 2
+  Right = 9
+  ScrollBy = 31
+  ScrollByLines = 29
+  ScrollTo = 30
+  SelectAll = 21
+  SelectAllIfCollapsed = 22
+  SelectHardLineAtPoint = 26
+  SelectLineAtPoint = 25
+  SelectWordAtPoint = 24
+  ShiftClickExtension = 28
+  TextEnd = 15
+  TextStart = 14
+  Up = 12
+  WordLeft = 10
+  WordRight = 11
 enum Bevy.TextJustify : int
   Center = 1
   End = 5
@@ -13137,6 +13230,7 @@ static class Bevy.Ui
   static UiInteraction InteractionOf(Entity entity)
   static string? EditableTextOf(Entity node)
   static void ClearFontAtlases()
+  static void EditText(Entity field, TextEdit edit)
   static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
   static void ScrollText(Entity field, Vec2 offset)
   static void SelfUpdate(Entity widget, UiWidgetKind kind)
@@ -13507,6 +13601,19 @@ struct Bevy.ViewVisibility : IMirroredLayout, INativeComponent
   bool WasVisible { get; }
   byte Bits
   override string ToString()
+readonly struct Bevy.VirtualKeyPressed : IEntityEvent, IEquatable<VirtualKeyPressed>, IReportedEvent
+  Entity Keyboard { get; init; }
+  VirtualKeyPressed(Entity Keyboard, string Key, int Row, int Column)
+  bool Equals(VirtualKeyPressed other)
+  int Column { get; init; }
+  int Row { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(VirtualKeyPressed left, VirtualKeyPressed right)
+  static bool op_Inequality(VirtualKeyPressed left, VirtualKeyPressed right)
+  string Key { get; init; }
+  void Deconstruct(out Entity Keyboard, out string Key, out int Row, out int Column)
 struct Bevy.Visibility : IMirroredLayout, INativeComponent
   Visibility(VisibilityMode mode)
   VisibilityMode Mode

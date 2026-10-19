@@ -132,4 +132,30 @@ public static unsafe partial class Ui
         ArgumentNullException.ThrowIfNull(text);
         Native.Check(Native.bcs_ui_set_editable_value(node.Bits, text), $"setting the text field {node}");
     }
+
+    /// <summary>
+    /// Queues one of Bevy's text edits on a field, applied with those the keyboard makes in the
+    /// frame, so a button or a virtual key types into a field as a key would.
+    /// </summary>
+    /// <param name="field">A node made a field with <see cref="SetEditableText"/>.</param>
+    /// <param name="edit">The edit, such as <see cref="TextEdit.Insert"/> or <see cref="TextEdit.Backspace"/>.</param>
+    /// <exception cref="BevyNativeException">
+    /// The node is gone or is no field, or this build has no renderer.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// Ui.EditText(field, TextEdit.Insert("a"));
+    /// Ui.EditText(field, TextEdit.Left(select: true));
+    /// </code>
+    /// </example>
+    public static void EditText(Entity field, TextEdit edit)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(edit.Text ?? "");
+        fixed (byte* text = bytes)
+        {
+            Native.Check(
+                Native.bcs_ui_edit_text(field.Bits, (int)edit.Kind, edit.Select ? 1 : 0, edit.Point.X, edit.Point.Y, text, bytes.Length),
+                $"queuing {edit.Kind} on {field}");
+        }
+    }
 }

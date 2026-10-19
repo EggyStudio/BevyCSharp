@@ -19,7 +19,9 @@ public sealed class FeathersTests
     public void ThePropsAreLaidOutAsTheBridgeReadsThem()
     {
         Assert.Equal(8, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Min)).ToInt32());
-        Assert.Equal(16, Marshal.SizeOf<NativeFeathersProps>());
+        Assert.Equal(16, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.Token)).ToInt32());
+        Assert.Equal(24, Marshal.OffsetOf<NativeFeathersProps>(nameof(NativeFeathersProps.TokenLength)).ToInt32());
+        Assert.Equal(32, Marshal.SizeOf<NativeFeathersProps>());
     }
 
     /// <summary>
@@ -148,5 +150,91 @@ public sealed class FeathersTests
         Assert.True(checkedAfter, "the checkbox was not checked by the click");
         Assert.Equal(ButtonVariantRef.ValueVariant.Primary, variant);
         Assert.Equal(new Val.Px(10f), margin);
+    }
+
+    /// <summary>
+    /// A number input holds each of its four types exactly as written, a long beyond what a double
+    /// holds whole among them, and takes its limits and units.
+    /// </summary>
+    [SkippableFact]
+    public void ANumberInputHoldsEachTypeAsWritten()
+    {
+        Needs.Renderer();
+
+        var read = new List<NumberInputValue?>();
+        var run = new PictureRun
+        {
+            Configure = config => config.Feathers = true,
+            Scene = ecs =>
+            {
+                var input = Feathers.NumberInput(Entity.None, "X", FeathersToken.TextInputXAxis);
+                read.Add(Feathers.NumberOf(input));
+                Feathers.SetNumber(input, 1.5f);
+                read.Add(Feathers.NumberOf(input));
+                Feathers.SetNumber(input, 0.1);
+                read.Add(Feathers.NumberOf(input));
+                Feathers.SetNumber(input, -7);
+                read.Add(Feathers.NumberOf(input));
+                Feathers.SetNumber(input, long.MaxValue - 1);
+                read.Add(Feathers.NumberOf(input));
+                Feathers.SetNumberLimit(input, 0L, 10L, hard: true);
+                Feathers.SetNumberUnits(input, NumberUnits.LengthMeters);
+            },
+        };
+        run.Until("started", world => world.Resource<Time>().FrameCount >= 2).Go();
+
+        Assert.Equal(new NumberInputValue(NumberKind.Float, 1.5, 0), read[1]);
+        Assert.Equal(new NumberInputValue(NumberKind.Double, 0.1, 0), read[2]);
+        Assert.Equal(new NumberInputValue(NumberKind.Int, -7, -7), read[3]);
+        Assert.Equal(NumberKind.Long, read[4]!.Value.Kind);
+        Assert.Equal(long.MaxValue - 1, read[4]!.Value.Whole);
+    }
+
+    /// <summary>
+    /// A click on a virtual key is reported on the keyboard with the key's text and where it
+    /// stands, and the text is typed into a field through <see cref="Ui.EditText"/>, as Bevy's
+    /// example types it.
+    /// </summary>
+    [SkippableFact]
+    public void AVirtualKeyIsReportedWithItsTextAndTypesIntoAField()
+    {
+        Needs.Renderer();
+
+        VirtualKeyPressed? pressed = null;
+        Entity field = Entity.None;
+        string? typed = null;
+
+        var run = new PictureRun
+        {
+            Width = 300,
+            Height = 200,
+            Configure = config => config.Feathers = true,
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                // A column, which stretches the keyboard and its rows to its width.
+                var corner = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(0f), Width = Length.Px(120f), Direction = UiDirection.Column });
+                var keyboard = Feathers.VirtualKeyboard(corner, [["Q", "W"], ["A"]]);
+                field = Ui.SpawnNode(new UiSettings { Absolute = true, Left = Length.Px(0f), Top = Length.Px(120f), Width = Length.Px(200f) });
+                Ui.SetEditableText(field, new UiEditableTextSettings { Text = "ab" });
+                ecs.Observe<VirtualKeyPressed>(keyboard, on =>
+                {
+                    pressed = on.Event;
+                    Ui.EditText(field, TextEdit.Insert(on.Event.Key));
+                });
+            },
+        };
+
+        // The second row's one key, which fills the row, below the first's.
+        run.Until("compiled", world => world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady()).Wait(5)
+            .Do("press", _ => SyntheticInput.Press(60f, 40f))
+            .Wait(2)
+            .Do("release", _ => SyntheticInput.Release(60f, 40f))
+            .Wait(4)
+            .Do("read", _ => typed = Ui.EditableTextOf(field))
+            .Go();
+
+        Assert.Equal(new VirtualKeyPressed(pressed!.Value.Keyboard, "A", 1, 0), pressed);
+        Assert.Equal("abA", typed);
     }
 }

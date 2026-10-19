@@ -29,7 +29,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
     ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw", "ComponentArray`1"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),
-    ("The interface", "ui.md", ["Ui", "UiGrid", "Feathers", "Length", "Sides", "Corners", "Track", "ImGuiRuntime", "ImGuiTextures"]),
+    ("The interface", "ui.md", ["Ui", "UiGrid", "TextEdit", "Feathers", "Length", "Sides", "Corners", "Track", "ImGuiRuntime", "ImGuiTextures"]),
     ("Audio", "audio.md", ["Audio"]),
     ("Physics", "physics.md", ["Physics.PhysicsWorld", "Physics.PhysicsPlugin", "Physics.PhysicsShape", "Physics.Joint", "Physics.Colliders"]),
     ("Input", "input.md", ["Input", "LogicalKey", "Gamepad", "SyntheticInput", "KeyTable"]),

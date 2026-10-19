@@ -4,7 +4,7 @@ namespace Bevy.Interop;
 
 /// <summary>What a Feathers control is made with, the bridge's <c>BcsFeathersProps</c>.</summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct NativeFeathersProps
+public unsafe struct NativeFeathersProps
 {
     /// <summary>A button's look, as <see cref="ButtonVariant"/> numbers it.</summary>
     public int Variant;
@@ -17,4 +17,10 @@ public struct NativeFeathersProps
 
     /// <summary>A slider's greatest value.</summary>
     public float Max;
+
+    /// <summary>A theme token the control is colored by, as UTF-8, or null for its own.</summary>
+    public byte* Token;
+
+    /// <summary>How many bytes <see cref="Token"/> holds.</summary>
+    public int TokenLength;
 }

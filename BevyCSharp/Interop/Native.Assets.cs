@@ -662,6 +662,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ui_set_editable_lines(ulong entity, float lines);
 
+    /// <summary>Queues one of Bevy's text edits on a field.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ui_edit_text(ulong entity, int kind, int select, float x, float y, byte* text, int length);
+
     /// <summary>Makes one of Bevy's widgets keep its own state.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

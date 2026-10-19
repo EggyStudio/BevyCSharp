@@ -344,6 +344,91 @@ pub extern "C" fn bcs_ui_set_editable_lines(entity: u64, lines: f32) -> i32 {
     })
 }
 
+/// Queues one of Bevy's `TextEdit`s on a text field, applied with the edits the keyboard makes
+/// this frame, as a key of Bevy's virtual keyboard or a game's own button types into a field.
+///
+/// `kind` is the edit's place in Bevy's `TextEdit`, from `Copy` at zero to `ScrollBy`, leaving out
+/// the input method's composition, which reaches a field through the input method's messages.
+/// `select` is the flag of the cursor's moves that extends the selection, `(x, y)` the point of the
+/// edits at a point or the scroll's displacement, `x` the lines `ScrollByLines` scrolls, and `text`
+/// what `Insert` puts at the cursor. Answers [`status::NULL_ARG`] for a kind there is none of.
+///
+/// # Safety
+/// `text` must be valid for `len` bytes of UTF-8, or null where `len` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_ui_edit_text(entity: u64, kind: i32, select: i32, x: f32, y: f32, text: *const u8, len: i32) -> i32 {
+    crate::interop::guard(|| {
+        if (text.is_null() && len != 0) || len < 0 {
+            return status::NULL_ARG;
+        }
+        let bytes: &[u8] = if len == 0 { &[] } else { unsafe { core::slice::from_raw_parts(text, len as usize) } };
+        let Ok(inserted) = core::str::from_utf8(bytes) else {
+            return status::NULL_ARG;
+        };
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, kind, select, x, y, inserted);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::math::Vec2;
+            use bevy::text::{EditableText, TextEdit};
+
+            let select = select != 0;
+            let at = Vec2::new(x, y);
+            let edit = match kind {
+                0 => TextEdit::Copy,
+                1 => TextEdit::Cut,
+                2 => TextEdit::Paste,
+                3 => TextEdit::Insert(inserted.into()),
+                4 => TextEdit::Backspace,
+                5 => TextEdit::BackspaceWord,
+                6 => TextEdit::Delete,
+                7 => TextEdit::DeleteWord,
+                8 => TextEdit::Left(select),
+                9 => TextEdit::Right(select),
+                10 => TextEdit::WordLeft(select),
+                11 => TextEdit::WordRight(select),
+                12 => TextEdit::Up(select),
+                13 => TextEdit::Down(select),
+                14 => TextEdit::TextStart(select),
+                15 => TextEdit::TextEnd(select),
+                16 => TextEdit::HardLineStart(select),
+                17 => TextEdit::HardLineEnd(select),
+                18 => TextEdit::LineStart(select),
+                19 => TextEdit::LineEnd(select),
+                20 => TextEdit::CollapseSelection,
+                21 => TextEdit::SelectAll,
+                22 => TextEdit::SelectAllIfCollapsed,
+                23 => TextEdit::MoveToPoint(at),
+                24 => TextEdit::SelectWordAtPoint(at),
+                25 => TextEdit::SelectLineAtPoint(at),
+                26 => TextEdit::SelectedHardLineAtPoint(at),
+                27 => TextEdit::ExtendSelectionToPoint(at),
+                28 => TextEdit::ShiftClickExtension(at),
+                29 => TextEdit::ScrollByLines(x),
+                30 => TextEdit::ScrollTo(at),
+                31 => TextEdit::ScrollBy(at),
+                _ => return status::NULL_ARG,
+            };
+
+            with_world(|world| {
+                let Ok(mut entity_mut) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(mut editable) = entity_mut.get_mut::<EditableText>() else {
+                    return status::NOT_PRESENT;
+                };
+                editable.queue_edit(edit);
+                status::OK
+            })
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

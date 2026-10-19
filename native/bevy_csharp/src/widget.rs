@@ -29,9 +29,10 @@ pub struct BcsWidgetEvent {
     /// The widget it happened to, the button activated or the slider changed.
     pub entity: u64,
     /// The value of a change that names an entity, the radio button a group's choice moved to or
-    /// the tab a tab list's did.
+    /// the tab a tab list's did, the bits of a number input's `f64` or `i64`, its `i32` widened,
+    /// or a virtual key's row above its place in the row.
     pub other: u64,
-    /// Which of the seven kinds, in the order of [`spawn`]'s match.
+    /// Which of the eleven kinds, in the order of [`spawn`]'s match.
     pub kind: i32,
     /// The value of a change that is a number, a slider's.
     pub value: f32,
@@ -169,6 +170,50 @@ mod observers {
                 let report = BcsWidgetEvent { entity: event.event_target().to_bits(), kind, ..Default::default() };
                 forward(&mut world, target, report);
             }),
+            // A number input's other values, carried as bits in `other`, which a float does not
+            // hold whole.
+            7 => Observer::new(move |event: On<ValueChange<f64>>, mut world: DeferredWorld| {
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    other: event.value.to_bits(),
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
+                forward(&mut world, target, report);
+            }),
+            8 => Observer::new(move |event: On<ValueChange<i32>>, mut world: DeferredWorld| {
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    other: event.value as i64 as u64,
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
+                forward(&mut world, target, report);
+            }),
+            9 => Observer::new(move |event: On<ValueChange<i64>>, mut world: DeferredWorld| {
+                let report = BcsWidgetEvent {
+                    entity: event.source.to_bits(),
+                    kind,
+                    other: event.value as u64,
+                    is_final: event.is_final as u32,
+                    ..Default::default()
+                };
+                forward(&mut world, target, report);
+            }),
+            10 => Observer::new(
+                move |event: On<bevy::feathers::controls::VirtualKeyPressed<crate::feathers::VirtualKey>>,
+                      mut world: DeferredWorld| {
+                    let report = BcsWidgetEvent {
+                        entity: event.entity.to_bits(),
+                        kind,
+                        other: ((event.key.row as u64) << 32) | event.key.column as u64,
+                        ..Default::default()
+                    };
+                    forward(&mut world, target, report);
+                },
+            ),
             _ => return None,
         };
 

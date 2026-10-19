@@ -24,14 +24,14 @@ names what the bridge lacks. Gathered by what they lack, these hold the most row
 the most examples, and the largest is taken between groups of examples. The counts come from
 `BevyCSharp.Examples/triage.tsv` and move as rows are written or found to be reachable.
 
-Feathers' three wait on more of its controls bridged, and each of the others on a crate the lock
-does not hold, or, for the system fonts, on the decision to keep their discovery off.
+Feathers' gallery waits on more of its controls bridged, and each of the others on a crate the
+lock does not hold, or, for the system fonts, on the decision to keep their discovery off.
 
-- **Feathers' other controls, three examples.** Feathers' buttons, checkboxes, radio buttons,
-  toggle switches, sliders, captions and labels are spawned from C# (`Feathers`), and a node of the
-  game's own is colored from its theme. Its number input (`feathers_number_input`), its virtual
-  keyboard and the key it reports (`virtual_keyboard`), and its color controls, selects, list views,
-  menus, dialogs, panes, text input, scrollbar and disclosure toggle (`feathers_gallery`) are not.
+- **Feathers' other controls, one example.** Feathers' buttons, checkboxes, radio buttons, toggle
+  switches, sliders, number inputs, virtual keyboard, captions and labels are spawned from C#
+  (`Feathers`), and a node of the game's own is colored from its theme. Its color controls,
+  selects, list views, menus, dialogs, panes, text input, scrollbar and disclosure toggle
+  (`feathers_gallery`) are not.
 - **Bevy's dev tools, four examples.** Its FPS overlay and frame time graph (`fps_overlay`), its
   infinite grid (`infinite_grid`, `scene_viewer`) and its picking debug overlay (`debug_picking`),
   all in `bevy_dev_tools`.
