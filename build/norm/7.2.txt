@@ -7,3 +7,4 @@
 5a7f2c0	the owner's commit of the paragraph on ASKS.md in AGENTS.md
 ff467a5	the subject's three marks run together, typed and not pasted, pushed before the suite read it
 a0c8b1b	the owner's commit of the showcase caption naming the editor
+ee38a57	the review's sentence in the subject line where the three marks belong, pushed before the suite read it

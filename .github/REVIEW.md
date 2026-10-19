@@ -41,7 +41,11 @@ Next part (g), then the parts in order, and the owner's push of `714451b0` and `
 README nuget.org draws at the next upload. The owner pushed `714451b0` and `b68da75c` at 22:09 and
 22:11, the first run cancelled by the second as the build group has it and the second running at
 22:23; at 22:20 the owner gave the reviewer the pushes and the commits of its own edits, so the
-review's edits come in commits of their own from here on.
+review's edits come in commits of their own from here on. The first of them, `ee38a573`, was pushed
+with its sentence in the subject line where COMMITS.md's three marks belong, the reviewer's fault,
+so it stands on N 7.2's list with that reason as the list's head has it for a commit pushed before
+its fault was seen, since a pushed commit is not amended; the review's commits after it have the
+form.
 
 Before it, `714451b0` came, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
 bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
