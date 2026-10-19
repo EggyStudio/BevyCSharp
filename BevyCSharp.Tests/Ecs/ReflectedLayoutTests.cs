@@ -100,6 +100,13 @@ public sealed class ReflectedLayoutTests
     /// that moves a field fails here, with each component that moved named, before a mirror reads a
     /// game's bytes from where the field was.
     /// </summary>
+    /// <remarks>
+    /// The description is written from a bridge built with the editor, meshlets and Solari, so a
+    /// bridge built with less registers fewer of its types, and one it does not register, which it
+    /// answers as no component, is left out, as a <c>--render</c> bridge leaves out Solari's path tracer.
+    /// Every layout of a type the bridge has is still read, more than a hundred of them on any
+    /// bridge with the renderer.
+    /// </remarks>
     [SkippableFact]
     public void EveryLayoutTheDescriptionHoldsIsTheOneTheBridgeReads()
     {
@@ -110,22 +117,32 @@ public sealed class ReflectedLayoutTests
             .Where(words => words is ["layout", _, _])
             .ToDictionary(words => words[1], words => words[2], StringComparer.Ordinal);
         var moved = new List<string>();
+        var read = 0;
 
         using var harness = new EngineHarness(frames: 1);
         harness.On(Stage.Startup, _ =>
         {
             foreach (var (type, layout) in dumped)
             {
-                var read = ReflectedLayouts.Measure(type) is { } measured
-                    ? ReflectedLayouts.Signature(measured, ReflectedLayouts.PathsOf(layout))
-                    : null;
-                if (read != layout) moved.Add($"{type}: described {layout}, read {read}");
+                ReflectedLayout? measured;
+                try
+                {
+                    measured = ReflectedLayouts.Measure(type);
+                }
+                catch (BevyNativeException error) when (error.Status == NativeStatus.NoComponent)
+                {
+                    continue;
+                }
+
+                read++;
+                var signature = measured is { } found ? ReflectedLayouts.Signature(found, ReflectedLayouts.PathsOf(layout)) : null;
+                if (signature != layout) moved.Add($"{type}: described {layout}, read {signature}");
             }
         });
 
         harness.Run();
 
-        Assert.True(dumped.Count > 100, $"the description holds {dumped.Count} layouts");
+        Assert.True(read > 100, $"the bridge read {read} of the description's {dumped.Count} layouts");
         Assert.True(moved.Count == 0, "Layouts the bridge reads otherwise than the description:\n" + string.Join('\n', moved));
     }
 
