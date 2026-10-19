@@ -45,7 +45,10 @@ review's edits come in commits of their own from here on. The first of them, `ee
 with its sentence in the subject line where COMMITS.md's three marks belong, the reviewer's fault,
 so it stands on N 7.2's list with that reason as the list's head has it for a commit pushed before
 its fault was seen, since a pushed commit is not amended; the review's commits after it have the
-form.
+form. At 22:32 the push run of `b68da75c` was whole green, its three suites in 14 minutes, and the
+run of `2865032d`, started by the list's line, had its three suites running, the check that the norm
+test passes with the line. At 22:34 the owner asked for the five banners in the README's centered
+block, item 31 open again for them.
 
 Before it, `714451b0` came, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
 bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
@@ -954,7 +957,12 @@ from [SHARED.md](SHARED.md).
     `build/examples-table.py` writing the same. Done at `b68da75c` on 2026-10-19, the head one
     centering block of markdown and the gallery markdown tables of 260 by 146 thumbnails with padded
     names, measured on both sites before it was taken, nuget.org's page of the next upload the
-    check.
+    check. Open again on 2026-10-19 at 22:34 for the banners: the owner asked that the README's
+    centered block carry the five banners 3DEngine's carries, .NET, Graphics, Windowing, Shaders and
+    Status, as markdown images inside the block, each with this project's own value, .NET 10.0, the
+    graphics by what Bevy draws with, the windowing by its window crate, the shaders by what the
+    bridge compiles, and the status as the project stands, the labels' colors as 3DEngine's for the
+    labels the two share. One commit, between part (g)'s steps or with the next.
 
 ## Verdicts
 
