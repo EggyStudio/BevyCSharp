@@ -32,6 +32,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_time_frame_seconds(double* seconds);
 
+    /// <summary>Sets what holds a set clock still from the next frame, 1 a load and 2 until cleared.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_time_set_hold(uint holds);
+
+    /// <summary>Writes what holds a set clock still, 1 a load and 2 until cleared.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_time_hold(uint* holds);
+
     /// <summary>Writes how far the fixed clock has run past its last step, as a share of one.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -230,11 +230,11 @@ internal static partial class ConsoleWorldCommands
                 if (!PadsNow().Any(known => known.Entity == pad)) return null;
 
                 SyntheticInput.SetGamepadButton(pad, button, 1f);
-                until = ConsoleHost.Time.FrameCount + held;
+                until = ConsoleHost.Time.ClockFrames + held;
                 return null;
             }
 
-            if (ConsoleHost.Time.FrameCount < until) return null;
+            if (ConsoleHost.Time.ClockFrames < until) return null;
 
             SyntheticInput.SetGamepadButton(pad, button, 0f);
             return $"held {button} on pad {index} for {held} frames";
@@ -429,6 +429,10 @@ internal static partial class ConsoleWorldCommands
     /// for twelve frames. Held at most <see cref="ConsoleHost.LaterFrames"/> frames, which is as
     /// long as a caller waits for an answer.
     /// </para>
+    /// <para>
+    /// The frames are those the clock moves in (<see cref="Time.ClockFrames"/>), so a walk held
+    /// through a load the clock stands still for walks as far as one that was not.
+    /// </para>
     /// </remarks>
     [Command("input.hold", "Holds keys for a number of frames: input.hold <W|W,D|...> <frames>")]
     internal static string Hold(string line)
@@ -453,13 +457,13 @@ internal static partial class ConsoleWorldCommands
         }
 
         var held = (ulong)Math.Clamp(frames, 1, (int)ConsoleHost.LaterFrames - 1);
-        var until = ConsoleHost.Time.FrameCount + held;
+        var until = ConsoleHost.Time.ClockFrames + held;
 
         foreach (var key in keys) SyntheticInput.Press(key, Typed(key));
 
         ConsoleHost.Later(() =>
         {
-            if (ConsoleHost.Time.FrameCount < until) return null;
+            if (ConsoleHost.Time.ClockFrames < until) return null;
 
             foreach (var key in keys) SyntheticInput.Lift(key);
             return $"held {string.Join(',', keys)} for {held} frames";

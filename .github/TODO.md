@@ -559,12 +559,6 @@ cause is still there. Each is below with the mend that removes its cause and wha
 are taken once the gaps of Bevy's examples above are bridged, one a commit, each measured where a
 figure moves.
 
-- **Two examples start their animation when their model has loaded.** `animated_mesh_control` and
-  `many_foxes` play from the frame their glTF file finishes loading, which a slow device reaches in
-  fewer frames, so the pose captured differs and the list allows it. A set clock that stands still
-  while an asset the app asked for is loading counts every example's frames from its loads, and
-  both lines come off. It costs a hold in the bridge's clock with a way for `./bcs open` to ask for
-  it, and every capture taken again, since each example's frame then falls after its loads.
 - **Lavapipe draws some of the meshlet bunnies.** `many_meshlet_materials` drawn on Mesa's software
   device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
   Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
@@ -586,14 +580,6 @@ figure moves.
   `--meshlet --solari` for those five, compares all six. It costs the jobs run in a container
   of a newer image or Mesa from an archive outside Ubuntu's, a second Linux bridge built in the
   native job, and those six measured first on that Mesa.
-- **The drive reads a swing at its farthest.** `build/drive-feature-test.sh` judges the moving
-  platform and the elevator by the farthest each took the player over a wait, since the feature
-  test runs freely between two commands and a software device puts fewer frames between them, so
-  each command lands at another point of the swing. A clock that stands still between commands,
-  advancing only while a wait runs, lands each command on the same frame on every device, and the
-  check reads where the player stands after a set count of frames. It costs a hold in the bridge's
-  clock that `./bcs` drives, the one the loads above need, and the drive's other checks read again
-  under it.
 - **Bevy's anisotropy under a normal prepass is pinned, not mended.** An anisotropic material
   drawn forward on a camera with a normal prepass comes out blown white, because Bevy's shader
   skips the tangent frame anisotropy needs (`AnisotropyPrepassTests`, whose second test fails once
@@ -605,8 +591,8 @@ figure moves.
   shorter.
 - **The pack run's limits are sized for a software device.** The runner has no graphics card, so
   the capture shards, the game job and each capture command's wait are sized for lavapipe's few
-  frames a second (`.github/workflows/build.yml`, `build/capture-example.sh`), and the drive's swing
-  and the six uncompared examples above follow from it. A runner with a graphics card removes the
+  frames a second (`.github/workflows/build.yml`, `build/capture-example.sh`), and the six
+  uncompared examples above follow from it. A runner with a graphics card removes the
   cause beneath them. It costs GitHub's runners with a GPU, paid by the minute, and every capture
   then compared between two graphics cards, with lavapipe kept for the suite.
 

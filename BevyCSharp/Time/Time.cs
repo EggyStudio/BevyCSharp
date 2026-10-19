@@ -20,6 +20,12 @@ public sealed unsafe class Time
     /// <summary>The game's clock as a provider, its timers fired as the frame refreshes this.</summary>
     private readonly FrameTimeProvider _provider = new();
 
+    /// <summary>The holds asked for, of which the engine is told the load's.</summary>
+    private ClockHolds _holds;
+
+    /// <summary>Whether the engine holds the clock still, which the commands' hold sets between waits.</summary>
+    private bool _still;
+
     /// <summary>Seconds since the app started.</summary>
     public double ElapsedSeconds { get; private set; }
 
@@ -31,6 +37,16 @@ public sealed unsafe class Time
 
     /// <summary>Frames completed since the app started.</summary>
     public ulong FrameCount { get; private set; }
+
+    /// <summary>The frames since the app started in which the clock moved.</summary>
+    /// <remarks>
+    /// <see cref="FrameCount"/> where nothing holds the clock, and behind it by every frame a hold
+    /// kept still (<see cref="Holds"/>), told apart by the real clock's step, which is nothing in a
+    /// held frame and in Bevy's first and more than nothing in any other. A wait of <c>bcs</c> and
+    /// a capture at a frame count these, so on a set clock the frame they reach is the same moment
+    /// of the game however many frames a device spent loading or between commands.
+    /// </remarks>
+    internal ulong ClockFrames { get; private set; }
 
     /// <summary>
     /// Seconds one <see cref="Stage.FixedUpdate"/> step covers.
@@ -93,6 +109,7 @@ public sealed unsafe class Time
         RawDeltaSeconds = snapshot.RawDeltaSeconds;
         FrameCount = snapshot.FrameCount;
         FixedDeltaSeconds = snapshot.FixedDeltaSeconds;
+        if (snapshot.RawDeltaSeconds > 0.0) ClockFrames++;
 
         var instantaneous = Fps;
         SmoothedFps = SmoothedFps <= 0.0
@@ -198,6 +215,41 @@ public sealed unsafe class Time
             Native.Check(Native.bcs_time_set_frame_seconds(value), "Time.FrameSeconds");
         }
     }
+
+    /// <summary>What holds a set clock still, from the next frame.</summary>
+    /// <remarks>
+    /// The engine finds for itself whether a load runs, and the commands' hold is applied by the
+    /// server, which tells <see cref="HoldStill"/> whether a command is waiting once it has answered
+    /// each frame's requests. Turning that hold off lets the clock run again.
+    /// </remarks>
+    internal ClockHolds Holds
+    {
+        get => _holds;
+        set
+        {
+            _holds = value;
+            _still &= value.HasFlag(ClockHolds.Commands);
+            TellHolds();
+        }
+    }
+
+    /// <summary>
+    /// Holds the clock still from the next frame, or lets it move, where <see cref="Holds"/> holds
+    /// it between commands.
+    /// </summary>
+    internal void HoldStill(bool still)
+    {
+        still &= _holds.HasFlag(ClockHolds.Commands);
+        if (still == _still) return;
+
+        _still = still;
+        TellHolds();
+    }
+
+    /// <summary>Tells the engine the bits of its hold, the load's one and the still one.</summary>
+    private void TellHolds() => Native.Check(
+        Native.bcs_time_set_hold((_holds.HasFlag(ClockHolds.Loads) ? 1u : 0u) | (_still ? 2u : 0u)),
+        "Time.Holds");
 
     /// <summary>Stops the game's clock, from the next frame.</summary>
     public void Pause()

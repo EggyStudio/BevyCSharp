@@ -326,6 +326,98 @@ pub unsafe extern "C" fn bcs_time_frame_seconds(seconds: *mut f64) -> i32 {
     })
 }
 
+/// The holds [`bcs_time_set_hold`] takes, each a bit.
+pub mod hold {
+    /// Stands still while an asset the app asked for, or one it depends on, is loading.
+    pub const LOADS: u32 = 1;
+    /// Stands still until the bit is cleared.
+    pub const STILL: u32 = 2;
+}
+
+/// What holds a set clock still, and the length a frame it was set to while a frame holds it.
+///
+/// A held frame advances the set clock by nothing, so the game's clock, the fixed steps and Bevy's
+/// real clock all stand where they were while the frame runs its systems, draws and reads its
+/// input. Only a set clock is held. The machine's clock reads the time since the last frame it
+/// counted, so one held would hand the whole of the hold to the frame after it.
+#[derive(bevy::ecs::resource::Resource, Default)]
+pub struct ClockHold {
+    holds: u32,
+    kept: Option<std::time::Duration>,
+}
+
+/// Sets this frame's step of a set clock to nothing where a hold asks it to, before Bevy advances
+/// its clocks, keeping the length for [`release_clock`] to put back once they have.
+///
+/// A hold changes the strategy for no longer than Bevy's time system reads it, so the length a
+/// frame reads the same to everything else, `bcs_time_frame_seconds` and a change to it included.
+pub(crate) fn hold_clock(
+    mut hold: bevy::ecs::system::ResMut<ClockHold>,
+    mut strategy: bevy::ecs::system::ResMut<bevy::time::TimeUpdateStrategy>,
+    server: Option<bevy::ecs::system::Res<bevy::asset::AssetServer>>,
+    handles: Option<bevy::ecs::system::Res<crate::assets::AssetHandles>>,
+) {
+    let bevy::time::TimeUpdateStrategy::ManualDuration(length) = *strategy else {
+        return;
+    };
+
+    let still = hold.holds & hold::STILL != 0
+        || (hold.holds & hold::LOADS != 0
+            && server.zip(handles).is_some_and(|(server, handles)| handles.loading(&server)));
+
+    if still {
+        hold.kept = Some(length);
+        *strategy = bevy::time::TimeUpdateStrategy::ManualDuration(std::time::Duration::ZERO);
+    }
+}
+
+/// Puts back the length a frame of a set clock that [`hold_clock`] held, once Bevy has advanced its
+/// clocks by nothing.
+pub(crate) fn release_clock(
+    mut hold: bevy::ecs::system::ResMut<ClockHold>,
+    mut strategy: bevy::ecs::system::ResMut<bevy::time::TimeUpdateStrategy>,
+) {
+    if let Some(length) = hold.kept.take() {
+        *strategy = bevy::time::TimeUpdateStrategy::ManualDuration(length);
+    }
+}
+
+/// Sets what holds a set clock still, the bits of [`hold`], from the next frame.
+///
+/// [`hold::LOADS`] holds it while an asset the app asked for, or one that asset depends on, is
+/// loading, so the frames a load takes pass no time to the game, and what starts once a model has
+/// loaded starts at the same moment of the clock on a device that loads in fewer frames.
+/// [`hold::STILL`] holds it until it is cleared, which a session served to `bcs` sets between its
+/// commands, so the clock moves only while one waits. A bit this bridge does not know is dropped.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_time_set_hold(holds: u32) -> i32 {
+    crate::interop::guard(|| {
+        with_world(|world| {
+            world.get_resource_or_init::<ClockHold>().holds = holds & (hold::LOADS | hold::STILL);
+            status::OK
+        })
+    })
+}
+
+/// Writes what holds a set clock still, the bits of [`hold`].
+///
+/// # Safety
+/// `holds` must be writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_time_hold(holds: *mut u32) -> i32 {
+    crate::interop::guard(|| {
+        if holds.is_null() {
+            return status::NULL_ARG;
+        }
+
+        with_world(|world| {
+            let set = world.get_resource::<ClockHold>().map_or(0, |hold| hold.holds);
+            unsafe { holds.write(set) };
+            status::OK
+        })
+    })
+}
+
 /// Writes how far the fixed clock has run past its last step, as a share of a step, from zero up
 /// to less than one.
 ///
@@ -395,6 +487,43 @@ mod tests {
         for nothing in [0.0, -0.5, f64::NAN, f64::INFINITY] {
             assert!(frame_strategy(nothing).is_none(), "{nothing} set the clock");
         }
+    }
+
+    #[test]
+    fn a_held_frame_steps_a_set_clock_by_nothing_and_puts_its_length_back() {
+        use bevy::prelude::World;
+
+        let step = |world: &World| match world.resource::<TimeUpdateStrategy>() {
+            TimeUpdateStrategy::ManualDuration(duration) => Some(*duration),
+            _ => None,
+        };
+
+        let length = Duration::from_millis(100);
+        let mut world = World::new();
+        world.insert_resource(TimeUpdateStrategy::ManualDuration(length));
+        world.insert_resource(ClockHold { holds: hold::STILL, kept: None });
+        let before = world.register_system(hold_clock);
+        let after = world.register_system(release_clock);
+
+        // Nothing for Bevy's time system to step by, which runs between the two, and the length
+        // back for everything after it.
+        world.run_system(before).unwrap();
+        assert_eq!(step(&world), Some(Duration::ZERO));
+        world.run_system(after).unwrap();
+        assert_eq!(step(&world), Some(length));
+
+        // Let go, a frame steps the whole length.
+        world.resource_mut::<ClockHold>().holds = 0;
+        world.run_system(before).unwrap();
+        assert_eq!(step(&world), Some(length));
+        world.run_system(after).unwrap();
+
+        // The machine's clock is left as it is, held or not.
+        world.insert_resource(TimeUpdateStrategy::Automatic);
+        world.resource_mut::<ClockHold>().holds = hold::STILL;
+        world.run_system(before).unwrap();
+        world.run_system(after).unwrap();
+        assert!(matches!(world.resource::<TimeUpdateStrategy>(), TimeUpdateStrategy::Automatic));
     }
 
     #[test]

@@ -126,7 +126,7 @@ public sealed class ConsoleView
         if (ConsoleHost.Pending is { } poll)
         {
             var name = typed.Split(' ', 2)[0];
-            Waiting.Add((name, poll, ConsoleHost.GiveUpAt(ConsoleLog.Frame)));
+            Waiting.Add((name, poll, ConsoleHost.GiveUpAt(ClockFrames(world))));
         }
     }
 
@@ -148,7 +148,7 @@ public sealed class ConsoleView
     public static void AnswerLater(World world)
     {
         ArgumentNullException.ThrowIfNull(world);
-        var frame = ConsoleLog.Frame;
+        var frame = ClockFrames(world);
 
         for (var index = Waiting.Count - 1; index >= 0; index--)
         {
@@ -169,6 +169,13 @@ public sealed class ConsoleView
             }
         }
     }
+
+    /// <summary>
+    /// The frames the clock has moved in, which a command's give up is counted in, or the log's
+    /// frame where no world was lent.
+    /// </summary>
+    private static ulong ClockFrames(World? world) =>
+        world is not null && world.TryGetResource<Time>(out var time) ? time.ClockFrames : ConsoleLog.Frame;
 
     /// <summary>What was typed before this, or what is already there at the end of the list.</summary>
     public string Back(string current)

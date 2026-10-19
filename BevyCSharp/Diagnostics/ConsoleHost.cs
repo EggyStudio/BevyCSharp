@@ -24,7 +24,10 @@ public static class ConsoleHost
     /// <summary>What the last command said went wrong, or null when it merely answered.</summary>
     internal static CliError? Failure { get; private set; }
 
-    /// <summary>The frame the last command's answer should be held until, or null for now.</summary>
+    /// <summary>
+    /// The frame the last command's answer should be held until, counted in the frames the clock
+    /// moved in (<see cref="Time.ClockFrames"/>), or null for now.
+    /// </summary>
     internal static ulong? Held { get; private set; }
 
     /// <summary>What the last command said to ask each frame for its real answer, or null.</summary>
@@ -36,7 +39,8 @@ public static class ConsoleHost
 
     /// <summary>
     /// The frame from which a runner counts <see cref="LaterFrames"/> before giving
-    /// <see cref="Pending"/> up, or null to count from the frame the command ran in.
+    /// <see cref="Pending"/> up, or null to count from the frame the command ran in, each counted
+    /// in the frames the clock moved in.
     /// </summary>
     internal static ulong? PendingFrom { get; private set; }
 
@@ -77,12 +81,13 @@ public static class ConsoleHost
         Failure = new CliError(code, message);
 
     /// <summary>
-    /// Holds this command's answer until the frame counter reaches <paramref name="frame"/>.
+    /// Holds this command's answer until the clock's count of frames reaches <paramref name="frame"/>.
     /// </summary>
     /// <remarks>
     /// For a command whose point is the waiting. The command runs once, now, and says when its
     /// answer should be handed back; it is not run again. Whoever is using the console decides
-    /// what to do with that, and a console with no frames to wait for ignores it.
+    /// what to do with that, and a console with no frames to wait for ignores it. The count is
+    /// <see cref="Time.ClockFrames"/>, which leaves out the frames a hold kept the clock still in.
     /// </remarks>
     public static void Hold(ulong frame) => Held = frame;
 

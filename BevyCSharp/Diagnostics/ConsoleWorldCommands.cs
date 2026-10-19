@@ -20,14 +20,15 @@ namespace Bevy;
 /// </remarks>
 internal static partial class ConsoleWorldCommands
 {
-    /// <summary>Says where the app is.</summary>
+    /// <summary>Says where the app is, with the frames the clock moved in where a hold kept it still.</summary>
     [Command("app.status", "Says what the app is doing: frame, rate, renderer, entities")]
     internal static string Status()
     {
         var time = ConsoleHost.Time;
         var world = ConsoleHost.Ecs;
+        var clock = time.ClockFrames == time.FrameCount ? string.Empty : $" ({time.ClockFrames} of the clock)";
 
-        return $"frame {time.FrameCount} at {time.SmoothedFps:0.#} fps, "
+        return $"frame {time.FrameCount}{clock} at {time.SmoothedFps:0.#} fps, "
                + $"{time.ElapsedSeconds:0.##}s elapsed, {world.All().Length} entities, "
                + $"renderer {(App.HasRenderer ? "yes" : "no")}, "
                + $"interface {(App.HasEditor ? "yes" : "no")}, "
@@ -212,7 +213,9 @@ internal static partial class ConsoleWorldCommands
     /// with the answer held until then. A caller's own wait lands on whatever frame the app has
     /// reached when it next hears from it, which a fast device puts many frames later than a slow
     /// one, so a capture compared across devices names its frame. On a set clock, with
-    /// <c>bcs open --frame-time</c>, that frame is the same moment of the scene on any device.
+    /// <c>bcs open --frame-time</c>, that frame is the same moment of the scene on any device, and
+    /// it counts the frames the clock moved in, so with <c>--hold loads</c> it counts from the end
+    /// of the loads the app began with, which a slow device reaches in fewer frames.
     /// </para>
     /// </remarks>
     [Command("shot", "Captures the window to a PNG, at a frame if one is given: shot <path> [frame]")]
@@ -255,16 +258,16 @@ internal static partial class ConsoleWorldCommands
         }
 
         var at = (ulong)frame;
-        var now = ConsoleHost.Time.FrameCount;
+        var now = ConsoleHost.Time.ClockFrames;
         if (now > at)
         {
-            ConsoleHost.Fail("FRAME_PASSED", $"Frame {at} has passed, and the app is at frame {now}.");
+            ConsoleHost.Fail("FRAME_PASSED", $"Frame {at} has passed, and the app's clock is at frame {now}.");
             return $"frame {at} has passed";
         }
 
         string? Take()
         {
-            if (ConsoleHost.Time.FrameCount < at) return null;
+            if (ConsoleHost.Time.ClockFrames < at) return null;
             Render.Screenshot(path);
             return $"capturing frame {at} to {path}";
         }
@@ -338,12 +341,13 @@ internal static partial class ConsoleWorldCommands
     /// <remarks>
     /// What makes "do this, let it settle, then look" one call. An interface reacts over several
     /// frames, a capture is read back over several more, and a caller that asks immediately sees
-    /// the frame before the one it caused.
+    /// the frame before the one it caused. The frames are those the clock moves in
+    /// (<see cref="Time.ClockFrames"/>), so a hold's frames are left out of the count.
     /// </remarks>
-    [Command("frames.wait", "Answers after N more frames: frames.wait <count>")]
+    [Command("frames.wait", "Answers after N more frames of the clock: frames.wait <count>")]
     internal static string Wait(int count)
     {
-        var now = ConsoleHost.Time.FrameCount;
+        var now = ConsoleHost.Time.ClockFrames;
         var wanted = (ulong)Math.Clamp(count, 1, 10_000);
 
         ConsoleHost.Hold(now + wanted);

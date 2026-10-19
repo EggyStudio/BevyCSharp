@@ -1781,7 +1781,7 @@ static void SetLogFilter(IEnumerable<string>? paths);           // Has Bevy's lo
 
 ```csharp
 static void Fail(string code, string message);                  // Says the command failed, with a code a script can branch on
-static void Hold(ulong frame);                                  // Holds this command's answer until the frame counter reaches frame
+static void Hold(ulong frame);                                  // Holds this command's answer until the clock's count of frames reaches frame
 static void Later(Func<string> poll);                           // Says this command's answer is not ready yet, and how to ask for it
 static ConsoleHost.Scope Lend(World world);                     // Lends the world to commands run inside the returned scope
 ```

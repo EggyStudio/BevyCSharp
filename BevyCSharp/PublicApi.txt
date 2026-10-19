@@ -1036,6 +1036,7 @@ sealed class Bevy.Config
   const string DefaultTitle = "BevyCSharp"
   const string FrameTimeVariable = "BCS_FRAME_TIME"
   const string FramesVariable = "BCS_FRAMES"
+  const string HoldClockVariable = "BCS_HOLD_CLOCK"
   const string OffscreenVariable = "BCS_OFFSCREEN"
   double FixedHz { get; set; }
   double FrameSeconds { get; set; }

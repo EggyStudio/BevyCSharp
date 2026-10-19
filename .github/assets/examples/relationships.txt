@@ -17,7 +17,7 @@ Alice is targeting Charlie
 Charlie is targeting Bob
 Bob is targeting Alice
 Alice is targeting Charlie
-Err(TargetingCycle { initial_entity: 121v0, visited: {123v0, 122v0, 121v0} }) 
+Err(TargetingCycle { initial_entity: 125v0, visited: {127v0, 126v0, 125v0} }) 
 
 Removing Charlie's targeting relationship.
 

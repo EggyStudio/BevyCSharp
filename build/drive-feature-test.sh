@@ -7,7 +7,9 @@
 #   build/drive-feature-test.sh [folder the feature test was built to]
 #
 # The program is started offscreen and serving, with each frame a sixtieth of a second of its clock
-# however long the machine took to draw it, so a walk is planned in frames. Each station is tried
+# however long the machine took to draw it, so a walk is planned in frames, and the clock held still
+# between commands, so it moves only while one waits and each command finds the game at the same
+# moment of its clock on any device, however many frames came before it. Each station is tried
 # from where `player.put` sets the player down, facing the way the course runs, east, as a teleport
 # to the course leaves it, and judged by where `player` says it is after. A failure is said as an
 # error annotation with the program's last lines at a warning or worse, and a capture of each
@@ -64,6 +66,7 @@ for _ in $(seq 1 90); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.
 ./bcs status | grep -q "ready.*BevyCSharp.FeatureTest" || fail "the feature test never answered"
 
 quiet app.frametime 0.0166667
+quiet app.hold commands
 
 # The day held still at eight in the morning, the sun low in the east as the views were framed
 # under, so each run captures the same light, and put back as it was at the end, as the effects
@@ -90,9 +93,14 @@ quiet mode walking
 shot 1-hub
 
 # The hub's frame time under the weather, beside Sponza's, which on the workflow's software
-# renderer measures the weather's cost there.
-c app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
-  | awk '{ printf "1-hub, the weather at its lowest tier %.1f ms\n", ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
+# renderer measures the weather's cost there. Each is a frame's mean on the machine's clock over 30
+# frames, as frame.profile measures it, where the rate app.status says is the set clock's, a
+# sixtieth of a second a frame on any device, and less where held frames pass none.
+frame_time() {
+  c frame.profile 30 | tail -n 1 | sed -n 's/.*frame_ms=\([0-9.]*\).*/\1/p' \
+    | awk -v name="$1" '{ printf "%s %.1f ms\n", name, $1 }' >> "$shots/frame-times.txt"
+}
+frame_time "1-hub, the weather at its lowest tier"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
 read -r _ y z < <(where)
@@ -180,7 +188,7 @@ holds "$crawled" ">" 86 || fail "the player did not crawl through the tunnel, on
 shot 3-tunnel
 
 # Ice, which keeps some of the speed after the key is let go, where plain ground stops the player at
-# once. The frames each command of bcs takes pass as well, so the slide read is the part left of it.
+# once. The wait after the walk is part of the slide, so the slide read is the part left of it.
 at 52.5 "$(up 0.2)" 0
 quiet input.hold W 60
 quiet frames.wait 61
@@ -205,36 +213,31 @@ holds "$back" "<" 47 || fail "the pit did not put the player back at the course'
 # The moving platform carries the player and the elevator lifts it, each put on where it is now,
 # and the disc turns it.
 #
-# The platform and the elevator swing back and forth, so each is judged by the farthest it took the
-# player from where it stood, read every 30 frames, over a wait long enough that the least of that
-# at any point of the swing is past the one asked for, 1.5 for the platform over 240 frames and 1.6
-# for the elevator over 300. Where it stood after the wait alone says nothing at the end of a swing,
-# which a wait straddling it brings back to where it began. A software device puts fewer frames
-# between two commands than a graphics card does, so the run comes to each at another point of its
-# swing, and on lavapipe the platform's 90 frames straddled its end, taking the player from x 60.96
-# to 61.00.
-farthest() {
-  local axis=$1 x y z start far=0
+# The platform and the elevator swing back and forth, and each is judged by how far it took the
+# player from where it stood over a set count of frames. The clock stands still between commands,
+# so the run comes to each at the same point of its swing on every device. A clock running between
+# commands brought each device to another point, and on lavapipe the platform's 90 frames straddled
+# the end of its swing, taking the player from x 60.96 to 61.00. A wait added before them moves
+# that point, and the count is chosen again where a check then fails.
+moved() {
+  local axis=$1 x y z start
   read -r x y z < <(where) || return 1
   start=${!axis}
-  for _ in $(seq 30 30 "$2"); do
-    quiet frames.wait 30
-    read -r x y z < <(where) || return 1
-    far=$(awk -v a="${!axis}" -v b="$start" -v f="$far" 'BEGIN { d = a > b ? a - b : b - a; print (d > f ? d : f) }')
-  done
-  echo "$far"
+  quiet frames.wait "$2"
+  read -r x y z < <(where) || return 1
+  awk -v a="${!axis}" -v b="$start" 'BEGIN { d = a - b; print (d < 0 ? -d : d) }'
 }
 read -r px py pz < <(piece Moving platform)
 quiet player.put "$px" "$(awk -v y="$py" 'BEGIN { print y + 0.3 }')" "$pz"
 quiet frames.wait 10
-carried=$(farthest x 240)
-holds "$carried" ">" 1 || fail "the moving platform did not carry the player, which went no farther than $carried from where it stood"
+carried=$(moved x 90)
+holds "$carried" ">" 1 || fail "the moving platform did not carry the player, which went $carried from where it stood"
 read -r ex ey ez < <(piece Elevator)
 quiet player.put "$ex" "$(awk -v y="$ey" 'BEGIN { print y + 0.3 }')" "$ez"
 quiet frames.wait 10
-lifted=$(farthest y 300)
+lifted=$(moved y 90)
 read -r _ ey2 _ < <(piece Elevator)
-holds "$lifted" ">" 1 || fail "the elevator did not move the player, which went no farther than $lifted from where it stood, the elevator at y $ey2"
+holds "$lifted" ">" 1 || fail "the elevator did not move the player, which went $lifted from where it stood, the elevator at y $ey2"
 at 82 "$(up 1)" 10
 read -r turn_x _ turn_z < <(where)
 quiet frames.wait 90
@@ -296,11 +299,7 @@ if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END
   quiet scene.load intel-sponza
   for _ in $(seq 1 60); do grep -q "Intel Sponza stands" "$log" && break; quiet frames.wait 10; done
   grep -q "Intel Sponza stands" "$log" || fail "Sponza did not load from its pack"
-  timed() {
-    view "$@"
-    c app.status | sed -n 's/^frame [0-9]* at \([0-9.]*\) fps.*/\1/p' \
-      | awk -v name="$1" '{ printf "%s %.1f ms\n", name, ($1 > 0 ? 1000 / $1 : 0) }' >> "$shots/frame-times.txt"
-  }
+  timed() { view "$@"; frame_time "$1"; }
   timed 17-sponza 45 4 -45 60 3 -60 120
   timed 18-sponza-hall 57 2.5 -57 80 2 -80 120
   timed 19-sponza-gallery 74 6.5 -66 62 5.5 -78 120

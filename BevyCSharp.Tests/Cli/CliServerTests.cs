@@ -257,6 +257,53 @@ public sealed class CliServerTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// A set clock held between commands moves only while one waits, a wait of five frames moving
+    /// it five frames' time and one of three, three, and stands still through the frames between.
+    /// </summary>
+    /// <remarks>
+    /// The asks between the two waits each take a frame or more, frames in which the clock must not
+    /// move, as a script's commands come a few frames apart on a slow device and many on a fast one.
+    /// </remarks>
+    [Fact]
+    public void AClockHeldBetweenCommandsMovesOnlyWhileOneWaits()
+    {
+        var elapsed = new System.Collections.Concurrent.ConcurrentDictionary<ulong, double>();
+        using var app = Serving(new Config { Headless = true, HeadlessFps = 60, FrameSeconds = 0.1 });
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world => elapsed[world.Resource<Time>().FrameCount] = world.Resource<Time>().ElapsedSeconds,
+            "Test.Clock"));
+
+        var running = Start(app);
+        var session = Ready();
+
+        try
+        {
+            var refused = Ask(session, "run", "app.hold sideways");
+            Assert.Equal("BAD_ARGUMENT", refused.GetProperty("errors")[0].GetProperty("code").GetString());
+
+            var held = Ask(session, "run", "app.hold commands");
+            Assert.True(held.GetProperty("success").GetBoolean(), held.GetRawText());
+            var from = Frame(held);
+
+            var five = Frame(Ask(session, "run", "frames.wait 5"));
+            var between = 0ul;
+            for (var ask = 0; ask < 3; ask++) between = Frame(Ask(session, "run", "app.status"));
+            var three = Frame(Ask(session, "run", "frames.wait 3"));
+
+            Assert.True(between > five, $"no frame passed between the waits, which answered in {five} and asked again in {between}");
+            Assert.Equal(0.5, elapsed[five] - elapsed[from], 9);
+            Assert.Equal(elapsed[five], elapsed[between], 9);
+            Assert.Equal(0.3, elapsed[three] - elapsed[five], 9);
+        }
+        finally
+        {
+            Stop(session, running);
+        }
+
+        static ulong Frame(JsonElement answer) => answer.GetProperty("data").GetProperty("frame").GetUInt64();
+    }
+
     // A capture's file, once the picture has come back off the GPU and been written whole.
     private static string Written(string path)
     {

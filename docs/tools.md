@@ -223,6 +223,7 @@ and asks it things:
 ./bcs open --editor                    # start one, detached, and wait until it answers
 ./bcs open --editor --offscreen        # the same, on a machine with no display
 ./bcs open --example 3d_scene --frame-time 0.016666   # each frame a sixtieth to the game, however long it takes
+./bcs open --example many_foxes --frame-time 0.016666 --hold loads   # that clock held while the foxes load
 ./bcs list                             # every command that app offers, with its parameters
 ./bcs command entity.set Cube Transform.Translation 0,2.5,0
 ./bcs command entity.set Cube Transform.Rotation -30,45,0    # degrees, as the inspector shows them
@@ -231,14 +232,15 @@ and asks it things:
 ./bcs command input.hold W,D 12        # held for twelve frames exactly, for a game walking while they are
 ./bcs command input.drag 400 300 120 0 10   # pressed, moved 12 pixels a frame for ten frames, released
 ./bcs command input.drop 'levels/yard.scene.json;notes.txt'   # files dropped on the window, for a game to read
-./bcs command frames.wait 5
+./bcs command frames.wait 5            # five frames of the clock, those a hold keeps still left out
+./bcs command app.hold commands        # the set clock moving only while a command waits
 ./bcs command pipelines.wait           # until every pipeline asked for has compiled
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs command diagnostics              # Bevy's diagnostics store, as its log prints it
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition
 ./bcs command memory.collect           # what it holds, after a full compacting collection
 ./bcs shot /tmp/after.png              # captures the window, and waits for the file
-./bcs shot /tmp/settled.png 300        # in the app's 300th frame, the same moment on any device on a set clock
+./bcs shot /tmp/settled.png 300        # in the 300th frame of the app's clock, the same moment on any device on a set clock
 ./bcs command window.list              # the windows past the first a game spawned, by #index
 ./bcs command window.shot '#402 /tmp/second.png'   # one of them, offscreen as well
 ```

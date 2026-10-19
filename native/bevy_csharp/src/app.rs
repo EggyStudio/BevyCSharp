@@ -528,6 +528,19 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         app.insert_resource(strategy);
     }
 
+    // A set clock held still for a frame, while a load the app asked for runs or between the
+    // commands of a session served to bcs, by a step of nothing around Bevy's time system alone.
+    app.init_resource::<crate::sync::ClockHold>();
+    app.add_systems(
+        First,
+        (
+            crate::sync::hold_clock.before(bevy::time::TimeSystems),
+            crate::sync::release_clock
+                .after(bevy::time::TimeSystems)
+                .before(BcsSet::Sync),
+        ),
+    );
+
     // Pin the orderings that matter between exclusive C# systems.
     //
     // The frame snapshot runs after Bevy has advanced its clocks, or it would report the previous

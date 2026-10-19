@@ -186,6 +186,23 @@ impl AssetHandles {
     fn live(&self) -> i32 {
         self.slots.iter().filter(|s| s.handle.is_some()).count() as i32
     }
+
+    /// Whether an asset C# holds, or one of the assets it depends on, is loading.
+    ///
+    /// Bevy's recursive state, so a glTF file counts as loading until its images have loaded as
+    /// well. An asset built in memory has no state to read, and one that failed is not loading,
+    /// so neither counts. What a held clock waits on (`sync::hold_clock`), so it is asked once a
+    /// frame only while that hold is on.
+    pub(crate) fn loading(&self, server: &AssetServer) -> bool {
+        use bevy::asset::RecursiveDependencyLoadState;
+
+        self.slots.iter().filter_map(|slot| slot.handle.as_ref()).any(|handle| {
+            matches!(
+                server.get_recursive_dependency_load_state(handle.id()),
+                Some(RecursiveDependencyLoadState::Loading)
+            )
+        })
+    }
 }
 
 /// Takes ownership of a handle and returns the value C# will refer to it by.

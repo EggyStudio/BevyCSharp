@@ -44,7 +44,8 @@ What is usually there:
 | `input.drag <x> <y> <dx> <dy> <frames> [Right\|Middle]` | Press at a point, move an equal step each frame for that many frames, release the frame after, and answer then, for a swipe, a handle or a slider dragged |
 | `input.button <pad> <South\|Start\|...> <frames>`, `input.axis <pad> <LeftX\|...\|RightTrigger> <value>`, `input.pads` | Hold a gamepad's button or set its axis, pretended pads connected up to the one the number names where it is past the last, pad 3 at most, so 1 on a machine with none plays as a second player |
 | `input.keydown <key>`, `input.keyup <key>` | Hold a key across calls, for as long as the calls between take; keys reach an offscreen run too |
-| `frames.wait <n>` | Answers after n more frames, so act, settle and look is one call |
+| `frames.wait <n>` | Answers after n more frames of the clock, so act, settle and look is one call |
+| `app.frametime [seconds\|off]`, `app.hold [loads\|commands\|off]` | Each frame a set length to the game, and that clock held still while a load runs or between commands |
 | `frame.profile [frames]` | What a frame spends on managed systems by name, calls into the bridge, Bevy's schedule and the render's phases |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
@@ -127,6 +128,14 @@ render pipeline is compiled the first time something asks to be drawn with it an
 skips the mesh until it is ready. `./bcs open` returns as soon as the app answers, which is before
 that. Give a fresh session `./bcs command frames.wait 120` before believing a picture with nothing
 in it.
+
+**A picture or a check that has to be the same on every device** runs on a set clock, held still
+where devices would spend different numbers of frames. `./bcs open --frame-time 0.016666 --hold
+loads,commands` makes each frame a sixtieth of a second to the game, holds the clock while what the
+app loads is loading, and holds it between commands, so it moves only while one waits.
+`frames.wait`, `input.hold` and `./bcs shot <path> <frame>` count the frames the clock moved in, so
+each lands on the same moment of the game however many frames a device spent loading or between
+two commands. `app.hold` changes the holds in a running app.
 
 **On a machine with no display**, open the session with `--offscreen`. It installs the renderer and
 draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and

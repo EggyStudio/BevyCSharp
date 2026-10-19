@@ -100,6 +100,18 @@ at zero, `bcs open --frame-time` puts that in the environment of the app it star
 `Time.FrameSeconds` or the `app.frametime` command changes it while the game runs, zero letting the
 machine's clock run again from where the set one had reached.
 
+A set clock can be held still as well, so a frame counted on it is the same moment of the game on
+a device that spent more frames loading or waiting. `BCS_HOLD_CLOCK` names what holds it, `loads`
+while an asset the game asked for, or one that asset depends on, is loading, and `commands` between
+the commands of a session served to `bcs`, so it moves only while one waits, both named with a
+comma between. A held frame runs its systems, draws and reads its input as any other, and passes no
+time to the game or its fixed steps. A fox whose run starts once its model has loaded then starts
+it at the same moment of the clock on a device that loads in fewer frames, and a script's next
+command finds the game where its last wait left it. `bcs open --hold` puts that in the environment
+of the app it starts, and the `app.hold` command changes it while the game runs. The machine's
+clock is never held, since it reads the time since the last frame it counted and would hand the
+frame after a hold the whole of it.
+
 The camera is steered the way an editor's scene view is, so the scene can be looked at from
 anywhere while trying something out:
 

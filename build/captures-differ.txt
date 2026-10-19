@@ -4,6 +4,4 @@
 # cause named and kept, a device that draws less of a feature, or Bevy drawing something otherwise
 # from one run to the next, and never a fault waiting to be found, which fails the run until it is.
 # A line comes off it in the batch that mends its cause.
-animated_mesh_control 0.10	The fox's animation starts once its model has loaded, in whichever frame the load finishes, which a device drawing slowly reaches in fewer frames, so the fox stands in another pose. 7.4% on lavapipe.
-many_foxes 0.12	The foxes' run starts once their model has loaded, in whichever frame the load finishes, which a device drawing slowly reaches in fewer frames, so each fox stands in another pose. 10.2% on lavapipe, in a container of the runner's image.
 many_meshlet_materials 0.10	Lavapipe draws some of the meshlet bunnies, a device drawing less of meshlets. 7.3% on lavapipe.

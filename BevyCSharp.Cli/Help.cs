@@ -20,10 +20,11 @@ internal static class Help
                 [--example <name>]       One of Bevy's examples written here, by Bevy's name
                 [--offscreen]            Draw into an image instead of a window, with no display
                 [--frame-time <seconds>] Each frame advances the clock by that much, not the machine's
+                [--hold loads,commands]  That clock held still while a load runs, or between commands
               list                       Every command the connected app offers, with its arguments
               command <name> [args]      Run one against the live world
-              shot <path> [frame]        Capture the window, at a frame counted from the first if
-                                         one is given, and wait for the file
+              shot <path> [frame]        Capture the window, at a frame of the clock counted from
+                                         the first if one is given, and wait for the file
               logs [-n N] [--follow]     What a launched app has been saying
               stop                       Ask it to close
 

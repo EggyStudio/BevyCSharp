@@ -69,6 +69,22 @@ internal static class Launch
             extra.RemoveRange(clock, 2);
         }
 
+        // What holds that clock still, handed over the same way, and read by the app as it starts
+        // so a load its first frame begins is held from the second.
+        string? hold = null;
+        var holds = extra.IndexOf("--hold");
+        if (holds >= 0)
+        {
+            var words = holds + 1 < extra.Count ? extra[holds + 1].Split(',', StringSplitOptions.TrimEntries) : [];
+            if (words.Length == 0 || words.Any(word => word is not ("loads" or "commands")))
+            {
+                return Output.Refuse(options, "open", "BAD_ARGUMENTS", "--hold takes loads, commands, or both with a comma between, as in --hold loads,commands.");
+            }
+
+            hold = extra[holds + 1];
+            extra.RemoveRange(holds, 2);
+        }
+
         // Always, because an app that is not serving is an app this tool cannot reach.
         if (!extra.Contains("--serve")) extra.Add("--serve");
 
@@ -96,7 +112,7 @@ internal static class Launch
         var log = Repo.LogFor(project);
         var started = DateTimeOffset.UtcNow;
 
-        if (Start(project, extra, log, frameTime) is { Length: > 0 } failure)
+        if (Start(project, extra, log, frameTime, hold) is { Length: > 0 } failure)
         {
             return Output.Refuse(options, "open", "LAUNCH_FAILED", failure);
         }
@@ -255,8 +271,9 @@ internal static class Launch
     /// Starts the app with its output in a file, and lets go of it.
     /// </summary>
     /// <param name="frameTime">The seconds each frame advances the app's clock by, or nothing for the machine's.</param>
+    /// <param name="hold">What holds that clock still, <c>loads</c>, <c>commands</c> or both, or nothing.</param>
     /// <returns>What went wrong, or an empty string.</returns>
-    private static string Start(string project, IReadOnlyList<string> arguments, string log, string? frameTime)
+    private static string Start(string project, IReadOnlyList<string> arguments, string log, string? frameTime, string? hold)
     {
         var binary = Repo.BinaryFor(project);
         var start = new ProcessStartInfo
@@ -266,6 +283,7 @@ internal static class Launch
         };
 
         if (frameTime is not null) start.Environment[Config.FrameTimeVariable] = frameTime;
+        if (hold is not null) start.Environment[Config.HoldClockVariable] = hold;
 
         if (binary is null)
         {

@@ -8,65 +8,65 @@ WARN csharp: Change detected!
 	-> added: true
 	-> changed: true
 	-> changed by: change_detection.cs:38
-INFO csharp: New value: MyComponent(0.0) 124v0
-INFO csharp: New value: MyComponent(0.0) 124v0
-INFO csharp: New value: MyComponent(0.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 125v0
+INFO csharp: New value: MyComponent(0.0) 125v0
+INFO csharp: New value: MyComponent(0.0) 125v0
 INFO csharp: New value: MyResource(0.0)
-INFO csharp: New value: MyComponent(0.0) 124v0
-INFO csharp: New value: MyComponent(0.0) 124v0
-INFO csharp: New value: MyComponent(0.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(0.0) 125v0
+INFO csharp: New value: MyComponent(0.0) 125v0
+INFO csharp: New value: MyComponent(0.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 WARN csharp: Change detected!
 	-> value: MyComponent(1.0)
 	-> added: false
 	-> changed: true
 	-> changed by: change_detection.cs:55
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 INFO csharp: New value: MyResource(1.0)
+INFO csharp: New value: MyComponent(1.0) 125v0
 WARN csharp: Change detected!
 	-> value: MyResource(1.0)
 	-> added: false
 	-> changed: true
 	-> changed by: change_detection.cs:65
-INFO csharp: New value: MyComponent(1.0) 124v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
 INFO csharp: New value: MyResource(1.0)
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(1.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(1.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
 WARN csharp: Change detected!
 	-> value: MyComponent(2.0)
 	-> added: false
 	-> changed: true
 	-> changed by: change_detection.cs:55
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
 INFO csharp: New value: MyResource(2.0)
 WARN csharp: Change detected!
 	-> value: MyResource(2.0)
 	-> added: false
 	-> changed: true
 	-> changed by: change_detection.cs:65
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
 INFO csharp: New value: MyResource(2.0)
-INFO csharp: New value: MyComponent(2.0) 124v0
-INFO csharp: New value: MyComponent(2.0) 124v0
+INFO csharp: New value: MyComponent(2.0) 125v0
+INFO csharp: New value: MyComponent(2.0) 125v0
 INFO csharp: New value: MyResource(2.0)
 INFO csharp: New value: MyResource(2.0)

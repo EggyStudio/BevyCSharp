@@ -332,6 +332,21 @@ public sealed class Config
             ? seconds
             : 0;
 
+    /// <summary>The environment variable that holds a set clock still while a load runs, or between commands.</summary>
+    /// <remarks>
+    /// <c>loads</c> holds it while an asset the app asked for is loading, <c>commands</c> between
+    /// the commands of a session served to <c>bcs</c>, so it moves only while one waits, and both
+    /// are named with a comma between. A held frame passes no time to the game, so on a set clock
+    /// (<see cref="FrameSecondsAsked"/>) a capture at a frame or a script's next command lands on
+    /// the same moment of the game on every device. <c>bcs open --hold</c> sets it, and the
+    /// <c>app.hold</c> command changes it while the app runs.
+    /// </remarks>
+    public const string HoldClockVariable = "BCS_HOLD_CLOCK";
+
+    /// <summary>The holds the environment asks for, or none where it names none it knows.</summary>
+    internal static ClockHolds ClockHoldsAsked =>
+        ClockHoldNames.TryParse(Environment.GetEnvironmentVariable(HoldClockVariable), out var holds) ? holds : ClockHolds.None;
+
     /// <summary>True when the environment asks for <see cref="Offscreen"/> whatever the config says.</summary>
     public static bool OffscreenAsked =>
         Environment.GetEnvironmentVariable(OffscreenVariable) is { Length: > 0 } value

@@ -55,4 +55,29 @@ public sealed class EnvironmentOptionTests
 
         Assert.Equal(0.02, read, 9);
     }
+
+    [Fact]
+    public void TheEnvironmentHoldsTheClockFromTheFirstFrame()
+    {
+        var read = new Dictionary<string, ClockHolds>();
+
+        try
+        {
+            foreach (var asked in new[] { "loads,commands", "loads, sideways" })
+            {
+                Environment.SetEnvironmentVariable(Config.HoldClockVariable, asked);
+                using var app = new App(new Config { Headless = true, HeadlessFrames = 2, FrameSeconds = 0.1 });
+                app.AddSystem(Stage.Update, new SystemDescriptor(world => read.TryAdd(asked, world.Resource<Time>().Holds), "Test.Read"));
+                Assert.Equal(0, app.Run());
+            }
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(Config.HoldClockVariable, null);
+        }
+
+        // A word the variable does not know holds nothing, rather than part of what it names.
+        Assert.Equal(ClockHolds.Loads | ClockHolds.Commands, read["loads,commands"]);
+        Assert.Equal(ClockHolds.None, read["loads, sideways"]);
+    }
 }

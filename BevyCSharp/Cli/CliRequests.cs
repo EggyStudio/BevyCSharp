@@ -32,7 +32,11 @@ internal sealed class CliRequest(string operation, string? line, string? id)
     /// <summary>What it answered, to be handed back once its frame arrives.</summary>
     public string? Held { get; set; }
 
-    /// <summary>The frame that releases it.</summary>
+    /// <summary>The frame that releases it, counted in the frames the clock moved in.</summary>
+    /// <remarks>
+    /// <see cref="Time.ClockFrames"/>, which is <see cref="Time.FrameCount"/> unless a hold kept
+    /// frames still, so a wait held through a load ends at the same moment of the game on any device.
+    /// </remarks>
     public ulong Release { get; set; }
 
     /// <summary>
@@ -74,7 +78,16 @@ internal sealed class CliQueue
     /// Answers everything that arrived, and releases anything whose frame has come.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Run from a system, so <paramref name="world"/> is the one Bevy lent this frame.
+    /// </para>
+    /// <para>
+    /// Where the clock is held between commands (<see cref="ClockHolds.Commands"/>), it moves in the
+    /// next frame if a command's answer is still held and stands still if none is, so the clock
+    /// moves only while a command waits. A wait counts the frames the clock moved in, which then
+    /// are the frames it waited through, and a command after it finds the game where the wait
+    /// left it, however many frames came between the two.
+    /// </para>
     /// </remarks>
     public void Pump(World world)
     {
@@ -86,9 +99,18 @@ internal sealed class CliQueue
             else request.Complete(envelope);
         }
 
+        var time = world.Resource<Time>();
+        Release(world, time);
+        time.HoldStill(_held.Count == 0);
+    }
+
+    /// <summary>Releases each held request whose frame has come or whose answer has arrived.</summary>
+    private void Release(World world, Time time)
+    {
         if (_held.Count == 0) return;
 
-        var frame = world.Resource<Time>().FrameCount;
+        var frame = time.FrameCount;
+        var clock = time.ClockFrames;
 
         for (var index = _held.Count - 1; index >= 0; index--)
         {
@@ -105,7 +127,7 @@ internal sealed class CliQueue
                     request.Complete(CliDispatch.Release(request, frame));
                     _held.RemoveAt(index);
                 }
-                else if (frame >= request.Release)
+                else if (clock >= request.Release)
                 {
                     request.Complete(CliJson.Fail(
                         request.Operation,
@@ -118,7 +140,7 @@ internal sealed class CliQueue
                 continue;
             }
 
-            if (frame < request.Release) continue;
+            if (clock < request.Release) continue;
 
             request.Complete(CliDispatch.Release(request, frame));
             _held.RemoveAt(index);

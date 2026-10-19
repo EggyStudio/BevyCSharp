@@ -147,7 +147,7 @@ internal static class CliDispatch
             request.Holding = name;
             request.Held = answer;
             request.Poll = poll;
-            request.Release = ConsoleHost.GiveUpAt(frame);
+            request.Release = ConsoleHost.GiveUpAt(world.Resource<Time>().ClockFrames);
             return null;
         }
 

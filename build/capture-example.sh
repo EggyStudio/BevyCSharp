@@ -96,10 +96,12 @@ esac
 # so what moves by the clock stands at the same place in a capture on any device, which a capture
 # compared with its checked-in picture asks. A device drawing on the CPU, as the workflow's does,
 # compiles for seconds, and on the machine's clock an example turning its camera has gone half
-# round by the frame its capture is taken at.
+# round by the frame its capture is taken at. The clock is held still while what the example loads
+# is loading, so a fox whose run starts once its model has loaded starts it at the same moment of
+# the clock on a device that loads in fewer frames, and the frames counted are the clock's.
 # One that does not start ends this with 3, which build/capture-examples.sh tells from one that
 # started and could not be captured, and stops on when examples do not start one after another.
-./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 -- --size 1280x720 "${arguments[@]}" || exit 3
+./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 --hold loads -- --size 1280x720 "${arguments[@]}" || exit 3
 
 # One drawn with what this device or this bridge has not, meshlets or ray-traced lighting, says so
 # as its app is built, and is captured as those words, with the times and colors taken off, beside
@@ -162,9 +164,9 @@ case "$example" in
   *) ;;
 esac
 
-# The frame the picture is taken in, counted from the app's first, late enough for a scene that
-# moves to be under way and what it loads to have arrived at sixty frames a second. One where things
-# fall or fade in is given longer by name.
+# The frame the picture is taken in, counted in the frames the clock moved in from the app's first,
+# which are those after what it loads has arrived, late enough for a scene that moves to be under
+# way. One where things fall or fade in is given longer by name.
 frames=120
 case "$example" in
   # A cake that first appears after five seconds.

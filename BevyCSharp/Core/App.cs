@@ -357,6 +357,14 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>Wires the two internal systems that bracket every frame.</summary>
     private void RegisterEngineSystems()
     {
+        // The holds on a set clock the environment asks for, told to the engine in the first frame,
+        // which reads no time gone whatever holds it, so the loads the game's startup begins are
+        // held from the second.
+        if (Config.ClockHoldsAsked is not ClockHolds.None and var holds)
+        {
+            AddSystem(Stage.Startup, new SystemDescriptor(world => world.Resource<Time>().Holds = holds, "Engine.ClockHolds"));
+        }
+
         // The project's icon on the window it opens, where there is one. An offscreen or headless
         // run has none to show it on.
         if (HasRenderer && Project.Icon is { Length: > 0 } icon)
