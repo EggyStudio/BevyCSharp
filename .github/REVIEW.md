@@ -38,7 +38,10 @@ shown width is softer on a doubled display than the scaled capture was, for 1.9 
 full captures were. Checked were the documents' links with the 337 thumbnails against the checkout,
 the headings, the norm tests after a clean build, 18 of 18, and the table script's check. Right.
 Next part (g), then the parts in order, and the owner's push of `714451b0` and `b68da75c`, whose
-README nuget.org draws at the next upload.
+README nuget.org draws at the next upload. The owner pushed `714451b0` and `b68da75c` at 22:09 and
+22:11, the first run cancelled by the second as the build group has it and the second running at
+22:23; at 22:20 the owner gave the reviewer the pushes and the commits of its own edits, so the
+review's edits come in commits of their own from here on.
 
 Before it, `714451b0` came, item 29's part (f) and nothing else, 62 files, the ABI 294 to 295. The
 bridge gains a clock hold with two bits, one holding while any asset C# holds is loading by Bevy's
