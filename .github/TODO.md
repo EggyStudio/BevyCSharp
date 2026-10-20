@@ -559,10 +559,6 @@ cause is still there. Each is below with the mend that removes its cause and wha
 are taken once the gaps of Bevy's examples above are bridged, one a commit, each measured where a
 figure moves.
 
-- **Lavapipe draws some of the meshlet bunnies.** `many_meshlet_materials` drawn on Mesa's software
-  device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
-  Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
-  draws them all, a cost outside this repository whose size is known only once it is traced.
 - **Bevy's anisotropy under a normal prepass is pinned, not mended.** An anisotropic material
   drawn forward on a camera with a normal prepass comes out blown white, because Bevy's shader
   skips the tangent frame anisotropy needs (`AnisotropyPrepassTests`, whose second test fails once

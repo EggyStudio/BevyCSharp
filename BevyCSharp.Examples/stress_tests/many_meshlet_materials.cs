@@ -15,14 +15,19 @@ namespace BevyCSharp.Examples.StressTests;
 internal static class ManyMeshletMaterials
 {
     // Bevy's window for its stress tests, 1920 by 1080 at a scale factor of one with no vertical
-    // sync, drawn as fast as it can, its frame times logged, and room for the clusters it asks for.
+    // sync, drawn as fast as it can, its frame times logged, and room for the clusters it draws.
+    //
+    // 65,536 cluster slots where Bevy's example asks for 8,192, too few for its 2,500 bunnies, which
+    // Bevy's documentation of the slots says shows as missing or blinking meshes, so a graphics card
+    // and lavapipe each drew another part of the crowd on each take. 65,536 is the smallest power of
+    // two that draws it whole on both, and costs 256 kilobytes of the device's memory.
     public static void Configure(Config config)
     {
         (config.Width, config.Height, config.ScaleFactor) = (1920, 1080, 1f);
         config.Vsync = false;
         config.HeadlessFps = 0;
         config.LogFrameTimes = true;
-        config.MeshletClusters = 8192;
+        config.MeshletClusters = 1 << 16;
     }
 
     public static void Build(App app)
