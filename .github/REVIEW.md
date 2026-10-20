@@ -10,63 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `2949041f`, Verdict 40's mend and nothing else, carrying the review's file and the
-ledger's. Courtyard, the first game, Stress and Swarm name `0.5.174` as their default; the cause
-more exactly is that NuGet resolves a missing minimum to the next version up with a warning, and the
-games-on-defaults script builds without warnings allowed, so the warning failed the build, which
-Swarm's comment says beside the other three's and BUILDING.md's paragraph says with the rule that a
-default is a version the feed has, a game needing what no published version carries being built on a
-pack of the checkout until one is published, the local-pack recipe standing; the step is unchanged.
-The check as the step asked: the script run on the machine found `0.5.174` listed and built all four
-games on it restored from the feed alone into a fresh packages folder without warnings, item 22's
-check of Swarm against the feed and not a local pack; the norm, document script and script tests
-gave 66 and the documents check is clean, no engine code changed. Read at 12:18 and pushed at 12:18,
-the build run of `d56e7cb7` having ended green. The pack run of `3b0e54d7` published `0.5.174`, said
-under Verdicts 36 and 40. Nothing of the coder's is open; the ledger's two features, the upgrading
-guide and the budget's report wait on the owner's word. At 23:21 the owner gave item 37, the feature
-test moved into the games folder (Decision 45). At about 23:47 the owner gave the modeling work,
-Decision 46 and items 38 to 45, taken after item 37.
+Reviewed up to `cf70c650`, item 37, the feature test moved to `games/FeatureTest`, and nothing else,
+carrying the review's file and the ledger's. The project imports the repository's build files by
+hand around the SDK's, since the games folder's empty files keep them from a game, so it keeps the
+tree's reference and builds on the package where a version is named, as the drive job and the
+testers' zips name one; the project's comment and BUILDING.md say so and the testers' README does
+not, rightly, being the testers' sheet. The program keeps its name, so what names the program stands
+and what names the folder follows, the CLI mapping the one to the other, and the defaults script
+leaves the feature test out. The suite 1,532 passed and 3 skipped, the course run on a fresh pack
+with 20 captures, 47 renames followed. Read at 00:00 on 2026-10-21. The build run of `2949041f` had
+ended green at 10:18, so the head was pushed at 00:01 and the day's pack run with publish on started
+at 00:01, run 39505038553, which is Verdict 40's step whole and Verdict 38's third shard; the push's
+own build run was cancelled at its start, since the pack run runs its jobs whole and the suites
+would have run twice, losing no figure; the owner then said the bill is not to be weighed, so it was
+the only one (Decision 47). The norm's term for a game gained the feature test's clause. Next item
+38, the edit mesh kernel, the recipe's words written first in the Reply; Decision 46 and items 38 to
+45, the modeling work of 2026-10-20, follow in order. At about 00:29 the owner asked for animated
+captures, Decision 48 and item 46, taken before item 38's second commit.
 
-Before it, `d56e7cb7` came, item 36 and nothing else, carrying the review's file and the ledger's
-row. The physics world reads a joint's force as the accumulated impulse magnitude of the joint's own
-constraint, the first in its list, over the last step's length, which the step records after the
-library's timestep, answering zero for a joint that is gone, a rope with slack or before the first
-step, and leaving out a hinge's motor and limit, a ball joint's cone and a slider's angular lock,
-travel and drive, the slider reading its point-on-line servo as 3DEngine leaves its slider's lock
-out, at no cost until called, both engines on the same library version, which has the call. A test
-hangs a 3 kg box on a 1.5 m distance joint from a kinematic hook and reads 0 before a step, 29.416
-after 120 steps against 29.43, 0 with slack and 0 once disconnected, one fact at the one substep
-this world solves a step in, having no setting for more; the physics guide has the paragraph after
-the rope example with a compiled snippet that disconnects past 2,000 N, and the surface listing and
-the cheat sheet are written again; this engine has no upgrading page, so there is no entry, the
-ledger's new row saying so. Checked were the suite, 1,532 passed and 3 skipped of 1,535, and the
-documents check, with no native change. Pushed at 11:41.
+Before it, `2949041f` came, Verdict 40's mend and nothing else, carrying the review's file and the
+ledger's, the four games naming `0.5.174` as their default.
 
-Before it, `3b0e54d7` came, Verdict 39's mend and nothing else, carrying the review's file. The
-reading finished: it is the seed's order, not the pipelines, a dry run of the anisotropy mend with
-its resource and system present and the shader not rewritten giving the runner's picture to no
-pixel, one extra plain entity spawned before the bunnies leaving the checked-in picture unchanged,
-and one extra entity with a component of its own, a new archetype, giving the runner's picture
-exactly, since Bevy numbers meshlet instances by the order its extract query meets their archetypes
-and an archetype made before them reorders that, each resource being one in Bevy 0.20 and the mend's
-resource having been one, the meshlet id stable as the bunny is the only meshlet asset. The cluster
-material carries a seed and names its own meshlet fragment shader, a WESL string with a fixed handle
-as the sprite material's vertex shader has, reading the meshlet id from the visibility buffer in the
-same two lines as Bevy's resolve and coloring from the seed and the meshlet id as Bevy's does from
-the instance and meshlet ids; a native call creates it with the seed at ABI 298, the render API
-takes a seed with remarks saying why, and the surface listing, the cheat sheet and the drawing guide
-follow; the example gives each back bunny its place in the row with the reason in a comment; the
-seeded capture in Fedora with an extra archetype made before the bunnies is no pixel from the one
-without. `meshlet` is taken again with the seeded colors and `test_meshlet` too, its checked-in
-picture having been 466 pixels off on the runner, within its allowance, and the runner's matching
-the machine's to 2, so its drawing moved on both alike, while `many_meshlet_materials` matches to 1
-pixel and stands; the thumbnails are written again. Checked were the three profiles, the cargo
-tests, 104 and 179, the Windows and macOS cross checks, the headless tests skipping the four meshlet
-tests, the meshlet tests on the GPU, 4, the suite, 1,530 passed and 3 skipped of 1,534 with the
-cheat sheet test failing until the sheet was written again, and the norm tests, 18. Pushed at 10:42
-after the previous build run had ended, and the pack run with publish on started at once,
-`39395229271`, which proves item 29's (h), (i) and (j), Verdict 36's wait and Verdicts 37 to 39's
-mends together and gives the feed's second listing time.
+Before it, `d56e7cb7` came, item 36 and nothing else, carrying the review's files, `GetJointForce`
+in the form said before it, with its test and its guide paragraph.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1097,7 +1063,8 @@ from [SHARED.md](SHARED.md).
     said in its README, or builds on the package as 3DEngine's does with the drive job packing
     first; the first keeps the drive's time and what the test is for. The feature test stays out of
     the README's gallery as before. One commit, the move alone with the references, carrying the
-    review's files; the tests that name the path pass after it.
+    review's files; the tests that name the path pass after it. Done at `cf70c650` on 2026-10-21, as
+    the head says.
 
 38. **An edit mesh a program shapes by operations, with a recipe that rebuilds it, built into what
     the engine draws and collides with (Decision 46).** The owner asked for modeling in both
@@ -1247,6 +1214,36 @@ from [SHARED.md](SHARED.md).
     the game. `model.export` and `model.import` beside the save and the load. Tests: a box exported
     and read back with the engine's own reader having the same counts, a file validated against the
     glTF schema's required fields, and a known glTF's import counted. One commit.
+
+46. **An animated capture of a run, frames taken at an interval and written as one file, and one
+    made from captures on disk (Decision 48).** The owner asked at about 00:29 on 2026-10-21 for
+    captures made into animations from several pictures with a time between them, a second or 250
+    ms, as tooling to show things in the documentation and in devlogs. The engine gains a recorder:
+    `record <path> <length> [every <step>] [scale <s>]` beside `shot` and `window.shot` in the
+    catalog, taking frames from the frame being drawn at a step given in milliseconds or frames
+    (`250ms`, `15f`), for a length in seconds or frames or a count of pictures (`5s`, `8`), scaled
+    down by a factor where asked, each frame kept in memory as it is taken and the file written when
+    the length is reached or `record.stop` is sent, with the frames' own times as the delays, so a
+    step of 1 s plays at 1 s and `record ... play <ms>` plays faster or slower; the formats by the
+    path's extension, `.gif` by an encoder of the engine's own in managed code, a palette of 256
+    colors by median cut over all the frames with ordered dithering, the LZW of the format and a
+    loop forever, and `.png` as an animated PNG, the frames as the format's frame chunks over the
+    engine's PNG writer, lossless, which GitHub's pages play as they play a GIF; no library is
+    taken, the dependency table allowing none for it and, for a program,
+    `Capture.StartRecording(path, intervalMs)` and `Capture.StopRecording()` with their cheat sheet
+    lines through the script and the surface listing; and a step of its own in the bcs client,
+    `./bcs record <path> <length> [--every <step>]`, which sends the command and waits for the file.
+    For captures on disk, a script `build/animate.py <out> <pictures...> --delay <ms> [--loop n]
+    [--scale s]` assembles PNG or WebP captures into a GIF, an animated PNG or an animated WebP by
+    their extension, with Pillow where it is present and the engine's own writers where it is not,
+    so a devlog's animation is made from the captures the pack run already takes; the guide's
+    section on captures shows both, with one animation of a game in the README's gallery as its
+    first use. Tests: a recording of eight frames at 250 ms on the null device whose file parses as
+    a GIF with eight frames and the delays right, the same as an animated PNG read back by the
+    engine's reader frame by frame, a palette of a known picture within a distance of its colors,
+    and the script run over three captures in the suite. Two commits, the recorder with its formats
+    and the command, then the client's step and the script. One or two days, before item 38's second
+    commit.
 
 ## Verdicts
 
@@ -1838,6 +1835,22 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     export comes earlier than last, and whether a dependency for robust booleans is wanted later
     should the partition's limits show.
 
+47. **The Actions bill is not weighed.** The owner wrote at 00:06 on 2026-10-21 that the bill need
+    not be considered, the runs being free of charge for them. So a push's build run is left to run
+    beside a pack run started at the same time and is never cancelled for its cost, macOS stays in
+    every push, the three systems' suites run on every push as they do, and the reviewer's reading
+    of the month's minutes stands as a reading and not as a reason; a run is still cancelled where
+    it is doomed, so its figures are not waited for, and a push still waits for the run before it to
+    end, so no figure is lost.
+
+48. **Animated captures as tooling for documentation and devlogs.** The owner wrote at about 00:29
+    on 2026-10-21 that it is to be possible to capture, or to make animations from several captures,
+    with timings such as a second or 250 ms between the pictures, to have more tooling to show
+    things in the documentation or in devlogs. So item 46: a recorder in the engine taking frames at
+    a step for a length and writing a GIF or an animated PNG by encoders of the engine's own, a
+    client step for it, and a script assembling an animation from captures on disk, with one
+    animation in the README as its first use; the same in both engines.
+
 ## Replies
 
 Shared: a set clock held still while an asset the app asked for is loading and between the commands
@@ -1881,3 +1894,70 @@ answers zero for a joint that is gone, a rope with slack, or before the first st
 step in one substep, so the test reads at that count alone, a rope holding a three kilogram box at
 29.416 against its weight of 29.43. This engine has no upgrading page, so the change has the guide's
 paragraph, the cheat sheet's line and the surface listing without one.
+
+Shared: the edit mesh with its primitives, its selection and what moves it, in the commit carrying
+this line, item 38's first half, for the first row of Modeling, and the recipe's words for items 38
+to 45, which 3DEngine's items 59 to 66 take, the operations and their order the same so a recipe
+written in one engine builds the same mesh in the other, its faces numbered alike. A recipe is
+text, one operation a line, its words apart by spaces, lengths in meters, angles in degrees, a
+number written as `float.ToString(CultureInfo.InvariantCulture)` writes it, `#` to the end of a
+line a comment, a blank line skipped, and `model 1` its first line, the form and its version. A
+command is `model.<verb> <name> <the line's words after the verb>`, so `model.box room 8 3 6` is the
+line `box 8 3 6` run on the model called room, and the commands outside the recipe are `model.new`,
+`model.free`, `model.list`, `model.info`, `model.undo`, `model.redo`, `model.save <path>`,
+`model.load <path>`, `model.recipe`, `model.show <x> <y> <z>`, `model.export <path>` and
+`model.import <path>`. The lines of item 38:
+
+```
+box X Y Z                 plane X Z                 wedge X Y Z
+cylinder RADIUS HEIGHT SIDES                        cone RADIUS HEIGHT SIDES
+stairs STEPS RISE RUN WIDTH                         arch RADIUS THICKNESS DEPTH SIDES
+  each followed by [at X Y Z] [center]
+select all | none | invert
+select [add | remove] face I...
+select [add | remove] +x | -x | +y | -y | +z | -z
+select [add | remove] box X0 Y0 Z0 X1 Y1 Z1
+select [add | remove] slot NAME
+move X Y Z
+rotate x | y | z DEGREES [at X Y Z]                 rotate AX AY AZ DEGREES [at X Y Z]
+scale F [at X Y Z]                                  scale X Y Z [at X Y Z]
+grid STEP                 snap                      material NAME             clear
+extrude DISTANCE          extrude X Y Z             inset DISTANCE
+delete                    delete fill               merge DISTANCE
+flip                      triangulate               duplicate                 join PATH
+shade smooth [DEGREES]    shade flat
+```
+
+A primitive is placed by the lowest corner of its bounds, at the origin unless `at` gives another,
+or by their middle with `center`, and is all that is selected after it. The numbering is each
+engine's to match. A box, a cylinder, a wedge, a flight and an arch are an outline pushed out along
+an axis, the outline's points at the near end numbered first and then at the far end, the faces
+the near end (its corners the outline backwards), the far end (the outline forwards), then a side
+for each edge of the outline in order, `[i, i+1, n+i+1, n+i]`, and an outline whose area turns
+clockwise about the axis is reversed first. The outlines, as (first, second) coordinates: a box
+about Y in (z, x) from (0, 0), (Z, 0), (Z, X), (0, X); a cylinder about Y in (z, x) with point i at
+radius times (cos a, sin a), a = 360° (i + ½) / SIDES; a wedge about X in (y, z) from (0, 0), (0,
+Z), (Y, Z), which is reversed; a flight about X in (y, z) from (0, 0), then (k+1)·RISE, k·RUN and
+(k+1)·RISE, (k+1)·RUN for each step k, then (0, STEPS·RUN); an arch about Z in (x, y), the outside
+at radius times (cos a, sin a), a = 180° i / SIDES for i from 0 to SIDES, then the inside from
+SIDES down to 0. A cone is a cylinder's outline at the base, numbered first, its point last at the
+height over the middle, the base the first face (the outline backwards) and then `[i, i+1, point]`.
+A plane is (0, 0, 0), (0, 0, Z), (X, 0, Z), (X, 0, 0), one face. A wedge and a flight rise along +Z,
+an arch opens along Z, and a cylinder of four sides is a box facing along X and Z.
+
+The selection is a set of vertices and a set of faces. A face picked brings its corners, an edge is
+selected where both its ends are, and removing a face keeps the corners another selected face has.
+`invert` selects the faces not selected with their corners and the vertices not selected. A box
+picks the vertices inside it by 1e-5 on every side and the faces all of whose corners it picks, and
+removing by a box removes every face with a corner it picks. A face faces the way along an axis its
+Newell normal is nearest, Y first where two are as near, then X. A turn and a scale are about the
+middle of the selection's bounds unless `at` gives a point, a turn counter-clockwise looking back
+along its axis, and a scale whose three factors multiply to less than zero reverses in place the
+corners of each face whose every corner it moved. One choice differs from the item, which the
+guide says: a measure typed is taken as given and never rounded to the grid, as Blender takes a
+number typed, since a move of a fifth of a meter on a meter's grid would otherwise move nothing.
+The grid step is where a point picked or dragged by hand lands (item 40), and `snap` rounds each
+selected vertex to it, halfway going away from zero. `grid` takes a meter or a power of two of it
+from a sixteenth to sixty-four. `new` and `free` make and drop a model and are commands, `clear`
+empties one in a recipe. The lines of items 39 to 45 are fixed in the Reply of the commit that first
+reads them, in either engine, the other following.

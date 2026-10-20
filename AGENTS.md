@@ -86,6 +86,7 @@ Stop any serving session before running the suite.
 | `BevyCSharp/Generated` | `bevy-components.tsv`, Bevy's components as the wrappers in `Bevy.Reflected` are generated from |
 | `BevyCSharp/Input` | `Input`, `Key`, gamepads and `SyntheticInput` |
 | `BevyCSharp/Math` | `Vec2`, `Vec3`, `Quat`, `Transform` and `GlobalTransform` |
+| `BevyCSharp/Modeling` | `EditMesh`, a mesh shaped by operations through a selection, as a modeling program shapes one |
 | `BevyCSharp/Scenes` | Scene files, saved games and `Persistent<T>` settings |
 | `BevyCSharp/Time` | `Time`, the frame's clock and the fixed one |
 | `BevyCSharp/Ui` | ImGui's runtime, input and textures |

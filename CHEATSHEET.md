@@ -1069,6 +1069,45 @@ static void CapturePointer(PointerId pointer, Entity entity, PointerHit hit);  /
 static void ReleaseCapture(PointerId pointer);                  // Releases what a pointer was locked to by CapturePointer, which does nothing where it was not locked
 ```
 
+## Modeling
+
+The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md).
+
+### `EditMesh`
+
+```csharp
+Vec3 Position(int vertex);                                      // Where a vertex is
+ReadOnlySpan<int> Corners(int face);                            // A face's vertices, in order round it, counter-clockwise seen from the side it faces
+string SlotOf(int face);                                        // The name of a face's material slot
+Vec3 Normal(int face);                                          // The way a face faces, a length of one, or zero for a face with no area
+Vec3 Center(int face);                                          // The middle of a face, the mean of its corners
+IEnumerable<(int, int)> Edges();                                // The edges, each once, its ends in the order of their indices
+EditMesh Clear();                                               // Takes away every vertex, face and slot but the first, and the selection with them
+EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a box
+EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false);  // Adds a flat rectangle facing up
+EditMesh Cylinder(float radius, float height, int sides, Vec3 at = default, bool centered = false);  // Adds a cylinder standing along Y, its round side made of flat sides
+EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool centered = false);  // Adds a cone standing along Y, its point at the top over the middle of its base
+EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a wedge, a box cut through from one bottom edge to the opposite top edge, rising along Z
+EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false);  // Adds a flight of stairs rising along Z, closed underneath
+EditMesh Arch(float radius, float thickness, float depth, int sides, Vec3 at = default, bool centered = false);  // Adds an arch, half a ring standing on its two feet, its opening along Z
+bool IsVertexSelected(int vertex);                              // Whether a vertex is selected
+bool IsFaceSelected(int face);                                  // Whether a face is selected
+EditMesh SelectAll();                                           // Selects every vertex and every face
+EditMesh SelectNone();                                          // Selects nothing
+EditMesh SelectInvert();                                        // Selects what was not selected, and leaves what was
+EditMesh SelectFaces(IEnumerable<int> faces, SelectionMode mode = SelectionMode.Replace);  // Selects faces by their indices
+EditMesh SelectFacing(Vec3 direction, SelectionMode mode = SelectionMode.Replace);  // Selects the faces that face nearest one way along an axis, such as up
+EditMesh SelectInside(Vec3 corner, Vec3 opposite, SelectionMode mode = SelectionMode.Replace);  // Selects the vertices inside a box, the faces all of whose corners are inside it, and the edges between
+EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace);  // Selects the faces in a material slot
+EditMesh Move(Vec3 by);                                         // Moves the selected vertices
+EditMesh Rotate(Vec3 axis, float degrees, Vec3? pivot = null);  // Turns the selected vertices about an axis
+EditMesh Scale(Vec3 factor, Vec3? pivot = null);                // Scales the selected vertices toward or away from a point
+EditMesh Scale(float factor, Vec3? pivot = null);               // Scales the selected vertices by one factor along every axis
+EditMesh Grid(float step);                                      // Sets the grid step a point picked by hand lands on and Snap rounds to
+EditMesh Snap();                                                // Puts each selected vertex on the nearest point of the grid
+EditMesh Material(string slot);                                 // Puts the selected faces in a material slot, which is made where the mesh has none of that name
+```
+
 ## Shaders
 
 The guide's page is [shaders.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/shaders.md).

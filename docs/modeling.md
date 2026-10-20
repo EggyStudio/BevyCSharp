@@ -1,0 +1,174 @@
+# Modeling
+
+An `EditMesh` is a mesh shaped by operations, as a modeling program shapes one, for blocking out
+a level or a prop from code. It starts empty, takes primitives, and is changed through a selection,
+each call returning the mesh so the next follows on:
+
+```csharp
+var room = new EditMesh()
+    .Box(new Vec3(8f, 3f, 6f))
+    .SelectFacing(Vec3.UnitY)
+    .Move(new Vec3(0f, 1f, 0f));      // the ceiling a meter higher
+```
+
+A vertex is a point, and a face is a loop of three or more vertices, wound counter-clockwise seen
+from the side it faces. A face of any count is kept whole, so a box's side is one face of four
+corners and a staircase's side is one face of many, and it is cut into triangles only when it is
+drawn. Edges are read from the faces, each pair of corners that follow one another round a face.
+
+What a mesh holds is read from it:
+
+<!-- compiled with:
+var room = new EditMesh();
+-->
+```csharp
+Console.WriteLine($"{room.VertexCount} vertices, {room.EdgeCount} edges, {room.FaceCount} faces");
+Console.WriteLine($"{room.Volume} cubic meters, {room.OpenEdges} open edges");
+var (low, high) = room.Bounds;
+```
+
+`Volume` is the space a closed mesh holds, positive when its faces face out. `OpenEdges` counts the
+edges not shared by two faces running along them in opposite directions, the edge of a hole, an
+edge three faces meet at, or one beside a face turned the wrong way, and `IsClosed` is true where
+there are none, which a solid needs for its volume and its collider to mean anything.
+
+## Primitives
+
+Each primitive is added to what the mesh holds and selected, so the call after it acts on it. Each
+is placed by its lowest corner, at the origin unless `at` says otherwise, or by its middle where
+`centered` is set:
+
+```csharp
+var mesh = new EditMesh()
+    .Box(new Vec3(2f, 3f, 4f))                                   // from (0, 0, 0) to (2, 3, 4)
+    .Box(new Vec3(1f), at: new Vec3(5f, 0f, 0f))                 // its corner at (5, 0, 0)
+    .Box(new Vec3(1f), at: new Vec3(0f, 5f, 0f), centered: true); // its middle at (0, 5, 0)
+```
+
+### Box
+
+`Box(size)`, eight vertices and six faces of four corners, as wide along X, as tall along Y and as
+deep along Z as `size` says. A box of two by three by four holds 24 cubic meters.
+
+### Plane
+
+`Plane(width, depth)`, one face of four corners lying flat and facing up, as wide along X and as deep
+along Z as given. Its four edges are open, as a floor's are before walls meet it.
+
+### Cylinder and cone
+
+`Cylinder(radius, height, sides)` stands along Y, its round side made of `sides` flat sides, and
+`Cone(radius, height, sides)` stands on a base of as many sides with its point over the middle.
+Their corners stand half a side round from the axes, so a cylinder of four sides is a box with its
+sides facing along X and Z, and one of eight has a flat side facing each way along them.
+
+```csharp
+var pillar = new EditMesh().Cylinder(0.4f, 3f, 8);   // 16 vertices, 24 edges, 10 faces
+var spire = new EditMesh().Cone(1f, 2f, 6);           // 7 vertices, 12 edges, 7 faces
+```
+
+### Wedge
+
+`Wedge(size)` is a box cut through from one bottom edge to the opposite top edge. It is nothing tall
+at its lowest Z and its full height at its highest, so it rises along Z as stairs do, and a wedge
+laid over a flight of stairs makes their ramp.
+
+### Stairs
+
+`Stairs(steps, rise, run, width)` is a flight rising along Z, each step `rise` high and `run` deep,
+as wide along X as `width`. It is closed underneath, a back face as tall as the flight at its far end
+and a floor under it, so it is a solid that stands on the ground and against a wall:
+
+```csharp
+var flight = new EditMesh().Stairs(12, 0.25f, 0.3f, 2f);   // three meters up over 3.6
+```
+
+Its two sides are faces of one outline each, a step's corner at a time. A flight of four steps has
+twenty vertices, thirty edges and twelve faces, and holds the sum of its steps, each as tall as it
+stands.
+
+### Arch
+
+`Arch(radius, thickness, depth, sides)` is half a ring standing on its two feet, its curve made of
+`sides` flat sides and its opening along Z. It is twice its radius wide and its radius tall, so it
+stands over a doorway as wide as its inside, `radius - thickness` either side of its middle.
+
+## The selection
+
+Operations act on what is selected, a set of vertices and a set of faces. Selecting a face selects
+its corners, so moving the vertices selected moves the faces selected, and an edge is selected where
+both its ends are.
+
+| Call | Selects |
+|---|---|
+| `SelectAll()`, `SelectNone()` | Everything, or nothing |
+| `SelectInvert()` | What was not selected, faces with their corners |
+| `SelectFaces([0, 3])` | Faces by their indices |
+| `SelectFacing(Vec3.UnitY)` | The faces facing nearest a way along an axis, here up |
+| `SelectInside(corner, opposite)` | The vertices inside a box, and the faces all of whose corners are |
+| `SelectSlot("wall")` | The faces in a material slot |
+
+Each but the first three takes a `SelectionMode` after it, `Replace` unless it says `Add` or
+`Remove`. `SelectFacing` sorts a face by which of the six directions along the axes its normal is
+nearest, so every face is a floor, a ceiling or one of four walls. A slope rising exactly as far as
+it runs, at forty-five degrees, is taken as a floor, where a character walks it.
+
+```csharp
+var hall = new EditMesh()
+    .Box(new Vec3(10f, 3f, 4f))
+    .SelectFacing(Vec3.UnitX)
+    .SelectFacing(-Vec3.UnitX, SelectionMode.Add);   // both ends of the hall
+```
+
+## Moving, turning and scaling
+
+`Move(by)` moves the selected vertices, `Rotate(axis, degrees)` turns them about an axis and
+`Scale(factor)` stretches them, each along one axis or all three. A turn or a scale is about the
+middle of the box holding the selection unless a pivot is given, so a part turned a quarter in place
+stays on the grid it stood on, and a negative scale mirrors the selection with its faces still
+facing out.
+
+```csharp
+var tower = new EditMesh()
+    .Box(new Vec3(4f, 12f, 4f))
+    .SelectFacing(Vec3.UnitY)
+    .Scale(new Vec3(0.5f, 1f, 0.5f))                          // the top drawn in, a taper
+    .SelectAll()
+    .Rotate(Vec3.UnitY, 45f, pivot: Vec3.Zero);               // the whole turned about the origin
+```
+
+## The grid
+
+A mesh holds a grid step, a meter unless `Grid(step)` sets a power of two of one from a sixteenth to
+sixty-four. A measure typed is taken as given, so a move of a fifth of a meter moves a fifth of a
+meter whatever the step. `Snap()` puts each selected vertex on the nearest point of the grid,
+which mends what turns and scales left off it:
+
+```csharp
+var crate = new EditMesh()
+    .Box(new Vec3(1f))
+    .Rotate(Vec3.UnitY, 30f)
+    .Grid(0.25f)
+    .Snap();
+```
+
+## Material slots
+
+Each face has a material slot, a name, the first of which, `default`, every new face takes.
+`Material("wall")` puts the selected faces in the slot of that name, made where there is none, so a
+mesh's faces are sorted into floors, walls and trims before what each is drawn with is decided:
+
+```csharp
+var cell = new EditMesh()
+    .Box(new Vec3(6f, 3f, 6f))
+    .Material("wall")
+    .SelectFacing(-Vec3.UnitY)
+    .Material("floor");
+```
+
+---
+
+Before this, [Drawing](drawing.md).
+Next, [Materials and textures](materials.md).
+Its calls are each a line in the [cheatsheet](../CHEATSHEET.md#modeling). The
+[guide's contents](../README.md#guide) list every page.
