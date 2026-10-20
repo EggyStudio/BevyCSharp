@@ -10,7 +10,7 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
 build/build-native.sh          # build the native bridge (headless profile)
 dotnet build                   # build the managed side
 build/test.py                  # run the bridge's tests and the suite, with a page of what failed
-dotnet run --project BevyCSharp.FeatureTest -- --headless --frames 120 --verbose
+dotnet run --project games/FeatureTest -- --headless --frames 120 --verbose
 ```
 
 Most of what the bridge does is only observable from managed code, so the suite is where nearly
@@ -55,7 +55,7 @@ and the packed `.nupkg`. The repository root stays clean.
 BevyCSharp/            managed runtime library
 BevyCSharp.Generator/  Roslyn source generator
 BevyCSharp.Editor/     the editor, and the framework its panels are built on
-BevyCSharp.FeatureTest/ every feature on one map, for a tester
+games/FeatureTest/     every feature on one map, for a tester
 BevyCSharp.Examples/   Bevy's examples in C#, by Bevy's names (.github/EXAMPLES.md)
 docs/                  the guide, a page an area, which the README's Guide lists
 BevyCSharp.Tests/      test suite, run against a real Bevy app
@@ -160,8 +160,8 @@ the folder and before its assembly (`AssetPack`, [SCENES.md](SCENES.md) §1).
 They can be compiled into the bridge instead, which then serves one game:
 
 ```bash
-build/build-native.sh --render --embed BevyCSharp.FeatureTest/assets    # bash
-build/build-native.ps1 -Render -Embed BevyCSharp.FeatureTest/assets      # PowerShell
+build/build-native.sh --render --embed games/FeatureTest/assets    # bash
+build/build-native.ps1 -Render -Embed games/FeatureTest/assets      # PowerShell
 ```
 
 The bridge's build script reads the folder as the library compiles, and the bridge serves it in
@@ -402,7 +402,7 @@ names.
 The testers' zips are made by hand as well, each on the system it is for, since native code is
 published for the system it is made on. A zip holds the feature test published as native code from
 the package, the bridge built with meshlets and ray-traced lighting and the interface's library, the
-assets, the scene packs' manifests and `BevyCSharp.FeatureTest/README.txt`, which names the keys,
+assets, the scene packs' manifests and `games/FeatureTest/README.txt`, which names the keys,
 the panel, the console and where the logs and the settings are. A tester has no `slangc`, so each
 zip carries the cache of its compiled shaders, which the script fills by running the published
 program with every program it can use made (`feature.shaders`). `build/publish-feature-test.sh`
@@ -422,7 +422,11 @@ holds on every system, since an entry is named by the shader's path, its defines
 own modules.
 
 A version named with `-p:BevyCSharpVersion` builds the feature test on that package rather than on
-the library's project, as the script and the pack workflow do.
+the library's project, as the script and the pack workflow do. It lives in `games/FeatureTest`
+beside the games, as 3DEngine's does, and is not built as one. Its project imports the repository's
+`Directory.Build.props` and `Directory.Build.targets`, which the games folder keeps from a game, so
+it is built as the repository's other projects are, and it names no version of its own, so
+`build/games-on-defaults.sh` leaves it out.
 
 The jobs that play, capture, walk and pack run each step through `build/step.py`, as the shell
 GitHub runs the step's script in. A step that fails having said nothing is given an error naming

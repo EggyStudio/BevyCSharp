@@ -475,7 +475,7 @@ light like any other. With the camera's ambient light off
 add.
 
 The feature test carries a small screen-space GI written this way, as a reference for how the pieces
-fit rather than a technique to ship, in `BevyCSharp.FeatureTest/Behaviors/ScreenSpaceLight.cs` and
+fit rather than a technique to ship, in `games/FeatureTest/Behaviors/ScreenSpaceLight.cs` and
 the three `gi_*.slang` files beside its other shaders. Its panel's graphics page turns it on, and
 `./bcs command feature.gi "on 4"` on a running one turns it on with the indirect light exaggerated
 four times, which is how its share of the picture is told apart from the rest.

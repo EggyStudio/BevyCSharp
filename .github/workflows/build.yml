@@ -467,8 +467,8 @@ jobs:
           BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
         run: |
           mkdir -p "$SHOTS"
-          dotnet build BevyCSharp.FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
-          build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
+          dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
+          build/drive-feature-test.sh games/FeatureTest/bin/Release/net10.0
 
       # The feature test played a round at a time at the hub, as the games job soaks the games
       # (build/soaks.sh), here after the course run, which left its shaders compiled in the cache

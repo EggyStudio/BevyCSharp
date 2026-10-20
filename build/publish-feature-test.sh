@@ -44,7 +44,7 @@ esac
 name="BevyCSharp-FeatureTest-$rid"
 out="build/feature-test/$name"
 rm -rf "$out" "$out.zip"
-dotnet publish BevyCSharp.FeatureTest -c Release -r "$rid" -p:PublishAot=true -p:BevyCSharpVersion="$version" -o "$out" "$@"
+dotnet publish games/FeatureTest -c Release -r "$rid" -p:PublishAot=true -p:BevyCSharpVersion="$version" -o "$out" "$@"
 
 # The program the publish wrote, native code with no assembly beside it to run in its place.
 if [ -f "$out/BevyCSharp.FeatureTest.dll" ]; then
@@ -80,7 +80,7 @@ else
     sleep 1
   done
   grep -q "compiling\|failed" <<< "$listed" && fail "not every shader compiled: $listed"
-  for shader in BevyCSharp.FeatureTest/assets/shaders/*.slang; do
+  for shader in games/FeatureTest/assets/shaders/*.slang; do
     grep -q "shaders/$(basename "$shader")" <<< "$listed" || fail "the program never made $(basename "$shader")"
   done
   ./bcs stop > "$said" || fail "./bcs stop ended with $?, $(head -n 1 "$said")"
@@ -90,7 +90,7 @@ fi
 # program and the library's documentation, and what a tester reads first.
 rm -rf "$out/logs"
 rm -f "$out"/*.dbg "$out"/*.pdb "$out"/*.xml
-cp BevyCSharp.FeatureTest/README.txt "$out/README.txt"
+cp games/FeatureTest/README.txt "$out/README.txt"
 
 # Zipped by Python's own module, which each system the script runs on has, where zip is missing on
 # Windows. There it is python, since python3 may be the store's stand-in for one.

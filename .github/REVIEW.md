@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d56e7cb7`, item 36 and nothing else, carrying the review's file and the ledger's
+Reviewed up to `2949041f`, Verdict 40's mend and nothing else, carrying the review's file and the
+ledger's. Courtyard, the first game, Stress and Swarm name `0.5.174` as their default; the cause
+more exactly is that NuGet resolves a missing minimum to the next version up with a warning, and the
+games-on-defaults script builds without warnings allowed, so the warning failed the build, which
+Swarm's comment says beside the other three's and BUILDING.md's paragraph says with the rule that a
+default is a version the feed has, a game needing what no published version carries being built on a
+pack of the checkout until one is published, the local-pack recipe standing; the step is unchanged.
+The check as the step asked: the script run on the machine found `0.5.174` listed and built all four
+games on it restored from the feed alone into a fresh packages folder without warnings, item 22's
+check of Swarm against the feed and not a local pack; the norm, document script and script tests
+gave 66 and the documents check is clean, no engine code changed. Read at 12:18 and pushed at 12:18,
+the build run of `d56e7cb7` having ended green. The pack run of `3b0e54d7` published `0.5.174`, said
+under Verdicts 36 and 40. Nothing of the coder's is open; the ledger's two features, the upgrading
+guide and the budget's report wait on the owner's word. At 23:21 the owner gave item 37, the feature
+test moved into the games folder (Decision 45). At about 23:47 the owner gave the modeling work,
+Decision 46 and items 38 to 45, taken after item 37.
+
+Before it, `d56e7cb7` came, item 36 and nothing else, carrying the review's file and the ledger's
 row. The physics world reads a joint's force as the accumulated impulse magnitude of the joint's own
 constraint, the first in its list, over the last step's length, which the step records after the
 library's timestep, answering zero for a joint that is gone, a rope with slack or before the first
@@ -23,32 +40,7 @@ this world solves a step in, having no setting for more; the physics guide has t
 the rope example with a compiled snippet that disconnects past 2,000 N, and the surface listing and
 the cheat sheet are written again; this engine has no upgrading page, so there is no entry, the
 ledger's new row saying so. Checked were the suite, 1,532 passed and 3 skipped of 1,535, and the
-documents check, with no native change. Read at 11:36 and pushed at 11:41 once the build run of
-`41ebc700` had ended green, whose page showed item 35's names, linux, windows, macos and digest
-green and the pack-only jobs skipped by their ids; the pack run of `3b0e54d7` runs on. At 11:51 the
-pack run of `3b0e54d7` had every build job green, the drive at 11:30 and Courtyard at 11:22, and its
-pack job had logged in and pushed the package to nuget.org at 11:48 through the policy and said what
-was made before the games' step, Verdict 36's form on the page, the games' step waiting on the feed;
-the build run of this head runs. At 12:15 the pack run of `3b0e54d7` had ended red at 12:12 on its
-pack job's last step alone: the feed listed `0.5.174` and the templates within 24 minutes of the
-push, so the wait held and Verdict 36 is settled, the package's nuspec naming `3b0e54d7` with 9
-lines of notes, the 9 engine commits since `0.5.149`'s `3eaa0a44` and none of the review's; then the
-games built on their defaults failed on Swarm, whose project names `0.5.0`, a version the feed never
-had (Verdict 40), the prerelease warning on the physics library standing for the owner. The coder
-mends Verdict 40, one small commit; the ledger's two features and the budget's report wait on the
-owner's word.
-
-Before it, `41ebc700` came, item 35 and nothing else, the workflow and BUILDING.md, with no review
-edits to carry. Every job dropped its name but the suite's, which keeps its matrix as include
-entries of a system and its runner and is named by the system, linux, windows and macos, its cache
-keys, digest artifacts and steps still reading the runner so nothing else changed; the ids native,
-test, digest, drive, storm and readme stand, game is games, examples is captures and examples-fedora
-is captures-fedora, no job needs a renamed one and the pack workflow needs only build, so no needs
-moved, and the artifacts keep their names; the head comment names each job by its id and says why
-only the suite carries a name, worded with no expression; the comments that called the job the game
-or the play job say the games job, BUILDING.md's one mention following, and the step script's line
-on an old run keeps the job's name as it was then. The workflow, script, norm and document script
-tests gave 65; no test named the old ids. Pushed at 11:21 once the build run before it had ended.
+documents check, with no native change. Pushed at 11:41.
 
 Before it, `3b0e54d7` came, Verdict 39's mend and nothing else, carrying the review's file. The
 reading finished: it is the seed's order, not the pipelines, a dry run of the anisotropy mend with
@@ -1092,6 +1084,170 @@ from [SHARED.md](SHARED.md).
     counts the engine runs. One commit, carrying the review's files. Done at `d56e7cb7` on
     2026-10-20, as the head says.
 
+37. **The feature test moves into the games folder, as 3DEngine's lives (Decision 45).** The owner
+    wrote on 2026-10-20 at 23:21 that 3DEngine's feature test under its games folder looks good and
+    BevyCSharp is to do the same: `BevyCSharp.FeatureTest` moves to `games/FeatureTest` with its
+    history kept by a move git follows, and every place that names the old path follows it, 58 files
+    today, the solution, the workflow's drive and storm jobs, the drive, soak, scenes and publish
+    scripts, the answer script, the editor's project and its play, the CLI's launch and tools, the
+    tests that name it, BUILDING.md, TODO.md, the guides and AGENTS.md's table row. Read first what
+    the games' build properties apply to a project under that folder, since the games build on the
+    packed package where the feature test tests the tree through a project reference, and say
+    whether it keeps the tree's reference by opting out of those properties in its own project file,
+    said in its README, or builds on the package as 3DEngine's does with the drive job packing
+    first; the first keeps the drive's time and what the test is for. The feature test stays out of
+    the README's gallery as before. One commit, the move alone with the references, carrying the
+    review's files; the tests that name the path pass after it.
+
+38. **An edit mesh a program shapes by operations, with a recipe that rebuilds it, built into what
+    the engine draws and collides with (Decision 46).** The owner asked for modeling in both
+    engines, Blender's kind, from the command line as well as in a game, grid prototyping first;
+    this item is the kernel the rest stands on. An edit mesh is a polygon mesh of vertices, faces as
+    loops of vertex indices of any count, a texture coordinate at each face corner, a material slot
+    and a smooth flag a face, and edges read from the faces; a selection of vertices, edges or faces
+    as sets; and its history as the list of operations that made it, the recipe, so undo drops the
+    last line and rebuilds, and a saved model is its recipe, a text file `*.model` of one operation
+    a line in the words the commands of item 40 use, read back and rebuilt at load, so a level's
+    models are small files a reader understands and a diff reads. The operations of this item: new
+    and free; the primitives box, plane, cylinder, cone, wedge, stairs with a count of steps, a
+    rise, a run and a width and closed underneath, and arch, each placed by its lowest corner or its
+    center on the grid; select all, none, invert, faces by index, faces by the direction their
+    normal faces nearest (`+y`, `-x`), vertices and faces inside a box, and the faces sharing a
+    material slot; move, rotate about an axis through the selection's center or a given pivot, and
+    scale, of the selection, snapped to a grid step the mesh holds (one meter by default, any power
+    of two of it down to a sixteenth); extrude faces along their normals by a distance or by a
+    vector, the sides filled; inset faces by a distance; delete the selection, the faces left open
+    or the hole filled; merge vertices within a distance; flip the selection's normals; triangulate;
+    duplicate the selection in place; and join another edit mesh in. The build: faces triangulated
+    with ear clipping, so a concave face triangulates right, normals per face or averaged where the
+    smooth flag is set and the edge's angle under a threshold, tangents from the texture
+    coordinates, one mesh a material slot, through `Modeling.Build`, a mesh handle a material slot
+    through `CreateMesh` from a `MeshData`, written again in place through `WriteMesh` after a
+    change, so an entity drawn with it follows the edit, and a collider through a
+    `ColliderShape.Mesh` over the built mesh. The surface is a static class `Modeling` beside
+    `Meshes` and `MeshFiles`, over a sealed class `EditMesh`, each call with its cheat sheet line
+    through the script and the surface listing, and a guide page `docs/modeling.md` with a section
+    an operation showing the recipe and what it makes. Tests: a test an operation on exact counts of
+    vertices, edges and faces, the signed volume of a closed mesh (a two by three by four box 24, a
+    stairs the sum of its steps), and watertightness, every edge shared by two faces with opposite
+    winding, and a recipe written and read back making the same counts; a capture of each primitive
+    in the gallery row. Two commits, the mesh and the primitives with the selection and the
+    transforms, then the topology operations, the recipe, the build and the collider.
+
+39. **Grid prototyping: materials that show a meter, texture coordinates aligned to the world, and
+    openings cut by booleans (Decision 46).** The owner's first use: blocking out a level with
+    textures of different colors showing a grid of about a meter, stairs, and windows cut by boolean
+    operations. The engine makes the grid image, `Images.Grid(int pixelsPerMeter, Color face, Color
+    line, Color fine)`, an image of one meter's cell with its edge lines and lines every tenth of a
+    meter in a finer tone, 1024 pixels a meter by default with mipmaps, and a prototype material
+    from a color, the grid image tinted, in a small set of named colors for floors, walls, ceilings,
+    stairs, doors, windows, and a hazard, so a level reads by color as the dev textures of the
+    engines of the 2000s read; a face's texture coordinates by world-aligned box mapping, each face
+    projected along the axis its normal faces nearest, in meters, so the grid shows one meter
+    everywhere and continues across faces, which is the default of every primitive and of every face
+    a boolean makes. Booleans: union, difference and intersection of two edit meshes, the second
+    placed by a transform, written in the engine as the binary space partition algorithm of csg.js,
+    each mesh split by the other's planes, the parts kept by the operation, the triangles then
+    merged back into faces where coplanar and sharing edges and the vertices merged, so a window cut
+    from a wall is a few faces and not a hundred triangles; coplanar faces of the two meshes handled
+    by the algorithm's classification with an epsilon the mesh holds, and the limit said in the
+    guide that two faces in one plane are cut as the algorithm cuts them, so an opening is cut with
+    a box a little deeper than the wall. The new primitives on it: a room, a box with its inside
+    hollowed by a wall thickness, a door and a window, each a cut of a box through a wall selected
+    or named, a ramp. Tests: a box cut by a box through its wall has the faces counted, is
+    watertight and has the volume of the two less their overlap; a union of two boxes sharing a
+    face; the grid image's lines at the right pixels; the box mapping giving a two meter face
+    coordinates spanning two; a capture of a room with a window and a door and stairs in it. Two
+    commits, the grid image, the materials and the mapping, then the booleans and the openings.
+
+40. **The modeling commands, so a level is blocked out from the terminal, and a window in the game
+    to shape by hand (Decision 46).** The owner asked that all of it be possible from the command
+    line, simple to use. The engine's catalog gains `model.*` commands, one an operation, each
+    taking the model's name first and then the operation's measures in the recipe's words, so a line
+    typed is a line of the recipe: `model.box room 8 3 6`, `model.select room +y`, `model.extrude
+    room 1`, `model.cut room window 1 1 2 0.5`, `model.material room wall`, `model.undo room`,
+    `model.save room resources/models/room.model`, `model.load room <path>`, `model.show room 0 0 0`
+    spawning or moving an entity that draws the model and follows its edits, `model.info room`
+    answering the counts, the bounds, the volume and the open edges, and `model.list`; a command
+    answers the counts after it, so a script reads what it did, and `./bcs command model.<op>`
+    reaches each as the catalog does. The window: an ImGui window a program draws with one call,
+    `Modeling.DrawWindow(EditMesh)`, and the same window as a panel of the editor, which picks
+    entities already, opened on the edit mesh an entity's mesh was built from; it lists the recipe
+    with the last lines undone and redone by buttons, shows the selection's counts, offers each
+    operation with its measures as fields and a button, and takes the mouse in the 3D view: a click
+    selects the face under the pointer by a ray tested against the edit mesh's faces one by one,
+    with shift adding and control removing, a drag along the face's normal extrudes or moves the
+    selection by the grid step with the distance shown, and the hovered face and the selection drawn
+    as outlines over the model, the way the voxel game's aim outlines a block. A guide section on
+    blocking out a level from the terminal, as a script of `./bcs command` lines making a room with
+    a window. Tests: the commands through the console host making the room of the guide and reading
+    its counts, a load after a save giving the same, and the window's picking tested through the ray
+    against a known face. Two commits, the commands, then the window.
+
+41. **Texture coordinates shaped and textures given to faces (Decision 46).** The owner asked for UV
+    processing and adding textures to surfaces. The selection's texture coordinates by projection,
+    planar along an axis or the view, box as item 39's default, cylindrical about an axis, and
+    spherical; moved, scaled and rotated as a whole or about their center; set to a texel density,
+    so many pixels a meter, read from the material's texture; and reset to the world-aligned
+    default. A material slot takes a material of the engine's, a color with a texture and the maps
+    the engine's material has, so a face is given a texture by giving its slot one, the built
+    model's meshes drawn with each slot's; slots added, renamed and removed, and the faces of a
+    removed slot given the first. The texture coordinates of the recipe's operations are recorded as
+    operations too, so a saved recipe rebuilds them. A section of the window shows the selection's
+    coordinates over the slot's texture. Tests: each projection's coordinates on a box's known face,
+    the density on a two meter face with a 512 pixel texture, and a capture of a room with a brick
+    wall and a wooden floor from the examples' resources. One commit.
+
+42. **A game that is a level blocked out with the tools, Blockout unless the owner names it
+    otherwise (Decision 46).** A game under `games/` built on the package as the others are: a level
+    of three rooms, a corridor, stairs between two floors, a window and two doors, made from one
+    recipe file of some forty lines in the game's resources and rebuilt at load, in the prototype
+    materials; a character walking it through the character controller as Courtyard has, the level
+    solid through the built collider; F1 opening the modeling window on the level's edit mesh so the
+    level is reshaped while walking in it, the collider rebuilt on a change, and F5 saving the
+    recipe; a sun and the global illumination on, so the grid walls show the light. Commands
+    `blockout.status` and `blockout.autopilot` for the drive and the soak, the drive walking the
+    stairs to the upper floor and reading the character's height, cutting a window by a command and
+    reading the counts, and a capture; the game joins the build-all, drive, soak and storm lists and
+    the README's gallery with its capture, and the guide's page names it. One commit.
+
+43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The owner's later
+    wave: selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
+    selected edges by a width with a count of segments, the profile round; loop cut, a cut around a
+    ring of faces at a fraction; subdivide the selected faces by a count; bridge two selected face
+    loops of the same count; fill a hole of selected edges with one face; dissolve the selected
+    faces into one, or the selected edges, keeping the shape; knife, a cut of the selected faces by
+    a plane; mirror of the selection across an axis through a pivot, merging on the plane; spin of
+    the selected edges about an axis by an angle in steps; and smooth, the vertices moved toward
+    their neighbors' mean by a factor. Each in the recipe and the commands, in the window with its
+    measures. Tests: each operation's counts on a box, a bevel of a box's twelve edges with two
+    segments watertight and the volume between the box's and its inscribed one, a mirror of a half
+    giving a whole with no doubled vertices; a capture of a beveled, inset and loop-cut box. Two
+    commits, the bevel, the loop cut and the subdivision, then the rest.
+
+44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The owner
+    asked for Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the
+    build over the base, which stays editable: mirror across axes, array by a count and an offset or
+    along a curve of positions, bevel as item 43's over every edge or the edges past an angle,
+    subdivision by Catmull-Clark to a level, solidify by a thickness inward or outward, boolean with
+    another edit mesh placed by a transform, and triangulate; each added, reordered, removed and
+    applied, applying baking its result into the base and dropping it; in the recipe as `modifier`
+    lines and in the commands and the window, the build's time for a stack read in a test against a
+    budget. Tests: a mirror on a half box giving a box's counts, an array of three, a subdivision of
+    a box to level one giving 26 vertices and level two 98, a solidified plane watertight, and a
+    capture of a subdivided and beveled shape. One commit.
+
+45. **What is modeled is exported for Blender and imported from it (Decision 46).** The built mesh
+    and its materials written as a glTF 2.0 file, a JSON with its buffer beside or embedded,
+    positions, normals, texture coordinates, indices, one primitive a material slot with the slot's
+    color and its texture referenced by path, by a writer of the engine's own in managed code, so a
+    level blocked out in the game is opened and finished in Blender; and a model file read into an
+    edit mesh through the engine's glTF reader, `Read`, triangles merged back into faces where
+    coplanar and sharing edges, materials into slots, so a model from Blender is cut and shaped in
+    the game. `model.export` and `model.import` beside the save and the load. Tests: a box exported
+    and read back with the engine's own reader having the same counts, a file validated against the
+    glTF schema's required fields, and a known glTF's import counted. One commit.
+
 ## Verdicts
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -1333,7 +1489,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     commit, with the step's script run on the machine against the feed as the check, as its message
     asks, and item 22's check of Swarm read again against the feed and not a local pack, so a
     default names a published version from here; the step stays as it is, since it found the fault.
-    Settled when the step passes whole on the next pack run with publish on.
+    Settled when the step passes whole on the next pack run with publish on. Mended at `2949041f` on
+    2026-10-20, as the head says, the script's check passing on the machine against the feed.
 
 ## Decisions
 
@@ -1650,6 +1807,36 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     coder adds one sentence saying so to COMMITS.md in the next batch, in the paragraph on what a
     commit carries, naming the review's files, the batch that comes next and the one commit a day at
     most, and no one who decided it (N 4.7).
+
+45. **The feature test lives in the games folder, as 3DEngine's does.** The owner wrote on
+    2026-10-20 at 23:21, seeing 3DEngine's feature test under its games folder, that it looks good
+    and BevyCSharp is to do the same; so `BevyCSharp.FeatureTest` becomes `games/FeatureTest`, item
+    37, the two engines' trees reading alike, a program beside the games that is not a game to show.
+
+46. **Modeling in both engines, from the kernel to the modifiers, grid prototyping first.** The
+    owner wrote at about 23:47 on 2026-10-20 that the engines are to support modeling too, beyond
+    the primitives they have, Blender's kind, possible in a game and all of it from the command
+    line, simple to use so it is the more powerful: grid prototyping as the essential tool of world
+    design, with textures of different colors showing a grid of about a meter, stairs, and windows
+    through boolean operations; processing texture coordinates and adding textures to surfaces; and
+    later selecting a face, insetting and pulling it, merging, beveling and Blender-like modifiers;
+    the reviewer to shape the best solution, adding and removing as it sees fit, and to ask what
+    needs asking. The reviewer's shape, the same in both engines by SHARED.md's rows and each
+    engine's own underneath: items 38 to 45, an edit mesh of faces of any count with a selection and
+    a recipe of operations that is its history, its undo and its saved file, built into the engine's
+    meshes and colliders; the grid materials, world-aligned texture coordinates and booleans by
+    binary space partition, written in the engine since the dependency table takes no library for
+    it; the commands, one an operation in the recipe's words, and an ImGui window a program draws
+    with face picking by ray and a drag to extrude, no editor application in 3DEngine and the
+    editor's panel in BevyCSharp; texture coordinate projections and materials by slot; a game
+    blocking out a level from one recipe; the face and edge operations; a modifier stack applied at
+    the build; and glTF written by the engine and read into an edit mesh, so Blender opens what the
+    game made and the game cuts what Blender made. Each engine's coder takes the items after its
+    current work, item 58 and the feature test's sixth part in 3DEngine and item 37 in BevyCSharp,
+    in the items' order, the two in parallel to one text, the words of the recipe and the commands
+    the same in both. The owner is asked the game's name, Blockout failing a word, whether the glTF
+    export comes earlier than last, and whether a dependency for robust booleans is wanted later
+    should the partition's limits show.
 
 ## Replies
 

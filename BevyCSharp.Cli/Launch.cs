@@ -288,7 +288,7 @@ internal static class Launch
         if (binary is null)
         {
             return $"{project} has not been built yet. Run 'bcs build' first, or "
-                   + $"'dotnet build {project}/{project}.csproj'.";
+                   + $"'dotnet build {Repo.FolderOf(project)}/{project}.csproj'.";
         }
 
         if (OperatingSystem.IsWindows())

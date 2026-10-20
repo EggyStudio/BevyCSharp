@@ -162,7 +162,7 @@ compute and not ray queries.
 
 The feature test carries ray-traced ambient occlusion built this way, with no Solari. A plane, a box
 and a sphere stand in for its ground, cube and lamp in a ray scene, a compute shader traces four
-short rays from every surface on screen (`BevyCSharp.FeatureTest/assets/shaders/rtao.slang`), and the
+short rays from every surface on screen (`games/FeatureTest/assets/shaders/rtao.slang`), and the
 answer is written into the occlusion Bevy's own lighting reads. Its panel's graphics page turns it
 on, and `./bcs command feature.rtao show` on a running one paints the occlusion in place of the
 picture.

@@ -3,7 +3,7 @@
 # offscreen, and fails at the first station that does not do what it is for, then captures each
 # zone drawn rather than played, the render gallery, the light hall and the meadow.
 #
-#   dotnet build BevyCSharp.FeatureTest
+#   dotnet build games/FeatureTest
 #   build/drive-feature-test.sh [folder the feature test was built to]
 #
 # The program is started offscreen and serving, with each frame a sixtieth of a second of its clock
@@ -17,7 +17,7 @@
 set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
-program="${1:-BevyCSharp.FeatureTest/bin/Debug/net10.0}"
+program="${1:-games/FeatureTest/bin/Debug/net10.0}"
 
 # The program holds to a memory cap, eight gigabytes where the environment names none, and
 # past it stops and says so, rather than take the machine's memory (MemoryGuard).

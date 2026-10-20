@@ -105,7 +105,7 @@ work, so the two lowest tiers vanish into it:
 | Ultra | 10 to 13 ms |
 
 ```bash
-cd BevyCSharp.FeatureTest/bin/Debug/net10.0 && ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve --timings
+cd games/FeatureTest/bin/Debug/net10.0 && ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve --timings
 ./bcs command setting "WeatherTier High"    # and the frame rate from ./bcs command app.status
 ```
 

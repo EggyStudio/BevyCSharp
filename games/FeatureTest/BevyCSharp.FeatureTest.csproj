@@ -1,4 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+
+    <!--
+      The repository's own build files, which the empty Directory.Build.props and
+      Directory.Build.targets of the games folder keep from a game, imported by hand where MSBuild
+      would import them, the properties before the SDK's and the targets after, so the SDK's
+      defaults see them as they see them in the repository's other projects. The feature test lives
+      beside the games, as 3DEngine's does, and is not built as one, because it tests the tree. The
+      solution builds it, the editor's Play and bcs open run it, and it references the library's
+      project unless a version is named, so it is built as the repository's other projects are,
+      with their language settings, their documentation file and the embedding of an export's
+      assets that the root's targets give a project referencing the library.
+    -->
+    <Import Project="../../Directory.Build.props"/>
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -13,8 +27,8 @@
       generator as an analyzer.
     -->
     <ItemGroup Condition="'$(BevyCSharpVersion)' == ''">
-        <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
-        <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
+        <ProjectReference Include="../../BevyCSharp/BevyCSharp.csproj"/>
+        <ProjectReference Include="../../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
     </ItemGroup>
@@ -43,8 +57,11 @@
       beside the program for its Scenes page. The packs themselves are fetched, never copied.
     -->
     <ItemGroup>
-        <None Include="../scenes/*.json" CopyToOutputDirectory="PreserveNewest"
+        <None Include="../../scenes/*.json" CopyToOutputDirectory="PreserveNewest"
               Link="scenes/%(Filename)%(Extension)"/>
     </ItemGroup>
+
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
+    <Import Project="../../Directory.Build.targets"/>
 
 </Project>

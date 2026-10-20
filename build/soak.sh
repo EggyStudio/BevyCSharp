@@ -30,7 +30,7 @@ case "$name" in
     *) echo "soak.sh: no game called $name, only courtyard, stress, swarm and feature-test" >&2; exit 2 ;;
 esac
 if [ "$name" = feature-test ]; then
-    folder="${3:-BevyCSharp.FeatureTest/bin/Release/net10.0}"
+    folder="${3:-games/FeatureTest/bin/Release/net10.0}"
 else
     folder="${3:-games/$program/bin/Debug/net10.0}"
 fi

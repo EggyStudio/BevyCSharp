@@ -274,7 +274,7 @@ internal static class Tools
 
         var ran = Shell.Run(
             "dotnet",
-            ["run", "--project", project, "--nologo", "--", .. rest],
+            ["run", "--project", Repo.FolderOf(project), "--nologo", "--", .. rest],
             Repo.Root,
             echo: !options.Json);
 

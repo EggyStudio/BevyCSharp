@@ -23,7 +23,7 @@ build/fetch-slang.sh
 # Built with warnings as errors, as the workflow builds every project, which also copies the new
 # bridge beside the program. The folder is given whole, since the course script writes the program's
 # log into it from the program's own folder.
-dotnet build BevyCSharp.FeatureTest -c Release -warnaserror
+dotnet build games/FeatureTest -c Release -warnaserror
 mkdir -p build/scenes
-SHOTS="$PWD/build/scenes" build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
+SHOTS="$PWD/build/scenes" build/drive-feature-test.sh games/FeatureTest/bin/Release/net10.0
 cat build/scenes/frame-times.txt

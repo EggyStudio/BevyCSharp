@@ -19,7 +19,14 @@ internal static class Repo
 
     /// <summary>The project directory for a short name such as <c>editor</c>.</summary>
     public static string? ProjectFor(string name) =>
-        Root is null ? null : Path.Combine(Root, name);
+        Root is null ? null : Path.Combine(Root, FolderOf(name));
+
+    /// <summary>
+    /// The folder a project is in from the checkout's root, which is its name, but for the feature
+    /// test's, which lives beside the games as 3DEngine's does.
+    /// </summary>
+    public static string FolderOf(string project) =>
+        project.Equals("BevyCSharp.FeatureTest", StringComparison.OrdinalIgnoreCase) ? "games/FeatureTest" : project;
 
     /// <summary>
     /// The built executable for a project, when there is one to run directly.

@@ -44,6 +44,9 @@ echo "BevyCSharp $version is listed on nuget.org"
 failed=()
 for project in games/*/*.csproj; do
     game="$(basename "$(dirname "$project")")"
+    # The feature test lives beside the games and is not one, built on the tree's projects unless a
+    # version is named, so it names no default to build on (BUILDING.md).
+    [ "$game" = FeatureTest ] && continue
     default="$(sed -n "s/.*<BevyCSharpVersion Condition=[^>]*>\([^<]*\)<.*/\1/p" "$project")"
     if dotnet build "$project" -warnaserror -v q --nologo \
         -p:RestoreSources=https://api.nuget.org/v3/index.json -p:RestorePackagesPath="$work/packages" \
