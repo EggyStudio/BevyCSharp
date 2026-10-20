@@ -18,7 +18,7 @@ An example allowed more is a line of build/captures-differ.txt, its name and the
 measured at, then a tab and why. One with nothing checked in is said and passed over, since a new
 example's capture is taken in the commit that writes it. Pictures are decoded to PPM by
 ImageMagick, or by libwebp's dwebp where ImageMagick was built without WebP, as
-build/capture-examples.sh decodes them.
+build/capture-examples.sh decodes them, and a machine with neither fails the run saying so by name.
 """
 
 import os
@@ -38,6 +38,9 @@ ALLOWED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "captures-dif
 
 # A number as an example prints one, a sign, digits and a fraction or an exponent.
 NUMBER = re.compile(r"[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?")
+
+# The tools decode() reads a picture with, by the names they are run as.
+DECODERS = ("magick", "convert", "dwebp")
 
 
 def decode(path):
@@ -141,6 +144,14 @@ def main(arguments):
     against = arguments[arguments.index("--against") + 1] if "--against" in arguments else ".github/assets/examples"
     shares = allowed()
     failed, compared, missing = [], 0, []
+
+    if any(name.endswith(".webp") for name in os.listdir(captures)) and not any(map(shutil.which, DECODERS)):
+        why = ("No tool on this machine decodes the pictures, ImageMagick's magick or convert or libwebp's dwebp, "
+               "so none was compared. The imagemagick or webp package puts one there.")
+        print(why, file=sys.stderr)
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            print(f"::error title=No decoder for the pictures::{why}")
+        return 1
 
     for name in sorted(os.listdir(captures)):
         example, kind = os.path.splitext(name)

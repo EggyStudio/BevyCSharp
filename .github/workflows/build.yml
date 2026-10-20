@@ -596,6 +596,12 @@ jobs:
       - name: Fetch Bevy's files and slangc
         run: build/fetch-bevy-assets.sh && build/fetch-slang.sh
 
+      # libwebp's tools and ImageMagick on the runner, which the compare reads the six with, as the
+      # shards' job has them. The container that captures them installs its own inside it, so on the
+      # pack run of d0e58c56 the compare, which runs here, found neither and read nothing.
+      - name: Install WebP and ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends webp imagemagick
+
       - name: Capture the six in Fedora 44
         run: build/capture-in-fedora.sh "${{ runner.temp }}/examples" clustered_decals meshlet test_meshlet many_meshlet_materials solari solari_reflections
 
