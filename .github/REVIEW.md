@@ -1441,3 +1441,17 @@ a Linux bridge the native job builds with `--meshlet --solari` under a name the 
 (`build/capture-in-fedora.sh`), and compares them, while the four shards stay on Ubuntu 24.04's Mesa
 25.2, which draws some scenes two to seven times faster than Fedora's, measured on the same four
 cores, for 3DEngine to consider where its runner's Mesa leaves examples uncompared.
+
+Shared: a mesh replaced in place keeps its indirect light under Solari and the light probes, read
+for the row of a mesh that replaces one in place, with no fault found and nothing changed. A wall
+whose red glow Solari's rays carry to a floor was swapped in one frame for a new mesh asset of the
+same shape, and the frame of the swap, the next and one sixty frames on were taken against the frame
+before, the mean red of a patch of floor by the wall read 170.4 before, 172.2 in the frame of the
+swap and the next and 170.9 after, where the same run with nothing swapped read 170.3, 172.0, 172.2
+and 171.2, two runs of each within 0.4. Bevy 0.20's Solari builds the acceleration structure of
+every added or changed mesh in the frame it is extracted (`prepare_raytracing_blas`), holding only
+the compaction after to 400,000 vertices a frame, which changes nothing drawn. Bevy's environment
+maps and irradiance volumes are textures no mesh feeds; the bridge's live capturing probe, which
+captures its cubemap from the scene each frame, reflected a swapped red block on a mirror ball with
+no pixel of 9,216 changed in the frame of the swap or after. So BevyCSharp's cell is "has, by Bevy's
+design".
