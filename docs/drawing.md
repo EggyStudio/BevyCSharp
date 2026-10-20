@@ -131,7 +131,9 @@ handle it answers draws nothing until then. The mesh has to be indexed triangles
 coordinates. A meshlet mesh is drawn with a standard material, and while meshlets run every camera
 draws once a pixel, since Bevy's meshlet renderer cannot draw a multisampled picture.
 `Render.CreateClusterMaterial()` instead draws each cluster in a color of its own, which shows how
-a mesh was cut and which level of detail is drawn where.
+a mesh was cut and which level of detail is drawn where. Its seed, `CreateClusterMaterial(3)`, is
+mixed into the colors, so meshes side by side can be told apart, and a mesh keeps its colors
+whatever else the world holds.
 
 Converting is the slow part, so a game does it once. `saveTo:` writes the finished mesh as a file
 under the asset root, and that file loads as fast as it reads:

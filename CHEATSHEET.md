@@ -996,7 +996,7 @@ static void CountDrawnMeshes(bool on);                          // Starts or sto
 static DrawnMeshCount DrawnMeshes(out uint drawn);              // How many meshes the opaque pass drew in a recent frame, while CountDrawnMeshes is on
 static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string? saveTo = null);  // Starts cutting a mesh into clusters that Bevy's meshlet renderer culls and picks a level of detail for on the GPU, and answers the meshlet mesh at once
 static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet);  // Gives an entity a meshlet mesh to draw, in place of any ordinary mesh it had
-static AssetHandle CreateClusterMaterial();                     // Makes a material that draws each cluster of a meshlet mesh in a color of its own
+static AssetHandle CreateClusterMaterial(uint seed = 0);        // Makes a material that draws each cluster of a meshlet mesh in a color of its own
 static string MeshPathOf(Entity entity);                        // Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere
 static string MaterialPathOf(Entity entity);                    // Where an entity's material was loaded from, or empty when it was not
 static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an entity is drawn with, or None when it has none

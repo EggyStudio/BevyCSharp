@@ -288,16 +288,26 @@ public static unsafe partial class Render
     /// inside a system.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// For seeing how a mesh was cut and which level of detail is drawn where. Clusters far from
-    /// the camera are fewer and larger. Each cluster's color is picked from its number, so it holds
-    /// still as the camera moves until a different level is drawn. It is Bevy's own, the material
-    /// its meshlet renderer draws when no fragment program is named, and is given to an entity with
-    /// <see cref="SetMaterial"/> as any other. On an ordinary mesh it draws as Bevy's default
-    /// material.
+    /// the camera are fewer and larger. Each cluster's color is picked from its number and the
+    /// material's <paramref name="seed"/>, so it holds still as the camera moves until a different
+    /// level is drawn, and meshes given materials of different seeds are drawn in different colors.
+    /// It is given to an entity with <see cref="SetMaterial"/> as any other. On an ordinary mesh it
+    /// draws as Bevy's default material.
+    /// </para>
+    /// <para>
+    /// Bevy's own, the material its meshlet renderer draws when no fragment program is named, picks
+    /// the color from the cluster's number and the instance's place in Bevy's list of meshlet
+    /// instances. That place moves whenever an archetype is made before the instances', as a
+    /// resource is, so every cluster's color changes with nothing in the scene changing. The seed
+    /// stands in for the place.
+    /// </para>
     /// </remarks>
+    /// <param name="seed">Mixed into each cluster's color, a mesh's place in a scene's own list for one.</param>
     /// <exception cref="BevyNativeException">Meshlets are not running (see <see cref="MeshletsActive"/>).</exception>
-    public static AssetHandle CreateClusterMaterial() =>
-        new(Native.Check(Native.bcs_render_cluster_material_create(), "making a cluster material"));
+    public static AssetHandle CreateClusterMaterial(uint seed = 0) =>
+        new(Native.Check(Native.bcs_render_cluster_material_create(seed), "making a cluster material"));
 
     /// <summary>
     /// Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere.

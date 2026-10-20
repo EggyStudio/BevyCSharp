@@ -72,6 +72,13 @@ pub fn install(app: &mut bevy::app::App, clusters: u32, backends: Option<wgpu::B
     });
 
     app.add_plugins(bevy::pbr::MaterialPlugin::<ClusterMaterial>::default());
+    if let Some(mut shaders) = app.world_mut().get_resource_mut::<bevy::asset::Assets<bevy::shader::Shader>>() {
+        // A UUID handle, whose insertion cannot fail.
+        let _ = shaders.insert(
+            CLUSTER_FRAGMENT.id(),
+            bevy::shader::Shader::from_wesl(CLUSTER_FRAGMENT_SOURCE, "bcs/cluster_fragment.wesl"),
+        );
+    }
 
     app.init_resource::<Conversions>();
     app.add_systems(Update, (convert_meshes, attach_made).chain());
@@ -266,19 +273,57 @@ fn only_what_meshlets_keep(mesh: &bevy::mesh::Mesh) -> Result<bevy::mesh::Mesh, 
 }
 
 /// A material that draws each cluster of a meshlet mesh in a color of its own, picked from the
-/// cluster's number, to see how a mesh was cut and which level of detail is drawn where.
+/// cluster's number and the material's seed, to see how a mesh was cut and which level of detail is
+/// drawn where.
 ///
 /// Bevy's meshlet renderer shades a material that names no fragment program of its own this way,
-/// so the material is empty, and only its type says what to draw. Bevy's `meshlet` example draws its
-/// back row with one. On an ordinary mesh it draws as Bevy's default material.
+/// with the seed the instance's place in Bevy's list of meshlet instances, and Bevy's `meshlet`
+/// example draws its back row with one. That place follows the order Bevy's query meets the
+/// instances' archetypes in, so an archetype made before them, as each resource is in Bevy 0.20,
+/// moves every instance's place and recolors every cluster, as the resource the bridge's mend of
+/// the standard material's anisotropy added did to the picture of the `meshlet` example. The
+/// material carries its seed instead, and [`CLUSTER_FRAGMENT_SOURCE`] picks the color from it and
+/// the cluster's number, so a mesh keeps its colors whatever else the world holds. On an ordinary
+/// mesh it draws as Bevy's default material.
 #[cfg(feature = "meshlet")]
 #[derive(bevy::asset::Asset, bevy::reflect::TypePath, bevy::render::render_resource::AsBindGroup, Clone, Default)]
 pub struct ClusterMaterial {
-    _empty: (),
+    /// Mixed into each cluster's color, so meshes given different seeds are drawn in different colors.
+    #[uniform(0)]
+    seed: u32,
 }
 
 #[cfg(feature = "meshlet")]
-impl bevy::pbr::Material for ClusterMaterial {}
+impl bevy::pbr::Material for ClusterMaterial {
+    fn meshlet_mesh_fragment_shader() -> bevy::shader::ShaderRef {
+        CLUSTER_FRAGMENT.into()
+    }
+}
+
+/// The fragment shader a [`ClusterMaterial`] draws a meshlet mesh with.
+#[cfg(feature = "meshlet")]
+const CLUSTER_FRAGMENT: bevy::asset::Handle<bevy::shader::Shader> =
+    bevy::asset::uuid_handle!("08903a5c-705d-4a13-bf60-b38000392ca9");
+
+/// Bevy 0.20's `meshlet/meshlet_mesh_material.wesl` fragment shader, its seed the material's in
+/// place of the instance's place in Bevy's list. The cluster's number is read from the visibility
+/// buffer in the same two lines as Bevy's `resolve_vertex_output` reads it. A bump of Bevy that
+/// changes them stops the shader compiling, and the `meshlet` example's back row goes undrawn,
+/// which the compare of its picture names.
+#[cfg(feature = "meshlet")]
+const CLUSTER_FRAGMENT_SOURCE: &str = r#"import bevy_pbr::meshlet::bindings::{meshlet_visibility_buffer, meshlet_raster_clusters};
+import bevy_pbr::render::utils::rand_f;
+
+@group(3) @binding(0) var<uniform> seed: u32;
+
+@fragment
+fn fragment(@builtin(position) frag_coord: vec4<f32>) -> @location(0) vec4<f32> {
+    let packed_ids = u32(textureLoad(meshlet_visibility_buffer, vec2<u32>(frag_coord.xy)).r);
+    let meshlet_id = meshlet_raster_clusters[packed_ids >> 7u].offset;
+    var rng = seed ^ meshlet_id;
+    return vec4(rand_f(&rng), rand_f(&rng), rand_f(&rng), 1.0);
+}
+"#;
 
 /// Puts a cluster material on an entity when `material` is one, answering whether it was.
 ///
@@ -295,13 +340,14 @@ pub fn attach_material(entity: &mut bevy::ecs::world::EntityWorldMut, material: 
     }
 }
 
-/// Makes a [`ClusterMaterial`] and returns its key, or [`status::UNSUPPORTED`] where meshlets are
-/// not running, since the material's plugin is added only with them.
+/// Makes a [`ClusterMaterial`] with a seed and returns its key, or [`status::UNSUPPORTED`] where
+/// meshlets are not running, since the material's plugin is added only with them.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_render_cluster_material_create() -> i32 {
+pub extern "C" fn bcs_render_cluster_material_create(seed: u32) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "meshlet"))]
         {
+            let _ = seed;
             status::UNSUPPORTED
         }
 
@@ -314,7 +360,7 @@ pub extern "C" fn bcs_render_cluster_material_create() -> i32 {
             with_world(|world| {
                 let handle = world
                     .resource_mut::<bevy::asset::Assets<ClusterMaterial>>()
-                    .add(ClusterMaterial::default())
+                    .add(ClusterMaterial { seed })
                     .untyped();
                 crate::assets::insert_handle(world, handle)
             })

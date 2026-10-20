@@ -309,7 +309,7 @@ internal static unsafe partial class Native
     /// <summary>Makes a material that colors each cluster of a meshlet mesh.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_cluster_material_create();
+    internal static partial int bcs_render_cluster_material_create(uint seed);
 
     /// <summary>Starts making a meshlet mesh from a mesh, answering its key at once.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

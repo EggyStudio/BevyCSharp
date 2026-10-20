@@ -10,7 +10,41 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `05ed21e4`, Verdict 38's mend and nothing else. The animator and its source are
+Reviewed up to `20f3d5c0`, item 34 and nothing else, carrying Decision 44's sentence in COMMITS.md
+and the review's file. The bridge keeps a per-thread row guard, the runner taking its address
+through a new native call, the ABI at 297, and a check at every exit from the world while a walk is
+under way looks the named entity's component up and sets moved where its address differs or the
+entity is gone; the sequential walks, one component and with others, hand the method copies and
+write each back to the row where moved stays clear, and where it is set put each by entity, list the
+runs again unmarked, go on after the entity passed last and skip moved entities for the rest of the
+walk, which stays on the calling thread, the parallel path untouched; a method that throws leaves
+its components as they were, its copy not written back, the try and finally dropped since it cost 2
+ns an entity. The guide's threading section says what is promised, a change to the method's own
+entity made at once, and that a change to another entity is still queued, since made at once it may
+run an entity twice that frame or not at all, the how-it-works page and the chunk's remark
+following. The cost in nanoseconds an entity, 100,000 walked on the calling thread with a
+one-addition method, best and middle of the last thirty of ninety frames after tiering, in the rows'
+remark: a 16-byte component 1.5 and 2.4 before and 4.9 and 7.0 after, with a 40-byte transform
+beside it 3.8 and 6.4 to 12.4 and 16.0, and a 128-byte component 6.5 and 9.0 to 14.4 and 18.1; most
+of the first cut's cost was a store forwarding stall, the method's last four-byte store followed by
+a 16-byte read of the copy, 11 ns against 3.3 four bytes at a time, so the write back copies four
+bytes at a time up to 64 bytes and whole above; walks across the thread pool pay nothing, so
+PERFORMANCE.md's table stands; sixty rounds inside one frame timed the JIT's first tier, so the
+figures are from frames 60 to 90. Four tests, a method marking its own entity keeping its write and
+running once a frame, the two-component form keeping both writes after the move, a method growing
+its own table with 4,096 entities keeping its write with the component's address asserted moved, and
+a method playing a graph on its own entity playing once and keeping its write, all failing on the
+old bridge, where the growth test read a garbage entity from the table's freed memory; two Rust
+tests, a write not noticed, an insert or despawn noticed, and a table grown by 4,096 spawns noticed.
+Checked were the three profiles, the cargo tests, 104 and 179, the Windows and macOS cross checks,
+the headless tests, 26 passing and 3 skipped, the suite, 1,531 passed and 3 skipped of 1,534, the
+norm tests, 18, and the documents check. Pushed at once. At 08:45 the pack run of `05ed21e4` had
+ended red at 08:34 on the Fedora job alone, the drive green at 08:33 after 69 minutes and every
+other job green, the pack job skipped, so Verdict 36's wait and item 29's parts wait on the next
+pack run; the build run of this head was green at 08:44. Verdict 39's reading stands under it; the
+coder is on it, then item 35.
+
+Before it, `05ed21e4` came, Verdict 38's mend and nothing else. The animator and its source are
 sparse components, the reason in the animator's remark; the clock hold keeps the ids of the bridge's
 own reads while the load hold is on, the wait gated to the render profile since that alone plays
 clips, each id dropped once it stops loading, and the assets module factors out the loading check;
@@ -27,16 +61,10 @@ matched the new pictures to 0.5, 0 and 1.9 pixels; the scratch probe shows each 
 playing once in the second frame, which the hold keeps still. Checked were the three profiles'
 checks, the cargo tests, 102 and 177, the Windows and macOS cross checks clean after the gate, the
 changed tests on the headless bridge passing 3 and skipping the 7 that need a renderer, the suite on
-the full bridge, 1,527 passed and 3 skipped of 1,530, and the norm tests, 18. The reviewer pushes
-and starts the pack run with publish on at once, which proves item 29's (h), (i) and (j), Verdict
-36's wait and Verdicts 37 and 38's mends together and gives the feed's second listing time; the
-review's edits ride in the coder's next batch as AGENTS.md has it. At 07:43 the pack run of
-`05ed21e4` had its three suites, the seven native builds, the README and the storm green, the first
-shard green at 07:40 with `many_foxes` matching, Verdict 38's first of three, and the Fedora job red
-at 07:39 on its compare, which ran this time, `meshlet` differing in 10.9 percent of its pixels over
-the colored bunnies (Verdict 39), the other shards, the drive and Courtyard running; the pack job
-will be skipped again. By 08:14 the other three shards and Courtyard were green too, the drive still
-running. The coder reads item 34; item 35, the jobs' names, follows it by the owner's word of 07:07.
+the full bridge, 1,527 passed and 3 skipped of 1,530, and the norm tests, 18. The reviewer pushed
+and started the pack run with publish on at once; by 08:14 it had everything green but the Fedora
+job, red on `meshlet`'s patches (Verdict 39), the drive still running, the pack job to be skipped;
+the first shard passed with `many_foxes` matching, Verdict 38's first of three.
 
 Before it, `6fcecb1a` came, Verdict 37's mend and nothing else, with the review's commit between.
 The Fedora capture job installs libwebp's tools and ImageMagick on the runner before the capture,
@@ -47,28 +75,6 @@ with the tools present, one capture matching with exit 0; the norm tests pass, 1
 read, said under it, two faults in the bridge's animator and neither in the example, and its mend is
 one commit in hand, after which the reviewer starts the pack run with publish on anew. A fault the
 reading uncovered beyond the verdict is item 34.
-
-Before it, `6cca47f7` came, the reading of the ledger's replaced-mesh row under Replies and nothing
-else, with the review's commits between. No fault was found and nothing in the engine changed. Under
-Solari, the ray-tracing tests' glowing red wall swapped in one step for a new mesh asset of the same
-shape with its ray-tracing mesh, the frame of the swap captured on the editor bridge, a 24 by 20
-patch of floor by the wall read a mean red of 170.4 before, 172.2 in the frame of the swap and the
-next and 170.9 sixty frames on, against 170.3, 172.0, 172.2 and 171.2 with nothing swapped, two runs
-of each within 0.4, a single pixel swinging 20 or more between frames either way from Solari's
-samples, so the patch's mean is the measure; Bevy 0.20 builds the acceleration structure of every
-added or changed mesh in the frame it is extracted and holds the compaction after it alone to
-400,000 vertices a frame, which changes nothing drawn, so by design no frame goes without the new
-mesh's light whatever the count swapped at once. Bevy's environment maps and irradiance volumes are
-textures no mesh feeds, and the bridge's live capturing probe, which the scene feeds each frame,
-showed its mirror ball unchanged in every one of 9,216 pixels in the frame of the swap, the next and
-sixty on with its red block swapped. The scratch test is deleted. SHARED.md's row takes the reading
-in both engines. At 05:35 the pack run with publish on of `d0e58c56` had ended red at 05:30 on two
-capture jobs, the six in Fedora, whose compare step on the runner found no decoder for the pictures
-the container wrote (Verdict 37), and the first shard, where `many_foxes` differed in 6.7 percent of
-its pixels with the foxes a step along in their run (Verdict 38), so the pack job was skipped and
-nothing was published; the three suites, the seven native builds, the Fedora captures themselves,
-the drive, Courtyard, the storm, the README and the other three shards were green, the drive in 45
-minutes. The coder mends both, and the reviewer starts the pack run anew on the mends.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1049,7 +1055,8 @@ from [SHARED.md](SHARED.md).
     the rest, the moved entity not visited again in the frame, and one more where the insert grows
     the column so the row the runner handed out moves, the write landing and nothing read through
     the old address; and the behaviors guide saying what is promised and what is not. One commit,
-    carrying Decision 44's sentence.
+    carrying Decision 44's sentence. Done at `20f3d5c0` on 2026-10-20, as the head says; the
+    sequential walk's cost about three times an entity for the promise, the parallel walk's none.
 
 35. **The build workflow's jobs are named as 3DEngine's are, by their ids, with no expression in a
     name.** The owner wrote on 2026-10-20 that a push run's page shows the pack-only jobs with their
@@ -1191,7 +1198,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     minutes, near twice the 47 measured, the coder's figure where the reviewer's 45 would have given
     up two minutes before the one listing read, and the job's limit at 120; the pack run with
     publish on started on it is the second reading of the feed's time, and its pack job passing
-    whole settles the verdict.
+    whole settles the verdict. A reading of the feed's time from the other engine: its `5.2.155`,
+    pushed at 08:38 on 2026-10-20, was listed at 08:48, ten minutes.
 
 37. **The Fedora capture job compares its six pictures on the runner, which has no decoder for
     them.** On the pack run of `d0e58c56`, 2026-10-20 at 05:07, the job's compare step failed at its
@@ -1261,7 +1269,36 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     one, the example's debug colors keyed to something stable, or, if the partition is not the
     bridge's to fix, the colored bunnies' region left out of the compare with the reason in the
     differ file, which would be its one line. One commit. Settled when the Fedora job passes on the
-    next pack run.
+    next pack run. Read so far by 08:27 on 2026-10-20: the partition is not the bridge's, since the
+    example loads Bevy's prebuilt meshlet bunny, pinned by the assets file to one commit, so both
+    machines read the same clusters, and the colors are seeded from the instance and meshlet ids,
+    both stable; the runner's picture shows the near cluster-colored bunny a whole level coarser,
+    larger clusters, other colors, no holes. Two things can choose the level, the
+    imperceptible-error formula with its one-pixel threshold, and the cull pass's append into the
+    raster clusters' list, which has no bound check, software clusters filling from the left and
+    hardware ones from the right, so with the 16,384 budget overrun they overwrite each other in an
+    order the atomics set, which the thread count changes; the coder captures the example in Fedora
+    44 with the runner's own bridge, once pinned to four cpus and once on all 32, to tell them
+    apart. Read further by 08:56: it is neither the thread count nor the runner's build. In Fedora
+    44 on Mesa 26.2.4 compared with no allowance, the runner's own bridge from the pack run on all
+    32 cores gives the runner's picture to no pixel, as does the coder's bridge at `05ed21e4`; the
+    bridge of `5195e95a`, before the anisotropy mend, gives the checked-in picture to no pixel; and
+    the head's bridge with the mend gated off by a scratch variable gives the checked-in picture and
+    with it on the runner's, each to no pixel. So the engine draws the example the same on both
+    machines and both builds, and the picture went stale at `0f8e89b4`, which retook its anisotropy
+    pictures on the GPU and never ran the six in Fedora, where the compare could not see it until
+    Verdict 37's decoders. What moved is the color of nearly every cluster with the outlines
+    coinciding to 89 to 92 percent within a pixel, the same clusters under another seed of the
+    instance and meshlet ids, not a coarser level as it first looked. The coder splits the mend's
+    two effects next, its resource and system present with the shader not rewritten against the full
+    rewrite, to say whether the seed moved with the extra resource entity Bevy spawns or with the
+    shader's recompiled pipelines. The reviewer's direction: where the seed moved with an entity's
+    id, the example keys its colors to the meshlet's id and the instance's place in the example's
+    own list, so the picture holds when an entity is spawned before it, with the reason in the
+    example's comment, and the picture is taken again in Fedora once; where it moved with the
+    pipelines alone, the picture is taken again with the reason in the commit; `test_meshlet` and
+    `many_meshlet_materials` checked against theirs the same way, which matched on the runner. One
+    commit.
 
 ## Decisions
 

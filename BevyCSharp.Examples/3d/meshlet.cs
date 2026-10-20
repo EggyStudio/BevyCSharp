@@ -46,7 +46,6 @@ internal static class Meshlet
         // A mesh cut into clusters ahead of time with Bevy's meshlet processor, as Bevy's example
         // loads it.
         var bunny = AssetServer.Load(AssetKind.MeshletMesh, "meshlet/bunny.meshlet_mesh");
-        var clusters = Render.CreateClusterMaterial();
         string[] colors = ["#dc2626", "#ea580c", "#facc15", "#16a34a", "#0284c7"];
 
         for (var x = -2; x <= 2; x++)
@@ -56,7 +55,11 @@ internal static class Meshlet
                 new Transform(new Vec3(x / 2f, 0f, -0.3f), Quat.Identity, new Vec3(0.2f)));
             if (x == 1) ecs.Add(front, new BunnyWiggler());
 
-            Spawn(ecs, bunny, clusters, new Transform(new Vec3(x / 2f, 0f, 0.3f), Quat.FromRotationY(MathF.PI), new Vec3(0.2f)));
+            // Each back bunny's clusters colored by its place in the row, where Bevy's are by its
+            // place in Bevy's list of meshlet instances, which moves with every archetype made
+            // before the bunnies', so the picture holds whatever the engine adds.
+            Spawn(ecs, bunny, Render.CreateClusterMaterial((uint)(x + 2)),
+                new Transform(new Vec3(x / 2f, 0f, 0.3f), Quat.FromRotationY(MathF.PI), new Vec3(0.2f)));
         }
     }
 

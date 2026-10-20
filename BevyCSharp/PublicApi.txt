@@ -12263,7 +12263,7 @@ readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedE
   void Deconstruct(out Entity Entity, out T Value)
 static class Bevy.Render
   static (int, int) PointLightsDrawn { get; }
-  static AssetHandle CreateClusterMaterial()
+  static AssetHandle CreateClusterMaterial(uint seed = 0u)
   static AssetHandle CreateDecalMaterial(MaterialSettings settings, float depthFadeFactor = 1f, float depthBias = 0f)
   static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth)
   static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true)
