@@ -31,7 +31,13 @@ push run of `3eaa0a44` was whole green and the pack run's three suites and diges
 natives finishing, so the Linux suites of `e7ea1a06`'s run and both runs of `3eaa0a44` settle
 Verdict 33, and the Windows and macOS suites of the two runs are Verdicts 34's and 35's second of
 three. Right. Next (h), then (i) and (j), item 29's last three parts, and the pack job's push read
-when the run ends.
+when the run ends. At 02:20 on 2026-10-20 the pack run of `3eaa0a44` had every job green and its
+pack job at the step that builds each game on the package from the feed: the login through the
+trusted publishing policy and the push to nuget.org both passed at 02:00, the first package
+published through the policy, and the feed listed `BevyCSharp.Templates` `0.5.149` from `3eaa0a44`
+with the engine's `0.5.149` still being indexed, so item 33 is proven; item 32's notes are read on
+the package's page when the feed lists it, and Verdicts 34 and 35 take the run's suites as their
+second of three.
 
 Before it, `a7895887` came, item 32's rule and nothing else, with the review's commit between. The
 notes script walks the commits after the start and leaves out one whose files all lie under
@@ -940,7 +946,8 @@ from [SHARED.md](SHARED.md).
     whose push the feed accepts, the first the owner starts after the policy stands. One commit, the
     pattern `BevyCSharp*`; at 22:54 the owner asked whether the pack could upload by itself, so this
     comes first, right after the step of (g) in hand, and item 32 with it. Done at `e1f516fa` on
-    2026-10-19; the first pack run with publish on is its check.
+    2026-10-19; the first pack run with publish on is its check. Proven on the pack run of
+    `3eaa0a44` on 2026-10-20 at 02:00, the login and the push passing and `0.5.149` on the feed.
 
 ## Verdicts
 
