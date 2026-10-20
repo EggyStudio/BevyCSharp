@@ -76,11 +76,12 @@ public sealed partial class NormTests
     [Fact]
     public void N_1_3()
     {
-        var found = Sources("BevyCSharp/", ".cs")
-            .Concat(Sources("BevyCSharp.Tests/", ".cs"))
-            .Concat(Sources("BevyCSharp.Examples/", ".cs"))
+        // The Slang shaders count as the C# and the Rust beside them do, in the library, the tests,
+        // the examples and the bridge, as 3DEngine's test counts its own.
+        var found = Sources("BevyCSharp/", ".cs", ".slang")
+            .Concat(Sources("BevyCSharp.Tests/", ".cs", ".slang"))
+            .Concat(Sources("BevyCSharp.Examples/", ".cs", ".slang"))
             .Concat(Sources("native/bevy_csharp/src/", ".rs", ".slang"))
-            .Concat(Sources("BevyCSharp.Examples/", ".slang"))
             .Where(file => !file.EndsWith(".g.cs", StringComparison.Ordinal))
             .Where(file => File.ReadLines(Full(file)).Count() > 800);
         Hold("1.3", found, "a file of more than 800 lines");
