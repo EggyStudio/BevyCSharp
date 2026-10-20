@@ -67,7 +67,7 @@ build/                 the native build scripts, and everything they generate
 ## Warnings
 
 A build has no warnings, and a warning fails the workflow (NORM.md, N 6.1). The test job builds the
-solution with `-warnaserror`, the game job builds Courtyard the same way, and every cargo build in
+solution with `-warnaserror`, the games job builds Courtyard the same way, and every cargo build in
 the workflow runs with `CARGO_BUILD_WARNINGS=deny`, cargo's own setting, which fails a build that
 printed a warning, the warnings of a crate it replays from its cache included. A warning that is
 right to keep is turned off where it arises, with its reason beside it.

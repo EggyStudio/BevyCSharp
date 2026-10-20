@@ -2,9 +2,15 @@
 # test job builds (test), and puts the three systems' pages on one (digest). The pack workflow calls
 # this one with `pack` (pack.yml), which adds the render bridge built for all six platforms (native)
 # and, on the Linux one, Courtyard and Swarm played from a package of this commit with the games
-# soaked and Courtyard published native (game), the feature test run through its course (drive),
-# every example captured (examples), a window stormed (storm) and the README walked in a container
-# (readme), and the pack run packs only once every job here passed.
+# soaked and Courtyard published native (games), the feature test run through its course (drive),
+# every example captured (captures), the six drawn with meshlets, Solari and clustered decals
+# captured in Fedora (captures-fedora), a window stormed (storm) and the README walked in a
+# container (readme), and the pack run packs only once every job here passed.
+#
+# The jobs show their ids, as 3DEngine's do, and only the suite's carries a name. GitHub skips a
+# matrix job before it expands the matrix and prints a name holding an expression as written, so a
+# push's page showed the pack-only jobs with their names' expressions unexpanded, where a job with
+# no name shows its id alone when skipped and its matrix entry's values beside it when it runs.
 name: build
 
 # Documents and captures are left out, apart from the README, the guide and BUILDING.md, whose links
@@ -49,7 +55,6 @@ env:
 
 jobs:
   native:
-    name: native (${{ matrix.rid }}${{ matrix.features && ', for the captures' || '' }})
     if: ${{ inputs.pack }}
     runs-on: ${{ matrix.os }}
     # A cold render build compiles the whole of Bevy, wgpu and winit, which is roughly a quarter
@@ -110,8 +115,10 @@ jobs:
           # Only the pack run's own jobs read them, so they need not outlive it by much.
           retention-days: 3
 
+  # Each named for its system, as 3DEngine's suite jobs are, through its entry, since this job is
+  # never skipped and its name's expression always expands.
   test:
-    name: test (${{ matrix.os }})
+    name: ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
     # An hour, where the three took 11 to 14 minutes on the push of 5e01491e with their caches, so
     # a headless bridge built with no cache and a lost suite run again in parts (build/test.py) both
@@ -120,7 +127,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-latest]
+        include:
+          - { system: linux, os: ubuntu-24.04 }
+          - { system: windows, os: windows-latest }
+          - { system: macos, os: macos-latest }
 
     steps:
       - uses: actions/checkout@v5
@@ -262,7 +272,6 @@ jobs:
   # One page for the commit from each system's page, a line for each system and each cause with
   # the systems it was seen on, the one place that says where a commit fails.
   digest:
-    name: test digest
     needs: [test]
     if: always()
     runs-on: ubuntu-24.04
@@ -283,8 +292,7 @@ jobs:
   # repository is, and played from its menu to its win by games/Courtyard/play.sh with no display.
   # Only where the bridges are built, since the game draws offscreen and the test job's headless
   # bridge draws nothing.
-  game:
-    name: play Courtyard
+  games:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
@@ -411,9 +419,8 @@ jobs:
 
   # The feature test, built on a package as Courtyard is, and run through the hub and each station
   # of its course, every one judged by where the player ends up (build/drive-feature-test.sh). A job
-  # of its own beside the play job, so the course run adds nothing to how long a run takes.
+  # of its own beside the games job, so the course run adds nothing to how long a run takes.
   drive:
-    name: run the feature test's course
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # An hour and a half. The course run's holds and waits come to some 4,600 frames, and lavapipe
@@ -424,7 +431,7 @@ jobs:
     # of twenty-two and a half where its rounds are too slow for six readings in fifteen.
     timeout-minutes: 90
     needs: [native]
-    # Each step through build/step.py, as the play job has it.
+    # Each step through build/step.py, as the games job has it.
     defaults:
       run:
         shell: python3 build/step.py {0}
@@ -441,7 +448,7 @@ jobs:
           name: native-linux-x64
           path: build/artifacts/linux-x64
 
-      # Lavapipe and ALSA, as the play job has them.
+      # Lavapipe and ALSA, as the games job has them.
       - name: Install a software Vulkan and ALSA
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
 
@@ -450,7 +457,7 @@ jobs:
       - name: Fetch slangc
         run: build/fetch-slang.sh
 
-      # A package of this commit's library and the Linux bridge alone, as the play job packs one.
+      # A package of this commit's library and the Linux bridge alone, as the games job packs one.
       - name: Pack
         run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
@@ -463,7 +470,7 @@ jobs:
           dotnet build BevyCSharp.FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
           build/drive-feature-test.sh BevyCSharp.FeatureTest/bin/Release/net10.0
 
-      # The feature test played a round at a time at the hub, as the play job soaks the games
+      # The feature test played a round at a time at the hub, as the games job soaks the games
       # (build/soaks.sh), here after the course run, which left its shaders compiled in the cache
       # beside its assets, so the readings are not of compiles. Alone on the runner, since on the
       # working machine's lavapipe held to four processors its first round ended six minutes into
@@ -498,8 +505,7 @@ jobs:
   # with the one in .github/assets/examples, failing on one that differs by more than devices do
   # (build/compare-captures.py). Four jobs share the list, each taking every fourth example by its
   # place in it, 90 of the 360, and each keeps its captures as an artifact of its own.
-  examples:
-    name: capture the examples (${{ matrix.shard }} of 4)
+  captures:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # An hour each. The whole list took 56 minutes on the pack run of d2a20b6a, some ten seconds an
@@ -514,7 +520,7 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
-    # Each step through build/step.py, as the game job has it.
+    # Each step through build/step.py, as the games job has it.
     defaults:
       run:
         shell: python3 build/step.py {0}
@@ -531,7 +537,7 @@ jobs:
           name: native-linux-x64
           path: build/artifacts/linux-x64
 
-      # Lavapipe, as the game job has it, since the runner has no graphics card, libwebp's tools,
+      # Lavapipe, as the games job has it, since the runner has no graphics card, libwebp's tools,
       # which write and read the captures where ImageMagick has no WebP, and ImageMagick, which
       # scales a shot of another shape to 1280 by 720 before it is written. The runner has none, so
       # on the pack run of b178ae3f resizing and window_settings kept their windows' sizes.
@@ -568,8 +574,7 @@ jobs:
   # with meshlets and the two with Solari. The four shards above capture them as words compared with
   # nothing, and capture the rest on the runner's own Mesa, which draws some scenes two to seven
   # times faster than Fedora's (BUILDING.md).
-  examples-fedora:
-    name: capture the six in Fedora
+  captures-fedora:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # Forty-five minutes, where the six took twenty five on lavapipe held to four cores, solari's
@@ -622,7 +627,6 @@ jobs:
   # under xvfb-run, which gives a minimized window back where nothing else on the runner would show
   # one. The test skips where it is not asked for, so the step asks and fails when it was skipped.
   storm:
-    name: storm a window
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # Twenty minutes, where the tests' build takes a few and the storm took a minute and a half on
@@ -704,14 +708,13 @@ jobs:
   # the README has it, built and run with no display. build/readme-walk.sh takes the program out of
   # README.md, so a change to the README or the template that parts them fails here.
   readme:
-    name: walk the README
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # Half an hour for a pack, the container's image pulled and a game made, built and run in it,
     # so a step that waits fails within the run.
     timeout-minutes: 30
     needs: [native]
-    # Each step through build/step.py, as the game job has it.
+    # Each step through build/step.py, as the games job has it.
     defaults:
       run:
         shell: python3 build/step.py {0}
