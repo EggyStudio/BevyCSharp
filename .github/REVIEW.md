@@ -24,8 +24,13 @@ mesh's light whatever the count swapped at once. Bevy's environment maps and irr
 textures no mesh feeds, and the bridge's live capturing probe, which the scene feeds each frame,
 showed its mirror ball unchanged in every one of 9,216 pixels in the frame of the swap, the next and
 sixty on with its red block swapped. The scratch test is deleted. SHARED.md's row takes the reading
-in both engines. The coder has no item and waits on the pack run's findings or the owner's word on
-the ledger's features.
+in both engines. At 05:35 the pack run with publish on of `d0e58c56` had ended red at 05:30 on two
+capture jobs, the six in Fedora, whose compare step on the runner found no decoder for the pictures
+the container wrote (Verdict 37), and the first shard, where `many_foxes` differed in 6.7 percent of
+its pixels with the foxes a step along in their run (Verdict 38), so the pack job was skipped and
+nothing was published; the three suites, the seven native builds, the Fedora captures themselves,
+the drive, Courtyard, the storm, the README and the other three shards were green, the drive in 45
+minutes. The coder mends both, and the reviewer starts the pack run anew on the mends.
 
 Before it, `5e9235ce` came, item 2's Slang count and nothing else, with the review's commit between.
 The test of N 1.3 counts the Slang shaders beside the C# of the library and the tests as it counts
@@ -1109,6 +1114,33 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     up two minutes before the one listing read, and the job's limit at 120; the pack run with
     publish on started on it is the second reading of the feed's time, and its pack job passing
     whole settles the verdict.
+
+37. **The Fedora capture job compares its six pictures on the runner, which has no decoder for
+    them.** On the pack run of `d0e58c56`, 2026-10-20 at 05:07, the job's compare step failed at its
+    first picture, `clustered_decals.webp`, which the compare script said could not be decoded; the
+    script decodes through ImageMagick or libwebp's tool, and the shards' job installs both on the
+    runner where this job installs them in the container alone, so on the runner the script found
+    neither and read nothing. The six pictures the container wrote are whole, lossy WebP of the same
+    encoding as the checked-in ones, 1280 by 720 and 1920 by 1080, read from the uploaded artifact.
+    The mend is one thing, under N 3.5: the job installs libwebp's tools and ImageMagick on the
+    runner before the compare, as the shards' job does, with the reason in its comment, or compares
+    inside the container where they are; and the compare script, where it finds no decoder, says so
+    by name in place of saying the picture could not be decoded, so the next such page names the
+    fault. Settled when the job passes on the next pack run.
+
+38. **`many_foxes` differed in 6.7 percent of its pixels on a capture shard, the foxes a step along
+    in their run.** On the pack run of `d0e58c56`, 2026-10-20 at 05:00, the first shard's compare
+    failed on `many_foxes` alone, 6.7 percent of its pixels past the 2 allowed within x 24 to 1,894
+    and y 132 to 899, the whole field of foxes; the uploaded capture against the checked-in picture
+    shows the same scene, the same colors and the same shadows, each fox a little further along its
+    gallop, so the frame's animation time was not the picture's, where the shards passed the example
+    on every run before and the three other shards passed theirs on this one. The capture's frame is
+    counted on the set clock with the clock held while a load runs (`714451b0`), so the reading
+    comes first: whether the foxes' animation players start on the frame their asset arrives and
+    count from a time the hold does not cover, or whether the run had a load the hold did not catch;
+    then the mend where it points, the players' start tied to the held clock or the example's
+    animation time set at the capture's frame, with the reason in the remark, one commit. Settled at
+    three green first shards in a row after the mend.
 
 ## Decisions
 
