@@ -36,7 +36,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Input", "input.md", ["Input", "LogicalKey", "Gamepad", "SyntheticInput", "KeyTable"]),
     ("The window", "window.md", ["Window", "UpdateMode"]),
     ("Math", "", ["Vec3", "Quat", "Color", "Transform", "GlobalTransform", "EaseFunction"]),
-    ("The tools", "tools.md", ["ConsoleCommands", "Diagnostics", "ConsoleHost", "ConsoleHost+Scope", "ConsoleLog", "CliClient", "CliJson", "CliPlugin", "CliSessionFile"]),
+    ("The tools", "tools.md", ["Capture", "ConsoleCommands", "Diagnostics", "ConsoleHost", "ConsoleHost+Scope", "ConsoleLog", "CliClient", "CliJson", "CliPlugin", "CliSessionFile"]),
 };
 
 bool Listed(Type t) => t.Namespace is "Bevy" or "Bevy.Physics" && !t.IsEnum && !typeof(Delegate).IsAssignableFrom(t)

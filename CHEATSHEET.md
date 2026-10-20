@@ -1793,6 +1793,13 @@ float Sample(float t);                                          // The value at 
 
 The guide's page is [tools.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md).
 
+### `Capture`
+
+```csharp
+static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f);  // Starts recording what this run draws, a picture at each interval of its clock, until StopRecording, as an animated GIF or PNG
+static Task<string>? StopRecording();                           // Stops a recording, whose file is written once the pictures it asked for have come back
+```
+
 ### `ConsoleCommands`
 
 ```csharp

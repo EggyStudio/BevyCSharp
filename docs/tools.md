@@ -287,6 +287,44 @@ game built on BevyCSharp is drivable exactly the way the editor is. The editor a
 registers `eval`, which compiles a fragment of C# and runs it against the live world through the
 same script host that reloads behavior scripts.
 
+## Animated captures
+
+`record` takes pictures of what the window shows at a step of the app's clock and writes them as
+one animated file, a GIF or an animated PNG by the path's extension, for a page of the guide or a
+devlog:
+
+```bash
+./bcs command record /tmp/walk.gif 5s every 250ms             # twenty pictures a quarter second apart
+./bcs command record /tmp/turn.png 8 every 1s scale 0.5       # eight a second apart, half as wide and high
+./bcs command record /tmp/run.gif 120f every 15f play 100ms   # every fifteenth of 120 frames, played faster
+./bcs command record.stop                                     # ends one sooner, with what it took
+```
+
+The length is seconds, frames of the clock or a count of pictures, and the step after `every` is
+milliseconds, seconds or frames, a tenth of a second unless given. Each picture is of the frame
+being drawn when it falls due and is kept in memory, and the file is written once the length is
+reached and the last picture is back off the GPU, under its own name only when it is whole. Each
+frame is shown for the time between it and the next by the clock, so a step of a second plays at a
+second, and `play` shows every frame for one time in its place. On a set clock
+(`bcs open --frame-time`) the pictures are the same moments of the game on any device.
+
+A GIF holds 256 colors, one palette cut for the whole recording by median cut, and a pixel between
+two of them is dithered by a pattern that holds still where the picture does, so a part that does
+not move costs nothing after the first frame. It counts time in hundredths of a second, and browsers
+play a delay under two hundredths slower. An animated PNG keeps every color as drawn and every
+millisecond, in a larger file. The engine writes both itself, and browsers and GitHub's pages play
+both.
+
+A program records the same way, until it stops, and the task each call returns finishes with the
+file's path once it is written:
+
+```csharp
+var recording = Capture.StartRecording("captures/jump.gif", intervalMs: 250, scale: 0.5f);   // as the jump starts
+
+// As it lands, a frame or more later, which writes the file once the last pictures are back.
+_ = Capture.StopRecording();
+```
+
 ---
 
 Before this, [Making a game](making-a-game.md).

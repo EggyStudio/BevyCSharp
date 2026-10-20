@@ -622,6 +622,9 @@ readonly struct Bevy.Capture : IEquatable<Capture>
   override bool Equals(object obj)
   override int GetHashCode()
   override string ToString()
+  static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f)
+  static Task<string>? StopRecording()
+  static bool IsRecording { get; }
   static bool op_Equality(Capture left, Capture right)
   static bool op_Inequality(Capture left, Capture right)
   void Deconstruct(out int Id)

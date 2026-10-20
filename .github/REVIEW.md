@@ -10,29 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `cf70c650`, item 37, the feature test moved to `games/FeatureTest`, and nothing else,
-carrying the review's file and the ledger's. The project imports the repository's build files by
-hand around the SDK's, since the games folder's empty files keep them from a game, so it keeps the
-tree's reference and builds on the package where a version is named, as the drive job and the
-testers' zips name one; the project's comment and BUILDING.md say so and the testers' README does
-not, rightly, being the testers' sheet. The program keeps its name, so what names the program stands
-and what names the folder follows, the CLI mapping the one to the other, and the defaults script
-leaves the feature test out. The suite 1,532 passed and 3 skipped, the course run on a fresh pack
-with 20 captures, 47 renames followed. Read at 00:00 on 2026-10-21. The build run of `2949041f` had
-ended green at 10:18, so the head was pushed at 00:01 and the day's pack run with publish on started
-at 00:01, run 39505038553, which is Verdict 40's step whole and Verdict 38's third shard; the push's
-own build run was cancelled at its start, since the pack run runs its jobs whole and the suites
-would have run twice, losing no figure; the owner then said the bill is not to be weighed, so it was
-the only one (Decision 47). The norm's term for a game gained the feature test's clause. Next item
-38, the edit mesh kernel, the recipe's words written first in the Reply; Decision 46 and items 38 to
-45, the modeling work of 2026-10-20, follow in order. At about 00:29 the owner asked for animated
-captures, Decision 48 and item 46, taken before item 38's second commit.
+Reviewed up to `08d03b4d`, item 38's first half, the edit mesh with its seven primitives, its
+selection and what moves it, and nothing else, carrying the review's files: `EditMesh` under
+`BevyCSharp/Modeling`, the primitives placed by their bounds' lowest corner or middle and selected
+after, the selection by all, none, invert, index, axis direction, box and slot in the three modes,
+move, rotate, scale, grid, snap and material, the counts, the volume, the open edges, closed and
+bounds; 22 tests of exact counts, closedness and volume, the box 8, 12 and 6 with 24, the stairs of
+four 20, 30 and 12; the guide page between drawing and materials, the cheat sheet's group, the
+AGENTS.md row N 1.5 asks for; the suite 1,554 passed and 3 skipped; `SelectionMode` named so since
+the sockets' `SelectMode` is in the CLI's server. The Reply fixes the recipe's words for items 38 to
+45 and 3DEngine's 59 to 66, the line forms, the command form `model.<verb> <name> <words>`, the
+commands outside the recipe, each primitive's outline and numbering so a face's index is the same in
+both engines, the selection's rules and the facing tie order, y then x; the one choice differing
+from the item stands, a typed measure taken as given and `snap` rounding the selection to the grid,
+where a point picked or dragged lands, since a move of a fifth of a meter on a meter's grid would
+otherwise move nothing. Read at 00:32 on 2026-10-21 and pushed at 00:32, no build run being in
+flight, the pack run of `cf70c650` going on beside it. Next item 46's two commits, the animated
+capture, then item 38's second half, the topology operations, the recipe, the build and the
+collider, whose bridge change asks Bevy's tangents by a flag bit, the ABI at 299; then items 39 to
+45 in order.
+
+Before it, `cf70c650` came, item 37, the feature test moved to `games/FeatureTest`, and nothing
+else, carrying the review's file and the ledger's, the tree's reference kept through explicit SDK
+imports. Pushed at 00:01, the day's pack run with publish on started then, run 39505038553.
 
 Before it, `2949041f` came, Verdict 40's mend and nothing else, carrying the review's file and the
 ledger's, the four games naming `0.5.174` as their default.
-
-Before it, `d56e7cb7` came, item 36 and nothing else, carrying the review's files, `GetJointForce`
-in the form said before it, with its test and its guide paragraph.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1099,7 +1102,9 @@ from [SHARED.md](SHARED.md).
     stairs the sum of its steps), and watertightness, every edge shared by two faces with opposite
     winding, and a recipe written and read back making the same counts; a capture of each primitive
     in the gallery row. Two commits, the mesh and the primitives with the selection and the
-    transforms, then the topology operations, the recipe, the build and the collider.
+    transforms, then the topology operations, the recipe, the build and the collider. First half
+    done at `08d03b4d` on 2026-10-21, the mesh, the primitives, the selection and the transforms
+    with the recipe's words in the Reply, as the head says; the second half follows item 46.
 
 39. **Grid prototyping: materials that show a meter, texture coordinates aligned to the world, and
     openings cut by booleans (Decision 46).** The owner's first use: blocking out a level with
@@ -1961,3 +1966,26 @@ selected vertex to it, halfway going away from zero. `grid` takes a meter or a p
 from a sixteenth to sixty-four. `new` and `free` make and drop a model and are commands, `clear`
 empties one in a recipe. The lines of items 39 to 45 are fixed in the Reply of the commit that first
 reads them, in either engine, the other following.
+
+Shared: a run recorded as an animated GIF or PNG, in the commit carrying this line, item 46's first
+half, for its row, the words those 3DEngine's item 70 takes. The command is `record <path>
+<length> [every <step>] [scale <s>] [play <time>]`, the length seconds (`5s`), frames of the clock
+(`120f`) or a bare count of pictures (`8`), the step milliseconds (`250ms`), seconds or frames, a
+tenth of a second unless given, the scale above zero and up to one, and `play` a time every frame is
+shown for in place of the time between it and the next, which the item named `play <ms>`; and
+`record.stop` ends one sooner with what it took. A picture is taken when the clock reaches the start
+and each step after it, and one that would fall at or past the length is not, so `5s every 250ms`
+takes twenty, the last a quarter before the end; the last frame is shown for the step, or where the
+step is frames for the time before it. The file is the path's extension, `.gif` or `.png`, written
+on a worker under `<path>.part` and moved into place whole once the last picture is back.
+`Capture.StartRecording(path, intervalMs, scale)` records until `Capture.StopRecording()`, each
+returning a task that finishes with the path once it is written. The GIF's palette is 255 colors by
+median cut over every frame's pixels counted in 32 steps a channel, each color the mean of its
+pixels, the 256th left clear; a pixel is dithered by Bayer's eight by eight pattern between its
+nearest color and the one on the other side of it, so a pixel that is a color of the palette is
+never dithered and a still part gives the same indices each frame; a frame after the first is the
+rectangle that changed, its unchanged pixels clear, left in place; delays are rounded to hundredths
+so their sum stays nearest the sum given. The animated PNG's frames after the first are the
+rectangle that changed, written over, rows filtered adaptively. Both are read back in the tests by
+a reader that lays each frame over the last as a browser does. The client's step and
+`build/animate.py` come with the second half.

@@ -412,6 +412,10 @@ public sealed unsafe partial class App : IDisposable
             {
                 Animation.PostFinished(world.Resource<MessageBus>());
                 Animation.AdvanceMachines(world.Resource<EcsWorld>());
+
+                // A recording's picture of this frame asked for, and those of frames before kept
+                // as they come back off the GPU.
+                Recorder.Tick(world.Resource<Time>());
             }
 
             DataAssets.PostChanges(world.Resource<MessageBus>());
