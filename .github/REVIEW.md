@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `0f8e89b4`, item 29's part (j) and nothing else, with the review's commit between,
+Reviewed up to `d0e58c56`, Verdict 36's mend and nothing else, with the review's commit between. The
+games-on-defaults script waits as long as ninety minutes for nuget.org to list the package the pack
+job pushed, where it waited twenty, the override kept, its comment saying the run of `3eaa0a44`
+found the engine's `0.5.149` listed 47 minutes after its push and the templates within twenty, so
+the wait is near twice what it took; when the wait ends unlisted the error says the package was
+pushed and stands on nuget.org, which had not listed it within the ninety minutes, so no game was
+built on its default, and names the script to run once it is; the pack job's limit goes from 45
+minutes to 120 with the ninety and the 47 in its comment; the step that says what was made moves
+from the job's end to right after the push, before the games' step, so a run whose wait ends red
+still says on its page that the package was pushed, where before it ran last and was skipped when
+the games' step failed; BUILDING.md's publishing section gives the ninety, the 47 and what a wait
+that ends unlisted says. Checked were the script's parse and the workflow, script and norm tests,
+65. The reviewer starts the pack run with publish on at once, which proves item 29's (h), (i) and
+(j) and this mend together, settles Verdicts 34 and 35 on its suites if green and Verdict 36 on its
+pack job passing whole, and gives the second reading of what the feed takes. Every item of the Now
+list is done or the reviewer's own, so the coder's next is said under item 2.
+
+Before it, `0f8e89b4` came, item 29's part (j) and nothing else, with the review's commit between,
 and item 29 has no part open. The bridge, in the render profile alone, mends Bevy's standard
 material fragment shader by three exact replacements in its text once it has loaded, closing the
 block that skips the prepass normals before anisotropy's part, giving anisotropy's setup a tangent
@@ -33,8 +50,7 @@ Windows and macOS cross checks, the cargo tests, 102 and 177, the whole suite af
 build, 1,525 passed and 3 skipped, and the cheat sheet and surface unchanged. Decision 39 asked a
 patched shader with a test that fails when Bevy's original changes, and this is that in the smaller
 form, the lines in place of a copy. The push's build run cancels the one of `9b6dceaa` and carries
-Verdicts 34 and 35's third suites. Next Verdict 36's mend, then the pack run with publish on that
-proves (h), (i), (j) and the mend together.
+Verdicts 34 and 35's third suites.
 
 Before it, `5195e95a` came, item 29's part (i) and nothing else, with the review's commit between,
 and with it the differ list holds no line. Each power of two of the cluster budget was taken twice
@@ -52,31 +68,6 @@ own documentation, and EXAMPLES.md follows; the picture is the GPU's whole grid 
 its header, and TODO.md's paragraph on lavapipe's bunnies goes; no Mesa report is written, and the
 budget's report to Bevy is the owner's call. Checked were a strict build of the solution, the norm
 and example catalog tests, 19, the documents check and the table's check.
-
-Before it, `17b004c0` came, item 29's part (h) and nothing else, with the review's commits between.
-The native job's matrix gains a Linux entry built with meshlets and Solari for the captures,
-uploaded under a name the pack's pattern never takes, its cache key its own so the other entries'
-caches stay warm, a cold build 18 minutes 51 seconds on the development machine; a fifth capture
-job, needing the native job and running on the runner's Ubuntu, runs Fedora 44 from its registry
-through podman or docker by a script of its own, installs Fedora's Mesa, the .NET SDK, ImageMagick,
-WebP and ALSA, reads the Mesa package's version against the one the workflow names, 26.2.4 with its
-reason, and stops with an error naming both and the retake where they differ, checked with a wrong
-name, then captures `clustered_decals` and the five drawn with meshlets and Solari with the bridge
-and compares them, under 45 minutes with the six's 25 on four cores as the reason, Solari's 400
-frames 13 of them, its captures uploaded; the capture script gives Solari a wait of 1,500 seconds
-and every other shot 600, the remark giving the 13 minutes. BUILDING.md says which image draws which
-pictures, the four shards on the runner's Mesa 25.2 and the six in Fedora's 26.2.4, with
-`multi_asset_sync` at 57 seconds against 331 as the reason, and that a new Mesa is a commit naming
-it that takes the six again; TODO.md's paragraph on the six uncompared goes, and the clause naming
-them in the pack run's limits. The differ line stays at 10 with the budget's reason, Bevy's own
-8,192 slots too few for 2,500 bunnies, 6.9 percent between two GPU takes and 5.2 on Fedora's
-lavapipe. The Shared line under Replies is taken into SHARED.md's row on captures compared across
-devices in both engines. Checked were the script run as the job would from a fresh checkout, all six
-captured in 726 seconds on every core, the six matching, `clustered_decals` 2 pixels, `meshlet` 0,
-`test_meshlet` 481, `solari` 1,636, `solari_reflections` 1,198 and `many_meshlet_materials` 50,657,
-5.5 percent inside its line, and the workflow, script and norm tests, 65. The job's first real run
-is the next pack run's, which the reviewer starts when Verdict 36's mend is in with (i) and (j), so
-one run proves them all; the push's build run carries Verdicts 34 and 35's third suites.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1109,7 +1100,11 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     2026-10-20 is the first form, the wait set from what the feed took, the templates listed within
     20 minutes and the engine by 47, so a wait of 45 minutes with the job's limit raised to hold it,
     and the summary moved before the games' step, so a run says the push stood even where the wait
-    gives up; the reviewer takes it.
+    gives up; the reviewer takes it. Mended at `d0e58c56` on 2026-10-20 with a wait of ninety
+    minutes, near twice the 47 measured, the coder's figure where the reviewer's 45 would have given
+    up two minutes before the one listing read, and the job's limit at 120; the pack run with
+    publish on started on it is the second reading of the feed's time, and its pack job passing
+    whole settles the verdict.
 
 ## Decisions
 
