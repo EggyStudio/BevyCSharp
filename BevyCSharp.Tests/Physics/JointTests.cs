@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>Covers a ball joint kept within a cone, a distance joint whose range changes after it is made, and a slider driven along its travel.</summary>
+/// <summary>Covers a ball joint kept within a cone, a distance joint whose range changes after it is made and the force it holds with, and a slider driven along its travel.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
 /// with 3DEngine's own cases for them (its <c>c5227118</c> and <c>979c97be</c>).
@@ -78,6 +78,44 @@ public sealed class JointTests
         Assert.InRange(hung, 8.95f, 9.05f);
         Assert.False(otherKind, "a ball joint was given a distance joint's range");
         Assert.True(reversed);
+    }
+
+    /// <summary>
+    /// A rope reads the weight of the box hanging on it once it has settled, and nothing before the
+    /// first step, with slack in it, or once it is gone.
+    /// </summary>
+    /// <remarks>
+    /// 3DEngine's case (its <c>fdcfd435</c>), at the one substep this world solves a step in.
+    /// </remarks>
+    [Fact]
+    public void ARopeReadsTheWeightOfTheBoxHangingOnIt()
+    {
+        var (first, held, slack, gone) = (-1f, 0f, -1f, -1f);
+
+        InAWorld(new PhysicsSettings(), (ecs, physics) =>
+        {
+            var hook = Body(ecs, physics, new Vec3(0f, 10f, 0f), PhysicsShape.Box(new Vec3(0.1f)), BodyKind.Kinematic);
+            var box = Body(ecs, physics, new Vec3(0f, 8f, 0f), PhysicsShape.Box(new Vec3(0.5f)), BodyKind.Dynamic, mass: 3f);
+
+            // From the hook's middle to the box's top, a meter and a half and as taut as it can be.
+            var rope = physics.Connect(hook, box, Joint.Distance(Vec3.Zero, new Vec3(0f, 0.5f, 0f), 0f, 1.5f));
+            first = physics.JointForce(rope);
+
+            Steps(ecs, physics, 120);
+            held = physics.JointForce(rope);
+
+            physics.SetDistance(rope, 0f, 3f);
+            Steps(ecs, physics, 1);
+            slack = physics.JointForce(rope);
+
+            physics.Disconnect(rope);
+            gone = physics.JointForce(rope);
+        });
+
+        Assert.Equal(0f, first);
+        Assert.InRange(held, 3f * 9.81f * 0.99f, 3f * 9.81f * 1.01f);
+        Assert.Equal(0f, slack);
+        Assert.Equal(0f, gone);
     }
 
     /// <summary>

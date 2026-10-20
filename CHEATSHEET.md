@@ -1500,6 +1500,7 @@ bool SetMotor(JointHandle joint, float degreesPerSecond, float torque);  // Chan
 bool SetDistance(JointHandle joint, float minimum, float maximum);  // Changes how far apart a distance joint keeps its points, as a winch reeling a rope in does when it is set a little shorter each frame
 bool SetDrive(JointHandle joint, float unitsPerSecond, float force);  // Changes a slider's drive while it runs, to send a lift up or hold it where it is
 float? SliderPosition(JointHandle joint);                       // How far a slider's second body is along its axis from where it was joined, or null for a joint that is no slider
+float JointForce(JointHandle joint);                            // The force a joint held its bodies together with over the last step, in newtons where mass is in kilograms, as a rope holding a three kilogram box reads the box's weight, 29.4
 bool Disconnect(JointHandle joint);                             // Takes a joint away, leaving both bodies free
 void MarkPlaced(Entity entity);                                 // Says that entity was put where it is rather than moved there, as when a level starts again, so its kinematic body is put at the new place, at rest, and not carried there through whatever is between
 void SetLayer(Entity entity, int layer);                        // Puts an entity's body on one of 32 layers, 0 to 31, which decides what it collides with, as SetLayersCollide says

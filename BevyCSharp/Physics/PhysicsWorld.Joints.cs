@@ -293,6 +293,34 @@ public sealed partial class PhysicsWorld
         return Vector3.Dot(second.Position - anchor, Vector3.Transform(slider.AxisA, first.Orientation));
     }
 
+    /// <summary>
+    /// The force a joint held its bodies together with over the last step, in newtons where mass is
+    /// in kilograms, as a rope holding a three kilogram box reads the box's weight, 29.4. Zero for a
+    /// joint that is gone, a rope with slack in it, or before the first step.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The joint's own hold, the impulse its own constraint gave over the step, which Bepu keeps to
+    /// start the next step's from, so it costs nothing until it is asked for. A hinge's limit and
+    /// motor, a ball joint's cone and a slider's lock against turning, its travel and its drive are
+    /// left out. A ball joint's, a distance joint's and a slider's line are a force alone, while a
+    /// hinge's and a weld's hold their bodies from turning too, and a torque is added in.
+    /// </para>
+    /// <para>
+    /// A joint that breaks under a load reads this each step and is taken away with
+    /// <see cref="Disconnect"/> past a force the game chose, as a bridge breaks where it is weak.
+    /// Bepu solves each step here in one substep, so the impulse over the step's length is the
+    /// force through it.
+    /// </para>
+    /// </remarks>
+    public float JointForce(JointHandle joint)
+    {
+        if (_disposed || _lastStep <= 0f || !_joints.TryGetValue(joint.Id, out var held)) return 0f;
+        if (!_simulation.Solver.ConstraintExists(held.Constraints[0])) return 0f;
+
+        return _simulation.Solver.GetAccumulatedImpulseMagnitude(held.Constraints[0]) / _lastStep;
+    }
+
     /// <summary>The turn that takes Z onto a direction, the shortest one.</summary>
     private static Quaternion Toward(Vector3 direction)
     {

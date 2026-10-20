@@ -10,7 +10,53 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `20f3d5c0`, item 34 and nothing else, carrying Decision 44's sentence in COMMITS.md
+Reviewed up to `41ebc700`, item 35 and nothing else, the workflow and BUILDING.md, with no review
+edits to carry. Every job dropped its name but the suite's, which keeps its matrix as include
+entries of a system and its runner and is named by the system, linux, windows and macos, its cache
+keys, digest artifacts and steps still reading the runner so nothing else changed; the ids native,
+test, digest, drive, storm and readme stand, game is games, examples is captures and examples-fedora
+is captures-fedora, no job needs a renamed one and the pack workflow needs only build, so no needs
+moved, and the artifacts keep their names; the head comment names each job by its id and says why
+only the suite carries a name, worded with no expression; the comments that called the job the game
+or the play job say the games job, BUILDING.md's one mention following, and the step script's line
+on an old run keeps the job's name as it was then. The workflow, script, norm and document script
+tests gave 65; no test named the old ids. Read at 10:42; its push waits for the build run of
+`3b0e54d7` to end, and the pack run with publish on of `3b0e54d7` runs on under the old names. The
+cached render-target bridges on the machine are at ABI 295 and stale, used by the coder's scratch
+scripts alone. At 11:11 the ledger gave item 36, the joint's force read from 3DEngine's `fdcfd435`;
+At 11:20 the pack run of `3b0e54d7` had its suites, native builds, README, storm and the Fedora six
+green, the Fedora job passing for the first time at 11:17, which settles Verdicts 37 and 39, its
+first and second shards green, Verdict 38's second of three, and the other shards, the drive and
+Courtyard running, the pack job after them; the build run of `3b0e54d7` ended green, so `41ebc700`
+was pushed; the ledger's two features and the budget's report wait on the owner's word.
+
+Before it, `3b0e54d7` came, Verdict 39's mend and nothing else, carrying the review's file. The
+reading finished: it is the seed's order, not the pipelines, a dry run of the anisotropy mend with
+its resource and system present and the shader not rewritten giving the runner's picture to no
+pixel, one extra plain entity spawned before the bunnies leaving the checked-in picture unchanged,
+and one extra entity with a component of its own, a new archetype, giving the runner's picture
+exactly, since Bevy numbers meshlet instances by the order its extract query meets their archetypes
+and an archetype made before them reorders that, each resource being one in Bevy 0.20 and the mend's
+resource having been one, the meshlet id stable as the bunny is the only meshlet asset. The cluster
+material carries a seed and names its own meshlet fragment shader, a WESL string with a fixed handle
+as the sprite material's vertex shader has, reading the meshlet id from the visibility buffer in the
+same two lines as Bevy's resolve and coloring from the seed and the meshlet id as Bevy's does from
+the instance and meshlet ids; a native call creates it with the seed at ABI 298, the render API
+takes a seed with remarks saying why, and the surface listing, the cheat sheet and the drawing guide
+follow; the example gives each back bunny its place in the row with the reason in a comment; the
+seeded capture in Fedora with an extra archetype made before the bunnies is no pixel from the one
+without. `meshlet` is taken again with the seeded colors and `test_meshlet` too, its checked-in
+picture having been 466 pixels off on the runner, within its allowance, and the runner's matching
+the machine's to 2, so its drawing moved on both alike, while `many_meshlet_materials` matches to 1
+pixel and stands; the thumbnails are written again. Checked were the three profiles, the cargo
+tests, 104 and 179, the Windows and macOS cross checks, the headless tests skipping the four meshlet
+tests, the meshlet tests on the GPU, 4, the suite, 1,530 passed and 3 skipped of 1,534 with the
+cheat sheet test failing until the sheet was written again, and the norm tests, 18. Pushed at 10:42
+after the previous build run had ended, and the pack run with publish on started at once,
+`39395229271`, which proves item 29's (h), (i) and (j), Verdict 36's wait and Verdicts 37 to 39's
+mends together and gives the feed's second listing time.
+
+Before it, `20f3d5c0` came, item 34 and nothing else, carrying Decision 44's sentence in COMMITS.md
 and the review's file. The bridge keeps a per-thread row guard, the runner taking its address
 through a new native call, the ABI at 297, and a check at every exit from the world while a walk is
 under way looks the named entity's component up and sets moved where its address differs or the
@@ -38,43 +84,8 @@ old bridge, where the growth test read a garbage entity from the table's freed m
 tests, a write not noticed, an insert or despawn noticed, and a table grown by 4,096 spawns noticed.
 Checked were the three profiles, the cargo tests, 104 and 179, the Windows and macOS cross checks,
 the headless tests, 26 passing and 3 skipped, the suite, 1,531 passed and 3 skipped of 1,534, the
-norm tests, 18, and the documents check. Pushed at once. At 08:45 the pack run of `05ed21e4` had
-ended red at 08:34 on the Fedora job alone, the drive green at 08:33 after 69 minutes and every
-other job green, the pack job skipped, so Verdict 36's wait and item 29's parts wait on the next
-pack run; the build run of this head was green at 08:44. Verdict 39's reading stands under it; the
-coder is on it, then item 35.
-
-Before it, `05ed21e4` came, Verdict 38's mend and nothing else. The animator and its source are
-sparse components, the reason in the animator's remark; the clock hold keeps the ids of the bridge's
-own reads while the load hold is on, the wait gated to the render profile since that alone plays
-clips, each id dropped once it stops loading, and the assets module factors out the loading check;
-the holds' documentation names the read. Two tests, a behavior playing its own scenes' clip on eight
-roots each starting once and keeping what it wrote, and a clock held for loads standing still while
-a scene's clips are read, at a tenth of a second a frame the elapsed time at the first ask equal to
-that when the clip plays and the first ask refused, both passing on the new bridge and failing on
-the old, where four of the eight roots started two or three times and the elapsed time moved 1.0 to
-1.1, one unheld frame. The fourteen examples that call the animation were taken again on the editor
-bridge, eleven identical to their pictures and three retaken with their thumbnails, `many_foxes` at
-6.6 percent off against the runner's 6.7, `animated_mesh` at 498 pixels and `many_morph_targets` at
-466, each retake repeated to no pixel, and on the host's lavapipe held to four cores the three
-matched the new pictures to 0.5, 0 and 1.9 pixels; the scratch probe shows each of the 1,000 foxes
-playing once in the second frame, which the hold keeps still. Checked were the three profiles'
-checks, the cargo tests, 102 and 177, the Windows and macOS cross checks clean after the gate, the
-changed tests on the headless bridge passing 3 and skipping the 7 that need a renderer, the suite on
-the full bridge, 1,527 passed and 3 skipped of 1,530, and the norm tests, 18. The reviewer pushed
-and started the pack run with publish on at once; by 08:14 it had everything green but the Fedora
-job, red on `meshlet`'s patches (Verdict 39), the drive still running, the pack job to be skipped;
-the first shard passed with `many_foxes` matching, Verdict 38's first of three.
-
-Before it, `6fcecb1a` came, Verdict 37's mend and nothing else, with the review's commit between.
-The Fedora capture job installs libwebp's tools and ImageMagick on the runner before the capture,
-with the reason in its comment, and the compare script, where a folder holds pictures and none of
-the three decoders is on the path, fails before reading anything, naming the missing tools on its
-error stream and in an error annotation, checked with the path emptied, exit 1 with the message, and
-with the tools present, one capture matching with exit 0; the norm tests pass, 18. Verdict 38 is
-read, said under it, two faults in the bridge's animator and neither in the example, and its mend is
-one commit in hand, after which the reviewer starts the pack run with publish on anew. A fault the
-reading uncovered beyond the verdict is item 34.
+norm tests, 18, and the documents check. Pushed at once. The pack run of `05ed21e4` ended red at
+08:34 on the Fedora job alone, every other job green, the pack job skipped.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1075,7 +1086,20 @@ from [SHARED.md](SHARED.md).
     text; the suite's steps, which branch on the system five times, stay one text for the same
     reason. The graph then reads as 3DEngine's, the three suites, the digest and the examples on a
     push with the pack-only jobs skipped by id, and the whole set on a pack run. The workflow tests
-    follow the ids, and BUILDING.md's job names with them. One commit, after item 34.
+    follow the ids, and BUILDING.md's job names with them. One commit, after item 34. Done at
+    `41ebc700` on 2026-10-20, as the head says.
+
+36. **A program reads the force a joint held its bodies with over the last step, from 3DEngine's
+    `GetPhysicsJointForce`.** SHARED.md's row, taken on 2026-10-20 since this engine simulates its
+    bodies over the same library on the managed side and the flat API reads a contact's impulse and
+    no joint's: a bridge game in 3DEngine could not make a weak bridge break where it is weak, since
+    the joints' give under load reads alike for a truss and a bare road, where the solver's
+    accumulated impulse for the joint's own constraint over a substep is the force in newtons. So
+    the physics API gains the read, the impulse magnitude of the joint's constraint over the last
+    step, its limit and motor apart, costing nothing until called, with its cheat sheet line, the
+    surface listing, the upgrading page's entry and the physics guide's paragraph on joints, and a
+    test of a box hanging on a distance joint reading its weight within a percent at the substep
+    counts the engine runs. One commit, carrying the review's files.
 
 ## Verdicts
 
@@ -1213,7 +1237,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     inside the container where they are; and the compare script, where it finds no decoder, says so
     by name in place of saying the picture could not be decoded, so the next such page names the
     fault. Settled when the job passes on the next pack run. Mended at `6fcecb1a` on 2026-10-20, as
-    the head says.
+    the head says. The job passed on the pack run of `3b0e54d7` on 2026-10-20 at 11:17, its six
+    compared on the runner. Settled on the pack run of `3b0e54d7` on 2026-10-20.
 
 38. **`many_foxes` differed in 6.7 percent of its pixels on a capture shard, the foxes a step along
     in their run.** On the pack run of `d0e58c56`, 2026-10-20 at 05:00, the first shard's compare
@@ -1251,7 +1276,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     move. The row's move for Bevy's own animation types is item 34. Mended at `05ed21e4` on
     2026-10-20 as the head says, the first shard of the pack run started on it the first of three.
     Settled at three green first shards in a row after the mend. The first shard of the pack run of
-    `05ed21e4` passed at 07:40 on 2026-10-20 with the example matching, the first of three.
+    `05ed21e4` passed at 07:40 on 2026-10-20 with the example matching, the first of three. The
+    first shard of the pack run of `3b0e54d7` passed at 11:19 on 2026-10-20, the second of three.
 
 39. **`meshlet`'s colored bunnies differ in their patches between the Fedora job's capture and the
     picture.** On the pack run of `05ed21e4`, 2026-10-20 at 07:39, the Fedora job's compare, running
@@ -1298,7 +1324,10 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     example's comment, and the picture is taken again in Fedora once; where it moved with the
     pipelines alone, the picture is taken again with the reason in the commit; `test_meshlet` and
     `many_meshlet_materials` checked against theirs the same way, which matched on the runner. One
-    commit.
+    commit. Mended at `3b0e54d7` on 2026-10-20, as the head says, the seed the example's own; the
+    pack run started on it is the check. The Fedora job passed on the pack run of `3b0e54d7` on
+    2026-10-20 at 11:17 with the seeded picture. Settled on the pack run of `3b0e54d7` on
+    2026-10-20.
 
 ## Decisions
 
@@ -1650,3 +1679,12 @@ maps and irradiance volumes are textures no mesh feeds; the bridge's live captur
 captures its cubemap from the scene each frame, reflected a swapped red block on a mirror ball with
 no pixel of 9,216 changed in the frame of the swap or after. So BevyCSharp's cell is "has, by Bevy's
 design".
+
+Shared: the force a joint held its bodies with over the last step, in the commit carrying this line,
+for the row 3DEngine took at `fdcfd435`. `PhysicsWorld.JointForce` reads the impulse Bepu kept for
+the joint's own constraint over the step's length, the first of the joint's constraints, so a
+hinge's motor and limit, a ball joint's cone and a slider's lock, travel and drive are left out, and
+answers zero for a joint that is gone, a rope with slack, or before the first step. This engine's world solves a
+step in one substep, so the test reads at that count alone, a rope holding a three kilogram box at
+29.416 against its weight of 29.43. This engine has no upgrading page, so the change has the guide's
+paragraph, the cheat sheet's line and the surface listing without one.

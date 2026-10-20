@@ -4739,6 +4739,7 @@ sealed class Bevy.Physics.PhysicsWorld : IDisposable
   bool SetDrive(JointHandle joint, float unitsPerSecond, float force)
   bool SetMotor(JointHandle joint, float degreesPerSecond, float torque)
   float ContactImpulse(Entity a, Entity b)
+  float JointForce(JointHandle joint)
   float? SliderPosition(JointHandle joint)
   int Count { get; }
   int LayerOf(Entity entity)

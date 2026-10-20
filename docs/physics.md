@@ -287,6 +287,21 @@ var rope = physics.Connect(hook, crate, Joint.Distance(Vec3.Zero, Vec3.Zero, 0f,
 physics.SetDistance(rope, 0f, length -= 0.5f * ctx.Time.Delta);
 ```
 
+`JointForce` says how hard a joint held its bodies together over the last step, in newtons where
+mass is in kilograms, so a rope a three kilogram box hangs on reads its weight, 29.4. It reads the
+joint's own hold, a hinge's limit and motor, a ball joint's cone and a slider's lock, travel and
+drive apart, and a hinge's and a weld's take in the torque that keeps their bodies from turning.
+Bepu keeps each joint's impulse for its next step, so the call costs nothing until it is made, and a
+joint that breaks under a load reads it each step and is taken away past a force the game chose:
+
+<!-- compiled with:
+PhysicsWorld physics = ctx.Res<PhysicsWorld>();
+JointHandle rope = default;
+-->
+```csharp
+if (physics.JointForce(rope) > 2000f) physics.Disconnect(rope);
+```
+
 A slider keeps the second body on a line through its middle and from turning against the first, a
 drawer, a sliding door or a lift on its frame. It stops at the ends of its travel, measured from
 where it was joined, and drives itself along the line where it has a drive, which pushes with no

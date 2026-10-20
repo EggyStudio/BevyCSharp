@@ -75,6 +75,9 @@ public sealed partial class PhysicsWorld : IDisposable
 
     private int _nextJoint;
 
+    /// <summary>How long the last step was, which turns a joint's impulse into a force (<see cref="JointForce"/>).</summary>
+    private float _lastStep;
+
     /// <summary>Each bouncy body's velocity before the last step, and what struck something in it.</summary>
     private Dictionary<Entity, Vector3>? _beforeLast;
 
@@ -444,6 +447,7 @@ public sealed partial class PhysicsWorld : IDisposable
         _contacts.Near.Clear();
         _contacts.Struck.Clear();
         _simulation.Timestep(seconds, _threads);
+        _lastStep = seconds;
         Report(messages);
         Bounce(before);
 
