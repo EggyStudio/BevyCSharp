@@ -10,7 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5e9235ce`, item 2's Slang count and nothing else, with the review's commit between.
+Reviewed up to `6cca47f7`, the reading of the ledger's replaced-mesh row under Replies and nothing
+else, with the review's commits between. No fault was found and nothing in the engine changed. Under
+Solari, the ray-tracing tests' glowing red wall swapped in one step for a new mesh asset of the same
+shape with its ray-tracing mesh, the frame of the swap captured on the editor bridge, a 24 by 20
+patch of floor by the wall read a mean red of 170.4 before, 172.2 in the frame of the swap and the
+next and 170.9 sixty frames on, against 170.3, 172.0, 172.2 and 171.2 with nothing swapped, two runs
+of each within 0.4, a single pixel swinging 20 or more between frames either way from Solari's
+samples, so the patch's mean is the measure; Bevy 0.20 builds the acceleration structure of every
+added or changed mesh in the frame it is extracted and holds the compaction after it alone to
+400,000 vertices a frame, which changes nothing drawn, so by design no frame goes without the new
+mesh's light whatever the count swapped at once. Bevy's environment maps and irradiance volumes are
+textures no mesh feeds, and the bridge's live capturing probe, which the scene feeds each frame,
+showed its mirror ball unchanged in every one of 9,216 pixels in the frame of the swap, the next and
+sixty on with its red block swapped. The scratch test is deleted. SHARED.md's row takes the reading
+in both engines. The coder has no item and waits on the pack run's findings or the owner's word on
+the ledger's features.
+
+Before it, `5e9235ce` came, item 2's Slang count and nothing else, with the review's commit between.
 The test of N 1.3 counts the Slang shaders beside the C# of the library and the tests as it counts
 those of the examples and the bridge since `72307f37`, with a comment naming 3DEngine's form, the
 tests' 91 shaders at 106 lines at most and the bridge's longest at 628, all under 800; the norm
@@ -36,31 +53,6 @@ that ends unlisted says. Checked were the script's parse and the workflow, scrip
 65. The reviewer starts the pack run with publish on at once, which proves item 29's (h), (i) and
 (j) and this mend together, settles Verdicts 34 and 35 on its suites if green and Verdict 36 on its
 pack job passing whole, and gives the second reading of what the feed takes.
-
-Before it, `0f8e89b4` came, item 29's part (j) and nothing else, with the review's commit between,
-and item 29 has no part open. The bridge, in the render profile alone, mends Bevy's standard
-material fragment shader by three exact replacements in its text once it has loaded, closing the
-block that skips the prepass normals before anisotropy's part, giving anisotropy's setup a tangent
-frame of its own from the world normal and tangent, and dropping the brace the setup was inside,
-each replacement finding its text exactly once in Bevy 0.20's file, the mended text differing in
-those lines alone, and outside a normal prepass the frame the same call on the same normal and
-tangent, so nothing else draws otherwise; the mended source is set on the loaded shader asset and
-the render world compiles it again as for a shader written while the game runs. No copy of Bevy's
-shader is kept, only the lines changed, so no file of Bevy's needs its license notice, the notices
-covering the crate already. A replacement that does not find its text exactly once refuses the whole
-mend, warns naming the file to follow and leaves Bevy's shader, and a native call answers mended or
-refused, read as an internal flag. The anisotropy prepass tests' highlight theory takes four
-cameras, forward, deferred with occlusion, a normal prepass and occlusion, each under a fiftieth of
-the pixels blown white; the pinned test goes and a test asserts the mend took, so a Bevy whose text
-moved fails there naming the file; a Rust test covers the exactly-once rule; the remarks on the
-anisotropy strength and the materials guide's line say the bridge mends it, and TODO.md's pinned
-paragraph goes. Checked were the five anisotropy prepass tests on the editor bridge, six 3D examples
-taken again on it identical to their pictures, the cargo checks of the four profiles with the
-Windows and macOS cross checks, the cargo tests, 102 and 177, the whole suite after a clean strict
-build, 1,525 passed and 3 skipped, and the cheat sheet and surface unchanged. Decision 39 asked a
-patched shader with a test that fails when Bevy's original changes, and this is that in the smaller
-form, the lines in place of a copy. The push's build run cancels the one of `9b6dceaa` and carries
-Verdicts 34 and 35's third suites.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -139,7 +131,9 @@ from [SHARED.md](SHARED.md).
     the coder reads SHARED.md's row on a mesh replaced in place keeping its indirect light,
     3DEngine's `03e0bd36`, under Solari and under Bevy's light probes, whether a frame draws without
     indirect light when a mesh is replaced, with a capture of the frame after the swap against the
-    one before, and reports the reading under Replies for the row; a fault found is an item.
+    one before, and reports the reading under Replies for the row; a fault found is an item. The
+    replaced-mesh row read at `6cca47f7` on 2026-10-20, no fault found, the figures in the head and
+    the ledger.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
