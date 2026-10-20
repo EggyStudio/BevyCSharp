@@ -10,7 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6cca47f7`, the reading of the ledger's replaced-mesh row under Replies and nothing
+Reviewed up to `6fcecb1a`, Verdict 37's mend and nothing else, with the review's commit between. The
+Fedora capture job installs libwebp's tools and ImageMagick on the runner before the capture, with
+the reason in its comment, and the compare script, where a folder holds pictures and none of the
+three decoders is on the path, fails before reading anything, naming the missing tools on its error
+stream and in an error annotation, checked with the path emptied, exit 1 with the message, and with
+the tools present, one capture matching with exit 0; the norm tests pass, 18. Verdict 38 is read,
+said under it, two faults in the bridge's animator and neither in the example, and its mend is one
+commit in hand, after which the reviewer starts the pack run with publish on anew. A fault the
+reading uncovered beyond the verdict is item 34.
+
+Before it, `6cca47f7` came, the reading of the ledger's replaced-mesh row under Replies and nothing
 else, with the review's commits between. No fault was found and nothing in the engine changed. Under
 Solari, the ray-tracing tests' glowing red wall swapped in one step for a new mesh asset of the same
 shape with its ray-tracing mesh, the frame of the swap captured on the editor bridge, a 24 by 20
@@ -42,22 +52,6 @@ so no code moved. The pack run with publish on of `d0e58c56` runs since 04:25. T
 their mends, so Verdicts 34 and 35 are settled. Every item of the Now list is done or the reviewer's
 own; the coder reads the ledger's row on a replaced mesh under Solari and the probes meanwhile, said
 under item 2, and the ledger's vehicle and path-traced reference go to the owner for items.
-
-Before it, `d0e58c56` came, Verdict 36's mend and nothing else, with the review's commit between.
-The games-on-defaults script waits as long as ninety minutes for nuget.org to list the package the
-pack job pushed, where it waited twenty, the override kept, its comment saying the run of `3eaa0a44`
-found the engine's `0.5.149` listed 47 minutes after its push and the templates within twenty, so
-the wait is near twice what it took; when the wait ends unlisted the error says the package was
-pushed and stands on nuget.org, which had not listed it within the ninety minutes, so no game was
-built on its default, and names the script to run once it is; the pack job's limit goes from 45
-minutes to 120 with the ninety and the 47 in its comment; the step that says what was made moves
-from the job's end to right after the push, before the games' step, so a run whose wait ends red
-still says on its page that the package was pushed, where before it ran last and was skipped when
-the games' step failed; BUILDING.md's publishing section gives the ninety, the 47 and what a wait
-that ends unlisted says. Checked were the script's parse and the workflow, script and norm tests,
-65. The reviewer starts the pack run with publish on at once, which proves item 29's (h), (i) and
-(j) and this mend together, settles Verdicts 34 and 35 on its suites if green and Verdict 36 on its
-pack job passing whole, and gives the second reading of what the feed takes.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -992,6 +986,22 @@ from [SHARED.md](SHARED.md).
     2026-10-19; the first pack run with publish on is its check. Proven on the pack run of
     `3eaa0a44` on 2026-10-20 at 02:00, the login and the push passing and `0.5.149` on the feed.
 
+34. **A behavior's write after a call that moves its entity's table row lands in another entity's
+    row.** Found under Verdict 38 on 2026-10-20: a behavior holds its own table row by reference
+    while it runs, and a call it makes that inserts a table component on its entity, or takes one
+    off, moves the entity to another table and the old table's last row into its place, so what the
+    behavior writes after the call lands in that other entity; in `many_foxes` half the foxes'
+    started flags landed in other foxes' rows and 499 played twice. Verdict 38's mend makes the
+    animator's two components sparse, so a play keeps the row, and names what stays: the graph play
+    and the clips insert Bevy's own animation player and graph handle on the entity the first time,
+    Bevy's types, whose storage the bridge cannot choose, and a behavior calling them in its update
+    would move its row the same way. The item is the general mend, read first for its form and cost:
+    every call a behavior can make that changes its own entity's archetype found by reading the
+    bridge's entry points, and either the change deferred to the end of the behavior's run, as
+    Bevy's own commands are, or the runner resolving the row again after each such call, with a test
+    that a behavior playing a graph on its own entity keeps what it writes; the reading says which,
+    with the cost. One commit, after Verdict 38's.
+
 ## Verdicts
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -1126,7 +1136,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     runner before the compare, as the shards' job does, with the reason in its comment, or compares
     inside the container where they are; and the compare script, where it finds no decoder, says so
     by name in place of saying the picture could not be decoded, so the next such page names the
-    fault. Settled when the job passes on the next pack run.
+    fault. Settled when the job passes on the next pack run. Mended at `6fcecb1a` on 2026-10-20, as
+    the head says.
 
 38. **`many_foxes` differed in 6.7 percent of its pixels on a capture shard, the foxes a step along
     in their run.** On the pack run of `d0e58c56`, 2026-10-20 at 05:00, the first shard's compare
@@ -1139,8 +1150,30 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     comes first: whether the foxes' animation players start on the frame their asset arrives and
     count from a time the hold does not cover, or whether the run had a load the hold did not catch;
     then the mend where it points, the players' start tied to the held clock or the example's
-    animation time set at the capture's frame, with the reason in the remark, one commit. Settled at
-    three green first shards in a row after the mend.
+    animation time set at the capture's frame, with the reason in the remark, one commit. Read by
+    05:48 on 2026-10-20 on the development machine with logging in a scratch copy of the example,
+    two faults in the bridge's animator and neither in the example. The first play on a scene loads
+    the file again to read the clips' names, since Bevy freed the file's root asset once the scene
+    had loaded, and that load is not among the handles the load hold watches, so the frames it takes
+    pass on the clock; on the GPU all 1,000 plays failed in the first frame and succeeded in the
+    second, and on a device whose load lands a frame sooner or later every fox starts a frame sooner
+    or later. And a play inserts the animator's source and then its animator on the scene root,
+    every call after taking the animator off and putting it back, table components all, so each call
+    moves the root to another table and the old table's last row into its place while the behavior
+    that called it holds its own row by reference, and its started flag lands in another fox's row:
+    in the second frame 1,000 plays returned true and 501 foxes still read not started in the third
+    and played again, 499 twice and one three times, each replay resetting the clip a frame later,
+    the half following the table's order and so moving with the frame the file arrives in. The mend,
+    one commit: the two animator components sparse, so the root changes archetype but keeps its row
+    and the behavior's write lands on its own; the clock hold keeping the ids of loads the bridge
+    starts for the app while the hold is on, holding the clock while any of them loads and dropping
+    each once it stops; two engine tests failing before the mend, several scene roots whose behavior
+    plays a clip each playing once and keeping what they wrote, and no time passing under a held
+    clock between a scene's first play and the one that succeeds; and the pictures of the examples
+    that play clips taken again, `many_foxes`, `animated_mesh`, `animated_mesh_control`,
+    `morph_targets`, `many_morph_targets`, `mirror` and `scene_viewer`, since their start frames can
+    move. The row's move for Bevy's own animation types is item 34. Settled at three green first
+    shards in a row after the mend.
 
 ## Decisions
 
