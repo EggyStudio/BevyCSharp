@@ -15,10 +15,11 @@ The test of N 1.3 counts the Slang shaders beside the C# of the library and the 
 those of the examples and the bridge since `72307f37`, with a comment naming 3DEngine's form, the
 tests' 91 shaders at 106 lines at most and the bridge's longest at 628, all under 800; the norm
 tests pass, 18. The lists were read whole against their rules and hold no debt, said under item 2,
-so no code moved. The pack run with publish on of `d0e58c56` runs since 04:25. Every item of the Now
-list is done or the reviewer's own; the coder reads the ledger's row on a replaced mesh under Solari
-and the probes meanwhile, said under item 2, and the ledger's vehicle and path-traced reference go
-to the owner for items.
+so no code moved. The pack run with publish on of `d0e58c56` runs since 04:25. The push run of
+`9b6dceaa` passed its three suites by 03:55, the third green Windows and macOS suites in a row after
+their mends, so Verdicts 34 and 35 are settled. Every item of the Now list is done or the reviewer's
+own; the coder reads the ledger's row on a replaced mesh under Solari and the probes meanwhile, said
+under item 2, and the ledger's vehicle and path-traced reference go to the owner for items.
 
 Before it, `d0e58c56` came, Verdict 36's mend and nothing else, with the review's commit between.
 The games-on-defaults script waits as long as ninety minutes for nuget.org to list the package the
@@ -1072,7 +1073,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     release notes tests sweep their repositories through git, whichever the other tests that make
     repositories, if any, already do. Mended at `7a0f07ea` the same day, the test folder's sweep
     clearing the read-only attribute on a refusal. Settled at three green Windows suites in a row
-    after the mend. The push run and the pack run of `3eaa0a44` passed the suite, two of three.
+    after the mend. The push run and the pack run of `3eaa0a44` and the push run of `9b6dceaa`
+    passed the Windows suite on 2026-10-20, the third at 03:55, three green in a row. Settled on the
+    runs of `3eaa0a44` and `9b6dceaa` on 2026-10-20.
 
 35. **The load hold test's image never loaded on the macOS runner.** On the pack run of `987676b5`,
     2026-10-19, the macOS suite failed `ClockHoldTests.AClockHeldForLoadsStandsStillUntilTheyEnd` at
@@ -1087,7 +1090,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     same day: the held clock holds nothing the load waits on, the test had given the load a few
     milliseconds unpaced, and it paces its frames at sixty a second up to six hundred. Settled at
     three green macOS suites in a row after the mend. The push run and the pack run of `3eaa0a44`
-    passed the suite, two of three.
+    and the push run of `9b6dceaa` passed the macOS suite on 2026-10-20, the third at 03:55, three
+    green in a row. Settled on the runs of `3eaa0a44` and `9b6dceaa` on 2026-10-20.
 
 36. **The pack job waits 20 minutes for nuget.org to list the package it pushed, and the feed took
     longer.** On the pack run of `3eaa0a44`, 2026-10-20, the pack job logged in and pushed `0.5.149`
