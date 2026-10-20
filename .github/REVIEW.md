@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `93600e85`, item 29's part (g), and `93b19994` before it, the layouts test's mend,
+Reviewed up to `17b004c0`, item 29's part (h) and nothing else, with the review's commits between.
+The native job's matrix gains a Linux entry built with meshlets and Solari for the captures,
+uploaded under a name the pack's pattern never takes, its cache key its own so the other entries'
+caches stay warm, a cold build 18 minutes 51 seconds on the development machine; a fifth capture
+job, needing the native job and running on the runner's Ubuntu, runs Fedora 44 from its registry
+through podman or docker by a script of its own, installs Fedora's Mesa, the .NET SDK, ImageMagick,
+WebP and ALSA, reads the Mesa package's version against the one the workflow names, 26.2.4 with its
+reason, and stops with an error naming both and the retake where they differ, checked with a wrong
+name, then captures `clustered_decals` and the five drawn with meshlets and Solari with the bridge
+and compares them, under 45 minutes with the six's 25 on four cores as the reason, Solari's 400
+frames 13 of them, its captures uploaded; the capture script gives Solari a wait of 1,500 seconds
+and every other shot 600, the remark giving the 13 minutes. BUILDING.md says which image draws which
+pictures, the four shards on the runner's Mesa 25.2 and the six in Fedora's 26.2.4, with
+`multi_asset_sync` at 57 seconds against 331 as the reason, and that a new Mesa is a commit naming
+it that takes the six again; TODO.md's paragraph on the six uncompared goes, and the clause naming
+them in the pack run's limits. The differ line stays at 10 with the budget's reason, Bevy's own
+8,192 slots too few for 2,500 bunnies, 6.9 percent between two GPU takes and 5.2 on Fedora's
+lavapipe. The Shared line under Replies is taken into SHARED.md's row on captures compared across
+devices in both engines. Checked were the script run as the job would from a fresh checkout, all six
+captured in 726 seconds on every core, the six matching, `clustered_decals` 2 pixels, `meshlet` 0,
+`test_meshlet` 481, `solari` 1,636, `solari_reflections` 1,198 and `many_meshlet_materials` 50,657,
+5.5 percent inside its line, and the workflow, script and norm tests, 65. The job's first real run
+is the next pack run's, which the reviewer starts when Verdict 36's mend is in with (i) and (j), so
+one run proves them all; the push's build run carries Verdicts 34 and 35's third suites. Next (i),
+then (j), then Verdict 36.
+
+Before it, `93600e85` came, item 29's part (g), and `93b19994` before it, the layouts test's mend,
 both in the pack run with publish on started at 23:55, 39331259657 on the review's commit after
 them. The layouts test catches the bridge's refusal of a type it does not register and leaves the
 type out, counts the layouts read and asks for more than a hundred, its remarks saying the
@@ -54,34 +80,6 @@ publishing commit, whose three files lie under the folder, left out and the list
 its file under the build folder. Right. The reviewer starts the pack run with publish on as the
 check of items 32 and 33 and of Verdicts 34 and 35 (Decision 43). Next the layouts test's mend,
 (g)'s commit, then (h).
-
-Before it, `17487d27` came, Verdict 35's mend, and `7a0f07ea` before it, Verdict 34's, with the
-review's commits between, part (g) still in the tree. Verdict 34: the test folder's deletion, on the
-first refusal, takes the read-only attribute off every file left in the folder and tries again
-before its usual two seconds of retries, the remarks giving git's read-only objects as the reason
-and naming the runs, no other test making a repository; the release notes, norm and other test
-folder tests pass on Linux, 73 of 73, and the three Windows suites are the check since no Windows
-stands here. Verdict 35: the old test ran thirty frames unpaced, the image asked for in the third,
-so the load had a few milliseconds of the machine's time, while the load runs on Bevy's task pool
-and is collected before the update with no step of the clock in it, so the held clock holds nothing
-the load waits on, as the other runners and the test's own frames agree; the mend paces the frames
-at sixty a second up to six hundred and exits three frames after the load, the remarks saying why,
-as the asset tests bound a load already; the failure did not reproduce here on one core or a loaded
-one, so the three macOS suites are the evidence. A correction to part (f)'s record: five of the
-seventeen pictures called drift were the lookup table's difference, taken before on a bridge with it
-and by (f) on a render bridge without, and five more held a frame in (f)'s probe, so the hold moved
-them. Part (g) so far: all 373 taken on the render bridge with the table, 316 of 332 pictures
-identical, eleven moving by a pixel or more, most the many lights' 711 pixels, the specular tint's
-463 on the highlight and the many cubes' 138, copied in with their thumbnails, the decal maps kept
-for flipping between two states; in the runner's image the many lights and the specular tint come
-within a pixel of the GPU's and the many cubes within 0.15 percent where the bridges stood 45.4 and
-4.6 apart; the suite on that bridge passed 1,509 of 1,527 with one failure older than the batch, the
-reflected layouts test asking the bridge for every type of the description, dumped from the fullest
-bridge, so a bridge without Solari refuses the path tracer's and the test throws, which the headless
-suites skip and the editor bridge hides, to be mended in a small commit, a type the bridge does not
-register left out and more than a hundred layouts still required. Right. Next the notes' rule on
-commits under `.github/`, item 32's, in a small commit before (g)'s, then the pack run with publish
-on, then the layouts test's mend and (g)'s commit, then (h).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -934,7 +932,8 @@ from [SHARED.md](SHARED.md).
     the documentation's sentence as the reason, so the picture is whole and compared as the others
     are, the differ line comes off and TODO.md's paragraph goes; a report of the budget to Bevy is
     the owner's call, as upstream reports are. Order: (h)'s commit first with the line's reason as
-    the budget's, then (i)'s commit taking the line off, two things, two commits.
+    the budget's, then (i)'s commit taking the line off, two things, two commits. (h) done at
+    `17b004c0` on 2026-10-20, as the head says.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
