@@ -10,9 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d0e58c56`, Verdict 36's mend and nothing else, with the review's commit between. The
-games-on-defaults script waits as long as ninety minutes for nuget.org to list the package the pack
-job pushed, where it waited twenty, the override kept, its comment saying the run of `3eaa0a44`
+Reviewed up to `5e9235ce`, item 2's Slang count and nothing else, with the review's commit between.
+The test of N 1.3 counts the Slang shaders beside the C# of the library and the tests as it counts
+those of the examples and the bridge since `72307f37`, with a comment naming 3DEngine's form, the
+tests' 91 shaders at 106 lines at most and the bridge's longest at 628, all under 800; the norm
+tests pass, 18. The lists were read whole against their rules and hold no debt, said under item 2,
+so no code moved. The pack run with publish on of `d0e58c56` runs since 04:25. Every item of the Now
+list is done or the reviewer's own; the coder reads the ledger's row on a replaced mesh under Solari
+and the probes meanwhile, said under item 2, and the ledger's vehicle and path-traced reference go
+to the owner for items.
+
+Before it, `d0e58c56` came, Verdict 36's mend and nothing else, with the review's commit between.
+The games-on-defaults script waits as long as ninety minutes for nuget.org to list the package the
+pack job pushed, where it waited twenty, the override kept, its comment saying the run of `3eaa0a44`
 found the engine's `0.5.149` listed 47 minutes after its push and the templates within twenty, so
 the wait is near twice what it took; when the wait ends unlisted the error says the package was
 pushed and stands on nuget.org, which had not listed it within the ninety minutes, so no game was
@@ -24,8 +34,7 @@ the games' step failed; BUILDING.md's publishing section gives the ninety, the 4
 that ends unlisted says. Checked were the script's parse and the workflow, script and norm tests,
 65. The reviewer starts the pack run with publish on at once, which proves item 29's (h), (i) and
 (j) and this mend together, settles Verdicts 34 and 35 on its suites if green and Verdict 36 on its
-pack job passing whole, and gives the second reading of what the feed takes. Every item of the Now
-list is done or the reviewer's own, so the coder's next is said under item 2.
+pack job passing whole, and gives the second reading of what the feed takes.
 
 Before it, `0f8e89b4` came, item 29's part (j) and nothing else, with the review's commit between,
 and item 29 has no part open. The bridge, in the render profile alone, mends Bevy's standard
@@ -51,23 +60,6 @@ build, 1,525 passed and 3 skipped, and the cheat sheet and surface unchanged. De
 patched shader with a test that fails when Bevy's original changes, and this is that in the smaller
 form, the lines in place of a copy. The push's build run cancels the one of `9b6dceaa` and carries
 Verdicts 34 and 35's third suites.
-
-Before it, `5195e95a` came, item 29's part (i) and nothing else, with the review's commit between,
-and with it the differ list holds no line. Each power of two of the cluster budget was taken twice
-on the GPU with the editor bridge and compared with the whole crowd at 2 to the 20th, 2 to the 13th
-203,842 pixels from whole and its two takes 64,547 apart, 2 to the 14th 184,531 and 100,647, 2 to
-the 15th 70,504 and 90,767, and 2 to the 16th, 17th and 18th 0 from whole and 0 between takes, so
-65,536 slots is the smallest power of two that draws the crowd whole, 256 KB of the device's memory
-against Bevy's 32, and on Fedora 44's lavapipe through the container script with the meshlet and
-Solari bridge it comes within 1.2 pixels of the GPU's whole picture, the comparison matching with no
-line to allow it. The example's configuration takes 65,536 clusters with a comment giving Bevy's
-8,192, the documentation's missing or blinking meshes, the measurement and the cost; its triage row
-says it takes 65,536 cluster slots where Bevy's takes 8,192, too few for its 2,500 bunnies by Bevy's
-own documentation, and EXAMPLES.md follows; the picture is the GPU's whole grid at 1920 by 1080 as N
-4.5's list has it, its gallery thumbnail made again; the line leaves the differ file, which keeps
-its header, and TODO.md's paragraph on lavapipe's bunnies goes; no Mesa report is written, and the
-budget's report to Bevy is the owner's call. Checked were a strict build of the solution, the norm
-and example catalog tests, 19, the documents check and the table's check.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -120,19 +112,33 @@ from [SHARED.md](SHARED.md).
    is read by the reviewing session, and a failure it names comes first here.
 
 2. **The norm's lists are paid down.** A listed file is mended when a batch next touches it, in a
-   commit of its own that moves code alone, the largest first where there is a choice, and a batch
-   reads the lists for the files it will touch before it starts. Every rule is checked or by review
-   since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test is to count the
-   Slang shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's does
-   since its `09419080`, none of them over 800 today, which it does not yet (SHARED.md's row, taken
-   next). `60141490` takes `NativeTypes.Render.cs` off N 1.3's list, split into ten files named for
-   their structs, and those ten types off N 1.2's. `render/assets.rs`, `NormTests.cs` and
-   `UiTests.cs`, which stood at 799, 794 and 794, are split at `88a75e54`, `f68bd192` and `09e3b339`
-   to 557, 588 and 535, each a commit that moves code alone; `app.rs` is at 709 since `c5b6d1d3`. N
-   7.2's list takes `ff467a5f`, the subject's marks run together and pushed before the suite read
-   them, beside the owner's `5a7f2c07`, and the list only gets shorter from there; `a0c8b1b0`, the
-   owner's own one-line commit of the showcase's caption, pushed, joins it as the owner's with
-   custom_schedule's commit, three left out.
+    commit of its own that moves code alone, the largest first where there is a choice, and a batch
+    reads the lists for the files it will touch before it starts. Every rule is checked or by review
+    since the run of `156d2ce` passed on macOS, N 6.2 the last taken. N 1.3's test is to count the
+    Slang shaders of the bridge and the examples as it counts the C# and the Rust, as 3DEngine's
+    does since its `09419080`, none of them over 800 today, which it does not yet (SHARED.md's row,
+    taken next). `60141490` takes `NativeTypes.Render.cs` off N 1.3's list, split into ten files
+    named for their structs, and those ten types off N 1.2's. `render/assets.rs`, `NormTests.cs` and
+    `UiTests.cs`, which stood at 799, 794 and 794, are split at `88a75e54`, `f68bd192` and
+    `09e3b339` to 557, 588 and 535, each a commit that moves code alone; `app.rs` is at 709 since
+    `c5b6d1d3`. N 7.2's list takes `ff467a5f`, the subject's marks run together and pushed before
+    the suite read them, beside the owner's `5a7f2c07`, and the list only gets shorter from there;
+    `a0c8b1b0`, the owner's own one-line commit of the showcase's caption, pushed, joins it as the
+    owner's with custom_schedule's commit, three left out. N 1.3's count of the Slang shaders done
+    at `5e9235ce` on 2026-10-20. The lists read whole against their rules by 04:29 the same day:
+    1.4's 30 entries are tests of what is no area of the library, the build, the documents, the
+    editor, the examples, the generator, the scripting and the norm's own, listed by nature as the
+    list's head says; 4.5's 20 are examples drawn at the window Bevy's own asks for, 18 stress tests
+    and the headless renderer at 1920 by 1080 and the scale factor override at 512 by 288, which the
+    rule leaves out; B 3's 15 entry points answer a constant or a flag and cannot panic, which the
+    rule leaves out; 3.3's six are clocks or waits on things outside the frame, the asset server's
+    threads, the file watcher, the socket server and the test folder's retried delete; 4.1's four
+    are documents quoting another's words or naming the dash itself; 1.2, 1.3 and 3.4 hold headers
+    alone; 7.2 stays. So the lists hold no debt, and nothing moves. Meanwhile, with no item open,
+    the coder reads SHARED.md's row on a mesh replaced in place keeping its indirect light,
+    3DEngine's `03e0bd36`, under Solari and under Bevy's light probes, whether a frame draws without
+    indirect light when a mesh is replaced, with a capture of the frame after the swap against the
+    one before, and reports the reading under Replies for the row; a fault found is an item.
 
 3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
    typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
