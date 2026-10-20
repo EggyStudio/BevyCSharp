@@ -5,7 +5,7 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// An anisotropic material drawn forward on a camera with a normal prepass, which Bevy 0.20 draws
-/// blown white.
+/// blown white and the bridge mends, drawn as on every other camera.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -19,10 +19,11 @@ namespace Bevy.Tests;
 /// prepass normal out for a transmissive material and not for an anisotropic one.
 /// </para>
 /// <para>
-/// Ambient occlusion asks for the normal prepass, which is how the feature test's gallery met it. A
-/// camera drawing deferred draws the same sphere right. When the second test fails, Bevy has mended
-/// its shader, and the remarks on <see cref="MaterialSettings.AnisotropyStrength"/> and the
-/// materials guide's line come out with it.
+/// The bridge mends the shader in the text Bevy ships, the setup moved out of the skipped block with
+/// a tangent frame of its own (<c>render/mended.rs</c>). Ambient occlusion asks for the normal
+/// prepass, which is how the feature test's gallery met it. A release of Bevy whose text moved
+/// refuses the mend, which the last test here holds, so the mend is written again for that release,
+/// or taken out where Bevy has mended its shader.
 /// </para>
 /// </remarks>
 [Collection("engine")]
@@ -31,42 +32,55 @@ public sealed class AnisotropyPrepassTests
     [SkippableTheory]
     [InlineData("forward")]
     [InlineData("deferred with occlusion")]
+    [InlineData("a normal prepass")]
+    [InlineData("occlusion")]
     public void ABrushedSphereKeepsItsHighlight(string camera)
     {
         Needs.Renderer();
 
         var white = WhiteOf(view =>
         {
-            if (camera != "forward")
+            if (camera == "deferred with occlusion")
             {
                 Shaders.SetPrepass(view, depth: true, deferred: true);
                 Render.SetAmbientOcclusion(view, AmbientOcclusionQuality.High);
             }
-        }, out var pixels);
+            else if (camera == "occlusion")
+            {
+                Render.SetAmbientOcclusion(view, AmbientOcclusionQuality.High);
+            }
+            else if (camera == "a normal prepass")
+            {
+                Shaders.SetPrepass(view, depth: true, normals: true);
+            }
+        }, out var pixels, out _);
 
         Assert.True(white < pixels / 50, $"{white} of {pixels} pixels blown white drawn {camera}");
     }
 
-    [SkippableTheory]
-    [InlineData("a normal prepass")]
-    [InlineData("occlusion")]
-    public void ABrushedSphereBlowsWhiteForwardUnderANormalPrepassAsBevyDrawsIt(string camera)
+    /// <summary>
+    /// The bridge mended Bevy's shader, which a release of Bevy whose text moved refuses, failing
+    /// here so the mend follows it.
+    /// </summary>
+    [SkippableFact]
+    public void TheBridgeMendsBevysShaderForAnisotropy()
     {
         Needs.Renderer();
 
-        var white = WhiteOf(view =>
-        {
-            if (camera == "occlusion") Render.SetAmbientOcclusion(view, AmbientOcclusionQuality.High);
-            else Shaders.SetPrepass(view, depth: true, normals: true);
-        }, out var pixels);
+        WhiteOf(view => Shaders.SetPrepass(view, depth: true, normals: true), out _, out var mended);
 
-        // About half the picture is the sphere, all of it white while Bevy's shader is as it is.
-        Assert.True(white > pixels / 4, $"only {white} of {pixels} pixels blown white under {camera}, so Bevy may have mended its shader; see the remarks");
+        Assert.True(mended == true, mended is null
+            ? "the standard material's shader had not loaded when the picture was taken"
+            : "Bevy's pbr_fragment.wesl is not the text the bridge's mend was written for; follow it in native/bevy_csharp/src/render/mended.rs");
     }
 
-    /// <summary>How many pixels of a brushed metal sphere come out white, on a camera set up as given.</summary>
-    private static int WhiteOf(Action<Entity> camera, out int pixels)
+    /// <summary>
+    /// How many pixels of a brushed metal sphere come out white, on a camera set up as given, and
+    /// whether the bridge had mended Bevy's shader by the picture.
+    /// </summary>
+    private static int WhiteOf(Action<Entity> camera, out int pixels, out bool? mended)
     {
+        bool? read = null;
         var run = new PictureRun
         {
             Scene = ecs =>
@@ -92,8 +106,9 @@ public sealed class AnisotropyPrepassTests
             },
         };
 
-        run.Wait(ShaderMaterialTests.Settled).Capture("picture").Go();
+        run.Wait(ShaderMaterialTests.Settled).Do("mend", _ => read = Render.AnisotropyMended).Capture("picture").Go();
 
+        mended = read;
         var picture = run.Picture("picture");
         pixels = (int)(picture.Width * picture.Height);
         return PictureRun.Count(picture, (r, g, b) => r > 245 && g > 245 && b > 245);

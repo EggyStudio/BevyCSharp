@@ -62,6 +62,27 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Whether the bridge mended Bevy's standard material for anisotropy under a normal prepass,
+    /// true once mended, false where Bevy's shader is not the text the mend was written for, and
+    /// null before the shader has loaded or where nothing is drawn.
+    /// </summary>
+    /// <remarks>
+    /// Bevy 0.20's forward shader skips the tangent frame anisotropy needs where a camera has a
+    /// normal prepass, and the bridge mends that in the text Bevy ships (<c>render/mended.rs</c>).
+    /// A release whose text moved refuses the mend, which a test holds, so the mend follows Bevy.
+    /// </remarks>
+    internal static bool? AnisotropyMended
+    {
+        get
+        {
+            if (!App.HasRenderer) return null;
+            uint mends;
+            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.AnisotropyMended");
+            return (mends & 1) != 0 ? true : (mends & 2) != 0 ? false : null;
+        }
+    }
+
+    /// <summary>
     /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.

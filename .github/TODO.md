@@ -559,12 +559,6 @@ cause is still there. Each is below with the mend that removes its cause and wha
 are taken once the gaps of Bevy's examples above are bridged, one a commit, each measured where a
 figure moves.
 
-- **Bevy's anisotropy under a normal prepass is pinned, not mended.** An anisotropic material
-  drawn forward on a camera with a normal prepass comes out blown white, because Bevy's shader
-  skips the tangent frame anisotropy needs (`AnisotropyPrepassTests`, whose second test fails once
-  Bevy mends it). Bevy's `pbr_fragment` shader building the tangent frame wherever anisotropy is
-  on mends it at its cause. It costs a change to Bevy, which is not reported from this repository,
-  or else a patched shader in the bridge that has to follow every release of Bevy's.
 - **The norm's lists.** The places listed in `build/norm/` as not yet keeping a rule of NORM.md are
   mended as a batch next touches each, in a commit that moves code alone, and the lists only get
   shorter.

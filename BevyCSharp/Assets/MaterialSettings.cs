@@ -184,11 +184,10 @@ public sealed class MaterialSettings
     /// tangents has and a primitive generates.
     /// </para>
     /// <para>
-    /// Drawn forward by a camera with a normal prepass, which ambient occlusion asks for, Bevy 0.20
-    /// draws an anisotropic surface blown white. Its forward shader then loads the normal the
-    /// prepass wrote and skips the block that sets up the stretch's tangents, while the material
-    /// still asks for the stretched highlight, which with no tangents has no falloff. A camera
-    /// drawing deferred (<see cref="Render.SetDeferredRendering"/>) draws it right.
+    /// Drawn forward by a camera with a normal prepass, which ambient occlusion asks for, Bevy 0.20's
+    /// shader draws an anisotropic surface blown white, since it then loads the normal the prepass
+    /// wrote and skips the block that sets up the stretch's tangents. The bridge mends that shader
+    /// in the text Bevy ships, so the surface is drawn as on any other camera.
     /// </para>
     /// </remarks>
     public float AnisotropyStrength { get; set; }

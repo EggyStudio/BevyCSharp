@@ -196,6 +196,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_pipelines_waiting(uint* waiting);
 
+    /// <summary>Writes which of Bevy's shaders the bridge mended, 1 for anisotropy under a normal prepass and 2 where that was refused.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_shader_mends(uint* mends);
+
     /// <summary>Makes an empty geometry pool, writing its three buffer keys.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

@@ -37,6 +37,8 @@ pub mod lights;
 pub mod material;
 pub mod material2d;
 pub mod materials2d;
+#[cfg(feature = "render")]
+pub mod mended;
 pub mod mesh_data;
 pub mod meshes;
 pub mod meshlets;

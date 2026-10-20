@@ -290,6 +290,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             crate::render::post::install(&mut app);
             crate::render::exposure::install(&mut app);
 
+            // Bevy's shaders mended where they draw wrong, a standard material's anisotropy under a
+            // normal prepass among them.
+            crate::render::mended::install(&mut app);
+
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();
