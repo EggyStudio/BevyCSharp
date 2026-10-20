@@ -920,7 +920,21 @@ from [SHARED.md](SHARED.md).
     commit, with the SHARED.md row for the reviewer to write. The alternative, every capture in
     Fedora on eight shards or a raised budget, costs two to five times the capture minutes on a Mesa
     slower for some scenes, and is not taken; the owner is told that the shards stay on the runner's
-    Mesa, a narrowing of Decision 39's words by the measured cost.
+    Mesa, a narrowing of Decision 39's words by the measured cost. (i)'s cause found by 03:14 on
+    2026-10-20, and it is not Mesa's. `many_meshlet_materials` drops bunnies on every device because
+    its cluster budget is too small for its crowd, Bevy's own example setting 8,192 cluster buffer
+    slots for its grid of 2,500, which the port's configuration mirrors, where Bevy's own
+    documentation of the field says that too low a number shows missing or blinking meshes; raised
+    to 2 to the 20th in a local experiment not kept, two GPU takes on the editor bridge match in
+    every pixel and the host's lavapipe comes within 1.2 pixels of them, where at 8,192 the GPU's
+    takes differ by 6.9 percent and lavapipe's by 5 to 7. So no Mesa report is written. The reviewer
+    decides, on the owner's precedent in Decision 39 of mending Bevy's faults in the port with the
+    difference said, that the port's example takes the smallest power of two that draws the crowd
+    whole on both devices, measured, the difference from Bevy's 8,192 said in its triage row with
+    the documentation's sentence as the reason, so the picture is whole and compared as the others
+    are, the differ line comes off and TODO.md's paragraph goes; a report of the budget to Bevy is
+    the owner's call, as upstream reports are. Order: (h)'s commit first with the line's reason as
+    the budget's, then (i)'s commit taking the line off, two things, two commits.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
