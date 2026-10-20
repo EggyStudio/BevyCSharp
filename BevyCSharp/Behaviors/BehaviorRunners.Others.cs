@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Bevy;
@@ -99,56 +100,151 @@ public static partial class BehaviorRunners
         // Left unmarked under a [Changed] filter and marked a row at a time as the method runs on
         // it, as the one-component form does, so the filter sees what changed before this ran.
         var filtered = changed.Length > 0;
-        using var chunks = ecs.Chunks<T>(Except(all, own), without, markChanged: !filtered);
-        if (chunks.IsEmpty) return;
-
-        using var firsts = ecs.Chunks<T1>(Except(all, others[0]), without, writes[0] && !filtered);
         var two = others.Length > 1;
-        using var seconds = two ? ecs.Chunks<T2>(Except(all, others[1]), without, writes[1] && !filtered) : default;
-
-        var commands = world.Resource<EcsCommands>();
-        var time = world.Resource<Time>();
-        var input = world.Resource<Input>();
-
-        // A [Changed] filter reads change ticks an entity at a time, which only the main thread
-        // may do, so it keeps the loop on it, as the one-component form does.
-        var effectiveThreshold = changed.Length > 0 ? 0 : parallelThreshold;
-
-        for (var index = 0; index < chunks.Count; index++)
+        var withOwn = Except(all, own);
+        var withFirst = Except(all, others[0]);
+        var withSecond = two ? Except(all, others[1]) : withFirst;
+        var chunks = ecs.Chunks<T>(withOwn, without, markChanged: !filtered);
+        var firsts = default(ChunkSet<T1>);
+        var seconds = default(ChunkSet<T2>);
+        var rows = default(Rows);
+        try
         {
-            var chunk = chunks[index];
-            var first = Matching(firsts, index, chunk);
-            var second = two ? Matching(seconds, index, chunk) : first;
-            if (chunk.Length == 0) continue;
+            if (chunks.IsEmpty) return;
 
-            if (effectiveThreshold > 0 && chunk.Length >= effectiveThreshold)
+            firsts = ecs.Chunks<T1>(withFirst, without, writes[0] && !filtered);
+            if (two) seconds = ecs.Chunks<T2>(withSecond, without, writes[1] && !filtered);
+
+            var commands = world.Resource<EcsCommands>();
+            var time = world.Resource<Time>();
+            var input = world.Resource<Input>();
+            var context = new BehaviorContext(world, ecs, commands, time, input);
+            rows = new Rows(own);
+
+            // A [Changed] filter reads change ticks an entity at a time, which only the main thread
+            // may do, so it keeps the loop on it, as the one-component form does.
+            var effectiveThreshold = changed.Length > 0 ? 0 : parallelThreshold;
+
+            for (var index = 0; index < chunks.Count; index++)
             {
-                RunTogetherParallel(world, ecs, commands, time, input, chunk, first, second, body);
+                var chunk = chunks[index];
+                var first = Matching(firsts, index, chunk);
+                var second = two ? Matching(seconds, index, chunk) : first;
+                if (chunk.Length == 0) continue;
+
+                if (effectiveThreshold > 0 && chunk.Length >= effectiveThreshold && rows.From == 0 && !rows.AnyMoved)
+                {
+                    RunTogetherParallel(world, ecs, commands, time, input, chunk, first, second, body);
+                    (rows.Previous, rows.HasPrevious) = (chunk.EntityAt(chunk.Length - 1), true);
+                    continue;
+                }
+
+                if (WalkTogether(context, ecs, chunk, first, second, changed, own, others, writes, body, ref rows)) continue;
+
+                // A call moved the row the method held, so every component's runs are listed
+                // again, as the one-component form lists its own.
+                chunks.Dispose();
+                firsts.Dispose();
+                seconds.Dispose();
+                (chunks, firsts, seconds) = (default, default, default);
+                chunks = ecs.Chunks<T>(withOwn, without, markChanged: false);
+                firsts = ecs.Chunks<T1>(withFirst, without, markChanged: false);
+                if (two) seconds = ecs.Chunks<T2>(withSecond, without, markChanged: false);
+                index = rows.Resume(chunks, index) - 1;
+            }
+        }
+        finally
+        {
+            rows.Dispose();
+            seconds.Dispose();
+            firsts.Dispose();
+            chunks.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Walks one run of all the components on the calling thread from <see cref="Rows.From"/>,
+    /// and answers false where a call moved the row a method held, as the one-component walk does.
+    /// </summary>
+    /// <remarks>
+    /// Each component is handed as a copy and written back, as the one-component walk hands its
+    /// own, and one taken <c>in</c> is not written back, since the method does not write it.
+    /// </remarks>
+    private static unsafe bool WalkTogether<T, T1, T2>(
+        BehaviorContext context,
+        EcsWorld ecs,
+        Interop.NativeChunk chunk,
+        Interop.NativeChunk first,
+        Interop.NativeChunk second,
+        ReadOnlySpan<int> changed,
+        int own,
+        int[] others,
+        bool[] writes,
+        BehaviorRunner<T, T1, T2> body,
+        ref Rows rows)
+        where T : unmanaged
+        where T1 : unmanaged
+        where T2 : unmanaged
+    {
+        var components = chunk.Components<T>();
+        var firstComponents = first.Components<T1>();
+        var secondComponents = second.Components<T2>();
+        var entities = chunk.Entities;
+        var two = others.Length > 1;
+        var writesFirst = writes[0];
+        var writesSecond = two && writes[1];
+        var guard = rows.Guard;
+        var skipping = rows.AnyMoved;
+        var (previous, hasPrevious) = (rows.Previous, rows.HasPrevious);
+        var from = rows.From;
+        rows.From = 0;
+        rows.Watch();
+
+        for (var i = from; i < components.Length; i++)
+        {
+            var entity = entities[i];
+            if ((skipping && rows.Skips(entity)) || (changed.Length > 0 && !AnyChanged(ecs, entity, changed)))
+            {
+                (previous, hasPrevious) = (entity, true);
                 continue;
             }
 
-            var context = new BehaviorContext(world, ecs, commands, time, input);
-            var components = chunk.Components<T>();
-            var firstComponents = first.Components<T1>();
-            var secondComponents = second.Components<T2>();
-            var entities = chunk.Entities;
-
-            for (var i = 0; i < components.Length; i++)
+            if (changed.Length > 0)
             {
-                var entity = entities[i];
-                if (filtered)
-                {
-                    if (!AnyChanged(ecs, entity, changed)) continue;
-
-                    ecs.MarkChanged(entity, own);
-                    if (writes[0]) ecs.MarkChanged(entity, others[0]);
-                    if (two && writes[1]) ecs.MarkChanged(entity, others[1]);
-                }
-
-                context.Entity = entity;
-                body(ref components[i], ref firstComponents[i], ref secondComponents[i], entity, context);
+                ecs.MarkChanged(entity, own);
+                if (writesFirst) ecs.MarkChanged(entity, others[0]);
+                if (writesSecond) ecs.MarkChanged(entity, others[1]);
             }
+
+            context.Entity = entity;
+            ref var row = ref components[i];
+            ref var firstRow = ref firstComponents[i];
+            ref var secondRow = ref secondComponents[i];
+            var copy = row;
+            var firstCopy = firstRow;
+            var secondCopy = secondRow;
+            guard->Entity = entity.Bits;
+            guard->Address = (nint)Unsafe.AsPointer(ref row);
+            body(ref copy, ref firstCopy, ref secondCopy, entity, context);
+
+            if (guard->Moved == 0)
+            {
+                WriteBack(ref row, in copy);
+                if (writesFirst) WriteBack(ref firstRow, in firstCopy);
+                if (writesSecond) WriteBack(ref secondRow, in secondCopy);
+                (previous, hasPrevious) = (entity, true);
+                continue;
+            }
+
+            rows.Stop(entity, i, previous, hasPrevious);
+            Put(entity, copy);
+            if (writesFirst) Put(entity, firstCopy);
+            if (writesSecond) Put(entity, secondCopy);
+            return false;
         }
+
+        (rows.Previous, rows.HasPrevious) = (previous, hasPrevious);
+        return true;
     }
 
     /// <summary>The ids but one, which is the component being listed rather than required.</summary>

@@ -35,8 +35,9 @@ public partial struct Gravity
 `Query` yields *references* into Bevy's table storage, so assigning to `row.Component` writes the
 real component. There is no copy and no write-back step.
 
-**Instance methods run per entity.** `this` is bound by reference to that entity's component. The struct's fields are per-entity state
-living in Bevy's tables.
+**Instance methods run per entity.** `this` is bound by reference to that entity's component, or on the main thread to a copy
+written back to it once the method returns, for the reason [Threading](#threading) gives. The struct's fields are per-entity
+state living in Bevy's tables.
 
 ```csharp
 [Behavior]
@@ -448,8 +449,10 @@ public void Cheer(BehaviorContext ctx)
 }
 ```
 
-Queue structural changes rather than applying them mid-loop. Spawning, despawning, adding and
-removing all move entities between archetypes, which invalidates every reference the loop holds:
+A change queued on `ctx.Cmd` lands at the end of `PostUpdate`, once every system of the frame has
+seen the world as it was. A change to another entity is always queued, since spawning, despawning,
+adding and removing move entities between the tables the loop is walking, and one made at once to
+another entity may have the loop run an entity twice that frame or not at all.
 
 <!-- compiled with:
 public float Fuse;
@@ -459,9 +462,18 @@ public float Fuse;
 public void Tick(BehaviorContext ctx)
 {
     Fuse -= ctx.Time.Delta;
-    if (Fuse <= 0f) ctx.Cmd.Despawn(ctx.Entity);   // not ctx.Ecs.Despawn
+    if (Fuse <= 0f) ctx.Cmd.Despawn(ctx.Entity);   // gone once the frame's systems have run
 }
 ```
+
+A change to the method's own entity can be made at once, `ctx.Ecs.Add(ctx.Entity, ...)` or a call
+that puts something on the entity as it works, as `Animation.PlayGraph` does the first time. The
+method is handed a copy of each component it takes, written back to its row once it returns, and
+where a call moved the row the runner writes the copy to wherever the entity went and goes on from
+the row after, each entity run once. The copy costs a few nanoseconds an entity on the main
+thread, about three for a small component and eight for a large one, and nothing across worker
+threads, where a call into the world fails, so a method making one is marked `[MainThread]` as
+above and walked on the main thread.
 
 A change can wait, too. `ctx.Cmd.Delayed(seconds)` is a queue of its own whose commands land once
 that long has passed after the frame's queue is applied, Bevy's `commands.delayed()`, so something

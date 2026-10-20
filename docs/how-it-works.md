@@ -26,8 +26,11 @@ size and alignment through Bevy's dynamic `ComponentDescriptor` support. From th
 ordinary Bevy component. It lives in tables, participates in archetypes, and Bevy's own change
 detection sees it.
 
-**Iteration is zero-copy.** A query hands C# raw pointers into Bevy's table storage. The
-per-entity loop writes straight into the component column, no marshaling, no staging buffer.
+**Iteration reads the tables in place.** A query hands C# raw pointers into Bevy's table storage,
+with no marshaling and no staging buffer. A behavior's loop across worker threads writes straight
+into the component column, and one on the main thread hands each method a copy of its components
+and writes it back, so a call the method makes that moves its entity to another table cannot leave
+it writing into another entity's row.
 
 **C# systems are exclusive systems.** While managed code can spawn and despawn at any moment,
 that is the only sound option, so Bevy serializes C# systems against each other. The parallelism

@@ -137,7 +137,9 @@ internal static class BehaviorEmitter
     /// <remarks>
     /// The loop itself is <c>BehaviorRunners.Run</c>'s job. All this method contributes is the
     /// filter component ids and a lambda that forwards to the user's method with <c>this</c>
-    /// bound by reference, so writes land in Bevy's storage rather than in a copy.
+    /// bound by reference to what the runner hands it, the row in Bevy's storage across worker
+    /// threads and a copy written back to it on the main thread, where a call the method makes can
+    /// move the row.
     /// </remarks>
     private static void EmitInstanceSystem(StringBuilder source, BehaviorModel model, StageMethod method)
     {

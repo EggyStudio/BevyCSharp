@@ -8,9 +8,9 @@ namespace Bevy.Interop;
 /// <remarks>
 /// The pointers reference Bevy's own memory, so writing through <see cref="Components{T}"/>
 /// updates the component in place with no copy. They stay valid only until the next
-/// structural change to the world (a spawn, despawn, insert or remove), which is exactly why
-/// behavior methods queue structural work on <see cref="EcsCommands"/> instead of applying it
-/// mid-iteration.
+/// structural change to the world (a spawn, despawn, insert or remove), which is why the behavior
+/// runner hands a method copies of its components on the main thread and lists the runs again
+/// where a call the method made moved the row it was walking.
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public readonly unsafe struct NativeChunk

@@ -51,7 +51,9 @@ rest of the prose here.
 
 A commit that changes the library's public surface carries `BevyCSharp/PublicApi.txt` written again
 by `build/api.sh`, which the suite holds the library to, so the change is in the diff where it is
-read.
+read. REVIEW.md, SHARED.md and NORM.md are edited in the tree by the session that writes REVIEW.md
+and carried by whichever batch comes next, and are never committed on their own but in one commit a
+day at most, at the day's end, where no batch carried them.
 
 Written from a shell, so the marks are exact rather than pasted:
 

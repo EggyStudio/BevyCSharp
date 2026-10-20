@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Bevy;
@@ -71,58 +72,105 @@ public static partial class BehaviorRunners
         // filter, so a method watching its own component would run on every entity every frame.
         // A row the filter skips is left unmarked, as Bevy leaves a row its query does not reach.
         var hasChangedFilter = changed.Length > 0;
-        using var chunks = ecs.Chunks<T>(with, without, markChanged: !hasChangedFilter);
-        if (chunks.IsEmpty) return;
-
-        var commands = world.Resource<EcsCommands>();
-        var time = world.Resource<Time>();
-        var input = world.Resource<Input>();
-
-        // A [Changed] filter reads Bevy's change ticks per entity, which only the main thread
-        // may do, so it disables the parallel path rather than racing.
-        var effectiveThreshold = hasChangedFilter ? 0 : parallelThreshold;
-
-        for (var chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
+        var chunks = ecs.Chunks<T>(with, without, markChanged: !hasChangedFilter);
+        var rows = default(Rows);
+        try
         {
-            var chunk = chunks[chunkIndex];
-            if (chunk.Length == 0) continue;
+            if (chunks.IsEmpty) return;
 
-            if (effectiveThreshold > 0 && chunk.Length >= effectiveThreshold)
+            var commands = world.Resource<EcsCommands>();
+            var time = world.Resource<Time>();
+            var input = world.Resource<Input>();
+            var context = new BehaviorContext(world, ecs, commands, time, input);
+            rows = new Rows(ComponentType<T>.ChunkId);
+
+            // A [Changed] filter reads Bevy's change ticks per entity, which only the main thread
+            // may do, so it disables the parallel path rather than racing.
+            var effectiveThreshold = hasChangedFilter ? 0 : parallelThreshold;
+
+            for (var chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
             {
-                RunChunkParallel(world, ecs, commands, time, input, chunk, body);
+                var chunk = chunks[chunkIndex];
+                if (chunk.Length == 0) continue;
+
+                if (effectiveThreshold > 0 && chunk.Length >= effectiveThreshold && rows.From == 0 && !rows.AnyMoved)
+                {
+                    RunChunkParallel(world, ecs, commands, time, input, chunk, body);
+                    (rows.Previous, rows.HasPrevious) = (chunk.EntityAt(chunk.Length - 1), true);
+                    continue;
+                }
+
+                if (RunChunkSequential(context, ecs, chunk, changed, body, ref rows)) continue;
+
+                // A call moved the row the method held, so the runs are listed again, marking
+                // nothing the first listing marked, and the walk goes on.
+                chunks.Dispose();
+                chunks = default;
+                chunks = ecs.Chunks<T>(with, without, markChanged: false);
+                chunkIndex = rows.Resume(chunks, chunkIndex) - 1;
             }
-            else
-            {
-                RunChunkSequential(
-                    new BehaviorContext(world, ecs, commands, time, input),
-                    ecs, chunk, changed, body);
-            }
+        }
+        finally
+        {
+            rows.Dispose();
+            chunks.Dispose();
         }
     }
 
-    /// <summary>Walks one chunk on the calling thread, applying any change filter.</summary>
-    private static void RunChunkSequential<T>(
+    /// <summary>
+    /// Walks one chunk on the calling thread from <see cref="Rows.From"/>, applying any change
+    /// filter, and answers false where a call moved the row a method held, which ends the walk of
+    /// these runs.
+    /// </summary>
+    private static unsafe bool RunChunkSequential<T>(
         BehaviorContext context,
         EcsWorld ecs,
         Interop.NativeChunk chunk,
         ReadOnlySpan<int> changed,
-        BehaviorRunner<T> body) where T : unmanaged
+        BehaviorRunner<T> body,
+        ref Rows rows) where T : unmanaged
     {
         var components = chunk.Components<T>();
         var entities = chunk.Entities;
+        var guard = rows.Guard;
+        var skipping = rows.AnyMoved;
+        var (previous, hasPrevious) = (rows.Previous, rows.HasPrevious);
+        var from = rows.From;
+        rows.From = 0;
+        rows.Watch();
 
-        for (var i = 0; i < components.Length; i++)
+        for (var i = from; i < components.Length; i++)
         {
             var entity = entities[i];
-            if (changed.Length > 0)
+            if ((skipping && rows.Skips(entity)) || (changed.Length > 0 && !AnyChanged(ecs, entity, changed)))
             {
-                if (!AnyChanged(ecs, entity, changed)) continue;
-                ecs.MarkChanged(entity, ComponentType<T>.ChunkId);
+                (previous, hasPrevious) = (entity, true);
+                continue;
             }
 
+            if (changed.Length > 0) ecs.MarkChanged(entity, ComponentType<T>.ChunkId);
+
             context.Entity = entity;
-            body(ref components[i], entity, context);
+            ref var row = ref components[i];
+            var copy = row;
+            guard->Entity = entity.Bits;
+            guard->Address = (nint)Unsafe.AsPointer(ref row);
+            body(ref copy, entity, context);
+
+            if (guard->Moved == 0)
+            {
+                WriteBack(ref row, in copy);
+                (previous, hasPrevious) = (entity, true);
+                continue;
+            }
+
+            rows.Stop(entity, i, previous, hasPrevious);
+            Put(entity, copy);
+            return false;
         }
+
+        (rows.Previous, rows.HasPrevious) = (previous, hasPrevious);
+        return true;
     }
 
     /// <summary>

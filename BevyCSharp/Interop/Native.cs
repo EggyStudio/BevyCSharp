@@ -25,7 +25,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 296;
+    internal const int ExpectedAbiVersion = 297;
 
     /// <summary>
     /// The window the <c>bcs_window_*</c> calls address for the primary one, which no entity's
@@ -746,6 +746,11 @@ internal static unsafe partial class Native
         int markChanged,
         NativeChunk* output,
         int capacity);
+
+    /// <summary>Writes the address of this thread's row guard, which the behavior runner writes before each method and reads after.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_ecs_row_guard(NativeRowGuard** guard);
 
     // -- Hierarchy
 

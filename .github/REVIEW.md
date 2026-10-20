@@ -10,14 +10,42 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6fcecb1a`, Verdict 37's mend and nothing else, with the review's commit between. The
-Fedora capture job installs libwebp's tools and ImageMagick on the runner before the capture, with
-the reason in its comment, and the compare script, where a folder holds pictures and none of the
-three decoders is on the path, fails before reading anything, naming the missing tools on its error
-stream and in an error annotation, checked with the path emptied, exit 1 with the message, and with
-the tools present, one capture matching with exit 0; the norm tests pass, 18. Verdict 38 is read,
-said under it, two faults in the bridge's animator and neither in the example, and its mend is one
-commit in hand, after which the reviewer starts the pack run with publish on anew. A fault the
+Reviewed up to `05ed21e4`, Verdict 38's mend and nothing else. The animator and its source are
+sparse components, the reason in the animator's remark; the clock hold keeps the ids of the bridge's
+own reads while the load hold is on, the wait gated to the render profile since that alone plays
+clips, each id dropped once it stops loading, and the assets module factors out the loading check;
+the holds' documentation names the read. Two tests, a behavior playing its own scenes' clip on eight
+roots each starting once and keeping what it wrote, and a clock held for loads standing still while
+a scene's clips are read, at a tenth of a second a frame the elapsed time at the first ask equal to
+that when the clip plays and the first ask refused, both passing on the new bridge and failing on
+the old, where four of the eight roots started two or three times and the elapsed time moved 1.0 to
+1.1, one unheld frame. The fourteen examples that call the animation were taken again on the editor
+bridge, eleven identical to their pictures and three retaken with their thumbnails, `many_foxes` at
+6.6 percent off against the runner's 6.7, `animated_mesh` at 498 pixels and `many_morph_targets` at
+466, each retake repeated to no pixel, and on the host's lavapipe held to four cores the three
+matched the new pictures to 0.5, 0 and 1.9 pixels; the scratch probe shows each of the 1,000 foxes
+playing once in the second frame, which the hold keeps still. Checked were the three profiles'
+checks, the cargo tests, 102 and 177, the Windows and macOS cross checks clean after the gate, the
+changed tests on the headless bridge passing 3 and skipping the 7 that need a renderer, the suite on
+the full bridge, 1,527 passed and 3 skipped of 1,530, and the norm tests, 18. The reviewer pushes
+and starts the pack run with publish on at once, which proves item 29's (h), (i) and (j), Verdict
+36's wait and Verdicts 37 and 38's mends together and gives the feed's second listing time; the
+review's edits ride in the coder's next batch as AGENTS.md has it. At 07:43 the pack run of
+`05ed21e4` had its three suites, the seven native builds, the README and the storm green, the first
+shard green at 07:40 with `many_foxes` matching, Verdict 38's first of three, and the Fedora job red
+at 07:39 on its compare, which ran this time, `meshlet` differing in 10.9 percent of its pixels over
+the colored bunnies (Verdict 39), the other shards, the drive and Courtyard running; the pack job
+will be skipped again. By 08:14 the other three shards and Courtyard were green too, the drive still
+running. The coder reads item 34; item 35, the jobs' names, follows it by the owner's word of 07:07.
+
+Before it, `6fcecb1a` came, Verdict 37's mend and nothing else, with the review's commit between.
+The Fedora capture job installs libwebp's tools and ImageMagick on the runner before the capture,
+with the reason in its comment, and the compare script, where a folder holds pictures and none of
+the three decoders is on the path, fails before reading anything, naming the missing tools on its
+error stream and in an error annotation, checked with the path emptied, exit 1 with the message, and
+with the tools present, one capture matching with exit 0; the norm tests pass, 18. Verdict 38 is
+read, said under it, two faults in the bridge's animator and neither in the example, and its mend is
+one commit in hand, after which the reviewer starts the pack run with publish on anew. A fault the
 reading uncovered beyond the verdict is item 34.
 
 Before it, `6cca47f7` came, the reading of the ledger's replaced-mesh row under Replies and nothing
@@ -41,17 +69,6 @@ its pixels with the foxes a step along in their run (Verdict 38), so the pack jo
 nothing was published; the three suites, the seven native builds, the Fedora captures themselves,
 the drive, Courtyard, the storm, the README and the other three shards were green, the drive in 45
 minutes. The coder mends both, and the reviewer starts the pack run anew on the mends.
-
-Before it, `5e9235ce` came, item 2's Slang count and nothing else, with the review's commit between.
-The test of N 1.3 counts the Slang shaders beside the C# of the library and the tests as it counts
-those of the examples and the bridge since `72307f37`, with a comment naming 3DEngine's form, the
-tests' 91 shaders at 106 lines at most and the bridge's longest at 628, all under 800; the norm
-tests pass, 18. The lists were read whole against their rules and hold no debt, said under item 2,
-so no code moved. The pack run with publish on of `d0e58c56` runs since 04:25. The push run of
-`9b6dceaa` passed its three suites by 03:55, the third green Windows and macOS suites in a row after
-their mends, so Verdicts 34 and 35 are settled. Every item of the Now list is done or the reviewer's
-own; the coder reads the ledger's row on a replaced mesh under Solari and the probes meanwhile, said
-under item 2, and the ledger's vehicle and path-traced reference go to the owner for items.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1000,7 +1017,58 @@ from [SHARED.md](SHARED.md).
     bridge's entry points, and either the change deferred to the end of the behavior's run, as
     Bevy's own commands are, or the runner resolving the row again after each such call, with a test
     that a behavior playing a graph on its own entity keeps what it writes; the reading says which,
-    with the cost. One commit, after Verdict 38's.
+    with the cost. One commit, after Verdict 38's. Read by 07:06 on 2026-10-20. Every bridge entry
+    point reaches the world through one module's two functions and no other path, and behind them
+    stand about 300 insert and remove sites, the explicit structural calls, the setters that insert
+    where missing, meshes, materials, lights and cameras, the animation calls, which insert Bevy's
+    player and graph handle and the targets' ids, and the hooks and observers a call fires;
+    deferring them would change what each answers within the same body, as an insert followed by a
+    read does in the animator, so the form is the runner resolving the row. The bridge keeps a
+    per-thread row guard, the entity, the address of its component as the runner handed it, the
+    component's id and a moved flag, which the runner gets a pointer to once a run through a new
+    native call; at each exit from the world while the guard holds an entity the bridge looks the
+    component's address up again and sets moved where it differs, the entity moved to another table,
+    the column grown and moved, or the entity or component gone. The sequential loops, one component
+    and with others, hand the method a copy of each component it takes by reference and write the
+    copy back to the row when moved is clear, and by entity where it is set and the entity still has
+    the component, then list the runs again and go on from the row after the entity visited before,
+    each moved entity in a set the rest of the run skips, so none is visited twice and the entity
+    that took its row is visited; the parallel path changes nothing, since the world is thread-local
+    and a method on a worker gets no world from every call. The cost falls on the sequential path
+    alone, under 4,096 entities a chunk, on the main thread or under a changed filter, a copy of
+    each reference component in and out, three stores to the guard and one load an entity, every
+    native call a thread-local load and a branch and one entity lookup more while a guard is set,
+    and a move a listing again and a search; the stress movers run parallel from a few thousand on,
+    so PERFORMANCE.md's table does not move. Promised is a call that changes the running entity
+    itself, its writes landing, each entity visited once and memory valid when a column grows; a
+    body that changes other entities directly is still told to queue them, as the behaviors guide
+    says. The reviewer takes the form, with the cost measured in nanoseconds an entity before and
+    after on a sequential run with a small component and a large one, recorded in the remark; the
+    tests as proposed, a behavior playing a graph on its own entity keeping what it writes, one
+    adding a component to its own entity through the context keeping its write and visited once with
+    the rest, the moved entity not visited again in the frame, and one more where the insert grows
+    the column so the row the runner handed out moves, the write landing and nothing read through
+    the old address; and the behaviors guide saying what is promised and what is not. One commit,
+    carrying Decision 44's sentence.
+
+35. **The build workflow's jobs are named as 3DEngine's are, by their ids, with no expression in a
+    name.** The owner wrote on 2026-10-20 that a push run's page shows the pack-only jobs with their
+    name templates unexpanded, `capture the examples (${{ matrix.shard }} of 4)` and `native (${{
+    matrix.rid }}...)`, since GitHub skips a matrix job before it expands the matrix and prints the
+    name as written, where 3DEngine's skipped jobs show plain names because its jobs carry no `name`
+    and no matrix. At 07:10 the owner left the shape to the reviewer, for a graph that reads as
+    3DEngine's. So: the suite job keeps its matrix, which is never skipped, and names its three
+    entries `linux`, `windows` and `macos` through an include and the entry's system in its `name`,
+    as 3DEngine's suite jobs are named, since a name's expression expands wherever the job runs;
+    every pack-only job drops its `name` and shows its id, `native`, `captures` for the four shards,
+    `captures-fedora`, `games`, `drive`, `storm` and `readme`, GitHub appending a matrix entry's
+    values where the matrix runs and a skipped job showing its id alone; `digest` shows its id too.
+    The matrices stay where they save copies, the native job's seven targets and the four shards,
+    since a matrix entry is one node of the graph as a job of its own would be and the steps are one
+    text; the suite's steps, which branch on the system five times, stay one text for the same
+    reason. The graph then reads as 3DEngine's, the three suites, the digest and the examples on a
+    push with the pack-only jobs skipped by id, and the whole set on a pack run. The workflow tests
+    follow the ids, and BUILDING.md's job names with them. One commit, after item 34.
 
 ## Verdicts
 
@@ -1172,8 +1240,28 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     clock between a scene's first play and the one that succeeds; and the pictures of the examples
     that play clips taken again, `many_foxes`, `animated_mesh`, `animated_mesh_control`,
     `morph_targets`, `many_morph_targets`, `mirror` and `scene_viewer`, since their start frames can
-    move. The row's move for Bevy's own animation types is item 34. Settled at three green first
-    shards in a row after the mend.
+    move. The row's move for Bevy's own animation types is item 34. Mended at `05ed21e4` on
+    2026-10-20 as the head says, the first shard of the pack run started on it the first of three.
+    Settled at three green first shards in a row after the mend. The first shard of the pack run of
+    `05ed21e4` passed at 07:40 on 2026-10-20 with the example matching, the first of three.
+
+39. **`meshlet`'s colored bunnies differ in their patches between the Fedora job's capture and the
+    picture.** On the pack run of `05ed21e4`, 2026-10-20 at 07:39, the Fedora job's compare, running
+    for the first time with its decoders in place, found `meshlet` differing in 10.9 percent of its
+    pixels past the 2 allowed, within x 126 to 616 and y 192 to 607, which is the row of bunnies
+    drawn with a color a meshlet, while the plain bunnies on the right, the floor and the shadows
+    match; the uploaded capture against the picture shows the same bunnies in the same places with
+    their patches cut otherwise, larger and elsewhere, so the meshlets the bridge built from the
+    mesh, or the level of detail it chose, differ between the bridge the runner built and the one
+    the picture was taken with on the development machine, where the coder's own container run
+    matched the picture to no pixel. The reading comes first: the meshlet count and the level drawn
+    on the runner against the machine, whether the builder's partition is deterministic across
+    builds of the bridge and its dependencies, and whether the runner's four cores or its Mesa pick
+    another level; then the mend where it points, a deterministic partition if the builder allows
+    one, the example's debug colors keyed to something stable, or, if the partition is not the
+    bridge's to fix, the colored bunnies' region left out of the compare with the reason in the
+    differ file, which would be its one line. One commit. Settled when the Fedora job passes on the
+    next pack run.
 
 ## Decisions
 
@@ -1479,6 +1567,17 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     end of a day's batch, and when the owner asks, and not after every commit, since a pack run is
     more than an hour of the runners' time; the run is read and recorded as every run is, and its
     package is what the game and the other engine take.
+
+44. **The review's files are committed by the batch that comes next, and by the reviewer at most
+    once a day.** The owner wrote on 2026-10-20 that the review's commits had become nine of every
+    ten in the history and were to stop, and then that the reviewer is to edit the review's files in
+    the tree and commit nothing, as it did before 2026-10-19, with one commit a day at most where
+    that makes sense. So REVIEW.md, SHARED.md and NORM.md stay edited in the tree and the coder's
+    next batch carries them, as AGENTS.md has it; the reviewer commits them in a commit of their own
+    only at a day's end where no batch carried them, never for a reading, a run or a package. The
+    coder adds one sentence saying so to COMMITS.md in the next batch, in the paragraph on what a
+    commit carries, naming the review's files, the batch that comes next and the one commit a day at
+    most, and no one who decided it (N 4.7).
 
 ## Replies
 
