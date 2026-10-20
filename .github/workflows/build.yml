@@ -49,7 +49,7 @@ env:
 
 jobs:
   native:
-    name: native (${{ matrix.rid }})
+    name: native (${{ matrix.rid }}${{ matrix.features && ', for the captures' || '' }})
     if: ${{ inputs.pack }}
     runs-on: ${{ matrix.os }}
     # A cold render build compiles the whole of Bevy, wgpu and winit, which is roughly a quarter
@@ -69,6 +69,10 @@ jobs:
           - { os: windows-11-arm, rid: win-arm64, target: aarch64-pc-windows-msvc }
           - { os: macos-latest, rid: osx-arm64, target: aarch64-apple-darwin }
           - { os: macos-latest, rid: osx-x64, target: x86_64-apple-darwin }
+          # The Linux bridge with meshlets and Solari as well, which the capture job in Fedora draws
+          # the six examples the runner's Mesa cannot with, under a name the pack job does not take,
+          # since a game's package carries the render bridge alone.
+          - { os: ubuntu-24.04, rid: linux-x64, target: x86_64-unknown-linux-gnu, features: --meshlet --solari, artifact: captures-linux-x64 }
 
     steps:
       - uses: actions/checkout@v5
@@ -84,7 +88,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: native -> ../build/target
-          key: ${{ matrix.target }}
+          key: ${{ matrix.target }}${{ matrix.features && '-captures' || '' }}
 
       # The only development packages a render build needs. Everything graphical resolves at
       # runtime, since winit reaches X11 and Wayland through dlopen, and wgpu loads Vulkan the
@@ -96,11 +100,11 @@ jobs:
 
       - name: Build native bridge
         shell: bash
-        run: build/build-native.sh --render --target ${{ matrix.target }}
+        run: build/build-native.sh --render ${{ matrix.features }} --target ${{ matrix.target }}
 
       - uses: actions/upload-artifact@v7
         with:
-          name: native-${{ matrix.rid }}
+          name: ${{ matrix.artifact || format('native-{0}', matrix.rid) }}
           path: build/artifacts/${{ matrix.rid }}/*
           if-no-files-found: error
           # Only the pack run's own jobs read them, so they need not outlive it by much.
@@ -555,6 +559,54 @@ jobs:
         if: always()
         with:
           name: examples-${{ matrix.shard }}
+          path: ${{ runner.temp }}/examples
+          if-no-files-found: ignore
+
+  # The six examples the runner's Mesa cannot draw, captured in Fedora 44 on Fedora's own Mesa with
+  # the Linux bridge built with meshlets and Solari, and compared with their pictures:
+  # clustered_decals, which Mesa 25.2's lavapipe ends with a fault in its rasterizer, the three drawn
+  # with meshlets and the two with Solari. The four shards above capture them as words compared with
+  # nothing, and capture the rest on the runner's own Mesa, which draws some scenes two to seven
+  # times faster than Fedora's (BUILDING.md).
+  examples-fedora:
+    name: capture the six in Fedora
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # Forty-five minutes, where the six took twenty five on lavapipe held to four cores, solari's
+    # four hundred frames of rays thirteen of them, beside the image, its packages and the build.
+    timeout-minutes: 45
+    needs: [native]
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+    # The Mesa the six's pictures were measured on, which the job holds Fedora's to, so a new one is
+    # a commit that names it and takes the six again (build/capture-in-fedora.sh).
+    env:
+      MESA: 26.2.4
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: captures-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Bevy's files and slangc on the runner, which the container reads from the checkout.
+      - name: Fetch Bevy's files and slangc
+        run: build/fetch-bevy-assets.sh && build/fetch-slang.sh
+
+      - name: Capture the six in Fedora 44
+        run: build/capture-in-fedora.sh "${{ runner.temp }}/examples" clustered_decals meshlet test_meshlet many_meshlet_materials solari solari_reflections
+
+      - name: Compare the six with the checked-in ones
+        if: ${{ !cancelled() }}
+        run: python3 build/compare-captures.py "${{ runner.temp }}/examples"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: examples-fedora
           path: ${{ runner.temp }}/examples
           if-no-files-found: ignore
 

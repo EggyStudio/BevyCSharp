@@ -1426,3 +1426,12 @@ clock moved in (`Time.ClockFrames`, a frame whose real step is more than nothing
 loads,commands`, `BCS_HOLD_CLOCK` and `app.hold` ask for it, the capture holds for loads and the
 drive between commands, whose 25 readings came out the same on a graphics card and on lavapipe, for
 3DEngine to consider where its captures and its scripted runs wait on a load or on a script's pace.
+
+Shared: the examples the runner's Mesa cannot draw captured in a container of a distribution image
+whose own Mesa draws them, in the commit carrying this line, for the row of the captures compared
+across devices. A fifth capture job runs `clustered_decals` and the five drawn with meshlets and
+Solari in Fedora 44 on its Mesa 26.2.4, which the workflow names and the job holds Fedora's to, with
+a Linux bridge the native job builds with `--meshlet --solari` under a name the pack does not take
+(`build/capture-in-fedora.sh`), and compares them, while the four shards stay on Ubuntu 24.04's Mesa
+25.2, which draws some scenes two to seven times faster than Fedora's, measured on the same four
+cores, for 3DEngine to consider where its runner's Mesa leaves examples uncompared.

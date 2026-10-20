@@ -196,12 +196,17 @@ case "$example" in
   multi_asset_sync|many_morph_targets) frames=30 ;;
   *) ;;
 esac
+# A shot waits ten minutes for its frame, and solari's twenty five, its four hundred frames of rays
+# taking thirteen minutes on Mesa's lavapipe held to the runner's four cores.
+wait=600
+[ "$example" = solari ] && wait=1500
+
 # Taken in that frame, which the app holds the request for, rather than in whichever frame it has
 # reached when a wait ends, which a fast device puts many frames later than a slow one. On the set
 # clock every pipeline compiles in the frame that asks for it, so that frame is the same moment of
 # the scene, drawn whole, on any device.
 shot="${out%.webp}.shot.png"
-./bcs shot "$shot" "$frames" --quiet --timeout 600 \
+./bcs shot "$shot" "$frames" --quiet --timeout "$wait" \
     || { echo "capture-example.sh: ./bcs shot of frame $frames ended with $? in $example" >&2; exit 1; }
 
 # Every picture sixteen by nine, as the README's gallery shows each in a box of that shape, so a

@@ -4,4 +4,4 @@
 # cause named and kept, a device that draws less of a feature, or Bevy drawing something otherwise
 # from one run to the next, and never a fault waiting to be found, which fails the run until it is.
 # A line comes off it in the batch that mends its cause.
-many_meshlet_materials 0.10	Lavapipe draws some of the meshlet bunnies, a device drawing less of meshlets. 7.3% on lavapipe.
+many_meshlet_materials 0.10	Its cluster budget, Bevy's own 8,192 slots, is too small for its 2,500 bunnies, which Bevy says shows as missing or blinking meshes, so each device and each take draws another part of the crowd. 6.9% between two takes on a graphics card, 5.2% on Fedora 44's lavapipe.

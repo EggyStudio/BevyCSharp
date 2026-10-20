@@ -544,6 +544,16 @@ drawn with what the device or the bridge has not, meshlets or ray-traced lightin
 the words its log gives of that, and one a device ends the process drawing as the words saying so
 with the device's own description, each beside where its picture would be and compared with nothing.
 
+Those jobs draw on the runner's own Mesa, Ubuntu 24.04's 25.2, whose lavapipe ends `clustered_decals`
+with a fault in its rasterizer and draws neither meshlets nor Solari on a `--render` bridge, so the
+six are words there. A fifth job captures those six in a container of Fedora 44 and compares them
+(`build/capture-in-fedora.sh`), drawn by Fedora's own Mesa 26.2.4 with a Linux bridge the native job
+builds with `--meshlet --solari` as well, under a name the pack job does not take. The workflow names
+that Mesa and the job stops where Fedora's is another, so a new one is a commit that takes the six
+again. The rest stay on the runner's Mesa, which draws some scenes two to seven times faster than
+Fedora's, `multi_asset_sync` in 57 seconds where Fedora's takes 331, so the four jobs on Fedora's
+would not end within their time.
+
 `monitor_info` opens a window on each monitor the platform reports, and an offscreen run reports
 none, so `build/capture-example.sh` hands it to `build/capture-monitor-info.sh`, which runs it on
 four virtual monitors of sway in a container of Ubuntu 24.04 with .NET's SDK, drawn by Mesa's

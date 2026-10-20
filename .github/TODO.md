@@ -563,14 +563,6 @@ figure moves.
   device shows part of its crowd, and the list allows it. The cause lies in Mesa and is not traced.
   Tracing which draws lavapipe drops, and reporting them to Mesa, takes the line off once a release
   draws them all, a cost outside this repository whose size is known only once it is traced.
-- **The runner's software device leaves six examples uncompared.** The pack run captures on Mesa
-  25.2's lavapipe with a `--render` bridge, so `clustered_decals`, which ends that lavapipe with a
-  fault in its rasterizer, and the five examples drawn with meshlets or Solari are captured as words
-  and compared with nothing (`build/capture-example.sh`), and the decal tests skip there. A newer
-  Mesa on the runner, as Mesa 26.2's lavapipe draws the decals, with a bridge built with
-  `--meshlet --solari` for those five, compares all six. It costs the jobs run in a container
-  of a newer image or Mesa from an archive outside Ubuntu's, a second Linux bridge built in the
-  native job, and those six measured first on that Mesa.
 - **Bevy's anisotropy under a normal prepass is pinned, not mended.** An anisotropic material
   drawn forward on a camera with a normal prepass comes out blown white, because Bevy's shader
   skips the tangent frame anisotropy needs (`AnisotropyPrepassTests`, whose second test fails once
@@ -582,9 +574,8 @@ figure moves.
   shorter.
 - **The pack run's limits are sized for a software device.** The runner has no graphics card, so
   the capture shards, the game job and each capture command's wait are sized for lavapipe's few
-  frames a second (`.github/workflows/build.yml`, `build/capture-example.sh`), and the six
-  uncompared examples above follow from it. A runner with a graphics card removes the
-  cause beneath them. It costs GitHub's runners with a GPU, paid by the minute, and every capture
+  frames a second (`.github/workflows/build.yml`, `build/capture-example.sh`). A runner with a
+  graphics card removes the cause beneath them. It costs GitHub's runners with a GPU, paid by the minute, and every capture
   then compared between two graphics cards, with lavapipe kept for the suite.
 
 ### Build and release
